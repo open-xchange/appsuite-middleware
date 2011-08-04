@@ -51,13 +51,13 @@ package com.openexchange.messaging.json.osgi;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -79,18 +79,13 @@ import com.openexchange.messaging.json.servlets.MessagesServlet;
 import com.openexchange.messaging.json.servlets.ServicesServlet;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
-import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.tools.service.SessionServletRegistration;
 
-public class Activator extends DeferredActivator {
+public class Activator extends AJAXModuleActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
 
     private static final Class<?>[] NEEDED_SERVICES = new Class[] { MessagingServiceRegistry.class, HttpService.class, CacheService.class, ConfigViewFactory.class };
-
-    private final List<ServiceTracker> trackers = new LinkedList<ServiceTracker>();
-
-    private final List<ServiceRegistration> registrations = new LinkedList<ServiceRegistration>();
 
     private final List<SessionServletRegistration> servletRegistrations = new ArrayList<SessionServletRegistration>(3);
 
@@ -127,9 +122,7 @@ public class Activator extends DeferredActivator {
         }
         servletRegistrations.clear();
 
-        for (final ServiceRegistration registration : registrations) {
-            registration.unregister();
-        }
+        unregisterServices();
     }
 
     @Override
@@ -137,17 +130,15 @@ public class Activator extends DeferredActivator {
         try {
             parser = new MessagingMessageParser();
 
-            trackers.add(new ContentParserTracker(context, parser));
-            trackers.add(new HeaderParserTracker(context, parser));
+            rememberTracker(new ContentParserTracker(context, parser));
+            rememberTracker(new HeaderParserTracker(context, parser));
 
             writer = new MessagingMessageWriter();
-            trackers.add(new ContentWriterTracker(context, writer));
-            trackers.add(new HeaderWriterTracker(context, writer));
-            trackers.add(new ServiceTracker(context, I18nService.class.getName(), new I18nServiceCustomizer(context)));
+            rememberTracker(new ContentWriterTracker(context, writer));
+            rememberTracker(new HeaderWriterTracker(context, writer));
+            track(I18nService.class, new I18nServiceCustomizer(context));
 
-            for (final ServiceTracker tracker : trackers) {
-                tracker.open();
-            }
+            openTrackers();
 
             register();
         } catch (final Throwable x) {
@@ -178,6 +169,9 @@ public class Activator extends DeferredActivator {
             }
 
             if (servletRegistrations.isEmpty()) {
+                
+                
+                
                 servletRegistrations.add(new SessionServletRegistration(context, new AccountServlet(), "ajax/messaging/account"));
                 servletRegistrations.add(new SessionServletRegistration(context, new MessagesServlet(), "/ajax/messaging/message"));
                 servletRegistrations.add(new SessionServletRegistration(context, new ServicesServlet(), "/ajax/messaging/service"));

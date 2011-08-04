@@ -95,6 +95,15 @@ public abstract class HousekeepingActivator extends DeferredActivator {
     }
 
     /**
+     * Checks if this activator has at least one service registered.
+     * 
+     * @return <code>true</code> if this activator has at least one service registered; otherwise <code>false</code>
+     */
+    protected boolean hasRegisteredServices() {
+        return !serviceRegistrations.isEmpty();
+    }
+
+    /**
      * Registers specified service with the specified properties under the specified class.
      * 
      * @param clazz The service's class
