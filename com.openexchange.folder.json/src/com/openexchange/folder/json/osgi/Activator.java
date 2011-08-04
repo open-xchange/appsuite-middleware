@@ -50,10 +50,8 @@
 package com.openexchange.folder.json.osgi;
 
 import static com.openexchange.folder.json.services.ServiceRegistry.getInstance;
-import java.util.ArrayList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.config.ConfigurationService;
@@ -119,13 +117,9 @@ public class Activator extends AJAXModuleActivator {
             /*
              * Preference item
              */
-            serviceRegistrations = new ArrayList<ServiceRegistration>(2);
-            serviceRegistrations.add(context.registerService(PreferencesItemService.class.getName(), new Tree(), null));
-            serviceRegistrations.add(context.registerService(
-                MultipleHandlerFactoryService.class.getName(),
-                new FolderMultipleHandlerFactory(),
-                null));
-            serviceRegistrations.add(context.registerService(LoginHandlerService.class.getName(), new FolderConsistencyLoginHandler(), null));
+            registerService(PreferencesItemService.class, new Tree());
+            registerService(MultipleHandlerFactoryService.class, new FolderMultipleHandlerFactory());
+            registerService(LoginHandlerService.class, new FolderConsistencyLoginHandler());
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
@@ -135,24 +129,7 @@ public class Activator extends AJAXModuleActivator {
     @Override
     public void stopBundle() throws Exception {
         try {
-            if (null != trackers) {
-                /*
-                 * Close trackers
-                 */
-                while (!trackers.isEmpty()) {
-                    trackers.remove(0).close();
-                }
-                trackers = null;
-            }
-            if (null != serviceRegistrations) {
-                /*
-                 * Unregister
-                 */
-                while (!serviceRegistrations.isEmpty()) {
-                    serviceRegistrations.remove(0).unregister();
-                }
-                serviceRegistrations = null;
-            }
+            cleanUp();
             /*
              * Restore
              */
