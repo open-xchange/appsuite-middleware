@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,85 +47,93 @@
  *
  */
 
-package com.openexchange.secret.recovery.json;
+package com.openexchange.secret.recovery.json.action;
 
-import java.util.Collection;
-import java.util.Date;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.recovery.SecretInconsistencyDetector;
 import com.openexchange.secret.recovery.SecretMigrator;
+import com.openexchange.secret.recovery.json.SecretRecoveryAJAXRequest;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
- * {@link SecretRecoveryMultipleHandler}
+ * {@link AbstractSecretRecoveryAction}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SecretRecoveryMultipleHandler implements MultipleHandler {
+public abstract class AbstractSecretRecoveryAction implements AJAXActionService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SecretRecoveryMultipleHandler.class));
+    public static volatile SecretService secretService;
+    public static volatile SecretInconsistencyDetector detector;
+    public static volatile SecretMigrator migrator;
 
-    private static final String CHECK = "check";
-    private static final String MIGRATE = "migrate";
+    private static final AJAXRequestResult RESULT_JSON_NULL = new AJAXRequestResult(JSONObject.NULL, "json");
 
-    private final SecretInconsistencyDetector detector;
-    private final SecretMigrator migrator;
-    private final SecretService secretService;
+    protected final ServiceLookup services;
 
-    public SecretRecoveryMultipleHandler(final SecretInconsistencyDetector detector, final SecretMigrator migrator, final SecretService secretService) {
-        this.detector = detector;
-        this.migrator = migrator;
-        this.secretService = secretService;
+    /**
+     * Initializes a new {@link AbstractSecretRecoveryAction}.
+     */
+    protected AbstractSecretRecoveryAction(final ServiceLookup services) {
+        super();
+        this.services = services;
     }
 
-    public void close() {
-        // Nothing to do
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> is absent
+     */
+    protected <S> S getService(final Class<? extends S> clazz) {
+        return services.getService(clazz);
     }
 
-    public Date getTimestamp() {
-        return null;
-    }
-
-    public Collection<OXException> getWarnings() {
-        return null;
-    }
-
-    public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws OXException, JSONException {
-        if(action.equals(CHECK)) {
-            return check(jsonObject, session);
-        } else if (action.equals(MIGRATE)) {
-            return migrate(jsonObject, session);
-        } else {
-            throw AjaxExceptionCodes.UnknownAction.create( action);
+    @Override
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+        try {
+            return perform(new SecretRecoveryAJAXRequest(request, session));
+        } catch (final JSONException e) {
+            throw AjaxExceptionCodes.JSONError.create(e, e.getMessage());
         }
     }
 
-    private Object check(final JSONObject request, final ServerSession session) throws OXException, JSONException {
-        final String diagnosis = detector.isSecretWorking(session);
-        final JSONObject object = new JSONObject();
-        object.put("secretWorks", diagnosis == null);
-        if(diagnosis != null) {
-            LOG.info("Secrets in session "+session.getSessionID()+" seem to need migration: "+diagnosis);
-            object.put("diagnosis", diagnosis);
-        }
-        return object;
+    /**
+     * Performs specified request.
+     *
+     * @param req The request
+     * @return The result
+     * @throws OXException If an error occurs
+     * @throws JSONException If a JSON error occurs
+     */
+    protected abstract AJAXRequestResult perform(SecretRecoveryAJAXRequest req) throws OXException, JSONException;
+
+    /**
+     * Gets the result filled with JSON <code>NULL</code>.
+     *
+     * @return The result with JSON <code>NULL</code>.
+     */
+    protected static AJAXRequestResult getJSONNullResult() {
+        return RESULT_JSON_NULL;
     }
 
-    private Object migrate(final JSONObject request, final ServerSession session) throws JSONException, OXException {
-        final String password = request.getString("password");
-        final String secret = secretService.getSecret(session);
-
-        migrator.migrate(password, secret, session);
-
-        return Integer.valueOf(1);
+    protected static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final char[] chars = string.toCharArray();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < chars.length; i++) {
+            isWhitespace = Character.isWhitespace(chars[i]);
+        }
+        return isWhitespace;
     }
 
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,38 +49,39 @@
 
 package com.openexchange.secret.recovery.json;
 
-import com.openexchange.ajax.MultipleAdapterServlet;
-import com.openexchange.multiple.MultipleHandler;
-import com.openexchange.secret.SecretService;
-import com.openexchange.secret.recovery.SecretInconsistencyDetector;
-import com.openexchange.secret.recovery.SecretMigrator;
-import com.openexchange.tools.session.ServerSession;
-
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.secret.recovery.json.action.CheckAction;
+import com.openexchange.secret.recovery.json.action.MigrateAction;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link SecretRecoveryServlet}
+ * {@link SecretRecoveryActionFactory}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SecretRecoveryServlet extends MultipleAdapterServlet {
+public class SecretRecoveryActionFactory implements AJAXActionServiceFactory {
 
-    public static SecretService secretService;
-    public static SecretInconsistencyDetector detector;
-    public static SecretMigrator migrator;
+    private final Map<String, AJAXActionService> actions;
 
-    @Override
-    protected MultipleHandler createMultipleHandler() {
-        return new SecretRecoveryMultipleHandler(detector, migrator, secretService);
+    /**
+     * Initializes a new {@link SecretRecoveryActionFactory}.
+     *
+     * @param services The service look-up
+     */
+    public SecretRecoveryActionFactory(final ServiceLookup services) {
+        super();
+        actions = new ConcurrentHashMap<String, AJAXActionService>(2);
+        actions.put("check", new CheckAction(services));
+        actions.put("migrate", new MigrateAction(services));
     }
 
     @Override
-    protected boolean requiresBody(final String action) {
-        return false;
-    }
-
-    @Override
-    protected boolean hasModulePermission(final ServerSession session) {
-        return true;
+    public AJAXActionService createActionService(final String action) throws OXException {
+        return actions.get(action);
     }
 
 }

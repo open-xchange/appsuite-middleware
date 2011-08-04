@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,51 +47,38 @@
  *
  */
 
-package com.openexchange.secret.recovery.json.osgi;
+package com.openexchange.secret.recovery.json.action;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.secret.SecretService;
-import com.openexchange.secret.recovery.SecretInconsistencyDetector;
-import com.openexchange.secret.recovery.SecretMigrator;
-import com.openexchange.secret.recovery.json.SecretRecoveryActionFactory;
-import com.openexchange.secret.recovery.json.action.AbstractSecretRecoveryAction;
-import com.openexchange.secret.recovery.json.preferences.Enabled;
-import com.openexchange.server.osgiservice.Whiteboard;
+import org.json.JSONException;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.secret.recovery.json.SecretRecoveryAJAXRequest;
+import com.openexchange.server.ServiceLookup;
 
-public class SecretRecoveryJSONActivator extends AJAXModuleActivator {
+/**
+ * {@link MigrateAction}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public final class MigrateAction extends AbstractSecretRecoveryAction {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SecretRecoveryJSONActivator.class));
-
-    private static final Class<?>[] NEEDED_SERVICES = new Class<?>[] {
-        SecretMigrator.class, SecretInconsistencyDetector.class, SecretService.class };
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
+    /**
+     * Initializes a new {@link MigrateAction}.
+     * 
+     * @param services
+     */
+    public MigrateAction(final ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        try {
-            final Whiteboard whiteboard = new Whiteboard(context);
+    protected AJAXRequestResult perform(final SecretRecoveryAJAXRequest req) throws OXException, JSONException {
+        final String password = req.getParameter("password");
+        final String secret = secretService.getSecret(req.getSession());
 
-            final SecretService secretService = whiteboard.getService(SecretService.class);
-            final SecretMigrator migrator = whiteboard.getService(SecretMigrator.class);
-            final SecretInconsistencyDetector detector = whiteboard.getService(SecretInconsistencyDetector.class);
+        migrator.migrate(password, secret, req.getSession());
 
-            AbstractSecretRecoveryAction.detector = detector;
-            AbstractSecretRecoveryAction.migrator = migrator;
-            AbstractSecretRecoveryAction.secretService = secretService;
-
-            registerModule(new SecretRecoveryActionFactory(this), "recovery/secret");
-            registerService(PreferencesItemService.class, new Enabled());
-        } catch (final Exception x) {
-            LOG.error(x.getMessage(), x);
-        }
-
+        return new AJAXRequestResult(Integer.valueOf(1), "int");
     }
 
 }
