@@ -310,7 +310,7 @@ public abstract class AJPv13Request {
             System.arraycopy(payloadData, pos, retval, 0, numOfBytes > available ? available : numOfBytes);
             pos += numOfBytes;
             return retval;
-        } catch (final RuntimeException e) {
+        } catch (final IndexOutOfBoundsException e) {
             final AJPv13BrokenCycleException ajpExc = new AJPv13BrokenCycleException().setPayload(payloadData);
             /*
              * Dump package
