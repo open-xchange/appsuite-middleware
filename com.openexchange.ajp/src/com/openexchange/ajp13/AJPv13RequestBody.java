@@ -117,8 +117,8 @@ public final class AJPv13RequestBody extends AJPv13Request {
      *
      * @param payloadData The body's payload data
      */
-    public AJPv13RequestBody(final byte[] payloadData) {
-        super(payloadData);
+    public AJPv13RequestBody(final byte[] payloadData, final int dataLength) {
+        super(payloadData, dataLength);
     }
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13RequestBody.class));

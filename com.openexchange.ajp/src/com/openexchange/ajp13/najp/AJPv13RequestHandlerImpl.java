@@ -203,7 +203,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
                     return;
                 }
                 if (CPING_PREFIX_CODE == prefixCode) {
-                    ajpRequest = new AJPv13CPingRequest(ajpCon.getPayloadData(dataLength - 1, true));
+                    ajpRequest = new AJPv13CPingRequest(ajpCon.getPayloadData(dataLength - 1, true), dataLength);
                 } else {
                     /*
                      * Unknown prefix code in first package: Leave routine.
@@ -232,7 +232,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
                 /*
                  * Any following packages after package #1 have to be a request body package which does not contain a prefix code
                  */
-                ajpRequest = new AJPv13RequestBody(ajpCon.getPayloadData(dataLength, true));
+                ajpRequest = new AJPv13RequestBody(ajpCon.getPayloadData(dataLength, true), dataLength);
             }
             ajpRequest.processRequest(this);
         } catch (final AJPv13Exception e) {
@@ -293,9 +293,9 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
             /*
              * Create forward request with payload data
              */
-            ajpRequest = new AJPv13ForwardRequest(payload);
+            ajpRequest = new AJPv13ForwardRequest(payload, dataLength);
         } else {
-            ajpRequest = new AJPv13ForwardRequest(ajpCon.getPayloadData(dataLength - 1, true));
+            ajpRequest = new AJPv13ForwardRequest(ajpCon.getPayloadData(dataLength - 1, true), dataLength);
         }
         /*
          * Process forward request
@@ -317,7 +317,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
              * We got a following request body package.
              */
             final int len = ajpCon.readInitialBytes(false);
-            ajpRequest = new AJPv13RequestBody(ajpCon.getPayloadData(len, true));
+            ajpRequest = new AJPv13RequestBody(ajpCon.getPayloadData(len, true), len);
             ajpRequest.processRequest(this);
         } else if (0 == contentLength) {
             /*

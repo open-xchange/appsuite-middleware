@@ -71,8 +71,8 @@ public final class AJPv13CPingRequest extends AJPv13Request {
      *
      * @param payloadData The payload data
      */
-    public AJPv13CPingRequest(final byte[] payloadData) {
-        super(payloadData);
+    public AJPv13CPingRequest(final byte[] payloadData, final int dataLength) {
+        super(payloadData, dataLength);
     }
 
     @Override
