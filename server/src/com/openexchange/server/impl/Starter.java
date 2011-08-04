@@ -173,7 +173,6 @@ public class Starter implements Initialization {
      */
     new com.openexchange.filemanagement.internal.ManagedFileInitialization(),
     new com.openexchange.mailaccount.internal.MailAccountStorageInit(),
-    new com.openexchange.mailaccount.json.init.MailAccountServletInit(),
     new com.openexchange.multiple.internal.MultipleHandlerInit(),
     new com.openexchange.groupware.impl.id.IDGeneratorInit() };
 
