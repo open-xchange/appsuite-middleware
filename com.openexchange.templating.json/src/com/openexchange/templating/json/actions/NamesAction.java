@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,78 +47,47 @@
  *
  */
 
-package com.openexchange.templating.json;
+package com.openexchange.templating.json.actions;
 
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.templating.TemplateService;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
-
+import com.openexchange.templating.json.TemplatingAJAXRequest;
 
 /**
- * {@link TemplateMultipleHandler}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link NamesAction}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class TemplateMultipleHandler implements MultipleHandler {
+public class NamesAction extends AbstractTemplatingAction implements AJAXActionService {
 
-    private static ServiceLookup services = null;
-
-    public static void setServices(ServiceLookup lookup) {
-        services = lookup;
+    /**
+     * Initializes a new {@link NamesAction}.
+     * 
+     * @param services
+     */
+    public NamesAction(final ServiceLookup services) {
+        super(services);
     }
 
-    private static enum Action {
-        names
-    }
-
-    private static enum Param {
-        only
-    }
-
-    public void close() {
-
-    }
-
-    public Date getTimestamp() {
-        return new Date();
-    }
-
-    public Collection<OXException> getWarnings() {
-        return Collections.emptyList();
-    }
-
-    public Object performRequest(String action, JSONObject jsonObject, ServerSession session, boolean secure) throws JSONException, OXException {
-        if(action.equalsIgnoreCase(Action.names.name())) {
-            return names(jsonObject, session);
-        } else {
-            throw AjaxExceptionCodes.UnknownAction.create( action);
-        }
-    }
-
-    private JSONArray names(JSONObject jsonObject, ServerSession session) throws JSONException, OXException {
-
+    @Override
+    protected AJAXRequestResult perform(final TemplatingAJAXRequest req) throws OXException, JSONException {
         boolean onlyBasic = false;
         boolean onlyUser = false;
         String[] filter = null;
 
-        if(jsonObject.has(Param.only.name())) {
-            Set<String> only = new HashSet<String>(Arrays.asList(jsonObject.getString(Param.only.name()).split("\\s*,\\s*")));
-
-
-            if(only.contains("basic")) {
+        final String param = req.getParameter("only");
+        if (null != param) {
+            final Set<String> only = new HashSet<String>(Arrays.asList(param.split("\\s*,\\s*")));
+            if (only.contains("basic")) {
                 onlyBasic = true;
                 only.remove("basic");
             } else if (only.contains("user")) {
@@ -128,25 +97,25 @@ public class TemplateMultipleHandler implements MultipleHandler {
             filter = only.toArray(new String[only.size()]);
         }
 
-        TemplateService templates = services.getService(TemplateService.class);
+        final TemplateService templates = services.getService(TemplateService.class);
 
-        if(onlyBasic) {
-            return ARRAY(templates.getBasicTemplateNames(filter));
+        if (onlyBasic) {
+            return new AJAXRequestResult(ARRAY(templates.getBasicTemplateNames(filter)), "json");
         }
 
-        if(onlyUser) {
-            List<String> basicTemplateNames = templates.getBasicTemplateNames(filter);
-            List<String> templateNames = templates.getTemplateNames(session, filter);
+        if (onlyUser) {
+            final List<String> basicTemplateNames = templates.getBasicTemplateNames(filter);
+            final List<String> templateNames = templates.getTemplateNames(req.getSession(), filter);
             templateNames.removeAll(basicTemplateNames);
-            return ARRAY(templateNames);
+            return new AJAXRequestResult(ARRAY(templateNames), "json");
         }
 
-        return ARRAY(templates.getTemplateNames(session, filter));
+        return new AJAXRequestResult(ARRAY(templates.getTemplateNames(req.getSession(), filter)), "json");
     }
 
-    private JSONArray ARRAY(List<String> templateNames) {
-        JSONArray array = new JSONArray();
-        for (String name : templateNames) {
+    private static JSONArray ARRAY(final List<String> templateNames) {
+        final JSONArray array = new JSONArray();
+        for (final String name : templateNames) {
             array.put(name);
         }
         return array;

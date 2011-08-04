@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,33 +49,37 @@
 
 package com.openexchange.templating.json;
 
-import com.openexchange.ajax.MultipleAdapterServlet;
-import com.openexchange.multiple.MultipleHandler;
-import com.openexchange.tools.session.ServerSession;
-
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.templating.json.actions.NamesAction;
 
 /**
- * {@link TemplatingServlet}
+ * {@link TemplatingActionFactory}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class TemplatingServlet extends MultipleAdapterServlet {
+public class TemplatingActionFactory implements AJAXActionServiceFactory {
 
-    private static final MultipleHandler HANDLER = new TemplateMultipleHandler();
+    private final Map<String, AJAXActionService> actions;
 
-    @Override
-    protected MultipleHandler createMultipleHandler() {
-        return HANDLER;
+    /**
+     * Initializes a new {@link TemplatingActionFactory}.
+     *
+     * @param services The service look-up
+     */
+    public TemplatingActionFactory(final ServiceLookup services) {
+        super();
+        actions = new ConcurrentHashMap<String, AJAXActionService>(2);
+        actions.put("names", new NamesAction(services));
     }
 
     @Override
-    protected boolean requiresBody(String action) {
-        return false;
-    }
-
-    @Override
-    protected boolean hasModulePermission(ServerSession session) {
-        return true;
+    public AJAXActionService createActionService(final String action) throws OXException {
+        return actions.get(action);
     }
 
 }
