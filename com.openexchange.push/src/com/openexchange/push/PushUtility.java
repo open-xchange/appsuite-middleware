@@ -114,8 +114,8 @@ public final class PushUtility {
                         Types.EMAIL,
                         null,
                         null,
-                        folder,
-                        folder,
+                        null,
+                        null,
                         session);
                 properties.put(CommonEvent.EVENT_KEY, commonEvent);
             }

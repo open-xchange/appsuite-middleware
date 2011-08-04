@@ -52,14 +52,6 @@ package com.openexchange.multiple.internal;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.json.multiple.MailAccountMultipleHandlerFactory;
-import com.openexchange.multiple.handlers.AppointmentFactoryService;
-import com.openexchange.multiple.handlers.ConfigFactoryService;
-import com.openexchange.multiple.handlers.ContactsFactoryService;
-import com.openexchange.multiple.handlers.GroupFactoryService;
-import com.openexchange.multiple.handlers.QuotaFactoryService;
-import com.openexchange.multiple.handlers.ReminderFactoryService;
-import com.openexchange.multiple.handlers.ResourceFactoryService;
-import com.openexchange.multiple.handlers.TasksFactoryService;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.services.ServerServiceRegistry;
 
@@ -92,14 +84,14 @@ public final class MultipleHandlerInit implements Initialization {
         /*
          * Add known handlers
          */
-        registry.addFactoryService(new QuotaFactoryService());
-        registry.addFactoryService(new AppointmentFactoryService());
-        registry.addFactoryService(new ContactsFactoryService());
-        registry.addFactoryService(new GroupFactoryService());
-        registry.addFactoryService(new ReminderFactoryService());
-        registry.addFactoryService(new ResourceFactoryService());
-        registry.addFactoryService(new TasksFactoryService());
-        registry.addFactoryService(new ConfigFactoryService());
+        //registry.addFactoryService(new QuotaFactoryService());
+        //registry.addFactoryService(new AppointmentFactoryService());
+        //registry.addFactoryService(new ContactsFactoryService());
+        //registry.addFactoryService(new GroupFactoryService());
+        //registry.addFactoryService(new ReminderFactoryService());
+        //registry.addFactoryService(new ResourceFactoryService());
+        //registry.addFactoryService(new TasksFactoryService());
+        //registry.addFactoryService(new ConfigFactoryService());
         registry.addFactoryService(new MailAccountMultipleHandlerFactory());
     }
 
