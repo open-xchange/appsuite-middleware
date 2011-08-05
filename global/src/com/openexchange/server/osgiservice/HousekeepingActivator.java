@@ -143,7 +143,9 @@ public abstract class HousekeepingActivator extends DeferredActivator {
     }
 
     /**
-     * Creates and starts a new {@link ServiceTracker} instance parameterized with given customizer.
+     * Creates and remembers a new {@link ServiceTracker} instance parameterized with given customizer.
+     * <p>
+     * <b>NOTE</b>: Don't forget to open tracker(s) with {@link #openTrackers()}.
      *
      * @param clazz The class of the tracked service
      * @param customizer The customizer applied to newly created {@link ServiceTracker} instance
@@ -156,7 +158,9 @@ public abstract class HousekeepingActivator extends DeferredActivator {
     }
 
     /**
-     * Creates and starts a new {@link ServiceTracker} instance parameterized with given customizer.
+     * Creates and remembers a new {@link ServiceTracker} instance parameterized with given customizer.
+     * <p>
+     * <b>NOTE</b>: Don't forget to open tracker(s) with {@link #openTrackers()}.
      *
      * @param filter The tracker's filter
      * @param customizer The customizer applied to newly created {@link ServiceTracker} instance
@@ -169,7 +173,9 @@ public abstract class HousekeepingActivator extends DeferredActivator {
     }
 
     /**
-     * Creates and starts a new {@link ServiceTracker} instance for specified service's class.
+     * Creates and remembers a new {@link ServiceTracker} instance for specified service's class.
+     * <p>
+     * <b>NOTE</b>: Don't forget to open tracker(s) with {@link #openTrackers()}.
      *
      * @param clazz The service's class
      * @return The newly created {@link ServiceTracker} instance
@@ -179,8 +185,10 @@ public abstract class HousekeepingActivator extends DeferredActivator {
     }
 
     /**
-     * Creates and starts a new {@link ServiceTracker} instance for specified filter.
-     *
+     * Creates and remembers a new {@link ServiceTracker} instance for specified filter.
+     * <p>
+     * <b>NOTE</b>: Don't forget to open tracker(s) with {@link #openTrackers()}.
+     * 
      * @param filter The filter to apply
      * @return The newly created {@link ServiceTracker} instance
      */
@@ -189,7 +197,9 @@ public abstract class HousekeepingActivator extends DeferredActivator {
     }
 
     /**
-     * Creates and starts a new {@link ServiceTracker} instance with given listener applied.
+     * Creates and remembers a new {@link ServiceTracker} instance with given listener applied.
+     * <p>
+     * <b>NOTE</b>: Don't forget to open tracker(s) with {@link #openTrackers()}.
      *
      * @param clazz The service's class
      * @param listener The service's listener triggered on {@link ServiceTracker#addingService(ServiceReference)} and so on
@@ -220,7 +230,9 @@ public abstract class HousekeepingActivator extends DeferredActivator {
     }
 
     /**
-     * Creates and starts a new {@link ServiceTracker} instance with given listener applied.
+     * Creates and remembers a new {@link ServiceTracker} instance with given listener applied.
+     * <p>
+     * <b>NOTE</b>: Don't forget to open tracker(s) with {@link #openTrackers()}.
      *
      * @param filter The service filter
      * @param listener The service's listener triggered on {@link ServiceTracker#addingService(ServiceReference)} and so on
@@ -238,8 +250,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
 
             @Override
             public void modifiedService(final ServiceReference<S> arg0, final S arg1) {
-                // TODO Auto-generated method stub
-
+                // Nothing to do
             }
 
             @Override
