@@ -82,7 +82,7 @@ public class CaldavActivator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CaldavActivator.class));
 
-    private static final Class[] NEEDED = new Class[]{ICalEmitter.class, ICalParser.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class, FolderService.class, UserService.class, ConfigViewFactory.class};
+    private static final Class<?>[] NEEDED = new Class<?>[]{ICalEmitter.class, ICalParser.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class, FolderService.class, UserService.class, ConfigViewFactory.class};
 
     private OSGiPropertyMixin mixin;
 
@@ -100,7 +100,7 @@ public class CaldavActivator extends HousekeepingActivator {
             rememberTracker(new ServletRegistration(context, new CalDAV(), "/servlet/dav/caldav"));
             rememberTracker(new ServletRegistration(context, new DevNullServlet(), "/servlet/dav/dev/null")); // FIXME activate this elsewhere
 
-            CaldavPerformer performer = CaldavPerformer.getInstance();
+            final CaldavPerformer performer = CaldavPerformer.getInstance();
             mixin = new OSGiPropertyMixin(context, performer);
             performer.setGlobalMixins(mixin);
 
@@ -108,7 +108,7 @@ public class CaldavActivator extends HousekeepingActivator {
             registerService(PropertyMixinFactory.class, new PropertyMixinFactory() {
 
                 @Override
-                public PropertyMixin create(SessionHolder sessionHolder) {
+                public PropertyMixin create(final SessionHolder sessionHolder) {
                     return new CalendarUserAddressSet(sessionHolder);
                 }
 
@@ -117,7 +117,7 @@ public class CaldavActivator extends HousekeepingActivator {
 
             registerService(PathRegistration.class, new PathRegistration("caldav"));
             openTrackers();
-        } catch (Throwable t) {
+        } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
         }
     }

@@ -52,9 +52,6 @@ package com.openexchange.calendar.osgi;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.calendar.CalendarAdministration;
 import com.openexchange.calendar.CalendarReminderDelete;
 import com.openexchange.calendar.api.AppointmentSqlFactory;
@@ -64,38 +61,35 @@ import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarAdministrationService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.reminder.TargetService;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 
-public class Activator implements BundleActivator {
+/**
+ * {@link Activator}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public class Activator extends HousekeepingActivator {
 
-    private ServiceRegistration appointmentSqlFactoryRegistration;
-    private ServiceRegistration calendarCollectionRegistration;
-    private ServiceRegistration calendarAdministrationRegistration;
-    private ServiceRegistration calendarReminderDeleteRegistration;
+    /**
+     * Initializes a new {@link Activator}.
+     */
+    public Activator() {
+        super();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
-	 */
-	@Override
-    public void start(BundleContext context) throws Exception {
-	    appointmentSqlFactoryRegistration = context.registerService(AppointmentSqlFactoryService.class.getName(), new AppointmentSqlFactory(), null);
-	    calendarCollectionRegistration = context.registerService(CalendarCollectionService.class.getName(), new CalendarCollection(), null);
-	    calendarAdministrationRegistration = context.registerService(CalendarAdministrationService.class.getName(), new CalendarAdministration(), null);
-        Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
+    @Override
+    protected java.lang.Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
+    };
+
+    @Override
+    protected void startBundle() throws Exception {
+        registerService(AppointmentSqlFactoryService.class, new AppointmentSqlFactory());
+        registerService(CalendarCollectionService.class, new CalendarCollection());
+        registerService(CalendarAdministrationService.class, new CalendarAdministration());
+        final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
         props.put(TargetService.MODULE_PROPERTY, I(Types.APPOINTMENT));
-        calendarReminderDeleteRegistration = context.registerService(TargetService.class.getName(), new CalendarReminderDelete(), props);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-	 */
-	@Override
-    public void stop(BundleContext context) throws Exception {
-	    appointmentSqlFactoryRegistration.unregister();
-	    calendarCollectionRegistration.unregister();
-	    calendarAdministrationRegistration.unregister();
-	    calendarReminderDeleteRegistration.unregister();
-	}
+        registerService(TargetService.class, new CalendarReminderDelete(), props);
+    }
 
 }
