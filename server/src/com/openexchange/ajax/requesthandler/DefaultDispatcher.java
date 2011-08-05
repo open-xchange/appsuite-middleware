@@ -104,14 +104,18 @@ public class DefaultDispatcher implements Dispatcher {
     public AJAXRequestResult perform(final AJAXRequestData request, final AJAXState state, final ServerSession session) throws OXException {
         List<AJAXActionCustomizer> outgoing = new ArrayList<AJAXActionCustomizer>(customizerFactories.size());
         final List<AJAXActionCustomizer> todo = new LinkedList<AJAXActionCustomizer>();
-
+        /*
+         * Create customizers
+         */
         for (final AJAXActionCustomizerFactory customizerFactory : customizerFactories) {
             final AJAXActionCustomizer customizer = customizerFactory.createCustomizer(request, session);
             if (customizer != null) {
                 todo.add(customizer);
             }
         }
-
+        /*
+         * Iterate customizers for AJAXRequestData
+         */
         AJAXRequestData modifiedRequest = request;
         while (!todo.isEmpty()) {
             final Iterator<AJAXActionCustomizer> iterator = todo.iterator();
@@ -122,7 +126,6 @@ public class DefaultDispatcher implements Dispatcher {
                     if (modified != null) {
                         modifiedRequest = modified;
                     }
-
                     outgoing.add(customizer);
                     iterator.remove();
                 } catch (final FlowControl.Later l) {
@@ -130,12 +133,16 @@ public class DefaultDispatcher implements Dispatcher {
                 }
             }
         }
-
+        /*
+         * Look-up appropriate factory for request's module
+         */
         final AJAXActionServiceFactory factory = lookupFactory(modifiedRequest.getModule());
-
         if (factory == null) {
             throw AjaxExceptionCodes.UNKNOWN_MODULE.create(modifiedRequest.getModule());
         }
+        /*
+         * Get associated action
+         */
         final AJAXActionService action = factory.createActionService(modifiedRequest.getAction());
         if (action == null) {
             throw AjaxExceptionCodes.UnknownAction.create(modifiedRequest.getAction());
@@ -153,7 +160,6 @@ public class DefaultDispatcher implements Dispatcher {
                 modifiedRequest.setFormat(actionMetadata.defaultFormat());
             }
         }
-
         /*
          * State already initialized for module?
          */
@@ -174,7 +180,9 @@ public class DefaultDispatcher implements Dispatcher {
             }
             throw AjaxExceptionCodes.UnexpectedError.create(e, e.getMessage());
         }
-
+        /*
+         * Iterate customizers in reverse oder for request data and result pair
+         */
         Collections.reverse(outgoing);
         outgoing = new LinkedList<AJAXActionCustomizer>(outgoing);
         while (!outgoing.isEmpty()) {
