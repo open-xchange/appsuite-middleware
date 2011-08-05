@@ -220,7 +220,7 @@ public final class DispatcherServlet extends SessionServlet {
         candidate.write(request, result, hReq, hResp);
     }
 
-    protected AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session) throws IOException, OXException {
+    protected static AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session) throws IOException, OXException {
         final AJAXRequestData retval = new AJAXRequestData();
         retval.setSecure(Tools.considerSecure(req));
         {
@@ -266,7 +266,7 @@ public final class DispatcherServlet extends SessionServlet {
             }
         }
         if (isFileUpload) {
-            final UploadEvent upload = processUpload(req);
+            final UploadEvent upload = processUploadStatic(req);
             final Iterator<UploadFile> iterator = upload.getUploadFilesIterator();
             while (iterator.hasNext()) {
                 retval.addFile(iterator.next());
