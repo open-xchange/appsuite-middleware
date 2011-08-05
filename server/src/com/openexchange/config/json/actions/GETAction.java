@@ -71,9 +71,6 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class GETAction extends AbstractConfigAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(GETAction.class));
-
     /**
      * Initializes a new {@link GETAction}.
      */
