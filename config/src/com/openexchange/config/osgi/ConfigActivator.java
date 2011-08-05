@@ -68,7 +68,7 @@ public final class ConfigActivator implements BundleActivator {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ConfigActivator.class));
 
-    private ServiceRegistration registration;
+    private ServiceRegistration<ConfigurationService> registration;
 
     /**
      * Default constructor
@@ -81,9 +81,9 @@ public final class ConfigActivator implements BundleActivator {
     public void start(final BundleContext context) throws Exception {
         LOG.info("starting bundle: com.openexchange.configread");
         try {
-            ConfigurationService configService = new ConfigurationImpl();
-            registration = context.registerService(ConfigurationService.class.getName(), configService, null);
-            Hashtable<String, Object> properties = new Hashtable<String,Object>();
+            final ConfigurationService configService = new ConfigurationImpl();
+            registration = context.registerService(ConfigurationService.class, configService, null);
+            final Hashtable<String, Object> properties = new Hashtable<String,Object>();
             properties.put("scope", "server");
             context.registerService(ConfigProviderService.class.getName(), new ConfigProviderServiceImpl(configService), properties);
         } catch (final Throwable t) {
