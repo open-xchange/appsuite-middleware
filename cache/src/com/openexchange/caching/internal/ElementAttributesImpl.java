@@ -176,6 +176,7 @@ public final class ElementAttributesImpl implements ElementAttributes, Cloneable
         size = attr.size;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Object clone() {
         try {
@@ -229,6 +230,7 @@ public final class ElementAttributesImpl implements ElementAttributes, Cloneable
         return createTime;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public ArrayList<ElementEventHandler> getElementEventHandlers() {
         return (ArrayList<ElementEventHandler>) eventHandlers.clone();

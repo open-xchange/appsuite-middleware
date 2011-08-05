@@ -98,12 +98,6 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13RequestHandlerImpl.class));
 
-    private static final int NO = 0;
-
-    private static final int BUSY = 1;
-
-    private static final int DONE = 2;
-
     private HttpServlet servlet;
 
     private final StringBuilder servletId;
@@ -172,17 +166,17 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
              * Check if we received the first package which must contain a prefix code
              */
             if (firstPackage) {
-                /*
+                /*-
                  * AJP cycle still intact?
-                 */
-                if (false && endResponseSent) {
-                    /*
-                     * Caught in another cycle! Abort immediately
-                     */
+                 * 
+                if (endResponseSent) {
+                    // Caught in another cycle! Abort immediately
                     ajpCon.dropOutstandingData();
                     final AJPv13Exception e = new AJPv13Exception(AJPCode.IO_ERROR, false, "Broken AJP cyle. Detected outgoing data available with first AJP package.");
                     LOG.error(e.getMessage(), e);
                 }
+                 * 
+                 */
                 /*
                  * Read Prefix Code from Input Stream
                  */
