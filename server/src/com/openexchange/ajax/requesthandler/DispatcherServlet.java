@@ -84,7 +84,7 @@ import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link DispatcherServlet}
+ * {@link DispatcherServlet} - The main dispatcher servlet which delegates request to dispatcher framework.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
