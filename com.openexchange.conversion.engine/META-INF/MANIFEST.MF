@@ -7,9 +7,10 @@ Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.conversion,
  com.openexchange.exception,
+ com.openexchange.log,
+ com.openexchange.server.osgiservice,
  com.openexchange.session,
  org.apache.commons.logging,
- com.openexchange.log,
  org.apache.commons.logging.impl,
  org.osgi.framework,
  org.osgi.util.tracker

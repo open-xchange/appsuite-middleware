@@ -49,31 +49,22 @@
 
 package com.openexchange.conversion.engine.osgi;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.conversion.engine.internal.ConversionEngineRegistry;
 import com.openexchange.conversion.engine.internal.ConversionServiceImpl;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 
 /**
  * {@link ConversionEngineActivator} - Activator for conversion engine
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ConversionEngineActivator implements BundleActivator {
+public final class ConversionEngineActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ConversionEngineActivator.class));
-
-    private ServiceRegistration serviceRegistration;
-
-    private List<ServiceTracker> trackers;
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ConversionEngineActivator.class));
 
     /**
      * Initializes a new {@link ConversionEngineActivator}
@@ -83,7 +74,12 @@ public final class ConversionEngineActivator implements BundleActivator {
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
+    protected Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
         try {
             /*
              * Clear registry
@@ -92,17 +88,13 @@ public final class ConversionEngineActivator implements BundleActivator {
             /*
              * Start-up service trackers
              */
-            final ServiceTrackerCustomizer customizer = new ConversionEngineCustomizer(context);
-            trackers = new ArrayList<ServiceTracker>(2);
-            trackers.add(new ServiceTracker(context, DataHandler.class.getName(), customizer));
-            trackers.add(new ServiceTracker(context, DataSource.class.getName(), customizer));
-            for (final ServiceTracker tracker : trackers) {
-                tracker.open();
-            }
+            track(DataHandler.class, new DataHandlerTracker(context));
+            track(DataSource.class, new DataSourceTracker(context));
+            openTrackers();
             /*
              * Register service
              */
-            serviceRegistration = context.registerService(ConversionService.class.getName(), new ConversionServiceImpl(), null);
+            registerService(ConversionService.class, new ConversionServiceImpl());
             if (LOG.isInfoEnabled()) {
                 LOG.info("Conversion engine successfully started");
             }
@@ -113,29 +105,13 @@ public final class ConversionEngineActivator implements BundleActivator {
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
-
+    protected void stopBundle() throws Exception {
         try {
-            if (null != trackers) {
-                /*
-                 * Close service trackers
-                 */
-                while (!trackers.isEmpty()) {
-                    trackers.remove(0).close();
-                }
-                trackers = null;
-            }
+            cleanUp();
             /*
              * Clear registry
              */
             ConversionEngineRegistry.getInstance().clearAll();
-            /*
-             * Unregister service
-             */
-            if (serviceRegistration != null) {
-                serviceRegistration.unregister();
-                serviceRegistration = null;
-            }
             if (LOG.isInfoEnabled()) {
                 LOG.info("Conversion engine successfully stopped");
             }
