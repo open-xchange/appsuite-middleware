@@ -87,7 +87,7 @@ public final class HttpServiceImpl implements HttpService {
     }
 
     @Override
-    public void registerServlet(final String alias, final Servlet servlet, @SuppressWarnings("unchecked") final Dictionary initparams, final HttpContext context) throws ServletException {
+    public void registerServlet(final String alias, final Servlet servlet, final Dictionary initparams, final HttpContext context) throws ServletException {
         try {
             @SuppressWarnings("unchecked") final Dictionary<String, String> dic = initparams;
             HttpServletManager.registerServlet(alias, (HttpServlet) servlet, dic);
