@@ -68,7 +68,7 @@ public final class MDNSActivator implements BundleActivator {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MDNSActivator.class));
 
-    private List<ServiceRegistration> registrations;
+    private List<ServiceRegistration<?>> registrations;
 
     private MDNSServiceImpl service;
 
@@ -86,7 +86,7 @@ public final class MDNSActivator implements BundleActivator {
              * Create mDNS service
              */
             service = new MDNSServiceImpl();
-            registrations = new ArrayList<ServiceRegistration>(2);
+            registrations = new ArrayList<ServiceRegistration<?>>(2);
             registrations.add(context.registerService(MDNSService.class.getName(), service, null));
             registrations.add(context.registerService(CommandProvider.class.getName(), new MDNSCommandProvider(service), null));
         } catch (final Exception e) {

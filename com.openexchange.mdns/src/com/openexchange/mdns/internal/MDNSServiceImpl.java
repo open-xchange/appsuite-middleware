@@ -111,7 +111,7 @@ public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
         }
     }
 
-    private UUID getIdentifierFor(final String serviceId) {
+    private UUID getIdentifierFor(/*final String serviceId*/) {
         return UUID.randomUUID();
     }
 
