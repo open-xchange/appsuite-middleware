@@ -73,7 +73,7 @@ public class ConfigTools {
      * @return
      */
     public static long parseTimespan(final String span) {
-        return TimeSpanParser.parseTimespan(span);
+        return TimeSpanParser.parseTimespan(span).longValue();
     }
 
 }
