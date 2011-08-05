@@ -95,6 +95,12 @@ public abstract class AbstractTemplatingAction implements AJAXActionService {
             return perform(new TemplatingAJAXRequest(request, session));
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSONError.create(e, e.getMessage());
+        } catch (final IllegalStateException e) {
+            final Throwable cause = e.getCause();
+            if (cause instanceof OXException) {
+                throw (OXException) cause;
+            }
+            throw AjaxExceptionCodes.UnexpectedError.create(e, e.getMessage());
         }
     }
 

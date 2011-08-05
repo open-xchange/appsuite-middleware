@@ -95,6 +95,12 @@ public abstract class AbstractConversionAction implements AJAXActionService {
             return perform(new ConversionAJAXRequest(request, session));
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSONError.create(e, e.getMessage());
+        } catch (final IllegalStateException e) {
+            final Throwable cause = e.getCause();
+            if (cause instanceof OXException) {
+                throw (OXException) cause;
+            }
+            throw AjaxExceptionCodes.UnexpectedError.create(e, e.getMessage());
         }
     }
 

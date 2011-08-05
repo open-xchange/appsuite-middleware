@@ -142,7 +142,15 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
         if (!session.getUserConfiguration().hasWebMail()) {
             throw AjaxExceptionCodes.NoPermissionForModule.create("mail");
         }
-        return perform(new MailRequest(request, session));
+        try {
+            return perform(new MailRequest(request, session));
+        } catch (final IllegalStateException e) {
+            final Throwable cause = e.getCause();
+            if (cause instanceof OXException) {
+                throw (OXException) cause;
+            }
+            throw AjaxExceptionCodes.UnexpectedError.create(e, e.getMessage());
+        }
     }
 
     /**
