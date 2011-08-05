@@ -86,7 +86,7 @@ public class SecretRecoveryJSONActivator extends AJAXModuleActivator {
             AbstractSecretRecoveryAction.migrator = migrator;
             AbstractSecretRecoveryAction.secretService = secretService;
 
-            registerModule(new SecretRecoveryActionFactory(this), "recovery/secret");
+            registerModule(new SecretRecoveryActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "recovery/secret");
             registerService(PreferencesItemService.class, new Enabled());
         } catch (final Exception x) {
             LOG.error(x.getMessage(), x);

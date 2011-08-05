@@ -95,7 +95,7 @@ public final class ResourceRequestActivator extends AJAXModuleActivator {
         /*
          * Register request handler
          */
-        registerModule(new ResourceActionFactory(this), "resource");
+        registerModule(new ResourceActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "resource");
         registerService(PreferencesItemService.class, new Module());
     }
 }

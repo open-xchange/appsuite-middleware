@@ -69,7 +69,7 @@ public class Activator extends AJAXModuleActivator {
     protected void startBundle() throws Exception {
         rememberTracker(new ServiceTracker<TargetService, TargetService>(context, TargetService.class.getName(), new TargetRegistryCustomizer(context)));
         openTrackers();
-        registerModule(new ReminderActionFactory(this), "reminder");
+        registerModule(new ReminderActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "reminder");
     }
 
     @Override

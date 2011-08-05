@@ -74,7 +74,7 @@ public final class ManagedfFileJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        registerModule(new ManagedFileActionFactory(this), "file");
+        registerModule(new ManagedFileActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "file");
     }
 
 }

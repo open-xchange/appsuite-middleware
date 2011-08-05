@@ -73,7 +73,7 @@ public final class ResourceJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        registerModule(new ResourceActionFactory(this), "resource");
+        registerModule(new ResourceActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "resource");
     }
 
 }

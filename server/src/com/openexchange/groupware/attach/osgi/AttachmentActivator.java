@@ -70,6 +70,6 @@ public final class AttachmentActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        registerModule(new MailActionFactory(this), "attachment");
+        registerModule(new MailActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "attachment");
     }
 }

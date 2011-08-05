@@ -75,7 +75,7 @@ public class Activator extends AJAXModuleActivator {
         props.put(TargetService.MODULE_PROPERTY, I(Types.TASK));
         registerService(TargetService.class, new ModifyThroughDependant(), props);
 
-        registerModule(new TaskActionFactory(this), "tasks");
+        registerModule(new TaskActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "tasks");
     }
 
     @Override

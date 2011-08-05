@@ -67,7 +67,7 @@ public class TemplatingJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        registerModule(new TemplatingActionFactory(this), "templating");
+        registerModule(new TemplatingActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "templating");
     }
 
 }

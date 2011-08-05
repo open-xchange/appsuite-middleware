@@ -74,7 +74,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        registerModule(new MailActionFactory(this), "mail");
+        registerModule(new MailActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "mail");
     }
 
 }

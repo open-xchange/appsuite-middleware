@@ -74,7 +74,7 @@ public final class AppointmentJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        registerModule(new AppointmentActionFactory(this), "calendar");
+        registerModule(new AppointmentActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "calendar");
     }
 
 }

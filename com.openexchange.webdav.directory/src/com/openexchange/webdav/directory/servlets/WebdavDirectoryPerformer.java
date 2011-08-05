@@ -141,7 +141,7 @@ public class WebdavDirectoryPerformer implements SessionHolder {
         WebdavAction trace;
 
 
-        this.factory = new DirectoryWebdavFactory(this);
+        this.factory = new DirectoryWebdavFactory(new ExceptionOnAbsenceServiceLookup(this));
 
         unlock = prepare(new WebdavUnlockAction(), true, true, new WebdavIfAction(0, false, false));
         propPatch = prepare(new WebdavProppatchAction(protocol), true, true, new WebdavExistsAction(), new WebdavIfAction(0, true, false));

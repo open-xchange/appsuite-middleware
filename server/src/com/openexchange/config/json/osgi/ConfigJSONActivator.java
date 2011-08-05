@@ -74,7 +74,7 @@ public final class ConfigJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        registerModule(new ConfigActionFactory(this), "config");
+        registerModule(new ConfigActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "config");
     }
 
 }

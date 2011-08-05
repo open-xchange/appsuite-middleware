@@ -74,7 +74,7 @@ public final class QuotaJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        registerModule(new QuotaActionFactory(this), "quota");
+        registerModule(new QuotaActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "quota");
     }
 
 }

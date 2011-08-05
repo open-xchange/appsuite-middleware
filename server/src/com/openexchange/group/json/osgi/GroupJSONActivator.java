@@ -73,7 +73,7 @@ public final class GroupJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        registerModule(new GroupActionFactory(this), "group");
+        registerModule(new GroupActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "group");
     }
 
 }
