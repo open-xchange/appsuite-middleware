@@ -444,12 +444,11 @@ public final class AJPv13Task implements Task<Object> {
                         LOG.error(logMe.getMessage(), logMe);
                         closeAndKeepAlive(ajpCon);
                     }
-                    ajpCon.resetConnection(false);
+                    ajpCon.resetConnection(true);
                     monitor.decrementNumProcessing();
                     monitor.addProcessingTime(System.currentTimeMillis() - processingStart);
                     monitor.incrementNumRequests();
                     processing = false;
-                    flush();
                 } while (!t.isInterrupted() && client != null && !client.isClosed());
                 /*-
                  * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -592,13 +591,6 @@ public final class AJPv13Task implements Task<Object> {
              */
             writeEndResponse(s, false);
             ajpCon.getAjpRequestHandler().setEndResponseSent();
-        }
-    }
-
-    private void flush() throws IOException {
-        final Socket s = client;
-        if (null != s) {
-            s.getOutputStream().flush();
         }
     }
 

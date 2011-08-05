@@ -147,7 +147,7 @@ public interface AJPv13RequestHandler {
     /**
      * Releases associated servlet instance and resets request handler to hold initial values
      */
-    public void reset(final boolean discardConnection);
+    public void reset();
 
     /**
      * Sets this request handler's servlet reference to the one bound to given path argument
