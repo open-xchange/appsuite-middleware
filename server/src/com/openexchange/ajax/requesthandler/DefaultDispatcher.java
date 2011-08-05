@@ -140,15 +140,17 @@ public class DefaultDispatcher implements Dispatcher {
         if (action == null) {
             throw AjaxExceptionCodes.UnknownAction.create(modifiedRequest.getAction());
         }
+        /*
+         * Check for Action annotation
+         */
         final Action actionMetadata = getActionMetadata(action);
-
-        if (actionMetadata != null) {
+        if (actionMetadata == null) {
             if (modifiedRequest.getFormat() == null) {
-                modifiedRequest.setFormat(actionMetadata.defaultFormat());
+                modifiedRequest.setFormat("apiResponse");
             }
         } else {
             if (modifiedRequest.getFormat() == null) {
-                modifiedRequest.setFormat("apiResponse");
+                modifiedRequest.setFormat(actionMetadata.defaultFormat());
             }
         }
 

@@ -52,13 +52,18 @@ package com.openexchange.ajax.requesthandler;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-
 /**
- * {@link Action}
- *
+ * {@link Action} - The action annotation provides the default format for an {@link AJAXActionService}.
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Action {
+
+    /**
+     * Gets the default format.
+     * 
+     * @return The default format
+     */
     String defaultFormat() default "apiResponse";
 }
