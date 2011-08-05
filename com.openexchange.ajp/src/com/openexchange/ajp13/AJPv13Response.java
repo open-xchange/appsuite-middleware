@@ -405,45 +405,64 @@ public class AJPv13Response {
 
     /**
      * Creates the <code>END_RESPONSE</code> response bytes.
-     *
+     * 
      * @return an array of <code>byte</code> containing the <code>END_RESPONSE</code> response bytes
-     * @throws AJPv13Exception If <code>END_RESPONSE</code> response bytes cannot be created.
      */
-    public static final byte[] getEndResponseBytes() throws AJPv13Exception {
+    public static final byte[] getEndResponseBytes() {
         return getEndResponseBytes(false);
     }
 
     /**
      * Data length of END_RESPONSE:
-     *
+     * 
      * <pre>
      * prefix(1) + close_connection_boolean(1)
      * </pre>
      */
     private static final int END_RESPONSE_LENGTH = 2;
 
+    private static final byte[] END_RESPONSE_REUSE;
+
+    private static final byte[] END_RESPONSE_CLOSE;
+    
+    static {
+        final ByteArrayOutputStream sink = new UnsynchronizedByteArrayOutputStream(6);
+        sink.write('A');
+        sink.write('B');
+        final int dataLength = END_RESPONSE_LENGTH;
+        sink.write((dataLength >> 8)); // high
+        sink.write((dataLength & (255))); // low
+        sink.write(END_RESPONSE_PREFIX_CODE);
+        sink.write(1);
+        END_RESPONSE_REUSE = sink.toByteArray();
+        sink.reset();
+        sink.write('A');
+        sink.write('B');
+        sink.write((dataLength >> 8)); // high
+        sink.write((dataLength & (255))); // low
+        sink.write(END_RESPONSE_PREFIX_CODE);
+        sink.write(0);
+        END_RESPONSE_CLOSE = sink.toByteArray();
+    }
+
     /**
      * Creates the <code>END_RESPONSE</code> response bytes.
-     *
+     * 
      * @param closeConnection - whether or not to signal connection closure
      * @return an array of <code>byte</code> containing the <code>END_RESPONSE</code> response bytes
-     * @throws AJPv13Exception If <code>END_RESPONSE</code> response bytes cannot be created.
      */
-    public static final byte[] getEndResponseBytes(final boolean closeConnection) throws AJPv13Exception {
+    public static final byte[] getEndResponseBytes(final boolean closeConnection) {
         /*
          * No need to check against max package size cause it's a static package size of 6
          */
-        final ByteArrayOutputStream sink = new UnsynchronizedByteArrayOutputStream(END_RESPONSE_LENGTH + RESPONSE_PREFIX_LENGTH);
-        fillStartBytes(END_RESPONSE_PREFIX_CODE, END_RESPONSE_LENGTH, sink);
         if (closeConnection) {
-            writeBoolean(false, sink);
+            return END_RESPONSE_CLOSE;
         } else if (AJPv13Config.isAJPModJK()) {
-            writeBoolean(true, sink);
+            return END_RESPONSE_REUSE;
         } else {
             final boolean reuseConnection = AJPv13Server.getNumberOfOpenAJPSockets() <= AJPv13Config.getAJPMaxNumOfSockets();
-            writeBoolean(reuseConnection, sink);
+            return reuseConnection ? END_RESPONSE_REUSE : END_RESPONSE_CLOSE;
         }
-        return sink.toByteArray();
     }
 
     /**

@@ -444,12 +444,11 @@ public final class AJPv13Task implements Task<Object> {
                         LOG.error(logMe.getMessage(), logMe);
                         closeAndKeepAlive(ajpCon);
                     }
-                    ajpCon.resetConnection(false);
+                    ajpCon.resetConnection(true);
                     monitor.decrementNumProcessing();
                     monitor.addProcessingTime(System.currentTimeMillis() - processingStart);
                     monitor.incrementNumRequests();
                     processing = false;
-                    flush();
                 } while (!t.isInterrupted() && client != null && !client.isClosed());
                 /*-
                  * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -595,13 +594,6 @@ public final class AJPv13Task implements Task<Object> {
         }
     }
 
-    private void flush() throws IOException {
-        final Socket s = client;
-        if (null != s) {
-            s.getOutputStream().flush();
-        }
-    }
-
     /**
      * Closes current AJP cycle (End-Response package) but keeps socket connection alive.
      *
@@ -615,7 +607,7 @@ public final class AJPv13Task implements Task<Object> {
             /*
              * Send END_RESPONSE package
              */
-            writeEndResponse(s, false);
+            writeAJPCycleEnd(s, ajpCon.getAjpRequestHandler(), false);
             ajpCon.getAjpRequestHandler().setEndResponseSent();
         }
     }
@@ -634,28 +626,7 @@ public final class AJPv13Task implements Task<Object> {
             if (s != null) {
                 try {
                     if (closeOrderly && !s.isClosed()) {
-                        final AJPv13RequestHandler requestHandler = ajpCon.getAjpRequestHandler();
-                        if (!requestHandler.isHeadersSent()) {
-                            final OutputStream out = s.getOutputStream();
-                            final HttpServletResponseWrapper response = new HttpServletResponseWrapper(null);
-                            final byte[] errMsg = response.composeAndSetError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, null);
-                            // Write headers
-                            out.write(AJPv13Response.getSendHeadersBytes(response));
-                            out.flush();
-                            // Write error message
-                            out.write(AJPv13Response.getSendBodyChunkBytes(errMsg));
-                            out.flush();
-                            // Write end-response
-                            out.write(AJPv13Response.getEndResponseBytes(true));
-                            out.flush();
-                        } else if (!requestHandler.isEndResponseSent()) {
-                            final OutputStream out = s.getOutputStream();
-                            /*
-                             * Send end-response
-                             */
-                            out.write(AJPv13Response.getEndResponseBytes(true));
-                            out.flush();
-                        }
+                        writeAJPCycleEnd(s, ajpCon.getAjpRequestHandler(), true);
                     }
                 } catch (final Exception e) {
                     if (DEBUG_ENABLED) {
@@ -674,6 +645,30 @@ public final class AJPv13Task implements Task<Object> {
             if (DEBUG_ENABLED) {
                 LOG.debug(e.getMessage(), e);
             }
+        }
+    }
+
+    private static void writeAJPCycleEnd(final Socket s, final AJPv13RequestHandler requestHandler, final boolean closeConnection) throws IOException, AJPv13Exception {
+        if (!requestHandler.isHeadersSent()) {
+            final OutputStream out = s.getOutputStream();
+            final HttpServletResponseWrapper response = new HttpServletResponseWrapper(null);
+            final byte[] errMsg = response.composeAndSetError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, null);
+            // Write headers
+            out.write(AJPv13Response.getSendHeadersBytes(response));
+            out.flush();
+            // Write error message
+            out.write(AJPv13Response.getSendBodyChunkBytes(errMsg));
+            out.flush();
+            // Write end-response
+            out.write(AJPv13Response.getEndResponseBytes(closeConnection));
+            out.flush();
+        } else if (!requestHandler.isEndResponseSent()) {
+            final OutputStream out = s.getOutputStream();
+            /*
+             * Send end-response
+             */
+            out.write(AJPv13Response.getEndResponseBytes(closeConnection));
+            out.flush();
         }
     }
 

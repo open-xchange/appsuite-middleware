@@ -157,18 +157,13 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
     void resetConnection(final boolean releaseRequestHandler) {
         blocker.acquire();
         try {
-            if (state == IDLE_STATE) {
-                return;
-            }
             if (ajpRequestHandler != null) {
                 resetRequestHandler(releaseRequestHandler);
             }
             if (outputStream != null) {
                 outputStream.acquire();
                 try {
-                    outputStream.flush();
-                } catch (final IOException e) {
-                    LOG.debug(e.getMessage(), e);
+                    outputStream.dropBuffer();
                 } finally {
                     outputStream.release();
                 }
@@ -184,12 +179,13 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
         /*
          * Discard request handler's reference to this connection if it ought to be released from it
          */
-        ajpRequestHandler.reset(release);
         if (release) {
             /*
              * Discard request handler reference
              */
             ajpRequestHandler = null;
+        } else {
+            ajpRequestHandler.reset();
         }
     }
 

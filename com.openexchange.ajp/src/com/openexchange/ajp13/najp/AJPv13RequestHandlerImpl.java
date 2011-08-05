@@ -352,7 +352,17 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
                 return;
             }
             ajpRequest.response(this);
+        } catch (final AJPv13Exception e) {
+            clearBuffers();
+            throw e;
+        } catch (final ServletException e) {
+            clearBuffers();
+            throw e;
         } catch (final IOException e) {
+            clearBuffers();
+            throw new AJPv13Exception(AJPCode.IO_ERROR, false, e, e.getMessage());
+        } catch (final RuntimeException e) {
+            clearBuffers();
             throw new AJPv13Exception(AJPCode.IO_ERROR, false, e, e.getMessage());
         } finally {
             ajpConblocker.release();
@@ -415,7 +425,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
      * Releases associated servlet instance and resets request handler to hold initial values
      */
     @Override
-    public void reset(final boolean discardConnection) {
+    public void reset() {
         ajpConblocker.acquire();
         try {
             if (state.equals(State.IDLE)) {
@@ -453,9 +463,6 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
             servletPath = null;
             state = State.IDLE;
             clonedForwardPackage = null;
-            if (discardConnection) {
-                ajpCon = null;
-            }
         } finally {
             ajpConblocker.release();
         }
