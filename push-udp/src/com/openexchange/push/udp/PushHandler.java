@@ -113,7 +113,13 @@ public class PushHandler implements EventHandler {
 
         final int module = event.getModule();
 
-        final FolderObject parentFolder = (FolderObject) event.getSourceFolder();
+        Object tmp = event.getSourceFolder();
+        final FolderObject parentFolder;
+        if (tmp instanceof FolderObject) {
+            parentFolder = (FolderObject) event.getSourceFolder();
+        } else {
+            parentFolder = null;
+        }
         if (parentFolder == null && module != Types.EMAIL) {
             LOG.warn("folder object in event is null");
             return;

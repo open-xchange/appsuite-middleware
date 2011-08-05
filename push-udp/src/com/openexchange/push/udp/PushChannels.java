@@ -119,7 +119,7 @@ public class PushChannels {
         NetworkInterface senderIface = NetworkInterface.getByInetAddress(senderAddress);
         NetworkInterface internalIface = NetworkInterface.getByInetAddress(internalSenderAddress);
 
-        return senderIface.equals(internalIface);
+        return senderIface != null && senderIface.equals(internalIface);
     }
 
     private void listenForRegistrations() {
