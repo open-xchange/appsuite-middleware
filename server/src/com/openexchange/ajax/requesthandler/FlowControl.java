@@ -57,6 +57,10 @@ package com.openexchange.ajax.requesthandler;
  */
 public class FlowControl {
 
+    private FlowControl() {
+        super();
+    }
+
     /**
      * The flow control indicating "later" policy.
      */
