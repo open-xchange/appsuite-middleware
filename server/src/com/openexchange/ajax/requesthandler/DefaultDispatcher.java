@@ -200,7 +200,6 @@ public class DefaultDispatcher implements Dispatcher {
                     // Remains in list and is therefore retried
                 }
             }
-
         }
         return result;
     }
