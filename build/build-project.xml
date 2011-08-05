@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Build bundle">
+
+    <!-- Constants -->
+    <property name="mainBinDir" value="build"/>
+    <property name="simSrcDir" value="sim"/>
+    <property name="simBinDir" value="sim-build"/>
+    <property name="testSrcDir" value="test"/>
+    <property name="testBinDir" value="test-build"/>
+    <property file="META-INF/MANIFEST.MF"/>
+    <property file="build.properties"/>
+    <property name="testJarFile" value="${bundlesDir}/${Bundle-SymbolicName}-test.jar"/>
+
+    <target name="prepareClasspath" depends="testForMainBuild">
+        <!-- propertycopy name="reqClasspath" from="${projectName}.requiredClasspath" override="true"/>
+        <echo message="${reqClasspath}"/ -->
+        <setProjectDependencies projectName="${projectName}" binDir="${mainBinDir}" pathId="mainDependencies" deepPathId="mainDeepDependencies"/>
+        <setProjectDependencies projectName="${projectName}" binDir="${simBinDir}" pathId="simDependencies" deepPathId="simDeepDependencies"/>
+        <setProjectDependencies projectName="${projectName}" binDir="${testBinDir}" pathId="testDependencies" deepPathId="testDeepDependencies"/>
+        <path id="mainCompileClasspath">
+            <path refid="mainDependencies"/>
+        </path>
+        <!-- property name="printablePath" refid="mainBinClasses"/>
+        <echo message="${printablePath}"/ -->
+        <path id="simCompileClasspath">
+            <path refid="mainCompileClasspath"/>
+            <path refid="simDependencies"/>
+            <path refid="mainBinClasses"/>
+        </path>
+        <!-- property name="printablePath" refid="simCompileClasspath"/>
+        <echo message="${printablePath}"/ -->
+        <path id="testCompileClasspath">
+            <path refid="simCompileClasspath"/>
+            <path refid="testDependencies"/>
+            <pathelement location="${simBinDir}"/>
+        </path>
+        <!-- property name="printablePath" refid="testCompileClasspath"/>
+        <echo message="${printablePath}"/ -->
+        <path id="testRunClasspath">
+            <path refid="testCompileClasspath"/>
+            <path refid="testDeepDependencies"/>
+            <pathelement location="${bundlesDir}/${Bundle-SymbolicName}-test.jar"/>
+        </path>
+    </target>
+
+    <target name="compile">
+        <mkdir dir="${binDir}"/>
+        <javac srcdir="${srcDir}" destdir="${binDir}" debug="true" encoding="US-ASCII" source="1.5" target="1.5" includeAntRuntime="false">
+            <classpath refid="${compileClasspath}"/>
+        </javac>
+    </target>
+
+    <target name="testForMainBuild">
+        <if>
+            <equals arg1="${buildType}" arg2="bundle"/>
+            <then>
+                <property name="buildMain" value="true"/>
+                <path id="mainBinClasses">
+                    <pathelement location="${mainBinDir}"/>
+                </path>
+            </then>
+            <else>
+                <if>
+                    <available file="${bundlesDir}/${projectName}" type="dir"/>
+                    <then>
+                        <path id="mainBinClasses">
+                            <pathelement location="${bundlesDir}/${projectName}/${projectName}.jar"/>
+                        </path>
+                    </then>
+                    <else>
+                        <path id="mainBinClasses">
+                            <pathelement location="${bundlesDir}/${projectName}.jar"/>
+                        </path>
+                    </else>
+                </if>
+            </else>
+        </if>
+    </target>
+
+    <target name="buildMain" depends="testForMainBuild" if="buildMain">
+        <fail message="Building the bundle is not implemented."/>
+    </target>
+
+    <target name="testForSimBuild">
+        <condition property="buildSim">
+            <and>
+                <equals arg1="${buildType}" arg2="tests"/>
+                <available file="${simSrcDir}" type="dir"/>
+            </and>
+        </condition>
+    </target>
+
+    <target name="buildSim" depends="testForSimBuild" if="buildSim">
+        <antcall target="compile" inheritrefs="true">
+            <param name="srcDir" value="${simSrcDir}"/>
+            <param name="binDir" value="${simBinDir}"/>
+            <param name="compileClasspath" value="simCompileClasspath"/>
+        </antcall>
+    </target>
+
+    <target name="testForTestBuild">
+        <condition property="testIt">
+            <and>
+                <equals arg1="${buildType}" arg2="tests"/>
+                <available file="${testSrcDir}" type="dir"/>
+            </and>
+        </condition>
+    </target>
+
+    <target name="buildTest" depends="testForTestBuild" if="testIt">
+        <antcall target="compile" inheritrefs="true">
+            <param name="srcDir" value="${testSrcDir}"/>
+            <param name="binDir" value="${testBinDir}"/>
+            <param name="compileClasspath" value="testCompileClasspath"/>
+        </antcall>
+    </target>
+
+    <target name="testForTestJar">
+        <condition property="testJAR">
+            <and>
+                <equals arg1="${buildType}" arg2="tests"/>
+                <or>
+                    <available file="${simSrcDir}" type="dir"/>
+                    <available file="${testSrcDir}" type="dir"/>
+                </or>
+            </and>
+        </condition>
+    </target>
+
+    <target name="addSimToJAR" if="buildSim">
+        <jar jarfile="${testJarFile}">
+            <fileset dir="${simBinDir}"/>
+        </jar>
+    </target>
+
+    <target name="addTestToJAR" if="testIt">
+        <jar jarfile="${testJarFile}" update="true">
+            <fileset dir="${testBinDir}"/>
+        </jar>
+    </target>
+
+    <target name="buildTestJAR" depends="buildTest,testForTestJar,addSimToJAR,addTestToJAR" if="testJAR"/>
+
+    <target name="runTests" depends="buildTestJAR" if="testIt">
+        <mkdir dir="${logDir}"/>
+        <junit errorProperty="testFailed" failureProperty="testFailed" showoutput="yes" printsummary="yes" fork="yes" dir="${basedir}">
+            <classpath>
+                <path refid="testRunClasspath"/>
+                <!-- Code coverage with emma -->
+            </classpath>
+            <formatter type="brief" usefile="false"/>
+            <formatter type="xml"/>
+            <batchtest todir="${logDir}">
+                <zipfileset src="${testJarFile}" includes="**/UnitTests.class"/>
+            </batchtest>
+        </junit>
+    </target>
+
+    <target name="build" depends="prepareClasspath,buildMain,buildSim,runTests"/>
+
+	<target name="dist">
+		<property name="destDir" value="${distDir}/${packageName}/${projectName}"/>
+        <mkdir dir="${destDir}"/>
+        <copy todir="${destDir}">
+            <fileset dir=".">
+                <exclude name="**${distDir}/**"/>
+                <exclude name="Todo"/>
+            </fileset>
+        </copy>
+	</target>
+
+    <target name="clean">
+        <delete dir="${simBinDir}"/>
+        <delete dir="${testBinDir}"/>
+        <delete file="${testJarFile}"/>
+    </target>
+
+</project>

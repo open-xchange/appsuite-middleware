@@ -49,9 +49,13 @@
 
 package com.openexchange.ant.data;
 
-import java.io.*;
-import java.util.*;
-
+import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import org.apache.tools.ant.BuildException;
 import org.jdom.Attribute;
 import org.jdom.Document;

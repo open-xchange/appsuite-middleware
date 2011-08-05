@@ -2,12 +2,19 @@
 <project name="Bundle Builder" basedir=".">
 
     <!-- customizable values -->
+    <property name="prefix" value="/opt/open-xchange"/>
+	<property name="distDir" value=""/>
+
     <property name="packageName" value="open-xchange-common"/>
+	<property name="branch" value="master"/>
 
 	<!-- Constants -->
     <property name="mainDir" value=".."/>
     <property name="checkoutDir" value="${mainDir}"/>
     <property name="logDir" value="${mainDir}/log"/>
+
+    <!-- Install Constants -->
+    <property name="bundlesDir" value="${prefix}/bundles"/>
 
 	<target name="antExtensions">
         <path id="ant3rdPartyLib">
@@ -24,6 +31,7 @@
             <pathelement location="${build}"/>
         </path>
         <taskdef resource="tasks.properties" classpathref="antClasspath"/>
+		<taskdef resource="net/sf/antcontrib/antcontrib.properties"/>
     </target>
 
     <target name="clean">
@@ -39,16 +47,74 @@
         </createProjectList>
     </target>
 
+    <target name="updateProject">
+        <echo message="Fetching bundle ${projectName} from SCM."/>
+    	<echo>Needs to be implemented for bundles in different repositories.</echo>
+    </target>
+
+    <target name="buildProject">
+        <copy file="build-project.xml" tofile="${checkoutDir}/${projectName}/build.xml" overwrite="true"/>
+        <ant dir="${checkoutDir}/${projectName}" antfile="build.xml" target="clean"/>
+    	<if>
+    		<equals arg1="dist" arg2="${buildType}"/>
+    		<then>
+    			<ant dir="${checkoutDir}/${projectName}" antfile="build.xml" target="dist"/>
+    		</then>
+			<else>
+				<ant dir="${checkoutDir}/${projectName}" antfile="build.xml" target="build"/>
+    		</else>
+    	</if>
+        <delete file="${checkoutDir}/${projectName}/build.xml" />
+    </target>
+
 	<target name="buildProjects" depends="antExtensions,prepare">
-		<echo>TODO</echo>
-		<!-- TODO -->
+        <foreach list="${projectsList}" target="updateProject" param="projectName"/>
+        <!-- Computes the dependencies and sorts the projects accordingly -->
+		<mkdir dir="${bundlesDir}"/>
+        <computeBuildOrder dir="${checkoutDir}" propertyName="projectsOrdered" projectList="${projectsList}">
+            <classpath>
+                <dirset dir="${bundlesDir}" includes="com.openexchange.*"/>
+                <fileset dir="${bundlesDir}" includes="*.jar"/>
+            </classpath>
+        </computeBuildOrder>
+        <foreach list="${projectsOrdered}" target="buildProject" param="projectName" inheritAll="true"/>
     </target>
 
 	<target name="distBuild">
         <property name="buildType" value="dist"/>
     </target>
 
-    <target name="dist" depends="distBuild,buildProjects"/>
+    <target name="dist" depends="distBuild">
+    	<!-- Packaging files -->
+    	<property name="packageDir" value="${distDir}/${packageName}"/>
+        <mkdir dir="${packageDir}"/>
+		<copy todir="${packageDir}">
+            <fileset dir="${mainDir}/${packageName}">
+                <exclude name="**${distDir}/**"/>
+                <exclude name="Todo"/>
+            </fileset>
+		</copy>
+    	<!-- Buildsystem -->
+    	<property name="buildDir" value="${distDir}/${packageName}/build"/>
+        <mkdir dir="${buildDir}"/>
+        <copy todir="${buildDir}">
+            <fileset dir=".">
+                <exclude name="**${distDir}/**"/>
+                <exclude name="Todo"/>
+            </fileset>
+        </copy>
+    	<antcall target="buildProjects"/>
+        <delete file="${packageName}.tar.gz"/>
+        <tar destfile="${packageName}.tar.gz" basedir="${distDir}" compression="gzip">
+        	<fileset dir="${distDir}">
+    			<include name="**"/>
+			    <exclude name="exclude"/>
+			</fileset>
+    	</tar>
+		<fail message="Todo"/>
+        <!-- dpkg-source does not like anything else -->
+        <delete dir="${distDir}"/>
+	</target>
 
 	<target name="cpd">
         <mkdir dir="${logDir}"/>

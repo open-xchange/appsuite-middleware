@@ -154,7 +154,10 @@ public class ComputeBuildOrder extends Task {
                 requiredClasspath.append(classpathEntry);
                 requiredClasspath.append(',');
             }
-            requiredClasspath.setLength(requiredClasspath.length() - 1);
+            if (requiredClasspath.length() > 0) {
+                // first package will not have dependencies.
+                requiredClasspath.setLength(requiredClasspath.length() - 1);
+            }
             log(module.getName() + ".requiredClasspath: " + requiredClasspath, Project.MSG_DEBUG);
             getProject().setInheritedProperty(module.getName() + ".requiredClasspath", requiredClasspath.toString());
             // deep dependencies
@@ -163,17 +166,18 @@ public class ComputeBuildOrder extends Task {
                 deepClasspath.append(classpathEntry);
                 deepClasspath.append(',');
             }
-            deepClasspath.setLength(deepClasspath.length() - 1);
+            if (deepClasspath.length() > 0) {
+                // first package will not have dependencies.
+                deepClasspath.setLength(deepClasspath.length() - 1);
+            }
             log(module.getName() + ".deepClasspath: " + deepClasspath, Project.MSG_DEBUG);
             getProject().setInheritedProperty(module.getName() + ".deepClasspath", deepClasspath.toString());
         }
     }
 
-    private String getModuleNamesList(Collection<AbstractModule> modules,
-            char delimiter) {
+    private String getModuleNamesList(Collection<AbstractModule> modules, char delimiter) {
         StringBuffer buffer = new StringBuffer();
-        for (Iterator<AbstractModule> modulesIt = modules.iterator(); modulesIt
-                .hasNext();) {
+        for (Iterator<AbstractModule> modulesIt = modules.iterator(); modulesIt.hasNext();) {
             buffer.append(modulesIt.next().getName());
             if (modulesIt.hasNext()) {
                 buffer.append(delimiter);

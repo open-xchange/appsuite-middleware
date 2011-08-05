@@ -50,7 +50,6 @@
 package com.openexchange.ant.tasks;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import org.apache.tools.ant.BuildException;
