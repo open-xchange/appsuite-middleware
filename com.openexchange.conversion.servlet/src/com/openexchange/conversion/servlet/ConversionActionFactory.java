@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,34 +47,38 @@
  *
  */
 
-package com.openexchange.conversion.servlet.osgi;
+package com.openexchange.conversion.servlet;
 
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.conversion.ConversionService;
-import com.openexchange.conversion.servlet.ConversionActionFactory;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link ConversionServletActivator}
+ * {@link ConversionActionFactory}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ConversionServletActivator extends AJAXModuleActivator {
+public class ConversionActionFactory implements AJAXActionServiceFactory {
+
+    private final Map<String, AJAXActionService> actions;
 
     /**
-     * Initializes a new {@link ConversionServletActivator}
+     * Initializes a new {@link ConversionActionFactory}.
+     *
+     * @param services The service look-up
      */
-    public ConversionServletActivator() {
+    public ConversionActionFactory(final ServiceLookup services) {
         super();
+        actions = new ConcurrentHashMap<String, AJAXActionService>(2);
+        //actions.put("convert", new NamesAction(services));
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConversionService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        registerModule(new ConversionActionFactory(this), "conversion");
+    public AJAXActionService createActionService(final String action) throws OXException {
+        return actions.get(action);
     }
 
 }

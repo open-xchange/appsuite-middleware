@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,33 +47,36 @@
  *
  */
 
-package com.openexchange.conversion.servlet;
+package com.openexchange.server;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+
 
 /**
- * {@link ConversionServletServiceRegistry} - A registry for services needed by spell check servlet bundle
- *
+ * {@link ExceptionOnAbsenceServiceLookup}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ConversionServletServiceRegistry {
+public final class ExceptionOnAbsenceServiceLookup implements ServiceLookup {
 
-    private static final ServiceRegistry REGISTRY = new ServiceRegistry();
+    private final ServiceLookup serviceLookup;
 
     /**
-     * Gets the service registry
-     *
-     * @return The service registry
+     * Initializes a new {@link ExceptionOnAbsenceServiceLookup}.
+     * 
+     * @param serviceLookup The service look-up
      */
-    public static ServiceRegistry getServiceRegistry() {
-        return REGISTRY;
+    public ExceptionOnAbsenceServiceLookup(final ServiceLookup serviceLookup) {
+        super();
+        this.serviceLookup = serviceLookup;
     }
 
-    /**
-     * Initializes a new {@link ConversionServletServiceRegistry}
-     */
-    private ConversionServletServiceRegistry() {
-        super();
+    @Override
+    public <S> S getService(final Class<? extends S> clazz) {
+        final S service = serviceLookup.getService(clazz);
+        if (null == service) {
+            throw new IllegalStateException(ServiceExceptionCode.SERVICE_UNAVAILABLE.create(clazz.getSimpleName()));
+        }
+        return service;
     }
 
 }
