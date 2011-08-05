@@ -88,52 +88,64 @@ public final class NoACLExtension implements ACLExtension {
         fullRights = new ReadOnlyRights(tmp);
     }
 
+    @Override
     public boolean canRead(final Rights rights) {
         return true;
     }
 
+    @Override
     public boolean canLookUp(final Rights rights) {
         return true;
     }
 
+    @Override
     public boolean canKeepSeen(final Rights rights) {
         return true;
     }
 
+    @Override
     public boolean canWrite(final Rights rights) {
         return true;
     }
 
+    @Override
     public boolean canInsert(final Rights rights) {
         return true;
     }
 
+    @Override
     public boolean canPost(final Rights rights) {
         return true;
     }
 
+    @Override
     public boolean canGetACL(final Rights rights) {
         // GETACL/LISTRIGHTS must not be performed on missing ACL support
         return false;
     }
 
+    @Override
     public boolean canSetACL(final Rights rights) {
         // SETACL/DELETEACL must not be performed on missing ACL support
         return false;
     }
 
+    @Override
     public boolean canCreate(final Rights rights) {
         return true;
     }
 
+    @Override
     public boolean canDeleteMailbox(final Rights rights) {
         return true;
     }
 
+    @Override
     public boolean canDeleteMessages(final Rights rights) {
         return true;
     }
 
+    @Override
     public boolean canExpunge(final Rights rights) {
         return true;
     }
@@ -143,82 +155,102 @@ public final class NoACLExtension implements ACLExtension {
      *
      * @return An empty rights object.
      */
+    @Override
     public Rights getFullRights() {
         return fullRights;
     }
 
+    @Override
     public void addFolderAdminRights(final Rights rights) {
         // Nothing to do
     }
 
+    @Override
     public boolean containsFolderAdminRights(final Rights rights) {
         return true;
     }
 
+    @Override
     public void addFolderVisibility(final Rights rights) {
         // Nothing to do
     }
 
+    @Override
     public boolean containsFolderVisibility(final Rights rights) {
         return true;
     }
 
+    @Override
     public void addCreateObjects(final Rights rights) {
         // Nothing to do
     }
 
+    @Override
     public void addCreateSubfolders(final Rights rights) {
         // Nothing to do
     }
 
+    @Override
     public void addDeleteAll(final Rights rights) {
         // Nothing to do
     }
 
+    @Override
     public void addNonMappable(final Rights rights) {
         // Nothing to do
     }
 
+    @Override
     public void addReadAll(final Rights rights) {
         // Nothing to do
     }
 
+    @Override
     public void addReadAllKeepSeen(final Rights rights) {
         // Nothing to do
     }
 
+    @Override
     public void addWriteAll(final Rights rights) {
         // Nothing to do
     }
 
+    @Override
     public boolean containsCreateObjects(final Rights rights) {
         return true;
     }
 
+    @Override
     public boolean containsCreateSubfolders(final Rights rights) {
         return true;
     }
 
+    @Override
     public boolean containsDeleteAll(final Rights rights) {
         return true;
     }
 
+    @Override
     public boolean containsNonMappable(final Rights rights) {
         return true;
     }
 
+    @Override
     public boolean containsReadAll(final Rights rights) {
         return true;
     }
 
+    @Override
     public boolean containsReadAllKeepSeen(final Rights rights) {
         return true;
     }
 
+    @Override
     public boolean containsWriteAll(final Rights rights) {
         return true;
     }
 
+    @Override
     public boolean aclSupport() {
         return false;
     }

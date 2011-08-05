@@ -82,6 +82,7 @@ public class ProxyServletActivator implements BundleActivator {
 
     private List<ServiceRegistration> registrations;
 
+    @Override
     public void start(final BundleContext context) throws Exception {
         final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ProxyServletActivator.class));
         try {
@@ -113,6 +114,7 @@ public class ProxyServletActivator implements BundleActivator {
         }
     }
 
+    @Override
     public void stop(final BundleContext context) throws Exception {
         final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ProxyServletActivator.class));
         try {

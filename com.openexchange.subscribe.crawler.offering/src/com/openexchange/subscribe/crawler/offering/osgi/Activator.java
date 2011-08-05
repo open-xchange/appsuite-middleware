@@ -17,6 +17,7 @@ public class Activator implements BundleActivator {
 
     private ServletRegistration servletRegistration;
 
+    @Override
     public void start(BundleContext context) throws Exception {
 	    whiteboard = new Whiteboard(context);
 
@@ -26,7 +27,8 @@ public class Activator implements BundleActivator {
 	    servletRegistration = new ServletRegistration(context, new CrawlerOfferingServlet(), ALIAS);
     }
 
-	public void stop(BundleContext context) throws Exception {
+	@Override
+    public void stop(BundleContext context) throws Exception {
         servletRegistration.remove();
 	    whiteboard.close();
 	}

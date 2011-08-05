@@ -175,6 +175,7 @@ public class CaldavCollection extends AbstractCollection {
         // IGNORE, this is not writable
     }
 
+    @Override
     public List<WebdavResource> getChildren() throws OXException {
         State state = factory.getState();
         List<Appointment> appointments = state.getFolder(getId());
@@ -208,62 +209,77 @@ public class CaldavCollection extends AbstractCollection {
         return new CaldavResource(this, appointment, factory);
     }
 
+    @Override
     public void create() throws OXException {
         // throw new OXException(getUrl(), HttpServletResponse.SC_FORBIDDEN);
     }
 
+    @Override
     public boolean exists() throws OXException {
         return true;
     }
 
+    @Override
     public Date getCreationDate() throws OXException {
         return folder.getCreationDate();
     }
 
+    @Override
     public String getDisplayName() throws OXException {
         return getFolderName(folder);
     }
 
+    @Override
     public Date getLastModified() throws OXException {
         return folder.getLastModified();
     }
 
+    @Override
     public WebdavLock getLock(final String token) throws OXException {
         return null;
     }
 
+    @Override
     public List<WebdavLock> getLocks() throws OXException {
         return Collections.emptyList();
     }
 
+    @Override
     public WebdavLock getOwnLock(final String token) throws OXException {
         return null;
     }
 
+    @Override
     public List<WebdavLock> getOwnLocks() throws OXException {
         return Collections.emptyList();
     }
 
+    @Override
     public String getSource() throws OXException {
         return null;
     }
 
+    @Override
     public WebdavPath getUrl() {
         return url;
     }
 
+    @Override
     public void lock(final WebdavLock lock) throws OXException {
         // IGNORE
     }
 
+    @Override
     public void save() throws OXException {
 //        throw new OXException(getUrl(), HttpServletResponse.SC_FORBIDDEN);
     }
 
+    @Override
     public void setDisplayName(final String displayName) throws OXException {
         // IGNORE
     }
 
+    @Override
     public void unlock(final String token) throws OXException {
         // IGNORE
     }

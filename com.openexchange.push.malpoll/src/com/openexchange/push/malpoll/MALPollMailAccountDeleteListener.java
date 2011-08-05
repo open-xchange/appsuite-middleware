@@ -68,10 +68,12 @@ public final class MALPollMailAccountDeleteListener implements MailAccountDelete
         super();
     }
 
+    @Override
     public void onAfterMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OXException {
         // Nothing to do
     }
 
+    @Override
     public void onBeforeMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OXException {
         if (MALPollPushListener.getAccountId() == id) {
             MALPollPushListenerRegistry.getInstance().purgeUserPushListener(cid, user);

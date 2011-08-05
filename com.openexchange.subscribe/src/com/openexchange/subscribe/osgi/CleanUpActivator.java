@@ -68,6 +68,7 @@ public class CleanUpActivator implements BundleActivator {
     private Whiteboard whiteboard;
     private FolderCleanUpEventHandler folderCleanUpEventHandler;
 
+    @Override
     public void start(BundleContext context) throws Exception {
         whiteboard = new Whiteboard(context);
         ContextService contexts = whiteboard.getService(ContextService.class);
@@ -76,6 +77,7 @@ public class CleanUpActivator implements BundleActivator {
         folderCleanUpEventHandler = new FolderCleanUpEventHandler(context, AbstractSubscribeService.STORAGE, contexts);
     }
 
+    @Override
     public void stop(BundleContext context) throws Exception {
         folderCleanUpEventHandler.close();
         whiteboard.close();

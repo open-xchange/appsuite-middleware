@@ -107,26 +107,32 @@ public final class MDNSServiceEntryImpl implements MDNSServiceEntry {
         return result;
     }
 
+    @Override
     public InetAddress getAddress() {
         return address;
     }
 
+    @Override
     public String getInfo() {
         return info;
     }
 
+    @Override
     public String getServiceId() {
         return serviceId;
     }
 
+    @Override
     public UUID getId() {
         return id;
     }
 
+    @Override
     public int getPort() {
         return port;
     }
 
+    @Override
     public String getType() {
         return type;
     }

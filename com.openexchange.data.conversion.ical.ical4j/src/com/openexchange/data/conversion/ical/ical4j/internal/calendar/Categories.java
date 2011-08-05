@@ -63,10 +63,12 @@ import com.openexchange.groupware.contexts.Context;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class Categories<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T,U> {
+    @Override
     public boolean isSet(final U calendar) {
         return calendar.containsCategories();
     }
 
+    @Override
     public void emit(final int index, final U u, final T t, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
         final String categories = u.getCategories();
         if(null == categories){
@@ -75,11 +77,13 @@ public class Categories<T extends CalendarComponent, U extends CalendarObject> e
         t.getProperties().add(new net.fortuna.ical4j.model.property.Categories(categories));
     }
 
+    @Override
     public boolean hasProperty(final T t) {
         final PropertyList categoriesList = t.getProperties("CATEGORIES");
         return categoriesList.size() > 0;
     }
 
+    @Override
     public void parse(final int index, final T component, final U cObj, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
        final PropertyList categoriesList = component.getProperties("CATEGORIES");
         final StringBuilder bob = new StringBuilder();

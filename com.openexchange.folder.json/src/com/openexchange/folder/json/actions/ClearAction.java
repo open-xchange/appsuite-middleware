@@ -78,6 +78,7 @@ public final class ClearAction extends AbstractFolderAction {
         super();
     }
 
+    @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final com.openexchange.tools.session.ServerSession session) throws OXException {
         /*
          * Parse parameters

@@ -154,18 +154,22 @@ public class MessagingMessageWriterTest extends TestCase {
 
     private static final class InverseWriter implements MessagingHeaderWriter {
 
+        @Override
         public int getRanking() {
             return 2;
         }
 
+        @Override
         public boolean handles(final Entry<String, Collection<MessagingHeader>> entry) {
             return true;
         }
 
+        @Override
         public String writeKey(final Entry<String, Collection<MessagingHeader>> entry) throws JSONException, OXException {
             return entry.getKey();
         }
 
+        @Override
         public Object writeValue(final Entry<String, Collection<MessagingHeader>> entry, final ServerSession session) throws JSONException, OXException {
             return new StringBuilder(entry.getValue().iterator().next().getValue()).reverse().toString();
         }
@@ -272,14 +276,17 @@ public class MessagingMessageWriterTest extends TestCase {
 
     private static class InverseContentWriter implements MessagingContentWriter {
 
+        @Override
         public int getRanking() {
             return 2;
         }
 
+        @Override
         public boolean handles(final MessagingPart part, final MessagingContent content) {
             return true;
         }
 
+        @Override
         public Object write(final MessagingPart part, final MessagingContent content, final ServerSession session, final DisplayMode mode) throws OXException, JSONException {
             return new StringBuilder(((StringContent) content).getData()).reverse().toString();
         }
@@ -386,14 +393,17 @@ public class MessagingMessageWriterTest extends TestCase {
         for (final String value : values) {
             header.add(new MessagingHeader() {
 
+                @Override
                 public String getName() {
                     return name;
                 }
 
+                @Override
                 public String getValue() {
                     return value;
                 }
 
+                @Override
                 public HeaderType getHeaderType() {
                     return HeaderType.PLAIN;
                 }

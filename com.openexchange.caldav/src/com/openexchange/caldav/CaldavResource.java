@@ -296,6 +296,7 @@ public class CaldavResource extends AbstractResource {
 
     }
 
+    @Override
     public void create() throws OXException {
         checkRange();
         write(true);
@@ -388,6 +389,7 @@ public class CaldavResource extends AbstractResource {
         return null;
     }
 
+    @Override
     public void delete() throws OXException {
         final AppointmentSQLInterface appointments = factory.getAppointmentInterface();
         try {
@@ -401,10 +403,12 @@ public class CaldavResource extends AbstractResource {
         }
     }
 
+    @Override
     public boolean exists() throws OXException {
         return exists;
     }
 
+    @Override
     public InputStream getBody() throws OXException {
         return new ByteArrayInputStream(icalFile());
     }
@@ -445,18 +449,22 @@ public class CaldavResource extends AbstractResource {
 
     }
 
+    @Override
     public String getContentType() throws OXException {
         return "text/calendar";
     }
 
+    @Override
     public Date getCreationDate() throws OXException {
         return appointment.getCreationDate();
     }
 
+    @Override
     public String getDisplayName() throws OXException {
         return appointment.getTitle();
     }
 
+    @Override
     public String getETag() throws OXException {
         if (!exists) {
             return "";
@@ -464,70 +472,87 @@ public class CaldavResource extends AbstractResource {
         return "http://www.open-xchange.com/caldav/etags/" + appointment.getObjectID() + "-" + appointment.getLastModified().getTime();
     }
 
+    @Override
     public String getLanguage() throws OXException {
         return null;
     }
 
+    @Override
     public Date getLastModified() throws OXException {
         return appointment.getLastModified();
     }
 
+    @Override
     public Long getLength() throws OXException {
         return (long) icalFile().length;
     }
 
+    @Override
     public WebdavLock getLock(final String token) throws OXException {
         return null;
     }
 
+    @Override
     public List<WebdavLock> getLocks() throws OXException {
         return Collections.emptyList();
     }
 
+    @Override
     public WebdavLock getOwnLock(final String token) throws OXException {
         return null;
     }
 
+    @Override
     public List<WebdavLock> getOwnLocks() throws OXException {
         return null;
     }
 
+    @Override
     public String getSource() throws OXException {
         return null;
     }
 
+    @Override
     public WebdavPath getUrl() {
         return url;
     }
 
+    @Override
     public void lock(final WebdavLock lock) throws OXException {
 
     }
 
+    @Override
     public void save() throws OXException {
         write(false);
     }
 
+    @Override
     public void setContentType(final String type) throws OXException {
 
     }
 
+    @Override
     public void setDisplayName(final String displayName) throws OXException {
         appointment.setTitle(displayName);
     }
 
+    @Override
     public void setLanguage(final String language) throws OXException {
 
     }
 
+    @Override
     public void setLength(final Long length) throws OXException {
 
     }
 
+    @Override
     public void setSource(final String source) throws OXException {
 
     }
 
+    @Override
     public void unlock(final String token) throws OXException {
 
     }

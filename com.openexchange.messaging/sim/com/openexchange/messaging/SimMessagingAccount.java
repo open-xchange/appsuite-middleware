@@ -64,18 +64,22 @@ public class SimMessagingAccount implements MessagingAccount{
     private String displayName;
     private Map<String, Object> configuration;
 
+    @Override
     public Map<String, Object> getConfiguration() {
         return configuration;
     }
 
+    @Override
     public String getDisplayName() {
         return displayName;
     }
 
+    @Override
     public int getId() {
         return id;
     }
 
+    @Override
     public MessagingService getMessagingService() {
         return messagingService;
     }

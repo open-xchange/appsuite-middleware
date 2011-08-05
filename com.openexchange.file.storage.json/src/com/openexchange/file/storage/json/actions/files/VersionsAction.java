@@ -86,6 +86,7 @@ public class VersionsAction extends AbstractFileAction {
 
         return new TimedResult<File>() {
 
+            @Override
             public SearchIterator<File> results() throws OXException {
                 return new FilteringSearchIterator<File>(versions.results()) {
 
@@ -98,6 +99,7 @@ public class VersionsAction extends AbstractFileAction {
                 };
             }
 
+            @Override
             public long sequenceNumber() throws OXException {
                 return versions.sequenceNumber();
             }

@@ -62,6 +62,7 @@ public interface MailIdleCounter extends Counter {
      *
      * @return The count
      */
+    @Override
     int getCount();
 
 }

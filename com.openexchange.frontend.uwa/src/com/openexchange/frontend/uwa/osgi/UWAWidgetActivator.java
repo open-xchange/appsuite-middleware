@@ -106,6 +106,7 @@ public class UWAWidgetActivator extends HousekeepingActivator {
 
         registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
 
+            @Override
             public Collection<? extends UpdateTask> getUpdateTasks() {
                 return Arrays.asList(updateTask1, updateTask2);
             }

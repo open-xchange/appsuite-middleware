@@ -85,10 +85,12 @@ public class ConfigCascade implements ConfigViewFactory {
         providers.put(scope, configProvider);
     }
 
+    @Override
     public ConfigView getView(final int user, final int context) {
         return new View(user, context);
     }
 
+    @Override
     public ConfigView getView() {
         return new View(-1, -1);
     }
@@ -98,6 +100,7 @@ public class ConfigCascade implements ConfigViewFactory {
         this.path = null;
     }
 
+    @Override
     public String[] getSearchPath() {
         return searchPath;
     }
@@ -131,23 +134,28 @@ public class ConfigCascade implements ConfigViewFactory {
             this.context = context;
         }
 
+        @Override
         public <T> void set(final String scope, final String property, final T value) throws OXException {
             ((ConfigProperty<T>) property(scope, property, value.getClass())).set(value);
         }
 
+        @Override
         public <T> T get(final String property, final Class<T> coerceTo) throws OXException {
             return property(property, coerceTo).get();
         }
 
+        @Override
         public <T> ConfigProperty<T> property(final String scope, final String property, final Class<T> coerceTo) throws OXException {
             return new CoercingConfigProperty<T>(coerceTo, providers.get(scope).get(property, context, user), stringParser);
         }
 
+        @Override
         public <T> ComposedConfigProperty<T> property(final String property, final Class<T> coerceTo) {
             return new CoercingComposedConfigProperty<T>(coerceTo, new ComposedConfigProperty<String>() {
 
                 private String[] overriddenStrings;
 
+                @Override
                 public String get() throws OXException {
                     final String finalScope = getFinalScope();
                     for (final ConfigProviderService provider : getConfigProviders(finalScope)) {
@@ -163,6 +171,7 @@ public class ConfigCascade implements ConfigViewFactory {
                     return property(property, String.class).precedence("server", "context", "user").get("final");
                 }
 
+                @Override
                 public String get(final String metadataName) throws OXException {
                     for (final ConfigProviderService provider : getConfigProviders(null)) {
                         final String value = provider.get(property, context, user).get(metadataName);
@@ -173,6 +182,7 @@ public class ConfigCascade implements ConfigViewFactory {
                     return null;
                 }
 
+                @Override
                 public <M> M get(final String metadataName, final Class<M> m) throws OXException {
                     for (final ConfigProviderService provider : getConfigProviders(null)) {
                         final String value = provider.get(property, context, user).get(metadataName);
@@ -187,6 +197,7 @@ public class ConfigCascade implements ConfigViewFactory {
                     return null;
                 }
 
+                @Override
                 public List<String> getMetadataNames() throws OXException {
                     final Set<String> metadataNames = new HashSet<String>();
                     for (final ConfigProviderService provider : getConfigProviders(null)) {
@@ -199,14 +210,17 @@ public class ConfigCascade implements ConfigViewFactory {
                 }
 
 
+                @Override
                 public <M> ComposedConfigProperty<String> set(final String metadataName, final M value) throws OXException {
                     throw new UnsupportedOperationException("Unscoped set is not supported");
                 }
 
+                @Override
                 public ComposedConfigProperty<String> set(final String value) throws OXException {
                     throw new UnsupportedOperationException("Unscoped set is not supported");
                 }
 
+                @Override
                 public ComposedConfigProperty<String> precedence(final String... scopes) throws OXException {
                     overriddenStrings = scopes;
                     return this;
@@ -227,6 +241,7 @@ public class ConfigCascade implements ConfigViewFactory {
                     return p;
                 }
 
+                @Override
                 public boolean isDefined() throws OXException {
                     final String finalScope = getFinalScope();
                     for (final ConfigProviderService provider : getConfigProviders(finalScope)) {
@@ -238,6 +253,7 @@ public class ConfigCascade implements ConfigViewFactory {
                     return false;
                 }
 
+                @Override
                 public <M> ComposedConfigProperty<M> to(final Class<M> otherType) throws OXException {
                     return new CoercingComposedConfigProperty<M>(otherType, this, stringParser);
                 }
@@ -246,6 +262,7 @@ public class ConfigCascade implements ConfigViewFactory {
             }, stringParser);
         }
 
+        @Override
         public Map<String, ComposedConfigProperty<String>> all() throws OXException {
             final Set<String> names = new HashSet<String>();
             for (final ConfigProviderService provider : getConfigProviders()) {

@@ -64,6 +64,7 @@ public class PublicationsCreatedAndLastModifiedColumn extends ExtendedColumnCrea
         super(dbService);
     }
 
+    @Override
     public String[] getDependencies() {
         return new String[] { "com.openexchange.groupware.update.tasks.CreatePublicationTablesTask" };
     }

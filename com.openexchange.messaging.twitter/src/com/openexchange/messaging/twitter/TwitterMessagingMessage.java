@@ -145,68 +145,84 @@ public final class TwitterMessagingMessage implements MessagingMessage {
         picture = status.getUser().getProfileImageURL().toString();
     }
 
+    @Override
     public int getColorLabel() {
         return 0;
     }
 
+    @Override
     public int getFlags() {
         return 0;
     }
 
+    @Override
     public String getFolder() {
         return MessagingFolder.ROOT_FULLNAME;
     }
 
+    @Override
     public long getReceivedDate() {
         return status.getCreatedAt().getTime();
     }
 
+    @Override
     public Collection<String> getUserFlags() {
         return Collections.emptyList();
     }
 
+    @Override
     public MessagingContent getContent() throws OXException {
         return content;
     }
 
+    @Override
     public String getDisposition() throws OXException {
         return MessagingPart.INLINE;
     }
 
+    @Override
     public String getFileName() throws OXException {
         return null;
     }
 
+    @Override
     public MessagingHeader getFirstHeader(final String name) throws OXException {
         final Collection<MessagingHeader> collection = getHeader(name);
         return null == collection ? null : (collection.isEmpty() ? null : collection.iterator().next());
     }
 
+    @Override
     public Collection<MessagingHeader> getHeader(final String name) {
         return headers.get(name);
     }
 
+    @Override
     public Map<String, Collection<MessagingHeader>> getHeaders() {
         return headers;
     }
 
+    @Override
     public String getSectionId() {
         // Always top level
         return null;
     }
 
+    @Override
     public void writeTo(final OutputStream os) throws IOException, OXException {
         // TODO Auto-generated method stub
     }
 
+    @Override
     public long getSize() {
         return size;
     }
 
+    @Override
     public int getThreadLevel() {
         return 0;
     }
 
+    @Override
     public ContentType getContentType() throws OXException {
         return CONTENT_TYPE;
     }
@@ -219,14 +235,17 @@ public final class TwitterMessagingMessage implements MessagingMessage {
         return wrap(new StringMessageHeader(name, value));
     }
 
+    @Override
     public String getId() {
         return String.valueOf(status.getId());
     }
 
+    @Override
     public String getPicture() {
         return picture;
     }
 
+    @Override
     public String getUrl() throws OXException {
         return null;
     }

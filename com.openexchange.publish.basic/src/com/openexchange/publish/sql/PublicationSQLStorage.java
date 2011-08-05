@@ -109,6 +109,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         this.txPolicy = txPolicy;
     }
 
+    @Override
     public void forgetPublication(final Publication publication) throws OXException {
         if (!exist(publication.getId(), publication.getContext())) {
             return;
@@ -127,6 +128,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         }
     }
 
+    @Override
     public Publication getPublication(final Context ctx, final int publicationId) throws OXException {
         Publication retval = null;
 
@@ -166,6 +168,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         return retval;
     }
 
+    @Override
     public List<Publication> getPublications(final Context ctx, final String module, final String entityId) throws OXException {
         List<Publication> retval = null;
 
@@ -202,6 +205,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         return retval;
     }
 
+    @Override
     public List<Publication> getPublications(final Context ctx, final String publicationTarget) throws OXException {
         List<Publication> retval = null;
 
@@ -237,10 +241,12 @@ public class PublicationSQLStorage implements PublicationStorage {
         return retval;
     }
 
+    @Override
     public List<Publication> getPublicationsOfUser(final Context ctx, final int userId)  throws OXException {
     	return getPublicationsOfUser(ctx, userId, null);
     }
 
+    @Override
     public List<Publication> getPublicationsOfUser(final Context ctx, final int userId, final String module)  throws OXException {
         List<Publication> retval = null;
 
@@ -289,6 +295,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         return retval;
     }
 
+    @Override
     public void rememberPublication(final Publication publication) throws OXException {
         if (publication.getId() > 0) {
             throw IDGiven.create();
@@ -309,6 +316,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         }
     }
 
+    @Override
     public void updatePublication(final Publication publication) throws OXException {
         if (!exist(publication.getId(), publication.getContext())) {
             throw PublicationNotFound.create();
@@ -327,6 +335,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         }
     }
 
+    @Override
     public Collection<Publication> search(final Context ctx, final String targetId, final Map<String, Object> query) throws OXException {
         final List<Publication> retval = new ArrayList<Publication>();
         Connection readConnection = null;
@@ -369,6 +378,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         return retval;
     }
 
+    @Override
     public void deletePublicationsOfUser(final int userID, final Context context) throws OXException {
         Connection writeConnection = null;
         try {
@@ -385,6 +395,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         }
     }
 
+    @Override
     public void deletePublicationsInContext(final int contextId, final Context ctx) throws OXException {
         Connection writeConnection = null;
         try {

@@ -71,18 +71,22 @@ public class InfostoreDefaultAccountManager implements FileStorageAccountManager
     public static final String DEFAULT_ID = "infostore";
     private static final FileStorageAccount DEFAULT_ACCOUNT = new FileStorageAccount() {
 
+        @Override
         public Map<String, Object> getConfiguration() {
             return Collections.emptyMap();
         }
 
+        @Override
         public String getDisplayName() {
             return "Standard Infostore";
         }
 
+        @Override
         public FileStorageService getFileStorageService() {
             return InfostoreFileStorageService.getInstance();
         }
 
+        @Override
         public String getId() {
             return DEFAULT_ID;
         }
@@ -90,18 +94,22 @@ public class InfostoreDefaultAccountManager implements FileStorageAccountManager
     };
 
 
+    @Override
     public String addAccount(final FileStorageAccount account, final Session session) throws OXException {
         return "";
     }
 
+    @Override
     public boolean checkSecretCanDecryptStrings(final Session session, final String secret) throws OXException {
         return true;
     }
 
+    @Override
     public void deleteAccount(final FileStorageAccount account, final Session session) throws OXException {
 
     }
 
+    @Override
     public FileStorageAccount getAccount(final String id, final Session session) throws OXException {
         if(id.equals(DEFAULT_ID)) {
             return DEFAULT_ACCOUNT;
@@ -109,14 +117,17 @@ public class InfostoreDefaultAccountManager implements FileStorageAccountManager
         throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(id, "com.openexchange.infostore");
     }
 
+    @Override
     public List<FileStorageAccount> getAccounts(final Session session) throws OXException {
         return Arrays.asList(DEFAULT_ACCOUNT);
     }
 
+    @Override
     public void migrateToNewSecret(final String oldSecret, final String newSecret, final Session session) throws OXException {
 
     }
 
+    @Override
     public void updateAccount(final FileStorageAccount account, final Session session) throws OXException {
 
     }

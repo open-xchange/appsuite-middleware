@@ -66,6 +66,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class MessagingSecretHandling implements SecretConsistencyCheck, SecretMigrator {
 
+    @Override
     public String checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws OXException {
         final Collection<MessagingService> messagingServices = getMessagingServices();
         for (final MessagingService messagingService : messagingServices) {
@@ -78,6 +79,7 @@ public class MessagingSecretHandling implements SecretConsistencyCheck, SecretMi
         return null;
     }
 
+    @Override
     public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws OXException {
         final Collection<MessagingService> messagingServices = getMessagingServices();
         for (final MessagingService messagingService : messagingServices) {

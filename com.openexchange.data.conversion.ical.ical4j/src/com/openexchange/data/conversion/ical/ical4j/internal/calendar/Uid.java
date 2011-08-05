@@ -68,18 +68,22 @@ public final class Uid<T extends CalendarComponent, U extends CalendarObject> ex
         super();
     }
 
+    @Override
     public boolean isSet(final U calendar) {
         return isSet(calendar, CalendarObject.UID) && calendar.getUid().length() != 0;
     }
 
+    @Override
     public void emit(final int index, final U calendar, final T component, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
         component.getProperties().add(new net.fortuna.ical4j.model.property.Uid(calendar.getUid()));
     }
 
+    @Override
     public boolean hasProperty(final CalendarComponent component) {
         return null != component.getProperty(Property.UID);
     }
 
+    @Override
     public void parse(final int index, final T component, final U calendar, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
         calendar.setUid(component.getProperty(Property.UID).getValue());
     }

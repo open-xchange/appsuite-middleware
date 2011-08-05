@@ -144,10 +144,12 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
         super.endRequest(status);
     }
 
+    @Override
     public CaldavProtocol getProtocol() {
         return PROTOCOL;
     }
 
+    @Override
     public WebdavCollection resolveCollection(final WebdavPath url) throws OXException {
         if (url.size() > 1) {
             throw WebdavProtocolException.generalError(url, 404);
@@ -173,6 +175,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
         return url.size() == 0;
     }
 
+    @Override
     public WebdavResource resolveResource(final WebdavPath url) throws OXException {
         if (url.size() == 2) {
             return mixin(((CaldavCollection) resolveCollection(url.parent())).getChild(url.name()));

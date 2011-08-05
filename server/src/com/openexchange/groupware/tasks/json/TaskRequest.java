@@ -60,7 +60,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link TaskRequest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TaskRequest {
@@ -78,7 +78,7 @@ public final class TaskRequest {
 
     /**
      * Initializes a new {@link TaskRequest}.
-     * 
+     *
      * @param session The session
      * @param request The request
      */
@@ -91,7 +91,7 @@ public final class TaskRequest {
 
     /**
      * Sets the time zone.
-     * 
+     *
      * @param timeZone The time zone
      */
     public void setTimeZone(final TimeZone timeZone) {
@@ -100,7 +100,7 @@ public final class TaskRequest {
 
     /**
      * Gets the time zone (initially set to session's user one).
-     * 
+     *
      * @return The time zone
      */
     public TimeZone getTimeZone() {
@@ -117,7 +117,7 @@ public final class TaskRequest {
 
     /**
      * Gets optional <code>int</code> parameter.
-     * 
+     *
      * @param name The parameter name
      * @return The <code>int</code>
      * @throws OXException If parameter is an invalid number value
@@ -136,7 +136,7 @@ public final class TaskRequest {
 
     /**
      * Requires <code>int</code> parameter.
-     * 
+     *
      * @param name The parameter name
      * @return The <code>int</code>
      * @throws OXException If parameter is missing or not a number
@@ -160,7 +160,7 @@ public final class TaskRequest {
 
     /**
      * Checks for presence of comma-separated <code>int</code> list.
-     * 
+     *
      * @param name The parameter name
      * @return The <code>int</code> array
      * @throws OXException If an error occurs
@@ -208,7 +208,7 @@ public final class TaskRequest {
 
     /**
      * Checks for presence of comma-separated <code>String</code> list.
-     * 
+     *
      * @param name The parameter name
      * @return The <code>String</code> array
      * @throws OXException If parameter is absdent
@@ -223,7 +223,7 @@ public final class TaskRequest {
 
     /**
      * Checks for presence of comma-separated <code>String</code> list.
-     * 
+     *
      * @param name The parameter name
      * @return The <code>String</code> array
      */
@@ -237,7 +237,7 @@ public final class TaskRequest {
 
     /**
      * Gets the request.
-     * 
+     *
      * @return The request
      */
     public AJAXRequestData getRequest() {
@@ -246,7 +246,7 @@ public final class TaskRequest {
 
     /**
      * Gets the session.
-     * 
+     *
      * @return The session
      */
     public ServerSession getSession() {

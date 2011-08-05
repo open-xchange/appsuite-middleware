@@ -100,6 +100,7 @@ public class ContactFolderLoaderTest extends TestCase {
 
         contactSQLFactory = new ContactInterfaceFactory() {
 
+            @Override
             public ContactSQLInterface create(final int folderId, final Session session) throws OXException {
                 return contacts;
             }

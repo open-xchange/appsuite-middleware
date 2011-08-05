@@ -80,6 +80,7 @@ public final class FacebookEventHandler implements EventHandler {
         super();
     }
 
+    @Override
     public void handleEvent(final Event event) {
         final String topic = event.getTopic();
         try {

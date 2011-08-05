@@ -88,6 +88,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
         super();
     }
 
+    @Override
     public void handleLogin(final LoginResult login) throws OXException {
         final int cid = login.getSession().getContextId();
         DatabaseService databaseService = null;
@@ -188,6 +189,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
         return newFolder;
     }
 
+    @Override
     public void handleLogout(final LoginResult logout) {
         // Nothing to do on logout
     }

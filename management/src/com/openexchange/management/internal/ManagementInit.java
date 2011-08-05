@@ -89,6 +89,7 @@ public final class ManagementInit implements Initialization {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void start() throws OXException {
         if (started.get()) {
             LOG.error(ManagementInit.class.getName() + " already started");
@@ -133,6 +134,7 @@ public final class ManagementInit implements Initialization {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void stop() throws OXException {
         if (!started.get()) {
             LOG.error(ManagementInit.class.getName() + " has not been started");

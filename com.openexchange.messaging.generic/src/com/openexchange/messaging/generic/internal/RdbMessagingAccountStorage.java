@@ -117,6 +117,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
 
     private static final String SQL_SELECT_CONFIDS_FOR_USER = "SELECT confId FROM messagingAccount WHERE cid = ? AND user = ? AND serviceId = ?";
 
+    @Override
     public MessagingAccount getAccount(final String serviceId, final int id, final Session session, final Modifier modifier) throws OXException {
         final DatabaseService databaseService = getService(CLAZZ_DB);
         /*
@@ -189,6 +190,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
 
     private static final String SQL_SELECT_ACCOUNTS = "SELECT account, confId, displayName FROM messagingAccount WHERE cid = ? AND user = ? AND serviceId = ?";
 
+    @Override
     public List<MessagingAccount> getAccounts(final String serviceId, final Session session, final Modifier modifier) throws OXException {
         final DatabaseService databaseService = getService(CLAZZ_DB);
         /*
@@ -292,6 +294,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
 
     private static final String SQL_INSERT = "INSERT INTO messagingAccount (cid, user, account, confId, serviceId, displayName) VALUES (?, ?, ?, ?, ?, ?)";
 
+    @Override
     public int addAccount(final String serviceId, final MessagingAccount account, final Session session, final Modifier modifier) throws OXException {
         final DatabaseService databaseService = getService(CLAZZ_DB);
         /*
@@ -377,6 +380,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
 
     private static final String SQL_DELETE = "DELETE FROM messagingAccount WHERE cid = ? AND user = ? AND serviceId = ? AND account = ?";
 
+    @Override
     public void deleteAccount(final String serviceId, final MessagingAccount account, final Session session, final Modifier modifier) throws OXException {
         final DatabaseService databaseService = getService(CLAZZ_DB);
         /*
@@ -433,6 +437,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
 
     private static final String SQL_UPDATE = "UPDATE messagingAccount SET displayName = ? WHERE cid = ? AND user = ? AND serviceId = ? AND account = ?";
 
+    @Override
     public void updateAccount(final String serviceId, final MessagingAccount account, final Session session, final Modifier modifier) throws OXException {
         final DatabaseService databaseService = getService(CLAZZ_DB);
         /*

@@ -72,6 +72,7 @@ public class SubscriptionSourceCollector implements SubscriptionSourceDiscoveryS
     private final Map<String, SubscribeService> services = new HashMap<String, SubscribeService>();
     private final Map<String, SortedSet<SubscribeService>> shelvedServices = new HashMap<String, SortedSet<SubscribeService>>();
 
+    @Override
     public SubscriptionSource getSource(final String identifier) {
         if(!services.containsKey(identifier)) {
             return null;
@@ -79,6 +80,7 @@ public class SubscriptionSourceCollector implements SubscriptionSourceDiscoveryS
         return services.get(identifier).getSubscriptionSource();
     }
 
+    @Override
     public List<SubscriptionSource> getSources(final int folderModule) {
         final List<SubscriptionSource> sources = new LinkedList<SubscriptionSource>();
         for(final SubscribeService subscriber : services.values()) {
@@ -89,14 +91,17 @@ public class SubscriptionSourceCollector implements SubscriptionSourceDiscoveryS
         return sources;
     }
 
+    @Override
     public List<SubscriptionSource> getSources() {
         return getSources(-1);
     }
 
+    @Override
     public boolean knowsSource(final String identifier) {
         return services.containsKey(identifier);
     }
 
+    @Override
     public SubscriptionSourceDiscoveryService filter(final int user, final int context) throws OXException {
         return new FilteredSubscriptionSourceDiscoveryService(user, context, this);
     }
@@ -122,6 +127,7 @@ public class SubscriptionSourceCollector implements SubscriptionSourceDiscoveryS
         resurrectFromShelf(identifier);
     }
 
+    @Override
     public SubscriptionSource getSource(final Context context, final int subscriptionId) throws OXException {
         for(final SubscribeService source : services.values()) {
             if(source.knows(context, subscriptionId)) {
@@ -138,6 +144,7 @@ public class SubscriptionSourceCollector implements SubscriptionSourceDiscoveryS
         if(set == null) {
             set = new TreeSet<SubscribeService>(new Comparator<SubscribeService>(){
 
+                @Override
                 public int compare(final SubscribeService o1, final SubscribeService o2) {
                     return o1.getSubscriptionSource().getPriority() - o2.getSubscriptionSource().getPriority();
                 }

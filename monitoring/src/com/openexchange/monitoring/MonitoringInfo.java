@@ -127,6 +127,7 @@ public class MonitoringInfo {
 
     private static final Counter EMPTY_COUNTER = new Counter() {
 
+        @Override
         public int getCount() {
             return 0;
         }

@@ -98,10 +98,12 @@ public class CreatePublicationTables extends AbstractCreateTableImpl {
         };
     }
 
+    @Override
     public String[] requiredTables() {
         return new String[] { "user" };
     }
 
+    @Override
     public String[] tablesToCreate() {
         return new String[] { "publications", "sequence_publications", "publication_users" };
     }

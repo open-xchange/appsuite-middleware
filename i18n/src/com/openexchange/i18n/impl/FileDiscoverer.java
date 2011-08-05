@@ -73,6 +73,7 @@ public class FileDiscoverer {
     public String[] getFilesFromLanguageFolder(final String extension) {
         final String[] files = dir.list(new FilenameFilter() {
 
+            @Override
             public boolean accept(final File d, final String f) {
                 return f.endsWith(extension);
             }

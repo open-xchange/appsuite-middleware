@@ -155,6 +155,7 @@ public class LoginPageByFormActionRegexVerifiedByStringStep extends AbstractStep
         return username;
     }
 
+    @Override
     public void setUsername(final String username) {
         this.username = username;
     }
@@ -163,6 +164,7 @@ public class LoginPageByFormActionRegexVerifiedByStringStep extends AbstractStep
         return password;
     }
 
+    @Override
     public void setPassword(final String password) {
         this.password = password;
     }
@@ -208,6 +210,7 @@ public class LoginPageByFormActionRegexVerifiedByStringStep extends AbstractStep
         this.numberOfForm = numberOfForm;
     }
 
+    @Override
     public String getBaseUrl() {
         return baseUrl;
     }
@@ -216,6 +219,7 @@ public class LoginPageByFormActionRegexVerifiedByStringStep extends AbstractStep
         this.baseUrl = baseUrl;
     }
 
+    @Override
     public Page getLoginPage() {
         return loginPage;
     }

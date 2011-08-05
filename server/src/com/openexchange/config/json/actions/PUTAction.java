@@ -64,7 +64,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link PUTAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PUTAction extends AbstractConfigAction {
@@ -104,7 +104,7 @@ public final class PUTAction extends AbstractConfigAction {
 
     /**
      * Splits a value for a not leaf setting into its subsettings and stores them.
-     * 
+     *
      * @param storage setting storage.
      * @param setting actual setting.
      * @throws OXException if an error occurs.

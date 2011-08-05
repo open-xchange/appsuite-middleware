@@ -56,7 +56,7 @@ import com.openexchange.server.ServiceHolder;
 
 /**
  * {@link BundleServiceTracker} - Tracks a bundle service and fills or empties corresponding {@link ServiceHolder} instance
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class BundleServiceTracker<S> implements ServiceTrackerCustomizer<S, S> {
@@ -72,7 +72,7 @@ public class BundleServiceTracker<S> implements ServiceTrackerCustomizer<S, S> {
 
     /**
      * Initializes a new bundle service tracker
-     * 
+     *
      * @param context The bundle context
      * @param serviceClass The service's class (used for dynamic type comparison and casts)
      */
@@ -82,7 +82,7 @@ public class BundleServiceTracker<S> implements ServiceTrackerCustomizer<S, S> {
 
     /**
      * Initializes a new bundle service tracker
-     * 
+     *
      * @param context The bundle context
      * @param serviceHolder The service holder
      * @param serviceClass The service's class (used for dynamic type comparison and casts)
@@ -116,7 +116,7 @@ public class BundleServiceTracker<S> implements ServiceTrackerCustomizer<S, S> {
 
     /**
      * Invoked when service is added
-     * 
+     *
      * @param service The service
      */
     protected void addingServiceInternal(final S service) {
@@ -153,7 +153,7 @@ public class BundleServiceTracker<S> implements ServiceTrackerCustomizer<S, S> {
 
     /**
      * Invoked when service is added
-     * 
+     *
      * @param service The service
      */
     protected void removedServiceInternal(final S service) {

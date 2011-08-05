@@ -85,6 +85,7 @@ public class PasswordCrypter implements LoginHandlerService, SecretConsistencyCh
         }
     }
 
+    @Override
     public void handleLogin(final LoginResult login) throws OXException {
         /*
          * Crypt & store password to support digest authentication mechanisms which require to look-up a user's password by a certain
@@ -109,14 +110,17 @@ public class PasswordCrypter implements LoginHandlerService, SecretConsistencyCh
         }
     }
 
+    @Override
     public void handleLogout(final LoginResult logout) {
         // Nothing to to.
     }
 
+    @Override
     public String checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws OXException {
         return null;
     }
 
+    @Override
     public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws OXException {
         final CryptoService cryptoService = PasscryptServiceRegistry.getServiceRegistry().getService(CryptoService.class, true);
         final UserAttributeAccess attributeAccess = UserAttributeAccess.getDefaultInstance();

@@ -73,26 +73,32 @@ public final class DelegateExecutorService extends AbstractExecutorService {
         this.executorService = executorService;
     }
 
+    @Override
     public boolean awaitTermination(final long timeout, final TimeUnit unit) throws InterruptedException {
         return executorService.awaitTermination(timeout, unit);
     }
 
+    @Override
     public void execute(final Runnable command) {
         executorService.execute(command);
     }
 
+    @Override
     public boolean isShutdown() {
         return executorService.isShutdown();
     }
 
+    @Override
     public boolean isTerminated() {
         return executorService.isTerminated();
     }
 
+    @Override
     public void shutdown() {
         throw new UnsupportedOperationException("Shutdown not allowed.");
     }
 
+    @Override
     public List<Runnable> shutdownNow() {
         throw new UnsupportedOperationException("Shutdown not allowed.");
     }

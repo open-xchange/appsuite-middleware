@@ -71,16 +71,19 @@ public class CrawlerRegisterer implements ServiceTrackerCustomizer {
         this.activator = activator;
     }
 
+    @Override
     public Object addingService(ServiceReference reference) {
         ConfigurationService configurationService = (ConfigurationService) context.getService(reference);
         activator.registerServices(configurationService);
         return configurationService;
     }
 
+    @Override
     public void modifiedService(ServiceReference reference, Object service) {
         //nothing to do here
     }
 
+    @Override
     public void removedService(ServiceReference reference, Object service) {
         activator.unregisterServices();
         context.ungetService(reference);

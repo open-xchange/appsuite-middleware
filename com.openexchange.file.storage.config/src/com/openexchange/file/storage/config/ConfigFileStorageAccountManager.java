@@ -90,18 +90,22 @@ public final class ConfigFileStorageAccountManager implements FileStorageAccount
         }
     }
 
+    @Override
     public String addAccount(final FileStorageAccount account, final Session session) throws OXException {
         throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create(serviceId);
     }
 
+    @Override
     public void updateAccount(final FileStorageAccount account, final Session session) throws OXException {
         throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create(serviceId);
     }
 
+    @Override
     public void deleteAccount(final FileStorageAccount account, final Session session) throws OXException {
         throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create(serviceId);
     }
 
+    @Override
     public List<FileStorageAccount> getAccounts(final Session session) throws OXException {
         final Map<String, ConfigFileStorageAccount> accounts = ConfigFileStorageAccountParser.getInstance().getAccountsFor(serviceId);
         if (null == accounts || accounts.isEmpty()) {
@@ -114,6 +118,7 @@ public final class ConfigFileStorageAccountManager implements FileStorageAccount
         return ret;
     }
 
+    @Override
     public FileStorageAccount getAccount(final String id, final Session session) throws OXException {
         final Map<String, ConfigFileStorageAccount> accounts = ConfigFileStorageAccountParser.getInstance().getAccountsFor(serviceId);
         if (null == accounts) {
@@ -156,10 +161,12 @@ public final class ConfigFileStorageAccountManager implements FileStorageAccount
         return ret;
     }
 
+    @Override
     public boolean checkSecretCanDecryptStrings(final Session session, final String secret) {
         return true;
     }
 
+    @Override
     public void migrateToNewSecret(final String oldSecret, final String newSecret, final Session session) {
         // Nothing to do
     }

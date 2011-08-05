@@ -59,6 +59,7 @@ import com.openexchange.xml.jdom.JDOMParser;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class JDOMParserImpl implements JDOMParser {
+    @Override
     public Document parse(final InputStream is) throws JDOMException, IOException {
         return new SAXBuilder().build(is);
     }

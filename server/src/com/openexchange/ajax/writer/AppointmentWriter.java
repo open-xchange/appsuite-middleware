@@ -102,7 +102,7 @@ public class AppointmentWriter extends CalendarWriter {
 
     /**
      * Applies specified session to this writer.
-     * 
+     *
      * @param session The session to set
      */
     public void setSession(final ServerSession session) {

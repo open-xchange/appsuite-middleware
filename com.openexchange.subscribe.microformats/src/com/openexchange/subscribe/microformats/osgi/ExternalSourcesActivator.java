@@ -129,6 +129,7 @@ public class ExternalSourcesActivator extends DeferredActivator {
 
             timer.scheduleAtFixedRate(new Runnable() {
 
+                @Override
                 public void run() {
                     for (ExternalSubscriptionSourceDiscoveryService service : services) {
                         try {

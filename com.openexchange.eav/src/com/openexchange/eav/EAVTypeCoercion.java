@@ -60,21 +60,21 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link EAVTypeCoercion}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class EAVTypeCoercion {
 
     public static enum Mode { INCOMING, OUTGOING }
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EAVTypeCoercion.class));
 
     private Mode mode = Mode.INCOMING;
-    
+
     public EAVTypeCoercion(Mode mode) {
         this.mode = mode;
     }
-    
+
     public Object coerce(EAVType origType, Object payload, EAVTypeMetadataNode typeInfo) throws OXException {
         return coerce(origType, payload, typeInfo, null);
     }
@@ -159,7 +159,7 @@ public class EAVTypeCoercion {
         case INCOMING: return time - timeZone.getOffset(time);
         case OUTGOING : return time + timeZone.getOffset(time);
         }
-        return -1; 
+        return -1;
     }
 
 }

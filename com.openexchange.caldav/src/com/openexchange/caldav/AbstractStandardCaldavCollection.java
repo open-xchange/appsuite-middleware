@@ -132,54 +132,67 @@ public abstract class AbstractStandardCaldavCollection extends AbstractCollectio
 
     }
 
+    @Override
     public void create() throws OXException {
         // IGNORE
     }
 
+    @Override
     public boolean exists() throws OXException {
         return true;
     }
 
+    @Override
     public Date getCreationDate() throws OXException {
         return new Date(0);
     }
 
+    @Override
     public Date getLastModified() throws OXException {
         return new Date(0);
     }
 
+    @Override
     public WebdavLock getLock(final String token) throws OXException {
         return null;
     }
 
+    @Override
     public List<WebdavLock> getLocks() throws OXException {
         return Collections.emptyList();
     }
 
+    @Override
     public WebdavLock getOwnLock(final String token) throws OXException {
         return null;
     }
 
+    @Override
     public List<WebdavLock> getOwnLocks() throws OXException {
         return Collections.emptyList();
     }
 
+    @Override
     public String getSource() throws OXException {
         return null;
     }
 
+    @Override
     public void lock(final WebdavLock lock) throws OXException {
         // IGNORE
     }
 
+    @Override
     public void save() throws OXException {
         // IGNORE
     }
 
+    @Override
     public void setDisplayName(final String displayName) throws OXException {
         // IGNORE
     }
 
+    @Override
     public void unlock(final String token) throws OXException {
         // IGNORE
     }

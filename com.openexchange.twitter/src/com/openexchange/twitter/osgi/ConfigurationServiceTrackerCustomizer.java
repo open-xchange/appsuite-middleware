@@ -76,6 +76,7 @@ public final class ConfigurationServiceTrackerCustomizer implements ServiceTrack
         this.context = context;
     }
 
+    @Override
     public Object addingService(final ServiceReference reference) {
         final Object service = context.getService(reference);
         if (!ConfigurationService.class.isInstance(service)) {
@@ -95,10 +96,12 @@ public final class ConfigurationServiceTrackerCustomizer implements ServiceTrack
         return service;
     }
 
+    @Override
     public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do
     }
 
+    @Override
     public void removedService(final ServiceReference reference, final Object service) {
         if (null != service && ConfigurationService.class.isInstance(service)) {
             try {

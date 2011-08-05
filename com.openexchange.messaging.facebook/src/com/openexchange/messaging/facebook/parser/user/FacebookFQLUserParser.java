@@ -86,6 +86,7 @@ public final class FacebookFQLUserParser {
 
             m.put("uid", new ItemHandler() {
 
+                @Override
                 public void handleItem(final Node item, final FacebookUser user) throws OXException {
                     user.setUid(FacebookMessagingUtility.parseUnsignedLong(item.getTextContent()));
                 }
@@ -93,6 +94,7 @@ public final class FacebookFQLUserParser {
 
             m.put("name", new ItemHandler() {
 
+                @Override
                 public void handleItem(final Node item, final FacebookUser user) throws OXException {
                     user.setName(item.getTextContent());
                 }
@@ -100,6 +102,7 @@ public final class FacebookFQLUserParser {
 
             m.put("pic_small", new ItemHandler() {
 
+                @Override
                 public void handleItem(final Node item, final FacebookUser user) throws OXException {
                     user.setPicSmall(item.getTextContent());
                 }

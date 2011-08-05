@@ -88,6 +88,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
         this.twitter4jTwitter = twitter4jTwitter;
     }
 
+    @Override
     public List<DirectMessage> getDirectMessages() throws OXException {
         try {
             final List<twitter4j.DirectMessage> l = twitter4jTwitter.getDirectMessages();
@@ -102,6 +103,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
         }
     }
 
+    @Override
     public List<DirectMessage> getDirectMessages(final Paging paging) throws OXException {
         try {
             final List<twitter4j.DirectMessage> l = twitter4jTwitter.getDirectMessages(pagingFrom(paging));
@@ -116,6 +118,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
         }
     }
 
+    @Override
     public List<Status> getFriendsTimeline() throws OXException {
         try {
             final List<twitter4j.Status> l = twitter4jTwitter.getFriendsTimeline();
@@ -130,6 +133,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
         }
     }
 
+    @Override
     public List<Status> getFriendsTimeline(final Paging paging) throws OXException {
         try {
             final List<twitter4j.Status> l = twitter4jTwitter.getFriendsTimeline(pagingFrom(paging));
@@ -144,6 +148,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
         }
     }
 
+    @Override
     public List<Status> getHomeTimeline() throws OXException {
         try {
             final List<twitter4j.Status> l = twitter4jTwitter.getHomeTimeline();
@@ -158,6 +163,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
         }
     }
 
+    @Override
     public List<Status> getHomeTimeline(final Paging paging) throws OXException {
         try {
             final List<twitter4j.Status> l = twitter4jTwitter.getHomeTimeline(pagingFrom(paging));
@@ -172,6 +178,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
         }
     }
 
+    @Override
     public DirectMessage sendDirectMessage(final String id, final String text) throws OXException {
         try {
             return new DirectMessageImpl(twitter4jTwitter.sendDirectMessage(id, text));
@@ -180,6 +187,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
         }
     }
 
+    @Override
     public Status updateStatus(final String status) throws OXException {
         try {
             return new StatusImpl(twitter4jTwitter.updateStatus(status));
@@ -188,6 +196,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
         }
     }
 
+    @Override
     public Status updateStatus(final String status, final long inReplyToStatusId) throws OXException {
         try {
             final StatusUpdate statusUpdate = new StatusUpdate(status);
@@ -198,6 +207,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
         }
     }
 
+    @Override
     public Status retweetStatus(final long statusId) throws OXException {
         try {
             return new StatusImpl(twitter4jTwitter.retweetStatus(statusId));
@@ -206,6 +216,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
         }
     }
 
+    @Override
     public Status destroyStatus(final long statusId) throws OXException {
         try {
             return new StatusImpl(twitter4jTwitter.destroyStatus(statusId));
@@ -214,6 +225,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
         }
     }
 
+    @Override
     public Status showStatus(final long statusId) throws OXException {
         try {
             return new StatusImpl(twitter4jTwitter.showStatusAuthenticated(statusId));
@@ -222,6 +234,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
         }
     }
 
+    @Override
     public User getUser() throws OXException {
         User tmp = user;
         if (null == tmp) {
@@ -235,6 +248,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
         return tmp;
     }
 
+    @Override
     public User showUser(final String id) throws OXException {
         try {
             return new UserImpl(twitter4jTwitter.showUser(id));

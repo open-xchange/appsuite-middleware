@@ -61,14 +61,17 @@ import com.openexchange.publish.Publication;
  */
 public class AllowEverything implements SecurityStrategy {
 
+    @Override
     public boolean mayCreate(Publication publication) throws OXException {
         return true;
     }
 
+    @Override
     public boolean mayDelete(Publication publication) throws OXException {
         return true;
     }
 
+    @Override
     public boolean mayUpdate(Publication publication) throws OXException {
         return true;
     }

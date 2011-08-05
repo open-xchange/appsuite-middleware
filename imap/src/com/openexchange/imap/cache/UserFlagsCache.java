@@ -152,18 +152,22 @@ public final class UserFlagsCache {
             return tmp;
         }
 
+        @Override
         public CacheKey getKey() {
             return getKeyInternal();
         }
 
+        @Override
         public Boolean getValue() {
             return value;
         }
 
+        @Override
         public void setValue(final Boolean value) {
             this.value = value;
         }
 
+        @Override
         public Class<Boolean> getEntryClass() {
             return Boolean.class;
         }

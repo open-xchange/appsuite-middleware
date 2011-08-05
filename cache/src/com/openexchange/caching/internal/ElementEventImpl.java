@@ -75,6 +75,7 @@ public final class ElementEventImpl extends EventObject implements ElementEvent 
      * (non-Javadoc)
      * @see com.openexchange.cache.ElementEvent#getElementEvent()
      */
+    @Override
     public int getElementEvent() {
         return elementEvent;
     }

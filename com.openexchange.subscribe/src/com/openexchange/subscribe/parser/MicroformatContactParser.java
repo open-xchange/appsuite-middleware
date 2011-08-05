@@ -108,6 +108,7 @@ public class MicroformatContactParser extends ContactHandler implements Subscrip
         return bob.toString();
     }
 
+    @Override
     public void handleSubscription(final Subscription subscription) throws OXException{
         try {
             final String website = readSubscription(subscription);

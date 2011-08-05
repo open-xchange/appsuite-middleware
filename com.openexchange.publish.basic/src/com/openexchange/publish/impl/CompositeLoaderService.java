@@ -68,6 +68,7 @@ public class CompositeLoaderService implements PublicationDataLoaderService {
 
     private final Map<String, PublicationDataLoaderService> subLoaders = new HashMap<String, PublicationDataLoaderService>();
 
+    @Override
     public Collection<? extends Object> load(Publication publication) throws OXException {
         return getSubLoader(publication.getModule()).load(publication);
     }

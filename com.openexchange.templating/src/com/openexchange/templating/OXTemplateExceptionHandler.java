@@ -64,6 +64,7 @@ public interface OXTemplateExceptionHandler {
 
     OXTemplateExceptionHandler RETHROW_HANDLER = new OXTemplateExceptionHandler() {
 
+        @Override
         public void handleTemplateException(OXException te, Writer out) throws OXException {
             throw te;
         }

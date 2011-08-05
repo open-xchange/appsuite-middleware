@@ -77,10 +77,12 @@ public final class FixSubscriptionTablePrimaryKey extends UpdateTaskAdapter {
         this.dbService = service;
     }
 
+    @Override
     public String[] getDependencies() {
         return new String[] { "com.openexchange.groupware.update.tasks.CreateSubscribeTableTask" };
     }
 
+    @Override
     public void perform(PerformParameters params) throws OXException {
         int cid = params.getContextId();
         Connection con = dbService.getForUpdateTask(cid);

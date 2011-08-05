@@ -228,6 +228,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return imapProperties;
     }
 
+    @Override
     public MailMessage[] getMessages(final String fullName, final String[] mailIds, final MailField[] mailFields, final String[] headerNames) throws OXException {
         if ((mailIds == null) || (mailIds.length == 0)) {
             return EMPTY_RETVAL;
@@ -1500,6 +1501,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
+    @Override
     public void updateMessageFlags(final String fullName, final int flagsArg, final boolean set) throws OXException {
         if (null == fullName) {
             // Nothing to do
@@ -1686,6 +1688,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
+    @Override
     public void updateMessageColorLabel(final String fullName, final int colorLabel) throws OXException {
         if (null == fullName) {
             // Nothing to do

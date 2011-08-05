@@ -117,6 +117,7 @@ public class ServiceRegistry implements ServiceLookup {
      * @param clazz The service's class
      * @return The service if found; otherwise <code>null</code>
      */
+    @Override
     public <S extends Object> S getService(final Class<? extends S> clazz) {
         final Object service = services.get(clazz);
         if (null == service) {

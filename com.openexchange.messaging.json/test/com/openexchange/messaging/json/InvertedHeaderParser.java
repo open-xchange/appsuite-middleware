@@ -57,15 +57,18 @@ import com.openexchange.messaging.StringMessageHeader;
 
 public class InvertedHeaderParser implements MessagingHeaderParser {
 
+    @Override
     public boolean handles(final String key, final Object value) {
         return true;
     }
 
+    @Override
     public void parseAndAdd(final Map<String, Collection<MessagingHeader>> headers, final String key, final Object value) {
         final StringMessageHeader header = new StringMessageHeader(key, new StringBuilder((String)value).reverse().toString());
         headers.put(key, Arrays.asList((MessagingHeader)header));
     }
 
+    @Override
     public int getRanking() {
         return 2;
     }

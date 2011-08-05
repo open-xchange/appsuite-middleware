@@ -84,6 +84,7 @@ public class TagArgument implements Argument
     /**
      * @see org.apache.jsieve.Argument#getValue()
      */
+    @Override
     public Object getValue()
     {
         return getTag();

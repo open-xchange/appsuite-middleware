@@ -70,6 +70,7 @@ public class OXTemplateImpl implements OXTemplate{
         this.template = template;
     }
 
+    @Override
     public void process(final Object rootObject, final Writer writer) throws OXException {
         try {
             template.process(rootObject, writer);
@@ -80,6 +81,7 @@ public class OXTemplateImpl implements OXTemplate{
         }
     }
 
+    @Override
     public TemplateLevel getLevel() {
         return level;
     }

@@ -53,7 +53,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AJAXActionCustomizerFactory}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -61,7 +61,7 @@ public interface AJAXActionCustomizerFactory {
 
     /**
      * Creates an appropriate customizer for specified request data and session
-     * 
+     *
      * @param request The request data
      * @param session The session
      * @return The customizer

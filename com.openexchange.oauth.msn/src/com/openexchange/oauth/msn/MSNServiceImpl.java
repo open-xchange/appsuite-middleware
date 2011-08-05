@@ -89,6 +89,7 @@ public class MSNServiceImpl implements MSNService {
         this.activator = activator;
     }
 
+    @Override
     public List<Contact> getContacts(String password, int user, int contextId, int accountId) {
         List<Contact> contacts = new ArrayList<Contact>();
 
@@ -254,6 +255,7 @@ public class MSNServiceImpl implements MSNService {
         return accessToken;
     }
 
+    @Override
     public String getAccountDisplayName(String password, int user, int contextId, int accountId) {
         String displayName = "";
         try {

@@ -62,7 +62,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link AttachmentToken}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AttachmentToken implements AttachmentTokenConstants {
@@ -112,7 +112,7 @@ public final class AttachmentToken implements AttachmentTokenConstants {
 
     /**
      * Sets the access information.
-     * 
+     *
      * @param accountId The account identifier
      * @param session The session
      * @return This token with access information applied
@@ -130,7 +130,7 @@ public final class AttachmentToken implements AttachmentTokenConstants {
 
     /**
      * Sets the attachment information.
-     * 
+     *
      * @param mailId The mail identifier
      * @param attachmentId The attachment identifier
      * @return This token with access attachment applied
@@ -144,7 +144,7 @@ public final class AttachmentToken implements AttachmentTokenConstants {
 
     /**
      * Touches this token.
-     * 
+     *
      * @return This token with elapse timeout reseted
      */
     public AttachmentToken touch() {
@@ -157,7 +157,7 @@ public final class AttachmentToken implements AttachmentTokenConstants {
 
     /**
      * Gets the token identifier.
-     * 
+     *
      * @return The token identifier
      */
     public String getId() {
@@ -166,7 +166,7 @@ public final class AttachmentToken implements AttachmentTokenConstants {
 
     /**
      * Checks if this token is expired.
-     * 
+     *
      * @return <code>true</code> if this token is expired; otherwise <code>false</code>
      */
     public boolean isExpired() {
@@ -177,7 +177,7 @@ public final class AttachmentToken implements AttachmentTokenConstants {
      * Gets the associated attachment.
      * <p>
      * <b>Note</b>: After calling this method {@link #close()} needs to be called!
-     * 
+     *
      * @return The associated attachment
      * @throws MailException
      * @see {@link #close()}
@@ -203,7 +203,7 @@ public final class AttachmentToken implements AttachmentTokenConstants {
 
     /**
      * Gets the user agent identifier.
-     * 
+     *
      * @return The user agent identifier
      */
     public String getUserAgent() {
@@ -212,7 +212,7 @@ public final class AttachmentToken implements AttachmentTokenConstants {
 
     /**
      * Gets the client IP address.
-     * 
+     *
      * @return The client IP address
      */
     public String getClientIp() {
@@ -221,7 +221,7 @@ public final class AttachmentToken implements AttachmentTokenConstants {
 
     /**
      * Gets the client
-     * 
+     *
      * @return The client
      */
     public String getClient() {
@@ -230,7 +230,7 @@ public final class AttachmentToken implements AttachmentTokenConstants {
 
     /**
      * Gets the session identifier
-     * 
+     *
      * @return The session identifier
      */
     public String getSessionId() {
@@ -239,7 +239,7 @@ public final class AttachmentToken implements AttachmentTokenConstants {
 
     /**
      * Gets the contextId
-     * 
+     *
      * @return The contextId
      */
     public int getContextId() {
@@ -248,7 +248,7 @@ public final class AttachmentToken implements AttachmentTokenConstants {
 
     /**
      * Gets the userId
-     * 
+     *
      * @return The userId
      */
     public int getUserId() {

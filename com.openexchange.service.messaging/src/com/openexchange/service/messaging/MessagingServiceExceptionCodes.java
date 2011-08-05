@@ -125,18 +125,22 @@ public enum MessagingServiceExceptionCodes implements OXExceptionCode {
         this.category = category;
     }
 
+    @Override
     public String getPrefix() {
         return "MESSAGING-SERVICE";
     }
 
+    @Override
     public Category getCategory() {
         return category;
     }
 
+    @Override
     public String getMessage() {
         return message;
     }
 
+    @Override
     public int getNumber() {
         return detailNumber;
     }
@@ -145,6 +149,7 @@ public enum MessagingServiceExceptionCodes implements OXExceptionCode {
         return null;
     }
 
+    @Override
     public boolean equals(final OXException e) {
         return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }

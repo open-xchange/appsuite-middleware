@@ -64,14 +64,17 @@ public abstract class AbstractTask<V> implements Task<V> {
         super();
     }
 
+    @Override
     public void afterExecute(final Throwable throwable) {
         // NOP
     }
 
+    @Override
     public void beforeExecute(final Thread thread) {
         // NOP
     }
 
+    @Override
     public void setThreadName(final ThreadRenamer threadRenamer) {
         // NOP
     }

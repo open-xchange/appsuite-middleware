@@ -79,6 +79,7 @@ public final class URLMailAttachmentActivator implements BundleActivator {
         name = "com.openexchange.url.mail.attachment";
     }
 
+    @Override
     public void start(final BundleContext context) throws Exception {
         LOG.info("starting bundle: " + name);
         try {
@@ -94,6 +95,7 @@ public final class URLMailAttachmentActivator implements BundleActivator {
         }
     }
 
+    @Override
     public void stop(final BundleContext context) throws Exception {
         LOG.info("stopping bundle: " + name);
         try {

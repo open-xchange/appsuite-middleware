@@ -82,18 +82,22 @@ public class HTMLMicroformatParser implements OXMFParser {
     private final Set<String> containerClasses = new HashSet<String>();
     private final Set<String> prefixes = new HashSet<String>();
 
+    @Override
     public void addAttributePrefix(String prefix) {
         prefixes.add(prefix);
     }
 
+    @Override
     public void addContainerElement(String containerElement) {
         containerClasses.add(containerElement);
     }
 
+    @Override
     public List<Map<String, String>> parse(String html) throws OXException {
         return parse(new StringReader(html));
     }
 
+    @Override
     public List<Map<String, String>> parse(Reader html) throws OXException {
         DOMParser parser = new DOMParser();
         ArrayList<Map<String, String>> container = new ArrayList<Map<String, String>>();
@@ -212,6 +216,7 @@ public class HTMLMicroformatParser implements OXMFParser {
         return false;
     }
 
+    @Override
     public void reset() {
 
     }

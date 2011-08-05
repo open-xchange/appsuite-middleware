@@ -182,10 +182,12 @@ public final class IMAPTracer {
             this.out = out;
         }
 
+        @Override
         public boolean isTrace() {
             return trace;
         }
 
+        @Override
         public OutputStream getOut() {
             return out;
         }

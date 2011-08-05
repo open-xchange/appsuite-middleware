@@ -90,7 +90,7 @@ public class TimeSpanParser  implements StringParser {
      */
     public static Long parseTimespan(final String span) {
         if(span == null) {
-            return -1l;
+            return Long.valueOf(-1);
         }
         final StringBuilder numberBuilder = new StringBuilder();
         final StringBuilder unitBuilder = new StringBuilder();
@@ -108,7 +108,7 @@ public class TimeSpanParser  implements StringParser {
 
                         throw new IllegalArgumentException("I don't know unit "+unit);
                     }
-                    tally += Long.parseLong(numberBuilder.toString()) * factor;
+                    tally += Long.parseLong(numberBuilder.toString()) * factor.longValue();
                     numberBuilder.setLength(0);
                     unitBuilder.setLength(0);
                     mode = 0;
@@ -127,25 +127,26 @@ public class TimeSpanParser  implements StringParser {
             if(factor == null) {
                 throw new IllegalArgumentException("I don't know unit "+unit);
             }
-            tally += Long.parseLong(numberBuilder.toString()) * factor;
+            tally += Long.parseLong(numberBuilder.toString()) * factor.longValue();
         }
-        return tally;
+        return Long.valueOf(tally);
     }
 
-    private static final Set<Class> SUPPORTED = new HashSet<Class>() {{
+    private static final Set<Class<?>> SUPPORTED = new HashSet<Class<?>>() {{
         add(Long.class);
         add(long.class);
         add(Date.class);
     }};
 
-    public <T> T parse(String s, Class<T> t) {
+    @Override
+    public <T> T parse(final String s, final Class<T> t) {
         if(!SUPPORTED.contains(t)) {
             return null;
         }
         Long timespan = null;
         try {
             timespan = parseTimespan(s);
-        } catch (IllegalArgumentException x) {
+        } catch (final IllegalArgumentException x) {
             return null;
         }
         if(t == Long.class || t == long.class) {

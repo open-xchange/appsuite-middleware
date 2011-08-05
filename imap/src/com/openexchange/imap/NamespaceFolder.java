@@ -96,6 +96,7 @@ public class NamespaceFolder extends IMAPFolder {
     public Folder[] list(final String pattern) throws MessagingException {
         final ListInfo[] li = (ListInfo[]) doCommand(new ProtocolCommand() {
 
+            @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
                 return p.list("", new StringBuilder().append(fullName).append(separator).append(pattern).toString());
             }
@@ -114,6 +115,7 @@ public class NamespaceFolder extends IMAPFolder {
     public Folder[] listSubscribed(final String pattern) throws MessagingException {
         final ListInfo[] li = (ListInfo[]) doCommand(new ProtocolCommand() {
 
+            @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
                 return p.lsub("", new StringBuilder().append(fullName).append(separator).append(pattern).toString());
             }

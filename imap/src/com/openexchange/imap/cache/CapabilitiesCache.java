@@ -148,18 +148,22 @@ public final class CapabilitiesCache {
             return tmp;
         }
 
+        @Override
         public CacheKey getKey() {
             return getKeyInternal();
         }
 
+        @Override
         public CapabilitiesResponse getValue() {
             return capRes;
         }
 
+        @Override
         public void setValue(final CapabilitiesResponse value) {
             capRes = value;
         }
 
+        @Override
         public Class<CapabilitiesResponse> getEntryClass() {
             return CapabilitiesResponse.class;
         }

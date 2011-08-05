@@ -85,6 +85,7 @@ public abstract class AbstractPublicationService implements PublicationService {
         return STORAGE;
     }
 
+    @Override
     public void create(final Publication publication) throws OXException {
         checkPermission(Permission.CREATE, publication);
         modifyIncoming(publication);
@@ -94,6 +95,7 @@ public abstract class AbstractPublicationService implements PublicationService {
         modifyOutgoing(publication);
     }
 
+    @Override
     public void delete(final Publication publication) throws OXException {
         checkPermission(Permission.DELETE, publicationForPermissionCheck(publication));
         beforeDelete(publication);
@@ -101,6 +103,7 @@ public abstract class AbstractPublicationService implements PublicationService {
         afterDelete(publication);
     }
 
+    @Override
     public Collection<Publication> getAllPublications(final Context ctx) throws OXException {
         final List<Publication> publications = STORAGE.getPublications(ctx, getTarget().getId());
         for (final Publication publication : publications) {
@@ -110,6 +113,7 @@ public abstract class AbstractPublicationService implements PublicationService {
         return publications;
     }
 
+    @Override
     public Collection<Publication> getAllPublications(final Context ctx, final String entityId) throws OXException {
         final List<Publication> publications = STORAGE.getPublications(ctx, getTarget().getModule(), entityId);
         for (final Publication publication : publications) {
@@ -119,6 +123,7 @@ public abstract class AbstractPublicationService implements PublicationService {
         return publications;
     }
 
+    @Override
     public Collection<Publication> getAllPublications(final Context ctx, final int userId, final String module) throws OXException {
     	List<Publication> publications;
     	if (module == null) {
@@ -134,10 +139,12 @@ public abstract class AbstractPublicationService implements PublicationService {
         return publications;
     }
 
+    @Override
     public boolean knows(final Context ctx, final int publicationId) throws OXException {
         return load(ctx, publicationId) != null;
     }
 
+    @Override
     public Publication load(final Context ctx, final int publicationId) throws OXException {
         final Publication publication = loadInternally(ctx, publicationId);
         if(publication != null) {
@@ -155,6 +162,7 @@ public abstract class AbstractPublicationService implements PublicationService {
         return null;
     }
 
+    @Override
     public void update(final Publication publication) throws OXException {
         checkPermission(Permission.UPDATE, publicationForPermissionCheck(publication));
         modifyIncoming(publication);
@@ -178,6 +186,7 @@ public abstract class AbstractPublicationService implements PublicationService {
 
     // Callbacks for subclasses
 
+    @Override
     public abstract PublicationTarget getTarget() throws OXException;
 
     public void modifyIncoming(final Publication publication) throws OXException {

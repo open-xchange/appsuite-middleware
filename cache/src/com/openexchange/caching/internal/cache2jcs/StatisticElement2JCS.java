@@ -74,18 +74,22 @@ public final class StatisticElement2JCS implements StatisticElement {
         this.statElement = statElement;
     }
 
+    @Override
     public String getData() {
         return statElement.getData();
     }
 
+    @Override
     public String getName() {
         return statElement.getName();
     }
 
+    @Override
     public void setData(final String data) {
         statElement.setData(data);
     }
 
+    @Override
     public void setName(final String name) {
         statElement.setName(name);
     }

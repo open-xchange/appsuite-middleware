@@ -103,7 +103,7 @@ public class EAVDSL extends TestCase{
     }
 
     // Objects
-    
+
     public static  EAVNode N(String name) {
         return new EAVNode(name);
     }
@@ -398,13 +398,14 @@ public class EAVDSL extends TestCase{
         }
 
     }
-    
-   
+
+
 
     private static <T extends AbstractNode<T>>  List<T> serialize(AbstractNode<T> node) {
         final List<T> collected = new ArrayList<T>();
         node.visit(new AbstractNodeVisitor<T>() {
 
+            @Override
             public void visit(int index, T node) {
                 collected.add(node);
             }
@@ -422,6 +423,7 @@ public class EAVDSL extends TestCase{
         sortChildren(node);
         node.visit(new AbstractNodeVisitor<T>() {
 
+            @Override
             public void visit(int index, T node) {
                 for (int i = 0; i < index; i++) {
                     builder.append("    ");
@@ -435,27 +437,28 @@ public class EAVDSL extends TestCase{
 
         return builder.toString();
     }
-    
+
     private static <T extends AbstractNode<T>> void sortChildren(AbstractNode<T> node) {
         if(node.isLeaf()) {
             return;
         }
         Collections.sort(node.getChildren(), new Comparator<AbstractNode<T>>() {
 
+            @Override
             public int compare(AbstractNode<T> o1, AbstractNode<T> o2) {
                 if(o1 == null) {
                     return 1;
                 }
                 return o1.getName().compareTo(o2.getName());
             }
-            
+
         });
         for(AbstractNode<T> child : node.getChildren()) {
             sortChildren(child);
         }
     }
-    
-    
+
+
 
     public static void assertType(EAVTypeMetadataNode types, EAVType type, String... pathElements) {
         assertType(types, type, EAVContainerType.SINGLE, pathElements);
@@ -466,22 +469,22 @@ public class EAVDSL extends TestCase{
         org.junit.Assert.assertEquals(type, types.resolve(path).getType());
         org.junit.Assert.assertEquals(cType, types.resolve(path).getContainerType());
     }
-    
+
     public static void assertTransformation(EAVSetTransformation transformation,EAVType type, TransformList...lists) {
         assertSame(transformation.getType(), type);
         EAVMultipleCompare compare = new EAVMultipleCompare();
-        
+
         for (TransformList transformList : lists) {
             Object[] payload = null;
             switch(transformList.operation) {
-            case ADD: 
+            case ADD:
                 payload = transformation.getAdd();
                 break;
             case REMOVE:
                 payload = transformation.getRemove();
                 break;
             }
-            
+
             if(! (Boolean) transformation.getType().doSwitch(compare, transformList.payload, payload)) {
                 fail("Payloads differ");
             }
@@ -506,31 +509,32 @@ public class EAVDSL extends TestCase{
         }
         return retval;
     }
-    
+
     // Pluggable
-    
+
     private static <T extends AbstractNode<T>> boolean comparePayloads(AbstractNode<T> node1, AbstractNode<T> node2) {
         return COMPARISON_STRATEGIES.get(node1.getClass()).comparePayloads(node1, node2);
     }
-    
-    
+
+
     private static <T extends AbstractNode<T>> String printPayload(AbstractNode<T> node) {
         return COMPARISON_STRATEGIES.get(node.getClass()).printPayload(node);
     }
-    
+
     private static Map<Class, ComparisonStrategy> COMPARISON_STRATEGIES = new HashMap<Class, ComparisonStrategy>() {{
         put(EAVNode.class, new EAVNodeComparisonStrategy());
         put(EAVTypeMetadataNode.class, new EAVTypeMetadataComparisonStrategy());
         put(EAVSetTransformation.class, new EAVSetTransformationComparisonStrategy());
     }};
-    
+
     private static interface ComparisonStrategy<T extends AbstractNode<T>> {
         public String printPayload(T node);
         public boolean comparePayloads(T node1, T node2);
     }
-    
+
     private static class EAVNodeComparisonStrategy implements ComparisonStrategy<EAVNode> {
 
+        @Override
         public boolean comparePayloads(EAVNode expectedNode, EAVNode actualNode) {
             if(expectedNode.getType() != actualNode.getType()) {
                 return false;
@@ -555,9 +559,10 @@ public class EAVDSL extends TestCase{
                 return false;
             }
             return true;
-            
+
         }
 
+        @Override
         public String printPayload(EAVNode node) {
             EAVTypeSwitcher pp = null;
             if(node.isMultiple()) {
@@ -567,11 +572,12 @@ public class EAVDSL extends TestCase{
             }
             return (String) node.getType().doSwitch(pp, node.getPayload());
         }
-        
+
     }
-    
+
     private static class EAVTypeMetadataComparisonStrategy implements ComparisonStrategy<EAVTypeMetadataNode> {
 
+        @Override
         public boolean comparePayloads(EAVTypeMetadataNode node1, EAVTypeMetadataNode node2) {
             boolean optionsMatch = node1.getOptions() == node2.getOptions();
             if(!optionsMatch && (node1.getOptions() == null || node2.getOptions() == null)) {
@@ -579,19 +585,21 @@ public class EAVDSL extends TestCase{
             } else {
                 optionsMatch = node1.getOptions().equals(node2.getOptions());
             }
-            
-            
+
+
             return node1.getContainerType() == node2.getContainerType() && node1.getType() == node2.getType() && optionsMatch;
         }
 
+        @Override
         public String printPayload(EAVTypeMetadataNode node) {
             return node.getTypeDescription()+"  "+node.getOptions();
         }
-        
+
     }
-    
+
     private static class EAVSetTransformationComparisonStrategy implements ComparisonStrategy<EAVSetTransformation> {
 
+        @Override
         public boolean comparePayloads(EAVSetTransformation expectedNode, EAVSetTransformation actualNode) {
             if(expectedNode.getType() == actualNode.getType()) {
                 return true;
@@ -606,13 +614,14 @@ public class EAVDSL extends TestCase{
             return (Boolean) expectedNode.getType().doSwitch(compare, expectedNode.getAdd(), actualNode.getAdd()) && (Boolean) expectedNode.getType().doSwitch(compare, expectedNode.getRemove(), actualNode.getRemove());
         }
 
+        @Override
         public String printPayload(EAVSetTransformation node) {
             if(!node.isLeaf()) {
                 return "";
             }
             EAVMultiplePrettyPrint multiplePrettyPrint = new EAVMultiplePrettyPrint();
             StringBuilder builder = new StringBuilder();
-            
+
             if(null != node.getAdd()) {
                 builder.append("ADD: [");
                 builder.append(node.getType().doSwitch(multiplePrettyPrint, (Object)node.getAdd()));
@@ -624,12 +633,12 @@ public class EAVDSL extends TestCase{
                 builder.append("] ");
             }
             builder.append(node.getType());
-            
+
             return builder.toString();
         }
-        
+
     }
-    
+
     public static EAVTypeMetadataNode createMetadataNode(String key, EAVType type, EAVContainerType containerType, String optionKey, String option, EAVTypeMetadataNode... children) {
         EAVTypeMetadataNode retval;
         if (key == null) {
@@ -637,49 +646,49 @@ public class EAVDSL extends TestCase{
         } else {
             retval = new EAVTypeMetadataNode(key);
         }
-        
+
         if (type != null) {
             retval.setType(type);
         }
-        
+
         if (containerType != null) {
             retval.setContainerType(containerType);
         }
-        
+
         if (optionKey != null) {
             retval.setOption(optionKey, option);
         }
-        
+
         if (children.length > 0) {
             retval.addChildren(children);
         }
-        
+
         return retval;
     }
-    
+
     public static EAVSetTransformation createSetTransformation(String name, EAVType type, Object[] add, Object[] remove, EAVSetTransformation... children) {
         EAVSetTransformation retval = new EAVSetTransformation();
-        
+
         if (name != null) {
             retval.setName(name);
         }
-        
+
         if (type != null) {
             retval.setType(type);
         }
-        
+
         if (add != null && add.length > 0) {
             retval.setAdd(add);
         }
-        
+
         if (remove != null && remove.length > 0) {
             retval.setRemove(remove);
         }
-        
+
         if (children != null && children.length > 0) {
             retval.addChildren(children);
         }
-        
+
         return retval;
     }
 }

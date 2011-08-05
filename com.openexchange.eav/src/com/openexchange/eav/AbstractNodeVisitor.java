@@ -57,11 +57,11 @@ package com.openexchange.eav;
  *
  */
 public interface AbstractNodeVisitor<T extends AbstractNode<T>> {
-    
+
     static RecursionBreak BREAK = new RecursionBreak();
     static SkipSubtree SKIP = new SkipSubtree();
-    
-    
+
+
 
     public void visit(int index, T node);
 
@@ -74,6 +74,6 @@ public interface AbstractNodeVisitor<T extends AbstractNode<T>> {
     public class SkipSubtree extends RuntimeException {
 
     }
-    
+
 
 }

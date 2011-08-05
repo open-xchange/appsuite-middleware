@@ -60,7 +60,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * {@link LogProperties} - Provides thread-local log properties.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class LogProperties {
@@ -79,7 +79,7 @@ public final class LogProperties {
 
     /**
      * Sets the configured log property names.
-     * 
+     *
      * @param propertyNames The log property names
      */
     public static void configuredProperties(final Collection<String> propertyNames) {
@@ -89,7 +89,7 @@ public final class LogProperties {
 
     /**
      * Gets the list containing sorted property names.
-     * 
+     *
      * @return The list containing sorted property names
      */
     public static List<String> getPropertyNames() {
@@ -103,7 +103,7 @@ public final class LogProperties {
 
     /**
      * Gets the thread-local log properties.
-     * 
+     *
      * @return The log properties
      */
     public static Map<String, Object> optLogProperties() {
@@ -119,7 +119,7 @@ public final class LogProperties {
 
     /**
      * Gets the thread-local log properties.
-     * 
+     *
      * @return The log properties
      */
     public static Map<String, Object> getLogProperties() {
@@ -137,7 +137,7 @@ public final class LogProperties {
 
     /**
      * Puts specified log property. A <code>null</code> value removes the property.
-     * 
+     *
      * @param name The property name
      * @param value The property value
      */

@@ -191,26 +191,32 @@ public final class SessionImpl implements Session {
         }
     }
 
+    @Override
     public int getContextId() {
         return contextId;
     }
 
+    @Override
     public boolean containsParameter(final String name) {
         return parameters.containsKey(name);
     }
 
+    @Override
     public Object getParameter(final String name) {
         return parameters.get(name);
     }
 
+    @Override
     public String getRandomToken() {
         return randomToken;
     }
 
+    @Override
     public String getSecret() {
         return secret;
     }
 
+    @Override
     public String getSessionID() {
         return sessionId;
     }
@@ -219,6 +225,7 @@ public final class SessionImpl implements Session {
         return userId;
     }
 
+    @Override
     public void setParameter(final String name, final Object value) {
         if (PARAM_LOCK.equals(name)) {
             return;
@@ -230,35 +237,43 @@ public final class SessionImpl implements Session {
         }
     }
 
+    @Override
     public void removeRandomToken() {
         randomToken = null;
     }
 
+    @Override
     public String getLocalIp() {
         return localIp;
     }
 
 
+    @Override
     public void setLocalIp(final String localIp) {
         this.localIp = localIp;
     }
 
+    @Override
     public String getLoginName() {
         return loginName;
     }
 
+    @Override
     public int getUserId() {
         return userId;
     }
 
+    @Override
     public String getUserlogin() {
         return loginName;
     }
 
+    @Override
     public String getLogin() {
         return login;
     }
 
+    @Override
     public String getPassword() {
         return password;
     }
@@ -272,22 +287,27 @@ public final class SessionImpl implements Session {
         this.password = password;
     }
 
+    @Override
     public String getAuthId() {
         return authId;
     }
 
+    @Override
     public String getHash() {
         return hash;
     }
 
+    @Override
     public void setHash(final String hash) {
         this.hash = hash;
     }
 
+    @Override
     public String getClient() {
         return client;
     }
 
+    @Override
     public void setClient(String client) {
         this.client = client;
     }

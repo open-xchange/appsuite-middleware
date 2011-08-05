@@ -82,6 +82,7 @@ public class OXHCalendarParser implements ObjectParser<Appointment>{
 
     private List<Appointment> calendarData;
 
+    @Override
     public Collection<Appointment> parse(Reader html) throws OXException {
         DOMParser parser = new DOMParser();
         reset();

@@ -59,19 +59,23 @@ import com.openexchange.exception.OXException;
  */
 public class DoNothingCryptoService implements CryptoService {
 
+    @Override
     public String decrypt(String encryptedPayload, String password) throws OXException {
         return encryptedPayload;
     }
 
 
+    @Override
     public String decrypt(EncryptedData data, String password, boolean useSalt) throws OXException {
         return data.toString();
     }
 
+    @Override
     public String encrypt(String data, String password) throws OXException {
         return data;
     }
 
+    @Override
     public EncryptedData encrypt(String data, String password, boolean useSalt) throws OXException {
         return null;
     }

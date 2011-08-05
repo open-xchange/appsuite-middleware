@@ -80,10 +80,12 @@ public class RandomTokenContainerImpl<T> implements RandomTokenContainer<T> {
         this.cleanUp = cleanUp;
     }
 
+    @Override
     public T get(final String token) {
         return delegate.get(token);
     }
 
+    @Override
     public String rememberForSession(final Session session, final T value) {
         while(true) {
             final String token = UUIDSessionIdGenerator.randomUUID();
@@ -110,6 +112,7 @@ public class RandomTokenContainerImpl<T> implements RandomTokenContainer<T> {
         tokenList.add(token);
     }
 
+    @Override
     public T remove(final String token) {
         final T removed = delegate.remove(token);
         if(removed != null && cleanUp != null) {

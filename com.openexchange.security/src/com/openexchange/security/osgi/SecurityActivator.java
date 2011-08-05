@@ -75,7 +75,8 @@ public final class SecurityActivator implements BundleActivator {
 		super();
 	}
 
-	public void start(final BundleContext context) throws Exception {
+	@Override
+    public void start(final BundleContext context) throws Exception {
 		try {
 			serviceRegistration = context.registerService(BundleAccessSecurityService.class.getName(),
 					new BundleAccessSecurityServiceImpl(), null);
@@ -86,7 +87,8 @@ public final class SecurityActivator implements BundleActivator {
 
 	}
 
-	public void stop(final BundleContext context) throws Exception {
+	@Override
+    public void stop(final BundleContext context) throws Exception {
 		try {
 			serviceRegistration.unregister();
 			serviceRegistration = null;

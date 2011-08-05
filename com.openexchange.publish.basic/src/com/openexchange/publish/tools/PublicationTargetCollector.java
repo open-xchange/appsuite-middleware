@@ -70,10 +70,12 @@ public class PublicationTargetCollector implements PublicationTargetDiscoverySer
 
     private final Map<String, PublicationTarget> targets = new HashMap<String, PublicationTarget>();
 
+    @Override
     public PublicationTarget getTarget(String id) {
         return targets.get(id);
     }
 
+    @Override
     public PublicationTarget getTarget(Context context, int publicationId) throws OXException {
         for(PublicationTarget target : targets.values()) {
             if(target.getPublicationService().knows(context, publicationId)) {
@@ -83,6 +85,7 @@ public class PublicationTargetCollector implements PublicationTargetDiscoverySer
         return null;
     }
 
+    @Override
     public Collection<PublicationTarget> getTargetsForEntityType(String module) {
         ArrayList<PublicationTarget> responsible = new ArrayList<PublicationTarget>();
         for(PublicationTarget target : targets.values()) {
@@ -93,10 +96,12 @@ public class PublicationTargetCollector implements PublicationTargetDiscoverySer
         return responsible;
     }
 
+    @Override
     public boolean knows(String id) {
         return targets.containsKey(id);
     }
 
+    @Override
     public Collection<PublicationTarget> listTargets() {
         return targets.values();
     }

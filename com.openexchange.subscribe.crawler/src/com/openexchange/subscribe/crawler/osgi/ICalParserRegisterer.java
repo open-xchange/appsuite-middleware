@@ -71,16 +71,19 @@ public class ICalParserRegisterer implements ServiceTrackerCustomizer {
         this.activator = activator;
     }
 
+    @Override
     public Object addingService(ServiceReference reference) {
         ICalParser iCalParser = (ICalParser) context.getService(reference);
         activator.setICalParser(iCalParser);
         return iCalParser;
     }
 
+    @Override
     public void modifiedService(ServiceReference reference, Object service) {
         //nothing to do here
     }
 
+    @Override
     public void removedService(ServiceReference reference, Object service) {
         activator.setICalParser(null);
         context.ungetService(reference);

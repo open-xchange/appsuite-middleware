@@ -192,30 +192,37 @@ public class SyndMessage implements MessagingMessage {
         headers.put(header.toString(), Arrays.asList(value));
     }
 
+    @Override
     public int getColorLabel() throws OXException {
         return -1;
     }
 
+    @Override
     public int getFlags() throws OXException {
         return -1;
     }
 
+    @Override
     public String getFolder() {
         return folder;
     }
 
+    @Override
     public String getId() {
         return id;
     }
 
+    @Override
     public long getReceivedDate() {
         return ((Date) tryThese(entry.getPublishedDate(), entry.getUpdatedDate(), new Date(-1))).getTime();
     }
 
+    @Override
     public int getThreadLevel() {
         return -1;
     }
 
+    @Override
     public Collection<String> getUserFlags() throws OXException {
         final List categories = entry.getCategories();
         if(categories == null) {
@@ -228,22 +235,27 @@ public class SyndMessage implements MessagingMessage {
         return strings;
     }
 
+    @Override
     public MessagingContent getContent() throws OXException {
         return content;
     }
 
+    @Override
     public ContentType getContentType() throws OXException {
         return (ContentType) getFirstHeader(CONTENT_TYPE);
     }
 
+    @Override
     public String getDisposition() throws OXException {
         return INLINE;
     }
 
+    @Override
     public String getFileName() throws OXException {
         return null;
     }
 
+    @Override
     public MessagingHeader getFirstHeader(final String name) throws OXException {
         if(headers.containsKey(name)) {
             return headers.get(name).iterator().next();
@@ -251,6 +263,7 @@ public class SyndMessage implements MessagingMessage {
         return null;
     }
 
+    @Override
     public Collection<MessagingHeader> getHeader(final String name) throws OXException {
         if(headers.containsKey(name)) {
             return headers.get(name);
@@ -258,22 +271,27 @@ public class SyndMessage implements MessagingMessage {
         return null;
     }
 
+    @Override
     public Map<String, Collection<MessagingHeader>> getHeaders() throws OXException {
         return headers;
     }
 
+    @Override
     public String getSectionId() {
         return null;
     }
 
+    @Override
     public long getSize() throws OXException {
         return 0;
     }
 
+    @Override
     public void writeTo(final OutputStream os) throws IOException, OXException {
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create();
     }
 
+    @Override
     public String getPicture() {
         if (!b_picUrl) {
             final SyndImage image = ((entry.getSource() != null) ? entry.getSource() : feed).getImage();
@@ -319,6 +337,7 @@ public class SyndMessage implements MessagingMessage {
         return null;
     }
 
+    @Override
     public String getUrl() throws OXException {
         return entry.getLink();
     }

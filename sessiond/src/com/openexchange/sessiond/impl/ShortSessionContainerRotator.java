@@ -65,6 +65,7 @@ public class ShortSessionContainerRotator implements Runnable {
         super();
     }
 
+    @Override
     public void run() {
         try {
             SessionHandler.cleanUp();

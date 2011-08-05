@@ -84,6 +84,7 @@ public class UpdateIterator implements MapIterator<String, Object> {
 
     private final InsertIterator insertIterator = new InsertIterator();
 
+    @Override
     public void handle(String name, Object value) throws IterationBreak {
         try {
             if(original.containsKey(name)) {

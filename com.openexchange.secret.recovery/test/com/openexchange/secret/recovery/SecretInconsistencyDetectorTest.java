@@ -102,6 +102,7 @@ public class SecretInconsistencyDetectorTest {
 
     private static final class FailingSecretConsistencyCheck implements SecretConsistencyCheck {
 
+        @Override
         public String checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws OXException {
             return "Kabooom, Baby!";
         }
@@ -110,6 +111,7 @@ public class SecretInconsistencyDetectorTest {
 
     private static final class PassingSecretConsistencyCheck implements SecretConsistencyCheck {
 
+        @Override
         public String checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws OXException {
             return null;
         }

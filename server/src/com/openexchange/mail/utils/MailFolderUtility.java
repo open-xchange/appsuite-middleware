@@ -73,7 +73,7 @@ public final class MailFolderUtility {
 
     /**
      * Performs mailbox encoding.
-     * 
+     *
      * @param fullName The full name
      * @return The encoded full name
      */
@@ -83,7 +83,7 @@ public final class MailFolderUtility {
 
     /**
      * Performs mailbox decoding.
-     * 
+     *
      * @param encoded The encoded full name
      * @return The decoded full name
      */

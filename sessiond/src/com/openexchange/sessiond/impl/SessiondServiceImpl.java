@@ -80,30 +80,37 @@ public class SessiondServiceImpl implements SessiondService {
         migrateLock = new ReentrantLock();
     }
 
+    @Override
     public String addSession(final AddSessionParameter param) throws OXException {
         return SessionHandler.addSession(param.getUserId(), param.getUserLoginInfo(), param.getPassword(), param.getContext(), param.getClientIP(), param.getFullLogin(), param.getAuthId(), param.getHash(), param.getClient());
     }
 
+    @Override
     public void changeSessionPassword(final String sessionId, final String newPassword) throws OXException {
         SessionHandler.changeSessionPassword(sessionId, newPassword);
     }
 
+    @Override
     public boolean refreshSession(final String sessionId) {
         return SessionHandler.refreshSession(sessionId);
     }
 
+    @Override
     public boolean removeSession(final String sessionId) {
         return SessionHandler.clearSession(sessionId);
     }
 
+    @Override
     public int removeUserSessions(final int userId, final Context ctx) {
         return SessionHandler.removeUserSessions(userId, ctx.getContextId(), true).length;
     }
 
+    @Override
     public int getUserSessions(final int userId, final int contextId) {
         return SessionHandler.getUserSessions(userId, contextId).length;
     }
 
+    @Override
     public Collection<Session> getSessions(final int userId, final int contextId) {
         final SessionControl[] sessionControls = SessionHandler.getUserSessions(userId, contextId);
         if (null == sessionControls || 0 == sessionControls.length) {
@@ -117,6 +124,7 @@ public class SessiondServiceImpl implements SessiondService {
         return list;
     }
 
+    @Override
     public Session getSession(final String sessionId) {
         SessionControl sessionControl = SessionHandler.getSession(sessionId);
         if (null == sessionControl) {
@@ -142,14 +150,17 @@ public class SessiondServiceImpl implements SessiondService {
         return sessionControl.getSession();
     }
 
+    @Override
     public Session getSessionByRandomToken(final String randomToken, final String localIp) {
         return SessionHandler.getSessionByRandomToken(randomToken, localIp);
     }
 
+    @Override
     public Session getSessionByRandomToken(final String randomToken) {
         return SessionHandler.getSessionByRandomToken(randomToken, null);
     }
 
+    @Override
     public int getNumberOfActiveSessions() {
         return SessionHandler.getNumberOfActiveSessions();
     }

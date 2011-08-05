@@ -153,6 +153,7 @@ public class MessagingDatagramHandler {
             this.logger = logger;
         }
 
+        @Override
         public Object call() {
             try {
                 /*
@@ -179,6 +180,7 @@ public class MessagingDatagramHandler {
                         for (final MessageHandlerWrapper handler : eventHandlers) {
                             threadPool.submit(ThreadPools.task(new Runnable() {
 
+                                @Override
                                 public void run() {
                                     handler.handleMessage(message);
                                 }

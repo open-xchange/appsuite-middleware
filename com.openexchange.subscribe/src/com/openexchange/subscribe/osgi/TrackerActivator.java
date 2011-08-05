@@ -76,11 +76,13 @@ public final class TrackerActivator implements BundleActivator {
         super();
     }
 
+    @Override
     public void start(final BundleContext context) throws Exception {
         closeTrackers();
         openTrackers(context);
     }
 
+    @Override
     public void stop(final BundleContext context) throws Exception {
         closeTrackers();
     }

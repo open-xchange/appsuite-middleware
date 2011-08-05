@@ -83,6 +83,7 @@ public class UserConfigProvider implements ConfigProviderService {
         this.contexts = contexts;
     }
 
+    @Override
     public BasicProperty get(final String property, final int context, final int userId) throws OXException {
         if(context == NO_CONTEXT && userId == NO_USER) {
             return NO_PROPERTY;
@@ -94,6 +95,7 @@ public class UserConfigProvider implements ConfigProviderService {
 
             return new BasicProperty() {
 
+                @Override
                 public String get() {
                     final Map<String, Set<String>> attributes = user.getAttributes();
 
@@ -104,14 +106,17 @@ public class UserConfigProvider implements ConfigProviderService {
                     return set.iterator().next();
                 }
 
+                @Override
                 public String get(final String metadataName) throws OXException {
                     return null;
                 }
 
+                @Override
                 public boolean isDefined() throws OXException {
                     return get() != null;
                 }
 
+                @Override
                 public void set(final String value) throws OXException {
                     try {
                         users.setAttribute(DYNAMIC_ATTR_PREFIX+property, value, userId, ctx);
@@ -119,10 +124,12 @@ public class UserConfigProvider implements ConfigProviderService {
                         throw new OXException(e);
                     }
                 }
+                @Override
                 public void set(final String metadataName, final String value) throws OXException {
                     throw ConfigCascadeExceptionCodes.CAN_NOT_DEFINE_METADATA.create(metadataName, "user");
                 }
 
+                @Override
                 public List<String> getMetadataNames() throws OXException {
                     return Collections.emptyList();
                 }
@@ -132,6 +139,7 @@ public class UserConfigProvider implements ConfigProviderService {
 
     }
 
+    @Override
     public Collection<String> getAllPropertyNames(final int context, final int userId) throws OXException {
         if(context == NO_CONTEXT && userId == NO_CONTEXT) {
             return Collections.emptyList();

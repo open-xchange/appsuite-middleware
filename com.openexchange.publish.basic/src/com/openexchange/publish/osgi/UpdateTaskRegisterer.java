@@ -80,9 +80,11 @@ public class UpdateTaskRegisterer implements ServiceTrackerCustomizer {
         this.context = context;
     }
 
+    @Override
     public Object addingService(ServiceReference reference) {
         final DatabaseService service = (DatabaseService) context.getService(reference);
         registration = context.registerService(UpdateTaskProviderService.class.getName(), new UpdateTaskProviderService() {
+            @Override
             public Collection<UpdateTaskV2> getUpdateTasks() {
                 return Arrays.asList(
                     (UpdateTaskV2) new PublicationWithUsernameAndPasswordUpdateTask(service),
@@ -96,10 +98,12 @@ public class UpdateTaskRegisterer implements ServiceTrackerCustomizer {
         return service;
     }
 
+    @Override
     public void modifiedService(ServiceReference reference, Object service) {
         // Nothing to do.
     }
 
+    @Override
     public void removedService(ServiceReference reference, Object service) {
         registration.unregister();
         context.ungetService(reference);

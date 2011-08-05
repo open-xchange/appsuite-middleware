@@ -69,12 +69,14 @@ public final class FolderConsistencyLoginHandler implements LoginHandlerService 
         super();
     }
 
+    @Override
     public void handleLogin(final LoginResult login) throws OXException {
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
         folderService.checkConsistency("1", login.getSession());
         folderService.checkConsistency("0", login.getSession());
     }
 
+    @Override
     public void handleLogout(final LoginResult logout) throws OXException {
         // Nothing to do
     }

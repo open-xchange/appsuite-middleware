@@ -87,33 +87,40 @@ public class SessionScopedContainerImpl<T> implements SessionScopedContainer<T> 
         this.lifecycle = lifecycle;
     }
 
+    @Override
     public void clear() {
         for (Session key : keySet()) {
             remove(key);
         }
     }
 
+    @Override
     public boolean containsKey(Object key) {
         return delegate.containsKey(ID(key));
     }
 
+    @Override
     public boolean containsValue(Object value) {
         return delegate.containsValue(value);
     }
 
+    @Override
     public Set<java.util.Map.Entry<Session, T>> entrySet() {
         Set<Map.Entry<Session, T>> entrySet = new HashSet<Map.Entry<Session, T>>();
         for (final Map.Entry<SessionKey, T> entry : delegate.entrySet()) {
             entrySet.add(new Map.Entry<Session, T>() {
 
+                @Override
                 public Session getKey() {
                     return entry.getKey().session;
                 }
 
+                @Override
                 public T getValue() {
                     return entry.getValue();
                 }
 
+                @Override
                 public T setValue(T value) {
                     return entry.setValue(value);
                 }
@@ -123,6 +130,7 @@ public class SessionScopedContainerImpl<T> implements SessionScopedContainer<T> 
         return entrySet;
     }
 
+    @Override
     public T get(Object key) {
         key = ID(key);
         if (!delegate.containsKey(key) && initial != null) {
@@ -138,10 +146,12 @@ public class SessionScopedContainerImpl<T> implements SessionScopedContainer<T> 
         return delegate.get(key);
     }
 
+    @Override
     public boolean isEmpty() {
         return delegate.isEmpty();
     }
 
+    @Override
     public Set<Session> keySet() {
         Set<Session> keySet = new HashSet<Session>();
         for (SessionKey key : delegate.keySet()) {
@@ -150,26 +160,31 @@ public class SessionScopedContainerImpl<T> implements SessionScopedContainer<T> 
         return keySet;
     }
 
+    @Override
     public T put(Session key, T value) {
         return delegate.put(ID(key), value);
     }
 
+    @Override
     public void putAll(Map<? extends Session, ? extends T> m) {
         for (Map.Entry<? extends Session, ? extends T> entry : m.entrySet()) {
             delegate.put(ID(entry.getKey()), entry.getValue());
         }
     }
 
+    @Override
     public T remove(Object key) {
         T removed = delegate.remove(ID(key));
         cleanUp(removed);
         return removed;
     }
 
+    @Override
     public int size() {
         return delegate.size();
     }
 
+    @Override
     public Collection<T> values() {
         return delegate.values();
     }

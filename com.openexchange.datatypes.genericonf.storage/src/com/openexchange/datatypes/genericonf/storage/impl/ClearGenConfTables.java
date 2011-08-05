@@ -69,6 +69,7 @@ public class ClearGenConfTables extends ContextDelete {
         super();
     }
 
+    @Override
     public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
         if (!isContextDelete(event)) {
             return;

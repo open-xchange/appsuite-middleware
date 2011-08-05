@@ -78,6 +78,7 @@ public class Priority extends AbstractVerifyingAttributeConverter<VToDo, Task> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isSet(final Task task) {
         return task.containsPriority();
     }
@@ -85,6 +86,7 @@ public class Priority extends AbstractVerifyingAttributeConverter<VToDo, Task> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void emit(final int index, final Task task, final VToDo vToDo,
         final List<ConversionWarning> warnings, final Context ctx, final Object... args)
         throws ConversionError {
@@ -107,6 +109,7 @@ public class Priority extends AbstractVerifyingAttributeConverter<VToDo, Task> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean hasProperty(final VToDo vToDo) {
         return vToDo.getPriority() != null;
     }
@@ -114,6 +117,7 @@ public class Priority extends AbstractVerifyingAttributeConverter<VToDo, Task> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void parse(final int index, final VToDo todo, final Task task,
         final TimeZone timeZone, final Context ctx,
         final List<ConversionWarning> warnings) throws ConversionError {

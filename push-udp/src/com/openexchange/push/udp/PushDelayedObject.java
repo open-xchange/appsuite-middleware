@@ -78,6 +78,7 @@ public class PushDelayedObject implements Delayed {
         hash = result;
     }
 
+    @Override
     public long getDelay(final TimeUnit timeUnit) {
         return (creationTime + delay) - System.currentTimeMillis();
     }
@@ -86,6 +87,7 @@ public class PushDelayedObject implements Delayed {
         return abstractPushObject;
     }
 
+    @Override
     public int compareTo(final Delayed delayed) {
         return 0;
     }

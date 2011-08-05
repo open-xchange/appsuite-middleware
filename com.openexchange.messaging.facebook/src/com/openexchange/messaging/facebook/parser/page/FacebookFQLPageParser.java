@@ -86,6 +86,7 @@ public final class FacebookFQLPageParser {
 
             m.put("page_id", new ItemHandler() {
 
+                @Override
                 public void handleItem(final Node item, final FacebookPage page) throws OXException {
                     page.setPageId(FacebookMessagingUtility.parseUnsignedLong(item.getTextContent()));
                 }
@@ -93,6 +94,7 @@ public final class FacebookFQLPageParser {
 
             m.put("name", new ItemHandler() {
 
+                @Override
                 public void handleItem(final Node item, final FacebookPage page) throws OXException {
                     page.setName(item.getTextContent());
                 }
@@ -100,6 +102,7 @@ public final class FacebookFQLPageParser {
 
             m.put("pic_small", new ItemHandler() {
 
+                @Override
                 public void handleItem(final Node item, final FacebookPage page) throws OXException {
                     page.setPicSmall(item.getTextContent());
                 }

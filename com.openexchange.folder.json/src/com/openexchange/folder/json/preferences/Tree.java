@@ -80,17 +80,21 @@ public class Tree implements PreferencesItemService {
         super();
     }
 
+    @Override
     public String[] getPath() {
         return new String[] { "modules", "folder", NAME };
     }
 
+    @Override
     public IValueHandler getSharedValue() {
         return new IValueHandler() {
 
+            @Override
             public int getId() {
                 return NO_ID;
             }
 
+            @Override
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
                 Integer tree = ServerUserSetting.getInstance().getFolderTree(ctx.getContextId(), user.getId());
                 if (null == tree) {
@@ -110,14 +114,17 @@ public class Tree implements PreferencesItemService {
                 setting.setSingleValue(tree);
             }
 
+            @Override
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return true;
             }
 
+            @Override
             public boolean isWritable() {
                 return true;
             }
 
+            @Override
             public void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws OXException {
                 final String value = setting.getSingleValue().toString();
                 final Integer tree;

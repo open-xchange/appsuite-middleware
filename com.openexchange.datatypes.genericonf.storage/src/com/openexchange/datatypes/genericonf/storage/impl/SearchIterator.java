@@ -81,6 +81,7 @@ public class SearchIterator implements MapIterator<String, Object> {
     private static final ToSQLType toSQL = new ToSQLType();
 
 
+    @Override
     public void handle(String key, Object object) throws IterationBreak {
 
         if(!stringsIncluded && object.getClass() == String.class) {

@@ -88,34 +88,42 @@ public class RSSMessagingService implements MessagingService {
 
     private final FeedFetcher fetcher = new HttpURLFeedFetcher(HashMapFeedInfoCache.getInstance());
 
+    @Override
     public MessagingAccountAccess getAccountAccess(final int accountId, final Session session) {
         return new RSSFeedOperations(accountId, session, fetcher, accountManager);
     }
 
+    @Override
     public MessagingAccountManager getAccountManager() {
         return accountManager;
     }
 
+    @Override
     public MessagingAccountTransport getAccountTransport(final int accountId, final Session session) {
         return new RSSFeedOperations(accountId, session, fetcher, accountManager);
     }
 
+    @Override
     public Set<String> getSecretProperties() {
         return Collections.emptySet();
     }
 
+    @Override
     public String getDisplayName() {
         return DISPLAY_NAME;
     }
 
+    @Override
     public DynamicFormDescription getFormDescription() {
         return FORM_DESCRIPTION;
     }
 
+    @Override
     public String getId() {
         return ID;
     }
 
+    @Override
     public List<MessagingAction> getMessageActions() {
         return Collections.emptyList();
     }
@@ -127,6 +135,7 @@ public class RSSMessagingService implements MessagingService {
             MessagingPermission.DELETE_OWN_OBJECTS};
     }
 
+    @Override
     public int[] getStaticRootPermissions() {
         return getStaticRootPerms();
     }

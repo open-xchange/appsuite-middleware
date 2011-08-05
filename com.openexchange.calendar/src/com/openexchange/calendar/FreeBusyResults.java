@@ -185,6 +185,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
         }
     }
 
+    @Override
     public final CalendarDataObject next() throws OXException {
         return al.get(counter++);
     }
@@ -266,6 +267,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
         return cdao;
     }
 
+    @Override
     public int size() {
         return -1;
     }
@@ -274,15 +276,18 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
         return false;
     }
 
+    @Override
     public void addWarning(final OXException warning) {
 		warnings.add(warning);
 	}
 
-	public OXException[] getWarnings() {
+	@Override
+    public OXException[] getWarnings() {
 		return warnings.isEmpty() ? null : warnings.toArray(new OXException[warnings.size()]);
 	}
 
-	public boolean hasWarnings() {
+	@Override
+    public boolean hasWarnings() {
 		return !warnings.isEmpty();
 	}
 
@@ -319,6 +324,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
         }
     }
 
+    @Override
     public boolean hasNext() throws OXException {
         if (!al.isEmpty() && counter < al.size()) {
             return true;
@@ -344,6 +350,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
         }
     }
 
+    @Override
     public void close() throws OXException {
         al = null;
         title = null;

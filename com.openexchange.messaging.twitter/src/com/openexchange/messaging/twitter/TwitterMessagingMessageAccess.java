@@ -115,6 +115,7 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
         this.session = session;
     }
 
+    @Override
     public MessagingPart getAttachment(final String folder, final String messageId, final String sectionId) throws OXException {
         final AttachmentFinderHandler handler = new AttachmentFinderHandler(sectionId);
         new MessageParser().parseMessage(getMessage(folder, messageId, true), handler);
@@ -125,26 +126,31 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
         return part;
     }
 
+    @Override
     public void appendMessages(final String folder, final MessagingMessage[] messages) throws OXException {
         checkFolder(folder);
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(TwitterMessagingService.getServiceId());
     }
 
+    @Override
     public List<String> copyMessages(final String sourceFolder, final String destFolder, final String[] messageIds, final boolean fast) throws OXException {
         checkFolder(sourceFolder);
         checkFolder(destFolder);
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(TwitterMessagingService.getServiceId());
     }
 
+    @Override
     public void deleteMessages(final String folder, final String[] messageIds, final boolean hardDelete) throws OXException {
         checkFolder(folder);
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(TwitterMessagingService.getServiceId());
     }
 
+    @Override
     public List<MessagingMessage> getAllMessages(final String folder, final IndexRange indexRange, final MessagingField sortField, final OrderDirection order, final MessagingField... fields) throws OXException {
         return searchMessages(folder, IndexRange.NULL, sortField, order, null, fields);
     }
 
+    @Override
     public MessagingMessage getMessage(final String folder, final String id, final boolean peek) throws OXException {
         checkFolder(folder);
         try {
@@ -158,6 +164,7 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
         return new TwitterMessagingMessage(twitterAccess.showStatus(id), session);
     }
 
+    @Override
     public List<MessagingMessage> getMessages(final String folder, final String[] messageIds, final MessagingField[] fields) throws OXException {
         checkFolder(folder);
         try {
@@ -174,12 +181,14 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
 
 
 
+    @Override
     public List<String> moveMessages(final String sourceFolder, final String destFolder, final String[] messageIds, final boolean fast) throws OXException {
         checkFolder(sourceFolder);
         checkFolder(destFolder);
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(TwitterMessagingService.getServiceId());
     }
 
+    @Override
     public MessagingMessage perform(final String folder, final String id, final String action) throws OXException {
         checkFolder(folder);
         if (TwitterConstants.TYPE_RETWEET.equalsIgnoreCase(action)) {
@@ -207,6 +216,7 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
         throw MessagingExceptionCodes.UNKNOWN_ACTION.create(action);
     }
 
+    @Override
     public MessagingMessage perform(final String action) throws OXException {
         /*
          * No supported actions for this perform() method
@@ -214,6 +224,7 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
         throw MessagingExceptionCodes.UNKNOWN_ACTION.create(action);
     }
 
+    @Override
     public MessagingMessage perform(final MessagingMessage message, final String action) throws OXException {
         if (TwitterConstants.TYPE_TWEET.equalsIgnoreCase(action)) {
             try {
@@ -227,6 +238,7 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
         throw MessagingExceptionCodes.UNKNOWN_ACTION.create(action);
     }
 
+    @Override
     public List<MessagingMessage> searchMessages(final String folder, final IndexRange indexRange, final MessagingField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MessagingField[] fields) throws OXException {
         checkFolder(folder);
         try {
@@ -263,6 +275,7 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
         }
     }
 
+    @Override
     public void updateMessage(final MessagingMessage message, final MessagingField[] fields) throws OXException {
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(TwitterMessagingService.getServiceId());
     }
@@ -306,6 +319,7 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
 //        return retval;
 //    }
 
+    @Override
     public MessagingContent resolveContent(final String folder, final String id, final String referenceId) throws OXException {
         throw new UnsupportedOperationException();
     }

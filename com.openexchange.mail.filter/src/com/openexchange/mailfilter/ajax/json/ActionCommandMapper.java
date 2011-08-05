@@ -80,10 +80,12 @@ import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
 
 final class ActionCommandMapper implements Mapper<Rule> {
 
+    @Override
     public String getAttrName() {
         return RuleFields.ACTIONCMDS;
     }
 
+    @Override
     public Object getAttribute(final Rule obj) throws JSONException {
         final JSONArray array = new JSONArray();
         final IfCommand ifCommand = obj.getIfCommand();
@@ -99,10 +101,12 @@ final class ActionCommandMapper implements Mapper<Rule> {
         return array;
     }
 
+    @Override
     public boolean isNull(final Rule obj) {
         return (null == obj.getIfCommand());
     }
 
+    @Override
     public void setAttribute(final Rule rule, final Object obj) throws JSONException, SieveException, OXException {
         final JSONArray jarray = (JSONArray) obj;
         final IfCommand ifCommand = rule.getIfCommand();

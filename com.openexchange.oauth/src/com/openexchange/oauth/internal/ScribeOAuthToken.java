@@ -74,10 +74,12 @@ public final class ScribeOAuthToken implements OAuthToken {
         this.token = token;
     }
 
+    @Override
     public String getSecret() {
         return token == null ? EMPTY : token.getSecret();
     }
 
+    @Override
     public String getToken() {
         return token == null ? EMPTY : token.getToken();
     }

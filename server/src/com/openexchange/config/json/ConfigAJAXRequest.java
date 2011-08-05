@@ -63,7 +63,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ConfigAJAXRequest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ConfigAJAXRequest {
@@ -85,7 +85,7 @@ public final class ConfigAJAXRequest {
 
     /**
      * Initializes a new {@link ConfigAJAXRequest}.
-     * 
+     *
      * @param session The session
      * @param request The request
      */
@@ -104,7 +104,7 @@ public final class ConfigAJAXRequest {
 
     /**
      * Gets the qfs
-     * 
+     *
      * @return The qfs
      */
     public QuotaFileStorage getQfs() {
@@ -113,7 +113,7 @@ public final class ConfigAJAXRequest {
 
     /**
      * Gets the fsException
-     * 
+     *
      * @return The fsException
      */
     public OXException getFsException() {
@@ -122,7 +122,7 @@ public final class ConfigAJAXRequest {
 
     /**
      * Requires <code>int</code> parameter.
-     * 
+     *
      * @param name The parameter name
      * @return The <code>int</code>
      * @throws OXException If parameter is missing or not a number
@@ -141,7 +141,7 @@ public final class ConfigAJAXRequest {
 
     /**
      * Gets the data object.
-     * 
+     *
      * @return The data object or <code>null</code> if no data object available
      */
     public <V> V getData() {
@@ -150,7 +150,7 @@ public final class ConfigAJAXRequest {
 
     /**
      * Sets the time zone.
-     * 
+     *
      * @param timeZone The time zone
      */
     public void setTimeZone(final TimeZone timeZone) {
@@ -159,7 +159,7 @@ public final class ConfigAJAXRequest {
 
     /**
      * Gets the time zone (initially set to session's user one).
-     * 
+     *
      * @return The time zone
      */
     public TimeZone getTimeZone() {
@@ -200,7 +200,7 @@ public final class ConfigAJAXRequest {
 
     /**
      * Gets optional <code>int</code> parameter.
-     * 
+     *
      * @param name The parameter name
      * @return The <code>int</code>
      * @throws OXException If parameter is an invalid number value
@@ -224,7 +224,7 @@ public final class ConfigAJAXRequest {
 
     /**
      * Checks for presence of comma-separated <code>int</code> list.
-     * 
+     *
      * @param name The parameter name
      * @return The <code>int</code> array
      * @throws OXException If an error occurs
@@ -248,7 +248,7 @@ public final class ConfigAJAXRequest {
 
     /**
      * Checks for presence of comma-separated <code>String</code> list.
-     * 
+     *
      * @param name The parameter name
      * @return The <code>String</code> array
      * @throws OXException If parameter is absdent
@@ -263,7 +263,7 @@ public final class ConfigAJAXRequest {
 
     /**
      * Checks for presence of comma-separated <code>String</code> list.
-     * 
+     *
      * @param name The parameter name
      * @return The <code>String</code> array
      */
@@ -277,7 +277,7 @@ public final class ConfigAJAXRequest {
 
     /**
      * Gets the request.
-     * 
+     *
      * @return The request
      */
     public AJAXRequestData getRequest() {
@@ -286,7 +286,7 @@ public final class ConfigAJAXRequest {
 
     /**
      * Gets the session.
-     * 
+     *
      * @return The session
      */
     public ServerSession getSession() {

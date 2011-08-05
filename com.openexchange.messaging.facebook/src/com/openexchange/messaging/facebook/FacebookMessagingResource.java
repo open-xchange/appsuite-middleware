@@ -96,24 +96,29 @@ public class FacebookMessagingResource implements MessagingResource {
         facebookOAuthInfo = FacebookOAuthAccess.accessFor(messagingAccount, session);
     }
 
+    @Override
     public void close() {
         /*
          * Close is performed when last session gone by FacebookEventHandler
          */
     }
 
+    @Override
     public void connect() throws OXException {
         // no-op
     }
 
+    @Override
     public boolean isConnected() {
         return true;
     }
 
+    @Override
     public boolean ping() throws OXException {
         return true;
     }
 
+    @Override
     public boolean cacheable() {
         return false;
     }

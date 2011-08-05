@@ -83,6 +83,7 @@ public class DatabaseAuthentication implements AuthenticationService {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Authenticated handleLoginInfo(final LoginInfo loginInfo)
         throws OXException {
         final String password = loginInfo.getPassword();
@@ -110,9 +111,11 @@ public class DatabaseAuthentication implements AuthenticationService {
             throw new OXException(e);
         }
         return new Authenticated() {
+            @Override
             public String getContextInfo() {
                 return splitted[0];
             }
+            @Override
             public String getUserInfo() {
                 return splitted[1];
             }

@@ -67,11 +67,13 @@ public class SimMessagingServiceRegistry implements MessagingServiceRegistry{
 
     private OXException exception;
 
+    @Override
     public List<MessagingService> getAllServices(int user, int context) throws OXException {
         exception();
         return new ArrayList<MessagingService>(services.values());
     }
 
+    @Override
     public MessagingService getMessagingService(final String id, int user, int context) throws OXException {
         exception();
         return services.get(id);
@@ -91,6 +93,7 @@ public class SimMessagingServiceRegistry implements MessagingServiceRegistry{
         this.exception = exception;
     }
 
+    @Override
     public boolean containsMessagingService(final String id, int user, int context) {
         return services.containsKey(id);
     }

@@ -67,11 +67,13 @@ public class I18nActivator implements BundleActivator {
         super();
     }
 
+    @Override
     public void start(BundleContext context) throws Exception {
         tracker = new ServiceTracker(context, I18nService.class.getName(), new I18nServiceCustomizer(context));
         tracker.open();
     }
 
+    @Override
     public void stop(BundleContext context) throws Exception {
         tracker.close();
     }

@@ -58,10 +58,12 @@ package com.openexchange.modules.model;
  */
 public abstract class AbstractModel<T extends Model<T>> implements Model<T>{
 
+    @Override
     public Object get(Attribute<T> attribute) {
         return attribute.get((T)this);
     }
 
+    @Override
     public void set(Attribute<T> attribute, Object value) {
         attribute.set((T)this, value);
     }

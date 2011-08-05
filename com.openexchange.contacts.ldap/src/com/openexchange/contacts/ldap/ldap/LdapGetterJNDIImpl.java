@@ -85,6 +85,7 @@ public class LdapGetterJNDIImpl implements LdapGetter {
         this.objectfullname = objectfullname;
     }
 
+    @Override
     public String getAttribute(final String attributename) throws OXException {
         try {
             final Attribute attribute = attributes.get(attributename);
@@ -103,6 +104,7 @@ public class LdapGetterJNDIImpl implements LdapGetter {
         }
     }
 
+    @Override
     public Date getDateAttribute(final String attributename) throws OXException {
         try {
             final Attribute attribute = attributes.get(attributename);
@@ -134,6 +136,7 @@ public class LdapGetterJNDIImpl implements LdapGetter {
         }
     }
 
+    @Override
     public int getIntAttribute(final String attributename) throws OXException {
         try {
             final Attribute attribute = attributes.get(attributename);
@@ -153,6 +156,7 @@ public class LdapGetterJNDIImpl implements LdapGetter {
         }
     }
 
+    @Override
     public LdapGetter getLdapGetterForDN(final String dn, String[] attributes) throws OXException {
         try {
             return new LdapGetterJNDIImpl(context.getAttributes(dn, attributes), context, dn);
@@ -161,6 +165,7 @@ public class LdapGetterJNDIImpl implements LdapGetter {
         }
     }
 
+    @Override
     public List<String> getMultiValueAttribute(final String attributename) throws OXException {
         final List<String> retval = new ArrayList<String>();
         try {
@@ -187,6 +192,7 @@ public class LdapGetterJNDIImpl implements LdapGetter {
         }
     }
 
+    @Override
     public String getObjectFullName() throws OXException {
         return objectfullname;
     }

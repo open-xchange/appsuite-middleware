@@ -83,6 +83,7 @@ public class Called implements Expectation {
         return methodName;
     }
 
+    @Override
     public void verify(Method method, Object[] args) {
         String methodName = method.getName();
         assertEquals(getMethodName(), methodName);

@@ -306,6 +306,7 @@ final class ListLsubCollection {
              */
             imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
+                @Override
                 public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
                     doRootListCommand(protocol);
                     return null;
@@ -317,6 +318,7 @@ final class ListLsubCollection {
              */
             imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
+                @Override
                 public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
                     doListLsubCommand(protocol, true);
                     return null;
@@ -328,6 +330,7 @@ final class ListLsubCollection {
              */
             imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
+                @Override
                 public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
                     doListLsubCommand(protocol, false);
                     return null;
@@ -540,6 +543,7 @@ final class ListLsubCollection {
              */
             return (ListLsubEntry) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
+                @Override
                 public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
                     return doSingleListCommandWithLsub(protocol, fullName);
                 }
@@ -1038,6 +1042,7 @@ final class ListLsubCollection {
         try {
             imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
+                @Override
                 public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
                     doSingleListCommand(fullName, protocol, false);
                     return null;
@@ -1047,6 +1052,7 @@ final class ListLsubCollection {
 
             imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
+                @Override
                 public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
                     doSingleListCommand(fullName, protocol, true);
                     return null;
@@ -1390,86 +1396,107 @@ final class ListLsubCollection {
             this.fullName = fullName;
         }
 
+        @Override
         public String getName() {
             return fullName.substring(fullName.lastIndexOf('/') + 1);
         }
 
+        @Override
         public boolean exists() {
             return false;
         }
 
+        @Override
         public ListLsubEntry getParent() {
             return null;
         }
 
+        @Override
         public List<ListLsubEntry> getChildren() {
             return Collections.emptyList();
         }
 
+        @Override
         public String getFullName() {
             return fullName;
         }
 
+        @Override
         public Set<String> getAttributes() {
             return Collections.emptySet();
         }
 
+        @Override
         public char getSeparator() {
             return '/';
         }
 
+        @Override
         public ChangeState getChangeState() {
             return ChangeState.UNCHANGED;
         }
 
+        @Override
         public boolean hasInferiors() {
             return false;
         }
 
+        @Override
         public boolean canOpen() {
             return false;
         }
 
+        @Override
         public int getType() {
             return 0;
         }
 
+        @Override
         public boolean isSubscribed() {
             return false;
         }
 
+        @Override
         public int getMessageCount() {
             return -1;
         }
 
+        @Override
         public int getNewMessageCount() {
             return -1;
         }
 
+        @Override
         public int getUnreadMessageCount() {
             return -1;
         }
 
+        @Override
         public List<ACL> getACLs() {
             return null;
         }
 
+        @Override
         public void rememberACLs(final List<ACL> aclList) {
             // Nothing to do
         }
 
+        @Override
         public void rememberCounts(final int total, final int recent, final int unseen) {
             // Nothing to do
         }
 
+        @Override
         public boolean isNamespace() {
             return false;
         }
 
+        @Override
         public boolean hasChildren() {
             return false;
         }
 
+        @Override
         public Rights getMyRights() {
             return null;
         }
@@ -1569,6 +1596,7 @@ final class ListLsubCollection {
             }
         }
 
+        @Override
         public String getName() {
             return fullName.substring(fullName.lastIndexOf(separator) + 1);
         }
@@ -1582,6 +1610,7 @@ final class ListLsubCollection {
             this.parent = parent;
         }
 
+        @Override
         public ListLsubEntry getParent() {
             return parent;
         }
@@ -1648,6 +1677,7 @@ final class ListLsubCollection {
             children.add(child);
         }
 
+        @Override
         public List<ListLsubEntry> getChildren() {
             return null == children ? Collections.<ListLsubEntry> emptyList() : new ArrayList<ListLsubEntry>(children);
         }
@@ -1656,22 +1686,27 @@ final class ListLsubCollection {
             return null == children ? Collections.<ListLsubEntryImpl> emptySet() : children;
         }
 
+        @Override
         public String getFullName() {
             return fullName;
         }
 
+        @Override
         public Set<String> getAttributes() {
             return attributes;
         }
 
+        @Override
         public char getSeparator() {
             return separator;
         }
 
+        @Override
         public ChangeState getChangeState() {
             return changeState;
         }
 
+        @Override
         public boolean hasInferiors() {
             return hasInferiors;
         }
@@ -1681,14 +1716,17 @@ final class ListLsubCollection {
             return this;
         }
 
+        @Override
         public boolean canOpen() {
             return canOpen;
         }
 
+        @Override
         public int getType() {
             return type;
         }
 
+        @Override
         public boolean exists() {
             return true;
         }
@@ -1697,6 +1735,7 @@ final class ListLsubCollection {
             this.subscribed = Boolean.valueOf(subscribed);
         }
 
+        @Override
         public boolean isSubscribed() {
             return null == subscribed ? (null == lsubMap ? true : lsubMap.containsKey(fullName)) : subscribed.booleanValue();
         }
@@ -1715,14 +1754,17 @@ final class ListLsubCollection {
             System.arraycopy(status, 0, this.status, 0, status.length);
         }
 
+        @Override
         public int getMessageCount() {
             return null == status ? -1 : status[0];
         }
 
+        @Override
         public int getNewMessageCount() {
             return null == status ? -1 : status[1];
         }
 
+        @Override
         public int getUnreadMessageCount() {
             return null == status ? -1 : status[2];
         }
@@ -1736,6 +1778,7 @@ final class ListLsubCollection {
          *
          * @return MYRIGHTS or <code>null</code> if absent
          */
+        @Override
         public Rights getMyRights() {
             return myRights;
         }
@@ -1749,14 +1792,17 @@ final class ListLsubCollection {
             this.acls = acls;
         }
 
+        @Override
         public List<ACL> getACLs() {
             return acls == null ? null : new ArrayList<ACL>(acls);
         }
 
+        @Override
         public void rememberACLs(final List<ACL> aclList) {
             this.acls = new ArrayList<ACL>(aclList);
         }
 
+        @Override
         public void rememberCounts(final int total, final int recent, final int unseen) {
             if (null == status) {
                 status = new int[3];
@@ -1822,6 +1868,7 @@ final class ListLsubCollection {
             return sb.toString();
         }
 
+        @Override
         public int compareTo(final ListLsubEntryImpl anotherEntry) {
             final String anotherFullName = anotherEntry.fullName;
             return fullName == null ? (anotherFullName == null ? 0 : -1) : fullName.compareToIgnoreCase(anotherFullName);
@@ -1837,10 +1884,12 @@ final class ListLsubCollection {
             return this;
         }
 
+        @Override
         public boolean isNamespace() {
             return namespace;
         }
 
+        @Override
         public boolean hasChildren() {
             return null == hasChildren ? (null != children && !children.isEmpty()) : hasChildren.booleanValue();
         }

@@ -249,14 +249,17 @@ public class GoogleCalendarAPIStep extends AbstractStep<CalendarDataObject[], Ob
         }
     }
 
+    @Override
     public String getBaseUrl() {
         return "";
     }
 
+    @Override
     public void setPassword(final String password) {
         this.password = password;
     }
 
+    @Override
     public void setUsername(final String username) {
         this.username = username;
     }

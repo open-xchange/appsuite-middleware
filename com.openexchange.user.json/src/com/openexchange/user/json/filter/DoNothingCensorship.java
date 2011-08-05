@@ -59,6 +59,7 @@ import com.openexchange.groupware.container.Contact;
  */
 public class DoNothingCensorship implements ContactCensorship {
 
+    @Override
     public void censor(final Contact contact) {
         // Do nothing
     }

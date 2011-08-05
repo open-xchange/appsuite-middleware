@@ -143,6 +143,7 @@ public class UWAWidget extends AbstractModel<UWAWidget> implements Serializable{
         this.parameters = parameters;
     }
 
+    @Override
     public Metadata<UWAWidget> getMetadata() {
         return METADATA;
     }
@@ -164,6 +165,7 @@ public class UWAWidget extends AbstractModel<UWAWidget> implements Serializable{
             this.type = type;
         }
 
+        @Override
         public Object get(UWAWidget thing) {
             switch(this) {
             case ADJ: return thing.getADJ();
@@ -179,12 +181,14 @@ public class UWAWidget extends AbstractModel<UWAWidget> implements Serializable{
             return null;
         }
 
+        @Override
         public String getName() {
             return this.name().toLowerCase();
         }
 
         private static final EnumSet<Field> NULLABLE = EnumSet.of(ID, TITLE, URL, PARAMETERS);
 
+        @Override
         public void set(UWAWidget thing, Object value) {
             if(value == null && ! NULLABLE.contains(this)) {
                 return ;
@@ -210,6 +214,7 @@ public class UWAWidget extends AbstractModel<UWAWidget> implements Serializable{
             return attributes;
         }
 
+        @Override
         public Class getType() {
             return type;
         }
@@ -235,22 +240,27 @@ public class UWAWidget extends AbstractModel<UWAWidget> implements Serializable{
             }
         }
 
+        @Override
         public UWAWidget create() {
             return new UWAWidget();
         }
 
+        @Override
         public List<Attribute<UWAWidget>> getAllFields() {
             return allFields;
         }
 
+        @Override
         public Attribute<UWAWidget> getIdField() {
             return Field.ID;
         }
 
+        @Override
         public String getName() {
             return "uwaWidget";
         }
 
+        @Override
         public List<Attribute<UWAWidget>> getPersistentFields() {
             return persistentFields;
         }

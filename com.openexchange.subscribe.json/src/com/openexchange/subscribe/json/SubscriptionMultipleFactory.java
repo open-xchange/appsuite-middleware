@@ -74,10 +74,12 @@ public class SubscriptionMultipleFactory implements MultipleHandlerFactoryServic
         this.secretService = secretService;
     }
 
+    @Override
     public MultipleHandler createMultipleHandler() {
         return new SubscriptionMultipleHandler(discovery, executor, secretService);
     }
 
+    @Override
     public String getSupportedModule() {
         return "subscriptions";
     }

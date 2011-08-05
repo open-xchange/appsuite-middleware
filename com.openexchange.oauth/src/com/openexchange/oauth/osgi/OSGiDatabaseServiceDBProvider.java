@@ -70,6 +70,7 @@ public class OSGiDatabaseServiceDBProvider extends AbstractOSGiDelegateService<D
         super(DatabaseService.class);
     }
 
+    @Override
     public Connection getReadConnection(final Context ctx) throws OXException {
         try {
             return getService().getReadOnly(ctx);
@@ -78,6 +79,7 @@ public class OSGiDatabaseServiceDBProvider extends AbstractOSGiDelegateService<D
         }
     }
 
+    @Override
     public void releaseReadConnection(final Context ctx, final Connection con) {
         if (con != null) {
             final DatabaseService dbService = optService();
@@ -88,6 +90,7 @@ public class OSGiDatabaseServiceDBProvider extends AbstractOSGiDelegateService<D
         }
     }
 
+    @Override
     public Connection getWriteConnection(final Context ctx) throws OXException {
         try {
             return getService().getWritable(ctx);
@@ -96,6 +99,7 @@ public class OSGiDatabaseServiceDBProvider extends AbstractOSGiDelegateService<D
         }
     }
 
+    @Override
     public void releaseWriteConnection(final Context ctx, final Connection con) {
         if (con == null) {
             return;

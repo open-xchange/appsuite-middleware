@@ -79,10 +79,12 @@ public final class OAuthCreateTableTask2 extends UpdateTaskAdapter {
         this.dbService = dbService;
     }
 
+    @Override
     public String[] getDependencies() {
         return new String[] { OAuthCreateTableTask.class.getName() };
     }
 
+    @Override
     public void perform(final PerformParameters params) throws OXException {
         final int contextId = params.getContextId();
         final Connection writeCon;

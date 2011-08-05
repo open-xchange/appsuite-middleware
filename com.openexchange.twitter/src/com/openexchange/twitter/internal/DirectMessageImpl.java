@@ -76,10 +76,12 @@ public final class DirectMessageImpl implements DirectMessage {
         this.twitter4jDirectMessage = twitter4jDirectMessage;
     }
 
+    @Override
     public Date getCreatedAt() {
         return twitter4jDirectMessage.getCreatedAt();
     }
 
+    @Override
     public long getId() {
         return twitter4jDirectMessage.getId();
     }
@@ -96,6 +98,7 @@ public final class DirectMessageImpl implements DirectMessage {
         return twitter4jDirectMessage.getRateLimitStatus().getResetTimeInSeconds();
     }
 
+    @Override
     public User getRecipient() {
         if (null == recipient) {
             recipient = new UserImpl(twitter4jDirectMessage.getRecipient());
@@ -103,14 +106,17 @@ public final class DirectMessageImpl implements DirectMessage {
         return recipient;
     }
 
+    @Override
     public long getRecipientId() {
         return twitter4jDirectMessage.getRecipientId();
     }
 
+    @Override
     public String getRecipientScreenName() {
         return twitter4jDirectMessage.getRecipientScreenName();
     }
 
+    @Override
     public User getSender() {
         if (null == sender) {
             sender = new UserImpl(twitter4jDirectMessage.getSender());
@@ -118,14 +124,17 @@ public final class DirectMessageImpl implements DirectMessage {
         return sender;
     }
 
+    @Override
     public long getSenderId() {
         return twitter4jDirectMessage.getSenderId();
     }
 
+    @Override
     public String getSenderScreenName() {
         return twitter4jDirectMessage.getSenderScreenName();
     }
 
+    @Override
     public String getText() {
         return twitter4jDirectMessage.getText();
     }

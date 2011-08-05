@@ -92,6 +92,7 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
         return new MessagingAccountImpl();
     }
 
+    @Override
     public int addAccount(final MessagingAccount account, final Session session) throws OXException {
         try {
             final MailAccountStorageService mass =
@@ -167,6 +168,7 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
         }
     }
 
+    @Override
     public void deleteAccount(final MessagingAccount account, final Session session) throws OXException {
         try {
             final MailAccountStorageService mass =
@@ -179,6 +181,7 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
         }
     }
 
+    @Override
     public MessagingAccount getAccount(final int id, final Session session) throws OXException {
         try {
             final MailAccountStorageService mass =
@@ -238,6 +241,7 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
         return ret;
     }
 
+    @Override
     public List<MessagingAccount> getAccounts(final Session session) throws OXException {
         try {
             final MailAccountStorageService mass =
@@ -254,6 +258,7 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
         }
     }
 
+    @Override
     public void updateAccount(final MessagingAccount account, final Session session) throws OXException {
         try {
             final MailAccountStorageService mass =
@@ -600,18 +605,22 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
             map.put(name, value);
         }
 
+        @Override
         public Map<String, Object> getConfiguration() {
             return Collections.unmodifiableMap(map);
         }
 
+        @Override
         public String getDisplayName() {
             return displayName;
         }
 
+        @Override
         public int getId() {
             return id;
         }
 
+        @Override
         public MessagingService getMessagingService() {
             return messagingService;
         }
@@ -630,10 +639,12 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
 
     }
 
+    @Override
     public String checkSecretCanDecryptStrings(final Session session, final String secret) throws OXException {
         return null; // Mail Accounts are handled elsewhere, this is just an adapter class between the mail system and the messaging system
     }
 
+    @Override
     public void migrateToNewSecret(final String oldSecret, final String newSecret, final Session session) throws OXException {
         return; // We do this elsewhere
     }

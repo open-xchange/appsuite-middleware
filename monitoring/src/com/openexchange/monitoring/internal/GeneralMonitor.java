@@ -69,34 +69,42 @@ public class GeneralMonitor implements GeneralMonitorMBean, MBeanRegistration {
         super();
     }
 
+    @Override
     public int getNumberOfAJAXConnections() {
         return MonitoringInfo.getNumberOfAJAXConnections();
     }
 
+    @Override
     public int getNumberOfOpenAJPSockets() {
         return MonitoringInfo.getNumberOfOpenSockets();
     }
 
+    @Override
     public int getNumberOfWebDAVUserConnections() {
         return MonitoringInfo.getNumberOfConnections(MonitoringInfo.WEBDAV_USER);
     }
 
+    @Override
     public int getNumberOfOutlookConnections() {
         return MonitoringInfo.getNumberOfConnections(MonitoringInfo.OUTLOOK);
     }
 
+    @Override
     public int getNumberOfSyncMLConnections() {
         return MonitoringInfo.getNumberOfConnections(MonitoringInfo.SYNCML);
     }
 
+    @Override
     public int getNumberOfIMAPConnections() {
         return MonitoringInfo.getNumberOfConnections(MonitoringInfo.IMAP);
     }
 
+    @Override
     public int getNumberOfIdleMailConnections() {
         return MonitoringInfo.getNumberOfConnections(MonitoringInfo.MAIL_IDLE);
     }
 
+    @Override
     public int getNumberOfActiveSessions() {
         final SessiondService sessiondService = MonitoringServiceRegistry.getServiceRegistry().getService(SessiondService.class);
         if (sessiondService != null) {
@@ -108,10 +116,12 @@ public class GeneralMonitor implements GeneralMonitorMBean, MBeanRegistration {
         return 0;
     }
 
+    @Override
     public int getNumberOfRunningAJPListeners() {
         return MonitoringInfo.getNumberOfRunningAJPListeners();
     }
 
+    @Override
     public ObjectName preRegister(final MBeanServer server, final ObjectName nameArg) throws Exception {
         ObjectName name = nameArg;
         if (name == null) {
@@ -122,24 +132,28 @@ public class GeneralMonitor implements GeneralMonitorMBean, MBeanRegistration {
         return name;
     }
 
+    @Override
     public void postRegister(final Boolean registrationDone) {
         if (LOG.isTraceEnabled()) {
             LOG.trace(new StringBuilder("postRegister() with ").append(registrationDone));
         }
     }
 
+    @Override
     public void preDeregister() throws Exception {
         if (LOG.isTraceEnabled()) {
             LOG.trace("preDeregister()");
         }
     }
 
+    @Override
     public void postDeregister() {
         if (LOG.isTraceEnabled()) {
             LOG.trace("postDeregister()");
         }
     }
 
+    @Override
     public Integer getNbObjects() {
         try {
             return Integer.valueOf((server.queryMBeans(new ObjectName("*:*"), null)).size());

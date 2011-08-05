@@ -84,6 +84,7 @@ public class ContactFolderLoader implements PublicationDataLoaderService {
     /* (non-Javadoc)
      * @see com.openexchange.publish.PublicationDataLoaderService#load(com.openexchange.publish.Publication)
      */
+    @Override
     public Collection<? extends Object> load(final Publication publication) throws OXException {
         final LinkedList<Contact> list = new LinkedList<Contact>();
         try {

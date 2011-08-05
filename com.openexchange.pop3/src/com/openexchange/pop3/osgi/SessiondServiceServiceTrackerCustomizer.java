@@ -75,6 +75,7 @@ public class SessiondServiceServiceTrackerCustomizer implements ServiceTrackerCu
         this.context = context;
     }
 
+    @Override
     public Object addingService(final ServiceReference reference) {
         final Object addedService = context.getService(reference);
         if (null == addedService) {
@@ -89,10 +90,12 @@ public class SessiondServiceServiceTrackerCustomizer implements ServiceTrackerCu
         return null;
     }
 
+    @Override
     public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do
     }
 
+    @Override
     public void removedService(final ServiceReference reference, final Object service) {
         if (null != service) {
             try {

@@ -110,6 +110,7 @@ public final class FolderWriter {
             this.jsonArray = jsonArray;
         }
 
+        @Override
         public void put(final String key, final Object value) throws JSONException {
             jsonArray.put(value);
         }
@@ -133,6 +134,7 @@ public final class FolderWriter {
             this.jsonObject = jsonObject;
         }
 
+        @Override
         public void put(final String key, final Object value) throws JSONException {
             if (null == value || JSONObject.NULL.equals(value)) {
                 // Don't write NULL value
@@ -150,6 +152,7 @@ public final class FolderWriter {
 
     private static final FolderFieldWriter UNKNOWN_FIELD_FFW = new FolderFieldWriter() {
 
+        @Override
         public void writeField(final JSONValuePutter jsonValue, final UserizedFolder folder) throws JSONException {
             jsonValue.put("unknown_field", JSONObject.NULL);
         }
@@ -163,6 +166,7 @@ public final class FolderWriter {
         final TIntObjectHashMap<FolderFieldWriter> m = new TIntObjectHashMap<FolderFieldWriter>(32);
         m.put(FolderField.ID.getColumn(), new FolderFieldWriter() {
 
+            @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final String id = folder.getID();
                 jsonPutter.put(FolderField.ID.getName(), id);
@@ -170,6 +174,7 @@ public final class FolderWriter {
         });
         m.put(FolderField.CREATED_BY.getColumn(), new FolderFieldWriter() {
 
+            @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final int createdBy = folder.getCreatedBy();
                 jsonPutter.put(FolderField.CREATED_BY.getName(), -1 == createdBy ? JSONObject.NULL : Integer.valueOf(createdBy));
@@ -177,6 +182,7 @@ public final class FolderWriter {
         });
         m.put(FolderField.MODIFIED_BY.getColumn(), new FolderFieldWriter() {
 
+            @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final int modifiedBy = folder.getModifiedBy();
                 jsonPutter.put(FolderField.MODIFIED_BY.getName(), -1 == modifiedBy ? JSONObject.NULL : Integer.valueOf(modifiedBy));
@@ -184,6 +190,7 @@ public final class FolderWriter {
         });
         m.put(FolderField.CREATION_DATE.getColumn(), new FolderFieldWriter() {
 
+            @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final Date d = folder.getCreationDate();
                 jsonPutter.put(FolderField.CREATION_DATE.getName(), null == d ? JSONObject.NULL : Long.valueOf(d.getTime()));
@@ -191,6 +198,7 @@ public final class FolderWriter {
         });
         m.put(FolderField.LAST_MODIFIED.getColumn(), new FolderFieldWriter() {
 
+            @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final Date d = folder.getLastModified();
                 jsonPutter.put(FolderField.LAST_MODIFIED.getName(), null == d ? JSONObject.NULL : Long.valueOf(d.getTime()));
@@ -198,6 +206,7 @@ public final class FolderWriter {
         });
         m.put(FolderField.LAST_MODIFIED_UTC.getColumn(), new FolderFieldWriter() {
 
+            @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final Date d = folder.getLastModifiedUTC();
                 jsonPutter.put(FolderField.LAST_MODIFIED_UTC.getName(), null == d ? JSONObject.NULL : Long.valueOf(d.getTime()));
@@ -205,6 +214,7 @@ public final class FolderWriter {
         });
         m.put(FolderField.FOLDER_ID.getColumn(), new FolderFieldWriter() {
 
+            @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final String pid = folder.getParentID();
                 jsonPutter.put(FolderField.FOLDER_ID.getName(), pid);
@@ -212,6 +222,7 @@ public final class FolderWriter {
         });
         m.put(FolderField.FOLDER_NAME.getColumn(), new FolderFieldWriter() {
 
+            @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final String name = folder.getLocalizedName(folder.getLocale());
                 jsonPutter.put(FolderField.FOLDER_NAME.getName(), name);
@@ -219,6 +230,7 @@ public final class FolderWriter {
         });
         m.put(FolderField.MODULE.getColumn(), new FolderFieldWriter() {
 
+            @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final ContentType obj = folder.getContentType();
                 jsonPutter.put(FolderField.MODULE.getName(), null == obj ? JSONObject.NULL : obj.toString());
@@ -226,6 +238,7 @@ public final class FolderWriter {
         });
         m.put(FolderField.TYPE.getColumn(), new FolderFieldWriter() {
 
+            @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final Type obj = folder.getType();
                 jsonPutter.put(FolderField.TYPE.getName(), null == obj ? JSONObject.NULL : Integer.valueOf(obj.getType()));
@@ -233,6 +246,7 @@ public final class FolderWriter {
         });
         m.put(FolderField.SUBFOLDERS.getColumn(), new FolderFieldWriter() {
 
+            @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final String[] obj = folder.getSubfolderIDs();
                 if (null == obj) {
@@ -245,6 +259,7 @@ public final class FolderWriter {
         });
         m.put(FolderField.OWN_RIGHTS.getColumn(), new FolderFieldWriter() {
 
+            @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final int bits = folder.getBits();
                 if (bits < 0) {
@@ -264,6 +279,7 @@ public final class FolderWriter {
         });
         m.put(FolderField.PERMISSIONS_BITS.getColumn(), new FolderFieldWriter() {
 
+            @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final JSONArray ja;
                 {
@@ -286,6 +302,7 @@ public final class FolderWriter {
         });
         m.put(FolderField.SUMMARY.getColumn(), new FolderFieldWriter() {
 
+            @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final String obj = folder.getSummary();
                 jsonPutter.put(FolderField.SUMMARY.getName(), null == obj ? JSONObject.NULL : obj);
@@ -293,18 +310,21 @@ public final class FolderWriter {
         });
         m.put(FolderField.STANDARD_FOLDER.getColumn(), new FolderFieldWriter() {
 
+            @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 jsonPutter.put(FolderField.STANDARD_FOLDER.getName(), Boolean.valueOf(folder.isDefault()));
             }
         });
         m.put(FolderField.STANDARD_FOLDER_TYPE.getColumn(), new FolderFieldWriter() {
 
+            @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 jsonPutter.put(FolderField.STANDARD_FOLDER_TYPE.getName(), Integer.valueOf(folder.getDefaultType()));
             }
         });
         m.put(FolderField.TOTAL.getColumn(), new FolderFieldWriter() {
 
+            @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final int obj = folder.getTotal();
                 jsonPutter.put(FolderField.TOTAL.getName(), -1 == obj ? JSONObject.NULL : Integer.valueOf(obj));
@@ -312,6 +332,7 @@ public final class FolderWriter {
         });
         m.put(FolderField.NEW.getColumn(), new FolderFieldWriter() {
 
+            @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final int obj = folder.getNew();
                 jsonPutter.put(FolderField.NEW.getName(), -1 == obj ? JSONObject.NULL : Integer.valueOf(obj));
@@ -319,6 +340,7 @@ public final class FolderWriter {
         });
         m.put(FolderField.UNREAD.getColumn(), new FolderFieldWriter() {
 
+            @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final int obj = folder.getUnread();
                 jsonPutter.put(FolderField.UNREAD.getName(), -1 == obj ? JSONObject.NULL : Integer.valueOf(obj));
@@ -326,6 +348,7 @@ public final class FolderWriter {
         });
         m.put(FolderField.DELETED.getColumn(), new FolderFieldWriter() {
 
+            @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final int obj = folder.getDeleted();
                 jsonPutter.put(FolderField.DELETED.getName(), -1 == obj ? JSONObject.NULL : Integer.valueOf(obj));
@@ -333,12 +356,14 @@ public final class FolderWriter {
         });
         m.put(FolderField.SUBSCRIBED.getColumn(), new FolderFieldWriter() {
 
+            @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 jsonPutter.put(FolderField.SUBSCRIBED.getName(), Boolean.valueOf(folder.isSubscribed()));
             }
         });
         m.put(FolderField.SUBSCR_SUBFLDS.getColumn(), new FolderFieldWriter() {
 
+            @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 /*-
                  *
@@ -350,6 +375,7 @@ public final class FolderWriter {
         });
         m.put(FolderField.CAPABILITIES.getColumn(), new FolderFieldWriter() {
 
+            @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final int caps = folder.getCapabilities();
                 jsonPutter.put(FolderField.CAPABILITIES.getName(), -1 == caps ? JSONObject.NULL : Integer.valueOf(caps));
@@ -422,6 +448,7 @@ public final class FolderWriter {
                     final AdditionalFolderField additionalFolderField = additionalFolderFieldList.get(curCol);
                     ffw = new FolderFieldWriter() {
 
+                        @Override
                         public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                             final FolderObject fo = new FolderObject();
                             final int numFolderId = getUnsignedInteger(folder.getID());
@@ -520,6 +547,7 @@ public final class FolderWriter {
                     final AdditionalFolderField additionalFolderField = additionalFolderFieldList.get(curCol);
                     ffw = new FolderFieldWriter() {
 
+                        @Override
                         public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                             final FolderObject fo = new FolderObject();
                             final int numFolderId = getUnsignedInteger(folder.getID());

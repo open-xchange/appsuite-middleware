@@ -314,6 +314,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
         }
     }
 
+    @Override
     public void handleXMLDeclaration(final String version, final Boolean standalone, final String encoding) {
         if (null != version) {
             htmlBuilder.append("<?xml version=\"").append(version).append('"');
@@ -327,14 +328,17 @@ public final class HTMLFilterHandler implements HTMLHandler {
         }
     }
 
+    @Override
     public void handleComment(final String comment) {
         htmlBuilder.append(COMMENT_START).append(comment).append(COMMENT_END);
     }
 
+    @Override
     public void handleDocDeclaration(final String docDecl) {
         htmlBuilder.append("<!DOCTYPE").append(docDecl).append('>');
     }
 
+    @Override
     public void handleEndTag(final String tag) {
         if (skipLevel == 0) {
             if (body && BODY.equals(tag)) {
@@ -352,10 +356,12 @@ public final class HTMLFilterHandler implements HTMLHandler {
         }
     }
 
+    @Override
     public void handleError(final String errorMsg) {
         LOG.error(errorMsg);
     }
 
+    @Override
     public void handleSimpleTag(final String tag, final Map<String, String> attributes) {
         if (skipLevel > 0) {
             return;
@@ -365,6 +371,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
         }
     }
 
+    @Override
     public void handleStartTag(final String tag, final Map<String, String> attributes) {
         if (skipLevel > 0) {
             skipLevel++;
@@ -400,6 +407,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
         return (SCRIPT.equals(check) || check.startsWith("w:worddocument"));
     }
 
+    @Override
     public void handleCDATA(final String text) {
         if (skipLevel == 0) {
             htmlBuilder.append("<![CDATA[");
@@ -417,6 +425,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
         }
     }
 
+    @Override
     public void handleText(final String text, final boolean ignorable) {
         if (skipLevel == 0) {
             if (isCss) {

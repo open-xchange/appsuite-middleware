@@ -247,6 +247,7 @@ public class FolderProperties {
         final CheckStringPropertyEnumParameter parameterObject = new CheckStringPropertyEnumParameter(conf, logBuilder, prefix, name);
 
         checkStringPropertyNonOptional(parameterObject, Parameters.foldername, new SetterClosure() {
+            @Override
             public void set(final String string) {
                 retval.setFoldername(string);
             }
@@ -257,15 +258,18 @@ public class FolderProperties {
         logBuilder.append("-------------------------------------------------------------------------------").append('\n');
 
         checkStringPropertyEnum(parameterObject, Parameters.contactTypes, LdapConfigurationExceptionCode.CONTACT_TYPES_WRONG, new SetterEnumClosure<ContactTypes>() {
+            @Override
             public void set(final ContactTypes enumeration) {
                 retval.setContacttypes(enumeration);
             }
+            @Override
             public ContactTypes valueOf(final String string) throws IllegalArgumentException {
                 return ContactTypes.valueOf(string);
             }
         });
 
         checkStringPropertyNonOptional(parameterObject, Parameters.searchfilter, new SetterClosure() {
+            @Override
             public void set(final String string) {
                 retval.setSearchfilter(string);
             }
@@ -274,6 +278,7 @@ public class FolderProperties {
 
         // Here we iterate over all properties...
         checkStringPropertyNonOptional(parameterObject, Parameters.uri, new SetterClosure() {
+            @Override
             public void set(final String string) {
                 retval.setUri(string);
             }
@@ -281,6 +286,7 @@ public class FolderProperties {
         logBuilder.append("\tUri: ").append(retval.getUri()).append('\n');
 
         checkStringPropertyNonOptional(parameterObject, Parameters.baseDN, new SetterClosure() {
+            @Override
             public void set(final String string) {
                 retval.setBaseDN(string);
             }
@@ -288,6 +294,7 @@ public class FolderProperties {
         logBuilder.append("\tBaseDN: ").append(retval.getBaseDN()).append('\n');
 
         checkStringProperty(parameterObject, Parameters.AdminDN, new SetterClosure() {
+            @Override
             public void set(final String string) {
                 retval.setAdminDN(string);
             }
@@ -295,48 +302,58 @@ public class FolderProperties {
         logBuilder.append("\tAdminDN: ").append(retval.getAdminDN()).append('\n');
 
         checkStringProperty(parameterObject, Parameters.AdminBindPW, new SetterClosure() {
+            @Override
             public void set(final String string) {
                 retval.setAdminBindPW(string);
             }
         });
 
         checkStringPropertyEnum(parameterObject, Parameters.searchScope, LdapConfigurationExceptionCode.SEARCH_SCOPE_WRONG, new SetterEnumClosure<SearchScope>() {
+            @Override
             public void set(final SearchScope enumeration) {
                 retval.setSearchScope(enumeration);
             }
+            @Override
             public SearchScope valueOf(final String string) throws IllegalArgumentException {
                 return SearchScope.valueOf(string);
             }
         });
 
         checkStringPropertyEnum(parameterObject , Parameters.authtype, LdapConfigurationExceptionCode.AUTH_TYPE_WRONG, new SetterEnumClosure<AuthType>() {
+            @Override
             public void set(final AuthType enumeration) {
                 retval.setAuthtype(enumeration);
             }
+            @Override
             public AuthType valueOf(final String string) throws IllegalArgumentException {
                 return AuthType.valueOf(string);
             }
         });
 
         checkStringPropertyEnum(parameterObject, Parameters.sorting, LdapConfigurationExceptionCode.SORTING_WRONG, new SetterEnumClosure<Sorting>() {
+            @Override
             public void set(final Sorting enumeration) {
                 retval.setSorting(enumeration);
             }
+            @Override
             public Sorting valueOf(final String string) throws IllegalArgumentException {
                 return Sorting.valueOf(string);
             }
         });
 
         checkStringPropertyEnum(parameterObject, Parameters.userLoginSource, LdapConfigurationExceptionCode.USER_LOGIN_SOURCE_WRONG, new SetterEnumClosure<LoginSource>() {
+            @Override
             public void set(final LoginSource enumeration) {
                 retval.setUserLoginSource(enumeration);
             }
+            @Override
             public LoginSource valueOf(final String string) throws IllegalArgumentException {
                 return LoginSource.valueOf(string);
             }
         });
 
         checkStringProperty(parameterObject, Parameters.userSearchFilter, new SetterClosure() {
+            @Override
             public void set(final String string) {
                 retval.setUserSearchFilter(string);
             }
@@ -356,6 +373,7 @@ public class FolderProperties {
         logBuilder.append("\tuserSearchScope: ").append(retval.getUserSearchScope()).append('\n');
 
         checkStringProperty(parameterObject, Parameters.userSearchAttribute, new SetterClosure() {
+            @Override
             public void set(final String string) {
                 retval.setUserSearchAttribute(string);
             }
@@ -396,10 +414,12 @@ public class FolderProperties {
         }
 
         checkStringProperty(parameterObject, Parameters.searchfilter_distributionlist, new SetterFallbackClosure() {
+            @Override
             public void set(final String string) {
                 retval.setSearchfilterDistributionlist(string);
             }
 
+            @Override
             public String getFallback() {
                 return retval.getSearchfilter();
             }
@@ -419,10 +439,12 @@ public class FolderProperties {
         logBuilder.append("\tsearchScope_distributionlist: ").append(retval.getSearchScopeDistributionlist()).append('\n');
 
         checkStringProperty(parameterObject, Parameters.baseDN_distributionlist, new SetterFallbackClosure() {
+            @Override
             public void set(final String string) {
                 retval.setBaseDNDistributionlist(string);
             }
 
+            @Override
             public String getFallback() {
                 return retval.getBaseDN();
             }
@@ -437,9 +459,11 @@ public class FolderProperties {
         logBuilder.append("\tADS_deletion_support: ").append(retval.isAds_deletion_support()).append('\n');
 
         checkStringPropertyEnum(parameterObject, Parameters.referrals, LdapConfigurationExceptionCode.REFERRALS_WRONG, new SetterEnumClosure<ReferralTypes>() {
+            @Override
             public void set(final ReferralTypes enumeration) {
                 retval.setReferrals(enumeration);
             }
+            @Override
             public ReferralTypes valueOf(final String string) throws IllegalArgumentException {
                 return ReferralTypes.valueOf(string);
             }

@@ -78,6 +78,7 @@ public class GenericImpl implements ConfigJumpService {
     /**
      * {@inheritDoc}
      */
+    @Override
     public URL getLink(final Replacements values) throws OXException {
         final String username = values.getUsername();
         final String password = values.getPassword();

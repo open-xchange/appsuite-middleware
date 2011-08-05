@@ -111,10 +111,12 @@ public class OSGIFileStorageServiceRegistry implements FileStorageServiceRegistr
         }
     }
 
+    @Override
     public List<FileStorageService> getAllServices() throws OXException {
         return new ArrayList<FileStorageService>(map.values());
     }
 
+    @Override
     public FileStorageService getFileStorageService(final String id) throws OXException {
         final FileStorageService filestorageService = map.get(id);
         if (null == filestorageService) {
@@ -123,6 +125,7 @@ public class OSGIFileStorageServiceRegistry implements FileStorageServiceRegistr
         return filestorageService;
     }
 
+    @Override
     public boolean containsFileStorageService(final String id) {
         return null == id ? false : map.containsKey(id);
     }
@@ -136,6 +139,7 @@ public class OSGIFileStorageServiceRegistry implements FileStorageServiceRegistr
             this.context = context;
         }
 
+        @Override
         public Object addingService(final ServiceReference reference) {
             final Object service = context.getService(reference);
             if ((service instanceof FileStorageService)) {
@@ -157,10 +161,12 @@ public class OSGIFileStorageServiceRegistry implements FileStorageServiceRegistr
             return null;
         }
 
+        @Override
         public void modifiedService(final ServiceReference reference, final Object service) {
             // Nothing to do
         }
 
+        @Override
         public void removedService(final ServiceReference reference, final Object service) {
             if (null != service) {
                 try {

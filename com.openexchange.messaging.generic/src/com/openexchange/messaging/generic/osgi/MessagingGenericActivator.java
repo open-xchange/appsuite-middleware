@@ -177,6 +177,7 @@ public class MessagingGenericActivator extends DeferredActivator {
             registrations = new ArrayList<ServiceRegistration>();
             final MessagingGenericCreateTableTask createTableTask = new MessagingGenericCreateTableTask();
             registrations.add(context.registerService(UpdateTaskProviderService.class.getName(), new UpdateTaskProviderService() {
+                @Override
                 public Collection<UpdateTask> getUpdateTasks() {
                     return Arrays.asList(((UpdateTask) createTableTask));
                 }

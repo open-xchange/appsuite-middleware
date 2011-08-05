@@ -61,11 +61,12 @@ import java.util.EnumSet;
 public class EAVTypeFilter implements EAVNodeFilter {
 
     private EnumSet<EAVType> typesToAccept = null;
-    
+
     public EAVTypeFilter(EnumSet<EAVType> typesToAccept) {
         this.typesToAccept = typesToAccept;
     }
-    
+
+    @Override
     public boolean accept(EAVNode node) {
         return typesToAccept.contains(node.getType());
     }

@@ -378,58 +378,72 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         notifyFullNames = "INBOX";
     }
 
+    @Override
     public boolean isFastFetch() {
         return fastFetch;
     }
 
+    @Override
     public boolean notifyRecent() {
         return notifyRecent;
     }
 
+    @Override
     public int getNotifyFrequencySeconds() {
         return notifyFrequencySeconds;
     }
 
+    @Override
     public String getNotifyFullNames() {
         return notifyFullNames;
     }
 
+    @Override
     public boolean isPropagateClientIPAddress() {
         return propagateClientIPAddress;
     }
 
+    @Override
     public Set<String> getPropagateHostNames() {
         return propagateHostNames;
     }
 
+    @Override
     public String getImapAuthEnc() {
         return imapAuthEnc;
     }
 
+    @Override
     public int getImapConnectionIdleTime() {
         return imapConnectionIdleTime;
     }
 
+    @Override
     public int getImapConnectionTimeout() {
         return imapConnectionTimeout;
     }
 
+    @Override
     public int getImapTemporaryDown() {
         return imapTemporaryDown;
     }
 
+    @Override
     public boolean isImapSearch() {
         return imapSearch;
     }
 
+    @Override
     public boolean isImapSort() {
         return imapSort;
     }
 
+    @Override
     public int getImapTimeout() {
         return imapTimeout;
     }
 
+    @Override
     public BoolCapVal getSupportsACLs() {
         return supportsACLs;
     }
@@ -443,10 +457,12 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         return entity2AclImpl;
     }
 
+    @Override
     public int getBlockSize() {
         return blockSize;
     }
 
+    @Override
     public Map<String, Boolean> getNewACLExtMap() {
         return newACLExtMap;
     }
@@ -460,54 +476,67 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         return spamHandlerName;
     }
 
+    @Override
     public int getAttachDisplaySize() {
         return mailProperties.getAttachDisplaySize();
     }
 
+    @Override
     public char getDefaultSeparator() {
         return mailProperties.getDefaultSeparator();
     }
 
+    @Override
     public int getMailAccessCacheIdleSeconds() {
         return mailProperties.getMailAccessCacheIdleSeconds();
     }
 
+    @Override
     public int getMailAccessCacheShrinkerSeconds() {
         return mailProperties.getMailAccessCacheShrinkerSeconds();
     }
 
+    @Override
     public int getMailFetchLimit() {
         return mailProperties.getMailFetchLimit();
     }
 
+    @Override
     public int getWatcherFrequency() {
         return mailProperties.getWatcherFrequency();
     }
 
+    @Override
     public int getWatcherTime() {
         return mailProperties.getWatcherTime();
     }
 
+    @Override
     public boolean isAllowNestedDefaultFolderOnAltNamespace() {
         return mailProperties.isAllowNestedDefaultFolderOnAltNamespace();
     }
 
+    @Override
     public boolean isIgnoreSubscription() {
         return mailProperties.isIgnoreSubscription();
     }
 
+    @Override
     public boolean isSupportSubscription() {
         return mailProperties.isSupportSubscription();
     }
 
+    @Override
     public boolean isUserFlagsEnabled() {
         return mailProperties.isUserFlagsEnabled();
     }
 
+    @Override
     public boolean isWatcherEnabled() {
         return mailProperties.isWatcherEnabled();
     }
 
+    @Override
     public boolean isWatcherShallClose() {
         return mailProperties.isWatcherShallClose();
     }

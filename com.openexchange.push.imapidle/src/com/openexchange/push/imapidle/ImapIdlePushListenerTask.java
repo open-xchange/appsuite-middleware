@@ -67,6 +67,7 @@ public final class ImapIdlePushListenerTask implements Runnable {
         this.listener = listener;
     }
 
+    @Override
     public void run() {
         try {
             while (listener.checkNewMail()) {

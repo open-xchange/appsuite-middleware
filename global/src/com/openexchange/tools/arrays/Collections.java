@@ -410,6 +410,7 @@ public final class Collections {
          * (non-Javadoc)
          * @see java.util.Enumeration#hasMoreElements()
          */
+        @Override
         public boolean hasMoreElements() {
             return iter.hasNext();
         }
@@ -418,6 +419,7 @@ public final class Collections {
          * (non-Javadoc)
          * @see java.util.Enumeration#nextElement()
          */
+        @Override
         public T nextElement() {
             return iter.next();
         }

@@ -84,22 +84,27 @@ public final class MailAccountPOP3StorageProvider implements POP3StorageProvider
         deleteListeners = Collections.unmodifiableList(tmp);
     }
 
+    @Override
     public POP3Storage getPOP3Storage(final POP3Access pop3Access, final POP3StorageProperties properties) throws OXException {
         return new MailAccountPOP3Storage(pop3Access, properties);
     }
 
+    @Override
     public String getPOP3StorageName() {
         return NAME;
     }
 
+    @Override
     public POP3StorageProperties getPOP3StorageProperties(final POP3Access pop3Access) throws OXException {
         return SessionPOP3StorageProperties.getInstance(pop3Access);
     }
 
+    @Override
     public List<MailAccountDeleteListener> getDeleteListeners() {
         return deleteListeners;
     }
 
+    @Override
     public boolean unregisterDeleteListenersOnAbsence() {
         return false;
     }

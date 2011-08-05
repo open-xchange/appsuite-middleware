@@ -106,10 +106,12 @@ public final class FixedExecutorService extends AbstractExecutorService {
         this.executorService = executorService;
     }
 
+    @Override
     public boolean awaitTermination(final long timeout, final TimeUnit unit) throws InterruptedException {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public void execute(final Runnable command) {
         lock.lock();
         try {
@@ -157,19 +159,23 @@ public final class FixedExecutorService extends AbstractExecutorService {
         }
     }
 
+    @Override
     public boolean isShutdown() {
         return false;
     }
 
+    @Override
     public boolean isTerminated() {
         return false;
     }
 
+    @Override
     public void shutdown() {
         // No shut-down
         throw new UnsupportedOperationException("Shutdown not allowed.");
     }
 
+    @Override
     public List<Runnable> shutdownNow() {
         // No shut-down
         throw new UnsupportedOperationException("Shutdown not allowed.");

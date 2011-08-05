@@ -73,18 +73,22 @@ public final class SimFileStorageAccount implements FileStorageAccount {
         super();
     }
 
+    @Override
     public Map<String, Object> getConfiguration() {
         return configuration;
     }
 
+    @Override
     public String getDisplayName() {
         return displayName;
     }
 
+    @Override
     public String getId() {
         return id;
     }
 
+    @Override
     public FileStorageService getFileStorageService() {
         return fsService;
     }

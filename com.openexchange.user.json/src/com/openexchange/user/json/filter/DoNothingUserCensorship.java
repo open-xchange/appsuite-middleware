@@ -59,6 +59,7 @@ import com.openexchange.groupware.ldap.User;
  */
 public class DoNothingUserCensorship implements UserCensorship {
 
+    @Override
     public User censor(final User user) {
         return user;
     }

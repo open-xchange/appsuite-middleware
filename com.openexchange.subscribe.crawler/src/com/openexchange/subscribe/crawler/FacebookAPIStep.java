@@ -270,6 +270,7 @@ public class FacebookAPIStep extends AbstractStep<Contact[], Object> implements 
         return username;
     }
 
+    @Override
     public void setUsername(final String username) {
         this.username = username;
     }
@@ -278,6 +279,7 @@ public class FacebookAPIStep extends AbstractStep<Contact[], Object> implements 
         return password;
     }
 
+    @Override
     public void setPassword(final String password) {
         this.password = password;
     }
@@ -314,6 +316,7 @@ public class FacebookAPIStep extends AbstractStep<Contact[], Object> implements 
         this.linkAvailableAfterLogin = linkAvailableAfterLogin;
     }
 
+    @Override
     public String getBaseUrl() {
         return url;
     }

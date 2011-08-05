@@ -69,6 +69,7 @@ public class Activator implements BundleActivator {
     private ServiceDependentRegistration<TemplateServiceImpl> serviceRegistration;
 
 
+    @Override
     public void start(final BundleContext context) throws Exception {
         whiteboard = new Whiteboard(context);
 
@@ -102,6 +103,7 @@ public class Activator implements BundleActivator {
         serviceRegistration.start();
     }
 
+    @Override
     public void stop(final BundleContext context) throws Exception {
         serviceRegistration.close();
         whiteboard.close();

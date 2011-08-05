@@ -129,15 +129,18 @@ public class CryptoServiceImpl implements CryptoService {
      */
     private final byte[] SALT = new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f };
 
+    @Override
     public String encrypt(String data, String password) throws OXException {
         return encrypt(data, password, false).getData();
     }
 
+    @Override
     public String decrypt(String encryptedData, String password) throws OXException {
         return decrypt(new EncryptedData(encryptedData, null), password, false);
         // return decrypt(encryptedData, generateSecretKey(password));
     }
 
+    @Override
     public String decrypt(EncryptedData data, String password, boolean useSalt) throws OXException {
         if (useSalt && data.getSalt() == null) {
             throw NoSalt.create();
@@ -150,6 +153,7 @@ public class CryptoServiceImpl implements CryptoService {
         }
     }
 
+    @Override
     public EncryptedData encrypt(String data, String password, boolean useSalt) throws OXException {
         if (useSalt) {
             byte[] salt = generateSalt();

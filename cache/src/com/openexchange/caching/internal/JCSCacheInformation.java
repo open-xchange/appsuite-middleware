@@ -83,10 +83,12 @@ public class JCSCacheInformation extends StandardMBean implements CacheInformati
         cacheHub = CompositeCacheManager.getInstance();
     }
 
+    @Override
     public long getMemoryCacheCount(final String name) {
         return cacheHub.getCache(name).getMemoryCache().getKeyArray().length;
     }
 
+    @Override
     public String getCacheStatistics(final String name) {
         if ("*".equals(name)) {
             final String[] cacheNames = cacheHub.getCacheNames();
@@ -99,6 +101,7 @@ public class JCSCacheInformation extends StandardMBean implements CacheInformati
         return cacheHub.getCache(name).getStats();
     }
 
+    @Override
     public long getMemoryCacheDataSize(final String name) {
         final IMemoryCache memCache = cacheHub.getCache(name).getMemoryCache();
 
@@ -131,6 +134,7 @@ public class JCSCacheInformation extends StandardMBean implements CacheInformati
         return counter.getCount() - 4;
     }
 
+    @Override
     public String[] listRegionNames() {
         return cacheHub.getCacheNames();
     }

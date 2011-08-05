@@ -95,6 +95,7 @@ public final class UserActionFactory implements AJAXActionServiceFactory {
         actions = initActions();
     }
 
+    @Override
     public AJAXActionService createActionService(final String action) throws OXException {
         if (null == action) {
             throw AjaxExceptionCodes.UnknownAction.create( action);

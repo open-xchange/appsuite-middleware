@@ -79,6 +79,7 @@ public final class IMAPNotifierTracker implements ServiceTrackerCustomizer {
         reference = new AtomicReference<IMAPNotifierRegistryService>();
     }
 
+    @Override
     public Object addingService(final ServiceReference serviceReference) {
         final Object service = context.getService(serviceReference);
         final IMAPNotifierRegistryService registryService = (IMAPNotifierRegistryService) service;
@@ -102,10 +103,12 @@ public final class IMAPNotifierTracker implements ServiceTrackerCustomizer {
         return null;
     }
 
+    @Override
     public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do
     }
 
+    @Override
     public void removedService(final ServiceReference serviceReference, final Object service) {
         if (null == service) {
             return;

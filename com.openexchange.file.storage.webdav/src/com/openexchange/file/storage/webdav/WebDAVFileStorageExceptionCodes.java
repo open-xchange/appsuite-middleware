@@ -124,22 +124,27 @@ public enum WebDAVFileStorageExceptionCodes implements OXExceptionCode {
         this.category = category;
     }
 
+    @Override
     public String getPrefix() {
         return "WEBDAV_FILE_STORAGE";
     }
 
+    @Override
     public Category getCategory() {
         return category;
     }
 
+    @Override
     public String getMessage() {
         return message;
     }
 
+    @Override
     public int getNumber() {
         return detailNumber;
     }
 
+    @Override
     public boolean equals(final OXException e) {
         return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }

@@ -65,14 +65,17 @@ public class SimOAuthServiceMetaDataRegistry implements OAuthServiceMetaDataRegi
 
     private final Map<String, OAuthServiceMetaData> map = new HashMap<String, OAuthServiceMetaData>();
 
+    @Override
     public boolean containsService(String id) {
         return map.containsKey(id);
     }
 
+    @Override
     public List<OAuthServiceMetaData> getAllServices() {
         return new ArrayList<OAuthServiceMetaData>(map.values());
     }
 
+    @Override
     public OAuthServiceMetaData getService(String id) throws OXException {
         if (!containsService(id)) {
             throw OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA.create(id);

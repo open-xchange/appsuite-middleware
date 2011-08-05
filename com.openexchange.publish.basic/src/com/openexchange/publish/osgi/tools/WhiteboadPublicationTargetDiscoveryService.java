@@ -77,22 +77,27 @@ public class WhiteboadPublicationTargetDiscoveryService implements PublicationTa
         tracker.close();
     }
 
+    @Override
     public PublicationTarget getTarget(Context context, int publicationId) throws OXException {
         return getDelegate().getTarget(context, publicationId);
     }
 
+    @Override
     public PublicationTarget getTarget(String id) throws OXException {
         return getDelegate().getTarget(id);
     }
 
+    @Override
     public Collection<PublicationTarget> getTargetsForEntityType(String module) throws OXException {
         return getDelegate().getTargetsForEntityType(module);
     }
 
+    @Override
     public boolean knows(String id) throws OXException {
         return getDelegate().knows(id);
     }
 
+    @Override
     public Collection<PublicationTarget> listTargets() throws OXException {
         return getDelegate().listTargets();
     }

@@ -139,6 +139,7 @@ public class PropertyHandler {
         final String name = param.getName();
         final String property = conf.getProperty(name, new PropertyListener() {
 
+            @Override
             public void onPropertyChange(final PropertyEvent event) {
                 switch (event.getType()) {
                 case CHANGED:
@@ -240,6 +241,7 @@ public class PropertyHandler {
 
 
         setIntegerParam(logBuilder, configuration, Parameters.port, new IntegerSetterClosuse() {
+            @Override
             public void setter(final int value) {
                 setPort(value);
             }
@@ -260,12 +262,14 @@ public class PropertyHandler {
         }
 
         setIntegerParam(logBuilder, configuration, Parameters.retries, new IntegerSetterClosuse() {
+            @Override
             public void setter(final int value) {
                 setRetries(value);
             }
         });
 
         setIntegerParam(logBuilder, configuration, Parameters.retrysleep, new IntegerSetterClosuse() {
+            @Override
             public void setter(final int value) {
                 setRetrysleep(value);
             }

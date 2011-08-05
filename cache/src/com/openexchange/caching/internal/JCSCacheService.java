@@ -83,6 +83,7 @@ public final class JCSCacheService implements CacheService {
         super();
     }
 
+    @Override
     public void freeCache(final String name) {
         if (JCSCacheServiceInit.getInstance().isDefaultCacheRegion(name)) {
             // No freeing of a default cache, this is done on bundle stop
@@ -101,6 +102,7 @@ public final class JCSCacheService implements CacheService {
          */
     }
 
+    @Override
     public Cache getCache(final String name) throws OXException {
         try {
             /*
@@ -118,26 +120,32 @@ public final class JCSCacheService implements CacheService {
         }
     }
 
+    @Override
     public void loadConfiguration(final String cacheConfigFile) throws OXException {
         JCSCacheServiceInit.getInstance().loadConfiguration(cacheConfigFile);
     }
 
+    @Override
     public void loadConfiguration(final InputStream inputStream) throws OXException {
         JCSCacheServiceInit.getInstance().loadConfiguration(inputStream);
     }
 
+    @Override
     public void loadDefaultConfiguration() throws OXException {
         JCSCacheServiceInit.getInstance().loadDefaultConfiguration();
     }
 
+    @Override
     public CacheKey newCacheKey(final int contextId, final int objectId) {
         return new CacheKeyImpl(contextId, objectId);
     }
 
+    @Override
     public CacheKey newCacheKey(final int contextId, final Serializable obj) {
         return new CacheKeyImpl(contextId, obj);
     }
 
+    @Override
     public CacheKey newCacheKey(final int contextId, final Serializable... objs) {
         return new CacheKeyImpl(contextId, objs);
     }

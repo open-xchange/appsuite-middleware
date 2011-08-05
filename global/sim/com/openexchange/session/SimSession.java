@@ -71,26 +71,32 @@ public class SimSession implements Session {
         super();
     }
 
+    @Override
     public boolean containsParameter(String name) {
         return parameters.containsKey(name);
     }
 
+    @Override
     public String getAuthId() {
         return null;
     }
 
+    @Override
     public int getContextId() {
         return contextId;
     }
 
+    @Override
     public String getLocalIp() {
         return null;
     }
 
+    @Override
     public String getLogin() {
         return null;
     }
 
+    @Override
     public String getLoginName() {
         return loginName;
     }
@@ -99,10 +105,12 @@ public class SimSession implements Session {
         this.loginName = loginName;
     }
 
+    @Override
     public Object getParameter(String name) {
         return parameters.get(name);
     }
 
+    @Override
     public String getPassword() {
         return password;
     }
@@ -111,6 +119,7 @@ public class SimSession implements Session {
         this.password = password;
     }
 
+    @Override
     public String getRandomToken() {
         return randomToken;
     }
@@ -119,14 +128,17 @@ public class SimSession implements Session {
         this.randomToken = randomToken;
     }
 
+    @Override
     public void removeRandomToken() {
         randomToken = null;
     }
 
+    @Override
     public String getSecret() {
         return null;
     }
 
+    @Override
     public String getSessionID() {
         return sessionId;
     }
@@ -135,18 +147,22 @@ public class SimSession implements Session {
         this.sessionId = sessionId;
     }
 
+    @Override
     public int getUserId() {
         return userId;
     }
 
+    @Override
     public String getUserlogin() {
         return null;
     }
 
+    @Override
     public void setParameter(String name, Object value) {
         parameters.put(name, value);
     }
 
+    @Override
     public String getHash() {
         // TODO Auto-generated method stub
         return null;
@@ -156,6 +172,7 @@ public class SimSession implements Session {
      * (non-Javadoc)
      * @see com.openexchange.session.Session#setLocalIp(java.lang.String)
      */
+    @Override
     public void setLocalIp(String ip) {
         // TODO Auto-generated method stub
 
@@ -165,6 +182,7 @@ public class SimSession implements Session {
      * (non-Javadoc)
      * @see com.openexchange.session.Session#setHash(java.lang.String)
      */
+    @Override
     public void setHash(String hash) {
         // TODO Auto-generated method stub
 
@@ -188,11 +206,13 @@ public class SimSession implements Session {
         this.userId = userId;
     }
 
+    @Override
     public String getClient() {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public void setClient(String client) {
         // TODO Auto-generated method stub
     }

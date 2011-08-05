@@ -191,30 +191,37 @@ public final class MailMessageService implements MessagingService {
         return this;
     }
 
+    @Override
     public Set<String> getSecretProperties() {
         return secretProperties;
     }
 
+    @Override
     public MessagingAccountAccess getAccountAccess(final int accountId, final Session session) throws OXException {
         return new MailMessagingAccountAccess(accountId, session);
     }
 
+    @Override
     public MessagingAccountManager getAccountManager() {
         return accountManager;
     }
 
+    @Override
     public MessagingAccountTransport getAccountTransport(final int accountId, final Session session) throws OXException {
         return new MailMessagingAccountTransport(accountId, session);
     }
 
+    @Override
     public String getDisplayName() {
         return DISPLAY_NAME;
     }
 
+    @Override
     public DynamicFormDescription getFormDescription() {
         return formDescription;
     }
 
+    @Override
     public String getId() {
         return ID;
     }
@@ -225,10 +232,12 @@ public final class MailMessageService implements MessagingService {
             new MessagingAction(MailConstants.TYPE_REPLY, MessagingAction.Type.STORAGE),
             new MessagingAction(MailConstants.TYPE_REPLY_ALL, MessagingAction.Type.STORAGE)));
 
+    @Override
     public List<MessagingAction> getMessageActions() {
         return ACTIONS;
     }
 
+    @Override
     public int[] getStaticRootPermissions() {
         return null;
     }

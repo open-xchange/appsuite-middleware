@@ -97,6 +97,7 @@ public class Activator implements BundleActivator {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void start(final BundleContext context) throws Exception {
         final OXUserResolver userResolver = new OXUserResolver();
         userTracker = new ServiceTracker(context, UserService.class.getName(), new UserServiceTrackerCustomizer(context, userResolver));
@@ -119,6 +120,7 @@ public class Activator implements BundleActivator {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void stop(final BundleContext context) throws Exception {
         emitterRegistration.unregister();
         parserRegistration.unregister();

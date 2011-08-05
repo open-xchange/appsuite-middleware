@@ -684,6 +684,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
         assertEquals(fileId2.getService(), serviceId2);
     }
 
+    @Override
     public FileStorageAccountAccess getAccountAccess(String accountId, Session session) throws OXException {
         if (this.accountId == null) {
             this.accountId = accountId;
@@ -698,6 +699,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * (non-Javadoc)
      * @see com.openexchange.file.storage.FileStorageService#getAccountManager()
      */
+    @Override
     public FileStorageAccountManager getAccountManager() {
         return this;
     }
@@ -706,6 +708,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * (non-Javadoc)
      * @see com.openexchange.file.storage.FileStorageService#getDisplayName()
      */
+    @Override
     public String getDisplayName() {
         // TODO Auto-generated method stub
         return null;
@@ -715,6 +718,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * (non-Javadoc)
      * @see com.openexchange.file.storage.FileStorageService#getFormDescription()
      */
+    @Override
     public DynamicFormDescription getFormDescription() {
         // TODO Auto-generated method stub
         return null;
@@ -724,6 +728,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * (non-Javadoc)
      * @see com.openexchange.file.storage.FileStorageService#getId()
      */
+    @Override
     public String getId() {
         return "someId";
     }
@@ -732,6 +737,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * (non-Javadoc)
      * @see com.openexchange.file.storage.FileStorageService#getSecretProperties()
      */
+    @Override
     public Set<String> getSecretProperties() {
         // TODO Auto-generated method stub
         return null;
@@ -741,6 +747,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * (non-Javadoc)
      * @see com.openexchange.file.storage.FileStorageAccountAccess#getAccountId()
      */
+    @Override
     public String getAccountId() {
         return "someAccount";
     }
@@ -749,6 +756,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * (non-Javadoc)
      * @see com.openexchange.file.storage.FileStorageAccountAccess#getFileAccess()
      */
+    @Override
     public FileStorageFileAccess getFileAccess() throws OXException {
         if (files != null) {
             return files;
@@ -760,6 +768,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * (non-Javadoc)
      * @see com.openexchange.file.storage.FileStorageAccountAccess#getFolderAccess()
      */
+    @Override
     public FileStorageFolderAccess getFolderAccess() throws OXException {
         // TODO Auto-generated method stub
         return null;
@@ -769,6 +778,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * (non-Javadoc)
      * @see com.openexchange.file.storage.FileStorageAccountAccess#getRootFolder()
      */
+    @Override
     public FileStorageFolder getRootFolder() throws OXException {
         // TODO Auto-generated method stub
         return null;
@@ -778,6 +788,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * (non-Javadoc)
      * @see com.openexchange.file.storage.FileStorageResource#cacheable()
      */
+    @Override
     public boolean cacheable() {
         // TODO Auto-generated method stub
         return false;
@@ -787,6 +798,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * (non-Javadoc)
      * @see com.openexchange.file.storage.FileStorageResource#close()
      */
+    @Override
     public void close() {
         // TODO Auto-generated method stub
 
@@ -796,6 +808,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * (non-Javadoc)
      * @see com.openexchange.file.storage.FileStorageResource#connect()
      */
+    @Override
     public void connect() throws OXException {
         // TODO Auto-generated method stub
 
@@ -805,6 +818,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * (non-Javadoc)
      * @see com.openexchange.file.storage.FileStorageResource#isConnected()
      */
+    @Override
     public boolean isConnected() {
         // TODO Auto-generated method stub
         return false;
@@ -814,6 +828,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * (non-Javadoc)
      * @see com.openexchange.file.storage.FileStorageResource#ping()
      */
+    @Override
     public boolean ping() throws OXException {
         // TODO Auto-generated method stub
         return false;
@@ -823,6 +838,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * (non-Javadoc)
      * @see com.openexchange.file.storage.FileStorageAccountAccess#getService()
      */
+    @Override
     public FileStorageService getService() {
         // TODO Auto-generated method stub
         return this;
@@ -838,6 +854,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * @see com.openexchange.file.storage.FileStorageAccountManager#addAccount(com.openexchange.file.storage.FileStorageAccount,
      * com.openexchange.session.Session)
      */
+    @Override
     public String addAccount(FileStorageAccount account, Session session) throws OXException {
         // TODO Auto-generated method stub
         return null;
@@ -848,6 +865,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * @see com.openexchange.file.storage.FileStorageAccountManager#checkSecretCanDecryptStrings(com.openexchange.session.Session,
      * java.lang.String)
      */
+    @Override
     public boolean checkSecretCanDecryptStrings(Session session, String secret) throws OXException {
         // TODO Auto-generated method stub
         return false;
@@ -858,6 +876,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * @see com.openexchange.file.storage.FileStorageAccountManager#deleteAccount(com.openexchange.file.storage.FileStorageAccount,
      * com.openexchange.session.Session)
      */
+    @Override
     public void deleteAccount(FileStorageAccount account, Session session) throws OXException {
         // TODO Auto-generated method stub
 
@@ -867,6 +886,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * (non-Javadoc)
      * @see com.openexchange.file.storage.FileStorageAccountManager#getAccount(java.lang.String, com.openexchange.session.Session)
      */
+    @Override
     public FileStorageAccount getAccount(String id, Session session) throws OXException {
         // TODO Auto-generated method stub
         return null;
@@ -876,24 +896,29 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * (non-Javadoc)
      * @see com.openexchange.file.storage.FileStorageAccountManager#getAccounts(com.openexchange.session.Session)
      */
+    @Override
     public List<FileStorageAccount> getAccounts(Session session) throws OXException {
         FileStorageAccount account = new FileStorageAccount() {
 
+                    @Override
                     public Map<String, Object> getConfiguration() {
                 // TODO Auto-generated method stub
                 return null;
             }
 
+                    @Override
                     public String getDisplayName() {
                 // TODO Auto-generated method stub
                 return null;
             }
 
+                    @Override
                     public FileStorageService getFileStorageService() {
                 // TODO Auto-generated method stub
                 return null;
             }
 
+                    @Override
                     public String getId() {
                 return "account 23";
             }
@@ -906,6 +931,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * @see com.openexchange.file.storage.FileStorageAccountManager#migrateToNewSecret(java.lang.String, java.lang.String,
      * com.openexchange.session.Session)
      */
+    @Override
     public void migrateToNewSecret(String oldSecret, String newSecret, Session session) throws OXException {
         // TODO Auto-generated method stub
 
@@ -916,6 +942,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
      * @see com.openexchange.file.storage.FileStorageAccountManager#updateAccount(com.openexchange.file.storage.FileStorageAccount,
      * com.openexchange.session.Session)
      */
+    @Override
     public void updateAccount(FileStorageAccount account, Session session) throws OXException {
         // TODO Auto-generated method stub
 
@@ -939,6 +966,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
             this.id = id;
         }
 
+            @Override
             public Object perform(Object self, Object... arguments) {
             (this.file = (File) arguments[0]).setId(id);
             return null;

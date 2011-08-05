@@ -73,6 +73,7 @@ public class SimFolderUpdaterStrategy implements FolderUpdaterStrategy<String> {
     private final Set<String> savedElements = new HashSet<String>();
     private final Map<String, String> updatedElements = new HashMap<String, String>();
 
+    @Override
     public boolean handles(final FolderObject folder) {
         return true;
     }
@@ -92,6 +93,7 @@ public class SimFolderUpdaterStrategy implements FolderUpdaterStrategy<String> {
         return savedElements.contains(string);
     }
 
+    @Override
     public int calculateSimilarityScore(final String original, final String candidate, final Object session) throws OXException {
         int counter = 0;
         for (int i = 0, size = Math.min(original.length(), candidate.length()); i < size; i++) {
@@ -106,26 +108,32 @@ public class SimFolderUpdaterStrategy implements FolderUpdaterStrategy<String> {
         return counter;
     }
 
+    @Override
     public void closeSession(final Object session) throws OXException {
 
     }
 
+    @Override
     public Collection<String> getData(final TargetFolderDefinition target, final Object session) throws OXException {
         return dataSet;
     }
 
+    @Override
     public int getThreshold(final Object session) throws OXException {
         return 3;
     }
 
+    @Override
     public void save(final String newElement, final Object session) throws OXException {
         savedElements.add(newElement);
     }
 
+    @Override
     public Object startSession(final TargetFolderDefinition target) throws OXException {
         return null;
     }
 
+    @Override
     public void update(final String original, final String update, final Object session) throws OXException {
         updatedElements.put(original, update);
     }

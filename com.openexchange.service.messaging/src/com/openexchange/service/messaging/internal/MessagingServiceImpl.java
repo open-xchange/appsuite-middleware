@@ -74,6 +74,7 @@ public final class MessagingServiceImpl implements MessagingService {
         this.poster = new MessagingDatagramPoster(datagramSocket);
     }
 
+    @Override
     public void postMessage(final Message message) throws OXException {
         /*
          * Deliver message

@@ -68,10 +68,12 @@ public class PublicationTargetMultipleHandlerFactory implements MultipleHandlerF
         this.discoverer = discoverer;
     }
 
+    @Override
     public MultipleHandler createMultipleHandler() {
         return new PublicationTargetMultipleHandler(discoverer);
     }
 
+    @Override
     public String getSupportedModule() {
         return "publicationTargets";
     }

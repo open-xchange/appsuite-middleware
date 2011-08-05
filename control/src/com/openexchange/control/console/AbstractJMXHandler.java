@@ -84,6 +84,7 @@ public abstract class AbstractJMXHandler {
             return ret;
         }
 
+        @Override
         public Subject authenticate(final Object credentials) {
             if (!(credentials instanceof String[])) {
                 if (credentials == null) {

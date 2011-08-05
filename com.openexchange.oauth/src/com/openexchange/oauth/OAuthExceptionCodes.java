@@ -121,18 +121,22 @@ public enum OAuthExceptionCodes implements OXExceptionCode {
         display = category.getLogLevel().implies(LogLevel.DEBUG);
     }
 
+    @Override
     public String getPrefix() {
         return "OAUTH";
     }
 
+    @Override
     public Category getCategory() {
         return category;
     }
 
+    @Override
     public String getMessage() {
         return message;
     }
 
+    @Override
     public int getNumber() {
         return number;
     }
@@ -141,6 +145,7 @@ public enum OAuthExceptionCodes implements OXExceptionCode {
         return null;
     }
 
+    @Override
     public boolean equals(final OXException e) {
         return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }

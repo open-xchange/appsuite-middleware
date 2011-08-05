@@ -70,18 +70,21 @@ public class TrustAllManager implements X509TrustManager {
     /**
      * @see javax.net.ssl.X509TrustManager#checkClientTrusted(java.security.cert.X509Certificate[], java.lang.String)
      */
+    @Override
     public void checkClientTrusted(final X509Certificate[] chain, final String authType) throws CertificateException {
     }
 
     /**
      * @see javax.net.ssl.X509TrustManager#checkServerTrusted(java.security.cert.X509Certificate[], java.lang.String)
      */
+    @Override
     public void checkServerTrusted(final X509Certificate[] chain, final String authType) throws CertificateException {
     }
 
     /**
      * @see javax.net.ssl.X509TrustManager#getAcceptedIssuers()
      */
+    @Override
     public X509Certificate[] getAcceptedIssuers() {
         return new X509Certificate[0];
     }

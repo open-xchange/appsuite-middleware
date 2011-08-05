@@ -147,6 +147,7 @@ public final class SessionPOP3StorageProperties implements POP3StorageProperties
         }
     }
 
+    @Override
     public void addProperty(final String propertyName, final String propertyValue) throws OXException {
         final Lock readLock = rwLock.readLock();
         readLock.lock();
@@ -159,6 +160,7 @@ public final class SessionPOP3StorageProperties implements POP3StorageProperties
         }
     }
 
+    @Override
     public String getProperty(final String propertyName) throws OXException {
         final Lock readLock = rwLock.readLock();
         readLock.lock();
@@ -177,6 +179,7 @@ public final class SessionPOP3StorageProperties implements POP3StorageProperties
         }
     }
 
+    @Override
     public void removeProperty(final String propertyName) throws OXException {
         final Lock readLock = rwLock.readLock();
         readLock.lock();
@@ -214,6 +217,7 @@ public final class SessionPOP3StorageProperties implements POP3StorageProperties
             this.tinvalid = tinvalid;
         }
 
+        @Override
         public void run() {
             final Lock writeLock = trwLock.writeLock();
             writeLock.lock();

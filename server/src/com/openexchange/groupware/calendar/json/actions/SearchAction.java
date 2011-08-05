@@ -102,7 +102,7 @@ public final class SearchAction extends AbstractAppointmentAction {
         }
         final int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
         Date timestamp = new Date(0);
-        
+
         final JSONObject jData = req.getData();
         final AppointmentSearchObject searchObj = new AppointmentSearchObject();
 

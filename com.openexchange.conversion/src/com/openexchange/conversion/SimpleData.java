@@ -81,10 +81,12 @@ public final class SimpleData<D extends Object> implements Data<D> {
         this.dataProperties = dataProperties;
     }
 
+    @Override
     public D getData() {
         return data;
     }
 
+    @Override
     public DataProperties getDataProperties() {
         return dataProperties;
     }

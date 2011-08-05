@@ -76,6 +76,7 @@ public class CompositePublicationTargetDiscoveryService implements PublicationTa
         services.remove(service);
     }
 
+    @Override
     public List<PublicationTarget> listTargets() throws OXException {
         LinkedList<PublicationTarget> targets = new LinkedList<PublicationTarget>();
         for (PublicationTargetDiscoveryService service : services) {
@@ -84,6 +85,7 @@ public class CompositePublicationTargetDiscoveryService implements PublicationTa
         return targets;
     }
 
+    @Override
     public boolean knows(String id) throws OXException {
         for (PublicationTargetDiscoveryService service : services) {
             if(service.knows(id)) {
@@ -93,6 +95,7 @@ public class CompositePublicationTargetDiscoveryService implements PublicationTa
         return false;
     }
 
+    @Override
     public PublicationTarget getTarget(String id) throws OXException {
         for (PublicationTargetDiscoveryService service : services) {
             if(service.knows(id)) {
@@ -102,6 +105,7 @@ public class CompositePublicationTargetDiscoveryService implements PublicationTa
         return null;
     }
 
+    @Override
     public PublicationTarget getTarget(Context context, int publicationId) throws OXException {
         for(PublicationTargetDiscoveryService service : services) {
             PublicationTarget target = service.getTarget(context, publicationId);
@@ -112,6 +116,7 @@ public class CompositePublicationTargetDiscoveryService implements PublicationTa
         return null;
     }
 
+    @Override
     public Collection<PublicationTarget> getTargetsForEntityType(String module) throws OXException {
         List<PublicationTarget> targets = new ArrayList<PublicationTarget>();
         for(PublicationTargetDiscoveryService service : services) {

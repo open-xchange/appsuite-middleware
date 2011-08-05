@@ -140,10 +140,12 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
         this.contexts = contexts;
     }
 
+    @Override
     public OAuthServiceMetaDataRegistry getMetaDataRegistry() {
         return registry;
     }
 
+    @Override
     public List<OAuthAccount> getAccounts(final String password, final int user, final int contextId) throws OXException {
         final Context context = getContext(contextId);
         final Connection con = getConnection(true, context);
@@ -176,6 +178,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
         }
     }
 
+    @Override
     public List<OAuthAccount> getAccounts(final String serviceMetaData, final String password, final int user, final int contextId) throws OXException {
         final Context context = getContext(contextId);
         final Connection con = getConnection(true, context);
@@ -209,6 +212,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
         }
     }
 
+    @Override
     public OAuthInteraction initOAuth(final String serviceMetaData, String callbackUrl) throws OXException {
         try {
             final OAuthServiceMetaData metaData = registry.getService(serviceMetaData);
@@ -266,6 +270,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
         }
     }
 
+    @Override
     public OAuthAccount createAccount(final String serviceMetaData, final Map<String, Object> arguments, final int user, final int contextId) throws OXException {
         try {
             /*
@@ -315,6 +320,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
         }
     }
 
+    @Override
     public OAuthAccount createAccount(final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId) throws OXException {
         try {
             /*
@@ -378,6 +384,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
         }
     }
 
+    @Override
     public void deleteAccount(final int accountId, final int user, final int contextId) throws OXException {
         final Context context = getContext(contextId);
         final Connection con = getConnection(false, context);
@@ -454,6 +461,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
         return sessions.isEmpty() ? null : sessions.iterator().next();
     }
 
+    @Override
     public void updateAccount(final int accountId, final Map<String, Object> arguments, final int user, final int contextId) throws OXException {
         final List<Setter> list = setterFrom(arguments);
         if (list.isEmpty()) {
@@ -496,6 +504,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
         }
     }
 
+    @Override
     public OAuthAccount getAccount(final int accountId, final String password, final int user, final int contextId) throws OXException {
         final Context context = getContext(contextId);
         final Connection con = getConnection(true, context);
@@ -528,6 +537,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
         }
     }
 
+    @Override
     public OAuthAccount updateAccount(final int accountId, final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId) throws OXException {
         try {
             /*
@@ -690,11 +700,13 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
         if (null != displayName) {
             ret.add(new Setter() {
 
+                @Override
                 public int set(final int pos, final PreparedStatement stmt) throws SQLException {
                     stmt.setString(pos, displayName);
                     return pos + 1;
                 }
 
+                @Override
                 public void appendTo(final StringBuilder stmtBuilder) {
                     stmtBuilder.append("displayName = ?");
                 }
@@ -716,12 +728,14 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
             final String secret = encrypt(token.getSecret(), password);
             ret.add(new Setter() {
 
+                @Override
                 public int set(final int pos, final PreparedStatement stmt) throws SQLException {
                     stmt.setString(pos, sToken);
                     stmt.setString(pos + 1, secret);
                     return pos + 2;
                 }
 
+                @Override
                 public void appendTo(final StringBuilder stmtBuilder) {
                     stmtBuilder.append("accessToken = ?, accessSecret = ?");
                 }
@@ -769,6 +783,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
         return isWhitespace;
     }
 
+    @Override
     public String checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws OXException {
         final Context context = session.getContext();
         final Connection con = getConnection(true, context);
@@ -801,6 +816,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
         return null;
     }
 
+    @Override
     public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws OXException {
         final Context context = session.getContext();
         final Connection con = getConnection(false, context);

@@ -54,7 +54,7 @@ import java.util.Collection;
 
 /**
  * {@link EAVNode}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class EAVNode extends AbstractNode<EAVNode> {
@@ -65,10 +65,11 @@ public class EAVNode extends AbstractNode<EAVNode> {
 
     private EAVContainerType containerType = EAVContainerType.SINGLE;
 
+    @Override
     public EAVNode newInstance(){
         return new EAVNode();
     }
-    
+
     public EAVNode() {
         super();
     }
@@ -91,7 +92,7 @@ public class EAVNode extends AbstractNode<EAVNode> {
         }
         return type;
     }
-    
+
     public String getTypeDescription() {
         return type.name()+" "+containerType.name();
     }
@@ -167,6 +168,7 @@ public class EAVNode extends AbstractNode<EAVNode> {
         return containerType.isMultiple();
     }
 
+    @Override
     public void copyPayloadFromOther(EAVNode other) {
         this.payload = other.payload;
         this.type = other.type;
@@ -188,26 +190,26 @@ public class EAVNode extends AbstractNode<EAVNode> {
         this.type = type;
         this.containerType = containerType;
 
-        this.payload = collection.toArray((Object[]) type.getArray(collection.size()));
+        this.payload = collection.toArray(type.getArray(collection.size()));
 
     }
-    
+
     public void setPayload(InputStream inputStream) {
         this.type = EAVType.BINARY;
         this.containerType = EAVContainerType.SINGLE;
         this.payload = inputStream;
     }
-    
+
     public void setPayload(InputStream[] inputStreams) {
         setPayload(EAVContainerType.MULTISET, inputStreams);
     }
-    
+
     public void setPayload(EAVContainerType cType, InputStream[] inputStreams) {
         this.type = EAVType.BINARY;
         this.containerType = cType;
         this.payload = inputStreams;
     }
-    
+
     public void setPayload(EAVType type, EAVContainerType cType,Object payload) {
         this.type = type;
         this.containerType  = cType;
@@ -224,13 +226,13 @@ public class EAVNode extends AbstractNode<EAVNode> {
         for(EAVNode child : children) {
             typeData.addChild(child.extractTypeData());
         }
-        
+
         return typeData;
     }
 
 
 
 
-    
+
 
 }

@@ -87,12 +87,14 @@ public class Activator implements BundleActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
 
+    @Override
     public void start(final BundleContext bundleContext) throws Exception {
         services = new OSGiServicePublisher(bundleContext);
         context = bundleContext;
         registerListenerForConfigurationService();
     }
 
+    @Override
     public void stop(final BundleContext bundleContext) throws Exception {
         unregisterListenerForConfigurationService();
         services.removeAllServices();
@@ -131,17 +133,21 @@ public class Activator implements BundleActivator {
 
             private static final String UNDEFINED_STRING = "undefined";
 
+            @Override
             public String[] getPath() {
                 return path;
             }
 
+            @Override
             public IValueHandler getSharedValue() {
                 return new IValueHandler() {
 
+                    @Override
                     public int getId() {
                         return NO_ID;
                     }
 
+                    @Override
                     public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
                         try {
                             Object value = viewFactory.getView(user.getId(), ctx.getContextId()).get(propertyName, String.class);
@@ -163,14 +169,17 @@ public class Activator implements BundleActivator {
                         }
                     }
 
+                    @Override
                     public boolean isAvailable(UserConfiguration userConfig) {
                         return true;
                     }
 
+                    @Override
                     public boolean isWritable() {
                         return writable;
                     }
 
+                    @Override
                     public void writeValue(Session session, Context ctx, User user, Setting setting) throws OXException {
                         Object value = setting.getSingleValue();
                         if(value == null) {
@@ -219,17 +228,21 @@ public class Activator implements BundleActivator {
 
             PreferencesItemService metadataItem = new PreferencesItemService() {
 
+                @Override
                 public String[] getPath() {
                     return metadataPath;
                 }
 
+                @Override
                 public IValueHandler getSharedValue() {
                     return new IValueHandler() {
 
+                        @Override
                         public int getId() {
                             return NO_ID;
                         }
 
+                        @Override
                         public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
                             try {
                                 ComposedConfigProperty<String> prop = viewFactory.getView(user.getId(), ctx.getContextId()).property(propertyName, String.class);
@@ -248,14 +261,17 @@ public class Activator implements BundleActivator {
                             }
                         }
 
+                        @Override
                         public boolean isAvailable(UserConfiguration userConfig) {
                             return true;
                         }
 
+                        @Override
                         public boolean isWritable() {
                             return false;
                         }
 
+                        @Override
                         public void writeValue(Session session, Context ctx, User user, Setting setting) throws OXException {
                             // IGNORE
                         }
@@ -277,29 +293,36 @@ public class Activator implements BundleActivator {
 
         PreferencesItemService configurableItem = new PreferencesItemService(){
 
+            @Override
             public String[] getPath() {
                 return configurablePath;
             }
 
+            @Override
             public IValueHandler getSharedValue() {
                 return new IValueHandler() {
 
+                    @Override
                     public int getId() {
                         return NO_ID;
                     }
 
+                    @Override
                     public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
                         setting.setSingleValue(writable);
                     }
 
+                    @Override
                     public boolean isAvailable(UserConfiguration userConfig) {
                         return true;
                     }
 
+                    @Override
                     public boolean isWritable() {
                         return false;
                     }
 
+                    @Override
                     public void writeValue(Session session, Context ctx, User user, Setting setting) throws OXException {
                         // IGNORE
                     }
@@ -336,6 +359,7 @@ public class Activator implements BundleActivator {
 
         }
 
+        @Override
         public Object addingService(final ServiceReference serviceReference) {
             final Object addedService = context.getService(serviceReference);
             if(ConfigViewFactory.class.isAssignableFrom(addedService.getClass())) {
@@ -344,10 +368,12 @@ public class Activator implements BundleActivator {
             return addedService;
         }
 
+        @Override
         public void modifiedService(final ServiceReference serviceReference, final Object o) {
             // IGNORE
         }
 
+        @Override
         public void removedService(final ServiceReference serviceReference, final Object o) {
             context.ungetService(serviceReference);
         }

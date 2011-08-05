@@ -79,6 +79,7 @@ public abstract class AbstractMessagingServiceAction implements AJAXActionServic
         this.registry = registry;
     }
 
+    @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         try {
             return doIt(request, session);

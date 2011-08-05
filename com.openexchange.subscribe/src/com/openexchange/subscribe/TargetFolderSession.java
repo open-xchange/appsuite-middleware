@@ -64,84 +64,104 @@ public class TargetFolderSession implements Session {
     }
 
     //IMPLEMENTED:
+    @Override
     public int getContextId() {
         return target.getContext().getContextId();
     }
 
+    @Override
     public int getUserId() {
         return target.getUserId();
     }
 
     //NOT IMPLEMENTED AT ALL:
+    @Override
     public String getLocalIp() {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public String getLogin() {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public String getLoginName() {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public Object getParameter(final String name) {
         return params.get(name);
     }
 
+    @Override
     public boolean containsParameter(final String name) {
         return params.containsKey(name);
     }
 
+    @Override
     public String getPassword() {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public String getRandomToken() {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public String getSecret() {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public String getSessionID() {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public String getUserlogin() {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public void removeRandomToken() {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public void setParameter(final String name, final Object value) {
         params.put(name, value);
     }
 
+    @Override
     public String getAuthId() {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public String getHash() {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public void setLocalIp(String ip) {
         // Nothing to do here.
     }
 
+    @Override
     public void setHash(String hash) {
         // TODO Auto-generated method stub
     }
 
+    @Override
     public String getClient() {
         return null;
     }
 
+    @Override
     public void setClient(String client) {
         // Nothing to do.
     }

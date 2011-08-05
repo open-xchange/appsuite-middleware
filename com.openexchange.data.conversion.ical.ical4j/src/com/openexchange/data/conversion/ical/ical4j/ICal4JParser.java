@@ -130,6 +130,7 @@ public class ICal4JParser implements ICalParser {
 
     }
 
+    @Override
     public List<CalendarDataObject> parseAppointments(final String icalText, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
         try {
             return parseAppointments(new ByteArrayInputStream(icalText.getBytes(UTF8)), defaultTZ, ctx, errors, warnings);
@@ -139,6 +140,7 @@ public class ICal4JParser implements ICalParser {
         return Collections.emptyList();
     }
 
+    @Override
     public List<CalendarDataObject> parseAppointments(final InputStream ical, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
         final List<CalendarDataObject> appointments = new ArrayList<CalendarDataObject>();
         BufferedReader reader = null;
@@ -172,6 +174,7 @@ public class ICal4JParser implements ICalParser {
         return appointments;
     }
 
+    @Override
     public String parseProperty(final String propertyName, final InputStream ical) {
         if (null == propertyName || null == ical) {
             return null;
@@ -197,6 +200,7 @@ public class ICal4JParser implements ICalParser {
         }
     }
 
+    @Override
     public List<Task> parseTasks(final String icalText, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
         try {
             return parseTasks(new ByteArrayInputStream(icalText.getBytes(UTF8)), defaultTZ, ctx, errors, warnings);
@@ -206,6 +210,7 @@ public class ICal4JParser implements ICalParser {
         return new LinkedList<Task>();
     }
 
+    @Override
     public List<Task> parseTasks(final InputStream ical, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
         final List<Task> tasks = new ArrayList<Task>();
         BufferedReader reader = null;

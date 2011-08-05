@@ -92,6 +92,7 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
         setConfigService(configService);
     }
 
+    @Override
     public ServerProperty get(final String property, final int context, final int user) throws OXException {
         final ServerProperty basicProperty = properties.get(property);
         if (basicProperty != null) {
@@ -109,6 +110,7 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
         return retval;
     }
 
+    @Override
     public Collection<String> getAllPropertyNames(final int context, final int user) throws OXException {
         final Iterator<String> propertyNames = configService.propertyNames();
         final Set<String> retval = new HashSet<String>();
@@ -144,6 +146,7 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
             if (! checkMap(o)) {
                 continue;
             }
+            @SuppressWarnings("unchecked")
             final Map<String, Object> metadataDef = (Map<String, Object>) o;
             for(final Map.Entry<String, Object> entry : metadataDef.entrySet()) {
                 final String propertyName = entry.getKey();
@@ -151,6 +154,7 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
                 if (! checkMap(value2)) {
                     continue;
                 }
+                @SuppressWarnings("unchecked")
                 final Map<String, Object> metadata = (Map<String, Object>) value2;
                 final ServerProperty basicProperty = get(propertyName, -1, -1);
                 for(final Map.Entry<String, Object> metadataProp : metadata.entrySet()) {

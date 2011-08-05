@@ -100,14 +100,17 @@ public final class MessagingGenericCreateTableTask extends AbstractCreateTableIm
         return new String[] { getMessagingAccountTable() };
     }
 
+    @Override
     public TaskAttributes getAttributes() {
         return new Attributes();
     }
 
+    @Override
     public String[] getDependencies() {
         return new String[0];
     }
 
+    @Override
     public void perform(final PerformParameters params) throws com.openexchange.exception.OXException {
         final int contextId = params.getContextId();
         createTable("messagingAccount", getMessagingAccountTable(), contextId);
@@ -117,22 +120,27 @@ public final class MessagingGenericCreateTableTask extends AbstractCreateTableIm
         }
     }
 
+    @Override
     public int addedWithVersion() {
         return Schema.NO_VERSION;
     }
 
+    @Override
     public int getPriority() {
         return UpdateTask.UpdateTaskPriority.NORMAL.priority;
     }
 
+    @Override
     public void perform(final Schema schema, final int contextId) throws com.openexchange.exception.OXException {
         UpdateTaskAdapter.perform(this, schema, contextId);
     }
 
+    @Override
     public String[] requiredTables() {
         return new String[] { "user" };
     }
 
+    @Override
     public String[] tablesToCreate() {
         return new String[] { "messagingAccount" };
     }

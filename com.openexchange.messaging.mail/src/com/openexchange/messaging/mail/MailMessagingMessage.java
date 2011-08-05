@@ -85,6 +85,7 @@ public class MailMessagingMessage extends MailMessagingBodyPart implements Messa
         this.mailMessage = mailMessage;
     }
 
+    @Override
     public int getColorLabel() throws OXException {
         return mailMessage.getColorLabel();
     }
@@ -98,6 +99,7 @@ public class MailMessagingMessage extends MailMessagingBodyPart implements Messa
         mailMessage.setColorLabel(colorLabel);
     }
 
+    @Override
     public int getFlags() throws OXException {
         return mailMessage.getFlags();
     }
@@ -111,6 +113,7 @@ public class MailMessagingMessage extends MailMessagingBodyPart implements Messa
         mailMessage.setFlags(flags);
     }
 
+    @Override
     public Collection<String> getUserFlags() throws OXException {
         final String[] userFlags = mailMessage.getUserFlags();
         return null == userFlags ? Collections.<String> emptyList() : Arrays.asList(userFlags);
@@ -129,6 +132,7 @@ public class MailMessagingMessage extends MailMessagingBodyPart implements Messa
         mailMessage.addUserFlags(userFlags.toArray(new String[userFlags.size()]));
     }
 
+    @Override
     public String getFolder() {
         return mailMessage.getFolder();
     }
@@ -142,6 +146,7 @@ public class MailMessagingMessage extends MailMessagingBodyPart implements Messa
         mailMessage.setFolder(folder);
     }
 
+    @Override
     public long getReceivedDate() {
         final Date receivedDate = mailMessage.getReceivedDate();
         return null == receivedDate ? -1L : receivedDate.getTime();
@@ -156,6 +161,7 @@ public class MailMessagingMessage extends MailMessagingBodyPart implements Messa
         mailMessage.setReceivedDate(receivedDate >= 0 ? new Date(receivedDate) : null);
     }
 
+    @Override
     public int getThreadLevel() {
         return mailMessage.getThreadLevel();
     }
@@ -169,6 +175,7 @@ public class MailMessagingMessage extends MailMessagingBodyPart implements Messa
         mailMessage.setThreadLevel(threadLevel);
     }
 
+    @Override
     public String getId() {
         return mailMessage.getMailId();
     }
@@ -182,6 +189,7 @@ public class MailMessagingMessage extends MailMessagingBodyPart implements Messa
         mailMessage.setMailId(id);
     }
 
+    @Override
     public String getPicture() {
         return picture;
     }
@@ -195,6 +203,7 @@ public class MailMessagingMessage extends MailMessagingBodyPart implements Messa
         this.picture = picture;
     }
 
+    @Override
     public String getUrl() throws OXException {
         return null;
     }

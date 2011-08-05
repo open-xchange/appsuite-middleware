@@ -88,18 +88,22 @@ public class SubscriptionSourceMultipleHandler implements MultipleHandler {
         this.discoverer = discoverer;
     }
 
+    @Override
     public void close() {
         // Nothing to close.
     }
 
+    @Override
     public Date getTimestamp() {
         return null;
     }
 
+    @Override
     public Collection<OXException> getWarnings() {
         return Collections.<OXException> emptySet();
     }
 
+    @Override
     public JSONValue performRequest(final String action, final JSONObject request, final ServerSession session, final boolean secure) throws JSONException, OXException {
         try {
             if(null == action) {

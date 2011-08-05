@@ -121,6 +121,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
 
     private static final String SQL_INSERT_UIDLS = "INSERT INTO " + TABLE_NAME + " (cid, user, id, uidl, fullname, uid) VALUES (?, ?, ?, ?, ?, ?)";
 
+    @Override
     public void addMappings(final String[] uidls, final FullnameUIDPair[] fullnameUIDPairs) throws OXException {
         final Connection con;
         try {
@@ -172,6 +173,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
 
     private static final String SQL_SELECT_PAIR = "SELECT fullname, uid FROM " + TABLE_NAME + " WHERE cid = ? AND user = ? AND id = ? AND uidl = ?";
 
+    @Override
     public FullnameUIDPair getFullnameUIDPair(final String uidl) throws OXException {
         final Connection con;
         try {
@@ -203,6 +205,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
 
     private static final String SQL_SELECT_UIDL = "SELECT uidl FROM " + TABLE_NAME + " WHERE cid = ? AND user = ? AND id = ? AND fullname = ? AND uid = ?";
 
+    @Override
     public String getUIDL(final FullnameUIDPair fullnameUIDPair) throws OXException {
         final Connection con;
         try {
@@ -233,6 +236,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         }
     }
 
+    @Override
     public String[] getUIDLs(final FullnameUIDPair[] fullnameUIDPairs) throws OXException {
         final String[] uidls = new String[fullnameUIDPairs.length];
         for (int i = 0; i < uidls.length; i++) {
@@ -241,6 +245,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         return uidls;
     }
 
+    @Override
     public FullnameUIDPair[] getFullnameUIDPairs(final String[] uidls) throws OXException {
         final FullnameUIDPair[] pairs = new FullnameUIDPair[uidls.length];
         for (int i = 0; i < pairs.length; i++) {
@@ -251,6 +256,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
 
     private static final String SQL_SELECT_ALL_UIDL = "SELECT uidl, fullname, uid FROM " + TABLE_NAME + " WHERE cid = ? AND user = ? AND id = ?";
 
+    @Override
     public Map<String, FullnameUIDPair> getAllUIDLs() throws OXException {
         final Connection con;
         try {
@@ -283,6 +289,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
 
     private static final String SQL_DELETE_PAIRS = "DELETE FROM " + TABLE_NAME + " WHERE cid = ? AND user = ? AND id = ? AND fullname = ? AND uid = ?";
 
+    @Override
     public void deleteFullnameUIDPairMappings(final FullnameUIDPair[] fullnameUIDPairs) throws OXException {
         final Connection con;
         try {
@@ -312,6 +319,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         }
     }
 
+    @Override
     public void deleteUIDLMappings(final String[] uidls) throws OXException {
         final Connection con;
         try {

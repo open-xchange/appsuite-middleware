@@ -80,6 +80,7 @@ public final class DelegateEventHandler implements EventHandler {
         this.messagingService = messagingService;
     }
 
+    @Override
     public void handleEvent(final Event event) {
         if (Constants.ORIGIN_REMOTE.equals(event.getProperty(Constants.PROPERTY_EVENT_ORIGIN))) {
             /*

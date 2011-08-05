@@ -57,14 +57,14 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link MigrateAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MigrateAction extends AbstractSecretRecoveryAction {
 
     /**
      * Initializes a new {@link MigrateAction}.
-     * 
+     *
      * @param services
      */
     public MigrateAction(final ServiceLookup services) {

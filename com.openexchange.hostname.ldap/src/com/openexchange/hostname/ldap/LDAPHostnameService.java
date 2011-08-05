@@ -165,6 +165,7 @@ public class LDAPHostnameService implements HostnameService {
         return searchControls;
     }
 
+    @Override
     public String getHostname(final int userId, final int contextId) {
         try {
             final String hostnameFromCache = instance.getHostnameFromCache(contextId);

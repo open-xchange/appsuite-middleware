@@ -181,14 +181,16 @@ public class StatementBuilder implements IStatementBuilder {
 	/*
 	 * Commands
 	 */
-	public String buildCommand(Command element) {
+	@Override
+    public String buildCommand(Command element) {
 		fCommand = element;
 		reset();
 		element.build(this);
 		return getStatement();
 	}
 
-	public PreparedStatement prepareStatement(Connection con, Command element, List<? extends Object> values) throws SQLException {
+	@Override
+    public PreparedStatement prepareStatement(Connection con, Command element, List<? extends Object> values) throws SQLException {
 	    String command = buildCommand(element);
 	    PreparedStatement statement = con.prepareStatement(command);
 	    for (int i = 0; i < values.size(); i++) {
@@ -223,7 +225,8 @@ public class StatementBuilder implements IStatementBuilder {
 	    SQLTools.closeSQLStuff(con, stmt, rs);
 	}
 
-	public void buildDELETE(DELETE delete) {
+	@Override
+    public void buildDELETE(DELETE delete) {
 		append("DELETE");
 		delete.getFrom().build(this);
 		if (delete.getWhere() != null) {
@@ -231,7 +234,8 @@ public class StatementBuilder implements IStatementBuilder {
         }
 	}
 
-	public void buildINSERT(INSERT insert) {
+	@Override
+    public void buildINSERT(INSERT insert) {
 		append("INSERT");
 		insert.getInto().build(this);
 		if (insert.getSubSelect() != null) {
@@ -256,7 +260,8 @@ public class StatementBuilder implements IStatementBuilder {
         }
 	}
 
-	public void buildSELECT(SELECT select) {
+	@Override
+    public void buildSELECT(SELECT select) {
 		append("SELECT ");
 		if (select.getExpression() != null) {
 		    select.getExpression().build(this);
@@ -269,7 +274,8 @@ public class StatementBuilder implements IStatementBuilder {
         }
 	}
 
-	public void buildUPDATE(UPDATE update) {
+	@Override
+    public void buildUPDATE(UPDATE update) {
 		append("UPDATE ");
 		append(update.getTableName());
 		append(" SET ");
@@ -282,34 +288,42 @@ public class StatementBuilder implements IStatementBuilder {
 	/*
 	 * Clauses
 	 */
-	public void buildDISTINCT(DISTINCT element) {
+	@Override
+    public void buildDISTINCT(DISTINCT element) {
 	}
 
-	public void buildFROM(FROM from) {
+	@Override
+    public void buildFROM(FROM from) {
 		append(" FROM ");
 		buildElementList(from.getTables());
 	}
 
-	public void buildGROUPBY(GROUPBY element) {
+	@Override
+    public void buildGROUPBY(GROUPBY element) {
 	}
 
-	public void buildHAVING(HAVING element) {
+	@Override
+    public void buildHAVING(HAVING element) {
 	}
 
-	public void buildINTO(INTO element) {
+	@Override
+    public void buildINTO(INTO element) {
 		append(" INTO ");
 		append(element.getTableName());
 	}
 
-	public void buildON(ON on) {
+	@Override
+    public void buildON(ON on) {
 		append(" ON ");
 		on.getPredicate().build(this);
 	}
 
-	public void buildORDERBY(ORDERBY element) {
+	@Override
+    public void buildORDERBY(ORDERBY element) {
 	}
 
-	public void buildWHERE(WHERE where) {
+	@Override
+    public void buildWHERE(WHERE where) {
 		append(" WHERE ");
 		where.getPredicate().build(this);
 	}
@@ -317,11 +331,13 @@ public class StatementBuilder implements IStatementBuilder {
 	/*
 	 * Named Values
 	 */
-	public void buildColumn(Column column) {
+	@Override
+    public void buildColumn(Column column) {
 		append(column.getName());
 	}
 
-	public void buildConstant(Constant constant) {
+	@Override
+    public void buildConstant(Constant constant) {
 		if (constant == Constant.PLACEHOLDER) {
             append("?");
         } else if (constant == Constant.ASTERISK) {
@@ -342,7 +358,8 @@ public class StatementBuilder implements IStatementBuilder {
 		}
 	}
 
-	public void buildTable(Table table) {
+	@Override
+    public void buildTable(Table table) {
 		append(table.getName());
 		if (table.getAlias() != null) {
 		    blank();
@@ -350,7 +367,8 @@ public class StatementBuilder implements IStatementBuilder {
 		}
 	}
 
-	public void buildJoin(Join join) {
+	@Override
+    public void buildJoin(Join join) {
 		append("(");
 		join.getLeftTable().build(this);
 		append(" JOIN ");
@@ -359,7 +377,8 @@ public class StatementBuilder implements IStatementBuilder {
 		append(")");
 	}
 
-	public void buildLeftOuterJoin(LeftOuterJoin join) {
+	@Override
+    public void buildLeftOuterJoin(LeftOuterJoin join) {
 		append("(");
 		join.getLeftTable().build(this);
 		append(" LEFT OUTER JOIN ");
@@ -368,7 +387,8 @@ public class StatementBuilder implements IStatementBuilder {
 		append(")");
 	}
 
-	public void buildAssignment(Assignment element) {
+	@Override
+    public void buildAssignment(Assignment element) {
 		element.getLeftExpression().build(this);
 		blank();
 		append(element.getSqlKeyword());
@@ -402,11 +422,13 @@ public class StatementBuilder implements IStatementBuilder {
 		append(")");
 	}
 
-	public void buildAND(AND and) {
+	@Override
+    public void buildAND(AND and) {
 		buildCondition(and);
 	}
 
-	public void buildOR(OR or) {
+	@Override
+    public void buildOR(OR or) {
 		buildCondition(or);
 	}
 
@@ -438,19 +460,22 @@ public class StatementBuilder implements IStatementBuilder {
 	/*
 	 * Unary Predicates
 	 */
-	public void buildISNULL(ISNULL element) {
+	@Override
+    public void buildISNULL(ISNULL element) {
 		element.getExpression().build(this);
 		blank();
 		append(element.getSqlKeyword());
 	}
 
-	public void buildNOTNULL(NOTNULL element) {
+	@Override
+    public void buildNOTNULL(NOTNULL element) {
 		element.getExpression().build(this);
 		blank();
 		append(element.getSqlKeyword());
 	}
 
-	public void buildNOT(NOT element) {
+	@Override
+    public void buildNOT(NOT element) {
 		append(element.getSqlKeyword());
 		append("(");
 		element.getExpression().build(this);
@@ -460,50 +485,61 @@ public class StatementBuilder implements IStatementBuilder {
 	/*
 	 * Binary Predicates
 	 */
-	public void buildEQUALS(EQUALS element) {
+	@Override
+    public void buildEQUALS(EQUALS element) {
 		buildBinaryPredicate(element);
 	}
 
-	public void buildGREATER(GREATER element) {
+	@Override
+    public void buildGREATER(GREATER element) {
 		buildBinaryPredicate(element);
 	}
 
-	public void buildGREATEROREQUAL(GREATEROREQUAL element) {
+	@Override
+    public void buildGREATEROREQUAL(GREATEROREQUAL element) {
 		buildBinaryPredicate(element);
 	}
 
-	public void buildIN(IN element) {
+	@Override
+    public void buildIN(IN element) {
 		buildBinaryPredicate(element);
 	}
 
-	public void buildNOTEQUALS(NOTEQUALS element) {
+	@Override
+    public void buildNOTEQUALS(NOTEQUALS element) {
 		buildBinaryPredicate(element);
 	}
 
-	public void buildNOTIN(NOTIN element) {
+	@Override
+    public void buildNOTIN(NOTIN element) {
 		buildBinaryPredicate(element);
 	}
 
-	public void buildSMALLER(SMALLER element) {
+	@Override
+    public void buildSMALLER(SMALLER element) {
 		buildBinaryPredicate(element);
 	}
 
-	public void buildSMALLEROREQUAL(SMALLEROREQUAL element) {
+	@Override
+    public void buildSMALLEROREQUAL(SMALLEROREQUAL element) {
 		buildBinaryPredicate(element);
 	}
 
 	/*
 	 * Ternary Predicates
 	 */
-	public void buildBETWEEN(BETWEEN element) {
+	@Override
+    public void buildBETWEEN(BETWEEN element) {
 		buildTernaryPredicate(element);
 	}
 
-	public void buildLIKE(LIKE element) {
+	@Override
+    public void buildLIKE(LIKE element) {
 		buildTernaryPredicate(element);
 	}
 
-	public void buildNOTLIKE(NOTLIKE element) {
+	@Override
+    public void buildNOTLIKE(NOTLIKE element) {
 		buildTernaryPredicate(element);
 	}
 
@@ -517,18 +553,21 @@ public class StatementBuilder implements IStatementBuilder {
 		append(")");
 	}
 
-	public void buildALL(ALL element) {
+	@Override
+    public void buildALL(ALL element) {
 		buildOperator(element);
 	}
 
-	public void buildANY(ANY element) {
+	@Override
+    public void buildANY(ANY element) {
 		buildOperator(element);
 	}
 
 	/*
 	 * Existence
 	 */
-	public void buildEXISTS(EXISTS element) {
+	@Override
+    public void buildEXISTS(EXISTS element) {
 		append(element.getSqlKeyword());
 		append("(");
 		element.getSelect().build(this);
@@ -536,7 +575,8 @@ public class StatementBuilder implements IStatementBuilder {
 
 	}
 
-	public void buildNOTEXISTS(NOTEXISTS element) {
+	@Override
+    public void buildNOTEXISTS(NOTEXISTS element) {
 		append(element.getSqlKeyword());
 		append("(");
 		element.getSelect().build(this);
@@ -566,30 +606,36 @@ public class StatementBuilder implements IStatementBuilder {
 	/*
 	 * Unary Arithmetic Expressions
 	 */
-	public void buildUnaryMINUS(UnaryMINUS element) {
+	@Override
+    public void buildUnaryMINUS(UnaryMINUS element) {
 		buildUnaryArithmeticExpression(element);
 	}
 
-	public void buildUnaryPLUS(UnaryPLUS element) {
+	@Override
+    public void buildUnaryPLUS(UnaryPLUS element) {
 		buildUnaryArithmeticExpression(element);
 	}
 
 	/*
 	 * Binary Arithmetic Expressions
 	 */
-	public void buildDIVIDE(DIVIDE element) {
+	@Override
+    public void buildDIVIDE(DIVIDE element) {
 		buildBinaryArithmeticExpression(element);
 	}
 
-	public void buildMINUS(MINUS element) {
+	@Override
+    public void buildMINUS(MINUS element) {
 		buildBinaryArithmeticExpression(element);
 	}
 
-	public void buildPLUS(PLUS element) {
+	@Override
+    public void buildPLUS(PLUS element) {
 		buildBinaryArithmeticExpression(element);
 	}
 
-	public void buildTIMES(TIMES element) {
+	@Override
+    public void buildTIMES(TIMES element) {
 		buildBinaryArithmeticExpression(element);
 	}
 
@@ -610,26 +656,32 @@ public class StatementBuilder implements IStatementBuilder {
         append(")");
     }
 
+    @Override
     public void buildBitAND(BitAND function) {
         buildBinaryBitFunction(function);
     }
 
+    @Override
     public void buildBitLSHIFT(BitLSHIFT function) {
         buildBinaryBitFunction(function);
     }
 
+    @Override
     public void buildBitOR(BitOR function) {
         buildBinaryBitFunction(function);
     }
 
+    @Override
     public void buildBitRSHIFT(BitRSHIFT function) {
         buildBinaryBitFunction(function);
     }
 
+    @Override
     public void buildBitXOR(BitXOR function) {
         buildBinaryBitFunction(function);
     }
 
+    @Override
     public void buildINVERT(INVERT function) {
         buildUnaryBitFunction(function);
     }
@@ -637,7 +689,8 @@ public class StatementBuilder implements IStatementBuilder {
 	/*
 	 * Functions
 	 */
-	public void buildGenericFunction(GenericFunction element) {
+	@Override
+    public void buildGenericFunction(GenericFunction element) {
 		append(element.getSqlKeyword());
 		append("(");
 		buildElementList(Arrays.asList(element.getArguments()));
@@ -676,56 +729,68 @@ public class StatementBuilder implements IStatementBuilder {
 	/*
 	 * Unary Functions
 	 */
-	public void buildABS(ABS element) {
+	@Override
+    public void buildABS(ABS element) {
 		buildUnaryFunction(element);
 	}
 
-	public void buildAVG(AVG element) {
+	@Override
+    public void buildAVG(AVG element) {
 		buildUnaryFunction(element);
 	}
 
-	public void buildCOUNT(COUNT element) {
+	@Override
+    public void buildCOUNT(COUNT element) {
 		buildUnaryFunction(element);
 	}
 
-	public void buildLENGTH(LENGTH element) {
+	@Override
+    public void buildLENGTH(LENGTH element) {
 		buildUnaryFunction(element);
 	}
 
-	public void buildMAX(MAX element) {
+	@Override
+    public void buildMAX(MAX element) {
 		buildUnaryFunction(element);
 	}
 
-	public void buildMIN(MIN element) {
+	@Override
+    public void buildMIN(MIN element) {
 		buildUnaryFunction(element);
 	}
 
-	public void buildSQRT(SQRT element) {
+	@Override
+    public void buildSQRT(SQRT element) {
 		buildUnaryFunction(element);
 	}
 
-	public void buildSUM(SUM element) {
+	@Override
+    public void buildSUM(SUM element) {
 		buildUnaryFunction(element);
 	}
 
 	/*
 	 * Binary Functions
 	 */
-	public void buildCONCAT(CONCAT element) {
+	@Override
+    public void buildCONCAT(CONCAT element) {
 		buildBinaryFunction(element);
 	}
 
 	/*
 	 * Ternary Functions
 	 */
-	public void buildLOCATE(LOCATE element) {
+	@Override
+    public void buildLOCATE(LOCATE element) {
 		buildTernaryFunction(element);
 	}
 
-	public void buildSUBSTRING(SUBSTRING element) {
+	@Override
+    public void buildSUBSTRING(SUBSTRING element) {
 		buildTernaryFunction(element);
 	}
 
+    @Override
     public void buildList(LIST element) {
         append("(");
         for (Iterator<Expression> iter = element.getExpressions().iterator(); iter.hasNext();) {

@@ -51,7 +51,7 @@ package com.openexchange.ajp13.exception;
 
 /**
  * {@link AJPv13BrokenCycleException} - Thrown if a broken AJP cycle is detected
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AJPv13BrokenCycleException extends AJPv13Exception {
@@ -74,7 +74,7 @@ public class AJPv13BrokenCycleException extends AJPv13Exception {
 
     /**
      * Initializes a new {@link AJPv13BrokenCycleException}.
-     * 
+     *
      * @param code The code
      * @param args The arguments
      */
@@ -84,7 +84,7 @@ public class AJPv13BrokenCycleException extends AJPv13Exception {
 
     /**
      * Sets the package's payload.
-     * 
+     *
      * @param payload the payload
      * @return This exception with payload applied
      */
@@ -95,7 +95,7 @@ public class AJPv13BrokenCycleException extends AJPv13Exception {
 
     /**
      * Gets the package payload.
-     * 
+     *
      * @return The payload or <code>null</code>
      */
     public byte[] getPayload() {
@@ -104,7 +104,7 @@ public class AJPv13BrokenCycleException extends AJPv13Exception {
 
     /**
      * Gets the dump.
-     * 
+     *
      * @return The dump
      */
     public String getDump() {
@@ -113,7 +113,7 @@ public class AJPv13BrokenCycleException extends AJPv13Exception {
 
     /**
      * Sets the dump.
-     * 
+     *
      * @param dumped The dump
      */
     public void setDump(final String dumped) {

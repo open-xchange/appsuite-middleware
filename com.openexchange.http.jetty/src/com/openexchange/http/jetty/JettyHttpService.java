@@ -90,14 +90,17 @@ public class JettyHttpService implements HttpService {
 
     }
 
+    @Override
     public HttpContext createDefaultHttpContext() {
         return null; // Let's see if we can get away with this
     }
 
+    @Override
     public void registerResources(String alias, String name, HttpContext context) {
         // TODO
     }
 
+    @Override
     public void registerServlet(String alias, Servlet servlet, Dictionary initparams, HttpContext context)  {
         try {
             if (!alias.startsWith("/")) {
@@ -130,6 +133,7 @@ public class JettyHttpService implements HttpService {
         }
     }
 
+    @Override
     public void unregister(String alias) {
 
     }

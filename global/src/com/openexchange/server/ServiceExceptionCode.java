@@ -85,22 +85,27 @@ public enum ServiceExceptionCode implements OXExceptionCode {
         this.category = category;
     }
 
+    @Override
     public String getMessage() {
         return message;
     }
 
+    @Override
     public Category getCategory() {
         return category;
     }
 
+    @Override
     public int getNumber() {
         return detailNumber;
     }
 
+    @Override
     public String getPrefix() {
         return "SRV";
     }
 
+    @Override
     public boolean equals(final OXException e) {
         return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }

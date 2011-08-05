@@ -78,6 +78,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
         m.put(AppointmentFields.FULL_TIME, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Appointment candidate) {
                 return Boolean.valueOf(candidate.getFullTime());
             }
@@ -85,6 +86,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
         m.put(AppointmentFields.IGNORE_CONFLICTS, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Appointment candidate) {
                 return Boolean.valueOf(candidate.getIgnoreConflicts());
             }
@@ -92,6 +94,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
         m.put(AppointmentFields.LOCATION, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Appointment candidate) {
                 return candidate.getLocation();
             }
@@ -99,6 +102,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
         m.put(AppointmentFields.SHOW_AS, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Appointment candidate) {
                 return Integer.valueOf(candidate.getShownAs());
             }
@@ -106,6 +110,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
         m.put(AppointmentFields.TIMEZONE, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Appointment candidate) {
                 return candidate.getTimezone();
             }
@@ -117,6 +122,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
         m.put(AppointmentFields.ALARM, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Appointment candidate) {
                 return Integer.valueOf(candidate.getAlarm());
             }
@@ -124,6 +130,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
         m.put(AppointmentFields.CHANGE_EXCEPTIONS, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Appointment candidate) {
                 return candidate.getChangeException();
             }
@@ -131,6 +138,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
         m.put(ParticipantsFields.CONFIRM_MESSAGE, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Appointment candidate) {
                 return candidate.getConfirmMessage();
             }
@@ -138,6 +146,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
         m.put(ParticipantsFields.CONFIRMATION, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Appointment candidate) {
                 return Integer.valueOf(candidate.getConfirm());
             }
@@ -145,6 +154,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
         m.put(AppointmentFields.DAY_IN_MONTH, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Appointment candidate) {
                 return Integer.valueOf(candidate.getDayInMonth());
             }
@@ -152,6 +162,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
         m.put(AppointmentFields.DAYS, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Appointment candidate) {
                 return Integer.valueOf(candidate.getDays());
             }
@@ -159,6 +170,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
         m.put(AppointmentFields.DELETE_EXCEPTIONS, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Appointment candidate) {
                 return candidate.getDeleteException();
             }
@@ -166,6 +178,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
         m.put(AppointmentFields.END_DATE, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Appointment candidate) {
                 return candidate.getEndDate();
             }
@@ -173,6 +186,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
         m.put(AppointmentFields.INTERVAL, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Appointment candidate) {
                 return Integer.valueOf(candidate.getInterval());
             }
@@ -180,6 +194,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
         m.put(AppointmentFields.MONTH, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Appointment candidate) {
                 return Integer.valueOf(candidate.getMonth());
             }
@@ -187,6 +202,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
         m.put(AppointmentFields.NOTE, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Appointment candidate) {
                 return candidate.getNote();
             }
@@ -194,6 +210,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
         m.put(AppointmentFields.NOTIFICATION, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Appointment candidate) {
                 return Boolean.valueOf(candidate.getNotification());
             }
@@ -201,6 +218,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
         m.put(AppointmentFields.OCCURRENCES, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Appointment candidate) {
                 return Integer.valueOf(candidate.getOccurrence());
             }
@@ -208,6 +226,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
         m.put(AppointmentFields.PARTICIPANTS, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Appointment candidate) {
                 return candidate.getParticipants();
             }
@@ -215,6 +234,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
         m.put(AppointmentFields.RECURRENCE_CALCULATOR, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Appointment candidate) {
                 return Integer.valueOf(candidate.getRecurrenceCalculator());
             }
@@ -222,6 +242,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
         m.put(AppointmentFields.RECURRENCE_DATE_POSITION, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Appointment candidate) {
                 return candidate.getRecurrenceDatePosition();
             }
@@ -229,6 +250,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
         m.put(AppointmentFields.RECURRENCE_ID, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Appointment candidate) {
                 return Integer.valueOf(candidate.getRecurrenceID());
             }
@@ -236,6 +258,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
         m.put(AppointmentFields.RECURRENCE_POSITION, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Appointment candidate) {
                 return Integer.valueOf(candidate.getRecurrencePosition());
             }
@@ -243,6 +266,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
         m.put(AppointmentFields.RECURRENCE_START, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Appointment candidate) {
                 return Long.valueOf(candidate.getRecurringStart());
             }
@@ -250,6 +274,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
         m.put(AppointmentFields.RECURRENCE_TYPE, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Appointment candidate) {
                 return Integer.valueOf(candidate.getRecurrenceType());
             }
@@ -257,6 +282,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
         m.put(AppointmentFields.START_DATE, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Appointment candidate) {
                 return candidate.getStartDate();
             }
@@ -264,6 +290,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
         m.put(AppointmentFields.TITLE, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Appointment candidate) {
                 return candidate.getTitle();
             }
@@ -271,12 +298,14 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
         m.put(AppointmentFields.UNTIL, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Appointment candidate) {
                 return candidate.getUntil();
             }
         });
         m.put(AppointmentFields.USERS, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Appointment candidate) {
                 return candidate.getUsers();
             }
@@ -288,6 +317,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
         m.put(AppointmentFields.CATEGORIES, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Appointment candidate) {
                 return candidate.getCategories();
             }
@@ -295,6 +325,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
         m.put(AppointmentFields.COLORLABEL, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Appointment candidate) {
                 return Integer.valueOf(candidate.getLabel());
             }
@@ -302,6 +333,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
         m.put(AppointmentFields.CREATED_BY, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Appointment candidate) {
                 return Integer.valueOf(candidate.getCreatedBy());
             }
@@ -309,6 +341,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
         m.put(AppointmentFields.CREATION_DATE, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Appointment candidate) {
                 return candidate.getCreationDate();
             }
@@ -316,6 +349,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
         m.put(AppointmentFields.FOLDER_ID, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Appointment candidate) {
                 return Integer.valueOf(candidate.getParentFolderID());
             }
@@ -323,6 +357,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
         m.put(AppointmentFields.ID, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Appointment candidate) {
                 return Integer.valueOf(candidate.getObjectID());
             }
@@ -330,6 +365,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
         m.put(AppointmentFields.LAST_MODIFIED, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Appointment candidate) {
                 return candidate.getLastModified();
             }
@@ -337,6 +373,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
         m.put(AppointmentFields.MODIFIED_BY, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Appointment candidate) {
                 return Integer.valueOf(candidate.getModifiedBy());
             }
@@ -344,6 +381,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
         m.put(AppointmentFields.PRIVATE_FLAG, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Appointment candidate) {
                 return Boolean.valueOf(candidate.getPrivateFlag());
             }
@@ -370,6 +408,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
         super();
     }
 
+    @Override
     public <T> T getAttribute(final String attributeName, final Appointment candidate) {
         final AttributeGetter getter = GETTERS.get(attributeName);
         if (null == getter) {

@@ -82,10 +82,12 @@ public class StrategyFolderUpdaterService<T> implements FolderUpdaterService<T> 
         this.usesMultipleStrategy = usesMultipleStrategy;
     }
 
+    @Override
     public boolean handles(final FolderObject folder) {
         return strategy.handles(folder);
     }
 
+    @Override
     public void save(final Collection<T> data, final TargetFolderDefinition target) throws OXException {
         final Object session = strategy.startSession(target);
 
@@ -129,6 +131,7 @@ public class StrategyFolderUpdaterService<T> implements FolderUpdaterService<T> 
      * - overwrite existing objects, deleting fields not given by the update (the classic update: one subscription on one folder)
      * - only touch fields given in the updated object (the aggregating update: multiple subscriptions on one folder)
      */
+    @Override
     public boolean usesMultipleStrategy() {
         return usesMultipleStrategy;
     }

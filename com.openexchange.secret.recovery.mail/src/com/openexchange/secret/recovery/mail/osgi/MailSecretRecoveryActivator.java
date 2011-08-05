@@ -88,6 +88,7 @@ public class MailSecretRecoveryActivator extends DeferredActivator {
 
         consistencyReg = context.registerService(SecretConsistencyCheck.class.getName(), new SecretConsistencyCheck() {
 
+            @Override
             public String checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws OXException {
                 return mailAccountStorage.checkCanDecryptPasswords(session.getUserId(), session.getContextId(), secret);
             }
@@ -96,6 +97,7 @@ public class MailSecretRecoveryActivator extends DeferredActivator {
 
         migratorReg = context.registerService(SecretMigrator.class.getName(), new SecretMigrator() {
 
+            @Override
             public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws OXException {
                 mailAccountStorage.migratePasswords(session.getUserId(), session.getContextId(), oldSecret, newSecret);
             }

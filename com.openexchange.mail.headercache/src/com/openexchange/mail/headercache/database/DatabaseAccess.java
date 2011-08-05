@@ -191,11 +191,13 @@ public final class DatabaseAccess {
             this.fullname = fullname;
         }
 
+        @Override
         public int applyField(final MailMessage mail, final ResultSet rs, final int pos) throws IOException, SQLException, OXException {
             mail.setFolder(fullname);
             return pos;
         }
 
+        @Override
         public String getField() {
             return null;
         }
@@ -214,10 +216,12 @@ public final class DatabaseAccess {
 
         MAP.put(MailField.FLAGS, new SetterApplier() {
 
+            @Override
             public String getField() {
                 return "h.flags, h.userFlags";
             }
 
+            @Override
             public int applyField(final MailMessage mail, final ResultSet rs, final int pos) throws SQLException {
                 int p = pos;
                 // System flags
@@ -233,10 +237,12 @@ public final class DatabaseAccess {
 
         MAP.put(MailField.RECEIVED_DATE, new SetterApplier() {
 
+            @Override
             public String getField() {
                 return "h.receivedDate";
             }
 
+            @Override
             public int applyField(final MailMessage mail, final ResultSet rs, final int pos) throws SQLException {
                 int p = pos;
                 final long recDate = rs.getLong(p++);
@@ -249,10 +255,12 @@ public final class DatabaseAccess {
 
         MAP.put(MailField.SIZE, new SetterApplier() {
 
+            @Override
             public String getField() {
                 return "h.rfc822Size";
             }
 
+            @Override
             public int applyField(final MailMessage mail, final ResultSet rs, final int pos) throws SQLException {
                 int p = pos;
                 final long size = rs.getLong(p++);
@@ -266,10 +274,12 @@ public final class DatabaseAccess {
 
         MAP.put(MailField.HEADERS, new SetterApplier() {
 
+            @Override
             public String getField() {
                 return "h.headers";
             }
 
+            @Override
             public int applyField(final MailMessage mail, final ResultSet rs, final int pos) throws IOException, SQLException, OXException {
                 int p = pos;
                 final InputStream binaryStream = rs.getBinaryStream(p++);
@@ -290,6 +300,7 @@ public final class DatabaseAccess {
                         } else {
                             final Callable<Object> c = new Callable<Object>() {
 
+                                @Override
                                 public Object call() throws IOException {
                                     try {
                                         fillPipeDeflate(pipedOut, binaryStream);
@@ -1058,6 +1069,7 @@ public final class DatabaseAccess {
             this.mail = mail;
         }
 
+        @Override
         public InputStream call() throws Exception {
             final ByteArrayOutputStream sink = new UnsynchronizedByteArrayOutputStream(BUFSIZE);
             {

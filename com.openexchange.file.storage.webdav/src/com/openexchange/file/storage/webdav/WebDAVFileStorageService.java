@@ -118,26 +118,32 @@ public final class WebDAVFileStorageService implements FileStorageService {
         }
     }
 
+    @Override
     public String getId() {
         return WebDAVConstants.ID;
     }
 
+    @Override
     public String getDisplayName() {
         return "WebDAV File Storage Service";
     }
 
+    @Override
     public DynamicFormDescription getFormDescription() {
         return formDescription;
     }
 
+    @Override
     public Set<String> getSecretProperties() {
         return secretProperties;
     }
 
+    @Override
     public FileStorageAccountManager getAccountManager() {
         return accountManager;
     }
 
+    @Override
     public FileStorageAccountAccess getAccountAccess(final String accountId, final Session session) throws OXException {
         return new WebDAVFileStorageAccountAccess(this, accountManager.getAccount(accountId, session), session);
     }

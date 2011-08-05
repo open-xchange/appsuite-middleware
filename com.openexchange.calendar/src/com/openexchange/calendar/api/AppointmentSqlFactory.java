@@ -67,6 +67,7 @@ public class AppointmentSqlFactory implements AppointmentSqlFactoryService {
      * @param session
      * @return
      */
+    @Override
     public AppointmentSQLInterface createAppointmentSql(Session session) {
         return new CalendarSql(session);
     }

@@ -112,14 +112,17 @@ public class OSGiPublicationTargetDiscovererCollector implements PublicationTarg
         }
     }
 
+    @Override
     public Object addingService(ServiceReference reference) {
         return add(reference);
     }
 
+    @Override
     public void modifiedService(ServiceReference reference, Object service) {
 
     }
 
+    @Override
     public void removedService(ServiceReference reference, Object service) {
         delegate.removeDiscoveryService((PublicationTargetDiscoveryService) service);
         context.ungetService(reference);
@@ -135,6 +138,7 @@ public class OSGiPublicationTargetDiscovererCollector implements PublicationTarg
         return discovery;
     }
 
+    @Override
     public PublicationTarget getTarget(Context context, int publicationId) throws OXException {
         if(!grabbedAll) {
             grabAll();
@@ -142,6 +146,7 @@ public class OSGiPublicationTargetDiscovererCollector implements PublicationTarg
         return delegate.getTarget(context, publicationId);
     }
 
+    @Override
     public PublicationTarget getTarget(String id) throws OXException {
         if(!grabbedAll) {
             grabAll();
@@ -149,6 +154,7 @@ public class OSGiPublicationTargetDiscovererCollector implements PublicationTarg
         return delegate.getTarget(id);
     }
 
+    @Override
     public Collection<PublicationTarget> getTargetsForEntityType(String module) throws OXException {
         if(!grabbedAll) {
             grabAll();
@@ -156,6 +162,7 @@ public class OSGiPublicationTargetDiscovererCollector implements PublicationTarg
         return delegate.getTargetsForEntityType(module);
     }
 
+    @Override
     public boolean knows(String id) throws OXException {
         if(!grabbedAll) {
             grabAll();
@@ -163,6 +170,7 @@ public class OSGiPublicationTargetDiscovererCollector implements PublicationTarg
         return delegate.knows(id);
     }
 
+    @Override
     public List<PublicationTarget> listTargets() throws OXException {
         if(!grabbedAll) {
             grabAll();

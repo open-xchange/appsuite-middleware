@@ -89,6 +89,7 @@ public class MailMessagingResource implements MessagingResource {
         }
     }
 
+    @Override
     public boolean cacheable() {
         /*
          * Mail access is already cached internally
@@ -96,10 +97,12 @@ public class MailMessagingResource implements MessagingResource {
         return false;
     }
 
+    @Override
     public void close() {
         mailAccess.close(true);
     }
 
+    @Override
     public void connect() throws OXException {
         try {
             mailAccess.connect();
@@ -108,10 +111,12 @@ public class MailMessagingResource implements MessagingResource {
         }
     }
 
+    @Override
     public boolean isConnected() {
         return mailAccess.isConnected();
     }
 
+    @Override
     public boolean ping() throws OXException {
         try {
             return mailAccess.ping();

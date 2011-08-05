@@ -121,6 +121,7 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
 
     private static final String SQL_INSERT = "INSERT INTO " + TABLE_NAME + " (cid, user, id, uidl) VALUES (?, ?, ?, ?)";
 
+    @Override
     public void addUIDL(final String uidl) throws OXException {
         final Connection con;
         try {
@@ -154,6 +155,7 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
 
     private static final String SQL_DELETE_ALL = "DELETE FROM " + TABLE_NAME + " WHERE cid = ? AND user = ? AND id = ?";
 
+    @Override
     public void clear() throws OXException {
         final Connection con;
         try {
@@ -179,6 +181,7 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
 
     private static final String SQL_SELECT_ALL = "SELECT uidl FROM " + TABLE_NAME + " WHERE cid = ? AND user = ? AND id = ?";
 
+    @Override
     public Set<String> getUIDLs() throws OXException {
         final Connection con;
         try {
@@ -208,6 +211,7 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
         }
     }
 
+    @Override
     public void removeUIDL(final String uidl) throws OXException {
         final Connection con;
         try {
@@ -232,6 +236,7 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
         }
     }
 
+    @Override
     public void addAllUIDL(final Collection<? extends String> uidls) throws OXException {
         final Connection con;
         try {

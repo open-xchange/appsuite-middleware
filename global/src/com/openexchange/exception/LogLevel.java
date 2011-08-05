@@ -96,6 +96,7 @@ public enum LogLevel {
      */
     public static final Comparator<LogLevel> COMPARATOR = new Comparator<LogLevel>() {
 
+        @Override
         public int compare(final LogLevel o1, final LogLevel o2) {
             return (-o1.ordinal() + o2.ordinal());
         }

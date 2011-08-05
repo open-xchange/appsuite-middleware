@@ -59,20 +59,20 @@ import junit.framework.TestCase;
  *
  */
 public class EAVPathTest extends TestCase {
-    
+
     public void testAppend() {
         assertEquals(new EAVPath("1", "2"), new EAVPath("1").append("2"));
     }
-    
+
     public void testShiftLeft() {
         assertEquals(new EAVPath("2", "3", "4"), new EAVPath("1","2", "3", "4").shiftLeft());
     }
-    
+
     public void testParse() {
         EAVPath path = EAVPath.parse("/contacts/12/13/com.openexchange.test/attribute");
         assertEquals(new EAVPath("contacts", "12", "13", "com.openexchange.test", "attribute"), path);
     }
-    
+
     public void testParseEmpty() {
         EAVPath path = EAVPath.parse("");
         assertEquals(new EAVPath(), path);

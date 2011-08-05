@@ -191,26 +191,31 @@ public class CalendarMySQL implements CalendarSqlImp {
     static {
         STATEMENT_FILLERS = new HashMap<Integer, StatementFiller>(22);
         STATEMENT_FILLERS.put(Integer.valueOf(Appointment.TITLE), new StatementFiller() {
+            @Override
             public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao) throws SQLException {
                 stmt.setString(pos, cdao.getTitle());
             }
         });
         STATEMENT_FILLERS.put(Integer.valueOf(Appointment.START_DATE), new StatementFiller() {
+            @Override
             public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao) throws SQLException {
                 stmt.setTimestamp(pos, new java.sql.Timestamp(cdao.getStartDate().getTime()));
             }
         });
         STATEMENT_FILLERS.put(Integer.valueOf(Appointment.END_DATE), new StatementFiller() {
+            @Override
             public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao) throws SQLException {
                 stmt.setTimestamp(pos, new java.sql.Timestamp(cdao.getEndDate().getTime()));
             }
         });
         STATEMENT_FILLERS.put(Integer.valueOf(Appointment.SHOWN_AS), new StatementFiller() {
+            @Override
             public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao) throws SQLException {
                 stmt.setInt(pos, cdao.getShownAs());
             }
         });
         STATEMENT_FILLERS.put(Integer.valueOf(Appointment.LOCATION), new StatementFiller() {
+            @Override
             public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao) throws SQLException {
                 if (cdao.getLocation() == null) {
                     stmt.setNull(pos, java.sql.Types.VARCHAR);
@@ -220,6 +225,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             }
         });
         STATEMENT_FILLERS.put(Integer.valueOf(Appointment.NOTE), new StatementFiller() {
+            @Override
             public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao) throws SQLException {
                 if (cdao.getNote() == null) {
                     stmt.setNull(pos, java.sql.Types.VARCHAR);
@@ -229,6 +235,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             }
         });
         STATEMENT_FILLERS.put(Integer.valueOf(Appointment.CATEGORIES), new StatementFiller() {
+            @Override
             public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao) throws SQLException {
                 if (cdao.getCategories() == null) {
                     stmt.setNull(pos, java.sql.Types.VARCHAR);
@@ -238,16 +245,19 @@ public class CalendarMySQL implements CalendarSqlImp {
             }
         });
         STATEMENT_FILLERS.put(Integer.valueOf(Appointment.FULL_TIME), new StatementFiller() {
+            @Override
             public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao) throws SQLException {
                 stmt.setInt(pos, I(cdao.getFullTime()));
             }
         });
         STATEMENT_FILLERS.put(Integer.valueOf(Appointment.COLOR_LABEL), new StatementFiller() {
+            @Override
             public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao) throws SQLException {
                 stmt.setInt(pos, cdao.getLabel());
             }
         });
         STATEMENT_FILLERS.put(Integer.valueOf(Appointment.MODIFIED_BY), new StatementFiller() {
+            @Override
             public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao)
                     throws OXException, SQLException {
                 if (cdao.containsModifiedBy()) {
@@ -258,6 +268,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             }
         });
         STATEMENT_FILLERS.put(Integer.valueOf(Appointment.LAST_MODIFIED), new StatementFiller() {
+            @Override
             public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao) throws SQLException {
                 if (cdao.containsLastModified()) {
                     stmt.setLong(pos, cdao.getLastModified().getTime());
@@ -269,11 +280,13 @@ public class CalendarMySQL implements CalendarSqlImp {
             }
         });
         STATEMENT_FILLERS.put(Integer.valueOf(Appointment.PRIVATE_FLAG), new StatementFiller() {
+            @Override
             public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao) throws SQLException {
                 stmt.setInt(pos, I(cdao.getPrivateFlag()));
             }
         });
         STATEMENT_FILLERS.put(Integer.valueOf(Appointment.FOLDER_ID), new StatementFiller() {
+            @Override
             public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao)
                     throws OXException, SQLException {
                 if (cdao.getFolderType() == FolderObject.PRIVATE || cdao.getFolderType() == FolderObject.SHARED) {
@@ -286,54 +299,63 @@ public class CalendarMySQL implements CalendarSqlImp {
             }
         });
         STATEMENT_FILLERS.put(Integer.valueOf(Appointment.RECURRENCE_TYPE), new StatementFiller() {
+            @Override
             public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao)
                     throws OXException, SQLException {
                 stmt.setString(pos, cdao.getRecurrence());
             }
         });
         STATEMENT_FILLERS.put(Integer.valueOf(Appointment.RECURRENCE_ID), new StatementFiller() {
+            @Override
             public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao)
                     throws OXException, SQLException {
                 stmt.setInt(pos, cdao.getRecurrenceID());
             }
         });
         STATEMENT_FILLERS.put(Integer.valueOf(Appointment.DELETE_EXCEPTIONS), new StatementFiller() {
+            @Override
             public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao)
                     throws OXException, SQLException {
                 stmt.setString(pos, cdao.getDelExceptions());
             }
         });
         STATEMENT_FILLERS.put(Integer.valueOf(Appointment.CHANGE_EXCEPTIONS), new StatementFiller() {
+            @Override
             public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao)
                     throws OXException, SQLException {
                 stmt.setString(pos, cdao.getExceptions());
             }
         });
         STATEMENT_FILLERS.put(Integer.valueOf(Appointment.RECURRENCE_CALCULATOR), new StatementFiller() {
+            @Override
             public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao)
                     throws OXException, SQLException {
                 stmt.setInt(pos, cdao.getRecurrenceCalculator());
             }
         });
         STATEMENT_FILLERS.put(Integer.valueOf(Appointment.RECURRENCE_POSITION), new StatementFiller() {
+            @Override
             public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao)
                     throws OXException, SQLException {
                 stmt.setInt(pos, cdao.getRecurrencePosition());
             }
         });
         STATEMENT_FILLERS.put(Integer.valueOf(Appointment.NUMBER_OF_ATTACHMENTS), new StatementFiller() {
+            @Override
             public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao)
                     throws OXException, SQLException {
                 stmt.setInt(pos, cdao.getNumberOfAttachments());
             }
         });
         STATEMENT_FILLERS.put(Integer.valueOf(Appointment.TIMEZONE), new StatementFiller() {
+            @Override
             public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao)
                     throws OXException, SQLException {
                 stmt.setString(pos, cdao.getTimezoneFallbackUTC());
             }
         });
         STATEMENT_FILLERS.put(Integer.valueOf(Appointment.SEQUENCE), new StatementFiller() {
+            @Override
             public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao)
                     throws OXException, SQLException {
                 stmt.setInt(pos, cdao.getSequence());
@@ -345,6 +367,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         super();
     }
 
+    @Override
     public final PreparedStatement getAllAppointmentsForUser(final Context c, final int uid, final int groups[], final UserConfiguration uc, final java.util.Date d1, final java.util.Date d2, final String select, final Connection readcon, final java.util.Date since, final int orderBy, final Order orderDir) throws OXException, SQLException {
         return getAllAppointmentsForUser(c, uid, groups, uc, d1, d2, select, readcon, since, orderBy, orderDir, false);
     }
@@ -388,6 +411,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return pst;
     }
 
+    @Override
     public final PreparedStatement getConflicts(final Context c, final java.util.Date d1, final java.util.Date d2, final java.util.Date d3, final java.util.Date d4, final Connection readcon, final String member_sql_in, final boolean free_busy_select) throws SQLException {
         final StringBuilder sb = new StringBuilder(64);
         if (free_busy_select) {
@@ -447,6 +471,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return pst;
     }
 
+    @Override
     public final PreparedStatement getAllPrivateAppointmentAndFolderIdsForUser(final Context c, final int id, final Connection readcon) throws SQLException {
         final PreparedStatement stmt = readcon.prepareStatement(SELECT_ALL_PRIVATE_FOLDERS_IN_WHICH_A_USER_IS_A_PARTICIPANT);
         stmt.setInt(1, id);
@@ -454,6 +479,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return stmt;
     }
 
+    @Override
     public PreparedStatement getSharedAppointmentFolderQuery(final Context c, final CalendarFolderObject cfo, final Connection readcon) throws SQLException {
         final StringBuilder sb = new StringBuilder("SELECT object_id, pfid, member_uid FROM prg_dates_members WHERE cid = ? AND pfid IN (");
         for(final Object o : cfo.getSharedFolderList()) {
@@ -466,6 +492,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     }
 
+    @Override
     public final PreparedStatement getResourceConflictsPrivateFolderInformation(final Context c, final java.util.Date d1, final java.util.Date d2, final java.util.Date d3, final java.util.Date d4, final Connection readcon, final String resource_sql_in) throws SQLException {
         final StringBuilder sb = new StringBuilder(184);
         sb.append("SELECT pdm.object_id, pdm.pfid, pdm.member_uid FROM prg_dates");
@@ -508,6 +535,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return pst;
     }
 
+    @Override
     public final PreparedStatement getResourceConflicts(final Context c, final java.util.Date d1, final java.util.Date d2, final java.util.Date d3, final java.util.Date d4, final Connection readcon, final String resource_sql_in) throws SQLException {
         final StringBuilder sb = new StringBuilder(184);
         sb.append(FREE_BUSY_SELECT);
@@ -550,6 +578,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return pst;
     }
 
+    @Override
     public final PreparedStatement getFreeBusy(final int uid, final Context c, final java.util.Date d1, final java.util.Date d2, final Connection readcon) throws SQLException {
         final StringBuilder sb = new StringBuilder(64);
         sb.append(FREE_BUSY_SELECT);
@@ -571,6 +600,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return pst;
     }
 
+    @Override
     public final PreparedStatement getResourceFreeBusy(final int uid, final Context c, final java.util.Date d1, final java.util.Date d2, final Connection readcon) throws SQLException {
         final StringBuilder sb = new StringBuilder(64);
         sb.append(FREE_BUSY_SELECT);
@@ -592,6 +622,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return pst;
     }
 
+    @Override
     public PreparedStatement getActiveAppointments(final Context c, final int uid, final java.util.Date d1, final java.util.Date d2, final String select, final Connection readcon) throws SQLException {
         final StringBuilder sb = new StringBuilder(64);
         sb.append(parseSelect(select));
@@ -611,6 +642,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return pst;
     }
 
+    @Override
     public final boolean[] getUserActiveAppointmentsRangeSQL(final Context c, final int uid, final int groups[], final UserConfiguration uc, final java.util.Date d1, final java.util.Date d2, final Connection readcon) throws SQLException, OXException {
         final StringBuilder sb = new StringBuilder(64);
         final long start = d1.getTime();
@@ -717,6 +749,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         }
     }
 
+    @Override
     public final PreparedStatement getPublicFolderRangeSQL(final Context c, final int uid, final int groups[], final int fid, final java.util.Date d1, final java.util.Date d2, final String select, final boolean readall, final Connection readcon, final int orderBy, final Order orderDir) throws SQLException {
         final StringBuilder sb = new StringBuilder(32);
         sb.append(parseSelect(select));
@@ -745,6 +778,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return pst;
     }
 
+    @Override
     public final PreparedStatement getPrivateFolderRangeSQL(final Context c, final int uid, final int groups[], final int fid, final java.util.Date d1, final java.util.Date d2, final String select, final boolean readall, final Connection readcon, final int orderBy, final Order orderDir) throws SQLException {
         final StringBuilder sb = new StringBuilder(64);
         sb.append(parseSelect(select));
@@ -777,10 +811,12 @@ public class CalendarMySQL implements CalendarSqlImp {
         return pst;
     }
 
+    @Override
     public final PreparedStatement getSharedFolderRangeSQL(final Context c, final int uid, final int shared_folder_owner, final int groups[], final int fid, final java.util.Date d1, final java.util.Date d2, final String select, final boolean readall, final Connection readcon, final int orderBy, final Order orderDir) throws SQLException {
         return getSharedFolderRangeSQL(c, uid, shared_folder_owner, groups, fid, d1, d2, select, readall, readcon, orderBy, orderDir, false);
     }
 
+    @Override
     public final PreparedStatement getSharedFolderRangeSQL(final Context c, final int uid, final int shared_folder_owner, final int groups[], final int fid, final java.util.Date d1, final java.util.Date d2, final String select, final boolean readall, final Connection readcon, final int orderBy, final Order orderDir, final boolean includePrivateAppointments) throws SQLException {
         final StringBuilder sb = new StringBuilder(32);
         sb.append(parseSelect(select));
@@ -816,6 +852,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return pst;
     }
 
+    @Override
     public final PreparedStatement getPrivateFolderModifiedSinceSQL(final Context c, final int uid, final int groups[], final int fid, final java.util.Date since, final String select, final boolean readall, final Connection readcon, final java.util.Date d1, final java.util.Date d2) throws SQLException {
         final StringBuilder sb = new StringBuilder(64);
         sb.append(parseSelect(select));
@@ -847,6 +884,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return pst;
     }
 
+    @Override
     public final PreparedStatement getSharedFolderModifiedSinceSQL(final Context c, final int uid, final int shared_folder_owner, final int groups[], final int fid, final java.util.Date since, final String select, final boolean readall, final Connection readcon, final java.util.Date d1, final java.util.Date d2, final boolean includePrivateFlag) throws SQLException {
         final StringBuilder sb = new StringBuilder(32);
         sb.append(parseSelect(select));
@@ -881,6 +919,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return pst;
     }
 
+    @Override
     public final PreparedStatement getPublicFolderModifiedSinceSQL(final Context c, final int uid, final int groups[], final int fid, final java.util.Date since, final String select, final boolean readall, final Connection readcon, final java.util.Date d1, final java.util.Date d2) throws SQLException {
         final StringBuilder sb = new StringBuilder(48);
         sb.append(parseSelect(select));
@@ -907,6 +946,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return pst;
     }
 
+    @Override
     public final PreparedStatement getPrivateFolderDeletedSinceSQL(final Context c, final int uid, final int fid, final java.util.Date d1, final String select, final Connection readcon) throws SQLException {
         final StringBuilder sb = new StringBuilder(128);
         sb.append(parseSelect(select));
@@ -927,6 +967,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return pst;
     }
 
+    @Override
     public final PreparedStatement getSharedFolderDeletedSinceSQL(final Context c, final int uid, final int shared_folder_owner, final int fid, final java.util.Date d1, final String select, final Connection readcon) throws SQLException {
         final StringBuilder sb = new StringBuilder(128);
         sb.append(parseSelect(select));
@@ -947,6 +988,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return pst;
     }
 
+    @Override
     public final PreparedStatement getPublicFolderDeletedSinceSQL(final Context c, final int uid, final int fid, final java.util.Date d1, final String select, final Connection readcon) throws SQLException {
         final StringBuilder sb = new StringBuilder(96);
         sb.append(parseSelect(select));
@@ -963,6 +1005,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return pst;
     }
 
+    @Override
     public final String getObjectsByidSQL(final int oids[][], final int cid, final String select) {
         final StringBuilder sb = new StringBuilder(64);
         sb.append(parseSelect(select));
@@ -975,6 +1018,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return sb.toString();
     }
 
+    @Override
     public PreparedStatement getPrivateFolderObjects(final int fid, final Context c, final Connection readcon) throws SQLException {
         final StringBuilder sb = new StringBuilder(64);
         sb.append("SELECT intfield01, created_from FROM prg_dates ");
@@ -989,6 +1033,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return getPreparedStatement(readcon, sb.toString());
     }
 
+    @Override
     public PreparedStatement getPublicFolderObjects(final int fid, final Context c, final Connection readcon) throws SQLException {
         final StringBuilder sb = new StringBuilder(64);
         sb.append("SELECT intfield01, created_from FROM prg_dates pd");
@@ -1000,6 +1045,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return getPreparedStatement(readcon, sb.toString());
     }
 
+    @Override
     public boolean checkIfFolderContainsForeignObjects(final int uid, final int fid, final Context c, final Connection readcon, final int foldertype) throws SQLException {
         final StringBuilder sb = new StringBuilder();
         if (foldertype == FolderObject.PRIVATE) {
@@ -1040,6 +1086,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return ret;
     }
 
+    @Override
     public boolean checkIfFolderIsEmpty(final int uid, final int fid, final Context c, final Connection readcon, final int foldertype) throws SQLException {
         final StringBuilder sb = new StringBuilder();
         if (foldertype == FolderObject.PRIVATE) {
@@ -1098,6 +1145,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return CalendarMySQL.select;
     }
 
+    @Override
     public PreparedStatement getSearchStatement(final int uid, final AppointmentSearchObject searchObj, final CalendarFolderObject cfo, final OXFolderAccess folderAccess, final String columns, final int orderBy, final Order orderDir, final Context ctx, final Connection readcon) throws SQLException, OXException {
         final StringBuilder sb = new StringBuilder(128);
         sb.append("SELECT ");
@@ -1223,6 +1271,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return pst;
     }
 
+    @Override
     public final PreparedStatement getSearchQuery(final String select, final int uid, final int groups[], final UserConfiguration uc, final int orderBy, final Order orderDir, final AppointmentSearchObject searchobject, final Context c, final Connection readcon, final CalendarFolderObject cfo, final boolean isShared) throws SQLException, OXException {
         final StringBuilder sb = new StringBuilder(128);
         sb.append(parseSelect(select));
@@ -1359,14 +1408,17 @@ public class CalendarMySQL implements CalendarSqlImp {
         return pst;
     }
 
+    @Override
     public final ResultSet getResultSet(final PreparedStatement pst) throws SQLException {
         return pst.executeQuery();
     }
 
+    @Override
     public final PreparedStatement getPreparedStatement(final Connection readcon, final String sql) throws SQLException {
         return readcon.prepareStatement(sql, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
     }
 
+    @Override
     public final String loadAppointment(final int oid, final Context c) throws SQLException {
         final StringBuilder sb = new StringBuilder(384);
         sb.append("SELECT creating_date, created_from, changing_date, changed_from, fid, pflag, timestampfield01, timestampfield02, timezone, ").append(" intfield02, intfield03, field01, field02, intfield06, intfield08, field04, intfield07, field09, organizer, uid, sequence, intfield04, intfield05, field06, field07, field08 FROM prg_dates  WHERE cid = ");
@@ -1377,6 +1429,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     }
 
+    @Override
     public final CalendarDataObject[] insertAppointment(final CalendarDataObject cdao, final Connection writecon, final Session so) throws DataTruncation, SQLException, OXException, OXException {
     	return insertAppointment0(cdao, writecon, so, true);
     }
@@ -1790,6 +1843,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return millis < System.currentTimeMillis();
     }
 
+    @Override
     public final void getParticipantsSQLIn(final List<CalendarDataObject> list, final Connection readcon, final int cid, final String sqlin) throws SQLException {
 
         final Statement stmt = readcon.createStatement();
@@ -1889,6 +1943,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         }
     }
 
+    @Override
     public final Participants getParticipants(final CalendarDataObject cdao, final Connection readcon) throws SQLException {
         final Participants participants = new Participants();
         final Statement stmt = readcon.createStatement();
@@ -1952,6 +2007,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return participants;
     }
 
+    @Override
     public final void getUserParticipantsSQLIn(final CalendarFolderObject visibleFolders, final List<CalendarDataObject> list, final Connection readcon, final int cid, final int uid, final String sqlin) throws SQLException, OXException {
         final Statement stmt = readcon.createStatement();
         ResultSet rs = null;
@@ -2062,6 +2118,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         }
     }
 
+    @Override
     public final Participants getUserParticipants(final CalendarDataObject cdao, final Connection readcon, final int uid) throws SQLException, OXException {
         final Participants participants = new Participants();
         final Statement stmt = readcon.createStatement();
@@ -2144,6 +2201,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return participants;
     }
 
+    @Override
     public final CalendarDataObject loadObjectForUpdate(final CalendarDataObject cdao, final Session so, final Context ctx, final int inFolder, final Connection con) throws SQLException, OXException {
         final CalendarOperation co = new CalendarOperation();
         Connection readcon = null;
@@ -2180,6 +2238,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return edao;
     }
 
+    @Override
     public final CalendarDataObject[] updateAppointment(final CalendarDataObject cdao, final CalendarDataObject edao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified) throws SQLException, OXException {
         return updateAppointment(cdao, edao, writecon, so, ctx, inFolder, clientLastModified, true, false);
     }
@@ -3462,6 +3521,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     private static final String SQL_CONFIRM2 = "UPDATE prg_dates SET changing_date = ?, changed_from = ? WHERE intfield01 = ? AND cid = ?";
 
+    @Override
     public final Date setUserConfirmation(final int oid, final int folderId, final int uid, final int confirm, final String message, final Session so, final Context ctx) throws OXException {
         checkConfirmPermission(folderId, uid, so, ctx);
         Connection writecon = null;
@@ -3541,6 +3601,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return changeTimestamp;
     }
 
+    @Override
     public Date setExternalConfirmation(final int oid, final int folderId, final String mail, final int confirm, final String message, final Session so, final Context ctx) throws OXException {
         checkConfirmPermission(folderId, -1, so, ctx);
 
@@ -3638,6 +3699,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return CalendarObject.NONE;
     }
 
+    @Override
     public final long attachmentAction(int folderId, final int oid, final int uid, Session session, final Context c, final int numberOfAttachments) throws OXException {
         Connection writecon = null;
         int changes[];
@@ -4155,6 +4217,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return false;
     }
 
+    @Override
     public final void deleteAppointment(final int uid, final CalendarDataObject cdao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified) throws SQLException, OXException {
         final Connection readcon = DBPool.pickup(ctx);
         final CalendarDataObject edao;
@@ -4229,6 +4292,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         }
     }
 
+    @Override
     public void deleteAppointmentsInFolder(final Session so, final Context ctx, final ResultSet rs, final Connection readcon, final Connection writecon, final int foldertype, final int fid) throws SQLException, OXException {
         while (rs.next()) {
             final int oid = rs.getInt(1);
@@ -4961,6 +5025,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         }
     }
 
+    @Override
     public int resolveUid(final Session session, final String uid) throws OXException {
         final Context ctx = Tools.getContext(session);
 
@@ -4996,6 +5061,7 @@ public class CalendarMySQL implements CalendarSqlImp {
     /* (non-Javadoc)
      * @see com.openexchange.calendar.CalendarSqlImp#getFolder(com.openexchange.session.Session, int)
      */
+    @Override
     public int getFolder(final Session session, final int objectId) throws OXException {
         final Context ctx = Tools.getContext(session);
 

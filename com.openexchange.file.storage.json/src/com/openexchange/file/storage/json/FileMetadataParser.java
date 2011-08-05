@@ -89,6 +89,7 @@ public class FileMetadataParser implements FileMetadataParserService{
         jsonHandler = new JSONParserHandler();
     }
 
+    @Override
     public File parse(JSONObject object) throws OXException {
         DefaultFile file = new DefaultFile();
 
@@ -108,6 +109,7 @@ public class FileMetadataParser implements FileMetadataParserService{
 
         private final FileFieldSet set = new FileFieldSet();
 
+        @Override
         public Object handle(Field field, Object... args) {
             File md = md(args);
             JSONObject object = get(1, JSONObject.class, args);
@@ -157,9 +159,11 @@ public class FileMetadataParser implements FileMetadataParserService{
         }
     }
 
+    @Override
     public List<Field> getFields(final JSONObject object) {
         return File.Field.inject(new AbstractFileFieldHandler() {
 
+            @Override
             public Object handle(Field field, Object... args) {
                 List<File.Field> fields = (List<File.Field>) args[0];
                 if(object.has(field.getName())) {

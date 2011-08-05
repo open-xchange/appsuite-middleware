@@ -64,6 +64,7 @@ public class SubscriptionsCreatedAndLastModifiedColumn extends ExtendedColumnCre
         super(dbService);
     }
 
+    @Override
     public String[] getDependencies() {
         return new String[] { "com.openexchange.groupware.update.tasks.CreateSubscribeTableTask" };
     }

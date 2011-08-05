@@ -267,14 +267,17 @@ public class MessagingMessageParser {
             super();
         }
 
+        @Override
         public int getRanking() {
             return 0;
         }
 
+        @Override
         public boolean handles(final String key, final Object value) {
             return JSONArray.class.isInstance(value);
         }
 
+        @Override
         public void parseAndAdd(final Map<String, Collection<MessagingHeader>> headers, final String key, final Object value) throws JSONException {
             final JSONArray values = (JSONArray) value;
             final LinkedList<MessagingHeader> valueList = new LinkedList<MessagingHeader>();
@@ -293,10 +296,12 @@ public class MessagingMessageParser {
             super();
         }
 
+        @Override
         public int getRanking() {
             return 0;
         }
 
+        @Override
         public boolean handles(final MessagingBodyPart partlyParsedMessage, final Object content) throws OXException {
             if (null != partlyParsedMessage.getContentType()) {
                 return partlyParsedMessage.getContentType().getPrimaryType().equals("text");
@@ -304,6 +309,7 @@ public class MessagingMessageParser {
             return false;
         }
 
+        @Override
         public MessagingContent parse(final MessagingBodyPart partlyParsedMessage, final Object content, final MessagingInputStreamRegistry registry) throws JSONException, OXException {
             return new StringContent((String) content);
         }
@@ -315,10 +321,12 @@ public class MessagingMessageParser {
             super();
         }
 
+        @Override
         public int getRanking() {
             return 0;
         }
 
+        @Override
         public boolean handles(final MessagingBodyPart partlyParsedMessage, final Object content) throws OXException {
             if (null != partlyParsedMessage.getContentType()) {
                 final String primaryType = partlyParsedMessage.getContentType().getPrimaryType();
@@ -327,6 +335,7 @@ public class MessagingMessageParser {
             return false;
         }
 
+        @Override
         public MessagingContent parse(final MessagingBodyPart partlyParsedMessage, final Object content, final MessagingInputStreamRegistry registry) throws JSONException, OXException, IOException {
             if (String.class.isInstance(content)) {
                 final byte[] decoded = Base64.decode((String) content);
@@ -370,10 +379,12 @@ public class MessagingMessageParser {
             super();
         }
 
+        @Override
         public int getRanking() {
             return 0;
         }
 
+        @Override
         public boolean handles(final MessagingBodyPart partlyParsedMessage, final Object content) throws OXException {
             if (null != partlyParsedMessage.getContentType()) {
                 final String primaryType = partlyParsedMessage.getContentType().getPrimaryType();
@@ -382,6 +393,7 @@ public class MessagingMessageParser {
             return false;
         }
 
+        @Override
         public MessagingContent parse(final MessagingBodyPart partlyParsedMessage, final Object content, final MessagingInputStreamRegistry registry) throws JSONException, OXException, IOException {
 
             final MimeMultipartContent multipartContent = new MimeMultipartContent();

@@ -71,46 +71,57 @@ public class FileMetadata implements DocumentMetadata {
         this.file = document;
     }
 
+    @Override
     public String getCategories() {
         return file.getCategories();
     }
 
+    @Override
     public int getColorLabel() {
         return file.getColorLabel();
     }
 
+    @Override
     public String getContent() {
         return file.getContent();
     }
 
+    @Override
     public Date getCreationDate() {
         return file.getCreated();
     }
 
+    @Override
     public int getCreatedBy() {
         return file.getCreatedBy();
     }
 
+    @Override
     public String getDescription() {
         return file.getDescription();
     }
 
+    @Override
     public String getFileMD5Sum() {
         return file.getFileMD5Sum();
     }
 
+    @Override
     public String getFileMIMEType() {
         return file.getFileMIMEType();
     }
 
+    @Override
     public String getFileName() {
         return file.getFileName();
     }
 
+    @Override
     public long getFileSize() {
         return file.getFileSize();
     }
 
+    @Override
     public long getFolderId() {
         if(file.getFolderId() == null) {
             return -1;
@@ -118,6 +129,7 @@ public class FileMetadata implements DocumentMetadata {
         return Long.valueOf(file.getFolderId());
     }
 
+    @Override
     public int getId() {
         if(file.getId() == FileStorageFileAccess.NEW) {
             return InfostoreFacade.NEW;
@@ -125,138 +137,172 @@ public class FileMetadata implements DocumentMetadata {
         return Integer.valueOf(file.getId());
     }
 
+    @Override
     public Date getLastModified() {
         return file.getLastModified();
     }
 
+    @Override
     public Date getLockedUntil() {
         return file.getLockedUntil();
     }
 
+    @Override
     public int getModifiedBy() {
         return file.getModifiedBy();
     }
 
+    @Override
     public int getNumberOfVersions() {
         return file.getNumberOfVersions();
     }
 
+    @Override
     public String getProperty(String key) {
         return file.getProperty(key);
     }
 
+    @Override
     public Set<String> getPropertyNames() {
         return file.getPropertyNames();
     }
 
+    @Override
     public long getSequenceNumber() {
         return file.getSequenceNumber();
     }
 
+    @Override
     public String getTitle() {
         return file.getTitle();
     }
 
+    @Override
     public String getURL() {
         return file.getURL();
     }
 
+    @Override
     public int getVersion() {
         return file.getVersion();
     }
 
+    @Override
     public String getVersionComment() {
         return file.getVersionComment();
     }
 
+    @Override
     public boolean isCurrentVersion() {
         return file.isCurrentVersion();
     }
 
+    @Override
     public void setCategories(String categories) {
         file.setCategories(categories);
     }
 
+    @Override
     public void setColorLabel(int color) {
         file.setColorLabel(color);
     }
 
+    @Override
     public void setCreationDate(Date creationDate) {
         file.setCreated(creationDate);
     }
 
+    @Override
     public void setCreatedBy(int cretor) {
         file.setCreatedBy(cretor);
     }
 
+    @Override
     public void setDescription(String description) {
         file.setDescription(description);
     }
 
+    @Override
     public void setFileMD5Sum(String sum) {
         file.setFileMD5Sum(sum);
     }
 
+    @Override
     public void setFileMIMEType(String type) {
         file.setFileMIMEType(type);
     }
 
+    @Override
     public void setFileName(String fileName) {
         file.setFileName(fileName);
     }
 
+    @Override
     public void setFileSize(long length) {
         file.setFileSize(length);
     }
 
+    @Override
     public void setFolderId(long folderId) {
         file.setFolderId(String.valueOf(folderId));
     }
 
+    @Override
     public void setId(int id) {
         file.setId(String.valueOf(id));
     }
 
+    @Override
     public void setIsCurrentVersion(boolean bool) {
         file.setIsCurrentVersion(bool);
     }
 
+    @Override
     public void setLastModified(Date now) {
         file.setLastModified(now);
     }
 
+    @Override
     public void setLockedUntil(Date lockedUntil) {
         file.setLockedUntil(lockedUntil);
     }
 
+    @Override
     public void setModifiedBy(int lastEditor) {
         file.setModifiedBy(lastEditor);
     }
 
+    @Override
     public void setNumberOfVersions(int numberOfVersions) {
         file.setNumberOfVersions(numberOfVersions);
     }
 
+    @Override
     public void setTitle(String title) {
         file.setTitle(title);
     }
 
+    @Override
     public void setURL(String url) {
         file.setURL(url);
     }
 
+    @Override
     public void setVersion(int version) {
         file.setVersion(version);
     }
 
+    @Override
     public void setVersionComment(String string) {
         file.setVersionComment(string);
     }
 
+    @Override
     public String getFilestoreLocation() {
         return fileSpool;
     }
 
+    @Override
     public void setFilestoreLocation(String string) {
         this.fileSpool = string;
     }

@@ -80,6 +80,7 @@ public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<Cale
     private static final int[] COMPARISON_COLUMNS = {
         Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.TITLE, Appointment.START_DATE, Appointment.END_DATE, Appointment.UID, Appointment.NOTE, Appointment.LAST_MODIFIED, Appointment.SEQUENCE };
 
+    @Override
     public int calculateSimilarityScore(final CalendarDataObject original, final CalendarDataObject candidate, final Object session) throws OXException {
         int score = 0;
         // A score of 10 is sufficient for a match
@@ -116,10 +117,12 @@ public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<Cale
         }
     }
 
+    @Override
     public void closeSession(final Object session) throws OXException {
 
     }
 
+    @Override
     public Collection<CalendarDataObject> getData(final TargetFolderDefinition target, final Object session) throws OXException {
         final CalendarSql calendarSql = (CalendarSql) getFromSession(SQL_INTERFACE, session);
 
@@ -142,14 +145,17 @@ public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<Cale
         return retval;
     }
 
+    @Override
     public int getThreshold(final Object session) throws OXException {
         return 9;
     }
 
+    @Override
     public boolean handles(final FolderObject folder) {
         return folder.getModule() == FolderObject.CALENDAR;
     }
 
+    @Override
     public void save(final CalendarDataObject newElement, final Object session) throws OXException {
         final CalendarSql calendarSql = (CalendarSql) getFromSession(SQL_INTERFACE, session);
         final TargetFolderDefinition target = (TargetFolderDefinition) getFromSession(TARGET, session);
@@ -163,6 +169,7 @@ public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<Cale
         return ((Map<Integer, Object>) session).get(key);
     }
 
+    @Override
     public Object startSession(final TargetFolderDefinition target) throws OXException {
         final Map<Integer, Object> userInfo = new HashMap<Integer, Object>();
         userInfo.put(SQL_INTERFACE, new CalendarSql(new TargetFolderSession(target)));
@@ -170,6 +177,7 @@ public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<Cale
         return userInfo;
     }
 
+    @Override
     public void update(final CalendarDataObject original, final CalendarDataObject update, final Object session) throws OXException {
         final CalendarSql calendarSql = (CalendarSql) getFromSession(SQL_INTERFACE, session);
 

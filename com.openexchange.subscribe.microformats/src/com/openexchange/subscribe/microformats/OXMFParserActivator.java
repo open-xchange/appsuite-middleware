@@ -65,10 +65,12 @@ public class OXMFParserActivator implements BundleActivator {
 
     private ServiceRegistration parserRegistration;
 
+    @Override
     public void start(BundleContext context) throws Exception {
         parserRegistration = context.registerService(OXMFParserFactoryService.class.getName(), new OXMFParserFactoryServiceImpl(), null);
     }
 
+    @Override
     public void stop(BundleContext context) throws Exception {
         parserRegistration.unregister();
     }

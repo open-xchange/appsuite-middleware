@@ -87,6 +87,7 @@ public class ExtensionDetailsAction extends AbstractVoipNowSOAPAction<ExtensionI
         super();
     }
 
+    @Override
     public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
         String extensionId = checkStringParameter(request, "id");
 		VoipNowServerSetting setting = getSOAPVoipNowServerSetting(session);

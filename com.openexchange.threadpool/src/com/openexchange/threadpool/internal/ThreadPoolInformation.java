@@ -75,22 +75,27 @@ public final class ThreadPoolInformation extends StandardMBean implements Thread
         this.threadPoolService = threadPoolService;
     }
 
+    @Override
     public int getActiveCount() {
         return threadPoolService.getActiveCount();
     }
 
+    @Override
     public long getCompletedTaskCount() {
         return threadPoolService.getCompletedTaskCount();
     }
 
+    @Override
     public int getLargestPoolSize() {
         return threadPoolService.getLargestPoolSize();
     }
 
+    @Override
     public int getPoolSize() {
         return threadPoolService.getPoolSize();
     }
 
+    @Override
     public long getTaskCount() {
         return threadPoolService.getTaskCount();
     }

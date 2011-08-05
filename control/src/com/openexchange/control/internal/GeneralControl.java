@@ -83,6 +83,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
         this.bundleContext = bundleContext;
     }
 
+    @Override
     public List<Map<String, String>> list() {
         LOG.info("control command: list");
         final List<Map<String, String>> arrayList = new ArrayList<Map<String, String>>();
@@ -97,6 +98,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
         return arrayList;
     }
 
+    @Override
     public void start(final String name) throws MBeanException {
         LOG.info("control command: start package " + name);
         final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
@@ -111,6 +113,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
         }
     }
 
+    @Override
     public void stop(final String name) throws MBeanException {
         LOG.info("control command: stop package " + name);
         final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
@@ -125,11 +128,13 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
         }
     }
 
+    @Override
     public void restart(final String name) throws MBeanException {
         stop(name);
         start(name);
     }
 
+    @Override
     public void install(final String location) {
         LOG.info("install package: " + location);
         try {
@@ -139,6 +144,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
         }
     }
 
+    @Override
     public void uninstall(final String name) throws MBeanException {
         LOG.info("uninstall package");
         final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
@@ -153,6 +159,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
         }
     }
 
+    @Override
     public void update(final String name, final boolean autofresh) throws MBeanException {
         LOG.info("control command: update package: " + name);
         final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
@@ -170,11 +177,13 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
         }
     }
 
+    @Override
     public void refresh() {
         LOG.info("control command: refresh");
         freshPackages(bundleContext);
     }
 
+    @Override
     public void shutdown() {
         LOG.info("control command: shutdown");
         shutdown(bundleContext, false);
@@ -212,6 +221,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
         }
     }
 
+    @Override
     public List<Map<String, Object>> services() {
         LOG.info("control command: services");
         final List<Map<String, Object>> serviceList = new ArrayList<Map<String, Object>>();
@@ -261,6 +271,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
         return serviceList;
     }
 
+    @Override
     public String version() {
         return Version.getVersionString();
     }
@@ -274,6 +285,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
         return null;
     }
 
+    @Override
     public ObjectName preRegister(final MBeanServer server, final ObjectName nameArg) throws Exception {
         ObjectName name = nameArg;
         if (name == null) {
@@ -284,18 +296,21 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
         return name;
     }
 
+    @Override
     public void postRegister(final Boolean registrationDone) {
         if (LOG.isTraceEnabled()) {
             LOG.trace(new StringBuilder("postRegister() with ").append(registrationDone));
         }
     }
 
+    @Override
     public void preDeregister() throws Exception {
         if (LOG.isTraceEnabled()) {
             LOG.trace("preDeregister()");
         }
     }
 
+    @Override
     public void postDeregister() {
         if (LOG.isTraceEnabled()) {
             LOG.trace("postDeregister()");

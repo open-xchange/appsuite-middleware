@@ -133,102 +133,127 @@ public class UserPrincipalResource extends AbstractResource {
         // IGNORE
     }
 
+    @Override
     public void create() throws OXException {
         // IGNORE
     }
 
+    @Override
     public void delete() throws OXException {
         // IGNORE
     }
 
+    @Override
     public boolean exists() throws OXException {
         return true;
     }
 
+    @Override
     public InputStream getBody() throws OXException {
         return null;
     }
 
+    @Override
     public String getContentType() throws OXException {
         return null;
     }
 
+    @Override
     public Date getCreationDate() throws OXException {
         return new Date(0);
     }
 
+    @Override
     public String getDisplayName() throws OXException {
         return user.getDisplayName();
     }
 
+    @Override
     public String getETag() throws OXException {
         return "http://www.open-xchange.com/webdav/users/"+user.getId();
     }
 
+    @Override
     public String getLanguage() throws OXException {
         return null;
     }
 
+    @Override
     public Date getLastModified() throws OXException {
         return new Date(0);
     }
 
+    @Override
     public Long getLength() throws OXException {
         return null;
     }
 
+    @Override
     public WebdavLock getLock(String token) throws OXException {
         return null;
     }
 
+    @Override
     public List<WebdavLock> getLocks() throws OXException {
         return Collections.emptyList();
     }
 
+    @Override
     public WebdavLock getOwnLock(String token) throws OXException {
         return null;
     }
 
+    @Override
     public List<WebdavLock> getOwnLocks() throws OXException {
         return Collections.emptyList();
     }
 
+    @Override
     public String getSource() throws OXException {
         return null;
     }
 
+    @Override
     public WebdavPath getUrl() {
         return url;
     }
 
+    @Override
     public void lock(WebdavLock lock) throws OXException {
         // IGNORE
     }
 
+    @Override
     public void save() throws OXException {
         // IGNORE
     }
 
+    @Override
     public void setContentType(String type) throws OXException {
         // IGNORE
     }
 
+    @Override
     public void setDisplayName(String displayName) throws OXException {
         // IGNORE
     }
 
+    @Override
     public void setLanguage(String language) throws OXException {
         // IGNORE
     }
 
+    @Override
     public void setLength(Long length) throws OXException {
         // IGNORE
     }
 
+    @Override
     public void setSource(String source) throws OXException {
         // IGNORE
     }
 
+    @Override
     public void unlock(String token) throws OXException {
         // IGNORE
     }

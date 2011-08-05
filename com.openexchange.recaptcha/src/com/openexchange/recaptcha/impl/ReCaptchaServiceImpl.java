@@ -78,6 +78,7 @@ public class ReCaptchaServiceImpl implements ReCaptchaService {
         this.options = options;
     }
 
+    @Override
     public boolean check(String address, String challenge, String response, boolean strict) {
         ReCaptchaImpl reCaptcha = new ReCaptchaImpl();
         reCaptcha.setPrivateKey(props.getProperty("privateKey"));
@@ -92,6 +93,7 @@ public class ReCaptchaServiceImpl implements ReCaptchaService {
         }
     }
 
+    @Override
     public String getHTML() {
         ReCaptcha reCaptcha = ReCaptchaFactory.newReCaptcha(props.getProperty("publicKey"), props.getProperty("privateKey"), false);
         return reCaptcha.createRecaptchaHtml(null, options);

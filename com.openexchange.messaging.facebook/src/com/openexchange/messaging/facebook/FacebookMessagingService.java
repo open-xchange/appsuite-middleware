@@ -110,30 +110,37 @@ public final class FacebookMessagingService implements MessagingService {
         formDescription = new ReadOnlyDynamicFormDescription(tmpDescription);
     }
 
+    @Override
     public Set<String> getSecretProperties() {
         return Collections.emptySet();
     }
 
+    @Override
     public MessagingAccountAccess getAccountAccess(final int accountId, final Session session) throws OXException {
         return new FacebookMessagingAccountAccess(accountManager.getAccount(accountId, session), session);
     }
 
+    @Override
     public MessagingAccountManager getAccountManager() {
         return accountManager;
     }
 
+    @Override
     public MessagingAccountTransport getAccountTransport(final int accountId, final Session session) throws OXException {
         return new FacebookMessagingAccountTransport(accountManager.getAccount(accountId, session), session);
     }
 
+    @Override
     public String getDisplayName() {
         return DISPLAY_NAME;
     }
 
+    @Override
     public DynamicFormDescription getFormDescription() {
         return formDescription;
     }
 
+    @Override
     public String getId() {
         return ID;
     }
@@ -143,6 +150,7 @@ public final class FacebookMessagingService implements MessagingService {
             new MessagingAction(FacebookConstants.TYPE_UPDATE_STATUS, MessagingAction.Type.MESSAGE),
             new MessagingAction(FacebookConstants.TYPE_POST, MessagingAction.Type.MESSAGE)));
 
+    @Override
     public List<MessagingAction> getMessageActions() {
         /*
          * status update, wall
@@ -157,6 +165,7 @@ public final class FacebookMessagingService implements MessagingService {
             MessagingPermission.NO_PERMISSIONS};
     }
 
+    @Override
     public int[] getStaticRootPermissions() {
         return getStaticRootPerms();
     }

@@ -69,6 +69,7 @@ public class FileConverter implements ResultConverter {
 
     private static final FileMetadataWriter writer = new FileMetadataWriter();
 
+    @Override
     public void convert(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
         final AJAXInfostoreRequest iReq = new AJAXInfostoreRequest(request, session);
         Object resultObject = result.getResultObject();
@@ -84,14 +85,17 @@ public class FileConverter implements ResultConverter {
         result.setResultObject(resultObject);
     }
 
+    @Override
     public String getInputFormat() {
         return "infostore";
     }
 
+    @Override
     public String getOutputFormat() {
         return "json";
     }
 
+    @Override
     public Quality getQuality() {
         return Quality.GOOD;
     }

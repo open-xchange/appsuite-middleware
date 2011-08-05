@@ -60,28 +60,34 @@ import com.openexchange.datatypes.genericonf.WidgetSwitcher;
  */
 public class ValueWriterSwitch implements WidgetSwitcher {
 
+    @Override
     public Object input(Object... args) {
         return args[0];
     }
 
+    @Override
     public Object password(Object... args) {
         return null;
     }
 
+    @Override
     public Object checkbox(Object[] args) {
        return args[0];
     }
 
+    @Override
     public Object link(Object... args) {
         String link = (String) args[0];
         String prefix = (String) args[1];
         return link.charAt(0) == '/' ? prefix + link : link;
     }
 
+    @Override
     public Object text(Object... args) {
         return args[0];
     }
 
+    @Override
     public Object custom(Object... args) {
         return args[0];
     }

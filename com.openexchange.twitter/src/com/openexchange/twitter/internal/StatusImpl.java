@@ -77,26 +77,32 @@ public final class StatusImpl implements Status {
         this.twitter4jStatus = twitter4jStatus;
     }
 
+    @Override
     public Date getCreatedAt() {
         return twitter4jStatus.getCreatedAt();
     }
 
+    @Override
     public long getId() {
         return twitter4jStatus.getId();
     }
 
+    @Override
     public String getInReplyToScreenName() {
         return twitter4jStatus.getInReplyToScreenName();
     }
 
+    @Override
     public long getInReplyToStatusId() {
         return twitter4jStatus.getInReplyToStatusId();
     }
 
+    @Override
     public long getInReplyToUserId() {
         return twitter4jStatus.getInReplyToUserId();
     }
 
+    @Override
     public RetweetDetails getRetweetDetails() {
         if (null == retweetDetails) {
             retweetDetails = new RetweetDetailsImpl(twitter4jStatus.getRetweetedStatus(), twitter4jStatus.getRetweetCount());
@@ -104,14 +110,17 @@ public final class StatusImpl implements Status {
         return retweetDetails;
     }
 
+    @Override
     public String getSource() {
         return twitter4jStatus.getSource();
     }
 
+    @Override
     public String getText() {
         return twitter4jStatus.getText();
     }
 
+    @Override
     public User getUser() {
         if (null == user) {
             user = new UserImpl(twitter4jStatus.getUser());
@@ -119,14 +128,17 @@ public final class StatusImpl implements Status {
         return user;
     }
 
+    @Override
     public boolean isFavorited() {
         return twitter4jStatus.isFavorited();
     }
 
+    @Override
     public boolean isRetweet() {
         return twitter4jStatus.isRetweet();
     }
 
+    @Override
     public boolean isTruncated() {
         return twitter4jStatus.isTruncated();
     }

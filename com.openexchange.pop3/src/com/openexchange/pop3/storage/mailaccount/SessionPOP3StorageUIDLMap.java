@@ -187,6 +187,7 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         }
     }
 
+    @Override
     public void addMappings(final String[] uidls, final FullnameUIDPair[] fullnameUIDPairs) throws OXException {
         final Lock readLock = rwLock.readLock();
         readLock.lock();
@@ -206,6 +207,7 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         }
     }
 
+    @Override
     public FullnameUIDPair getFullnameUIDPair(final String uidl) throws OXException {
         final Lock readLock = rwLock.readLock();
         readLock.lock();
@@ -217,6 +219,7 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         }
     }
 
+    @Override
     public FullnameUIDPair[] getFullnameUIDPairs(final String[] uidls) throws OXException {
         final Lock readLock = rwLock.readLock();
         readLock.lock();
@@ -232,6 +235,7 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         }
     }
 
+    @Override
     public String getUIDL(final FullnameUIDPair fullnameUIDPair) throws OXException {
         final Lock readLock = rwLock.readLock();
         readLock.lock();
@@ -243,6 +247,7 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         }
     }
 
+    @Override
     public String[] getUIDLs(final FullnameUIDPair[] fullnameUIDPairs) throws OXException {
         final Lock readLock = rwLock.readLock();
         readLock.lock();
@@ -258,6 +263,7 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         }
     }
 
+    @Override
     public Map<String, FullnameUIDPair> getAllUIDLs() throws OXException {
         final Lock readLock = rwLock.readLock();
         readLock.lock();
@@ -271,6 +277,7 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         }
     }
 
+    @Override
     public void deleteFullnameUIDPairMappings(final FullnameUIDPair[] fullnameUIDPairs) throws OXException {
         final Lock readLock = rwLock.readLock();
         readLock.lock();
@@ -288,6 +295,7 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         }
     }
 
+    @Override
     public void deleteUIDLMappings(final String[] uidls) throws OXException {
         final Lock readLock = rwLock.readLock();
         readLock.lock();
@@ -333,6 +341,7 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
             this.tmode = tmode;
         }
 
+        @Override
         public void run() {
             final Lock writeLock = trwLock.writeLock();
             writeLock.lock();

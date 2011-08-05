@@ -85,6 +85,7 @@ public class InfostoreFolderLoader implements PublicationDataLoaderService {
 
 
 
+    @Override
     public Collection<? extends Object> load(final Publication publication) throws OXException {
         final LinkedList<Object> list = new LinkedList<Object>();
         try {

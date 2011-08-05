@@ -211,6 +211,7 @@ public abstract class DeferredRegistryRegistration<R, P> extends ServiceTracker 
             this.service = service;
         }
 
+        @Override
         public int compareTo(ServiceEntry o) {
             return getPriority() - o.getPriority();
         }

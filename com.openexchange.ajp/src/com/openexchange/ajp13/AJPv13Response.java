@@ -307,7 +307,7 @@ public class AJPv13Response {
 
     /**
      * Sets the name of the echo header.
-     * 
+     *
      * @param headerName The header name
      */
     public static void setEchoHeaderName(final String headerName) {
@@ -316,7 +316,7 @@ public class AJPv13Response {
 
     /**
      * Gets the name of the echo header.
-     * 
+     *
      * @return The header name
      */
     public static String getEchoHeaderName() {

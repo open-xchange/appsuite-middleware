@@ -115,10 +115,12 @@ public final class OSGiMetaDataRegistry implements OAuthServiceMetaDataRegistry 
         map = new ConcurrentHashMap<String, OAuthServiceMetaData>();
     }
 
+    @Override
     public List<OAuthServiceMetaData> getAllServices() {
         return new ArrayList<OAuthServiceMetaData>(map.values());
     }
 
+    @Override
     public OAuthServiceMetaData getService(final String id) throws OXException {
         final OAuthServiceMetaData service = map.get(id);
         if (null == service) {
@@ -127,6 +129,7 @@ public final class OSGiMetaDataRegistry implements OAuthServiceMetaDataRegistry 
         return service;
     }
 
+    @Override
     public boolean containsService(final String id) {
         return null == id ? false : map.containsKey(id);
     }
@@ -165,6 +168,7 @@ public final class OSGiMetaDataRegistry implements OAuthServiceMetaDataRegistry 
             this.context = context;
         }
 
+        @Override
         public Object addingService(final ServiceReference reference) {
             final Object service = context.getService(reference);
             if ((service instanceof OAuthServiceMetaData)) {
@@ -186,10 +190,12 @@ public final class OSGiMetaDataRegistry implements OAuthServiceMetaDataRegistry 
             return null;
         }
 
+        @Override
         public void modifiedService(final ServiceReference reference, final Object service) {
             // Nothing to do
         }
 
+        @Override
         public void removedService(final ServiceReference reference, final Object service) {
             if (null != service) {
                 try {

@@ -77,30 +77,37 @@ public class ArrayIterator<T> implements SearchIterator<T> {
         this.array = Arrays.clone(array);
     }
 
+    @Override
     public boolean hasNext() throws OXException {
         return index < array.length;
     }
 
+    @Override
     public T next() throws OXException {
         return array[index++];
     }
 
+    @Override
     public void close() throws OXException {
         // Does not apply to array-backed iterator
     }
 
+    @Override
     public int size() {
         return array.length;
     }
 
+    @Override
     public void addWarning(final OXException warning) {
         warnings.add(warning);
     }
 
+    @Override
     public OXException[] getWarnings() {
         return warnings.isEmpty() ? null : warnings.toArray(new OXException[warnings.size()]);
     }
 
+    @Override
     public boolean hasWarnings() {
         return !warnings.isEmpty();
     }

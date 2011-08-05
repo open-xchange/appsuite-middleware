@@ -72,6 +72,7 @@ public class MockOAuthService implements OAuthService {
     /* (non-Javadoc)
      * @see com.openexchange.oauth.OAuthService#createAccount(java.lang.String, java.util.Map, int, int)
      */
+    @Override
     public OAuthAccount createAccount(String serviceMetaData, Map<String, Object> arguments, int user, int contextId) throws OXException {
         // TODO Auto-generated method stub
         return null;
@@ -80,6 +81,7 @@ public class MockOAuthService implements OAuthService {
     /* (non-Javadoc)
      * @see com.openexchange.oauth.OAuthService#createAccount(java.lang.String, com.openexchange.oauth.OAuthInteractionType, java.util.Map, int, int)
      */
+    @Override
     public OAuthAccount createAccount(String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId) throws OXException {
         // TODO Auto-generated method stub
         return null;
@@ -88,6 +90,7 @@ public class MockOAuthService implements OAuthService {
     /* (non-Javadoc)
      * @see com.openexchange.oauth.OAuthService#deleteAccount(int, int, int)
      */
+    @Override
     public void deleteAccount(int accountId, int user, int contextId) throws OXException {
         // TODO Auto-generated method stub
 
@@ -96,28 +99,34 @@ public class MockOAuthService implements OAuthService {
     /* (non-Javadoc)
      * @see com.openexchange.oauth.OAuthService#getAccount(int, java.lang.String, int, int)
      */
+    @Override
     public OAuthAccount getAccount(int accountId, String password, int user, int contextId) throws OXException {
         return new OAuthAccount() {
 
+            @Override
             public String getDisplayName() {
                 // TODO Auto-generated method stub
                 return null;
             }
 
+            @Override
             public int getId() {
                 // TODO Auto-generated method stub
                 return 0;
             }
 
+            @Override
             public OAuthServiceMetaData getMetaData() {
                 // TODO Auto-generated method stub
                 return null;
             }
 
+            @Override
             public String getSecret() {
                 return tokenSecret;
             }
 
+            @Override
             public String getToken() {
                 return token;
             }
@@ -128,6 +137,7 @@ public class MockOAuthService implements OAuthService {
     /* (non-Javadoc)
      * @see com.openexchange.oauth.OAuthService#getAccounts(java.lang.String, int, int)
      */
+    @Override
     public List<OAuthAccount> getAccounts(String password, int user, int contextId) throws OXException {
         // TODO Auto-generated method stub
         return null;
@@ -136,6 +146,7 @@ public class MockOAuthService implements OAuthService {
     /* (non-Javadoc)
      * @see com.openexchange.oauth.OAuthService#getAccounts(java.lang.String, java.lang.String, int, int)
      */
+    @Override
     public List<OAuthAccount> getAccounts(String serviceMetaData, String password, int user, int contextId) throws OXException {
         // TODO Auto-generated method stub
         return null;
@@ -144,6 +155,7 @@ public class MockOAuthService implements OAuthService {
     /* (non-Javadoc)
      * @see com.openexchange.oauth.OAuthService#getMetaDataRegistry()
      */
+    @Override
     public OAuthServiceMetaDataRegistry getMetaDataRegistry() {
         // TODO Auto-generated method stub
         return null;
@@ -152,6 +164,7 @@ public class MockOAuthService implements OAuthService {
     /* (non-Javadoc)
      * @see com.openexchange.oauth.OAuthService#initOAuth(java.lang.String, java.lang.String)
      */
+    @Override
     public OAuthInteraction initOAuth(String serviceMetaData, String callbackUrl) throws OXException {
         // TODO Auto-generated method stub
         return null;
@@ -160,6 +173,7 @@ public class MockOAuthService implements OAuthService {
     /* (non-Javadoc)
      * @see com.openexchange.oauth.OAuthService#updateAccount(int, java.util.Map, int, int)
      */
+    @Override
     public void updateAccount(int accountId, Map<String, Object> arguments, int user, int contextId) throws OXException {
         // TODO Auto-generated method stub
 
@@ -168,6 +182,7 @@ public class MockOAuthService implements OAuthService {
     /* (non-Javadoc)
      * @see com.openexchange.oauth.OAuthService#updateAccount(int, java.lang.String, com.openexchange.oauth.OAuthInteractionType, java.util.Map, int, int)
      */
+    @Override
     public OAuthAccount updateAccount(int accountId, String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId) throws OXException {
         // TODO Auto-generated method stub
         return null;

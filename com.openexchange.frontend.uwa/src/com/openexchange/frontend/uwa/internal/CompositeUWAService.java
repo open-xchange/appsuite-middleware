@@ -131,6 +131,7 @@ public class CompositeUWAService implements UWAWidgetService {
 
     private static final Set<Field> POSITION_FIELDS = EnumSet.of(Field.ADJ);
 
+    @Override
     public List<UWAWidget> all() throws OXException {
         try {
             final List<UWAWidget> userWidgets = userScope.load();
@@ -184,6 +185,7 @@ public class CompositeUWAService implements UWAWidgetService {
         widget.setId(IDMangler.mangle(scope, widget.getId()));
     }
 
+    @Override
     public void create(final UWAWidget widget) throws OXException {
         try {
             final int dbId = idGenerator.getId("uwaWidget", ctxId);
@@ -203,6 +205,7 @@ public class CompositeUWAService implements UWAWidgetService {
 
     }
 
+    @Override
     public void delete(final String id) throws OXException {
         if (isProtected(id)) {
             throw UWAWidgetExceptionCodes.PROTECTED.create(id);
@@ -221,6 +224,7 @@ public class CompositeUWAService implements UWAWidgetService {
 
     }
 
+    @Override
     public UWAWidget get(final String id) throws OXException {
         final List<String> components = IDMangler.unmangle(id);
         final String scope = components.get(0);
@@ -260,6 +264,7 @@ public class CompositeUWAService implements UWAWidgetService {
         return widget;
     }
 
+    @Override
     public void update(final UWAWidget widget, final List<? extends Attribute<UWAWidget>> modified) throws OXException {
         if (isProtected(widget.getId())) {
             if (!onlyPositionFields(modified)) {

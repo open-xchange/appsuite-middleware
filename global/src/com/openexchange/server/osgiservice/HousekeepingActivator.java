@@ -61,7 +61,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 /**
  * A {@link HousekeepingActivator} helps with housekeeping tasks like remembering service trackers or service registrations and cleaning
  * them up later.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class HousekeepingActivator extends DeferredActivator {
@@ -96,7 +96,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
 
     /**
      * Checks if this activator has at least one service registered.
-     * 
+     *
      * @return <code>true</code> if this activator has at least one service registered; otherwise <code>false</code>
      */
     protected boolean hasRegisteredServices() {
@@ -105,7 +105,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
 
     /**
      * Registers specified service with the specified properties under the specified class.
-     * 
+     *
      * @param clazz The service's class
      * @param service The service reference
      * @param properties The service's properties
@@ -116,7 +116,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
 
     /**
      * Registers specified service under the specified class.
-     * 
+     *
      * @param clazz The service's class
      * @param service The service reference
      */
@@ -126,7 +126,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
 
     /**
      * Adds specified service tracker to this activator. Thus it is automatically closed and removed by {@link #cleanUp()}.
-     * 
+     *
      * @param tracker The service tracker
      */
     protected void rememberTracker(final ServiceTracker<?, ?> tracker) {
@@ -135,7 +135,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
 
     /**
      * Removes specified service tracker from this activator.
-     * 
+     *
      * @param tracker The service tracker
      */
     protected void forgetTracker(final ServiceTracker<?, ?> tracker) {
@@ -144,7 +144,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
 
     /**
      * Creates and starts a new {@link ServiceTracker} instance parameterized with given customizer.
-     * 
+     *
      * @param clazz The class of the tracked service
      * @param customizer The customizer applied to newly created {@link ServiceTracker} instance
      * @return The newly created {@link ServiceTracker} instance
@@ -157,7 +157,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
 
     /**
      * Creates and starts a new {@link ServiceTracker} instance parameterized with given customizer.
-     * 
+     *
      * @param filter The tracker's filter
      * @param customizer The customizer applied to newly created {@link ServiceTracker} instance
      * @return The newly created {@link ServiceTracker} instance
@@ -170,7 +170,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
 
     /**
      * Creates and starts a new {@link ServiceTracker} instance for specified service's class.
-     * 
+     *
      * @param clazz The service's class
      * @return The newly created {@link ServiceTracker} instance
      */
@@ -180,7 +180,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
 
     /**
      * Creates and starts a new {@link ServiceTracker} instance for specified filter.
-     * 
+     *
      * @param filter The filter to apply
      * @return The newly created {@link ServiceTracker} instance
      */
@@ -190,7 +190,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
 
     /**
      * Creates and starts a new {@link ServiceTracker} instance with given listener applied.
-     * 
+     *
      * @param clazz The service's class
      * @param listener The service's listener triggered on {@link ServiceTracker#addingService(ServiceReference)} and so on
      * @return The newly created {@link ServiceTracker} instance
@@ -221,7 +221,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
 
     /**
      * Creates and starts a new {@link ServiceTracker} instance with given listener applied.
-     * 
+     *
      * @param filter The service filter
      * @param listener The service's listener triggered on {@link ServiceTracker#addingService(ServiceReference)} and so on
      * @return The newly created {@link ServiceTracker} instance

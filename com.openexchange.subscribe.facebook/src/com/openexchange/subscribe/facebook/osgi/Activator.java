@@ -21,6 +21,7 @@ public class Activator implements BundleActivator {
         super();
     }
 
+    @Override
     public void start(final BundleContext context) throws Exception {
         final Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + OAuthServiceMetaData.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + FacebookService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + ContextService.class.getName() + "))");
         tracker = new ServiceTracker(context, filter, new FacebookRegisterer(context));
@@ -30,6 +31,7 @@ public class Activator implements BundleActivator {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void stop(final BundleContext context) throws Exception {
         tracker.close();
     }

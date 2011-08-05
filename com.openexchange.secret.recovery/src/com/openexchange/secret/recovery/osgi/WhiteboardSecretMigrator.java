@@ -66,6 +66,7 @@ public class WhiteboardSecretMigrator extends ServiceTracker implements SecretMi
         super(context, SecretMigrator.class.getName(), null);
     }
 
+    @Override
     public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws OXException {
         final Object[] services = getServices();
         for (final Object object : services) {

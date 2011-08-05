@@ -77,14 +77,17 @@ public enum Property implements PropertyInterface {
         this.name = name;
     }
 
+    @Override
     public Class<? extends Object> getClazz() {
         return clazz;
     }
 
+    @Override
     public Required getRequired() {
         return required;
     }
 
+    @Override
     public String getName() {
         return name;
     }

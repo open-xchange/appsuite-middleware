@@ -64,10 +64,10 @@ import com.openexchange.exception.OXExceptionFactory;
 public enum EAVErrorMessage implements OXExceptionCode {
 
     NO_OPTIONS(1, "The type %s may not have any options", "", CATEGORY_USER_INPUT),
-    UNKNOWN_OPTION(2, "The type %s may not have any options other than %s", "", CATEGORY_USER_INPUT), 
-    ILLEGAL_OPTION(3, "Illegal value %s for option %s", "", CATEGORY_USER_INPUT), 
-    ILLEGAL_VALUE(4, "Illegal value %s for type %s", "Please specify only legal values for a given type", CATEGORY_USER_INPUT), 
-    INCOMPATIBLE_TYPES(5, "Can not coerce from type %s to type %s", "Please specify only legal values for a given type", CATEGORY_USER_INPUT), 
+    UNKNOWN_OPTION(2, "The type %s may not have any options other than %s", "", CATEGORY_USER_INPUT),
+    ILLEGAL_OPTION(3, "Illegal value %s for option %s", "", CATEGORY_USER_INPUT),
+    ILLEGAL_VALUE(4, "Illegal value %s for type %s", "Please specify only legal values for a given type", CATEGORY_USER_INPUT),
+    INCOMPATIBLE_TYPES(5, "Can not coerce from type %s to type %s", "Please specify only legal values for a given type", CATEGORY_USER_INPUT),
     WRONG_TYPES(6, "Incompatible types for path %s. Found %s and %s", "Type leafs must match", CATEGORY_USER_INPUT),
     ;
 
@@ -86,29 +86,34 @@ public enum EAVErrorMessage implements OXExceptionCode {
         this.errorCode = errorCode;
     }
 
+    @Override
     public String getPrefix() {
         return "EAV";
     }
 
+    @Override
     public int getNumber() {
         return errorCode;
     }
 
+    @Override
     public String getMessage() {
         return message;
     }
 
+    @Override
     public Category getCategory() {
         return category;
     }
 
+    @Override
     public boolean equals(final OXException e) {
         return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -117,7 +122,7 @@ public enum EAVErrorMessage implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -127,7 +132,7 @@ public enum EAVErrorMessage implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

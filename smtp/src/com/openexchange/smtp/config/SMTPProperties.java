@@ -182,30 +182,37 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
         smtpConnectionTimeout = 0;
     }
 
+    @Override
     public String getSmtpLocalhost() {
         return smtpLocalhost;
     }
 
+    @Override
     public boolean isSmtpAuth() {
         return smtpAuth;
     }
 
+    @Override
     public boolean isSmtpEnvelopeFrom() {
         return smtpEnvelopeFrom;
     }
 
+    @Override
     public String getSmtpAuthEnc() {
         return smtpAuthEnc;
     }
 
+    @Override
     public int getSmtpTimeout() {
         return smtpTimeout;
     }
 
+    @Override
     public int getSmtpConnectionTimeout() {
         return smtpConnectionTimeout;
     }
 
+    @Override
     public int getReferencedPartLimit() {
         return transportProperties.getReferencedPartLimit();
     }

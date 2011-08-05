@@ -78,6 +78,7 @@ public final class CustomThreadFactory implements java.util.concurrent.ThreadFac
         len = namePrefix.length() + 7;
     }
 
+    @Override
     public Thread newThread(final Runnable r) {
         /*
          * Ensure a positive thread number

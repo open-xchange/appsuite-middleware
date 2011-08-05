@@ -137,6 +137,7 @@ public final class FacebookFQLStreamParser {
             final Map<String, ItemHandler> m = new HashMap<String, ItemHandler>(8);
             m.put("post_id", new ItemHandler() {
 
+                @Override
                 public void handleItem(final Node item, final FacebookMessagingMessage message) {
                     final String content = item.getTextContent();
                     message.setId(content);
@@ -145,6 +146,7 @@ public final class FacebookFQLStreamParser {
             });
             m.put("actor_id", new ItemHandler() {
 
+                @Override
                 public void handleItem(final Node item, final FacebookMessagingMessage message) throws OXException {
                     // message.setHeader(MessagingHeader.KnownHeader.FROM.toString(), item.getTextContent());
                     final String content = item.getTextContent();
@@ -158,6 +160,7 @@ public final class FacebookFQLStreamParser {
             });
             m.put("created_time", new ItemHandler() {
 
+                @Override
                 public void handleItem(final Node item, final FacebookMessagingMessage message) throws OXException {
                     final long time = FacebookMessagingUtility.parseUnsignedLong(item.getTextContent()) * 1000L;
                     message.setHeader(new MimeDateMessagingHeader(MessagingHeader.KnownHeader.DATE.toString(), time));
@@ -166,6 +169,7 @@ public final class FacebookFQLStreamParser {
             });
             m.put("updated_time", new ItemHandler() {
 
+                @Override
                 public void handleItem(final Node item, final FacebookMessagingMessage message) throws OXException {
                     final long time = FacebookMessagingUtility.parseUnsignedLong(item.getTextContent()) * 1000L;
                     message.setHeader(new MimeDateMessagingHeader("X-Facebook-Updated-Time", time));
@@ -173,6 +177,7 @@ public final class FacebookFQLStreamParser {
             });
             m.put("filter_key", new ItemHandler() {
 
+                @Override
                 public void handleItem(final Node item, final FacebookMessagingMessage message) throws OXException {
                     if (item.hasChildNodes()) {
                         message.setHeader("X-Facebook-Filter-Key", item.getTextContent());
@@ -181,6 +186,7 @@ public final class FacebookFQLStreamParser {
             });
             m.put("message", new ItemHandler() {
 
+                @Override
                 public void handleItem(final Node item, final FacebookMessagingMessage message) throws OXException {
                     /*-
                      * Text is already HTML-escaped: '<' ==> &lt;
@@ -194,6 +200,7 @@ public final class FacebookFQLStreamParser {
         final Map<String, AttachmentHandler> m = new HashMap<String, AttachmentHandler>(8);
         m.put("album", new AttachmentHandler() {
 
+            @Override
             public void handleAttachment(final NodeList attachNodes, final int len, final FacebookMessagingMessage message, final MultipartProvider multipartProvider) throws OXException {
                 String name = null;
                 String href = null;
@@ -239,6 +246,7 @@ public final class FacebookFQLStreamParser {
         });
         m.put("link", new AttachmentHandler() {
 
+            @Override
             public void handleAttachment(final NodeList attachNodes, final int len, final FacebookMessagingMessage message, final MultipartProvider multipartProvider) {
                 String name = null;
                 String href = null;
@@ -283,6 +291,7 @@ public final class FacebookFQLStreamParser {
         });
         m.put("group", new AttachmentHandler() {
 
+            @Override
             public void handleAttachment(final NodeList attachNodes, final int len, final FacebookMessagingMessage message, final MultipartProvider multipartProvider) throws OXException {
                 /*
                  * A group post
@@ -334,6 +343,7 @@ public final class FacebookFQLStreamParser {
         });
         m.put("video", new AttachmentHandler() {
 
+            @Override
             public void handleAttachment(final NodeList attachNodes, final int len, final FacebookMessagingMessage message, final MultipartProvider multipartProvider) throws OXException {
                 String sourceURL = null;
                 String ext = null;
@@ -413,6 +423,7 @@ public final class FacebookFQLStreamParser {
         });
         m.put("photo", new AttachmentHandler() {
 
+            @Override
             public void handleAttachment(final NodeList attachNodes, final int len, final FacebookMessagingMessage message, final MultipartProvider multipartProvider) throws OXException {
                 String sourceURL = null;
                 String ext = null;
@@ -462,6 +473,7 @@ public final class FacebookFQLStreamParser {
         });
         m.put("swf", new AttachmentHandler() {
 
+            @Override
             public void handleAttachment(final NodeList attachNodes, final int len, final FacebookMessagingMessage message, final MultipartProvider multipartProvider) throws OXException {
                 String sourceURL = null;
                 /*
@@ -524,6 +536,7 @@ public final class FacebookFQLStreamParser {
         });
         m.put("event", new AttachmentHandler() {
 
+            @Override
             public void handleAttachment(final NodeList attachNodes, final int len, final FacebookMessagingMessage message, final MultipartProvider multipartProvider) throws OXException {
 
                 final Node name = getNodeByName("name", attachNodes, len);

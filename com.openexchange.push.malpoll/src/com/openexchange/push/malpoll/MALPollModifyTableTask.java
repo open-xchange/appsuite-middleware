@@ -79,10 +79,12 @@ public final class MALPollModifyTableTask extends UpdateTaskAdapter {
         super();
     }
 
+    @Override
     public String[] getDependencies() {
         return new String[] { MALPollCreateTableTask.class.getName() };
     }
 
+    @Override
     public void perform(final PerformParameters params) throws OXException {
         final int contextId = params.getContextId();
         final Connection con = Database.getNoTimeout(contextId, true);

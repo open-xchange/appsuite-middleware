@@ -354,18 +354,22 @@ public final class FolderCache {
             key = IMAPServiceRegistry.getService(CacheService.class).newCacheKey(code, code);
         }
 
+        @Override
         public CacheKey getKey() {
             return key;
         }
 
+        @Override
         public FolderMap getValue() {
             return folderMap;
         }
 
+        @Override
         public void setValue(final FolderMap folderMap) {
             this.folderMap = folderMap;
         }
 
+        @Override
         public Class<FolderMap> getEntryClass() {
             return FolderMap.class;
         }

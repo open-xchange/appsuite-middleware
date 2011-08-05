@@ -100,16 +100,19 @@ public class OSGiSubscriptionSourceCollector extends SubscriptionSourceCollector
         this.tracker.close();
     }
 
+    @Override
     public Object addingService(final ServiceReference reference) {
         final SubscribeService subscribeService = (SubscribeService) context.getService(reference);
         addSubscribeService(subscribeService);
         return subscribeService;
     }
 
+    @Override
     public void modifiedService(final ServiceReference reference, final Object service) {
         // IGNORE
     }
 
+    @Override
     public void removedService(final ServiceReference reference, final Object service) {
         removeSubscribeService(((SubscribeService) service).getSubscriptionSource().getId());
     }

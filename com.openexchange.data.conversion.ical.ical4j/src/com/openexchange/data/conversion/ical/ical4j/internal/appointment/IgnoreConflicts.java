@@ -73,6 +73,7 @@ public final class IgnoreConflicts extends AbstractVerifyingAttributeConverter<V
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isSet(final Appointment appointment) {
         // Ignore this always on output.
         return false;
@@ -81,6 +82,7 @@ public final class IgnoreConflicts extends AbstractVerifyingAttributeConverter<V
     /**
      * {@inheritDoc}
      */
+    @Override
     public void emit(final int index, final Appointment appointment, final VEvent vEvent,
         final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
         // Ignore this always on output.
@@ -89,6 +91,7 @@ public final class IgnoreConflicts extends AbstractVerifyingAttributeConverter<V
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean hasProperty(final VEvent vEvent) {
         // Set it always on input.
         return true;
@@ -97,6 +100,7 @@ public final class IgnoreConflicts extends AbstractVerifyingAttributeConverter<V
     /**
      * {@inheritDoc}
      */
+    @Override
     public void parse(final int index, final VEvent vEvent, final Appointment appointment,
         final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
         // Set it always on input.

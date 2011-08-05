@@ -33,6 +33,7 @@ public class ServletRegisterer implements ServiceTrackerCustomizer {
         this.context = context;
     }
 
+    @Override
     public Object addingService(final ServiceReference reference) {
         final Object service = context.getService(reference);
         tryRegistering((HttpService) service);
@@ -53,10 +54,12 @@ public class ServletRegisterer implements ServiceTrackerCustomizer {
 
     }
 
+    @Override
     public void modifiedService(final ServiceReference reference, final Object service) {
         // Nope
     }
 
+    @Override
     public void removedService(final ServiceReference reference, final Object service) {
         ((HttpService) service).unregister(Constants.PATH);
         context.ungetService(reference);

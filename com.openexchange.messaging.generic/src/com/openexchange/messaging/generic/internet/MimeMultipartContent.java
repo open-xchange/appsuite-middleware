@@ -120,6 +120,7 @@ public class MimeMultipartContent implements MultipartContent {
         this.mimeMultipart = mimeMultipart;
     }
 
+    @Override
     public MessagingBodyPart get(final int index) throws OXException {
         try {
             final MimeMessagingBodyPart bodyPart = new MimeMessagingBodyPart((MimePart) mimeMultipart.getBodyPart(index), this);
@@ -131,6 +132,7 @@ public class MimeMultipartContent implements MultipartContent {
         }
     }
 
+    @Override
     public int getCount() throws OXException {
         try {
             return mimeMultipart.getCount();

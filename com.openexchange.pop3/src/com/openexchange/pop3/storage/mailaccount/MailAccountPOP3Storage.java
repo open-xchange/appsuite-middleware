@@ -221,6 +221,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
         return sb.toString();
     }
 
+    @Override
     public Collection<OXException> getWarnings() {
         return Collections.unmodifiableCollection(warnings);
     }
@@ -238,6 +239,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
         return separator;
     }
 
+    @Override
     public void drop() throws OXException {
         if (null != path) {
             if (defaultMailAccess.isConnected()) {
@@ -278,15 +280,18 @@ public class MailAccountPOP3Storage implements POP3Storage {
         return path;
     }
 
+    @Override
     public void close() {
         defaultMailAccess.close(true);
     }
 
+    @Override
     public int getUnreadMessagesCount(final String fullname) throws OXException {
         final String realFullname = getRealFullname(fullname);
         return defaultMailAccess.getUnreadMessagesCount(realFullname);
     }
 
+    @Override
     public void connect() throws OXException {
         defaultMailAccess.connect(false);
         try {
@@ -400,6 +405,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
         return new String[] { fullname.substring(0, pos), fullname.substring(pos + 1) };
     }
 
+    @Override
     public IMailFolderStorage getFolderStorage() throws OXException {
         if (null == folderStorage) {
             folderStorage = new MailAccountPOP3FolderStorage(defaultMailAccess.getFolderStorage(), this, pop3Access);
@@ -407,6 +413,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
         return folderStorage;
     }
 
+    @Override
     public IMailMessageStorage getMessageStorage() throws OXException {
         if (null == messageStorage) {
             messageStorage = new MailAccountPOP3MessageStorage(
@@ -422,6 +429,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
         return defaultMailAccess.getMessageStorage();
     }
 
+    @Override
     public void releaseResources() {
         try {
             getFolderStorage().releaseResources();
@@ -451,6 +459,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
         }
     };
 
+    @Override
     public void syncMessages(final boolean expunge) throws OXException {
         POP3Store pop3Store = null;
         try {
@@ -719,10 +728,12 @@ public class MailAccountPOP3Storage implements POP3Storage {
         return tmp;
     }
 
+    @Override
     public POP3StorageUIDLMap getUIDLMap() throws OXException {
         return SessionPOP3StorageUIDLMap.getInstance(pop3Access);
     }
 
+    @Override
     public POP3StorageTrashContainer getTrashContainer() throws OXException {
         return SessionPOP3StorageTrashContainer.getInstance(pop3Access);
     }

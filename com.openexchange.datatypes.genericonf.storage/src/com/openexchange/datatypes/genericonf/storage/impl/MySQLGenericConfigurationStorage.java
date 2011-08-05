@@ -83,10 +83,12 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
         this.provider = provider;
     }
 
+    @Override
     public int save(final Context ctx, final Map<String, Object> content) throws OXException {
         return save(null, ctx, content);
     }
 
+    @Override
     public int save(final Connection con, final Context ctx, final Map<String, Object> content) throws OXException {
         return ((Integer) write(con, ctx, new TX() {
 
@@ -145,10 +147,12 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
         }
     }
 
+    @Override
     public void fill(final Context ctx, final int id, final Map<String, Object> content) throws OXException {
         fill(null, ctx, id, content);
     }
 
+    @Override
     public void fill(final Connection con, final Context ctx, final int id, final Map<String, Object> content) throws OXException {
         Connection readCon = con;
         final boolean connectionHandling = con == null;
@@ -201,10 +205,12 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
     }
 
 
+    @Override
     public void update(final Context ctx, final int id, final Map<String, Object> content) throws OXException {
         update(null, ctx, id, content);
     }
 
+    @Override
     public void update(final Connection con, final Context ctx, final int id, final Map<String, Object> content) throws OXException {
         final Map<String, Object> original = new HashMap<String, Object>();
         fill(con, ctx, id, original);
@@ -231,10 +237,12 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
 
     }
 
+    @Override
     public void delete(final Context ctx, final int id) throws OXException {
         delete(null, ctx, id);
     }
 
+    @Override
     public void delete(final Connection con, final Context ctx, final int id) throws OXException {
 
         write(con, ctx, new TX() {
@@ -259,6 +267,7 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
 
     }
 
+    @Override
     public void delete(final Connection con, final Context ctx) throws OXException {
 
         write(con, ctx, new TX() {
@@ -281,10 +290,12 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
 
     }
 
+    @Override
     public List<Integer> search(final Context ctx, final Map<String, Object> query) throws OXException {
         return search(null, ctx, query);
     }
 
+    @Override
     public List<Integer> search(Connection con, final Context ctx, final Map<String, Object> query) throws OXException {
         final boolean handleOwnConnections = con == null;
 

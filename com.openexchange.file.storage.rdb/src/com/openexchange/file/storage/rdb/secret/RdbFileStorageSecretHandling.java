@@ -71,6 +71,7 @@ public abstract class RdbFileStorageSecretHandling implements SecretConsistencyC
         super();
     }
 
+    @Override
     public String checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws OXException {
         final Collection<FileStorageService> messagingServices = getFileStorageServices();
         for (final FileStorageService messagingService : messagingServices) {
@@ -82,6 +83,7 @@ public abstract class RdbFileStorageSecretHandling implements SecretConsistencyC
         return null;
     }
 
+    @Override
     public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws OXException {
         final Collection<FileStorageService> messagingServices = getFileStorageServices();
         for (final FileStorageService messagingService : messagingServices) {

@@ -79,6 +79,7 @@ public final class MessagingGenericDeleteListener implements DeleteListener {
         super();
     }
 
+    @Override
     public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws com.openexchange.exception.OXException {
         if (DeleteEvent.TYPE_USER != event.getType()) {
             return;
@@ -119,6 +120,7 @@ public final class MessagingGenericDeleteListener implements DeleteListener {
 
                     OXException genConfError;
 
+                    @Override
                     public boolean execute(final int confId) {
                         try {
                             genericConfStorageService.delete(writeCon, context, confId);

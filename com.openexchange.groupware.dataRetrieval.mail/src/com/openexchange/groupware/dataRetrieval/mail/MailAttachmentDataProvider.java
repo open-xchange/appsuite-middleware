@@ -87,18 +87,22 @@ public class MailAttachmentDataProvider implements DataProvider<MailAttachmentSt
         this.mailService = mailService;
     }
 
+    @Override
     public String getId() {
         return ID;
     }
 
+    @Override
     public MailAttachmentState start() {
         return new MailAttachmentState();
     }
 
+    @Override
     public void close(final MailAttachmentState state) {
         state.close();
     }
 
+    @Override
     public InputStream retrieve(final MailAttachmentState state, final Map<String, Object> specification, final ServerSession session) throws OXException {
         check(specification, PARAMETER_FOLDERID, PARAMETER_ID, PARAMETER_MAILATTACHMENT);
         final String folderPath = specification.get(PARAMETER_FOLDERID).toString();
@@ -129,6 +133,7 @@ public class MailAttachmentDataProvider implements DataProvider<MailAttachmentSt
         }
     }
 
+    @Override
     public FileMetadata retrieveMetadata(final MailAttachmentState state, final Map<String, Object> specification, final ServerSession session) throws OXException {
         final String folderPath = specification.get(PARAMETER_FOLDERID).toString();
         final String uid = specification.get(PARAMETER_ID).toString();
@@ -154,14 +159,17 @@ public class MailAttachmentDataProvider implements DataProvider<MailAttachmentSt
             this.mailPart = mailPart;
         }
 
+        @Override
         public String getFilename() {
             return mailPart.getFileName();
         }
 
+        @Override
         public long getSize() {
             return mailPart.getSize();
         }
 
+        @Override
         public String getType() {
             return mailPart.getContentType().toString(true);
         }

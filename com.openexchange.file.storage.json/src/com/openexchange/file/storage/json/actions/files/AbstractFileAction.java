@@ -180,6 +180,7 @@ public abstract class AbstractFileAction implements AJAXActionService {
         return new AJAXRequestResult(true, new Date(sequenceNumber));
     }
 
+    @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         final AJAXInfostoreRequest req = new AJAXInfostoreRequest(request, session);
         try {

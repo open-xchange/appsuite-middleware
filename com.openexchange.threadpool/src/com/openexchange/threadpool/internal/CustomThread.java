@@ -176,11 +176,13 @@ public final class CustomThread extends Thread implements ThreadRenamer {
         setName(originalName);
     }
 
+    @Override
     public void rename(final String newName) {
         setName(newName);
         changed = true;
     }
 
+    @Override
     public void renamePrefix(final String newPrefix) {
         if (null == appendix) {
             setName(newPrefix);

@@ -89,6 +89,7 @@ public final class ConfigurationImpl implements ConfigurationService {
             super();
         }
 
+        @Override
         public boolean accept(final File pathname) {
             return pathname.isDirectory() || pathname.getName().toLowerCase().endsWith(EXT);
         }
@@ -179,6 +180,7 @@ public final class ConfigurationImpl implements ConfigurationService {
             }
             processDirectory(dirs[i], fileFilter, new FileProcessor() {
 
+                @Override
                 public void processFile(File file) {
                     processPropertiesFile(file);
                 }
@@ -187,6 +189,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 
             processDirectory(dirs[i], new FileFilter() {
 
+                @Override
                 public boolean accept(File pathname) {
                     return pathname.isDirectory() || pathname.getName().endsWith(".yml") || pathname.getName().endsWith(".yaml");
                 }
@@ -195,6 +198,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 
             new FileProcessor() {
 
+                @Override
                 public void processFile(File file) {
                     Object o = null;
                     try {
@@ -274,14 +278,17 @@ public final class ConfigurationImpl implements ConfigurationService {
         }
     }
 
+    @Override
     public String getProperty(final String name) {
         return properties.get(name);
     }
 
+    @Override
     public String getProperty(final String name, final String defaultValue) {
         return properties.containsKey(name) ? properties.get(name) : defaultValue;
     }
 
+    @Override
     public String getProperty(final String name, final PropertyListener listener) {
         if (properties.containsKey(name)) {
             final PropertyWatcher pw = PropertyWatcher.addPropertyWatcher(name, properties.get(name), true);
@@ -294,6 +301,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         return null;
     }
 
+    @Override
     public String getProperty(final String name, final String defaultValue, final PropertyListener listener) {
         if (properties.containsKey(name)) {
             final PropertyWatcher pw = PropertyWatcher.addPropertyWatcher(name, properties.get(name), true);
@@ -306,6 +314,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         return defaultValue;
     }
 
+    @Override
     public void removePropertyListener(final String name, final PropertyListener listener) {
         final PropertyWatcher pw = PropertyWatcher.getPropertyWatcher(name);
         if (pw != null) {
@@ -319,6 +328,7 @@ public final class ConfigurationImpl implements ConfigurationService {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Properties getFile(final String filename) {
         return getFile(filename, null);
     }
@@ -354,6 +364,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         return retval;
     }
 
+    @Override
     public Properties getPropertiesInFolder(final String folderName) {
         return getPropertiesInFolder(folderName, null);
     }
@@ -385,6 +396,7 @@ public final class ConfigurationImpl implements ConfigurationService {
      * (non-Javadoc)
      * @see com.openexchange.config.Configuration#getProperty(java.lang.String, boolean)
      */
+    @Override
     public boolean getBoolProperty(final String name, final boolean defaultValue) {
         final String prop = properties.get(name);
         if (null != prop) {
@@ -397,6 +409,7 @@ public final class ConfigurationImpl implements ConfigurationService {
      * (non-Javadoc)
      * @see com.openexchange.config.Configuration#getProperty(java.lang.String, int)
      */
+    @Override
     public int getIntProperty(final String name, final int defaultValue) {
         final String prop = properties.get(name);
         if (prop != null) {
@@ -415,6 +428,7 @@ public final class ConfigurationImpl implements ConfigurationService {
      * (non-Javadoc)
      * @see com.openexchange.config.Configuration#propertyNames()
      */
+    @Override
     public Iterator<String> propertyNames() {
         return properties.keySet().iterator();
     }
@@ -423,10 +437,12 @@ public final class ConfigurationImpl implements ConfigurationService {
      * (non-Javadoc)
      * @see com.openexchange.config.Configuration#size()
      */
+    @Override
     public int size() {
         return properties.size();
     }
 
+    @Override
     public String getText(final String filename) {
         final String text = texts.get(filename);
         if (text != null) {
@@ -480,6 +496,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         return null;
     }
 
+    @Override
     public Object getYaml(String filename) {
         String path = yamlPaths.get(filename);
         if (path == null) {
@@ -496,6 +513,7 @@ public final class ConfigurationImpl implements ConfigurationService {
     }
 
 
+    @Override
     public Map<String, Object> getYamlInFolder(String folderName) {
         final Map<String, Object> retval = new HashMap<String, Object>();
         final Iterator<Entry<String, String>> iter = yamlPaths.entrySet().iterator();

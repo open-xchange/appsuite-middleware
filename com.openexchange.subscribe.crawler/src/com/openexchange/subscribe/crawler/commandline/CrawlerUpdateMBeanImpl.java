@@ -84,6 +84,7 @@ public final class CrawlerUpdateMBeanImpl extends StandardMBean implements Crawl
     /* (non-Javadoc)
      * @see com.openexchange.subscribe.crawler.commandline.CrawlerUpdateMBean#updateAllInstalledCrawlers()
      */
+    @Override
     public void updateCrawlersAccordingToConfiguration(){
         LOG.info("Called updateCrawlersAccordingToConfiguration");
         CrawlerUpdateTask update = new CrawlerUpdateTask(configurationService, activator);

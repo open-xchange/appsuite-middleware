@@ -110,14 +110,17 @@ public class GenericSubscribeService extends AbstractSubscribeService {
         // May be overridden to include extra fields
     }
 
+    @Override
     public SubscriptionSource getSubscriptionSource() {
         return SOURCE;
     }
 
+    @Override
     public boolean handles(final int folderModule) {
         return folderModule == this.module;
     }
 
+    @Override
     public Collection getContent(final Subscription subscription) throws OXException {
 
         final Workflow workflow = getWorkflow();

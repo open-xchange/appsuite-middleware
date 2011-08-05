@@ -93,14 +93,17 @@ public enum SubscriptionJSONErrorMessages implements OXExceptionCode {
         this.errorCode = errorCode;
     }
 
+    @Override
     public String getPrefix() {
         return "SUBH";
     }
 
+    @Override
     public int getNumber() {
         return errorCode;
     }
 
+    @Override
     public String getMessage() {
         return message;
     }
@@ -109,10 +112,12 @@ public enum SubscriptionJSONErrorMessages implements OXExceptionCode {
         return help;
     }
 
+    @Override
     public Category getCategory() {
         return category;
     }
 
+    @Override
     public boolean equals(final OXException e) {
         return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }

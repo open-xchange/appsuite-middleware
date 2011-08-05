@@ -67,6 +67,7 @@ public class BinaryContentDumperTest extends TestCase {
     public void testHandles() {
         assertTrue(new BinaryContentDumper().handles(new BinaryContent() {
 
+            @Override
             public InputStream getData() throws OXException {
                 // TODO Auto-generated method stub
                 return null;
@@ -90,6 +91,7 @@ public class BinaryContentDumperTest extends TestCase {
     private BinaryContent getBinaryContent(final InputStream is) {
         return new BinaryContent() {
 
+            @Override
             public InputStream getData() throws OXException {
                 return is;
             }

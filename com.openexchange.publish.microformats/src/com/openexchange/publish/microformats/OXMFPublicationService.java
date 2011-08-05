@@ -309,6 +309,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
             this.withoutInfostore = withoutInfostore;
         }
 
+        @Override
         public DynamicFormDescription getUserSpecificDescription(final User user, final UserConfiguration configuration) {
             if (configuration.hasInfostore()) {
                 return getFormDescription();

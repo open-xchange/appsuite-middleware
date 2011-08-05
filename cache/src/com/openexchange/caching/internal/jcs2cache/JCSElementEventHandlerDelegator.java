@@ -76,6 +76,7 @@ public final class JCSElementEventHandlerDelegator implements IElementEventHandl
         this.handler = handler;
     }
 
+    @Override
     public void handleElementEvent(final IElementEvent elemEvent) {
         switch (elemEvent.getElementEvent()) {
         case IElementEventConstants.ELEMENT_EVENT_EXCEEDED_IDLETIME_BACKGROUND:

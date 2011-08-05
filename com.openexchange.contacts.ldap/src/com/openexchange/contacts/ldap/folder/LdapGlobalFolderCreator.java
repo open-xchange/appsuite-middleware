@@ -196,82 +196,102 @@ public class LdapGlobalFolderCreator {
     private static Session getDummySessionObj(final int admin_user_id, final int contextid) {
         return new Session(){
 
+            @Override
             public int getContextId() {
                 return contextid;
             }
 
+            @Override
             public String getLocalIp() {
                 return null;
             }
 
+            @Override
             public String getLogin() {
                 return null;
             }
 
+            @Override
             public String getLoginName() {
                 return null;
             }
 
+            @Override
             public Object getParameter(final String name) {
                 return null;
             }
 
+            @Override
             public boolean containsParameter(final String name) {
                 return false;
             }
 
+            @Override
             public String getPassword() {
                 return null;
             }
 
+            @Override
             public String getRandomToken() {
                 return null;
             }
 
+            @Override
             public String getSecret() {
                 return null;
             }
 
+            @Override
             public String getSessionID() {
                 return null;
             }
 
+            @Override
             public int getUserId() {
                 return admin_user_id;
             }
 
+            @Override
             public String getUserlogin() {
                 return null;
             }
 
+            @Override
             public void removeRandomToken() {
                 // Nothing to do
             }
 
+            @Override
             public void setParameter(final String name, final Object value) {
                 // Nothing to do
             }
+            @Override
             public String getAuthId() {
                 throw new UnsupportedOperationException();
             }
 
+            @Override
             public String getHash() {
                 return null;
             }
 
+            @Override
             public String getClient() {
                 return null;
             }
 
+            @Override
             public void setClient(final String client) {
                 // Nothing to do.
             }
 
+            @Override
             public void setLocalIp(final String ip) {
                 // TODO Auto-generated method stub
 
             }
 
+            @Override
             public void setHash(final String hash) {
                 // TODO Auto-generated method stub
 

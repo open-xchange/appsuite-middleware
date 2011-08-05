@@ -76,6 +76,7 @@ public final class GetAction extends AbstractOAuthAJAXActionService {
         super();
     }
 
+    @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         try {
             /*

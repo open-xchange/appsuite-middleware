@@ -83,10 +83,12 @@ public class FacebookDropObsoleteAccountsTask extends UpdateTaskAdapter {
         this.dbService = dbService;
     }
 
+    @Override
     public String[] getDependencies() {
         return new String[] { "com.openexchange.messaging.generic.groupware.MessagingGenericCreateTableTask", "com.openexchange.groupware.update.tasks.CreateGenconfTablesTask" };
     }
 
+    @Override
     public void perform(final PerformParameters params) throws OXException {
         final int contextId = params.getContextId();
         final Connection writeCon;

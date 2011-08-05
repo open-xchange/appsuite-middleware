@@ -70,16 +70,20 @@ public class Enabled implements PreferencesItemService {
         super();
     }
 
+    @Override
     public String[] getPath() {
         return new String[] { "modules", "com.openexchange.secret.recovery", "module" };
     }
 
+    @Override
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
+            @Override
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) {
                 setting.setSingleValue(Boolean.valueOf(true));
             }
 
+            @Override
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return true;
             }

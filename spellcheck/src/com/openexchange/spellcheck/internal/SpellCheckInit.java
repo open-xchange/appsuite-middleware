@@ -83,7 +83,8 @@ public class SpellCheckInit implements Initialization {
 	 *
 	 * @see com.openexchange.server.Initialization#start()
 	 */
-	public void start() throws OXException {
+	@Override
+    public void start() throws OXException {
 		DictonaryStorage.loadDictionaries();
 		RdbUserSpellDictionary.start();
 	}
@@ -93,7 +94,8 @@ public class SpellCheckInit implements Initialization {
 	 *
 	 * @see com.openexchange.server.Initialization#stop()
 	 */
-	public void stop() {
+	@Override
+    public void stop() {
 		RdbUserSpellDictionary.stop();
 		DictonaryStorage.clearDictionaries();
 	}

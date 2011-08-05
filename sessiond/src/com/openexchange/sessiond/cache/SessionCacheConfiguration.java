@@ -83,6 +83,7 @@ public final class SessionCacheConfiguration implements Initialization {
         return instance;
     }
 
+    @Override
     public void start() throws OXException {
         final ConfigurationService configurationService = getServiceRegistry().getService(ConfigurationService.class);
         if (null == configurationService) {
@@ -112,6 +113,7 @@ public final class SessionCacheConfiguration implements Initialization {
         }
     }
 
+    @Override
     public void stop() {
         final CacheService cacheService = getServiceRegistry().getService(CacheService.class);
         if (null != cacheService) {

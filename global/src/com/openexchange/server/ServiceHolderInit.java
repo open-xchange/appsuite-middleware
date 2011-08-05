@@ -90,6 +90,7 @@ public final class ServiceHolderInit implements Initialization {
         started = new AtomicBoolean();
     }
 
+    @Override
     public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
             LOG.error("Service holder initialization already started", new Throwable());
@@ -152,6 +153,7 @@ public final class ServiceHolderInit implements Initialization {
         }
     }
 
+    @Override
     public void stop() throws OXException {
         if (!started.compareAndSet(true, false)) {
             LOG.error("Service holder initialization has not been started", new Throwable());

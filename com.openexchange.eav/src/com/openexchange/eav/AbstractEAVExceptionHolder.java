@@ -60,13 +60,13 @@ import com.openexchange.exception.OXException;
  */
 public abstract class AbstractEAVExceptionHolder {
     private OXException exception;
-    
-    
-    
+
+
+
     protected void setException(final OXException exception) {
         this.exception = exception;
     }
-    
+
     public void throwException() throws OXException {
         if(exception != null) {
             throw exception;

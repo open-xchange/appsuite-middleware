@@ -63,9 +63,9 @@ public class EAVContainerTypeTest extends EAVUnitTest {
 
     public void testEnforceSetCriterium() {
         Number[] numbers = new Number[]{1,2,3,3,4,5,5,5,6,7};
-        
+
         Number[] restricted = (Number[]) EAVContainerType.SET.applyRestrictions(EAVType.NUMBER, numbers);
-        
+
         LinkedList<Number> asList = new LinkedList<Number>(Arrays.asList(restricted));
         for(int i = 1; i < 8; i++) {
             assertTrue(i+" was not in list", asList.contains(i));
@@ -73,19 +73,19 @@ public class EAVContainerTypeTest extends EAVUnitTest {
         }
         assertTrue(asList.toString()+" remained", asList.isEmpty());
     }
-    
+
     public void testPassThroughMultisets() {
         Number[] numbers = new Number[]{1,2,3,3,4,5,5,5,6,7};
-        
+
         Number[] restricted = (Number[]) EAVContainerType.MULTISET.applyRestrictions(EAVType.NUMBER, numbers);
-        
-        
+
+
         LinkedList<Number> asList = new LinkedList<Number>(Arrays.asList(restricted));
         for(Number i : numbers) {
             assertTrue(i+" was not in list", asList.contains(i));
-            asList.remove((Number)i);
+            asList.remove(i);
         }
         assertTrue(asList.toString()+" remained", asList.isEmpty());
     }
-    
+
 }

@@ -78,6 +78,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
         super(mailAccount);
     }
 
+    @Override
     public int getBlockSize() {
         final String blockSizeStr = properties.get("com.openexchange.imap.blockSize");
         if (null == blockSizeStr) {
@@ -92,6 +93,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
         }
     }
 
+    @Override
     public String getImapAuthEnc() {
         String imapAuthEncStr = properties.get("com.openexchange.imap.imapAuthEnc");
         if (null == imapAuthEncStr) {
@@ -108,6 +110,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
         return fallback;
     }
 
+    @Override
     public int getImapConnectionIdleTime() {
         final String tmp = properties.get("com.openexchange.imap.maxIMAPConnectionIdleTime");
         if (null == tmp) {
@@ -122,6 +125,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
         }
     }
 
+    @Override
     public int getImapConnectionTimeout() {
         final String tmp = properties.get("com.openexchange.imap.imapConnectionTimeout");
         if (null == tmp) {
@@ -136,6 +140,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
         }
     }
 
+    @Override
     public int getImapTemporaryDown() {
         final String tmp = properties.get("com.openexchange.imap.imapTemporaryDown");
         if (null == tmp) {
@@ -150,6 +155,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
         }
     }
 
+    @Override
     public int getNotifyFrequencySeconds() {
         final String tmp = properties.get("com.openexchange.imap.notifyFrequencySeconds");
         if (null == tmp) {
@@ -164,6 +170,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
         }
     }
 
+    @Override
     public String getNotifyFullNames() {
         final String tmp = properties.get("com.openexchange.imap.notifyFullNames");
         if (null == tmp) {
@@ -173,6 +180,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
         return tmp.trim();
     }
 
+    @Override
     public int getImapTimeout() {
         final String tmp = properties.get("com.openexchange.imap.imapTimeout");
         if (null == tmp) {
@@ -187,10 +195,12 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
         }
     }
 
+    @Override
     public Map<String, Boolean> getNewACLExtMap() {
         return IMAPProperties.getInstance().getNewACLExtMap();
     }
 
+    @Override
     public BoolCapVal getSupportsACLs() {
         final String tmp = properties.get("com.openexchange.imap.imapSupportsACL");
         if (null == tmp) {
@@ -200,6 +210,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
         return BoolCapVal.parseBoolCapVal(tmp.trim());
     }
 
+    @Override
     public boolean isFastFetch() {
         final String tmp = properties.get("com.openexchange.imap.imapFastFetch");
         if (null == tmp) {
@@ -209,6 +220,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
         return Boolean.parseBoolean(tmp.trim());
     }
 
+    @Override
     public boolean notifyRecent() {
         final String tmp = properties.get("com.openexchange.imap.notifyRecent");
         if (null == tmp) {
@@ -218,6 +230,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
         return Boolean.parseBoolean(tmp.trim());
     }
 
+    @Override
     public boolean isPropagateClientIPAddress() {
         final String tmp = properties.get("com.openexchange.imap.propagateClientIPAddress");
         if (null == tmp) {
@@ -227,6 +240,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
         return Boolean.parseBoolean(tmp.trim());
     }
 
+    @Override
     public Set<String> getPropagateHostNames() {
         final String tmp = properties.get("com.openexchange.imap.propagateHostNames");
         if (null == tmp) {
@@ -236,6 +250,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
         return Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(tmp.trim().split(" *, *"))));
     }
 
+    @Override
     public boolean isImapSearch() {
         final String tmp = properties.get("com.openexchange.imap.imapSearch");
         if (null == tmp) {
@@ -245,6 +260,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
         return Boolean.parseBoolean(tmp.trim());
     }
 
+    @Override
     public boolean isImapSort() {
         final String tmp = properties.get("com.openexchange.imap.imapSort");
         if (null == tmp) {

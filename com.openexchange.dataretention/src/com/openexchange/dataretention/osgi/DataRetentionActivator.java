@@ -66,10 +66,12 @@ public final class DataRetentionActivator implements BundleActivator {
         super();
     }
 
+    @Override
     public void start(final BundleContext context) throws Exception {
         // Nope
     }
 
+    @Override
     public void stop(final BundleContext arg0) throws Exception {
         // Nope
     }

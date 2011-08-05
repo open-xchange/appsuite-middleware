@@ -752,6 +752,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 final Map<LoginAndPass, StampAndError> map2 = failedAuths;
                 final Runnable r = new Runnable() {
 
+                    @Override
                     public void run() {
                         /*
                          * Clean-up temporary-down map
@@ -821,14 +822,17 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             this.session = session;
         }
 
+        @Override
         public void folderRenamed(final FolderEvent e) {
             ListLsubCache.clearCache(accountId, session);
         }
 
+        @Override
         public void folderDeleted(final FolderEvent e) {
             ListLsubCache.clearCache(accountId, session);
         }
 
+        @Override
         public void folderCreated(final FolderEvent e) {
             ListLsubCache.clearCache(accountId, session);
         }

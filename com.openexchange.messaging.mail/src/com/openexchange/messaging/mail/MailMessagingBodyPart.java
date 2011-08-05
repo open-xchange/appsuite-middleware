@@ -87,6 +87,7 @@ public class MailMessagingBodyPart extends MailMessagingPart implements Messagin
         this.parent = parent;
     }
 
+    @Override
     public MultipartContent getParent() throws OXException {
         return parent;
     }

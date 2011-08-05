@@ -217,6 +217,7 @@ public final class IMAPNotifierTask {
             this.fullNames = fullNames;
         }
 
+        @Override
         public void run() {
             try {
                 final Iterator<String> iter = fullNames.values().iterator();

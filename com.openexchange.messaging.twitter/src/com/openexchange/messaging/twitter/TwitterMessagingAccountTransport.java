@@ -78,6 +78,7 @@ public final class TwitterMessagingAccountTransport extends AbstractTwitterMessa
         super(account, session);
     }
 
+    @Override
     public void transport(final MessagingMessage message, final Collection<MessagingAddressHeader> recipients) throws OXException {
         final String messageType;
         {
@@ -135,18 +136,22 @@ public final class TwitterMessagingAccountTransport extends AbstractTwitterMessa
         }
     }
 
+    @Override
     public void close() {
         connected = false;
     }
 
+    @Override
     public void connect() throws OXException {
         connected = true;
     }
 
+    @Override
     public boolean isConnected() {
         return connected;
     }
 
+    @Override
     public boolean cacheable() {
         // Nothing to cache
         return false;

@@ -75,6 +75,7 @@ public class DynamicWhiteboardFactory implements OXCloseable {
         tracker.open();
     }
 
+    @Override
     public void close() throws OXException {
         tracker.close();
     }
@@ -167,6 +168,7 @@ public class DynamicWhiteboardFactory implements OXCloseable {
             tracker.open();
         }
 
+        @Override
         public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
             if((args == null || args.length == 0) && TO_STRING.equals(method.getName())) {
                 return "OSGi Proxy ( "+klass.getName()+" ) "+hashCode();
@@ -199,6 +201,7 @@ public class DynamicWhiteboardFactory implements OXCloseable {
             return tracker.getService();
         }
 
+        @Override
         public void close() throws OXException {
             tracker.close();
         }

@@ -70,6 +70,7 @@ public class InfostoreDeltaWrapper implements Delta<File>{
     }
 
 
+    @Override
     public SearchIterator<File> getDeleted() {
         SearchIterator<DocumentMetadata> deleted = delegate.getDeleted();
         if(deleted == null) {
@@ -79,6 +80,7 @@ public class InfostoreDeltaWrapper implements Delta<File>{
     }
 
 
+    @Override
     public SearchIterator<File> getModified() {
         SearchIterator<DocumentMetadata> modified = delegate.getModified();
         if(modified == null) {
@@ -88,6 +90,7 @@ public class InfostoreDeltaWrapper implements Delta<File>{
     }
 
 
+    @Override
     public SearchIterator<File> getNew() {
         SearchIterator<DocumentMetadata> new1 = delegate.getNew();
         if(new1 == null) {
@@ -97,6 +100,7 @@ public class InfostoreDeltaWrapper implements Delta<File>{
     }
 
 
+    @Override
     public SearchIterator<File> results() throws OXException {
         SearchIterator<DocumentMetadata> results = delegate.results();
         if(results == null) {
@@ -106,6 +110,7 @@ public class InfostoreDeltaWrapper implements Delta<File>{
     }
 
 
+    @Override
     public long sequenceNumber() throws OXException {
         return delegate.sequenceNumber();
     }

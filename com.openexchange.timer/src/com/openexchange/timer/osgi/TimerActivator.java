@@ -75,6 +75,7 @@ public final class TimerActivator implements BundleActivator {
         super();
     }
 
+    @Override
     public void start(final BundleContext context) throws Exception {
         if (true) {
             return;
@@ -92,6 +93,7 @@ public final class TimerActivator implements BundleActivator {
         }
     }
 
+    @Override
     public void stop(final BundleContext context) throws Exception {
         if (true) {
             return;

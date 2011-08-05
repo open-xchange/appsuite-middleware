@@ -59,7 +59,7 @@ import com.openexchange.exception.OXException;
 /**
  * {@link CombinedActionFactory} - Gathers {@link AJAXActionServiceFactory AJAX action factories} which share the same module identifier but
  * offer different actions as indicated by {@link Module} annotation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CombinedActionFactory implements AJAXActionServiceFactory {
@@ -81,7 +81,7 @@ public final class CombinedActionFactory implements AJAXActionServiceFactory {
 
     /**
      * Checks if this combined factory is empty.
-     * 
+     *
      * @return <code>true</code> if empty; otherwise <code>false</code>
      */
     public boolean isEmpty() {
@@ -90,7 +90,7 @@ public final class CombinedActionFactory implements AJAXActionServiceFactory {
 
     /**
      * Adds specified factory (if not already contained).
-     * 
+     *
      * @param factory The factory to add
      * @throws IllegalArgumentException If factory has no {@link Module} annotation or an action-conflict is detected
      */
@@ -118,7 +118,7 @@ public final class CombinedActionFactory implements AJAXActionServiceFactory {
 
     /**
      * Removes specified factory.
-     * 
+     *
      * @param factory The factory to remove
      */
     public void remove(final AJAXActionServiceFactory factory) {

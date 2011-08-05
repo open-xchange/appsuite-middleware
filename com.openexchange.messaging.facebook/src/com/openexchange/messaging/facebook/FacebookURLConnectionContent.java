@@ -184,6 +184,7 @@ public final class FacebookURLConnectionContent implements BinaryContent {
         }
     }
 
+    @Override
     public InputStream getData() throws OXException {
         final byte[] tmp = bytes;
         if (null == tmp) {

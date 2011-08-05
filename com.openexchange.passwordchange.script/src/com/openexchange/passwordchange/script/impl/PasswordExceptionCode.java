@@ -69,22 +69,27 @@ public enum PasswordExceptionCode implements OXExceptionCode {
         this.detailNumber = detailNumber;
     }
 
+    @Override
     public String getPrefix() {
         return "PSW";
     }
 
+    @Override
     public Category getCategory() {
         return category;
     }
 
+    @Override
     public int getNumber() {
         return detailNumber;
     }
 
+    @Override
     public String getMessage() {
         return message;
     }
 
+    @Override
     public boolean equals(final OXException e) {
         return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }

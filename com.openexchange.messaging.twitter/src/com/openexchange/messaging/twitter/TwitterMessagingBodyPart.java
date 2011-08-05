@@ -161,47 +161,58 @@ public final class TwitterMessagingBodyPart implements MessagingBodyPart {
         }
     }
 
+    @Override
     public void writeTo(final OutputStream os) throws IOException, OXException {
         // Nothing to do
     }
 
+    @Override
     public long getSize() throws OXException {
         return size;
     }
 
+    @Override
     public String getSectionId() {
         return sectionId;
     }
 
+    @Override
     public Map<String, Collection<MessagingHeader>> getHeaders() {
         return headers;
     }
 
+    @Override
     public MessagingHeader getFirstHeader(final String name) throws OXException {
         final Collection<MessagingHeader> collection = getHeader(name);
         return null == collection ? null : (collection.isEmpty() ? null : collection.iterator().next());
     }
 
+    @Override
     public Collection<MessagingHeader> getHeader(final String name) {
         return headers.get(name);
     }
 
+    @Override
     public String getFileName() throws OXException {
         return null;
     }
 
+    @Override
     public String getDisposition() throws OXException {
         return CONTENT_DISPOSITION.getDisposition();
     }
 
+    @Override
     public ContentType getContentType() throws OXException {
         return contentType;
     }
 
+    @Override
     public MessagingContent getContent() throws OXException {
         return content;
     }
 
+    @Override
     public MultipartContent getParent() throws OXException {
         return parent;
     }

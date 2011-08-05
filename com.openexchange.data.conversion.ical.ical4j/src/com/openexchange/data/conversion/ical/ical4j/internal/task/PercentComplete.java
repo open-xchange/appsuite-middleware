@@ -61,19 +61,23 @@ import com.openexchange.groupware.tasks.Task;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class PercentComplete extends AbstractVerifyingAttributeConverter<VToDo, Task> {
+    @Override
     public boolean isSet(final Task task) {
         return task.containsPercentComplete();
     }
 
+    @Override
     public void emit(final int index, final Task task, final VToDo vToDo, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
         final net.fortuna.ical4j.model.property.PercentComplete percentage = new net.fortuna.ical4j.model.property.PercentComplete(task.getPercentComplete());
         vToDo.getProperties().add(percentage);
     }
 
+    @Override
     public boolean hasProperty(final VToDo vToDo) {
         return vToDo.getPercentComplete() != null;
     }
 
+    @Override
     public void parse(final int index, final VToDo todo, final Task task, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
         if(null == todo.getPercentComplete()) {
             return;

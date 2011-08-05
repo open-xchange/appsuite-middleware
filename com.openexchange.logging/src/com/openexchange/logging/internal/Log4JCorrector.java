@@ -65,6 +65,7 @@ public final class Log4JCorrector implements LoggingCorrector {
         super();
     }
 
+    @Override
     public final void correct() {
         for (String className : new String[] { Constants.LOGIN_PERFORMER, Constants.SESSION_HANDLER }) {
             LogFactory.getLog(className);

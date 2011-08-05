@@ -85,6 +85,7 @@ public final class ACLExtensionInit implements Initialization {
         started = new AtomicBoolean();
     }
 
+    @Override
     public void start() throws OXException {
         if (started.get()) {
             LOG.error(ACLExtensionInit.class.getName() + " already started");
@@ -128,6 +129,7 @@ public final class ACLExtensionInit implements Initialization {
          */
     }
 
+    @Override
     public void stop() throws OXException {
         if (!started.get()) {
             LOG.error(ACLExtensionInit.class.getName() + " cannot be stopped since it has not been started before");

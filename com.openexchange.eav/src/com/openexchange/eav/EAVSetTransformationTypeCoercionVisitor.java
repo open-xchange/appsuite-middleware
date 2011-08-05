@@ -64,13 +64,14 @@ public class EAVSetTransformationTypeCoercionVisitor extends AbstractEAVExceptio
     private EAVTypeMetadataNode metadata;
     private EAVTypeCoercion coercion = null;
     private TimeZone defaultTZ;
-    
+
     public EAVSetTransformationTypeCoercionVisitor(EAVTypeMetadataNode metadata, TimeZone defaultTZ, EAVTypeCoercion.Mode mode) {
         this.metadata = metadata;
         this.defaultTZ = defaultTZ;
         this.coercion = new EAVTypeCoercion(mode);
     }
 
+    @Override
     public void visit(int index, EAVSetTransformation node) {
         if(!node.isLeaf()) {
             return;
@@ -79,12 +80,12 @@ public class EAVSetTransformationTypeCoercionVisitor extends AbstractEAVExceptio
         if(metadataNode == null) {
             return;
         }
-        
+
         if(!metadataNode.getContainerType().isMultiple()) {
             setException( EAVErrorMessage.WRONG_TYPES.create(node.getPath(), node.getType().toString()+", MULTIPLE", metadataNode.getTypeDescription()) );
             throw BREAK;
         }
-        
+
         try {
             node.setAdd(coercion.coerceMultiple(node.getType(), node.getAdd(), metadataNode, defaultTZ));
             node.setRemove(coercion.coerceMultiple(node.getType(), node.getRemove(), metadataNode, defaultTZ));
@@ -94,8 +95,8 @@ public class EAVSetTransformationTypeCoercionVisitor extends AbstractEAVExceptio
             throw BREAK;
         }
     }
-    
-    
-    
-    
+
+
+
+
 }

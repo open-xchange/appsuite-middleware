@@ -72,6 +72,7 @@ public enum Entity2ACLExceptionCode implements OXExceptionCode {
         number = detailNumber;
     }
 
+    @Override
     public String getPrefix() {
         return "ACL";
     }
@@ -79,6 +80,7 @@ public enum Entity2ACLExceptionCode implements OXExceptionCode {
     /**
      * @return the category.
      */
+    @Override
     public Category getCategory() {
         return category;
     }
@@ -86,6 +88,7 @@ public enum Entity2ACLExceptionCode implements OXExceptionCode {
     /**
      * @return the message.
      */
+    @Override
     public String getMessage() {
         return message;
     }
@@ -93,10 +96,12 @@ public enum Entity2ACLExceptionCode implements OXExceptionCode {
     /**
      * @return the number.
      */
+    @Override
     public int getNumber() {
         return number;
     }
 
+    @Override
     public boolean equals(final OXException e) {
         return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }

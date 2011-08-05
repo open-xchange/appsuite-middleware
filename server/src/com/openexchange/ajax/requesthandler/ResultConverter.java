@@ -54,7 +54,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ResultConverter}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface ResultConverter {
@@ -68,28 +68,28 @@ public interface ResultConverter {
 
     /**
      * Gets the input format.
-     * 
+     *
      * @return The input format
      */
     String getInputFormat();
 
     /**
      * Gets the output format.
-     * 
+     *
      * @return The output format
      */
     String getOutputFormat();
 
     /**
      * Gets the quality.
-     * 
+     *
      * @return The quality
      */
     Quality getQuality();
 
     /**
      * Converts specified request data and result pair using given converter.
-     * 
+     *
      * @param request The request data
      * @param result The result
      * @param session The associated session

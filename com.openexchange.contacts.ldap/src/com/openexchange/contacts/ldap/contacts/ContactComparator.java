@@ -68,6 +68,7 @@ public class ContactComparator implements Comparator<Contact> {
         this.order = order;
     }
 
+    @Override
     public int compare(Contact o1, Contact o2) {
         int retval;
         switch (this.orderfield) {

@@ -64,14 +64,14 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link UpdateAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UpdateAction extends AbstractGroupAction {
 
     /**
      * Initializes a new {@link UpdateAction}.
-     * 
+     *
      * @param services
      */
     public UpdateAction(final ServiceLookup services) {

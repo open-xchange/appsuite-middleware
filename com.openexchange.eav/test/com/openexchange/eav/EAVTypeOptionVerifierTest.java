@@ -61,53 +61,53 @@ import com.openexchange.exception.OXException;
  */
 public class EAVTypeOptionVerifierTest extends EAVUnitTest {
     private final EAVTypeOptionVerifier verifier = new EAVTypeOptionVerifier();
-    
+
     public void testStringsHaveNoOptions() {
         assertFails(EAVErrorMessage.NO_OPTIONS, EAVType.STRING, M("someOption", "someValue"));
         assertPasses(EAVType.STRING, M());
     }
-    
+
     public void testNumbersHaveNoOptions() {
         assertFails(EAVErrorMessage.NO_OPTIONS, EAVType.NUMBER, M("someOption", "someValue"));
         assertPasses(EAVType.NUMBER, M());
     }
-    
+
     public void testDatesHaveNoOptions() {
         assertFails(EAVErrorMessage.NO_OPTIONS, EAVType.DATE, M("someOption", "someValue"));
         assertPasses(EAVType.DATE, M());
     }
-    
+
     public void testBinariesHaveNoOptions() {
         assertFails(EAVErrorMessage.NO_OPTIONS, EAVType.BINARY, M("someOption", "someValue"));
         assertPasses(EAVType.BINARY, M());
     }
-    
+
     public void testBoolsHaveNoOptions() {
         assertFails(EAVErrorMessage.NO_OPTIONS, EAVType.BOOLEAN, M("someOption", "someValue"));
         assertPasses(EAVType.BOOLEAN, M());
     }
-    
+
     public void testTimesHaveTimezonesAndNothingElse() {
         assertFails(EAVErrorMessage.UNKNOWN_OPTION, EAVType.TIME, M("someOption", "someValue"));
         assertPasses(EAVType.TIME, M());
         assertPasses(EAVType.TIME, M("timezone", "UTC"));
     }
-    
-    
+
+
     public void testUnknownTimezone() {
         assertFails(EAVErrorMessage.ILLEGAL_OPTION, EAVType.TIME, M("timezone", "stardate"));
     }
-    
+
     protected void assertPasses(final EAVType type, final Map<String, Object> options) {
         assertSame("Verification failed", null, type.doSwitch(verifier, options));
     }
-    
+
     protected void assertFails(final EAVErrorMessage expectedMessage, final EAVType type, final Map<String, Object> options) {
         final OXException exception = (OXException) type.doSwitch(verifier, options);
         assertNotNull("Expected: "+expectedMessage.getMessage()+" but got null", exception);
         assertEquals(expectedMessage.getNumber(), exception.getCode());
     }
-    
-    
-    
+
+
+
 }

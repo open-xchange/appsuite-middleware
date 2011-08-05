@@ -95,14 +95,17 @@ public class LinkedInSubscribeService  extends AbstractSubscribeService {
         source.setFormDescription(form);
     }
 
+    @Override
     public Collection<?> getContent(Subscription subscription) throws OXException {
         return activator.getLinkedInService().getContacts(subscription.getSecret(), subscription.getUserId(), subscription.getContext().getContextId(), (Integer)subscription.getConfiguration().get("account"));
     }
 
+    @Override
     public SubscriptionSource getSubscriptionSource() {
         return source;
     }
 
+    @Override
     public boolean handles(int folderModule) {
         return FolderObject.CONTACT == folderModule;
     }

@@ -254,6 +254,7 @@ public final class DictonaryStorage {
         final List<Locale> ll = new ArrayList<Locale>();
         final File[] subdirs = spellCheckDir.listFiles(new FileFilter() {
 
+            @Override
             public boolean accept(final File pathname) {
                 final Matcher m = PAT_LOCALE.matcher(pathname.getName());
                 if (m.matches() && pathname.isDirectory()) {
@@ -286,6 +287,7 @@ public final class DictonaryStorage {
         {
             final File[] files = dir.listFiles(new FilenameFilter() {
 
+                @Override
                 public boolean accept(final File dir, final String name) {
                     return PAT_FILENAME_PHON.matcher(name).matches();
                 }
@@ -306,6 +308,7 @@ public final class DictonaryStorage {
          */
         final File[] files = dir.listFiles(new FilenameFilter() {
 
+            @Override
             public boolean accept(final File dir, final String name) {
                 return PAT_FILENAME_WL.matcher(name).matches();
             }
@@ -441,6 +444,7 @@ public final class DictonaryStorage {
          * (non-Javadoc)
          * @see org.mozilla.intl.chardet.nsICharsetDetectionObserver#Notify(java.lang.String)
          */
+        @Override
         public void Notify(final String charset) {
             this.charset = charset;
         }

@@ -133,6 +133,7 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
         return folderStorage;
     }
 
+    @Override
     public String[] appendMessages(final String destFolder, final MailMessage[] msgs) throws OXException {
         /*
          * Append to mail account storage and return storage's IDs, NOT UIDLS!!!
@@ -171,10 +172,12 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
         uidlMap.addMappings(uidls, pairs);
     }
 
+    @Override
     public String[] copyMessages(final String sourceFolder, final String destFolder, final String[] mailIDs, final boolean fast) throws OXException {
         return delegatee.copyMessages(getRealFullname(sourceFolder), getRealFullname(destFolder), mailIDs, fast);
     }
 
+    @Override
     public void deleteMessages(final String folder, final String[] mailIDs, final boolean hardDelete) throws OXException {
         if (hardDelete || performHardDelete(folder)) {
             // Clean from storage
@@ -201,6 +204,7 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
         return !getFolderStorage().getFolder(trashFullname).isHoldsFolders();
     }
 
+    @Override
     public MailMessage[] getAllMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws OXException {
         final MailMessage[] mails = delegatee.getAllMessages(getRealFullname(folder), indexRange, sortField, order, fields);
         for (final MailMessage mailMessage : mails) {
@@ -209,14 +213,17 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
         return mails;
     }
 
+    @Override
     public MailPart getAttachment(final String folder, final String mailId, final String sequenceId) throws OXException {
         return delegatee.getAttachment(getRealFullname(folder), mailId, sequenceId);
     }
 
+    @Override
     public MailPart getImageAttachment(final String folder, final String mailId, final String contentId) throws OXException {
         return delegatee.getImageAttachment(getRealFullname(folder), mailId, contentId);
     }
 
+    @Override
     public MailMessage getMessage(final String folder, final String mailId, final boolean markSeen) throws OXException {
         final MailMessage mail = delegatee.getMessage(getRealFullname(folder), mailId, markSeen);
         if (mail.containsFolder() && null != mail.getFolder()) {
@@ -228,6 +235,7 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
         return mail;
     }
 
+    @Override
     public MailMessage[] getMessages(final String folder, final String[] mailIds, final MailField[] fields) throws OXException {
         final MailMessage[] mails = delegatee.getMessages(getRealFullname(folder), mailIds, fields);
         for (final MailMessage mailMessage : mails) {
@@ -236,6 +244,7 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
         return mails;
     }
 
+    @Override
     public MailMessage[] getThreadSortedMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
         final MailMessage[] mails = delegatee.getThreadSortedMessages(
             getRealFullname(folder),
@@ -250,6 +259,7 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
         return mails;
     }
 
+    @Override
     public MailMessage[] getUnreadMessages(final String folder, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int limit) throws OXException {
         final MailMessage[] mails = delegatee.getUnreadMessages(getRealFullname(folder), sortField, order, fields, limit);
         for (final MailMessage mailMessage : mails) {
@@ -258,6 +268,7 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
         return mails;
     }
 
+    @Override
     public String[] moveMessages(final String sourceFolder, final String destFolder, final String[] mailIDs, final boolean fast) throws OXException {
         // Move to destination folder
         final String realSourceFullname = getRealFullname(sourceFolder);
@@ -280,14 +291,17 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
         return fast ? new String[0] : newMailIds;
     }
 
+    @Override
     public void releaseResources() throws OXException {
         delegatee.releaseResources();
     }
 
+    @Override
     public MailMessage saveDraft(final String draftFullname, final ComposedMailMessage draftMail) throws OXException {
         return delegatee.saveDraft(getRealFullname(draftFullname), draftMail);
     }
 
+    @Override
     public MailMessage[] searchMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
         final MailMessage[] mails = delegatee.searchMessages(getRealFullname(folder), indexRange, sortField, order, searchTerm, fields);
         for (final MailMessage mailMessage : mails) {
@@ -296,14 +310,17 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
         return mails;
     }
 
+    @Override
     public void updateMessageColorLabel(final String folder, final String[] mailIds, final int colorLabel) throws OXException {
         delegatee.updateMessageColorLabel(getRealFullname(folder), mailIds, colorLabel);
     }
 
+    @Override
     public void updateMessageFlags(final String folder, final String[] mailIds, final int flags, final boolean set) throws OXException {
         delegatee.updateMessageFlags(getRealFullname(folder), mailIds, flags, set);
     }
 
+    @Override
     public MailMessage[] getDeletedMessages(final String folder, final MailField[] fields) throws OXException {
         final MailMessage[] mails = delegatee.getDeletedMessages(folder, fields);
         for (final MailMessage mailMessage : mails) {
@@ -313,6 +330,7 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
 
     }
 
+    @Override
     public MailMessage[] getNewAndModifiedMessages(final String folder, final MailField[] fields) throws OXException {
         final MailMessage[] mails = delegatee.getNewAndModifiedMessages(folder, fields);
         for (final MailMessage mailMessage : mails) {

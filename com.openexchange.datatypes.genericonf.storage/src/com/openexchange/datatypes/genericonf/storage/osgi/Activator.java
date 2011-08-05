@@ -68,6 +68,7 @@ public class Activator implements BundleActivator {
 
     private ServiceRegistration createTablesServiceRegistration;
 
+    @Override
     public void start(final BundleContext context) throws Exception {
         final MySQLGenericConfigurationStorage mySQLGenericConfigurationStorage = new MySQLGenericConfigurationStorage();
         mySQLGenericConfigurationStorage.setDBProvider(new WhiteboardDBProvider(context));
@@ -79,6 +80,7 @@ public class Activator implements BundleActivator {
             null);
     }
 
+    @Override
     public void stop(final BundleContext context) throws Exception{
         serviceRegistration.unregister();
         createTablesServiceRegistration.unregister();

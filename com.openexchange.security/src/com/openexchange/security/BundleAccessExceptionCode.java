@@ -24,23 +24,28 @@ public enum BundleAccessExceptionCode implements OXExceptionCode {
 		this.category = category;
 	}
 
-	public String getPrefix() {
+	@Override
+    public String getPrefix() {
 	    return "SECURITY";
 	}
 
-	public Category getCategory() {
+	@Override
+    public Category getCategory() {
 		return category;
 	}
 
-	public int getNumber() {
+	@Override
+    public int getNumber() {
 		return detailNumber;
 	}
 
-	public String getMessage() {
+	@Override
+    public String getMessage() {
 		return message;
 	}
 
-	public boolean equals(final OXException e) {
+	@Override
+    public boolean equals(final OXException e) {
         return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }
 

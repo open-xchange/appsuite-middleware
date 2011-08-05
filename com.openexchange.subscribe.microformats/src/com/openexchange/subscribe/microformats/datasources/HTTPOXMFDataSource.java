@@ -69,6 +69,7 @@ public class HTTPOXMFDataSource implements OXMFDataSource {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(HTTPOXMFDataSource.class));
 
+    @Override
     public Reader getData(Subscription subscription) throws OXException {
         String site = (String)subscription.getConfiguration().get(URL);
 

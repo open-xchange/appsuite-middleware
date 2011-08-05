@@ -78,11 +78,13 @@ public class CoercingComposedConfigProperty<T> implements ComposedConfigProperty
         this.delegate = d;
     }
 
+    @Override
     public ComposedConfigProperty<T> precedence(final String... scopes) throws OXException {
         initDelegate(delegate.precedence(scopes));
         return this;
     }
 
+    @Override
     public T get() throws OXException {
         final String value = delegate.get();
         return parse(value, coerceTo);
@@ -100,32 +102,39 @@ public class CoercingComposedConfigProperty<T> implements ComposedConfigProperty
         return parsed;
     }
 
+    @Override
     public String get(final String metadataName) throws OXException {
         return delegate.get(metadataName);
     }
 
+    @Override
     public <M> M get(final String metadataName, final Class<M> m) throws OXException {
         return parse(delegate.get(metadataName), m);
     }
 
+    @Override
     public boolean isDefined() throws OXException {
         return delegate.isDefined();
     }
 
+    @Override
     public CoercingComposedConfigProperty<T> set(final T value) throws OXException {
         delegate.set(value.toString()); // We assume good toString methods that allow reparsing
         return this;
     }
 
+    @Override
     public <M> CoercingComposedConfigProperty<T> set(final String metadataName, final M value) throws OXException {
         delegate.set(metadataName, value);
         return this;
     }
 
+    @Override
     public <M> ComposedConfigProperty<M> to(final Class<M> otherType) throws OXException {
         return delegate.to(otherType);
     }
 
+    @Override
     public List<String> getMetadataNames() throws OXException {
         return delegate.getMetadataNames();
     }

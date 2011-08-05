@@ -72,6 +72,7 @@ public class Whitelist implements Authentication {
         init();
     }
 
+    @Override
     public boolean auth(HttpServletRequest req) {
         if (addresses == null || addresses.size() == 0) {
             return true;

@@ -67,11 +67,13 @@ public final class ICal4jItem implements ICalItem {
         this.component = component;
     }
 
+    @Override
     public String getUID() {
         final Property property = component.getProperty(Uid.UID);
         return null == property ? null : property.getValue();
     }
 
+    @Override
     public void setUID(final String value) {
         if (component.getProperties().contains(Property.UID)) {
             ((Uid) component.getProperty(Property.UID)).setValue(value);

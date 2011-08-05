@@ -264,6 +264,7 @@ public final class MemorizerWorker {
             }
         }
 
+        @Override
         public Object call() throws Exception {
             /*
              * Stay active as long as flag is true

@@ -79,6 +79,7 @@ public class ContextConfigProvider extends AbstractContextBasedConfigProvider {
 
         return new BasicProperty() {
 
+            @Override
             public String get() {
                 final Map<String, Set<String>> attributes = ctx.getAttributes();
 
@@ -89,22 +90,27 @@ public class ContextConfigProvider extends AbstractContextBasedConfigProvider {
                 return set.iterator().next();
             }
 
+            @Override
             public String get(final String metadataName) throws OXException {
                 return null;
             }
 
+            @Override
             public boolean isDefined() throws OXException {
                 return get() != null;
             }
 
+            @Override
             public void set(final String value) throws OXException {
                 throw ConfigCascadeExceptionCodes.CAN_NOT_SET_PROPERTY.create(property, "user");
             }
 
+            @Override
             public void set(final String metadataName, final String value) throws OXException {
                 throw ConfigCascadeExceptionCodes.CAN_NOT_DEFINE_METADATA.create(metadataName, "user");
             }
 
+            @Override
             public List<String> getMetadataNames() throws OXException {
                 return Collections.emptyList();
             }

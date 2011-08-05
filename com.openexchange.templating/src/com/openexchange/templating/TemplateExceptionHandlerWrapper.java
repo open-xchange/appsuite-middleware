@@ -72,6 +72,7 @@ public class TemplateExceptionHandlerWrapper implements TemplateExceptionHandler
     /**
      * {@inheritDoc}
      */
+    @Override
     public void handleTemplateException(final freemarker.template.TemplateException te, final Environment env, final Writer out) throws freemarker.template.TemplateException {
         final OXException exception = TemplateErrorMessage.UnderlyingException.create(te);
 

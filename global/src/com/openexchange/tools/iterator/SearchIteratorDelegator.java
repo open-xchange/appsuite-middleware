@@ -107,18 +107,22 @@ public class SearchIteratorDelegator<T> implements SearchIterator<T> {
         this(collection.iterator(), collection.size());
     }
 
+    @Override
     public boolean hasNext() throws OXException {
         return delegate.hasNext();
     }
 
+    @Override
     public T next() throws OXException {
         return delegate.next();
     }
 
+    @Override
     public void close() throws OXException {
         // Nothing to do
     }
 
+    @Override
     public int size() {
         if (size < 0) {
             return -1;
@@ -130,14 +134,17 @@ public class SearchIteratorDelegator<T> implements SearchIterator<T> {
         return (size >= 0);
     }
 
+    @Override
     public void addWarning(final OXException warning) {
         warnings.add(warning);
     }
 
+    @Override
     public OXException[] getWarnings() {
         return warnings.isEmpty() ? null : warnings.toArray(new OXException[warnings.size()]);
     }
 
+    @Override
     public boolean hasWarnings() {
         return !warnings.isEmpty();
     }

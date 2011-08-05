@@ -206,6 +206,7 @@ public class FormDescriptionWriterTest extends TestCase{
 
     private static final class TestTranslator implements Translator {
 
+        @Override
         public String translate(String toTranslate) {
             return toTranslate;
         }

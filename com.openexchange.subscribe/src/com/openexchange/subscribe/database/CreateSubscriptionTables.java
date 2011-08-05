@@ -84,10 +84,12 @@ public class CreateSubscriptionTables extends AbstractCreateTableImpl {
         };
     }
 
+    @Override
     public String[] requiredTables() {
         return new String[]{"user"};
     }
 
+    @Override
     public String[] tablesToCreate() {
         return new String[]{"subscriptions","sequence_subscriptions"};
     }

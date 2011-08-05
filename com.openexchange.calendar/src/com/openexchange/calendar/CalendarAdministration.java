@@ -110,6 +110,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
     /* (non-Javadoc)
      * @see com.openexchange.calendar.CalendarAdministrationService#deletePerformed(com.openexchange.groupware.delete.DeleteEvent, java.sql.Connection, java.sql.Connection)
      */
+    @Override
     public void deletePerformed(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon) throws OXException {
         try {
             switch (deleteEvent.getType()) {
@@ -136,6 +137,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
         }
     }
 
+    @Override
     public void downgradePerformed(final DowngradeEvent downgradeEvent) throws OXException {
         if (!downgradeEvent.getNewUserConfiguration().hasCalendar()) {
             removePrivate(downgradeEvent);
@@ -697,6 +699,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
     /* (non-Javadoc)
      * @see com.openexchange.calendar.CalendarAdministrationService#initializeUpdateString()
      */
+    @Override
     public final void initializeUpdateString() {
         final CalendarCollection collection = new CalendarCollection();
         u1 = new StringBuilder(128);
@@ -746,6 +749,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
     /* (non-Javadoc)
      * @see com.openexchange.calendar.CalendarAdministrationService#getDowngradeListener()
      */
+    @Override
     public DowngradeListener getDowngradeListener() {
         return new DowngradeListener() {
 

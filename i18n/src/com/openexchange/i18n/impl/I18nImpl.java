@@ -70,6 +70,7 @@ public class I18nImpl implements I18nService {
         serverBundle = bundle;
     }
 
+    @Override
     public String getLocalized(final String key) {
         if (serverBundle == null) {
             return key;
@@ -84,6 +85,7 @@ public class I18nImpl implements I18nService {
         }
     }
 
+    @Override
     public boolean hasKey(final String key) {
         try {
             serverBundle.getString(key);
@@ -93,6 +95,7 @@ public class I18nImpl implements I18nService {
         }
     }
 
+    @Override
     public Locale getLocale() {
         if (null == serverBundle) {
             return null;

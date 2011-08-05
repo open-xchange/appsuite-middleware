@@ -94,82 +94,102 @@ public final class TwitterMessagingFolder implements MessagingFolder {
         permissions = Arrays.asList(ownPermission);
     }
 
+    @Override
     public Set<String> getCapabilities() {
         return Collections.emptySet();
     }
 
+    @Override
     public String getId() {
         return MessagingFolder.ROOT_FULLNAME;
     }
 
+    @Override
     public String getName() {
         return MessagingFolder.ROOT_FULLNAME;
     }
 
+    @Override
     public MessagingPermission getOwnPermission() {
         return ownPermission;
     }
 
+    @Override
     public String getParentId() {
         return null;
     }
 
+    @Override
     public List<MessagingPermission> getPermissions() {
         return permissions;
     }
 
+    @Override
     public boolean hasSubfolders() {
         return false;
     }
 
+    @Override
     public boolean hasSubscribedSubfolders() {
         return false;
     }
 
+    @Override
     public boolean isSubscribed() {
         return true;
     }
 
+    @Override
     public int getDeletedMessageCount() {
         return 0;
     }
 
+    @Override
     public int getMessageCount() {
         return TwitterConstants.TIMELINE_LENGTH;
     }
 
+    @Override
     public int getNewMessageCount() {
         return 0;
     }
 
+    @Override
     public int getUnreadMessageCount() {
         return 0;
     }
 
+    @Override
     public boolean isDefaultFolder() {
         return false;
     }
 
+    @Override
     public boolean isHoldsFolders() {
         return false;
     }
 
+    @Override
     public boolean isHoldsMessages() {
         return true;
     }
 
+    @Override
     public boolean isRootFolder() {
         return true;
     }
 
+    @Override
     public boolean containsDefaultFolderType() {
         return true;
     }
 
+    @Override
     public DefaultFolderType getDefaultFolderType() {
         return DefaultFolderType.MESSAGING;
     }
 
+    @Override
     public char getSeparator() {
         return '.';
     }

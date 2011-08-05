@@ -74,6 +74,7 @@ public final class CacheStatistics2JCS extends Statistics2JCS implements CacheSt
         super(cacheStats);
     }
 
+    @Override
     public Statistics[] getAuxiliaryCacheStats() {
         final IStats[] stats = ((ICacheStats) super.stats).getAuxiliaryCacheStats();
         if (stats == null) {
@@ -86,10 +87,12 @@ public final class CacheStatistics2JCS extends Statistics2JCS implements CacheSt
         return retval;
     }
 
+    @Override
     public String getRegionName() {
         return ((ICacheStats) super.stats).getRegionName();
     }
 
+    @Override
     public void setAuxiliaryCacheStats(final Statistics[] statistics) {
         if (statistics == null) {
             ((ICacheStats) super.stats).setAuxiliaryCacheStats(null);
@@ -102,6 +105,7 @@ public final class CacheStatistics2JCS extends Statistics2JCS implements CacheSt
         ((ICacheStats) super.stats).setAuxiliaryCacheStats(stats);
     }
 
+    @Override
     public void setRegionName(final String name) {
         ((ICacheStats) super.stats).setRegionName(name);
     }

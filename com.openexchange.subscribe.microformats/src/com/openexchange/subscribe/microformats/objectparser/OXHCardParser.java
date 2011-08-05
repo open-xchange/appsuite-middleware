@@ -69,6 +69,7 @@ import com.openexchange.subscribe.microformats.transformers.MapToContactObjectTr
  */
 public class OXHCardParser implements ObjectParser<Contact>{
 
+    @Override
     public List<Contact> parse(Reader html) throws OXException {
         BufferedReader bufferedReader = new BufferedReader(html);
         String line;

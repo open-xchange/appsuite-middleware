@@ -66,104 +66,104 @@ import com.openexchange.exception.OXException;
  *
  */
 public class EAVTypeCoercionTest extends EAVUnitTest {
-    
+
     private final EAVTypeCoercion typeCoercion = new EAVTypeCoercion(EAVTypeCoercion.Mode.INCOMING);
-    
+
     /*
-     * Coercion 
+     * Coercion
      */
     public void testCoerceNumberToDate() throws OXException {
         final EAVTypeMetadataNode dateMetadata = TYPE("testDate", EAVType.DATE);
-        
+
         final Object expected = 1245715200000l;
-        
+
         final Object actual = typeCoercion.coerce(EAVType.NUMBER, expected, dateMetadata);
-        
+
         assertEquals(expected, actual);
     }
-    
+
     public void testCoerceNumberToTimeWithTimezone() throws OXException {
         final TimeZone tz = TimeZone.getTimeZone("Pacific/Rarotonga");
         final long nowUTC = new Date().getTime();
         final long nowRarotonga = nowUTC + tz.getOffset(nowUTC);
-        
+
         final EAVTypeMetadataNode timeMetadata = TYPE("testTime", EAVType.TIME, M("timezone", "Pacific/Rarotonga"));
-        
+
         final long actual = (Long) typeCoercion.coerce(EAVType.NUMBER, nowRarotonga, timeMetadata);
-        
+
         assertEquals(nowUTC, actual);
     }
-    
+
     public void testCoerceNumberToTimeWithDefaultTimezone() throws OXException {
         final TimeZone tz = TimeZone.getTimeZone("Pacific/Rarotonga");
         final long nowUTC = new Date().getTime();
         final long nowRarotonga = nowUTC + tz.getOffset(nowUTC);
-        
+
         final EAVTypeMetadataNode timeMetadata = TYPE("testTime", EAVType.TIME);
-        
+
         final long actual = (Long) typeCoercion.coerce(EAVType.NUMBER, nowRarotonga, timeMetadata, tz);
-        
+
         assertEquals(nowUTC, actual);
     }
-    
+
     public void testCoerceNumberToTimeWithoutTimezoneAssumingUTC() throws OXException {
         final long nowUTC = new Date().getTime();
-        
+
         final EAVTypeMetadataNode timeMetadata = TYPE("testTime", EAVType.TIME);
-        
+
         final long actual = (Long) typeCoercion.coerce(EAVType.NUMBER, nowUTC, timeMetadata);
-        
+
         assertEquals(nowUTC, actual);
     }
-    
+
     public void testCoerceStringToBinary() throws IOException, OXException {
         final Base64 base64 = new Base64();
         final byte[] bytes = "Hello World".getBytes("UTF-8");
         final String encoded = new String(base64.encode(bytes), "ASCII");
-        
+
         final EAVTypeMetadataNode binaryMetadata = TYPE("testBinary", EAVType.BINARY);
-        
+
         final InputStream data = (InputStream) typeCoercion.coerce(EAVType.STRING, encoded, binaryMetadata);
-        
+
         final byte[] buffer = new byte[bytes.length];
         final int read = data.read(buffer);
-        
+
         assertEquals(read, buffer.length);
         assertEquals(-1, data.read());
         assertEquals("Hello World", new String(buffer, "UTF-8"));
    }
-    
+
     public void testLeaveSameTypesAlone() throws OXException {
-        
+
         final EAVTypeMetadataNode stringMetadata = TYPE("testString", EAVType.STRING);
         final EAVTypeMetadataNode booleanMetadata = TYPE("testBool", EAVType.BOOLEAN);
         final EAVTypeMetadataNode numberMetadata = TYPE("testNumber", EAVType.NUMBER);
-        
-        
+
+
         assertUnchanged(EAVType.STRING, "Hello", stringMetadata);
         assertUnchanged(EAVType.BOOLEAN, true, booleanMetadata);
         assertUnchanged(EAVType.NUMBER, 12, numberMetadata);
-        
+
     }
-    
-    
+
+
     public void testInvalidDate() {
         final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         calendar.setTime(new Date());
         calendar.set(Calendar.HOUR, 23);
-        
+
         final long notMidnightUTC = calendar.getTimeInMillis();
         final EAVTypeMetadataNode dateMetadata = TYPE("testDate", EAVType.DATE);
-        
+
         try {
             typeCoercion.coerce(EAVType.NUMBER, notMidnightUTC, dateMetadata);
             fail("Type coercion accepted illegal date");
         } catch (final OXException x) {
             assertTrue(EAVErrorMessage.ILLEGAL_VALUE.equals(x));
         }
-        
+
     }
-    
+
     // Note: For more about the validity of type coercions see the EAVTypeTest
     public void testImplicitTypeMismatch() {
         final EAVTypeMetadataNode stringMetadata = TYPE("testString", EAVType.STRING);
@@ -174,47 +174,47 @@ public class EAVTypeCoercionTest extends EAVUnitTest {
             assertTrue(EAVErrorMessage.INCOMPATIBLE_TYPES.equals(x));
         }
     }
-    
-    
+
+
     protected void assertUnchanged(final EAVType type, final Object datum, final EAVTypeMetadataNode metadata) throws OXException {
         assertEquals(datum, typeCoercion.coerce(type, datum, metadata));
     }
-    
+
     public void testCoerceEAVNodeTree() throws UnsupportedEncodingException {
         final TimeZone tz = TimeZone.getTimeZone("Pacific/Rarotonga");
         final long nowUTC = new Date().getTime();
         final long nowRarotonga = nowUTC + tz.getOffset(nowUTC);
-        
+
         final Base64 base64 = new Base64();
         final byte[] bytes = "Hello World".getBytes("UTF-8");
         final String encoded = new String(base64.encode(bytes), "ASCII");
-        
-        
+
+
         final EAVNode tree = N("com.openexchange.test",
                             N("date", EAVType.NUMBER, 1245715200000l),
                             N("time", EAVType.NUMBER, nowRarotonga),
                             N("binary", encoded),
-                            N("multiples", 
+                            N("multiples",
                                 N("date", EAVType.NUMBER, 1245715200000l,1245715200000l,1245715200000l),
                                 N("time", EAVType.NUMBER, nowRarotonga, nowRarotonga, nowRarotonga),
                                 N("binary", encoded, encoded, encoded)
                             )
                         );
-        
+
         final EAVNode expected = N("com.openexchange.test",
                                 N("date", EAVType.DATE, 1245715200000l),
                                 N("time", EAVType.TIME, nowUTC),
                                 N("binary", bytes),
-                                N("multiples", 
+                                N("multiples",
                                     N("date", EAVType.DATE, 1245715200000l,1245715200000l,1245715200000l),
                                     N("time", EAVType.TIME, nowUTC, nowUTC, nowUTC),
                                     N("binary", bytes, bytes, bytes)
                                 )
                             );
 
-        
-        
-        final EAVTypeMetadataNode metadata = TYPE("com.openexchange.test", 
+
+
+        final EAVTypeMetadataNode metadata = TYPE("com.openexchange.test",
                                              TYPE("date", EAVType.DATE),
                                              TYPE("time", EAVType.TIME, M("timezone", tz.getID())),
                                              TYPE("binary", EAVType.BINARY),
@@ -224,86 +224,86 @@ public class EAVTypeCoercionTest extends EAVUnitTest {
                                                  TYPE("binary", EAVType.BINARY, EAVContainerType.MULTISET)
                                              )
                                         );
-        
+
         final EAVNodeTypeCoercionVisitor visitor = new EAVNodeTypeCoercionVisitor(metadata, null, EAVTypeCoercion.Mode.INCOMING);
         tree.visit(visitor);
-        
+
         assertNoError(visitor);
         assertEquals(expected, tree);
     }
-    
+
     public void testCoercingSingleToMultipleFails() {
         final EAVNode tree = N("com.openexchange.test",
                             N("attribute", EAVType.NUMBER, 1245715200000l)
                         );
-   
-        final EAVTypeMetadataNode metadata = TYPE("com.openexchange.test", 
+
+        final EAVTypeMetadataNode metadata = TYPE("com.openexchange.test",
                                            TYPE("attribute", EAVType.DATE, EAVContainerType.MULTISET)
                                        );
-        
+
         final EAVNodeTypeCoercionVisitor visitor = new EAVNodeTypeCoercionVisitor(metadata, null, EAVTypeCoercion.Mode.INCOMING);
         tree.visit(visitor);
-        
+
         assertError(visitor, EAVErrorMessage.WRONG_TYPES);
      }
-    
+
 
     public void testCoerceEAVSetTransformationTree() throws UnsupportedEncodingException {
         final TimeZone tz = TimeZone.getTimeZone("Pacific/Rarotonga");
         final long nowUTC = new Date().getTime();
         final long nowRarotonga = nowUTC + tz.getOffset(nowUTC);
-        
+
         final Base64 base64 = new Base64();
         final byte[] bytes = "Hello World".getBytes("UTF-8");
         final String encoded = new String(base64.encode(bytes), "ASCII");
-        
-        
-        final EAVSetTransformation transformation = TRANS("com.openexchange.test", 
+
+
+        final EAVSetTransformation transformation = TRANS("com.openexchange.test",
                                                     TRANS("date", ADD(1245715200000l), REMOVE(1245715200000l)),
                                                     TRANS("time", ADD(nowRarotonga), REMOVE(nowRarotonga)),
                                                     TRANS("binary", ADD(encoded), REMOVE(encoded))
                                               );
 
-        final EAVTypeMetadataNode metadata = TYPE("com.openexchange.test", 
+        final EAVTypeMetadataNode metadata = TYPE("com.openexchange.test",
                                             TYPE("date", EAVType.DATE, EAVContainerType.MULTISET),
                                             TYPE("time", EAVType.TIME, EAVContainerType.MULTISET, M("timezone", tz.getID())),
                                             TYPE("binary", EAVType.BINARY, EAVContainerType.MULTISET)
-                                            
+
                                        );
-        
+
         final EAVSetTransformationTypeCoercionVisitor visitor = new EAVSetTransformationTypeCoercionVisitor(metadata, null,EAVTypeCoercion.Mode.INCOMING);
         transformation.visit(visitor);
-        
+
         assertNoError(visitor);
-        
+
         assertTransformation(transformation.getChildByName("date"), EAVType.DATE, ADD(1245715200000l), REMOVE(1245715200000l));
         assertTransformation(transformation.getChildByName("time"), EAVType.TIME, ADD(nowUTC), REMOVE(nowUTC));
         assertTransformation(transformation.getChildByName("binary"), EAVType.BINARY, ADD(bytes), REMOVE(bytes));
     }
-    
+
 
     public void testCoercingSingleToMultipleInTransformationTreeFails() {
-        final EAVSetTransformation transformation = TRANS("com.openexchange.test", 
+        final EAVSetTransformation transformation = TRANS("com.openexchange.test",
                                                     TRANS("date", ADD(1245715200000l), REMOVE(1245715200000l))
                                               );
 
-        final EAVTypeMetadataNode metadata = TYPE("com.openexchange.test", 
+        final EAVTypeMetadataNode metadata = TYPE("com.openexchange.test",
                                             TYPE("date", EAVType.DATE, EAVContainerType.SINGLE)
                                        );
-    
+
         final EAVSetTransformationTypeCoercionVisitor visitor = new EAVSetTransformationTypeCoercionVisitor(metadata, null, EAVTypeCoercion.Mode.INCOMING);
         transformation.visit(visitor);
-        
+
         assertError(visitor, EAVErrorMessage.WRONG_TYPES);
     }
-    
+
     private void assertNoError(final AbstractEAVExceptionHolder holder) {
         assertNull(holder.getException());
     }
-    
+
     private void assertError(final AbstractEAVExceptionHolder holder, final EAVErrorMessage message) {
         assertNotNull(holder.getException());
         assertEquals(message.getNumber(), holder.getException().getCode());
     }
-    
+
 }

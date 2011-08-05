@@ -61,16 +61,19 @@ import com.openexchange.publish.json.EntityType;
  */
 public class IDType implements EntityType {
 
+    @Override
     public JSONObject toEntity(String entityId) throws JSONException {
         JSONObject object = new JSONObject();
         object.put("id", entityId);
         return object;
     }
 
+    @Override
     public String toEntityID(JSONObject entityDefinition) throws JSONException {
         return String.valueOf(entityDefinition.getInt("id"));
     }
 
+    @Override
     public String toEntityID(HttpServletRequest entityDefinition) throws JSONException {
         return entityDefinition.getParameter("id");
     }

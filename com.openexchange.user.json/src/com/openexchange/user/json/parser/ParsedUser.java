@@ -76,86 +76,107 @@ public final class ParsedUser implements User {
         super();
     }
 
+    @Override
     public String[] getAliases() {
         return null;
     }
 
+    @Override
     public Map<String, Set<String>> getAttributes() {
         return null;
     }
 
+    @Override
     public int getContactId() {
         return -1;
     }
 
+    @Override
     public String getDisplayName() {
         return null;
     }
 
+    @Override
     public String getGivenName() {
         return null;
     }
 
+    @Override
     public int[] getGroups() {
         return null;
     }
 
+    @Override
     public int getId() {
         return id;
     }
 
+    @Override
     public String getImapLogin() {
         return null;
     }
 
+    @Override
     public String getImapServer() {
         return null;
     }
 
+    @Override
     public Locale getLocale() {
         return locale;
     }
 
+    @Override
     public String getLoginInfo() {
         return null;
     }
 
+    @Override
     public String getMail() {
         return null;
     }
 
+    @Override
     public String getMailDomain() {
         return null;
     }
 
+    @Override
     public String getPasswordMech() {
         return null;
     }
 
+    @Override
     public String getPreferredLanguage() {
         return null == locale ? null : locale.toString();
     }
 
+    @Override
     public int getShadowLastChange() {
         return 0;
     }
 
+    @Override
     public String getSmtpServer() {
         return null;
     }
 
+    @Override
     public String getSurname() {
         return null;
     }
 
+    @Override
     public String getTimeZone() {
         return timeZone;
     }
 
+    @Override
     public String getUserPassword() {
         return null;
     }
 
+    @Override
     public boolean isMailEnabled() {
         return true;
     }

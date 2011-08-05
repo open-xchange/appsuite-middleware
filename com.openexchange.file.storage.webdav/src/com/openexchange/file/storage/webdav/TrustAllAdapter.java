@@ -78,14 +78,17 @@ public class TrustAllAdapter implements SecureProtocolSocketFactory {
         delegate = (TrustAllSSLSocketFactory) TrustAllSSLSocketFactory.getDefault();
     }
 
+    @Override
     public Socket createSocket(final String host, final int port) throws IOException, UnknownHostException {
         return delegate.createSocket(host, port);
     }
 
+    @Override
     public Socket createSocket(final String host, final int port, final InetAddress localAddress, final int localPort) throws IOException, UnknownHostException {
         return delegate.createSocket(host, port, localAddress, localPort);
     }
 
+    @Override
     public Socket createSocket(final String host, final int port, final InetAddress localAddress, final int localPort, final HttpConnectionParams params) throws IOException, UnknownHostException, ConnectTimeoutException {
         Socket socket;
         final int timeout = params.getConnectionTimeout();
@@ -113,6 +116,7 @@ public class TrustAllAdapter implements SecureProtocolSocketFactory {
         return socket;
     }
 
+    @Override
     public Socket createSocket(final Socket socket, final String host, final int port, final boolean autoClose) throws IOException, UnknownHostException {
         return delegate.createSocket(socket, host, port, autoClose);
     }

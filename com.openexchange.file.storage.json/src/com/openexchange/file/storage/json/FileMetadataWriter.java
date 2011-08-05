@@ -101,6 +101,7 @@ public class FileMetadataWriter {
 
         private final FileFieldGet get = new FileFieldGet();
 
+        @Override
         public Object handle(final Field field, final Object... args) {
             final Object value = field.doSwitch(get, args);
             if(value == null && field == File.Field.LOCKED_UNTIL) {
@@ -155,6 +156,7 @@ public class FileMetadataWriter {
     public JSONObject write(final File file, final TimeZone timezone) {
         return File.Field.inject(new AbstractFileFieldHandler() {
 
+            @Override
             public Object handle(final Field field, final Object... args) {
                 final JSONObject o = get(0, JSONObject.class, args);
                 try {

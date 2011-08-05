@@ -78,6 +78,7 @@ public final class PropertyEventImpl implements PropertyEvent {
      * (non-Javadoc)
      * @see com.openexchange.config.PropertyEvent#getType()
      */
+    @Override
     public Type getType() {
         return type;
     }
@@ -86,6 +87,7 @@ public final class PropertyEventImpl implements PropertyEvent {
      * (non-Javadoc)
      * @see com.openexchange.config.PropertyEvent#getName()
      */
+    @Override
     public String getName() {
         return name;
     }
@@ -94,6 +96,7 @@ public final class PropertyEventImpl implements PropertyEvent {
      * (non-Javadoc)
      * @see com.openexchange.config.PropertyEvent#getValue()
      */
+    @Override
     public String getValue() {
         return value;
     }

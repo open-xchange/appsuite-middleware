@@ -130,6 +130,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
         this.mimeMessage = mimeMessage;
     }
 
+    @Override
     public int getColorLabel() throws OXException {
         if (null == cachedParsedFlags) {
             try {
@@ -167,6 +168,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
         }
     }
 
+    @Override
     public int getFlags() throws OXException {
         if (null == cachedParsedFlags) {
             try {
@@ -203,6 +205,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
         }
     }
 
+    @Override
     public Collection<String> getUserFlags() throws OXException {
         if (null == cachedParsedFlags) {
             try {
@@ -250,6 +253,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
         }
     }
 
+    @Override
     public String getFolder() {
         if (null == folder) {
             /*
@@ -270,6 +274,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
         this.folder = folder;
     }
 
+    @Override
     public long getReceivedDate() {
         return receivedDate;
     }
@@ -283,6 +288,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
         this.receivedDate = receivedDate;
     }
 
+    @Override
     public int getThreadLevel() {
         return threadLevel;
     }
@@ -296,6 +302,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
         this.threadLevel = threadLevel;
     }
 
+    @Override
     public String getId() {
         return id;
     }
@@ -309,6 +316,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
         this.id = id;
     }
 
+    @Override
     public String getPicture() {
         return picture;
     }
@@ -323,6 +331,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
         this.picture = picture;
     }
 
+    @Override
     public String getUrl() throws OXException {
         return null;
     }

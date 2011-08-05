@@ -79,6 +79,7 @@ public final class MDNSActivator implements BundleActivator {
         super();
     }
 
+    @Override
     public void start(final BundleContext context) throws Exception {
         try {
             /*
@@ -94,6 +95,7 @@ public final class MDNSActivator implements BundleActivator {
         }
     }
 
+    @Override
     public void stop(final BundleContext context) throws Exception {
         try {
             if (registrations != null) {

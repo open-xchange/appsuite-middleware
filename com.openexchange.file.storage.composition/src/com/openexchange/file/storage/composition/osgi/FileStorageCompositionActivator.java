@@ -91,6 +91,7 @@ public class FileStorageCompositionActivator extends DeferredActivator {
     protected void startBundle() throws Exception {
         registration = context.registerService(IDBasedFileAccessFactory.class.getName(), new IDBasedFileAccessFactory() {
 
+            @Override
             public IDBasedFileAccess createAccess(Session session) {
                 return new CompositingIDBasedFileAccess(session) {
 

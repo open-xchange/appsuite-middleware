@@ -92,6 +92,7 @@ public class Whiteboard implements OXCloseable {
         return factory.isActive(o);
     }
 
+    @Override
     public void close() throws OXException {
         for(final OXCloseable closeable : closeables) {
             try {

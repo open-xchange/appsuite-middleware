@@ -61,9 +61,11 @@ import com.openexchange.groupware.ldap.User;
 public interface UserResolver {
 
     UserResolver EMPTY = new UserResolver() {
+        @Override
         public List<User> findUsers(final List<String> mails, final Context ctx) {
             return new ArrayList<User>();
         }
+        @Override
         public User loadUser(final int userId, final Context ctx) {
             return null;
         }

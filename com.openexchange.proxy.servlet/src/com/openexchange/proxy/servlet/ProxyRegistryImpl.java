@@ -92,6 +92,7 @@ public final class ProxyRegistryImpl implements ProxyRegistry {
         registry = new ConcurrentHashMap<String, ConcurrentMap<UUID, ProxyRegistrationEntry>>();
     }
 
+    @Override
     public URI register(final ProxyRegistration registration) throws OXException {
         final String sessionId = registration.getSessionId();
         /*

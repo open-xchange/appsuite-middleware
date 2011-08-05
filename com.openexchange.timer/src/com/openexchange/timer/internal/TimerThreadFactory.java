@@ -71,6 +71,7 @@ final class TimerThreadFactory implements java.util.concurrent.ThreadFactory {
         len = namePrefix.length() + 5;
     }
 
+    @Override
     public Thread newThread(final Runnable r) {
         final Thread t = new Thread(r, getThreadName(threadNumber.getAndIncrement(), new StringBuilder(len).append(namePrefix)));
         t.setUncaughtExceptionHandler(new TimerUncaughtExceptionhandler());
@@ -99,6 +100,7 @@ final class TimerThreadFactory implements java.util.concurrent.ThreadFactory {
             super();
         }
 
+        @Override
         public void uncaughtException(final Thread t, final Throwable e) {
             LOG1.fatal("Thread terminated with exception: " + t.getName(), e);
         }

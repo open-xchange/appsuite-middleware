@@ -83,6 +83,7 @@ public final class PathAction extends AbstractFolderAction {
         super();
     }
 
+    @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         /*
          * Parse parameters

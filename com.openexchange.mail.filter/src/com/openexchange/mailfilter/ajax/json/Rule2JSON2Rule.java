@@ -252,18 +252,22 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
 
         new Mapper<Rule>() {
 
+            @Override
             public String getAttrName() {
                 return RuleFields.POSITION;
             }
 
+            @Override
             public Object getAttribute(final Rule obj) throws JSONException {
                 return Integer.valueOf(obj.getPosition());
             }
 
+            @Override
             public boolean isNull(final Rule obj) {
                 return -1 == obj.getPosition();
             }
 
+            @Override
             public void setAttribute(final Rule obj, final Object attr) throws JSONException {
                 obj.setPosition(((Integer)attr).intValue());
             }
@@ -271,10 +275,12 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
 
         new Mapper<Rule>() {
 
+            @Override
             public String getAttrName() {
                 return RuleFields.RULENAME;
             }
 
+            @Override
             public Object getAttribute(final Rule obj) throws JSONException {
                 final RuleComment ruleComment = obj.getRuleComment();
                 if (null != ruleComment) {
@@ -284,10 +290,12 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
 				return JSONObject.NULL;
             }
 
+            @Override
             public boolean isNull(final Rule obj) {
                 return false;
             }
 
+            @Override
             public void setAttribute(final Rule obj, final Object attr) throws JSONException {
                 final RuleComment ruleComment = obj.getRuleComment();
                 if (null != ruleComment) {
@@ -300,18 +308,22 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
 
         new Mapper<Rule>() {
 
+            @Override
             public String getAttrName() {
                 return RuleFields.ACTIVE;
             }
 
+            @Override
             public Object getAttribute(final Rule obj) throws JSONException {
                 return Boolean.valueOf(!obj.isCommented());
             }
 
+            @Override
             public boolean isNull(final Rule obj) {
                 return false;
             }
 
+            @Override
             public void setAttribute(final Rule obj, final Object attr) throws JSONException {
                 obj.setCommented(!((Boolean) attr).booleanValue());
             }
@@ -319,10 +331,12 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
 
         new Mapper<Rule>() {
 
+            @Override
             public String getAttrName() {
                 return RuleFields.FLAGS;
             }
 
+            @Override
             public Object getAttribute(final Rule obj) throws JSONException {
                 final JSONArray tmp = new JSONArray();
                 final RuleComment name = obj.getRuleComment();
@@ -334,10 +348,12 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 return tmp;
             }
 
+            @Override
             public boolean isNull(final Rule obj) {
                 return false;
             }
 
+            @Override
             public void setAttribute(final Rule rule, final Object obj) throws JSONException {
                 final JSONArray array = (JSONArray) obj;
                 final ArrayList<String> list = new ArrayList<String>(array.length());
@@ -355,10 +371,12 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
 
         new Mapper<Rule>() {
 
+            @Override
             public String getAttrName() {
                 return RuleFields.TEST;
             }
 
+            @Override
             public Object getAttribute(final Rule obj) throws JSONException {
                 final JSONObject tmp = new JSONObject();
 
@@ -367,10 +385,12 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 return tmp;
             }
 
+            @Override
             public boolean isNull(final Rule obj) {
                 return (null == obj.getTestCommand());
             }
 
+            @Override
             public void setAttribute(final Rule rule, final Object obj) throws JSONException, SieveException, OXException {
                 final JSONObject jobj = (JSONObject) obj;
                 final String id = jobj.getString(GeneralFields.ID);
@@ -603,18 +623,22 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
 
         new Mapper<Rule>() {
 
+            @Override
             public String getAttrName() {
                 return RuleFields.TEXT;
             }
 
+            @Override
             public Object getAttribute(final Rule obj) throws JSONException {
                 return obj.getText();
             }
 
+            @Override
             public boolean isNull(final Rule obj) {
                 return null == obj.getText();
             }
 
+            @Override
             public void setAttribute(final Rule obj, final Object attr) throws JSONException {
                 obj.setText((String)attr);
             }
@@ -623,18 +647,22 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
 
         new Mapper<Rule>() {
 
+            @Override
             public String getAttrName() {
                 return RuleFields.ERRORMSG;
             }
 
+            @Override
             public Object getAttribute(final Rule obj) throws JSONException {
                 return obj.getErrormsg();
             }
 
+            @Override
             public boolean isNull(final Rule obj) {
                 return null == obj.getErrormsg();
             }
 
+            @Override
             public void setAttribute(final Rule obj, final Object attr) throws JSONException {
                 obj.setErrormsg((String)attr);
             }

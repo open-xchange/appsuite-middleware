@@ -107,6 +107,7 @@ public final class IMAPNotifierMessageRecentListener implements MessageRecentLis
                     if (isEmptyString(notifierFullNames)) {
                         fullNameChecker = new FullNameChecker() {
 
+                            @Override
                             public boolean check(final String fullName) {
                                 return false;
                             }
@@ -118,6 +119,7 @@ public final class IMAPNotifierMessageRecentListener implements MessageRecentLis
                             final String fn = BASE64MailboxEncoder.encode(fullNames[0]).toUpperCase(Locale.US);
                             fullNameChecker = new FullNameChecker() {
 
+                                @Override
                                 public boolean check(final String fullName) {
                                     if (null == fullName) {
                                         return false;
@@ -132,6 +134,7 @@ public final class IMAPNotifierMessageRecentListener implements MessageRecentLis
                             }
                             fullNameChecker = new FullNameChecker() {
 
+                                @Override
                                 public boolean check(final String fullName) {
                                     if (null == fullName) {
                                         return false;
@@ -239,6 +242,7 @@ public final class IMAPNotifierMessageRecentListener implements MessageRecentLis
         this.session = session;
     }
 
+    @Override
     public void recentAvailable(final MessageRecentEvent event) {
         try {
             PushUtility.triggerOSGiEvent(

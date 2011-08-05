@@ -67,22 +67,27 @@ public class DeltaImpl<T> implements Delta<T> {
         this.sequenceNumber = sequenceNumber;
     }
 
+    @Override
     public SearchIterator<T> getNew() {
         return New;
     }
 
+    @Override
     public SearchIterator<T> getModified() {
         return Modified;
     }
 
+    @Override
     public SearchIterator<T> getDeleted() {
         return Deleted;
     }
 
+    @Override
     public SearchIterator<T> results() throws OXException {
         return new CombinedSearchIterator<T>(New , Modified);
     }
 
+    @Override
     public long sequenceNumber() throws OXException {
         return sequenceNumber;
     }

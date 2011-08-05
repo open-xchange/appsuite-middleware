@@ -165,6 +165,7 @@ public final class Entity2ACLAutoDetector {
             this.key = key;
         }
 
+        @Override
         public Entity2ACL call() throws Exception {
             final String greeting = IMAPCapabilityAndGreetingCache.getGreeting(key, imapConfig.isSecure(), imapConfig.getIMAPProperties());
             return implFor(greeting, imapConfig);

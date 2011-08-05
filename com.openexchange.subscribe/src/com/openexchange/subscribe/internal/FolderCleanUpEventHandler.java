@@ -97,6 +97,7 @@ public class FolderCleanUpEventHandler implements EventHandler {
         registration.unregister();
     }
 
+    @Override
     public void handleEvent(final Event event) {
         final CommonEvent commonEvent = (CommonEvent) event.getProperty(CommonEvent.EVENT_KEY);
         final FolderObject actionObj = (FolderObject) commonEvent.getActionObj();

@@ -68,6 +68,7 @@ public class Activator implements BundleActivator {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void start(final BundleContext context) throws Exception {
         final Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ContextService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + UserService.class.getName() + "))");
         tracker = new ServiceTracker(context, filter, new AuthenticationRegisterer(context));
@@ -77,6 +78,7 @@ public class Activator implements BundleActivator {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void stop(final BundleContext context) throws Exception {
         tracker.close();
     }

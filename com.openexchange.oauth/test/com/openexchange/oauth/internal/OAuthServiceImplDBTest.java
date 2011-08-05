@@ -161,10 +161,12 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         arguments.put(OAuthConstants.ARGUMENT_PASSWORD, "password");
         arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new OAuthToken() {
 
+            @Override
             public String getSecret() {
                 return "requestSecret";
             }
 
+            @Override
             public String getToken() {
                 return "requestToken";
             }});
@@ -180,10 +182,12 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         arguments.put(OAuthConstants.ARGUMENT_PASSWORD, "password");
         arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new OAuthToken() {
 
+            @Override
             public String getSecret() {
                 return "requestSecret";
             }
 
+            @Override
             public String getToken() {
                 return "requestToken";
             }});
@@ -279,10 +283,12 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         arguments.put(OAuthConstants.ARGUMENT_PASSWORD, "password");
         arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new OAuthToken() {
 
+            @Override
             public String getSecret() {
                 return "requestSecret";
             }
 
+            @Override
             public String getToken() {
                 return "requestToken";
             }});

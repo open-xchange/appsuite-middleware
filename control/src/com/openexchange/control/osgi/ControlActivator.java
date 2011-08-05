@@ -81,6 +81,7 @@ public final class ControlActivator implements BundleActivator {
         super();
     }
 
+    @Override
     public void start(final BundleContext context) throws Exception {
         LOG.info("starting bundle: com.openexchange.control");
         try {
@@ -104,6 +105,7 @@ public final class ControlActivator implements BundleActivator {
         }
     }
 
+    @Override
     public void stop(final BundleContext context) throws Exception {
         LOG.info("stopping bundle: com.openexchange.control");
 
@@ -149,6 +151,7 @@ public final class ControlActivator implements BundleActivator {
             this.logger = logger;
         }
 
+        @Override
         public Object addingService(final ServiceReference reference) {
             final Object addedService = bundleContext.getService(reference);
             if (!(addedService instanceof ManagementService)) {
@@ -174,10 +177,12 @@ public final class ControlActivator implements BundleActivator {
             return null;
         }
 
+        @Override
         public void modifiedService(final ServiceReference reference, final Object service) {
             // Nothing to do
         }
 
+        @Override
         public void removedService(final ServiceReference reference, final Object service) {
             if (null != service) {
                 try {

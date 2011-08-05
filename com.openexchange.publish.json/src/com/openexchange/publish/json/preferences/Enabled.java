@@ -68,16 +68,19 @@ public class Enabled implements PreferencesItemService {
         super();
     }
 
+    @Override
     public String[] getPath() {
         return new String[] { "modules", "com.openexchange.publish" };
     }
 
+    @Override
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
 
             /**
              * {@inheritDoc}
              */
+            @Override
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
                 setting.setSingleValue(Boolean.valueOf(userConfig.isPublication()));
             }
@@ -85,6 +88,7 @@ public class Enabled implements PreferencesItemService {
             /**
              * {@inheritDoc}
              */
+            @Override
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return true;
             }

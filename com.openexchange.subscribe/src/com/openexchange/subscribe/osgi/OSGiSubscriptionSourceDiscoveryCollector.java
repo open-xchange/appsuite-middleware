@@ -95,6 +95,7 @@ public class OSGiSubscriptionSourceDiscoveryCollector implements ServiceTrackerC
         tracker.close();
     }
 
+    @Override
     public Object addingService(final ServiceReference reference) {
         final SubscriptionSourceDiscoveryService service = (SubscriptionSourceDiscoveryService) context.getService(reference);
         if(blacklist.contains(service) || service.getClass() == getClass()) {
@@ -105,10 +106,12 @@ public class OSGiSubscriptionSourceDiscoveryCollector implements ServiceTrackerC
         return service;
     }
 
+    @Override
     public void modifiedService(final ServiceReference reference, final Object service) {
 
     }
 
+    @Override
     public void removedService(final ServiceReference reference, final Object service) {
         delegate.removeSubscriptionSourceDiscoveryService((SubscriptionSourceDiscoveryService) service);
         references.remove(reference);
@@ -116,26 +119,32 @@ public class OSGiSubscriptionSourceDiscoveryCollector implements ServiceTrackerC
     }
 
 
+    @Override
     public SubscriptionSource getSource(final Context context, final int subscriptionId) throws OXException {
         return delegate.getSource(context, subscriptionId);
     }
 
+    @Override
     public SubscriptionSource getSource(final String identifier) {
         return delegate.getSource(identifier);
     }
 
+    @Override
     public List<SubscriptionSource> getSources() {
         return delegate.getSources();
     }
 
+    @Override
     public List<SubscriptionSource> getSources(final int folderModule) {
         return delegate.getSources(folderModule);
     }
 
+    @Override
     public boolean knowsSource(final String identifier) {
         return delegate.knowsSource(identifier);
     }
 
+    @Override
     public SubscriptionSourceDiscoveryService filter(final int user, final int context) throws OXException {
         return delegate.filter(user, context);
     }

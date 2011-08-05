@@ -77,6 +77,7 @@ public class LdapUserFolderCreator implements LoginHandlerService {
         super();
     }
 
+    @Override
     public void handleLogin(final LoginResult login) throws OXException {
         // Here we create the users personal LDAP Folder
         final Session session = login.getSession();
@@ -160,6 +161,7 @@ public class LdapUserFolderCreator implements LoginHandlerService {
         return newFolder;
     }
 
+    @Override
     public void handleLogout(final LoginResult logout) throws OXException {
         // Nothing to do on logout
     }

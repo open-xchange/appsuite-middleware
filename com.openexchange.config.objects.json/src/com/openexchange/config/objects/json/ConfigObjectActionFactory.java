@@ -79,12 +79,14 @@ public class ConfigObjectActionFactory implements AJAXActionServiceFactory{
         this.registryFactory = registryFactory;
     }
 
+    @Override
     public AJAXActionService createActionService(String action) throws OXException {
         if(!GET.equals(action)) {
             throw AjaxExceptionCodes.UnknownAction.create( action);
         }
         return new AJAXActionService() {
 
+            @Override
             public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
 
                 String path = request.getParameter(PATH);

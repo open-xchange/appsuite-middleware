@@ -69,16 +69,19 @@ public class I18nCustomizer implements ServiceTrackerCustomizer {
         this.context = context;
     }
 
+    @Override
     public Object addingService(ServiceReference reference) {
         I18nService service = (I18nService) context.getService(reference);
         I18n.getInstance().addI18nService(service);
         return service;
     }
 
+    @Override
     public void modifiedService(ServiceReference reference, Object service) {
         // Nothing to do.
     }
 
+    @Override
     public void removedService(ServiceReference reference, Object service) {
         I18nService i18nService = (I18nService) service;
         I18n.getInstance().removeI18nService(i18nService);

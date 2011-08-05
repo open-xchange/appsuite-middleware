@@ -109,7 +109,7 @@ public interface Loggable {
 
     /**
      * Gets the properties.
-     * 
+     *
      * @return The properties
      */
     public Map<String, Object> properties();

@@ -67,24 +67,31 @@ public class CustomizableSearchIterator<T> implements SearchIterator<T>{
         this.customizer = customizer;
     }
 
+    @Override
     public void addWarning(OXException warning) {
         searchIterator.addWarning(warning);
     }
+    @Override
     public void close() throws OXException {
         searchIterator.close();
     }
+    @Override
     public OXException[] getWarnings() {
         return searchIterator.getWarnings();
     }
+    @Override
     public boolean hasNext() throws OXException {
         return searchIterator.hasNext();
     }
+    @Override
     public boolean hasWarnings() {
         return searchIterator.hasWarnings();
     }
+    @Override
     public T next() throws OXException {
         return customizer.customize(searchIterator.next());
     }
+    @Override
     public int size() {
         return searchIterator.size();
     }

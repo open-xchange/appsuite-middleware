@@ -82,6 +82,7 @@ public final class CustomThreadPoolExecutorTimerService implements TimerService 
                 this.exec = exec;
             }
 
+            @Override
             public void run() {
                 exec.purge();
             }
@@ -90,34 +91,42 @@ public final class CustomThreadPoolExecutorTimerService implements TimerService 
         executorService.scheduleWithFixedDelay(new PurgeRunnable(executorService), 30L, 30L, TimeUnit.SECONDS);
     }
 
+    @Override
     public ScheduledTimerTask schedule(final Runnable command, final long delay, final TimeUnit unit) {
         return new WrappingScheduledTimerTask(executorService.schedule(command, delay, unit));
     }
 
+    @Override
     public ScheduledTimerTask schedule(final Runnable command, final long delay) {
         return schedule(command, delay, TimeUnit.MILLISECONDS);
     }
 
+    @Override
     public ScheduledTimerTask scheduleAtFixedRate(final Runnable command, final long initialDelay, final long period, final TimeUnit unit) {
         return new WrappingScheduledTimerTask(executorService.scheduleAtFixedRate(command, initialDelay, period, unit));
     }
 
+    @Override
     public ScheduledTimerTask scheduleAtFixedRate(final Runnable command, final long initialDelay, final long period) {
         return scheduleAtFixedRate(command, initialDelay, period, TimeUnit.MILLISECONDS);
     }
 
+    @Override
     public ScheduledTimerTask scheduleWithFixedDelay(final Runnable command, final long initialDelay, final long delay, final TimeUnit unit) {
         return new WrappingScheduledTimerTask(executorService.scheduleWithFixedDelay(command, initialDelay, delay, unit));
     }
 
+    @Override
     public ScheduledTimerTask scheduleWithFixedDelay(final Runnable command, final long initialDelay, final long delay) {
         return scheduleWithFixedDelay(command, initialDelay, delay, TimeUnit.MILLISECONDS);
     }
 
+    @Override
     public void purge() {
         executorService.purge();
     }
 
+    @Override
     public Executor getExecutor() {
         return executorService;
     }

@@ -87,6 +87,7 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
 
     private final List<ObjectParser> objectParsers = new LinkedList<ObjectParser>();
 
+    @Override
     public Collection getContent(Subscription subscription) throws OXException {
         Reader htmlData = mfSource.getData(subscription);
         return getContent(htmlData);
@@ -140,6 +141,7 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
         }
     }
 
+    @Override
     public SubscriptionSource getSubscriptionSource() {
         return source;
     }
@@ -148,6 +150,7 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
         this.source = source;
     }
 
+    @Override
     public boolean handles(int folderModule) {
         return source.getFolderModule() == folderModule;
     }

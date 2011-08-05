@@ -119,6 +119,7 @@ public final class RdbHeaderCacheProperties implements HeaderCacheProperties {
 
     private static final String SQL_DELETE = "DELETE FROM " + TABLE_NAME + " WHERE cid = ? AND user = ? AND id = ? AND name = ?";
 
+    @Override
     public void addProperty(final String propertyName, final String propertyValue) throws OXException {
         final DatabaseService databaseService = getDBService();
         final Connection con;
@@ -165,6 +166,7 @@ public final class RdbHeaderCacheProperties implements HeaderCacheProperties {
 
     private static final String SQL_SELECT = "SELECT value FROM " + TABLE_NAME + " WHERE cid = ? AND user = ? AND id = ? AND name = ?";
 
+    @Override
     public String getProperty(final String propertyName) throws OXException {
         final DatabaseService databaseService = getDBService();
         final Connection con = databaseService.getReadOnly(cid);
@@ -190,6 +192,7 @@ public final class RdbHeaderCacheProperties implements HeaderCacheProperties {
         }
     }
 
+    @Override
     public void removeProperty(final String propertyName) throws OXException {
         final DatabaseService databaseService = getDBService();
         final Connection con;

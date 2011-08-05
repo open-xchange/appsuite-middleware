@@ -58,7 +58,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link TemplatingAJAXRequest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TemplatingAJAXRequest {
@@ -74,7 +74,7 @@ public final class TemplatingAJAXRequest {
 
     /**
      * Initializes a new {@link TemplatingAJAXRequest}.
-     * 
+     *
      * @param session The session
      * @param request The request
      */
@@ -86,7 +86,7 @@ public final class TemplatingAJAXRequest {
 
     /**
      * Requires <code>int</code> parameter.
-     * 
+     *
      * @param name The parameter name
      * @return The <code>int</code>
      * @throws OXException If parameter is missing or not a number
@@ -105,7 +105,7 @@ public final class TemplatingAJAXRequest {
 
     /**
      * Gets the data object.
-     * 
+     *
      * @return The data object or <code>null</code> if no data object available
      */
     public <V> V getData() {
@@ -146,7 +146,7 @@ public final class TemplatingAJAXRequest {
 
     /**
      * Gets optional <code>int</code> parameter.
-     * 
+     *
      * @param name The parameter name
      * @return The <code>int</code>
      * @throws OXException If parameter is an invalid number value
@@ -170,7 +170,7 @@ public final class TemplatingAJAXRequest {
 
     /**
      * Checks for presence of comma-separated <code>int</code> list.
-     * 
+     *
      * @param name The parameter name
      * @return The <code>int</code> array
      * @throws OXException If an error occurs
@@ -194,7 +194,7 @@ public final class TemplatingAJAXRequest {
 
     /**
      * Checks for presence of comma-separated <code>String</code> list.
-     * 
+     *
      * @param name The parameter name
      * @return The <code>String</code> array
      * @throws OXException If parameter is absdent
@@ -209,7 +209,7 @@ public final class TemplatingAJAXRequest {
 
     /**
      * Checks for presence of comma-separated <code>String</code> list.
-     * 
+     *
      * @param name The parameter name
      * @return The <code>String</code> array
      */
@@ -223,7 +223,7 @@ public final class TemplatingAJAXRequest {
 
     /**
      * Gets the request.
-     * 
+     *
      * @return The request
      */
     public AJAXRequestData getRequest() {
@@ -232,7 +232,7 @@ public final class TemplatingAJAXRequest {
 
     /**
      * Gets the session.
-     * 
+     *
      * @return The session
      */
     public ServerSession getSession() {

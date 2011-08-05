@@ -115,102 +115,127 @@ class RFC2086ACLExtension extends AbstractACLExtension {
         fullRights = new ReadOnlyRights("acdilprsw");
     }
 
+    @Override
     public boolean canGetACL(final Rights rights) {
         return rights.contains(Rights.Right.READ) || rights.contains(Rights.Right.ADMINISTER);
     }
 
+    @Override
     public boolean canSetACL(final Rights rights) {
         return rights.contains(Rights.Right.ADMINISTER);
     }
 
+    @Override
     public boolean canCreate(final Rights rights) {
         return rights.contains(Rights.Right.CREATE);
     }
 
+    @Override
     public boolean canDeleteMailbox(final Rights rights) {
         return rights.contains(Rights.Right.CREATE);
     }
 
+    @Override
     public boolean canDeleteMessages(final Rights rights) {
         return rights.contains(Rights.Right.DELETE);
     }
 
+    @Override
     public boolean canExpunge(final Rights rights) {
         return rights.contains(Rights.Right.DELETE);
     }
 
+    @Override
     public Rights getFullRights() {
         return fullRights;
     }
 
+    @Override
     public void addFolderAdminRights(final Rights rights) {
         rights.add(RIGHTS_FOLDER_ADMIN);
     }
 
+    @Override
     public boolean containsFolderAdminRights(final Rights rights) {
         return rights.contains(RIGHTS_FOLDER_ADMIN);
     }
 
+    @Override
     public void addFolderVisibility(final Rights rights) {
         rights.add(RIGHTS_FOLDER_VISIBLE);
     }
 
+    @Override
     public boolean containsFolderVisibility(final Rights rights) {
         return rights.contains(RIGHTS_FOLDER_VISIBLE);
     }
 
+    @Override
     public void addCreateObjects(final Rights rights) {
         rights.add(RIGHTS_FOLDER_CREATE_OBJECTS);
     }
 
+    @Override
     public void addCreateSubfolders(final Rights rights) {
         rights.add(RIGHTS_FOLDER_CREATE_SUBFOLDERS);
     }
 
+    @Override
     public void addDeleteAll(final Rights rights) {
         rights.add(RIGHTS_DELETE_ALL);
     }
 
+    @Override
     public void addNonMappable(final Rights rights) {
         rights.add(RIGHTS_UNMAPPABLE);
     }
 
+    @Override
     public void addReadAll(final Rights rights) {
         rights.add(RIGHTS_READ_ALL);
     }
 
+    @Override
     public void addReadAllKeepSeen(final Rights rights) {
         rights.add(RIGHTS_READ_ALL_KEEP_SEEN);
     }
 
+    @Override
     public void addWriteAll(final Rights rights) {
         rights.add(RIGHTS_WRITE_ALL);
     }
 
+    @Override
     public boolean containsCreateObjects(final Rights rights) {
         return rights.contains(RIGHTS_FOLDER_CREATE_OBJECTS);
     }
 
+    @Override
     public boolean containsCreateSubfolders(final Rights rights) {
         return rights.contains(RIGHTS_FOLDER_CREATE_SUBFOLDERS);
     }
 
+    @Override
     public boolean containsDeleteAll(final Rights rights) {
         return rights.contains(RIGHTS_DELETE_ALL);
     }
 
+    @Override
     public boolean containsNonMappable(final Rights rights) {
         return rights.contains(RIGHTS_UNMAPPABLE);
     }
 
+    @Override
     public boolean containsReadAll(final Rights rights) {
         return rights.contains(RIGHTS_READ_ALL);
     }
 
+    @Override
     public boolean containsReadAllKeepSeen(final Rights rights) {
         return rights.contains(RIGHTS_READ_ALL_KEEP_SEEN);
     }
 
+    @Override
     public boolean containsWriteAll(final Rights rights) {
         return rights.contains(RIGHTS_WRITE_ALL);
     }

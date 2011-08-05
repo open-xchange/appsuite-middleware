@@ -119,22 +119,27 @@ public class SearchIteratorException extends OXException {
             display = category.getLogLevel().implies(LogLevel.DEBUG);
         }
 
+        @Override
         public Category getCategory() {
             return category;
         }
 
+        @Override
         public int getNumber() {
             return detailNumber;
         }
 
+        @Override
         public String getMessage() {
             return message;
         }
 
+        @Override
         public String getPrefix() {
             return null;
         }
 
+        @Override
         public boolean equals(final OXException e) {
             return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
         }

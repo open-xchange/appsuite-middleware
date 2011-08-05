@@ -86,10 +86,12 @@ public final class FacebookMessagingAccountAccess extends FacebookMessagingResou
         super(messagingAccount, session);
     }
 
+    @Override
     public int getAccountId() {
         return messagingAccount.getId();
     }
 
+    @Override
     public MessagingFolderAccess getFolderAccess() throws OXException {
         FacebookMessagingFolderAccess tmp = folderAccess;
         if (null == tmp) {
@@ -98,6 +100,7 @@ public final class FacebookMessagingAccountAccess extends FacebookMessagingResou
         return tmp;
     }
 
+    @Override
     public MessagingMessageAccess getMessageAccess() throws OXException {
         FacebookMessagingMessageAccess tmp = messageAccess;
         if (null == tmp) {
@@ -106,6 +109,7 @@ public final class FacebookMessagingAccountAccess extends FacebookMessagingResou
         return tmp;
     }
 
+    @Override
     public MessagingFolder getRootFolder() throws OXException {
         connect();
         return getFolderAccess().getRootFolder();

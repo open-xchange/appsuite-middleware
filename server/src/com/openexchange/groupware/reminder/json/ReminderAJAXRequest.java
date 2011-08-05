@@ -91,7 +91,7 @@ public final class ReminderAJAXRequest {
 
     /**
      * Requires <code>int</code> parameter.
-     * 
+     *
      * @param name The parameter name
      * @return The <code>int</code>
      * @throws OXException If parameter is missing or not a number
@@ -110,7 +110,7 @@ public final class ReminderAJAXRequest {
 
     /**
      * Gets the data object.
-     * 
+     *
      * @return The data object or <code>null</code> if no data object available
      */
     public <V> V getData() {
@@ -119,7 +119,7 @@ public final class ReminderAJAXRequest {
 
     /**
      * Sets the time zone.
-     * 
+     *
      * @param timeZone The time zone
      */
     public void setTimeZone(final TimeZone timeZone) {
@@ -128,7 +128,7 @@ public final class ReminderAJAXRequest {
 
     /**
      * Gets the time zone (initially set to session's user one).
-     * 
+     *
      * @return The time zone
      */
     public TimeZone getTimeZone() {

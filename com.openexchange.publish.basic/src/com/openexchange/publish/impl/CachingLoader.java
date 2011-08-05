@@ -80,6 +80,7 @@ public class CachingLoader implements PublicationDataLoaderService {
         this.cachingService = whiteboard.getService(CacheService.class);
     }
 
+    @Override
     public Collection<? extends Object> load(final Publication publication) throws OXException {
         try {
             final Collection<? extends Object> fromCache = tryCache(publication);

@@ -74,6 +74,7 @@ public class SubscriptionSecretHandling implements SecretConsistencyCheck, Secre
         this.discovery = discovery;
     }
 
+    @Override
     public String checkSecretCanDecryptStrings(ServerSession session, String secret) throws OXException {
         List<SubscriptionSource> sources = discovery.getSources();
         for (SubscriptionSource subscriptionSource : sources) {
@@ -93,6 +94,7 @@ public class SubscriptionSecretHandling implements SecretConsistencyCheck, Secre
         return null;
     }
 
+    @Override
     public void migrate(String oldSecret, String newSecret, ServerSession session) throws OXException {
         List<SubscriptionSource> sources = discovery.getSources();
         for (SubscriptionSource subscriptionSource : sources) {

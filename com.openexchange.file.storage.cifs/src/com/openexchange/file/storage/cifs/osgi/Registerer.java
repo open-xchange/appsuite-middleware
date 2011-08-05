@@ -83,6 +83,7 @@ public final class Registerer implements EventHandler {
         this.context = context;
     }
 
+    @Override
     public void handleEvent(final Event event) {
         if (FileStorageAccountManagerProvider.TOPIC.equals(event.getTopic())) {
             final int ranking;

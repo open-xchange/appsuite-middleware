@@ -7,11 +7,13 @@ import jcifs.smb.SmbFilenameFilter;
 public class FilterFiles {
 
     static class ShortFilenameFilter implements SmbFilenameFilter {
+        @Override
         public boolean accept( SmbFile dir, String name ) throws SmbException {
             return name.length() < 14;
         }
     }
     static class BigFileFilter implements SmbFileFilter {
+        @Override
         public boolean accept( SmbFile file ) throws SmbException {
             return file.length() > 0x1FFFFL;
         }

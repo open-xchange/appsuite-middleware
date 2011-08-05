@@ -132,6 +132,7 @@ public final class AllFetch {
          */
         INTERNALDATE("INTERNALDATE", INTERNALDATE.class, new FetchItemHandler() {
 
+            @Override
             public void handleItem(final Item item, final MailMessage m, final Log logger) {
                 m.setReceivedDate(((INTERNALDATE) item).getDate());
             }
@@ -141,6 +142,7 @@ public final class AllFetch {
          */
         UID("UID", UID.class, new FetchItemHandler() {
 
+            @Override
             public void handleItem(final Item item, final MailMessage m, final Log logger) {
                 m.setMailId(String.valueOf(((UID) item).uid));
             }
@@ -150,6 +152,7 @@ public final class AllFetch {
          */
         FLAGS("FLAGS", FLAGS.class, new FetchItemHandler() {
 
+            @Override
             public void handleItem(final Item item, final MailMessage m, final Log logger) throws OXException {
                 MIMEMessageConverter.parseFlags((FLAGS) item, m);
             }
@@ -159,6 +162,7 @@ public final class AllFetch {
          */
         BODYSTRUCTURE("BODYSTRUCTURE", BODYSTRUCTURE.class, new FetchItemHandler() {
 
+            @Override
             public void handleItem(final Item item, final MailMessage m, final Log logger) throws OXException {
                 final BODYSTRUCTURE bs = (BODYSTRUCTURE) item;
                 final StringBuilder sb = new StringBuilder();
@@ -182,6 +186,7 @@ public final class AllFetch {
          */
         SIZE("RFC822.SIZE", RFC822SIZE.class, new FetchItemHandler() {
 
+            @Override
             public void handleItem(final Item item, final MailMessage m, final Log logger) {
                 m.setSize(((RFC822SIZE) item).size);
             }
@@ -193,6 +198,7 @@ public final class AllFetch {
          */
         ENVELOPE("ENVELOPE", ENVELOPE.class, new FetchItemHandler() {
 
+            @Override
             public void handleItem(final Item item, final MailMessage m, final Log logger) {
                 final com.sun.mail.imap.protocol.ENVELOPE envelope = (ENVELOPE) item;
                 // Date
@@ -308,6 +314,7 @@ public final class AllFetch {
         }
         return (MailMessage[]) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
+            @Override
             public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
                 /*-
                  * Arguments:  sequence set
@@ -477,6 +484,7 @@ public final class AllFetch {
      */
     protected static final Comparator<MailMessage> ASC_COMP = new Comparator<MailMessage>() {
 
+        @Override
         public int compare(final MailMessage m1, final MailMessage m2) {
             final Date d1 = m1.getReceivedDate();
             final Date d2 = m2.getReceivedDate();
@@ -490,6 +498,7 @@ public final class AllFetch {
      */
     protected static final Comparator<MailMessage> DESC_COMP = new Comparator<MailMessage>() {
 
+        @Override
         public int compare(final MailMessage m1, final MailMessage m2) {
             final Date d1 = m1.getReceivedDateDirect();
             final Date d2 = m2.getReceivedDateDirect();

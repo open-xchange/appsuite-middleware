@@ -80,22 +80,27 @@ public enum I18NErrorMessages implements OXExceptionCode {
         this.errorCode = errorCode;
     }
 
+    @Override
     public String getPrefix() {
         return "I18N";
     }
 
+    @Override
     public int getNumber() {
         return errorCode;
     }
 
+    @Override
     public String getMessage() {
         return message;
     }
 
+    @Override
     public Category getCategory() {
         return category;
     }
 
+    @Override
     public boolean equals(final OXException e) {
         return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }

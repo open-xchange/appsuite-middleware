@@ -77,19 +77,23 @@ public class SimOXMFParser implements OXMFParser {
         this.data = data;
     }
 
+    @Override
     public void addAttributePrefix(String prefix) {
         prefixes.add(prefix);
     }
 
+    @Override
     public void addContainerElement(String containerElement) {
         containerElements.add(containerElement);
     }
 
+    @Override
     public List<Map<String, String>> parse(String html) throws OXException {
         this.html  = html;
         return data;
     }
 
+    @Override
     public List<Map<String, String>> parse(Reader html) throws OXException {
         this.html  = readAll(html);
         return data;
@@ -113,6 +117,7 @@ public class SimOXMFParser implements OXMFParser {
         return html;
     }
 
+    @Override
     public void reset() {
 
     }

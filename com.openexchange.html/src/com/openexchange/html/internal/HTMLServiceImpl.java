@@ -123,6 +123,7 @@ public final class HTMLServiceImpl implements HTMLService {
 
     private static final Pattern IMG_PATTERN = Pattern.compile("<img[^>]*>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
+    @Override
     public String replaceImages(final String content, final String sessionId) {
         if (null == content) {
             return null;
@@ -216,6 +217,7 @@ public final class HTMLServiceImpl implements HTMLService {
         return sb.toString();
     }
 
+    @Override
     public String formatHrefLinks(final String content) {
         try {
             final Matcher m = PATTERN_LINK_WITH_GROUP.matcher(content);
@@ -274,6 +276,7 @@ public final class HTMLServiceImpl implements HTMLService {
         return sb.append(anchorTag.substring(0, pos)).append(" target=\"").append(STR_BLANK).append('"').append(anchorTag.substring(pos)).toString();
     }
 
+    @Override
     public String formatURLs(final String content, final String comment) {
         try {
             final Matcher m = PATTERN_URL.matcher(content);
@@ -403,12 +406,14 @@ public final class HTMLServiceImpl implements HTMLService {
         return isAscci;
     }
 
+    @Override
     public String filterWhitelist(final String htmlContent) {
         final HTMLFilterHandler handler = new HTMLFilterHandler(this, htmlContent.length());
         HTMLParser.parse(htmlContent, handler);
         return handler.getHTML();
     }
 
+    @Override
     public String filterWhitelist(final String htmlContent, final String configName) {
         String confName = configName;
         if (!confName.endsWith(".properties")) {
@@ -428,6 +433,7 @@ public final class HTMLServiceImpl implements HTMLService {
         return ServiceRegistry.getInstance().getService(ConfigurationService.class);
     }
 
+    @Override
     public String filterExternalImages(final String htmlContent, final boolean[] modified) {
         final HTMLImageFilterHandler handler = new HTMLImageFilterHandler(this, htmlContent.length());
         HTMLParser.parse(htmlContent, handler);
@@ -435,6 +441,7 @@ public final class HTMLServiceImpl implements HTMLService {
         return handler.getHTML();
     }
 
+    @Override
     public String html2text(final String htmlContent, final boolean appendHref) {
         final HTML2TextHandler handler = new HTML2TextHandler(this, htmlContent.length(), appendHref);
         HTMLParser.parse(htmlContent, handler);
@@ -445,10 +452,12 @@ public final class HTMLServiceImpl implements HTMLService {
 
     private static final Pattern PATTERN_CRLF = Pattern.compile("\r?\n");
 
+    @Override
     public String htmlFormat(final String plainText, final boolean withQuote, final String commentId) {
         return PATTERN_CRLF.matcher(escape(plainText, withQuote, commentId)).replaceAll(HTML_BR);
     }
 
+    @Override
     public String htmlFormat(final String plainText, final boolean withQuote) {
         return PATTERN_CRLF.matcher(escape(plainText, withQuote, null)).replaceAll(HTML_BR);
     }
@@ -521,6 +530,7 @@ public final class HTMLServiceImpl implements HTMLService {
      * @return The properly escaped HTML content
      * @see #htmlFormat(String, boolean)
      */
+    @Override
     public String htmlFormat(final String plainText) {
         return htmlFormat(plainText, true);
     }
@@ -578,6 +588,7 @@ public final class HTMLServiceImpl implements HTMLService {
      * @param entity The HTML entity
      * @return The corresponding unicode character or <code>null</code>
      */
+    @Override
     public Character getHTMLEntity(final String entity) {
         if (null == entity) {
             return null;
@@ -597,6 +608,7 @@ public final class HTMLServiceImpl implements HTMLService {
 
     private static final Pattern PAT_ENTITIES = Pattern.compile("&(?:#([0-9]+)|#x([0-9a-fA-F]+)|([a-zA-Z]+));");
 
+    @Override
     public String replaceHTMLEntities(final String content) {
         final Matcher m = PAT_ENTITIES.matcher(content);
         final MatcherReplacer mr = new MatcherReplacer(m, content);
@@ -647,6 +659,7 @@ public final class HTMLServiceImpl implements HTMLService {
         }
     }
 
+    @Override
     public String prettyPrint(final String htmlContent) {
         if (null == htmlContent) {
             return htmlContent;
@@ -681,6 +694,7 @@ public final class HTMLServiceImpl implements HTMLService {
 
     private static final Pattern PATTERN_BODY_START = Pattern.compile(Pattern.quote("<body"), Pattern.CASE_INSENSITIVE);
 
+    @Override
     public String checkBaseTag(final String htmlContent, final boolean externalImagesAllowed) {
         if (null == htmlContent) {
             return htmlContent;
@@ -727,6 +741,7 @@ public final class HTMLServiceImpl implements HTMLService {
         return sb.toString();
     }
 
+    @Override
     public String dropScriptTagsInHeader(final String htmlContent) {
         if (null == htmlContent || htmlContent.indexOf("<script") < 0) {
             return htmlContent;
@@ -751,10 +766,12 @@ public final class HTMLServiceImpl implements HTMLService {
         return sb.toString();
     }
 
+    @Override
     public String getConformHTML(final String htmlContent, final String charset) {
         return getConformHTML(htmlContent, charset, true);
     }
 
+    @Override
     public String getConformHTML(final String htmlContent, final String charset, final boolean replaceUrls) {
         if (null == htmlContent || 0 == htmlContent.length()) {
             /*

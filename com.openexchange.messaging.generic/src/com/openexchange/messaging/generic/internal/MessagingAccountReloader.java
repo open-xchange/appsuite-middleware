@@ -107,20 +107,24 @@ public final class MessagingAccountReloader extends Refresher<MessagingAccount> 
         return "MessagingAccountReloader: " + delegate.toString();
     }
 
+    @Override
     public Map<String, Object> getConfiguration() {
         updateDelegate();
         return delegate.getConfiguration();
     }
 
+    @Override
     public String getDisplayName() {
         updateDelegate();
         return delegate.getDisplayName();
     }
 
+    @Override
     public int getId() {
         return delegate.getId();
     }
 
+    @Override
     public MessagingService getMessagingService() {
         updateDelegate();
         return delegate.getMessagingService();

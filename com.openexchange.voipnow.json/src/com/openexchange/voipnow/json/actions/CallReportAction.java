@@ -111,7 +111,8 @@ public class CallReportAction extends AbstractVoipNowSOAPAction<ReportInterface>
 		super();
 	}
 
-	public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+	@Override
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
 		try {
 			/*
 			 * Parse parameters

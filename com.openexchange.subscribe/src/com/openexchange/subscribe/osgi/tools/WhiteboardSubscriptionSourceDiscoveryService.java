@@ -76,26 +76,32 @@ public class WhiteboardSubscriptionSourceDiscoveryService implements Subscriptio
         tracker.close();
     }
 
+    @Override
     public SubscriptionSource getSource(final Context context, final int subscriptionId) throws OXException {
         return getDelegate().getSource(context, subscriptionId);
     }
 
+    @Override
     public SubscriptionSource getSource(final String identifier) {
         return getDelegate().getSource(identifier);
     }
 
+    @Override
     public List<SubscriptionSource> getSources() {
         return getDelegate().getSources();
     }
 
+    @Override
     public List<SubscriptionSource> getSources(final int folderModule) {
         return getDelegate().getSources(folderModule);
     }
 
+    @Override
     public boolean knowsSource(final String identifier) {
         return getDelegate().knowsSource(identifier);
     }
 
+    @Override
     public SubscriptionSourceDiscoveryService filter(final int user, final int context) throws OXException {
         return getDelegate().filter(user, context);
     }

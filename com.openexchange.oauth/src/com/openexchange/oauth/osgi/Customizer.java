@@ -77,6 +77,7 @@ public final class Customizer<S> implements ServiceTrackerCustomizer {
         this.context = context;
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public Object addingService(final ServiceReference reference) {
         final Object service = context.getService(reference);
@@ -84,10 +85,12 @@ public final class Customizer<S> implements ServiceTrackerCustomizer {
         return service;
     }
 
+    @Override
     public void modifiedService(final ServiceReference reference, final Object service) {
         // Nope
     }
 
+    @Override
     public void removedService(final ServiceReference reference, final Object service) {
         this.reference.set(null);
         context.ungetService(reference);

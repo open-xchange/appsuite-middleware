@@ -54,7 +54,7 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * {@link ResponseRenderer} - Writes a certain request data and result pair to HTTP request/response.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -62,7 +62,7 @@ public interface ResponseRenderer {
 
     /**
      * Checks if this renderer handles specified request data and result pair.
-     * 
+     *
      * @param request The request data
      * @param result The result
      * @return <code>true</code> if is capable to handle; otherwise <code>false</code>
@@ -71,14 +71,14 @@ public interface ResponseRenderer {
 
     /**
      * Gets this outputter's ranking.
-     * 
+     *
      * @return The ranking
      */
     public int getRanking();
 
     /**
      * Writes specified request data and result pair to given HTTP request/response.
-     * 
+     *
      * @param request The request data
      * @param result The result
      * @param httpReq The HTTP request

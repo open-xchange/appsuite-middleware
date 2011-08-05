@@ -59,17 +59,17 @@ package com.openexchange.eav;
 public class TransformList {
     public static final int ADD = 1;
     public static final int REMOVE = -1;
-    
-    
+
+
     public Object[] payload;
     public EAVType type;
     public int operation;
-    
+
     public TransformList(EAVType type, int operation, Object[] payload) {
         this.payload = payload;
         this.type = type;
         this.operation = operation;
     }
 
-    
+
 }

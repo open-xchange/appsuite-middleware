@@ -83,6 +83,7 @@ public class DateStringParser implements StringParser {
         return subParser;
     }
 
+    @Override
     public <T> T parse(String s, Class<T> t) {
         if(t != Date.class || s == null) {
             return null;

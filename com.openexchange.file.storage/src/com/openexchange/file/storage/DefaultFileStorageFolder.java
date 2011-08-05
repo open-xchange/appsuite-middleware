@@ -128,6 +128,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
      *
      * @return The list of capabilities or <code>null</code> if not set
      */
+    @Override
     public Set<String> getCapabilities() {
         if (null == capabilities) {
             return null;
@@ -148,6 +149,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
         }
     }
 
+    @Override
     public String getId() {
         return id;
     }
@@ -161,6 +163,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
         this.id = id;
     }
 
+    @Override
     public int getFileCount() {
         return fileCount;
     }
@@ -174,6 +177,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
         this.fileCount = fileCount;
     }
 
+    @Override
     public String getName() {
         return name;
     }
@@ -187,6 +191,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
         this.name = name;
     }
 
+    @Override
     public FileStoragePermission getOwnPermission() {
         return ownPermission;
     }
@@ -200,6 +205,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
         this.ownPermission = ownPermission;
     }
 
+    @Override
     public String getParentId() {
         return parentId;
     }
@@ -213,6 +219,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
         this.parentId = parentId;
     }
 
+    @Override
     public List<FileStoragePermission> getPermissions() {
         if (null == permissions) {
             return Collections.emptyList();
@@ -245,6 +252,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
         permissions.add(permission);
     }
 
+    @Override
     public boolean hasSubfolders() {
         return subfolders;
     }
@@ -276,6 +284,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
         b_subfolders = false;
     }
 
+    @Override
     public boolean hasSubscribedSubfolders() {
         return subscribedSubfolders;
     }
@@ -307,6 +316,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
         b_subscribedSubfolders = false;
     }
 
+    @Override
     public boolean isDefaultFolder() {
         return defaultFolder;
     }
@@ -338,6 +348,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
         b_defaultFolder = false;
     }
 
+    @Override
     public boolean isHoldsFolders() {
         return holdsFolders;
     }
@@ -369,6 +380,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
         b_holdsFolders = false;
     }
 
+    @Override
     public boolean isHoldsFiles() {
         return holdsFiles;
     }
@@ -400,6 +412,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
         b_holdsFiles = true;
     }
 
+    @Override
     public boolean isRootFolder() {
         return rootFolder;
     }
@@ -431,6 +444,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
         b_rootFolder = false;
     }
 
+    @Override
     public boolean isSubscribed() {
         return subscribed;
     }
@@ -480,10 +494,12 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
         this.exists = exists;
     }
 
+    @Override
     public Date getCreationDate() {
         return creationDate;
     }
 
+    @Override
     public Date getLastModifiedDate() {
         return lastModifiedDate;
     }
@@ -506,6 +522,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
         this.lastModifiedDate = lastModifiedDate;
     }
 
+    @Override
     public Map<String, Object> getProperties() {
         return properties;
     }

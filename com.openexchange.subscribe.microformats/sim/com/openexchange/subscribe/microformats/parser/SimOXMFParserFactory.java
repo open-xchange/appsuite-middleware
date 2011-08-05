@@ -67,6 +67,7 @@ public class SimOXMFParserFactory implements OXMFParserFactoryService {
         this.parser = parser;
     }
 
+    @Override
     public OXMFParser getParser() {
         return parser;
     }

@@ -70,10 +70,12 @@ public class ServerProperty implements BasicProperty {
 
     private final Map<String, String> metadata = new HashMap<String, String>();
 
+    @Override
     public String get() {
         return value;
     }
 
+    @Override
     public String get(String metadataName) {
         return metadata.get(metadataName);
     }
@@ -82,18 +84,22 @@ public class ServerProperty implements BasicProperty {
         this.defined = defined;
     }
 
+    @Override
     public boolean isDefined() {
         return defined;
     }
 
+    @Override
     public void set(String value) {
         this.value = value;
     }
 
+    @Override
     public void set(String metadataName, String value) {
         metadata.put(metadataName, value);
     }
 
+    @Override
     public List<String> getMetadataNames() throws OXException {
         return new ArrayList<String>(metadata.keySet());
     }

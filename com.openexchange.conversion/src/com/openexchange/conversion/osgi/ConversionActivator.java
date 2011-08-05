@@ -74,6 +74,7 @@ public final class ConversionActivator implements BundleActivator {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void start(final BundleContext context) throws Exception {
         // Nope
     }
@@ -81,6 +82,7 @@ public final class ConversionActivator implements BundleActivator {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void stop(final BundleContext context) throws Exception {
         // Nope
     }

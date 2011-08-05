@@ -97,26 +97,32 @@ public class ExternalSubscriptionSourceDiscoveryService implements SubscriptionS
         this.formParser = formParser;
     }
 
+    @Override
     public SubscriptionSource getSource(final String identifier) {
         return sources.getSource(identifier);
     }
 
+    @Override
     public SubscriptionSource getSource(final Context context, final int subscriptionId) throws OXException {
         return sources.getSource(context, subscriptionId);
     }
 
+    @Override
     public List<SubscriptionSource> getSources() {
         return sources.getSources();
     }
 
+    @Override
     public List<SubscriptionSource> getSources(final int folderModule) {
         return sources.getSources(folderModule);
     }
 
+    @Override
     public boolean knowsSource(final String identifier) {
         return sources.knowsSource(identifier);
     }
 
+    @Override
     public SubscriptionSourceDiscoveryService filter(final int user, final int context) throws OXException {
         return null;
     }

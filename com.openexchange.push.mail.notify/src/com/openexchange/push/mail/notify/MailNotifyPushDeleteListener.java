@@ -68,6 +68,7 @@ public final class MailNotifyPushDeleteListener implements DeleteListener {
         super();
     }
 
+    @Override
     public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
         if (DeleteEvent.TYPE_USER == event.getType()) {
             try {

@@ -79,6 +79,7 @@ public final class DelegatingRejectedExecutionHandler implements RejectedExecuti
         this.threadPool = threadPool;
     }
 
+    @Override
     public void rejectedExecution(final Runnable r, final ThreadPoolExecutor executor) {
         if (r instanceof CustomFutureTask<?>) {
             // Perform task's handler or default if null

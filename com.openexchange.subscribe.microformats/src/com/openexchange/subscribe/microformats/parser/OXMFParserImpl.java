@@ -107,6 +107,7 @@ public final class OXMFParserImpl implements OXMFParser {
         parsedContainerElements = new ArrayList<Map<String, String>>();
     }
 
+    @Override
     public void reset() {
         containerElements.clear();
         attributePrefixes.clear();
@@ -115,18 +116,22 @@ public final class OXMFParserImpl implements OXMFParser {
         level = 0;
     }
 
+    @Override
     public void addContainerElement(final String containerElement) {
         containerElements.add(containerElement);
     }
 
+    @Override
     public void addAttributePrefix(final String prefix) {
         attributePrefixes.add(prefix);
     }
 
+    @Override
     public List<Map<String, String>> parse(final String html) throws OXException {
         return parse(new StringReader(html));
     }
 
+    @Override
     public List<Map<String, String>> parse(final Reader html) throws OXException {
         /*
          * Create XMLStreamReader instance

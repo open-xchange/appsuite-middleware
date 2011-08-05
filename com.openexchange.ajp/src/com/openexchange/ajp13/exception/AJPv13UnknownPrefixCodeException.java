@@ -51,19 +51,19 @@ package com.openexchange.ajp13.exception;
 
 /**
  * {@link AJPv13UnknownPrefixCodeException} - Thrown if an unknown prefix code is detected
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AJPv13UnknownPrefixCodeException extends AJPv13BrokenCycleException {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 6801323036004164878L;
 
     /**
      * Initializes a new {@link AJPv13UnknownPrefixCodeException}
-     * 
+     *
      * @param unknownPrefixCode The unknown prefix code
      */
     public AJPv13UnknownPrefixCodeException(final int unknownPrefixCode) {

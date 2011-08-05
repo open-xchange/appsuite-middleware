@@ -314,6 +314,7 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
         return username;
     }
 
+    @Override
     public void setUsername(final String username) {
         this.username = username;
     }
@@ -322,10 +323,12 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
         return password;
     }
 
+    @Override
     public void setPassword(final String password) {
         this.password = password;
     }
 
+    @Override
     public String getBaseUrl() {
         return "";
     }

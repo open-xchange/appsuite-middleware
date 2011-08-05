@@ -89,6 +89,7 @@ public final class AbortBehavior implements RefusedExecutionBehavior<Object> {
      * @throws Exception If task execution fails
      * @throws RejectedExecutionException If there is no remedy
      */
+    @Override
     public Object refusedExecution(final Task<Object> task, final ThreadPoolService threadPool) throws Exception {
         throw new RejectedExecutionException();
     }

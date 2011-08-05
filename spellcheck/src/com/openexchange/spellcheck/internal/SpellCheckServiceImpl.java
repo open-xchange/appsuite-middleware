@@ -76,7 +76,8 @@ public final class SpellCheckServiceImpl implements SpellCheckService {
 	 * @see com.openexchange.spellcheck.SpellCheckService#getSpellChecker(int,
 	 *      com.openexchange.groupware.contexts.Context)
 	 */
-	public SpellChecker getSpellChecker(final int userId, final Context ctx) throws OXException {
+	@Override
+    public SpellChecker getSpellChecker(final int userId, final Context ctx) throws OXException {
 		return SpellCheckerImpl.newSpellCheck(userId, ctx);
 	}
 
@@ -86,7 +87,8 @@ public final class SpellCheckServiceImpl implements SpellCheckService {
 	 * @see com.openexchange.spellcheck.SpellCheckService#getSpellChecker(int,
 	 *      java.lang.String, com.openexchange.groupware.contexts.Context)
 	 */
-	public SpellChecker getSpellChecker(final int userId, final String localeStr, final Context ctx)
+	@Override
+    public SpellChecker getSpellChecker(final int userId, final String localeStr, final Context ctx)
 			throws OXException {
 		return SpellCheckerImpl.newSpellCheck(userId, localeStr, ctx);
 	}
@@ -97,7 +99,8 @@ public final class SpellCheckServiceImpl implements SpellCheckService {
 	 * @see com.openexchange.spellcheck.SpellCheckService#getSpellChecker(int,
 	 *      java.util.Locale, com.openexchange.groupware.contexts.Context)
 	 */
-	public SpellChecker getSpellChecker(final int userId, final Locale locale, final Context ctx)
+	@Override
+    public SpellChecker getSpellChecker(final int userId, final Locale locale, final Context ctx)
 			throws OXException {
 		return SpellCheckerImpl.newSpellCheck(userId, locale, ctx);
 	}

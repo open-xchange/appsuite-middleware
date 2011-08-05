@@ -76,6 +76,7 @@ public class ContactCollectorServiceImpl implements ContactCollectorService {
         super();
     }
 
+    @Override
     public void memorizeAddresses(final List<InternetAddress> addresses, final Session session) {
         memorizeAddresses(addresses, session, true);
     }
@@ -116,6 +117,7 @@ public class ContactCollectorServiceImpl implements ContactCollectorService {
         AliasesProvider.getInstance().stop();
     }
 
+    @Override
     public void createCollectFolder(final Session session, final Context ctx, final String folderName, final Connection con) throws OXException, SQLException {
         new ContactCollectorFolderCreator().create(session, ctx, folderName, con);
     }

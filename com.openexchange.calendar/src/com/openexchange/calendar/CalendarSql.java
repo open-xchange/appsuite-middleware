@@ -133,6 +133,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         this.recColl = new CalendarCollection();
     }
 
+    @Override
     public boolean[] hasAppointmentsBetween(final Date d1, final Date d2) throws OXException {
         if (session == null) {
             throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
@@ -158,11 +159,13 @@ public class CalendarSql implements AppointmentSQLInterface {
         }
     }
 
+    @Override
     public SearchIterator<Appointment> getAppointmentsBetweenInFolder(final int fid, final int[] cols, final Date start, final Date end, final int orderBy, final Order orderDir) throws OXException, SQLException {
         return getAppointmentsBetweenInFolder(fid, cols, start, end, 0, 0, orderBy, orderDir);
     }
 
 
+    @Override
     public SearchIterator<Appointment> getAppointmentsBetweenInFolder(final int fid, int[] cols, final Date start, final Date end, final int from, final int to, final int orderBy, final Order orderDir) throws OXException, SQLException {
         if (session == null) {
             throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
@@ -223,6 +226,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         return includePrivateAppointments;
     }
 
+    @Override
     public SearchIterator<Appointment> getModifiedAppointmentsInFolder(final int fid, final Date start, final Date end, int[] cols, final Date since) throws OXException {
         if (session == null) {
             throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
@@ -282,10 +286,12 @@ public class CalendarSql implements AppointmentSQLInterface {
         }
     }
 
+    @Override
     public SearchIterator<Appointment> getModifiedAppointmentsInFolder(final int fid, final int cols[], final Date since) throws OXException {
         return getModifiedAppointmentsInFolder(fid, null, null, cols, since);
     }
 
+    @Override
     public SearchIterator<Appointment> getDeletedAppointmentsInFolder(final int fid, int cols[], final Date since) throws OXException {
         if (session == null) {
             throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
@@ -345,6 +351,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         }
     }
 
+    @Override
     public CalendarDataObject getObjectById(final int oid, final int inFolder) throws OXException, SQLException {
         return getObjectById(oid, inFolder, null);
     }
@@ -391,6 +398,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         }
     }
 
+    @Override
     public CalendarDataObject[] insertAppointmentObject(final CalendarDataObject cdao) throws OXException {
         RecurrenceChecker.check(cdao);
         if (session == null) {
@@ -491,6 +499,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         }
     }
 
+    @Override
     public CalendarDataObject[] updateAppointmentObject(final CalendarDataObject cdao, final int inFolder, final Date clientLastModified) throws OXException {
         RecurrenceChecker.check(cdao);
         if (session == null) {
@@ -618,6 +627,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         }
     }
 
+    @Override
     public void deleteAppointmentObject(final CalendarDataObject cdao, final int inFolder, final Date clientLastModified) throws OXException, SQLException {
         if (session == null) {
             throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
@@ -652,6 +662,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         }
     }
 
+    @Override
     public void deleteAppointmentsInFolder(final int fid) throws OXException, SQLException {
         if (session == null) {
             throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
@@ -668,6 +679,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         }
     }
 
+    @Override
     public void deleteAppointmentsInFolder(final int fid, final Connection writeCon) throws OXException {
         if (session == null) {
             throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
@@ -702,6 +714,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         }
     }
 
+    @Override
     public boolean checkIfFolderContainsForeignObjects(final int uid, final int fid) throws OXException, SQLException {
         if (session == null) {
             throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
@@ -731,6 +744,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         }
     }
 
+    @Override
     public boolean checkIfFolderContainsForeignObjects(final int uid, final int fid, final Connection readCon) throws OXException,
             SQLException {
         if (session == null) {
@@ -755,6 +769,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         }
     }
 
+    @Override
     public boolean isFolderEmpty(final int uid, final int fid) throws OXException, SQLException {
         if (session == null) {
             throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
@@ -784,6 +799,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         }
     }
 
+    @Override
     public boolean isFolderEmpty(final int uid, final int fid, final Connection readCon) throws OXException {
         if (session == null) {
             throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
@@ -810,6 +826,7 @@ public class CalendarSql implements AppointmentSQLInterface {
     /* (non-Javadoc)
      * @see com.openexchange.api2.AppointmentSQLInterface#setUserConfirmation(int, int, int, java.lang.String)
      */
+    @Override
     public Date setUserConfirmation(final int oid, final int folderId, final int uid, final int confirm, final String confirm_message) throws OXException {
         if (session == null) {
             throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
@@ -825,6 +842,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         return cimp.setUserConfirmation(oid, folderId, uid, confirm, confirm_message, session, ctx);
     }
 
+    @Override
     public Date setExternalConfirmation(final int oid, final int folderId, final String mail, final int confirm, final String message) throws OXException {
         if (session == null) {
             throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
@@ -840,6 +858,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         return cimp.setExternalConfirmation(oid, folderId, mail, confirm, message, session, ctx);
     }
 
+    @Override
     public SearchIterator<Appointment> getObjectsById(final int[][] oids, int[] cols) throws OXException {
         if (session == null) {
             throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
@@ -877,10 +896,12 @@ public class CalendarSql implements AppointmentSQLInterface {
         return SearchIteratorAdapter.emptyIterator();
     }
 
+    @Override
     public SearchIterator<Appointment> getAppointmentsByExtendedSearch(final AppointmentSearchObject searchobject, final int orderBy, final Order orderDir, final int cols[]) throws OXException, SQLException {
         return getAppointmentsByExtendedSearch(searchobject, orderBy, orderDir, cols, 0, 0);
     }
 
+    @Override
     public SearchIterator<Appointment> searchAppointments(final AppointmentSearchObject searchObj, final int orderBy, final Order orderDir, int[] cols) throws OXException {
         if (session == null) {
             throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
@@ -1029,10 +1050,12 @@ public class CalendarSql implements AppointmentSQLInterface {
     }
 
 
+    @Override
     public final long attachmentAction(final int folderId, final int oid, final int uid, final Session session, final Context c, final int numberOfAttachments) throws OXException {
         return cimp.attachmentAction(folderId, oid, uid, session, c, numberOfAttachments);
     }
 
+    @Override
     public SearchIterator<Appointment> getFreeBusyInformation(final int uid, final int type, final Date start, final Date end) throws OXException {
         if (session == null) {
             throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
@@ -1090,6 +1113,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         }
     }
 
+    @Override
     public SearchIterator<Appointment> getActiveAppointments(final int user_uid, final Date start, final Date end, int cols[]) throws OXException {
         if (session == null) {
             throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
@@ -1120,6 +1144,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         }
     }
 
+    @Override
     public SearchIterator<Appointment> getModifiedAppointmentsBetween(final int userId, final Date start, final Date end, int[] cols, final Date since, final int orderBy, final Order orderDir) throws OXException, SQLException {
         if (session == null) {
             throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
@@ -1157,6 +1182,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         }
     }
 
+    @Override
     public SearchIterator<Appointment> getAppointmentsBetween(final int user_uid, final Date start, final Date end, final int cols[], final int orderBy, final Order orderDir) throws OXException, SQLException {
         return getModifiedAppointmentsBetween(user_uid, start, end, cols, null, orderBy, orderDir);
     }
@@ -1217,18 +1243,22 @@ public class CalendarSql implements AppointmentSQLInterface {
         return new StringBuilder(str.length() + 2).append('(').append(str).append(')').toString();
     }
 
+    @Override
     public int resolveUid(final String uid) throws OXException {
         return cimp.resolveUid(session, uid);
     }
 
+    @Override
     public int getFolder(final int objectId) throws OXException {
         return cimp.getFolder(session, objectId);
     }
 
+    @Override
     public void setIncludePrivateAppointments(final boolean include) {
         this.includePrivateAppointments = include;
     }
 
+    @Override
     public boolean getIncludePrivateAppointments() {
         return this.includePrivateAppointments;
     }

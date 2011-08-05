@@ -69,6 +69,7 @@ public class SimMapTransformer implements MapToObjectTransformer {
         this.data = data;
     }
 
+    @Override
     public List<? extends Object> transform(List<Map<String, String>> list) throws OXException {
         this.input = list;
         return data;

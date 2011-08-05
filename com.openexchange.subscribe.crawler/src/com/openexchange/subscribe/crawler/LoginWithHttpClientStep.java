@@ -152,14 +152,17 @@ public class LoginWithHttpClientStep extends AbstractStep<Object, Object> implem
         }
     }
 
+    @Override
     public String getBaseUrl() {
         return "";
     }
 
+    @Override
     public void setPassword(String password) {
         url = url.replace("PASSWORD", password);
     }
 
+    @Override
     public void setUsername(String username) {
         url = url.replace("USERNAME", username);
     }

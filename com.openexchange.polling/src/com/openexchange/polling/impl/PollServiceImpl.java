@@ -71,6 +71,7 @@ public class PollServiceImpl implements PollService {
 
     private final Map<Integer, Poll> polls = new ConcurrentHashMap<Integer, Poll>();
 
+    @Override
     public void createPoll(Poll poll, int cid) {
         int newID = ID_COUNTER.incrementAndGet();
 
@@ -79,18 +80,22 @@ public class PollServiceImpl implements PollService {
         polls.put(newID, poll);
     }
 
+    @Override
     public void deletePoll(int id, int cid) {
         polls.remove(id);
     }
 
+    @Override
     public Poll getPoll(int id, int cid) {
         return polls.get(id);
     }
 
+    @Override
     public List<Poll> getPolls(int cid) {
         return new ArrayList<Poll>(polls.values());
     }
 
+    @Override
     public void saveAnswers(int id, int cid, Answer answer) {
         Poll poll = polls.get(id);
         if (poll == null) {
@@ -104,6 +109,7 @@ public class PollServiceImpl implements PollService {
         }
     }
 
+    @Override
     public void updatePoll(Poll poll, int cid) {
         polls.put(poll.getId(), poll);
     }

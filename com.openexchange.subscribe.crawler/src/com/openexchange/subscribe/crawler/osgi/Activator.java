@@ -104,6 +104,7 @@ public class Activator implements BundleActivator {
 
     private ICalParser iCalParser = null;
 
+    @Override
     public void start(final BundleContext context) throws Exception {
 
         bundleContext = context;
@@ -123,6 +124,7 @@ public class Activator implements BundleActivator {
         }
     }
 
+    @Override
     public void stop(final BundleContext context) throws Exception {
         while (!trackers.isEmpty()) {
             trackers.pop().close();

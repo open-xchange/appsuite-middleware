@@ -72,7 +72,7 @@ public abstract class AJAXModuleActivator extends HousekeepingActivator {
 
     /**
      * Registers specified factory with given module identifier.
-     * 
+     *
      * @param factory The factory to register
      * @param module The module identifier; accessible path would be: <code>"/ajax/"</code> + &lt;module&gt;
      */
@@ -82,7 +82,7 @@ public abstract class AJAXModuleActivator extends HousekeepingActivator {
 
     /**
      * Registers specified factory with given module identifier which is not accessible by multiple module.
-     * 
+     *
      * @param factory The factory to register
      * @param module The module identifier; accessible path would be: <code>"/ajax/"</code> + &lt;module&gt;
      */
@@ -95,7 +95,7 @@ public abstract class AJAXModuleActivator extends HousekeepingActivator {
         properties.put("module", module);
         properties.put("multiple", multiple ? "true" : "false");
         /*-
-         * 
+         *
         final Module moduleAnnotation = factory.getClass().getAnnotation(Module.class);
         if (null != moduleAnnotation) {
             final String[] actions = moduleAnnotation.actions();
@@ -110,7 +110,7 @@ public abstract class AJAXModuleActivator extends HousekeepingActivator {
                 properties.put("actions", list);
             }
         }
-         * 
+         *
          */
         registerService(AJAXActionServiceFactory.class, factory, properties);
     }

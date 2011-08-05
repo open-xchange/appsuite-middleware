@@ -96,6 +96,7 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
         this.infostore = infostore;
     }
 
+    @Override
     public int calculateSimilarityScore(final DocumentMetadataHolder original, final DocumentMetadataHolder candidate, final Object session) throws OXException {
         int score = 0;
         final DocumentMetadata dm1 = original.documentMetadata;
@@ -116,10 +117,12 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
         return s1.equals(s2);
     }
 
+    @Override
     public void closeSession(final Object session) throws OXException {
 
     }
 
+    @Override
     public Collection<DocumentMetadataHolder> getData(final TargetFolderDefinition target, final Object session) throws OXException {
         final List<DocumentMetadataHolder> list = new ArrayList<DocumentMetadataHolder>();
         final InfostoreSession sess = (InfostoreSession) session;
@@ -136,14 +139,17 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
         return list;
     }
 
+    @Override
     public int getThreshold(final Object session) throws OXException {
         return 2;
     }
 
+    @Override
     public boolean handles(final FolderObject folder) {
         return folder.getModule() == FolderObject.INFOSTORE;
     }
 
+    @Override
     public void save(final DocumentMetadataHolder newElement, final Object session) throws OXException {
         final InfostoreSession sess = (InfostoreSession) session;
         final InputStream file = grabFile(newElement);
@@ -178,10 +184,12 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
         return null;
     }
 
+    @Override
     public Object startSession(final TargetFolderDefinition target) throws OXException {
         return new InfostoreSession(target);
     }
 
+    @Override
     public void update(final DocumentMetadataHolder original, final DocumentMetadataHolder update, final Object session) throws OXException {
         if(null != update.documentMetadata.getLastModified() && original.documentMetadata.getLastModified().after(update.documentMetadata.getLastModified())) {
             return;

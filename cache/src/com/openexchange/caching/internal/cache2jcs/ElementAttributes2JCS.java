@@ -75,24 +75,29 @@ public final class ElementAttributes2JCS implements ElementAttributes {
         this.attributes = attributes;
     }
 
+    @Override
     public void addElementEventHandler(final ElementEventHandler eventHandler) {
         attributes.addElementEventHandler(new JCSElementEventHandlerDelegator(eventHandler));
     }
 
+    @Override
     public void addElementEventHandlers(final ArrayList<ElementEventHandler> eventHandlers) {
         for (final Object object : eventHandlers) {
             attributes.addElementEventHandler(new JCSElementEventHandlerDelegator((ElementEventHandler) object));
         }
     }
 
+    @Override
     public ElementAttributes copy() {
         return new ElementAttributes2JCS(attributes.copy());
     }
 
+    @Override
     public long getCreateTime() {
         return attributes.getCreateTime();
     }
 
+    @Override
     public ArrayList<ElementEventHandler> getElementEventHandlers() {
         final ArrayList<?> l = attributes.getElementEventHandlers();
         final ArrayList<ElementEventHandler> retval;
@@ -107,78 +112,97 @@ public final class ElementAttributes2JCS implements ElementAttributes {
         return retval;
     }
 
+    @Override
     public long getIdleTime() {
         return attributes.getIdleTime();
     }
 
+    @Override
     public boolean getIsEternal() {
         return attributes.getIsEternal();
     }
 
+    @Override
     public boolean getIsLateral() {
         return attributes.getIsLateral();
     }
 
+    @Override
     public boolean getIsRemote() {
         return attributes.getIsRemote();
     }
 
+    @Override
     public boolean getIsSpool() {
         return attributes.getIsSpool();
     }
 
+    @Override
     public long getLastAccessTime() {
         return attributes.getLastAccessTime();
     }
 
+    @Override
     public long getMaxLifeSeconds() {
         return attributes.getMaxLifeSeconds();
     }
 
+    @Override
     public int getSize() {
         return attributes.getSize();
     }
 
+    @Override
     public long getTimeToLiveSeconds() {
         return attributes.getTimeToLiveSeconds();
     }
 
+    @Override
     public long getVersion() {
         return attributes.getVersion();
     }
 
+    @Override
     public void setIdleTime(final long idle) {
         attributes.setIdleTime(idle);
     }
 
+    @Override
     public void setIsEternal(final boolean val) {
         attributes.setIsEternal(val);
     }
 
+    @Override
     public void setIsLateral(final boolean val) {
         attributes.setIsLateral(val);
     }
 
+    @Override
     public void setIsRemote(final boolean val) {
         attributes.setIsRemote(val);
     }
 
+    @Override
     public void setIsSpool(final boolean val) {
         attributes.setIsSpool(val);
     }
 
+    @Override
     public void setLastAccessTimeNow() {
         attributes.setLastAccessTimeNow();
     }
 
+    @Override
     public void setMaxLifeSeconds(final long mls) {
         attributes.setMaxLifeSeconds(mls);
     }
 
+    @Override
     public void setSize(final int size) {
         attributes.setSize(size);
     }
 
+    @Override
     public void setVersion(final long version) {
         attributes.setVersion(version);
     }

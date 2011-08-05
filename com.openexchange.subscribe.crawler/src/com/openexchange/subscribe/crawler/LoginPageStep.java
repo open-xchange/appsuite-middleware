@@ -146,6 +146,7 @@ public class LoginPageStep extends AbstractStep<HtmlPage, Object> implements Log
         return username;
     }
 
+    @Override
     public void setUsername(final String username) {
         this.username = username;
     }
@@ -154,6 +155,7 @@ public class LoginPageStep extends AbstractStep<HtmlPage, Object> implements Log
         return password;
     }
 
+    @Override
     public void setPassword(final String password) {
         this.password = password;
     }
@@ -198,6 +200,7 @@ public class LoginPageStep extends AbstractStep<HtmlPage, Object> implements Log
         this.linkAvailableAfterLogin = linkAvailableAfterLogin;
     }
 
+    @Override
     public String getBaseUrl() {
         return baseUrl;
     }
@@ -207,6 +210,7 @@ public class LoginPageStep extends AbstractStep<HtmlPage, Object> implements Log
     }
 
 
+    @Override
     public Page getLoginPage() {
         return loginPage;
     }

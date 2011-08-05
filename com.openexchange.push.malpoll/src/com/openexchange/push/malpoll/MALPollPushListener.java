@@ -391,6 +391,7 @@ public final class MALPollPushListener implements PushListener {
         }
     }
 
+    @Override
     public void notifyNewMail() throws OXException {
         PushUtility.triggerOSGiEvent(MailFolderUtility.prepareFullname(ACCOUNT_ID, folder), session);
     }

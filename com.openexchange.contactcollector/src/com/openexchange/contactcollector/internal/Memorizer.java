@@ -126,6 +126,7 @@ public class Memorizer implements Runnable {
         this.aliasesMap = aliasesMap;
     }
 
+    @Override
     public void run() {
         if (!isEnabled() || getFolderId() == 0) {
             return;
@@ -373,6 +374,7 @@ public class Memorizer implements Runnable {
         if (null == f) {
             final FutureTask<Set<InternetAddress>> ft = new FutureTask<Set<InternetAddress>>(new Callable<Set<InternetAddress>>() {
 
+                @Override
                 public Set<InternetAddress> call() throws Exception {
                     // All context-known users' aliases
                     final int[] allUserIDs = userService.listAllUser(context);

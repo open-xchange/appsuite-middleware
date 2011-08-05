@@ -91,6 +91,7 @@ public final class DiscardOldestBehavior implements RefusedExecutionBehavior<Obj
      * @throws Exception If task execution fails
      * @throws RejectedExecutionException If there is no remedy
      */
+    @Override
     public Object refusedExecution(final Task<Object> task, final ThreadPoolService threadPool) throws Exception {
         if (!threadPool.isShutdown()) {
             ((CustomThreadPoolExecutor) threadPool.getExecutor()).getQueue().poll();

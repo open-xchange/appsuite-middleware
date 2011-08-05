@@ -152,6 +152,7 @@ public final class RdbPOP3StorageProperties implements POP3StorageProperties {
 
     private static final String SQL_DELETE = "DELETE FROM " + TABLE_NAME + " WHERE cid = ? AND user = ? AND id = ? AND name = ?";
 
+    @Override
     public void addProperty(final String propertyName, final String propertyValue) throws OXException {
         final Connection con;
         try {
@@ -187,6 +188,7 @@ public final class RdbPOP3StorageProperties implements POP3StorageProperties {
         }
     }
 
+    @Override
     public String getProperty(final String propertyName) throws OXException {
         final Connection con;
         try {
@@ -201,6 +203,7 @@ public final class RdbPOP3StorageProperties implements POP3StorageProperties {
         }
     }
 
+    @Override
     public void removeProperty(final String propertyName) throws OXException {
         final Connection con;
         try {

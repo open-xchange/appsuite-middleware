@@ -100,78 +100,97 @@ public final class MessagingPermissions {
             return delegate.equals(obj);
         }
 
+        @Override
         public int getDeletePermission() {
             return delegate.getDeletePermission();
         }
 
+        @Override
         public int getEntity() {
             return delegate.getEntity();
         }
 
+        @Override
         public int getFolderPermission() {
             return delegate.getFolderPermission();
         }
 
+        @Override
         public int getReadPermission() {
             return delegate.getReadPermission();
         }
 
+        @Override
         public int getSystem() {
             return delegate.getSystem();
         }
 
+        @Override
         public int getWritePermission() {
             return delegate.getWritePermission();
         }
 
+        @Override
         public boolean isAdmin() {
             return delegate.isAdmin();
         }
 
+        @Override
         public boolean isGroup() {
             return delegate.isGroup();
         }
 
+        @Override
         public void setAdmin(final boolean admin) {
             throw new UnsupportedOperationException("MessagingPermissions.UnmodifiableMessagingPermission.setAdmin()");
         }
 
+        @Override
         public void setAllPermissions(final int folderPermission, final int readPermission, final int writePermission, final int deletePermission) {
             throw new UnsupportedOperationException("MessagingPermissions.UnmodifiableMessagingPermission.setAllPermissions()");
         }
 
+        @Override
         public void setDeletePermission(final int permission) {
             throw new UnsupportedOperationException("MessagingPermissions.UnmodifiableMessagingPermission.setDeletePermission()");
         }
 
+        @Override
         public void setEntity(final int entity) {
             throw new UnsupportedOperationException("MessagingPermissions.UnmodifiableMessagingPermission.setEntity()");
         }
 
+        @Override
         public void setFolderPermission(final int permission) {
             throw new UnsupportedOperationException("MessagingPermissions.UnmodifiableMessagingPermission.setFolderPermission()");
         }
 
+        @Override
         public void setGroup(final boolean group) {
             throw new UnsupportedOperationException("MessagingPermissions.UnmodifiableMessagingPermission.setGroup()");
         }
 
+        @Override
         public void setMaxPermissions() {
             throw new UnsupportedOperationException("MessagingPermissions.UnmodifiableMessagingPermission.setMaxPermissions()");
         }
 
+        @Override
         public void setNoPermissions() {
             throw new UnsupportedOperationException("MessagingPermissions.UnmodifiableMessagingPermission.setNoPermissions()");
         }
 
+        @Override
         public void setReadPermission(final int permission) {
             throw new UnsupportedOperationException("MessagingPermissions.UnmodifiableMessagingPermission.setReadPermission()");
         }
 
+        @Override
         public void setSystem(final int system) {
             throw new UnsupportedOperationException("MessagingPermissions.UnmodifiableMessagingPermission.setSystem()");
         }
 
+        @Override
         public void setWritePermission(final int permission) {
             throw new UnsupportedOperationException("MessagingPermissions.UnmodifiableMessagingPermission.setWritePermission()");
         }

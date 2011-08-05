@@ -69,6 +69,7 @@ public class HeaderCacheMailAccountDeleteListener implements MailAccountDeleteLi
         super();
     }
 
+    @Override
     public void onAfterMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OXException {
         try {
             RdbHeaderCacheProperties.dropProperties(id, user, cid, con);
@@ -77,6 +78,7 @@ public class HeaderCacheMailAccountDeleteListener implements MailAccountDeleteLi
         }
     }
 
+    @Override
     public void onBeforeMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OXException {
         // Nothing to do
     }

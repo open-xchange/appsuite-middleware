@@ -169,6 +169,7 @@ public class LoginPageByFormActionRegexStep extends AbstractStep<HtmlPage, Objec
         return username;
     }
 
+    @Override
     public void setUsername(final String username) {
         this.username = username;
     }
@@ -177,6 +178,7 @@ public class LoginPageByFormActionRegexStep extends AbstractStep<HtmlPage, Objec
         return password;
     }
 
+    @Override
     public void setPassword(final String password) {
         this.password = password;
     }
@@ -229,6 +231,7 @@ public class LoginPageByFormActionRegexStep extends AbstractStep<HtmlPage, Objec
         this.numberOfForm = numberOfForm;
     }
 
+    @Override
     public String getBaseUrl() {
         return baseUrl;
     }
@@ -238,6 +241,7 @@ public class LoginPageByFormActionRegexStep extends AbstractStep<HtmlPage, Objec
     }
 
 
+    @Override
     public Page getLoginPage() {
         return loginPage;
     }

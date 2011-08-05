@@ -89,10 +89,12 @@ public class RevertTest extends FileActionTest {
 
         fileAccess().expectCall("getVersions", "12").andReturn(new TimedResult<File>() {
 
+            @Override
             public SearchIterator<File> results() throws OXException {
                 return new ArrayIterator<File>(new File[]{f1, f2, f3});
             }
 
+            @Override
             public long sequenceNumber() throws OXException {
                 return 0;
             }

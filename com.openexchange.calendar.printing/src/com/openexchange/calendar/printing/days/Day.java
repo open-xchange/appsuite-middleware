@@ -80,6 +80,7 @@ public class Day implements Comparable<Day> {
         columns.add(new TreeSet<CPAppointment>(new AppointmentStartComparator()));
     }
 
+    @Override
     public int compareTo(Day o) {
         return time.compareTo(o.time);
     }

@@ -62,9 +62,9 @@ public class EAVSelectiveFilter implements EAVNodeFilter {
 
     private EnumSet<EAVType> types;
     private EAVNodeFilter delegate;
-    
-    
-    
+
+
+
     public EAVSelectiveFilter(EnumSet<EAVType> types, EAVNodeFilter delegate) {
         super();
         this.types = types;
@@ -73,6 +73,7 @@ public class EAVSelectiveFilter implements EAVNodeFilter {
 
 
 
+    @Override
     public boolean accept(EAVNode node) {
         if(!types.contains(node.getType())) {
             return true;

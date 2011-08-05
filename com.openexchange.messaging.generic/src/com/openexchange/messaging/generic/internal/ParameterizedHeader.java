@@ -78,6 +78,7 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
         this.delegate = delegate;
     }
 
+    @Override
     public int compareTo(final ParameterizedHeader other) {
         if (this == other) {
             return 0;
@@ -112,6 +113,7 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
         return true;
     }
 
+    @Override
     public HeaderType getHeaderType() {
         return HeaderType.PARAMETERIZED;
     }
@@ -122,6 +124,7 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
      * @param key The parameter name
      * @param value The parameter value to add
      */
+    @Override
     public final void addParameter(final String key, final String value) {
         delegate.addParameter(key, value);
     }
@@ -132,6 +135,7 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
      * @param key The parameter name
      * @param value The parameter value
      */
+    @Override
     public final void setParameter(final String key, final String value) {
         delegate.setParameter(key, value);
     }
@@ -142,6 +146,7 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
      * @param key The parameter name
      * @return The parameter's value or <code>null</code> if not existing
      */
+    @Override
     public final String getParameter(final String key) {
         return delegate.getParameter(key);
     }
@@ -152,6 +157,7 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
      * @param key The parameter name
      * @return The parameter's value or <code>null</code> if not existing
      */
+    @Override
     public final String removeParameter(final String key) {
         return delegate.removeParameter(key);
     }
@@ -162,6 +168,7 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
      * @param key the parameter name
      * @return <code>true</code> if parameter is present; otherwise <code>false</code>
      */
+    @Override
     public final boolean containsParameter(final String key) {
         return delegate.containsParameter(key);
     }
@@ -171,6 +178,7 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
      *
      * @return All parameter names wrapped in an {@link Iterator}
      */
+    @Override
     public final Iterator<String> getParameterNames() {
         return delegate.getParameterNames();
     }

@@ -65,7 +65,7 @@ public class EAVTypeMetadataMergeTest extends EAVUnitTest {
                                         TYPE("exampleString", EAVType.STRING),
                                         TYPE("subObject",
                                               TYPE("exampleDate", EAVType.DATE)
-                                        )  
+                                        )
                                     );
         final EAVTypeMetadataNode tree2 = TYPE("com.openexchange.test",
                                         TYPE("exampleNumber", EAVType.NUMBER),
@@ -74,30 +74,30 @@ public class EAVTypeMetadataMergeTest extends EAVUnitTest {
                                             TYPE("exampleTime", EAVType.TIME)
                                         )
                                     );
-        
+
         final EAVTypeMetadataNode merged = tree1.mergeWith(tree2);
-        
+
         assertType(merged, EAVType.BOOLEAN, "exampleBoolean");
         assertType(merged, EAVType.NUMBER, "exampleNumber");
         assertType(merged, EAVType.STRING, "exampleString");
-        
+
         assertType(merged, EAVType.DATE, "subObject", "exampleDate");
         assertType(merged, EAVType.TIME, "subObject", "exampleTime");
-        
+
     }
-    
+
     public void testIncompatibleTypes() {
         final EAVTypeMetadataNode tree = TYPE("com.openexchange.test",
                                             TYPE("subObject",
                                                 TYPE("exampleAttribute", EAVType.DATE)
-                                            )  
+                                            )
                                         );
         final EAVTypeMetadataNode incompatibleTree = TYPE("com.openexchange.test",
                                                     TYPE("subObject",
                                                         TYPE("exampleAttribute", EAVType.STRING)
-                                                    )  
+                                                    )
                                                );
-        
+
         try {
             tree.mergeWith(incompatibleTree);
             fail("Could merge incompatible trees");
@@ -107,17 +107,17 @@ public class EAVTypeMetadataMergeTest extends EAVUnitTest {
 
 
     }
-    
+
     public void testIncompatibleContainerTypes() {
         final EAVTypeMetadataNode tree = TYPE("com.openexchange.test",
                                         TYPE("subObject",
                                             TYPE("exampleAttribute", EAVType.DATE, EAVContainerType.SET)
-                                        )  
+                                        )
                                     );
         final EAVTypeMetadataNode incompatibleTree = TYPE("com.openexchange.test",
                                                     TYPE("subObject",
                                                         TYPE("exampleAttribute", EAVType.DATE, EAVContainerType.MULTISET)
-                                                    )  
+                                                    )
                                                );
 
         try {
@@ -127,13 +127,13 @@ public class EAVTypeMetadataMergeTest extends EAVUnitTest {
             assertTrue(EAVErrorMessage.WRONG_TYPES.equals(x));
         }
     }
-    
+
     public void testMergeLeaf() throws OXException {
         final EAVTypeMetadataNode node1 = TYPE("attribute", EAVType.DATE, (EAVContainerType) null);
         final EAVTypeMetadataNode node2 = TYPE("attribute", (EAVType) null, EAVContainerType.SET);
-        
+
         final EAVTypeMetadataNode merged = node1.mergeWith(node2);
-        
+
         assertType(merged, EAVType.DATE, EAVContainerType.SET);
     }
 }

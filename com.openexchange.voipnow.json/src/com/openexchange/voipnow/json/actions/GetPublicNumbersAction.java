@@ -90,6 +90,7 @@ public class GetPublicNumbersAction extends AbstractVoipNowSOAPAction<ChannelInt
         super();
     }
 
+    @Override
     public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
         String userId = String.valueOf(getMainExtensionIDOfSessionUser(session.getUser(), session.getContextId()));
 		VoipNowServerSetting setting = getSOAPVoipNowServerSetting(session);

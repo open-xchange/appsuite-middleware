@@ -93,10 +93,12 @@ public class InternalVisitor implements SieveParserVisitor {
         return jjtAccept;
     }
 
+    @Override
     public Object visit(final SimpleNode node, final Object data) throws SieveException {
         return null;
     }
 
+    @Override
     public Object visit(final ASTstart node, final Object data) throws SieveException {
         if (data instanceof Boolean) {
             final Boolean value = (Boolean) data;
@@ -110,6 +112,7 @@ public class InternalVisitor implements SieveParserVisitor {
         return visitChildren;
     }
 
+    @Override
     public Object visit(final ASTcommands node, final Object data) throws SieveException {
         if (null != data) {
             final Object visitChildren = visitChildren(node, data);
@@ -120,6 +123,7 @@ public class InternalVisitor implements SieveParserVisitor {
         }
     }
 
+    @Override
     public Object visit(final ASTcommand node, final Object data) throws SieveException {
         final String name = node.getName();
         if ("require".equals(name)) {
@@ -249,14 +253,17 @@ public class InternalVisitor implements SieveParserVisitor {
         return data;
     }
 
+    @Override
     public Object visit(final ASTblock node, final Object data) throws SieveException {
         return visitChildren(node, new ArrayList<ActionCommand>());
     }
 
+    @Override
     public Object visit(final ASTarguments node, final Object data) throws SieveException {
         return visitChildren(node, new ArrayList<Object>());
     }
 
+    @Override
     public Object visit(final ASTargument node, final Object data) throws SieveException {
         if (0 < node.jjtGetNumChildren()) {
             final Object visitChildren = visitChildren(node, data);
@@ -282,6 +289,7 @@ public class InternalVisitor implements SieveParserVisitor {
         }
     }
 
+    @Override
     public Object visit(final ASTtest node, final Object data) throws SieveException {
         final String name = node.getName();
         for (final TestCommand.Commands command : TestCommand.Commands.values()) {
@@ -333,6 +341,7 @@ public class InternalVisitor implements SieveParserVisitor {
         throw new SieveException("Found not known test name: " + name + " in line " + node.getCoordinate().getStartLineNumber());
     }
 
+    @Override
     public Object visit(final ASTtest_list node, final Object data) throws SieveException {
         final ArrayList<TestCommand> list = new ArrayList<TestCommand>();
         for (int i = 0; i < node.jjtGetNumChildren(); i++) {
@@ -344,6 +353,7 @@ public class InternalVisitor implements SieveParserVisitor {
         return data;
     }
 
+    @Override
     public Object visit(final ASTstring node, final Object data) throws SieveException {
         final Object value = node.getValue();
         final String string = value.toString();
@@ -359,6 +369,7 @@ public class InternalVisitor implements SieveParserVisitor {
         }
     }
 
+    @Override
     public Object visit(final ASTstring_list node, final Object data) throws SieveException {
         final ArrayList<String> list = new ArrayList<String>();
         for (int i = 0; i < node.jjtGetNumChildren(); i++) {

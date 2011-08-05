@@ -181,6 +181,7 @@ public final class IMAPCapabilityAndGreetingCache {
             this.imapProperties = imapProperties;
         }
 
+        @Override
         public CapabilityAndGreeting call() throws IOException {
             Socket s = null;
             try {

@@ -88,6 +88,7 @@ public abstract class AbstractMessagingAction implements AJAXActionService {
         this.cache = cache;
     }
 
+    @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         final MessagingRequestData req = new MessagingRequestData(request, session, registry, parser, cache);
         try {

@@ -190,6 +190,7 @@ public class FileStorageRdbActivator extends DeferredActivator {
             final FileStorageRdbCreateTableTask createTableTask = new FileStorageRdbCreateTableTask();
             registrations.add(context.registerService(UpdateTaskProviderService.class.getName(), new UpdateTaskProviderService() {
 
+                @Override
                 public Collection<UpdateTask> getUpdateTasks() {
                     return Collections.<UpdateTask> singletonList(createTableTask);
                 }

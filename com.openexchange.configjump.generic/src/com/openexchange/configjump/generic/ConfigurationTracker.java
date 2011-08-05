@@ -80,6 +80,7 @@ public class ConfigurationTracker implements ServiceTrackerCustomizer {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Object addingService(final ServiceReference reference) {
         final ConfigurationService configuration = (ConfigurationService) context
             .getService(reference);
@@ -92,6 +93,7 @@ public class ConfigurationTracker implements ServiceTrackerCustomizer {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void modifiedService(final ServiceReference reference,
         final Object service) {
         // Nothing to do.
@@ -100,6 +102,7 @@ public class ConfigurationTracker implements ServiceTrackerCustomizer {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void removedService(final ServiceReference reference,
         final Object service) {
         // Nothing to do.

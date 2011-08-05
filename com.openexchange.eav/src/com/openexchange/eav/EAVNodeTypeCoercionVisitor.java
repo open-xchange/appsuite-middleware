@@ -54,7 +54,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link EAVNodeTypeCoercionVisitor}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class EAVNodeTypeCoercionVisitor extends AbstractEAVExceptionHolder implements AbstractNodeVisitor<EAVNode> {
@@ -71,6 +71,7 @@ public class EAVNodeTypeCoercionVisitor extends AbstractEAVExceptionHolder imple
         this.coercion = new EAVTypeCoercion(mode);
     }
 
+    @Override
     public void visit(final int index, final EAVNode node) {
         if (!node.isLeaf()) {
             return;

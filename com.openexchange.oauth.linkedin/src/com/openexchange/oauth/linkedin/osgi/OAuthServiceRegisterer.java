@@ -71,6 +71,7 @@ public class OAuthServiceRegisterer implements ServiceTrackerCustomizer {
         this.activator = activator;
     }
 
+    @Override
     public Object addingService(ServiceReference reference) {
         OAuthService oauth = (OAuthService) context.getService(reference);
         activator.setOauthService(oauth);
@@ -80,10 +81,12 @@ public class OAuthServiceRegisterer implements ServiceTrackerCustomizer {
 
     }
 
+    @Override
     public void modifiedService(ServiceReference reference, Object service) {
         //nothing to do here
     }
 
+    @Override
     public void removedService(ServiceReference reference, Object service) {
         activator.setOauthService(null);
         context.ungetService(reference);

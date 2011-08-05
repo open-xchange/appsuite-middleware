@@ -114,6 +114,7 @@ public class MimeMessagingPart implements MessagingPart {
             this.binaryContent = binaryContent;
         }
 
+        @Override
         public InputStream getInputStream() throws IOException {
             try {
                 return binaryContent.getData();
@@ -138,6 +139,7 @@ public class MimeMessagingPart implements MessagingPart {
             }
         }
 
+        @Override
         public String getName() {
             return null;
         }
@@ -171,6 +173,7 @@ public class MimeMessagingPart implements MessagingPart {
             this.name = name;
         }
 
+        @Override
         public void handleHeader(final Header header, final Collection<MessagingHeader> collection) throws OXException {
             try {
                 collection.addAll(MimeAddressMessagingHeader.parseRFC822(name, header.getValue()));
@@ -197,6 +200,7 @@ public class MimeMessagingPart implements MessagingPart {
 
         m.put(HeaderName.valueOf(MimeContentDisposition.getContentDispositionName()), new HeaderHandler() {
 
+            @Override
             public void handleHeader(final Header header, final Collection<MessagingHeader> collection) throws OXException {
                 collection.add(new MimeContentDisposition(header.getValue()));
             }
@@ -206,6 +210,7 @@ public class MimeMessagingPart implements MessagingPart {
 
             private final String name = MessagingHeader.KnownHeader.DATE.toString();
 
+            @Override
             public void handleHeader(final Header header, final Collection<MessagingHeader> collection) throws OXException {
                 collection.add(new MimeDateMessagingHeader(name, header.getValue()));
             }
@@ -299,6 +304,7 @@ public class MimeMessagingPart implements MessagingPart {
         size = -1L;
     }
 
+    @Override
     public MessagingContent getContent() throws OXException {
         MessagingContent tmp = cachedContent;
         if (null == tmp) {
@@ -372,6 +378,7 @@ public class MimeMessagingPart implements MessagingPart {
         }
     }
 
+    @Override
     public ContentType getContentType() throws OXException {
         if (!b_cachedContentType) {
             ContentType tmp = cachedContentType;
@@ -394,6 +401,7 @@ public class MimeMessagingPart implements MessagingPart {
         return cachedContentType;
     }
 
+    @Override
     public String getDisposition() throws OXException {
         try {
             return part.getDisposition();
@@ -402,6 +410,7 @@ public class MimeMessagingPart implements MessagingPart {
         }
     }
 
+    @Override
     public String getFileName() throws OXException {
         try {
             return part.getFileName();
@@ -410,11 +419,13 @@ public class MimeMessagingPart implements MessagingPart {
         }
     }
 
+    @Override
     public MessagingHeader getFirstHeader(final String name) throws OXException {
         final Collection<MessagingHeader> collection = getHeader(name);
         return null == collection ? null : (collection.isEmpty() ? null : collection.iterator().next());
     }
 
+    @Override
     public Collection<MessagingHeader> getHeader(final String name) throws OXException {
         try {
             return getHeaders().get(name);
@@ -423,6 +434,7 @@ public class MimeMessagingPart implements MessagingPart {
         }
     }
 
+    @Override
     public Map<String, Collection<MessagingHeader>> getHeaders() throws OXException {
         Map<String, Collection<MessagingHeader>> tmp = headers;
         if (null == tmp) {
@@ -467,6 +479,7 @@ public class MimeMessagingPart implements MessagingPart {
         return tmp;
     }
 
+    @Override
     public String getSectionId() {
         return sectionId;
     }
@@ -480,6 +493,7 @@ public class MimeMessagingPart implements MessagingPart {
         this.sectionId = sectionId;
     }
 
+    @Override
     public long getSize() throws OXException {
         if (size < 0) {
             /*
@@ -503,6 +517,7 @@ public class MimeMessagingPart implements MessagingPart {
         this.size = size <= 0 ? -1L : size;
     }
 
+    @Override
     public void writeTo(final OutputStream os) throws IOException, OXException {
         try {
             part.writeTo(os);

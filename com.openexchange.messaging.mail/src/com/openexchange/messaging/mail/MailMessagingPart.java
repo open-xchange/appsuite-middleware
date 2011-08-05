@@ -117,6 +117,7 @@ public class MailMessagingPart implements MessagingPart {
 
     private static final String CT_MUL = "multipart/";
 
+    @Override
     public MessagingContent getContent() throws OXException {
         MessagingContent tmp = cachedContent;
         if (null == tmp) {
@@ -246,19 +247,23 @@ public class MailMessagingPart implements MessagingPart {
         return charset;
     }
 
+    @Override
     public ContentType getContentType() throws OXException {
         final com.openexchange.mail.mime.ContentType contentType = mailPart.getContentType();
         return null == contentType ? null : new MailContentType(contentType);
     }
 
+    @Override
     public String getDisposition() throws OXException {
         return mailPart.getContentDisposition().getDisposition();
     }
 
+    @Override
     public String getFileName() throws OXException {
         return mailPart.getFileName();
     }
 
+    @Override
     public MessagingHeader getFirstHeader(final String name) throws OXException {
         final String firstHeader = mailPart.getFirstHeader(name);
         if (null == firstHeader) {
@@ -273,10 +278,12 @@ public class MailMessagingPart implements MessagingPart {
         return tmp.remove(0);
     }
 
+    @Override
     public Collection<MessagingHeader> getHeader(final String name) throws OXException {
         return convertTo(name);
     }
 
+    @Override
     public Map<String, Collection<MessagingHeader>> getHeaders() throws OXException {
         final Map<String, Collection<MessagingHeader>> ret = new HashMap<String, Collection<MessagingHeader>>();
         for (final Iterator<String> iter = mailPart.getHeaders().getHeaderNames(); iter.hasNext();) {
@@ -308,6 +315,7 @@ public class MailMessagingPart implements MessagingPart {
         return ret;
     }
 
+    @Override
     public String getSectionId() {
         return mailPart.getSequenceId();
     }
@@ -321,10 +329,12 @@ public class MailMessagingPart implements MessagingPart {
         mailPart.setSequenceId(sectionId);
     }
 
+    @Override
     public long getSize() throws OXException {
         return mailPart.getSize();
     }
 
+    @Override
     public void writeTo(final OutputStream os) throws IOException, OXException {
         mailPart.writeTo(os);
     }
@@ -360,6 +370,7 @@ public class MailMessagingPart implements MessagingPart {
             this.name = name;
         }
 
+        @Override
         public void handleHeader(final String header, final Collection<MessagingHeader> collection) throws OXException {
             try {
                 collection.addAll(MimeAddressMessagingHeader.parseRFC822(name, header));
@@ -386,6 +397,7 @@ public class MailMessagingPart implements MessagingPart {
 
         m.put(HeaderName.valueOf(MimeContentDisposition.getContentDispositionName()), new HeaderHandler() {
 
+            @Override
             public void handleHeader(final String header, final Collection<MessagingHeader> collection) throws OXException {
                 collection.add(new MimeContentDisposition(header));
             }
@@ -393,6 +405,7 @@ public class MailMessagingPart implements MessagingPart {
 
         m.put(HeaderName.valueOf(MimeContentType.getContentTypeName()), new HeaderHandler() {
 
+            @Override
             public void handleHeader(final String header, final Collection<MessagingHeader> collection) throws OXException {
                 collection.add(new MimeContentType(header));
             }
@@ -402,6 +415,7 @@ public class MailMessagingPart implements MessagingPart {
 
             private final String name = MessagingHeader.KnownHeader.DATE.toString();
 
+            @Override
             public void handleHeader(final String header, final Collection<MessagingHeader> collection) throws OXException {
                 collection.add(new MimeDateMessagingHeader(name, header));
             }

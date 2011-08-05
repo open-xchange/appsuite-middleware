@@ -74,10 +74,12 @@ public class PublicationMultipleHandlerFactory implements MultipleHandlerFactory
         this.config = config;
     }
 
+    @Override
     public MultipleHandler createMultipleHandler() {
         return new PublicationMultipleHandler(discoverer, entityMap, config);
     }
 
+    @Override
     public String getSupportedModule() {
         return "publications";
     }

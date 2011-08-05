@@ -71,6 +71,7 @@ public class SimMicroformatSource implements OXMFDataSource {
         this.data = data;
     }
 
+    @Override
     public Reader getData(Subscription subscription) throws OXException {
         this.subscription = subscription;
         return new StringReader(data);

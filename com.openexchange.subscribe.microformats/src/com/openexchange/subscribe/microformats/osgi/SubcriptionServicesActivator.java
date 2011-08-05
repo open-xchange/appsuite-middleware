@@ -95,6 +95,7 @@ public class SubcriptionServicesActivator implements BundleActivator {
         super();
     }
 
+    @Override
     public void start(final BundleContext context) throws Exception {
         final HTTPOXMFDataSource dataSource = new HTTPOXMFDataSource();
         final HTMLMicroformatParserFactory parserFactory = new HTMLMicroformatParserFactory();
@@ -165,6 +166,7 @@ public class SubcriptionServicesActivator implements BundleActivator {
         }
     }
 
+    @Override
     public void stop(final BundleContext context) throws Exception {
         if (null != registrations) {
             for (final ServiceRegistration registration : registrations) {

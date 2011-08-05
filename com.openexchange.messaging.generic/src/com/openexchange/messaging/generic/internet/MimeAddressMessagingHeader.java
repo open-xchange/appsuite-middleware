@@ -153,6 +153,7 @@ public class MimeAddressMessagingHeader implements MessagingAddressHeader {
         this.internetAddress = internetAddress;
     }
 
+    @Override
     public String getName() {
         return name;
     }
@@ -163,10 +164,12 @@ public class MimeAddressMessagingHeader implements MessagingAddressHeader {
      *
      * @return The RFC 822 / RFC 2047 encoded address
      */
+    @Override
     public String getValue() {
         return internetAddress.toString();
     }
 
+    @Override
     public HeaderType getHeaderType() {
         return HeaderType.ADDRESS;
     }
@@ -180,15 +183,18 @@ public class MimeAddressMessagingHeader implements MessagingAddressHeader {
         return internetAddress.toUnicodeString();
     }
 
+    @Override
     public String getPersonal() {
         return internetAddress.getPersonal();
 
     }
 
+    @Override
     public String getAddress() {
         return internetAddress.getAddress();
     }
 
+    @Override
     public void setAddress(final String address) throws OXException {
         if (null == address) {
             final IllegalArgumentException e = new IllegalArgumentException("Address is null.");
@@ -197,6 +203,7 @@ public class MimeAddressMessagingHeader implements MessagingAddressHeader {
         internetAddress.setAddress(address);
     }
 
+    @Override
     public void setPersonal(final String personal) {
         try {
             internetAddress.setPersonal(personal, "UTF-8");

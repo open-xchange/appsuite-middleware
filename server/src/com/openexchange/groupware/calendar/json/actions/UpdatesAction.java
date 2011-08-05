@@ -51,17 +51,11 @@ package com.openexchange.groupware.calendar.json.actions;
 
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.container.DateOrderObject;
-import com.openexchange.ajax.fields.OrderFields;
-import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.request.AppointmentRequest;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.writer.AppointmentWriter;
@@ -74,18 +68,15 @@ import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link UpdatesAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UpdatesAction extends AbstractAppointmentAction {
@@ -95,7 +86,7 @@ public final class UpdatesAction extends AbstractAppointmentAction {
 
     /**
      * Initializes a new {@link UpdatesAction}.
-     * 
+     *
      * @param services
      */
     public UpdatesAction(final ServiceLookup services) {

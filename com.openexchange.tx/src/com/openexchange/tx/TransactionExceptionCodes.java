@@ -84,14 +84,17 @@ public enum TransactionExceptionCodes implements OXExceptionCode {
         this.number = number;
     }
 
+    @Override
     public int getNumber() {
         return number;
     }
 
+    @Override
     public String getPrefix() {
         return "TX";
     }
 
+    @Override
     public String getMessage() {
         return message;
     }
@@ -100,10 +103,12 @@ public enum TransactionExceptionCodes implements OXExceptionCode {
         return null;
     }
 
+    @Override
     public Category getCategory() {
         return category;
     }
 
+    @Override
     public boolean equals(final OXException e) {
         return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }

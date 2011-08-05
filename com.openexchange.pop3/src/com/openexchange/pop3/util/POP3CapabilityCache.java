@@ -301,6 +301,7 @@ public final class POP3CapabilityCache {
             this.timeout = timeout;
         }
 
+        @Override
         public String call() throws IOException {
             Socket s = null;
             final StringBuilder sb = new StringBuilder(512);

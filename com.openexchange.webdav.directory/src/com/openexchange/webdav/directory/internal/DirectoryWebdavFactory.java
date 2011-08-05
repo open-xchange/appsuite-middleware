@@ -79,10 +79,12 @@ public class DirectoryWebdavFactory extends AbstractWebdavFactory{
         this.sessionHolder = sessionHolder;
     }
 
+    @Override
     public Protocol getProtocol() {
         return PROTOCOL;
     }
 
+    @Override
     public WebdavCollection resolveCollection(WebdavPath url) throws OXException {
         Node n = ROOT;
         for(String component : url) {
@@ -94,6 +96,7 @@ public class DirectoryWebdavFactory extends AbstractWebdavFactory{
         return mixin(new NodeCollection(n, this, url));
     }
 
+    @Override
     public WebdavResource resolveResource(WebdavPath url) throws OXException {
         return resolveCollection(url);
     }

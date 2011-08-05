@@ -163,22 +163,27 @@ public class MapperTest extends Mapper {
     private LdapGetter getLdapGetter(final Mappings mappingsFromProperties, final Date creationdate, final Date modifieddate) {
         return new LdapGetter() {
 
+            @Override
             public String getObjectFullName() throws OXException {
                 return "Test";
             }
 
+            @Override
             public List<String> getMultiValueAttribute(String attributename) throws OXException {
                 return null;
             }
 
+            @Override
             public LdapGetter getLdapGetterForDN(String dn, String[] attributes) throws OXException {
                 return null;
             }
 
+            @Override
             public int getIntAttribute(String attributename) throws OXException {
                 return 0;
             }
 
+            @Override
             public Date getDateAttribute(String attributename) throws OXException {
                 if (mappingsFromProperties.getCreationdate().equals(attributename)) {
                     return creationdate;
@@ -189,6 +194,7 @@ public class MapperTest extends Mapper {
                 return null;
             }
 
+            @Override
             public String getAttribute(String attributename) throws OXException {
                 return null;
             }
