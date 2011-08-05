@@ -78,7 +78,6 @@ import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.systemname.SystemNameService;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
@@ -185,9 +184,6 @@ public final class DispatcherServlet extends SessionServlet {
         AJAXState state = null;
         final Dispatcher dispatcher = DISPATCHER.get();
         try {
-            if (action == null) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_ACTION);
-            }
             final ServerSession session = getSessionObject(req);
 
             request = parseRequest(req, preferStream, isFileUpload, session);
@@ -250,9 +246,11 @@ public final class DispatcherServlet extends SessionServlet {
         /*
          * Set the action
          */
-        retval.setAction(req.getParameter("action"));
-        if (retval.getAction() == null) {
+        final String action = req.getParameter("action");
+        if (null == action) {
             retval.setAction(req.getMethod().toUpperCase());
+        } else {
+            retval.setAction(action);
         }
         /*
          * Set the format

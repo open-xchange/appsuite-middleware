@@ -98,13 +98,13 @@ public final class GETAction extends AbstractConfigAction {
          */
         final Object object = convert2JS(setting);
         if (object instanceof JSONValue) {
-            new AJAXRequestResult(object, "json");
+            return new AJAXRequestResult(object, "json");
         }
         if (object instanceof Number) {
-            new AJAXRequestResult(object, "int");
+            return new AJAXRequestResult(object, "int");
         }
         if (object instanceof String) {
-            new AJAXRequestResult(object, "string");
+            return new AJAXRequestResult(object, "string");
         }
         return new AJAXRequestResult(object);
     }
