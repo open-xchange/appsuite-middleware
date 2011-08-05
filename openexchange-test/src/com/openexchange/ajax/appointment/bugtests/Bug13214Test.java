@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import com.openexchange.exception.OXException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -59,8 +60,7 @@ import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 
@@ -119,12 +119,10 @@ public class Bug13214Test extends AbstractAJAXSession {
 
             try {
                 assertTrue("No Exception occurred.", updateResponse.hasError());
-                Exception e = updateResponse.getException();
-                assertTrue("Wrong Exception", e instanceof AbstractOXException);
+                OXException e = updateResponse.getException();
+                assertTrue("Wrong Exception", e instanceof OXException);
                 assertEquals(
-                    "Wrong Exception",
-                    OXCalendarException.Code.END_DATE_BEFORE_START_DATE.getDetailNumber(),
-                    ((AbstractOXException) e).getDetailNumber());
+                    "Wrong Exception", e.similarTo(OXCalendarExceptionCodes.END_DATE_BEFORE_START_DATE.create()));
             } finally {
                 if (!updateResponse.hasError()) {
                     updateAppointment.setLastModified(updateResponse.getTimestamp());

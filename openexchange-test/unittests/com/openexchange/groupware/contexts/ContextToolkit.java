@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware.contexts;
 
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 
 /**
@@ -66,7 +66,7 @@ public final class ContextToolkit {
     private ContextToolkit() {
         super();
     }
-    public static Context getDefaultContext() throws ContextException {
+    public static Context getDefaultContext() throws OXException {
         return stor.getContext(stor.getContextId("defaultcontext"));
     }
 }

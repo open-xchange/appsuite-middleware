@@ -48,13 +48,14 @@
  */
 package com.openexchange.test.fixtures;
 
+import com.openexchange.exception.OXException;
 import java.util.List;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public interface Fixtures<T> {
-    Fixture<T> getEntry(String entryName) throws FixtureException;
+    Fixture<T> getEntry(String entryName) throws OXException;
 
     List<String> getEntryNames();
 }

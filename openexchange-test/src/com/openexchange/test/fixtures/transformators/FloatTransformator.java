@@ -48,20 +48,19 @@
  */
 package com.openexchange.test.fixtures.transformators;
 
-import com.openexchange.test.fixtures.FixtureException;
-
+import com.openexchange.exception.OXException;
 /**
  * @author Martin Braun <martin.braun@open-xchange.com>
  */
 public class FloatTransformator implements Transformator{
-    public Object transform(final String value) throws FixtureException {
+    public Object transform(final String value) throws OXException {
         if(value == null) {
             return 0;
         }
         try {
             return Float.parseFloat(value);
         } catch (NumberFormatException x) {
-            throw new FixtureException(x);
+            throw new OXException(x);
         }
     }
 }

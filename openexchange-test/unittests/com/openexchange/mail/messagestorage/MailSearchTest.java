@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.messagestorage;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -56,7 +57,6 @@ import java.util.Map;
 import javax.mail.MessagingException;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.IndexRange;
-import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.api.MailAccess;
@@ -116,7 +116,7 @@ public final class MailSearchTest extends AbstractMailTest {
 
 	private static final MailField[] FIELDS_FULL = { MailField.FULL };
 
-	public void testMailSearch() throws MailException, MessagingException, IOException {
+	public void testMailSearch() throws OXException, MessagingException, IOException {
 			final SessionObject session = getSession();
 			final MailMessage[] mails = getMessages(getTestMailDir(), -1);
 
@@ -300,7 +300,7 @@ public final class MailSearchTest extends AbstractMailTest {
 			+ "      0x15208141 | 2829 F2BE 2242 91F0 24EB C0A7 258E F1A2 1520 8141\n" + "    </div>\n" + "  </body>\n"
 			+ "\n" + "</html>\n" + "\n" + "------=_Part_932_16478682.1207643538866--\n" + "\n";
 
-	public void testMailSearchSmallMailbox() throws MailException, MessagingException, IOException {
+	public void testMailSearchSmallMailbox() throws OXException, MessagingException, IOException {
 			final SessionObject session = getSession();
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
@@ -467,7 +467,7 @@ public final class MailSearchTest extends AbstractMailTest {
 			}
 	}
 
-	public void testMailSearchLargeMailbox() throws MailException, MessagingException, IOException {
+	public void testMailSearchLargeMailbox() throws OXException, MessagingException, IOException {
 			final SessionObject session = getSession();
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);

@@ -49,6 +49,7 @@
 
 package com.openexchange.webdav;
 
+import com.openexchange.exception.OXException;
 import junit.framework.TestCase;
 
 import com.openexchange.webdav.xml.framework.WebDAVClient;

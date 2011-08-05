@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.framework;
 
+import com.openexchange.exception.OXException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;

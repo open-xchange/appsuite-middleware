@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.task;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.F;
 import java.io.IOException;
 import java.util.TimeZone;
@@ -67,8 +68,6 @@ import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.ajax.task.actions.ListRequest;
 import com.openexchange.groupware.tasks.Create;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.tools.servlet.OXJSONException;
 
 /**
  * Target duration set to null.
@@ -105,7 +104,7 @@ public class Bug14450Test extends AbstractTaskTest {
         super.tearDown();
     }
 
-    public void testGetRequest() throws AjaxException, IOException, SAXException, JSONException, OXJSONException {
+    public void testGetRequest() throws OXException, IOException, SAXException, JSONException, OXException {
         GetRequest request = new GetRequest(task.getParentFolderID(), task.getObjectID());
         GetResponse response = client.execute(request);
         Task toTest = response.getTask(tz);
@@ -119,7 +118,7 @@ public class Bug14450Test extends AbstractTaskTest {
         assertEquals("Actual costs has wrong value.", F(task.getActualCosts()), F(toTest.getActualCosts()));
     }
 
-    public void testListRequest() throws AjaxException, IOException, SAXException, JSONException {
+    public void testListRequest() throws OXException, IOException, SAXException, JSONException {
         ListIDs ids = ListIDs.l(new int[] { task.getParentFolderID(), task.getObjectID() });
         ListRequest request = new ListRequest(ids, new int[] { Task.TARGET_DURATION, Task.ACTUAL_DURATION, Task.TARGET_COSTS, Task.ACTUAL_COSTS });
         CommonListResponse response = client.execute(request);

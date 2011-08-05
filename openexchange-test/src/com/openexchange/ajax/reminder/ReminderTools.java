@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.reminder;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 
 import org.json.JSONException;
@@ -60,7 +61,6 @@ import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.reminder.actions.RangeRequest;
 import com.openexchange.ajax.reminder.actions.RangeResponse;
 import com.openexchange.groupware.reminder.ReminderObject;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * 
@@ -76,7 +76,7 @@ public final class ReminderTools extends Assert {
     }
 
     public static RangeResponse get(final AJAXClient client,
-        final RangeRequest request) throws AjaxException, IOException,
+        final RangeRequest request) throws OXException, IOException,
         SAXException, JSONException {
         return Executor.execute(client.getSession(), request);
     }

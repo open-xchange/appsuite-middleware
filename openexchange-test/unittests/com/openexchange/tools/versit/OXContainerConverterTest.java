@@ -49,13 +49,11 @@
 
 package com.openexchange.tools.versit;
 
-
-
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.tools.versit.converter.ConverterPrivacyException;
 
 /**
  * This test was only written to test additions that I made to 
@@ -86,7 +84,7 @@ public class OXContainerConverterTest extends AbstractOXContainerConverterTest {
 		try {
 			isFlaggedAsPrivate(versitData);
 			fail("Should throw privacy exception");
-		} catch (final ConverterPrivacyException e){
+		} catch (final OXException e){
 			assertTrue("Should throw privacy exception" , true);
 			return;
 		} catch (final Exception e) {

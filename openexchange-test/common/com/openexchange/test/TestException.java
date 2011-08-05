@@ -49,13 +49,14 @@
 
 package com.openexchange.test;
 
+import com.openexchange.ajp13.servlet.OXServletException.Code;
 import com.openexchange.exception.OXException;
 /**
  * Exception only for tests. This should be only used if some test is not able
  * to perform its normal operation. E.g. it does not find some folder.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class TestException extends Exception {
+public class TestException extends OXException {
 
     /**
      * For serialization.
@@ -67,11 +68,11 @@ public class TestException extends Exception {
     }
 
     public TestException(final String message) {
-        super(message);
+        super(6667, message);
     }
 
     public TestException(final String message, final Exception exc) {
-        super(message, exc);
+        super(6668, message, exc);
     }
 
     public TestException(final Exception exc) {

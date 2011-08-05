@@ -48,6 +48,7 @@
  */
 package com.openexchange.test.fixtures.transformators;
 
+import com.openexchange.exception.OXException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,7 +60,6 @@ import javax.mail.internet.InternetAddress;
 
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
-import com.openexchange.test.fixtures.FixtureException;
 import com.openexchange.test.fixtures.FixtureLoader;
 import com.openexchange.test.fixtures.SimpleCredentials;
 
@@ -80,7 +80,7 @@ public class InternetAddressTransformator implements Transformator {
 		this.fixtureLoader = fixtureLoader;
 	}
 
-	public Object transform(final String value) throws FixtureException {
+	public Object transform(final String value) throws OXException {
 		if (null == value || 1 > value.length()) { return null; }
 
 		if (false == value.contains(":")) {
@@ -116,26 +116,26 @@ public class InternetAddressTransformator implements Transformator {
 		return addresses.toArray(new InternetAddress[addresses.size()]);
     }
 	
-	private InternetAddress getAddress(final String address) throws FixtureException {
+	private InternetAddress getAddress(final String address) throws OXException {
 		try {
 			return InternetAddress.parse(address)[0];
 		} catch (Exception e) {
-			throw new FixtureException("Unable to parse e-mail address from " + address);
+			throw OXException.general("Unable to parse e-mail address from " + address);
 		}
 	}
 	
-	private List<InternetAddress> getAddresses(final String fixtureName, final String fixtureEntry, final boolean plainFlags) throws FixtureException {
+	private List<InternetAddress> getAddresses(final String fixtureName, final String fixtureEntry, final boolean plainFlags) throws OXException {
 		final Contact contact = ("users".equals(fixtureName)) 
 			? fixtureLoader.getFixtures(fixtureName, SimpleCredentials.class).getEntry(fixtureEntry).getEntry().asContact() //users
 			: fixtureLoader.getFixtures(fixtureName, Contact.class).getEntry(fixtureEntry).getEntry(); //contacts
 		if (null == contact) {
-			throw new FixtureException("Unable to convert " + fixtureName + ":" + fixtureEntry + " into a contact.");
+			throw OXException.general("Unable to convert " + fixtureName + ":" + fixtureEntry + " into a contact.");
 		} else {
 			return getAddresses(contact, plainFlags);
 		}
 	}
 
-	private List<InternetAddress> getAddresses(final Contact contact, final boolean plainFlags) throws FixtureException {
+	private List<InternetAddress> getAddresses(final Contact contact, final boolean plainFlags) throws OXException {
 		final List<InternetAddress> addresses = new ArrayList<InternetAddress>();
 		if (contact.containsDistributionLists()) {
 			final DistributionListEntryObject[] entries = contact.getDistributionList();
@@ -145,7 +145,7 @@ public class InternetAddressTransformator implements Transformator {
 						try {
 							addresses.add(new InternetAddress(entry.getEmailaddress()));
 						} catch (AddressException e) {
-							throw new FixtureException(e);
+							throw new OXException(e);
 						}
 					}
 				}
@@ -173,13 +173,13 @@ public class InternetAddressTransformator implements Transformator {
 					}
 				}
 			} catch (UnsupportedEncodingException e) {
-				throw new FixtureException(e);
+				throw new OXException(e);
 			} catch (AddressException e) {
 				e.printStackTrace();
 			}
 		}
 		if (1 > addresses.size()) {
-			throw new FixtureException("no e-mail addresses found in contact");
+			throw OXException.general("no e-mail addresses found in contact");
 		}
 		return addresses;
 	}

@@ -49,8 +49,8 @@
 
 package com.openexchange.groupware.importexport;
 
+import com.openexchange.exception.OXException;
 import java.sql.SQLException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -71,7 +71,7 @@ import com.openexchange.test.AjaxInit;
  */
 public class SessionHelper {
 
-	public static SessionObject getSession() throws SQLException, AbstractOXException{
+	public static SessionObject getSession() throws SQLException, OXException{
 	    final ContextStorage contextStorage = ContextStorage.getInstance();
 	    int contextId = contextStorage.getContextId(AjaxInit.getAJAXProperty("contextName"));
 	    Context context = contextStorage.getContext(contextId);

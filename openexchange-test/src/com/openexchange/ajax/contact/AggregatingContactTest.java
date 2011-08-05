@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.contact;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
@@ -166,7 +167,7 @@ public class AggregatingContactTest extends AbstractAJAXSession{
         
         AJAXClient client2 = new AJAXClient(User.User2);
         GetResponse getResponse = client2.execute(new GetContactByUIDRequest(aggregatorUUID, tz));
-        AbstractOXException exception = getResponse.getException();
+        OXException exception = getResponse.getException();
         assertNotNull("Should not be able to retrieve contact", exception);
         assertEquals("Should prohibit access", "CON-0104", exception.getErrorCode());
         

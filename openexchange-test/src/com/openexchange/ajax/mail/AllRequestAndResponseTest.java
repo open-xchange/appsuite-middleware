@@ -15,9 +15,8 @@ import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.mail.actions.AllRequest;
 import com.openexchange.ajax.mail.actions.AllResponse;
 import com.openexchange.ajax.mail.actions.SendRequest;
-import com.openexchange.configuration.ConfigurationException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * 
@@ -32,7 +31,7 @@ public class AllRequestAndResponseTest extends AbstractMailTest {
 	protected String folder;
 	String mailObject_25kb;
 
-    public AllRequestAndResponseTest(String name) throws ConfigurationException, AjaxException, IOException, SAXException, JSONException {
+    public AllRequestAndResponseTest(String name) throws OXException, IOException, SAXException, JSONException {
         super(name);
         this.client = new AJAXClient(User.User1);
     }

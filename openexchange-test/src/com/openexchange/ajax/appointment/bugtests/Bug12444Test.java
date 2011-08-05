@@ -49,14 +49,14 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
 import java.util.Calendar;
 import java.util.TimeZone;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -90,10 +90,9 @@ public final class Bug12444Test extends AbstractAJAXSession {
         final InsertRequest request = new InsertRequest(appointment, tz, false);
         final CommonInsertResponse response = client.execute(request);
         assertTrue("Server responded not with expected exception.", response.hasError());
-        final AbstractOXException e = response.getException();
-        assertEquals("Wrong exception component.", EnumComponent.APPOINTMENT, e.getComponent());
-        assertEquals("Wrong exception code.", 8, e.getDetailNumber());
-        assertEquals("Wrong exception category.", Category.USER_INPUT, e.getCategory());
+        final OXException e = response.getException();
+        assertEquals("Wrong exception code.", 8, e.getCode());
+        assertEquals("Wrong exception category.", Category.CATEGORY_USER_INPUT, e.getCategory());
     }
 
     private Participant[] createParticipants() {

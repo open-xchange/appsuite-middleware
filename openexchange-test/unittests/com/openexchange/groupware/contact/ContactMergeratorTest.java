@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.contact;
 
+import com.openexchange.exception.OXException;
 import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.groupware.container.Contact;

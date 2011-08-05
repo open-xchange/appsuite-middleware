@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.notify;
 
+import com.openexchange.exception.OXException;
 import java.util.Calendar;
 import java.util.Date;
 import com.openexchange.groupware.container.Appointment;

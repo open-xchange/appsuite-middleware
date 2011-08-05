@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail.contenttypes;
 
+import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import com.openexchange.ajax.mail.TestMail;
 

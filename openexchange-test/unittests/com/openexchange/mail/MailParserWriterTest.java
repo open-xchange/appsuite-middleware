@@ -49,7 +49,7 @@
 
 package com.openexchange.mail;
 
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -147,16 +147,13 @@ public final class MailParserWriterTest extends AbstractMailTest {
             } finally {
                 mailConnection.close(true);
             }
-        } catch (final MailException e) {
-            e.printStackTrace();
-            fail(e.getMessage());
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
     }
 
-    private static void writeFolder(final MailFolder f, final MailAccess<?, ?> mailConnection, final ServerSession session) throws MailException, ContextException {
+    private static void writeFolder(final MailFolder f, final MailAccess<?, ?> mailConnection, final ServerSession session) throws OXException, OXException {
         System.out.println(FolderWriter.writeMailFolder(MailAccount.DEFAULT_ID, f, mailConnection.getMailConfig(), session));
         final MailFolder[] flds = mailConnection.getFolderStorage().getSubfolders(f.getFullname(), true);
         for (final MailFolder folder : flds) {

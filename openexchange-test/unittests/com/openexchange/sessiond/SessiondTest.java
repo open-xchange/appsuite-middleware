@@ -49,6 +49,7 @@
 
 package com.openexchange.sessiond;
 
+import com.openexchange.exception.OXException;
 import java.io.FileInputStream;
 import java.util.Properties;
 import java.util.UUID;

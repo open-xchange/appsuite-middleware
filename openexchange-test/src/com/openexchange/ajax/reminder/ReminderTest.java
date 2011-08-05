@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.reminder;
 
+import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Date;
@@ -77,8 +78,6 @@ import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.test.OXTestToolkit;
 import com.openexchange.test.TestException;
 import com.openexchange.tools.URLParameter;
-import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.tools.servlet.OXJSONException;
 
 public abstract class ReminderTest extends AbstractAJAXTest {
 
@@ -92,14 +91,14 @@ public abstract class ReminderTest extends AbstractAJAXTest {
      * @deprecated use {@link RangeRequest}.
      */
     @Deprecated
-    public static ReminderObject[] listReminder(final WebConversation webConversation, final Date end, final TimeZone timeZone, final String host, final String sessionId) throws IOException, SAXException, JSONException, OXJSONException, AjaxException {
+    public static ReminderObject[] listReminder(final WebConversation webConversation, final Date end, final TimeZone timeZone, final String host, final String sessionId) throws IOException, SAXException, JSONException, OXException, OXException {
         final AJAXSession session = new AJAXSession(webConversation, host, sessionId);
         final RangeRequest request = new RangeRequest(end);
         final RangeResponse response = Executor.execute(session, request, host);
         return response.getReminder(timeZone);
     }
 
-    public static ReminderObject[] listUpdates(final WebConversation webConversation, final Date lastModified, String host, final String sessionId, final TimeZone timeZone) throws Exception, TestException {
+    public static ReminderObject[] listUpdates(final WebConversation webConversation, final Date lastModified, String host, final String sessionId, final TimeZone timeZone) throws Exception, OXException {
         host = appendPrefix(host);
 
         final URLParameter parameter = new URLParameter();
@@ -140,7 +139,7 @@ public abstract class ReminderTest extends AbstractAJAXTest {
         return reminderObj;
     }
 
-    public static int[] deleteReminder(final WebConversation webConversation, final int objectId, String host, final String sessionId) throws Exception, TestException {
+    public static int[] deleteReminder(final WebConversation webConversation, final int objectId, String host, final String sessionId) throws Exception, OXException {
         host = appendPrefix(host);
 
         final URLParameter parameter = new URLParameter();

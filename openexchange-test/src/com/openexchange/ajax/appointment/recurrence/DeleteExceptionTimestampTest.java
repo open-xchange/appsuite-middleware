@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.Date;
 import org.json.JSONException;
@@ -58,7 +59,6 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.test.CalendarTestManager;
-import com.openexchange.tools.servlet.AjaxException;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 
 /**
@@ -98,7 +98,7 @@ public class DeleteExceptionTimestampTest extends AbstractAJAXSession {
         super.tearDown();
     }
     
-    public void testTimestampShouldBeDifferentAfterCreatingDeleteException() throws AjaxException, IOException, SAXException, JSONException {
+    public void testTimestampShouldBeDifferentAfterCreatingDeleteException() throws OXException, IOException, SAXException, JSONException {
         Date oldTimestamp = appointment.getLastModified();
         
         DeleteRequest deleteRequest = new DeleteRequest(appointment.getObjectID(), appointment.getParentFolderID(), 3, oldTimestamp, true);

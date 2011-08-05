@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.task;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 
 import org.json.JSONException;
@@ -61,7 +62,6 @@ import com.openexchange.ajax.task.actions.ListRequest;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TestTask;
 import com.openexchange.test.TaskTestManager;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  *
@@ -103,7 +103,7 @@ public final class Bug12727Test extends AbstractTaskTestForAJAXClient {
         super.tearDown();
     }
 
-    public void testOccurrences() throws AjaxException, IOException,
+    public void testOccurrences() throws OXException, IOException,
         SAXException, JSONException {
         final ListRequest request = new ListRequest(ListIDs.l(
             new int[] {
@@ -123,7 +123,7 @@ public final class Bug12727Test extends AbstractTaskTestForAJAXClient {
         }
     }
 
-    private void createTask() throws AjaxException, IOException, SAXException,
+    private void createTask() throws OXException, IOException, SAXException,
         JSONException {
         task = getNewTask("Test for bug 12727");
         task.startsToday();

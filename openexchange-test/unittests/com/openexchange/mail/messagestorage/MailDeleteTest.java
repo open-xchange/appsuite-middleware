@@ -49,11 +49,11 @@
 
 package com.openexchange.mail.messagestorage;
 
+import com.openexchange.exception.OXException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.mail.IndexRange;
-import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
@@ -81,7 +81,7 @@ public final class MailDeleteTest extends MessageStorageTest {
         MailField.THREAD_LEVEL, MailField.SIZE, MailField.PRIORITY, MailField.SENT_DATE, MailField.RECEIVED_DATE, MailField.CC,
         MailField.BCC, MailField.FOLDER_ID };
 
-    public void testMailDeleteNonExistingMails() throws MailException {
+    public void testMailDeleteNonExistingMails() throws OXException {
         /*
          * Delete non existing mail
          */
@@ -93,7 +93,7 @@ public final class MailDeleteTest extends MessageStorageTest {
         }
     }
 
-    public void testMailDeleteNonExistingMailsMixed() throws MailException {
+    public void testMailDeleteNonExistingMailsMixed() throws OXException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         /*
          * Delete non existing mail
@@ -111,21 +111,21 @@ public final class MailDeleteTest extends MessageStorageTest {
         }
     }
     
-    public void testMailDeleteNonExistingFolder() throws MailException {
+    public void testMailDeleteNonExistingFolder() throws OXException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         /*
          * Delete non existing mail
          */
         try {
             mailAccess.getMessageStorage().deleteMessages("NonExistingFolder1337", uids, true);
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             assertTrue("Wrong Exception is thrown.", e.getErrorCode().endsWith("-1002"));
         } finally {
             mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
         }
     }
 
-    public void testMailDelete() throws MailException {
+    public void testMailDelete() throws OXException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         String[] trashedIDs = null;
         try {

@@ -49,10 +49,10 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import com.openexchange.exception.OXException;
 import java.util.Calendar;
 import java.util.Date;
 import com.openexchange.ajax.AppointmentTest;
-import com.openexchange.api.OXConflictException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.java.util.TimeZones;
 
@@ -118,8 +118,8 @@ public class Bug8317Test extends AppointmentTest {
             final int objectId2 = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
             deleteAppointment(getWebConversation(), objectId2, appointmentFolderId, getHostName(), getSessionId());
             fail("conflict exception expected!");
-        } catch (final OXConflictException exc) {
-            // Perfect. The insertAppointment throws a OXConflictException
+        } catch (final OXException exc) {
+            // Perfect. The insertAppointment throws a OXException
             // And this is what we expect here !!!
         } finally {
             deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());

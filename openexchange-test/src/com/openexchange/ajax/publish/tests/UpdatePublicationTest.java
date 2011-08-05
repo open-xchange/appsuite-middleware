@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.publish.tests;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import org.json.JSONException;
@@ -59,10 +60,7 @@ import com.openexchange.ajax.publish.actions.UpdatePublicationRequest;
 import com.openexchange.ajax.publish.actions.UpdatePublicationResponse;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.publish.Publication;
-import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.SimPublicationTargetDiscoveryService;
-import com.openexchange.publish.json.PublicationJSONException;
-import com.openexchange.tools.servlet.AjaxException;
 
 
 /**
@@ -76,7 +74,7 @@ public class UpdatePublicationTest extends AbstractPublicationTest {
         super(name);
     }
     
-    public void testShouldUpdateExistingPublication() throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException{
+    public void testShouldUpdateExistingPublication() throws OXException, IOException, SAXException, JSONException, OXException, OXException{
         final Contact contact = createDefaultContactFolderWithOneContact();
         String folderID = String.valueOf(contact.getParentFolderID() );
         String module = "contacts";
@@ -100,7 +98,7 @@ public class UpdatePublicationTest extends AbstractPublicationTest {
         assertEquals("Should return 1 in case of success", I(1), updResp.getData());
     }
 
-    public void testShouldBeAbleToUpdateExistingPublicationsSiteName() throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException{
+    public void testShouldBeAbleToUpdateExistingPublicationsSiteName() throws OXException, IOException, SAXException, JSONException, OXException, OXException{
         SimPublicationTargetDiscoveryService discovery = new SimPublicationTargetDiscoveryService();
 
         final Contact contact = createDefaultContactFolderWithOneContact();
@@ -141,7 +139,7 @@ public class UpdatePublicationTest extends AbstractPublicationTest {
     */
     
     /*
-    public void testUpdatingNonExistentPublicationShouldFail() throws AjaxException, IOException, SAXException, JSONException{
+    public void testUpdatingNonExistentPublicationShouldFail() throws OXException, IOException, SAXException, JSONException{
         final Contact contact = createDefaultContactFolderWithOneContact();
         String folderID = String.valueOf(contact.getParentFolderID() );
         String module = "contacts";

@@ -48,11 +48,11 @@
  */
 package com.openexchange.groupware.attach;
 
+import com.openexchange.exception.OXException;
 import junit.framework.TestCase;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -124,7 +124,7 @@ public class CopyAttachmentsForChangeExceptionsTest extends TestCase {
 
     // Bug 12377
 
-    public void testShouldCopyAttachments() throws AbstractOXException, IOException {
+    public void testShouldCopyAttachments() throws OXException, IOException {
         final CalendarDataObject master = appointments.buildBasicAppointment(D("10/02/2008 10:00"), D("10/02/2008 12:00"));
         master.setRecurrenceType(CalendarDataObject.DAILY);
         master.setInterval(1);

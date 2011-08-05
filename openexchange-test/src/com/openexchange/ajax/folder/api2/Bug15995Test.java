@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.folder.api2;
 
+import com.openexchange.exception.OXException;
 import java.util.Locale;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;

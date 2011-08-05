@@ -48,6 +48,7 @@
  */
 package com.openexchange.groupware.calendar;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.tools.events.EventAssertions.assertDeleteEvent;
 import static com.openexchange.tools.events.EventAssertions.assertModificationEvent;
 
@@ -59,12 +60,9 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.api2.OXException;
 import com.openexchange.calendar.CalendarAdministration;
 import com.openexchange.calendar.CalendarSql;
 import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
@@ -73,7 +71,6 @@ import com.openexchange.groupware.container.Participants;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
-import com.openexchange.groupware.downgrade.DowngradeFailedException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
@@ -130,10 +127,7 @@ public class CalendarDowngradeUserTest extends TestCase {
             con = DBPool.pickupWriteable(ctx);
             final DowngradeEvent event = new DowngradeEvent(config, con, ctx);
             new CalendarAdministration().downgradePerformed(event);
-        } catch (final DBPoolingException x) {
-            x.printStackTrace();
-            fail(x.getMessage());
-        } catch (final DowngradeFailedException x) {
+        } catch (final OXException x) {
             x.printStackTrace();
             fail(x.getMessage());
         } finally {
@@ -195,8 +189,6 @@ public class CalendarDowngradeUserTest extends TestCase {
             for(final FolderObject folder : cleanFolders) {
                 oxma.deleteFolder(folder,false, System.currentTimeMillis());
             }
-        } catch (final DBPoolingException e) {
-            // IGNORE
         } catch (final OXException e) {
             // IGNORE
         } finally {
@@ -280,7 +272,7 @@ public class CalendarDowngradeUserTest extends TestCase {
             fo = oxma.createFolder(fo, true, System.currentTimeMillis());
             cleanFolders.add( fo );
             return publicFolderId = fo.getObjectID();
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             e.printStackTrace();
             return -1;
         } finally {
@@ -305,8 +297,6 @@ public class CalendarDowngradeUserTest extends TestCase {
         try {
             csql.getObjectById(objectID, parentFolderID);
             fail("The appointment exists!");
-        } catch(final OXObjectNotFoundException x) {
-
         } catch (final OXException x) {
             x.printStackTrace();
             fail(x.toString());

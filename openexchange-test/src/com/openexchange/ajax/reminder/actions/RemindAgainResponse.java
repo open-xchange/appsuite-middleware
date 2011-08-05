@@ -49,13 +49,13 @@
 
 package com.openexchange.ajax.reminder.actions;
 
+import com.openexchange.exception.OXException;
 import java.util.TimeZone;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.parser.ReminderParser;
 import com.openexchange.groupware.reminder.ReminderObject;
-import com.openexchange.tools.servlet.OXJSONException;
 
 /**
  * {@link RemindAgainResponse}
@@ -73,7 +73,7 @@ public class RemindAgainResponse extends AbstractAJAXResponse {
         super(response);
     }
 
-    public ReminderObject getReminder(final TimeZone timeZone) throws OXJSONException {
+    public ReminderObject getReminder(final TimeZone timeZone) throws OXException {
         if (null == reminder) {
             final JSONObject jremind = (JSONObject) getData();
             reminder = new ReminderObject();

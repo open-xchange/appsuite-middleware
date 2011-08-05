@@ -1,15 +1,15 @@
 package com.openexchange.webdav.xml.contact;
 
 import java.io.ByteArrayInputStream;
+
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
-import com.openexchange.groupware.contact.ContactException;
+import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.AttachmentTest;
 import com.openexchange.webdav.xml.ContactTest;
 import com.openexchange.webdav.xml.FolderTest;
@@ -77,8 +77,8 @@ public class NewTest extends ContactTest {
 			final int objectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getLogin(), getPassword());
 			deleteContact(getWebConversation(), objectId, parentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 			fail("conflict exception expected!");
-		} catch (final TestException exc) {
-			assertExceptionMessage(exc.getMessage(), new ContactException(Category.USER_INPUT, "", 171).getErrorCode());
+		} catch (final OXException exc) {
+			assertTrue(exc.similarTo(ContactExceptionCodes.PFLAG_IN_PUBLIC_FOLDER.create()));
 		}
 	}	
 	

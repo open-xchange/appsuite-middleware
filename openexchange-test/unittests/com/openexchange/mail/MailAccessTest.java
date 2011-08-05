@@ -49,6 +49,7 @@
 
 package com.openexchange.mail;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
@@ -77,7 +78,7 @@ public final class MailAccessTest extends AbstractMailTest {
 		super(name);
 	}
 
-	public void testMailAccess() throws MailException, InterruptedException {
+	public void testMailAccess() throws OXException, InterruptedException {
 			final SessionObject session = getSession();
 			MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();

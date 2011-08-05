@@ -48,21 +48,20 @@
  */
 package com.openexchange.test.fixtures.transformators;
 
-import com.openexchange.test.fixtures.FixtureException;
-
+import com.openexchange.exception.OXException;
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  * @author Markus Wagner <markus.wagner@open-xchange.com>
  */
 public class IntegerTransformator implements Transformator{
-    public Object transform(final String value) throws FixtureException {
+    public Object transform(final String value) throws OXException {
         if(null == value) {
         	return 0;
         }
     	try {
             return Integer.parseInt(value);
         } catch (NumberFormatException x) {
-            throw new FixtureException(x);
+            throw new OXException(x);
         }
     }
 }

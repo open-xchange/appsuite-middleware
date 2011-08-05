@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.resource;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -61,7 +62,6 @@ import com.openexchange.ajax.resource.actions.ResourceAllResponse;
 import com.openexchange.ajax.resource.actions.ResourceListRequest;
 import com.openexchange.ajax.resource.actions.ResourceListResponse;
 import com.openexchange.resource.Resource;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * {@link ResourceTools}
@@ -74,13 +74,13 @@ public class ResourceTools {
         super();
     }
 
-    private static int[] getAllResourceIds(AJAXClient client) throws AjaxException, IOException, SAXException, JSONException {
+    private static int[] getAllResourceIds(AJAXClient client) throws OXException, IOException, SAXException, JSONException {
         ResourceAllRequest request = new ResourceAllRequest();
         ResourceAllResponse response = client.execute(request);
         return response.getIDs();        
     }
 
-    private static List<Resource> getResources(AJAXClient client) throws AjaxException, IOException, SAXException, JSONException {
+    private static List<Resource> getResources(AJAXClient client) throws OXException, IOException, SAXException, JSONException {
         ResourceListRequest listReq = new ResourceListRequest(getAllResourceIds(client));
         ResourceListResponse listResp = client.execute(listReq);
         List<Resource> resources = new ArrayList<Resource>();
@@ -90,12 +90,12 @@ public class ResourceTools {
         return resources;
     }
 
-    public static int getSomeResource(AJAXClient client) throws AjaxException, IOException, SAXException, JSONException {
+    public static int getSomeResource(AJAXClient client) throws OXException, IOException, SAXException, JSONException {
         int[] resourceIds = getAllResourceIds(client);
         return resourceIds[rand.nextInt(resourceIds.length)];
     }
 
-    public static List<Resource> getResources(AJAXClient client, int count) throws AjaxException, IOException, SAXException, JSONException {
+    public static List<Resource> getResources(AJAXClient client, int count) throws OXException, IOException, SAXException, JSONException {
         List<Resource> resource = getResources(client);
         resource = extractByRandom(resource, count);
         return resource;

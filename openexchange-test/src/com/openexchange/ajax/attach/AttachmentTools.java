@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.attach;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CommonObject;

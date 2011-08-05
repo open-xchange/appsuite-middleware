@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.importexport;
 
+import com.openexchange.exception.OXException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -62,12 +63,9 @@ import java.util.List;
 import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
 import com.openexchange.api2.ContactSQLInterface;
-import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.importexport.importers.CSVContactImporter;
 
 /**
@@ -96,7 +94,7 @@ public class CSVContactImportTest extends AbstractContactTest {
         defaultFormat = Format.CSV;
     }
 
-    @Test public void canImport() throws ImportExportException{
+    @Test public void canImport() throws OXException{
         final List <String> folders = new LinkedList<String>();
         folders.add(Integer.toString(folderId));
         //normal case
@@ -107,7 +105,7 @@ public class CSVContactImportTest extends AbstractContactTest {
         try{
             imp.canImport(sessObj, Format.CSV, folders, null);
             fail("Could import two folders, but should not");
-        } catch (final ImportExportException e){
+        } catch (final OXException e){
             assertTrue("Cannot import more than one folder", true);
         }
 
@@ -115,7 +113,7 @@ public class CSVContactImportTest extends AbstractContactTest {
         folders.remove("blaFolder");
         try{
             assertTrue("Cannot import ICAL" , !imp.canImport(sessObj, Format.ICAL, folders, null) );
-        } catch (final ImportExportException e){
+        } catch (final OXException e){
             fail("Exception caught, but only 'false' value expected");
         }
 
@@ -170,7 +168,7 @@ public class CSVContactImportTest extends AbstractContactTest {
         assertTrue("One result?" , 1 == results.size());
         final ImportResult res = results.get(0);
         assertTrue("Should have error", res.hasError() );
-        assertEquals("Should contain error for not importing because fields are missing", 808, res.getException().getDetailNumber());
+        assertEquals("Should contain error for not importing because fields are missing", 808, res.getException().getCode());
 
         //no import, please
         final ContactSQLInterface contactSql = new RdbContactSQLImpl(sessObj);
@@ -204,7 +202,7 @@ public class CSVContactImportTest extends AbstractContactTest {
 
         try {
             imp.importData(sessObj, defaultFormat, is, folders, null);
-        } catch (final ImportExportException e) {
+        } catch (final OXException e) {
             assertEquals("Checking correct file with wrong header" , notASingleImport, e.getErrorCode());
             return;
         }
@@ -217,7 +215,7 @@ public class CSVContactImportTest extends AbstractContactTest {
 
         try {
             imp.importData(sessObj, defaultFormat, is, folders, null);
-        } catch (final ImportExportException e) {
+        } catch (final OXException e) {
             assertEquals("Checking malformed file with wrong header" , malformedCSV, e.getErrorCode());
             return;
         }
@@ -252,7 +250,7 @@ public class CSVContactImportTest extends AbstractContactTest {
         dateTest("04/01/1981");
     }
     
-    private void dateTest(String date) throws ImportExportException, UnsupportedEncodingException {
+    private void dateTest(String date) throws OXException, UnsupportedEncodingException {
         final List<ImportResult> results = importStuff(ContactField.GIVEN_NAME.getReadableName() + " , " + ContactField.BIRTHDAY.getReadableName() + "\n" + "Tobias Prinz ,"+date);
         assertTrue("One result?" , results.size() == 1);
         final ImportResult res = results.get(0);
@@ -263,7 +261,7 @@ public class CSVContactImportTest extends AbstractContactTest {
      * Counting the TIMEZONE element?
      */
     @Test
-    public void bug7109() throws ImportExportException, UnsupportedEncodingException, ContextException {
+    public void bug7109() throws OXException, UnsupportedEncodingException, OXException {
         final List<ImportResult> results1 = importStuff(ContactField.DISPLAY_NAME.getReadableName()+", "+ContactField.GIVEN_NAME.getReadableName() + " , " + ContactField.BIRTHDAY.getReadableName() + "\n" + "Tobias Prinz , "+ "Tobias Prinz , "+System.currentTimeMillis());
         final List<ImportResult> results2 = importStuff(ContactField.DISPLAY_NAME.getReadableName()+", "+ContactField.GIVEN_NAME.getReadableName() + " , " + ContactField.BIRTHDAY.getReadableName() + "\n" + "Tobias Prinz , "+ "Tobias Prinz , 1981/04/01");
         final List<ImportResult> results3 = importStuff(ContactField.DISPLAY_NAME.getReadableName()+", "+ContactField.GIVEN_NAME.getReadableName() + " , " + "stupidColumnName\n" + "Tobias Prinz , "+ "Tobias Prinz , 1981/04/01");
@@ -281,7 +279,7 @@ public class CSVContactImportTest extends AbstractContactTest {
         try    {
             importStuff("stupidColumnName, yet another stupid column name\n" + "Tobias Prinz , 1981/04/01");
             fail("Importing without any useful column titles should fail.");
-        } catch (final ImportExportException exc1){
+        } catch (final OXException exc1){
             assertEquals("Could not translate any column title", notASingleImport, exc1.getErrorCode());
         }
     }
@@ -289,7 +287,7 @@ public class CSVContactImportTest extends AbstractContactTest {
     /*
      * This was listed as 6825, 7107 or 7386
      */
-    @Test public void bugTooMuchInformation() throws UnsupportedEncodingException, NumberFormatException, OXException, ContextException{
+    @Test public void bugTooMuchInformation() throws UnsupportedEncodingException, NumberFormatException, OXException, OXException{
         final String stringTooLong = "aaaaaaaaaabbbbbbbbbbccccccccccddddddddddeeeeeeeeeeffffffffffgggggggggghhhhhhhhhhiiiiiiiiiijjjjjjjjjjkkkkkkkkkkllllllllllmmmmmmmmmmnnnnnnnnnnooooooooooppppppppppqqqqqqqqqqrrrrrrrrrrttttttttttuuuuuuuuuvvvvvvvvvwwwwwwwwwwxxxxxxxxxxyyyyyyyyyyzzzzzzzzzz00000000001111111111222222222233333333334444444444455555555556666666666777777777788888888889999999999";
         final String expected = "aaaaaaaaaabbbbbbbbbbccccccccccddddddddddeeeeeeeeeeffffffffffgggg";
         final List<ImportResult> results = importStuff(ContactField.GIVEN_NAME.getReadableName() + " , " +ContactField.SUFFIX.getReadableName() + "\nElvis," + stringTooLong);
@@ -305,7 +303,7 @@ public class CSVContactImportTest extends AbstractContactTest {
     /*
      * "private" flag is being set
      */
-    @Test public void bug7710() throws UnsupportedEncodingException, NumberFormatException, OXException, ContextException {
+    @Test public void bug7710() throws UnsupportedEncodingException, NumberFormatException, OXException, OXException {
         final String file = ContactField.DISPLAY_NAME.getReadableName()+", "+ContactField.GIVEN_NAME.getReadableName() + " , " + ContactField.PRIVATE_FLAG.getReadableName() + "\nTobias Prinz, Tobias Prinz,true";
         final List<ImportResult> results = importStuff(file);
         assertTrue("Only one result", 1 == results.size());
@@ -319,8 +317,8 @@ public class CSVContactImportTest extends AbstractContactTest {
         try {
             importStuff(file);
             fail("Should throw exception");
-        } catch (ImportExportException e){
-            assertEquals("Should throw exception for missing fields to build a display name" , 807, e.getDetailNumber());
+        } catch (OXException e){
+            assertEquals("Should throw exception for missing fields to build a display name" , 807, e.getCode());
         }
     }
     
@@ -331,12 +329,12 @@ public class CSVContactImportTest extends AbstractContactTest {
         assertEquals("Should give one result", 1, results.size());
         ImportResult res = results.get(0);
         assertTrue("Needs to contain one error", res.hasError());
-        ImportExportException exception = (ImportExportException) res.getException();
-        assertEquals("Should have a problem because there is no material for a display name", 808, exception.getDetailNumber());
+        OXException exception = (OXException) res.getException();
+        assertEquals("Should have a problem because there is no material for a display name", 808, exception.getCode());
     }
 
     
-    protected void checkFirstResult(final int objectID ) throws OXException, ContextException {
+    protected void checkFirstResult(final int objectID ) throws OXException, OXException {
         final Contact co = new RdbContactSQLImpl(sessObj).getObjectById(objectID, folderId);
         assertEquals("Checking name" ,  NAME1 , co.getGivenName());
         assertEquals("Checking e-Mail" ,  EMAIL1 , co.getEmail1());

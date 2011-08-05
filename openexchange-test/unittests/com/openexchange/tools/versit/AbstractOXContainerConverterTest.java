@@ -1,8 +1,8 @@
 package com.openexchange.tools.versit;
 
+import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
@@ -28,7 +28,7 @@ public abstract class AbstractOXContainerConverterTest extends TestCase {
 		return sessObj;
 	}
 
-	public static User getUserParticipant() throws AbstractOXException {
+	public static User getUserParticipant() throws OXException {
 	
 		final UserStorage uStorage = UserStorage.getInstance();
 		final Context ctx = new ContextImpl(1);

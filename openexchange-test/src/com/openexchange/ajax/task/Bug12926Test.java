@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.task;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,7 +69,6 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.tasks.Create;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.tools.servlet.AjaxException;
 
 
 /**
@@ -117,7 +117,7 @@ public final class Bug12926Test extends AbstractTaskTest {
         super.tearDown();
     }
 
-    public void testTaskStaysInDelegatorFolder() throws AjaxException, IOException, SAXException, JSONException {
+    public void testTaskStaysInDelegatorFolder() throws OXException, IOException, SAXException, JSONException {
         final Task task2 = new Task();
         task2.setObjectID(task.getObjectID());
         task2.setParentFolderID(task.getParentFolderID());

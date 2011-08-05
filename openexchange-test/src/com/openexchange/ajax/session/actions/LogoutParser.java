@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.session.actions;
 
+import com.openexchange.exception.OXException;
 import org.json.JSONException;
 
 import com.openexchange.ajax.container.Response;

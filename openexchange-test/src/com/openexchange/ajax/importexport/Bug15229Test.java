@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.importexport;
 
+import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -56,7 +57,6 @@ import java.util.List;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.groupware.importexport.ImportResult;
-import com.openexchange.test.TestException;
 
 public class Bug15229Test extends AbstractVCardImportTest {
 
@@ -67,7 +67,7 @@ public class Bug15229Test extends AbstractVCardImportTest {
     /**
      * Test escaped colons in URLs
      */
-    public void testColons() throws TestException, SAXException, JSONException, Exception {
+    public void testColons() throws OXException, SAXException, JSONException, Exception {
         String bug = "BEGIN:VCARD\n" +
             "\n" +
             "VERSION:3.0\n" +

@@ -49,6 +49,7 @@
 
 package com.openexchange.webdav.xml.appointment;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -67,9 +68,7 @@ import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.UserValues;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.tools.servlet.AjaxException;
 
 
 
@@ -138,7 +137,7 @@ public class FreeBusyTest extends ManagedAppointmentTest {
     }
 
     
-    private int getFreeBusyState(Appointment app) throws IOException, SAXException, AjaxException, JSONException, ParseException {
+    private int getFreeBusyState(Appointment app) throws IOException, SAXException, OXException, JSONException, ParseException {
         String[] address = values.getDefaultAddress().split("@");
         assertEquals("Default address ("+values.getDefaultAddress()+") should contain one @", 2, address.length);
         

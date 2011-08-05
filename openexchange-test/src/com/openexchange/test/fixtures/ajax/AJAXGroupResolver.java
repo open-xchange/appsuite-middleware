@@ -49,6 +49,7 @@
 
 package com.openexchange.test.fixtures.ajax;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -58,7 +59,6 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.group.actions.GetRequest;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.test.fixtures.GroupResolver;
-import com.openexchange.tools.servlet.AjaxException;
 
 public class AJAXGroupResolver implements GroupResolver {
 	private AJAXClient client;
@@ -87,7 +87,7 @@ public class AJAXGroupResolver implements GroupResolver {
 				groupMembers[i] = contactFinder.getContact(userId);
 			}
 			return groupMembers;
-		} catch (AjaxException e) {
+		} catch (OXException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();

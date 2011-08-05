@@ -49,6 +49,9 @@
 
 package com.openexchange.groupware;
 
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.ProblematicAttribute;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -57,8 +60,6 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.TimeZone;
 import junit.framework.TestCase;
-import com.openexchange.api.OXPermissionException;
-import com.openexchange.api2.OXException;
 import com.openexchange.api2.ReminderService;
 import com.openexchange.calendar.CalendarOperation;
 import com.openexchange.calendar.CalendarSql;
@@ -66,10 +67,8 @@ import com.openexchange.calendar.CalendarSqlImp;
 import com.openexchange.calendar.ConflictHandler;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.event.impl.EventConfigImpl;
-import com.openexchange.groupware.AbstractOXException.ProblematicAttribute;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.Constants;
-import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
@@ -1425,10 +1424,8 @@ public class CalendarTest extends TestCase {
             try {
                 csql.updateAppointmentObject(update1, private_folder_id, new Date());
                 fail("Move from a private folder with private flag should not be possibe!");
-            } catch(final OXPermissionException e) {
+            } catch(final OXException e) {
                 // Very good if we get an error
-            } catch(final OXCalendarException oxce) {
-                // Very good if we get this kind of error
             } catch(final Exception e) {
                 fail ("Nooo "+e.getMessage());
             }

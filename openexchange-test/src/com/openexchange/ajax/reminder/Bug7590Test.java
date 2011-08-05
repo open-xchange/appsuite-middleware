@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.reminder;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.TimeZone;
@@ -65,7 +66,6 @@ import com.openexchange.ajax.reminder.actions.RangeResponse;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.reminder.ReminderObject;
-import com.openexchange.tools.servlet.AjaxException;
 
 public class Bug7590Test extends AbstractAJAXSession {
 
@@ -126,7 +126,7 @@ public class Bug7590Test extends AbstractAJAXSession {
         ReminderTest.compareReminder(expected, actual);
     }
 
-    private Appointment createAppointment() throws AjaxException, IOException, SAXException, JSONException {
+    private Appointment createAppointment() throws OXException, IOException, SAXException, JSONException {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testBug7590");
 

@@ -48,20 +48,19 @@
  */
 package com.openexchange.test.fixtures.transformators;
 
-import com.openexchange.test.fixtures.FixtureException;
-
+import com.openexchange.exception.OXException;
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class LongTransformator implements Transformator{
-    public Object transform(final String value) throws FixtureException {
+    public Object transform(final String value) throws OXException {
         if(value == null) {
             return 0;
         }
         try {
             return Long.parseLong(value);
         } catch (NumberFormatException x) {
-            throw new FixtureException(x);
+            throw new OXException(x);
         }
     }
 }

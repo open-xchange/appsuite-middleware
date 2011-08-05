@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.service;
 
+import com.openexchange.exception.OXException;
 import junit.framework.TestCase;
 
 

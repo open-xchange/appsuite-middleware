@@ -2,7 +2,8 @@ package com.openexchange.groupware.userconfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.groupware.AbstractOXException;
+
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 
@@ -15,17 +16,17 @@ public class OverridingUserConfigurationStorage extends UserConfigurationStorage
     }
 
     @Override
-    protected void startInternal() throws AbstractOXException {
+    protected void startInternal() throws OXException {
         delegate.startInternal();
     }
 
     @Override
-    protected void stopInternal() throws AbstractOXException {
+    protected void stopInternal() throws OXException {
         delegate.stopInternal();
     }
 
     @Override
-    public UserConfiguration getUserConfiguration(final int userId, final int[] groups, final Context ctx) throws UserConfigurationException {
+    public UserConfiguration getUserConfiguration(final int userId, final int[] groups, final Context ctx) throws OXException {
         final UserConfiguration config = getOverride(userId, groups, ctx);
         if( config != null) {
             return config;
@@ -34,7 +35,7 @@ public class OverridingUserConfigurationStorage extends UserConfigurationStorage
     }
 
     @Override
-    public UserConfiguration[] getUserConfiguration(Context ctx, User[] users) throws UserConfigurationException {
+    public UserConfiguration[] getUserConfiguration(Context ctx, User[] users) throws OXException {
         List<UserConfiguration> retval = new ArrayList<UserConfiguration>();
         for (User user : users) {
             retval.add(getUserConfiguration(user.getId(), user.getGroups(), ctx));
@@ -43,29 +44,29 @@ public class OverridingUserConfigurationStorage extends UserConfigurationStorage
     }
 
     @Override
-    public void clearStorage() throws UserConfigurationException {
+    public void clearStorage() throws OXException {
         delegate.clearStorage();
     }
 
     @Override
-    public void removeUserConfiguration(final int userId, final Context ctx) throws UserConfigurationException {
+    public void removeUserConfiguration(final int userId, final Context ctx) throws OXException {
         delegate.removeUserConfiguration(userId,ctx);
     } 
 
-    public UserConfiguration getOverride(final int userId, final int[] groups, final Context ctx) throws UserConfigurationException {
+    public UserConfiguration getOverride(final int userId, final int[] groups, final Context ctx) throws OXException {
         return null;
     }
 
-    public void override() throws AbstractOXException {
+    public void override() throws OXException {
         UserConfigurationStorage.setInstance(this);
     }
 
-    public void takeBack() throws AbstractOXException {
+    public void takeBack() throws OXException {
         UserConfigurationStorage.setInstance(delegate);
     }
 
     @Override
-    public void saveUserConfiguration(final int permissionBits, final int userId, final Context ctx) throws UserConfigurationException {
+    public void saveUserConfiguration(final int permissionBits, final int userId, final Context ctx) throws OXException {
         delegate.saveUserConfiguration(permissionBits, userId, ctx);
     }
 }

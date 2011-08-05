@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.attach;
 
+import com.openexchange.exception.OXException;
 import java.util.Date;
 
 import com.openexchange.ajax.container.Response;

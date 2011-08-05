@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.task.actions;
 
+import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -60,7 +61,6 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
-import com.openexchange.groupware.tasks.TaskException;
 
 /**
  * Stores the parameter for searching for tasks.
@@ -107,7 +107,7 @@ public class SearchRequest extends AbstractTaskRequest<SearchResponse> {
     public JSONObject getBody() throws JSONException {
         try {
             return TaskSearchJSONWriter.write(search);
-        } catch (final TaskException e) {
+        } catch (final OXException e) {
             throw new JSONException(e);
         }
     }

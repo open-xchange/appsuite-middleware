@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.session;
 
-
+import com.openexchange.exception.OXException;
 /**
  * {@link RedeemTest}
  *

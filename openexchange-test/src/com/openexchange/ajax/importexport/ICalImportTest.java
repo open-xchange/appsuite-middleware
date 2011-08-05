@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.importexport;
 
+import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
@@ -62,7 +63,6 @@ import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.webdav.xml.AppointmentTest;
 import com.openexchange.webdav.xml.TaskTest;
-import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
@@ -141,7 +141,7 @@ public class ICalImportTest extends AbstractICalTest {
 		TaskTest.deleteTask(getWebConversation(), Integer.parseInt(importResult[0].getObjectId()), taskFolderId, getHostName(), getLogin(), getPassword());
 	}
     // Bug 12177
-    public void testWarnings() throws JSONException, AjaxException, IOException, SAXException {
+    public void testWarnings() throws JSONException, OXException, IOException, SAXException {
         StringBuilder icalText = new StringBuilder(1500);
         icalText.append("BEGIN:VCALENDAR\n");
         icalText.append("VERSION:2.0").append('\n');

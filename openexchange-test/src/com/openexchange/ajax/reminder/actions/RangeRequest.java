@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.reminder.actions;
 
+import com.openexchange.exception.OXException;
 import java.util.Date;
 
 import org.json.JSONException;

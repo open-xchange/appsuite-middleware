@@ -2,7 +2,7 @@ package com.openexchange.groupware.infostore;
 
 import java.sql.SQLException;
 
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.database.impl.CreateDocumentAction;
 import com.openexchange.tx.UndoableAction;
 
@@ -32,11 +32,11 @@ public class CreateDocumentActionTest extends AbstractInfostoreActionTest {
 		}
 	}
 
-	private void checkNotInDocTable(final DocumentMetadata doc) throws DBPoolingException, SQLException {
+	private void checkNotInDocTable(final DocumentMetadata doc) throws OXException, SQLException {
 		assertNoResult("SELECT 1 FROM infostore WHERE id = ? and cid = ?", doc.getId(), getContext().getContextId());	
 	}
 	
-	private void checkInDocTable(final DocumentMetadata doc) throws DBPoolingException, SQLException {
+	private void checkInDocTable(final DocumentMetadata doc) throws OXException, SQLException {
 		assertResult("SELECT 1 FROM infostore WHERE id = ? and cid = ?", doc.getId(), getContext().getContextId());
 	}
 

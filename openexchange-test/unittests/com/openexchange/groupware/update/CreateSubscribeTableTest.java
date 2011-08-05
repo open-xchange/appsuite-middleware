@@ -49,8 +49,8 @@
 
 package com.openexchange.groupware.update;
 
+import com.openexchange.exception.OXException;
 import java.sql.SQLException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.update.tasks.CreateSubscribeTableTask;
 
 /**
@@ -70,7 +70,7 @@ public class CreateSubscribeTableTest extends UpdateTest {
         super.tearDown();
     }
     
-    public void testShouldCreateSubscriptionsTable() throws AbstractOXException {
+    public void testShouldCreateSubscriptionsTable() throws OXException {
         executeTask();
         try {
             exec("SELECT cid, id, user_id, configuration_id, source_id, folder_id, last_update FROM subscriptions");
@@ -79,7 +79,7 @@ public class CreateSubscribeTableTest extends UpdateTest {
         }
     }
     
-    public void testShouldCreateSequenceTable() throws AbstractOXException {
+    public void testShouldCreateSequenceTable() throws OXException {
         executeTask();
         try {
             exec("SELECT cid, id FROM sequence_subscriptions");
@@ -88,16 +88,16 @@ public class CreateSubscribeTableTest extends UpdateTest {
         }
     }
     
-    public void testShouldCreateEntryInSequenceTableForEveryContext() throws AbstractOXException, SQLException {
+    public void testShouldCreateEntryInSequenceTableForEveryContext() throws OXException, SQLException {
         executeTask();
         assertResult("SELECT 1 FROM sequence_subscriptions WHERE cid = "+existing_ctx_id);
     }
     
-    private void executeTask() throws AbstractOXException {
+    private void executeTask() throws OXException {
         new CreateSubscribeTableTask().perform(schema, existing_ctx_id);
     }
     
-    public void testShouldBeRunnableTwice() throws AbstractOXException {
+    public void testShouldBeRunnableTwice() throws OXException {
         executeTask();
         executeTask();
     }

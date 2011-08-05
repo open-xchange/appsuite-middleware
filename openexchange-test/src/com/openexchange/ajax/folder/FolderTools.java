@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.folder;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -63,11 +64,8 @@ import com.openexchange.ajax.folder.actions.ListResponse;
 import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.Executor;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.tools.servlet.OXJSONException;
 
 /**
  * 
@@ -87,12 +85,12 @@ public final class FolderTools {
      */
     @Deprecated
     public static ListResponse list(final AJAXClient client,
-        final ListRequest request) throws AjaxException, IOException,
+        final ListRequest request) throws OXException, IOException,
         SAXException, JSONException {
         return Executor.execute(client, request);
     }
 
-    public static List<FolderObject> getSubFolders(AJAXClient client, String parent, boolean ignoreMailFolder) throws AjaxException, IOException, SAXException, JSONException, OXException {
+    public static List<FolderObject> getSubFolders(AJAXClient client, String parent, boolean ignoreMailFolder) throws OXException, IOException, SAXException, JSONException, OXException {
         final ListRequest request = new ListRequest(API.OX_OLD, parent, ignoreMailFolder);
         final ListResponse response = client.execute(request);
         final List<FolderObject> retval = new ArrayList<FolderObject>();
@@ -111,7 +109,7 @@ public final class FolderTools {
         return retval;
     }
 
-    public static void shareFolder(AJAXClient client, API api, int folderId, int userId, int fp, int opr, int opw, int opd) throws AjaxException, IOException, SAXException, JSONException, OXJSONException, OXException {
+    public static void shareFolder(AJAXClient client, API api, int folderId, int userId, int fp, int opr, int opw, int opd) throws OXException, IOException, SAXException, JSONException, OXException, OXException {
         GetRequest getQ = new GetRequest(api, folderId);
         GetResponse getR = client.execute(getQ);
         FolderObject origFolder = getR.getFolder();
@@ -133,7 +131,7 @@ public final class FolderTools {
         client.execute(updQ);
     }
 
-    public static void unshareFolder(AJAXClient client, API api, int folderId, int userId) throws AjaxException, IOException, SAXException, JSONException, OXJSONException, OXException {
+    public static void unshareFolder(AJAXClient client, API api, int folderId, int userId) throws OXException, IOException, SAXException, JSONException, OXException, OXException {
         GetRequest getQ = new GetRequest(api, folderId);
         GetResponse getR = client.execute(getQ);
         FolderObject origFolder = getR.getFolder();

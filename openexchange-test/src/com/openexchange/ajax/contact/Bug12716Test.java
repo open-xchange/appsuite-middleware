@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.contact;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 
 import org.json.JSONException;
@@ -63,7 +64,6 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
@@ -99,7 +99,7 @@ public final class Bug12716Test extends AbstractAJAXSession {
         super.tearDown();
     }
 
-    public void testListProblem() throws AjaxException, IOException,
+    public void testListProblem() throws OXException, IOException,
         SAXException, JSONException {
         final int[] columns = new int[] {
             20, 1, 5, 2, 3, 4, 20, 100, 101,
@@ -123,7 +123,7 @@ public final class Bug12716Test extends AbstractAJAXSession {
         }
     }
 
-    private Contact insertContact() throws AjaxException, IOException,
+    private Contact insertContact() throws OXException, IOException,
         SAXException, JSONException {
         final Contact contact = new Contact();
         contact.setParentFolderID(folderId);
@@ -135,7 +135,7 @@ public final class Bug12716Test extends AbstractAJAXSession {
         return contact;
     }
 
-    private void deleteContact() throws AjaxException, IOException,
+    private void deleteContact() throws OXException, IOException,
         SAXException, JSONException {
         client.execute(new DeleteRequest(contact));
     }

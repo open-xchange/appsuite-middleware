@@ -1,10 +1,10 @@
 package com.openexchange.webdav.action.behaviour;
 
+import com.openexchange.exception.OXException;
 import java.util.HashSet;
 
 import junit.framework.TestCase;
 
-import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.webdav.action.MockWebdavRequest;
 
 public class UserAgentBehaviourTest extends TestCase {
@@ -23,12 +23,12 @@ public class UserAgentBehaviourTest extends TestCase {
 		try {
 			new UserAgentBehaviour(".*", new C13(), new C2(), new C123());
 			fail("Could create conflicting behaviour");
-		} catch (final ConfigurationException x) {
+		} catch (final OXException x) {
 			assertTrue(true);
 		}
 	}
 	
-	public void testProvides() throws ConfigurationException {
+	public void testProvides() throws OXException {
 		
 		assertProvides(new UserAgentBehaviour(".*", new C13()) , I1.class, I3.class);
 		assertProvides(new UserAgentBehaviour(".*", new C2()) , I2.class);
@@ -38,7 +38,7 @@ public class UserAgentBehaviourTest extends TestCase {
 		
 	}
 	
-	public void testMatches() throws ConfigurationException {
+	public void testMatches() throws OXException {
 		final MockWebdavRequest req = new MockWebdavRequest(null, "");
 		req.setHeader("User-Agent", "Bla");
 		
@@ -48,7 +48,7 @@ public class UserAgentBehaviourTest extends TestCase {
 		
 	}
 	
-	public void testGet() throws ConfigurationException {
+	public void testGet() throws OXException {
 		final C13 c13 = new C13();
 		final C2 c2 = new C2();
 		

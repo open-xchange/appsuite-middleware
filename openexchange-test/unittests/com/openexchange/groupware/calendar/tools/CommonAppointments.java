@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.calendar.tools;
 
+import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -64,11 +65,8 @@ import java.util.Set;
 import java.util.TimeZone;
 
 import com.openexchange.api2.AppointmentSQLInterface;
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.calendar.CalendarSql;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
@@ -81,7 +79,6 @@ import com.openexchange.session.Session;
 import com.openexchange.setuptools.TestFolderToolkit;
 import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorException;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -268,7 +265,7 @@ public class CommonAppointments {
         return session;
     }
 
-    public void deleteAll(final Context ctx) throws SQLException, DBPoolingException {
+    public void deleteAll(final Context ctx) throws SQLException, OXException {
         Statement stmt = null;
         Connection writeCon = null;
         try {
@@ -288,16 +285,16 @@ public class CommonAppointments {
 
     }
 
-    public List<Appointment> getPrivateAppointments() throws AbstractOXException {
+    public List<Appointment> getPrivateAppointments() throws OXException {
        return getAppointmentsInFolder(privateFolder);
 
     }
 
-    public List<Appointment> getAppointmentsInFolder(final int folderId) throws AbstractOXException {
+    public List<Appointment> getAppointmentsInFolder(final int folderId) throws OXException {
         return getAppointmentsInFolder(folderId, new int[]{CalendarDataObject.OBJECT_ID});
     }
     
-    public List<Appointment> getAppointmentsInFolder(final int folderId, int[] columns) throws AbstractOXException {
+    public List<Appointment> getAppointmentsInFolder(final int folderId, int[] columns) throws OXException {
         final List<Appointment> cdao = new ArrayList<Appointment>();
         try {
             final SearchIterator<Appointment> iterator = calendar.getAppointmentsBetweenInFolder(folderId, columns, new Date(0), new Date(Long.MAX_VALUE), CalendarDataObject.OBJECT_ID, Order.ASCENDING);
@@ -310,13 +307,10 @@ public class CommonAppointments {
         } catch (final SQLException e) {
             e.printStackTrace();
             return Collections.EMPTY_LIST;
-        } catch (final SearchIteratorException e) {
-            e.printStackTrace();
-            return Collections.EMPTY_LIST;
         }
     }
 
-    public List<Appointment> getModifiedInFolder(final int folderId, final long since) throws AbstractOXException {
+    public List<Appointment> getModifiedInFolder(final int folderId, final long since) throws OXException {
         final List<Appointment> cdao = new ArrayList<Appointment>();
         try {
 
@@ -326,14 +320,12 @@ public class CommonAppointments {
             }
             return cdao;
         } catch (final OXException e) {
-            throw e;
-        } catch (final SearchIteratorException e) {
             e.printStackTrace();
             return Collections.EMPTY_LIST;
         }
     }
 
-    public List<Appointment> getDeletedInFolder(final int folderId, final long since) throws AbstractOXException {
+    public List<Appointment> getDeletedInFolder(final int folderId, final long since) throws OXException {
         final List<Appointment> cdao = new ArrayList<Appointment>();
         try {
 
@@ -343,8 +335,6 @@ public class CommonAppointments {
             }
             return cdao;
         } catch (final OXException e) {
-            throw e;
-        } catch (final SearchIteratorException e) {
             e.printStackTrace();
             return Collections.EMPTY_LIST;
         }

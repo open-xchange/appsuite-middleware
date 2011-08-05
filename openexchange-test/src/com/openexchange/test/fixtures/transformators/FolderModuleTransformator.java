@@ -49,9 +49,9 @@
 
 package com.openexchange.test.fixtures.transformators;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.ajax.Folder;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.test.fixtures.FixtureException;
 
 
 /**
@@ -65,7 +65,7 @@ public class FolderModuleTransformator implements Transformator {
     /* (non-Javadoc)
      * @see com.openexchange.test.fixtures.transformators.Transformator#transform(java.lang.String)
      */
-    public Object transform(String value) throws FixtureException {
+    public Object transform(String value) throws OXException {
         if( value.equalsIgnoreCase(Folder.MODULE_CALENDAR))
             return FolderObject.CALENDAR;
         if( value.equalsIgnoreCase(Folder.MODULE_CONTACT))

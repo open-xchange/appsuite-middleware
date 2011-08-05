@@ -52,14 +52,15 @@ package com.openexchange.ajax.appointment.recurrence;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.helper.AbstractAssertion;
+import com.openexchange.ajax.appointment.helper.AbstractPositiveAssertion;
 import com.openexchange.ajax.appointment.helper.NegativeAssertionOnCreate;
 import com.openexchange.ajax.appointment.helper.NegativeAssertionOnUpdate;
-import com.openexchange.ajax.appointment.helper.AbstractPositiveAssertion;
 import com.openexchange.ajax.appointment.helper.PositiveAssertionOnCreate;
-import com.openexchange.ajax.appointment.helper.PositiveAssertionOnDeleteException;
 import com.openexchange.ajax.appointment.helper.PositiveAssertionOnCreateAndUpdate;
+import com.openexchange.ajax.appointment.helper.PositiveAssertionOnDeleteException;
 import com.openexchange.ajax.appointment.helper.PositiveAssertionOnUpdateOnly;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.groupware.calendar.TimeTools;

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.framework;
 
+import com.openexchange.exception.OXException;
 import org.json.JSONArray;
 import org.json.JSONException;
 

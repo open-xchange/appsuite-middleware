@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.resource;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
@@ -56,7 +57,6 @@ import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.resource.actions.ResourceDeleteRequest;
 import com.openexchange.ajax.resource.actions.ResourceGetRequest;
 import com.openexchange.resource.Resource;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * {@link ResourceDeleteAJAXTest} - Tests the DELETE request on resource servlet
@@ -79,7 +79,7 @@ public final class ResourceDeleteAJAXTest extends AbstractResourceTest {
 	/**
 	 * Tests the <code>action=delete</code> request
 	 */
-	public void testDelete() throws AjaxException, JSONException, IOException, SAXException {
+	public void testDelete() throws OXException, JSONException, IOException, SAXException {
 		int id = -1;
 		try {
 			/*

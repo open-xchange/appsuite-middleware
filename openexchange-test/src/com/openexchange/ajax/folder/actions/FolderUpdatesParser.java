@@ -1,6 +1,7 @@
 
 package com.openexchange.ajax.folder.actions;
 
+import com.openexchange.exception.OXException;
 import java.util.Date;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -8,10 +9,8 @@ import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.CommonUpdatesParser;
 import com.openexchange.ajax.parser.FolderParser;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.test.fixtures.FixtureException;
 import com.openexchange.test.fixtures.transformators.FolderModuleTransformator;
 
 /**
@@ -99,7 +98,7 @@ public class FolderUpdatesParser extends CommonUpdatesParser<FolderUpdatesRespon
             final FolderModuleTransformator trafo = new FolderModuleTransformator();
             try {
                 return trafo.transform((String) actual);
-            } catch (final FixtureException e) {
+            } catch (final OXException e) {
                 e.printStackTrace();
                 return null; // TODO: Tierlieb: Change?
             }

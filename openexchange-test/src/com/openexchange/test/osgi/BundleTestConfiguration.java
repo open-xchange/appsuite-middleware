@@ -49,6 +49,7 @@
 
 package com.openexchange.test.osgi;
 
+import com.openexchange.exception.OXException;
 import org.json.JSONObject;
 import com.openexchange.ajax.LoginTest;
 

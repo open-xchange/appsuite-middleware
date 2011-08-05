@@ -49,6 +49,7 @@
 
 package com.openexchange.webdav.xml.framework;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 
 import org.apache.commons.httpclient.HttpClient;
@@ -56,11 +57,8 @@ import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.jdom.JDOMException;
 
-import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.WebDAVConfig;
 import com.openexchange.configuration.WebDAVConfig.Property;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.folder.FolderTools;
 import com.openexchange.webdav.xml.user.GroupUserTools;
 
@@ -86,7 +84,7 @@ public class WebDAVClient {
         this.session = session;
     }
 
-    public WebDAVClient(final User user) throws ConfigurationException {
+    public WebDAVClient(final User user) throws OXException {
         this(new WebDAVSession());
         WebDAVConfig.init();
         final String login = WebDAVConfig.getProperty(user.getLogin());
@@ -148,11 +146,11 @@ public class WebDAVClient {
         session = new WebDAVSession();
     }
 
-    public <T extends AbstractWebDAVResponse> T execute(final WebDAVRequest<T> request) throws IOException, JDOMException, AbstractOXException, TestException {
+    public <T extends AbstractWebDAVResponse> T execute(final WebDAVRequest<T> request) throws IOException, JDOMException, OXException, OXException {
          return Executor.execute(this, request);
     }
 
-    public <T extends AbstractWebDAVResponse> T execute(final String host, final WebDAVRequest<T> request) throws IOException, JDOMException, AbstractOXException, TestException {
+    public <T extends AbstractWebDAVResponse> T execute(final String host, final WebDAVRequest<T> request) throws IOException, JDOMException, OXException, OXException {
         if (null == host) {
             return execute(request);
         }

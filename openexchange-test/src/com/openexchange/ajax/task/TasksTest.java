@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.task;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.ajax.task.TaskTools.confirmTask;
 import static com.openexchange.ajax.task.TaskTools.deleteTask;
 import static com.openexchange.ajax.task.TaskTools.extractInsertId;
@@ -73,12 +74,10 @@ import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.ajax.participant.ParticipantTools;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * This class tests the AJAX interface of the tasks.
@@ -431,7 +430,7 @@ public class TasksTest extends AbstractAJAXTest {
      * @throws OXException if reading the folders fails.
      */
     protected int getPrivateTaskFolder() throws IOException, SAXException,
-        JSONException, OXException, AjaxException {
+        JSONException, OXException, OXException {
         if (0 == privateTaskFolder) {
             privateTaskFolder = TaskTools.getPrivateTaskFolder(getWebConversation(),
                 getHostName(), getSessionId());

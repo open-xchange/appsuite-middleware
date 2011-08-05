@@ -49,13 +49,13 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
-import com.openexchange.ajax.appointment.helper.OXError;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Changes;
 import com.openexchange.groupware.container.Expectations;
 
 /**
- * There are two ways to limit an apointment series: One is by date, one is by number of 
+ * There are two ways to limit an appointment series: One is by date, one is by number of 
  * occurrences. Currently, removal of an occurrence by creating a delete exception does 
  * not reduce the number of occurrences, also called "recurrence_count".
  * 
@@ -89,7 +89,7 @@ public class TestsForDeleteExceptionsAndFixedEndsOfSeries extends ManagedAppoint
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_POSITION, 6);
 
-        negativeAssertionOnDeleteException.check(app, changes, new OXError("APP", 11));
+        negativeAssertionOnDeleteException.check(app, changes, new OXException(11));
     }
     
     public void testShouldNotReduceNumberOfOccurrencesWhenDeletingOneInMonthlySeries() throws Exception {

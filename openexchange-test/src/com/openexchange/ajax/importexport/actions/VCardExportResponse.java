@@ -49,11 +49,12 @@
 
 package com.openexchange.ajax.importexport.actions;
 
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.ProblematicAttribute;
+
 import java.util.Date;
 
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AbstractOXException.ProblematicAttribute;
 
 
 public class VCardExportResponse extends AbstractAJAXResponse {
@@ -93,7 +94,7 @@ public class VCardExportResponse extends AbstractAJAXResponse {
      * {@inheritDoc}
      */
     @Override
-    public AbstractOXException getException() {
+    public OXException getException() {
         throw new UnsupportedOperationException();
     }
 
