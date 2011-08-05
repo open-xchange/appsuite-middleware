@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -252,7 +253,7 @@ public final class DispatcherServlet extends SessionServlet {
         {
             final String action = req.getParameter("action");
             if (null == action) {
-                retval.setAction(req.getMethod().toUpperCase());
+                retval.setAction(req.getMethod().toUpperCase(Locale.US));
             } else {
                 retval.setAction(action);
             }
