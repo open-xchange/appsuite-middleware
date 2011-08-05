@@ -625,6 +625,18 @@ public class AbstractContactSwitcherWithDelegate implements ContactSwitcher {
     public Object userfield20(final Object... objects) throws OXException {
 		return delegate.userfield20(objects);
 	}
+	
+    public Object numberofimages(Object... objects) throws OXException {
+        return delegate.numberofimages(objects);
+    }
+
+    public Object lastmodifiedofnewestattachment(Object... objects) throws OXException {
+        return delegate.lastmodifiedofnewestattachment(objects);
+    }
+
+    public Object usecount(Object... objects) throws OXException {
+        return delegate.usecount(objects);
+    }
 
     @Override
     public boolean _unknownfield(final Contact contact, final String fieldname, final Object value, final Object... additionalObjects) throws OXException {
