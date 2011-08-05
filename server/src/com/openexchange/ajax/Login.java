@@ -58,12 +58,14 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
@@ -130,6 +132,58 @@ public class Login extends AJAXServlet {
         void handleRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException;
     }
 
+    private static final class LoginConfiguration {
+        
+        protected final String uiWebPath;
+        protected final boolean sessiondAutoLogin;
+        protected final CookieHashSource hashSource;
+        protected final String httpAuthAutoLogin;
+        protected final String defaultClient;
+        protected final String clientVersion;
+        protected final String errorPageTemplate;
+        protected final int cookieExpiry;
+        protected final boolean insecure;
+        protected final boolean cookieForceHTTPS;
+        protected final boolean ipCheck;
+        protected final Queue<IPRange> ranges;
+
+        protected LoginConfiguration(final String uiWebPath, final boolean sessiondAutoLogin, final CookieHashSource hashSource, final String httpAuthAutoLogin, final String defaultClient, final String clientVersion, final String errorPageTemplate, final int cookieExpiry, final boolean cookieForceHTTPS, final boolean insecure, final boolean ipCheck, final Queue<IPRange> ranges) {
+            super();
+            this.uiWebPath = uiWebPath;
+            this.sessiondAutoLogin = sessiondAutoLogin;
+            this.hashSource = hashSource;
+            this.httpAuthAutoLogin = httpAuthAutoLogin;
+            this.defaultClient = defaultClient;
+            this.clientVersion = clientVersion;
+            this.errorPageTemplate = errorPageTemplate;
+            this.cookieExpiry = cookieExpiry;
+            this.cookieForceHTTPS = cookieForceHTTPS;
+            this.insecure = insecure;
+            this.ipCheck = ipCheck;
+            this.ranges = ranges;
+        }
+
+        /**
+         * Initializes a new {@link LoginConfiguration}.
+         */
+        protected LoginConfiguration() {
+            super();
+            this.uiWebPath = null;
+            this.sessiondAutoLogin = false;
+            this.hashSource = null;
+            this.httpAuthAutoLogin = null;
+            this.defaultClient = null;
+            this.clientVersion = null;
+            this.errorPageTemplate = null;
+            this.cookieExpiry = 0;
+            this.cookieForceHTTPS = false;
+            this.insecure = false;
+            this.ipCheck = false;
+            this.ranges = null;
+        }
+
+    }
+
     public static final String SESSION_PREFIX = "open-xchange-session-";
 
     public static final String SECRET_PREFIX = "open-xchange-secret-";
@@ -141,18 +195,7 @@ public class Login extends AJAXServlet {
         SECRET;
     }
 
-    private volatile String uiWebPath;
-    protected volatile boolean sessiondAutoLogin;
-    protected volatile CookieHashSource hashSource;
-    private volatile String httpAuthAutoLogin;
-    private volatile String defaultClient;
-    private volatile String clientVersion;
-    protected volatile String errorPageTemplate;
-    private volatile int cookieExpiry;
-    protected volatile boolean insecure = false;
-    private volatile boolean cookieForceHTTPS;
-    protected volatile boolean ipCheck;
-    protected volatile Queue<IPRange> ranges;
+    protected final AtomicReference<LoginConfiguration> confReference;
     private final Map<String, JSONRequestHandler> handlerMap;
 
     /**
@@ -160,6 +203,7 @@ public class Login extends AJAXServlet {
      */
     public Login() {
         super();
+        confReference = new AtomicReference<LoginConfiguration>(new LoginConfiguration());
         final Map<String, JSONRequestHandler> map = new ConcurrentHashMap<String, Login.JSONRequestHandler>(8);
         map.put(ACTION_LOGIN, new JSONRequestHandler() {
 
@@ -216,8 +260,9 @@ public class Login extends AJAXServlet {
                 try {
                     final Session session = LoginPerformer.getInstance().lookupSession(sessionId);
                     if (session != null) {
-                        SessionServlet.checkIP(ipCheck, ranges, session, req.getRemoteAddr());
-                        final String secret = SessionServlet.extractSecret(hashSource, req, session.getHash(), session.getClient());
+                        final LoginConfiguration conf = confReference.get();
+                        SessionServlet.checkIP(conf.ipCheck, conf.ranges, session, req.getRemoteAddr());
+                        final String secret = SessionServlet.extractSecret(conf.hashSource, req, session.getHash(), session.getClient());
 
                         if (secret == null || !session.getSecret().equals(secret)) {
                             resp.sendError(HttpServletResponse.SC_FORBIDDEN);
@@ -253,7 +298,8 @@ public class Login extends AJAXServlet {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
-                final String clientIP = insecure ? req.getRemoteAddr() : null;
+                final LoginConfiguration conf = confReference.get();
+                final String clientIP = conf.insecure ? req.getRemoteAddr() : null;
                 final Session session = sessiondService.getSessionByRandomToken(randomToken, clientIP);
                 if (session == null) {
                     // Unknown random token; throw error
@@ -266,7 +312,7 @@ public class Login extends AJAXServlet {
                     return;
                 }
                 // Remove old cookies to prevent usage of the old autologin cookie
-                if (insecure) {
+                if (conf.insecure) {
                     SessionServlet.removeOXCookies(session.getHash(), req, resp);
                 }
                 try {
@@ -286,7 +332,7 @@ public class Login extends AJAXServlet {
 
                 String client = req.getParameter(LoginFields.CLIENT_PARAM);
                 final String hash;
-                if (!insecure) {
+                if (!conf.insecure) {
                     hash = session.getHash();
                 } else {
                     if (null == client) {
@@ -324,7 +370,8 @@ public class Login extends AJAXServlet {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
-                final String clientIP = insecure ? req.getRemoteAddr() : null;
+                final LoginConfiguration conf = confReference.get();
+                final String clientIP = conf.insecure ? req.getRemoteAddr() : null;
                 final Session session = sessiondService.getSessionByRandomToken(randomToken, clientIP);
                 if (session == null) {
                     // Unknown random token; throw error
@@ -337,7 +384,7 @@ public class Login extends AJAXServlet {
                     return;
                 }
                 // Remove old cookies to prevent usage of the old autologin cookie
-                if (insecure) {
+                if (conf.insecure) {
                     SessionServlet.removeOXCookies(session.getHash(), req, resp);
                 }
                 try {
@@ -357,7 +404,7 @@ public class Login extends AJAXServlet {
 
                 String client = req.getParameter(LoginFields.CLIENT_PARAM);
                 final String hash;
-                if (!insecure) {
+                if (!conf.insecure) {
                     hash = session.getHash();
                 } else {
                     if (null == client) {
@@ -391,7 +438,8 @@ public class Login extends AJAXServlet {
                 final Response response = new Response();
                 Session session = null;
                 try {
-                    if (!sessiondAutoLogin) {
+                    final LoginConfiguration conf = confReference.get();
+                    if (!conf.sessiondAutoLogin) {
                         throw AjaxExceptionCodes.DisabledAction.create( "autologin");
                     }
 
@@ -414,12 +462,12 @@ public class Login extends AJAXServlet {
                                 session = sessiondService.getSession(sessionId);
                                 // IP check if enabled; otherwise update session's IP address if different to request's IP address
                                 // Insecure check is done in updateIPAddress method.
-                                if (!ipCheck) {
+                                if (!conf.ipCheck) {
                                     // Update IP address if necessary
                                     updateIPAddress(req.getRemoteAddr(), session);
                                 } else {
                                     final String newIP = req.getRemoteAddr();
-                                    SessionServlet.checkIP(true, ranges, session, newIP);
+                                    SessionServlet.checkIP(true, conf.ranges, session, newIP);
                                     // IP check passed: update IP address if necessary
                                     updateIPAddress(newIP, session);
                                 }
@@ -502,25 +550,26 @@ public class Login extends AJAXServlet {
                 try {
                     doFormLogin(req, resp);
                 } catch (final OXException e) {
-                    final String errorPage = errorPageTemplate.replace("ERROR_MESSAGE", e.getMessage());
+                    final String errorPage = confReference.get().errorPageTemplate.replace("ERROR_MESSAGE", e.getMessage());
                     resp.setContentType(CONTENTTYPE_HTML);
                     resp.getWriter().write(errorPage);
                 }
             }
         });
-        handlerMap = map;
+        handlerMap = Collections.unmodifiableMap(map);
     }
 
     @Override
     public void init(final ServletConfig config) throws ServletException {
         super.init(config);
-        uiWebPath = config.getInitParameter(ServerConfig.Property.UI_WEB_PATH.getPropertyName());
-        sessiondAutoLogin = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.SESSIOND_AUTOLOGIN.getPropertyName()));
-        hashSource = CookieHashSource.parse(config.getInitParameter(Property.COOKIE_HASH.getPropertyName()));
-        httpAuthAutoLogin = config.getInitParameter(ConfigurationProperty.HTTP_AUTH_AUTOLOGIN.getPropertyName());
-        defaultClient = config.getInitParameter(ConfigurationProperty.HTTP_AUTH_CLIENT.getPropertyName());
-        clientVersion = config.getInitParameter(ConfigurationProperty.HTTP_AUTH_VERSION.getPropertyName());
+        final String uiWebPath = config.getInitParameter(ServerConfig.Property.UI_WEB_PATH.getPropertyName());
+        final boolean sessiondAutoLogin = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.SESSIOND_AUTOLOGIN.getPropertyName()));
+        final CookieHashSource hashSource = CookieHashSource.parse(config.getInitParameter(Property.COOKIE_HASH.getPropertyName()));
+        final String httpAuthAutoLogin = config.getInitParameter(ConfigurationProperty.HTTP_AUTH_AUTOLOGIN.getPropertyName());
+        final String defaultClient = config.getInitParameter(ConfigurationProperty.HTTP_AUTH_CLIENT.getPropertyName());
+        final String clientVersion = config.getInitParameter(ConfigurationProperty.HTTP_AUTH_VERSION.getPropertyName());
         final String templateFileLocation = config.getInitParameter(ConfigurationProperty.ERROR_PAGE_TEMPLATE.getPropertyName());
+        String errorPageTemplate;
         if (null == templateFileLocation) {
             errorPageTemplate = ERROR_PAGE_TEMPLATE;
         } else {
@@ -533,11 +582,11 @@ public class Login extends AJAXServlet {
                 errorPageTemplate = ERROR_PAGE_TEMPLATE;
             }
         }
-        cookieExpiry = (int) (ConfigTools.parseTimespan(config.getInitParameter(ServerConfig.Property.COOKIE_TTL.getPropertyName())) / 1000);
-        cookieForceHTTPS = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.COOKIE_FORCE_HTTPS.getPropertyName())) || Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.FORCE_HTTPS.getPropertyName()));
-        insecure = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.INSECURE.getPropertyName()));
-        ipCheck = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.IP_CHECK.getPropertyName()));
-        ranges = new ConcurrentLinkedQueue<IPRange>();
+        final int cookieExpiry = (int) (ConfigTools.parseTimespan(config.getInitParameter(ServerConfig.Property.COOKIE_TTL.getPropertyName())) / 1000);
+        final boolean cookieForceHTTPS = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.COOKIE_FORCE_HTTPS.getPropertyName())) || Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.FORCE_HTTPS.getPropertyName()));
+        final boolean insecure = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.INSECURE.getPropertyName()));
+        final boolean ipCheck = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.IP_CHECK.getPropertyName()));
+        final Queue<IPRange> ranges = new ConcurrentLinkedQueue<IPRange>();
         final String tmp = config.getInitParameter(ConfigurationProperty.NO_IP_CHECK_RANGE.getPropertyName());
         if (tmp != null) {
             final String[] lines = tmp.split("\n");
@@ -548,6 +597,7 @@ public class Login extends AJAXServlet {
                 }
             }
         }
+        confReference.set(new LoginConfiguration(uiWebPath, sessiondAutoLogin, hashSource, httpAuthAutoLogin, defaultClient, clientVersion, errorPageTemplate, cookieExpiry, cookieForceHTTPS, insecure, ipCheck, ranges));
     }
 
     @Override
@@ -594,7 +644,7 @@ public class Login extends AJAXServlet {
      * @param session The session to update if IP addresses differ
      */
     protected void updateIPAddress(final String newIP, final Session session) {
-        if (insecure) {
+        if (confReference.get().insecure) {
             final String oldIP = session.getLocalIp();
             if (null != newIP && !newIP.equals(oldIP)) { // IPs differ
                 LOG.info(new StringBuilder("Updating sessions IP address. authID: ").append(session.getAuthId()).append(", sessionID: ").append(
@@ -629,7 +679,8 @@ public class Login extends AJAXServlet {
      * Writes or rewrites a cookie
      */
     private void doCookieReWrite(final HttpServletRequest req, final HttpServletResponse resp, final CookieType type) throws OXException, JSONException, IOException {
-        if (!sessiondAutoLogin && CookieType.SESSION == type) {
+        final LoginConfiguration conf = confReference.get();
+        if (!conf.sessiondAutoLogin && CookieType.SESSION == type) {
             throw AjaxExceptionCodes.DisabledAction.create( "store");
         }
         final SessiondService sessiond = ServerServiceRegistry.getInstance().getService(SessiondService.class);
@@ -641,9 +692,8 @@ public class Login extends AJAXServlet {
         if (null == sessionId) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( PARAMETER_SESSION);
         }
-
-        final Session session = SessionServlet.getSession(hashSource, req, sessionId, sessiond);
-        SessionServlet.checkIP(ipCheck, ranges, session, req.getRemoteAddr());
+        final Session session = SessionServlet.getSession(conf.hashSource, req, sessionId, sessiond);
+        SessionServlet.checkIP(conf.ipCheck, conf.ranges, session, req.getRemoteAddr());
         if (type == CookieType.SESSION) {
             writeSessionCookie(resp, session, session.getHash(), req.isSecure());
         } else {
@@ -705,13 +755,14 @@ public class Login extends AJAXServlet {
 
     private void configureCookie(final Cookie cookie, final boolean secure) {
         cookie.setPath("/");
-        if (cookieForceHTTPS || secure) {
+        final LoginConfiguration conf = confReference.get();
+        if (conf.cookieForceHTTPS || secure) {
             cookie.setSecure(true);
         }
-        if (!sessiondAutoLogin) {
+        if (!conf.sessiondAutoLogin) {
             return;
         }
-        cookie.setMaxAge(cookieExpiry);
+        cookie.setMaxAge(conf.cookieExpiry);
     }
 
     protected void doLogin(final HttpServletRequest req, final HttpServletResponse resp) throws OXException, IOException {
@@ -868,32 +919,38 @@ public class Login extends AJAXServlet {
     }
 
     private String parseClient(final HttpServletRequest req, final boolean strict) throws OXException {
-        final String client = parseClient(req);
-        if (strict && defaultClient.equals(client)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.CLIENT_PARAM);
-        }
-        return client;
-    }
-
-    private String parseClient(final HttpServletRequest req) {
         final String client;
         if (null == req.getParameter(LoginFields.CLIENT_PARAM)) {
-            client = defaultClient;
+            if (strict) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.CLIENT_PARAM);
+            }
+            client = confReference.get().defaultClient;
         } else {
             client = req.getParameter(LoginFields.CLIENT_PARAM);
         }
         return client;
     }
 
+    private String parseClient(final HttpServletRequest req) {
+        String client;
+        try {
+            client = parseClient(req, false);
+        } catch (final OXException e) {
+            client = confReference.get().defaultClient;
+        }
+        return client;
+    }
+
     private static String parseAuthId(final HttpServletRequest req, final boolean strict) throws OXException {
         final String authId;
-        if (null == req.getParameter(LoginFields.AUTHID_PARAM)) {
+        final String authIdParam = req.getParameter(LoginFields.AUTHID_PARAM);
+        if (null == authIdParam) {
             if (strict) {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.AUTHID_PARAM);
             }
             authId = UUIDs.getUnformattedString(UUID.randomUUID());
         } else {
-            authId = req.getParameter(LoginFields.AUTHID_PARAM);
+            authId = authIdParam;
         }
         return authId;
     }
@@ -925,7 +982,7 @@ public class Login extends AJAXServlet {
     }
 
     protected void doFormLogin(final HttpServletRequest req, final HttpServletResponse resp) throws OXException, OXException, IOException {
-        final LoginRequest request = parseLogin(req, LoginFields.LOGIN_PARAM ,true);
+        final LoginRequest request = parseLogin(req, LoginFields.LOGIN_PARAM, true);
         final LoginResult result = LoginPerformer.getInstance().doLogin(request);
         final Session session = result.getSession();
 
@@ -946,7 +1003,8 @@ public class Login extends AJAXServlet {
             throw LoginExceptionCodes.UNKNOWN_HTTP_AUTHORIZATION.create();
         }
         final String client = parseClient(req);
-        final String version = clientVersion;
+        final LoginConfiguration conf = confReference.get();
+        final String version = conf.clientVersion;
         final String clientIP = parseClientIP(req);
         final String userAgent = parseUserAgent(req);
         final Map<String, List<String>> headers = copyHeaders(req);
@@ -997,13 +1055,13 @@ public class Login extends AJAXServlet {
         final Session session = result.getSession();
         Tools.disableCaching(resp);
         writeSecretCookie(resp, session, session.getHash(), req.isSecure());
-        resp.sendRedirect(generateRedirectURL(null, httpAuthAutoLogin, session.getSessionID()));
+        resp.sendRedirect(generateRedirectURL(null, conf.httpAuthAutoLogin, session.getSessionID()));
     }
 
     protected String generateRedirectURL(final String uiWebPathParam, final String shouldStore, final String sessionId) {
         String retval = uiWebPathParam;
         if (null == retval) {
-            retval = uiWebPath;
+            retval = confReference.get().uiWebPath;
         }
         // Prevent HTTP response splitting.
         retval = retval.replaceAll("[\n\r]", "");

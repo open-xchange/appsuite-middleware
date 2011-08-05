@@ -357,6 +357,9 @@ public final class ImapIdlePushListener implements PushListener {
                     break;
                 case ALWAYS:
                 default:
+                    if (DEBUG_ENABLED) {
+                        LOG.info("IDLE: Mail event for Context: " + session.getContextId() + ", Login: " + session.getLoginName());
+                    }
                     notifyNewMail();
                     break;
                 }
@@ -405,6 +408,7 @@ public final class ImapIdlePushListener implements PushListener {
         return true;
     }
 
+    @Override
     public void notifyNewMail() throws OXException {
         PushUtility.triggerOSGiEvent(MailFolderUtility.prepareFullname(ACCOUNT_ID, folder), session);
     }
