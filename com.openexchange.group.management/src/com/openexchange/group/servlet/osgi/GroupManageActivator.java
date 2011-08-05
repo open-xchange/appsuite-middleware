@@ -64,16 +64,12 @@ import com.openexchange.user.UserService;
  */
 public class GroupManageActivator extends AJAXModuleActivator {
 
-    private static final Class<?>[] NEEDED_SERVICES = new Class<?>[] { UserService.class, GroupService.class };
-
-    private GroupManageActionFactory factory;
-
     /**
      * {@inheritDoc}
      */
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
+        return new Class<?>[] { UserService.class, GroupService.class };
     }
 
     /**
@@ -81,30 +77,7 @@ public class GroupManageActivator extends AJAXModuleActivator {
      */
     @Override
     protected void startBundle() throws Exception {
-        registerService();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void stopBundle() throws Exception {
-        unregisterService();
-        super.stopBundle();
-    }
-
-    private void registerService() {
-        if (factory == null) {
-            factory = new GroupManageActionFactory(new ExceptionOnAbsenceServiceLookup(this));
-            registerModule(factory, "group");
-            registerService(PreferencesItemService.class, new Module());
-        }
-    }
-
-    private void unregisterService() {
-        if (null != factory) {
-            unregisterServices();
-            factory = null;
-        }
+        registerModule(new GroupManageActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "group");
+        registerService(PreferencesItemService.class, new Module());
     }
 }

@@ -4,6 +4,7 @@ import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.polling.PollService;
 import com.openexchange.polling.json.actions.PollActionFactory;
+import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 
 public class PollingJSONActivator extends AJAXModuleActivator {
 
@@ -15,7 +16,7 @@ public class PollingJSONActivator extends AJAXModuleActivator {
 	@Override
 	protected void startBundle() throws Exception {
 
-		registerModule(new PollActionFactory(this), "poll");
+		registerModule(new PollActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "poll");
 		registerService(ResultConverter.class, new PollResultConverter());
 	}
 
