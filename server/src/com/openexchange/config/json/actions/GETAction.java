@@ -49,6 +49,7 @@
 
 package com.openexchange.config.json.actions;
 
+import java.util.Date;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -103,10 +104,10 @@ public final class GETAction extends AbstractConfigAction {
         if (object instanceof Number) {
             return new AJAXRequestResult(object, "int");
         }
-        if (object instanceof String) {
-            return new AJAXRequestResult(object, "string");
+        if (object instanceof Date) {
+            return new AJAXRequestResult(object, "date");
         }
-        return new AJAXRequestResult(object);
+        return new AJAXRequestResult(object.toString(), "string");
     }
 
     /**
