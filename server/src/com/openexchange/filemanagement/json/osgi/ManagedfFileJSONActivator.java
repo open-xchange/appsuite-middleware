@@ -51,6 +51,7 @@ package com.openexchange.filemanagement.json.osgi;
 
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.filemanagement.json.ManagedFileActionFactory;
+import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 
 
 /**

@@ -53,16 +53,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.webdav.acl.mixins.CurrentUserPrincipal;
 import com.openexchange.webdav.acl.mixins.PrincipalURL;
+import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavResource;
-import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.helpers.AbstractCollection;
 
 

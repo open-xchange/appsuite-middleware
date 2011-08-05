@@ -51,6 +51,7 @@ package com.openexchange.config.json.osgi;
 
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.config.json.ConfigActionFactory;
+import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 
 
 /**

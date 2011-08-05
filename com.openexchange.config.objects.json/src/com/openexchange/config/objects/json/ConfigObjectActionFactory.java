@@ -61,13 +61,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link ConfigObjectActionFactory}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class ConfigObjectActionFactory implements AJAXActionServiceFactory{
+public class ConfigObjectActionFactory implements AJAXActionServiceFactory {
 
     private static final String GET = "get";
 
@@ -75,37 +74,42 @@ public class ConfigObjectActionFactory implements AJAXActionServiceFactory{
 
     ConfigObjectRegistryFactory registryFactory = null;
 
-    public ConfigObjectActionFactory(ConfigObjectRegistryFactory registryFactory) {
+    public ConfigObjectActionFactory(final ConfigObjectRegistryFactory registryFactory) {
         this.registryFactory = registryFactory;
     }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        if(!GET.equals(action)) {
-            throw AjaxExceptionCodes.UnknownAction.create( action);
+    public AJAXActionService createActionService(final String action) throws OXException {
+        if (!GET.equals(action)) {
+            throw AjaxExceptionCodes.UnknownAction.create(action);
         }
         return new AJAXActionService() {
 
             @Override
-            public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
-
-                String path = request.getParameter(PATH);
-                if(path == null) {
-                    throw AjaxExceptionCodes.MISSING_PARAMETER.create( PATH);
-                }
-
-                ConfigObjectRegistry view = registryFactory.getView(session.getUserId(), session.getContextId());
-                Object object = view.get(path);
-
-                if(object == null) {
-                    return AJAXRequestResult.EMPTY_REQUEST_RESULT;
-                }
-
+            public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
                 try {
-                    Object json = JSONCoercion.coerceToJSON(object);
+                    final String path = request.getParameter(PATH);
+                    if (path == null) {
+                        throw AjaxExceptionCodes.MISSING_PARAMETER.create(PATH);
+                    }
+
+                    final ConfigObjectRegistry view = registryFactory.getView(session.getUserId(), session.getContextId());
+                    final Object object = view.get(path);
+
+                    if (object == null) {
+                        return AJAXRequestResult.EMPTY_REQUEST_RESULT;
+                    }
+
+                    final Object json = JSONCoercion.coerceToJSON(object);
                     return new AJAXRequestResult(json);
-                } catch (JSONException e) {
-                    throw AjaxExceptionCodes.JSONError.create( e);
+                } catch (final JSONException e) {
+                    throw AjaxExceptionCodes.JSONError.create(e);
+                } catch (final IllegalStateException e) {
+                    final Throwable cause = e.getCause();
+                    if (cause instanceof OXException) {
+                        throw (OXException) cause;
+                    }
+                    throw AjaxExceptionCodes.UnexpectedError.create(e, e.getMessage());
                 }
             }
 

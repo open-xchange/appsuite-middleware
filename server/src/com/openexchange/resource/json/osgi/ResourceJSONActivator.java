@@ -51,6 +51,7 @@ package com.openexchange.resource.json.osgi;
 
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.resource.json.ResourceActionFactory;
+import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 
 /**
  * {@link ResourceJSONActivator}

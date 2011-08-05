@@ -58,12 +58,12 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.Interface;
 import com.openexchange.login.internal.LoginPerformer;
+import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.webdav.AllowAsteriskAsSeparatorCustomizer;
 import com.openexchange.tools.webdav.LoginCustomizer;
 import com.openexchange.tools.webdav.OXServlet;
-import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.webdav.directory.servlets.WebdavDirectoryPerformer.Action;
 import com.openexchange.webdav.protocol.WebdavStatus;
 

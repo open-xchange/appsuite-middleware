@@ -51,6 +51,7 @@ package com.openexchange.groupware.calendar.json.osgi;
 
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.groupware.calendar.json.AppointmentActionFactory;
+import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 
 
 /**

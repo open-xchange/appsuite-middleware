@@ -122,7 +122,15 @@ public class AJAXActionServiceAdapterHandler implements MultipleHandler, Multipl
                 request.putParameter(key, entry.getValue().toString());
             }
         }
-        result = actionService.perform(request, session);
+        try {
+            result = actionService.perform(request, session);
+        } catch (final IllegalStateException e) {
+            final Throwable cause = e.getCause();
+            if (cause instanceof OXException) {
+                throw (OXException) cause;
+            }
+            throw AjaxExceptionCodes.UnexpectedError.create(e, e.getMessage());
+        }
         return result.getResultObject();
     }
 

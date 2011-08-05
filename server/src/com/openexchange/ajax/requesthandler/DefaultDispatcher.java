@@ -162,7 +162,16 @@ public class DefaultDispatcher implements Dispatcher {
             }
         }
         modifiedRequest.setState(state);
-        AJAXRequestResult result = action.perform(modifiedRequest, session);
+        AJAXRequestResult result;
+        try {
+            result = action.perform(modifiedRequest, session);
+        } catch (final IllegalStateException e) {
+            final Throwable cause = e.getCause();
+            if (cause instanceof OXException) {
+                throw (OXException) cause;
+            }
+            throw AjaxExceptionCodes.UnexpectedError.create(e, e.getMessage());
+        }
 
         Collections.reverse(outgoing);
         outgoing = new LinkedList<AJAXActionCustomizer>(outgoing);

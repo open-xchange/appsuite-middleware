@@ -57,6 +57,7 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.reminder.TargetService;
 import com.openexchange.groupware.tasks.ModifyThroughDependant;
 import com.openexchange.groupware.tasks.json.TaskActionFactory;
+import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 
 /**
  * {@link Activator}

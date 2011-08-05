@@ -116,9 +116,18 @@ public class MultipleAdapter implements MultipleHandler {
             throw AjaxExceptionCodes.UnknownAction.create( action);
         }
         final AJAXRequestData request = parse("", action, jsonObject, session, secure);
-        final AJAXRequestResult ret = actionService.perform(request, session);
-        result.set(ret);
-        return ret.getResultObject();
+        final AJAXRequestResult requestResult;
+        try {
+            requestResult = actionService.perform(request, session);
+        } catch (final IllegalStateException e) {
+            final Throwable cause = e.getCause();
+            if (cause instanceof OXException) {
+                throw (OXException) cause;
+            }
+            throw AjaxExceptionCodes.UnexpectedError.create(e, e.getMessage());
+        }
+        result.set(requestResult);
+        return requestResult.getResultObject();
     }
 
     @Override

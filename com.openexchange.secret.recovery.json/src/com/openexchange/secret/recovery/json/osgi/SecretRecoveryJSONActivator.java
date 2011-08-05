@@ -59,6 +59,7 @@ import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.secret.recovery.json.SecretRecoveryActionFactory;
 import com.openexchange.secret.recovery.json.action.AbstractSecretRecoveryAction;
 import com.openexchange.secret.recovery.json.preferences.Enabled;
+import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 import com.openexchange.server.osgiservice.Whiteboard;
 
 public class SecretRecoveryJSONActivator extends AJAXModuleActivator {

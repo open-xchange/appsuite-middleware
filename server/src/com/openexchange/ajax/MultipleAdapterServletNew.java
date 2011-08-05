@@ -183,6 +183,16 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
+        }  catch (final IllegalStateException e) {
+            final Throwable cause = e.getCause();
+            if (cause instanceof OXException) {
+                final OXException oxe = (OXException) cause;
+                LOG.error(oxe.getMessage(), oxe);
+                response.setException(oxe);
+            } else {
+                LOG.error(e.getMessage(), e);
+                response.setException(AjaxExceptionCodes.UnexpectedError.create(e, e.getMessage()));
+            }
         }
         try {
             if (isFileUpload || (req.getParameter("respondWithHTML") != null && req.getParameter("respondWithHTML").equalsIgnoreCase("true")) ) {

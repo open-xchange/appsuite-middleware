@@ -51,6 +51,7 @@ package com.openexchange.group.json.osgi;
 
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.group.json.GroupActionFactory;
+import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 
 /**
  * {@link GroupJSONActivator}

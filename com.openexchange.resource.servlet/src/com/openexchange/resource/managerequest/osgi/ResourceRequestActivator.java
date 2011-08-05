@@ -55,6 +55,7 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.managerequest.preferences.Module;
 import com.openexchange.resource.managerequest.request.ResourceActionFactory;
+import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 import com.openexchange.user.UserService;
 
 /**
