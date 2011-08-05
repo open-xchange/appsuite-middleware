@@ -54,6 +54,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contact.json.ContactRequest;
 import com.openexchange.exception.OXException;
@@ -83,6 +84,7 @@ public class AllAction extends ContactAction {
     @Override
     protected AJAXRequestResult perform(ContactRequest req) throws OXException {
         ServerSession session = req.getSession();
+        TimeZone timeZone = req.getTimeZone();
         int folder = req.getFolder();
         int[] columns = req.getColumns();
         int sort = req.getSort();
@@ -104,8 +106,13 @@ public class AllAction extends ContactAction {
             
             while (it.hasNext()) {
                 Contact contact = it.next();
-                contacts.add(contact);
                 Date lastModified = contact.getLastModified();
+                
+                // Correct last modified and creation date with users timezone
+                contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
+                contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));                
+                contacts.add(contact);
+                
                 if (lastModified != null && timestamp.before(lastModified)) {
                     timestamp = lastModified;
                 }

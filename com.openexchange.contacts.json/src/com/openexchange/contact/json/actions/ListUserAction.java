@@ -54,6 +54,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.contact.json.ContactRequest;
@@ -87,15 +88,20 @@ public class ListUserAction extends ContactAction {
         Context ctx = session.getContext();
         Date timestamp = new Date(0);
         Date lastModified = null;
+        TimeZone timeZone = req.getTimeZone();
         
         ContactInterface contactInterface = new RdbContactSQLImpl(session, ctx);
         Map<String, List<Contact>> contactMap = new HashMap<String, List<Contact>>(1);
         List<Contact> contacts = new ArrayList<Contact>();
         for (int uid : uids) {
-            Contact contact = contactInterface.getUserById(uid);
-            contacts.add(contact);
-            
+            Contact contact = contactInterface.getUserById(uid);                 
             lastModified = contact.getLastModified();
+            
+            // Correct last modified and creation date with users timezone
+            contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
+            contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
+            contacts.add(contact);       
+            
             if (lastModified != null && timestamp.before(lastModified)) {
                 timestamp = lastModified;
             }

@@ -54,6 +54,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contact.json.ContactRequest;
 import com.openexchange.exception.OXException;
@@ -87,6 +88,7 @@ public class UpdatesAction extends ContactAction {
         long timestampLong = req.getTimestamp();
         Date timestamp = new Date(timestampLong);
         Date lastModified = null;
+        TimeZone timeZone = req.getTimeZone();
         
         ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
         List<Contact> modifiedList = new ArrayList<Contact>();
@@ -97,9 +99,13 @@ public class UpdatesAction extends ContactAction {
             it = contactInterface.getModifiedContactsInFolder(folder, columns, timestamp);
             while (it.hasNext()) {
                 Contact contact = it.next();
-                modifiedList.add(contact);
-                
                 lastModified = contact.getLastModified();
+                
+                // Correct last modified and creation date with users timezone
+                contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
+                contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
+                modifiedList.add(contact);                
+                
                 if ((lastModified != null) && (timestamp.getTime() < lastModified.getTime())) {
                     timestamp = lastModified;
                 }
@@ -108,9 +114,13 @@ public class UpdatesAction extends ContactAction {
             it = contactInterface.getDeletedContactsInFolder(folder, columns, timestamp);
             while (it.hasNext()) {
                 Contact contact = it.next();
-                deletedList.add(contact);
-                
                 lastModified = contact.getLastModified();
+                
+                // Correct last modified and creation date with users timezone
+                contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
+                contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
+                deletedList.add(contact);                
+                
                 if ((lastModified != null) && (timestamp.getTime() < lastModified.getTime())) {
                     timestamp = lastModified;
                 }

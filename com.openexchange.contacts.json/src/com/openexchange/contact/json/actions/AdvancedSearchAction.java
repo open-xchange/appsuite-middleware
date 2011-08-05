@@ -54,6 +54,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -96,6 +97,7 @@ public class AdvancedSearchAction extends ContactAction {
         Date lastModified = null;
         Date timestamp = new Date(0);
         JSONObject json = (JSONObject) req.getData();
+        TimeZone timeZone = req.getTimeZone();
         
         JSONArray filterContent;
         SearchIterator<Contact> it = null;
@@ -109,9 +111,13 @@ public class AdvancedSearchAction extends ContactAction {
             it = multiplexer.extendedSearch(session, searchTerm, sort, order, collation, columns);
             while (it.hasNext()) {
                 Contact contact = it.next();
-                contacts.add(contact);
-                
                 lastModified = contact.getLastModified();
+                
+                // Correct last modified and creation date with users timezone
+                contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
+                contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
+                contacts.add(contact);                
+                
                 if (lastModified != null && timestamp.before(lastModified)) {
                     timestamp = lastModified;
                 }

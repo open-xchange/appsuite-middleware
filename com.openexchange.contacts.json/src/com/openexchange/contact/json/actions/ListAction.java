@@ -54,6 +54,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contact.json.ContactRequest;
 import com.openexchange.exception.OXException;
@@ -84,6 +85,7 @@ public class ListAction extends ContactAction {
         ServerSession session = req.getSession();
         int[] columns = req.getColumns();
         int[][] objectIdsAndFolderIds = req.getListRequestData();
+        TimeZone timeZone = req.getTimeZone();
         
         boolean allInSameFolder = true;
         int lastFolder = -1;
@@ -110,6 +112,10 @@ public class ListAction extends ContactAction {
                     contacts.add(contact);
                     
                     lastModified = contact.getLastModified();
+                    // Correct last modified and creation date with users timezone
+                    contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
+                    contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
+                    
                     if (lastModified != null && timestamp.before(lastModified)) {
                         timestamp = lastModified;
                     }
@@ -121,9 +127,13 @@ public class ListAction extends ContactAction {
                     it = contactInterface.getObjectsById(new int[][] { objectIdAndFolderId }, columns);
                     
                     while (it.hasNext()) {
-                        Contact contact = it.next();
-                        contacts.add(contact);
+                        Contact contact = it.next();                        
                         lastModified = contact.getLastModified();
+                        
+                        // Correct last modified and creation date with users timezone
+                        contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
+                        contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
+                        contacts.add(contact);
                     }
                     
                     if ((lastModified != null) && (timestamp.getTime() < lastModified.getTime())) {
