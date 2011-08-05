@@ -1,0 +1,195 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.contact.json.converters;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.fields.ContactFields;
+import com.openexchange.ajax.fields.DistributionListFields;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
+import com.openexchange.groupware.contact.helpers.ContactSetter;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.DistributionListEntryObject;
+import com.openexchange.groupware.container.LinkEntryObject;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
+
+
+/**
+ * {@link ContactParser}
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ */
+public class ContactParser {
+    
+    private static final Map<Integer, String> specialColumns = new HashMap<Integer, String>();
+    
+    static {
+        specialColumns.put(Contact.ANNIVERSARY, "date");
+        specialColumns.put(Contact.BIRTHDAY, "date");
+        specialColumns.put(Contact.DISTRIBUTIONLIST, "distributionlist");
+        specialColumns.put(Contact.LINKS, "links");
+    }
+    
+    protected boolean isSpecial(int column) {
+        return specialColumns.containsKey(column);
+    }
+    
+    public Contact parse(JSONObject json) throws OXException {
+        ContactSetter cs = new ContactSetter();
+        Contact contact = new Contact();
+        for (int column : Contact.JSON_COLUMNS) {
+            ContactField field = ContactField.getByValue(column);
+            if (field != null) {
+                String key = field.getAjaxName();
+                if (key != null && !key.isEmpty() && json.hasAndNotNull(key)) {
+                    try {
+                        Object value = json.get(key);
+                        if (isSpecial(column)) {
+                            parseSpecial(field, cs, contact, value);
+                        } else {
+                            field.doSwitch(cs, contact, value);
+                        }                        
+                    } catch (JSONException e) {
+                        throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e);
+                    }                             
+                }
+            }
+        }
+        
+        return contact;        
+    }
+    
+    private void parseSpecial(ContactField field, ContactSetter cs, Contact contact, Object value) throws OXException {
+        String type = specialColumns.get(field.getNumber());
+        if (type.equals("date")) {
+            try {
+                String timeStr = String.valueOf(value);
+                long time = Long.parseLong(timeStr);
+                field.doSwitch(cs, contact, new Date(time));
+            } catch (NumberFormatException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (OXException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        } else if (type.equals("distributionlist")) {
+            try {
+                JSONArray jsonDistributionList = new JSONArray(String.valueOf(value));
+                DistributionListEntryObject[] distributionList = parseDistributionList(jsonDistributionList);
+                field.doSwitch(cs, contact, distributionList);
+            } catch (JSONException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }            
+        } else if (type.equals("links")) {
+            try {
+                JSONArray jsonLinks = new JSONArray(String.valueOf(value));
+                LinkEntryObject[] links = parseLinks(jsonLinks);
+                field.doSwitch(cs, contact, links);
+            } catch (JSONException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }            
+        }
+    }
+    
+    private DistributionListEntryObject[] parseDistributionList(final JSONArray jsonDistributionList) throws OXException {
+        final DistributionListEntryObject[] distributionList = new DistributionListEntryObject[jsonDistributionList.length()];
+        for (int i = 0; i < jsonDistributionList.length(); i++) {
+            JSONObject entry;
+            try {
+                entry = jsonDistributionList.getJSONObject(i);
+                distributionList[i] = new DistributionListEntryObject();
+                if (entry.has(DistributionListFields.ID)) {
+                    distributionList[i].setEntryID(entry.getInt(DistributionListFields.ID));
+                }
+
+                if (entry.has(DistributionListFields.FIRST_NAME)) {
+                    distributionList[i].setFirstname(entry.getString(DistributionListFields.FIRST_NAME));
+                }
+
+                if (entry.has(DistributionListFields.LAST_NAME)) {
+                    distributionList[i].setFirstname(entry.getString(DistributionListFields.LAST_NAME));
+                }
+
+                distributionList[i].setDisplayname(entry.getString(DistributionListFields.DISPLAY_NAME));
+                distributionList[i].setEmailaddress(entry.getString(DistributionListFields.MAIL));
+                distributionList[i].setEmailfield(entry.getInt(DistributionListFields.MAIL_FIELD));
+            } catch (JSONException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }            
+        }
+        
+        return distributionList;
+    }
+
+    private LinkEntryObject[] parseLinks(final JSONArray jsonLinks) throws JSONException, OXException {
+        final LinkEntryObject[] links = new LinkEntryObject[jsonLinks.length()];
+        for (int i = 0; i < links.length; i++) {
+            links[i] = new LinkEntryObject();
+            final JSONObject entry = jsonLinks.getJSONObject(i);
+            if (entry.has(ContactFields.ID)) {
+                links[i].setLinkID(entry.getInt(ContactFields.ID));
+            }
+
+            links[i].setLinkDisplayname(entry.getString(DistributionListFields.DISPLAY_NAME));
+        }
+
+        return links;
+    }
+
+}

@@ -52,6 +52,7 @@ package com.openexchange.image.internal;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
+import com.openexchange.image.ImageData;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
 
