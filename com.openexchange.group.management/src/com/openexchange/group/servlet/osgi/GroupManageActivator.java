@@ -54,6 +54,7 @@ import com.openexchange.group.GroupService;
 import com.openexchange.group.servlet.preferences.Module;
 import com.openexchange.group.servlet.request.GroupManageActionFactory;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 import com.openexchange.user.UserService;
 
 /**
@@ -94,7 +95,7 @@ public class GroupManageActivator extends AJAXModuleActivator {
 
     private void registerService() {
         if (factory == null) {
-            factory = new GroupManageActionFactory(this);
+            factory = new GroupManageActionFactory(new ExceptionOnAbsenceServiceLookup(this));
             registerModule(factory, "group");
             registerService(PreferencesItemService.class, new Module());
         }

@@ -52,6 +52,7 @@ package com.openexchange.conversion.servlet.osgi;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.servlet.ConversionActionFactory;
+import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 
 /**
  * {@link ConversionServletActivator}
@@ -74,7 +75,7 @@ public final class ConversionServletActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        registerModule(new ConversionActionFactory(this), "conversion");
+        registerModule(new ConversionActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "conversion");
     }
 
 }
