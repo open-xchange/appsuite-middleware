@@ -2933,8 +2933,8 @@ public class Mail extends PermissionServlet implements UploadListener {
                 /*
                  * Request body is an empty JSON array
                  */
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn("Empty JSON array detected in request body.", new Throwable());
+                if (DEBUG) {
+                    LOG.debug("Empty JSON array detected in request body.", new Throwable());
                 }
                 final Response r = new Response(session);
                 r.setData(EMPTY_JSON_ARR);
