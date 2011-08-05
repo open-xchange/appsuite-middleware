@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,31 +49,36 @@
 
 package com.openexchange.conversion.servlet;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link ConversionServletServiceRegistry} - A registry for services needed by spell check servlet bundle
+ * {@link ConversionActionFactory}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ConversionServletServiceRegistry {
+public class ConversionActionFactory implements AJAXActionServiceFactory {
 
-    private static final ServiceRegistry REGISTRY = new ServiceRegistry();
+    private final Map<String, AJAXActionService> actions;
 
     /**
-     * Gets the service registry
+     * Initializes a new {@link ConversionActionFactory}.
      *
-     * @return The service registry
+     * @param services The service look-up
      */
-    public static ServiceRegistry getServiceRegistry() {
-        return REGISTRY;
+    public ConversionActionFactory(final ServiceLookup services) {
+        super();
+        actions = new ConcurrentHashMap<String, AJAXActionService>(2);
+        //actions.put("convert", new NamesAction(services));
     }
 
-    /**
-     * Initializes a new {@link ConversionServletServiceRegistry}
-     */
-    private ConversionServletServiceRegistry() {
-        super();
+    @Override
+    public AJAXActionService createActionService(final String action) throws OXException {
+        return actions.get(action);
     }
 
 }

@@ -49,27 +49,16 @@
 
 package com.openexchange.conversion.servlet.osgi;
 
-import javax.servlet.Servlet;
-import org.osgi.service.http.HttpService;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.conversion.ConversionService;
-import com.openexchange.conversion.servlet.ConversionServlet;
-import com.openexchange.conversion.servlet.ConversionServletServiceRegistry;
-import com.openexchange.server.osgiservice.DeferredActivator;
-import com.openexchange.server.osgiservice.ServiceRegistry;
-import com.openexchange.tools.service.SessionServletRegistration;
+import com.openexchange.conversion.servlet.ConversionActionFactory;
 
 /**
  * {@link ConversionServletActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ConversionServletActivator extends DeferredActivator {
-
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ConversionServletActivator.class));
-
-    private static final String ALIAS = "ajax/conversion";
-
-    private Servlet conversionServlet;
+public final class ConversionServletActivator extends AJAXModuleActivator {
 
     /**
      * Initializes a new {@link ConversionServletActivator}
@@ -78,77 +67,14 @@ public final class ConversionServletActivator extends DeferredActivator {
         super();
     }
 
-    private static final Class<?>[] NEEDED_SERVICES = { ConversionService.class };
-
-    private SessionServletRegistration servletRegistration;
-
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
-    }
-
-    @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        ConversionServletServiceRegistry.getServiceRegistry().addService(clazz, getService(clazz));
-        if (!allAvailable()) {
-            return;
-        }
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        if(servletRegistration != null) {
-            servletRegistration.close();
-            servletRegistration = null;
-        }
-        ConversionServletServiceRegistry.getServiceRegistry().removeService(clazz);
+        return new Class<?>[] { ConversionService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        try {
-            /*
-             * (Re-)Initialize service registry with available services
-             */
-            {
-                final ServiceRegistry registry = ConversionServletServiceRegistry.getServiceRegistry();
-                registry.clearRegistry();
-                final Class<?>[] classes = getNeededServices();
-                for (final Class<?> classe : classes) {
-                    final Object service = getService(classe);
-                    if (null != service) {
-                        registry.addService(classe, service);
-                    }
-                }
-            }
-            servletRegistration = new SessionServletRegistration(context, new ConversionServlet(), ALIAS);
-            servletRegistration.open();
-        } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
-            throw e;
-        }
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        try {
-            /*
-             * Unregister on bundle stop
-             */
-            final HttpService httpService = getService(HttpService.class);
-            if (httpService != null && conversionServlet != null) {
-                httpService.unregister(ALIAS);
-                conversionServlet = null;
-                LOG.info(ConversionServlet.class.getName() + " unregistered due to bundle stop");
-            }
-            /*
-             * Clear service registry
-             */
-            ConversionServletServiceRegistry.getServiceRegistry().clearRegistry();
-        } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
-            throw e;
-        }
+        registerModule(new ConversionActionFactory(this), "conversion");
     }
 
 }
