@@ -87,7 +87,7 @@ public abstract class JSONResultConverter implements ResultConverter {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(JSONResultConverter.class));
 
-    private ImageService imageService;
+    private final ImageService imageService;
 
     private ServerSession session;
 
@@ -109,7 +109,7 @@ public abstract class JSONResultConverter implements ResultConverter {
      * 
      * @param imageService
      */
-    public JSONResultConverter(ImageService imageService) {
+    public JSONResultConverter(final ImageService imageService) {
         super();
         this.imageService = imageService;
     }
@@ -125,39 +125,39 @@ public abstract class JSONResultConverter implements ResultConverter {
     }
 
     @Override
-    public void convert(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
+    public void convert(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
         this.session = session;
         convertResult(request, result, session, converter);
     }
 
     public abstract void convertResult(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException;
 
-    protected boolean isSpecial(int column) {
+    protected boolean isSpecial(final int column) {
         return specialColumns.containsKey(column);
     }
 
-    protected Object convertSpecial(ContactField field, Contact contact, ContactGetter cg) throws OXException {
-        String type = specialColumns.get(field.getNumber());
+    protected Object convertSpecial(final ContactField field, final Contact contact, final ContactGetter cg) throws OXException {
+        final String type = specialColumns.get(field.getNumber());
         if (type.equals("date")) {
-            Object value = field.doSwitch(cg, contact);
+            final Object value = field.doSwitch(cg, contact);
             if (value != null) {
-                Date date = (Date) value;
+                final Date date = (Date) value;
                 return date.getTime();
             }
             
             return null;
         } else if (type.equals("date_utc")) {
             // Set last_modified_utc
-            Date lastModified = contact.getLastModified();
-            Calendar calendar = new GregorianCalendar();
+            final Date lastModified = contact.getLastModified();
+            final Calendar calendar = new GregorianCalendar();
             calendar.setTime(lastModified);
-            int offset = calendar.get(Calendar.ZONE_OFFSET) + calendar.get(Calendar.DST_OFFSET);
+            final int offset = calendar.get(Calendar.ZONE_OFFSET) + calendar.get(Calendar.DST_OFFSET);
             calendar.add(Calendar.MILLISECOND, -offset);
             
             return calendar.getTime().getTime();
         } else if (type.equals("image")) {
             String imageUrl = null;
-            ImageService imageService = getImageService();
+            final ImageService imageService = getImageService();
             if (null == imageService) {
                 LOG.warn("Contact image URL cannot be written. Missing service: " + ImageService.class.getName());
             } else {
@@ -177,7 +177,7 @@ public abstract class JSONResultConverter implements ResultConverter {
             JSONArray distributionList = null;
             try {
                 distributionList = getDistributionListAsJSONArray(contact);
-            } catch (JSONException e) {
+            } catch (final JSONException e) {
                 throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             }
             
@@ -186,7 +186,7 @@ public abstract class JSONResultConverter implements ResultConverter {
             JSONArray links = null;
             try {
                 links = getLinksAsJSONArray(contact);
-            } catch (JSONException e) {
+            } catch (final JSONException e) {
                 throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             }
             
@@ -227,7 +227,7 @@ public abstract class JSONResultConverter implements ResultConverter {
         if (links != null) {
             final JSONArray jsonLinks = new JSONArray();
             for (int i = 0; i < links.length; i++) {
-                LinkEntryObject link = links[i];
+                final LinkEntryObject link = links[i];
                 final JSONObject jsonLink = new JSONObject();
                 
                 if (link.containsLinkID()) {

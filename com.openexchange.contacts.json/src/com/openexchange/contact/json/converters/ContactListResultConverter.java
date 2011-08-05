@@ -72,7 +72,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class ContactListResultConverter extends JSONResultConverter {    
     
-    public ContactListResultConverter(ImageService imageService) {
+    public ContactListResultConverter(final ImageService imageService) {
         super(imageService);
     }
 
@@ -82,8 +82,8 @@ public class ContactListResultConverter extends JSONResultConverter {
     }
 
     @Override
-    public void convertResult(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
-        Map<String, List<Contact>> contactMap = (Map<String, List<Contact>>) result.getResultObject();
+    public void convertResult(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
+        final Map<String, List<Contact>> contactMap = (Map<String, List<Contact>>) result.getResultObject();
         List<Contact> contacts = null;
         List<Contact> deleted = null;
         if (contactMap.size() == 1) {
@@ -93,21 +93,21 @@ public class ContactListResultConverter extends JSONResultConverter {
             deleted = contactMap.get("deleted");
         }
         
-        int[] columns = RequestTools.getColumnsAsIntArray(request, "columns");
+        final int[] columns = RequestTools.getColumnsAsIntArray(request, "columns");
         
-        JSONArray resultArray = new JSONArray();
-        for (Contact contact : contacts) {
-            JSONArray contactArray = new JSONArray();
+        final JSONArray resultArray = new JSONArray();
+        for (final Contact contact : contacts) {
+            final JSONArray contactArray = new JSONArray();
             
-            ContactGetter cg = new ContactGetter();
-            for (int column : columns) {
-                ContactField field = ContactField.getByValue(column);
+            final ContactGetter cg = new ContactGetter();
+            for (final int column : columns) {
+                final ContactField field = ContactField.getByValue(column);
                 if (field != null && !field.getAjaxName().isEmpty()) {                
-                    Object value = field.doSwitch(cg, contact);
+                    final Object value = field.doSwitch(cg, contact);
                     if (value == null) {
                         contactArray.put(JSONObject.NULL);
                     } else if (isSpecial(column)) {
-                        Object special = convertSpecial(field, contact, cg);
+                        final Object special = convertSpecial(field, contact, cg);
                         if (special == null) {
                             contactArray.put(JSONObject.NULL);                            
                         } else {
@@ -123,7 +123,7 @@ public class ContactListResultConverter extends JSONResultConverter {
         }
         
         if (deleted != null) {
-            for (Contact contact : deleted) {
+            for (final Contact contact : deleted) {
                 resultArray.put(contact.getObjectID());
             }
         }

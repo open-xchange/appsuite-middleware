@@ -67,20 +67,20 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class GetAction extends ContactAction {
 
-    public GetAction(ServiceLookup serviceLookup) {
+    public GetAction(final ServiceLookup serviceLookup) {
         super(serviceLookup);
     }
 
     @Override
-    protected AJAXRequestResult perform(ContactRequest req) throws OXException {
-        int id = req.getId();
-        int folder = req.getFolder();
-        TimeZone timeZone = req.getTimeZone();
-        ServerSession session = req.getSession();
+    protected AJAXRequestResult perform(final ContactRequest req) throws OXException {
+        final int id = req.getId();
+        final int folder = req.getFolder();
+        final TimeZone timeZone = req.getTimeZone();
+        final ServerSession session = req.getSession();
         
-        ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
-        Contact contact = contactInterface.getObjectById(id, folder);     
-        Date lastModified = contact.getLastModified();
+        final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
+        final Contact contact = contactInterface.getObjectById(id, folder);     
+        final Date lastModified = contact.getLastModified();
         
         // Correct last modified and creation date with users timezone
         contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));

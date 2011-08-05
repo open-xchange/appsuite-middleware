@@ -71,16 +71,16 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class ContactAction implements AJAXActionService {
     
-    private ServiceLookup serviceLookup;
+    private final ServiceLookup serviceLookup;
 
-    public ContactAction(ServiceLookup serviceLookup) {
+    public ContactAction(final ServiceLookup serviceLookup) {
         super();
         this.serviceLookup = serviceLookup;
     }
 
     @Override
-    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
-        ContactRequest contactRequest = new ContactRequest(request, session);
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+        final ContactRequest contactRequest = new ContactRequest(request, session);
         
         return perform(contactRequest);
     }
@@ -88,7 +88,7 @@ public abstract class ContactAction implements AJAXActionService {
     protected abstract AJAXRequestResult perform(ContactRequest req) throws OXException;
     
     protected ContactInterfaceDiscoveryService getContactInterfaceDiscoveryService() throws OXException {
-        ContactInterfaceDiscoveryService service = serviceLookup.getService(ContactInterfaceDiscoveryService.class);
+        final ContactInterfaceDiscoveryService service = serviceLookup.getService(ContactInterfaceDiscoveryService.class);
         if (service != null) {
             return service;
         } else {
@@ -96,13 +96,13 @@ public abstract class ContactAction implements AJAXActionService {
         }
     }
     
-    protected Date getCorrectedTime(Date date, TimeZone timeZone) {
+    protected Date getCorrectedTime(final Date date, final TimeZone timeZone) {
         if (date == null) {
             return null;
         }
         
-        int offset = timeZone.getOffset(date.getTime());
-        Calendar calendar = new GregorianCalendar();
+        final int offset = timeZone.getOffset(date.getTime());
+        final Calendar calendar = new GregorianCalendar();
         calendar.setTime(date);
         calendar.add(Calendar.MILLISECOND, offset);
         

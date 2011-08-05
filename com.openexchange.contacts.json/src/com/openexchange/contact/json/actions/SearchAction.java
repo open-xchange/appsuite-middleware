@@ -85,30 +85,30 @@ public class SearchAction extends ContactAction {
      * Initializes a new {@link SearchAction}.
      * @param serviceLookup
      */
-    public SearchAction(ServiceLookup serviceLookup) {
+    public SearchAction(final ServiceLookup serviceLookup) {
         super(serviceLookup);
     }
 
     @Override
-    protected AJAXRequestResult perform(ContactRequest req) throws OXException {
-        ServerSession session = req.getSession();
-        int[] columns = req.getColumns();
-        int sort = req.getSort();
-        Order order = req.getOrder();
-        String collation = req.getCollation();
+    protected AJAXRequestResult perform(final ContactRequest req) throws OXException {
+        final ServerSession session = req.getSession();
+        final int[] columns = req.getColumns();
+        final int sort = req.getSort();
+        final Order order = req.getOrder();
+        final String collation = req.getCollation();
         Date lastModified = null;
         Date timestamp = new Date(0);
-        TimeZone timeZone = req.getTimeZone();
+        final TimeZone timeZone = req.getTimeZone();
         
-        ContactSearchObject searchObject = createContactSearchObject((JSONObject) req.getData());
-        ContactSearchMultiplexer multiplexer = new ContactSearchMultiplexer(getContactInterfaceDiscoveryService());
+        final ContactSearchObject searchObject = createContactSearchObject((JSONObject) req.getData());
+        final ContactSearchMultiplexer multiplexer = new ContactSearchMultiplexer(getContactInterfaceDiscoveryService());
         SearchIterator<Contact> it = null;
-        List<Contact> contacts = new ArrayList<Contact>();
-        Map<String, List<Contact>> contactMap = new HashMap<String, List<Contact>>(1);
+        final List<Contact> contacts = new ArrayList<Contact>();
+        final Map<String, List<Contact>> contactMap = new HashMap<String, List<Contact>>(1);
         try {
             it = multiplexer.extendedSearch(session, searchObject, sort, order, collation, columns);
             while (it.hasNext()) {
-                Contact contact = it.next();
+                final Contact contact = it.next();
                 lastModified = contact.getLastModified();
                 
                 // Correct last modified and creation date with users timezone
@@ -131,7 +131,7 @@ public class SearchAction extends ContactAction {
         return new AJAXRequestResult(contactMap, lastModified, "contacts");
     }
     
-    private ContactSearchObject createContactSearchObject(JSONObject json) throws OXException {
+    private ContactSearchObject createContactSearchObject(final JSONObject json) throws OXException {
         ContactSearchObject searchObject = null;
         try {
             searchObject = new ContactSearchObject();
@@ -184,7 +184,7 @@ public class SearchAction extends ContactAction {
             searchObject.setYomiCompany(DataParser.parseString(json, ContactFields.YOMI_COMPANY));
             searchObject.setYomiFirstname(DataParser.parseString(json, ContactFields.YOMI_FIRST_NAME));
             searchObject.setYomiLastName(DataParser.parseString(json, ContactFields.YOMI_LAST_NAME));
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e);
         }
         

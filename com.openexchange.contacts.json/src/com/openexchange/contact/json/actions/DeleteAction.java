@@ -70,21 +70,21 @@ public class DeleteAction extends ContactAction {
      * Initializes a new {@link DeleteAction}.
      * @param serviceLookup
      */
-    public DeleteAction(ServiceLookup serviceLookup) {
+    public DeleteAction(final ServiceLookup serviceLookup) {
         super(serviceLookup);
     }
 
     @Override
-    protected AJAXRequestResult perform(ContactRequest req) throws OXException {
-        ServerSession session = req.getSession();
-        long timestamp = req.getTimestamp();
-        int[] deleteRequestData = req.getDeleteRequestData();
-        Date date = new Date(timestamp);
+    protected AJAXRequestResult perform(final ContactRequest req) throws OXException {
+        final ServerSession session = req.getSession();
+        final long timestamp = req.getTimestamp();
+        final int[] deleteRequestData = req.getDeleteRequestData();
+        final Date date = new Date(timestamp);
         
-        ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(deleteRequestData[1], session);
+        final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(deleteRequestData[1], session);
         contactInterface.deleteContactObject(deleteRequestData[0], deleteRequestData[1], date);
         
-        JSONObject response = new JSONObject();
+        final JSONObject response = new JSONObject();
         return new AJAXRequestResult(response, date, "json");
     }
 

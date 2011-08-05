@@ -76,15 +76,15 @@ public class RequestTools {
     
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RequestTools.class));
     
-    public static int[] getColumnsAsIntArray(AJAXRequestData request, String parameter) throws OXException {
-        String valueStr = request.getParameter("columns");
-        String[] valueStrArr = valueStr.split(",");
+    public static int[] getColumnsAsIntArray(final AJAXRequestData request, final String parameter) throws OXException {
+        final String valueStr = request.getParameter("columns");
+        final String[] valueStrArr = valueStr.split(",");
         
-        int[] values = new int[valueStrArr.length];
+        final int[] values = new int[valueStrArr.length];
         for (int i = 0; i < values.length; i++) {
             try {
                 values[i] = Integer.parseInt(valueStrArr[i].trim());
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 throw AjaxExceptionCodes.InvalidParameterValue.create(e, "columns", valueStr);
             }
         }
@@ -92,7 +92,7 @@ public class RequestTools {
         return values;
     }
     
-    public static int getNullableIntParameter(AJAXRequestData request, String parameter) throws OXException {
+    public static int getNullableIntParameter(final AJAXRequestData request, final String parameter) throws OXException {
         Integer intParam = null;
         try {
             intParam = request.getParameter(parameter, int.class);
@@ -101,20 +101,20 @@ public class RequestTools {
             } else {
                 return intParam.intValue();
             }
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             throw AjaxExceptionCodes.InvalidParameterValue.create(e, parameter, intParam);
         } 
     }
 
-    public static int[][] buildObjectIdAndFolderId(JSONArray json) throws OXException {
-        int[][] objectIdAndFolderId = new int[json.length()][];
+    public static int[][] buildObjectIdAndFolderId(final JSONArray json) throws OXException {
+        final int[][] objectIdAndFolderId = new int[json.length()][];
         for (int i = 0; i < json.length(); i++) {
             try {
-                JSONObject object = json.getJSONObject(i);
-                int folder = object.getInt("folder");
-                int id = object.getInt("id");
+                final JSONObject object = json.getJSONObject(i);
+                final int folder = object.getInt("folder");
+                final int id = object.getInt("id");
                 objectIdAndFolderId[i] = new int[] { id, folder };
-            } catch (JSONException e) {
+            } catch (final JSONException e) {
                 throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             }
         }
@@ -122,11 +122,11 @@ public class RequestTools {
         return objectIdAndFolderId;
     }
     
-    public static void setImageData(Contact contact, UploadFile file) throws OXException {
+    public static void setImageData(final Contact contact, final UploadFile file) throws OXException {
         FileInputStream fis = null;
         try {
             fis = new FileInputStream(file.getTmpFile());
-            ByteArrayOutputStream tmp = new UnsynchronizedByteArrayOutputStream((int) file.getSize());
+            final ByteArrayOutputStream tmp = new UnsynchronizedByteArrayOutputStream((int) file.getSize());
             final byte[] buf = new byte[2048];
             int len = -1;
             while ((len = fis.read(buf)) != -1) {
@@ -134,15 +134,15 @@ public class RequestTools {
             }
             contact.setImage1(tmp.toByteArray());
             contact.setImageContentType(file.getContentType());
-        } catch (FileNotFoundException e) {
+        } catch (final FileNotFoundException e) {
             throw AjaxExceptionCodes.NoUploadImage.create(e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw AjaxExceptionCodes.UnexpectedError.create(e, "I/O error while reading uploaded contact image.");
         } finally {
             if (fis != null) {
                 try {
                     fis.close();
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     LOG.warn("Error while closing FileInputStream for contact image upload.", e);
                 }
             }

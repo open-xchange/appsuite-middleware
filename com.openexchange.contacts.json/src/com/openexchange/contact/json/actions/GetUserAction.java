@@ -73,20 +73,20 @@ public class GetUserAction extends ContactAction {
      * Initializes a new {@link GetUserAction}.
      * @param serviceLookup
      */
-    public GetUserAction(ServiceLookup serviceLookup) {
+    public GetUserAction(final ServiceLookup serviceLookup) {
         super(serviceLookup);
     }
 
     @Override
-    protected AJAXRequestResult perform(ContactRequest req) throws OXException {
-        ServerSession session = req.getSession();
-        TimeZone timeZone = req.getTimeZone();
-        int uid = req.getId();        
-        Context ctx = session.getContext();
+    protected AJAXRequestResult perform(final ContactRequest req) throws OXException {
+        final ServerSession session = req.getSession();
+        final TimeZone timeZone = req.getTimeZone();
+        final int uid = req.getId();        
+        final Context ctx = session.getContext();
 
-        ContactInterface contactInterface = new RdbContactSQLImpl(session, ctx);
-        Contact contact = contactInterface.getUserById(uid);        
-        Date lastModified = contact.getLastModified();
+        final ContactInterface contactInterface = new RdbContactSQLImpl(session, ctx);
+        final Contact contact = contactInterface.getUserById(uid);        
+        final Date lastModified = contact.getLastModified();
         
         // Correct last modified and creation date with users timezone
         contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));

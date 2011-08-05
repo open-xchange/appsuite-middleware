@@ -62,7 +62,7 @@ public class ListRequestData {
     private int id;
     
 
-    public ListRequestData(int folder, int id) {
+    public ListRequestData(final int folder, final int id) {
         super();
         this.folder = folder;
         this.id = id;
@@ -82,7 +82,7 @@ public class ListRequestData {
      *
      * @param folder The folder to set
      */
-    public void setFolder(int folder) {
+    public void setFolder(final int folder) {
         this.folder = folder;
     }
     
@@ -100,7 +100,7 @@ public class ListRequestData {
      *
      * @param id The id to set
      */
-    public void setId(int id) {
+    public void setId(final int id) {
         this.id = id;
     }
 

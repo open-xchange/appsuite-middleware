@@ -77,36 +77,36 @@ public class AllAction extends ContactAction {
      * Initializes a new {@link AllAction}.
      * @param serviceLookup
      */
-    public AllAction(ServiceLookup serviceLookup) {
+    public AllAction(final ServiceLookup serviceLookup) {
         super(serviceLookup);
     }
 
     @Override
-    protected AJAXRequestResult perform(ContactRequest req) throws OXException {
-        ServerSession session = req.getSession();
-        TimeZone timeZone = req.getTimeZone();
-        int folder = req.getFolder();
-        int[] columns = req.getColumns();
-        int sort = req.getSort();
-        Order order = req.getOrder();
-        String collation = req.getCollation();
-        int leftHandLimit = req.getLeftHandLimit();
+    protected AJAXRequestResult perform(final ContactRequest req) throws OXException {
+        final ServerSession session = req.getSession();
+        final TimeZone timeZone = req.getTimeZone();
+        final int folder = req.getFolder();
+        final int[] columns = req.getColumns();
+        final int sort = req.getSort();
+        final Order order = req.getOrder();
+        final String collation = req.getCollation();
+        final int leftHandLimit = req.getLeftHandLimit();
         int rightHandLimit = req.getRightHandLimit();
         if (rightHandLimit == 0) {
             rightHandLimit = 50000;
         }
         
         Date timestamp = new Date(0);
-        ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
+        final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
         SearchIterator<Contact> it = null;
-        Map<String, List<Contact>> contactMap = new HashMap<String, List<Contact>>(1);
-        List<Contact> contacts = new ArrayList<Contact>();
+        final Map<String, List<Contact>> contactMap = new HashMap<String, List<Contact>>(1);
+        final List<Contact> contacts = new ArrayList<Contact>();
         try {
             it = contactInterface.getContactsInFolder(folder, leftHandLimit, rightHandLimit, sort, order, collation, columns);
             
             while (it.hasNext()) {
-                Contact contact = it.next();
-                Date lastModified = contact.getLastModified();
+                final Contact contact = it.next();
+                final Date lastModified = contact.getLastModified();
                 
                 // Correct last modified and creation date with users timezone
                 contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));

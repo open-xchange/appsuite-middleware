@@ -72,11 +72,11 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class ContactRequest {
 
-    private AJAXRequestData request;
+    private final AJAXRequestData request;
 
-    private ServerSession session;
+    private final ServerSession session;
 
-    public ContactRequest(AJAXRequestData request, ServerSession session) {
+    public ContactRequest(final AJAXRequestData request, final ServerSession session) {
         super();
         this.request = request;
         this.session = session;
@@ -91,7 +91,7 @@ public class ContactRequest {
     }
 
     public TimeZone getTimeZone() {
-        String timezone = request.getParameter("timezone");
+        final String timezone = request.getParameter("timezone");
         if (timezone == null) {
             return TimeZoneUtils.getTimeZone(session.getUser().getTimeZone());
         } else {
@@ -128,7 +128,7 @@ public class ContactRequest {
     }
 
     public int[][] getListRequestData() throws OXException {
-        JSONArray data = request.getParameter("data", JSONArray.class);
+        final JSONArray data = request.getParameter("data", JSONArray.class);
 
         return RequestTools.buildObjectIdAndFolderId(data);
     }
@@ -137,12 +137,12 @@ public class ContactRequest {
         return request.hasUploads();
     }
 
-    public JSONObject getContactJSON(boolean isUpload) throws OXException {
+    public JSONObject getContactJSON(final boolean isUpload) throws OXException {
         if (isUpload) {
-            String jsonField = request.getUploadEvent().getFormField("json");
+            final String jsonField = request.getUploadEvent().getFormField("json");
             try {
                 return new JSONObject(jsonField);
-            } catch (JSONException e) {
+            } catch (final JSONException e) {
                 throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e);
             }
         } else {
@@ -155,12 +155,12 @@ public class ContactRequest {
     }
 
     public int[] getDeleteRequestData() throws OXException {
-        JSONObject json = (JSONObject) request.getData();
-        int[] data = new int[2];
+        final JSONObject json = (JSONObject) request.getData();
+        final int[] data = new int[2];
         try {
             data[0] = json.getInt("id");
             data[1] = json.getInt("folder");
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e);
         }
 
@@ -168,17 +168,17 @@ public class ContactRequest {
     }
 
     public long getTimestamp() {
-        long timestamp = request.getParameter("timestamp", long.class);
+        final long timestamp = request.getParameter("timestamp", long.class);
         return timestamp;
     }
 
     public int[] getUserIds() throws OXException {
-        JSONArray json = (JSONArray) request.getData();
-        int userIdArray[] = new int[json.length()];
+        final JSONArray json = (JSONArray) request.getData();
+        final int userIdArray[] = new int[json.length()];
         for (int i = 0; i < userIdArray.length; i++) {
             try {
                 userIdArray[i] = json.getInt(i);
-            } catch (JSONException e) {
+            } catch (final JSONException e) {
                 throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e);
             }
         }
@@ -187,10 +187,10 @@ public class ContactRequest {
     }
 
     public int getFolderFromJSON() throws OXException {
-        JSONObject json = (JSONObject) request.getData();
+        final JSONObject json = (JSONObject) request.getData();
         try {
             return json.getInt("folder_id");
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e);
         }
     }
@@ -215,9 +215,9 @@ public class ContactRequest {
         return helper.toNativeArray();
     }
 
-    private int[] checkOrInsertLastModified(int[] columns) {
+    private int[] checkOrInsertLastModified(final int[] columns) {
         if (!Arrays.contains(columns, Contact.LAST_MODIFIED)) {
-            int[] newColumns = new int[columns.length + 1];
+            final int[] newColumns = new int[columns.length + 1];
             System.arraycopy(columns, 0, newColumns, 0, columns.length);
             newColumns[columns.length] = Contact.LAST_MODIFIED;
 

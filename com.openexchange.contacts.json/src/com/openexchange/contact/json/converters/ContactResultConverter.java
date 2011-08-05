@@ -69,7 +69,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class ContactResultConverter extends JSONResultConverter {
 
-    public ContactResultConverter(ImageService imageService) {
+    public ContactResultConverter(final ImageService imageService) {
         super(imageService);
     }
 
@@ -79,34 +79,34 @@ public class ContactResultConverter extends JSONResultConverter {
     }
 
     @Override
-    public void convertResult(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
-        Contact contact = (Contact) result.getResultObject();
+    public void convertResult(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
+        final Contact contact = (Contact) result.getResultObject();
         result.setResultObject(convert(contact, session), "json");
     }
 
-    private Object convert(Contact contact, ServerSession session) throws OXException {
-        JSONObject json = new JSONObject();
+    private Object convert(final Contact contact, final ServerSession session) throws OXException {
+        final JSONObject json = new JSONObject();
 
-        ContactGetter cg = new ContactGetter();
-        for (int column : Contact.JSON_COLUMNS) {
-            ContactField field = ContactField.getByValue(column);
+        final ContactGetter cg = new ContactGetter();
+        for (final int column : Contact.JSON_COLUMNS) {
+            final ContactField field = ContactField.getByValue(column);
             if (field != null && !field.getAjaxName().isEmpty()) {
                 try {
-                    Object value = field.doSwitch(cg, contact);
+                    final Object value = field.doSwitch(cg, contact);
                     
                     if (isSpecial(column)) {
-                        Object special = convertSpecial(field, contact, cg);
+                        final Object special = convertSpecial(field, contact, cg);
                         if (special != null && !String.valueOf(special).isEmpty()) {
-                            String jsonKey = field.getAjaxName();
+                            final String jsonKey = field.getAjaxName();
                             json.put(jsonKey, special);
                         }                            
                     } else {
                         if (value != null && !String.valueOf(value).isEmpty()) {
-                            String jsonKey = field.getAjaxName();
+                            final String jsonKey = field.getAjaxName();
                             json.put(jsonKey, value);
                         }
                     }
-                } catch (JSONException e) {
+                } catch (final JSONException e) {
                     OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
                 }
             }

@@ -79,7 +79,7 @@ public class ContactActionFactory implements AJAXActionServiceFactory {
     
     private static final Map<String, ContactAction> ACTIONS = new ConcurrentHashMap<String, ContactAction>();
     
-    public ContactActionFactory(ServiceLookup serviceLookup) {
+    public ContactActionFactory(final ServiceLookup serviceLookup) {
         super();
         ACTIONS.put("get", new GetAction(serviceLookup));
         ACTIONS.put("all", new AllAction(serviceLookup));
@@ -96,7 +96,7 @@ public class ContactActionFactory implements AJAXActionServiceFactory {
     }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
+    public AJAXActionService createActionService(final String action) throws OXException {
         return ACTIONS.get(action);
     }
 

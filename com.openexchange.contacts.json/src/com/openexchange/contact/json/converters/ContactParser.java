@@ -82,26 +82,26 @@ public class ContactParser {
         specialColumns.put(Contact.LINKS, "links");
     }
     
-    protected boolean isSpecial(int column) {
+    protected boolean isSpecial(final int column) {
         return specialColumns.containsKey(column);
     }
     
-    public Contact parse(JSONObject json) throws OXException {
-        ContactSetter cs = new ContactSetter();
-        Contact contact = new Contact();
-        for (int column : Contact.JSON_COLUMNS) {
-            ContactField field = ContactField.getByValue(column);
+    public Contact parse(final JSONObject json) throws OXException {
+        final ContactSetter cs = new ContactSetter();
+        final Contact contact = new Contact();
+        for (final int column : Contact.JSON_COLUMNS) {
+            final ContactField field = ContactField.getByValue(column);
             if (field != null) {
-                String key = field.getAjaxName();
+                final String key = field.getAjaxName();
                 if (key != null && !key.isEmpty() && json.hasAndNotNull(key)) {
                     try {
-                        Object value = json.get(key);
+                        final Object value = json.get(key);
                         if (isSpecial(column)) {
                             parseSpecial(field, cs, contact, value);
                         } else {
                             field.doSwitch(cs, contact, value);
                         }                        
-                    } catch (JSONException e) {
+                    } catch (final JSONException e) {
                         throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e);
                     }                             
                 }
@@ -111,35 +111,35 @@ public class ContactParser {
         return contact;        
     }
     
-    private void parseSpecial(ContactField field, ContactSetter cs, Contact contact, Object value) throws OXException {
-        String type = specialColumns.get(field.getNumber());
+    private void parseSpecial(final ContactField field, final ContactSetter cs, final Contact contact, final Object value) throws OXException {
+        final String type = specialColumns.get(field.getNumber());
         if (type.equals("date")) {
             try {
-                String timeStr = String.valueOf(value);
-                long time = Long.parseLong(timeStr);
+                final String timeStr = String.valueOf(value);
+                final long time = Long.parseLong(timeStr);
                 field.doSwitch(cs, contact, new Date(time));
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
-            } catch (OXException e) {
+            } catch (final OXException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         } else if (type.equals("distributionlist")) {
             try {
-                JSONArray jsonDistributionList = new JSONArray(String.valueOf(value));
-                DistributionListEntryObject[] distributionList = parseDistributionList(jsonDistributionList);
+                final JSONArray jsonDistributionList = new JSONArray(String.valueOf(value));
+                final DistributionListEntryObject[] distributionList = parseDistributionList(jsonDistributionList);
                 field.doSwitch(cs, contact, distributionList);
-            } catch (JSONException e) {
+            } catch (final JSONException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }            
         } else if (type.equals("links")) {
             try {
-                JSONArray jsonLinks = new JSONArray(String.valueOf(value));
-                LinkEntryObject[] links = parseLinks(jsonLinks);
+                final JSONArray jsonLinks = new JSONArray(String.valueOf(value));
+                final LinkEntryObject[] links = parseLinks(jsonLinks);
                 field.doSwitch(cs, contact, links);
-            } catch (JSONException e) {
+            } catch (final JSONException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }            
@@ -168,7 +168,7 @@ public class ContactParser {
                 distributionList[i].setDisplayname(entry.getString(DistributionListFields.DISPLAY_NAME));
                 distributionList[i].setEmailaddress(entry.getString(DistributionListFields.MAIL));
                 distributionList[i].setEmailfield(entry.getInt(DistributionListFields.MAIL_FIELD));
-            } catch (JSONException e) {
+            } catch (final JSONException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }            

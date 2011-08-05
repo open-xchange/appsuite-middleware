@@ -77,29 +77,29 @@ public class NewAction extends ContactAction {
      * Initializes a new {@link NewAction}.
      * @param serviceLookup
      */
-    public NewAction(ServiceLookup serviceLookup) {
+    public NewAction(final ServiceLookup serviceLookup) {
         super(serviceLookup);
     }
 
     @Override
-    protected AJAXRequestResult perform(ContactRequest req) throws OXException {
-        ServerSession session = req.getSession();
-        boolean containsImage = req.containsImage();
-        JSONObject json = req.getContactJSON(containsImage);
+    protected AJAXRequestResult perform(final ContactRequest req) throws OXException {
+        final ServerSession session = req.getSession();
+        final boolean containsImage = req.containsImage();
+        final JSONObject json = req.getContactJSON(containsImage);
         if (!json.has("folder_id")) {
             throw OXException.mandatoryField("missing folder");
         }
                 
         try {
-            int folder = json.getInt("folder_id");
-            ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
-            ContactParser parser = new ContactParser();
-            Contact contact = parser.parse(json);
+            final int folder = json.getInt("folder_id");
+            final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
+            final ContactParser parser = new ContactParser();
+            final Contact contact = parser.parse(json);
             if (containsImage) {              
                 UploadEvent uploadEvent = null;               
                 try {
                     uploadEvent = req.getUploadEvent();
-                    UploadFile file = uploadEvent.getUploadFileByFieldName("file");
+                    final UploadFile file = uploadEvent.getUploadFileByFieldName("file");
                     if (file == null) {
                         throw AjaxExceptionCodes.NoUploadImage.create();
                     }
@@ -114,9 +114,9 @@ public class NewAction extends ContactAction {
             }
             
             contactInterface.insertContactObject(contact);
-            JSONObject object = new JSONObject("{\"id\":" + contact.getObjectID() + "}");
+            final JSONObject object = new JSONObject("{\"id\":" + contact.getObjectID() + "}");
             return new AJAXRequestResult(object, contact.getLastModified(), "json");
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }        
     }

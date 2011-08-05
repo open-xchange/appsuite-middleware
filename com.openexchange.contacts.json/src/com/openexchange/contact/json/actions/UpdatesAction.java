@@ -76,29 +76,29 @@ public class UpdatesAction extends ContactAction {
      * Initializes a new {@link UpdatesAction}.
      * @param serviceLookup
      */
-    public UpdatesAction(ServiceLookup serviceLookup) {
+    public UpdatesAction(final ServiceLookup serviceLookup) {
         super(serviceLookup);
     }
 
     @Override
-    protected AJAXRequestResult perform(ContactRequest req) throws OXException {
-        ServerSession session = req.getSession();
-        int folder = req.getFolder();
-        int[] columns = req.getColumns();
-        long timestampLong = req.getTimestamp();
+    protected AJAXRequestResult perform(final ContactRequest req) throws OXException {
+        final ServerSession session = req.getSession();
+        final int folder = req.getFolder();
+        final int[] columns = req.getColumns();
+        final long timestampLong = req.getTimestamp();
         Date timestamp = new Date(timestampLong);
         Date lastModified = null;
-        TimeZone timeZone = req.getTimeZone();
+        final TimeZone timeZone = req.getTimeZone();
         
-        ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
-        List<Contact> modifiedList = new ArrayList<Contact>();
-        List<Contact> deletedList = new ArrayList<Contact>();
-        Map<String, List<Contact>> responseMap = new HashMap<String, List<Contact>>(2);
+        final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
+        final List<Contact> modifiedList = new ArrayList<Contact>();
+        final List<Contact> deletedList = new ArrayList<Contact>();
+        final Map<String, List<Contact>> responseMap = new HashMap<String, List<Contact>>(2);
         SearchIterator<Contact> it = null;
         try {
             it = contactInterface.getModifiedContactsInFolder(folder, columns, timestamp);
             while (it.hasNext()) {
-                Contact contact = it.next();
+                final Contact contact = it.next();
                 lastModified = contact.getLastModified();
                 
                 // Correct last modified and creation date with users timezone
@@ -113,7 +113,7 @@ public class UpdatesAction extends ContactAction {
             
             it = contactInterface.getDeletedContactsInFolder(folder, columns, timestamp);
             while (it.hasNext()) {
-                Contact contact = it.next();
+                final Contact contact = it.next();
                 lastModified = contact.getLastModified();
                 
                 // Correct last modified and creation date with users timezone

@@ -91,20 +91,20 @@ public class CopyAction extends ContactAction {
      * Initializes a new {@link CopyAction}.
      * @param serviceLookup
      */
-    public CopyAction(ServiceLookup serviceLookup) {
+    public CopyAction(final ServiceLookup serviceLookup) {
         super(serviceLookup);
     }
 
     @Override
-    protected AJAXRequestResult perform(ContactRequest req) throws OXException {
-        ServerSession session = req.getSession();
-        int id = req.getId();
-        int inFolder = req.getFolder();
+    protected AJAXRequestResult perform(final ContactRequest req) throws OXException {
+        final ServerSession session = req.getSession();
+        final int id = req.getId();
+        final int inFolder = req.getFolder();
         Date timestamp = new Date(0);
-        int folderId = req.getFolderFromJSON();
-        Context ctx = session.getContext();
+        final int folderId = req.getFolderFromJSON();
+        final Context ctx = session.getContext();
 
-        ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folderId, session);
+        final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folderId, session);
 
         final Contact contact = contactInterface.getObjectById(id, inFolder);
         final int origObjectId = contact.getObjectID();
@@ -197,7 +197,7 @@ public class CopyAction extends ContactAction {
             try {
                 attachmentBase.startTransaction();
                 do {
-                    AttachmentMetadataFactory factory = new AttachmentMetadataFactory();
+                    final AttachmentMetadataFactory factory = new AttachmentMetadataFactory();
                     final AttachmentMetadata orig = (AttachmentMetadata) iterator.next();
                     final AttachmentMetadata copy = factory.newAttachmentMetadata(orig);
                     copy.setFolderId(folderId);

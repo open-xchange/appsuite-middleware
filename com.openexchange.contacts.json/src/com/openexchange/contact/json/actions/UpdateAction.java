@@ -76,29 +76,29 @@ public class UpdateAction extends ContactAction {
      * Initializes a new {@link UpdateAction}.
      * @param serviceLookup
      */
-    public UpdateAction(ServiceLookup serviceLookup) {
+    public UpdateAction(final ServiceLookup serviceLookup) {
         super(serviceLookup);
     }
 
     @Override
-    protected AJAXRequestResult perform(ContactRequest req) throws OXException {
-        ServerSession session = req.getSession();
-        int folder = req.getFolder();
-        int id = req.getId();
-        long timestamp = req.getTimestamp();
-        Date date = new Date(timestamp);
-        boolean containsImage = req.containsImage();
-        JSONObject json = req.getContactJSON(containsImage);
+    protected AJAXRequestResult perform(final ContactRequest req) throws OXException {
+        final ServerSession session = req.getSession();
+        final int folder = req.getFolder();
+        final int id = req.getId();
+        final long timestamp = req.getTimestamp();
+        final Date date = new Date(timestamp);
+        final boolean containsImage = req.containsImage();
+        final JSONObject json = req.getContactJSON(containsImage);
         
-        ContactParser parser = new ContactParser();
-        Contact contact = parser.parse(json);
+        final ContactParser parser = new ContactParser();
+        final Contact contact = parser.parse(json);
         contact.setObjectID(id);
         
         if (containsImage) {
             UploadEvent uploadEvent = null;               
             try {
                 uploadEvent = req.getUploadEvent();
-                UploadFile file = uploadEvent.getUploadFileByFieldName("file");
+                final UploadFile file = uploadEvent.getUploadFileByFieldName("file");
                 if (file == null) {
                     throw AjaxExceptionCodes.NoUploadImage.create();
                 }
@@ -111,10 +111,10 @@ public class UpdateAction extends ContactAction {
             }
         }
         
-        ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
+        final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
         contactInterface.updateContactObject(contact, folder, date);
         
-        JSONObject response = new JSONObject();
+        final JSONObject response = new JSONObject();
         return new AJAXRequestResult(response, contact.getLastModified(), "json");
     }
 

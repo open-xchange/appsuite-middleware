@@ -83,34 +83,34 @@ public class AdvancedSearchAction extends ContactAction {
      * Initializes a new {@link AdvancedSearchAction}.
      * @param serviceLookup
      */
-    public AdvancedSearchAction(ServiceLookup serviceLookup) {
+    public AdvancedSearchAction(final ServiceLookup serviceLookup) {
         super(serviceLookup);
     }
 
     @Override
-    protected AJAXRequestResult perform(ContactRequest req) throws OXException {
-        ServerSession session = req.getSession();
-        int[] columns = req.getColumns();
-        int sort = req.getSort();
-        Order order = req.getOrder();
-        String collation = req.getCollation();
+    protected AJAXRequestResult perform(final ContactRequest req) throws OXException {
+        final ServerSession session = req.getSession();
+        final int[] columns = req.getColumns();
+        final int sort = req.getSort();
+        final Order order = req.getOrder();
+        final String collation = req.getCollation();
         Date lastModified = null;
         Date timestamp = new Date(0);
-        JSONObject json = (JSONObject) req.getData();
-        TimeZone timeZone = req.getTimeZone();
+        final JSONObject json = (JSONObject) req.getData();
+        final TimeZone timeZone = req.getTimeZone();
         
         JSONArray filterContent;
         SearchIterator<Contact> it = null;
-        List<Contact> contacts = new ArrayList<Contact>();
-        Map<String, List<Contact>> contactMap = new HashMap<String, List<Contact>>(1);
+        final List<Contact> contacts = new ArrayList<Contact>();
+        final Map<String, List<Contact>> contactMap = new HashMap<String, List<Contact>>(1);
         try {
             filterContent = json.getJSONArray("filter");
-            SearchTerm<?> searchTerm = SearchTermParser.parse(filterContent);
+            final SearchTerm<?> searchTerm = SearchTermParser.parse(filterContent);
 
-            ContactSearchMultiplexer multiplexer = new ContactSearchMultiplexer(getContactInterfaceDiscoveryService());
+            final ContactSearchMultiplexer multiplexer = new ContactSearchMultiplexer(getContactInterfaceDiscoveryService());
             it = multiplexer.extendedSearch(session, searchTerm, sort, order, collation, columns);
             while (it.hasNext()) {
-                Contact contact = it.next();
+                final Contact contact = it.next();
                 lastModified = contact.getLastModified();
                 
                 // Correct last modified and creation date with users timezone
@@ -122,7 +122,7 @@ public class AdvancedSearchAction extends ContactAction {
                     timestamp = lastModified;
                 }
             }
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e);
         } finally {
             if (it != null) {
