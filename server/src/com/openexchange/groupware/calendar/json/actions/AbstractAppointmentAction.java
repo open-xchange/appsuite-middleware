@@ -81,7 +81,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link AbstractAppointmentAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractAppointmentAction implements AJAXActionService {
@@ -120,7 +120,7 @@ public abstract class AbstractAppointmentAction implements AJAXActionService {
 
     /**
      * Gets the {@link AppointmentSqlFactoryService} instance.
-     * 
+     *
      * @return The service
      */
     protected AppointmentSqlFactoryService getService() {
@@ -129,7 +129,7 @@ public abstract class AbstractAppointmentAction implements AJAXActionService {
 
     /**
      * Gets the service of specified type
-     * 
+     *
      * @param clazz The service's class
      * @return The service or <code>null</code> is absent
      */
@@ -156,7 +156,7 @@ public abstract class AbstractAppointmentAction implements AJAXActionService {
 
     /**
      * Performs specified appointment request.
-     * 
+     *
      * @param req The appointment request
      * @return The result
      * @throws OXException If an error occurs
@@ -166,7 +166,7 @@ public abstract class AbstractAppointmentAction implements AJAXActionService {
 
     /**
      * Gets the result filled with JSON <code>NULL</code>.
-     * 
+     *
      * @return The result with JSON <code>NULL</code>.
      */
     protected static AJAXRequestResult getJSONNullResult() {

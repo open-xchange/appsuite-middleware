@@ -115,34 +115,42 @@ public final class TwitterMessagingService implements MessagingService {
         formDescription = new ReadOnlyDynamicFormDescription(tmpDescription);
     }
 
+    @Override
     public Set<String> getSecretProperties() {
         return Collections.emptySet();
     }
 
+    @Override
     public MessagingAccountAccess getAccountAccess(final int accountId, final Session session) throws OXException {
         return new TwitterMessagingAccountAccess(accountManager.getAccount(accountId, session), session);
     }
 
+    @Override
     public MessagingAccountManager getAccountManager() {
         return accountManager;
     }
 
+    @Override
     public MessagingAccountTransport getAccountTransport(final int accountId, final Session session) throws OXException {
         return new TwitterMessagingAccountTransport(accountManager.getAccount(accountId, session), session);
     }
 
+    @Override
     public List<MessagingAction> getMessageActions() {
         return ACTIONS;
     }
 
+    @Override
     public String getDisplayName() {
         return DISPLAY_NAME;
     }
 
+    @Override
     public String getId() {
         return ID;
     }
 
+    @Override
     public DynamicFormDescription getFormDescription() {
         return formDescription;
     }
@@ -154,6 +162,7 @@ public final class TwitterMessagingService implements MessagingService {
             MessagingPermission.DELETE_OWN_OBJECTS};
     }
 
+    @Override
     public int[] getStaticRootPermissions() {
         return getStaticRootPerms();
     }

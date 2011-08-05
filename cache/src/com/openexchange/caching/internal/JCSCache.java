@@ -82,6 +82,7 @@ public final class JCSCache implements Cache {
         this.cache = cache;
     }
 
+    @Override
     public void clear() throws OXException {
         try {
             cache.clear();
@@ -90,14 +91,17 @@ public final class JCSCache implements Cache {
         }
     }
 
+    @Override
     public void dispose() {
         cache.dispose();
     }
 
+    @Override
     public Object get(final Serializable key) {
         return cache.get(key);
     }
 
+    @Override
     public CacheElement getCacheElement(final Serializable key) {
         final ICacheElement cacheElement = cache.getCacheElement(key);
         if (cacheElement == null) {
@@ -106,6 +110,7 @@ public final class JCSCache implements Cache {
         return new CacheElement2JCS(cacheElement);
     }
 
+    @Override
     public ElementAttributes getDefaultElementAttributes() throws OXException {
         try {
             return new ElementAttributes2JCS(cache.getDefaultElementAttributes());
@@ -114,14 +119,17 @@ public final class JCSCache implements Cache {
         }
     }
 
+    @Override
     public Object getFromGroup(final Serializable key, final String group) {
         return cache.getFromGroup(key, group);
     }
 
+    @Override
     public void invalidateGroup(final String group) {
         cache.invalidateGroup(group);
     }
 
+    @Override
     public void put(final Serializable key, final Serializable obj) throws OXException {
         try {
             cache.put(key, obj);
@@ -130,6 +138,7 @@ public final class JCSCache implements Cache {
         }
     }
 
+    @Override
     public void put(final Serializable key, final Serializable val, final ElementAttributes attr) throws OXException {
         try {
             cache.put(key, val, new JCSElementAttributesDelegator(attr));
@@ -138,6 +147,7 @@ public final class JCSCache implements Cache {
         }
     }
 
+    @Override
     public void putInGroup(final Serializable key, final String groupName, final Serializable value) throws OXException {
         try {
             cache.putInGroup(key, groupName, value);
@@ -146,6 +156,7 @@ public final class JCSCache implements Cache {
         }
     }
 
+    @Override
     public void putInGroup(final Serializable key, final String groupName, final Object value, final ElementAttributes attr) throws OXException {
         try {
             cache.putInGroup(key, groupName, value, new JCSElementAttributesDelegator(attr));
@@ -154,6 +165,7 @@ public final class JCSCache implements Cache {
         }
     }
 
+    @Override
     public void putSafe(final Serializable key, final Serializable value) throws OXException {
         try {
             cache.putSafe(key, value);
@@ -164,6 +176,7 @@ public final class JCSCache implements Cache {
         }
     }
 
+    @Override
     public void remove(final Serializable key) throws OXException {
         try {
             cache.remove(key);
@@ -172,10 +185,12 @@ public final class JCSCache implements Cache {
         }
     }
 
+    @Override
     public void removeFromGroup(final Serializable key, final String group) {
         cache.remove(key, group);
     }
 
+    @Override
     public void setDefaultElementAttributes(final ElementAttributes attr) throws OXException {
         try {
             cache.setDefaultElementAttributes(new JCSElementAttributesDelegator(attr));
@@ -184,14 +199,17 @@ public final class JCSCache implements Cache {
         }
     }
 
+    @Override
     public CacheKey newCacheKey(final int contextId, final int objectId) {
         return new CacheKeyImpl(contextId, objectId);
     }
 
+    @Override
     public CacheKey newCacheKey(final int contextId, final Serializable... objs) {
         return new CacheKeyImpl(contextId, objs);
     }
 
+    @Override
     public CacheStatistics getStatistics() {
         return new CacheStatistics2JCS(cache.getStatistics());
     }

@@ -78,14 +78,17 @@ public final class ConversionServiceImpl implements ConversionService {
         super();
     }
 
+    @Override
     public DataHandler getDataHandler(final String identifier) {
         return getInstance().getDataHandler(identifier);
     }
 
+    @Override
     public DataSource getDataSource(final String identifier) {
         return getInstance().getDataSource(identifier);
     }
 
+    @Override
     public Object convert(final String dataSourceIdentifier, final DataArguments dataSourceArguments, final String dataHandlerIdentifier, final DataArguments dataHandlerArguments, final Session session) throws OXException {
         final DataSource dataSource = lookUpAndCheckDataSource(dataSourceIdentifier, dataSourceArguments);
         final DataHandler dataHandler = lookUpAndCheckDataHandler(dataHandlerIdentifier, dataHandlerArguments);
@@ -106,6 +109,7 @@ public final class ConversionServiceImpl implements ConversionService {
         return dataHandler.processData(data, dataHandlerArguments, session);
     }
 
+    @Override
     public Object convert(final InputStream inputStream, final String dataHandlerIdentifier, final DataArguments dataHandlerArguments, final Session session) throws OXException {
         final DataHandler dataHandler = lookUpAndCheckDataHandler(dataHandlerIdentifier, dataHandlerArguments);
         /*

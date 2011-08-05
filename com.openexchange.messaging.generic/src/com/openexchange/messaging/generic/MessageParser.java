@@ -75,6 +75,7 @@ public final class MessageParser {
      */
     private static final InlineDetector LENIENT_DETECTOR = new InlineDetector() {
 
+        @Override
         public boolean isInline(final String disposition, final String fileName) {
             return MessagingPart.INLINE.equalsIgnoreCase(disposition) || ((disposition == null) && (fileName == null));
         }
@@ -86,6 +87,7 @@ public final class MessageParser {
      */
     private static final InlineDetector STRICT_DETECTOR = new InlineDetector() {
 
+        @Override
         public boolean isInline(final String disposition, final String fileName) {
             return (MessagingPart.INLINE.equalsIgnoreCase(disposition) || (disposition == null)) && (fileName == null);
         }

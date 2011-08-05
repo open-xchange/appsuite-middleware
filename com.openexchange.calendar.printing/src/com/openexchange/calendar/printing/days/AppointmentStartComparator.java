@@ -64,6 +64,7 @@ public class AppointmentStartComparator implements Comparator<CPAppointment> {
         super();
     }
 
+    @Override
     public int compare(CPAppointment appointment1, CPAppointment appointment2) {
         int retval = appointment1.getStartDate().compareTo(appointment2.getStartDate());
         if (0 != retval) {

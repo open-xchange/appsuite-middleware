@@ -91,6 +91,7 @@ public class CrawlerUpdateTask implements Runnable {
         this.activator = activator;
     }
 
+    @Override
     public void run() {
 
         if (configurationService != null) {

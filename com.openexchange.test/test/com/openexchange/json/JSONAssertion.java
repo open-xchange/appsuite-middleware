@@ -207,6 +207,7 @@ public class JSONAssertion implements JSONCondition {
         return hasNoMoreKeys();
     }
 
+    @Override
     public boolean validate(Object o) {
         for(JSONCondition condition : conditions) {
             if(!condition.validate(o)) {
@@ -217,6 +218,7 @@ public class JSONAssertion implements JSONCondition {
         return true;
     }
 
+    @Override
     public String getComplaint() {
         return complaint;
     }
@@ -230,6 +232,7 @@ public class JSONAssertion implements JSONCondition {
             this.type = type;
         }
 
+        @Override
         public boolean validate(Object o) {
             boolean isCorrectType = type.isInstance(o);
             if(!isCorrectType) {
@@ -237,6 +240,7 @@ public class JSONAssertion implements JSONCondition {
             }
             return isCorrectType;
         }
+        @Override
         public String getComplaint() {
             return complaint;
         }
@@ -251,6 +255,7 @@ public class JSONAssertion implements JSONCondition {
             this.key = key;
         }
 
+        @Override
         public boolean validate(Object o) {
             if(!JSONObject.class.isInstance(o)) {
                 this.complaint = o.getClass().getName()+" can not have key "+key;
@@ -260,6 +265,7 @@ public class JSONAssertion implements JSONCondition {
             return ((JSONObject)o).has(key);
         }
 
+        @Override
         public String getComplaint() {
             if(complaint != null) {
                 return complaint;
@@ -276,10 +282,12 @@ public class JSONAssertion implements JSONCondition {
             this.index = index;
         }
 
+        @Override
         public boolean validate(Object o) {
             return ((JSONArray)o).length() > index;
         }
 
+        @Override
         public String getComplaint() {
             return "Missing index: "+index;
         }
@@ -296,6 +304,7 @@ public class JSONAssertion implements JSONCondition {
             this.value = value;
         }
 
+        @Override
         public boolean validate(Object o) {
             try {
                 Object object = ((JSONObject)o).get(key);
@@ -327,6 +336,7 @@ public class JSONAssertion implements JSONCondition {
             return false;
         }
 
+        @Override
         public String getComplaint() {
             return complaint;
         }
@@ -342,10 +352,12 @@ public class JSONAssertion implements JSONCondition {
             this.assertion = assertion;
         }
 
+        @Override
         public String getComplaint() {
             return assertion.getComplaint();
         }
 
+        @Override
         public boolean validate(Object o) {
             try {
                 Object subObject = ((JSONObject)o).get(key);
@@ -367,10 +379,12 @@ public class JSONAssertion implements JSONCondition {
             this.assertion = assertion;
         }
 
+        @Override
         public String getComplaint() {
             return assertion.getComplaint();
         }
 
+        @Override
         public boolean validate(Object o) {
             try {
                 Object subObject = ((JSONObject)o).get(key);
@@ -392,6 +406,7 @@ public class JSONAssertion implements JSONCondition {
             this.values = values;
         }
 
+        @Override
         public boolean validate(Object o) {
             JSONArray arr = (JSONArray) o;
             if(arr.length() != values.length) {
@@ -437,6 +452,7 @@ public class JSONAssertion implements JSONCondition {
             return true;
         }
 
+        @Override
         public String getComplaint() {
             return complaint;
         }

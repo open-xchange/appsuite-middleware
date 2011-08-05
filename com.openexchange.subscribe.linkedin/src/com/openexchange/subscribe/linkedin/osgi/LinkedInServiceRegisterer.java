@@ -70,6 +70,7 @@ public class LinkedInServiceRegisterer implements ServiceTrackerCustomizer {
         this.activator = activator;
     }
 
+    @Override
     public Object addingService(ServiceReference reference) {
         LinkedInService linkedIn = (LinkedInService) context.getService(reference);
         activator.setLinkedInService(linkedIn);
@@ -77,10 +78,12 @@ public class LinkedInServiceRegisterer implements ServiceTrackerCustomizer {
         return linkedIn;
     }
 
+    @Override
     public void modifiedService(ServiceReference arg0, Object arg1) {
       //nothing to do here
     }
 
+    @Override
     public void removedService(ServiceReference reference, Object arg1) {
         activator.setLinkedInService(null);
         activator.unregisterServices();

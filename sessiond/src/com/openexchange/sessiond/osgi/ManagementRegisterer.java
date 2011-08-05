@@ -79,16 +79,19 @@ final class ManagementRegisterer implements ServiceTrackerCustomizer {
         this.context = context;
     }
 
+    @Override
     public Object addingService(final ServiceReference reference) {
         final ManagementService management = (ManagementService) context.getService(reference);
         registerSessiondMBean(management);
         return management;
     }
 
+    @Override
     public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do.
     }
 
+    @Override
     public void removedService(final ServiceReference reference, final Object service) {
         final ManagementService management = (ManagementService) service;
         unregisterSessiondMBean(management);

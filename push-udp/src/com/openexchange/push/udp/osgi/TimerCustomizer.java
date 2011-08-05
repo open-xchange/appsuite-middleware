@@ -80,6 +80,7 @@ public final class TimerCustomizer implements ServiceTrackerCustomizer {
         this.context = context;
     }
 
+    @Override
     public Object addingService(final ServiceReference reference) {
         final TimerService timer = (TimerService) context.getService(reference);
         final PushConfiguration config = PushInit.getInstance().getConfig();
@@ -93,10 +94,12 @@ public final class TimerCustomizer implements ServiceTrackerCustomizer {
         return timer;
     }
 
+    @Override
     public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do.
     }
 
+    @Override
     public void removedService(final ServiceReference reference, final Object service) {
         if (null != sender) {
             LOG.info("Stopping push multicast discovery sender.");

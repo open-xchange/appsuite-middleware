@@ -68,14 +68,17 @@ public final class ReadOnlyIterator<E> implements Iterator<E> {
         this.delegate = delegate;
     }
 
+    @Override
     public boolean hasNext() {
         return delegate.hasNext();
     }
 
+    @Override
     public E next() {
         return delegate.next();
     }
 
+    @Override
     public void remove() {
         throw new UnsupportedOperationException("ReadOnlyIterator.remove() not supported");
     }

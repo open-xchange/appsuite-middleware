@@ -63,26 +63,32 @@ public class SimAccountAccess implements MessagingAccountAccess {
     private MessagingFolderAccess folderAccess;
     private MessagingMessageAccess messageAccess;
 
+    @Override
     public int getAccountId() {
         return accountId;
     }
 
+    @Override
     public MessagingFolderAccess getFolderAccess() throws OXException {
         return folderAccess;
     }
 
+    @Override
     public MessagingMessageAccess getMessageAccess() throws OXException {
         return messageAccess;
     }
 
+    @Override
     public void close() {
 
     }
 
+    @Override
     public void connect() throws OXException {
 
     }
 
+    @Override
     public boolean ping() throws OXException {
         return true;
     }
@@ -91,14 +97,17 @@ public class SimAccountAccess implements MessagingAccountAccess {
         messageAccess = access;
     }
 
+    @Override
     public boolean isConnected() {
         return true;
     }
 
+    @Override
     public MessagingFolder getRootFolder() throws OXException {
         return getFolderAccess().getRootFolder();
     }
 
+    @Override
     public boolean cacheable() {
         return true;
     }

@@ -87,6 +87,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
 
     private static final int[] MATCH_COLUMNS = I2i(Arrays.remove(i2I(Contact.CONTENT_COLUMNS), I(Contact.USERFIELD20)));
 
+    @Override
     public int calculateSimilarityScore(final Contact original, final Contact candidate, final Object session) {
         int score = 0;
         final int threshold = getThreshold(session);
@@ -156,10 +157,12 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
         return o1.equals(o2);
     }
 
+    @Override
     public void closeSession(final Object session) {
 
     }
 
+    @Override
     public Collection<Contact> getData(final TargetFolderDefinition target, final Object session) throws OXException {
         final OverridingContactInterface contacts = (OverridingContactInterface) getFromSession(SQL_INTERFACE, session);
 
@@ -180,14 +183,17 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
         return retval;
     }
 
+    @Override
     public int getThreshold(final Object session) {
         return 9;
     }
 
+    @Override
     public boolean handles(final FolderObject folder) {
         return folder.getModule() == FolderObject.CONTACT;
     }
 
+    @Override
     public void save(final Contact newElement, final Object session) throws OXException {
         final OverridingContactInterface contacts = (OverridingContactInterface) getFromSession(SQL_INTERFACE, session);
         final TargetFolderDefinition target = (TargetFolderDefinition) getFromSession(TARGET, session);
@@ -203,6 +209,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
         return ((Map<Integer, Object>) session).get(key);
     }
 
+    @Override
     public Object startSession(final TargetFolderDefinition target) throws OXException {
         final Map<Integer, Object> userInfo = new HashMap<Integer, Object>();
         userInfo.put(SQL_INTERFACE, new RdbContactSQLImpl(new TargetFolderSession(target)));
@@ -210,6 +217,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
         return userInfo;
     }
 
+    @Override
     public void update(final Contact original, final Contact update, final Object session) throws OXException {
         final RdbContactSQLImpl contacts = (RdbContactSQLImpl) getFromSession(SQL_INTERFACE, session);
 

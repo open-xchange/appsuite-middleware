@@ -74,6 +74,7 @@ public class SimPublicationService implements PublicationService {
      * (non-Javadoc)
      * @see com.openexchange.publish.PublicationService#create(com.openexchange.publish.Publication)
      */
+    @Override
     public void create(final Publication publication) {
         publication.setId(newId);
     }
@@ -82,6 +83,7 @@ public class SimPublicationService implements PublicationService {
      * (non-Javadoc)
      * @see com.openexchange.publish.PublicationService#delete(com.openexchange.publish.Publication)
      */
+    @Override
     public void delete(final Publication publication) {
         deletedIds.add(publication.getId());
     }
@@ -90,6 +92,7 @@ public class SimPublicationService implements PublicationService {
      * (non-Javadoc)
      * @see com.openexchange.publish.PublicationService#getAllPublications(com.openexchange.groupware.contexts.Context)
      */
+    @Override
     public Collection<Publication> getAllPublications(final Context ctx) {
         // TODO Auto-generated method stub
         return null;
@@ -99,6 +102,7 @@ public class SimPublicationService implements PublicationService {
      * (non-Javadoc)
      * @see com.openexchange.publish.PublicationService#getAllPublications(com.openexchange.groupware.contexts.Context, int)
      */
+    @Override
     public Collection<Publication> getAllPublications(final Context ctx, final String entityId) {
         // TODO Auto-generated method stub
         return null;
@@ -108,6 +112,7 @@ public class SimPublicationService implements PublicationService {
      * (non-Javadoc)
      * @see com.openexchange.publish.PublicationService#getTarget()
      */
+    @Override
     public PublicationTarget getTarget() {
         return target;
     }
@@ -116,6 +121,7 @@ public class SimPublicationService implements PublicationService {
      * (non-Javadoc)
      * @see com.openexchange.publish.PublicationService#knows(com.openexchange.groupware.contexts.Context, int)
      */
+    @Override
     public boolean knows(final Context ctx, final int publicationId) {
         // TODO Auto-generated method stub
         return false;
@@ -125,6 +131,7 @@ public class SimPublicationService implements PublicationService {
      * (non-Javadoc)
      * @see com.openexchange.publish.PublicationService#load(com.openexchange.groupware.contexts.Context, int)
      */
+    @Override
     public Publication load(final Context ctx, final int publicationId) {
         // TODO Auto-generated method stub
         return null;
@@ -134,6 +141,7 @@ public class SimPublicationService implements PublicationService {
      * (non-Javadoc)
      * @see com.openexchange.publish.PublicationService#update(com.openexchange.publish.Publication)
      */
+    @Override
     public void update(final Publication publication) {
         this.updatedId = publication.getId();
     }
@@ -154,7 +162,8 @@ public class SimPublicationService implements PublicationService {
         return deletedIds;
     }
 
-	public Collection<Publication> getAllPublications(final Context ctx, final int userId, final String module) throws OXException {
+	@Override
+    public Collection<Publication> getAllPublications(final Context ctx, final int userId, final String module) throws OXException {
 		// TODO Auto-generated method stub
 		return null;
 	}

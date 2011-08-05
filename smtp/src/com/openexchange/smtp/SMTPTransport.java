@@ -593,6 +593,7 @@ public final class SMTPTransport extends MailTransport {
             this.composedMail = composedMail;
         }
 
+        @Override
         public void run() {
             composedMail.cleanUp();
         }

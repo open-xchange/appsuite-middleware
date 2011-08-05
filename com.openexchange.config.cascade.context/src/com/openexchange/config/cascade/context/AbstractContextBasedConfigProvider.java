@@ -70,6 +70,7 @@ public abstract class AbstractContextBasedConfigProvider implements ConfigProvid
         this.contexts = contexts;
     }
 
+    @Override
     public BasicProperty get(final String property, final int context, final int user) throws OXException {
         if (context == NO_CONTEXT) {
             return NO_PROPERTY;
@@ -77,6 +78,7 @@ public abstract class AbstractContextBasedConfigProvider implements ConfigProvid
         return get(property, contexts.getContext(context), user);
     }
 
+    @Override
     public Collection<String> getAllPropertyNames(final int context, final int user) throws OXException {
         if (context == NO_CONTEXT) {
             return Collections.emptyList();

@@ -93,28 +93,34 @@ public class FacebookMessagingFolderAccess extends AbstractFacebookAccess implem
 
         m.put(MessagingFolder.ROOT_FULLNAME, new FolderInfo() {
 
+            @Override
             public MessagingFolder generateFolder(final FacebookMessagingFolderAccess folderAccess) throws OXException {
                 return folderAccess.getRootFolder();
             }
 
+            @Override
             public MessagingFolder[] getSubfolders(final FacebookMessagingFolderAccess folderAccess) throws OXException {
                 return new MessagingFolder[] { folderAccess.generateWallFolder() };
             }
 
+            @Override
             public MessagingFolder[] getPath(final FacebookMessagingFolderAccess folderAccess) throws OXException {
                 return EMPTY_PATH;
             }
         });
         m.put(FacebookConstants.FOLDER_WALL, new FolderInfo() {
 
+            @Override
             public MessagingFolder generateFolder(final FacebookMessagingFolderAccess folderAccess) throws OXException {
                 return folderAccess.generateWallFolder();
             }
 
+            @Override
             public MessagingFolder[] getSubfolders(final FacebookMessagingFolderAccess folderAccess) throws OXException {
                 return EMPTY_PATH;
             }
 
+            @Override
             public MessagingFolder[] getPath(final FacebookMessagingFolderAccess folderAccess) throws OXException {
                 return new MessagingFolder[] { folderAccess.generateWallFolder() };
             }
@@ -138,6 +144,7 @@ public class FacebookMessagingFolderAccess extends AbstractFacebookAccess implem
         super(facebookOAuthAccess, messagingAccount, session);
     }
 
+    @Override
     public void clearFolder(final String folderId) throws OXException {
         if (!KNOWN_FOLDER_IDS.contains(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
@@ -150,6 +157,7 @@ public class FacebookMessagingFolderAccess extends AbstractFacebookAccess implem
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(FacebookMessagingService.getServiceId());
     }
 
+    @Override
     public void clearFolder(final String folderId, final boolean hardDelete) throws OXException {
         if (!KNOWN_FOLDER_IDS.contains(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
@@ -162,10 +170,12 @@ public class FacebookMessagingFolderAccess extends AbstractFacebookAccess implem
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(FacebookMessagingService.getServiceId());
     }
 
+    @Override
     public String createFolder(final MessagingFolder toCreate) throws OXException {
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(FacebookMessagingService.getServiceId());
     }
 
+    @Override
     public String deleteFolder(final String folderId) throws OXException {
         if (!KNOWN_FOLDER_IDS.contains(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
@@ -178,6 +188,7 @@ public class FacebookMessagingFolderAccess extends AbstractFacebookAccess implem
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(FacebookMessagingService.getServiceId());
     }
 
+    @Override
     public String deleteFolder(final String folderId, final boolean hardDelete) throws OXException {
         if (!KNOWN_FOLDER_IDS.contains(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
@@ -190,22 +201,27 @@ public class FacebookMessagingFolderAccess extends AbstractFacebookAccess implem
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(FacebookMessagingService.getServiceId());
     }
 
+    @Override
     public boolean exists(final String folderId) throws OXException {
         return (KNOWN_FOLDER_IDS.contains(folderId));
     }
 
+    @Override
     public String getConfirmedHamFolder() throws OXException {
         return null;
     }
 
+    @Override
     public String getConfirmedSpamFolder() throws OXException {
         return null;
     }
 
+    @Override
     public String getDraftsFolder() throws OXException {
         return null;
     }
 
+    @Override
     public MessagingFolder getFolder(final String folderId) throws OXException {
         if (!KNOWN_FOLDER_IDS.contains(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
@@ -218,6 +234,7 @@ public class FacebookMessagingFolderAccess extends AbstractFacebookAccess implem
         return FOLDER_INFO_MAP.get(folderId).generateFolder(this);
     }
 
+    @Override
     public Quota getMessageQuota(final String folderId) throws OXException {
         if (!KNOWN_FOLDER_IDS.contains(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
@@ -231,6 +248,7 @@ public class FacebookMessagingFolderAccess extends AbstractFacebookAccess implem
 
     }
 
+    @Override
     public MessagingFolder[] getPath2DefaultFolder(final String folderId) throws OXException {
         if (!KNOWN_FOLDER_IDS.contains(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
@@ -243,6 +261,7 @@ public class FacebookMessagingFolderAccess extends AbstractFacebookAccess implem
         return FOLDER_INFO_MAP.get(folderId).getPath(this);
     }
 
+    @Override
     public Quota[] getQuotas(final String folder, final Type[] types) throws OXException {
         if (!KNOWN_FOLDER_IDS.contains(folder)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
@@ -257,6 +276,7 @@ public class FacebookMessagingFolderAccess extends AbstractFacebookAccess implem
 
     private static final Set<String> CAPS = Collections.emptySet();
 
+    @Override
     public MessagingFolder getRootFolder() throws OXException {
         return generateRootFolder();
     }
@@ -328,14 +348,17 @@ public class FacebookMessagingFolderAccess extends AbstractFacebookAccess implem
         return dmf;
     }
 
+    @Override
     public String getSentFolder() throws OXException {
         return null;
     }
 
+    @Override
     public String getSpamFolder() throws OXException {
         return null;
     }
 
+    @Override
     public Quota getStorageQuota(final String folderId) throws OXException {
         if (!KNOWN_FOLDER_IDS.contains(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
@@ -348,6 +371,7 @@ public class FacebookMessagingFolderAccess extends AbstractFacebookAccess implem
         return Quota.getUnlimitedQuota(Quota.Type.STORAGE);
     }
 
+    @Override
     public MessagingFolder[] getSubfolders(final String parentIdentifier, final boolean all) throws OXException {
         if (!KNOWN_FOLDER_IDS.contains(parentIdentifier)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
@@ -360,10 +384,12 @@ public class FacebookMessagingFolderAccess extends AbstractFacebookAccess implem
         return FOLDER_INFO_MAP.get(parentIdentifier).getSubfolders(this);
     }
 
+    @Override
     public String getTrashFolder() throws OXException {
         return null;
     }
 
+    @Override
     public String moveFolder(final String folderId, final String newParentId) throws OXException {
         if (!KNOWN_FOLDER_IDS.contains(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
@@ -376,6 +402,7 @@ public class FacebookMessagingFolderAccess extends AbstractFacebookAccess implem
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(FacebookMessagingService.getServiceId());
     }
 
+    @Override
     public String renameFolder(final String folderId, final String newName) throws OXException {
         if (!KNOWN_FOLDER_IDS.contains(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
@@ -388,6 +415,7 @@ public class FacebookMessagingFolderAccess extends AbstractFacebookAccess implem
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(FacebookMessagingService.getServiceId());
     }
 
+    @Override
     public String updateFolder(final String folderId, final MessagingFolder toUpdate) throws OXException {
         if (!KNOWN_FOLDER_IDS.contains(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(

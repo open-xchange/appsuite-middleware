@@ -127,10 +127,12 @@ public class CurrentUserPrivilegeSet implements PropertyMixin {
         this.privileges = Privilege.getApplying(permission);
     }
 
+    @Override
     public List<WebdavProperty> getAllProperties() throws OXException {
         return Collections.emptyList();
     }
 
+    @Override
     public WebdavProperty getProperty(String namespace, String name) throws OXException {
         if (namespace.equals(Protocol.DAV_NS.getURI()) && name.equals("current-user-privilege-set")) {
             WebdavProperty property = new WebdavProperty(namespace, name);

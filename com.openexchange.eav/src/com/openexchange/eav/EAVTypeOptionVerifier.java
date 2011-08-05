@@ -57,19 +57,22 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link EAVTypeOptionVerifier}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class EAVTypeOptionVerifier implements EAVTypeSwitcher {
 
+    @Override
     public Object binary(Object... args) {
         return noOptions(EAVType.BINARY, args);
     }
 
+    @Override
     public Object bool(Object... args) {
         return noOptions(EAVType.BOOLEAN, args);
     }
 
+    @Override
     public Object date(Object... args) {
         return noOptions(EAVType.DATE, args);
     }
@@ -78,6 +81,7 @@ public class EAVTypeOptionVerifier implements EAVTypeSwitcher {
      * (non-Javadoc)
      * @see com.openexchange.eav.EAVTypeSwitcher#nullValue(java.lang.Object[])
      */
+    @Override
     public Object nullValue(Object... args) {
         // TODO Auto-generated method stub
         return null;
@@ -87,6 +91,7 @@ public class EAVTypeOptionVerifier implements EAVTypeSwitcher {
      * (non-Javadoc)
      * @see com.openexchange.eav.EAVTypeSwitcher#number(java.lang.Object[])
      */
+    @Override
     public Object number(Object... args) {
         return noOptions(EAVType.NUMBER, args);
     }
@@ -95,11 +100,13 @@ public class EAVTypeOptionVerifier implements EAVTypeSwitcher {
      * (non-Javadoc)
      * @see com.openexchange.eav.EAVTypeSwitcher#object(java.lang.Object[])
      */
+    @Override
     public Object object(Object... args) {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public Object string(Object... args) {
         return noOptions(EAVType.STRING, args);
     }
@@ -108,6 +115,7 @@ public class EAVTypeOptionVerifier implements EAVTypeSwitcher {
      * (non-Javadoc)
      * @see com.openexchange.eav.EAVTypeSwitcher#time(java.lang.Object[])
      */
+    @Override
     public Object time(Object... args) {
         Map<String, Object> options = (Map<String, Object>) args[0];
         String timezone = (String) options.remove("timezone");
@@ -119,14 +127,14 @@ public class EAVTypeOptionVerifier implements EAVTypeSwitcher {
         }
         return EAVErrorMessage.ILLEGAL_OPTION.create(timezone, "timezone");
     }
-    
+
     private static final Set<String> ABBREVS = new HashSet<String>(){{
         for(String abbrev : TimeZone.getAvailableIDs()) {
             add(abbrev);
         }
     }};
-    
-    
+
+
     private boolean isKnownAbbreviation(String timezone) {
         return ABBREVS.contains(timezone);
     }

@@ -70,6 +70,7 @@ public final class SessiondMBeanImpl extends StandardMBean implements SessiondMB
         super(SessiondMBean.class);
     }
 
+    @Override
     public int clearUserSessions(final int userId, final int contextId) {
         return SessionHandler.removeUserSessions(userId, contextId, true).length;
     }

@@ -72,6 +72,7 @@ public class SpamdInstallationServiceListener implements ServiceTrackerCustomize
         this.context = context;
     }
 
+    @Override
     public Object addingService(ServiceReference serviceReference) {
         final Object service = context.getService(serviceReference);
         if (service instanceof SpamdService) {
@@ -84,10 +85,12 @@ public class SpamdInstallationServiceListener implements ServiceTrackerCustomize
         return service;
     }
 
+    @Override
     public void modifiedService(ServiceReference arg0, Object arg1) {
         // Nothing to do
     }
 
+    @Override
     public void removedService(ServiceReference arg0, Object o) {
         if (o instanceof SpamdService) {
             ServiceRegistry.getInstance().removeService(SpamdService.class);

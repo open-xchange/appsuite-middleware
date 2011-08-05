@@ -75,6 +75,7 @@ public class HTTPFormSubmittingOXMFDataSource implements OXMFDataSource {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(HTTPFormSubmittingOXMFDataSource.class));
 
+    @Override
     public Reader getData(Subscription subscription) throws OXException {
         if(!ExternalSubscriptionSource.class.isInstance(subscription.getSource())) {
             throw OXMFSubscriptionErrorMessage.CAN_ONLY_POST_TO_EXTERNAL_SUBSCRIPTION_SOURCES.create();
@@ -115,6 +116,7 @@ public class HTTPFormSubmittingOXMFDataSource implements OXMFDataSource {
 
     private static final class FormSwitcher implements WidgetSwitcher {
 
+        @Override
         public Object checkbox(Object... args) {
             if(args[0] != null && args[0] == Boolean.TRUE) {
                 return "on";
@@ -122,22 +124,27 @@ public class HTTPFormSubmittingOXMFDataSource implements OXMFDataSource {
             return null;
         }
 
+        @Override
         public Object input(Object... args) {
             return args[0];
         }
 
+        @Override
         public Object link(Object... args) {
             return args[0];
         }
 
+        @Override
         public Object password(Object... args) {
             return args[0];
         }
 
+        @Override
         public Object text(Object... args) {
             return args[0];
         }
 
+        @Override
         public Object custom(Object... args) {
             return null;
         }

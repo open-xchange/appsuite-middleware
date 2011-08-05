@@ -70,57 +70,70 @@ public final class PagingImpl implements Paging {
         this.twitter4jPaging = twitter4jPaging;
     }
 
+    @Override
     public Paging count(final int count) {
         twitter4jPaging.setCount(count);
         return this;
     }
 
+    @Override
     public int getCount() {
         return twitter4jPaging.getCount();
     }
 
+    @Override
     public long getMaxId() {
         return twitter4jPaging.getMaxId();
     }
 
+    @Override
     public int getPage() {
         return twitter4jPaging.getPage();
     }
 
+    @Override
     public long getSinceId() {
         return twitter4jPaging.getSinceId();
     }
 
+    @Override
     public Paging maxId(final long maxId) {
         twitter4jPaging.setMaxId(maxId);
         return this;
     }
 
+    @Override
     public void setCount(final int count) {
         twitter4jPaging.setCount(count);
     }
 
+    @Override
     public void setMaxId(final long maxId) {
         twitter4jPaging.setMaxId(maxId);
     }
 
+    @Override
     public void setPage(final int page) {
         twitter4jPaging.setPage(page);
     }
 
+    @Override
     public void setSinceId(final int sinceId) {
         twitter4jPaging.setSinceId(sinceId);
     }
 
+    @Override
     public void setSinceId(final long sinceId) {
         twitter4jPaging.setSinceId(sinceId);
     }
 
+    @Override
     public Paging sinceId(final int sinceId) {
         twitter4jPaging.setSinceId(sinceId);
         return this;
     }
 
+    @Override
     public Paging sinceId(final long sinceId) {
         twitter4jPaging.setSinceId(sinceId);
         return this;

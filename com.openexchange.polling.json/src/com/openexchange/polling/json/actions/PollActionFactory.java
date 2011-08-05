@@ -17,7 +17,8 @@ public class PollActionFactory implements AJAXActionServiceFactory {
 		ACTIONS.put("get", new GetAction(services));
 	}
 
-	public AJAXActionService createActionService(String action)
+	@Override
+    public AJAXActionService createActionService(String action)
 			throws OXException {
 
 		return ACTIONS.get(action);

@@ -81,7 +81,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link IMAPActivator} - The {@link BundleActivator activator} for IMAP bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IMAPActivator extends HousekeepingActivator {

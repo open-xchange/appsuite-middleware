@@ -177,6 +177,7 @@ public final class MBoxEnabledCache {
             this.prefix = prefix;
         }
 
+        @Override
         public Boolean call() throws Exception {
             return Boolean.valueOf(!IMAPCommandsCollection.supportsFolderType(imapFolder, FOLDER_TYPE, prefix));
         }

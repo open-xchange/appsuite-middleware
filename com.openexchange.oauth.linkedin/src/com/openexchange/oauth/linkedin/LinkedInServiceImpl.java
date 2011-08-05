@@ -99,6 +99,7 @@ public class LinkedInServiceImpl implements LinkedInService{
     /* (non-Javadoc)
      * @see com.openexchange.oauth.linkedin.LinkedInService#getContacts(int, int, int)
      */
+    @Override
     public List<Contact> getContacts(String password, int user, int contextId, int accountId) {
         OAuthServiceMetaData linkedInMetaData = new OAuthServiceMetaDataLinkedInImpl(activator);
         List<Contact> contacts = new ArrayList<Contact>();
@@ -243,6 +244,7 @@ public class LinkedInServiceImpl implements LinkedInService{
         return textVal;
     }
 
+    @Override
     public String getAccountDisplayName(String password, int user, int contextId, int accountId) {
         String displayName="";
         try {

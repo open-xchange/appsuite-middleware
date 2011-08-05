@@ -123,6 +123,7 @@ public abstract class ServiceHolder<S> {
             this.trace = trace;
         }
 
+        @Override
         public Object invoke(final Object proxy, final Method m, final Object[] args) throws Throwable {
             if (delegate == null) {
                 throw new NullPointerException("Service is not available anymore. Forgot to unget and reacquire?");

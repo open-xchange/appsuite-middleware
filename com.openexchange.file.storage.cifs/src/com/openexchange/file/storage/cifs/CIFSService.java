@@ -107,26 +107,32 @@ public final class CIFSService implements FileStorageService {
                 this);
     }
 
+    @Override
     public String getId() {
         return CIFSConstants.ID;
     }
 
+    @Override
     public String getDisplayName() {
         return "CIFS/SMB File Storage Service";
     }
 
+    @Override
     public DynamicFormDescription getFormDescription() {
         return formDescription;
     }
 
+    @Override
     public Set<String> getSecretProperties() {
         return secretProperties;
     }
 
+    @Override
     public FileStorageAccountManager getAccountManager() {
         return accountManager;
     }
 
+    @Override
     public FileStorageAccountAccess getAccountAccess(final String accountId, final Session session) throws OXException {
         return new CIFSAccountAccess(this, accountManager.getAccount(accountId, session), session);
     }

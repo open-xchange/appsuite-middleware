@@ -71,6 +71,7 @@ public final class ProxyEventHandler implements EventHandler {
         super();
     }
 
+    @Override
     public void handleEvent(final Event event) {
         final String topic = event.getTopic();
         try {

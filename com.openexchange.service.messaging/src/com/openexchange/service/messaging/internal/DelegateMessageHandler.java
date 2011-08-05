@@ -82,6 +82,7 @@ public final class DelegateMessageHandler extends ServiceTracker implements Mess
         eventAdminRef = new AtomicReference<EventAdmin>();
     }
 
+    @Override
     public void handleMessage(final Message message) {
         final EventAdmin eventAdmin = eventAdminRef.get();
         if (null == eventAdmin) {

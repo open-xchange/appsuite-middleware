@@ -86,6 +86,7 @@ public class Activator implements BundleActivator {
      * (non-Javadoc)
      * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
      */
+    @Override
     public void start(BundleContext context) throws Exception {
         bundleContext = context;
         services = new ArrayList<ServiceRegistration>();
@@ -105,6 +106,7 @@ public class Activator implements BundleActivator {
      * (non-Javadoc)
      * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
      */
+    @Override
     public void stop(BundleContext context) throws Exception {
         while (!trackers.isEmpty()) {
             trackers.pop().close();

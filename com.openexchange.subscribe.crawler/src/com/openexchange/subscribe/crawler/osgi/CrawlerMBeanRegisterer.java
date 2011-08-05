@@ -90,6 +90,7 @@ public class CrawlerMBeanRegisterer implements ServiceTrackerCustomizer{
         this.activator = activator;
     }
 
+    @Override
     public Object addingService(ServiceReference reference) {
         final Object obj = context.getService(reference);
         lock.lock();
@@ -123,11 +124,13 @@ public class CrawlerMBeanRegisterer implements ServiceTrackerCustomizer{
     }
 
 
+    @Override
     public void modifiedService(ServiceReference reference, Object service) {
         // nothing to do here
     }
 
 
+    @Override
     public void removedService(ServiceReference reference, Object service) {
         lock.lock();
         try {

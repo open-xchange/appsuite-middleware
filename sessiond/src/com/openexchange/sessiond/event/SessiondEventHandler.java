@@ -145,6 +145,7 @@ public final class SessiondEventHandler implements EventHandler {
         return true;
     }
 
+    @Override
     public void handleEvent(final Event event) {
         final String topic = event.getTopic();
         if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {

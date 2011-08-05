@@ -77,6 +77,7 @@ public class CleanUpActivator implements BundleActivator {
 
     private Whiteboard whiteboard;
 
+    @Override
     public void start(final BundleContext context) throws Exception {
         whiteboard = new Whiteboard(context);
         final ContextService contexts = whiteboard.getService(ContextService.class);
@@ -105,6 +106,7 @@ public class CleanUpActivator implements BundleActivator {
         registrations.add(context.registerService(EventHandler.class.getName(), handler, serviceProperties));
     }
 
+    @Override
     public void stop(final BundleContext context) throws Exception {
         for (final ServiceRegistration registration : registrations) {
             registration.unregister();

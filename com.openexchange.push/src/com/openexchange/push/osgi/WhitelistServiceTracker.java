@@ -75,6 +75,7 @@ public final class WhitelistServiceTracker implements ServiceTrackerCustomizer {
         this.context = context;
     }
 
+    @Override
     public Object addingService(final ServiceReference reference) {
         final Object service = context.getService(reference);
         if (service instanceof ConfigurationService) {
@@ -103,10 +104,12 @@ public final class WhitelistServiceTracker implements ServiceTrackerCustomizer {
         return null;
     }
 
+    @Override
     public void modifiedService(final ServiceReference reference, final Object service) {
         // NOP
     }
 
+    @Override
     public void removedService(final ServiceReference reference, final Object service) {
         // no-op
     }

@@ -64,6 +64,7 @@ public class PublicationUsersCreatedAndLastModifiedColumn extends ExtendedColumn
         super(dbService);
     }
 
+    @Override
     public String[] getDependencies() {
         return new String[] { PublicationWithUsernameAndPasswordUpdateTaskRetry.class.getName() };
     }

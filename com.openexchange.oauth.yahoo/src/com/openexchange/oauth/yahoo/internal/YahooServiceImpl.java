@@ -94,6 +94,7 @@ public class YahooServiceImpl implements YahooService {
     /* (non-Javadoc)
      * @see com.openexchange.oauth.yahoo.YahooService#getContacts(java.lang.String, int, int, int)
      */
+    @Override
     public List<Contact> getContacts(String password, int user, int contextId, int accountId) {
         List<Contact> contacts = new ArrayList<Contact>();
         OAuthAccount account = null;
@@ -315,6 +316,7 @@ public class YahooServiceImpl implements YahooService {
         return oxContact;
     }
 
+    @Override
     public String getAccountDisplayName(String password, int user, int contextId, int accountId) {
         String displayName = "";
         try {

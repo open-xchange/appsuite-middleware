@@ -63,7 +63,7 @@ import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
 
 /**
  * {@link Activator} - Activator for JSON folder interface.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Activator extends AJAXModuleActivator {

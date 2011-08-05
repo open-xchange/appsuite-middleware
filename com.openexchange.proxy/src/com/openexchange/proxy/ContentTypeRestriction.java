@@ -109,6 +109,7 @@ public class ContentTypeRestriction implements Restriction {
         }
     }
 
+    @Override
     public boolean allow(final Response response) {
         final Header header = response.getResponseHeader(CONTENT_TYPE);
         final String lcValue;
@@ -174,6 +175,7 @@ public class ContentTypeRestriction implements Restriction {
         return (s.toString());
     }
 
+    @Override
     public String getDescription() {
         return "Content-Type header must be equal or match one of: " + contentTypes.toString();
     }

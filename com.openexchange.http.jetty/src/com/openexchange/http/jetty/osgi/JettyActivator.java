@@ -81,6 +81,7 @@ public class JettyActivator extends HousekeepingActivator{
 
             registerService(SystemNameService.class, new SystemNameService() {
 
+                @Override
                 public String getSystemName() {
                     return "IMPLEMENTME";
                 }

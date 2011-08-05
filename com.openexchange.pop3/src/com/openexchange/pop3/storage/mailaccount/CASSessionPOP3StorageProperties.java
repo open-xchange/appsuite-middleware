@@ -104,12 +104,14 @@ public final class CASSessionPOP3StorageProperties implements CASPOP3StorageProp
         map = new ConcurrentHashMap<String, AtomicReference<String>>();
     }
 
+    @Override
     public void addProperty(final String propertyName, final String propertyValue) throws OXException {
         final AtomicReference<String> ref = putIfAbsent(propertyName);
         ref.set(propertyValue);
         delegatee.addProperty(propertyName, propertyValue);
     }
 
+    @Override
     public boolean compareAndSetProperty(final String propertyName, final String expectedPropertyValue, final String newPropertyValue) throws OXException {
         final AtomicReference<String> ref = putIfAbsent(propertyName);
         final boolean success = ref.compareAndSet(expectedPropertyValue, newPropertyValue);
@@ -131,6 +133,7 @@ public final class CASSessionPOP3StorageProperties implements CASPOP3StorageProp
         return ref;
     }
 
+    @Override
     public String getProperty(final String propertyName) throws OXException {
         if (map.containsKey(propertyName)) {
             return map.get(propertyName).get();
@@ -143,6 +146,7 @@ public final class CASSessionPOP3StorageProperties implements CASPOP3StorageProp
         return value;
     }
 
+    @Override
     public void removeProperty(final String propertyName) throws OXException {
         map.remove(propertyName);
         delegatee.removeProperty(propertyName);

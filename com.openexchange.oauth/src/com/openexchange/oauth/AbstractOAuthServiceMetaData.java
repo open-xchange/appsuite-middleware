@@ -74,18 +74,22 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
         super();
     }
 
+    @Override
     public String getId() {
         return id;
     }
 
+    @Override
     public String getDisplayName() {
         return displayName;
     }
 
+    @Override
     public String getAPIKey() {
         return apiKey;
     }
 
+    @Override
     public String getAPISecret() {
         return apiSecret;
     }
@@ -126,30 +130,37 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
         this.apiSecret = apiSecret;
     }
 
+    @Override
     public void processArguments(final Map<String, Object> arguments, final Map<String, String> parameter, Map<String, Object> state) {
         // no-op
     }
 
+    @Override
     public OAuthToken getOAuthToken(final Map<String, Object> arguments) throws OXException {
         return null;
     }
 
+    @Override
     public OAuthInteraction initOAuth(String callbackUrl) throws OXException {
         return null;
     }
 
+    @Override
     public boolean needsRequestToken() {
         return true;
     }
 
+    @Override
     public String getScope() {
         return null;
     }
 
+    @Override
     public String processAuthorizationURL(final String authUrl) {
         return authUrl;
     }
 
+    @Override
     public String modifyCallbackURL(String callbackUrl) {
         return callbackUrl;
     }

@@ -75,13 +75,15 @@ public final class CalendarReminderDelete implements TargetService {
 		super();
 	}
 
-	public void updateTargetObject(final Context ctx, final Connection con, final int targetId)
+	@Override
+    public void updateTargetObject(final Context ctx, final Connection con, final int targetId)
 			throws OXException {
 		updateAppointmentReminder(con, -1, targetId, ctx.getContextId());
 		//updateAppointmentLastModified(con, targetId, ctx.getContextId());
 	}
 
-	public void updateTargetObject(final Context ctx, final Connection con, final int targetId, final int userId)
+	@Override
+    public void updateTargetObject(final Context ctx, final Connection con, final int targetId, final int userId)
 			throws OXException {
 		updateAppointmentReminder(con, userId, targetId, ctx.getContextId());
 		//updateAppointmentLastModified(con, targetId, ctx.getContextId());

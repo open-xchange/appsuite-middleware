@@ -73,6 +73,7 @@ public class PublicationUserDeleteListener implements DeleteListener {
     private PublicationTargetDiscoveryService discoveryService;
     private GenericConfigurationStorageService genConfStorage;
 
+    @Override
     public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
         if(event.getType() != DeleteEvent.TYPE_USER) {
             return;

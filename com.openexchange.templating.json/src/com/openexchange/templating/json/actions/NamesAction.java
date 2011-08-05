@@ -64,14 +64,14 @@ import com.openexchange.templating.json.TemplatingAJAXRequest;
 
 /**
  * {@link NamesAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class NamesAction extends AbstractTemplatingAction implements AJAXActionService {
 
     /**
      * Initializes a new {@link NamesAction}.
-     * 
+     *
      * @param services
      */
     public NamesAction(final ServiceLookup services) {

@@ -81,6 +81,7 @@ public class TrackingProvider implements ConfigProviderService {
         this.tracker = providers;
     }
 
+    @Override
     public BasicProperty get(final String property, int context, int user) throws OXException {
         ServiceReference[] serviceReferences = tracker.getServiceReferences();
         if(serviceReferences == null) {
@@ -88,6 +89,7 @@ public class TrackingProvider implements ConfigProviderService {
         }
         Arrays.sort(serviceReferences, new Comparator<ServiceReference>() {
 
+            @Override
             public int compare(ServiceReference o1, ServiceReference o2) {
                 Comparable p1 = (Comparable) o1.getProperty("priority");
                 Comparable p2 = (Comparable) o2.getProperty("priority");
@@ -120,26 +122,32 @@ public class TrackingProvider implements ConfigProviderService {
         if(first == null) {
             first = new BasicProperty() {
 
+                @Override
                 public String get() throws OXException {
                     return null;
                 }
 
+                @Override
                 public String get(String metadataName) throws OXException {
                     return null;
                 }
 
+                @Override
                 public boolean isDefined() throws OXException {
                     return false;
                 }
 
+                @Override
                 public void set(String value) throws OXException {
                     throw new UnsupportedOperationException("Can't save setting "+property+". No ConfigProvider is specified for this value");
                 }
 
+                @Override
                 public void set(String metadataName, String value) throws OXException {
                     throw new UnsupportedOperationException("Can't save metadata "+metadataName+" on property "+property+". No ConfigProvider is specified for this value");
                 }
 
+                @Override
                 public List<String> getMetadataNames() throws OXException {
                     return Collections.emptyList();
                 }
@@ -148,6 +156,7 @@ public class TrackingProvider implements ConfigProviderService {
         return first;
     }
 
+    @Override
     public Collection<String> getAllPropertyNames(int context, int user) throws OXException {
         Object[] services = tracker.getServices();
         if(services == null) {

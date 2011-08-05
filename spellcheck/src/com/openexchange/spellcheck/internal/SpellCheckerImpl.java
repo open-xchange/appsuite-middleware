@@ -180,7 +180,8 @@ public final class SpellCheckerImpl implements SpellChecker {
 	 *
 	 * @see com.openexchange.spellcheck.SpellCheck#addWord(java.lang.String[])
 	 */
-	public void addWord(final String... words) {
+	@Override
+    public void addWord(final String... words) {
 		if ((userDictionary != null) && (words.length > 0)) {
 			final int mlen = words.length - 1;
 			for (int i = 0; i < mlen; i++) {
@@ -195,7 +196,8 @@ public final class SpellCheckerImpl implements SpellChecker {
 	 *
 	 * @see com.openexchange.spellcheck.SpellCheck#removeWord(java.lang.String[])
 	 */
-	public void removeWord(final String... words) {
+	@Override
+    public void removeWord(final String... words) {
 		if ((userDictionary != null) && (words.length > 0)) {
 			final int mlen = words.length - 1;
 			for (int i = 0; i < mlen; i++) {
@@ -210,7 +212,8 @@ public final class SpellCheckerImpl implements SpellChecker {
 	 *
 	 * @see com.openexchange.spellcheck.SpellCheck#getUserWords()
 	 */
-	public List<String> getUserWords() {
+	@Override
+    public List<String> getUserWords() {
 		if (userDictionary != null) {
 			final List<String> l = userDictionary.getWords();
 			Collections.sort(l);
@@ -224,7 +227,8 @@ public final class SpellCheckerImpl implements SpellChecker {
 	 *
 	 * @see com.openexchange.spellcheck.SpellCheck#checkSpelling(java.lang.String)
 	 */
-	public SpellCheckError[] checkSpelling(final String text) {
+	@Override
+    public SpellCheckError[] checkSpelling(final String text) {
 		spellCheckListener.clearErrors();
 		spellChecker.checkSpelling(new StringWordTokenizer(text));
 		return spellCheckListener.getSpellCheckErrors();
@@ -235,7 +239,8 @@ public final class SpellCheckerImpl implements SpellChecker {
 	 *
 	 * @see com.openexchange.spellcheck.SpellCheck#checkSpelling(java.lang.String)
 	 */
-	public SpellCheckError[] checkSpelling(final Document document) {
+	@Override
+    public SpellCheckError[] checkSpelling(final Document document) {
 		spellCheckListener.clearErrors();
 		spellChecker.checkSpelling(new DocumentWordTokenizer(document));
 		return spellCheckListener.getSpellCheckErrors();
@@ -247,7 +252,8 @@ public final class SpellCheckerImpl implements SpellChecker {
 	 * @see com.openexchange.spellcheck.SpellCheck#getSuggestions(java.lang.String,
 	 *      int)
 	 */
-	public List<String> getSuggestions(final String word, final int threshold) {
+	@Override
+    public List<String> getSuggestions(final String word, final int threshold) {
 		final List<?> l = spellChecker.getSuggestions(word, threshold);
 		if (l != null) {
 			final List<String> retval = new ArrayList<String>(l.size());
@@ -264,7 +270,8 @@ public final class SpellCheckerImpl implements SpellChecker {
 	 *
 	 * @see com.openexchange.spellcheck.SpellCheck#isCorrect(java.lang.String)
 	 */
-	public boolean isCorrect(final String word) {
+	@Override
+    public boolean isCorrect(final String word) {
 		return spellChecker.isCorrect(word);
 	}
 
@@ -285,7 +292,8 @@ public final class SpellCheckerImpl implements SpellChecker {
 		 *
 		 * @see com.swabunga.spell.event.SpellCheckListener#spellingError(com.swabunga.spell.event.SpellCheckEvent)
 		 */
-		public void spellingError(final SpellCheckEvent event) {
+		@Override
+        public void spellingError(final SpellCheckEvent event) {
 			errors.add(_SpellCheckError.generateSpellCheckError(event));
 		}
 
@@ -334,15 +342,18 @@ public final class SpellCheckerImpl implements SpellChecker {
 			startPos = event.getWordContextPosition();
 		}
 
-		public String getInvalidWord() {
+		@Override
+        public String getInvalidWord() {
 			return invalidWord;
 		}
 
-		public List<String> getSuggestions() {
+		@Override
+        public List<String> getSuggestions() {
 			return suggestions;
 		}
 
-		public int getWordStartingPosition() {
+		@Override
+        public int getWordStartingPosition() {
 			return startPos;
 		}
 

@@ -66,10 +66,12 @@ public final class ImapIdleMailAccountDeleteListener implements MailAccountDelet
         super();
     }
 
+    @Override
     public void onAfterMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) {
         // Nothing to do
     }
 
+    @Override
     public void onBeforeMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) {
         if (ImapIdlePushListener.getAccountId() == id) {
             ImapIdlePushListenerRegistry.getInstance().purgeUserPushListener(cid, user);

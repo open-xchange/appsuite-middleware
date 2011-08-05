@@ -70,22 +70,27 @@ public class CustomizableDelta<T> implements Delta<T>{
         this.customizer = customizer;
     }
 
+    @Override
     public SearchIterator<T> getDeleted() {
         return new CustomizableSearchIterator<T>(delta.getDeleted(), customizer);
     }
 
+    @Override
     public SearchIterator<T> getModified() {
         return new CustomizableSearchIterator<T>(delta.getModified(), customizer);
     }
 
+    @Override
     public SearchIterator<T> getNew() {
         return new CustomizableSearchIterator<T>(delta.getNew(), customizer);
     }
 
+    @Override
     public SearchIterator<T> results() throws OXException {
         return new CustomizableSearchIterator<T>(delta.results(), customizer);
     }
 
+    @Override
     public long sequenceNumber() throws OXException {
         return delta.sequenceNumber();
     }

@@ -149,6 +149,7 @@ public class PublicationTargetWriterTest extends TestCase {
 
     private static final class TestTarget extends PublicationTarget implements UserSpecificPublicationTarget {
 
+        @Override
         public DynamicFormDescription getUserSpecificDescription(User user, UserConfiguration configuration) {
             return new DynamicFormDescription().add(FormElement.input("userSpecific", "User Specific"));
         }

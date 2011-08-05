@@ -66,6 +66,7 @@ public final class JdkCorrector implements LoggingCorrector {
         super();
     }
 
+    @Override
     public final void correct() {
         LogManager manager = LogManager.getLogManager();
         for (String className : new String[] { Constants.LOGIN_PERFORMER, Constants.SESSION_HANDLER }) {

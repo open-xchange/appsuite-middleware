@@ -66,17 +66,20 @@ public class OSGiServicePublisher implements ServicePublisher {
         this.context = context;
     }
 
+    @Override
     public void publishService(final Class<?> clazz, final Object service) {
         final ServiceRegistration registration = context.registerService(clazz.getName(), service, null);
         serviceRegistrations.put(service, registration);
     }
 
+    @Override
     public void removeService(final Class<?> clazz, final Object service) {
         final ServiceRegistration registration = serviceRegistrations.get(service);
         serviceRegistrations.remove(service);
         registration.unregister();
     }
 
+    @Override
     public void removeAllServices() {
         for(final ServiceRegistration registration : serviceRegistrations.values()) {
             registration.unregister();

@@ -94,6 +94,7 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
 
         configCascade.setStringParser(new StringParser() {
 
+            @Override
             public <T> T parse(final String s, final Class<T> t) {
                 final Object service = stringParsers.getService();
                 if(service == null) {
@@ -108,6 +109,7 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
 
         final ServiceTracker serverProviders = track(createFilter("server"), new ServiceTrackerCustomizer() {
 
+            @Override
             public Object addingService(final ServiceReference reference) {
                 final ConfigProviderService provider = (ConfigProviderService) context.getService(reference);
                 if (isServerProvider(reference)) {
@@ -119,10 +121,12 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
                 return provider;
             }
 
+            @Override
             public void modifiedService(final ServiceReference reference, final Object service) {
                 // IGNORE
             }
 
+            @Override
             public void removedService(final ServiceReference reference, final Object service) {
 
             }

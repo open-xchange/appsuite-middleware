@@ -74,6 +74,7 @@ public class CascadingConfigObjectRegistry implements ConfigObjectRegistry{
         this.pathMapping = pathMapping;
     }
 
+    @Override
     public Object get(String path) throws OXException {
         try {
             String configKey = transform(path);

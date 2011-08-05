@@ -117,6 +117,7 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
         }
     }
 
+    @Override
     public FileStorageAccountManager getAccountManagerFor(final FileStorageService service) throws OXException {
         FileStorageAccountManagerProvider candidate = null;
         for (final FileStorageAccountManagerProvider provider : providers) {
@@ -139,6 +140,7 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
             this.context = context;
         }
 
+        @Override
         public Object addingService(final ServiceReference reference) {
             final Object service = context.getService(reference);
             if ((service instanceof FileStorageAccountManagerProvider)) {
@@ -174,10 +176,12 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
             return null;
         }
 
+        @Override
         public void modifiedService(final ServiceReference reference, final Object service) {
             // Nothing to do
         }
 
+        @Override
         public void removedService(final ServiceReference reference, final Object service) {
             if (null != service) {
                 try {

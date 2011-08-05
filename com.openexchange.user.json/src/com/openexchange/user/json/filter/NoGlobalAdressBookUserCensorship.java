@@ -64,6 +64,7 @@ import com.openexchange.user.json.field.UserField;
  */
 public class NoGlobalAdressBookUserCensorship implements UserCensorship {
 
+    @Override
     public User censor(final User user) {
         return new FilteredUser(user);
     }
@@ -76,6 +77,7 @@ public class NoGlobalAdressBookUserCensorship implements UserCensorship {
             this.delegate = delegate;
         }
 
+        @Override
         public String[] getAliases() {
             if(UserField.isProtected(UserField.ALIASES.getColumn())) {
                 return null;
@@ -83,10 +85,12 @@ public class NoGlobalAdressBookUserCensorship implements UserCensorship {
             return delegate.getAliases();
         }
 
+        @Override
         public Map<String, Set<String>> getAttributes() {
             return Collections.emptyMap();
         }
 
+        @Override
         public int getContactId() {
             if(UserField.isProtected(UserField.CONTACT_ID.getColumn())) {
                 return -1;
@@ -94,6 +98,7 @@ public class NoGlobalAdressBookUserCensorship implements UserCensorship {
             return delegate.getContactId();
         }
 
+        @Override
         public String getDisplayName() {
             if(UserField.isProtected(UserField.DISPLAY_NAME.getColumn())) {
                 return null;
@@ -101,6 +106,7 @@ public class NoGlobalAdressBookUserCensorship implements UserCensorship {
             return delegate.getDisplayName();
         }
 
+        @Override
         public String getGivenName() {
             if(UserField.isProtected(UserField.FIRST_NAME.getColumn())) {
                 return null;
@@ -108,6 +114,7 @@ public class NoGlobalAdressBookUserCensorship implements UserCensorship {
             return delegate.getGivenName();
         }
 
+        @Override
         public int[] getGroups() {
             if(UserField.isProtected(UserField.GROUPS.getColumn())) {
                 return null;
@@ -115,6 +122,7 @@ public class NoGlobalAdressBookUserCensorship implements UserCensorship {
             return delegate.getGroups();
         }
 
+        @Override
         public int getId() {
             if(UserField.isProtected(UserField.ID.getColumn())) {
                 return -1;
@@ -122,14 +130,17 @@ public class NoGlobalAdressBookUserCensorship implements UserCensorship {
             return delegate.getId();
         }
 
+        @Override
         public String getImapLogin() {
             return null;
         }
 
+        @Override
         public String getImapServer() {
             return null;
         }
 
+        @Override
         public Locale getLocale() {
             if(UserField.isProtected(UserField.LOCALE.getColumn())) {
                 return null;
@@ -137,6 +148,7 @@ public class NoGlobalAdressBookUserCensorship implements UserCensorship {
             return delegate.getLocale();
         }
 
+        @Override
         public String getLoginInfo() {
             if(UserField.isProtected(UserField.LOGIN_INFO.getColumn())) {
                 return null;
@@ -144,30 +156,37 @@ public class NoGlobalAdressBookUserCensorship implements UserCensorship {
             return delegate.getLoginInfo();
         }
 
+        @Override
         public String getMail() {
             return null;
         }
 
+        @Override
         public String getMailDomain() {
             return null;
         }
 
+        @Override
         public String getPasswordMech() {
             return null;
         }
 
+        @Override
         public String getPreferredLanguage() {
             return null;
         }
 
+        @Override
         public int getShadowLastChange() {
             return -1;
         }
 
+        @Override
         public String getSmtpServer() {
             return null;
         }
 
+        @Override
         public String getSurname() {
             if(UserField.isProtected(UserField.LAST_NAME.getColumn())) {
                 return null;
@@ -175,6 +194,7 @@ public class NoGlobalAdressBookUserCensorship implements UserCensorship {
             return delegate.getSurname();
         }
 
+        @Override
         public String getTimeZone() {
             if(UserField.isProtected(UserField.TIME_ZONE.getColumn())) {
                 return null;
@@ -182,10 +202,12 @@ public class NoGlobalAdressBookUserCensorship implements UserCensorship {
             return delegate.getTimeZone();
         }
 
+        @Override
         public String getUserPassword() {
             return null;
         }
 
+        @Override
         public boolean isMailEnabled() {
             return false;
         }

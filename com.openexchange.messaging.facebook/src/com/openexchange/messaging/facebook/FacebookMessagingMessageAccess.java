@@ -138,6 +138,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
         return this;
     }
 
+    @Override
     public MessagingPart getAttachment(final String folder, final String messageId, final String sectionId) throws OXException {
         final AttachmentFinderHandler handler = new AttachmentFinderHandler(sectionId);
         new MessageParser().parseMessage(getMessage(folder, messageId, true), handler);
@@ -148,6 +149,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
         return part;
     }
 
+    @Override
     public void appendMessages(final String folder, final MessagingMessage[] messages) throws OXException {
         if (!KNOWN_FOLDER_IDS.contains(folder)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
@@ -160,6 +162,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(FacebookMessagingService.getServiceId());
     }
 
+    @Override
     public List<String> copyMessages(final String sourceFolder, final String destFolder, final String[] messageIds, final boolean fast) throws OXException {
         if (!KNOWN_FOLDER_IDS.contains(sourceFolder)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
@@ -180,6 +183,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(FacebookMessagingService.getServiceId());
     }
 
+    @Override
     public void deleteMessages(final String folder, final String[] messageIds, final boolean hardDelete) throws OXException {
         if (!KNOWN_FOLDER_IDS.contains(folder)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
@@ -194,6 +198,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
 
     private static final EnumSet<MessagingField> SET_FULL = EnumSet.of(MessagingField.FULL);
 
+    @Override
     public MessagingMessage getMessage(final String folder, final String id, final boolean peek) throws OXException {
         final FacebookMessagingMessage message;
         {
@@ -238,10 +243,12 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
 
     private static final EnumSet<MessagingField> SET_ID = EnumSet.of(MessagingField.ID);
 
+    @Override
     public List<MessagingMessage> getAllMessages(final String folder, final IndexRange indexRange, final MessagingField sortField, final OrderDirection order, final MessagingField... fields) throws OXException {
         return searchMessages(folder, indexRange, sortField, order, null, fields);
     }
 
+    @Override
     public List<MessagingMessage> getMessages(final String folder, final String[] messageIds, final MessagingField[] fields) throws OXException {
         if (!KNOWN_FOLDER_IDS.contains(folder)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
@@ -431,6 +438,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
         return message;
     }
 
+    @Override
     public List<String> moveMessages(final String sourceFolder, final String destFolder, final String[] messageIds, final boolean fast) throws OXException {
         if (!KNOWN_FOLDER_IDS.contains(sourceFolder)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
@@ -451,6 +459,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(FacebookMessagingService.getServiceId());
     }
 
+    @Override
     public MessagingMessage perform(final String folder, final String id, final String action) throws OXException {
         /*
          * No supported actions for this perform() method
@@ -458,6 +467,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
         throw MessagingExceptionCodes.UNKNOWN_ACTION.create(action);
     }
 
+    @Override
     public MessagingMessage perform(final String action) throws OXException {
         /*
          * No supported actions for this perform() method
@@ -465,6 +475,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
         throw MessagingExceptionCodes.UNKNOWN_ACTION.create(action);
     }
 
+    @Override
     public MessagingMessage perform(final MessagingMessage message, final String action) throws OXException {
         if (FacebookConstants.TYPE_UPDATE_STATUS.equalsIgnoreCase(action)) {
             try {
@@ -507,6 +518,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
         throw MessagingExceptionCodes.UNKNOWN_ACTION.create(action);
     }
 
+    @Override
     public List<MessagingMessage> searchMessages(final String folder, final IndexRange indexRange, final MessagingField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MessagingField[] fields) throws OXException {
         if (!KNOWN_FOLDER_IDS.contains(folder)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
@@ -889,6 +901,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
         }
     } // End of method check()
 
+    @Override
     public void updateMessage(final MessagingMessage message, final MessagingField[] fields) throws OXException {
         if (!KNOWN_FOLDER_IDS.contains(message.getFolder())) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
@@ -919,6 +932,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
         return facebookUserId;
     }
 
+    @Override
     public MessagingContent resolveContent(final String folder, final String id, final String referenceId) throws OXException {
         throw new UnsupportedOperationException();
     }

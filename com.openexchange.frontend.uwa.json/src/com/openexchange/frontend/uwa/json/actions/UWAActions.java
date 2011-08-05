@@ -75,6 +75,7 @@ public class UWAActions implements AJAXActionServiceFactory {
         actions.put("delete", new DeleteAction(factory));
     }
 
+    @Override
     public AJAXActionService createActionService(String action) throws OXException {
         if (!actions.containsKey(action)) {
             throw AjaxExceptionCodes.UnknownAction.create( action);

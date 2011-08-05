@@ -95,14 +95,17 @@ private final Activator activator;
         source.setFormDescription(form);
     }
 
+    @Override
     public Collection<?> getContent(Subscription subscription) throws OXException {
         return activator.getYahooService().getContacts(subscription.getSecret(), subscription.getUserId(), subscription.getContext().getContextId(), (Integer)subscription.getConfiguration().get("account"));
     }
 
+    @Override
     public SubscriptionSource getSubscriptionSource() {
         return source;
     }
 
+    @Override
     public boolean handles(int folderModule) {
         return FolderObject.CONTACT == folderModule;
     }

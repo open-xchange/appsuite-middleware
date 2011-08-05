@@ -129,6 +129,7 @@ public final class IMAPFolderConverter {
             this.separator = separator;
         }
 
+        @Override
         public Object[] getArguments(final IMAPServer imapServer) throws OXException {
             return imapServer.getArguments(accountId, imapServerAddress, sessionUser, fullname, separator);
         }
@@ -490,6 +491,7 @@ public final class IMAPFolderConverter {
     private static void checkSubfoldersByCommands(final IMAPFolder imapFolder, final IMAPMailFolder mailFolder, final String fullname, final char separator, final boolean checkSubscribed) throws MessagingException {
         final ListInfo[] li = (ListInfo[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
+            @Override
             public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
                 final String pattern = mailFolder.isRootFolder() ? "%" : new StringBuilder().append(fullname).append(separator).append('%').toString();
                 if (checkSubscribed) {

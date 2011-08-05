@@ -302,18 +302,22 @@ public final class NamespaceFoldersCache {
             return tmp;
         }
 
+        @Override
         public CacheKey getKey() {
             return getKeyInternal();
         }
 
+        @Override
         public String[] getValue() {
             return fullnames;
         }
 
+        @Override
         public void setValue(final String[] value) {
             fullnames = value;
         }
 
+        @Override
         public Class<String[]> getEntryClass() {
             return String[].class;
         }

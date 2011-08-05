@@ -119,6 +119,7 @@ public class OSGIEventAdminLookup {
             this.context = context;
         }
 
+        @Override
         public Object addingService(final ServiceReference reference) {
             final Object service = context.getService(reference);
             if ((service instanceof EventAdmin)) {
@@ -132,10 +133,12 @@ public class OSGIEventAdminLookup {
             return null;
         }
 
+        @Override
         public void modifiedService(final ServiceReference reference, final Object service) {
             // Nothing to do
         }
 
+        @Override
         public void removedService(final ServiceReference reference, final Object service) {
             if (null != service) {
                 try {

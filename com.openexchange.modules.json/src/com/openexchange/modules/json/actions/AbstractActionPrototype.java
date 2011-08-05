@@ -80,6 +80,7 @@ public abstract class AbstractActionPrototype<T extends Model<T>> implements AJA
     }
 
 
+    @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         final RequestPrototype<T> req = createRequest(request, parser, session);
         try {

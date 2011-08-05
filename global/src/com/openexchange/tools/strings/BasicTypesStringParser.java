@@ -57,6 +57,7 @@ package com.openexchange.tools.strings;
  */
 public class BasicTypesStringParser implements StringParser {
 
+    @Override
     public <T> T parse(String s, Class<T> t) {
         if(s == null) {
             return null;

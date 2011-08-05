@@ -132,7 +132,7 @@ public final class NewAction extends AbstractAppointmentAction {
         }
 
         return new AJAXRequestResult(jsonResponseObj, timestamp, "json");
-        
+
     }
 
 }

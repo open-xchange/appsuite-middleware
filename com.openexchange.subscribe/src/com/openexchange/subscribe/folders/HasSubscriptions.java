@@ -77,14 +77,17 @@ public class HasSubscriptions implements AdditionalFolderField {
         this.discovery = discovery;
     }
 
+    @Override
     public int getColumnID() {
         return 3020;
     }
 
+    @Override
     public String getColumnName() {
         return "com.openexchange.subscribe.subscriptionFlag";
     }
 
+    @Override
     public Object getValue(final FolderObject folder, final ServerSession session) {
         if (!session.getUserConfiguration().isSubscription()) {
             return Boolean.FALSE;
@@ -114,6 +117,7 @@ public class HasSubscriptions implements AdditionalFolderField {
         return Boolean.FALSE;
     }
 
+    @Override
     public Object renderJSON(final Object value) {
         return value;
     }

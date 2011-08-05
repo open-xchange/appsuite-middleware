@@ -54,7 +54,7 @@ import com.openexchange.group.json.GroupActionFactory;
 
 /**
  * {@link GroupJSONActivator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class GroupJSONActivator extends AJAXModuleActivator {

@@ -133,6 +133,7 @@ public final class CIFSAccountAccess implements FileStorageAccountAccess {
         return session;
     }
 
+    @Override
     public void connect() throws OXException {
         if (connected.compareAndSet(false, true)) {
             final Map<String, Object> configuration = account.getConfiguration();
@@ -157,10 +158,12 @@ public final class CIFSAccountAccess implements FileStorageAccountAccess {
         }
     }
 
+    @Override
     public boolean isConnected() {
         return connected.get();
     }
 
+    @Override
     public void close() {
         if (connected.compareAndSet(true, false)) {
             rootUrl = null;
@@ -172,6 +175,7 @@ public final class CIFSAccountAccess implements FileStorageAccountAccess {
         }
     }
 
+    @Override
     public boolean ping() throws OXException {
         final Map<String, Object> configuration = account.getConfiguration();
         String url = (String) configuration.get(CIFSConstants.CIFS_URL);
@@ -202,14 +206,17 @@ public final class CIFSAccountAccess implements FileStorageAccountAccess {
         }
     }
 
+    @Override
     public boolean cacheable() {
         return true;
     }
 
+    @Override
     public String getAccountId() {
         return account.getId();
     }
 
+    @Override
     public FileStorageFolderAccess getFolderAccess() throws OXException {
         if (!connected.get()) {
             throw FileStorageExceptionCodes.NOT_CONNECTED.create();
@@ -226,6 +233,7 @@ public final class CIFSAccountAccess implements FileStorageAccountAccess {
         return tmp;
     }
 
+    @Override
     public FileStorageFileAccess getFileAccess() throws OXException {
         if (!connected.get()) {
             throw FileStorageExceptionCodes.NOT_CONNECTED.create();
@@ -242,11 +250,13 @@ public final class CIFSAccountAccess implements FileStorageAccountAccess {
         return tmp;
     }
 
+    @Override
     public FileStorageFolder getRootFolder() throws OXException {
         connect();
         return getFolderAccess().getRootFolder();
     }
 
+    @Override
     public FileStorageService getService() {
         return service;
     }

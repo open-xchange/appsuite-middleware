@@ -75,16 +75,19 @@ public class RegistryCustomizer<T> implements ServiceTrackerCustomizer {
         this.clazz = clazz;
     }
 
+    @Override
     public Object addingService(final ServiceReference serviceReference) {
         final Object service = context.getService(serviceReference);
         PushServiceRegistry.getServiceRegistry().addService(clazz, service);
         return service;
     }
 
+    @Override
     public void modifiedService(final ServiceReference serviceReference, final Object o) {
         // Nothing to do
     }
 
+    @Override
     public void removedService(final ServiceReference serviceReference, final Object o) {
         PushServiceRegistry.getServiceRegistry().removeService(clazz);
         context.ungetService(serviceReference);

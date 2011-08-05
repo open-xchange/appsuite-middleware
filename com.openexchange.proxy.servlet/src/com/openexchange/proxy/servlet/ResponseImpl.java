@@ -74,14 +74,17 @@ public final class ResponseImpl implements Response {
         this.httpMethod = httpMethod;
     }
 
+    @Override
     public int getStatusCode() {
         return httpMethod.getStatusCode();
     }
 
+    @Override
     public String getStatusText() {
         return httpMethod.getStatusText();
     }
 
+    @Override
     public Header[] getResponseHeaders() {
         final org.apache.commons.httpclient.Header[] headers = httpMethod.getResponseHeaders();
         if (null == headers) {
@@ -95,10 +98,12 @@ public final class ResponseImpl implements Response {
         return ret;
     }
 
+    @Override
     public Header getResponseHeader(final String headerName) {
         return new HeaderImpl(httpMethod.getResponseHeader(headerName));
     }
 
+    @Override
     public Header[] getResponseHeaders(final String headerName) {
         final org.apache.commons.httpclient.Header[] headers = httpMethod.getResponseHeaders(headerName);
         if (null == headers) {
@@ -112,6 +117,7 @@ public final class ResponseImpl implements Response {
         return ret;
     }
 
+    @Override
     public Header[] getResponseFooters() {
         final org.apache.commons.httpclient.Header[] headers = httpMethod.getResponseFooters();
         if (null == headers) {
@@ -125,18 +131,22 @@ public final class ResponseImpl implements Response {
         return ret;
     }
 
+    @Override
     public Header getResponseFooter(final String footerName) {
         return new HeaderImpl(httpMethod.getResponseFooter(footerName));
     }
 
+    @Override
     public byte[] getResponseBody() throws IOException {
         return httpMethod.getResponseBody();
     }
 
+    @Override
     public String getResponseBodyAsString() throws IOException {
         return httpMethod.getResponseBodyAsString();
     }
 
+    @Override
     public InputStream getResponseBodyAsStream() throws IOException {
         return httpMethod.getResponseBodyAsStream();
     }

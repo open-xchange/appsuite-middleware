@@ -67,14 +67,17 @@ public class SimEntry<T1, T2> implements Map.Entry<T1, T2>{
         this.value = value;
     }
 
+    @Override
     public T1 getKey() {
         return key;
     }
 
+    @Override
     public T2 getValue() {
         return value;
     }
 
+    @Override
     public T2 setValue(final T2 value) {
         final T2 old = this.value;
         this.value = value;

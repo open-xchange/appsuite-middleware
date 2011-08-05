@@ -78,10 +78,12 @@ public class Results {
             // Do Noting
         }
 
+        @Override
         public SearchIterator<T> results() throws OXException {
             return emptyIterator();
         }
 
+        @Override
         public long sequenceNumber() throws OXException {
             return 0;
         }
@@ -94,22 +96,27 @@ public class Results {
             // Do Nothing
         }
 
+        @Override
         public SearchIterator<T> getDeleted() {
             return emptyIterator();
         }
 
+        @Override
         public SearchIterator<T> getModified() {
             return emptyIterator();
         }
 
+        @Override
         public SearchIterator<T> getNew() {
             return emptyIterator();
         }
 
+        @Override
         public SearchIterator<T> results() throws OXException {
             return emptyIterator();
         }
 
+        @Override
         public long sequenceNumber() throws OXException {
             return 0;
         }

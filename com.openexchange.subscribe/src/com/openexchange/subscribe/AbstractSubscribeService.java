@@ -75,11 +75,13 @@ public abstract class AbstractSubscribeService implements SubscribeService {
 
     public static FolderService FOLDERS;
 
+    @Override
     public Collection<Subscription> loadSubscriptions(final Context ctx, final String folderId, final String secret) throws OXException {
         final List<Subscription> allSubscriptions = STORAGE.getSubscriptions(ctx, folderId);
         return prepareSubscriptions(allSubscriptions, secret, ctx, -1);
     }
 
+    @Override
     public Collection<Subscription> loadSubscriptions(final Context context, final int userId, final String secret) throws OXException {
         final List<Subscription> allSubscriptions = STORAGE.getSubscriptionsOfUser(context, userId);
         return prepareSubscriptions(allSubscriptions, secret, context, userId);
@@ -118,6 +120,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
     }
 
 
+    @Override
     public Subscription loadSubscription(final Context ctx, final int subscriptionId, final String secret) throws OXException {
         final Subscription subscription = STORAGE.getSubscription(ctx, subscriptionId);
         subscription.setSecret(secret);
@@ -125,16 +128,19 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         return subscription;
     }
 
+    @Override
     public void subscribe(final Subscription subscription) throws OXException {
         modifyIncoming(subscription);
         STORAGE.rememberSubscription(subscription);
         modifyOutgoing(subscription);
     }
 
+    @Override
     public void unsubscribe(final Subscription subscription) throws OXException {
         STORAGE.forgetSubscription(subscription);
     }
 
+    @Override
     public void update(final Subscription subscription) throws OXException {
         modifyIncoming(subscription);
         STORAGE.updateSubscription(subscription);
@@ -149,6 +155,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
 
     }
 
+    @Override
     public boolean knows(final Context ctx, final int subscriptionId) throws OXException {
         final Subscription subscription = STORAGE.getSubscription(ctx, subscriptionId);
         if (subscription == null) {
@@ -203,6 +210,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         }
     }
 
+    @Override
     public String checkSecretCanDecryptPasswords(final Context context, final User user, final String secret) throws OXException {
         final Set<String> passwordFields = getSubscriptionSource().getPasswordFields();
         if (passwordFields.isEmpty()) {
@@ -226,6 +234,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         return null;
     }
 
+    @Override
     public void migrateSecret(final Context context, final User user, final String oldSecret, final String newSecret) throws OXException {
         final Set<String> passwordFields = getSubscriptionSource().getPasswordFields();
         if (passwordFields.isEmpty()) {

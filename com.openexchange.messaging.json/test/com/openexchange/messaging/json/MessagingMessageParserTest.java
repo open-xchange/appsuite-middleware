@@ -322,14 +322,17 @@ public class MessagingMessageParserTest extends TestCase {
 
     private static final class ReversedContentParser implements MessagingContentParser {
 
+        @Override
         public int getRanking() {
             return 2;
         }
 
+        @Override
         public boolean handles(final MessagingBodyPart partlyParsedMessage, final Object content) throws OXException {
             return partlyParsedMessage.getContentType().getBaseType().equals("text/plain");
         }
 
+        @Override
         public MessagingContent parse(final MessagingBodyPart partlyParsedMessage, final Object content, final MessagingInputStreamRegistry registry) throws JSONException, OXException, IOException {
             return new StringContent(new StringBuilder((String)content).reverse().toString());
         }
@@ -370,6 +373,7 @@ public class MessagingMessageParserTest extends TestCase {
 
         private Object id;
 
+        @Override
         public InputStream get(final Object id) throws OXException, IOException {
             this.id = id;
             return new ByteArrayInputStream("Mock value".getBytes("UTF-8"));

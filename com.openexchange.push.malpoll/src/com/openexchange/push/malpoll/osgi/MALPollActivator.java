@@ -301,6 +301,7 @@ public final class MALPollActivator extends DeferredActivator {
 
                 private final Executor executor = timerService.getExecutor();
 
+                @Override
                 public void start(final MALPollPushListener l) {
                     /*
                      * Delegate execution to Executor instance
@@ -314,6 +315,7 @@ public final class MALPollActivator extends DeferredActivator {
              */
             starter = new Starter() {
 
+                @Override
                 public void start(final MALPollPushListener l) {
                     /*
                      * Execute in current thread
@@ -331,6 +333,7 @@ public final class MALPollActivator extends DeferredActivator {
          */
         final Runnable r = new Runnable() {
 
+            @Override
             public void run() {
                 try {
                     for (final Iterator<MALPollPushListener> pushListeners = MALPollPushListenerRegistry.getInstance().getPushListeners(); pushListeners.hasNext();) {

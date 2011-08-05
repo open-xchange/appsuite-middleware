@@ -87,10 +87,12 @@ public class AddressHeaderWriter implements MessagingHeaderWriter {
         "Resent-Cc".toLowerCase(Locale.US),
         "Resent-Bcc".toLowerCase(Locale.US)));
 
+    @Override
     public int getRanking() {
         return 1;
     }
 
+    @Override
     public boolean handles(final Entry<String, Collection<MessagingHeader>> entry) {
         final String name = entry.getKey();
         if (null == name) {
@@ -99,10 +101,12 @@ public class AddressHeaderWriter implements MessagingHeaderWriter {
         return WHITELIST.contains(name.toLowerCase(Locale.US));
     }
 
+    @Override
     public String writeKey(final Entry<String, Collection<MessagingHeader>> entry) throws JSONException, OXException {
         return entry.getKey();
     }
 
+    @Override
     public Object writeValue(final Entry<String, Collection<MessagingHeader>> entry, final ServerSession session) throws JSONException, OXException {
         final JSONArray addresses = new JSONArray();
         for (final MessagingHeader address : entry.getValue()) {

@@ -68,6 +68,7 @@ public enum IMAPServer {
      */
     COURIER("Courier", CourierEntity2ACL.getInstance(), new ArgumentGenerator() {
 
+        @Override
         public Object[] getArguments(final int accountId, final InetSocketAddress imapServerAddress, final int sessionUser, final String fullname, final char separator) {
             return new Object[] {
                 Integer.valueOf(accountId), imapServerAddress, Integer.valueOf(sessionUser), fullname, Character.valueOf(separator) };
@@ -84,6 +85,7 @@ public enum IMAPServer {
      */
     CYRUS("Cyrus", CyrusEntity2ACL.getInstance(), new ArgumentGenerator() {
 
+        @Override
         public Object[] getArguments(final int accountId, final InetSocketAddress imapServerAddress, final int sessionUser, final String fullname, final char separator) {
             return new Object[] { Integer.valueOf(accountId), imapServerAddress, Integer.valueOf(sessionUser) };
         }
@@ -99,6 +101,7 @@ public enum IMAPServer {
      */
     DOVECOT("Dovecot", DovecotEntity2ACL.getInstance(), new ArgumentGenerator() {
 
+        @Override
         public Object[] getArguments(final int accountId, final InetSocketAddress imapServerAddress, final int sessionUser, final String fullname, final char separator) {
             return new Object[] {
                 Integer.valueOf(accountId), imapServerAddress, Integer.valueOf(sessionUser), fullname, Character.valueOf(separator) };
@@ -115,6 +118,7 @@ public enum IMAPServer {
      */
     SUN_MESSAGING_SERVER("Sun", SUNMessagingServerEntity2ACL.getInstance(), new ArgumentGenerator() {
 
+        @Override
         public Object[] getArguments(final int accountId, final InetSocketAddress imapServerAddress, final int sessionUser, final String fullname, final char separator) {
             return new Object[] { Integer.valueOf(accountId), imapServerAddress, Integer.valueOf(sessionUser) };
         }
@@ -130,6 +134,7 @@ public enum IMAPServer {
      */
     MDAEMON("MDaemon", MDaemonEntity2ACL.getInstance(), new ArgumentGenerator() {
 
+        @Override
         public Object[] getArguments(final int accountId, final InetSocketAddress imapServerAddress, final int sessionUser, final String fullname, final char separator) {
             return new Object[] { Integer.valueOf(accountId), imapServerAddress, Integer.valueOf(sessionUser) };
         }

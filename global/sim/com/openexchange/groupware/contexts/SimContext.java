@@ -72,50 +72,62 @@ public class SimContext implements Context {
         this.id = id;
     }
 
+    @Override
     public int getContextId() {
         return id;
     }
 
+    @Override
     public String[] getFileStorageAuth() {
         return null;
     }
 
+    @Override
     public long getFileStorageQuota() {
         return 0;
     }
 
+    @Override
     public int getFilestoreId() {
         return 0;
     }
 
+    @Override
     public String getFilestoreName() {
         return null;
     }
 
+    @Override
     public String[] getLoginInfo() {
         return null;
     }
 
+    @Override
     public int getMailadmin() {
         return 0;
     }
 
+    @Override
     public String getName() {
         return null;
     }
 
+    @Override
     public boolean isEnabled() {
         return false;
     }
 
+    @Override
     public boolean isUpdating() {
         return false;
     }
 
+    @Override
     public boolean isReadOnly() {
         return false;
     }
 
+    @Override
     public Map<String, Set<String>> getAttributes() {
         return attributes;
     }

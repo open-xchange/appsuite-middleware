@@ -68,10 +68,12 @@ public class SubscriptionSourceMultipleFactory implements MultipleHandlerFactory
         this.discoverer = discoverer;
     }
 
+    @Override
     public MultipleHandler createMultipleHandler() {
         return new SubscriptionSourceMultipleHandler(discoverer);
     }
 
+    @Override
     public String getSupportedModule() {
         return "subscriptionSources";
     }

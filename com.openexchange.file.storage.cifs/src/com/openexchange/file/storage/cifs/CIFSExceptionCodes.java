@@ -121,22 +121,27 @@ public enum CIFSExceptionCodes implements OXExceptionCode {
         display = category.getLogLevel().implies(LogLevel.DEBUG);
     }
 
+    @Override
     public Category getCategory() {
         return category;
     }
 
+    @Override
     public String getMessage() {
         return message;
     }
 
+    @Override
     public int getNumber() {
         return detailNumber;
     }
 
+    @Override
     public String getPrefix() {
         return "CIFS";
     }
 
+    @Override
     public boolean equals(final OXException e) {
         return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }

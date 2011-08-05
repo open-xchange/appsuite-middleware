@@ -80,6 +80,7 @@ public final class UpdateAction extends AbstractOAuthAJAXActionService {
         super();
     }
 
+    @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         try {
             /*

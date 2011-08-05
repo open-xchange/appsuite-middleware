@@ -81,6 +81,7 @@ public class CombinedSearchIterator<T> implements SearchIterator<T> {
 
     private boolean next = false;
 
+    @Override
     public boolean hasNext() throws OXException{
         if (iterators.length == 0) {
             return false;
@@ -96,6 +97,7 @@ public class CombinedSearchIterator<T> implements SearchIterator<T> {
         return next;
     }
 
+    @Override
     public T next() throws OXException {
         if (iterators.length == 0 || !next) {
             throw SearchIteratorException.Code.NO_SUCH_ELEMENT.create("NON");
@@ -103,12 +105,14 @@ public class CombinedSearchIterator<T> implements SearchIterator<T> {
         return iterators[i].next();
     }
 
+    @Override
     public void close() throws OXException {
         for (final SearchIterator<T> iter : iterators) {
             iter.close();
         }
     }
 
+    @Override
     public int size() {
         return -1;
     }
@@ -117,10 +121,12 @@ public class CombinedSearchIterator<T> implements SearchIterator<T> {
         return false;
     }
 
+    @Override
     public void addWarning(final OXException warning) {
         throw new UnsupportedOperationException("Mehtod addWarning() not implemented");
     }
 
+    @Override
     public OXException[] getWarnings() {
         if (null == warnings) {
             if (iterators.length == 0) {
@@ -138,6 +144,7 @@ public class CombinedSearchIterator<T> implements SearchIterator<T> {
         return warnings.length == 0 ? null : warnings;
     }
 
+    @Override
     public boolean hasWarnings() {
         if (null == hasWarnings) {
             if (iterators.length == 0) {

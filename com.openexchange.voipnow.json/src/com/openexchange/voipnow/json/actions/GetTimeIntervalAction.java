@@ -97,6 +97,7 @@ public class GetTimeIntervalAction extends AbstractVoipNowSOAPAction<PBXInterfac
         return new PBXPort(getWsdlLocation()).getPBXPort();
     }
 
+    @Override
     public AJAXRequestResult perform(AJAXRequestData ajaxRequest, ServerSession session) throws OXException {
 
 		String userId = String.valueOf(getMainExtensionIDOfSessionUser(session.getUser(), session.getContextId()));

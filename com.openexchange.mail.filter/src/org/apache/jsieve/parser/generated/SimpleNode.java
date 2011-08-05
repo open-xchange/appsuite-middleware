@@ -17,16 +17,21 @@ public class SimpleNode extends org.apache.jsieve.parser.SieveNode implements No
     parser = p;
   }
 
-  public void jjtOpen() {
+  @Override
+public void jjtOpen() {
   }
 
-  public void jjtClose() {
+  @Override
+public void jjtClose() {
   }
 
-  public void jjtSetParent(Node n) { parent = n; }
-  public Node jjtGetParent() { return parent; }
+  @Override
+public void jjtSetParent(Node n) { parent = n; }
+  @Override
+public Node jjtGetParent() { return parent; }
 
-  public void jjtAddChild(Node n, int i) {
+  @Override
+public void jjtAddChild(Node n, int i) {
     if (children == null) {
       children = new Node[i + 1];
     } else if (i >= children.length) {
@@ -37,16 +42,19 @@ public class SimpleNode extends org.apache.jsieve.parser.SieveNode implements No
     children[i] = n;
   }
 
-  public Node jjtGetChild(int i) {
+  @Override
+public Node jjtGetChild(int i) {
     return children[i];
   }
 
-  public int jjtGetNumChildren() {
+  @Override
+public int jjtGetNumChildren() {
     return (children == null) ? 0 : children.length;
   }
 
   /** Accept the visitor. **/
-  public Object jjtAccept(SieveParserVisitor visitor, Object data) throws org.apache.jsieve.SieveException {
+  @Override
+public Object jjtAccept(SieveParserVisitor visitor, Object data) throws org.apache.jsieve.SieveException {
     return visitor.visit(this, data);
   }
 

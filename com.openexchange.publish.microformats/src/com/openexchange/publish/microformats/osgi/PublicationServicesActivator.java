@@ -75,6 +75,7 @@ public class PublicationServicesActivator implements BundleActivator {
 
     private OXMFPublicationService infostorePublisher;
 
+    @Override
     public void start(BundleContext context) throws Exception {
         contactPublisher = new OXMFPublicationService();
         contactPublisher.setFolderType("contacts");
@@ -108,6 +109,7 @@ public class PublicationServicesActivator implements BundleActivator {
 
     }
 
+    @Override
     public void stop(BundleContext context) throws Exception {
         for (ServiceRegistration registration : serviceRegistrations) {
             registration.unregister();

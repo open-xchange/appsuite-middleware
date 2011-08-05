@@ -138,6 +138,7 @@ public class TimeSpanParser  implements StringParser {
         add(Date.class);
     }};
 
+    @Override
     public <T> T parse(String s, Class<T> t) {
         if(!SUPPORTED.contains(t)) {
             return null;

@@ -98,6 +98,7 @@ public class FacebookSubscribeService extends AbstractSubscribeService {
         source.setFormDescription(form);
     }
 
+    @Override
     public Collection<?> getContent(Subscription subscription) throws OXException {
         return facebookService.getContacts(
             subscription.getSecret(),
@@ -106,10 +107,12 @@ public class FacebookSubscribeService extends AbstractSubscribeService {
             (Integer) subscription.getConfiguration().get("account"));
     }
 
+    @Override
     public SubscriptionSource getSubscriptionSource() {
         return source;
     }
 
+    @Override
     public boolean handles(int folderModule) {
         return FolderObject.CONTACT == folderModule;
     }

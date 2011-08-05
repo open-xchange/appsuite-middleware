@@ -69,6 +69,7 @@ public class WidgetSQLStorage extends UserScopedStorage<UWAWidget> {
 
     private static final AttributeHandler<UWAWidget> TURN_ID_TO_INT = new AttributeHandler<UWAWidget>() {
 
+        @Override
         public Object handle(Attribute<UWAWidget> attr, Object... args) {
             if(attr == UWAWidget.Field.ID) {
                 return Integer.parseInt((String)args[0]);
@@ -80,6 +81,7 @@ public class WidgetSQLStorage extends UserScopedStorage<UWAWidget> {
 
     private static final AttributeHandler<UWAWidget> TURN_ID_TO_STRING = new AttributeHandler<UWAWidget>() {
 
+        @Override
         public Object handle(Attribute<UWAWidget> attr, Object... args) {
             if(attr == UWAWidget.Field.ID) {
                 return args[0].toString();

@@ -72,30 +72,37 @@ public class InfostoreSearchIterator implements SearchIterator<File> {
         this.delegate = delegate;
     }
 
+    @Override
     public void addWarning(OXException warning) {
         delegate.addWarning(warning);
     }
 
+    @Override
     public void close() throws OXException {
         delegate.close();
     }
 
+    @Override
     public OXException[] getWarnings() {
         return delegate.getWarnings();
     }
 
+    @Override
     public boolean hasNext() throws OXException {
         return delegate.hasNext();
     }
 
+    @Override
     public boolean hasWarnings() {
         return delegate.hasWarnings();
     }
 
+    @Override
     public int size() {
         return delegate.size();
     }
 
+    @Override
     public File next() throws OXException {
         DocumentMetadata next = delegate.next();
         if(next == null) {

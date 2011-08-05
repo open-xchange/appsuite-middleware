@@ -66,6 +66,7 @@ import com.openexchange.messaging.MessagingContent;
  */
 public class BinaryContentDumper implements MessagingContentDumper {
 
+    @Override
     public void dump(final MessagingContent content, final OutputStream outputStream) throws OXException, IOException {
         final BinaryContent binContent = (BinaryContent) content;
         final InputStream inputStream = binContent.getData();
@@ -86,6 +87,7 @@ public class BinaryContentDumper implements MessagingContentDumper {
 
     }
 
+    @Override
     public boolean handles(final MessagingContent content) {
         return BinaryContent.class.isInstance(content);
     }

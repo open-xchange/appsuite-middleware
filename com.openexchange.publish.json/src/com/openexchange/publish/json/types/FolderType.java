@@ -63,16 +63,19 @@ import com.openexchange.publish.json.EntityType;
  */
 public class FolderType implements EntityType {
 
+    @Override
     public JSONObject toEntity(String entityId) throws JSONException {
         JSONObject object = new JSONObject();
         object.put("folder", entityId);
         return object;
     }
 
+    @Override
     public String toEntityID(JSONObject entityDefinition) throws JSONException {
         return String.valueOf(entityDefinition.getInt("folder"));
     }
 
+    @Override
     public String toEntityID(HttpServletRequest entityDefinition) throws JSONException {
         return entityDefinition.getParameter("folder");
     }

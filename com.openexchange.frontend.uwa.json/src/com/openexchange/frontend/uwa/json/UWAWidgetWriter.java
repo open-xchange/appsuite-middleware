@@ -72,6 +72,7 @@ public class UWAWidgetWriter extends ModelWriter<UWAWidget> {
 
     private static final AttributeHandler<UWAWidget> OVERRIDES = new AttributeHandler<UWAWidget>() {
 
+        @Override
         public Object handle(Attribute<UWAWidget> attr, Object... args) {
             if(args[0] == null) {
                 return null;

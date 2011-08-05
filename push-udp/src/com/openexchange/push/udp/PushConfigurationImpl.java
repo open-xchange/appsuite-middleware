@@ -231,106 +231,132 @@ public class PushConfigurationImpl extends AbstractConfigWrapper implements Push
         isInit = true;
     }
 
+    @Override
     public boolean isPushEnabled() {
         return isPushEnabled;
     }
 
+    @Override
     public void setPushEnabled(final boolean isPushEnabled) {
         this.isPushEnabled = isPushEnabled;
     }
 
+    @Override
     public Set<RemoteHostObject> getRemoteHost() {
         return remoteHost;
     }
 
+    @Override
     public void setRemoteHost(final Set<RemoteHostObject> remoteHost) {
         this.remoteHost = remoteHost;
     }
 
+    @Override
     public int getRegisterTimeout() {
         return registerTimeout;
     }
 
+    @Override
     public void setRegisterTimeout(final int registerTimeout) {
         this.registerTimeout = registerTimeout;
     }
 
+    @Override
     public int getRegisterPort() {
         return registerPort;
     }
 
+    @Override
     public void setRegisterPort(final int registerPort) {
         this.registerPort = registerPort;
     }
 
+    @Override
     public boolean isRegisterDistributionEnabled() {
         return isRegisterDistributionEnabled;
     }
 
+    @Override
     public void setRegisterDistributionEnabled(final boolean isRegisterDistributionEnabled) {
         this.isRegisterDistributionEnabled = isRegisterDistributionEnabled;
     }
 
+    @Override
     public boolean isEventDistributionEnabled() {
         return isEventDistributionEnabled;
     }
 
+    @Override
     public void setEventDistributionEnabled(final boolean isEventDistributionEnabled) {
         this.isEventDistributionEnabled = isEventDistributionEnabled;
     }
 
+    @Override
     public int getOutputQueueDelay() {
         return outputQueueDelay;
     }
 
+    @Override
     public void setOutputQueueDelay(final int outputQueueDelay) {
         this.outputQueueDelay = outputQueueDelay;
     }
 
+    @Override
     public InetAddress getSenderAddress() {
         return senderAddress;
     }
 
+    @Override
     public void setSenderAddress(final InetAddress senderAddress) {
         this.senderAddress = senderAddress;
     }
 
+    @Override
     public boolean isMultiCastEnabled() {
         return multicastEnabled;
     }
 
+    @Override
     public void setMultiCastEnabled(final boolean multicastEnabled) {
         this.multicastEnabled = multicastEnabled;
     }
 
+    @Override
     public int getMultiCastPort() {
         return multicastPort;
     }
 
+    @Override
     public InetAddress getMultiCastAddress() {
         return multicastAddress;
     }
 
+    @Override
     public void setMultiCastAddress(final InetAddress multicastAddress) {
         this.multicastAddress = multicastAddress;
     }
 
+    @Override
     public int getRemoteHostTimeOut() {
         return remoteHostTimeOut;
     }
 
+    @Override
     public void setRemoteHostTimeOut(final int remoteHostTimeOut) {
         this.remoteHostTimeOut = remoteHostTimeOut;
     }
 
+    @Override
     public int getRemoteHostRefresh() {
         return remoteHostRefresh;
     }
 
+    @Override
     public void setRemoteHostRefresh(final int remoteHostRefresh) {
         this.remoteHostRefresh = remoteHostRefresh;
     }
 
+    @Override
     public InetAddress getHostName() {
         return hostname;
     }

@@ -79,6 +79,7 @@ public abstract class EntityCleanUpEventHandler<T> implements EventHandler {
         this.contexts = contexts;
     }
 
+    @Override
     public void handleEvent(Event event) {
         final CommonEvent commonEvent = (CommonEvent) event.getProperty(CommonEvent.EVENT_KEY);
 

@@ -85,6 +85,7 @@ public class PingAction extends AbstractVoipNowSOAPAction<PBXInterface> {
         super();
     }
 
+    @Override
     public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
         VoipNowServerSetting setting = getSOAPVoipNowServerSetting(session);
 

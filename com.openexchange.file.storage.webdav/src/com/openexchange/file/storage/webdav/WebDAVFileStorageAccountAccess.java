@@ -158,6 +158,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
         return session;
     }
 
+    @Override
     public void connect() throws OXException {
         if (null != httpClientRef.get()) {
             return;
@@ -184,10 +185,12 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
         }
     }
 
+    @Override
     public boolean isConnected() {
         return (null != httpClientRef.get());
     }
 
+    @Override
     public void close() {
         final WebDAVFileStorageFileAccess thisFileAccess = fileAccess;
         if (null != thisFileAccess) {
@@ -201,6 +204,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
         httpClientRef.set(null);
     }
 
+    @Override
     public boolean ping() throws OXException {
         String url = (String) account.getConfiguration().get(WebDAVConstants.WEBDAV_URL);
         if (null == url) {
@@ -219,14 +223,17 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
         return true;
     }
 
+    @Override
     public boolean cacheable() {
         return true;
     }
 
+    @Override
     public String getAccountId() {
         return account.getId();
     }
 
+    @Override
     public FileStorageFolderAccess getFolderAccess() throws OXException {
         final HttpClient client = httpClientRef.get();
         if (null == client) {
@@ -244,6 +251,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
         return tmp;
     }
 
+    @Override
     public FileStorageFileAccess getFileAccess() throws OXException {
         final HttpClient client = httpClientRef.get();
         if (null == client) {
@@ -261,6 +269,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
         return tmp;
     }
 
+    @Override
     public FileStorageFolder getRootFolder() throws OXException {
         connect();
         return getFolderAccess().getRootFolder();
@@ -421,6 +430,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
         }
     }
 
+    @Override
     public FileStorageService getService() {
         return service;
     }

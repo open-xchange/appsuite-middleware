@@ -230,6 +230,7 @@ public interface FileStorageFileAccess extends TransactionAware {
                 this.delegate = delegate;
             }
 
+            @Override
             public int compare(final File o1, final File o2) {
                 return -delegate.compare(o1, o2);
             }

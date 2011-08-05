@@ -62,10 +62,12 @@ import com.openexchange.groupware.contexts.Context;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class Transparency extends AbstractVerifyingAttributeConverter<VEvent, Appointment> {
+    @Override
     public boolean isSet(final Appointment appointment) {
         return appointment.containsShownAs();
     }
 
+    @Override
     public void emit(final int index, final Appointment appointment, final VEvent event, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
         switch(appointment.getShownAs()) {
             case Appointment.RESERVED :
@@ -78,10 +80,12 @@ public class Transparency extends AbstractVerifyingAttributeConverter<VEvent, Ap
         }
     }
 
+    @Override
     public boolean hasProperty(final VEvent event) {
         return event.getTransparency() != null;
     }
 
+    @Override
     public void parse(final int index, final VEvent event, final Appointment appointment, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
         final String value = event.getProperty("TRANSP").getValue().toLowerCase();
         if("opaque".equals(value))  {

@@ -77,13 +77,16 @@ public class VoipNowFaxAddress implements PreferencesItemService {
         super();
     }
 
+    @Override
     public String[] getPath() {
         return PATH;
     }
 
+    @Override
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
 
+            @Override
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
                 try {
                     setting.setSingleValue(ServiceRegistry.getInstance().getService(ConfigurationService.class, true).getProperty(
@@ -96,6 +99,7 @@ public class VoipNowFaxAddress implements PreferencesItemService {
             /**
              * {@inheritDoc}
              */
+            @Override
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return true;
             }

@@ -91,30 +91,37 @@ public class RdbFileStorageAccountManager implements FileStorageAccountManager {
         this.service = service;
     }
 
+    @Override
     public FileStorageAccount getAccount(final String id, final Session session) throws OXException {
         return CACHE.getAccount(serviceId, Integer.parseInt(id), session);
     }
 
+    @Override
     public List<FileStorageAccount> getAccounts(final Session session) throws OXException {
         return CACHE.getAccounts(serviceId, session);
     }
 
+    @Override
     public String addAccount(final FileStorageAccount account, final Session session) throws OXException {
         return String.valueOf(CACHE.addAccount(serviceId, account, session));
     }
 
+    @Override
     public void deleteAccount(final FileStorageAccount account, final Session session) throws OXException {
         CACHE.deleteAccount(serviceId, account, session);
     }
 
+    @Override
     public void updateAccount(final FileStorageAccount account, final Session session) throws OXException {
         CACHE.updateAccount(serviceId, account, session);
     }
 
+    @Override
     public boolean checkSecretCanDecryptStrings(final Session session, final String secret) throws OXException {
         return CACHE.checkSecretCanDecryptStrings(service, session, secret);
     }
 
+    @Override
     public void migrateToNewSecret(final String oldSecret, final String newSecret, final Session session) throws OXException {
         CACHE.migrateToNewSecret(service, oldSecret, newSecret, session);
     }

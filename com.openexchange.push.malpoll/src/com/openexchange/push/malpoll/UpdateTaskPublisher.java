@@ -70,6 +70,7 @@ public final class UpdateTaskPublisher implements UpdateTaskProviderService {
         super();
     }
 
+    @Override
     @SuppressWarnings("deprecation")
     public Collection<UpdateTask> getUpdateTasks() {
         final List<UpdateTask> tasks = new ArrayList<UpdateTask>(2);

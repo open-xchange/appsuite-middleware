@@ -82,6 +82,7 @@ public final class MALPollPushManagerService implements PushManagerService {
         name = "MAL Poll Push Manager";
     }
 
+    @Override
     public PushListener startListener(final Session session) throws OXException {
         final MALPollPushListener pushListener = MALPollPushListener.newInstance(session, startTimerTaskPerListener);
         if (MALPollPushListenerRegistry.getInstance().addPushListener(
@@ -94,6 +95,7 @@ public final class MALPollPushManagerService implements PushManagerService {
         return null;
     }
 
+    @Override
     public boolean stopListener(final Session session) {
         return MALPollPushListenerRegistry.getInstance().removePushListener(
             session.getContextId(),

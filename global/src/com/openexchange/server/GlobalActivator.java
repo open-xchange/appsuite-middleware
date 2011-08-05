@@ -96,6 +96,7 @@ public final class GlobalActivator implements BundleActivator {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void start(final BundleContext context) throws Exception {
         try {
             initialization = new com.openexchange.server.ServerInitialization();
@@ -162,6 +163,7 @@ public final class GlobalActivator implements BundleActivator {
 
     }
 
+    @Override
     public void stop(final BundleContext context) throws Exception {
         try {
             if (null != trackers) {

@@ -80,14 +80,17 @@ public class ContentTypeParser implements MessagingHeaderParser {
         super();
     }
 
+    @Override
     public int getRanking() {
         return 1;
     }
 
+    @Override
     public boolean handles(final String key, final Object value) {
         return MimeContentType.getContentTypeName().equalsIgnoreCase(key);
     }
 
+    @Override
     public void parseAndAdd(final Map<String, Collection<MessagingHeader>> headers, final String key, final Object value) throws JSONException, OXException {
         if (JSONObject.class.isInstance(value)) {
             parseObject(headers, (JSONObject) value);

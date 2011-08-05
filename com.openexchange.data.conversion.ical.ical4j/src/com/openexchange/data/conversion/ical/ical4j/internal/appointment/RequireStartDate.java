@@ -58,6 +58,7 @@ import com.openexchange.groupware.container.Appointment;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class RequireStartDate implements ObjectVerifier<Appointment> {
+    @Override
     public void verify(final int index, final Appointment object, final List<ConversionWarning> warnings) throws ConversionError {
         if(!object.containsStartDate()) {
             throw new ConversionError(index, ConversionWarning.Code.MISSING_DTSTART);

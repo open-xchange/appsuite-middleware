@@ -80,6 +80,7 @@ public class SessiondInit implements Initialization {
         return singleton;
     }
 
+    @Override
     public void start() throws OXException {
         if (started.get()) {
             LOG.error(SessiondInit.class.getName() + " started");
@@ -108,6 +109,7 @@ public class SessiondInit implements Initialization {
         }
     }
 
+    @Override
     public void stop() {
         if (!started.get()) {
             LOG.error(SessiondInit.class.getName() + " has not been started");

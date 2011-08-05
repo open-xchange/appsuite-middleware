@@ -77,10 +77,12 @@ public final class TwitterMessagingAccountAccess extends AbstractTwitterMessagin
         super(account, session);
     }
 
+    @Override
     public int getAccountId() {
         return account.getId();
     }
 
+    @Override
     public MessagingFolderAccess getFolderAccess() throws OXException {
         if (null == folderAccess) {
             folderAccess = new TwitterMessagingFolderAccess(account, session);
@@ -88,6 +90,7 @@ public final class TwitterMessagingAccountAccess extends AbstractTwitterMessagin
         return folderAccess;
     }
 
+    @Override
     public MessagingMessageAccess getMessageAccess() throws OXException {
         if (null == messageAccess) {
             messageAccess = new TwitterMessagingMessageAccess(twitterAccess, account, session);
@@ -95,22 +98,27 @@ public final class TwitterMessagingAccountAccess extends AbstractTwitterMessagin
         return messageAccess;
     }
 
+    @Override
     public void close() {
         connected = false;
     }
 
+    @Override
     public void connect() throws OXException {
         connected = true;
     }
 
+    @Override
     public boolean isConnected() {
         return connected;
     }
 
+    @Override
     public MessagingFolder getRootFolder() throws OXException {
         return getFolderAccess().getRootFolder();
     }
 
+    @Override
     public boolean cacheable() {
         return true;
     }

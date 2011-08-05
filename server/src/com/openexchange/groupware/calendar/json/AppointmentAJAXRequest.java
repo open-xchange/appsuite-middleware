@@ -61,7 +61,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AppointmentAJAXRequest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AppointmentAJAXRequest {
@@ -79,7 +79,7 @@ public final class AppointmentAJAXRequest {
 
     /**
      * Initializes a new {@link AppointmentAJAXRequest}.
-     * 
+     *
      * @param session The session
      * @param request The request
      */
@@ -92,7 +92,7 @@ public final class AppointmentAJAXRequest {
 
     /**
      * Requires <code>int</code> parameter.
-     * 
+     *
      * @param name The parameter name
      * @return The <code>int</code>
      * @throws OXException If parameter is missing or not a number
@@ -111,7 +111,7 @@ public final class AppointmentAJAXRequest {
 
     /**
      * Gets the data object.
-     * 
+     *
      * @return The data object or <code>null</code> if no data object available
      */
     public <V> V getData() {
@@ -120,7 +120,7 @@ public final class AppointmentAJAXRequest {
 
     /**
      * Sets the time zone.
-     * 
+     *
      * @param timeZone The time zone
      */
     public void setTimeZone(final TimeZone timeZone) {
@@ -129,7 +129,7 @@ public final class AppointmentAJAXRequest {
 
     /**
      * Gets the time zone (initially set to session's user one).
-     * 
+     *
      * @return The time zone
      */
     public TimeZone getTimeZone() {
@@ -170,7 +170,7 @@ public final class AppointmentAJAXRequest {
 
     /**
      * Gets optional <code>int</code> parameter.
-     * 
+     *
      * @param name The parameter name
      * @return The <code>int</code> or {@link #NOT_FOUND} (<code>-9999</code>)
      * @throws OXException If parameter is an invalid number value
@@ -194,7 +194,7 @@ public final class AppointmentAJAXRequest {
 
     /**
      * Checks for presence of comma-separated <code>int</code> list.
-     * 
+     *
      * @param name The parameter name
      * @return The <code>int</code> array
      * @throws OXException If an error occurs
@@ -218,7 +218,7 @@ public final class AppointmentAJAXRequest {
 
     /**
      * Checks for presence of comma-separated <code>String</code> list.
-     * 
+     *
      * @param name The parameter name
      * @return The <code>String</code> array
      * @throws OXException If parameter is absdent
@@ -233,7 +233,7 @@ public final class AppointmentAJAXRequest {
 
     /**
      * Checks for presence of comma-separated <code>String</code> list.
-     * 
+     *
      * @param name The parameter name
      * @return The <code>String</code> array
      */
@@ -247,7 +247,7 @@ public final class AppointmentAJAXRequest {
 
     /**
      * Gets the request.
-     * 
+     *
      * @return The request
      */
     public AJAXRequestData getRequest() {
@@ -256,7 +256,7 @@ public final class AppointmentAJAXRequest {
 
     /**
      * Gets the session.
-     * 
+     *
      * @return The session
      */
     public ServerSession getSession() {
@@ -265,7 +265,7 @@ public final class AppointmentAJAXRequest {
 
     /**
      * Creates a new <code>java.util.Date</code> instance with this request's time zone offset subtracted from specified UTC time.
-     * 
+     *
      * @param utcTime The UTC time
      * @return A new <code>java.util.Date</code> with time zone offset applied
      */
@@ -275,7 +275,7 @@ public final class AppointmentAJAXRequest {
 
     /**
      * Parses specified <code>boolean</code> parameter
-     * 
+     *
      * @param name The parameter name
      * @return <code>true</code> if the string argument is not <code>null</code> and is equal, ignoring case, to the string
      *         <code>"true"</code>; otherwise <code>false</code>
@@ -286,7 +286,7 @@ public final class AppointmentAJAXRequest {
 
     /**
      * Checks specified <code>boolean</code> parameter
-     * 
+     *
      * @param name The parameter name
      * @return <code>true</code> if the string argument is equal, ignoring case, to the string <code>"true"</code>; otherwise
      *         <code>false</code>

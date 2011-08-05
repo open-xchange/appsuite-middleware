@@ -61,10 +61,12 @@ public interface Category extends Comparable<Category> {
      */
     public static final Category CATEGORY_ERROR = new Category() {
 
+        @Override
         public LogLevel getLogLevel() {
             return LogLevel.ERROR;
         }
 
+        @Override
         public Type getType() {
             return Category.EnumType.ERROR;
         }
@@ -74,6 +76,7 @@ public interface Category extends Comparable<Category> {
             return Category.EnumType.ERROR.getName();
         }
 
+        @Override
         public int compareTo(final Category other) {
             return LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
         }
@@ -85,10 +88,12 @@ public interface Category extends Comparable<Category> {
      */
     public static final Category CATEGORY_USER_INPUT = new Category() {
 
+        @Override
         public LogLevel getLogLevel() {
             return LogLevel.DEBUG;
         }
 
+        @Override
         public Type getType() {
             return Category.EnumType.USER_INPUT;
         }
@@ -98,6 +103,7 @@ public interface Category extends Comparable<Category> {
             return Category.EnumType.USER_INPUT.getName();
         }
 
+        @Override
         public int compareTo(final Category other) {
             return LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
         }
@@ -109,10 +115,12 @@ public interface Category extends Comparable<Category> {
      */
     public static final Category CATEGORY_CONFIGURATION = new Category() {
 
+        @Override
         public LogLevel getLogLevel() {
             return LogLevel.ERROR;
         }
 
+        @Override
         public Type getType() {
             return Category.EnumType.CONFIGURATION;
         }
@@ -122,6 +130,7 @@ public interface Category extends Comparable<Category> {
             return Category.EnumType.CONFIGURATION.getName();
         }
 
+        @Override
         public int compareTo(final Category other) {
             return LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
         }
@@ -133,10 +142,12 @@ public interface Category extends Comparable<Category> {
      */
     public static final Category CATEGORY_PERMISSION_DENIED = new Category() {
 
+        @Override
         public LogLevel getLogLevel() {
             return LogLevel.DEBUG;
         }
 
+        @Override
         public Type getType() {
             return Category.EnumType.PERMISSION_DENIED;
         }
@@ -146,6 +157,7 @@ public interface Category extends Comparable<Category> {
             return Category.EnumType.PERMISSION_DENIED.getName();
         }
 
+        @Override
         public int compareTo(final Category other) {
             return LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
         }
@@ -157,10 +169,12 @@ public interface Category extends Comparable<Category> {
      */
     public static final Category CATEGORY_TRY_AGAIN = new Category() {
 
+        @Override
         public LogLevel getLogLevel() {
             return LogLevel.DEBUG;
         }
 
+        @Override
         public Type getType() {
             return Category.EnumType.TRY_AGAIN;
         }
@@ -170,6 +184,7 @@ public interface Category extends Comparable<Category> {
             return Category.EnumType.TRY_AGAIN.getName();
         }
 
+        @Override
         public int compareTo(final Category other) {
             return LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
         }
@@ -181,10 +196,12 @@ public interface Category extends Comparable<Category> {
      */
     public static final Category CATEGORY_CONNECTIVITY = new Category() {
 
+        @Override
         public LogLevel getLogLevel() {
             return LogLevel.DEBUG;
         }
 
+        @Override
         public Type getType() {
             return Category.EnumType.TRY_AGAIN;
         }
@@ -194,6 +211,7 @@ public interface Category extends Comparable<Category> {
             return Category.EnumType.TRY_AGAIN.getName();
         }
 
+        @Override
         public int compareTo(final Category other) {
             return LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
         }
@@ -205,10 +223,12 @@ public interface Category extends Comparable<Category> {
      */
     public static final Category CATEGORY_SERVICE_DOWN = new Category() {
 
+        @Override
         public LogLevel getLogLevel() {
             return LogLevel.ERROR;
         }
 
+        @Override
         public Type getType() {
             return Category.EnumType.SERVICE_DOWN;
         }
@@ -218,6 +238,7 @@ public interface Category extends Comparable<Category> {
             return Category.EnumType.SERVICE_DOWN.getName();
         }
 
+        @Override
         public int compareTo(final Category other) {
             return LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
         }
@@ -229,10 +250,12 @@ public interface Category extends Comparable<Category> {
      */
     public static final Category CATEGORY_TRUNCATED = new Category() {
 
+        @Override
         public LogLevel getLogLevel() {
             return LogLevel.ERROR;
         }
 
+        @Override
         public Type getType() {
             return Category.EnumType.TRUNCATED;
         }
@@ -242,6 +265,7 @@ public interface Category extends Comparable<Category> {
             return Category.EnumType.TRUNCATED.getName();
         }
 
+        @Override
         public int compareTo(final Category other) {
             return LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
         }
@@ -253,10 +277,12 @@ public interface Category extends Comparable<Category> {
      */
     public static final Category CATEGORY_CONFLICT = new Category() {
 
+        @Override
         public LogLevel getLogLevel() {
             return LogLevel.DEBUG;
         }
 
+        @Override
         public Type getType() {
             return Category.EnumType.CONFLICT;
         }
@@ -266,6 +292,7 @@ public interface Category extends Comparable<Category> {
             return Category.EnumType.CONFLICT.getName();
         }
 
+        @Override
         public int compareTo(final Category other) {
             return LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
         }
@@ -277,10 +304,12 @@ public interface Category extends Comparable<Category> {
      */
     public static final Category CATEGORY_CAPACITY = new Category() {
 
+        @Override
         public LogLevel getLogLevel() {
             return LogLevel.DEBUG;
         }
 
+        @Override
         public Type getType() {
             return Category.EnumType.CAPACITY;
         }
@@ -290,6 +319,7 @@ public interface Category extends Comparable<Category> {
             return Category.EnumType.CAPACITY.getName();
         }
 
+        @Override
         public int compareTo(final Category other) {
             return LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
         }
@@ -301,10 +331,12 @@ public interface Category extends Comparable<Category> {
      */
     public static final Category CATEGORY_WARNING = new Category() {
 
+        @Override
         public LogLevel getLogLevel() {
             return LogLevel.DEBUG;
         }
 
+        @Override
         public Type getType() {
             return Category.EnumType.WARNING;
         }
@@ -314,6 +346,7 @@ public interface Category extends Comparable<Category> {
             return Category.EnumType.WARNING.getName();
         }
 
+        @Override
         public int compareTo(final Category other) {
             return LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
         }
@@ -382,6 +415,7 @@ public interface Category extends Comparable<Category> {
          */
         WARNING;
 
+        @Override
         public String getName() {
             return toString();
         }

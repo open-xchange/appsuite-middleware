@@ -72,7 +72,8 @@ public class Activator implements BundleActivator {
 
     private List<ServiceTracker> trackers;
 
-	public void start(final BundleContext context) throws Exception {
+	@Override
+    public void start(final BundleContext context) throws Exception {
 	    try {
 	        trackers = new ArrayList<ServiceTracker>(1);
 	        trackers.add(new ServiceTracker(context, HTMLService.class.getName(), new HTMLRegistryCustomizer(context)));
@@ -88,7 +89,8 @@ public class Activator implements BundleActivator {
 	    }
 	}
 
-	public void stop(final BundleContext context) throws Exception {
+	@Override
+    public void stop(final BundleContext context) throws Exception {
 	    if (null != trackers) {
 	        for (final ServiceTracker tracker : trackers) {
                 tracker.close();

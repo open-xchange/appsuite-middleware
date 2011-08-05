@@ -86,6 +86,7 @@ public final class FacebookFQLGroupParser {
 
             m.put("gid", new ItemHandler() {
 
+                @Override
                 public void handleItem(final Node item, final FacebookGroup group) throws OXException {
                     group.setGid(FacebookMessagingUtility.parseUnsignedLong(item.getTextContent()));
                 }
@@ -93,6 +94,7 @@ public final class FacebookFQLGroupParser {
 
             m.put("name", new ItemHandler() {
 
+                @Override
                 public void handleItem(final Node item, final FacebookGroup group) throws OXException {
                     group.setName(item.getTextContent());
                 }
@@ -100,6 +102,7 @@ public final class FacebookFQLGroupParser {
 
             m.put("pic_small", new ItemHandler() {
 
+                @Override
                 public void handleItem(final Node item, final FacebookGroup group) throws OXException {
                     group.setPicSmall(item.getTextContent());
                 }

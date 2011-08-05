@@ -358,6 +358,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
     }
 
+    @Override
     public int getUnreadCounter(final String fullName) throws OXException {
         if (DEFAULT_FOLDER_ID.equals(fullName)) {
             return 0;
@@ -389,6 +390,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
     }
 
+    @Override
     public int getNewCounter(final String fullName) throws OXException {
         if (DEFAULT_FOLDER_ID.equals(fullName)) {
             return 0;
@@ -420,6 +422,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
     }
 
+    @Override
     public int getTotalCounter(final String fullName) throws OXException {
         if (DEFAULT_FOLDER_ID.equals(fullName)) {
             return 0;

@@ -59,7 +59,7 @@ import com.openexchange.authentication.service.Authentication;
 
 /**
  * Authentication service tracker putting the service into the static authentication class.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class AuthenticationCustomizer implements ServiceTrackerCustomizer<AuthenticationService, AuthenticationService> {

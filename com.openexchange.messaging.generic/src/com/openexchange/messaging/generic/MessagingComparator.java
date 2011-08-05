@@ -139,6 +139,7 @@ public class MessagingComparator implements Comparator<MessagingMessage> {
         }
     }
 
+    @Override
     public int compare(final MessagingMessage o1, final MessagingMessage o2) {
         return descending ? -1 * compare0(o1, o2) : compare0(o1, o2);
     }

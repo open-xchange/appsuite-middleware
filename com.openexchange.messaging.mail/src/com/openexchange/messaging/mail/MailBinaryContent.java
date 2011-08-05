@@ -77,6 +77,7 @@ public class MailBinaryContent implements BinaryContent {
         this.part = part;
     }
 
+    @Override
     public InputStream getData() throws OXException {
         try {
             return part.getInputStream();

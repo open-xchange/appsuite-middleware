@@ -76,6 +76,7 @@ public class Statistics2JCS implements Statistics {
         this.stats = stats;
     }
 
+    @Override
     public StatisticElement[] getStatElements() {
         final IStatElement[] elems = stats.getStatElements();
         if (elems == null) {
@@ -88,10 +89,12 @@ public class Statistics2JCS implements Statistics {
         return retval;
     }
 
+    @Override
     public String getTypeName() {
         return stats.getTypeName();
     }
 
+    @Override
     public void setStatElements(final StatisticElement[] statisticElements) {
         if (statisticElements == null) {
             stats.setStatElements(null);
@@ -104,6 +107,7 @@ public class Statistics2JCS implements Statistics {
         stats.setStatElements(elems);
     }
 
+    @Override
     public void setTypeName(final String name) {
         stats.setTypeName(name);
     }

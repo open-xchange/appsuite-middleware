@@ -74,6 +74,7 @@ public class CompositeI18nTools implements I18nService {
         }
     }
 
+    @Override
     public String getLocalized(final String key) {
         for (final I18nService tool : tools) {
             if (tool.hasKey(key)) {
@@ -83,6 +84,7 @@ public class CompositeI18nTools implements I18nService {
         return key;
     }
 
+    @Override
     public boolean hasKey(final String key) {
         for (final I18nService tool : tools) {
             if (tool.hasKey(key)) {
@@ -92,6 +94,7 @@ public class CompositeI18nTools implements I18nService {
         return false;
     }
 
+    @Override
     public Locale getLocale() {
         return locale;
     }

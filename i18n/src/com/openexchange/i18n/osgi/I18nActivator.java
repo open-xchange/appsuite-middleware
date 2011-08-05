@@ -98,6 +98,7 @@ public class I18nActivator implements BundleActivator {
             this.csh = csh;
         }
 
+        @Override
         public void onServiceAvailable(final ConfigurationService service) throws Exception {
             unregisterAll();
             final ConfigurationService config = csh.getService();
@@ -108,6 +109,7 @@ public class I18nActivator implements BundleActivator {
             }
         }
 
+        @Override
         public void onServiceRelease() throws Exception {
         }
 
@@ -206,6 +208,7 @@ public class I18nActivator implements BundleActivator {
 
     private final List<ServiceTracker> serviceTrackerList = new ArrayList<ServiceTracker>();
 
+    @Override
     public void start(final BundleContext context) throws Exception {
 
         if (DEBUG) {
@@ -235,6 +238,7 @@ public class I18nActivator implements BundleActivator {
         }
     }
 
+    @Override
     public void stop(final BundleContext context) throws Exception {
         if (DEBUG) {
             LOG.debug("Stopping I18n");

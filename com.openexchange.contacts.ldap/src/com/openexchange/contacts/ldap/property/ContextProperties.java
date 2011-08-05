@@ -78,6 +78,7 @@ public class ContextProperties {
         final ContextProperties retval = new ContextProperties();
         // First list the folderdirs which should be registered to that context
         final File[] files = dir.listFiles(new FileFilter() {
+            @Override
             public boolean accept(File pathname) {
                 return pathname.isFile() && pathname.getName().endsWith(".properties");
             }

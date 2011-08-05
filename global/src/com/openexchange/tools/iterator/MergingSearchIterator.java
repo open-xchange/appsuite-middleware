@@ -86,10 +86,12 @@ public class MergingSearchIterator<T> implements SearchIterator<T> {
     }
 
 
+    @Override
     public void addWarning(final OXException warning) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public void close() throws OXException {
         OXException exception = null;
         for (final SearchIterator<T> iterator : iterators) {
@@ -104,6 +106,7 @@ public class MergingSearchIterator<T> implements SearchIterator<T> {
         }
     }
 
+    @Override
     public OXException[] getWarnings() {
         final List<OXException> exceptions = new ArrayList<OXException>(10);
         for (final SearchIterator<T> iterator : iterators) {
@@ -117,10 +120,12 @@ public class MergingSearchIterator<T> implements SearchIterator<T> {
         return exceptions.toArray(new OXException[exceptions.size()]);
     }
 
+    @Override
     public boolean hasNext() throws OXException {
         return hasNext;
     }
 
+    @Override
     public boolean hasWarnings() {
         for(final SearchIterator<T> iterator : iterators) {
             if(iterator.hasWarnings()) {
@@ -130,6 +135,7 @@ public class MergingSearchIterator<T> implements SearchIterator<T> {
         return false;
     }
 
+    @Override
     public T next() throws OXException {
         if(!hasNext) {
             return null;
@@ -163,6 +169,7 @@ public class MergingSearchIterator<T> implements SearchIterator<T> {
         return largest;
     }
 
+    @Override
     public int size() {
         int size = 0;
         for (final SearchIterator<T> iterator : iterators) {

@@ -103,10 +103,12 @@ public class PublicationMultipleHandler implements MultipleHandler {
         this.config = config;
     }
 
+    @Override
     public void close() {
         // Nothing to do.
     }
 
+    @Override
     public Date getTimestamp() {
         return null;
     }
@@ -123,6 +125,7 @@ public class PublicationMultipleHandler implements MultipleHandler {
         }
     };
 
+    @Override
     public Object performRequest(final String action, final JSONObject request, final ServerSession session, final boolean secure) throws JSONException, OXException {
         try {
             if (null == action) {
@@ -409,6 +412,7 @@ public class PublicationMultipleHandler implements MultipleHandler {
         return publication;
     }
 
+    @Override
     public Collection<OXException> getWarnings() {
         return Collections.<OXException> emptySet();
     }

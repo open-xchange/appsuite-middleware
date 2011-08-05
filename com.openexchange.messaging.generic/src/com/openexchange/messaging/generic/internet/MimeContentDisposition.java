@@ -167,6 +167,7 @@ public final class MimeContentDisposition extends ParameterizedHeader implements
     /**
      * @return disposition
      */
+    @Override
     public String getDisposition() {
         return cdo.getDisposition();
     }
@@ -174,6 +175,7 @@ public final class MimeContentDisposition extends ParameterizedHeader implements
     /**
      * Sets disposition
      */
+    @Override
     public void setDisposition(final String disposition) {
         cdo.setDisposition(disposition);
     }
@@ -181,6 +183,7 @@ public final class MimeContentDisposition extends ParameterizedHeader implements
     /**
      * Sets filename parameter
      */
+    @Override
     public void setFilenameParameter(final String filename) {
         cdo.setFilenameParameter(filename);
     }
@@ -188,6 +191,7 @@ public final class MimeContentDisposition extends ParameterizedHeader implements
     /**
      * @return the filename value or <code>null</code> if not present
      */
+    @Override
     public String getFilenameParameter() {
         return cdo.getFilenameParameter();
     }
@@ -195,6 +199,7 @@ public final class MimeContentDisposition extends ParameterizedHeader implements
     /**
      * @return <code>true</code> if filename parameter is present, <code>false</code> otherwise
      */
+    @Override
     public boolean containsFilenameParameter() {
         return cdo.containsFilenameParameter();
     }
@@ -202,6 +207,7 @@ public final class MimeContentDisposition extends ParameterizedHeader implements
     /**
      * Sets Content-Disposition
      */
+    @Override
     public void setContentDisposition(final String contentDisp) throws OXException {
         try {
             cdo.setContentDisposition(contentDisp);
@@ -215,6 +221,7 @@ public final class MimeContentDisposition extends ParameterizedHeader implements
      *
      * @return <code>true</code> if disposition is inline; otherwise <code>false</code>
      */
+    @Override
     public boolean isInline() {
         return cdo.isInline();
     }
@@ -224,6 +231,7 @@ public final class MimeContentDisposition extends ParameterizedHeader implements
      *
      * @return <code>true</code> if disposition is attachment; otherwise <code>false</code>
      */
+    @Override
     public boolean isAttachment() {
         return cdo.isAttachment();
     }
@@ -243,6 +251,7 @@ public final class MimeContentDisposition extends ParameterizedHeader implements
         return cdo.toString(skipEmptyParams);
     }
 
+    @Override
     public void setContentDispositio(final ContentDisposition contentDisp) {
         if (contentDisp == this) {
             return;
@@ -267,10 +276,12 @@ public final class MimeContentDisposition extends ParameterizedHeader implements
         }
     }
 
+    @Override
     public String getName() {
         return CONTENT_DISPOSITION;
     }
 
+    @Override
     public String getValue() {
         return toString();
     }

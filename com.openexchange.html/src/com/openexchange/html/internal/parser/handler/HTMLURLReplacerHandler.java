@@ -99,6 +99,7 @@ public final class HTMLURLReplacerHandler implements HTMLHandler {
         urlBuilder = new StringBuilder(128);
     }
 
+    @Override
     public void handleXMLDeclaration(final String version, final Boolean standalone, final String encoding) {
         if (null != version) {
             htmlBuilder.append("<?xml version=\"").append(version).append('"');
@@ -112,37 +113,45 @@ public final class HTMLURLReplacerHandler implements HTMLHandler {
         }
     }
 
+    @Override
     public void handleComment(final String comment) {
         htmlBuilder.append(COMMENT_START).append(comment).append(COMMENT_END);
     }
 
+    @Override
     public void handleDocDeclaration(final String docDecl) {
         htmlBuilder.append("<!DOCTYPE").append(docDecl).append('>');
     }
 
+    @Override
     public void handleEndTag(final String tag) {
         htmlBuilder.append("</").append(tag).append('>');
     }
 
+    @Override
     public void handleError(final String errorMsg) {
         final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(HTMLURLReplacerHandler.class));
         log.error(errorMsg);
     }
 
+    @Override
     public void handleSimpleTag(final String tag, final Map<String, String> attributes) {
         addStartTag(tag, attributes, true);
     }
 
+    @Override
     public void handleStartTag(final String tag, final Map<String, String> attributes) {
         addStartTag(tag, attributes, false);
     }
 
+    @Override
     public void handleCDATA(final String text) {
         htmlBuilder.append("<![CDATA[");
         htmlBuilder.append(text);
         htmlBuilder.append("]]>");
     }
 
+    @Override
     public void handleText(final String text, final boolean ignorable) {
         htmlBuilder.append(text);
     }

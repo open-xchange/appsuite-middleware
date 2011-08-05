@@ -93,7 +93,8 @@ public class MailFilterServletInit implements Initialization {
 	 *
 	 * @see com.openexchange.server.Initialization#start()
 	 */
-	public void start() throws OXException {
+	@Override
+    public void start() throws OXException {
 		if (!started.compareAndSet(false, true)) {
 			LOG.error("MailFilterServlet already started.");
 			return;
@@ -134,7 +135,8 @@ public class MailFilterServletInit implements Initialization {
 	 *
 	 * @see com.openexchange.server.Initialization#stop()
 	 */
-	public void stop() {
+	@Override
+    public void stop() {
 		if (!started.compareAndSet(true, false)) {
 			LOG.error("Mail filter servlet has not been started.");
 			return;

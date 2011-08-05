@@ -72,16 +72,19 @@ public final class ProxyRegistryCustomizer implements ServiceTrackerCustomizer {
         this.context = context;
     }
 
+    @Override
     public Object addingService(final ServiceReference reference) {
         final Object service = context.getService(reference);
         ProxyRegistryProvider.getInstance().setProxyRegistry((ProxyRegistry) service);
         return service;
     }
 
+    @Override
     public void modifiedService(final ServiceReference reference, final Object service) {
         // Nope
     }
 
+    @Override
     public void removedService(final ServiceReference reference, final Object service) {
         ProxyRegistryProvider.getInstance().setProxyRegistry(null);
         context.ungetService(reference);

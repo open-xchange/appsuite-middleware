@@ -350,22 +350,27 @@ public final class IMAPException extends OXException {
             return imapCode;
         }
 
+        @Override
         public int getNumber() {
             return imapCode.getNumber();
         }
 
+        @Override
         public String getPrefix() {
             return imapCode.getPrefix();
         }
 
+        @Override
         public Category getCategory() {
             return imapCode.getCategory();
         }
 
+        @Override
         public String getMessage() {
             return imapCode.getMessage();
         }
 
+        @Override
         public boolean equals(final OXException e) {
             return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
         }

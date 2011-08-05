@@ -77,6 +77,7 @@ public final class FolderActionFactory implements AJAXActionServiceFactory {
         return SINGLETON;
     }
 
+    @Override
     public AJAXActionService createActionService(final String action) throws OXException {
         final AJAXActionService retval = actions.get(action);
         if (null == retval) {

@@ -829,14 +829,17 @@ public class OXException extends Exception implements OXExceptionConstants {
     public void addTruncatedId(final int truncatedId) {
         problematics.add(new Truncated() {
 
+            @Override
             public int getId() {
                 return truncatedId;
             }
 
+            @Override
             public int getLength() {
                 return -1;
             }
 
+            @Override
             public int getMaxSize() {
                 return -1;
             }

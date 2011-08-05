@@ -167,6 +167,7 @@ public final class PropertyWatcher implements FileListener {
         return listeners.isEmpty();
     }
 
+    @Override
     public void onChange(final File file) {
         final FileInputStream fis;
         try {
@@ -206,6 +207,7 @@ public final class PropertyWatcher implements FileListener {
         }
     }
 
+    @Override
     public void onDelete() {
         value = null;
         notifyListeners(true);

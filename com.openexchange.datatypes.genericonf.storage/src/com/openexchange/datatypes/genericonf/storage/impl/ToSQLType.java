@@ -58,26 +58,32 @@ import com.openexchange.datatypes.genericonf.WidgetSwitcher;
  */
 public class ToSQLType implements WidgetSwitcher {
 
+    @Override
     public Object input(Object... args) {
         return args[0];
     }
 
+    @Override
     public Object password(Object... args) {
         return args[0];
     }
 
+    @Override
     public Object checkbox(Object...args) {
         return args[0];
     }
 
+    @Override
     public Object link(Object... args) {
         return args[0];
     }
 
+    @Override
     public Object text(Object... args) {
         return args[0];
     }
 
+    @Override
     public Object custom(Object... args) {
         if(args[0] == null) {
             return null;

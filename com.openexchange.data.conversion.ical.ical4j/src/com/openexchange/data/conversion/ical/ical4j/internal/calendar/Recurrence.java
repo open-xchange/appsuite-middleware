@@ -110,6 +110,7 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean hasProperty(final T component) {
         return null != component.getProperty("RRULE");
     }
@@ -117,10 +118,12 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isSet(final U calendar) {
         return calendar.containsRecurrenceType();
     }
 
+    @Override
     public void emit(final int index, final U calendar, final T component, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
         if (calendar.isException()) {
             return;
@@ -230,6 +233,7 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
     /**
      * {@inheritDoc}
      */
+    @Override
     public void parse(final int index, final T component, final U cObj, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
         if (null == cObj.getStartDate()) {
             return;

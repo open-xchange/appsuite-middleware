@@ -82,6 +82,7 @@ public final class FaxAuthAction extends AbstractVoipNowAction {
         super();
     }
 
+    @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         try {
             /*

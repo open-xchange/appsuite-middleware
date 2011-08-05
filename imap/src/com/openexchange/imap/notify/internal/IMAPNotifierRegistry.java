@@ -93,6 +93,7 @@ public final class IMAPNotifierRegistry implements IMAPNotifierRegistryService {
 
     private static final Pattern SPLIT = Pattern.compile(" *, *");
 
+    @Override
     public boolean addTaskFor(final int accountId, final Session session) {
         /*
          * Check for available full names
@@ -149,10 +150,12 @@ public final class IMAPNotifierRegistry implements IMAPNotifierRegistryService {
         return empty;
     }
 
+    @Override
     public boolean containsTaskFor(final Session session) {
         return map.containsKey(keyFor(session));
     }
 
+    @Override
     public void removeTaskFor(final Session session) {
         final ConcurrentMap<Integer, IMAPNotifierTask> tasks = map.remove(keyFor(session));
         if (null == tasks) {
@@ -167,6 +170,7 @@ public final class IMAPNotifierRegistry implements IMAPNotifierRegistryService {
      * ------------------------------ EventHandler stuff ------------------------------
      */
 
+    @Override
     public void handleRemovedSession(final Session session) {
         final SessiondService service = IMAPServiceRegistry.getService(SessiondService.class);
         if (null == service || service.getUserSessions(session.getUserId(), session.getContextId()) <= 0) {

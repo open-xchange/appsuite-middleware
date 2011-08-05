@@ -120,74 +120,92 @@ public class DefaultFile extends AbstractFile {
         copyFrom(file);
     }
 
+    @Override
     public String getCategories() {
         return categories;
     }
 
+    @Override
     public int getColorLabel() {
         return colorLabel;
     }
 
+    @Override
     public String getContent() {
         return content;
     }
 
+    @Override
     public Date getCreated() {
         return created;
     }
 
+    @Override
     public int getCreatedBy() {
         return createdBy;
     }
 
+    @Override
     public String getDescription() {
         return description;
     }
 
+    @Override
     public String getFileMD5Sum() {
         return fileMD5Sum;
     }
 
+    @Override
     public String getFileMIMEType() {
         return fileMIMEType;
     }
 
+    @Override
     public String getFileName() {
         return fileName;
     }
 
+    @Override
     public long getFileSize() {
         return fileSize;
     }
 
+    @Override
     public String getFolderId() {
         return folderId;
     }
 
+    @Override
     public String getId() {
         return id;
     }
 
+    @Override
     public Date getLastModified() {
         return lastModified;
     }
 
+    @Override
     public Date getLockedUntil() {
         return lockedUntil;
     }
 
+    @Override
     public int getModifiedBy() {
         return modifiedBy;
     }
 
+    @Override
     public int getNumberOfVersions() {
         return numberOfVersions;
     }
 
+    @Override
     public String getProperty(final String key) {
         return properties.get(key);
     }
 
+    @Override
     public Set<String> getPropertyNames() {
         return properties.keySet();
     }
@@ -206,6 +224,7 @@ public class DefaultFile extends AbstractFile {
         }
     }
 
+    @Override
     public long getSequenceNumber() {
         if (lastModified == null) {
             return 0;
@@ -213,102 +232,127 @@ public class DefaultFile extends AbstractFile {
         return lastModified.getTime();
     }
 
+    @Override
     public String getTitle() {
         return title;
     }
 
+    @Override
     public String getURL() {
         return url;
     }
 
+    @Override
     public int getVersion() {
         return version;
     }
 
+    @Override
     public String getVersionComment() {
         return versionComment;
     }
 
+    @Override
     public boolean isCurrentVersion() {
         return isCurrentVersion;
     }
 
+    @Override
     public void setCategories(final String categories) {
         this.categories = categories;
     }
 
+    @Override
     public void setColorLabel(final int color) {
         colorLabel = color;
     }
 
+    @Override
     public void setCreated(final Date creationDate) {
         created = creationDate;
     }
 
+    @Override
     public void setCreatedBy(final int creator) {
         createdBy = creator;
     }
 
+    @Override
     public void setDescription(final String description) {
         this.description = description;
     }
 
+    @Override
     public void setFileMD5Sum(final String sum) {
         fileMD5Sum = sum;
     }
 
+    @Override
     public void setFileMIMEType(final String type) {
         fileMIMEType = type;
     }
 
+    @Override
     public void setFileName(final String fileName) {
         this.fileName = fileName;
     }
 
+    @Override
     public void setFileSize(final long length) {
         fileSize = length;
     }
 
+    @Override
     public void setFolderId(final String folderId) {
         this.folderId = folderId;
     }
 
+    @Override
     public void setId(final String id) {
         this.id = id;
     }
 
+    @Override
     public void setIsCurrentVersion(final boolean bool) {
         isCurrentVersion = bool;
     }
 
+    @Override
     public void setLastModified(final Date now) {
         lastModified = now;
     }
 
+    @Override
     public void setLockedUntil(final Date lockedUntil) {
         this.lockedUntil = lockedUntil;
     }
 
+    @Override
     public void setModifiedBy(final int lastEditor) {
         modifiedBy = lastEditor;
     }
 
+    @Override
     public void setNumberOfVersions(final int numberOfVersions) {
         this.numberOfVersions = numberOfVersions;
     }
 
+    @Override
     public void setTitle(final String title) {
         this.title = title;
     }
 
+    @Override
     public void setURL(final String url) {
         this.url = url;
     }
 
+    @Override
     public void setVersion(final int version) {
         this.version = version;
     }
 
+    @Override
     public void setVersionComment(final String string) {
         versionComment = string;
     }

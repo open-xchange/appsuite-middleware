@@ -78,6 +78,7 @@ public class CascadingConfigObjectRegistryFactory implements ConfigObjectRegistr
         initPaths();
     }
 
+    @Override
     public ConfigObjectRegistry getView(int user, int context) throws OXException {
         try {
             return new CascadingConfigObjectRegistry(configFactory.getView(user, context), config, pathMapping);

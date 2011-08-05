@@ -60,7 +60,7 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link GroupManageActionFactory}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @Module(actions = { "new", "update", "delete" })
@@ -70,7 +70,7 @@ public final class GroupManageActionFactory implements AJAXActionServiceFactory 
 
     /**
      * Initializes a new {@link GroupManageActionFactory}.
-     * 
+     *
      * @param services The service look-up
      */
     public GroupManageActionFactory(final ServiceLookup services) {

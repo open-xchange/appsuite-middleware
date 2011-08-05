@@ -78,12 +78,13 @@ import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.systemname.SystemNameService;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DispatcherServlet}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -116,7 +117,7 @@ public final class DispatcherServlet extends SessionServlet {
 
     /**
      * Initializes a new {@link DispatcherServlet}.
-     * 
+     *
      * @param dispatcher The dispatcher
      * @param prefix The prefix
      */
@@ -131,7 +132,7 @@ public final class DispatcherServlet extends SessionServlet {
 
     /**
      * Adds specified renderer.
-     * 
+     *
      * @param renderer The renderer
      */
     public static void registerRenderer(final ResponseRenderer renderer) {
@@ -140,7 +141,7 @@ public final class DispatcherServlet extends SessionServlet {
 
     /**
      * Removes specified renderer.
-     * 
+     *
      * @param renderer The renderer
      */
     public static void unregisterRenderer(final ResponseRenderer renderer) {
@@ -164,7 +165,7 @@ public final class DispatcherServlet extends SessionServlet {
 
     /**
      * Handles given HTTP request and generates an appropriate result using referred {@link AJAXActionService}.
-     * 
+     *
      * @param req The HTTP request to handle
      * @param resp The HTTP response to write to
      * @param preferStream <code>true</code> to prefer passing request's body as binary data using an {@link InputStream} (typically for
@@ -177,8 +178,6 @@ public final class DispatcherServlet extends SessionServlet {
         Tools.disableCaching(resp);
 
         final String action = req.getParameter(PARAMETER_ACTION);
-        final boolean isFileUpload = FileUploadBase.isMultipartContent(new ServletRequestContext(req));
-
         AJAXRequestResult result = null;
         AJAXRequestData request = null;
         AJAXState state = null;
@@ -186,7 +185,7 @@ public final class DispatcherServlet extends SessionServlet {
         try {
             final ServerSession session = getSessionObject(req);
 
-            request = parseRequest(req, preferStream, isFileUpload, session);
+            request = parseRequest(req, preferStream, FileUploadBase.isMultipartContent(new ServletRequestContext(req)), session);
 
             state = dispatcher.begin();
 
@@ -196,13 +195,17 @@ public final class DispatcherServlet extends SessionServlet {
             LOG.error(e.getMessage(), e);
             JSONResponseRenderer.writeResponse(new Response().setException(e), action, req, resp);
             return;
+        } catch (final RuntimeException e) {
+            LOG.error(e.getMessage(), e);
+            final OXException exception = AjaxExceptionCodes.UnexpectedError.create(e, e.getMessage());
+            JSONResponseRenderer.writeResponse(new Response().setException(exception), action, req, resp);
+            return;
         } finally {
             if (null != state) {
                 dispatcher.end(state);
             }
         }
         sendResponse(request, result, req, resp);
-
     }
 
     private void sendResponse(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest hReq, final HttpServletResponse hResp) {

@@ -57,21 +57,22 @@ import java.util.List;
 
 /**
  * {@link EAVMultipleCompare}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class EAVMultipleCompare implements EAVTypeSwitcher {
 
+    @Override
     public Object binary(Object... args) {
         List<List<Byte>> list1 = convert((InputStream[]) args[0]);
         List<List<Byte>> list2 = convert((InputStream[]) args[1]);
-        
+
         if(list1.size() != list2.size()) {
             return false;
         }
-        
+
         list1.removeAll(list2);
-        
+
         return list1.isEmpty();
     }
 
@@ -94,14 +95,17 @@ public class EAVMultipleCompare implements EAVTypeSwitcher {
         }
     }
 
+    @Override
     public Object bool(Object... args) {
         return multisetWiseComparison(args[0], args[1]);
     }
 
+    @Override
     public Object date(Object... args) {
         return multisetWiseComparison(args[0], args[1]);
     }
 
+    @Override
     public Object number(Object... args) {
         return multisetWiseComparison(coerceLong(args[0]), coerceLong(args[1]));
     }
@@ -111,29 +115,33 @@ public class EAVMultipleCompare implements EAVTypeSwitcher {
         if(orig.length == 0) {
             return new Long[0];
         }
-        
+
         Long[] longs = new Long[orig.length];
         int i = 0;
         for(Number number : orig) {
             longs[i] = Long.valueOf(orig[i].toString());
             i++;
         }
-        
+
         return longs;
     }
 
+    @Override
     public Object object(Object... args) {
         return true;
     }
 
+    @Override
     public Object string(Object... args) {
         return multisetWiseComparison(args[0], args[1]);
     }
 
+    @Override
     public Object time(Object... args) {
         return multisetWiseComparison(args[0], args[1]);
     }
 
+    @Override
     public Object nullValue(Object... args) {
         return true;
     }
@@ -150,13 +158,13 @@ public class EAVMultipleCompare implements EAVTypeSwitcher {
         }
         List<Object> list1 = new ArrayList<Object>(Arrays.asList((Object[])object));
         List<Object> list2 = new ArrayList<Object>(Arrays.asList((Object[])object2));
-        
+
         if(list1.size() != list2.size()) {
             return false;
         }
-        
+
         list1.removeAll(list2);
-        
+
         return list1.isEmpty();
     }
 

@@ -71,10 +71,12 @@ public class GUI implements PreferencesItemService {
         super();
     }
 
+    @Override
     public String[] getPath() {
         return new String[]{"modules", "messaging" , NAME};
     }
 
+    @Override
     public IValueHandler getSharedValue() {
         return new SharedNode(NAME, 12);
     }

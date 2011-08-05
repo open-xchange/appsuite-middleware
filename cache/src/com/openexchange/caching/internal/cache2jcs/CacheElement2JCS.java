@@ -77,22 +77,27 @@ public final class CacheElement2JCS implements CacheElement {
         this.cacheElement = cacheElement;
     }
 
+    @Override
     public String getCacheName() {
         return cacheElement.getCacheName();
     }
 
+    @Override
     public ElementAttributes getElementAttributes() {
         return new ElementAttributes2JCS(cacheElement.getElementAttributes());
     }
 
+    @Override
     public Serializable getKey() {
         return cacheElement.getKey();
     }
 
+    @Override
     public Serializable getVal() {
         return cacheElement.getVal();
     }
 
+    @Override
     public void setElementAttributes(final ElementAttributes attr) {
         cacheElement.setElementAttributes(new JCSElementAttributesDelegator(attr));
 

@@ -51,39 +51,47 @@ package com.openexchange.eav;
 
 /**
  * {@link EAVValuePrettyPrint}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class EAVValuePrettyPrint implements EAVTypeSwitcher {
 
+    @Override
     public Object binary(Object... args) {
         return "< binary >";
     }
 
+    @Override
     public Object date(Object... args) {
         return args[0] + " < Date >";
     }
 
+    @Override
     public Object number(Object... args) {
         return args[0] + " < Number >";
     }
 
+    @Override
     public Object object(Object... args) {
         return null;
     }
 
+    @Override
     public Object string(Object... args) {
         return "\""+args[0]+ "\"" + " < String >";
     }
 
+    @Override
     public Object time(Object... args) {
         return args[0] + " < Time >";
     }
 
+    @Override
     public Object bool(Object... args) {
         return args[0] + " < Boolean >";
     }
 
+    @Override
     public Object nullValue(Object... args) {
         return "NULL";
     }

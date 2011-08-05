@@ -98,14 +98,17 @@ public enum DataRetentionExceptionMessages implements OXExceptionCode {
         number = detailNumber;
     }
 
+    @Override
     public String getPrefix() {
         return "DATARET";
     }
 
+    @Override
     public Category getCategory() {
         return category;
     }
 
+    @Override
     public int getNumber() {
         return number;
     }
@@ -114,10 +117,12 @@ public enum DataRetentionExceptionMessages implements OXExceptionCode {
         return null;
     }
 
+    @Override
     public String getMessage() {
         return message;
     }
 
+    @Override
     public boolean equals(final OXException e) {
         return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }

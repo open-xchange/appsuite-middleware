@@ -126,6 +126,7 @@ public class NodeCollection extends AbstractCollection {
 
     }
 
+    @Override
     public List<WebdavResource> getChildren() throws OXException {
         List<Node> childNodes = node.getChildren();
         List<WebdavResource> children = new ArrayList<WebdavResource>(childNodes.size());
@@ -135,63 +136,78 @@ public class NodeCollection extends AbstractCollection {
         return children;
     }
 
+    @Override
     public void create() {
 
     }
 
+    @Override
     public boolean exists() {
         return true;
     }
 
+    @Override
     public Date getCreationDate() {
         return new Date(0);
     }
 
+    @Override
     public String getDisplayName() {
         return node.getName();
     }
 
+    @Override
     public Date getLastModified() {
         return new Date(0);
     }
 
+    @Override
     public WebdavLock getLock(String token) {
         return null;
     }
 
+    @Override
     public List<WebdavLock> getLocks() {
         return Collections.emptyList();
     }
 
+    @Override
     public WebdavLock getOwnLock(String token) {
         return null;
     }
 
+    @Override
     public List<WebdavLock> getOwnLocks() {
         return Collections.emptyList();
     }
 
+    @Override
     public String getSource() {
         return null;
     }
 
+    @Override
     public WebdavPath getUrl() {
         return url;
     }
 
+    @Override
     public void lock(WebdavLock lock) {
 
     }
 
+    @Override
     public void save() {
 
     }
 
+    @Override
     public void setDisplayName(String displayName) {
 
     }
 
 
+    @Override
     public void unlock(String token) {
 
     }

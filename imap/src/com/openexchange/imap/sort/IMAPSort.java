@@ -330,6 +330,7 @@ public final class IMAPSort {
             this.descending = descending;
         }
 
+        @Override
         public Object doCommand(final IMAPProtocol p) throws ProtocolException {
             final String command = new StringBuilder("UID SORT (").append(descending ? "REVERSE " : "").append("ARRIVAL) UTF-8 ALL").toString();
             final Response[] r = p.command(command, null);

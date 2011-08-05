@@ -62,7 +62,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link EAVType}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public enum EAVType {
@@ -74,15 +74,15 @@ public enum EAVType {
     NUMBER("number"),
     BOOLEAN("boolean"),
     NULL("null");
-    
+
     public static final String KEY = "t";
-    
+
     private static Map<String, EAVType> types = new TreeMap<String, EAVType>(String.CASE_INSENSITIVE_ORDER);;
-    
+
     private static Map<Class<?>, EAVType> guessedTypes = new HashMap<Class<?>, EAVType>();
 
     private static final EnumMap<EAVType, EnumSet<EAVType>> COERCIBLE = new EnumMap<EAVType, EnumSet<EAVType>>(EAVType.class);
-    
+
     static {
         EAVTypeSwitcher guessSwitcher = getGuessSwitcher();
         COERCIBLE.put(EAVType.STRING, EnumSet.of(EAVType.BINARY));
@@ -99,7 +99,7 @@ public enum EAVType {
     }
 
     private String keyword;
-    
+
     public Object doSwitch(EAVTypeSwitcher switcher, Object... args) {
         switch (this) {
         case OBJECT:
@@ -131,11 +131,11 @@ public enum EAVType {
             throw result;
         }
     }
-    
+
     public static EAVType guessType(Class<?> clazz) {
         return guessedTypes.get(clazz);
     }
-    
+
     public boolean isCoercibleFrom(EAVType origType) {
         if(origType == NULL) {
             return true;
@@ -143,16 +143,17 @@ public enum EAVType {
         if(origType == this) {
             return true;
         }
-        
+
         return COERCIBLE.get(origType).contains(this);
     }
-    
+
     public String getSQLTable() {
         return (String) doSwitch(tableSwitcher);
     }
-    
+
     public static final EAVTypeSwitcher valueSwitcher = new EAVTypeSwitcher() {
 
+        @Override
         public Object binary(Object... args) {
             EAVNode node = (EAVNode) args[0];
             EAVContainerType cType = (EAVContainerType) args[1];
@@ -167,6 +168,7 @@ public enum EAVType {
             return null;
         }
 
+        @Override
         public Object bool(Object... args) {
             EAVNode node = (EAVNode) args[0];
             EAVContainerType cType = (EAVContainerType) args[1];
@@ -181,6 +183,7 @@ public enum EAVType {
             return null;
         }
 
+        @Override
         public Object date(Object... args) {
             EAVNode node = (EAVNode) args[0];
             EAVContainerType cType = (EAVContainerType) args[1];
@@ -195,11 +198,13 @@ public enum EAVType {
             return null;
         }
 
+        @Override
         public Object nullValue(Object... args) {
             // TODO Auto-generated method stub
             return null;
         }
 
+        @Override
         public Object number(Object... args) {
             EAVNode node = (EAVNode) args[0];
             EAVContainerType cType = (EAVContainerType) args[1];
@@ -214,11 +219,13 @@ public enum EAVType {
             return null;
         }
 
+        @Override
         public Object object(Object... args) {
             // TODO Auto-generated method stub
             return null;
         }
 
+        @Override
         public Object string(Object... args) {
             EAVNode node = (EAVNode) args[0];
             EAVContainerType cType = (EAVContainerType) args[1];
@@ -233,6 +240,7 @@ public enum EAVType {
             return null;
         }
 
+        @Override
         public Object time(Object... args) {
             EAVNode node = (EAVNode) args[0];
             EAVContainerType cType = (EAVContainerType) args[1];
@@ -246,7 +254,7 @@ public enum EAVType {
             }
             return null;
         }
-        
+
         private InputStream[] transformByteArrays(byte[][] byteArrays) {
             InputStream[] inputStreams = new InputStream[byteArrays.length];
             for (int i = 0; i < byteArrays.length; i++) {
@@ -254,93 +262,112 @@ public enum EAVType {
             }
             return inputStreams;
         }
-        
+
     };
-    
+
     public static final EAVTypeSwitcher tableSwitcher = new EAVTypeSwitcher() {
 
+        @Override
         public Object binary(Object... args) {
             return "blobTable";
         }
 
+        @Override
         public Object bool(Object... args) {
             return "boolTable";
         }
 
+        @Override
         public Object date(Object... args) {
             return "intTable";
         }
 
+        @Override
         public Object nullValue(Object... args) {
             return null;
         }
 
+        @Override
         public Object number(Object... args) {
             return "intTable";
         }
 
+        @Override
         public Object object(Object... args) {
             return null;
         }
 
+        @Override
         public Object string(Object... args) {
             return "textTable";
         }
 
+        @Override
         public Object time(Object... args) {
             return "intTable";
         }
-        
+
     };
-    
+
     private static EAVTypeSwitcher getGuessSwitcher() {
         return new EAVTypeSwitcher() {
 
+            @Override
             public Object binary(Object... args) {
                 return new Class[0];
             }
 
+            @Override
             public Object bool(Object... args) {
                 return new Class[]{Boolean.class};
             }
 
+            @Override
             public Object date(Object... args) {
                 return new Class[0];
             }
 
+            @Override
             public Object nullValue(Object... args) {
                 return new Class[0];
             }
 
+            @Override
             public Object number(Object... args) {
                 return new Class[]{Integer.class, Long.class, Float.class, Double.class};
             }
 
+            @Override
             public Object object(Object... args) {
                 return new Class[0];
             }
 
+            @Override
             public Object string(Object... args) {
                 return new Class[]{String.class};
             }
 
+            @Override
             public Object time(Object... args) {
                 return new Class[0];
             }
-            
+
         };
     }
 
     private static final EAVTypeSwitcher validationSwitch = new EAVTypeSwitcher() {
 
+        @Override
         public Object binary(Object... args) {
             return null;
         }
 
+        @Override
         public Object bool(Object... args) {
             return null;
         }
 
+        @Override
         public Object date(Object... args) {
             Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             calendar.setTimeInMillis((Long) args[0]);
@@ -352,81 +379,94 @@ public enum EAVType {
             return null;
         }
 
+        @Override
         public Object nullValue(Object... args) {
             return null;
         }
 
+        @Override
         public Object number(Object... args) {
             return null;
         }
 
+        @Override
         public Object object(Object... args) {
             return null;
         }
 
+        @Override
         public Object string(Object... args) {
             return null;
         }
 
+        @Override
         public Object time(Object... args) {
             return null;
         }
-        
+
     };
-    
+
     public Object[] getArray(int size) {
         return (Object[]) doSwitch(TYPED_ARRAY, size);
     }
-    
+
     public static final EAVTypeSwitcher TYPED_ARRAY = new EAVTypeSwitcher() {
 
+        @Override
         public Object binary(Object... args) {
             return new InputStream[(Integer) args[0]];
         }
 
+        @Override
         public Object bool(Object... args) {
             return new Boolean[(Integer) args[0]];
         }
 
+        @Override
         public Object date(Object... args) {
             return new Number[(Integer) args[0]];
         }
 
+        @Override
         public Object nullValue(Object... args) {
             throw new IllegalArgumentException("There are no sets of type NULL");
         }
 
+        @Override
         public Object number(Object... args) {
             return new Number[(Integer) args[0]];
         }
 
+        @Override
         public Object object(Object... args) {
             throw new IllegalArgumentException("There are no sets of type OBJECT");
         }
 
+        @Override
         public Object string(Object... args) {
             return new String[(Integer) args[0]];
         }
 
+        @Override
         public Object time(Object... args) {
             return new Number[(Integer) args[0]];
         }
 
     };
-    
-    
+
+
     private EAVType(String keyword) {
         this.keyword = keyword;
     }
-    
+
     public static EAVType getType(Object keyword) {
         return types.get(keyword);
     }
-    
+
     public static boolean containsType(Object keyword) {
         return types.containsKey(keyword);
     }
-    
+
     public String getKeyword() {
         return keyword;
     }

@@ -73,6 +73,7 @@ public class WhiteboardSecretService implements SecretService{
         tracker = new ServiceTracker(context, SecretService.class.getName(), null);
     }
 
+    @Override
     public String getSecret(final Session session) {
         final SecretService secretService = (SecretService) tracker.getService();
         if (secretService == null) {

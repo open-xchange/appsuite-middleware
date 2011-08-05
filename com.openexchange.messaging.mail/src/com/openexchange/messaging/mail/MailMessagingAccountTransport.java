@@ -92,6 +92,7 @@ public class MailMessagingAccountTransport implements MessagingAccountTransport 
         }
     }
 
+    @Override
     public void transport(final MessagingMessage message, final Collection<MessagingAddressHeader> recipients) throws OXException {
         try {
             final UnsynchronizedByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(8192);
@@ -112,10 +113,12 @@ public class MailMessagingAccountTransport implements MessagingAccountTransport 
         }
     }
 
+    @Override
     public boolean cacheable() {
         return false;
     }
 
+    @Override
     public void close() {
         try {
             mailTransport.close();
@@ -124,14 +127,17 @@ public class MailMessagingAccountTransport implements MessagingAccountTransport 
         }
     }
 
+    @Override
     public void connect() throws OXException {
         // Nope
     }
 
+    @Override
     public boolean isConnected() {
         return true;
     }
 
+    @Override
     public boolean ping() throws OXException {
         try {
             mailTransport.ping();

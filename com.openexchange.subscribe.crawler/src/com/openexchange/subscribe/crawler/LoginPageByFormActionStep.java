@@ -190,6 +190,7 @@ public class LoginPageByFormActionStep extends AbstractStep<HtmlPage, Object> im
         return username;
     }
 
+    @Override
     public void setUsername(final String username) {
         this.username = username;
     }
@@ -198,6 +199,7 @@ public class LoginPageByFormActionStep extends AbstractStep<HtmlPage, Object> im
         return password;
     }
 
+    @Override
     public void setPassword(final String password) {
         this.password = password;
     }
@@ -250,6 +252,7 @@ public class LoginPageByFormActionStep extends AbstractStep<HtmlPage, Object> im
         this.numberOfForm = numberOfForm;
     }
 
+    @Override
     public String getBaseUrl() {
         return baseUrl;
     }
@@ -269,6 +272,7 @@ public class LoginPageByFormActionStep extends AbstractStep<HtmlPage, Object> im
     }
 
 
+    @Override
     public Page getLoginPage() {
         return loginPage;
     }

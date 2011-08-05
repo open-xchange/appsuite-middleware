@@ -68,6 +68,7 @@ public class SessiondSessionSpecificRetrievalService implements SessionSpecificC
     private final ConcurrentHashMap<String, SessionScopedContainerImpl<?>> containers = new ConcurrentHashMap<String, SessionScopedContainerImpl<?>>();
     private final ConcurrentHashMap<String, RandomTokenContainerImpl<?>> randomTokenContainer = new ConcurrentHashMap<String, RandomTokenContainerImpl<?>>();
 
+    @Override
     public <T> SessionScopedContainer<T> getContainer(String name, Lifecycle lifecycle, InitialValueFactory<T> initial, CleanUp<T> cleanUp) {
         if (containers.containsKey(name)) {
             return (SessionScopedContainer<T>) containers.get(name);
@@ -83,6 +84,7 @@ public class SessiondSessionSpecificRetrievalService implements SessionSpecificC
         return newValue;
     }
 
+    @Override
     public void destroyContainer(String name, CleanUp cleanUp) {
         SessionScopedContainerImpl<?> removed = containers.remove(name);
         if (removed != null) {
@@ -103,6 +105,7 @@ public class SessiondSessionSpecificRetrievalService implements SessionSpecificC
         }
     }
 
+    @Override
     public <T> RandomTokenContainer<T> getRandomTokenContainer(String name, Lifecycle lifecycle, CleanUp<T> cleanUp) {
         if (randomTokenContainer.contains(name)) {
             return (RandomTokenContainer<T>) randomTokenContainer.get(name);
@@ -118,6 +121,7 @@ public class SessiondSessionSpecificRetrievalService implements SessionSpecificC
         return container;
     }
 
+    @Override
     public void destroyRandomTokenContainer(String name, CleanUp cleanUp) {
         RandomTokenContainerImpl<?> container = randomTokenContainer.get(name);
         container.clear(cleanUp);
@@ -125,26 +129,31 @@ public class SessiondSessionSpecificRetrievalService implements SessionSpecificC
 
     // Event Handling
 
+    @Override
     public void handleContainerRemoval(Map<String, Session> sessions) {
         for (Session session : sessions.values()) {
             handleLifecycleChange(session, Lifecycle.TERMINATE);
         }
     }
 
+    @Override
     public void handleError(OXException error) {
         // IGNORE
     }
 
+    @Override
     public void handleSessionDataRemoval(Map<String, Session> sessions) {
         for (Session session : sessions.values()) {
             handleLifecycleChange(session, Lifecycle.HIBERNATE);
         }
     }
 
+    @Override
     public void handleSessionReactivation(Session session) {
         // IGNORE
     }
 
+    @Override
     public void handleSessionRemoval(Session session) {
         handleLifecycleChange(session, Lifecycle.TERMINATE);
     }

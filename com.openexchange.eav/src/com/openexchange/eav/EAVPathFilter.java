@@ -62,13 +62,14 @@ public class EAVPathFilter implements EAVNodeFilter {
 
     private Set<EAVPath> paths;
     private EAVPath relativeRoot = null;
-    
+
     public EAVPathFilter(Set<EAVPath> paths, EAVPath relativeRoot) {
         super();
         this.paths = paths;
         this.relativeRoot = relativeRoot;
     }
 
+    @Override
     public boolean accept(EAVNode node) {
         return paths.contains(node.getRelativePath(relativeRoot));
     }

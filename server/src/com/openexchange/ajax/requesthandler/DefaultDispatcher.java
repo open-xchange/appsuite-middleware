@@ -64,7 +64,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DefaultDispatcher}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class DefaultDispatcher implements Dispatcher {
@@ -201,7 +201,7 @@ public class DefaultDispatcher implements Dispatcher {
 
     /**
      * Registers specified factory under given module.
-     * 
+     *
      * @param module The module
      * @param factory The factory (possibly annotated with {@link Module})
      */
@@ -229,7 +229,7 @@ public class DefaultDispatcher implements Dispatcher {
 
     /**
      * Adds specified customizer factory.
-     * 
+     *
      * @param factory The customizer factory
      */
     public void addCustomizer(final AJAXActionCustomizerFactory factory) {
@@ -238,7 +238,7 @@ public class DefaultDispatcher implements Dispatcher {
 
     /**
      * Releases specified factory from given module.
-     * 
+     *
      * @param module The module
      * @param factory The factory (possibly annotated with {@link Module})
      */

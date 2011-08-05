@@ -77,10 +77,12 @@ public class DueDate extends AbstractVerifyingAttributeConverter<VToDo, Task> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isSet(final Task task) {
         return false;  // EndDate only
     }
 
+    @Override
     public void emit(final int index, final Task task, final VToDo vToDo, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
        return; // EndDate only
     }
@@ -88,10 +90,12 @@ public class DueDate extends AbstractVerifyingAttributeConverter<VToDo, Task> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean hasProperty(final VToDo vToDo) {
         return null != vToDo.getDue();
     }
 
+    @Override
     public void parse(final int index, final VToDo vToDo, final Task task, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
         if(task.containsEndDate()) {
             return;

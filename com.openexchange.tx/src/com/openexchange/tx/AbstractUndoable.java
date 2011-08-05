@@ -55,11 +55,13 @@ public abstract class AbstractUndoable implements Undoable {
 
 	private String error;
 
-	public String error() {
+	@Override
+    public String error() {
 		return error;
 	}
 
-	public void undo() throws OXException {
+	@Override
+    public void undo() throws OXException {
 		try {
 			undoAction();
 		} catch (final OXException x) {

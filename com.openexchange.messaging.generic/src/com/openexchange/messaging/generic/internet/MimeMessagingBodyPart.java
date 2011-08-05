@@ -104,6 +104,7 @@ public class MimeMessagingBodyPart extends MimeMessagingPart implements Messagin
         this.parent = parent;
     }
 
+    @Override
     public MultipartContent getParent() throws OXException {
         return parent;
     }

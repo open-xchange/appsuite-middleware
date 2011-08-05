@@ -216,26 +216,32 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
         return threadPoolExecutor.shutdownNow();
     }
 
+    @Override
     public int getActiveCount() {
         return threadPoolExecutor.getActiveCount();
     }
 
+    @Override
     public long getCompletedTaskCount() {
         return threadPoolExecutor.getCompletedTaskCount();
     }
 
+    @Override
     public int getLargestPoolSize() {
         return threadPoolExecutor.getLargestPoolSize();
     }
 
+    @Override
     public int getPoolSize() {
         return threadPoolExecutor.getPoolSize();
     }
 
+    @Override
     public long getTaskCount() {
         return threadPoolExecutor.getTaskCount();
     }
 
+    @Override
     public <T> List<Future<T>> invokeAll(final Collection<? extends Task<T>> tasks) throws InterruptedException {
         if (tasks == null) {
             throw new NullPointerException();
@@ -270,6 +276,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
         }
     }
 
+    @Override
     public <T> List<Future<T>> invokeAll(final Collection<? extends Task<T>> tasks, final long timeout) throws InterruptedException {
         if (tasks == null) {
             throw new NullPointerException();
@@ -327,6 +334,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
         }
     }
 
+    @Override
     public <T> CompletionFuture<T> invoke(final Collection<? extends Task<T>> tasks) {
         if (tasks == null) {
             throw new NullPointerException();
@@ -338,6 +346,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
         return new CompletionFutureImpl<T>(completionService);
     }
 
+    @Override
     public <T> CompletionFuture<T> invoke(final Task<T>[] tasks) {
         if (tasks == null) {
             throw new NullPointerException();
@@ -349,6 +358,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
         return new CompletionFutureImpl<T>(completionService);
     }
 
+    @Override
     public <T> CompletionFuture<T> invoke(final Collection<? extends Task<T>> tasks, final RefusedExecutionBehavior<T> behavior) {
         if (tasks == null) {
             throw new NullPointerException();
@@ -369,26 +379,32 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
         return threadPoolExecutor;
     }
 
+    @Override
     public ExecutorService getExecutor() {
         return new DelegateExecutorService(threadPoolExecutor);
     }
 
+    @Override
     public ExecutorService getFixedExecutor() {
         return new FixedExecutorService(corePoolSize, threadPoolExecutor);
     }
 
+    @Override
     public ExecutorService getFixedExecutor(final int size) {
         return new FixedExecutorService(size, threadPoolExecutor);
     }
 
+    @Override
     public boolean isShutdown() {
         return threadPoolExecutor.isShutdown();
     }
 
+    @Override
     public boolean isTerminated() {
         return threadPoolExecutor.isTerminated();
     }
 
+    @Override
     public <T> Future<T> submit(final Task<T> task) {
         if (task == null) {
             throw new NullPointerException();
@@ -398,6 +414,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
         return ftask;
     }
 
+    @Override
     public <T> Future<T> submit(final Task<T> task, final RefusedExecutionBehavior<T> refusedExecutionBehavior) {
         if (task == null) {
             throw new NullPointerException();
@@ -450,6 +467,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
             this.completionQueue = new LinkedBlockingQueue<Future<V>>();
         }
 
+        @Override
         public Future<V> submit(final Callable<V> task) {
             if (task == null) {
                 throw new NullPointerException();
@@ -459,18 +477,22 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
             return f;
         }
 
+        @Override
         public Future<V> submit(final Runnable task, final V result) {
             throw new UnsupportedOperationException("ThreadPoolServiceImpl.CustomExecutorCompletionService.submit()");
         }
 
+        @Override
         public Future<V> take() throws InterruptedException {
             return completionQueue.take();
         }
 
+        @Override
         public Future<V> poll() {
             return completionQueue.poll();
         }
 
+        @Override
         public Future<V> poll(final long timeout, final TimeUnit unit) throws InterruptedException {
             return completionQueue.poll(timeout, unit);
         }
@@ -486,14 +508,17 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
             this.completionService = completionService;
         }
 
+        @Override
         public Future<V> poll() {
             return completionService.poll();
         }
 
+        @Override
         public Future<V> poll(final long timeout, final TimeUnit unit) throws InterruptedException {
             return completionService.poll(timeout, unit);
         }
 
+        @Override
         public Future<V> take() throws InterruptedException {
             return completionService.take();
         }

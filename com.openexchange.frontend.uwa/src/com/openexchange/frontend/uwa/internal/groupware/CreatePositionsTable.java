@@ -66,10 +66,12 @@ public class CreatePositionsTable extends AbstractCreateTableImpl {
         return new String[]{CREATE};
     }
 
+    @Override
     public String[] requiredTables() {
         return new String[0];
     }
 
+    @Override
     public String[] tablesToCreate() {
         return new String[]{"uwaWidgetPosition"};
     }

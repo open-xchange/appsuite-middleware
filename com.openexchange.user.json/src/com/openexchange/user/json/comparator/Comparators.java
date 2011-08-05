@@ -81,6 +81,7 @@ public final class Comparators {
      */
     public static final Comparator<User> COMPARATOR_ID = new Comparator<User>() {
 
+        @Override
         public int compare(final User o1, final User o2) {
             final int firstVal = o1.getId();
             final int secondVal = o2.getId();
@@ -97,6 +98,7 @@ public final class Comparators {
         enumMap.put(UserField.ID, COMPARATOR_ID);
         enumMap.put(UserField.ALIASES, new Comparator<User>() {
 
+            @Override
             public int compare(final User o1, final User o2) {
                 final int firstVal = o1.getId();
                 final int secondVal = o2.getId();
@@ -105,6 +107,7 @@ public final class Comparators {
         });
         enumMap.put(UserField.GROUPS, new Comparator<User>() {
 
+            @Override
             public int compare(final User o1, final User o2) {
                 final int firstVal = o1.getId();
                 final int secondVal = o2.getId();
@@ -113,6 +116,7 @@ public final class Comparators {
         });
         enumMap.put(UserField.TIME_ZONE, new Comparator<User>() {
 
+            @Override
             public int compare(final User o1, final User o2) {
                 final TimeZone timeZone1 = Utility.getTimeZone(o1.getTimeZone());
                 final TimeZone timeZone2 = Utility.getTimeZone(o2.getTimeZone());
@@ -124,6 +128,7 @@ public final class Comparators {
         });
         enumMap.put(UserField.LOCALE, new Comparator<User>() {
 
+            @Override
             public int compare(final User o1, final User o2) {
                 final Locale l1 = o1.getLocale();
                 final Locale l2 = o2.getLocale();
@@ -135,6 +140,7 @@ public final class Comparators {
         });
         enumMap.put(UserField.CONTACT_ID, new Comparator<User>() {
 
+            @Override
             public int compare(final User o1, final User o2) {
                 final int firstVal = o1.getContactId();
                 final int secondVal = o2.getContactId();
@@ -171,6 +177,7 @@ public final class Comparators {
             this.comparator = comparator;
         }
 
+        @Override
         public int compare(final T o1, final T o2) {
             return -1 * comparator.compare(o1, o2);
         }
@@ -195,6 +202,7 @@ public final class Comparators {
             if (null == loginInfoComp) {
                 final Comparator<User> newInst = new LocalizedComparator(sessionLocale) {
 
+                    @Override
                     public int compare(final User o1, final User o2) {
                         return collator.compare(o1.getLoginInfo(), o2.getLoginInfo());
                     }

@@ -79,51 +79,63 @@ public final class CSVRetentionData implements RetentionData {
         super();
     }
 
+    @Override
     public String getIPAddress() {
         return ipAddress;
     }
 
+    @Override
     public String getIdentifier() {
         return identifier;
     }
 
+    @Override
     public String getLogin() {
         return login;
     }
 
+    @Override
     public String[] getRecipientAddresses() {
         return recipients;
     }
 
+    @Override
     public String getSenderAddress() {
         return senderAddress;
     }
 
+    @Override
     public Date getStartTime() {
         return startTime;
     }
 
+    @Override
     public void setIPAddress(final String ipAddress) {
         this.ipAddress = ipAddress;
     }
 
+    @Override
     public void setIdentifier(final String identifier) {
         this.identifier = identifier;
     }
 
+    @Override
     public void setLogin(final String login) {
         this.login = login;
     }
 
+    @Override
     public void setRecipientAddresses(final String[] addresses) {
         recipients = new String[addresses.length];
         System.arraycopy(addresses, 0, recipients, 0, addresses.length);
     }
 
+    @Override
     public void setSenderAddress(final String sender) {
         senderAddress = sender;
     }
 
+    @Override
     public void setStartTime(final Date startTime) {
         this.startTime = new Date(startTime.getTime());
     }

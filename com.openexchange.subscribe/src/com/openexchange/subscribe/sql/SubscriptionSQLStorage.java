@@ -104,6 +104,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         this.discoveryService = discoveryService;
     }
 
+    @Override
     public void forgetSubscription(final Subscription subscription) throws OXException {
         if (!exist(subscription.getId(), subscription.getContext())) {
             return;
@@ -133,6 +134,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         }
     }
 
+    @Override
     public Subscription getSubscription(final Context ctx, final int id) throws OXException {
         Subscription retval = null;
 
@@ -175,6 +177,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         return retval;
     }
 
+    @Override
     public List<Subscription> getSubscriptions(final Context ctx, final String folderId) throws OXException {
         List<Subscription> retval = null;
 
@@ -216,6 +219,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
     }
 
 
+    @Override
     public List<Subscription> getSubscriptionsOfUser(final Context ctx, final int userId)  throws OXException {
         List<Subscription> retval = null;
 
@@ -254,6 +258,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         return retval;
     }
 
+    @Override
     public void rememberSubscription(final Subscription subscription) throws OXException {
         if (subscription.getId() > 0) {
             throw IDGiven.create();
@@ -284,6 +289,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         }
     }
 
+    @Override
     public void updateSubscription(final Subscription subscription) throws OXException {
         if (!exist(subscription.getId(), subscription.getContext())) {
             throw SubscriptionNotFound.create();
@@ -491,6 +497,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         return retval;
     }
 
+    @Override
     public void deleteAllSubscriptionsForUser(final int userId, final Context ctx) throws OXException {
         Connection writeConnection = null;
         try {
@@ -519,6 +526,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         }
     }
 
+    @Override
     public void deleteAllSubscriptionsInContext(final int contextId, final Context ctx) throws OXException {
         Connection writeConnection = null;
         try {
@@ -552,6 +560,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         }
     }
 
+    @Override
     public void deleteAllSubscriptionsWhereConfigMatches(final Map<String, Object> query, final String sourceId, final Context ctx) throws OXException {
         Connection writeConnection = null;
         try {

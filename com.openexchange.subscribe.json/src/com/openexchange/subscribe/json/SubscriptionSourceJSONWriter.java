@@ -83,6 +83,7 @@ public class SubscriptionSourceJSONWriter implements SubscriptionSourceJSONWrite
 
     }
 
+    @Override
     public JSONObject writeJSON(final SubscriptionSource source) throws OXException {
         validate(source);
         JSONObject retval = null;
@@ -94,6 +95,7 @@ public class SubscriptionSourceJSONWriter implements SubscriptionSourceJSONWrite
         return retval;
     }
 
+    @Override
     public JSONArray writeJSONArray(final List<SubscriptionSource> sourceList, final String[] fields) throws OXException {
         final JSONArray retval = new JSONArray();
         for (final SubscriptionSource source : sourceList) {

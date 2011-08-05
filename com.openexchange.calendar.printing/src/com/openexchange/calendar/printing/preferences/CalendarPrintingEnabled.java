@@ -71,17 +71,21 @@ public class CalendarPrintingEnabled implements PreferencesItemService {
         super();
     }
 
+    @Override
     public String[] getPath() {
         return PATH;
     }
 
+    @Override
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
 
+            @Override
             public boolean isAvailable(UserConfiguration userConfig) {
                 return userConfig.hasCalendar();
             }
 
+            @Override
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) {
                 setting.setSingleValue(Boolean.TRUE);
             }

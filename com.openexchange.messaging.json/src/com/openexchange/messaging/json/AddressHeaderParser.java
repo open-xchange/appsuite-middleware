@@ -85,14 +85,17 @@ public class AddressHeaderParser implements MessagingHeaderParser {
         "Resent-Cc",
         "Resent-Bcc"));
 
+    @Override
     public int getRanking() {
         return 1;
     }
 
+    @Override
     public boolean handles(final String key, final Object value) {
         return WHITELIST.contains(key);
     }
 
+    @Override
     public void parseAndAdd(final Map<String, Collection<MessagingHeader>> headers, final String key, final Object value) throws JSONException, OXException {
         final ArrayList<MessagingHeader> list = new ArrayList<MessagingHeader>();
 

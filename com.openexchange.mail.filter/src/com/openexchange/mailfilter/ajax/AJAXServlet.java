@@ -136,6 +136,7 @@ public abstract class AJAXServlet extends HttpServlet {
             request.setSession(session);
 
             request.setParameters(new AbstractRequest.Parameters() {
+                @Override
                 public String getParameter(final Parameter param) throws OXException {
                     final String value = req.getParameter(param.getName());
                     if (param.isRequired() && null == value) {
@@ -194,6 +195,7 @@ public abstract class AJAXServlet extends HttpServlet {
             request.setSession(session);
 
             request.setParameters(new AbstractRequest.Parameters() {
+                @Override
                 public String getParameter(final Parameter param) throws OXException {
                     final String value = req.getParameter(param.getName());
                     if (null == value) {

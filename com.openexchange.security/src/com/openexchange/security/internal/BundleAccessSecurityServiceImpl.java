@@ -72,7 +72,8 @@ public final class BundleAccessSecurityServiceImpl implements BundleAccessSecuri
 		super();
 	}
 
-	public void checkPermission(final Collection<String> paths, final String desiredPath) throws OXException {
+	@Override
+    public void checkPermission(final Collection<String> paths, final String desiredPath) throws OXException {
 		if (desiredPath == null || desiredPath.length() == 0) {
 			throw new IllegalArgumentException("desiredPath is null");
 		}
@@ -91,7 +92,8 @@ public final class BundleAccessSecurityServiceImpl implements BundleAccessSecuri
 		checkPermission(collection, p);
 	}
 
-	public void checkPermission(final String[] paths, final String desiredPath) throws OXException {
+	@Override
+    public void checkPermission(final String[] paths, final String desiredPath) throws OXException {
 		if (desiredPath == null || desiredPath.length() == 0) {
 			throw new IllegalArgumentException("desiredPath is null");
 		}
@@ -110,7 +112,8 @@ public final class BundleAccessSecurityServiceImpl implements BundleAccessSecuri
 		checkPermission(collection, p);
 	}
 
-	public void checkPermission(final BundleAccessPermissionCollection permissions,
+	@Override
+    public void checkPermission(final BundleAccessPermissionCollection permissions,
 			final BundleAccessPermission desiredPermission) throws OXException {
 		if (!permissions.implies(desiredPermission)) {
 			throw BundleAccessExceptionCode.ACCESS_DENIED.create(desiredPermission.getName());

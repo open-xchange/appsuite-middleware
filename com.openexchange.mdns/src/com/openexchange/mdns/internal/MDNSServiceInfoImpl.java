@@ -92,18 +92,22 @@ public final class MDNSServiceInfoImpl implements MDNSServiceInfo {
         this.hash = result;
     }
 
+    @Override
     public String getInfo() {
         return info;
     }
 
+    @Override
     public UUID getId() {
         return id;
     }
 
+    @Override
     public int getPort() {
         return port;
     }
 
+    @Override
     public String getServiceId() {
         return serviceId;
     }

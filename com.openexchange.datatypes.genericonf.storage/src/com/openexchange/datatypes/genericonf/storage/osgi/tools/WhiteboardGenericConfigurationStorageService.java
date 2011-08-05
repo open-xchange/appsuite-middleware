@@ -82,46 +82,57 @@ public class WhiteboardGenericConfigurationStorageService implements GenericConf
         return (GenericConfigurationStorageService) tracker.getService();
     }
 
+    @Override
     public void delete(Context ctx, int id) throws OXException {
         getDelegate().delete(ctx, id);
     }
 
+    @Override
     public void delete(Connection con, Context ctx, int id) throws OXException {
         getDelegate().delete(con, ctx, id);
     }
 
+    @Override
     public void delete(Connection writeConnection, Context ctx) throws OXException {
         getDelegate().delete(writeConnection, ctx);
     }
 
+    @Override
     public void fill(Context ctx, int id, Map<String, Object> content) throws OXException {
         getDelegate().fill(ctx, id, content);
     }
 
+    @Override
     public void fill(Connection con, Context ctx, int id, Map<String, Object> content) throws OXException {
         getDelegate().fill(con, ctx, id, content);
     }
 
+    @Override
     public int save(Connection con, Context ctx, Map<String, Object> content) throws OXException {
         return getDelegate().save(con, ctx, content);
     }
 
+    @Override
     public int save(Context ctx, Map<String, Object> content) throws OXException {
         return getDelegate().save(ctx, content);
     }
 
+    @Override
     public void update(Connection con, Context ctx, int id, Map<String, Object> content) throws OXException {
         getDelegate().update(con, ctx, id, content);
     }
 
+    @Override
     public void update(Context ctx, int id, Map<String, Object> content) throws OXException {
         getDelegate().update(ctx, id, content);
     }
 
+    @Override
     public List<Integer> search(Context ctx, Map<String, Object> query) throws OXException {
         return getDelegate().search(ctx, query);
     }
 
+    @Override
     public List<Integer> search(Connection con, Context ctx, Map<String, Object> query) throws OXException {
         return getDelegate().search(con, ctx, query);
     }

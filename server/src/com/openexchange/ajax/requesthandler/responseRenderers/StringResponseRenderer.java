@@ -59,7 +59,7 @@ import com.openexchange.ajax.requesthandler.ResponseRenderer;
 
 /**
  * {@link StringResponseRenderer}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class StringResponseRenderer implements ResponseRenderer {

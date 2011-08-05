@@ -85,6 +85,7 @@ public final class Entity2ACLInit implements Initialization {
         started = new AtomicBoolean();
     }
 
+    @Override
     public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
             LOG.error(MessageFormat.format("{0} already started", Entity2ACLInit.class.getName()));
@@ -127,6 +128,7 @@ public final class Entity2ACLInit implements Initialization {
         }
     }
 
+    @Override
     public void stop() throws OXException {
         if (!started.compareAndSet(true, false)) {
             LOG.error(Entity2ACLInit.class.getName() + " cannot be stopped since it has not been started before");

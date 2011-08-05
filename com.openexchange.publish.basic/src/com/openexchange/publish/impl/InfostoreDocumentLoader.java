@@ -87,6 +87,7 @@ public class InfostoreDocumentLoader implements PublicationDataLoaderService {
         this.userConfigs = userConfigService;
     }
 
+    @Override
     public Collection<? extends Object> load(Publication publication) throws OXException {
         ArrayList<InputStream> documents = new ArrayList<InputStream>();
         try {

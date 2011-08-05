@@ -180,6 +180,7 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
         }
     }
 
+    @Override
     public void addUIDL(final String uidl) throws OXException {
         final Lock readLock = rwLock.readLock();
         readLock.lock();
@@ -192,6 +193,7 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
         }
     }
 
+    @Override
     public void clear() throws OXException {
         final Lock readLock = rwLock.readLock();
         readLock.lock();
@@ -204,6 +206,7 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
         }
     }
 
+    @Override
     public Set<String> getUIDLs() throws OXException {
         final Lock readLock = rwLock.readLock();
         readLock.lock();
@@ -217,6 +220,7 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
         }
     }
 
+    @Override
     public void removeUIDL(final String uidl) throws OXException {
         final Lock readLock = rwLock.readLock();
         readLock.lock();
@@ -229,6 +233,7 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
         }
     }
 
+    @Override
     public void addAllUIDL(final Collection<? extends String> uidls) throws OXException {
         final Lock readLock = rwLock.readLock();
         readLock.lock();
@@ -268,6 +273,7 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
             this.tmode = tmode;
         }
 
+        @Override
         public void run() {
             final Lock writeLock = trwLock.writeLock();
             writeLock.lock();

@@ -113,6 +113,7 @@ public class SetFollowMeAction extends AbstractVoipNowSOAPAction<ExtensionInterf
         super();
     }
 
+    @Override
     public AJAXRequestResult perform(AJAXRequestData ajaxRequest, ServerSession session) throws OXException {
         try {
             String[] transferTo;

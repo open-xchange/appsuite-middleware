@@ -54,15 +54,16 @@ import java.io.InputStream;
 
 /**
  * {@link EAVPayloadCompare}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class EAVPayloadCompare implements EAVTypeSwitcher {
 
+    @Override
     public Object binary(Object... args) {
         InputStream expected = (InputStream) args[0];
         InputStream actual = (InputStream) args[1];
-        
+
         int expectedData;
         try {
             while((expectedData = expected.read())!= -1){
@@ -80,67 +81,74 @@ public class EAVPayloadCompare implements EAVTypeSwitcher {
         }
     }
 
+    @Override
     public Object date(Object... args) {
         return equals(args[0], args[1]);
     }
 
+    @Override
     public Object number(Object... args) {
         if(equals(args[0], args[1])) {
             return true;
         }
         long a = -1;
         long b = -1;
-        
+
         boolean aCast = false;
         boolean bCast = false;
         if(Long.class.isInstance(args[0])) {
             a = (Long)args[0];
             aCast = true;
         }
-        
+
         if(Long.class.isInstance(args[1])) {
             b = (Long) args[1];
             bCast = true;
         }
-        
+
         if(Integer.class.isInstance(args[0])) {
             a = (Integer) args[0];
             aCast = true;
         }
-        
+
         if(Integer.class.isInstance(args[1])) {
             b = (Integer) args[1];
             bCast = true;
         }
-        
+
         if(aCast != bCast) {
             return false;
         }
-        
+
         if(aCast) {
             return 0 == a-b;
         }
-        
+
         // TODO Floats
         return false;
     }
 
+    @Override
     public Object object(Object... args) {
         return true;
     }
 
+    @Override
     public Object string(Object... args) {
         return equals(args[0], args[1]);
     }
 
+    @Override
     public Object time(Object... args) {
         return equals(args[0], args[1]);
     }
-    
+
+    @Override
     public Object bool(Object... args) {
         return equals(args[0], args[1]);
     }
 
+    @Override
     public Object nullValue(Object... args) {
         return true;
     }

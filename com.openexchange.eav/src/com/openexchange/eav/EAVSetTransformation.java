@@ -60,14 +60,14 @@ package com.openexchange.eav;
 public class EAVSetTransformation extends AbstractNode<EAVSetTransformation>{
     private Object[] add = new Object[0];
     private Object[] remove = new Object[0];
-    
+
     private EAVType type;
 
     @Override
     public EAVSetTransformation newInstance() {
         return new EAVSetTransformation();
     }
-    
+
     public EAVSetTransformation() {
         super();
     }
@@ -84,41 +84,41 @@ public class EAVSetTransformation extends AbstractNode<EAVSetTransformation>{
         super(name);
     }
 
-    
+
     public Object[] getAdd() {
         return add;
     }
 
-    
+
     public void setAdd(Object[] add) {
         this.add = add;
     }
 
-    
+
     public Object[] getRemove() {
         return remove;
     }
 
-    
+
     public void setRemove(Object[] remove) {
         this.remove = remove;
     }
 
-    
+
     public EAVType getType() {
         return type;
     }
 
-    
+
     public void setType(EAVType type) {
         this.type = type;
     }
-    
+
     @Override
     public void copyPayloadFromOther(EAVSetTransformation other) {
         this.add = other.add;
         this.remove = other.remove;
         this.type = other.type;
     }
-    
+
 }

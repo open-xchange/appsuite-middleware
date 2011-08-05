@@ -78,6 +78,7 @@ public class ReferenceContent implements SimpleContent<String> {
         id = refId;
     }
 
+    @Override
     public String getData() throws OXException {
         return id;
     }

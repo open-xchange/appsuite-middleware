@@ -77,6 +77,7 @@ public class StringContent implements SimpleContent<String> {
         this.data = data;
     }
 
+    @Override
     public String getData() {
         return data;
     }

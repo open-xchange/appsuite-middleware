@@ -65,10 +65,12 @@ public abstract class AbstractTimedResult<T> implements TimedResult<T> {
         this.results = new LastModifiedExtractorIterator(results);
     }
 
+    @Override
     public SearchIterator<T> results() throws OXException {
         return results;
     }
 
+    @Override
     public long sequenceNumber() throws OXException {
         if (results.hasNext()) {
             results.fastForward();
@@ -93,30 +95,37 @@ public abstract class AbstractTimedResult<T> implements TimedResult<T> {
             this.size = results.size();
         }
 
+        @Override
         public void addWarning(final OXException warning) {
             results.addWarning(warning);
         }
 
+        @Override
         public void close() throws OXException {
             results.close();
         }
 
+        @Override
         public OXException[] getWarnings() {
             return results.getWarnings();
         }
 
+        @Override
         public boolean hasNext() throws OXException {
             return results.hasNext();
         }
 
+        @Override
         public int size() {
             return size;
         }
 
+        @Override
         public boolean hasWarnings() {
             return results.hasWarnings();
         }
 
+        @Override
         public T next() throws OXException {
 
             if (this.oxexception != null) {

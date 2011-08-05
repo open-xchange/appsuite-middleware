@@ -78,6 +78,7 @@ public class TaskFolderUpdaterStrategy implements FolderUpdaterStrategy<Task> {
     private static final int[] COMPARISON_COLUMNS = {
         Task.OBJECT_ID, Task.FOLDER_ID, Task.TITLE, Task.START_DATE, Task.END_DATE, Task.UID, Task.NOTE, Task.LAST_MODIFIED, Task.SEQUENCE };
 
+    @Override
     public int calculateSimilarityScore(final Task original, final Task candidate, final Object session) throws OXException {
         int score = 0;
         // A score of 10 is sufficient for a match
@@ -112,10 +113,12 @@ public class TaskFolderUpdaterStrategy implements FolderUpdaterStrategy<Task> {
         }
     }
 
+    @Override
     public void closeSession(final Object session) throws OXException {
 
     }
 
+    @Override
     public Collection<Task> getData(final TargetFolderDefinition target, final Object session) throws OXException {
         final TasksSQLInterface taskSql = (TasksSQLInterface) getFromSession(SQL_INTERFACE, session);
 
@@ -146,14 +149,17 @@ public class TaskFolderUpdaterStrategy implements FolderUpdaterStrategy<Task> {
         return retval;
     }
 
+    @Override
     public int getThreshold(final Object session) throws OXException {
         return 9;
     }
 
+    @Override
     public boolean handles(final FolderObject folder) {
         return folder.getModule() == FolderObject.TASK;
     }
 
+    @Override
     public void save(final Task newElement, final Object session) throws OXException {
         final TasksSQLInterface taskSql = (TasksSQLInterface) getFromSession(SQL_INTERFACE, session);
         final TargetFolderDefinition target = (TargetFolderDefinition) getFromSession(TARGET, session);
@@ -165,6 +171,7 @@ public class TaskFolderUpdaterStrategy implements FolderUpdaterStrategy<Task> {
         return ((Map<Integer, Object>) session).get(key);
     }
 
+    @Override
     public Object startSession(final TargetFolderDefinition target) throws OXException {
         final Map<Integer, Object> userInfo = new HashMap<Integer, Object>();
         userInfo.put(SQL_INTERFACE, new TasksSQLImpl(new TargetFolderSession(target)));
@@ -172,6 +179,7 @@ public class TaskFolderUpdaterStrategy implements FolderUpdaterStrategy<Task> {
         return userInfo;
     }
 
+    @Override
     public void update(final Task original, final Task update, final Object session) throws OXException {
         final TasksSQLInterface taskSql = (TasksSQLInterface) getFromSession(SQL_INTERFACE, session);
 

@@ -62,18 +62,22 @@ import com.openexchange.groupware.contexts.Context;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class Duration<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T,U> {
+    @Override
     public boolean isSet(final U calendar) {
         return false; // Always emitting endDate
     }
 
+    @Override
     public void emit(final int index, final U u, final T t, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
         return; // Always emitting endDate
     }
 
+    @Override
     public boolean hasProperty(final T t) {
         return null != t.getProperty("Duration");
     }
 
+    @Override
     public void parse(final int index, final T component, final U cObj, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
        final net.fortuna.ical4j.model.property.Duration duration = (net.fortuna.ical4j.model.property.Duration) component.getProperty("Duration");
         if(duration == null) {

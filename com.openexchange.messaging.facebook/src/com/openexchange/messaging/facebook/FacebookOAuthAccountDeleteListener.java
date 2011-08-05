@@ -77,10 +77,12 @@ public final class FacebookOAuthAccountDeleteListener implements OAuthAccountDel
         super();
     }
 
+    @Override
     public void onBeforeOAuthAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) {
         // Nope
     }
 
+    @Override
     public void onAfterOAuthAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OXException {
         final List<int[]> dataList = listFacebookMessagingAccounts(user, cid, con);
         for (final int[] data : dataList) {

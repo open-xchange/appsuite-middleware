@@ -62,6 +62,7 @@ public interface MailCounter extends Counter {
      *
      * @return The count
      */
+    @Override
     int getCount();
 
 }

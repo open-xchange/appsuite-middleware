@@ -131,18 +131,22 @@ public final class RootSubfolderCache {
             return tmp;
         }
 
+        @Override
         public CacheKey getKey() {
             return getKeyInternal();
         }
 
+        @Override
         public Boolean getValue() {
             return subfolderCreation;
         }
 
+        @Override
         public void setValue(final Boolean value) {
             subfolderCreation = value;
         }
 
+        @Override
         public Class<Boolean> getEntryClass() {
             return Boolean.class;
         }

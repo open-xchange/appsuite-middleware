@@ -72,16 +72,19 @@ public final class HTMLRegistryCustomizer implements ServiceTrackerCustomizer {
         this.context = context;
     }
 
+    @Override
     public Object addingService(final ServiceReference reference) {
         final Object service = context.getService(reference);
         HTMLServiceProvider.getInstance().setHTMLService((HTMLService) service);
         return service;
     }
 
+    @Override
     public void modifiedService(final ServiceReference reference, final Object service) {
         // Nope
     }
 
+    @Override
     public void removedService(final ServiceReference reference, final Object service) {
         HTMLServiceProvider.getInstance().setHTMLService(null);
         context.ungetService(reference);

@@ -61,10 +61,12 @@ import com.openexchange.calendar.printing.CPType;
  */
 public class WorkWeekPartitioningStrategy extends AbstractWeekPartitioningStrategy {
 
+    @Override
     public boolean isPackaging(CPType type) {
         return type == CPType.WORKWEEKVIEW;
     }
 
+    @Override
     public CPPartition partition(List<CPAppointment> appointments) {
         CPTool tools = new CPTool();
         tools.sort(appointments);

@@ -77,6 +77,7 @@ public final class MDNSListener implements javax.jmdns.ServiceListener {
         this.mdnsReregisterer = mdnsReregisterer;
     }
 
+    @Override
     public void serviceAdded(final javax.jmdns.ServiceEvent event) {
         try {
             event.getDNS().requestServiceInfo(event.getType(), event.getName());
@@ -86,6 +87,7 @@ public final class MDNSListener implements javax.jmdns.ServiceListener {
         }
     }
 
+    @Override
     public void serviceRemoved(final javax.jmdns.ServiceEvent event) {
         final String n = event.getName();
         final int pos = n.indexOf('/');
@@ -108,6 +110,7 @@ public final class MDNSListener implements javax.jmdns.ServiceListener {
         }
     }
 
+    @Override
     public void serviceResolved(final javax.jmdns.ServiceEvent event) {
         final javax.jmdns.ServiceInfo info = event.getInfo();
         final UUID id;

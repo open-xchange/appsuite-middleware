@@ -164,7 +164,8 @@ public class LoginPageByFormActionReturningStringStep extends AbstractStep<Strin
        return username;
    }
 
-   public void setUsername(final String username) {
+   @Override
+public void setUsername(final String username) {
        this.username = username;
    }
 
@@ -172,7 +173,8 @@ public class LoginPageByFormActionReturningStringStep extends AbstractStep<Strin
        return password;
    }
 
-   public void setPassword(final String password) {
+   @Override
+public void setPassword(final String password) {
        this.password = password;
    }
 
@@ -208,7 +210,8 @@ public class LoginPageByFormActionReturningStringStep extends AbstractStep<Strin
        this.numberOfForm = numberOfForm;
    }
 
-   public String getBaseUrl() {
+   @Override
+public String getBaseUrl() {
        return baseUrl;
    }
 
@@ -237,6 +240,7 @@ public class LoginPageByFormActionReturningStringStep extends AbstractStep<Strin
     }
 
 
+    @Override
     public Page getLoginPage() {
         return loginPage;
     }

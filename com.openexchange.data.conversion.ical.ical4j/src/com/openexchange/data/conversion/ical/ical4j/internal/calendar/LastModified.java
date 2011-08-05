@@ -66,20 +66,24 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class LastModified <T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T,U> {
 
+    @Override
     public boolean isSet(final U calendar) {
         return calendar.containsLastModified();
     }
 
+    @Override
     public void emit(final int index, final U calendar, final T t, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
         final net.fortuna.ical4j.model.property.LastModified lastModified = new net.fortuna.ical4j.model.property.LastModified();
         lastModified.setDate(toDateTime(calendar.getLastModified()));
         t.getProperties().add(lastModified);
     }
 
+    @Override
     public boolean hasProperty(final T t) {
         return null != t.getProperty("LAST-MODIFIED");
     }
 
+    @Override
     public void parse(final int index, final T component, final U cObj, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
         final DateProperty property = (DateProperty) component.getProperty("LAST-MODIFIED");
         final Date lastModified = ParserTools.parseDate(component, property, timeZone);

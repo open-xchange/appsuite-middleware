@@ -69,30 +69,37 @@ public final class AppointmentIteratorAdapter implements SearchIterator<Appointm
         this.delegate = retval;
     }
 
+    @Override
     public void addWarning(final OXException warning) {
         delegate.addWarning(warning);
     }
 
+    @Override
     public void close() throws OXException {
         delegate.close();
     }
 
+    @Override
     public OXException[] getWarnings() {
         return delegate.getWarnings();
     }
 
+    @Override
     public boolean hasNext() throws OXException{
         return delegate.hasNext();
     }
 
+    @Override
     public boolean hasWarnings() {
         return delegate.hasWarnings();
     }
 
+    @Override
     public Appointment next() throws OXException {
         return delegate.next();
     }
 
+    @Override
     public int size() {
         return delegate.size();
     }

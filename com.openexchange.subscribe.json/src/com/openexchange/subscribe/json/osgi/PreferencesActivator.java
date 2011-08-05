@@ -62,10 +62,12 @@ public class PreferencesActivator implements BundleActivator {
 
     private ServiceRegistration userConfigFlagRegistration;
 
+    @Override
     public void start(BundleContext context) throws Exception {
         userConfigFlagRegistration = context.registerService(PreferencesItemService.class.getName(), new Enabled(), null);
     }
 
+    @Override
     public void stop(BundleContext context) throws Exception {
         userConfigFlagRegistration.unregister();
     }

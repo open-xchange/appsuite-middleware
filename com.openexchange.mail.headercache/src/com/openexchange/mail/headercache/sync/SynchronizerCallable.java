@@ -120,6 +120,7 @@ public final class SynchronizerCallable implements Callable<Object> {
         this.enforce = enforce;
     }
 
+    @Override
     public Object call() throws OXException {
         try {
             final long s = DEBUG ? System.currentTimeMillis() : ZERO;

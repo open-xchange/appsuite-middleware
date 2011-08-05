@@ -77,6 +77,7 @@ public final class MailNotifyPushManagerService implements PushManagerService {
         this.useEmailAddress = useEmailAddress;
     }
 
+    @Override
     public PushListener startListener(final Session session) throws OXException {
         final MailNotifyPushListener pushListener = MailNotifyPushListener.newInstance(session);
         MailNotifyPushListenerRegistry listener = MailNotifyPushListenerRegistry.getInstance();
@@ -92,6 +93,7 @@ public final class MailNotifyPushManagerService implements PushManagerService {
         return null;
     }
 
+    @Override
     public boolean stopListener(final Session session) throws OXException {
         return MailNotifyPushListenerRegistry.getInstance().removePushListener(
             session.getContextId(),

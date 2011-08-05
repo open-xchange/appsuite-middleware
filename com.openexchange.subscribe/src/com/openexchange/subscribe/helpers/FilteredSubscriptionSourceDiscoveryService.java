@@ -81,6 +81,7 @@ public class FilteredSubscriptionSourceDiscoveryService implements SubscriptionS
         this.delegate = delegate;
     }
 
+    @Override
     public SubscriptionSource getSource(final String identifier) {
         if (accepts(identifier)) {
             return delegate.getSource(identifier);
@@ -88,25 +89,30 @@ public class FilteredSubscriptionSourceDiscoveryService implements SubscriptionS
         return null;
     }
 
+    @Override
     public SubscriptionSource getSource(final Context context, final int subscriptionId) throws OXException {
         final SubscriptionSource source = delegate.getSource(context, subscriptionId);
 
         return filter(source);
     }
 
+    @Override
     public List<SubscriptionSource> getSources() {
         return filter(delegate.getSources());
     }
 
 
+    @Override
     public List<SubscriptionSource> getSources(final int folderModule) {
         return filter(delegate.getSources(folderModule));
     }
 
+    @Override
     public boolean knowsSource(final String identifier) {
         return accepts(identifier) ? delegate.knowsSource(identifier) : false;
     }
 
+    @Override
     public SubscriptionSourceDiscoveryService filter(final int user, final int context) throws OXException {
         return delegate.filter(user, context);
     }

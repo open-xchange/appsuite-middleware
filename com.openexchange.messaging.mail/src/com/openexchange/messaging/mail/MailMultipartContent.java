@@ -95,6 +95,7 @@ public class MailMultipartContent implements MultipartContent {
         mimeMultipart.setSequenceId(sectionId);
     }
 
+    @Override
     public MessagingBodyPart get(final int index) throws OXException {
         try {
             final MailPart enclosedMailPart = mimeMultipart.getEnclosedMailPart(index);
@@ -121,6 +122,7 @@ public class MailMultipartContent implements MultipartContent {
         }
     }
 
+    @Override
     public int getCount() throws OXException {
         try {
             return mimeMultipart.getEnclosedCount();

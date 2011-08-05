@@ -81,6 +81,7 @@ public class Klass<T extends CalendarComponent, U extends CalendarObject> extend
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isSet(final U cObj) {
         return cObj.containsPrivateFlag();
     }
@@ -88,6 +89,7 @@ public class Klass<T extends CalendarComponent, U extends CalendarObject> extend
     /**
      * {@inheritDoc}
      */
+    @Override
     public void emit(final int index, final U cObj, final T component, final List<ConversionWarning> warnings,
             final Context ctx, final Object... args) throws ConversionError {
         if (cObj.getPrivateFlag()) {
@@ -100,10 +102,12 @@ public class Klass<T extends CalendarComponent, U extends CalendarObject> extend
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean hasProperty(final T component) {
         return component.getProperty(CLASS) != null;
     }
 
+    @Override
     public void parse(final int index, final T component, final U cObj, final TimeZone timeZone, final Context ctx,
             final List<ConversionWarning> warnings) throws ConversionError {
         final Clazz clazz = (Clazz) component.getProperty(CLASS);

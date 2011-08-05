@@ -90,6 +90,7 @@ public class CrawlerAutoUpdater implements ServiceTrackerCustomizer {
         this.activator = activator;
     }
 
+    @Override
     public Object addingService(ServiceReference reference) {
         final Object obj = context.getService(reference);
         final boolean taskSchedulingPossible;
@@ -117,10 +118,12 @@ public class CrawlerAutoUpdater implements ServiceTrackerCustomizer {
         return obj;
     }
 
+    @Override
     public void modifiedService(ServiceReference reference, Object service) {
         // Nothing to do.
     }
 
+    @Override
     public void removedService(ServiceReference reference, Object service) {
         ScheduledTimerTask cancel = null;
         lock.lock();

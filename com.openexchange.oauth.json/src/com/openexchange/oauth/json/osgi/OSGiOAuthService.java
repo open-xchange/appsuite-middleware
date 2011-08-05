@@ -80,30 +80,37 @@ public final class OSGiOAuthService extends AbstractOSGiDelegateService<OAuthSer
         }
     }
 
+    @Override
     public OAuthAccount createAccount(final String serviceMetaData, final Map<String, Object> arguments, final int user, final int contextId) throws OXException {
         return getService0().createAccount(serviceMetaData, arguments, user, contextId);
     }
 
+    @Override
     public OAuthAccount createAccount(final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId) throws OXException {
         return getService0().createAccount(serviceMetaData, type, arguments, user, contextId);
     }
 
+    @Override
     public void deleteAccount(final int accountId, final int user, final int contextId) throws OXException {
         getService0().deleteAccount(accountId, user, contextId);
     }
 
+    @Override
     public OAuthAccount getAccount(final int accountId, final String password, final int user, final int contextId) throws OXException {
         return getService0().getAccount(accountId, password, user, contextId);
     }
 
+    @Override
     public List<OAuthAccount> getAccounts(final String password, final int user, final int contextId) throws OXException {
         return getService0().getAccounts(password, user, contextId);
     }
 
+    @Override
     public List<OAuthAccount> getAccounts(final String serviceMetaData, final String password, final int user, final int contextId) throws OXException {
         return getService0().getAccounts(serviceMetaData, password, user, contextId);
     }
 
+    @Override
     public OAuthServiceMetaDataRegistry getMetaDataRegistry() {
         final OAuthService delegatee = optService();
         if (null == delegatee) {
@@ -112,14 +119,17 @@ public final class OSGiOAuthService extends AbstractOSGiDelegateService<OAuthSer
         return delegatee.getMetaDataRegistry();
     }
 
+    @Override
     public OAuthInteraction initOAuth(final String serviceMetaData, final String callbackUrl) throws OXException {
         return getService0().initOAuth(serviceMetaData, callbackUrl);
     }
 
+    @Override
     public void updateAccount(final int accountId, final Map<String, Object> arguments, final int user, final int contextId) throws OXException {
         getService0().updateAccount(accountId, arguments, user, contextId);
     }
 
+    @Override
     public OAuthAccount updateAccount(int accountId, String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId) throws OXException {
         return getService0().updateAccount(accountId, serviceMetaData, type, arguments, user, contextId);
     }

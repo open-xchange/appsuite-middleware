@@ -91,6 +91,7 @@ public final class DefaultAuthorizationImpl implements AuthorizationService {
      * @param user
      * @throws OXException
      */
+    @Override
     public void authorizeUser(final Context ctx, final User user) throws OXException {
         try {
             if (!ctx.isEnabled()) {

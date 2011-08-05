@@ -71,10 +71,12 @@ public final class ElementEvent2JCS implements ElementEvent {
         this.event = event;
     }
 
+    @Override
     public int getElementEvent() {
         return event.getElementEvent();
     }
 
+    @Override
     public Object getSource() {
         final Object source = event.getSource();
         if (source instanceof ICacheElement) {

@@ -70,10 +70,12 @@ public final class HeaderImpl implements Header {
         this.header = header;
     }
 
+    @Override
     public String getName() {
         return header.getName();
     }
 
+    @Override
     public String getValue() {
         return header.getValue();
     }

@@ -72,14 +72,17 @@ public class FolderSecurityStrategy implements SecurityStrategy {
         this.userConfigs = userConfigs;
     }
 
+    @Override
     public boolean mayCreate(final Publication publication) throws OXException {
         return isFolderAdmin(publication);
     }
 
+    @Override
     public boolean mayDelete(final Publication publication) throws OXException {
         return isFolderAdmin(publication);
     }
 
+    @Override
     public boolean mayUpdate(final Publication publication) throws OXException {
         return isFolderAdmin(publication);
     }

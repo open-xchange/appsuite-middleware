@@ -79,6 +79,7 @@ public class UserWidgetSQLStorage extends WidgetSQLStorage {
         final SELECT select = new SELECT("id").FROM(metadata.getName()).WHERE(predicate);
         return executeQuery(select, primaryKey(id), new ResultSetHandler<Boolean>() {
 
+            @Override
             public Boolean handle(final ResultSet rs) throws SQLException, OXException {
                 return rs.next();
             }

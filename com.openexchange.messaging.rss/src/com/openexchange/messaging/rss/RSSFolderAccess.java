@@ -68,46 +68,56 @@ public class RSSFolderAccess extends RSSCommon implements MessagingFolderAccess 
         super(accountId, session);
     }
 
+    @Override
     public void clearFolder(final String folderId) throws OXException {
         checkFolder(folderId);
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(RSSMessagingService.ID);
     }
 
+    @Override
     public void clearFolder(final String folderId, final boolean hardDelete) throws OXException {
         checkFolder(folderId);
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(RSSMessagingService.ID);
     }
 
+    @Override
     public String createFolder(final MessagingFolder toCreate) throws OXException {
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(RSSMessagingService.ID);
     }
 
+    @Override
     public String deleteFolder(final String folderId) throws OXException {
         checkFolder(folderId);
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(RSSMessagingService.ID);
     }
 
+    @Override
     public String deleteFolder(final String folderId, final boolean hardDelete) throws OXException {
         checkFolder(folderId);
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(RSSMessagingService.ID);
     }
 
+    @Override
     public boolean exists(final String folderId) {
         return EMPTY.equals(folderId);
     }
 
+    @Override
     public String getConfirmedHamFolder() {
         return null;
     }
 
+    @Override
     public String getConfirmedSpamFolder() {
         return null;
     }
 
+    @Override
     public String getDraftsFolder() {
         return null;
     }
 
+    @Override
     public MessagingFolder getFolder(final String folderId) throws OXException {
         checkFolder(folderId);
         return new RSSFolder(session.getUserId());
@@ -115,6 +125,7 @@ public class RSSFolderAccess extends RSSCommon implements MessagingFolderAccess 
 
     private static final Quota.Type[] MESSAGE = { Quota.Type.MESSAGE };
 
+    @Override
     public Quota getMessageQuota(final String folderId) throws OXException {
         checkFolder(folderId);
         return getQuotas(folderId, MESSAGE)[0];
@@ -122,51 +133,62 @@ public class RSSFolderAccess extends RSSCommon implements MessagingFolderAccess 
 
     private static final MessagingFolder[] EMPTY_PATH = new MessagingFolder[0];
 
+    @Override
     public MessagingFolder[] getPath2DefaultFolder(final String folderId) {
         return EMPTY_PATH;
     }
 
+    @Override
     public Quota[] getQuotas(final String folder, final Type[] types) throws OXException {
         checkFolder(folder);
         return Quota.getUnlimitedQuotas(types);
     }
 
+    @Override
     public MessagingFolder getRootFolder() {
         return new RSSFolder(session.getUserId());
     }
 
+    @Override
     public String getSentFolder() {
         return null;
     }
 
+    @Override
     public String getSpamFolder() {
         return null;
     }
 
     private static final Quota.Type[] STORAGE = { Quota.Type.STORAGE };
 
+    @Override
     public Quota getStorageQuota(final String folderId) throws OXException {
         checkFolder(folderId);
         return getQuotas(folderId, STORAGE)[0];
     }
 
+    @Override
     public MessagingFolder[] getSubfolders(final String parentIdentifier, final boolean all) throws OXException {
         checkFolder(parentIdentifier);
         return new MessagingFolder[0];
     }
 
+    @Override
     public String getTrashFolder() throws OXException {
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(RSSMessagingService.ID);
     }
 
+    @Override
     public String moveFolder(final String folderId, final String newParentId) throws OXException {
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(RSSMessagingService.ID);
     }
 
+    @Override
     public String renameFolder(final String folderId, final String newName) throws OXException {
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(RSSMessagingService.ID);
     }
 
+    @Override
     public String updateFolder(final String identifier, final MessagingFolder toUpdate) throws OXException {
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(RSSMessagingService.ID);
     }

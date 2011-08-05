@@ -63,12 +63,14 @@ public class Activator implements BundleActivator {
     private ServiceRegistration jdomRegistration;
     private ServiceRegistration springParserRegistration;
 
+    @Override
     public void start(final BundleContext bundleContext) throws Exception {
         this.jdomRegistration = bundleContext.registerService(JDOMParser.class.getName(), new JDOMParserImpl(), null);
         this.springParserRegistration = bundleContext.registerService(SpringParser.class.getName(), new DefaultSpringParser(), null);
         // new javax.xml.stream.internal.Activator().start(bundleContext);
     }
 
+    @Override
     public void stop(final BundleContext bundleContext) throws Exception {
         // new javax.xml.stream.internal.Activator().stop(bundleContext);
         jdomRegistration.unregister();

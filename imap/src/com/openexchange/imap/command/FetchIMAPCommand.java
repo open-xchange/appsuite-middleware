@@ -125,10 +125,12 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
             delegate = new IntSeqNumFetcher(arr);
         }
 
+        @Override
         public int getNextSeqNum(final int index) {
             return delegate.getNextSeqNum(index);
         }
 
+        @Override
         public int getIndexOf(final int value) {
             return delegate.getIndexOf(value);
         }
@@ -142,10 +144,12 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
             this.arr = arr;
         }
 
+        @Override
         public int getNextSeqNum(final int index) {
             return arr[index];
         }
 
+        @Override
         public int getIndexOf(final int value) {
             for (int i = 0; i < arr.length; i++) {
                 if (arr[i] == value) {
@@ -647,6 +651,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
             super();
         }
 
+        @Override
         public void handleItem(final Item item, final ExtendedMimeMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException, OXException {
             final InternetHeaders h;
             {
@@ -702,6 +707,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 
     private static final FetchItemHandler FLAGS_ITEM_HANDLER = new FetchItemHandler() {
 
+        @Override
         public void handleItem(final Item item, final ExtendedMimeMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException {
             msg.setFlags((FLAGS) item, true);
         }
@@ -709,6 +715,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 
     private static final FetchItemHandler ENVELOPE_ITEM_HANDLER = new FetchItemHandler() {
 
+        @Override
         public void handleItem(final Item item, final ExtendedMimeMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException {
             final ENVELOPE env = (ENVELOPE) item;
             msg.addFrom(env.from);
@@ -725,6 +732,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 
     private static final FetchItemHandler INTERNALDATE_ITEM_HANDLER = new FetchItemHandler() {
 
+        @Override
         public void handleItem(final Item item, final ExtendedMimeMessage msg, final org.apache.commons.logging.Log logger) {
             msg.setReceivedDate(((INTERNALDATE) item).getDate());
         }
@@ -732,6 +740,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 
     private static final FetchItemHandler SIZE_ITEM_HANDLER = new FetchItemHandler() {
 
+        @Override
         public void handleItem(final Item item, final ExtendedMimeMessage msg, final org.apache.commons.logging.Log logger) {
             msg.setSize(((RFC822SIZE) item).size);
         }
@@ -739,6 +748,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 
     private static final FetchItemHandler BODYSTRUCTURE_ITEM_HANDLER = new FetchItemHandler() {
 
+        @Override
         public void handleItem(final Item item, final ExtendedMimeMessage msg, final org.apache.commons.logging.Log logger) throws OXException {
             final BODYSTRUCTURE bs = (BODYSTRUCTURE) item;
             msg.setBodystructure(bs);
@@ -761,6 +771,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 
     private static final FetchItemHandler UID_ITEM_HANDLER = new FetchItemHandler() {
 
+        @Override
         public void handleItem(final Item item, final ExtendedMimeMessage msg, final org.apache.commons.logging.Log logger) {
             msg.setUid(((UID) item).uid);
         }
@@ -768,6 +779,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 
     private static final FetchItemHandler BODY_ITEM_HANDLER = new FetchItemHandler() {
 
+        @Override
         public void handleItem(final Item item, final ExtendedMimeMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException, OXException {
             final InputStream msgStream;
             if (item instanceof RFC822DATA) {
@@ -913,6 +925,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
      */
     public static final FetchProfileModifier DEFAULT_PROFILE_MODIFIER = new FetchProfileModifier() {
 
+        @Override
         public FetchProfile modify(final FetchProfile fetchProfile) {
             /*
              * Return unchanged
@@ -920,6 +933,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
             return fetchProfile;
         }
 
+        @Override
         public boolean byContentTypeHeader() {
             return false;
         }
@@ -930,10 +944,12 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
      */
     public static final FetchProfileModifier HEADERLESS_PROFILE_MODIFIER = new FetchProfileModifier() {
 
+        @Override
         public FetchProfile modify(final FetchProfile fetchProfile) {
             return getHeaderlessFetchProfile(fetchProfile);
         }
 
+        @Override
         public boolean byContentTypeHeader() {
             return false;
         }
@@ -944,10 +960,12 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
      */
     public static final FetchProfileModifier NO_BODYSTRUCTURE_PROFILE_MODIFIER = new FetchProfileModifier() {
 
+        @Override
         public FetchProfile modify(final FetchProfile fetchProfile) {
             return getSafeFetchProfile(fetchProfile);
         }
 
+        @Override
         public boolean byContentTypeHeader() {
             return true;
         }

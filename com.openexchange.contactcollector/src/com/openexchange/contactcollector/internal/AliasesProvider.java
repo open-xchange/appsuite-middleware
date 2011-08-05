@@ -114,6 +114,7 @@ public final class AliasesProvider {
         if (null == f) {
             final FutureTask<Set<InternetAddress>> ft = new FutureTask<Set<InternetAddress>>(new Callable<Set<InternetAddress>>() {
 
+                @Override
                 public Set<InternetAddress> call() throws Exception {
                     // All context-known users' aliases
                     final int[] allUserIDs = userService.listAllUser(context);

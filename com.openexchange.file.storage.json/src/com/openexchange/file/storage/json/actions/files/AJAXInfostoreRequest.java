@@ -119,6 +119,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         this.session = session;
     }
 
+    @Override
     public InfostoreRequest require(final Param... params) throws OXException {
         final String[] names = new String[params.length];
         for (int i = 0; i < params.length; i++) {
@@ -131,6 +132,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         return this;
     }
 
+    @Override
     public InfostoreRequest requireBody() throws OXException {
         if (data.getData() == null && !data.hasUploads() && data.getParameter("json") == null) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( "data");
@@ -142,14 +144,17 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         return data.getParameter(paramName) != null;
     }
 
+    @Override
     public InfostoreRequest requireFileMetadata() throws OXException {
         return requireBody();
     }
 
+    @Override
     public String getFolderId() throws OXException {
         return data.getParameter(Param.FOLDER_ID.getName());
     }
 
+    @Override
     public List<Field> getColumns() throws OXException {
         if (columns != null) {
             return columns;
@@ -179,6 +184,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         return columns = fields;
     }
 
+    @Override
     public Field getSortingField() throws OXException {
         if (sortingField != null) {
             return sortingField;
@@ -194,6 +200,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         return field;
     }
 
+    @Override
     public SortDirection getSortingOrder() throws OXException {
         final SortDirection sortDirection = SortDirection.get(data.getParameter(Param.ORDER.getName()));
         if (sortDirection == null) {
@@ -202,6 +209,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         return sortDirection;
     }
 
+    @Override
     public TimeZone getTimezone() throws OXException {
         String parameter = data.getParameter(Param.TIMEZONE.getName());
         if (parameter == null) {
@@ -210,6 +218,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         return TimeZone.getTimeZone(parameter);
     }
 
+    @Override
     public IDBasedFileAccess getFileAccess() {
         if(files != null) {
             return files;
@@ -217,18 +226,22 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         return files = Services.getFileAccessFactory().createAccess(session);
     }
 
+    @Override
     public AttachmentBase getAttachmentBase() {
         return Services.getAttachmentBase();
     }
 
+    @Override
     public ServerSession getSession() {
         return session;
     }
 
+    @Override
     public String getId() {
         return data.getParameter(Param.ID.getName());
     }
 
+    @Override
     public int getVersion() {
         final String parameter = data.getParameter(Param.VERSION.getName());
         if (parameter == null) {
@@ -237,6 +250,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         return Integer.parseInt(parameter);
     }
 
+    @Override
     public Set<String> getIgnore() {
         final String parameter = data.getParameter(Param.IGNORE.getName());
         if (parameter == null) {
@@ -246,6 +260,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         return new HashSet<String>(Arrays.asList(parameter.split("\\s*,\\s*")));
     }
 
+    @Override
     public long getTimestamp() {
         final String parameter = data.getParameter(Param.TIMESTAMP.getName());
         if (parameter == null) {
@@ -255,11 +270,13 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         return Long.parseLong(parameter);
     }
 
+    @Override
     public List<String> getIds() throws OXException {
         parseIDList();
         return ids;
     }
 
+    @Override
     public String getFolderForID(final String id) throws OXException {
         parseIDList();
         return folderMapping.get(id);
@@ -286,14 +303,17 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
     }
 
+    @Override
     public String getFolderAt(final int index) {
         return folders.get(index);
     }
 
+    @Override
     public List<String> getFolders() {
         return folders;
     }
 
+    @Override
     public int[] getVersions() throws OXException {
         if (versions != null) {
             return versions;
@@ -311,6 +331,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         return versions;
     }
 
+    @Override
     public long getDiff() {
         final String parameter = data.getParameter(Param.DIFF.getName());
         if (parameter == null) {
@@ -319,6 +340,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         return Long.parseLong(parameter);
     }
 
+    @Override
     public int getStart() {
         final String parameter = data.getParameter("start");
         if(parameter == null ) {
@@ -330,6 +352,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         return Integer.valueOf(parameter);
     }
 
+    @Override
     public int getEnd() {
         String parameter = data.getParameter("end");
         if(parameter == null) {
@@ -342,10 +365,12 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         return Integer.valueOf(parameter);
     }
 
+    @Override
     public String getSearchFolderId() throws OXException {
         return getFolderId();
     }
 
+    @Override
     public String getSearchQuery() throws OXException {
         final Object data2 = data.getData();
         if(data2 == null) {
@@ -411,20 +436,24 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         }
     }
 
+    @Override
     public File getFile() throws OXException {
         parseFile();
         return file;
     }
 
+    @Override
     public List<Field> getSentColumns() throws OXException {
         parseFile();
         return fields;
     }
 
+    @Override
     public boolean hasUploads() throws OXException {
         return data.hasUploads();
     }
 
+    @Override
     public InputStream getUploadedFileData() throws OXException {
         if(data.hasUploads()) {
             try {
@@ -450,14 +479,17 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         }
     }
 
+    @Override
     public int getAttachedId() {
         return getInt(Param.ATTACHED_ID);
     }
 
+    @Override
     public int getAttachment() {
         return getInt(Param.ATTACHMENT);
     }
 
+    @Override
     public int getModule() {
         return getInt(Param.MODULE);
     }

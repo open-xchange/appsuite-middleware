@@ -58,7 +58,7 @@ import com.openexchange.user.UserService;
 
 /**
  * Activator for the group management requests.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class GroupManageActivator extends AJAXModuleActivator {

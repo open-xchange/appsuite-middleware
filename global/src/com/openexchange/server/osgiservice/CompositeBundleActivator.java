@@ -65,6 +65,7 @@ public abstract class CompositeBundleActivator implements BundleActivator {
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CompositeBundleActivator.class));
     private final Stack<BundleActivator> activated = new Stack<BundleActivator>();
 
+    @Override
     public void start(final BundleContext context) throws Exception {
         Exception first = null;
         for (final BundleActivator activator : getActivators()) {
@@ -83,6 +84,7 @@ public abstract class CompositeBundleActivator implements BundleActivator {
         }
     }
 
+    @Override
     public void stop(final BundleContext context) throws Exception {
         Exception first = null;
         while (!activated.isEmpty()) {

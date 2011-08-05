@@ -83,6 +83,7 @@ public class WebserviceCollector implements ServiceListener {
     }
 
 
+    @Override
     public void serviceChanged(ServiceEvent event) {
         if(!open) {
             return;

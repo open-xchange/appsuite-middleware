@@ -63,23 +63,28 @@ public class SimMessagingTransport implements MessagingAccountTransport {
     private MessagingMessage message;
     private Collection<MessagingAddressHeader> recipients;
 
+    @Override
     public void transport(final MessagingMessage message, final Collection<MessagingAddressHeader> recipients) throws OXException {
         this.message = message;
         this.recipients = recipients;
     }
 
+    @Override
     public void close() {
 
     }
 
+    @Override
     public void connect() throws OXException {
 
     }
 
+    @Override
     public boolean isConnected() {
         return true;
     }
 
+    @Override
     public boolean ping() throws OXException {
         return true;
     }
@@ -92,6 +97,7 @@ public class SimMessagingTransport implements MessagingAccountTransport {
         return recipients;
     }
 
+    @Override
     public boolean cacheable() {
         return true;
     }

@@ -622,7 +622,7 @@ public final class AJPv13Task implements Task<Object> {
 
     /**
      * Closes the accepted client socket.
-     * 
+     *
      * @param closeOrderly Whether to write connection-terminating AJP END_RESPONSE package to web server
      */
     private void terminateAndClose(final boolean closeOrderly, final AJPv13ConnectionImpl ajpCon) {

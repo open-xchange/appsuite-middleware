@@ -72,62 +72,77 @@ public final class UserImpl implements com.openexchange.twitter.User {
         this.twitter4jUser = twitter4jUser;
     }
 
+    @Override
     public Date getCreatedAt() {
         return twitter4jUser.getCreatedAt();
     }
 
+    @Override
     public String getDescription() {
         return twitter4jUser.getDescription();
     }
 
+    @Override
     public int getFavouritesCount() {
         return twitter4jUser.getFavouritesCount();
     }
 
+    @Override
     public int getFollowersCount() {
         return twitter4jUser.getFollowersCount();
     }
 
+    @Override
     public int getFriendsCount() {
         return twitter4jUser.getFriendsCount();
     }
 
+    @Override
     public long getId() {
         return twitter4jUser.getId();
     }
 
+    @Override
     public String getLocation() {
         return twitter4jUser.getLocation();
     }
 
+    @Override
     public String getName() {
         return twitter4jUser.getName();
     }
 
+    @Override
     public String getProfileBackgroundColor() {
         return twitter4jUser.getProfileBackgroundColor();
     }
 
+    @Override
     public String getProfileBackgroundImageUrl() {
         return twitter4jUser.getProfileBackgroundImageUrl();
     }
 
+    @Override
     public URL getProfileImageURL() {
         return twitter4jUser.getProfileImageURL();
     }
 
+    @Override
     public String getProfileLinkColor() {
         return twitter4jUser.getProfileLinkColor();
     }
 
+    @Override
     public String getProfileSidebarBorderColor() {
         return twitter4jUser.getProfileSidebarBorderColor();
     }
 
+    @Override
     public String getProfileSidebarFillColor() {
         return twitter4jUser.getProfileSidebarFillColor();
     }
 
+    @Override
     public String getProfileTextColor() {
         return twitter4jUser.getProfileTextColor();
     }
@@ -144,6 +159,7 @@ public final class UserImpl implements com.openexchange.twitter.User {
         return twitter4jUser.getRateLimitStatus().getResetTimeInSeconds();
     }
 
+    @Override
     public String getScreenName() {
         return twitter4jUser.getScreenName();
     }
@@ -152,6 +168,7 @@ public final class UserImpl implements com.openexchange.twitter.User {
         return twitter4jUser.getStatus().getCreatedAt();
     }
 
+    @Override
     public int getStatusesCount() {
         return twitter4jUser.getStatusesCount();
     }
@@ -180,26 +197,32 @@ public final class UserImpl implements com.openexchange.twitter.User {
         return twitter4jUser.getStatus().getText();
     }
 
+    @Override
     public String getTimeZone() {
         return twitter4jUser.getTimeZone();
     }
 
+    @Override
     public URL getURL() {
         return twitter4jUser.getURL();
     }
 
+    @Override
     public int getUtcOffset() {
         return twitter4jUser.getUtcOffset();
     }
 
+    @Override
     public boolean isGeoEnabled() {
         return twitter4jUser.isGeoEnabled();
     }
 
+    @Override
     public boolean isProtected() {
         return twitter4jUser.isProtected();
     }
 
+    @Override
     public boolean isVerified() {
         return twitter4jUser.isVerified();
     }

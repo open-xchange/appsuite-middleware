@@ -76,6 +76,7 @@ public class CoercingConfigProperty<T> implements ConfigProperty<T> {
         this.parser = parser;
     }
 
+    @Override
     public T get() throws OXException {
         final String value = delegate.get();
         return parse(value, type);
@@ -93,32 +94,39 @@ public class CoercingConfigProperty<T> implements ConfigProperty<T> {
         return parsed;
     }
 
+    @Override
     public String get(final String metadataName) throws OXException {
         return delegate.get(metadataName);
     }
 
+    @Override
     public <M> M get(final String metadataName, final Class<M> m) throws OXException {
         return parse(delegate.get(metadataName), m);
     }
 
+    @Override
     public boolean isDefined() throws OXException {
         return delegate.isDefined();
     }
 
+    @Override
     public CoercingConfigProperty<T> set(final T value) throws OXException {
         delegate.set(value.toString()); // We assume good toString methods that allow reparsing
         return this;
     }
 
+    @Override
     public <M> CoercingConfigProperty<T> set(final String metadataName, final M value) throws OXException {
         delegate.set(metadataName, value.toString());
         return this;
     }
 
+    @Override
     public <M> ConfigProperty<M> to(final Class<M> otherType) throws OXException {
         return new CoercingConfigProperty<M>(otherType, delegate, parser);
     }
 
+    @Override
     public List<String> getMetadataNames() throws OXException {
         return delegate.getMetadataNames();
     }

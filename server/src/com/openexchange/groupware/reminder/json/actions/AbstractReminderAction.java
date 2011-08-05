@@ -102,7 +102,7 @@ public abstract class AbstractReminderAction implements AJAXActionService {
 
     /**
      * Gets the {@link AppointmentSqlFactoryService} instance.
-     * 
+     *
      * @return The service
      */
     protected AppointmentSqlFactoryService getService() {

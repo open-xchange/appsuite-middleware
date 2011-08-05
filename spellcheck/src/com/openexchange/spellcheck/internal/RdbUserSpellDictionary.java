@@ -219,6 +219,7 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
      * (non-Javadoc)
      * @see com.swabunga.spell.engine.SpellDictionary#addWord(java.lang.String)
      */
+    @Override
     public void addWord(final String word) {
         addWord(word, true);
     }
@@ -229,6 +230,7 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
      * (non-Javadoc)
      * @see com.swabunga.spell.engine.SpellDictionary#getSuggestions(java.lang.String, int)
      */
+    @Override
     public List<?> getSuggestions(final String sourceWord, final int scoreThreshold) {
         return EMPTY_SUGGESTIONS;
     }
@@ -237,6 +239,7 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
      * (non-Javadoc)
      * @see com.swabunga.spell.engine.SpellDictionary#getSuggestions(java.lang.String, int, int[][])
      */
+    @Override
     public List<?> getSuggestions(final String sourceWord, final int scoreThreshold, final int[][] matrix) {
         return EMPTY_SUGGESTIONS;
     }
@@ -245,6 +248,7 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
      * (non-Javadoc)
      * @see com.swabunga.spell.engine.SpellDictionary#isCorrect(java.lang.String)
      */
+    @Override
     public boolean isCorrect(final String word) {
         return words.containsKey(word);
     }
@@ -467,6 +471,7 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
         if (timer != null) {
             timerTask = timer.scheduleWithFixedDelay(new Runnable() {
 
+                @Override
                 public void run() {
                     try {
                         for (final Iterator<Key> iter = userDicts.keySet().iterator(); iter.hasNext();) {

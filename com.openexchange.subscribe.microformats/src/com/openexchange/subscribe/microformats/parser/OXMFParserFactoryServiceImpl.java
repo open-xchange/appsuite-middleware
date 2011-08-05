@@ -66,6 +66,7 @@ public final class OXMFParserFactoryServiceImpl implements OXMFParserFactoryServ
         super();
     }
 
+    @Override
     public OXMFParser getParser() {
         return new OXMFParserImpl();
     }

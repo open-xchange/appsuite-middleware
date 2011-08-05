@@ -63,6 +63,7 @@ public enum QueueType {
      */
     SYNCHRONOUS("synchronous", false, new IQueueProvider() {
 
+        @Override
         public BlockingQueue<Runnable> newWorkQueue(final int fixedCapacity) {
             return QueueProvider.getInstance().newSynchronousQueue();
         }
@@ -72,6 +73,7 @@ public enum QueueType {
      */
     LINKED("linked", true, new IQueueProvider() {
 
+        @Override
         public BlockingQueue<Runnable> newWorkQueue(final int fixedCapacity) {
             return QueueProvider.getInstance().newLinkedQueue(fixedCapacity);
         }

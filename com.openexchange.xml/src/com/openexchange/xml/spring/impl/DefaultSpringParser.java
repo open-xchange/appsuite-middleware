@@ -59,6 +59,7 @@ import com.openexchange.xml.spring.SpringParser;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class DefaultSpringParser implements SpringParser {
+    @Override
     public BeanFactory parseFile(final String path, final ClassLoader classLoader) {
         final DefaultListableBeanFactory beanfactory = new DefaultListableBeanFactory();
         final XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanfactory);

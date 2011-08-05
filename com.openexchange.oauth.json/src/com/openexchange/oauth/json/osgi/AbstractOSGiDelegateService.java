@@ -150,6 +150,7 @@ public abstract class AbstractOSGiDelegateService<S> {
             this.context = context;
         }
 
+        @Override
         @SuppressWarnings("unchecked")
         public Object addingService(final ServiceReference reference) {
             final Object service = context.getService(reference);
@@ -157,10 +158,12 @@ public abstract class AbstractOSGiDelegateService<S> {
             return service;
         }
 
+        @Override
         public void modifiedService(final ServiceReference reference, final Object service) {
             // Nope
         }
 
+        @Override
         public void removedService(final ServiceReference reference, final Object service) {
             this.reference.set(null);
             context.ungetService(reference);

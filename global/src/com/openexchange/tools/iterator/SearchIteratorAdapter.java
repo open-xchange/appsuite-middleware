@@ -78,30 +78,37 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
             super();
         }
 
+        @Override
         public boolean hasNext() throws OXException {
             return false;
         }
 
+        @Override
         public T next() throws OXException {
             return null;
         }
 
+        @Override
         public void close() throws OXException {
             // empty must not be closed.
         }
 
+        @Override
         public int size() {
             return 0;
         }
 
+        @Override
         public void addWarning(final OXException warning) {
             throw new UnsupportedOperationException("Method is not implemented");
         }
 
+        @Override
         public OXException[] getWarnings() {
             return null;
         }
 
+        @Override
         public boolean hasWarnings() {
             return false;
         }
@@ -144,18 +151,22 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
         b_size = true;
     }
 
+    @Override
     public boolean hasNext() throws OXException {
         return delegate.hasNext();
     }
 
+    @Override
     public T next() throws OXException {
         return delegate.next();
     }
 
+    @Override
     public void close() throws OXException {
         // delegate does not provide a close method.
     }
 
+    @Override
     public int size() {
         if (!b_size) {
             return -1;
@@ -167,14 +178,17 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
         return b_size;
     }
 
+    @Override
     public void addWarning(final OXException warning) {
         warnings.add(warning);
     }
 
+    @Override
     public OXException[] getWarnings() {
         return warnings.isEmpty() ? null : warnings.toArray(new OXException[warnings.size()]);
     }
 
+    @Override
     public boolean hasWarnings() {
         return !warnings.isEmpty();
     }
@@ -213,6 +227,7 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
     public static <T> Iterable<T> toIterable(final SearchIterator<T> iterator) {
         class SIIterator implements Iterator<T> {
 
+            @Override
             public boolean hasNext() {
                 try {
                     return iterator.hasNext();
@@ -222,6 +237,7 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
                 }
             }
 
+            @Override
             public T next() {
                 try {
                     return iterator.next();
@@ -231,6 +247,7 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
                 return null;
             }
 
+            @Override
             public void remove() {
                 throw new UnsupportedOperationException();
             }
@@ -238,6 +255,7 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
 
         return new Iterable<T>() {
 
+            @Override
             public Iterator<T> iterator() {
                 return new SIIterator();
             }

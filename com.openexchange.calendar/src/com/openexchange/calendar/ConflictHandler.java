@@ -167,6 +167,7 @@ public class ConflictHandler {
         // Because of 999 maximum number of conflicts the returned array may
         // contain a lot of appointments far in the future.
         Arrays.sort(resultConflicts, new Comparator<CalendarDataObject>() {
+            @Override
             public int compare(final CalendarDataObject cdao1, final CalendarDataObject cdao2) {
                 return cdao1.getStartDate().compareTo(cdao2.getStartDate());
             }

@@ -73,6 +73,7 @@ public class DynamicFormDescription implements Iterable<FormElement> {
         formElements = new ArrayList<FormElement>();
     }
 
+    @Override
     public Iterator<FormElement> iterator() {
         return formElements.iterator();
     }

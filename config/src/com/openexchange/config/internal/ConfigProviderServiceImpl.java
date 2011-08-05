@@ -92,6 +92,7 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
         setConfigService(configService);
     }
 
+    @Override
     public ServerProperty get(final String property, final int context, final int user) throws OXException {
         final ServerProperty basicProperty = properties.get(property);
         if (basicProperty != null) {
@@ -109,6 +110,7 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
         return retval;
     }
 
+    @Override
     public Collection<String> getAllPropertyNames(final int context, final int user) throws OXException {
         final Iterator<String> propertyNames = configService.propertyNames();
         final Set<String> retval = new HashSet<String>();

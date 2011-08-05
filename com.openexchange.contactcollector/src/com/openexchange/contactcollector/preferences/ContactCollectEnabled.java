@@ -68,18 +68,22 @@ public class ContactCollectEnabled implements PreferencesItemService {
         super();
     }
 
+    @Override
     public String[] getPath() {
         return PATH;
     }
 
+    @Override
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
 
+            @Override
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
                 final Boolean value = ServerUserSetting.getInstance().isContactCollectionEnabled(ctx.getContextId(), user.getId());
                 setting.setSingleValue(value);
             }
 
+            @Override
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasWebMail() && userConfig.hasContact() && userConfig.isCollectEmailAddresses();
             }

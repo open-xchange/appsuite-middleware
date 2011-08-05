@@ -66,11 +66,13 @@ public class FolderFieldActivator implements BundleActivator {
 
     public static SubscriptionSourceDiscoveryService DISCOVERY;
 
+    @Override
     public void start(BundleContext context) throws Exception {
         context.registerService(AdditionalFolderField.class.getName(), new HasSubscriptions(DISCOVERY), null);
 
     }
 
+    @Override
     public void stop(BundleContext context) throws Exception {
 
     }

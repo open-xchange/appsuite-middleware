@@ -80,18 +80,22 @@ public class DefaultMessagingAccount implements MessagingAccount {
         super();
     }
 
+    @Override
     public Map<String, Object> getConfiguration() {
         return configuration;
     }
 
+    @Override
     public String getDisplayName() {
         return displayName;
     }
 
+    @Override
     public int getId() {
         return id;
     }
 
+    @Override
     public MessagingService getMessagingService() {
         return messagingService;
     }

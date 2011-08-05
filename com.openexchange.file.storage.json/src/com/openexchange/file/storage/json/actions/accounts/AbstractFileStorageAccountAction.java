@@ -81,6 +81,7 @@ public abstract class AbstractFileStorageAccountAction implements AJAXActionServ
         parser = new FileStorageAccountParser(registry);
     }
 
+    @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         try {
             return doIt(request, session);

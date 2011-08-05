@@ -62,6 +62,7 @@ public class SecretRecoveryActivator implements BundleActivator {
 	private WhiteboardSecretInconsistencyDetector detector;
     private WhiteboardSecretMigrator migrator;
 
+    @Override
     public void start(final BundleContext context) throws Exception {
 	    detector = new WhiteboardSecretInconsistencyDetector(context);
 	    migrator = new WhiteboardSecretMigrator(context);
@@ -77,7 +78,8 @@ public class SecretRecoveryActivator implements BundleActivator {
 	    migrator.open();
 	}
 
-	public void stop(final BundleContext context) throws Exception {
+	@Override
+    public void stop(final BundleContext context) throws Exception {
 	    detector.close();
 	    migrator.close();
 	}

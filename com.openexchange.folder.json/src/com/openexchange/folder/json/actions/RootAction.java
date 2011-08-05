@@ -71,6 +71,7 @@ public final class RootAction extends AbstractFolderAction {
         super();
     }
 
+    @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         final ListAction listAction = (ListAction) FolderActionFactory.getInstance().createActionService(ListAction.ACTION);
         request.putParameter("parent", "0");

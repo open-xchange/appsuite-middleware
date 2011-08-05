@@ -76,6 +76,7 @@ public final class DumperHTMLHandler implements HTMLHandler {
         html = new StringBuilder(1024);
     }
 
+    @Override
     public void handleXMLDeclaration(final String version, final Boolean standalone, final String encoding) {
         if (null != version) {
             sb.append(CRLF).append("XML Declaration: Version=").append(version).append(" standalone=").append(standalone).append(
@@ -91,30 +92,36 @@ public final class DumperHTMLHandler implements HTMLHandler {
         }
     }
 
+    @Override
     public void handleComment(final String comment) {
         sb.append(CRLF).append("Comment: ").append(comment);
         html.append("<!--").append(comment).append("-->");
     }
 
+    @Override
     public void handleCDATA(final String text) {
         sb.append(CRLF).append("CDATA: ").append(text);
         html.append("<![CDATA[").append(text).append("]]>");
     }
 
+    @Override
     public void handleDocDeclaration(final String docDecl) {
         sb.append(CRLF).append("DOCTYPE: ").append(docDecl);
         html.append("<!DOCTYPE").append(docDecl).append('>');
     }
 
+    @Override
     public void handleEndTag(final String tag) {
         sb.append(CRLF).append("End Tag: ").append(tag);
         html.append("</").append(tag).append('>');
     }
 
+    @Override
     public void handleError(final String errorMsg) {
         sb.append(CRLF).append("Error: ").append(errorMsg);
     }
 
+    @Override
     public void handleSimpleTag(final String tag, final Map<String, String> attributes) {
         sb.append(CRLF).append("Simple Tag: ").append(tag);
         html.append('<').append(tag);
@@ -128,6 +135,7 @@ public final class DumperHTMLHandler implements HTMLHandler {
         html.append("/>");
     }
 
+    @Override
     public void handleStartTag(final String tag, final Map<String, String> attributes) {
         sb.append(CRLF).append("Start Tag: ").append(tag);
         html.append('<').append(tag);
@@ -141,6 +149,7 @@ public final class DumperHTMLHandler implements HTMLHandler {
         html.append('>');
     }
 
+    @Override
     public void handleText(final String text, final boolean ignorable) {
         sb.append(CRLF).append("Text: ").append(text);
         html.append(text);

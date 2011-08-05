@@ -62,6 +62,7 @@ import com.openexchange.groupware.container.Appointment;
  */
 public class PrivateAppointmentsHaveNoParticipants implements ObjectVerifier<Appointment> {
 
+    @Override
     public void verify(final int index, final Appointment object, final List<ConversionWarning> warnings) throws ConversionError {
         if (object.getParticipants() != null && object.getParticipants().length > 0 && object.getPrivateFlag()) {
             object.removeParticipants();

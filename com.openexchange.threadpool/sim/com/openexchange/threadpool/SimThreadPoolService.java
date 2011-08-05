@@ -77,70 +77,87 @@ public class SimThreadPoolService implements ThreadPoolService {
         return Runtime.getRuntime().availableProcessors() + 1;
     }
 
+    @Override
     public int getActiveCount() {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public long getCompletedTaskCount() {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public ExecutorService getExecutor() {
         return executor;
     }
 
+    @Override
     public ExecutorService getFixedExecutor(final int size) {
         return new FixedExecutorService(size, executor);
     }
 
+    @Override
     public ExecutorService getFixedExecutor() {
         return new FixedExecutorService(corePoolSize, executor);
     }
 
+    @Override
     public int getLargestPoolSize() {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public int getPoolSize() {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public long getTaskCount() {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public <T> CompletionFuture<T> invoke(final Collection<? extends Task<T>> tasks) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public <T> CompletionFuture<T> invoke(final Task<T>[] tasks) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public <T> CompletionFuture<T> invoke(final Collection<? extends Task<T>> tasks, final RefusedExecutionBehavior<T> refusedExecutionBehavior) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public <T> List<Future<T>> invokeAll(final Collection<? extends Task<T>> tasks) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public <T> List<Future<T>> invokeAll(final Collection<? extends Task<T>> tasks, final long timeout) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public boolean isShutdown() {
         return null == executor;
     }
 
+    @Override
     public boolean isTerminated() {
         return null == executor;
     }
 
+    @Override
     public <T> Future<T> submit(final Task<T> task) {
         return executor.submit(task);
     }
 
+    @Override
     public <T> Future<T> submit(final Task<T> task, final RefusedExecutionBehavior<T> refusedExecutionBehavior) {
         throw new UnsupportedOperationException();
     }

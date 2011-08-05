@@ -297,6 +297,7 @@ public class Rule implements Comparable<Rule> {
         return "Name: " + ((null != this.ruleComment && null != this.ruleComment.getRulename()) ? this.ruleComment.getRulename() : null) + ": " + this.commands;
     }
 
+    @Override
     public int compareTo(final Rule o) {
         return Integer.valueOf(this.linenumber).compareTo(Integer.valueOf(o.linenumber));
     }

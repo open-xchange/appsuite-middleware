@@ -87,6 +87,7 @@ public class InsertIterator implements MapIterator<String, Object> {
         }
     }
 
+    @Override
     public void handle(String key, Object value) throws IterationBreak {
         if(exception != null) {
             return;

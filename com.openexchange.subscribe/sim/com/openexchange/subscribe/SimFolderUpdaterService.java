@@ -70,11 +70,13 @@ public class SimFolderUpdaterService implements FolderUpdaterService {
     private boolean handles;
     private boolean usesMultipleStrategy = false;
 
+    @Override
     public boolean handles(FolderObject folder) {
         this.folder = folder;
         return handles;
     }
 
+    @Override
     public void save(Collection data, TargetFolderDefinition target) throws OXException {
         this.data = data;
         this.target = target;
@@ -120,6 +122,7 @@ public class SimFolderUpdaterService implements FolderUpdaterService {
     /* (non-Javadoc)
      * @see com.openexchange.subscribe.FolderUpdaterService#completelyOverwritesExistingObjects()
      */
+    @Override
     public boolean usesMultipleStrategy() {
         return usesMultipleStrategy;
     }

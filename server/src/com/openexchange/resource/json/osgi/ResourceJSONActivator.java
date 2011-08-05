@@ -54,7 +54,7 @@ import com.openexchange.resource.json.ResourceActionFactory;
 
 /**
  * {@link ResourceJSONActivator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ResourceJSONActivator extends AJAXModuleActivator {

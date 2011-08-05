@@ -100,6 +100,7 @@ public class OSGiPublicationTargetCollector implements ServiceTrackerCustomizer,
         grabbedAll = false;
     }
 
+    @Override
     public Object addingService(ServiceReference reference) {
         try {
             return add(reference);
@@ -109,10 +110,12 @@ public class OSGiPublicationTargetCollector implements ServiceTrackerCustomizer,
         return null;
     }
 
+    @Override
     public void modifiedService(ServiceReference reference, Object service) {
 
     }
 
+    @Override
     public void removedService(ServiceReference reference, Object service) {
         try {
             remove(reference, service);
@@ -151,6 +154,7 @@ public class OSGiPublicationTargetCollector implements ServiceTrackerCustomizer,
         return publisher;
     }
 
+    @Override
     public PublicationTarget getTarget(Context context, int publicationId) throws OXException {
         if(!grabbedAll) {
             grabAll();
@@ -158,6 +162,7 @@ public class OSGiPublicationTargetCollector implements ServiceTrackerCustomizer,
         return delegate.getTarget(context, publicationId);
     }
 
+    @Override
     public PublicationTarget getTarget(String id) throws OXException {
         if(!grabbedAll) {
             grabAll();
@@ -165,6 +170,7 @@ public class OSGiPublicationTargetCollector implements ServiceTrackerCustomizer,
         return delegate.getTarget(id);
     }
 
+    @Override
     public Collection<PublicationTarget> getTargetsForEntityType(String module) throws OXException {
         if(!grabbedAll) {
             grabAll();
@@ -172,6 +178,7 @@ public class OSGiPublicationTargetCollector implements ServiceTrackerCustomizer,
         return delegate.getTargetsForEntityType(module);
     }
 
+    @Override
     public boolean knows(String id) throws OXException {
         if(!grabbedAll) {
             grabAll();
@@ -179,6 +186,7 @@ public class OSGiPublicationTargetCollector implements ServiceTrackerCustomizer,
         return delegate.knows(id);
     }
 
+    @Override
     public Collection<PublicationTarget> listTargets() throws OXException {
         if(!grabbedAll) {
             grabAll();

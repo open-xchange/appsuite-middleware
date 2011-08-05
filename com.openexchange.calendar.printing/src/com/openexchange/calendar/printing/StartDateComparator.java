@@ -57,6 +57,7 @@ import java.util.Comparator;
  */
 public class StartDateComparator implements Comparator<CPAppointment> {
 
+    @Override
     public int compare(CPAppointment o1, CPAppointment o2) {
         return o1.getStartDate().compareTo(o2.getStartDate());
     }

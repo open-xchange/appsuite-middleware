@@ -71,14 +71,17 @@ public class ReferenceContentRenderer implements MessagingContentWriter {
      */
     private static final String REF = "ref";
 
+    @Override
     public int getRanking() {
         return 0;
     }
 
+    @Override
     public boolean handles(final MessagingPart part, final MessagingContent content) {
         return ReferenceContent.class.isInstance(content);
     }
 
+    @Override
     public Object write(final MessagingPart part, final MessagingContent content, final ServerSession session, final DisplayMode mode) throws OXException, JSONException {
         final ReferenceContent refContent = (ReferenceContent) content;
         final JSONObject object = new JSONObject();

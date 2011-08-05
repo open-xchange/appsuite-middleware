@@ -77,6 +77,7 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
         this.mailAccount = mailAccount;
     }
 
+    @Override
     public String getSmtpAuthEnc() {
         final String smtpAuthEncStr = properties.get("com.openexchange.smtp.smtpAuthEnc");
         if (null == smtpAuthEncStr) {
@@ -92,6 +93,7 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
         return fallback;
     }
 
+    @Override
     public int getSmtpConnectionTimeout() {
         final String smtpConTimeoutStr = properties.get("com.openexchange.smtp.smtpConnectionTimeout");
         if (null == smtpConTimeoutStr) {
@@ -106,6 +108,7 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
         }
     }
 
+    @Override
     public String getSmtpLocalhost() {
         final String smtpLocalhostStr = properties.get("com.openexchange.smtp.smtpLocalhost");
         if (null == smtpLocalhostStr) {
@@ -115,6 +118,7 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
         return (smtpLocalhostStr.length() == 0) || "null".equalsIgnoreCase(smtpLocalhostStr) ? null : smtpLocalhostStr;
     }
 
+    @Override
     public int getSmtpTimeout() {
         final String smtpTimeoutStr = properties.get("com.openexchange.smtp.smtpTimeout");
         if (null == smtpTimeoutStr) {
@@ -129,6 +133,7 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
         }
     }
 
+    @Override
     public boolean isSmtpAuth() {
         final String smtpAuthStr = properties.get("com.openexchange.smtp.smtpAuthentication");
         if (null == smtpAuthStr) {
@@ -138,6 +143,7 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
         return Boolean.parseBoolean(smtpAuthStr);
     }
 
+    @Override
     public boolean isSmtpEnvelopeFrom() {
         final boolean retval;
         if (mailAccount.getId() == 0) {

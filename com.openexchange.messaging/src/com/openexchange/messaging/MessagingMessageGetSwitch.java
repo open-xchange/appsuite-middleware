@@ -68,83 +68,103 @@ public class MessagingMessageGetSwitch implements MessagingMessageSwitcher {
         super();
     }
 
+    @Override
     public Object accountName(final Object... args) {
         throw new UnsupportedOperationException(); // TODO
     }
 
+    @Override
     public Object bcc(final Object... args) throws OXException {
         return header(args[0], KnownHeader.BCC.toString());
     }
 
+    @Override
     public Object body(final Object... args) throws OXException {
         final MessagingMessage message = (MessagingMessage) args[0];
         return message.getContent();
     }
 
+    @Override
     public Object cc(final Object... args) throws OXException {
         return header(args[0], KnownHeader.CC.toString());
     }
 
+    @Override
     public Object colorLabel(final Object... args) throws OXException {
         return Integer.valueOf(((MessagingMessage) args[0]).getColorLabel());
     }
 
+    @Override
     public Object contentType(final Object... args) throws OXException {
         return header(args[0], KnownHeader.CONTENT_TYPE.toString());
     }
 
+    @Override
     public Object dispositionNotificationTo(final Object... args) throws OXException {
         return header(args[0], KnownHeader.DISPOSITION_NOTIFICATION_TO.toString());
     }
 
+    @Override
     public Object flags(final Object... args) throws OXException {
         return Integer.valueOf(((MessagingMessage) args[0]).getFlags());
     }
 
+    @Override
     public Object folderId(final Object... args) {
         return ((MessagingMessage) args[0]).getFolder();
     }
 
+    @Override
     public Object from(final Object... args) throws OXException {
         return header(args[0], KnownHeader.FROM.toString());
     }
 
+    @Override
     public Object full(final Object... args) {
         return args[0];
     }
 
+    @Override
     public Object headers(final Object... args) throws OXException {
         return ((MessagingMessage) args[0]).getHeaders();
     }
 
+    @Override
     public Object id(final Object... args) {
         return ((MessagingMessage) args[0]).getId();
     }
 
+    @Override
     public Object priority(final Object... args) throws OXException {
         return header(args[0], KnownHeader.PRIORITY.toString());
     }
 
+    @Override
     public Object receivedDate(final Object... args) {
         return Long.valueOf(((MessagingMessage) args[0]).getReceivedDate());
     }
 
+    @Override
     public Object sentDate(final Object... args) throws OXException {
         return header(args[0], KnownHeader.SENT_DATE.toString());
     }
 
+    @Override
     public Object size(final Object... args) throws OXException {
         return Long.valueOf(((MessagingMessage) args[0]).getSize());
     }
 
+    @Override
     public Object subject(final Object... args) throws OXException {
         return header(args[0], KnownHeader.SUBJECT.toString());
     }
 
+    @Override
     public Object threadLevel(final Object... args) {
         return Integer.valueOf(((MessagingMessage) args[0]).getThreadLevel());
     }
 
+    @Override
     public Object to(final Object... args) throws OXException {
         return header(args[0], KnownHeader.TO.toString());
     }
@@ -153,10 +173,12 @@ public class MessagingMessageGetSwitch implements MessagingMessageSwitcher {
         return ((MessagingMessage) object).getHeader(header);
     }
 
+    @Override
     public Object picture(final Object... args) {
         return ((MessagingMessage) args[0]).getPicture();
     }
 
+    @Override
     public Object url(final Object... args) throws OXException {
         return ((MessagingMessage) args[0]).getUrl();
     }

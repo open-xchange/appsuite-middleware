@@ -159,6 +159,7 @@ public class Bug16158Test extends TestCase {
         void stop() {
             run = false;
         }
+        @Override
         public void run() {
             try {
                 while (run && !notFound) {
@@ -184,6 +185,7 @@ public class Bug16158Test extends TestCase {
         void stop() {
             run = false;
         }
+        @Override
         public void run() {
             while (run && !timeout) {
                 try {

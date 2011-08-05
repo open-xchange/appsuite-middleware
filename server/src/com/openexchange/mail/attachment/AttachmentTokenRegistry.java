@@ -74,7 +74,7 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants {
 
     /**
      * Gets the singleton instance.
-     * 
+     *
      * @return The singleton instance
      * @throws OXException If instance initialization fails
      */
@@ -113,7 +113,7 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants {
 
     /**
      * Initializes a new {@link AttachmentTokenRegistry}.
-     * 
+     *
      * @throws OXException If initialization fails
      */
     private AttachmentTokenRegistry() throws OXException {
@@ -136,7 +136,7 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants {
 
     /**
      * Drops tokens for given user.
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      */
@@ -147,7 +147,7 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants {
                 final AttachmentToken token = iter.next();
                 tokens.remove(token.getId());
                 iter.remove();
-                
+
             }
         }
         if (LOG.isDebugEnabled()) {
@@ -158,7 +158,7 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants {
 
     /**
      * Drops tokens for given session.
-     * 
+     *
      * @param Session The session
      */
     public void dropFor(final Session session) {
@@ -167,7 +167,7 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants {
 
     /**
      * Removes the token with specified identifier from this registry.
-     * 
+     *
      * @param tokenId The token identifier
      */
     public void removeToken(final String tokenId) {
@@ -190,7 +190,7 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants {
 
     /**
      * Gets the token for specified token identifier.
-     * 
+     *
      * @param tokenId The token identifier
      * @return The token or <code>null</code> if absent or expired
      */
@@ -208,7 +208,7 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants {
 
     /**
      * Puts specified token into this registry.
-     * 
+     *
      * @param token The token
      * @param session The session providing user data
      */
@@ -290,6 +290,7 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants {
             this.rtokens = rtokens;
         }
 
+        @Override
         public void run() {
             try {
                 for (final Iterator<AttachmentToken> iterator = rtokens.values().iterator(); iterator.hasNext();) {

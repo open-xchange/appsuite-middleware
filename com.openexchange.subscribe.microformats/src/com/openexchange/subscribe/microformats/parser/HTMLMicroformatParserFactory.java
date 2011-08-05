@@ -61,6 +61,7 @@ import com.openexchange.subscribe.microformats.OXMFParserFactoryService;
  */
 public class HTMLMicroformatParserFactory implements OXMFParserFactoryService {
 
+    @Override
     public OXMFParser getParser() {
         return new HTMLMicroformatParser();
     }

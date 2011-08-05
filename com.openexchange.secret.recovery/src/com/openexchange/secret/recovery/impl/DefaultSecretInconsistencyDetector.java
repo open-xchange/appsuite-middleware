@@ -68,6 +68,7 @@ public class DefaultSecretInconsistencyDetector implements SecretInconsistencyDe
     private final List<SecretConsistencyCheck> checks = new ArrayList<SecretConsistencyCheck>();
     private SecretService secretService;
 
+    @Override
     public String isSecretWorking(final ServerSession session) throws OXException {
         final List<SecretConsistencyCheck> theChecks = getChecks();
         for (final SecretConsistencyCheck secretConsistencyCheck : theChecks) {

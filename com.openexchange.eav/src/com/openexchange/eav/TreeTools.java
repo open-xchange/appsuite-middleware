@@ -63,7 +63,7 @@ public class TreeTools {
         }
         T copy = original.newInstance();
         copy.setName(original.getName());
-        
+
         if(original.isLeaf()) {
             copy.copyPayloadFromOther(original);
         } else {
@@ -79,47 +79,47 @@ public class TreeTools {
         }
         return copy;
     }
-    
+
     public static <T extends AbstractNode<T>> T copy(T original, AbstractNodeFilter<T> filter) {
         return copy(original, filter, null);
     }
-    
+
     public static <T extends AbstractNode<T>> T copy(T original, AbstractNodeProcessor<T> processor) {
         return copy(original, null, processor);
     }
-    
+
     public static <T extends AbstractNode<T>> T copy(T original) {
         return copy(original, null, null);
     }
-    
+
     public static <A extends AbstractNode<A>, B extends AbstractNode<B>> A copyStructure(AbstractNode<A> copyAs, AbstractNode<B> original) {
-        
+
         A retval = copyAs.newInstance();
         retval.setName(original.getName());
-        
+
         for(B child : original.getChildren()) {
             retval.addChild(copyStructure(copyAs, child));
         }
         return retval;
-        
+
     }
-    
-    
+
+
     public static <T extends AbstractNode<T>>String getStructureString(AbstractNode<T> node) {
         return getStructureString(node, 0);
     }
- 
+
     public static <T extends AbstractNode<T>> String getStructureString(AbstractNode<T> node, int indent) {
         StringBuilder builder = new StringBuilder();
         for(int i = 0; i < indent; i++) {
             builder.append("  ");
         }
         builder.append(node.getName()).append("\n");
-        
+
         for(T child : node.getChildren()) {
             builder.append(getStructureString(child, indent+1));
         }
         return builder.toString();
     }
-    
+
 }

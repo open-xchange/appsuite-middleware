@@ -104,14 +104,17 @@ public class LdapJNDIImpl implements LdapInterface {
          * For serialization
          */
         private static final long serialVersionUID = -3548239536056697658L;
+        @Override
         public byte[] getEncodedValue() {
             return new byte[] {};
         }
 
+        @Override
         public String getID() {
             return "1.2.840.113556.1.4.417";
         }
 
+        @Override
         public boolean isCritical() {
             return true;
         }
@@ -154,6 +157,7 @@ public class LdapJNDIImpl implements LdapInterface {
 
     }
 
+    @Override
     public void search(final String baseDN, final String filter, final boolean distributionslist, final Set<Integer> columns, final FillClosure closure) throws OXException {
         final String defaultNamingContext;
         if (deleted) {
@@ -536,6 +540,7 @@ public class LdapJNDIImpl implements LdapInterface {
     }
 
 
+    @Override
     public void close() throws OXException {
         try {
             this.context.close();

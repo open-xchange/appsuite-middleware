@@ -161,6 +161,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
         return true;
     }
 
+    @Override
     public void setContentType(final ContentType contentType) {
         if (contentType == this) {
             return;
@@ -186,6 +187,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
         }
     }
 
+    @Override
     public String getName() {
         return CONTENT_TYPE;
     }
@@ -195,6 +197,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
         return HeaderType.PARAMETERIZED;
     }
 
+    @Override
     public String getValue() {
         return toString();
     }
@@ -214,6 +217,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
     /**
      * @return primary type
      */
+    @Override
     public String getPrimaryType() {
         return cto.getPrimaryType();
     }
@@ -221,6 +225,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
     /**
      * Sets primary type
      */
+    @Override
     public void setPrimaryType(final String primaryType) {
         cto.setPrimaryType(primaryType);
     }
@@ -228,6 +233,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
     /**
      * @return sub-type
      */
+    @Override
     public String getSubType() {
         return cto.getSubType();
     }
@@ -235,6 +241,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
     /**
      * Sets sub-type
      */
+    @Override
     public void setSubType(final String subType) {
         cto.setSubType(subType);
     }
@@ -242,6 +249,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
     /**
      * @return base type (e.g. text/plain)
      */
+    @Override
     public String getBaseType() {
         return cto.getBaseType();
     }
@@ -249,6 +257,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
     /**
      * Sets base type (e.g. text/plain)
      */
+    @Override
     public void setBaseType(final String baseType) throws OXException {
         try {
             cto.setBaseType(baseType);
@@ -260,6 +269,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
     /**
      * Sets charset parameter
      */
+    @Override
     public void setCharsetParameter(final String charset) {
         cto.setCharsetParameter(charset);
     }
@@ -267,6 +277,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
     /**
      * @return the charset value or <code>null</code> if not present
      */
+    @Override
     public String getCharsetParameter() {
         return cto.getCharsetParameter();
     }
@@ -274,6 +285,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
     /**
      * @return <code>true</code> if charset parameter is present, <code>false</code> otherwise
      */
+    @Override
     public boolean containsCharsetParameter() {
         return cto.containsCharsetParameter();
     }
@@ -283,6 +295,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
      *
      * @param filename The name parameter
      */
+    @Override
     public void setNameParameter(final String filename) {
         cto.setNameParameter(filename);
     }
@@ -290,6 +303,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
     /**
      * @return the name value or <code>null</code> if not present
      */
+    @Override
     public String getNameParameter() {
         return cto.getNameParameter();
     }
@@ -297,6 +311,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
     /**
      * @return <code>true</code> if name parameter is present, <code>false</code> otherwise
      */
+    @Override
     public boolean containsNameParameter() {
         return cto.containsNameParameter();
     }
@@ -304,6 +319,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
     /**
      * Sets Content-Type
      */
+    @Override
     public void setContentType(final String contentType) throws OXException {
         try {
             cto.setContentType(contentType);
@@ -317,6 +333,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
      *
      * @return <code>true</code> if Content-Type's base type matches given pattern, <code>false</code> otherwise
      */
+    @Override
     public boolean isMimeType(final String pattern) {
         return cto.isMimeType(pattern);
     }
@@ -328,6 +345,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
      * @return <code>true</code> if Content-Type's base type starts ignore-case with specified prefix; otherwise <code>false</code>
      * @throws IllegalArgumentException If specified prefix is <code>null</code>
      */
+    @Override
     public boolean startsWith(final String prefix) {
         return cto.startsWith(prefix);
     }

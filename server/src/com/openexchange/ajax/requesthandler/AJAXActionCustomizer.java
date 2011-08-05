@@ -54,7 +54,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AJAXActionCustomizer} - Customizes a specified request data and result pair.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -62,7 +62,7 @@ public interface AJAXActionCustomizer {
 
     /**
      * Invoked prior to handling the request data with {@link AJAXActionService#perform(AJAXRequestData, ServerSession)}.
-     * 
+     *
      * @param request The request data
      * @param session The associated session
      * @return The possibly modified request data which is then passed to {@link AJAXActionService#perform(AJAXRequestData, ServerSession)}
@@ -72,7 +72,7 @@ public interface AJAXActionCustomizer {
 
     /**
      * Invoked after {@link AJAXActionService#perform(AJAXRequestData, ServerSession)} is performed.
-     * 
+     *
      * @param request The request data
      * @param result The result of {@link AJAXActionService#perform(AJAXRequestData, ServerSession)} invocation
      * @param session The associated session

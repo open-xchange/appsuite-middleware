@@ -67,7 +67,8 @@ public class Activator implements BundleActivator {
 	/**
 	 * {@inheritDoc}
 	 */
-	public void start(final BundleContext context) throws Exception {
+	@Override
+    public void start(final BundleContext context) throws Exception {
         services = new Services(context);
         tracker = new ServiceTracker(context, ConfigurationService.class
             .getName(), new ConfigurationTracker(context, services));
@@ -77,7 +78,8 @@ public class Activator implements BundleActivator {
 	/**
 	 * {@inheritDoc}
 	 */
-	public void stop(final BundleContext context) throws Exception {
+	@Override
+    public void stop(final BundleContext context) throws Exception {
         services.unregisterService();
         services = null;
         tracker.close();

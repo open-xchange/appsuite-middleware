@@ -71,16 +71,19 @@ public class I18nServiceTrackerCustomizer implements ServiceTrackerCustomizer, S
         services = new ConcurrentHashMap<Locale, I18nService>();
     }
 
+    @Override
     public Object addingService(ServiceReference reference) {
         I18nService tmp = (I18nService) context.getService(reference);
         services.put(tmp.getLocale(), tmp );
         return tmp;
     }
 
+    @Override
     public void modifiedService(ServiceReference reference, Object service) {
         // TODO Auto-generated method stub
     }
 
+    @Override
     public void removedService(ServiceReference reference, Object service) {
         Locale locale = ((I18nService) service).getLocale();
         if(services.containsKey(locale)){
@@ -89,6 +92,7 @@ public class I18nServiceTrackerCustomizer implements ServiceTrackerCustomizer, S
         }
     }
 
+    @Override
     public String translate(Locale locale, String translateMe) {
         if(services.containsKey(locale)) {
             return services.get(locale).getLocalized(translateMe);

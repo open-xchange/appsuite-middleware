@@ -104,10 +104,12 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
 
     public static ResourceResolver resourceResolver = new OXResourceResolver();
 
+    @Override
     public boolean isSet(final U cObj) {
         return cObj.containsParticipants();
     }
 
+    @Override
     public void emit(final int index, final U cObj, final T component, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
         final List<ResourceParticipant> resources = new LinkedList<ResourceParticipant>();
         for(final Participant p : cObj.getParticipants()) {
@@ -214,12 +216,14 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         return address;
     }
 
+    @Override
     public boolean hasProperty(final T component) {
         final PropertyList properties = component.getProperties(Property.ATTENDEE);
         final PropertyList resourcesList = component.getProperties(Property.RESOURCES);
         return properties.size() > 0 || resourcesList.size() > 0;
     }
 
+    @Override
     public void parse(final int index, final T component, final U cObj, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
         final PropertyList properties = component.getProperties(Property.ATTENDEE);
         final Map<String, ICalParticipant> mails = new HashMap<String, ICalParticipant>();

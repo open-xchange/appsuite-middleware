@@ -130,10 +130,12 @@ public class DefaultMessagingFolder implements MessagingFolder {
         newMessageCount = -1;
     }
 
+    @Override
     public boolean containsDefaultFolderType() {
         return b_defaultFolderType;
     }
 
+    @Override
     public DefaultFolderType getDefaultFolderType() {
         return defaultFolderType;
     }
@@ -161,6 +163,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
      *
      * @return The list of capabilities or <code>null</code> if not set
      */
+    @Override
     public Set<String> getCapabilities() {
         if (null == capabilities) {
             return null;
@@ -181,6 +184,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
         }
     }
 
+    @Override
     public int getDeletedMessageCount() {
         return deletedMessageCount;
     }
@@ -194,6 +198,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
         this.deletedMessageCount = deletedMessageCount;
     }
 
+    @Override
     public String getId() {
         return id;
     }
@@ -207,6 +212,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
         this.id = id;
     }
 
+    @Override
     public int getMessageCount() {
         return messageCount;
     }
@@ -220,6 +226,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
         this.messageCount = messageCount;
     }
 
+    @Override
     public String getName() {
         return name;
     }
@@ -233,6 +240,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
         this.name = name;
     }
 
+    @Override
     public int getNewMessageCount() {
         return newMessageCount;
     }
@@ -246,6 +254,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
         this.newMessageCount = newMessageCount;
     }
 
+    @Override
     public MessagingPermission getOwnPermission() {
         return ownPermission;
     }
@@ -259,6 +268,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
         this.ownPermission = ownPermission;
     }
 
+    @Override
     public String getParentId() {
         return parentId;
     }
@@ -272,6 +282,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
         this.parentId = parentId;
     }
 
+    @Override
     public List<MessagingPermission> getPermissions() {
         if (null == permissions) {
             return null;
@@ -304,6 +315,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
         permissions.add(permission);
     }
 
+    @Override
     public int getUnreadMessageCount() {
         return unreadMessageCount;
     }
@@ -317,6 +329,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
         this.unreadMessageCount = unreadMessageCount;
     }
 
+    @Override
     public boolean hasSubfolders() {
         return subfolders;
     }
@@ -348,6 +361,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
         b_subfolders = false;
     }
 
+    @Override
     public boolean hasSubscribedSubfolders() {
         return subscribedSubfolders;
     }
@@ -379,6 +393,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
         b_subscribedSubfolders = false;
     }
 
+    @Override
     public boolean isDefaultFolder() {
         return defaultFolder;
     }
@@ -410,6 +425,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
         b_defaultFolder = false;
     }
 
+    @Override
     public boolean isHoldsFolders() {
         return holdsFolders;
     }
@@ -441,6 +457,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
         b_holdsFolders = false;
     }
 
+    @Override
     public boolean isHoldsMessages() {
         return holdsMessages;
     }
@@ -472,6 +489,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
         b_holdsMessages = true;
     }
 
+    @Override
     public boolean isRootFolder() {
         return rootFolder;
     }
@@ -503,6 +521,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
         b_rootFolder = false;
     }
 
+    @Override
     public boolean isSubscribed() {
         return subscribed;
     }
@@ -552,6 +571,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
         this.exists = exists;
     }
 
+    @Override
     public char getSeparator() {
         return separator;
     }

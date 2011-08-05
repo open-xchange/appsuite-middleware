@@ -80,10 +80,12 @@ public class PrincipalWebdavFactory extends AbstractWebdavFactory {
         this.sessionHolder = sessionHolder;
     }
 
+    @Override
     public Protocol getProtocol() {
         return PROTOCOL;
     }
 
+    @Override
     public WebdavCollection resolveCollection(final WebdavPath url) throws OXException {
         if (url.size() != 0) {
             throw WebdavProtocolException.generalError(url, 404);
@@ -91,6 +93,7 @@ public class PrincipalWebdavFactory extends AbstractWebdavFactory {
         return mixin(new RootPrincipal(this));
     }
 
+    @Override
     public WebdavResource resolveResource(final WebdavPath url) throws OXException {
         if (url.size() == 0) {
             return mixin(new RootPrincipal(this));

@@ -57,5 +57,5 @@ package com.openexchange.eav;
  *
  */
 public interface EAVNodeProcessor extends AbstractNodeProcessor<EAVNode>{
-    
+
 }

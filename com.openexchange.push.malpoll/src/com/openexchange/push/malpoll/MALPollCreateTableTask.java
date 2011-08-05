@@ -76,10 +76,12 @@ public final class MALPollCreateTableTask extends AbstractCreateTableImpl implem
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MALPollCreateTableTask.class));
 
+    @Override
     public int addedWithVersion() {
         return 102;
     }
 
+    @Override
     public int getPriority() {
         return UpdateTaskPriority.HIGHEST.priority;
     }
@@ -111,26 +113,32 @@ public final class MALPollCreateTableTask extends AbstractCreateTableImpl implem
         return new String[] { getCreateHashTable(), getCreateUIDsTable() };
     }
 
+    @Override
     public String[] requiredTables() {
         return new String[] { "user", "user_mail_account" };
     }
 
+    @Override
     public String[] tablesToCreate() {
         return new String[] { "malPollHash", "malPollUid" };
     }
 
+    @Override
     public String[] getDependencies() {
         return new String[] { "com.openexchange.groupware.update.tasks.FolderAddIndex4SharedFolderSearch" };
     }
 
+    @Override
     public TaskAttributes getAttributes() {
         return new Attributes();
     }
 
+    @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
         UpdateTaskAdapter.perform(this, schema, contextId);
     }
 
+    @Override
     public void perform(final PerformParameters params) throws OXException {
         final int contextId = params.getContextId();
         createTable("malPollHash", getCreateHashTable(), contextId);

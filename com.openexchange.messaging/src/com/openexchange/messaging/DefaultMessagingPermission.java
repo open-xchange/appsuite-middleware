@@ -149,42 +149,52 @@ public class DefaultMessagingPermission implements MessagingPermission {
         return true;
     }
 
+    @Override
     public int getDeletePermission() {
         return deletePermission;
     }
 
+    @Override
     public int getEntity() {
         return entity;
     }
 
+    @Override
     public int getFolderPermission() {
         return folderPermission;
     }
 
+    @Override
     public int getReadPermission() {
         return readPermission;
     }
 
+    @Override
     public int getSystem() {
         return system;
     }
 
+    @Override
     public int getWritePermission() {
         return writePermission;
     }
 
+    @Override
     public boolean isAdmin() {
         return admin;
     }
 
+    @Override
     public boolean isGroup() {
         return group;
     }
 
+    @Override
     public void setAdmin(final boolean admin) {
         this.admin = admin;
     }
 
+    @Override
     public void setAllPermissions(final int folderPermission, final int readPermission, final int writePermission, final int deletePermission) {
         this.folderPermission = folderPermission;
         this.readPermission = readPermission;
@@ -192,22 +202,27 @@ public class DefaultMessagingPermission implements MessagingPermission {
         this.writePermission = writePermission;
     }
 
+    @Override
     public void setDeletePermission(final int permission) {
         deletePermission = permission;
     }
 
+    @Override
     public void setEntity(final int entity) {
         this.entity = entity;
     }
 
+    @Override
     public void setFolderPermission(final int permission) {
         folderPermission = permission;
     }
 
+    @Override
     public void setGroup(final boolean group) {
         this.group = group;
     }
 
+    @Override
     public void setMaxPermissions() {
         folderPermission = MessagingPermission.MAX_PERMISSION;
         readPermission = MessagingPermission.MAX_PERMISSION;
@@ -216,6 +231,7 @@ public class DefaultMessagingPermission implements MessagingPermission {
         admin = true;
     }
 
+    @Override
     public void setNoPermissions() {
         folderPermission = MessagingPermission.NO_PERMISSIONS;
         readPermission = MessagingPermission.NO_PERMISSIONS;
@@ -224,14 +240,17 @@ public class DefaultMessagingPermission implements MessagingPermission {
         admin = false;
     }
 
+    @Override
     public void setReadPermission(final int permission) {
         readPermission = permission;
     }
 
+    @Override
     public void setSystem(final int system) {
         this.system = system;
     }
 
+    @Override
     public void setWritePermission(final int permission) {
         writePermission = permission;
     }

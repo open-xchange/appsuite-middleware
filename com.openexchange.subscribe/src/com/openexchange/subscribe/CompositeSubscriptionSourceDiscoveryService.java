@@ -73,6 +73,7 @@ public class CompositeSubscriptionSourceDiscoveryService implements Subscription
     /* (non-Javadoc)
      * @see com.openexchange.subscribe.SubscriptionSourceDiscoveryService#getSource(java.lang.String)
      */
+    @Override
     public SubscriptionSource getSource(final String identifier) {
         SubscriptionSource current = null;
         for(final SubscriptionSourceDiscoveryService subDiscoverer : services) {
@@ -86,6 +87,7 @@ public class CompositeSubscriptionSourceDiscoveryService implements Subscription
         return current;
     }
 
+    @Override
     public List<SubscriptionSource> getSources(final int folderModule) {
         final Map<String, SubscriptionSource> allSources = new HashMap<String, SubscriptionSource>();
         for(final SubscriptionSourceDiscoveryService subDiscoverer : services) {
@@ -100,6 +102,7 @@ public class CompositeSubscriptionSourceDiscoveryService implements Subscription
         final List<SubscriptionSource> sources = new ArrayList<SubscriptionSource>(allSources.values());
         Collections.sort(sources, new Comparator<SubscriptionSource>() {
 
+            @Override
             public int compare(final SubscriptionSource o1, final SubscriptionSource o2) {
                 if(o1.getDisplayName() != null && o2.getDisplayName() != null) {
                     return o1.getDisplayName().compareTo(o2.getDisplayName());
@@ -112,10 +115,12 @@ public class CompositeSubscriptionSourceDiscoveryService implements Subscription
         return sources;
     }
 
+    @Override
     public List<SubscriptionSource> getSources() {
         return getSources(-1);
     }
 
+    @Override
     public boolean knowsSource(final String identifier) {
         for(final SubscriptionSourceDiscoveryService subDiscoverer : services) {
             if(subDiscoverer.knowsSource(identifier)) {
@@ -133,6 +138,7 @@ public class CompositeSubscriptionSourceDiscoveryService implements Subscription
         services.remove(service);
     }
 
+    @Override
     public SubscriptionSource getSource(final Context context, final int subscriptionId) throws OXException {
         for(final SubscriptionSourceDiscoveryService subDiscoverer : services) {
             final SubscriptionSource source = subDiscoverer.getSource(context, subscriptionId);
@@ -147,6 +153,7 @@ public class CompositeSubscriptionSourceDiscoveryService implements Subscription
         services.clear();
     }
 
+    @Override
     public SubscriptionSourceDiscoveryService filter(final int user, final int context) throws OXException {
         return new FilteredSubscriptionSourceDiscoveryService(user, context, this);
     }

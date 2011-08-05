@@ -58,6 +58,7 @@ package com.openexchange.modules.model;
 public interface AttributeHandler<T extends Model<T>> {
     AttributeHandler DO_NOTHING = new AttributeHandler() {
 
+        @Override
         public Object handle(Attribute attr, Object... args) {
             return null;
         }

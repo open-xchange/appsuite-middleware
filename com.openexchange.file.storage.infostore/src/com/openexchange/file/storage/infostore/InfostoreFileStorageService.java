@@ -74,6 +74,7 @@ public class InfostoreFileStorageService implements FileStorageService {
 
     private InfostoreSearchEngine search;
 
+    @Override
     public FileStorageAccountAccess getAccountAccess(final String accountId, final Session session) throws OXException {
         if (!accountId.equals(InfostoreDefaultAccountManager.DEFAULT_ID)) {
             throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId, getId());
@@ -81,22 +82,27 @@ public class InfostoreFileStorageService implements FileStorageService {
         return new InfostoreAccountAccess(session, this);
     }
 
+    @Override
     public FileStorageAccountManager getAccountManager() {
         return new InfostoreDefaultAccountManager();
     }
 
+    @Override
     public String getDisplayName() {
         return "Standard Infostore";
     }
 
+    @Override
     public String getId() {
         return "com.openexchange.infostore";
     }
 
+    @Override
     public Set<String> getSecretProperties() {
         return Collections.emptySet();
     }
 
+    @Override
     public DynamicFormDescription getFormDescription() {
         return new DynamicFormDescription();
     }

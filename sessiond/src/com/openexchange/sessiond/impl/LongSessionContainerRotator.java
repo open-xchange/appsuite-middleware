@@ -65,6 +65,7 @@ public class LongSessionContainerRotator implements Runnable {
         super();
     }
 
+    @Override
     public void run() {
         try {
             SessionHandler.cleanUpLongTerm();

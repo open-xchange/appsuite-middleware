@@ -69,6 +69,7 @@ public class SessionCacheTimer implements Runnable {
         super();
     }
 
+    @Override
     public void run() {
         try {
             SessionCache.getInstance().testConnection();

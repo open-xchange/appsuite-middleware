@@ -71,6 +71,7 @@ public class Activator implements BundleActivator {
         super();
     }
 
+    @Override
     public void start(BundleContext context) throws Exception {
         Filter filter = Tools.generateServiceFilter(context, HttpService.class, ConfigurationService.class);
         trackers.push(new ServiceTracker(context, filter, new ServletRegisterer(context)));
@@ -79,6 +80,7 @@ public class Activator implements BundleActivator {
         }
     }
 
+    @Override
     public void stop(BundleContext context) throws Exception {
         while (!trackers.isEmpty()) {
             trackers.pop().close();

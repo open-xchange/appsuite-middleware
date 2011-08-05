@@ -73,6 +73,7 @@ final class ServerInitialization implements Initialization {
         started = new AtomicBoolean();
     }
 
+    @Override
     public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
             return;
@@ -93,6 +94,7 @@ final class ServerInitialization implements Initialization {
         java.security.Security.setProperty("networkaddress.cache.negative.ttl", String.valueOf(10));
     }
 
+    @Override
     public void stop() throws OXException {
         if (!started.compareAndSet(true, false)) {
             return;

@@ -145,6 +145,7 @@ public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>
      * Compares this write task with the specified write task by their sequence numbers. Returns a negative integer, zero, or a positive
      * integer as this write task's sequence number is less than, equal to, or greater than the specified write task's sequence number.
      */
+    @Override
     public final int compareTo(final AbstractWriteTask o) {
         final long thisVal = sequenceNumber;
         final long anotherVal = o.sequenceNumber;
@@ -210,6 +211,7 @@ public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>
         }
     }
 
+    @Override
     public final void run() {
         try {
             ensureExistence();

@@ -196,10 +196,12 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         return null == lock ? session : lock;
     }
 
+    @Override
     public String getDefaultFolderPrefix() throws OXException {
         return "";
     }
 
+    @Override
     public void checkDefaultFolders() throws OXException {
         final MailSessionCache mailSessionCache = MailSessionCache.getInstance(session);
         if (!isDefaultFoldersChecked(mailSessionCache)) {
@@ -328,6 +330,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
 
     private static final MailField[] FIELDS_ID = { MailField.ID };
 
+    @Override
     public void clearFolder(final String fullname, final boolean hardDelete) throws OXException {
         if (!MailFolder.DEFAULT_FOLDER_ID.equals(fullname) && !isDefaultFolder(fullname)) {
             throw MailExceptionCode.FOLDER_NOT_FOUND.create(fullname);
@@ -362,10 +365,12 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         delegatee.clearFolder(getRealFullname(fullname), true);
     }
 
+    @Override
     public void clearFolder(final String fullname) throws OXException {
         clearFolder(fullname, false);
     }
 
+    @Override
     public String createFolder(final MailFolderDescription toCreate) throws OXException {
         toCreate.setParentFullname(getRealFullname(toCreate.getParentFullname()));
         toCreate.setSubscribed(false);
@@ -374,6 +379,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         return stripPathFromFullname(path, realFullname);
     }
 
+    @Override
     public String deleteFolder(final String fullname, final boolean hardDelete) throws OXException {
         // TODO: Shall we deny mail folder deletion in POP3 accounts?
         if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname) || isDefaultFolder(fullname)) {
@@ -483,10 +489,12 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         delegatee.deleteFolder(realFullname, true);
     }
 
+    @Override
     public String deleteFolder(final String fullname) throws OXException {
         return deleteFolder(fullname, false);
     }
 
+    @Override
     public boolean exists(final String fullname) throws OXException {
         if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname) || isDefaultFolder(fullname)) {
             return true;
@@ -494,18 +502,22 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         return delegatee.exists(getRealFullname(fullname));
     }
 
+    @Override
     public String getConfirmedHamFolder() throws OXException {
         return getStandardFolder(StorageUtility.INDEX_CONFIRMED_HAM);
     }
 
+    @Override
     public String getConfirmedSpamFolder() throws OXException {
         return getStandardFolder(StorageUtility.INDEX_CONFIRMED_SPAM);
     }
 
+    @Override
     public String getDraftsFolder() throws OXException {
         return getStandardFolder(StorageUtility.INDEX_DRAFTS);
     }
 
+    @Override
     public MailFolder getFolder(final String fullname) throws OXException {
         final String realFullname = getRealFullname(fullname);
         final MailFolder mailFolder = delegatee.getFolder(realFullname);
@@ -514,11 +526,13 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         return mailFolder;
     }
 
+    @Override
     public Quota getMessageQuota(final String fullname) throws OXException {
         final String realFullname = getRealFullname(fullname);
         return delegatee.getMessageQuota(realFullname);
     }
 
+    @Override
     public MailFolder[] getPath2DefaultFolder(final String fullname) throws OXException {
         final String realFullname = getRealFullname(fullname);
         final MailFolder[] folders = delegatee.getPath2DefaultFolder(realFullname);
@@ -532,28 +546,34 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         return tmp.toArray(new MailFolder[tmp.size()]);
     }
 
+    @Override
     public Quota[] getQuotas(final String fullname, final Type[] types) throws OXException {
         final String realFullname = getRealFullname(fullname);
         return delegatee.getQuotas(realFullname, types);
     }
 
+    @Override
     public MailFolder getRootFolder() throws OXException {
         return getFolder(MailFolder.DEFAULT_FOLDER_ID);
     }
 
+    @Override
     public String getSentFolder() throws OXException {
         return getStandardFolder(StorageUtility.INDEX_SENT);
     }
 
+    @Override
     public String getSpamFolder() throws OXException {
         return getStandardFolder(StorageUtility.INDEX_SPAM);
     }
 
+    @Override
     public Quota getStorageQuota(final String fullname) throws OXException {
         final String realFullname = getRealFullname(fullname);
         return delegatee.getStorageQuota(realFullname);
     }
 
+    @Override
     public MailFolder[] getSubfolders(final String parentFullname, final boolean all) throws OXException {
         final String parentRealFullname = getRealFullname(parentFullname);
         final MailFolder[] subfolders = delegatee.getSubfolders(parentRealFullname, true);
@@ -564,10 +584,12 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         return subfolders;
     }
 
+    @Override
     public String getTrashFolder() throws OXException {
         return getStandardFolder(StorageUtility.INDEX_TRASH);
     }
 
+    @Override
     public String moveFolder(final String fullname, final String newFullname) throws OXException {
         if (MailFolder.DEFAULT_FOLDER_ID.equals(newFullname)) {
             throw POP3ExceptionCode.MOVE_ILLEGAL.create();
@@ -589,10 +611,12 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         return newFullname;
     }
 
+    @Override
     public void releaseResources() throws OXException {
         delegatee.releaseResources();
     }
 
+    @Override
     public String renameFolder(final String fullname, final String newName) throws OXException {
         final MailFolder realMailFolder = delegatee.getFolder(getRealFullname(fullname));
         final String newFullname;
@@ -607,6 +631,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         return moveFolder(fullname, newFullname);
     }
 
+    @Override
     public String updateFolder(final String fullname, final MailFolderDescription toUpdate) throws OXException {
         final String realFullname = getRealFullname(fullname);
         toUpdate.setFullname(realFullname);

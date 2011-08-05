@@ -87,6 +87,7 @@ public class FacebookServiceImpl implements FacebookService {
         this.facebookMetaData = facebookMetaData;
     }
 
+    @Override
     public List<Contact> getContacts(String password, int user, int contextId, int accountId) {
 
         List<Contact> contacts = new ArrayList<Contact>();
@@ -192,6 +193,7 @@ public class FacebookServiceImpl implements FacebookService {
         return contacts;
     }
 
+    @Override
     public String getAccountDisplayName(String password, int user, int contextId, int accountId) {
         String displayName = "";
         try {

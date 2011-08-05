@@ -70,30 +70,37 @@ public class ContactCollectOnMailAccess implements PreferencesItemService {
         super();
     }
 
+    @Override
     public String[] getPath() {
         return PATH;
     }
 
+    @Override
     public IValueHandler getSharedValue() {
         return new IValueHandler() {
 
+            @Override
             public int getId() {
                 return -1;
             }
 
+            @Override
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
                 final Boolean value = ServerUserSetting.getInstance().isContactCollectOnMailAccess(ctx.getContextId(), user.getId());
                 setting.setSingleValue(value);
             }
 
+            @Override
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasWebMail() && userConfig.hasContact() && userConfig.isCollectEmailAddresses();
             }
 
+            @Override
             public boolean isWritable() {
                 return true;
             }
 
+            @Override
             public void writeValue(
                 final Session session, final Context ctx, final User user, final Setting setting) throws OXException {
                 final boolean value = Boolean.parseBoolean(String.valueOf(setting.getSingleValue()));

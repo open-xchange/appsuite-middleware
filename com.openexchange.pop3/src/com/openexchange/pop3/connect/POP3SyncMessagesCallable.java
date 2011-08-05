@@ -98,6 +98,7 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
         this.folderStorage = folderStorage;
     }
 
+    @Override
     public Object call() throws Exception {
         /*
          * Is it allowed to connect to real POP3 account to synchronize messages?

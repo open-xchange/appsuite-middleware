@@ -74,6 +74,7 @@ public final class PushManagerServiceTracker implements ServiceTrackerCustomizer
         this.context = context;
     }
 
+    @Override
     public Object addingService(final ServiceReference reference) {
         final Object service = context.getService(reference);
         if (service instanceof PushManagerService && PushManagerRegistry.getInstance().addPushManager((PushManagerService) service)) {
@@ -88,10 +89,12 @@ public final class PushManagerServiceTracker implements ServiceTrackerCustomizer
         return null;
     }
 
+    @Override
     public void modifiedService(final ServiceReference reference, final Object service) {
         // NOP
     }
 
+    @Override
     public void removedService(final ServiceReference reference, final Object service) {
         if (null != service) {
             try {

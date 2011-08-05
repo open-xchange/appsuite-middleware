@@ -106,14 +106,17 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
 
             return new OAuthInteraction() {
 
+                @Override
                 public String getAuthorizationURL() {
                     return authUrl;
                 }
 
+                @Override
                 public OAuthInteractionType getInteractionType() {
                     return OAuthInteractionType.CALLBACK;
                 }
 
+                @Override
                 public OAuthToken getRequestToken() {
                     return new DefaultOAuthToken();
                 }

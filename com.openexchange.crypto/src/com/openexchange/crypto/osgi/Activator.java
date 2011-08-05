@@ -63,10 +63,12 @@ public class Activator implements BundleActivator {
 
     private ServiceRegistration<CryptoService> cryptoRegistration;
 
+    @Override
     public void start(final BundleContext context) throws Exception {
         cryptoRegistration = context.registerService(CryptoService.class, new CryptoServiceImpl(), null);
     }
 
+    @Override
     public void stop(final BundleContext context) throws Exception {
         cryptoRegistration.unregister();
     }

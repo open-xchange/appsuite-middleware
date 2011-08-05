@@ -79,6 +79,7 @@ public class ContextOnlyUWAService implements UWAWidgetService {
         this.ctxId = ctxId;
     }
 
+    @Override
     public List<UWAWidget> all() throws OXException {
         try {
             return contextWidgets.load();
@@ -89,6 +90,7 @@ public class ContextOnlyUWAService implements UWAWidgetService {
         }
     }
 
+    @Override
     public void create(final UWAWidget widget) throws OXException {
         try {
             final int dbId = idGenerator.getId("uwaWidget", ctxId);
@@ -101,6 +103,7 @@ public class ContextOnlyUWAService implements UWAWidgetService {
         }
     }
 
+    @Override
     public void delete(final String id) throws OXException {
         try {
             contextWidgets.delete(id);
@@ -111,6 +114,7 @@ public class ContextOnlyUWAService implements UWAWidgetService {
         }
     }
 
+    @Override
     public UWAWidget get(final String id) throws OXException {
         try {
             return contextWidgets.load(id);
@@ -121,6 +125,7 @@ public class ContextOnlyUWAService implements UWAWidgetService {
         }
     }
 
+    @Override
     public void update(final UWAWidget widget, final List<? extends Attribute<UWAWidget>> modified) throws OXException {
         try {
             contextWidgets.update(widget, modified);

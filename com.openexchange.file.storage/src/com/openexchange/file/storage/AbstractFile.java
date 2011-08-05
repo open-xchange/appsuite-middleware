@@ -68,29 +68,36 @@ import com.openexchange.file.storage.meta.FileFieldHandling;
  */
 public abstract class AbstractFile implements File {
 
+    @Override
     public File dup() {
         return FileFieldHandling.dup(this);
     }
 
+    @Override
     public void copyInto(final File other) {
         FileFieldHandling.copy(this, other);
     }
 
+    @Override
     public void copyFrom(final File other) {
         FileFieldHandling.copy(other, this);
     }
 
+    @Override
     public void copyInto(final File other, final Field...fields) {
         FileFieldHandling.copy(this, other, fields);
     }
 
+    @Override
     public void copyFrom(final File other, final Field...fields) {
         FileFieldHandling.copy(other, this, fields);
     }
 
+    @Override
     public Set<File.Field> differences(final File other) {
         return Field.inject(new AbstractFileFieldHandler() {
 
+            @Override
             public Object handle(final Field field, final Object... args) {
                 final Set set = get(0,Set.class,args);
                 final int comparison = new FileComparator(field).compare(AbstractFile.this, other);
@@ -103,6 +110,7 @@ public abstract class AbstractFile implements File {
         }, new HashSet<File.Field>());
     }
 
+    @Override
     public boolean equals(final File other, final Field criterium, final Field...criteria) {
         final List<Field> fields = new ArrayList<Field>(1 + criteria.length);
 
@@ -124,6 +132,7 @@ public abstract class AbstractFile implements File {
         return FileFieldHandling.toString(this);
     }
 
+    @Override
     public boolean matches(final String pattern, final Field... fields) {
         final Pattern regex = Pattern.compile(wildcardToRegex(pattern), Pattern.CASE_INSENSITIVE);
         final FileFieldGet fileFieldGet = new FileFieldGet();

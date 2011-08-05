@@ -112,6 +112,7 @@ public class TemplateServiceImpl implements TemplateService {
         exceptionHandler = null;
     }
 
+    @Override
     public OXTemplateImpl loadTemplate(final String templateName) throws OXException {
         final String templatePath = config.getProperty(PATH_PROPERTY);
         if (templatePath == null) {
@@ -149,6 +150,7 @@ public class TemplateServiceImpl implements TemplateService {
         return retval;
     }
 
+    @Override
     public OXTemplate loadTemplate(final String templateName, final String defaultTemplateName, final ServerSession session) throws OXException {
         if (isEmpty(templateName) || !isUserTemplatingEnabled(session)) {
             return loadTemplate(defaultTemplateName);
@@ -263,6 +265,7 @@ public class TemplateServiceImpl implements TemplateService {
         this.infostore = helper;
     }
 
+    @Override
     public List<String> getBasicTemplateNames(final String...filter) {
         final String templatePath = config.getProperty(PATH_PROPERTY);
         final File templateDir = new File(templatePath);
@@ -311,7 +314,8 @@ public class TemplateServiceImpl implements TemplateService {
 		}
 
     	final File[] files = templateDir.listFiles(new FileFilter(){
-			public boolean accept(final File pathname) {
+			@Override
+            public boolean accept(final File pathname) {
 				return pathname.getName().endsWith(".properties")
 				&& pathname.canRead() && pathname.isFile();
 			}
@@ -355,7 +359,8 @@ public class TemplateServiceImpl implements TemplateService {
 
 	}
 
-	public List<String> getTemplateNames(final ServerSession session,
+	@Override
+    public List<String> getTemplateNames(final ServerSession session,
 			String... filter) throws OXException {
 		if(filter == null) {
 			filter = new String[0];
@@ -386,11 +391,13 @@ public class TemplateServiceImpl implements TemplateService {
         return basicTemplateNames;
 	}
 
+    @Override
     public OXTemplate loadTemplate(final String templateName, final OXTemplateExceptionHandler exceptionHandler) throws OXException {
 
         return loadTemplate(templateName);
     }
 
+    @Override
     public OXTemplate loadTemplate(final String templateName, final String defaultTemplateName, final ServerSession session, final OXTemplateExceptionHandler exceptionHandler) throws OXException {
         setExceptionHandler(exceptionHandler);
         return loadTemplate(templateName, defaultTemplateName, session);

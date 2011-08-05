@@ -77,6 +77,7 @@ public final class ConfigActivator implements BundleActivator {
         super();
     }
 
+    @Override
     public void start(final BundleContext context) throws Exception {
         LOG.info("starting bundle: com.openexchange.configread");
         try {
@@ -91,6 +92,7 @@ public final class ConfigActivator implements BundleActivator {
         }
     }
 
+    @Override
     public void stop(final BundleContext context) throws Exception {
         LOG.info("stopping bundle: com.openexchange.configread");
         try {

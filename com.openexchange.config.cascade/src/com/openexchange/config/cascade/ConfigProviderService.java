@@ -67,26 +67,32 @@ public interface ConfigProviderService {
 
     public static final BasicProperty NO_PROPERTY = new BasicProperty() {
 
+        @Override
         public String get() throws OXException {
             return null;
         }
 
+        @Override
         public String get(final String metadataName) throws OXException {
             return null;
         }
 
+        @Override
         public boolean isDefined() throws OXException {
             return false;
         }
 
+        @Override
         public void set(final String value) throws OXException {
 
         }
 
+        @Override
         public void set(final String metadataName, final String value) throws OXException {
 
         }
 
+        @Override
         public List<String> getMetadataNames() throws OXException {
             return Collections.emptyList();
         }

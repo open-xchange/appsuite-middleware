@@ -67,8 +67,8 @@ public class EAVTypeMetadataNode extends AbstractNode<EAVTypeMetadataNode> {
     private EAVType type = null;
     private EAVContainerType containerType = null;
     private Map<String, Object> options = new HashMap<String, Object>();
-    
-    
+
+
     public EAVTypeMetadataNode() {
         super();
     }
@@ -101,37 +101,37 @@ public class EAVTypeMetadataNode extends AbstractNode<EAVTypeMetadataNode> {
     public EAVTypeMetadataNode newInstance() {
         return new EAVTypeMetadataNode();
     }
-    
+
     public void setOptions(Map<String, Object> options) {
         this.options = new HashMap<String, Object>(options);
     }
-    
+
     public void setOption(String option, Object value) {
         this.options.put(option, value);
     }
-    
+
     public Object getOption(String option) {
         return options.get(option);
     }
-    
+
     public void setType(EAVType type) {
         this.type = type;
     }
-    
+
     public void setContainerType(EAVContainerType containerType) {
         this.containerType = containerType;
     }
-    
+
     public EAVType getType() {
         return type;
     }
- 
+
     public EAVContainerType getContainerType() {
         return containerType;
     }
- 
+
     private static final EAVTypeOptionVerifier verifier = new EAVTypeOptionVerifier();
-    
+
     public void verifyOptions() throws OXException {
         if(isLeaf()) {
             OXException x = (OXException) type.doSwitch(verifier, options);
@@ -164,8 +164,8 @@ public class EAVTypeMetadataNode extends AbstractNode<EAVTypeMetadataNode> {
             }
             return TreeTools.copy(this);
         }
-        
-        
+
+
         EAVTypeMetadataNode node = new EAVTypeMetadataNode(getName());
         Set<String> alreadyHandled = new HashSet<String>();
         for(EAVTypeMetadataNode child : getChildren()) {
@@ -179,7 +179,7 @@ public class EAVTypeMetadataNode extends AbstractNode<EAVTypeMetadataNode> {
                 }
                 if(null != otherChild) {
                     if(child.containerType == null) {
-                        child.containerType = otherChild.containerType; 
+                        child.containerType = otherChild.containerType;
                     }
                     if(child.type == null) {
                         child.type = otherChild.type;
@@ -197,13 +197,13 @@ public class EAVTypeMetadataNode extends AbstractNode<EAVTypeMetadataNode> {
                 node.addChild(toAdd);
             }
         }
-        
+
         for(EAVTypeMetadataNode child : other.getChildren()) {
             if(!alreadyHandled.contains(child.getName())) {
                 node.addChild(child);
             }
         }
-        
+
         return node;
     }
 
@@ -223,6 +223,6 @@ public class EAVTypeMetadataNode extends AbstractNode<EAVTypeMetadataNode> {
     }
 
 
-   
+
 
 }

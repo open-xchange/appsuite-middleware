@@ -75,6 +75,7 @@ public final class OXResourceResolver implements ResourceResolver {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Resource load(final int resourceId, final Context ctx) throws OXException, OXException {
         if (null == resourceService) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(
@@ -83,6 +84,7 @@ public final class OXResourceResolver implements ResourceResolver {
         return resourceService.getResource(resourceId, ctx);
     }
 
+    @Override
     public List<Resource> find(final List<String> resourceNames, final Context ctx)
         throws OXException, OXException {
         final List<Resource> retval = new ArrayList<Resource>();

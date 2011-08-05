@@ -282,26 +282,32 @@ public class OXMFPublicationServiceTest extends TestCase {
 
     private static final class FindEverythingTemplateService implements TemplateService {
 
+        @Override
         public OXTemplate loadTemplate(final String templateName) throws OXException {
             return null;
         }
 
+        @Override
         public OXTemplate loadTemplate(final String templateName, final String defaultTemplateName, final ServerSession session) throws OXException {
             return null;
         }
 
+        @Override
         public List<String> getBasicTemplateNames(final String...filter) throws OXException {
             return new ArrayList<String>(0);
         }
 
+        @Override
         public List<String> getTemplateNames(final ServerSession session, final String...filter) throws OXException {
             return new ArrayList<String>(0);
         }
 
+        @Override
         public OXTemplate loadTemplate(final String templateName, final OXTemplateExceptionHandler exceptionHandler) throws OXException {
             return null;
         }
 
+        @Override
         public OXTemplate loadTemplate(final String templateName, final String defaultTemplateName, final ServerSession session, final OXTemplateExceptionHandler exceptionHandler) throws OXException {
             return null;
         }

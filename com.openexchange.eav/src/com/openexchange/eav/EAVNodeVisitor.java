@@ -57,5 +57,5 @@ package com.openexchange.eav;
  *
  */
 public interface EAVNodeVisitor extends AbstractNodeVisitor<EAVNode>{
-    
+
 }

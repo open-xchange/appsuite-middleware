@@ -59,7 +59,8 @@ import org.osgi.framework.BundleContext;
  */
 public class Activator implements BundleActivator {
 
-	public void start(BundleContext context) throws Exception {
+	@Override
+    public void start(BundleContext context) throws Exception {
 	    /*
 	     * Uncomment if a suitable solution is available that does not break other log4j settings, e.g. as used in USM module
 	     */
@@ -79,7 +80,8 @@ public class Activator implements BundleActivator {
 	    */
 	}
 
-	public void stop(BundleContext context) throws Exception {
+	@Override
+    public void stop(BundleContext context) throws Exception {
 	    // Nothing to do.
 	}
 }

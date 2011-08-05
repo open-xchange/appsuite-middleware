@@ -119,6 +119,7 @@ public final class IMAPNumArgSplitter {
     public static String[] split(final int[] arr) {
         return split(new Tokenizer() {
 
+            @Override
             public String getNext(final int index) {
                 return String.valueOf(arr[index]);
             }
@@ -135,6 +136,7 @@ public final class IMAPNumArgSplitter {
     public static String[] split(final long[] arr) {
         return split(new Tokenizer() {
 
+            @Override
             public String getNext(final int index) {
                 return String.valueOf(arr[index]);
             }
@@ -151,6 +153,7 @@ public final class IMAPNumArgSplitter {
     public static String[] split(final Message[] arr) {
         return split(new Tokenizer() {
 
+            @Override
             public String getNext(final int index) {
                 return String.valueOf(arr[index].getMessageNumber());
             }

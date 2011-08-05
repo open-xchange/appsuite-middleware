@@ -68,18 +68,22 @@ public class SimPublicationTargetDiscoveryService implements PublicationTargetDi
         targets.put(target.getId(), target);
     }
 
+    @Override
     public Collection<PublicationTarget> listTargets() {
         return targets.values();
     }
 
+    @Override
     public boolean knows(String id) {
         return targets.containsKey(id);
     }
 
+    @Override
     public PublicationTarget getTarget(String id) {
         return targets.get(id);
     }
 
+    @Override
     public PublicationTarget getTarget(Context context, int publicationId) throws OXException {
         for (PublicationTarget target : targets.values()) {
             if (target.getPublicationService().knows(context, publicationId)) {
@@ -89,6 +93,7 @@ public class SimPublicationTargetDiscoveryService implements PublicationTargetDi
         return null;
     }
 
+    @Override
     public Collection<PublicationTarget> getTargetsForEntityType(String module) {
         List<PublicationTarget> targets = new ArrayList<PublicationTarget>();
         for (PublicationTarget target : this.targets.values()) {

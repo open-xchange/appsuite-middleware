@@ -77,16 +77,19 @@ public class Enabled implements PreferencesItemService {
         this.configViews = configViews;
     }
 
+    @Override
     public String[] getPath() {
         return new String[] { "modules", "messaging", "module" };
     }
 
+    @Override
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
 
             /**
              * {@inheritDoc}
              */
+            @Override
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
                 try {
                     final ConfigView view = configViews.getView(user.getId(), ctx.getContextId());
@@ -104,6 +107,7 @@ public class Enabled implements PreferencesItemService {
             /**
              * {@inheritDoc}
              */
+            @Override
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return true;
             }

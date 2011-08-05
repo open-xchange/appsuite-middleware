@@ -133,7 +133,7 @@ public class Login extends AJAXServlet {
     }
 
     private static final class LoginConfiguration {
-        
+
         protected final String uiWebPath;
         protected final boolean sessiondAutoLogin;
         protected final CookieHashSource hashSource;

@@ -91,14 +91,17 @@ public final class RetweetDetailsImpl implements RetweetDetails {
         return retweetStatus.getRateLimitStatus().getResetTimeInSeconds();
     }
 
+    @Override
     public Date getRetweetedAt() {
         return retweetStatus.getCreatedAt();
     }
 
+    @Override
     public long getRetweetId() {
         return retweetStatus.getId();
     }
 
+    @Override
     public User getRetweetingUser() {
         if (null == user) {
             user = new UserImpl(retweetStatus.getUser());

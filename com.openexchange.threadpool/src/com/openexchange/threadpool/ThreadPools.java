@@ -313,6 +313,7 @@ public final class ThreadPools {
             this.result = result;
         }
 
+        @Override
         public T call() {
             task.run();
             return result;
@@ -332,18 +333,22 @@ public final class ThreadPools {
             this.callable = callable;
         }
 
+        @Override
         public void afterExecute(final Throwable throwable) {
             // NOP
         }
 
+        @Override
         public void beforeExecute(final Thread thread) {
             // NOP
         }
 
+        @Override
         public void setThreadName(final ThreadRenamer threadRenamer) {
             // NOP
         }
 
+        @Override
         public V call() throws Exception {
             return callable.call();
         }
@@ -365,18 +370,22 @@ public final class ThreadPools {
             this.prefix = prefix;
         }
 
+        @Override
         public void afterExecute(final Throwable throwable) {
             // NOP
         }
 
+        @Override
         public void beforeExecute(final Thread thread) {
             // NOP
         }
 
+        @Override
         public void setThreadName(final ThreadRenamer threadRenamer) {
             threadRenamer.renamePrefix(prefix);
         }
 
+        @Override
         public V call() throws Exception {
             return callable.call();
         }
@@ -389,26 +398,32 @@ public final class ThreadPools {
             super();
         }
 
+        @Override
         public void shutdown() {
             // Nothing to do
         }
 
+        @Override
         public List<Runnable> shutdownNow() {
             return Collections.emptyList();
         }
 
+        @Override
         public boolean isShutdown() {
             return false;
         }
 
+        @Override
         public boolean isTerminated() {
             return false;
         }
 
+        @Override
         public boolean awaitTermination(final long timeout, final TimeUnit unit) throws InterruptedException {
             return false;
         }
 
+        @Override
         public void execute(final Runnable command) {
             command.run();
         }

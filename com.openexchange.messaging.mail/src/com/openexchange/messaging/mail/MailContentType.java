@@ -79,38 +79,47 @@ public final class MailContentType implements ContentType {
         this.contentType = contentType;
     }
 
+    @Override
     public boolean containsCharsetParameter() {
         return contentType.containsCharsetParameter();
     }
 
+    @Override
     public boolean containsNameParameter() {
         return contentType.containsNameParameter();
     }
 
+    @Override
     public String getBaseType() {
         return contentType.getBaseType();
     }
 
+    @Override
     public String getCharsetParameter() {
         return contentType.getCharsetParameter();
     }
 
+    @Override
     public String getNameParameter() {
         return contentType.getNameParameter();
     }
 
+    @Override
     public String getPrimaryType() {
         return contentType.getPrimaryType();
     }
 
+    @Override
     public String getSubType() {
         return contentType.getSubType();
     }
 
+    @Override
     public boolean isMimeType(final String pattern) {
         return contentType.isMimeType(pattern);
     }
 
+    @Override
     public void setBaseType(final String baseType) throws OXException {
         try {
             contentType.setBaseType(baseType);
@@ -119,10 +128,12 @@ public final class MailContentType implements ContentType {
         }
     }
 
+    @Override
     public void setCharsetParameter(final String charset) {
         contentType.setCharsetParameter(charset);
     }
 
+    @Override
     public void setContentType(final String contentType) throws OXException {
         try {
             this.contentType.setContentType(contentType);
@@ -131,6 +142,7 @@ public final class MailContentType implements ContentType {
         }
     }
 
+    @Override
     public void setContentType(final ContentType contentType) {
         final com.openexchange.mail.mime.ContentType thisObj = this.contentType;
         thisObj.setPrimaryType(contentType.getPrimaryType());
@@ -154,54 +166,67 @@ public final class MailContentType implements ContentType {
         }
     }
 
+    @Override
     public void setNameParameter(final String filename) {
         contentType.setNameParameter(filename);
     }
 
+    @Override
     public void setPrimaryType(final String primaryType) {
         contentType.setPrimaryType(primaryType);
     }
 
+    @Override
     public void setSubType(final String subType) {
         contentType.setSubType(subType);
     }
 
+    @Override
     public boolean startsWith(final String prefix) {
         return contentType.startsWith(prefix);
     }
 
+    @Override
     public void addParameter(final String key, final String value) {
         contentType.addParameter(key, value);
     }
 
+    @Override
     public boolean containsParameter(final String key) {
         return contentType.containsParameter(key);
     }
 
+    @Override
     public String getParameter(final String key) {
         return contentType.getParameter(key);
     }
 
+    @Override
     public Iterator<String> getParameterNames() {
         return contentType.getParameterNames();
     }
 
+    @Override
     public String removeParameter(final String key) {
         return contentType.removeParameter(key);
     }
 
+    @Override
     public void setParameter(final String key, final String value) {
         contentType.setParameter(key, value);
     }
 
+    @Override
     public String getName() {
         return "Content-Type";
     }
 
+    @Override
     public String getValue() {
         return contentType.toString();
     }
 
+    @Override
     public HeaderType getHeaderType() {
         return HeaderType.PARAMETERIZED;
     }

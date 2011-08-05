@@ -86,6 +86,7 @@ public class ClientDetailsAction extends AbstractVoipNowSOAPAction<ClientInterfa
         super();
     }
 
+    @Override
     public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
         String clientId = checkStringParameter(request, "id");
 

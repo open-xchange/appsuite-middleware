@@ -96,6 +96,7 @@ public class PushDiscoverySender implements Runnable {
         remoteHostFresh = pushConfigInterface.getRemoteHostRefresh();
     }
 
+    @Override
     public void run() {
         try {
             LOG.debug("Sending multicast discovery package: \"" + packetData + "\".");

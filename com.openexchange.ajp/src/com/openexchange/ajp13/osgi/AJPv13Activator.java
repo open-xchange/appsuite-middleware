@@ -69,7 +69,7 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link AJPv13Activator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AJPv13Activator extends HousekeepingActivator {

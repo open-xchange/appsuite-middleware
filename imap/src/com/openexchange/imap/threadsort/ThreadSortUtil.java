@@ -176,6 +176,7 @@ public final class ThreadSortUtil {
     public static String getThreadResponse(final IMAPFolder imapFolder, final String sortRange) throws MessagingException {
         final Object val = imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
+            @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
                 final Response[] r;
                 {

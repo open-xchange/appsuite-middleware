@@ -69,9 +69,11 @@ public class CustomizableTimedResult<T> implements TimedResult<T>{
         this.result = result;
         this.customizer = customizer;
     }
+    @Override
     public SearchIterator<T> results() throws OXException {
         return new CustomizableSearchIterator<T>(result.results(), customizer);
     }
+    @Override
     public long sequenceNumber() throws OXException {
         return result.sequenceNumber();
     }

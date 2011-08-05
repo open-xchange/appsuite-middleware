@@ -80,6 +80,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         super(rootUrl, auth, account, session);
     }
 
+    @Override
     public boolean exists(final String folderId) throws OXException {
         try {
             /*
@@ -108,6 +109,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         }
     }
 
+    @Override
     public FileStorageFolder getFolder(final String folderId) throws OXException {
         try {
             /*
@@ -157,6 +159,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         }
     }
 
+    @Override
     public FileStorageFolder[] getSubfolders(final String parentId, final boolean all) throws OXException {
         try {
             /*
@@ -195,10 +198,12 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         }
     }
 
+    @Override
     public FileStorageFolder getRootFolder() throws OXException {
         return getFolder(rootUrl);
     }
 
+    @Override
     public String createFolder(final FileStorageFolder toCreate) throws OXException {
         try {
             final String parentId = toCreate.getParentId();
@@ -228,6 +233,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         }
     }
 
+    @Override
     public String updateFolder(final String folderId, final FileStorageFolder toUpdate) throws OXException {
         try {
             final String fid = checkFolderId(folderId, rootUrl);
@@ -245,6 +251,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         }
     }
 
+    @Override
     public String moveFolder(final String folderId, final String newParentId) throws OXException {
         try {
             final String fid = checkFolderId(folderId, rootUrl);
@@ -306,6 +313,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         }
     }
 
+    @Override
     public String renameFolder(final String folderId, final String newName) throws OXException {
         try {
             final String fid = checkFolderId(folderId, rootUrl);
@@ -360,10 +368,12 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         }
     }
 
+    @Override
     public String deleteFolder(final String folderId) throws OXException {
         return deleteFolder(folderId, true);
     }
 
+    @Override
     public String deleteFolder(final String folderId, final boolean hardDelete) throws OXException {
         try {
             final String fid = checkFolderId(folderId, rootUrl);
@@ -399,10 +409,12 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         }
     }
 
+    @Override
     public void clearFolder(final String folderId) throws OXException {
         clearFolder(folderId, true);
     }
 
+    @Override
     public void clearFolder(final String folderId, final boolean hardDelete) throws OXException {
         clearFolder0(folderId);
     }
@@ -441,6 +453,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         }
     }
 
+    @Override
     public FileStorageFolder[] getPath2DefaultFolder(final String folderId) throws OXException {
         final List<FileStorageFolder> list = new ArrayList<FileStorageFolder>();
         final String fid = checkFolderId(folderId, rootUrl);
@@ -453,14 +466,17 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         return list.toArray(new FileStorageFolder[list.size()]);
     }
 
+    @Override
     public Quota getStorageQuota(final String folderId) throws OXException {
         return Quota.getUnlimitedQuota(Quota.Type.STORAGE);
     }
 
+    @Override
     public Quota getFileQuota(final String folderId) throws OXException {
         return Quota.getUnlimitedQuota(Quota.Type.FILE);
     }
 
+    @Override
     public Quota[] getQuotas(final String folder, final Type[] types) throws OXException {
         final Quota[] ret = new Quota[types.length];
         for (int i = 0; i < ret.length; i++) {

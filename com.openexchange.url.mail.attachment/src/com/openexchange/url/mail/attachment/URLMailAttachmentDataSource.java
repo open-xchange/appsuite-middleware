@@ -89,6 +89,7 @@ public final class URLMailAttachmentDataSource implements DataSource {
         super();
     }
 
+    @Override
     public <D> Data<D> getData(final Class<? extends D> type, final DataArguments dataArguments, final Session session) throws OXException {
         if (!InputStream.class.equals(type)) {
             throw DataExceptionCodes.TYPE_NOT_SUPPORTED.create(type.getName());
@@ -231,10 +232,12 @@ public final class URLMailAttachmentDataSource implements DataSource {
         }
     }
 
+    @Override
     public String[] getRequiredArguments() {
         return new String[] { "url" };
     }
 
+    @Override
     public Class<?>[] getTypes() {
         return new Class<?>[] { InputStream.class };
     }

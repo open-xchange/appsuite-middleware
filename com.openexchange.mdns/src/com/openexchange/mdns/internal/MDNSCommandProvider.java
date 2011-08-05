@@ -104,6 +104,7 @@ public final class MDNSCommandProvider implements CommandProvider {
         return null;
     }
 
+    @Override
     public String getHelp() {
         final StringBuilder builder = new StringBuilder(256).append("---Output tracked hosts of specified service---\n\t");
         builder.append("mdnsServices <service-id> - Output tracked hosts. Specify the service identifier; by default \"openexchange.service.messaging\".\n");

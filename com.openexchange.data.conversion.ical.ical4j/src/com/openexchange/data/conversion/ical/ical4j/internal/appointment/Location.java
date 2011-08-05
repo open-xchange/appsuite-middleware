@@ -61,19 +61,23 @@ import com.openexchange.groupware.contexts.Context;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class Location extends AbstractVerifyingAttributeConverter<VEvent, Appointment> {
+    @Override
     public boolean isSet(final Appointment appointmentObject) {
         return appointmentObject.containsLocation() && null != appointmentObject.getLocation() && appointmentObject.getLocation().length() != 0;
     }
 
+    @Override
     public void emit(final int index, final Appointment appointmentObject, final VEvent event, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
         final net.fortuna.ical4j.model.property.Location location = new net.fortuna.ical4j.model.property.Location(appointmentObject.getLocation());
         event.getProperties().add(location);
     }
 
+    @Override
     public boolean hasProperty(final VEvent event) {
         return event.getLocation() != null;
     }
 
+    @Override
     public void parse(final int index, final VEvent event, final Appointment appointment, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
         appointment.setLocation(event.getProperty("LOCATION").getValue());
     }

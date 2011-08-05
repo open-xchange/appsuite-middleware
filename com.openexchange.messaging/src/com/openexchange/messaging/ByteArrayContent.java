@@ -68,6 +68,7 @@ public class ByteArrayContent implements BinaryContent {
         this.data = data;
     }
 
+    @Override
     public InputStream getData() throws OXException {
         return new ByteArrayInputStream(data);
     }

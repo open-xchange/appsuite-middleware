@@ -147,18 +147,22 @@ public final class RightsCache {
             return tmp;
         }
 
+        @Override
         public CacheKey getKey() {
             return getKeyInternal();
         }
 
+        @Override
         public Rights getValue() {
             return rights;
         }
 
+        @Override
         public void setValue(final Rights value) {
             rights = value;
         }
 
+        @Override
         public Class<Rights> getEntryClass() {
             return Rights.class;
         }

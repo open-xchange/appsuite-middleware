@@ -75,10 +75,12 @@ public class DefaultMessagingAccountManager implements MessagingAccountManager {
             this.manager = manager;
         }
 
+        @Override
         public MessagingAccount modifyIncoming(final MessagingAccount account) throws OXException {
             return manager.modifyIncoming(account);
         }
 
+        @Override
         public MessagingAccount modifyOutgoing(final MessagingAccount account) throws OXException {
             return manager.modifyOutgoing(account);
         }
@@ -119,30 +121,37 @@ public class DefaultMessagingAccountManager implements MessagingAccountManager {
         return account;
     }
 
+    @Override
     public MessagingAccount getAccount(final int id, final Session session) throws OXException {
         return CACHE.getAccount(serviceId, id, session, modifier);
     }
 
+    @Override
     public List<MessagingAccount> getAccounts(final Session session) throws OXException {
         return CACHE.getAccounts(serviceId, session, modifier);
     }
 
+    @Override
     public int addAccount(final MessagingAccount account, final Session session) throws OXException {
         return CACHE.addAccount(serviceId, account, session, modifier);
     }
 
+    @Override
     public void deleteAccount(final MessagingAccount account, final Session session) throws OXException {
         CACHE.deleteAccount(serviceId, account, session, modifier);
     }
 
+    @Override
     public void updateAccount(final MessagingAccount account, final Session session) throws OXException {
         CACHE.updateAccount(serviceId, account, session, modifier);
     }
 
+    @Override
     public String checkSecretCanDecryptStrings(final Session session, final String secret) throws OXException {
         return CACHE.checkSecretCanDecryptStrings(service, session, secret);
     }
 
+    @Override
     public void migrateToNewSecret(final String oldSecret, final String newSecret, final Session session) throws OXException {
         CACHE.migrateToNewSecret(service, oldSecret, newSecret, session);
     }

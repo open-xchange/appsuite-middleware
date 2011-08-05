@@ -71,10 +71,12 @@ final class WrappingScheduledTimerTask implements ScheduledTimerTask {
         this.scheduledFuture = scheduledFuture;
     }
 
+    @Override
     public boolean cancel(final boolean mayInterruptIfRunning) {
         return scheduledFuture.cancel(mayInterruptIfRunning);
     }
 
+    @Override
     public boolean cancel() {
         return scheduledFuture.cancel(false);
     }

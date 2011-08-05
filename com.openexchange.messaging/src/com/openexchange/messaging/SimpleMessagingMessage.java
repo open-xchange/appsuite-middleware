@@ -99,63 +99,78 @@ public class SimpleMessagingMessage implements MessagingMessage, MessagingBodyPa
 
     private String url;
 
+    @Override
     public int getColorLabel() {
         return colorLabel;
     }
 
+    @Override
     public int getFlags() {
         return flags;
     }
 
+    @Override
     public String getFolder() {
         return folder;
     }
 
+    @Override
     public long getReceivedDate() {
         return receivedDate;
     }
 
+    @Override
     public Collection<String> getUserFlags() {
         return userFlags;
     }
 
+    @Override
     public MessagingContent getContent() throws OXException {
         return content;
     }
 
+    @Override
     public String getDisposition() throws OXException {
         return disposition;
     }
 
+    @Override
     public String getFileName() throws OXException {
         return fileName;
     }
 
+    @Override
     public MessagingHeader getFirstHeader(final String name) throws OXException {
         final Collection<MessagingHeader> collection = headers.get(name);
         return null == collection ? null : (collection.isEmpty() ? null : collection.iterator().next());
     }
 
+    @Override
     public Collection<MessagingHeader> getHeader(final String name) {
         return headers.get(name);
     }
 
+    @Override
     public Map<String, Collection<MessagingHeader>> getHeaders() {
         return headers;
     }
 
+    @Override
     public String getSectionId() {
         return sectionId;
     }
 
+    @Override
     public long getSize() {
         return size;
     }
 
+    @Override
     public int getThreadLevel() {
         return threadLevel;
     }
 
+    @Override
     public void writeTo(final OutputStream os) throws IOException, OXException {
         throw new UnsupportedOperationException();
     }
@@ -225,6 +240,7 @@ public class SimpleMessagingMessage implements MessagingMessage, MessagingBodyPa
         content = new MessagingPartArrayContent(parts);
     }
 
+    @Override
     public MultipartContent getParent() throws OXException {
         return parent;
     }
@@ -233,6 +249,7 @@ public class SimpleMessagingMessage implements MessagingMessage, MessagingBodyPa
         this.parent = parent;
     }
 
+    @Override
     public ContentType getContentType() throws OXException {
         return contentType;
     }
@@ -241,6 +258,7 @@ public class SimpleMessagingMessage implements MessagingMessage, MessagingBodyPa
         this.contentType = contentType;
     }
 
+    @Override
     public String getId() {
         return id;
     }
@@ -249,6 +267,7 @@ public class SimpleMessagingMessage implements MessagingMessage, MessagingBodyPa
         this.id = id;
     }
 
+    @Override
     public String getPicture() {
         return picture;
     }
@@ -261,6 +280,7 @@ public class SimpleMessagingMessage implements MessagingMessage, MessagingBodyPa
         this.url = url;
     }
 
+    @Override
     public String getUrl() throws OXException {
       return url;
     }

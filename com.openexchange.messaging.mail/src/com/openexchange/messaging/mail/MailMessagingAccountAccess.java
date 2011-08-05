@@ -86,10 +86,12 @@ public final class MailMessagingAccountAccess extends MailMessagingResource impl
         super(accountId, session);
     }
 
+    @Override
     public int getAccountId() {
         return accountId;
     }
 
+    @Override
     public MessagingFolderAccess getFolderAccess() throws OXException {
         if (!mailAccess.isConnected()) {
             throw MessagingExceptionCodes.NOT_CONNECTED.create();
@@ -111,6 +113,7 @@ public final class MailMessagingAccountAccess extends MailMessagingResource impl
         return tmp;
     }
 
+    @Override
     public MessagingMessageAccess getMessageAccess() throws OXException {
         if (!mailAccess.isConnected()) {
             throw MessagingExceptionCodes.NOT_CONNECTED.create();
@@ -127,6 +130,7 @@ public final class MailMessagingAccountAccess extends MailMessagingResource impl
         return tmp;
     }
 
+    @Override
     public MessagingFolder getRootFolder() throws OXException {
         try {
             return MailMessagingFolderAccess.convert2MessagingFolder(

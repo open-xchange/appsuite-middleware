@@ -70,18 +70,22 @@ public class SimCryptoService implements CryptoService {
         this.decrypted = decrypted;
     }
 
+    @Override
     public String decrypt(String encryptedPayload, String password) throws OXException {
         return decrypted;
     }
 
+    @Override
     public String decrypt(EncryptedData data, String password, boolean useSalt) throws OXException {
         return null;
     }
 
+    @Override
     public String encrypt(String data, String password) throws OXException {
         return encrypted;
     }
 
+    @Override
     public EncryptedData encrypt(String data, String password, boolean useSalt) throws OXException {
         return null;
     }

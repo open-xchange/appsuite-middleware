@@ -144,6 +144,7 @@ public class FileFieldHandling {
             this.switcher = switcher;
         }
 
+        @Override
         public Object handle(final Field field, final Object... args) {
             return field.doSwitch(switcher, args);
         }
@@ -157,94 +158,117 @@ public class FileFieldHandling {
             this.handler = handler;
         }
 
+        @Override
         public Object categories(final Object... args) {
             return handler.handle(Field.CATEGORIES, args);
         }
 
+        @Override
         public Object colorLabel(final Object... args) {
             return handler.handle(Field.COLOR_LABEL, args);
         }
 
+        @Override
         public Object content(final Object... args) {
             return handler.handle(Field.CONTENT, args);
         }
 
+        @Override
         public Object created(final Object... args) {
             return handler.handle(Field.CREATED, args);
         }
 
+        @Override
         public Object createdBy(final Object... args) {
             return handler.handle(Field.CREATED_BY, args);
         }
 
+        @Override
         public Object currentVersion(final Object... args) {
             return handler.handle(Field.CURRENT_VERSION, args);
         }
 
+        @Override
         public Object description(final Object... args) {
             return handler.handle(Field.DESCRIPTION, args);
         }
 
+        @Override
         public Object fileMd5sum(final Object... args) {
             return handler.handle(Field.FILE_MD5SUM, args);
         }
 
+        @Override
         public Object fileMimetype(final Object... args) {
             return handler.handle(Field.FILE_MIMETYPE, args);
         }
 
+        @Override
         public Object fileSize(final Object... args) {
             return handler.handle(Field.FILE_SIZE, args);
         }
 
+        @Override
         public Object filename(final Object... args) {
             return handler.handle(Field.FILENAME, args);
         }
 
+        @Override
         public Object folderId(final Object... args) {
             return handler.handle(Field.FOLDER_ID, args);
         }
 
+        @Override
         public Object id(final Object... args) {
             return handler.handle(Field.ID, args);
         }
 
+        @Override
         public Object lastModified(final Object... args) {
             return handler.handle(Field.LAST_MODIFIED, args);
         }
 
+        @Override
         public Object lastModifiedUtc(final Object... args) {
             return handler.handle(Field.LAST_MODIFIED_UTC, args);
         }
 
+        @Override
         public Object lockedUntil(final Object... args) {
             return handler.handle(Field.LOCKED_UNTIL, args);
         }
 
+        @Override
         public Object modifiedBy(final Object... args) {
             return handler.handle(Field.MODIFIED_BY, args);
         }
 
+        @Override
         public Object numberOfVersions(final Object... args) {
             return handler.handle(Field.NUMBER_OF_VERSIONS, args);
         }
 
+        @Override
         public Object sequenceNumber(final Object... args) {
             return handler.handle(Field.SEQUENCE_NUMBER, args);
         }
 
+        @Override
         public Object title(final Object... args) {
             return handler.handle(Field.TITLE, args);
         }
 
+        @Override
         public Object url(final Object... args) {
             return handler.handle(Field.URL, args);
         }
 
+        @Override
         public Object version(final Object... args) {
             return handler.handle(Field.VERSION, args);
         }
 
+        @Override
         public Object versionComment(final Object... args) {
             return handler.handle(Field.VERSION_COMMENT, args);
         }

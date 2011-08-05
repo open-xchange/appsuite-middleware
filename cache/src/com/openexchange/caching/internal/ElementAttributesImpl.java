@@ -195,6 +195,7 @@ public final class ElementAttributesImpl implements ElementAttributes, Cloneable
         }
     }
 
+    @Override
     public void addElementEventHandler(final ElementEventHandler eventHandler) {
         // lazy here, no concurrency problems expected
         if (eventHandlers == null) {
@@ -203,6 +204,7 @@ public final class ElementAttributesImpl implements ElementAttributes, Cloneable
         eventHandlers.add(eventHandler);
     }
 
+    @Override
     public void addElementEventHandlers(final ArrayList<ElementEventHandler> eventHandlers) {
         if (eventHandlers == null || eventHandlers.size() == 0) {
             return;
@@ -213,6 +215,7 @@ public final class ElementAttributesImpl implements ElementAttributes, Cloneable
         eventHandlers.addAll(eventHandlers);
     }
 
+    @Override
     public ElementAttributes copy() {
         try {
             return (ElementAttributes) clone();
@@ -221,88 +224,109 @@ public final class ElementAttributesImpl implements ElementAttributes, Cloneable
         }
     }
 
+    @Override
     public long getCreateTime() {
         return createTime;
     }
 
+    @Override
     public ArrayList<ElementEventHandler> getElementEventHandlers() {
         return (ArrayList<ElementEventHandler>) eventHandlers.clone();
     }
 
+    @Override
     public long getIdleTime() {
         return maxIdleTimeSeconds;
     }
 
+    @Override
     public boolean getIsEternal() {
         return isEternal;
     }
 
+    @Override
     public boolean getIsLateral() {
         return isLateral;
     }
 
+    @Override
     public boolean getIsRemote() {
         return isRemote;
     }
 
+    @Override
     public boolean getIsSpool() {
         return isSpool;
     }
 
+    @Override
     public long getLastAccessTime() {
         return lastAccessTime;
     }
 
+    @Override
     public long getMaxLifeSeconds() {
         return maxLifeSeconds;
     }
 
+    @Override
     public int getSize() {
         return size;
     }
 
+    @Override
     public long getTimeToLiveSeconds() {
         final long now = System.currentTimeMillis();
         return ((getCreateTime() + (getMaxLifeSeconds() * 1000)) - now) / 1000;
     }
 
+    @Override
     public long getVersion() {
         return version;
     }
 
+    @Override
     public void setIdleTime(final long idle) {
         maxIdleTimeSeconds = idle;
     }
 
+    @Override
     public void setIsEternal(final boolean val) {
         isEternal = val;
 
     }
 
+    @Override
     public void setIsLateral(final boolean val) {
         isLateral = val;
     }
 
+    @Override
     public void setIsRemote(final boolean val) {
         isRemote = val;
     }
 
+    @Override
     public void setIsSpool(final boolean val) {
         isSpool = val;
     }
 
+    @Override
     public void setLastAccessTimeNow() {
         lastAccessTime = System.currentTimeMillis();
     }
 
+    @Override
     public void setMaxLifeSeconds(final long mls) {
         maxLifeSeconds = mls;
     }
 
+    @Override
     public void setSize(final int size) {
         this.size = size;
     }
 
+    @Override
     public void setVersion(final long version) {
         this.version = version;
     }

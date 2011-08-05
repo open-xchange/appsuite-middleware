@@ -126,18 +126,22 @@ public final class MimeDateMessagingHeader implements DateMessagingHeader {
         }
     }
 
+    @Override
     public HeaderType getHeaderType() {
         return HeaderType.DATE;
     }
 
+    @Override
     public long getTime() {
         return time;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public String getValue() {
         return value;
     }

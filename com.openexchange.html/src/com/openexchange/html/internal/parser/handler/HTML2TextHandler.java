@@ -232,14 +232,17 @@ public final class HTML2TextHandler implements HTMLHandler {
         this.contextId = contextId;
     }
 
+    @Override
     public void handleComment(final String comment) {
         // Nothing to do
     }
 
+    @Override
     public void handleDocDeclaration(final String docDecl) {
         // Nothing to do
     }
 
+    @Override
     public void handleEndTag(final String tag) {
         final String ltag = tag.toLowerCase(Locale.US);
         if (TAG_BODY.equals(ltag)) {
@@ -288,6 +291,7 @@ public final class HTML2TextHandler implements HTMLHandler {
         prevTag = ltag;
     }
 
+    @Override
     public void handleError(final String errorMsg) {
         final StringBuilder sb = new StringBuilder(128 + errorMsg.length());
         sb.append("HTML parsing error occurred: ").append(errorMsg);
@@ -315,6 +319,7 @@ public final class HTML2TextHandler implements HTMLHandler {
         }
     }
 
+    @Override
     public void handleSimpleTag(final String tag, final Map<String, String> attributes) {
         if (insideBody) {
             final String ltag = tag.toLowerCase(Locale.US);
@@ -344,6 +349,7 @@ public final class HTML2TextHandler implements HTMLHandler {
         }
     }
 
+    @Override
     public void handleStartTag(final String tag, final Map<String, String> attributes) {
         final String ltag = tag.toLowerCase(Locale.US);
         if (TAG_BODY.equals(ltag)) {
@@ -386,6 +392,7 @@ public final class HTML2TextHandler implements HTMLHandler {
         }
     }
 
+    @Override
     public void handleCDATA(final String text) {
         if (insideBody && !ignore) {
             textBuilder.append(text);
@@ -423,6 +430,7 @@ public final class HTML2TextHandler implements HTMLHandler {
 
     private static final String STR_BLANK = " ";
 
+    @Override
     public void handleText(final String text, final boolean ignorable) {
         if (insideBody && !ignore) {
             /*
@@ -532,6 +540,7 @@ public final class HTML2TextHandler implements HTMLHandler {
         return this;
     }
 
+    @Override
     public void handleXMLDeclaration(final String version, final Boolean standalone, final String encoding) {
         // Nothing to do
     }

@@ -125,11 +125,13 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
         }
     }
 
+    @Override
     public List<MessagingService> getAllServices(final int user, final int context) throws OXException {
         return filter(new ArrayList<MessagingService>(map.values()), user, context);
     }
 
 
+    @Override
     public MessagingService getMessagingService(final String id, final int user, final int context) throws OXException {
         final MessagingService messagingService = map.get(id);
         if (null == messagingService || ! isAllowed(id, user, context)) {
@@ -191,6 +193,7 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
         return service.getView(user, context);
     }
 
+    @Override
     public boolean containsMessagingService(final String id, final int user, final int context) {
         try {
             return null == id ? false : (map.containsKey(id) && isAllowed(id, user, context));
@@ -208,6 +211,7 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
             this.context = context;
         }
 
+        @Override
         public Object addingService(final ServiceReference reference) {
             final Object service = context.getService(reference);
             if ((service instanceof MessagingService)) {
@@ -229,10 +233,12 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
             return null;
         }
 
+        @Override
         public void modifiedService(final ServiceReference reference, final Object service) {
             // Nothing to do
         }
 
+        @Override
         public void removedService(final ServiceReference reference, final Object service) {
             if (null != service) {
                 try {

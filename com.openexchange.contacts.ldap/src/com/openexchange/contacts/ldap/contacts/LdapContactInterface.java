@@ -103,6 +103,7 @@ public class LdapContactInterface implements ContactInterface {
             this.columns = columns;
         }
 
+        @Override
         public void run() {
             try {
                 final List<Contact> ldapContacts = getLDAPContacts(folderId, columns, null, null, null, false);
@@ -230,10 +231,12 @@ public class LdapContactInterface implements ContactInterface {
 //    }
 
 
+    @Override
     public void deleteContactObject(final int oid, final int fuid, final Date client_date) throws OXException {
         throw LdapExceptionCode.DELETE_NOT_POSSIBLE.create();
     }
 
+    @Override
     public SearchIterator<Contact> getContactsByExtendedSearch(final ContactSearchObject searchobject, final int orderBy, final Order order, final String collation, final int[] cols) throws OXException {
         final Set<Integer> columns = getColumnSet(cols);
         final int folderId;
@@ -292,6 +295,7 @@ public class LdapContactInterface implements ContactInterface {
 
 
     // The all request...
+    @Override
     public SearchIterator<Contact> getContactsInFolder(final int folderId, final int from, final int to, final int orderBy, final Order order, final String collation, final int[] cols) throws OXException {
 
         final Set<Integer> columns = getColumnSet(cols);
@@ -347,6 +351,7 @@ public class LdapContactInterface implements ContactInterface {
     }
 
 
+    @Override
     public SearchIterator<Contact> getDeletedContactsInFolder(final int folderId, final int[] cols, final Date since) throws OXException {
         if (folderprop.isOutlook_support() && folderprop.isAds_deletion_support()) {
             // Here we start to do some dirty tricks only possible with an AD which stores deleted objects in a special structure
@@ -364,16 +369,19 @@ public class LdapContactInterface implements ContactInterface {
         }
     }
 
+    @Override
     public int getFolderId() {
         return folderid;
     }
 
+    @Override
     public LdapServer getLdapServer() {
         final LdapServer ldapServer = new LdapServer();
         ldapServer.setContext(String.valueOf(context));
         return ldapServer;
     }
 
+    @Override
     public SearchIterator<Contact> getModifiedContactsInFolder(final int folderId, final int[] cols, final Date since) throws OXException {
         if (folderprop.isOutlook_support()) {
             final Set<Integer> columns = getColumnSet(cols);
@@ -386,16 +394,19 @@ public class LdapContactInterface implements ContactInterface {
     }
 
 
+    @Override
     public int getNumberOfContacts(final int folderId) throws OXException {
         LOG.info("Called getNumberOfContacts");
         return 0;
     }
 
+    @Override
     public Contact getObjectById(final int objectId, final int inFolder) throws OXException {
         LOG.info("Called getObjectById");
         return null;
     }
 
+    @Override
     public SearchIterator<Contact> getObjectsById(final int[][] objectIdAndInFolder, final int[] cols) throws OXException {
         final Set<Integer> columns = getColumnSet(cols);
         final ArrayList<Contact> contacts = new ArrayList<Contact>();
@@ -418,25 +429,30 @@ public class LdapContactInterface implements ContactInterface {
         return new ArrayIterator<Contact>(contacts.toArray(new Contact[contacts.size()]));
     }
 
+    @Override
     public Contact getUserById(final int userId, final boolean performReadCheck) throws OXException {
         LOG.info("Called getUserById");
         return null;
     }
 
+    @Override
     public Contact[] getUsersById(final int[] userIds, final boolean performReadCheck) throws OXException {
         LOG.info("Called getUsersById");
         return null;
     }
 
+    @Override
     public Contact getUserById(final int userId) throws OXException {
         LOG.info("Called getUserById");
         return null;
     }
 
+    @Override
     public void insertContactObject(final Contact co) throws OXException {
         throw LdapExceptionCode.INSERT_NOT_POSSIBLE.create();
     }
 
+    @Override
     public SearchIterator<Contact> searchContacts(final String searchpattern, final int folderId, final int orderBy, final Order order, final int[] cols) throws OXException {
         LOG.info("Called searchContacts");
         return null;
@@ -447,10 +463,12 @@ public class LdapContactInterface implements ContactInterface {
         initMappingTable();
     }
 
+    @Override
     public void updateContactObject(final Contact co, final int fid, final Date d) throws OXException {
         LOG.info("Called updateContactObject");
     }
 
+    @Override
     public void updateUserContact(final Contact contact, final Date lastmodified) throws OXException {
         LOG.info("Called updateUserContact");
     }
@@ -616,6 +634,7 @@ public class LdapContactInterface implements ContactInterface {
     private UidInterface getUidInterface() {
         return new UidInterface() {
 
+            @Override
             public Integer getUid(final String uid) throws OXException {
                 return ldapUidToOxUid(uid, getValuesMappingTable(), getKeyMappingTable());
             }
@@ -724,6 +743,7 @@ public class LdapContactInterface implements ContactInterface {
     private void searchAndFetch(final boolean distributionslist, final int folderId, final Set<Integer> columns, final String baseDN, final String filter, final ArrayList<Contact> arrayList, final LdapInterface iface) throws OXException {
         iface.search(baseDN, filter, distributionslist, columns, new FillClosure() {
 
+            @Override
             public void execute(final LdapGetter ldapGetter) throws OXException {
                 if (distributionslist) {
                     final Contact retval = Mapper.getDistriContact(ldapGetter, columns, folderprop, getUidInterface(), folderId, admin_id, attributes);
@@ -767,7 +787,8 @@ public class LdapContactInterface implements ContactInterface {
         throw new UnsupportedOperationException();
     }
 
-	public <T> SearchIterator<Contact> getContactsByExtendedSearch(
+	@Override
+    public <T> SearchIterator<Contact> getContactsByExtendedSearch(
 			final SearchTerm<T> searchterm, final int orderBy, final Order order,
 			final String collation, final int[] cols) throws OXException {
         throw new UnsupportedOperationException();

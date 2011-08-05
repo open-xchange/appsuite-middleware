@@ -123,7 +123,7 @@ public class MailAttachment extends AJAXServlet {
             }
             /*-
              * Security check
-             * 
+             *
              * IP-Check appropriate for roaming mobile devices?
              */
             if (false && null != token.getClientIp() && !req.getRemoteAddr().equals(token.getClientIp())) {

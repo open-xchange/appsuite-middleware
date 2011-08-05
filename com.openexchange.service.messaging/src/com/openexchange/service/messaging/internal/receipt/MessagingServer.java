@@ -221,6 +221,7 @@ public final class MessagingServer implements Runnable {
         return serverSocket;
     }
 
+    @Override
     public void run() {
         boolean keepOnRunning = true;
         while (keepOnRunning && running.get()) {
@@ -267,6 +268,7 @@ public final class MessagingServer implements Runnable {
             this.logger = logger;
         }
 
+        @Override
         public void run() {
             try {
                 latch.await();

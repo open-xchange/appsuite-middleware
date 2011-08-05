@@ -56,14 +56,14 @@ import com.openexchange.exception.OXException;
  * cycle.
  * <p>
  * This interface is optionally implemented by {@link AJAXActionServiceFactory AJAX action factories}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface AJAXStateHandler {
 
     /**
      * Initializes specified state.
-     * 
+     *
      * @param state The state
      * @throws OXException If start-up fails
      */
@@ -71,7 +71,7 @@ public interface AJAXStateHandler {
 
     /**
      * Cleans-up specified state.
-     * 
+     *
      * @param state The state
      * @throws OXException If shut-down fails
      */

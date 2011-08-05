@@ -67,6 +67,7 @@ public abstract class FilteringTimedResult<T> implements TimedResult<T> {
         this.delegate = delegate;
     }
 
+    @Override
     public SearchIterator<T> results() throws OXException {
         return new FilteringSearchIterator<T>(delegate.results()){
 
@@ -80,6 +81,7 @@ public abstract class FilteringTimedResult<T> implements TimedResult<T> {
 
     protected abstract boolean accept(T thing) throws OXException;
 
+    @Override
     public long sequenceNumber() throws OXException {
         return delegate.sequenceNumber();
     }

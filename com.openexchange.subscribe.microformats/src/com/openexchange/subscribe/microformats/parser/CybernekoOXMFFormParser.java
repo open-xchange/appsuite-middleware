@@ -71,10 +71,12 @@ import com.openexchange.subscribe.microformats.OXMFSubscriptionErrorMessage;
  */
 public class CybernekoOXMFFormParser implements OXMFFormParser {
 
+    @Override
     public OXMFForm parse(String html) {
         return parse(new StringReader(html));
     }
 
+    @Override
     public OXMFForm parse(Reader html) {
         OXMFForm form = new OXMFForm();
         DOMParser parser = new DOMParser();

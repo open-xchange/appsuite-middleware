@@ -60,33 +60,33 @@ import java.util.List;
  *
  */
 public abstract class AbstractNode<T extends AbstractNode<T>> {
-    
+
     protected T parent;
     protected List<T> children = new ArrayList<T>();
     protected String name;
-    
+
     public AbstractNode(T parent) {
         this(parent, null);
     }
-    
+
     public AbstractNode() {
         this((String)null);
     }
-    
+
     public AbstractNode(T parent, String name) {
         this.parent = parent;
         parent.getChildren().add((T)this);
         this.name = name;
     }
-    
+
     public AbstractNode(String name) {
         this.name = name;
     }
-    
+
     public boolean isRoot() {
         return parent == null;
     }
-    
+
     public void setParent(T parent) {
         this.parent = parent;
     }
@@ -99,22 +99,22 @@ public abstract class AbstractNode<T extends AbstractNode<T>> {
     public boolean isLeaf() {
         return children.isEmpty();
     }
-    
+
     public void setName(String name) {
         this.name = name;
     }
-    
+
     public String getName() {
         return name;
     }
-    
+
     public EAVPath getPath() {
         if(parent == null) {
             return new EAVPath(name);
         }
         return parent.getPath().append(name);
     }
-    
+
     public EAVPath getRelativePath(EAVPath relativePath) {
         if (getPath().equals(relativePath)) {
             return new EAVPath();
@@ -127,7 +127,7 @@ public abstract class AbstractNode<T extends AbstractNode<T>> {
     }
 
 
-    
+
     public T getParent() {
         return parent;
     }
@@ -141,11 +141,11 @@ public abstract class AbstractNode<T extends AbstractNode<T>> {
         }
         this.children = newNodes;
     }
-    
+
     public void addChild(T child) {
         addChildren(child);
     }
-    
+
     public void replaceChild(T tree) {
         removeChild(tree.getName());
         addChildren(tree);
@@ -160,9 +160,9 @@ public abstract class AbstractNode<T extends AbstractNode<T>> {
         visitor.visit(index, (T) this);
         if(parent != null) {
             parent.visitUpward(index-1, visitor);
-        }        
+        }
     }
-    
+
     public void visit(AbstractNodeVisitor<T> visitor) {
         try {
             visit(0, visitor);
@@ -195,7 +195,8 @@ public abstract class AbstractNode<T extends AbstractNode<T>> {
         }
         return child.resolve(path.shiftLeft());
     }
-    
+
+    @Override
     public String toString() {
         return getPath().toString();
     }
@@ -215,10 +216,10 @@ public abstract class AbstractNode<T extends AbstractNode<T>> {
             child.parent = (T)this;
         }
     }
-    
-    
+
+
     public abstract void copyPayloadFromOther(T other);
     public abstract T newInstance();
-   
-    
+
+
 }

@@ -89,6 +89,7 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
     // All columns need to be loaded here as we keep the original, not the update and no data may be lost
     private static final int[] COMPARISON_COLUMNS = Contact.CONTENT_COLUMNS;
 
+    @Override
     public int calculateSimilarityScore(final Contact original, final Contact candidate, final Object session) throws OXException {
         int score = 0;
         final int threshhold = getThreshold(session);
@@ -199,10 +200,12 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
         }
     }
 
+    @Override
     public void closeSession(final Object session) throws OXException {
 
     }
 
+    @Override
     public Collection<Contact> getData(final TargetFolderDefinition target, final Object session) throws OXException {
         final RdbContactSQLImpl contacts = (RdbContactSQLImpl) getFromSession(SQL_INTERFACE, session);
 
@@ -223,14 +226,17 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
         return retval;
     }
 
+    @Override
     public int getThreshold(final Object session) throws OXException {
         return 9;
     }
 
+    @Override
     public boolean handles(final FolderObject folder) {
         return folder.getModule() == FolderObject.CONTACT;
     }
 
+    @Override
     public void save(final Contact newElement, final Object session) throws OXException {
         final OverridingContactInterface contacts = (OverridingContactInterface) getFromSession(SQL_INTERFACE, session);
         final TargetFolderDefinition target = (TargetFolderDefinition) getFromSession(TARGET, session);
@@ -246,6 +252,7 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
         return ((Map<Integer, Object>) session).get(key);
     }
 
+    @Override
     public Object startSession(final TargetFolderDefinition target) throws OXException {
         final Map<Integer, Object> userInfo = new HashMap<Integer, Object>();
         userInfo.put(SQL_INTERFACE, new RdbContactSQLImpl(new TargetFolderSession(target)));
@@ -253,6 +260,7 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
         return userInfo;
     }
 
+    @Override
     public void update(final Contact original, final Contact update, final Object session) throws OXException {
         //This may only fill up fields NEVER overwrite them. Original should be used as base and filled up as needed
         //ALL Content Columns need to be considered here

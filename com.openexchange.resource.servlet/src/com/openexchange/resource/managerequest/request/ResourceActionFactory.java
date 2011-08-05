@@ -60,7 +60,7 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link ResourceActionFactory}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @Module(actions = { "new", "update", "delete" })
@@ -70,7 +70,7 @@ public class ResourceActionFactory implements AJAXActionServiceFactory {
 
     /**
      * Initializes a new {@link ResourceActionFactory}.
-     * 
+     *
      * @param services The service look-up
      */
     public ResourceActionFactory(final ServiceLookup services) {

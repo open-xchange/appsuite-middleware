@@ -150,39 +150,47 @@ public final class HeaderCacheMessageStorage implements IMailMessageStorage {
         accountId = mailAccess.getAccountId();
     }
 
+    @Override
     public String[] appendMessages(final String destFolder, final MailMessage[] msgs) throws OXException {
         final String[] ids = delegatee.appendMessages(destFolder, msgs);
         synchronizeFolder(destFolder, true, true);
         return ids;
     }
 
+    @Override
     public String[] copyMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws OXException {
         final String[] ids = delegatee.copyMessages(sourceFolder, destFolder, mailIds, fast);
         synchronizeFolder(destFolder, true, true);
         return ids;
     }
 
+    @Override
     public void deleteMessages(final String folder, final String[] mailIds, final boolean hardDelete) throws OXException {
         delegatee.deleteMessages(folder, mailIds, hardDelete);
         synchronizeFolder(folder, true, true);
     }
 
+    @Override
     public MailMessage[] getAllMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws OXException {
         return searchMessages(folder, indexRange, sortField, order, null, fields);
     }
 
+    @Override
     public MailPart getAttachment(final String folder, final String mailId, final String sequenceId) throws OXException {
         return delegatee.getAttachment(folder, mailId, sequenceId);
     }
 
+    @Override
     public MailMessage[] getDeletedMessages(final String folder, final MailField[] fields) throws OXException {
         return delegatee.getDeletedMessages(folder, fields);
     }
 
+    @Override
     public MailPart getImageAttachment(final String folder, final String mailId, final String contentId) throws OXException {
         return delegatee.getImageAttachment(folder, mailId, contentId);
     }
 
+    @Override
     public MailMessage getMessage(final String folder, final String mailId, final boolean markSeen) throws OXException {
         /*
          * Synchronize since we access the message storage
@@ -194,6 +202,7 @@ public final class HeaderCacheMessageStorage implements IMailMessageStorage {
         return delegatee.getMessage(folder, mailId, markSeen);
     }
 
+    @Override
     public MailMessage[] getMessages(final String folder, final String[] mailIds, final MailField[] fields) throws OXException {
         /*
          * Synchronize since we access the message storage
@@ -222,10 +231,12 @@ public final class HeaderCacheMessageStorage implements IMailMessageStorage {
         return mails;
     }
 
+    @Override
     public MailMessage[] getNewAndModifiedMessages(final String folder, final MailField[] fields) throws OXException {
         return delegatee.getNewAndModifiedMessages(folder, fields);
     }
 
+    @Override
     public MailMessage[] getThreadSortedMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
         /*
          * Synchronize since we access the message storage
@@ -257,6 +268,7 @@ public final class HeaderCacheMessageStorage implements IMailMessageStorage {
         return mails;
     }
 
+    @Override
     public MailMessage[] getUnreadMessages(final String folder, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int limit) throws OXException {
         /*
          * Synchronize since we access the message storage
@@ -283,6 +295,7 @@ public final class HeaderCacheMessageStorage implements IMailMessageStorage {
         return unreadMails;
     }
 
+    @Override
     public String[] moveMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws OXException {
         final String[] ids = delegatee.moveMessages(sourceFolder, destFolder, mailIds, fast);
         synchronizeFolder(sourceFolder, true, true);
@@ -290,16 +303,19 @@ public final class HeaderCacheMessageStorage implements IMailMessageStorage {
         return ids;
     }
 
+    @Override
     public void releaseResources() throws OXException {
         delegatee.releaseResources();
     }
 
+    @Override
     public MailMessage saveDraft(final String draftFullname, final ComposedMailMessage draftMail) throws OXException {
         final MailMessage draft = delegatee.saveDraft(draftFullname, draftMail);
         synchronizeFolder(draftFullname, true, true);
         return draft;
     }
 
+    @Override
     public MailMessage[] searchMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
         /*
          * Synchronize since we access the message storage
@@ -331,11 +347,13 @@ public final class HeaderCacheMessageStorage implements IMailMessageStorage {
         return mails;
     }
 
+    @Override
     public void updateMessageColorLabel(final String folder, final String[] mailIds, final int colorLabel) throws OXException {
         delegatee.updateMessageColorLabel(folder, mailIds, colorLabel);
         synchronizeFolder(folder, true, true);
     }
 
+    @Override
     public void updateMessageFlags(final String folder, final String[] mailIds, final int flags, final boolean set) throws OXException {
         delegatee.updateMessageFlags(folder, mailIds, flags, set);
         synchronizeFolder(folder, true, true);
@@ -516,6 +534,7 @@ public final class HeaderCacheMessageStorage implements IMailMessageStorage {
             this.enforce = enforce;
         }
 
+        @Override
         public Object call() throws Exception {
             synchronizeInExternalThread(folder, accountId, session, enforce);
             return null;

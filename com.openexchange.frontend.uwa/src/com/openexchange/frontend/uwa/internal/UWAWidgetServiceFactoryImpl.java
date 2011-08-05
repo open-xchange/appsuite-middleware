@@ -78,6 +78,7 @@ public class UWAWidgetServiceFactoryImpl implements UWAWidgetServiceFactory {
         this.idGenerator = idGenerator;
     }
 
+    @Override
     public UWAWidgetService getService(int userId, int ctxId) throws OXException {
         try {
             return new CompositeUWAService(dbService, configViews, config, idGenerator, userId, ctxId);
@@ -86,6 +87,7 @@ public class UWAWidgetServiceFactoryImpl implements UWAWidgetServiceFactory {
         }
     }
 
+    @Override
     public UWAWidgetService getService(int ctxId) throws OXException {
         return new ContextOnlyUWAService(dbService, idGenerator, ctxId);
     }

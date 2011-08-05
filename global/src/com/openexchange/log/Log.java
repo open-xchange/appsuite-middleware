@@ -93,30 +93,37 @@ public final class Log implements org.apache.commons.logging.Log {
         this.delegate = delegate;
     }
 
+    @Override
     public boolean isDebugEnabled() {
         return delegate.isDebugEnabled();
     }
 
+    @Override
     public boolean isErrorEnabled() {
         return delegate.isErrorEnabled();
     }
 
+    @Override
     public boolean isFatalEnabled() {
         return delegate.isFatalEnabled();
     }
 
+    @Override
     public boolean isInfoEnabled() {
         return delegate.isInfoEnabled();
     }
 
+    @Override
     public boolean isTraceEnabled() {
         return delegate.isTraceEnabled();
     }
 
+    @Override
     public boolean isWarnEnabled() {
         return delegate.isWarnEnabled();
     }
 
+    @Override
     public void trace(final Object message) {
         final LogService logService = LOGSERVICE_REFERENCE.get();
         if (null == logService) {
@@ -126,6 +133,7 @@ public final class Log implements org.apache.commons.logging.Log {
         }
     }
 
+    @Override
     public void trace(final Object message, final Throwable t) {
         final LogService logService = LOGSERVICE_REFERENCE.get();
         if (null == logService) {
@@ -135,6 +143,7 @@ public final class Log implements org.apache.commons.logging.Log {
         }
     }
 
+    @Override
     public void debug(final Object message) {
         final LogService logService = LOGSERVICE_REFERENCE.get();
         if (null == logService) {
@@ -144,6 +153,7 @@ public final class Log implements org.apache.commons.logging.Log {
         }
     }
 
+    @Override
     public void debug(final Object message, final Throwable t) {
         final LogService logService = LOGSERVICE_REFERENCE.get();
         if (null == logService) {
@@ -153,6 +163,7 @@ public final class Log implements org.apache.commons.logging.Log {
         }
     }
 
+    @Override
     public void info(final Object message) {
         final LogService logService = LOGSERVICE_REFERENCE.get();
         if (null == logService) {
@@ -162,6 +173,7 @@ public final class Log implements org.apache.commons.logging.Log {
         }
     }
 
+    @Override
     public void info(final Object message, final Throwable t) {
         final LogService logService = LOGSERVICE_REFERENCE.get();
         if (null == logService) {
@@ -171,6 +183,7 @@ public final class Log implements org.apache.commons.logging.Log {
         }
     }
 
+    @Override
     public void warn(final Object message) {
         final LogService logService = LOGSERVICE_REFERENCE.get();
         if (null == logService) {
@@ -180,6 +193,7 @@ public final class Log implements org.apache.commons.logging.Log {
         }
     }
 
+    @Override
     public void warn(final Object message, final Throwable t) {
         final LogService logService = LOGSERVICE_REFERENCE.get();
         if (null == logService) {
@@ -189,6 +203,7 @@ public final class Log implements org.apache.commons.logging.Log {
         }
     }
 
+    @Override
     public void error(final Object message) {
         final LogService logService = LOGSERVICE_REFERENCE.get();
         if (null == logService) {
@@ -198,6 +213,7 @@ public final class Log implements org.apache.commons.logging.Log {
         }
     }
 
+    @Override
     public void error(final Object message, final Throwable t) {
         final LogService logService = LOGSERVICE_REFERENCE.get();
         if (null == logService) {
@@ -207,6 +223,7 @@ public final class Log implements org.apache.commons.logging.Log {
         }
     }
 
+    @Override
     public void fatal(final Object message) {
         final LogService logService = LOGSERVICE_REFERENCE.get();
         if (null == logService) {
@@ -216,6 +233,7 @@ public final class Log implements org.apache.commons.logging.Log {
         }
     }
 
+    @Override
     public void fatal(final Object message, final Throwable t) {
         final LogService logService = LOGSERVICE_REFERENCE.get();
         if (null == logService) {

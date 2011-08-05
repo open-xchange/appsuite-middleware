@@ -79,6 +79,7 @@ public class SimSubscribeService implements SubscribeService {
         this.subscription = subscription;
     }
 
+    @Override
     public SubscriptionSource getSubscriptionSource() {
         return source;
     }
@@ -88,10 +89,12 @@ public class SimSubscribeService implements SubscribeService {
 
     }
 
+    @Override
     public boolean handles(final int folderModule) {
         return true;
     }
 
+    @Override
     public Collection<Subscription> loadSubscriptions(final Context context, final String folderId, final String secret) {
         return subscriptionIds;
     }
@@ -100,22 +103,27 @@ public class SimSubscribeService implements SubscribeService {
         return null;
     }
 
+    @Override
     public void subscribe(final Subscription subscription) {
 
     }
 
+    @Override
     public void unsubscribe(final Subscription subscription) {
 
     }
 
+    @Override
     public void update(final Subscription subscription) {
 
     }
 
+    @Override
     public Collection getContent(final Subscription subscription) {
         return content;
     }
 
+    @Override
     public Subscription loadSubscription(final Context context, final int subscriptionId, final String secret) {
         final Subscription subscriptionIdMemo = new Subscription();
         subscriptionIdMemo.setContext(context);
@@ -136,6 +144,7 @@ public class SimSubscribeService implements SubscribeService {
         this.content = content;
     }
 
+    @Override
     public boolean knows(final Context context, final int subscriptionId) {
         return true;
     }
@@ -147,6 +156,7 @@ public class SimSubscribeService implements SubscribeService {
     /* (non-Javadoc)
      * @see com.openexchange.subscribe.SubscribeService#loadSubscriptions(com.openexchange.groupware.contexts.Context, int, java.lang.String)
      */
+    @Override
     public Collection<Subscription> loadSubscriptions(final Context context, final int userId, final String secret) throws OXException {
         // TODO Auto-generated method stub
         return null;
@@ -155,6 +165,7 @@ public class SimSubscribeService implements SubscribeService {
     /* (non-Javadoc)
      * @see com.openexchange.subscribe.SubscribeService#checkSecretCanDecryptPasswords(com.openexchange.groupware.contexts.Context, com.openexchange.groupware.ldap.User, java.lang.String)
      */
+    @Override
     public String checkSecretCanDecryptPasswords(final Context context, final User user, final String secret) throws OXException {
         // TODO Auto-generated method stub
         return null;
@@ -163,6 +174,7 @@ public class SimSubscribeService implements SubscribeService {
     /* (non-Javadoc)
      * @see com.openexchange.subscribe.SubscribeService#migrateSecret(com.openexchange.groupware.contexts.Context, com.openexchange.groupware.ldap.User, java.lang.String, java.lang.String)
      */
+    @Override
     public void migrateSecret(final Context context, final User user, final String oldSecret, final String newSecret) throws OXException {
         // TODO Auto-generated method stub
 

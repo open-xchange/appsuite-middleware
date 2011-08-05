@@ -90,6 +90,7 @@ public class FacebookRegisterer implements ServiceTrackerCustomizer {
         this.context = context;
     }
 
+    @Override
     public Object addingService(ServiceReference reference) {
         final Object obj = context.getService(reference);
         final boolean needsRegistration;
@@ -122,10 +123,12 @@ public class FacebookRegisterer implements ServiceTrackerCustomizer {
         return obj;
     }
 
+    @Override
     public void modifiedService(ServiceReference reference, Object service) {
         // Nothing to do.
     }
 
+    @Override
     public void removedService(ServiceReference reference, Object service) {
         ServiceRegistration unregister = null;
         lock.lock();

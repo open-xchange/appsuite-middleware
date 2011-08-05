@@ -72,6 +72,7 @@ public class OXTwitterImpl extends twitter4j.TwitterImpl implements OXTwitter {
         super(conf, auth);
     }
 
+    @Override
     public Status showStatusAuthenticated(final long id) throws TwitterException {
         return new StatusJSONImpl(get(conf.getRestBaseURL() + "statuses/show/" + id + ".json?include_entities="
             + conf.isIncludeEntitiesEnabled()), conf);

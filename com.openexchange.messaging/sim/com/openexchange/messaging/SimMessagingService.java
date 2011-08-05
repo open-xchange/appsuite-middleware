@@ -91,6 +91,7 @@ public class SimMessagingService implements MessagingService {
         accountTransportMap = new HashMap<Integer, MessagingAccountTransport>();
     }
 
+    @Override
     public Set<String> getSecretProperties() {
         return getPasswordElementNames(formDescription);
     }
@@ -112,22 +113,27 @@ public class SimMessagingService implements MessagingService {
         return retval;
     }
 
+    @Override
     public MessagingAccountManager getAccountManager() {
         return accManager;
     }
 
+    @Override
     public List<MessagingAction> getMessageActions() {
         return capabilities;
     }
 
+    @Override
     public String getDisplayName() {
         return displayName;
     }
 
+    @Override
     public DynamicFormDescription getFormDescription() {
         return formDescription;
     }
 
+    @Override
     public String getId() {
         return id;
     }
@@ -152,6 +158,7 @@ public class SimMessagingService implements MessagingService {
         this.accManager = accManager;
     }
 
+    @Override
     public MessagingAccountAccess getAccountAccess(final int accountId, final Session session) throws OXException {
         final MessagingAccountAccess accountAccess = accountAccessMap.get(Integer.valueOf(accountId));
         if (null == accountAccess) {
@@ -164,6 +171,7 @@ public class SimMessagingService implements MessagingService {
         accountAccessMap.put(Integer.valueOf(accountId), accountAccess);
     }
 
+    @Override
     public MessagingAccountTransport getAccountTransport(final int accountId, final Session session) throws OXException {
         final MessagingAccountTransport accountTransport = accountTransportMap.get(Integer.valueOf(accountId));
         if (null == accountTransport) {
@@ -176,6 +184,7 @@ public class SimMessagingService implements MessagingService {
         accountTransportMap.put(Integer.valueOf(accountId), accountTransport);
     }
 
+    @Override
     public int[] getStaticRootPermissions() {
         if (null == staticRootPermissions) {
             return null;

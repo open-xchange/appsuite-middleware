@@ -57,10 +57,12 @@ import com.openexchange.mailfilter.ajax.json.AbstractObject2JSON2Object.Mapper;
 
 final class IDMapper implements Mapper<Rule> {
 
+    @Override
     public String getAttrName() {
         return RuleFields.ID;
     }
 
+    @Override
     public Object getAttribute(final Rule obj) throws JSONException {
         final RuleComment ruleComment = obj.getRuleComment();
         if (null != ruleComment) {
@@ -69,10 +71,12 @@ final class IDMapper implements Mapper<Rule> {
         return null;
     }
 
+    @Override
     public boolean isNull(final Rule obj) {
         return ((null == obj.getRuleComment()) || (-1 == obj.getRuleComment().getUniqueid()));
     }
 
+    @Override
     public void setAttribute(final Rule obj, final Object attr) throws JSONException {
         final RuleComment ruleComment = obj.getRuleComment();
         if (null != ruleComment) {

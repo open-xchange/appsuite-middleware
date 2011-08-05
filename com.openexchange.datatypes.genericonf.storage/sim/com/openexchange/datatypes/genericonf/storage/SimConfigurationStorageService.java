@@ -68,18 +68,22 @@ public class SimConfigurationStorageService implements GenericConfigurationStora
 
     public Map<Integer, Map<String, Object>> entries = new HashMap<Integer, Map<String, Object>>();
 
+    @Override
     public void delete(Context ctx, int id) throws OXException {
         entries.remove(id);
     }
 
+    @Override
     public void delete(Connection con, Context ctx, int id) throws OXException {
         entries.remove(id);
     }
 
+    @Override
     public void delete(Connection writeConnection, Context ctx) throws OXException {
         entries.clear();
     }
 
+    @Override
     public void fill(Context ctx, int id, Map<String, Object> content) throws OXException {
         if (!entries.containsKey(id)) {
             return;
@@ -87,6 +91,7 @@ public class SimConfigurationStorageService implements GenericConfigurationStora
         content.putAll(entries.get(id));
     }
 
+    @Override
     public void fill(Connection con, Context ctx, int id, Map<String, Object> content) throws OXException {
         if (!entries.containsKey(id)) {
             return;
@@ -94,30 +99,36 @@ public class SimConfigurationStorageService implements GenericConfigurationStora
         content.putAll(entries.get(id));
     }
 
+    @Override
     public int save(Context ctx, Map<String, Object> content) throws OXException {
         int id = currentId++;
         entries.put(id, content);
         return id;
     }
 
+    @Override
     public int save(Connection con, Context ctx, Map<String, Object> content) throws OXException {
         int id = currentId++;
         entries.put(id, content);
         return id;
     }
 
+    @Override
     public void update(Context ctx, int id, Map<String, Object> content) throws OXException {
         entries.put(id, content);
     }
 
+    @Override
     public void update(Connection con, Context ctx, int id, Map<String, Object> content) throws OXException {
         entries.put(id, content);
     }
 
+    @Override
     public List<Integer> search(Context ctx, Map<String, Object> query) throws OXException {
         return search(query);
     }
 
+    @Override
     public List<Integer> search(Connection con, Context ctx, Map<String, Object> query) throws OXException {
         return search(query);
     }

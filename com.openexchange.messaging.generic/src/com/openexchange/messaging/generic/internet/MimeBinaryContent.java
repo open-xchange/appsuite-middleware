@@ -131,6 +131,7 @@ public class MimeBinaryContent implements BinaryContent {
         cachedContent = null;
     }
 
+    @Override
     public InputStream getData() throws OXException {
         return getBodyPartInputStream();
     }

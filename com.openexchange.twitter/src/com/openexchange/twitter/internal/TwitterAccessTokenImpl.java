@@ -71,10 +71,12 @@ public final class TwitterAccessTokenImpl implements TwitterAccessToken {
         this.accessToken = accessToken;
     }
 
+    @Override
     public String getTokenSecret() {
         return accessToken.getTokenSecret();
     }
 
+    @Override
     public String getToken() {
         return accessToken.getToken();
     }

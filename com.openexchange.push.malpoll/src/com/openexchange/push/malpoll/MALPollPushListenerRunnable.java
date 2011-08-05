@@ -66,6 +66,7 @@ public final class MALPollPushListenerRunnable implements Runnable {
         this.listener = listener;
     }
 
+    @Override
     public void run() {
         try {
             listener.checkNewMail();

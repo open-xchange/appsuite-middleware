@@ -82,14 +82,17 @@ public abstract class AbstractStep<O,I> implements Step<O,I>{
         super();
     }
 
+    @Override
     public boolean executedSuccessfully() {
         return executedSuccessfully;
     }
 
+    @Override
     public Exception getException() {
         return this.exception;
     }
 
+    @Override
     public void setWorkflow (final Workflow workflow){
         this.workflow = workflow;
     }
@@ -102,44 +105,54 @@ public abstract class AbstractStep<O,I> implements Step<O,I>{
         this.description = description;
     }
 
+    @Override
     public abstract void execute(WebClient webClient) throws OXException;
 
+    @Override
     public Class inputType() {
         return input.getClass();
     }
 
+    @Override
     public Class outputType() {
         return output.getClass();
     }
 
+    @Override
     public O getOutput() {
         return output;
     }
 
+    @Override
     public void setInput(final I input) {
         this.input = input;
 
     }
 
+    @Override
     public I getInput() {
         return input;
     }
 
+    @Override
     public boolean isSwitchUserAgent() {
         return switchUserAgent;
     }
 
 
+    @Override
     public void setSwitchUserAgent(boolean switchUserAgent) {
         this.switchUserAgent = switchUserAgent;
     }
 
     // Convenience Methods for Development / Debugging
+    @Override
     public boolean isDebuggingEnabled() {
         return debuggingEnabled;
     }
 
 
+    @Override
     public void setDebuggingEnabled(boolean debuggingEnabled) {
         this.debuggingEnabled = debuggingEnabled;
     }
@@ -173,6 +186,7 @@ public abstract class AbstractStep<O,I> implements Step<O,I>{
         }
     }
 
+    @Override
     public TypeVariable<?>[] runEmpty(){
         return this.getClass().getTypeParameters();
     }

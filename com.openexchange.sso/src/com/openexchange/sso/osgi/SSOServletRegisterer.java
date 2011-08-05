@@ -78,6 +78,7 @@ public final class SSOServletRegisterer implements ServiceTrackerCustomizer {
         this.context = context;
     }
 
+    @Override
     public Object addingService(final ServiceReference reference) {
         final HttpService service = (HttpService) context.getService(reference);
         try {
@@ -90,10 +91,12 @@ public final class SSOServletRegisterer implements ServiceTrackerCustomizer {
         return service;
     }
 
+    @Override
     public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do.
     }
 
+    @Override
     public void removedService(final ServiceReference reference, final Object service) {
         final HttpService httpService = (HttpService) service;
         httpService.unregister(SSOConstants.SERVLET_PATH);

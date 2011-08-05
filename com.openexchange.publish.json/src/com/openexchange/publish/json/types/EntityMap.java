@@ -67,22 +67,27 @@ public class EntityMap implements Map<String, EntityType>{
     private static final EntityType FOLDER = new FolderType();
 
 
+    @Override
     public void clear() {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public boolean containsKey(Object key) {
         return true;
     }
 
+    @Override
     public boolean containsValue(Object value) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public Set<java.util.Map.Entry<String, EntityType>> entrySet() {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public EntityType get(Object key) {
         boolean slash = key.toString().contains("/");
         if(slash) {
@@ -91,30 +96,37 @@ public class EntityMap implements Map<String, EntityType>{
         return FOLDER;
     }
 
+    @Override
     public boolean isEmpty() {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public Set<String> keySet() {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public EntityType put(String key, EntityType value) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public void putAll(Map<? extends String, ? extends EntityType> t) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public EntityType remove(Object key) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public int size() {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public Collection<EntityType> values() {
         throw new UnsupportedOperationException();
     }

@@ -83,11 +83,13 @@ public final class MaxCapacityLinkedHashMap<K, V> extends LinkedHashMap<K, V> im
         return size() > maximumCapacity;
     }
 
+    @Override
     public V putIfAbsent(final K key, final V value) {
         final V currentValue = get(key);
         return (currentValue == null) ? put(key, value) : currentValue;
     }
 
+    @Override
     public boolean remove(final Object key, final Object value) {
         if (value.equals(get(key))) {
             remove(key);
@@ -96,10 +98,12 @@ public final class MaxCapacityLinkedHashMap<K, V> extends LinkedHashMap<K, V> im
         return false;
     }
 
+    @Override
     public V replace(final K key, final V value) {
         return containsKey(key) ? put(key, value) : null;
     }
 
+    @Override
     public boolean replace(final K key, final V oldValue, final V newValue) {
         final V currentValue = get(key);
         if (oldValue.equals(currentValue)) {

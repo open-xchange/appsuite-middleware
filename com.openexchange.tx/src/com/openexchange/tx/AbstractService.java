@@ -62,6 +62,7 @@ public abstract class AbstractService<T> implements TransactionAware {
 
     private static final boolean rememberStacks = false;
 
+    @Override
     public void startTransaction() throws TransactionException {
         final long id = Thread.currentThread().getId();
 
@@ -77,10 +78,12 @@ public abstract class AbstractService<T> implements TransactionAware {
         }
     }
 
+    @Override
     public void commit() throws TransactionException{
         commit(getActiveTransaction());
     }
 
+    @Override
     public void rollback() throws TransactionException{
         rollback(getActiveTransaction());
     }
@@ -89,6 +92,7 @@ public abstract class AbstractService<T> implements TransactionAware {
         return txIds.get(Thread.currentThread().getId());
     }
 
+    @Override
     public void finish() throws TransactionException{
         txIds.remove(Thread.currentThread().getId());
         if(rememberStacks) {

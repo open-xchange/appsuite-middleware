@@ -112,6 +112,7 @@ public final class AllAction extends AbstractUserAction {
             AJAXServlet.PARAMETER_SESSION,
             AJAXServlet.PARAMETER_ACTION)));
 
+    @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         try {
             /*

@@ -64,7 +64,7 @@ import com.openexchange.voipnow.json.services.ServiceRegistry;
 
 /**
  * {@link Activator} - Activator for VoipNow component.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Activator extends AJAXModuleActivator {

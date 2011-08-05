@@ -140,6 +140,7 @@ public final class FullnameUIDPair implements Comparable<FullnameUIDPair> {
         return true;
     }
 
+    @Override
     public int compareTo(final FullnameUIDPair other) {
         if (fullname == null) {
             if (other.fullname != null) {

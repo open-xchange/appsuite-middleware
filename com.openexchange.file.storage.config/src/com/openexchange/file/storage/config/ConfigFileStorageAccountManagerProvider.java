@@ -73,15 +73,18 @@ public final class ConfigFileStorageAccountManagerProvider implements FileStorag
         parser = ConfigFileStorageAccountParser.getInstance();
     }
 
+    @Override
     public boolean supports(final FileStorageService service) {
         final Map<String, ConfigFileStorageAccount> accounts = parser.getAccountsFor(service.getId());
         return (null != accounts && !accounts.isEmpty());
     }
 
+    @Override
     public FileStorageAccountManager getAccountManagerFor(final FileStorageService service) throws OXException {
         return new ConfigFileStorageAccountManager(service);
     }
 
+    @Override
     public int getRanking() {
         return 10;
     }

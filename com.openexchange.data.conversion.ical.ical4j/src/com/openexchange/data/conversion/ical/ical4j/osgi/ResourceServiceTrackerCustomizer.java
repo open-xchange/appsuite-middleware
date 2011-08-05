@@ -79,6 +79,7 @@ public final class ResourceServiceTrackerCustomizer implements
     /**
      * {@inheritDoc}
      */
+    @Override
     public Object addingService(final ServiceReference reference) {
         final ResourceService resourceService = (ResourceService) context
             .getService(reference);
@@ -89,6 +90,7 @@ public final class ResourceServiceTrackerCustomizer implements
     /**
      * {@inheritDoc}
      */
+    @Override
     public void modifiedService(final ServiceReference reference,
         final Object service) {
         // Nothing to do.
@@ -97,6 +99,7 @@ public final class ResourceServiceTrackerCustomizer implements
     /**
      * {@inheritDoc}
      */
+    @Override
     public void removedService(final ServiceReference reference,
         final Object service) {
         resourceResolver.setResourceService(null);

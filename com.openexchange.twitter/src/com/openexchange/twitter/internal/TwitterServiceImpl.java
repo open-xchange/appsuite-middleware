@@ -97,22 +97,26 @@ public final class TwitterServiceImpl implements TwitterService {
         super();
     }
 
+    @Override
     public TwitterAccess getTwitterAccess(final String twitterId, final String password) {
         return new TwitterAccessImpl(new OXTwitterImpl(OXConfigurationBase.getInstance().generateConfiguration(), new BasicAuthorization(
             twitterId,
             password)));
     }
 
+    @Override
     public TwitterAccess getUnauthenticatedTwitterAccess() {
         return new TwitterAccessImpl(new OXTwitterImpl(
             OXConfigurationBase.getInstance().generateConfiguration(),
             NullAuthorization.getInstance()));
     }
 
+    @Override
     public Paging newPaging() {
         return new PagingImpl(new twitter4j.Paging());
     }
 
+    @Override
     public TwitterAccess getOAuthTwitterAccess(final String twitterToken, final String twitterTokenSecret) throws OXException {
         /*
          * Insert the appropriate consumer key and consumer secret here
@@ -127,6 +131,7 @@ public final class TwitterServiceImpl implements TwitterService {
         return new TwitterAccessImpl(new OXTwitterImpl(configuration, new OAuthAuthorization(configuration)));
     }
 
+    @Override
     public TwitterAccessToken getTwitterAccessToken(final String twitterId, final String password) throws OXException {
         try {
             /*

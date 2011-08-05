@@ -79,6 +79,7 @@ public class DiscovererActivator implements BundleActivator {
 
     private Whiteboard whiteboard;
 
+    @Override
     public void start(final BundleContext context) throws Exception {
         whiteboard = new Whiteboard(context);
 
@@ -112,6 +113,7 @@ public class DiscovererActivator implements BundleActivator {
         context.registerService(DeleteListener.class.getName(), listener, null);
     }
 
+    @Override
     public void stop(final BundleContext context) throws Exception {
         discoveryRegistration.unregister();
         discoveryRegistration = null;

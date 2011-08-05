@@ -103,26 +103,32 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
         autoLogin = Boolean.parseBoolean(tmp);
     }
 
+    @Override
     public long getSessionContainerTimeout() {
         return SHORT_CONTAINER_LIFE_TIME;
     }
 
+    @Override
     public long getNumberOfSessionContainers() {
         return sessionShortLifeTime / SHORT_CONTAINER_LIFE_TIME;
     }
 
+    @Override
     public int getMaxSessions() {
         return maxSession;
     }
 
+    @Override
     public int getMaxSessionsPerUser() {
         return maxSessionPerUser;
     }
 
+    @Override
     public long getLifeTime() {
         return sessionShortLifeTime;
     }
 
+    @Override
     public long getRandomTokenTimeout() {
         return randomTokenTimeout;
     }
@@ -131,10 +137,12 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
         return longLifeTime;
     }
 
+    @Override
     public long getNumberOfLongTermSessionContainers() {
         return (longLifeTime - sessionShortLifeTime) / LONG_CONTAINER_LIFE_TIME;
     }
 
+    @Override
     public boolean isAutoLogin() {
         return autoLogin;
     }
@@ -151,6 +159,7 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
         return value;
     }
 
+    @Override
     public long getLongTermSessionContainerTimeout() {
         return LONG_CONTAINER_LIFE_TIME;
     }

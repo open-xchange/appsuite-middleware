@@ -92,6 +92,7 @@ public class MapToDocumentMetadataHolderTransformer implements MapToObjectTransf
     }};
 
 
+    @Override
     public List<? extends Object> transform(List<Map<String, String>> list) throws OXException {
         List<DocumentMetadataHolder> documents = new ArrayList<DocumentMetadataHolder>(list.size());
 

@@ -72,6 +72,7 @@ public final class MailAccountPOP3Properties extends MailAccountProperties imple
         super(mailAccount);
     }
 
+    @Override
     public String getPOP3AuthEnc() {
         final String pop3AuthEncStr = properties.get("com.openexchange.pop3.pop3AuthEnc");
         if (null == pop3AuthEncStr) {
@@ -88,6 +89,7 @@ public final class MailAccountPOP3Properties extends MailAccountProperties imple
         return fallback;
     }
 
+    @Override
     public int getPOP3ConnectionIdleTime() {
         final String tmp = properties.get("com.openexchange.pop3.pop3ConnectionIdleTime");
         if (null == tmp) {
@@ -102,6 +104,7 @@ public final class MailAccountPOP3Properties extends MailAccountProperties imple
         }
     }
 
+    @Override
     public int getPOP3BlockSize() {
         final String tmp = properties.get("com.openexchange.pop3.pop3BlockSize");
         if (null == tmp) {
@@ -121,6 +124,7 @@ public final class MailAccountPOP3Properties extends MailAccountProperties imple
         }
     }
 
+    @Override
     public int getPOP3ConnectionTimeout() {
         final String tmp = properties.get("com.openexchange.pop3.pop3ConnectionTimeout");
         if (null == tmp) {
@@ -135,6 +139,7 @@ public final class MailAccountPOP3Properties extends MailAccountProperties imple
         }
     }
 
+    @Override
     public int getPOP3TemporaryDown() {
         final String tmp = properties.get("com.openexchange.pop3.pop3TemporaryDown");
         if (null == tmp) {
@@ -149,6 +154,7 @@ public final class MailAccountPOP3Properties extends MailAccountProperties imple
         }
     }
 
+    @Override
     public int getPOP3Timeout() {
         final String tmp = properties.get("com.openexchange.pop3.pop3Timeout");
         if (null == tmp) {

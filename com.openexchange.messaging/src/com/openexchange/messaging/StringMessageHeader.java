@@ -74,14 +74,17 @@ public class StringMessageHeader implements MessagingHeader {
         this.value = value;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public String getValue() {
         return value;
     }
 
+    @Override
     public HeaderType getHeaderType() {
         return HeaderType.PLAIN;
     }

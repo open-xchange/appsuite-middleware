@@ -81,10 +81,12 @@ public final class TwitterMultipartContent implements MultipartContent {
         parts = new MessagingBodyPart[2];
     }
 
+    @Override
     public int getCount() {
         return parts.length;
     }
 
+    @Override
     public MessagingBodyPart get(final int index) {
         return parts[index];
     }

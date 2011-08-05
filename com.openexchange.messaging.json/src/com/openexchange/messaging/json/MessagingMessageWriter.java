@@ -110,14 +110,17 @@ public class MessagingMessageWriter {
             this.value = value;
         }
 
+        @Override
         public K getKey() {
             return key;
         }
 
+        @Override
         public V getValue() {
             return value;
         }
 
+        @Override
         public V setValue(final V value) {
             final V oldValue = this.value;
             this.value = value;
@@ -131,18 +134,22 @@ public class MessagingMessageWriter {
      */
     private static final MessagingHeaderWriter MULTI_HEADER_WRITER = new MessagingHeaderWriter() {
 
+        @Override
         public int getRanking() {
             return 0;
         }
 
+        @Override
         public boolean handles(final Entry<String, Collection<MessagingHeader>> entry) {
             return entry.getValue().size() > 1;
         }
 
+        @Override
         public String writeKey(final Entry<String, Collection<MessagingHeader>> entry) throws JSONException, OXException {
             return entry.getKey();
         }
 
+        @Override
         public Object writeValue(final Entry<String, Collection<MessagingHeader>> entry, final ServerSession session) throws JSONException, OXException {
             final JSONArray array = new JSONArray();
             for (final MessagingHeader header : entry.getValue()) {
@@ -158,18 +165,22 @@ public class MessagingMessageWriter {
      */
     private static final MessagingHeaderWriter SINGLE_HEADER_WRITER = new MessagingHeaderWriter() {
 
+        @Override
         public int getRanking() {
             return 0;
         }
 
+        @Override
         public boolean handles(final Entry<String, Collection<MessagingHeader>> entry) {
             return entry.getValue().size() <= 1;
         }
 
+        @Override
         public String writeKey(final Entry<String, Collection<MessagingHeader>> entry) throws JSONException, OXException {
             return entry.getKey();
         }
 
+        @Override
         public Object writeValue(final Entry<String, Collection<MessagingHeader>> entry, final ServerSession session) throws JSONException, OXException {
             final Collection<MessagingHeader> collection = entry.getValue();
             if (null == collection || collection.isEmpty()) {
@@ -212,10 +223,12 @@ public class MessagingMessageWriter {
 
     protected static class StringContentRenderer implements MessagingContentWriter {
 
+        @Override
         public boolean handles(final MessagingPart part, final MessagingContent content) {
             return StringContent.class.isInstance(content);
         }
 
+        @Override
         public Object write(final MessagingPart part, final MessagingContent content, final ServerSession session, final DisplayMode mode) {
             final String data = ((StringContent) content).getData();
             if (null == session || null == mode) {
@@ -224,6 +237,7 @@ public class MessagingMessageWriter {
             return HTMLProcessing.formatTextForDisplay(data, session.getUserSettingMail(), mode);
         }
 
+        @Override
         public int getRanking() {
             return 0;
         }
@@ -232,10 +246,12 @@ public class MessagingMessageWriter {
 
     protected static class BinaryContentRenderer implements MessagingContentWriter {
 
+        @Override
         public boolean handles(final MessagingPart part, final MessagingContent content) {
             return BinaryContent.class.isInstance(content);
         }
 
+        @Override
         public Object write(final MessagingPart part, final MessagingContent content, final ServerSession session, final DisplayMode mode) throws OXException {
             final BinaryContent binContent = (BinaryContent) content;
             final InputStream is = new BufferedInputStream(new Base64InputStream(binContent.getData(), true, -1, null));
@@ -263,6 +279,7 @@ public class MessagingMessageWriter {
 
         }
 
+        @Override
         public int getRanking() {
             return 0;
         }
@@ -278,10 +295,12 @@ public class MessagingMessageWriter {
             this.writer = writer;
         }
 
+        @Override
         public boolean handles(final MessagingPart part, final MessagingContent content) {
             return MultipartContent.class.isInstance(content);
         }
 
+        @Override
         public Object write(final MessagingPart part, final MessagingContent content, final ServerSession session, final DisplayMode mode) throws OXException, JSONException {
             final MultipartContent multipart = (MultipartContent) content;
             final JSONArray array = new JSONArray();
@@ -300,6 +319,7 @@ public class MessagingMessageWriter {
             return array;
         }
 
+        @Override
         public int getRanking() {
             return 0;
         }
@@ -559,12 +579,14 @@ public class MessagingMessageWriter {
         final EnumMap<MessagingField, JSONFieldHandler> map = new EnumMap<MessagingField, JSONFieldHandler>(MessagingField.class);
         map.put(MessagingField.HEADERS, new JSONFieldHandler() {
 
+            @Override
             public Object handle(final Object value, final MessagingMessage message, final String folderPrefix, final ServerSession session, final DisplayMode mode, final MessagingMessageWriter messageWriter) throws OXException, JSONException {
                 return messageWriter.writeHeaders(message.getHeaders(), session);
             }
         });
         map.put(MessagingField.BODY, new JSONFieldHandler() {
 
+            @Override
             public Object handle(final Object value, final MessagingMessage message, final String folderPrefix, final ServerSession session, final DisplayMode mode, final MessagingMessageWriter messageWriter) throws OXException, JSONException {
                 final MessagingContent content = (MessagingContent) value;
                 final MessagingContentWriter writer = messageWriter.optContentWriter(message, content);
@@ -576,6 +598,7 @@ public class MessagingMessageWriter {
         });
         map.put(MessagingField.FOLDER_ID, new JSONFieldHandler() {
 
+            @Override
             public Object handle(final Object value, final MessagingMessage message, final String folderPrefix, final ServerSession session, final DisplayMode mode, final MessagingMessageWriter messageWriter) throws OXException, JSONException {
                 return new StringBuilder(folderPrefix).append('/').append(value).toString();
             }
@@ -585,6 +608,7 @@ public class MessagingMessageWriter {
          */
         final JSONFieldHandler dateHandler = new JSONFieldHandler() {
 
+            @Override
             public Object handle(final Object value, final MessagingMessage message, final String folderPrefix, final ServerSession session, final DisplayMode mode, final MessagingMessageWriter messageWriter) throws OXException, JSONException {
                 final long date = ((Long) value).longValue();
                 if (date < 0) {
@@ -600,6 +624,7 @@ public class MessagingMessageWriter {
          */
         final JSONFieldHandler unsignedNumberHandler = new JSONFieldHandler() {
 
+            @Override
             public Object handle(final Object value, final MessagingMessage message, final String folderPrefix, final ServerSession session, final DisplayMode mode, final MessagingMessageWriter messageWriter) throws OXException, JSONException {
                 return ((Number) value).intValue() < 0 ? null : value;
             }

@@ -54,35 +54,42 @@ import java.util.Arrays;
 
 /**
  * {@link EAVMultiplePrettyPrint}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class EAVMultiplePrettyPrint implements EAVTypeSwitcher {
 
+    @Override
     public Object binary(Object... args) {
         return "<binary>, <binary>, ...";
     }
 
+    @Override
     public Object bool(Object... args) {
         return list(args[0], "bool");
     }
 
+    @Override
     public Object date(Object... args) {
         return list(args[0], "date");
     }
 
+    @Override
     public Object number(Object... args) {
         return list(args[0], "number");
     }
 
+    @Override
     public Object object(Object... args) {
         return null;
     }
 
+    @Override
     public Object string(Object... args) {
         return list(args[0], "string");
     }
 
+    @Override
     public Object time(Object... args) {
         return list(args[0], "time");
     }
@@ -91,6 +98,7 @@ public class EAVMultiplePrettyPrint implements EAVTypeSwitcher {
         return new ArrayList<Object>(Arrays.asList((Object[]) object)).toString() + " < " + type + " multiple >";
     }
 
+    @Override
     public Object nullValue(Object... args) {
         return "NULL";
     }

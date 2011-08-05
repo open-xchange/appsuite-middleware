@@ -301,42 +301,52 @@ public class EasyLogin extends HttpServlet {
 
                 private final String hash = HashCalculator.getHash(req, client);
 
+                @Override
                 public String getUserAgent() {
                     return userAgent;
                 }
 
+                @Override
                 public String getPassword() {
                     return password;
                 }
 
+                @Override
                 public String getLogin() {
                     return login;
                 }
 
+                @Override
                 public Interface getInterface() {
                     return Interface.HTTP_JSON;
                 }
 
+                @Override
                 public String getClientIP() {
                     return clientIP;
                 }
 
+                @Override
                 public String getAuthId() {
                     return authID;
                 }
 
+                @Override
                 public String getClient() {
                     return client;
                 }
 
+                @Override
                 public String getVersion() {
                     return null;
                 }
 
+                @Override
                 public String getHash() {
                     return hash;
                 }
 
+                @Override
                 public Map<String, List<String>> getHeaders() {
                     return headers;
                 }

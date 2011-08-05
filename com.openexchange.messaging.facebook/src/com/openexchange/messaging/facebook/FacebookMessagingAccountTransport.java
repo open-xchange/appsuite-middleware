@@ -92,6 +92,7 @@ public final class FacebookMessagingAccountTransport extends FacebookMessagingRe
         super(messagingAccount, session);
     }
 
+    @Override
     public void transport(final MessagingMessage message, final Collection<MessagingAddressHeader> recipients) throws OXException {
         transport(message, recipients, facebookOAuthInfo, facebookOAuthInfo.getFacebookUserId());
     }

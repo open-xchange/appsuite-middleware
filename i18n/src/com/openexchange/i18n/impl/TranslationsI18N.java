@@ -64,6 +64,7 @@ public class TranslationsI18N implements I18nService {
         this.translations = translations;
     }
 
+    @Override
     public String getLocalized(final String key) {
         final String translation = translations.translate(key);
         if (translation == null) {
@@ -72,10 +73,12 @@ public class TranslationsI18N implements I18nService {
         return translation;
     }
 
+    @Override
     public boolean hasKey(final String key) {
         return translations.getKnownStrings().contains(key);
     }
 
+    @Override
     public Locale getLocale() {
         return translations.getLocale();
     }

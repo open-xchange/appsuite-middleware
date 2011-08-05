@@ -63,10 +63,12 @@ public interface OAuthToken {
      */
     public static final OAuthToken EMPTY_TOKEN = new OAuthToken() {
 
+        @Override
         public String getToken() {
             return "";
         }
 
+        @Override
         public String getSecret() {
             return "";
         }

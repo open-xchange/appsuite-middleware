@@ -101,6 +101,7 @@ public final class MailMessagingFolderAccess implements MessagingFolderAccess {
         this.caps = caps;
     }
 
+    @Override
     public void clearFolder(final String folderId) throws OXException {
         try {
             folderStorage.clearFolder(folderId);
@@ -109,6 +110,7 @@ public final class MailMessagingFolderAccess implements MessagingFolderAccess {
         }
     }
 
+    @Override
     public void clearFolder(final String folderId, final boolean hardDelete) throws OXException {
         try {
             folderStorage.clearFolder(folderId, hardDelete);
@@ -117,6 +119,7 @@ public final class MailMessagingFolderAccess implements MessagingFolderAccess {
         }
     }
 
+    @Override
     public String createFolder(final MessagingFolder toCreate) throws OXException {
         try {
             final MailFolderDescription mfd = new MailFolderDescription();
@@ -137,6 +140,7 @@ public final class MailMessagingFolderAccess implements MessagingFolderAccess {
         }
     }
 
+    @Override
     public String deleteFolder(final String folderId) throws OXException {
         try {
             return folderStorage.deleteFolder(folderId);
@@ -145,6 +149,7 @@ public final class MailMessagingFolderAccess implements MessagingFolderAccess {
         }
     }
 
+    @Override
     public String deleteFolder(final String folderId, final boolean hardDelete) throws OXException {
         try {
             return folderStorage.deleteFolder(folderId, hardDelete);
@@ -153,6 +158,7 @@ public final class MailMessagingFolderAccess implements MessagingFolderAccess {
         }
     }
 
+    @Override
     public boolean exists(final String folderId) throws OXException {
         try {
             return folderStorage.exists(folderId);
@@ -161,6 +167,7 @@ public final class MailMessagingFolderAccess implements MessagingFolderAccess {
         }
     }
 
+    @Override
     public String getConfirmedHamFolder() throws OXException {
         try {
             return folderStorage.getConfirmedHamFolder();
@@ -169,6 +176,7 @@ public final class MailMessagingFolderAccess implements MessagingFolderAccess {
         }
     }
 
+    @Override
     public String getConfirmedSpamFolder() throws OXException {
         try {
             return folderStorage.getConfirmedSpamFolder();
@@ -177,6 +185,7 @@ public final class MailMessagingFolderAccess implements MessagingFolderAccess {
         }
     }
 
+    @Override
     public String getDraftsFolder() throws OXException {
         try {
             return folderStorage.getDraftsFolder();
@@ -185,6 +194,7 @@ public final class MailMessagingFolderAccess implements MessagingFolderAccess {
         }
     }
 
+    @Override
     public MessagingFolder getFolder(final String folderId) throws OXException {
         try {
             final MailFolder folder = folderStorage.getFolder(folderId);
@@ -293,6 +303,7 @@ public final class MailMessagingFolderAccess implements MessagingFolderAccess {
         }
     }
 
+    @Override
     public Quota getMessageQuota(final String folderId) throws OXException {
         try {
             final com.openexchange.mail.Quota messageQuota = folderStorage.getMessageQuota(folderId);
@@ -319,6 +330,7 @@ public final class MailMessagingFolderAccess implements MessagingFolderAccess {
         }
     }
 
+    @Override
     public MessagingFolder[] getPath2DefaultFolder(final String folderId) throws OXException {
         try {
             final MailFolder[] mailFolders = folderStorage.getPath2DefaultFolder(folderId);
@@ -332,6 +344,7 @@ public final class MailMessagingFolderAccess implements MessagingFolderAccess {
         }
     }
 
+    @Override
     public Quota[] getQuotas(final String folder, final Type[] types) throws OXException {
         try {
             final com.openexchange.mail.Quota.Type[] oTypes = new com.openexchange.mail.Quota.Type[types.length];
@@ -361,6 +374,7 @@ public final class MailMessagingFolderAccess implements MessagingFolderAccess {
         }
     }
 
+    @Override
     public MessagingFolder getRootFolder() throws OXException {
         try {
             return convert2MessagingFolder(folderStorage.getRootFolder(), caps);
@@ -369,6 +383,7 @@ public final class MailMessagingFolderAccess implements MessagingFolderAccess {
         }
     }
 
+    @Override
     public String getSentFolder() throws OXException {
         try {
             return folderStorage.getSentFolder();
@@ -377,6 +392,7 @@ public final class MailMessagingFolderAccess implements MessagingFolderAccess {
         }
     }
 
+    @Override
     public String getSpamFolder() throws OXException {
         try {
             return folderStorage.getSpamFolder();
@@ -385,6 +401,7 @@ public final class MailMessagingFolderAccess implements MessagingFolderAccess {
         }
     }
 
+    @Override
     public Quota getStorageQuota(final String folderId) throws OXException {
         try {
             final com.openexchange.mail.Quota messageQuota = folderStorage.getStorageQuota(folderId);
@@ -394,6 +411,7 @@ public final class MailMessagingFolderAccess implements MessagingFolderAccess {
         }
     }
 
+    @Override
     public MessagingFolder[] getSubfolders(final String parentIdentifier, final boolean all) throws OXException {
         try {
             final MailFolder[] mailFolders = folderStorage.getSubfolders(parentIdentifier, all);
@@ -407,6 +425,7 @@ public final class MailMessagingFolderAccess implements MessagingFolderAccess {
         }
     }
 
+    @Override
     public String getTrashFolder() throws OXException {
         try {
             return folderStorage.getTrashFolder();
@@ -415,6 +434,7 @@ public final class MailMessagingFolderAccess implements MessagingFolderAccess {
         }
     }
 
+    @Override
     public String moveFolder(final String folderId, final String newParentId) throws OXException {
         try {
             return folderStorage.moveFolder(folderId, newParentId);
@@ -423,6 +443,7 @@ public final class MailMessagingFolderAccess implements MessagingFolderAccess {
         }
     }
 
+    @Override
     public String renameFolder(final String folderId, final String newName) throws OXException {
         try {
             return folderStorage.renameFolder(folderId, newName);
@@ -431,6 +452,7 @@ public final class MailMessagingFolderAccess implements MessagingFolderAccess {
         }
     }
 
+    @Override
     public String updateFolder(final String identifier, final MessagingFolder toUpdate) throws OXException {
         try {
             final MailFolderDescription mfd = new MailFolderDescription();

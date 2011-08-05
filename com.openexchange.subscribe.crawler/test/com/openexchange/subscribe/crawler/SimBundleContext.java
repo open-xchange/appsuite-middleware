@@ -79,6 +79,7 @@ public class SimBundleContext implements BundleContext {
     /* (non-Javadoc)
      * @see org.osgi.framework.BundleContext#addBundleListener(org.osgi.framework.BundleListener)
      */
+    @Override
     public void addBundleListener(final BundleListener arg0) {
         // TODO Auto-generated method stub
 
@@ -87,6 +88,7 @@ public class SimBundleContext implements BundleContext {
     /* (non-Javadoc)
      * @see org.osgi.framework.BundleContext#addFrameworkListener(org.osgi.framework.FrameworkListener)
      */
+    @Override
     public void addFrameworkListener(final FrameworkListener arg0) {
         // TODO Auto-generated method stub
 
@@ -95,6 +97,7 @@ public class SimBundleContext implements BundleContext {
     /* (non-Javadoc)
      * @see org.osgi.framework.BundleContext#addServiceListener(org.osgi.framework.ServiceListener)
      */
+    @Override
     public void addServiceListener(final ServiceListener arg0) {
         // TODO Auto-generated method stub
 
@@ -103,6 +106,7 @@ public class SimBundleContext implements BundleContext {
     /* (non-Javadoc)
      * @see org.osgi.framework.BundleContext#addServiceListener(org.osgi.framework.ServiceListener, java.lang.String)
      */
+    @Override
     public void addServiceListener(final ServiceListener arg0, final String arg1) throws InvalidSyntaxException {
         // TODO Auto-generated method stub
 
@@ -111,6 +115,7 @@ public class SimBundleContext implements BundleContext {
     /* (non-Javadoc)
      * @see org.osgi.framework.BundleContext#createFilter(java.lang.String)
      */
+    @Override
     public Filter createFilter(final String arg0) throws InvalidSyntaxException {
         // TODO Auto-generated method stub
         return null;
@@ -119,6 +124,7 @@ public class SimBundleContext implements BundleContext {
     /* (non-Javadoc)
      * @see org.osgi.framework.BundleContext#getAllServiceReferences(java.lang.String, java.lang.String)
      */
+    @Override
     public ServiceReference[] getAllServiceReferences(final String arg0, final String arg1) throws InvalidSyntaxException {
         // TODO Auto-generated method stub
         return null;
@@ -127,6 +133,7 @@ public class SimBundleContext implements BundleContext {
     /* (non-Javadoc)
      * @see org.osgi.framework.BundleContext#getBundle()
      */
+    @Override
     public Bundle getBundle() {
         // TODO Auto-generated method stub
         return null;
@@ -135,6 +142,7 @@ public class SimBundleContext implements BundleContext {
     /* (non-Javadoc)
      * @see org.osgi.framework.BundleContext#getBundle(long)
      */
+    @Override
     public Bundle getBundle(final long arg0) {
         // TODO Auto-generated method stub
         return null;
@@ -143,6 +151,7 @@ public class SimBundleContext implements BundleContext {
     /* (non-Javadoc)
      * @see org.osgi.framework.BundleContext#getBundles()
      */
+    @Override
     public Bundle[] getBundles() {
         // TODO Auto-generated method stub
         return null;
@@ -151,6 +160,7 @@ public class SimBundleContext implements BundleContext {
     /* (non-Javadoc)
      * @see org.osgi.framework.BundleContext#getDataFile(java.lang.String)
      */
+    @Override
     public File getDataFile(final String arg0) {
         // TODO Auto-generated method stub
         return null;
@@ -159,6 +169,7 @@ public class SimBundleContext implements BundleContext {
     /* (non-Javadoc)
      * @see org.osgi.framework.BundleContext#getProperty(java.lang.String)
      */
+    @Override
     public String getProperty(final String arg0) {
         // TODO Auto-generated method stub
         return null;
@@ -167,6 +178,7 @@ public class SimBundleContext implements BundleContext {
     /* (non-Javadoc)
      * @see org.osgi.framework.BundleContext#getServiceReference(java.lang.String)
      */
+    @Override
     public ServiceReference getServiceReference(final String arg0) {
         // TODO Auto-generated method stub
         return null;
@@ -175,6 +187,7 @@ public class SimBundleContext implements BundleContext {
     /* (non-Javadoc)
      * @see org.osgi.framework.BundleContext#getServiceReferences(java.lang.String, java.lang.String)
      */
+    @Override
     public ServiceReference[] getServiceReferences(final String arg0, final String arg1) throws InvalidSyntaxException {
         // TODO Auto-generated method stub
         return null;
@@ -183,6 +196,7 @@ public class SimBundleContext implements BundleContext {
     /* (non-Javadoc)
      * @see org.osgi.framework.BundleContext#installBundle(java.lang.String)
      */
+    @Override
     public Bundle installBundle(final String arg0) throws BundleException {
         // TODO Auto-generated method stub
         return null;
@@ -191,6 +205,7 @@ public class SimBundleContext implements BundleContext {
     /* (non-Javadoc)
      * @see org.osgi.framework.BundleContext#installBundle(java.lang.String, java.io.InputStream)
      */
+    @Override
     public Bundle installBundle(final String arg0, final InputStream arg1) throws BundleException {
         // TODO Auto-generated method stub
         return null;
@@ -199,6 +214,7 @@ public class SimBundleContext implements BundleContext {
     /* (non-Javadoc)
      * @see org.osgi.framework.BundleContext#removeBundleListener(org.osgi.framework.BundleListener)
      */
+    @Override
     public void removeBundleListener(final BundleListener arg0) {
         // TODO Auto-generated method stub
 
@@ -207,6 +223,7 @@ public class SimBundleContext implements BundleContext {
     /* (non-Javadoc)
      * @see org.osgi.framework.BundleContext#removeFrameworkListener(org.osgi.framework.FrameworkListener)
      */
+    @Override
     public void removeFrameworkListener(final FrameworkListener arg0) {
         // TODO Auto-generated method stub
 
@@ -215,46 +232,55 @@ public class SimBundleContext implements BundleContext {
     /* (non-Javadoc)
      * @see org.osgi.framework.BundleContext#removeServiceListener(org.osgi.framework.ServiceListener)
      */
+    @Override
     public void removeServiceListener(final ServiceListener arg0) {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public ServiceRegistration<?> registerService(final String[] clazzes, final Object service, final Dictionary<String, ?> properties) {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public ServiceRegistration<?> registerService(final String clazz, final Object service, final Dictionary<String, ?> properties) {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public <S> ServiceRegistration<S> registerService(final Class<S> clazz, final S service, final Dictionary<String, ?> properties) {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public <S> ServiceReference<S> getServiceReference(final Class<S> clazz) {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public <S> Collection<ServiceReference<S>> getServiceReferences(final Class<S> clazz, final String filter) throws InvalidSyntaxException {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public <S> S getService(final ServiceReference<S> reference) {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public boolean ungetService(final ServiceReference<?> reference) {
         // TODO Auto-generated method stub
         return false;
     }
 
+    @Override
     public Bundle getBundle(final String location) {
         // TODO Auto-generated method stub
         return null;

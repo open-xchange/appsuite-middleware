@@ -61,54 +61,65 @@ public class SimConfigurationService implements ConfigurationService {
 
     public Map<String, String> stringProperties = new HashMap<String, String>();
 
+    @Override
     public boolean getBoolProperty(final String name, final boolean defaultValue) {
         // TODO Auto-generated method stub
         return false;
     }
 
+    @Override
     public Properties getFile(final String filename) {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public int getIntProperty(final String name, final int defaultValue) {
         // TODO Auto-generated method stub
         return 0;
     }
 
+    @Override
     public Properties getPropertiesInFolder(final String folderName) {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public String getProperty(final String name) {
         return stringProperties.get(name);
     }
 
+    @Override
     public String getProperty(final String name, final String defaultValue) {
         return stringProperties.containsKey(name) ? stringProperties.get(name) : defaultValue;
     }
 
+    @Override
     public String getProperty(final String name, final PropertyListener listener) {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public String getProperty(final String name, final String defaultValue, final PropertyListener listener) {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public Iterator<String> propertyNames() {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public void removePropertyListener(final String name, final PropertyListener listener) {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public int size() {
         // TODO Auto-generated method stub
         return 0;
@@ -117,6 +128,7 @@ public class SimConfigurationService implements ConfigurationService {
     /* (non-Javadoc)
      * @see com.openexchange.config.ConfigurationService#getText(java.lang.String)
      */
+    @Override
     public String getText(final String filename) {
         // TODO Auto-generated method stub
         return null;
@@ -125,6 +137,7 @@ public class SimConfigurationService implements ConfigurationService {
     /* (non-Javadoc)
      * @see com.openexchange.config.ConfigurationService#getYaml(java.lang.String)
      */
+    @Override
     public Object getYaml(String filename) {
         // TODO Auto-generated method stub
         return null;
@@ -133,6 +146,7 @@ public class SimConfigurationService implements ConfigurationService {
     /* (non-Javadoc)
      * @see com.openexchange.config.ConfigurationService#getYamlInDirectory(java.lang.String)
      */
+    @Override
     public Map<String, Object> getYamlInFolder(String dirName) {
         // TODO Auto-generated method stub
         return null;

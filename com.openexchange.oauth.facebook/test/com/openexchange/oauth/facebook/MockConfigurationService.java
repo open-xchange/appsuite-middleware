@@ -66,6 +66,7 @@ public class MockConfigurationService implements ConfigurationService {
     /* (non-Javadoc)
      * @see com.openexchange.config.ConfigurationService#getBoolProperty(java.lang.String, boolean)
      */
+    @Override
     public boolean getBoolProperty(String name, boolean defaultValue) {
         // TODO Auto-generated method stub
         return false;
@@ -74,6 +75,7 @@ public class MockConfigurationService implements ConfigurationService {
     /* (non-Javadoc)
      * @see com.openexchange.config.ConfigurationService#getFile(java.lang.String)
      */
+    @Override
     public Properties getFile(String filename) {
         // TODO Auto-generated method stub
         return null;
@@ -82,6 +84,7 @@ public class MockConfigurationService implements ConfigurationService {
     /* (non-Javadoc)
      * @see com.openexchange.config.ConfigurationService#getIntProperty(java.lang.String, int)
      */
+    @Override
     public int getIntProperty(String name, int defaultValue) {
         // TODO Auto-generated method stub
         return 0;
@@ -90,6 +93,7 @@ public class MockConfigurationService implements ConfigurationService {
     /* (non-Javadoc)
      * @see com.openexchange.config.ConfigurationService#getPropertiesInFolder(java.lang.String)
      */
+    @Override
     public Properties getPropertiesInFolder(String folderName) {
         // TODO Auto-generated method stub
         return null;
@@ -98,6 +102,7 @@ public class MockConfigurationService implements ConfigurationService {
     /* (non-Javadoc)
      * @see com.openexchange.config.ConfigurationService#getProperty(java.lang.String)
      */
+    @Override
     public String getProperty(String name) {
         // TODO Auto-generated method stub
         return null;
@@ -106,6 +111,7 @@ public class MockConfigurationService implements ConfigurationService {
     /* (non-Javadoc)
      * @see com.openexchange.config.ConfigurationService#getProperty(java.lang.String, java.lang.String)
      */
+    @Override
     public String getProperty(String name, String defaultValue) {
         // TODO Auto-generated method stub
         return null;
@@ -114,6 +120,7 @@ public class MockConfigurationService implements ConfigurationService {
     /* (non-Javadoc)
      * @see com.openexchange.config.ConfigurationService#getProperty(java.lang.String, com.openexchange.config.PropertyListener)
      */
+    @Override
     public String getProperty(String name, PropertyListener listener) {
         // TODO Auto-generated method stub
         return null;
@@ -122,6 +129,7 @@ public class MockConfigurationService implements ConfigurationService {
     /* (non-Javadoc)
      * @see com.openexchange.config.ConfigurationService#getProperty(java.lang.String, java.lang.String, com.openexchange.config.PropertyListener)
      */
+    @Override
     public String getProperty(String name, String defaultValue, PropertyListener listener) {
         // TODO Auto-generated method stub
         return null;
@@ -130,6 +138,7 @@ public class MockConfigurationService implements ConfigurationService {
     /* (non-Javadoc)
      * @see com.openexchange.config.ConfigurationService#getText(java.lang.String)
      */
+    @Override
     public String getText(String filename) {
         // TODO Auto-generated method stub
         return null;
@@ -138,6 +147,7 @@ public class MockConfigurationService implements ConfigurationService {
     /* (non-Javadoc)
      * @see com.openexchange.config.ConfigurationService#getYaml(java.lang.String)
      */
+    @Override
     public Object getYaml(String filename) {
         // TODO Auto-generated method stub
         return null;
@@ -146,6 +156,7 @@ public class MockConfigurationService implements ConfigurationService {
     /* (non-Javadoc)
      * @see com.openexchange.config.ConfigurationService#getYamlInFolder(java.lang.String)
      */
+    @Override
     public Map<String, Object> getYamlInFolder(String dirName) {
         // TODO Auto-generated method stub
         return null;
@@ -154,6 +165,7 @@ public class MockConfigurationService implements ConfigurationService {
     /* (non-Javadoc)
      * @see com.openexchange.config.ConfigurationService#propertyNames()
      */
+    @Override
     public Iterator<String> propertyNames() {
         // TODO Auto-generated method stub
         return null;
@@ -162,6 +174,7 @@ public class MockConfigurationService implements ConfigurationService {
     /* (non-Javadoc)
      * @see com.openexchange.config.ConfigurationService#removePropertyListener(java.lang.String, com.openexchange.config.PropertyListener)
      */
+    @Override
     public void removePropertyListener(String name, PropertyListener listener) {
         // TODO Auto-generated method stub
 
@@ -170,6 +183,7 @@ public class MockConfigurationService implements ConfigurationService {
     /* (non-Javadoc)
      * @see com.openexchange.config.ConfigurationService#size()
      */
+    @Override
     public int size() {
         // TODO Auto-generated method stub
         return 0;

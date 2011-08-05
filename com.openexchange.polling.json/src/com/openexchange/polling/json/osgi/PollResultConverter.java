@@ -18,19 +18,23 @@ import com.openexchange.tools.session.ServerSession;
 
 public class PollResultConverter implements ResultConverter {
 
-	public String getInputFormat() {
+	@Override
+    public String getInputFormat() {
 		return "poll";
 	}
 
-	public String getOutputFormat() {
+	@Override
+    public String getOutputFormat() {
 		return "json";
 	}
 
-	public Quality getQuality() {
+	@Override
+    public Quality getQuality() {
 		return Quality.GOOD;
 	}
 
-	public void convert(AJAXRequestData request, AJAXRequestResult result,
+	@Override
+    public void convert(AJAXRequestData request, AJAXRequestResult result,
 			ServerSession session, Converter converter) throws OXException {
 		Poll poll = (Poll) result.getResultObject();
 

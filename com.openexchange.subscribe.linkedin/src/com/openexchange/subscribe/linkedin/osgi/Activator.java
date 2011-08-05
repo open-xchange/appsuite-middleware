@@ -81,6 +81,7 @@ public class Activator implements BundleActivator {
 
     private ContextService contextService;
 
+    @Override
     public void start(BundleContext context) throws Exception {
         bundleContext = context;
         services = new ArrayList<ServiceRegistration>();
@@ -98,6 +99,7 @@ public class Activator implements BundleActivator {
         }
     }
 
+    @Override
     public void stop(BundleContext context) throws Exception {
         while (!trackers.isEmpty()) {
             trackers.pop().close();

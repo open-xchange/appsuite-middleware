@@ -65,24 +65,26 @@ public class EAVPath {
     private List<String> components;
 
     public EAVPath(String...components) {
-        this.components = new ArrayList<String>(Arrays.asList(components));   
+        this.components = new ArrayList<String>(Arrays.asList(components));
     }
-    
+
     public EAVPath(List<String> components) {
         this.components = components;
     }
-    
+
     public EAVPath(EAVPath original) {
         this.components = new ArrayList<String>(original.components);
     }
 
+    @Override
     public boolean equals(Object other) {
         if(EAVPath.class.isInstance(other)) {
             return ((EAVPath)other).components.equals(components);
         }
         return false;
     }
-    
+
+    @Override
     public int hashCode() {
         return components.hashCode();
     }
@@ -94,13 +96,14 @@ public class EAVPath {
         }
         return p;
     }
-    
+
     public EAVPath append(String name) {
         ArrayList<String> list = new ArrayList<String>(components);
         list.add(name);
         return new EAVPath(list);
     }
 
+    @Override
     public String toString() {
         if (components.size() == 0) {
             return "";
@@ -122,7 +125,7 @@ public class EAVPath {
         }
         return components.get(0);
     }
-    
+
     public String last() {
         if(components.isEmpty()) {
             return null;
@@ -150,10 +153,10 @@ public class EAVPath {
         for (String string : names) {
             list.add(this.append(string));
         }
-        
+
         return list;
     }
-    
+
     public int length() {
         return components.size();
     }

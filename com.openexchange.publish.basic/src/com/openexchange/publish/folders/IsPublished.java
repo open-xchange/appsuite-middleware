@@ -75,14 +75,17 @@ public class IsPublished implements AdditionalFolderField {
         this.discovery = discovery;
     }
 
+    @Override
     public int getColumnID() {
         return 3010;
     }
 
+    @Override
     public String getColumnName() {
         return "com.openexchange.publish.publicationFlag";
     }
 
+    @Override
     public Object getValue(final FolderObject folder, final ServerSession session) {
         if (!session.getUserConfiguration().isPublication()) {
             return Boolean.FALSE;
@@ -106,6 +109,7 @@ public class IsPublished implements AdditionalFolderField {
         return Boolean.FALSE;
     }
 
+    @Override
     public Object renderJSON(final Object value) {
         return value;
     }

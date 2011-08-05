@@ -85,6 +85,7 @@ import com.openexchange.groupware.tasks.Task;
  */
 public class ICal4JEmitter implements ICalEmitter {
 
+    @Override
     public String writeAppointments(final List<Appointment> appointmentObjects, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) {
         final Calendar calendar = new Calendar();
         initCalendar(calendar);
@@ -97,6 +98,7 @@ public class ICal4JEmitter implements ICalEmitter {
         return calendar.toString();
     }
 
+    @Override
     public String writeAppointmentRequest(final Appointment appointment, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
         final Calendar calendar = new Calendar();
         initCalendar(calendar);
@@ -109,6 +111,7 @@ public class ICal4JEmitter implements ICalEmitter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String writeTasks(final List<Task> tasks,
         final List<ConversionError> errors,
         final List<ConversionWarning> warnings, final Context ctx) {
@@ -176,12 +179,14 @@ public class ICal4JEmitter implements ICalEmitter {
         return vtodo;
     }
 
+    @Override
     public ICalSession createSession() {
         final ICal4jSession retval = new ICal4jSession();
         initCalendar(retval.getCalendar());
         return retval;
     }
 
+    @Override
     public ICalItem writeAppointment(final ICalSession session, final Appointment appointment, final Context ctx, final ITipContainer iTip, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
         final Calendar calendar = getCalendar(session);
 
@@ -222,6 +227,7 @@ public class ICal4JEmitter implements ICalEmitter {
         }
     }
 
+    @Override
     public ICalItem writeAppointment(final ICalSession session,
         final Appointment appointment, final Context ctx,
         final List<ConversionError> errors, final List<ConversionWarning> warnings)
@@ -231,6 +237,7 @@ public class ICal4JEmitter implements ICalEmitter {
     }
 
 
+    @Override
     public void writeSession(final ICalSession session, final OutputStream stream) throws ConversionError {
         final Calendar calendar = getCalendar(session);
         final CalendarOutputter outputter = new CalendarOutputter(false);
@@ -243,6 +250,7 @@ public class ICal4JEmitter implements ICalEmitter {
         }
     }
 
+    @Override
     public ICalItem writeTask(final ICalSession session, final Task task,
         final Context context, final List<ConversionError> errors,
         final List<ConversionWarning> warnings) throws ConversionError {

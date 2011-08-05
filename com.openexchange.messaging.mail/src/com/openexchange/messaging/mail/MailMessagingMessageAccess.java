@@ -111,6 +111,7 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
         this.session = session;
     }
 
+    @Override
     public void appendMessages(final String folder, final MessagingMessage[] messages) throws OXException {
         try {
             final MailMessage[] mails = new MailMessage[messages.length];
@@ -128,6 +129,7 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
         }
     }
 
+    @Override
     public MessagingPart getAttachment(final String folder, final String messageId, final String sectionId) throws OXException {
         final AttachmentFinderHandler handler = new AttachmentFinderHandler(sectionId);
         new MessageParser().parseMessage(getMessage(folder, messageId, true), handler);
@@ -138,6 +140,7 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
         return part;
     }
 
+    @Override
     public List<String> copyMessages(final String sourceFolder, final String destFolder, final String[] messageIds, final boolean fast) throws OXException {
         try {
             final String[] ids = messageStorage.copyMessages(sourceFolder, destFolder, messageIds, fast);
@@ -147,6 +150,7 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
         }
     }
 
+    @Override
     public void deleteMessages(final String folder, final String[] messageIds, final boolean hardDelete) throws OXException {
         try {
             messageStorage.deleteMessages(folder, messageIds, hardDelete);
@@ -155,6 +159,7 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
         }
     }
 
+    @Override
     public List<MessagingMessage> getAllMessages(final String folder, final IndexRange indexRange, final MessagingField sortField, final OrderDirection order, final MessagingField... fields) throws OXException {
         try {
             final MailMessage[] mails =
@@ -169,6 +174,7 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
         }
     }
 
+    @Override
     public MessagingMessage getMessage(final String folder, final String id, final boolean peek) throws OXException {
         try {
             return from(messageStorage.getMessage(folder, id, !peek));
@@ -177,6 +183,7 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
         }
     }
 
+    @Override
     public List<MessagingMessage> getMessages(final String folder, final String[] messageIds, final MessagingField[] fields) throws OXException {
         try {
             final MailMessage[] mails = messageStorage.getMessages(folder, messageIds, from(fields));
@@ -190,6 +197,7 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
         }
     }
 
+    @Override
     public List<String> moveMessages(final String sourceFolder, final String destFolder, final String[] messageIds, final boolean fast) throws OXException {
         try {
             final String[] ids = messageStorage.moveMessages(sourceFolder, destFolder, messageIds, fast);
@@ -199,6 +207,7 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
         }
     }
 
+    @Override
     public MessagingMessage perform(final String folder, final String id, final String action) throws OXException {
         try {
             if (MailConstants.TYPE_FORWARD.equalsIgnoreCase(action)) {
@@ -219,6 +228,7 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
         }
     }
 
+    @Override
     public MessagingMessage perform(final String action) throws OXException {
         /*
          * No supported actions for this perform() method
@@ -226,6 +236,7 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
         throw MessagingExceptionCodes.UNKNOWN_ACTION.create(action);
     }
 
+    @Override
     public MessagingMessage perform(final MessagingMessage message, final String action) throws OXException {
         /*
          * No supported actions for this perform() method
@@ -233,6 +244,7 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
         throw MessagingExceptionCodes.UNKNOWN_ACTION.create(action);
     }
 
+    @Override
     public List<MessagingMessage> searchMessages(final String folder, final IndexRange indexRange, final MessagingField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MessagingField[] fields) throws OXException {
         try {
             final MailMessage[] mails =
@@ -247,6 +259,7 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
         }
     }
 
+    @Override
     public void updateMessage(final MessagingMessage message, final MessagingField[] fields) throws OXException {
         try {
             final EnumSet<MessagingField> set = EnumSet.copyOf(Arrays.asList(fields));
@@ -261,6 +274,7 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
         }
     }
 
+    @Override
     public MessagingContent resolveContent(final String folder, final String id, final String referenceId) throws OXException {
         try {
             return new MailBinaryContent(messageStorage.getAttachment(folder, id, referenceId));

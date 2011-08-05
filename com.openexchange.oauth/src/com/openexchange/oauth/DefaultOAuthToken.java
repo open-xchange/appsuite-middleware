@@ -79,10 +79,12 @@ public class DefaultOAuthToken implements OAuthToken {
         this.secret = secret;
     }
 
+    @Override
     public String getToken() {
         return token;
     }
 
+    @Override
     public String getSecret() {
         return secret;
     }

@@ -68,6 +68,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class ReauthorizeAction extends AbstractOAuthTokenAction {
 
+    @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         /*
          * Parse parameters

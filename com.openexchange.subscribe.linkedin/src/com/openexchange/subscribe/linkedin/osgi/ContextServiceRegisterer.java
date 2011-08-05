@@ -70,6 +70,7 @@ public class ContextServiceRegisterer implements ServiceTrackerCustomizer {
         this.activator = activator;
     }
 
+    @Override
     public Object addingService(ServiceReference reference) {
         ContextService contexts = (ContextService) context.getService(reference);
         activator.setContextService(contexts);
@@ -77,10 +78,12 @@ public class ContextServiceRegisterer implements ServiceTrackerCustomizer {
         return contexts;
     }
 
+    @Override
     public void modifiedService(ServiceReference arg0, Object arg1) {
       //nothing to do here
     }
 
+    @Override
     public void removedService(ServiceReference reference, Object arg1) {
         activator.setContextService(null);
         activator.unregisterServices();

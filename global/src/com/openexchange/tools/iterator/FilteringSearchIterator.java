@@ -76,32 +76,39 @@ public abstract class FilteringSearchIterator<T> implements SearchIterator<T>{
     public abstract boolean accept(T thing) throws OXException;
 
 
+    @Override
     public void addWarning(final OXException warning) {
         delegate.addWarning(warning);
     }
 
+    @Override
     public void close() throws OXException {
         delegate.close();
     }
 
+    @Override
     public OXException[] getWarnings() {
         return delegate.getWarnings();
     }
 
+    @Override
     public boolean hasNext() throws OXException {
         return next != null;
     }
 
+    @Override
     public boolean hasWarnings() {
         return delegate.hasWarnings();
     }
 
+    @Override
     public T next() throws OXException {
         final T current = next;
         initNext();
         return current;
     }
 
+    @Override
     public int size() {
         return -1;
     }

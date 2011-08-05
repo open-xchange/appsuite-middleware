@@ -74,6 +74,7 @@ public class FileComparator implements Comparator<File>{
         delegate = comparator;
     }
 
+    @Override
     public int compare(final File o1, final File o2) {
         if(o1 == o2) {
             return 0;

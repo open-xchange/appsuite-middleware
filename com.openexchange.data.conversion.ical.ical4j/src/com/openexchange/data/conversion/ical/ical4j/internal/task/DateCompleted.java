@@ -78,6 +78,7 @@ public class DateCompleted extends AbstractVerifyingAttributeConverter<VToDo, Ta
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isSet(final Task task) {
         return task.containsDateCompleted();
     }
@@ -85,6 +86,7 @@ public class DateCompleted extends AbstractVerifyingAttributeConverter<VToDo, Ta
     /**
      * {@inheritDoc}
      */
+    @Override
     public void emit(final int index, final Task task, final VToDo vToDo,
                      final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
         final Completed completed = new Completed(EmitterTools.toDateTime(task.getDateCompleted()));
@@ -94,6 +96,7 @@ public class DateCompleted extends AbstractVerifyingAttributeConverter<VToDo, Ta
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean hasProperty(final VToDo vToDo) {
         return vToDo.getDateCompleted() != null;
     }
@@ -101,6 +104,7 @@ public class DateCompleted extends AbstractVerifyingAttributeConverter<VToDo, Ta
     /**
      * {@inheritDoc}
      */
+    @Override
     public void parse(final int index, final VToDo vToDo, final Task task, final TimeZone timeZone,
         final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
         final Completed completed =  vToDo.getDateCompleted();

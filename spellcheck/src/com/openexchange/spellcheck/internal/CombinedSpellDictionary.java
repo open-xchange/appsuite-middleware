@@ -110,7 +110,8 @@ public final class CombinedSpellDictionary implements SpellDictionary {
 	 *
 	 * @see com.swabunga.spell.engine.SpellDictionary#addWord(java.lang.String)
 	 */
-	public void addWord(final String word) {
+	@Override
+    public void addWord(final String word) {
 		throw new UnsupportedOperationException("CombinedSpellDictionary.addWord(java.lang.String) not supported");
 	}
 
@@ -120,7 +121,8 @@ public final class CombinedSpellDictionary implements SpellDictionary {
 	 * @see com.swabunga.spell.engine.SpellDictionary#getSuggestions(java.lang.String,
 	 *      int)
 	 */
-	@SuppressWarnings("unchecked")
+	@Override
+    @SuppressWarnings("unchecked")
 	public List<?> getSuggestions(final String sourceWord, final int scoreThreshold) {
 		final Set<String> set = new HashSet<String>();
 		for (final SpellDictionary dict : dicts) {
@@ -135,7 +137,8 @@ public final class CombinedSpellDictionary implements SpellDictionary {
 	 * @see com.swabunga.spell.engine.SpellDictionary#getSuggestions(java.lang.String,
 	 *      int, int[][])
 	 */
-	@SuppressWarnings("unchecked")
+	@Override
+    @SuppressWarnings("unchecked")
 	public List<?> getSuggestions(final String sourceWord, final int scoreThreshold, final int[][] matrix) {
 		final Set<String> set = new HashSet<String>();
 		for (final SpellDictionary dict : dicts) {
@@ -149,7 +152,8 @@ public final class CombinedSpellDictionary implements SpellDictionary {
 	 *
 	 * @see com.swabunga.spell.engine.SpellDictionary#isCorrect(java.lang.String)
 	 */
-	public boolean isCorrect(final String word) {
+	@Override
+    public boolean isCorrect(final String word) {
 		final int size = dicts.size();
 		boolean correct = false;
 		for (int i = 0; (i < size) && !correct; i++) {

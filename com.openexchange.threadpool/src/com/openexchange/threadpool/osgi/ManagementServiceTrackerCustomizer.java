@@ -85,6 +85,7 @@ public final class ManagementServiceTrackerCustomizer implements ServiceTrackerC
         this.threadPoolService = threadPoolService;
     }
 
+    @Override
     public Object addingService(final ServiceReference reference) {
         final Object service = context.getService(reference);
         if (!ManagementService.class.isInstance(service)) {
@@ -98,10 +99,12 @@ public final class ManagementServiceTrackerCustomizer implements ServiceTrackerC
         return service;
     }
 
+    @Override
     public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do
     }
 
+    @Override
     public void removedService(final ServiceReference reference, final Object service) {
         if (null != service && ManagementService.class.isInstance(service)) {
             try {

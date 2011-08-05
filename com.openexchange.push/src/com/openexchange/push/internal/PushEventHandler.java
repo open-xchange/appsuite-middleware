@@ -82,6 +82,7 @@ public final class PushEventHandler implements EventHandler {
         super();
     }
 
+    @Override
     public void handleEvent(final Event event) {
         final Runnable r = new PushEventHandlerRunnable(event);
         /*
@@ -106,6 +107,7 @@ public final class PushEventHandler implements EventHandler {
             this.event = event;
         }
 
+        @Override
         public void run() {
             final String topic = event.getTopic();
             try {

@@ -62,6 +62,7 @@ public class FromSQL implements WidgetSwitcher {
 
     private SQLException exception;
 
+    @Override
     public Object checkbox(Object[] args) {
         ResultSet rs = (ResultSet) args[0];
         String columnName = (String) args[1];
@@ -74,6 +75,7 @@ public class FromSQL implements WidgetSwitcher {
         }
     }
 
+    @Override
     public Object input(Object... args) {
         return string(args);
     }
@@ -90,6 +92,7 @@ public class FromSQL implements WidgetSwitcher {
         }
     }
 
+    @Override
     public Object password(Object... args) {
         return string(args);
     }
@@ -101,14 +104,17 @@ public class FromSQL implements WidgetSwitcher {
 
     }
 
+    @Override
     public Object link(Object... args) {
         return string(args);
     }
 
+    @Override
     public Object text(Object... args) {
         return string(args);
     }
 
+    @Override
     public Object custom(Object... args) {
         return string(args);
     }

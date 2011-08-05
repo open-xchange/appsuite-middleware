@@ -72,6 +72,7 @@ public abstract class AbstractVerifyingAttributeConverter<T extends CalendarComp
         this.verifier = verifier;
     }
 
+    @Override
     public void verify(final int index, final U object, final List<ConversionWarning> warnings) throws ConversionError {
         if(null == verifier) {
             return;

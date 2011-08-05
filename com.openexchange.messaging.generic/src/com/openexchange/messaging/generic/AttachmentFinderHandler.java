@@ -78,27 +78,33 @@ public final class AttachmentFinderHandler implements MessageHandler {
         this.sequenceId = sequenceId;
     }
 
+    @Override
     public boolean handleColorLabel(final int colorLabel) throws OXException {
         return true;
     }
 
+    @Override
     public boolean handleHeaders(final Map<String, Collection<MessagingHeader>> headers) throws OXException {
         return true;
     }
 
+    @Override
     public void handleMessageEnd(final MessagingMessage message) throws OXException {
         // Nothing to do
     }
 
+    @Override
     public boolean handleMultipart(final MultipartContent multipart) throws OXException {
         return true;
     }
 
+    @Override
     public boolean handleNestedMessage(final MessagingMessage message) throws OXException {
         new MessageParser().parseMessage(message, this);
         return (null == messagingPart);
     }
 
+    @Override
     public boolean handlePart(final MessagingPart part, final boolean isInline) throws OXException {
         if (sequenceId.equals(part.getSectionId())) {
             messagingPart = part;
@@ -107,14 +113,17 @@ public final class AttachmentFinderHandler implements MessageHandler {
         return true;
     }
 
+    @Override
     public boolean handleReceivedDate(final long receivedDate) throws OXException {
         return true;
     }
 
+    @Override
     public boolean handleSystemFlags(final int flags) throws OXException {
         return true;
     }
 
+    @Override
     public boolean handleUserFlags(final Collection<String> userFlags) throws OXException {
         return true;
     }

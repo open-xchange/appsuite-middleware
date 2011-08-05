@@ -87,13 +87,16 @@ public class PublicationTargetMultipleHandler implements MultipleHandler {
         this.discoverer = discoverer;
     }
 
+    @Override
     public void close() {
     }
 
+    @Override
     public Date getTimestamp() {
         return null;
     }
 
+    @Override
     public JSONValue performRequest(final String action, final JSONObject request, final ServerSession session, final boolean secure) throws JSONException, OXException {
         try {
             if (null == action) {
@@ -110,6 +113,7 @@ public class PublicationTargetMultipleHandler implements MultipleHandler {
         }
     }
 
+    @Override
     public Collection<OXException> getWarnings() {
         return Collections.<OXException> emptySet();
     }

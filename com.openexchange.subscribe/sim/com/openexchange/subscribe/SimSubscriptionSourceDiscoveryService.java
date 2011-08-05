@@ -70,15 +70,18 @@ public class SimSubscriptionSourceDiscoveryService implements SubscriptionSource
 
     private String lookupIdentifier;
 
+    @Override
     public SubscriptionSource getSource(final String identifier) {
         loadedSources.add(identifier);
         return sources.get(identifier);
     }
 
+    @Override
     public List<SubscriptionSource> getSources(final int folderModule) {
         return new ArrayList<SubscriptionSource>(sources.values());
     }
 
+    @Override
     public boolean knowsSource(final String identifier) {
         return sources.containsKey(identifier);
     }
@@ -87,6 +90,7 @@ public class SimSubscriptionSourceDiscoveryService implements SubscriptionSource
         sources.put(source.getId(), source);
     }
 
+    @Override
     public SubscriptionSource getSource(final Context context, final int subscriptionId) {
         return getSource(lookupIdentifier);
     }
@@ -103,10 +107,12 @@ public class SimSubscriptionSourceDiscoveryService implements SubscriptionSource
         loadedSources.clear();
     }
 
+    @Override
     public List<SubscriptionSource> getSources() {
         return getSources(-1);
     }
 
+    @Override
     public SubscriptionSourceDiscoveryService filter(final int user, final int context) throws OXException {
         return this;
     }

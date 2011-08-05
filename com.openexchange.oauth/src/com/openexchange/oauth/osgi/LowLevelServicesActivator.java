@@ -74,6 +74,7 @@ public class LowLevelServicesActivator implements BundleActivator {
         super();
     }
 
+    @Override
     public void start(BundleContext context) throws Exception {
         registrations.push(context.registerService(CreateTableService.class.getName(), new CreateOAuthAccountTable(), null));
         registrations.push(context.registerService(DeleteListener.class.getName(), new OAuthDeleteListener(), null));
@@ -81,6 +82,7 @@ public class LowLevelServicesActivator implements BundleActivator {
         tracker.open();
     }
 
+    @Override
     public void stop(BundleContext context) throws Exception {
         if (null != tracker) {
             tracker.close();

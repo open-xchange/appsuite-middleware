@@ -70,6 +70,7 @@ public class TimerServiceTracker implements ServiceTrackerCustomizer {
         this.context = context;
     }
 
+    @Override
     public Object addingService(final ServiceReference reference) {
         final TimerService service = (TimerService) context.getService(reference);
         SessionHandler.addTimerService(service);
@@ -77,10 +78,12 @@ public class TimerServiceTracker implements ServiceTrackerCustomizer {
         return service;
     }
 
+    @Override
     public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do.
     }
 
+    @Override
     public void removedService(final ServiceReference reference, final Object service) {
         SessionCacheTimer.removeTimerService();
         SessionHandler.removeTimerService();

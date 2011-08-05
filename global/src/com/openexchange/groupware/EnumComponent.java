@@ -302,6 +302,7 @@ public enum EnumComponent implements Component {
      * (non-Javadoc)
      * @see com.openexchange.groupware.Component#getAbbreviation()
      */
+    @Override
     public String getAbbreviation() {
         return abbreviation;
     }

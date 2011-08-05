@@ -234,6 +234,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
      * (non-Javadoc)
      * @see com.openexchange.subscribe.crawler.internal.LoginStep#getBaseUrl()
      */
+    @Override
     public String getBaseUrl() {
         return "";
     }
@@ -242,6 +243,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
      * (non-Javadoc)
      * @see com.openexchange.subscribe.crawler.internal.LoginStep#setPassword(java.lang.String)
      */
+    @Override
     public void setPassword(final String password) {
         this.password = password;
     }
@@ -250,6 +252,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
      * (non-Javadoc)
      * @see com.openexchange.subscribe.crawler.internal.LoginStep#setUsername(java.lang.String)
      */
+    @Override
     public void setUsername(final String username) {
         this.username = username;
     }
@@ -377,6 +380,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
     }
 
 
+    @Override
     public Page getLoginPage() {
         return loginPage;
     }
@@ -385,6 +389,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
 
         private DefaultHttpClient client;
 
+        @Override
         public HttpClient getHttpClient(final URL server) {
             if(client != null) {
                 return client;

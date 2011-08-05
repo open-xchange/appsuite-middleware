@@ -79,14 +79,17 @@ public final class OAuthInteractionImpl implements OAuthInteraction {
         this.requestToken = requestToken;
     }
 
+    @Override
     public OAuthToken getRequestToken() {
         return requestToken;
     }
 
+    @Override
     public OAuthInteractionType getInteractionType() {
         return interactionType;
     }
 
+    @Override
     public String getAuthorizationURL() {
         return authorizationURL;
     }

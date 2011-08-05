@@ -71,14 +71,17 @@ public final class RdbFileStorageAccountManagerProvider implements FileStorageAc
         super();
     }
 
+    @Override
     public boolean supports(final FileStorageService service) {
         return true;
     }
 
+    @Override
     public FileStorageAccountManager getAccountManagerFor(final FileStorageService service) throws OXException {
         return new RdbFileStorageAccountManager(service);
     }
 
+    @Override
     public int getRanking() {
         return 0;
     }

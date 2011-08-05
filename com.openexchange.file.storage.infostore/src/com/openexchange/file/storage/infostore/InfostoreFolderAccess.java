@@ -74,81 +74,97 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
 
     }
 
+    @Override
     public void clearFolder(final String folderId) throws OXException {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void clearFolder(final String folderId, final boolean hardDelete) throws OXException {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public String createFolder(final FileStorageFolder toCreate) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public String deleteFolder(final String folderId) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public String deleteFolder(final String folderId, final boolean hardDelete) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public boolean exists(final String folderId) throws OXException {
         // TODO Auto-generated method stub
         return false;
     }
 
+    @Override
     public Quota getFileQuota(final String folderId) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public FileStorageFolder getFolder(final String folderId) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public FileStorageFolder[] getPath2DefaultFolder(final String folderId) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public Quota[] getQuotas(final String folder, final Type[] types) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public FileStorageFolder getRootFolder() throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public Quota getStorageQuota(final String folderId) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public FileStorageFolder[] getSubfolders(final String parentIdentifier, final boolean all) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public String moveFolder(final String folderId, final String newParentId) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public String renameFolder(final String folderId, final String newName) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public String updateFolder(final String identifier, final FileStorageFolder toUpdate) throws OXException {
         // TODO Auto-generated method stub
         return null;

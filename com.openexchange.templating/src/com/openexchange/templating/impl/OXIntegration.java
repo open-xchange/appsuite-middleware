@@ -96,6 +96,7 @@ public class OXIntegration implements OXFolderHelper, OXInfostoreHelper {
         this.infostore = infostore;
     }
 
+    @Override
     public FolderObject createPrivateTemplateFolder(final ServerSession session) throws OXException {
         final OXFolderManager manager = OXFolderManager.getInstance(session);
         final OXFolderAccess access = getFolderAccess(session);
@@ -119,10 +120,12 @@ public class OXIntegration implements OXFolderHelper, OXInfostoreHelper {
         return manager.createFolder(fo, true, System.currentTimeMillis());
     }
 
+    @Override
     public FolderObject getGlobalTemplateFolder(final ServerSession session) throws OXException {
         return findTemplatesSubfolder(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, getFolderAccess(session), session.getContext());
     }
 
+    @Override
     public FolderObject getPrivateTemplateFolder(final ServerSession session) throws OXException {
         final OXFolderAccess access = getFolderAccess(session);
         final FolderObject privateInfostoreFolder = access.getDefaultFolder(session.getUserId(), FolderObject.INFOSTORE);
@@ -152,6 +155,7 @@ public class OXIntegration implements OXFolderHelper, OXInfostoreHelper {
         return null;
     }
 
+    @Override
     public String findTemplateInFolder(final ServerSession session, final FolderObject folder, final String name) throws OXException {
         final SearchIterator<DocumentMetadata> iterator = infostore.getDocuments(folder.getObjectID(), new Metadata[]{Metadata.ID_LITERAL, Metadata.TITLE_LITERAL, Metadata.FILENAME_LITERAL}, session.getContext(), session.getUser(), session.getUserConfiguration()).results();
         BufferedReader reader = null;
@@ -194,6 +198,7 @@ public class OXIntegration implements OXFolderHelper, OXInfostoreHelper {
         return null;
     }
 
+    @Override
     public void storeTemplateInFolder(final ServerSession session, final FolderObject folder, final String name, final String templateText) throws OXException {
         final DocumentMetadata metadata = new DocumentMetadataImpl();
         metadata.setFileName(name);
@@ -209,6 +214,7 @@ public class OXIntegration implements OXFolderHelper, OXInfostoreHelper {
         }
     }
 
+    @Override
     public List<String> getNames(final ServerSession session, final FolderObject folder, final String ... filter) throws OXException {
     	final HashSet<String> sieve = new HashSet<String>(Arrays.asList(filter));
 

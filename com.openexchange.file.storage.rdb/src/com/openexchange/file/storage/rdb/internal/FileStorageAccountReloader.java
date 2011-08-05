@@ -107,20 +107,24 @@ public final class FileStorageAccountReloader extends Refresher<FileStorageAccou
         return "FileStorageAccountReloader: " + delegate.toString();
     }
 
+    @Override
     public Map<String, Object> getConfiguration() {
         updateDelegate();
         return delegate.getConfiguration();
     }
 
+    @Override
     public String getDisplayName() {
         updateDelegate();
         return delegate.getDisplayName();
     }
 
+    @Override
     public String getId() {
         return delegate.getId();
     }
 
+    @Override
     public FileStorageService getFileStorageService() {
         updateDelegate();
         return delegate.getFileStorageService();

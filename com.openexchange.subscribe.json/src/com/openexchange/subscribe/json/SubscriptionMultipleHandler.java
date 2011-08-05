@@ -105,18 +105,22 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
         this.secretService = secretService;
     }
 
+    @Override
     public void close() {
 
     }
 
+    @Override
     public Date getTimestamp() {
         return null;
     }
 
+    @Override
     public Collection<OXException> getWarnings() {
         return Collections.<OXException> emptySet();
     }
 
+    @Override
     public Object performRequest(final String action, final JSONObject request, final ServerSession session, final boolean secure) throws JSONException, OXException {
         try {
             if (null == action) {
@@ -165,6 +169,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
             allSubscriptions = getSubscriptionsInFolder(session, folderId, secretService.getSecret(session));
             Collections.sort(allSubscriptions, new Comparator<Subscription>() {
 
+                @Override
                 public int compare(final Subscription o1, final Subscription o2) {
                     if(o1.getLastUpdate() == o2.getLastUpdate()) {
                         return o2.getId() - o1.getId();

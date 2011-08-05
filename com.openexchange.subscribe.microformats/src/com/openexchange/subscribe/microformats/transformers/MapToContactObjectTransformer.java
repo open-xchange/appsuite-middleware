@@ -82,7 +82,8 @@ public class MapToContactObjectTransformer implements MapToObjectTransformer{
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MapToContactObjectTransformer.class));
 
-	public List<Contact> transform (List<Map<String, String>> inlist){
+	@Override
+    public List<Contact> transform (List<Map<String, String>> inlist){
 		ArrayList<Contact> outlist = new ArrayList<Contact>();
 
 		for (Map<String,String> map : inlist){

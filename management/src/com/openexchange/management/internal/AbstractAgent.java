@@ -152,6 +152,7 @@ public abstract class AbstractAgent {
             System.arraycopy(credentials, 0, this.credentials, 0, credentials.length);
         }
 
+        @Override
         public Subject authenticate(final Object credentials) {
             if (!(credentials instanceof String[])) {
                 if (credentials == null) {

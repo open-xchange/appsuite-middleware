@@ -130,6 +130,7 @@ public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
         }
     }
 
+    @Override
     public List<MDNSServiceEntry> listByService(final String serviceId) throws OXException {
         rlock.lock();
         try {
@@ -143,6 +144,7 @@ public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
         }
     }
 
+    @Override
     public MDNSServiceInfo registerService(final String serviceId, final int port, final String info) throws OXException {
         wlock.lock();
         try {
@@ -163,6 +165,7 @@ public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
         }
     }
 
+    @Override
     public void unregisterService(final MDNSServiceInfo serviceInfo) throws OXException {
         wlock.lock();
         try {
@@ -179,6 +182,7 @@ public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
         }
     }
 
+    @Override
     public void reregisterServices() {
         /*-
          *
@@ -197,6 +201,7 @@ public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
          */
     }
 
+    @Override
     public boolean contains(final UUID id, final String serviceId) {
         return registeredServicesSet.containsKey(new Key(id, serviceId));
     }

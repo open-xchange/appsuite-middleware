@@ -58,6 +58,7 @@ import com.openexchange.groupware.container.Appointment;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class RequireEndDate  implements ObjectVerifier<Appointment> {
+    @Override
     public void verify(final int index, final Appointment object, final List<ConversionWarning> warnings) throws ConversionError {
         if(!object.containsEndDate()) {
             throw new ConversionError(index, "DTEND or Duration required");

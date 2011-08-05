@@ -105,6 +105,7 @@ public abstract class AbstractIMAPCommand<T> {
             this.abstractIMAPCommand = abstractIMAPCommand;
         }
 
+        @Override
         public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
             if (abstractIMAPCommand.returnDefaultValue) {
                 /*

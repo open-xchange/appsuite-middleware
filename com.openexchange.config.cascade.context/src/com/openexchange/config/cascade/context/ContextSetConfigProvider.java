@@ -156,26 +156,32 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
 
         return new BasicProperty() {
 
+            @Override
             public String get() {
                 return value;
             }
 
+            @Override
             public String get(final String metadataName) {
                 return null;
             }
 
+            @Override
             public boolean isDefined() {
                 return value != null;
             }
 
+            @Override
             public void set(final String value) throws OXException {
                 throw ConfigCascadeExceptionCodes.CAN_NOT_SET_PROPERTY.create(property, SCOPE);
             }
 
+            @Override
             public void set(final String metadataName, final String value) throws OXException {
                 throw ConfigCascadeExceptionCodes.CAN_NOT_DEFINE_METADATA.create(metadataName, SCOPE);
             }
 
+            @Override
             public List<String> getMetadataNames() throws OXException {
                 return Collections.emptyList();
             }

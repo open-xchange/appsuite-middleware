@@ -145,6 +145,7 @@ public class HTMLImageFilterHandler implements HTMLHandler {
         attrBuilder = new StringBuilder(128);
     }
 
+    @Override
     public void handleCDATA(final String text) {
         htmlBuilder.append("<![CDATA[");
         if (isCss) {
@@ -160,14 +161,17 @@ public class HTMLImageFilterHandler implements HTMLHandler {
         htmlBuilder.append("]]>");
     }
 
+    @Override
     public void handleComment(final String comment) {
         htmlBuilder.append("<!--").append(comment).append("-->");
     }
 
+    @Override
     public void handleDocDeclaration(final String docDecl) {
         htmlBuilder.append("<!DOCTYPE").append(docDecl).append('>').append(CRLF).append(CRLF);
     }
 
+    @Override
     public void handleEndTag(final String tag) {
         if (isCss && STYLE.equals(tag)) {
             isCss = false;
@@ -175,6 +179,7 @@ public class HTMLImageFilterHandler implements HTMLHandler {
         htmlBuilder.append("</").append(tag).append('>');
     }
 
+    @Override
     public void handleError(final String errorMsg) {
         LOG.error(errorMsg);
     }
@@ -183,6 +188,7 @@ public class HTMLImageFilterHandler implements HTMLHandler {
 
     private static final Pattern PATTERN_FILENAME = Pattern.compile("([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)");
 
+    @Override
     public void handleSimpleTag(final String tag, final Map<String, String> attributes) {
         if (IMG.equals(tag) || INPUT.equals(tag)) {
             final String src = attributes.get(SRC);
@@ -212,6 +218,7 @@ public class HTMLImageFilterHandler implements HTMLHandler {
         handleStart(tag, attributes, true);
     }
 
+    @Override
     public void handleStartTag(final String tag, final Map<String, String> attributes) {
         if (STYLE.equals(tag)) {
             isCss = true;
@@ -269,6 +276,7 @@ public class HTMLImageFilterHandler implements HTMLHandler {
         }
     }
 
+    @Override
     public void handleText(final String text, final boolean ignorable) {
         if (isCss) {
             if (ignorable) {
@@ -286,6 +294,7 @@ public class HTMLImageFilterHandler implements HTMLHandler {
         }
     }
 
+    @Override
     public void handleXMLDeclaration(final String version, final Boolean standalone, final String encoding) {
         if (null != version) {
             htmlBuilder.append("<?xml version=\"").append(version).append('"');

@@ -77,6 +77,7 @@ public final class HeaderCacheMailProviderServiceTracker implements ServiceTrack
         this.context = context;
     }
 
+    @Override
     public Object addingService(final ServiceReference reference) {
         final Object addedService = context.getService(reference);
         if (addedService instanceof MailProvider) {
@@ -117,10 +118,12 @@ public final class HeaderCacheMailProviderServiceTracker implements ServiceTrack
         return null;
     }
 
+    @Override
     public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do
     }
 
+    @Override
     public void removedService(final ServiceReference reference, final Object service) {
         if (null != service) {
             try {

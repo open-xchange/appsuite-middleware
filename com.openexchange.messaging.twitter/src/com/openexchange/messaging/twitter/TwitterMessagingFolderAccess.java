@@ -83,6 +83,7 @@ public final class TwitterMessagingFolderAccess implements MessagingFolderAccess
         cid = session.getContextId();
     }
 
+    @Override
     public void clearFolder(final String folderId) throws OXException {
         if (!EMPTY.equals(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
@@ -95,6 +96,7 @@ public final class TwitterMessagingFolderAccess implements MessagingFolderAccess
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(TwitterMessagingService.getServiceId());
     }
 
+    @Override
     public void clearFolder(final String folderId, final boolean hardDelete) throws OXException {
         if (!EMPTY.equals(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
@@ -107,10 +109,12 @@ public final class TwitterMessagingFolderAccess implements MessagingFolderAccess
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(TwitterMessagingService.getServiceId());
     }
 
+    @Override
     public String createFolder(final MessagingFolder toCreate) throws OXException {
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(TwitterMessagingService.getServiceId());
     }
 
+    @Override
     public String deleteFolder(final String folderId) throws OXException {
         if (!EMPTY.equals(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
@@ -123,6 +127,7 @@ public final class TwitterMessagingFolderAccess implements MessagingFolderAccess
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(TwitterMessagingService.getServiceId());
     }
 
+    @Override
     public String deleteFolder(final String folderId, final boolean hardDelete) throws OXException {
         if (!EMPTY.equals(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
@@ -135,10 +140,12 @@ public final class TwitterMessagingFolderAccess implements MessagingFolderAccess
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(TwitterMessagingService.getServiceId());
     }
 
+    @Override
     public boolean exists(final String folderId) throws OXException {
         return EMPTY.equals(folderId);
     }
 
+    @Override
     public MessagingFolder getFolder(final String folderId) throws OXException {
         if (!EMPTY.equals(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
@@ -153,6 +160,7 @@ public final class TwitterMessagingFolderAccess implements MessagingFolderAccess
 
     private static final Quota.Type[] MESSAGE = { Quota.Type.MESSAGE };
 
+    @Override
     public Quota getMessageQuota(final String folder) throws OXException {
         return getQuotas(folder, MESSAGE)[0];
     }
@@ -162,6 +170,7 @@ public final class TwitterMessagingFolderAccess implements MessagingFolderAccess
      */
     private static final MessagingFolder[] EMPTY_PATH = new MessagingFolder[0];
 
+    @Override
     public MessagingFolder[] getPath2DefaultFolder(final String folderId) throws OXException {
         if (!EMPTY.equals(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
@@ -174,6 +183,7 @@ public final class TwitterMessagingFolderAccess implements MessagingFolderAccess
         return EMPTY_PATH;
     }
 
+    @Override
     public Quota[] getQuotas(final String folderId, final Type[] types) throws OXException {
         if (!EMPTY.equals(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
@@ -186,16 +196,19 @@ public final class TwitterMessagingFolderAccess implements MessagingFolderAccess
         return Quota.getUnlimitedQuotas(types);
     }
 
+    @Override
     public MessagingFolder getRootFolder() throws OXException {
         return TwitterMessagingFolder.getInstance(user);
     }
 
     private static final Quota.Type[] STORAGE = { Quota.Type.STORAGE };
 
+    @Override
     public Quota getStorageQuota(final String folder) throws OXException {
         return getQuotas(folder, STORAGE)[0];
     }
 
+    @Override
     public MessagingFolder[] getSubfolders(final String parentFullname, final boolean all) throws OXException {
         if (!EMPTY.equals(parentFullname)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
@@ -208,6 +221,7 @@ public final class TwitterMessagingFolderAccess implements MessagingFolderAccess
         return EMPTY_PATH;
     }
 
+    @Override
     public String moveFolder(final String folderId, final String newFullname) throws OXException {
         if (!EMPTY.equals(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
@@ -220,6 +234,7 @@ public final class TwitterMessagingFolderAccess implements MessagingFolderAccess
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(TwitterMessagingService.getServiceId());
     }
 
+    @Override
     public String renameFolder(final String folderId, final String newName) throws OXException {
         if (!EMPTY.equals(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
@@ -232,6 +247,7 @@ public final class TwitterMessagingFolderAccess implements MessagingFolderAccess
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(TwitterMessagingService.getServiceId());
     }
 
+    @Override
     public String updateFolder(final String folderId, final MessagingFolder toUpdate) throws OXException {
         if (!EMPTY.equals(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
@@ -244,26 +260,32 @@ public final class TwitterMessagingFolderAccess implements MessagingFolderAccess
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(TwitterMessagingService.getServiceId());
     }
 
+    @Override
     public String getConfirmedHamFolder() throws OXException {
         return null;
     }
 
+    @Override
     public String getConfirmedSpamFolder() throws OXException {
         return null;
     }
 
+    @Override
     public String getDraftsFolder() throws OXException {
         return null;
     }
 
+    @Override
     public String getSentFolder() throws OXException {
         return null;
     }
 
+    @Override
     public String getSpamFolder() throws OXException {
         return null;
     }
 
+    @Override
     public String getTrashFolder() throws OXException {
         return null;
     }

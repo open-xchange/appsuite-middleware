@@ -72,6 +72,7 @@ public final class OAuthDeleteListener implements DeleteListener {
         super();
     }
 
+    @Override
     public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
         if (DeleteEvent.TYPE_USER != event.getType()) {
             return;

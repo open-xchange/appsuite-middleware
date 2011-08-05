@@ -70,6 +70,7 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer 
         this.activator = activator;
     }
 
+    @Override
     public Object addingService(ServiceReference reference) {
         OAuthServiceMetaData oAuthServiceMetaData = (OAuthServiceMetaData) context.getService(reference);
         // TODO Please use a service property or the service description to let the ServiceTracker filter the only wanted service.
@@ -80,10 +81,12 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer 
         return oAuthServiceMetaData;
     }
 
+    @Override
     public void modifiedService(ServiceReference arg0, Object arg1) {
       //nothing to do here
     }
 
+    @Override
     public void removedService(ServiceReference reference, Object arg1) {
         OAuthServiceMetaData oAuthServiceMetaData = (OAuthServiceMetaData) arg1;
         if ("com.openexchange.oauth.yahoo".equals(oAuthServiceMetaData.getId())) {

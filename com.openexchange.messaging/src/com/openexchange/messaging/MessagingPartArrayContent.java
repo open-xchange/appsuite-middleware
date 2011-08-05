@@ -70,10 +70,12 @@ public class MessagingPartArrayContent implements MultipartContent {
         this.parts = parts.toArray(new MessagingBodyPart[parts.size()]);
     }
 
+    @Override
     public MessagingBodyPart get(final int index) {
         return parts[index];
     }
 
+    @Override
     public int getCount() {
         return parts.length;
     }

@@ -58,6 +58,7 @@ package com.openexchange.messaging;
  * @since Open-Xchange v6.16
  */
 public interface SimpleMessagePart extends MessagingPart{
+    @Override
     public String getSectionId();
     public Object getData();
 }

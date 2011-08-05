@@ -131,6 +131,7 @@ public class ServiceDependentRegistration<T> extends ConditionalRegistration imp
         return true;
     }
 
+    @Override
     public void stateChanged() {
         check();
     }

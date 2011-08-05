@@ -77,6 +77,7 @@ public final class UserServiceTrackerCustomizer implements ServiceTrackerCustomi
     /**
      * {@inheritDoc}
      */
+    @Override
     public Object addingService(final ServiceReference reference) {
         final UserService userService = (UserService) context.getService(reference);
         userResolver.setUserService(userService);
@@ -86,6 +87,7 @@ public final class UserServiceTrackerCustomizer implements ServiceTrackerCustomi
     /**
      * {@inheritDoc}
      */
+    @Override
     public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do.
     }
@@ -93,6 +95,7 @@ public final class UserServiceTrackerCustomizer implements ServiceTrackerCustomi
     /**
      * {@inheritDoc}
      */
+    @Override
     public void removedService(final ServiceReference reference, final Object service) {
         userResolver.setUserService(null);
         context.ungetService(reference);

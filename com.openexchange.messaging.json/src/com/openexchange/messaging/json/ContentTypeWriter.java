@@ -76,18 +76,22 @@ public class ContentTypeWriter implements MessagingHeaderWriter {
         super();
     }
 
+    @Override
     public int getRanking() {
         return 0;
     }
 
+    @Override
     public boolean handles(final Entry<String, Collection<MessagingHeader>> entry) {
         return "content-type".equalsIgnoreCase(entry.getKey());
     }
 
+    @Override
     public String writeKey(final Entry<String, Collection<MessagingHeader>> entry) throws JSONException, OXException {
         return "Content-Type";
     }
 
+    @Override
     public Object writeValue(final Entry<String, Collection<MessagingHeader>> entry, final ServerSession session) throws JSONException, OXException {
         final ContentType cType = toCType(entry.getValue().iterator().next());
         final JSONObject jsonCType = new JSONObject();

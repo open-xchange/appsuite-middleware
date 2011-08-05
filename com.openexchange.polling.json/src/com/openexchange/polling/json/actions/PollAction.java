@@ -16,7 +16,8 @@ public abstract class PollAction implements AJAXActionService {
 		this.services = services;
 	}
 
-	public AJAXRequestResult perform(AJAXRequestData request,
+	@Override
+    public AJAXRequestResult perform(AJAXRequestData request,
 			ServerSession session) throws OXException {
 		PollRequest req = new PollRequest(request, session);
 		return perform(req);

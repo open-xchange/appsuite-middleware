@@ -66,14 +66,17 @@ public final class CSVDataRetentionService implements DataRetentionService {
         super();
     }
 
+    @Override
     public RetentionData newInstance() {
         return new CSVRetentionData();
     }
 
+    @Override
     public void storeOnAccess(final RetentionData retentionData) {
         CSVWriter.getInstance().write(retentionData, CSVWriter.TransactionType.ACCESS);
     }
 
+    @Override
     public void storeOnTransport(final RetentionData retentionData) {
         CSVWriter.getInstance().write(retentionData, CSVWriter.TransactionType.OUTBOUND);
     }

@@ -65,6 +65,7 @@ public final class MALPollDeleteListener implements DeleteListener {
         super();
     }
 
+    @Override
     public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
         if (DeleteEvent.TYPE_USER == event.getType()) {
             MALPollPushListenerRegistry.getInstance().purgeUserPushListener(event.getContext().getContextId(), event.getId());

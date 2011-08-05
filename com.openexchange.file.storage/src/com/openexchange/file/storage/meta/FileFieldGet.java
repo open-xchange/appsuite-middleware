@@ -59,94 +59,117 @@ import com.openexchange.file.storage.AbstractFileFieldSwitcher;
  */
 public class FileFieldGet extends AbstractFileFieldSwitcher {
 
+    @Override
     public Object categories(final Object... args) {
         return md( args ).getCategories();
     }
 
+    @Override
     public Object colorLabel(final Object... args) {
         return md( args ).getColorLabel();
     }
 
+    @Override
     public Object content(final Object... args) {
         return md( args ).getContent();
     }
 
+    @Override
     public Object created(final Object... args) {
         return md( args ).getCreated();
     }
 
+    @Override
     public Object createdBy(final Object... args) {
         return md( args ).getCreatedBy();
     }
 
+    @Override
     public Object currentVersion(final Object... args) {
         return md( args ).isCurrentVersion();
     }
 
+    @Override
     public Object description(final Object... args) {
         return md( args ).getDescription();
     }
 
+    @Override
     public Object fileMd5sum(final Object... args) {
         return md( args ).getFileMD5Sum();
     }
 
+    @Override
     public Object fileMimetype(final Object... args) {
         return md( args ).getFileMIMEType();
     }
 
+    @Override
     public Object fileSize(final Object... args) {
         return md( args ).getFileSize();
     }
 
+    @Override
     public Object filename(final Object... args) {
         return md( args ).getFileName();
     }
 
+    @Override
     public Object folderId(final Object... args) {
         return md( args ).getFolderId();
     }
 
+    @Override
     public Object id(final Object... args) {
         return md( args ).getId();
     }
 
+    @Override
     public Object lastModified(final Object... args) {
         return md( args ).getLastModified();
     }
 
+    @Override
     public Object lastModifiedUtc(final Object... args) {
         return md( args ).getLastModified();
     }
 
+    @Override
     public Object lockedUntil(final Object... args) {
         return md( args ).getLockedUntil();
     }
 
+    @Override
     public Object modifiedBy(final Object... args) {
         return md( args ).getModifiedBy();
     }
 
+    @Override
     public Object numberOfVersions(final Object... args) {
         return md( args ).getNumberOfVersions();
     }
 
+    @Override
     public Object sequenceNumber(final Object... args) {
         return md( args ).getSequenceNumber();
     }
 
+    @Override
     public Object title(final Object... args) {
         return md( args ).getTitle();
     }
 
+    @Override
     public Object url(final Object... args) {
         return md( args ).getURL();
     }
 
+    @Override
     public Object version(final Object... args) {
         return md( args ).getVersion();
     }
 
+    @Override
     public Object versionComment(final Object... args) {
         return md( args ).getVersionComment();
     }

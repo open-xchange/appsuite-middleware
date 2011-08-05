@@ -73,6 +73,7 @@ public class I18nTranslator implements Translator {
         this.service = service;
     }
 
+    @Override
     public String translate(final String toTranslate) {
         if (!service.hasKey(toTranslate)) {
             if (LOG.isWarnEnabled()) {

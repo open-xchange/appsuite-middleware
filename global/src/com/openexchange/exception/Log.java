@@ -82,22 +82,27 @@ public final class Log implements org.apache.commons.logging.Log {
         return delegatee.hashCode();
     }
 
+    @Override
     public boolean isDebugEnabled() {
         return delegatee.isDebugEnabled();
     }
 
+    @Override
     public boolean isErrorEnabled() {
         return delegatee.isErrorEnabled();
     }
 
+    @Override
     public boolean isFatalEnabled() {
         return delegatee.isFatalEnabled();
     }
 
+    @Override
     public boolean isInfoEnabled() {
         return delegatee.isInfoEnabled();
     }
 
+    @Override
     public boolean isTraceEnabled() {
         return delegatee.isTraceEnabled();
     }
@@ -107,14 +112,17 @@ public final class Log implements org.apache.commons.logging.Log {
         return delegatee.equals(obj);
     }
 
+    @Override
     public boolean isWarnEnabled() {
         return delegatee.isWarnEnabled();
     }
 
+    @Override
     public void trace(final Object message) {
         delegatee.trace(message);
     }
 
+    @Override
     public void trace(final Object message, final Throwable t) {
         if (OXException.class.isInstance(t) && !((OXException) t).isLoggable(LogLevel.TRACE)) {
             return;
@@ -122,10 +130,12 @@ public final class Log implements org.apache.commons.logging.Log {
         delegatee.trace(message, t);
     }
 
+    @Override
     public void debug(final Object message) {
         delegatee.debug(message);
     }
 
+    @Override
     public void debug(final Object message, final Throwable t) {
         if (OXException.class.isInstance(t) && !((OXException) t).isLoggable(LogLevel.DEBUG)) {
             return;
@@ -133,10 +143,12 @@ public final class Log implements org.apache.commons.logging.Log {
         delegatee.debug(message, t);
     }
 
+    @Override
     public void info(final Object message) {
         delegatee.info(message);
     }
 
+    @Override
     public void info(final Object message, final Throwable t) {
         if (OXException.class.isInstance(t) && !((OXException) t).isLoggable(LogLevel.INFO)) {
             return;
@@ -144,10 +156,12 @@ public final class Log implements org.apache.commons.logging.Log {
         delegatee.info(message, t);
     }
 
+    @Override
     public void warn(final Object message) {
         delegatee.warn(message);
     }
 
+    @Override
     public void warn(final Object message, final Throwable t) {
         if (OXException.class.isInstance(t) && !((OXException) t).isLoggable(LogLevel.WARNING)) {
             return;
@@ -155,10 +169,12 @@ public final class Log implements org.apache.commons.logging.Log {
         delegatee.warn(message, t);
     }
 
+    @Override
     public void error(final Object message) {
         delegatee.error(message);
     }
 
+    @Override
     public void error(final Object message, final Throwable t) {
         if (OXException.class.isInstance(t) && !((OXException) t).isLoggable(LogLevel.ERROR)) {
             return;
@@ -166,10 +182,12 @@ public final class Log implements org.apache.commons.logging.Log {
         delegatee.error(message, t);
     }
 
+    @Override
     public void fatal(final Object message) {
         delegatee.fatal(message);
     }
 
+    @Override
     public void fatal(final Object message, final Throwable t) {
         if (OXException.class.isInstance(t) && !((OXException) t).isLoggable(LogLevel.FATAL)) {
             return;

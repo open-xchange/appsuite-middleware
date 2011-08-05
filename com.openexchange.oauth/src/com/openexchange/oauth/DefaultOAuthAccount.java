@@ -69,14 +69,17 @@ public class DefaultOAuthAccount extends DefaultOAuthToken implements OAuthAccou
         super();
     }
 
+    @Override
     public int getId() {
         return id;
     }
 
+    @Override
     public String getDisplayName() {
         return displayName;
     }
 
+    @Override
     public OAuthServiceMetaData getMetaData() {
         return metaData;
     }

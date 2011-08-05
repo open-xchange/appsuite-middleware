@@ -57,6 +57,7 @@ package com.openexchange.i18n;
 public interface Translator {
 
     Translator EMPTY = new Translator() {
+        @Override
         public String translate(final String toTranslate) {
             return toTranslate;
         }

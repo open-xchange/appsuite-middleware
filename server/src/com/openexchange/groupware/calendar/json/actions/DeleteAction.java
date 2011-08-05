@@ -69,14 +69,14 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DeleteAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DeleteAction extends AbstractAppointmentAction {
 
     /**
      * Initializes a new {@link DeleteAction}.
-     * 
+     *
      * @param services
      */
     public DeleteAction(final ServiceLookup services) {

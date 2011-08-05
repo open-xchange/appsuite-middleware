@@ -75,7 +75,7 @@ public final class LoggableImpl implements Loggable {
 
     /**
      * Initializes a new {@link LoggableImpl}.
-     * 
+     *
      * @param level
      * @param log
      * @param message
@@ -98,7 +98,7 @@ public final class LoggableImpl implements Loggable {
 
     /**
      * Puts specified properties.
-     * 
+     *
      * @param properties The properties
      */
     public LoggableImpl putProperties(final Map<String, Object> properties) {

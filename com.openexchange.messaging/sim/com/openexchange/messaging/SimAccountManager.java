@@ -75,6 +75,7 @@ public class SimAccountManager implements MessagingAccountManager {
         return new SimMessagingAccount();
     }
 
+    @Override
     public int addAccount(final MessagingAccount account, final Session session) throws OXException {
         createdAccount = account;
         this.session = session;
@@ -92,6 +93,7 @@ public class SimAccountManager implements MessagingAccountManager {
         return session;
     }
 
+    @Override
     public void deleteAccount(final MessagingAccount account, final Session session) throws OXException {
         deletedAccount = account;
         this.session = session;
@@ -99,6 +101,7 @@ public class SimAccountManager implements MessagingAccountManager {
     }
 
 
+    @Override
     public MessagingAccount getAccount(final int id, final Session session) throws OXException {
         this.id = id;
         this.session = session;
@@ -106,11 +109,13 @@ public class SimAccountManager implements MessagingAccountManager {
         return accountToGet;
     }
 
+    @Override
     public List<MessagingAccount> getAccounts(final Session session) throws OXException {
         exception();
         return accounts;
     }
 
+    @Override
     public void updateAccount(final MessagingAccount account, final Session session) throws OXException {
         updatedAccount = account;
         this.session = session;
@@ -154,6 +159,7 @@ public class SimAccountManager implements MessagingAccountManager {
     /* (non-Javadoc)
      * @see com.openexchange.messaging.MessagingAccountManager#checkSecretCanDecryptStrings(com.openexchange.session.Session, java.lang.String)
      */
+    @Override
     public String checkSecretCanDecryptStrings(final Session session, final String secret) {
         return null;
     }
@@ -161,6 +167,7 @@ public class SimAccountManager implements MessagingAccountManager {
     /* (non-Javadoc)
      * @see com.openexchange.messaging.MessagingAccountManager#migrateToNewSecret(java.lang.String, java.lang.String, com.openexchange.session.Session)
      */
+    @Override
     public void migrateToNewSecret(final String oldSecret, final String newSecret, final Session session) {
         // TODO Auto-generated method stub
 

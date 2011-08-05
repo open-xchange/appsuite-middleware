@@ -74,6 +74,7 @@ public final class Note<T extends CalendarComponent, U extends CalendarObject> e
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isSet(final U calendarObject) {
         return calendarObject.containsNote() && null != calendarObject.getNote() && calendarObject.getNote().length() != 0;
     }
@@ -81,14 +82,17 @@ public final class Note<T extends CalendarComponent, U extends CalendarObject> e
     /**
      * {@inheritDoc}
      */
+    @Override
     public void emit(final int index, final U calendarObject, final T calendarComponent, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
         calendarComponent.getProperties().add(new Description(calendarObject.getNote()));
     }
 
+    @Override
     public boolean hasProperty(final T calendarComponent) {
         return null != calendarComponent.getProperty(Description.DESCRIPTION);
     }
 
+    @Override
     public void parse(final int index, final T calendarComponent, final U calendarObject, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
         calendarObject.setNote(calendarComponent.getProperty(Description.DESCRIPTION).getValue());
     }

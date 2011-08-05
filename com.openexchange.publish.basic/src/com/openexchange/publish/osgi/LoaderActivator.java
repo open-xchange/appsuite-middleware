@@ -75,6 +75,7 @@ public class LoaderActivator implements BundleActivator {
 
     private ServiceRegistration dataLoaderRegistration;
 
+    @Override
     public void start(final BundleContext context) throws Exception {
         whiteboard = new Whiteboard(context);
 
@@ -93,6 +94,7 @@ public class LoaderActivator implements BundleActivator {
             context.registerService(PublicationDataLoaderService.class.getName(), new CachingLoader(whiteboard, compositeLoader), null);
     }
 
+    @Override
     public void stop(final BundleContext context) throws Exception {
         dataLoaderRegistration.unregister();
         dataLoaderRegistration = null;

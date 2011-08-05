@@ -74,6 +74,7 @@ public class DynamicSim implements InvocationHandler{
         this.expectation = expectation;
     }
 
+    @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         expectation.verify(method, args);
         wasCalled = true;
@@ -128,6 +129,7 @@ public class DynamicSim implements InvocationHandler{
             this.invocationHandlers = handlers;
         }
 
+        @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             if(index == invocationHandlers.length) {
                 throw new IllegalStateException("Didn't expect method call: "+method);

@@ -69,6 +69,7 @@ public class UWAWidgetParser extends ModelParser<UWAWidget> {
 
     private static final AttributeHandler<UWAWidget> OVERRIDES = new AttributeHandler<UWAWidget>() {
 
+        @Override
         public Object handle(Attribute<UWAWidget> attr, Object... args) {
             if (attr == Field.PARAMETERS || attr == Field.ADJ) {
                 return args[0].toString();

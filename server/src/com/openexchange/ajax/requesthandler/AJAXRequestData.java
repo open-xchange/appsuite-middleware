@@ -148,10 +148,10 @@ public class AJAXRequestData {
         headers = new LinkedHashMap<String, String>();
     }
 
-    
+
     /**
      * Sets the URI part after path to the Servlet.
-     * 
+     *
      * @param servletRequestUri The URI part
      */
     public void setServletRequestURI(final String servletRequestUri) {
@@ -160,7 +160,7 @@ public class AJAXRequestData {
 
     /**
      * Gets the URI part after path to the Servlet.
-     * 
+     *
      * @return The URI part or <code>null</code> if not applicable
      */
     public String getSerlvetRequestURI() {

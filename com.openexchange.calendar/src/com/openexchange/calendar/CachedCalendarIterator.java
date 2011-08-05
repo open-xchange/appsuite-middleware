@@ -142,6 +142,7 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
         }
     }
 
+    @Override
     public boolean hasNext() throws OXException {
         if (!cache) {
             return non_cached_iterator.hasNext();
@@ -156,6 +157,7 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
         return false;
     }
 
+    @Override
     public CalendarDataObject next() throws OXException {
         if (!oxonfe) {
             if (!cache) {
@@ -180,6 +182,7 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
         return null;
     }
 
+    @Override
     public final void close() throws OXException {
         if (closed) {
             return;
@@ -188,19 +191,23 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
         non_cached_iterator.close();
     }
 
+    @Override
     public int size() {
         return non_cached_iterator.size();
     }
 
+    @Override
     public void addWarning(final OXException warning) {
 		warnings.add(warning);
 	}
 
-	public OXException[] getWarnings() {
+	@Override
+    public OXException[] getWarnings() {
 		return warnings.isEmpty() ? null : warnings.toArray(new OXException[warnings.size()]);
 	}
 
-	public boolean hasWarnings() {
+	@Override
+    public boolean hasWarnings() {
 		return !warnings.isEmpty();
 	}
 

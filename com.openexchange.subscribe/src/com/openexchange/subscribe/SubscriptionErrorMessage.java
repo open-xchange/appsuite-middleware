@@ -103,14 +103,17 @@ public enum SubscriptionErrorMessage implements OXExceptionCode {
         this.message = message;
     }
 
+    @Override
     public String getPrefix() {
         return "SUB";
     }
 
+    @Override
     public Category getCategory() {
         return category;
     }
 
+    @Override
     public int getNumber() {
         return errorCode;
     }
@@ -119,10 +122,12 @@ public enum SubscriptionErrorMessage implements OXExceptionCode {
         return help;
     }
 
+    @Override
     public String getMessage() {
         return message;
     }
 
+    @Override
     public boolean equals(final OXException e) {
         return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }

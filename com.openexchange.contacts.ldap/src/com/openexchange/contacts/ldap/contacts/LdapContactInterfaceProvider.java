@@ -99,6 +99,7 @@ public final class LdapContactInterfaceProvider implements ContactInterfaceProvi
         this.folderId = folderId;
     }
 
+    @Override
     public ContactInterface newContactInterface(final Session session) throws OXException {
         final LdapContactInterface ldapContactInterface = new LdapContactInterface(contextId, adminId, folderProperties, folderId, this);
         ldapContactInterface.setSession(session);

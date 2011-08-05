@@ -79,6 +79,7 @@ public final class SocketFetcher {
             this.logger = logger;
         }
 
+        @Override
         public Object run() {
             ClassLoader cl = null;
             try {

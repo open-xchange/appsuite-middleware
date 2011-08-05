@@ -78,6 +78,7 @@ public class RootCollection extends AbstractStandardCaldavCollection {
         includeProperties(new CalendarHomeSet());
     }
 
+    @Override
     public List<WebdavResource> getChildren() throws OXException {
         List<WebdavResource> children = new ArrayList<WebdavResource>(3);
         for (Type type : Arrays.asList(PrivateType.getInstance(), PublicType.getInstance(), SharedType.getInstance())) {
@@ -86,10 +87,12 @@ public class RootCollection extends AbstractStandardCaldavCollection {
         return children;
     }
 
+    @Override
     public WebdavPath getUrl() {
         return GroupwareCaldavFactory.ROOT_URL;
     }
 
+    @Override
     public String getDisplayName() throws OXException {
         return "";
     }

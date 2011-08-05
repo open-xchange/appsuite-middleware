@@ -109,6 +109,7 @@ public class DiscoveryActivator implements BundleActivator {
 
     private ServiceRegistration folderUpdaterRegistryRegistration;
 
+    @Override
     public void start(final BundleContext context) throws Exception {
         whiteboard = new Whiteboard(context);
         collector = new OSGiSubscriptionSourceCollector(context);
@@ -166,6 +167,7 @@ public class DiscoveryActivator implements BundleActivator {
 
     }
 
+    @Override
     public void stop(final BundleContext context) throws Exception {
         whiteboard.close();
         whiteboard = null;

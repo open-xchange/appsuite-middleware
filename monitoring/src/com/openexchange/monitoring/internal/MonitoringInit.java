@@ -99,6 +99,7 @@ public final class MonitoringInit implements Initialization {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void start() throws OXException {
         if (started.get()) {
             LOG.error(MonitoringInit.class.getName() + " already started");
@@ -128,6 +129,7 @@ public final class MonitoringInit implements Initialization {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void stop() throws OXException {
         if (!started.get()) {
             LOG.error(MonitoringInit.class.getName() + " has not been started");

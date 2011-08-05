@@ -84,42 +84,52 @@ public class RSSFeedOperations implements MessagingAccountAccess, MessagingAccou
         messageAccess = new RSSMessageAccess(accountId, session, fetcher, accounts);
     }
 
+    @Override
     public int getAccountId() {
         return accountId;
     }
 
+    @Override
     public MessagingFolderAccess getFolderAccess() throws OXException {
         return folderAccess;
     }
 
+    @Override
     public MessagingMessageAccess getMessageAccess() throws OXException {
         return messageAccess;
     }
 
+    @Override
     public MessagingFolder getRootFolder() throws OXException {
         return folderAccess.getRootFolder();
     }
 
+    @Override
     public void close() {
         connected = false;
     }
 
+    @Override
     public void connect() throws OXException {
         connected = true;
     }
 
+    @Override
     public boolean isConnected() {
         return connected;
     }
 
+    @Override
     public boolean ping() throws OXException {
         return true;
     }
 
+    @Override
     public void transport(final MessagingMessage message, final Collection<MessagingAddressHeader> recipients) throws OXException {
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(RSSMessagingService.ID);
     }
 
+    @Override
     public boolean cacheable() {
         // Nothing to cache
         return false;

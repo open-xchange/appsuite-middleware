@@ -77,10 +77,12 @@ public class PIMAttachmentDataProvider implements DataProvider<PIMAttachmentStat
         this.attachments = attachments;
     }
 
+    @Override
     public String getId() {
         return "attachments";
     }
 
+    @Override
     public InputStream retrieve(final PIMAttachmentState state, final Map<String, Object> specification, final ServerSession session) throws OXException {
         final int folderId = tolerantInt(specification.get(FOLDER));
         final int objectId = tolerantInt(specification.get(OBJECT));
@@ -90,6 +92,7 @@ public class PIMAttachmentDataProvider implements DataProvider<PIMAttachmentStat
         return attachments.getAttachedFile(folderId, objectId, moduleId, id, session.getContext(), session.getUser(), session.getUserConfiguration());
     }
 
+    @Override
     public FileMetadata retrieveMetadata(final PIMAttachmentState state, final Map<String, Object> specification, final ServerSession session) throws OXException {
 
         final int folderId = tolerantInt(specification.get(FOLDER));
@@ -106,10 +109,12 @@ public class PIMAttachmentDataProvider implements DataProvider<PIMAttachmentStat
         return Integer.parseInt(intable.toString());
     }
 
+    @Override
     public PIMAttachmentState start() {
         return null;
     }
 
+    @Override
     public void close(final PIMAttachmentState state) {
 
     }
@@ -122,14 +127,17 @@ public class PIMAttachmentDataProvider implements DataProvider<PIMAttachmentStat
             this.attachment = attachment;
         }
 
+        @Override
         public String getFilename() {
             return attachment.getFilename();
         }
 
+        @Override
         public long getSize() {
             return attachment.getFilesize();
         }
 
+        @Override
         public String getType() {
             return attachment.getFileMIMEType();
         }

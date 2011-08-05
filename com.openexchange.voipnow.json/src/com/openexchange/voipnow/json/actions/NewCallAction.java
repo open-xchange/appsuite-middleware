@@ -87,6 +87,7 @@ public final class NewCallAction extends AbstractVoipNowHTTPAction<GetMethod> {
         super();
     }
 
+    @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         try {
             /*
