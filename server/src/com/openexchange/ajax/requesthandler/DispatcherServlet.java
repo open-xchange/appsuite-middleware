@@ -249,11 +249,13 @@ public final class DispatcherServlet extends SessionServlet {
         /*
          * Set the action
          */
-        final String action = req.getParameter("action");
-        if (null == action) {
-            retval.setAction(req.getMethod().toUpperCase());
-        } else {
-            retval.setAction(action);
+        {
+            final String action = req.getParameter("action");
+            if (null == action) {
+                retval.setAction(req.getMethod().toUpperCase());
+            } else {
+                retval.setAction(action);
+            }
         }
         /*
          * Set the format
