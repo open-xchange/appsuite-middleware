@@ -296,45 +296,55 @@ final class MovePerformer extends AbstractPerformer {
             final boolean parentEquality = newRealParentStorage.equals(realParentStorage);
             if (destEquality) {
                 /*
-                 * Perform the move in virtual storage
+                 * Check presence in virtual tree
                  */
-                virtualStorage.updateFolder(folder, storageParameters);
-                /*
-                 * Remember previous virtual entries
-                 */
-                final String oldId = folder.getID();
-                final FolderInfo oldFolderInfo = new FolderInfo(oldId, storageFolder.getName());
+                final FolderInfo oldFolderInfo = new FolderInfo(folder.getID(), storageFolder.getName());
                 gatherSubfolders(treeId, oldFolderInfo, storageParameters, virtualStorage, true);
-                /*
-                 * Destination folder is compatible: Perform real move
-                 */
-                checkOpenedStorage(realStorage, openedStorages);
-                realStorage.updateFolder(folder, storageParameters);
-                final String newId = folder.getID();
-                if (!parentEquality) {
+                if (containsAny(folder.getTreeID(), oldFolderInfo, virtualStorage, storageParameters)) {
                     /*
-                     * Delete in virtual storage
+                     * Perform the move in virtual storage
                      */
-                    virtualStorage.deleteFolder(treeId, oldId, storageParameters);
-                }
-                /*
-                 * Generate map
-                 */
-                final FolderInfo newFolderInfo = new FolderInfo(newId, folder.getName());
-                gatherSubfolders(treeId, newFolderInfo, storageParameters, realStorage, false);
-                final Map<String, String> parentIDMap = generateParentIDMap(oldFolderInfo, newFolderInfo);
-                final Map<String, String> idMap = generateIDMap(oldFolderInfo, newFolderInfo);
-                for (final Entry<String, String> entry : parentIDMap.entrySet()) {
-                    final Folder up = new UpdateFolder();
-                    final String id = entry.getKey();
-                    up.setID(id);
-                    up.setParentID(entry.getValue());
-                    up.setTreeID(treeId);
-                    final String newIdent = idMap.get(id);
-                    if (null != newIdent) {
-                        up.setNewID(newIdent);
+                    virtualStorage.updateFolder(folder, storageParameters);
+                    /*
+                     * Remember previous virtual entries
+                     */
+                    final String oldId = folder.getID();
+                    /*
+                     * Destination folder is compatible: Perform real move
+                     */
+                    checkOpenedStorage(realStorage, openedStorages);
+                    realStorage.updateFolder(folder, storageParameters);
+                    final String newId = folder.getID();
+                    if (!parentEquality) {
+                        /*
+                         * Delete in virtual storage
+                         */
+                        virtualStorage.deleteFolder(treeId, oldId, storageParameters);
                     }
-                    virtualStorage.updateFolder(up, storageParameters);
+                    /*
+                     * Generate map
+                     */
+                    final FolderInfo newFolderInfo = new FolderInfo(newId, folder.getName());
+                    gatherSubfolders(treeId, newFolderInfo, storageParameters, realStorage, false);
+                    final Map<String, String> parentIDMap = generateParentIDMap(oldFolderInfo, newFolderInfo);
+                    final Map<String, String> idMap = generateIDMap(oldFolderInfo, newFolderInfo);
+                    for (final Entry<String, String> entry : parentIDMap.entrySet()) {
+                        final Folder up = new UpdateFolder();
+                        final String id = entry.getKey();
+                        up.setID(id);
+                        up.setParentID(entry.getValue());
+                        up.setTreeID(treeId);
+                        final String newIdent = idMap.get(id);
+                        if (null != newIdent) {
+                            up.setNewID(newIdent);
+                        }
+                        virtualStorage.updateFolder(up, storageParameters);
+                    }
+                } else {
+                    /*
+                     * There is nothing to change in virtual tree. Just delegate to to real folder storage
+                     */
+                    realStorage.updateFolder(folder, storageParameters);
                 }
                 /*
                  * Leave method
@@ -470,6 +480,18 @@ final class MovePerformer extends AbstractPerformer {
             permission = CalculatePermission.calculate(f, getSession(), ALL_ALLOWED);
         }
         return permission;
+    }
+
+    private static boolean containsAny(final String treeId, final FolderInfo folderInfo, final FolderStorage folderStorage, final StorageParameters storageParameters) throws OXException {
+        if (folderStorage.containsFolder(treeId, folderInfo.id, storageParameters)) {
+            return true;
+        }
+        for (final FolderInfo subfolder : folderInfo.subfolders) {
+            if (containsAny(treeId, subfolder, folderStorage, storageParameters)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static Map<String, String> generateIDMap(final FolderInfo oldFolder, final FolderInfo newFolder) {
