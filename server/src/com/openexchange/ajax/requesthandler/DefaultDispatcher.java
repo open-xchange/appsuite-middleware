@@ -63,7 +63,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link DefaultDispatcher}
+ * {@link DefaultDispatcher} - The default {@link Dispatcher dispatcher} implementation.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
