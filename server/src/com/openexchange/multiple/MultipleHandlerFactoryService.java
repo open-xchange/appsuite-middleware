@@ -49,12 +49,16 @@
 
 package com.openexchange.multiple;
 
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+
 /**
  * {@link MultipleHandlerFactoryService} - Provides {@link MultipleHandler} instances for a certain module indicated by
  * {@link #getSupportedModule()}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @deprecated Consider using {@link AJAXActionServiceFactory} framework instead
  */
+@Deprecated
 public interface MultipleHandlerFactoryService {
 
     /**
