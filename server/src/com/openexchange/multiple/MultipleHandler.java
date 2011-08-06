@@ -54,6 +54,7 @@ import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
@@ -61,7 +62,9 @@ import com.openexchange.tools.session.ServerSession;
  * {@link MultipleHandler} - Handles a multiple request.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @deprecated Consider using {@link AJAXActionServiceFactory} framework instead
  */
+@Deprecated
 public interface MultipleHandler {
 
     /**
