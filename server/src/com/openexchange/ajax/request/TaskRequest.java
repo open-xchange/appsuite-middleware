@@ -161,7 +161,7 @@ public class TaskRequest extends CalendarRequest {
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_COPY)) {
             return actionCopy(json);
         } else {
-            throw AjaxExceptionCodes.UnknownAction.create( action);
+            throw AjaxExceptionCodes.UNKNOWN_ACTION.create( action);
         }
     }
 

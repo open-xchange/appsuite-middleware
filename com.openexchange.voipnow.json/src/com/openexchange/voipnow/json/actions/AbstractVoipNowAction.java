@@ -198,7 +198,7 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
         try {
             return Long.valueOf(tmp);
         } catch (final NumberFormatException e) {
-            throw AjaxExceptionCodes.InvalidParameterValue.create( parameterName, tmp);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create( parameterName, tmp);
         }
     }
 
@@ -219,7 +219,7 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
         try {
             return Long.parseLong(tmp);
         } catch (final NumberFormatException e) {
-            throw AjaxExceptionCodes.InvalidParameterValue.create( parameterName, tmp);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create( parameterName, tmp);
         }
     }
 
@@ -254,7 +254,7 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
         try {
             return ActionUtility.getUnsignedInteger(tmp);
         } catch (final NumberFormatException e) {
-            throw AjaxExceptionCodes.InvalidParameterValue.create( parameterName, tmp);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create( parameterName, tmp);
         }
     }
 
@@ -275,7 +275,7 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
         try {
             return Integer.parseInt(tmp);
         } catch (final NumberFormatException e) {
-            throw AjaxExceptionCodes.InvalidParameterValue.create( parameterName, tmp);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create( parameterName, tmp);
         }
     }
 
@@ -313,7 +313,7 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
             if (null != parameter) {
                 if (null != foundName) {
                     // There was already one of specified choices
-                    throw AjaxExceptionCodes.EitherParameterConflict.create( name, foundName);
+                    throw AjaxExceptionCodes.EITHER_PARAMETER_CONFLICT.create( name, foundName);
                 }
                 foundName = name;
             }

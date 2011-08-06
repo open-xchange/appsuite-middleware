@@ -198,7 +198,7 @@ public final class DispatcherServlet extends SessionServlet {
             return;
         } catch (final RuntimeException e) {
             LOG.error(e.getMessage(), e);
-            final OXException exception = AjaxExceptionCodes.UnexpectedError.create(e, e.getMessage());
+            final OXException exception = AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             JSONResponseRenderer.writeResponse(new Response().setException(exception), action, req, resp);
             return;
         } finally {

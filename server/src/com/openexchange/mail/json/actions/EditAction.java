@@ -95,7 +95,7 @@ public final class EditAction extends AbstractMailAction {
         final AJAXRequestData request = req.getRequest();
         try {
             if (!request.hasUploads()) {
-                throw AjaxExceptionCodes.UnknownAction.create("edit");
+                throw AjaxExceptionCodes.UNKNOWN_ACTION.create("edit");
             }
             final ServerSession session = req.getSession();
             final UploadEvent uploadEvent = request.getUploadEvent();

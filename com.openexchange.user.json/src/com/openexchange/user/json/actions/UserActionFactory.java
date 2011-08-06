@@ -98,11 +98,11 @@ public final class UserActionFactory implements AJAXActionServiceFactory {
     @Override
     public AJAXActionService createActionService(final String action) throws OXException {
         if (null == action) {
-            throw AjaxExceptionCodes.UnknownAction.create( action);
+            throw AjaxExceptionCodes.UNKNOWN_ACTION.create( action);
         }
         final AJAXActionService retval = actions.get(action);
         if (null == retval) {
-            throw AjaxExceptionCodes.UnknownAction.create( action);
+            throw AjaxExceptionCodes.UNKNOWN_ACTION.create( action);
         }
         return retval;
     }

@@ -109,7 +109,7 @@ public final class MailRequest {
      */
     public void action(final String action, final JSONObject jsonObject, final MailServletInterface mailInterface) throws OXException, JSONException {
         if (!session.getUserConfiguration().hasWebMail()) {
-            throw AjaxExceptionCodes.NoPermissionForModule.create("mail");
+            throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create("mail");
         }
         if (action.equalsIgnoreCase(AJAXServlet.ACTION_ALL)) {
             MAIL_SERVLET.actionGetAllMails(session, writer, jsonObject, mailInterface);

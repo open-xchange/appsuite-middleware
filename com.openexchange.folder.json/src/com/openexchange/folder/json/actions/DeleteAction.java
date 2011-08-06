@@ -101,7 +101,7 @@ public final class DeleteAction extends AbstractFolderAction {
                 try {
                     timestamp = new Date(Long.parseLong(timestampStr));
                 } catch (final NumberFormatException e) {
-                    throw AjaxExceptionCodes.InvalidParameterValue.create("timestamp", timestampStr);
+                    throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("timestamp", timestampStr);
                 }
             }
         }
@@ -134,7 +134,7 @@ public final class DeleteAction extends AbstractFolderAction {
              */
             return new AJAXRequestResult(responseArray).addWarnings(warnings);
         } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSONError.create(e, e.getMessage());
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
 

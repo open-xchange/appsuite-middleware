@@ -298,7 +298,7 @@ public class SyncServlet extends PermissionServlet {
 	}
 
 	private static final OXException getWrappingOXException(final Throwable cause) {
-		return AjaxExceptionCodes.UnexpectedError.create(cause, cause.getMessage());
+		return AjaxExceptionCodes.UNEXPECTED_ERROR.create(cause, cause.getMessage());
 	}
 
 	private static final String checkStringParam(final HttpServletRequest req, final String paramName)

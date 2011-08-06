@@ -178,7 +178,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         }
 
         if (!unknownColumns.isEmpty()) {
-            throw AjaxExceptionCodes.InvalidParameterValue.create( Param.COLUMNS.getName(), unknownColumns.toString());
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create( Param.COLUMNS.getName(), unknownColumns.toString());
         }
 
         return columns = fields;
@@ -195,7 +195,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         }
         final Field field = sortingField = Field.get(sort);
         if (field == null) {
-            throw AjaxExceptionCodes.InvalidParameterValue.create( Param.SORT.getName(), sort);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create( Param.SORT.getName(), sort);
         }
         return field;
     }
@@ -204,7 +204,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     public SortDirection getSortingOrder() throws OXException {
         final SortDirection sortDirection = SortDirection.get(data.getParameter(Param.ORDER.getName()));
         if (sortDirection == null) {
-            throw AjaxExceptionCodes.InvalidParameterValue.create( Param.ORDER.getName(), sortDirection);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create( Param.ORDER.getName(), sortDirection);
         }
         return sortDirection;
     }
@@ -298,7 +298,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
                 folderMapping.put(id, tuple.optString(Param.FOLDER_ID.getName()));
             }
         } catch (final JSONException x) {
-            throw AjaxExceptionCodes.JSONError.create( x.getMessage());
+            throw AjaxExceptionCodes.JSON_ERROR.create( x.getMessage());
         }
 
     }
@@ -326,7 +326,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
                 versions[i] = body.getInt(i);
             }
         } catch (final JSONException x) {
-            throw AjaxExceptionCodes.JSONError.create( x.getMessage());
+            throw AjaxExceptionCodes.JSON_ERROR.create( x.getMessage());
         }
         return versions;
     }
@@ -381,7 +381,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         try {
             return queryObject.getString("pattern");
         } catch (final JSONException x) {
-            throw AjaxExceptionCodes.JSONError.create( x.getMessage());
+            throw AjaxExceptionCodes.JSON_ERROR.create( x.getMessage());
         }
     }
 
@@ -396,7 +396,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             try {
                 object = new JSONObject(data.getParameter(JSON));
             } catch (final JSONException e) {
-                throw AjaxExceptionCodes.JSONError.create( e.getMessage());
+                throw AjaxExceptionCodes.JSON_ERROR.create( e.getMessage());
             }
         }
 
@@ -461,7 +461,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
                 checkSize( uploadFile );
                 return new FileInputStream(uploadFile.getTmpFile());
             } catch (final FileNotFoundException e) {
-                throw AjaxExceptionCodes.IOError.create(  e.getMessage());
+                throw AjaxExceptionCodes.IO_ERROR.create(  e.getMessage());
             }
         }
         return null;

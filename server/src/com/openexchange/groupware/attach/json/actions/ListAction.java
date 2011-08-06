@@ -107,7 +107,7 @@ public final class ListAction extends AbstractAttachmentAction {
                     try {
                         ids[i] = Integer.parseInt(string);
                     } catch (final NumberFormatException e1) {
-                        throw AjaxExceptionCodes.InvalidParameter.create(string);
+                        throw AjaxExceptionCodes.IMVALID_PARAMETER.create(string);
                     }
                 }
             }
@@ -115,11 +115,11 @@ public final class ListAction extends AbstractAttachmentAction {
             final JSONValue jsonValue = list(session, folderId, attachedId, moduleId, ids, columns);
             return new AJAXRequestResult(jsonValue, "json");
         } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSONError.create(e, e.getMessage());
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            throw AjaxExceptionCodes.UnexpectedError.create(e, e.getMessage());
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final UnknownColumnException e) {
-            throw AjaxExceptionCodes.UnexpectedError.create(e, e.getMessage());
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 

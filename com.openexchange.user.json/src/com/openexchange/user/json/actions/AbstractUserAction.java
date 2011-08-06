@@ -126,7 +126,7 @@ public abstract class AbstractUserAction implements AJAXActionService {
                 }
             } else {
                 if (value.length() > 1) {
-                    throw AjaxExceptionCodes.InvalidParameterValue.create( key, value);
+                    throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create( key, value);
                 }
                 list.add(ALL);
             }
@@ -151,7 +151,7 @@ public abstract class AbstractUserAction implements AJAXActionService {
         try {
             return Long.valueOf(tmp);
         } catch (final NumberFormatException e) {
-            throw AjaxExceptionCodes.InvalidParameterValue.create( parameterName, tmp);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create( parameterName, tmp);
         }
     }
 
@@ -172,7 +172,7 @@ public abstract class AbstractUserAction implements AJAXActionService {
         try {
             return Long.parseLong(tmp);
         } catch (final NumberFormatException e) {
-            throw AjaxExceptionCodes.InvalidParameterValue.create( parameterName, tmp);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create( parameterName, tmp);
         }
     }
 
@@ -193,7 +193,7 @@ public abstract class AbstractUserAction implements AJAXActionService {
         try {
             return Integer.parseInt(tmp);
         } catch (final NumberFormatException e) {
-            throw AjaxExceptionCodes.InvalidParameterValue.create( parameterName, tmp);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create( parameterName, tmp);
         }
     }
 
@@ -214,7 +214,7 @@ public abstract class AbstractUserAction implements AJAXActionService {
         try {
             return Integer.parseInt(tmp);
         } catch (final NumberFormatException e) {
-            throw AjaxExceptionCodes.InvalidParameterValue.create( parameterName, tmp);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create( parameterName, tmp);
         }
     }
 

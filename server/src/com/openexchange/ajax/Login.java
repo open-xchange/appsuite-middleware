@@ -440,7 +440,7 @@ public class Login extends AJAXServlet {
                 try {
                     final LoginConfiguration conf = confReference.get();
                     if (!conf.sessiondAutoLogin) {
-                        throw AjaxExceptionCodes.DisabledAction.create( "autologin");
+                        throw AjaxExceptionCodes.DISABLED_ACTION.create( "autologin");
                     }
 
                     final Cookie[] cookies = req.getCookies();
@@ -617,7 +617,7 @@ public class Login extends AJAXServlet {
     private void doJSONAuth(final HttpServletRequest req, final HttpServletResponse resp, final String action) throws IOException {
         final JSONRequestHandler handler = handlerMap.get(action);
         if (null == handler) {
-            logAndSendException(resp, AjaxExceptionCodes.UnknownAction.create( action));
+            logAndSendException(resp, AjaxExceptionCodes.UNKNOWN_ACTION.create( action));
             return;
         }
         handler.handleRequest(req, resp);
@@ -681,7 +681,7 @@ public class Login extends AJAXServlet {
     private void doCookieReWrite(final HttpServletRequest req, final HttpServletResponse resp, final CookieType type) throws OXException, JSONException, IOException {
         final LoginConfiguration conf = confReference.get();
         if (!conf.sessiondAutoLogin && CookieType.SESSION == type) {
-            throw AjaxExceptionCodes.DisabledAction.create( "store");
+            throw AjaxExceptionCodes.DISABLED_ACTION.create( "store");
         }
         final SessiondService sessiond = ServerServiceRegistry.getInstance().getService(SessiondService.class);
         if (null == sessiond) {

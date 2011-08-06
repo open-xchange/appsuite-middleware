@@ -182,7 +182,7 @@ public final class MyServletRequest  {
 			// UI must send feature, upsell package and hostname
 			retval = actionTriggerEmailUpsell(jsonObject,request_src_hostname);
 		}else {
-			throw AjaxExceptionCodes.UnknownAction.create(action);
+			throw AjaxExceptionCodes.UNKNOWN_ACTION.create(action);
 		}
 
 		return retval;

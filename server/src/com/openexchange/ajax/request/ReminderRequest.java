@@ -149,7 +149,7 @@ public final class ReminderRequest {
         } else if (action.equalsIgnoreCase("remindAgain")) {
             return actionRemindAgain(jsonObject);
         } else {
-            throw AjaxExceptionCodes.UnknownAction.create( action);
+            throw AjaxExceptionCodes.UNKNOWN_ACTION.create( action);
         }
     }
 

@@ -95,7 +95,7 @@ public class PollParser {
 
             return poll;
         } catch (final JSONException x) {
-            throw AjaxExceptionCodes.JSONError.create(x.getMessage());
+            throw AjaxExceptionCodes.JSON_ERROR.create(x.getMessage());
         }
 
     }

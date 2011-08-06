@@ -106,7 +106,7 @@ public final class GetAction extends AbstractMailAccountAction {
             final JSONObject jsonAccount = MailAccountWriter.write(checkFullNames(mailAccount, storageService, session));
             return new AJAXRequestResult(jsonAccount);
         } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSONError.create(e, e.getMessage());
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
 

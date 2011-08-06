@@ -140,7 +140,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
     @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         if (!session.getUserConfiguration().hasWebMail()) {
-            throw AjaxExceptionCodes.NoPermissionForModule.create("mail");
+            throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create("mail");
         }
         try {
             return perform(new MailRequest(request, session));
@@ -149,7 +149,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
             if (cause instanceof OXException) {
                 throw (OXException) cause;
             }
-            throw AjaxExceptionCodes.UnexpectedError.create(e, e.getMessage());
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 

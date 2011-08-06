@@ -129,7 +129,7 @@ public abstract class AbstractReminderAction implements AJAXActionService {
             }
             return perform(reminderRequest);
         } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSONError.create(e, e.getMessage());
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
 

@@ -152,7 +152,7 @@ public abstract class AbstractRequest {
         }
         final Action retval = Action.byName(value);
         if (null == retval) {
-            throw AjaxExceptionCodes.UnknownAction.create( value);
+            throw AjaxExceptionCodes.UNKNOWN_ACTION.create( value);
         }
         return retval;
     }

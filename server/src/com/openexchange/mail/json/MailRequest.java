@@ -106,7 +106,7 @@ public final class MailRequest {
         try {
             return Integer.parseInt(parameter.trim());
         } catch (final NumberFormatException e) {
-            throw AjaxExceptionCodes.InvalidParameterValue.create(name, parameter);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
         }
     }
 
@@ -133,7 +133,7 @@ public final class MailRequest {
             try {
                 ret[i] = Integer.parseInt(sa[i].trim());
             } catch (final NumberFormatException e) {
-                throw AjaxExceptionCodes.InvalidParameterValue.create(name, parameter);
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
             }
         }
         return ret;

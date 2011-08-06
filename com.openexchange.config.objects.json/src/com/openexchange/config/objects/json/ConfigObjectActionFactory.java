@@ -81,7 +81,7 @@ public class ConfigObjectActionFactory implements AJAXActionServiceFactory {
     @Override
     public AJAXActionService createActionService(final String action) throws OXException {
         if (!GET.equals(action)) {
-            throw AjaxExceptionCodes.UnknownAction.create(action);
+            throw AjaxExceptionCodes.UNKNOWN_ACTION.create(action);
         }
         return new AJAXActionService() {
 
@@ -103,13 +103,13 @@ public class ConfigObjectActionFactory implements AJAXActionServiceFactory {
                     final Object json = JSONCoercion.coerceToJSON(object);
                     return new AJAXRequestResult(json);
                 } catch (final JSONException e) {
-                    throw AjaxExceptionCodes.JSONError.create(e);
+                    throw AjaxExceptionCodes.JSON_ERROR.create(e);
                 } catch (final IllegalStateException e) {
                     final Throwable cause = e.getCause();
                     if (cause instanceof OXException) {
                         throw (OXException) cause;
                     }
-                    throw AjaxExceptionCodes.UnexpectedError.create(e, e.getMessage());
+                    throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
                 }
             }
 

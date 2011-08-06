@@ -110,7 +110,7 @@ public class QuotaRequest {
         } else if ("mail".equals(action)) {
             return mail();
         }
-        throw AjaxExceptionCodes.UnknownAction.create( action);
+        throw AjaxExceptionCodes.UNKNOWN_ACTION.create( action);
     }
 
     private JSONObject filestore() throws OXException, JSONException {

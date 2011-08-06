@@ -97,7 +97,7 @@ public class FileMetadataParser implements FileMetadataParserService{
             File.Field.inject(jsonHandler, file, object);
         } catch (RuntimeException x) {
             if(x.getCause() != null && JSONException.class.isInstance(x.getCause())) {
-                throw AjaxExceptionCodes.JSONError.create( x.getCause().getMessage());
+                throw AjaxExceptionCodes.JSON_ERROR.create( x.getCause().getMessage());
             }
             throw x;
         }

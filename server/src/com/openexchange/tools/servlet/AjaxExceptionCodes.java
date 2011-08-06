@@ -12,7 +12,7 @@ public enum AjaxExceptionCodes implements OXExceptionCode {
     /**
      * Unknown AJAX action: %s.
      */
-    UnknownAction("Unknown AJAX action: %s.", Category.CATEGORY_ERROR, 1),
+    UNKNOWN_ACTION("Unknown AJAX action: %s.", Category.CATEGORY_ERROR, 1),
     /**
      * Missing the following request parameter: %s
      */
@@ -20,15 +20,15 @@ public enum AjaxExceptionCodes implements OXExceptionCode {
     /**
      * Missing upload image.
      */
-    NoUploadImage("Missing upload image.", Category.CATEGORY_ERROR, 3),
+    NO_UPLOAD_IMAGE("Missing upload image.", Category.CATEGORY_ERROR, 3),
     /**
      * Invalid parameter: %s
      */
-    InvalidParameter("Invalid parameter: %s", Category.CATEGORY_ERROR, 4),
+    IMVALID_PARAMETER("Invalid parameter: %s", Category.CATEGORY_ERROR, 4),
     /**
      * I/O error while writing to Writer object: %s
      */
-    IOError("I/O error while writing to Writer object: %s", Category.CATEGORY_ERROR, 5),
+    IO_ERROR("I/O error while writing to Writer object: %s", Category.CATEGORY_ERROR, 5),
     /**
      * Missing AJAX request handler for module %s
      */
@@ -44,39 +44,39 @@ public enum AjaxExceptionCodes implements OXExceptionCode {
     /**
      * JSON error: %s
      */
-    JSONError("JSON error: %s", Category.CATEGORY_ERROR, 9),
+    JSON_ERROR("JSON error: %s", Category.CATEGORY_ERROR, 9),
     /**
      * Invalid parameter "%1$s": %2$s
      */
-    InvalidParameterValue("Invalid parameter \"%1$s\": %2$s", Category.CATEGORY_ERROR, 10),
+    INVALID_PARAMETER_VALUE("Invalid parameter \"%1$s\": %2$s", Category.CATEGORY_ERROR, 10),
     /**
      * Unexpected error: %1$s
      */
-    UnexpectedError("Unexpected error: %1$s", Category.CATEGORY_ERROR, 11),
+    UNEXPECTED_ERROR("Unexpected error: %1$s", Category.CATEGORY_ERROR, 11),
     /**
      * A parameter conflict occurred.
      */
-    ParameterConflict("A parameter conflict occurred.", Category.CATEGORY_ERROR, 12),
+    PARAMETER_CONFLICT("A parameter conflict occurred.", Category.CATEGORY_ERROR, 12),
     /**
      * Parameter "%1$s" conflicts with parameter "%2$s".
      */
-    EitherParameterConflict("Parameter \"%1$s\" conflicts with parameter \"%2$s\".", Category.CATEGORY_ERROR, 13),
+    EITHER_PARAMETER_CONFLICT("Parameter \"%1$s\" conflicts with parameter \"%2$s\".", Category.CATEGORY_ERROR, 13),
     /**
      * Action "%1$s" on request path "%2$s" is not permitted via a non-secure connection.
      */
-    NonSecureDenied("Action \"%1$s\" on request path \"%2$s\" is not permitted via a non-secure connection.", Category.CATEGORY_ERROR, 14),
+    NON_SECURE_DENIED("Action \"%1$s\" on request path \"%2$s\" is not permitted via a non-secure connection.", Category.CATEGORY_ERROR, 14),
     /**
      * The action "%1$s" is disabled due to server configuration
      */
-    DisabledAction("The action \"%1$s\" is disabled due to server configuration", Category.CATEGORY_PERMISSION_DENIED, 15),
+    DISABLED_ACTION("The action \"%1$s\" is disabled due to server configuration", Category.CATEGORY_PERMISSION_DENIED, 15),
     /**
      * No permission for module: %s.
      */
-    NoPermissionForModule("No permission for module: %1$s.", Category.CATEGORY_PERMISSION_DENIED, 16),
+    NO_PERMISSION_FOR_MODULE("No permission for module: %1$s.", Category.CATEGORY_PERMISSION_DENIED, 16),
     /**
      * Object has been changed in the meantime.
      */
-    Conflict("Object has been changed in the meantime.", Category.CATEGORY_CONFLICT, 17),
+    CONFLICT("Object has been changed in the meantime.", Category.CATEGORY_CONFLICT, 17),
 
     ;
 

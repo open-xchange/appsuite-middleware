@@ -168,7 +168,7 @@ public class AppointmentRequest extends CalendarRequest {
 
     public JSONValue action(final String action, final JSONObject jsonObject) throws  JSONException, OXException{
         if (!session.getUserConfiguration().hasCalendar()) {
-            throw AjaxExceptionCodes.NoPermissionForModule.create("calendar");
+            throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create("calendar");
         }
         if (AJAXServlet.ACTION_CONFIRM.equalsIgnoreCase(action)) {
             return actionConfirm(jsonObject);
@@ -199,7 +199,7 @@ public class AppointmentRequest extends CalendarRequest {
         } else if (AJAXServlet.ACTION_RESOLVE_UID.equalsIgnoreCase(action)) {
             return actionResolveUid(jsonObject);
         } else {
-            throw AjaxExceptionCodes.UnknownAction.create( action);
+            throw AjaxExceptionCodes.UNKNOWN_ACTION.create( action);
         }
     }
 
@@ -962,7 +962,7 @@ public class AppointmentRequest extends CalendarRequest {
         } else if (participant.getType() == Participant.EXTERNAL_USER) {
             timestamp = appointmentSql.setExternalConfirmation(objectId, folderId, participant.getEmailAddress(), confirmStatus, confirmMessage);
         } else {
-            throw AjaxExceptionCodes.InvalidParameterValue.create( AJAXServlet.PARAMETER_TYPE, jData.get(AJAXServlet.PARAMETER_TYPE));
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create( AJAXServlet.PARAMETER_TYPE, jData.get(AJAXServlet.PARAMETER_TYPE));
         }
 
         return new JSONObject();

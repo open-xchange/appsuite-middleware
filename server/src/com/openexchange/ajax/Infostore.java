@@ -167,7 +167,7 @@ public class Infostore extends PermissionServlet {
         if (action.equals(ACTION_DOCUMENT)) {
             if (req.getParameter(PARAMETER_ID) == null) {
                 final Response resp = new Response(session);
-                resp.setException(AjaxExceptionCodes.UnexpectedError.create("You must provide a value for " + PARAMETER_ID));
+                resp.setException(AjaxExceptionCodes.UNEXPECTED_ERROR.create("You must provide a value for " + PARAMETER_ID));
                 final UnsynchronizedStringWriter w = new UnsynchronizedStringWriter();
                 try {
                     ResponseWriter.write(resp, w);
@@ -184,7 +184,7 @@ public class Infostore extends PermissionServlet {
             try {
                 id = Integer.valueOf(req.getParameter(PARAMETER_ID));
             } catch (final NumberFormatException x) {
-                handleOXException(res, AjaxExceptionCodes.InvalidParameter.create(PARAMETER_ID), STR_ERROR, true);
+                handleOXException(res, AjaxExceptionCodes.IMVALID_PARAMETER.create(PARAMETER_ID), STR_ERROR, true);
                 return;
             }
 
@@ -344,7 +344,7 @@ public class Infostore extends PermissionServlet {
             handleOXException(res, x, action, true);
         } catch (final Throwable t) {
             final Response resp = new Response(session);
-            resp.setException(AjaxExceptionCodes.UnexpectedError.create(t, t.getMessage()));
+            resp.setException(AjaxExceptionCodes.UNEXPECTED_ERROR.create(t, t.getMessage()));
             try {
                 res.setContentType("text/html; charset=UTF-8");
                 throw new UploadServletException(res, substituteJS(

@@ -119,7 +119,7 @@ public final class ClearAction extends AbstractFolderAction {
              */
             return new AJAXRequestResult(responseArray).addWarnings(warnings);
         } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
+            throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
         }
     }
 

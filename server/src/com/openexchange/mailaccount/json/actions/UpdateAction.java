@@ -184,7 +184,7 @@ public final class UpdateAction extends AbstractMailAccountAction {
 
             return new AJAXRequestResult(jsonAccount);
         } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
+            throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
         }
     }
 

@@ -140,7 +140,7 @@ public abstract class AbstractAppointmentAction implements AJAXActionService {
     @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         if (!session.getUserConfiguration().hasCalendar()) {
-            throw AjaxExceptionCodes.NoPermissionForModule.create("calendar");
+            throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create("calendar");
         }
         try {
             final AppointmentAJAXRequest ar = new AppointmentAJAXRequest(request, session);
@@ -150,7 +150,7 @@ public abstract class AbstractAppointmentAction implements AJAXActionService {
             }
             return perform(ar);
         } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSONError.create(e, e.getMessage());
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
 

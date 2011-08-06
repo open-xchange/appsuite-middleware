@@ -101,7 +101,7 @@ public final class UserParser {
             user.setId(userId);
             return user;
         } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
+            throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
         }
     }
 
@@ -174,7 +174,7 @@ public final class UserParser {
 
             return contact;
         } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
+            throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
         } catch (final OXException e) {
             throw new OXException(e);
         }

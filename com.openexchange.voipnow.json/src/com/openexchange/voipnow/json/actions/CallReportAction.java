@@ -151,7 +151,7 @@ public class CallReportAction extends AbstractVoipNowSOAPAction<ReportInterface>
 
 			return new AJAXRequestResult(calls);
 		} catch (final JSONException e) {
-			throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
+			throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
 		} catch (final DatatypeConfigurationException e) {
 			throw VoipNowExceptionCodes.SOAP_FAULT.create(e, e.getMessage());
 		}
@@ -230,7 +230,7 @@ public class CallReportAction extends AbstractVoipNowSOAPAction<ReportInterface>
 		// Set disposion
 		final List<String> allowedDispositions = Arrays.asList("answered","busy","failed","no answer","unknown","not allowed");
 		if(! allowedDispositions.contains(disposion.toLowerCase())) {
-            throw AjaxExceptionCodes.InvalidParameterValue.create( "disposion", disposion);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create( "disposion", disposion);
         }
 		callReportRequest.setDisposion(disposion.toUpperCase());
 

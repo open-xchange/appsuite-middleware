@@ -145,7 +145,7 @@ public class DefaultDispatcher implements Dispatcher {
          */
         final AJAXActionService action = factory.createActionService(modifiedRequest.getAction());
         if (action == null) {
-            throw AjaxExceptionCodes.UnknownAction.create(modifiedRequest.getAction());
+            throw AjaxExceptionCodes.UNKNOWN_ACTION.create(modifiedRequest.getAction());
         }
         /*
          * Check for Action annotation
@@ -178,7 +178,7 @@ public class DefaultDispatcher implements Dispatcher {
             if (cause instanceof OXException) {
                 throw (OXException) cause;
             }
-            throw AjaxExceptionCodes.UnexpectedError.create(e, e.getMessage());
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
         /*
          * Iterate customizers in reverse oder for request data and result pair

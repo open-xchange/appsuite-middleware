@@ -161,7 +161,7 @@ public final class ListAction extends AbstractUserAction {
              */
             return new AJAXRequestResult(jsonArray, lastModified);
         } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
+            throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
         }
     }
 

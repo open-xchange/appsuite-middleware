@@ -113,7 +113,7 @@ public class MultipleAdapter implements MultipleHandler {
     public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws JSONException, OXException {
         final AJAXActionService actionService = factory.createActionService(action);
         if (null == actionService) {
-            throw AjaxExceptionCodes.UnknownAction.create( action);
+            throw AjaxExceptionCodes.UNKNOWN_ACTION.create( action);
         }
         final AJAXRequestData request = parse("", action, jsonObject, session, secure);
         final AJAXRequestResult requestResult;
@@ -124,7 +124,7 @@ public class MultipleAdapter implements MultipleHandler {
             if (cause instanceof OXException) {
                 throw (OXException) cause;
             }
-            throw AjaxExceptionCodes.UnexpectedError.create(e, e.getMessage());
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
         result.set(requestResult);
         return requestResult.getResultObject();

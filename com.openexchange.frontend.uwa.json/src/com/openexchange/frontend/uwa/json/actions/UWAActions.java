@@ -78,7 +78,7 @@ public class UWAActions implements AJAXActionServiceFactory {
     @Override
     public AJAXActionService createActionService(String action) throws OXException {
         if (!actions.containsKey(action)) {
-            throw AjaxExceptionCodes.UnknownAction.create( action);
+            throw AjaxExceptionCodes.UNKNOWN_ACTION.create( action);
         }
         return actions.get(action);
     }

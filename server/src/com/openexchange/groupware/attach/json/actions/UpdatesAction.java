@@ -105,7 +105,7 @@ public final class UpdatesAction extends AbstractAttachmentAction {
             try {
                 timestamp = Long.parseLong(request.getParameter(AJAXServlet.PARAMETER_TIMESTAMP).trim());
             } catch (final NumberFormatException nfe) {
-                throw AjaxExceptionCodes.InvalidParameterValue.create(
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(
                     AJAXServlet.PARAMETER_TIMESTAMP,
                     request.getParameter(AJAXServlet.PARAMETER_TIMESTAMP));
             }
@@ -138,9 +138,9 @@ public final class UpdatesAction extends AbstractAttachmentAction {
                 order,
                 timeZoneId), "json");
         } catch (final RuntimeException e) {
-            throw AjaxExceptionCodes.UnexpectedError.create(e, e.getMessage());
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final UnknownColumnException e) {
-            throw AjaxExceptionCodes.UnexpectedError.create(e, e.getMessage());
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 

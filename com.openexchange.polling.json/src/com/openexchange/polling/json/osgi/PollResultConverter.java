@@ -78,7 +78,7 @@ public class PollResultConverter implements ResultConverter {
             object.put("questions", qArray);
             return object;
         } catch (final JSONException x) {
-            throw AjaxExceptionCodes.JSONError.create(x.getMessage());
+            throw AjaxExceptionCodes.JSON_ERROR.create(x.getMessage());
         }
     }
 

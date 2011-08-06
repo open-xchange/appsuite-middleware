@@ -191,7 +191,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
                 response.setException(oxe);
             } else {
                 LOG.error(e.getMessage(), e);
-                response.setException(AjaxExceptionCodes.UnexpectedError.create(e, e.getMessage()));
+                response.setException(AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage()));
             }
         }
         try {

@@ -217,7 +217,7 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
              */
             return new AJAXRequestResult(ret, 0 == lastModified ? null : new Date(lastModified)).addWarnings(warnings);
         } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSONError.create(e, e.getMessage());
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
 

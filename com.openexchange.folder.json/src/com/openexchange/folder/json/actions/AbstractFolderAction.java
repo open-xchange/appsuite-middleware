@@ -176,7 +176,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
                 final ContentType ct = tmpMap.get(str);
                 if (null == ct) {
                     com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AbstractFolderAction.class)).error("No content type for string: " + str);
-                    throw AjaxExceptionCodes.InvalidParameterValue.create(parameterName, tmp);
+                    throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(parameterName, tmp);
                 }
                 ret.add(ct);
             } else {
@@ -184,7 +184,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
                 final ContentType ct = availableContentTypes.get(key);
                 if (null == ct) {
                     com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AbstractFolderAction.class)).error("No content type for module: " + key);
-                    throw AjaxExceptionCodes.InvalidParameterValue.create(parameterName, tmp);
+                    throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(parameterName, tmp);
                 }
                 ret.add(ct);
             }
@@ -217,7 +217,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
              * Not found
              */
             com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AbstractFolderAction.class)).error("No content type for module: " + tmp);
-            throw AjaxExceptionCodes.InvalidParameterValue.create(parameterName, tmp);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(parameterName, tmp);
         }
         /*
          * A number
@@ -226,7 +226,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
         final ContentType ct = availableContentTypes.get(key);
         if (null == ct) {
             com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AbstractFolderAction.class)).error("No content type for module: " + key);
-            throw AjaxExceptionCodes.InvalidParameterValue.create(parameterName, tmp);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(parameterName, tmp);
         }
         return ct;
     }

@@ -100,7 +100,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
              */
             return reauthorizeCallbackAction(accountId, request, session);
         } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
+            throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
         }
     }
 

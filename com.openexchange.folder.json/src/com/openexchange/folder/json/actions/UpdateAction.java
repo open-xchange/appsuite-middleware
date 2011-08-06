@@ -105,7 +105,7 @@ public final class UpdateAction extends AbstractFolderAction {
                 try {
                     timestamp = new Date(Long.parseLong(timestampStr));
                 } catch (final NumberFormatException e) {
-                    throw AjaxExceptionCodes.InvalidParameterValue.create("timestamp", timestampStr);
+                    throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("timestamp", timestampStr);
                 }
             }
         }

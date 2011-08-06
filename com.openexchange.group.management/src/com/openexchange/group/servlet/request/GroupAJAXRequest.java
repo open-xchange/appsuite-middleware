@@ -104,7 +104,7 @@ public final class GroupAJAXRequest {
         try {
             return Integer.parseInt(parameter.trim());
         } catch (final NumberFormatException e) {
-            throw AjaxExceptionCodes.InvalidParameterValue.create(name, parameter);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
         }
     }
 
@@ -143,7 +143,7 @@ public final class GroupAJAXRequest {
         try {
             return new Date(Long.parseLong(parameter.trim()));
         } catch (final NumberFormatException e) {
-            throw AjaxExceptionCodes.InvalidParameterValue.create(name, parameter);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
         }
     }
 
@@ -155,7 +155,7 @@ public final class GroupAJAXRequest {
         try {
             return new Date(Long.parseLong(parameter.trim()));
         } catch (final NumberFormatException e) {
-            throw AjaxExceptionCodes.InvalidParameterValue.create(name, parameter);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
         }
     }
 
@@ -182,7 +182,7 @@ public final class GroupAJAXRequest {
         try {
             return Integer.parseInt(parameter.trim());
         } catch (final NumberFormatException e) {
-            throw AjaxExceptionCodes.InvalidParameterValue.create(name, parameter);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
         }
     }
 
@@ -209,7 +209,7 @@ public final class GroupAJAXRequest {
             try {
                 ret[i] = Integer.parseInt(sa[i].trim());
             } catch (final NumberFormatException e) {
-                throw AjaxExceptionCodes.InvalidParameterValue.create(name, parameter);
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
             }
         }
         return ret;

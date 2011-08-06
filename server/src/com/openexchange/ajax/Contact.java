@@ -238,7 +238,7 @@ public class Contact extends DataServlet {
                     final UploadFile uploadFile = upload.getUploadFileByFieldName(AJAXServlet.PARAMETER_FILE);
 
                     if (uploadFile == null) {
-                        throw AjaxExceptionCodes.NoUploadImage.create();
+                        throw AjaxExceptionCodes.NO_UPLOAD_IMAGE.create();
                     }
 
                     final String obj = upload.getFormField(AJAXServlet.PARAMETER_JSON);
@@ -337,7 +337,7 @@ public class Contact extends DataServlet {
                     }
                 }
             } else {
-                throw AjaxExceptionCodes.UnknownAction.create( action);
+                throw AjaxExceptionCodes.UNKNOWN_ACTION.create( action);
             }
         } catch (final JSONException e) {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);

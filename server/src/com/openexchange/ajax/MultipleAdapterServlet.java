@@ -125,7 +125,7 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
     }
 
     private OXException wrap(final Throwable t) {
-        return AjaxExceptionCodes.UnexpectedError.create(t, t.getMessage());
+        return AjaxExceptionCodes.UNEXPECTED_ERROR.create(t, t.getMessage());
     }
 
     protected boolean handleOverride(final HttpServletRequest req, final HttpServletResponse resp) {

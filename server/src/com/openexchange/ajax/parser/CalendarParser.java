@@ -255,7 +255,7 @@ public class CalendarParser extends CommonParser {
                     p.setIdentifier(id);
                     break;
                 default:
-                    throw AjaxExceptionCodes.UnexpectedError.create("invalid type");
+                    throw AjaxExceptionCodes.UNEXPECTED_ERROR.create("invalid type");
             }
             participant[i] = p;
         }
@@ -297,7 +297,7 @@ public class CalendarParser extends CommonParser {
         } else if ("yearly".equals(value)) {
             return CalendarObject.YEARLY;
         } else {
-            throw AjaxExceptionCodes.UnexpectedError.create("unknown value in " + CalendarFields.RECURRENCE_TYPE + ": " + value);
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create("unknown value in " + CalendarFields.RECURRENCE_TYPE + ": " + value);
         }
     }
 

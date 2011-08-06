@@ -86,7 +86,7 @@ public final class MailAccountActionFactory implements AJAXActionServiceFactory 
     public AJAXActionService createActionService(final String action) throws OXException {
         final AJAXActionService retval = actions.get(action);
         if (null == retval) {
-            throw AjaxExceptionCodes.UnknownAction.create( action);
+            throw AjaxExceptionCodes.UNKNOWN_ACTION.create( action);
         }
         return retval;
     }

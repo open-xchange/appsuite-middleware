@@ -147,7 +147,7 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
             }
             return new AJAXRequestResult(actionValidateBoolean(accountDescription, session, warnings)).addWarnings(warnings);
         } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
+            throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
         } catch (final GeneralSecurityException e) {
             throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(
                 e,

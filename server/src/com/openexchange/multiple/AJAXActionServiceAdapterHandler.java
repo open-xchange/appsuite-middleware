@@ -108,7 +108,7 @@ public class AJAXActionServiceAdapterHandler implements MultipleHandler, Multipl
     public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws JSONException, OXException {
         final AJAXActionService actionService = factory.createActionService(action);
         if (null == actionService) {
-            throw AjaxExceptionCodes.UnknownAction.create( action);
+            throw AjaxExceptionCodes.UNKNOWN_ACTION.create( action);
         }
         final AJAXRequestData request = new AJAXRequestData();
         request.setSecure(secure);
@@ -129,7 +129,7 @@ public class AJAXActionServiceAdapterHandler implements MultipleHandler, Multipl
             if (cause instanceof OXException) {
                 throw (OXException) cause;
             }
-            throw AjaxExceptionCodes.UnexpectedError.create(e, e.getMessage());
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
         return result.getResultObject();
     }

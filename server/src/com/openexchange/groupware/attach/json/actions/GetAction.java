@@ -100,7 +100,7 @@ public final class GetAction extends AbstractAttachmentAction {
 
             return new AJAXRequestResult(get(folderId, attachedId, moduleId, id, session), "json");
         } catch (final RuntimeException e) {
-            throw AjaxExceptionCodes.UnexpectedError.create(e, e.getMessage());
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 

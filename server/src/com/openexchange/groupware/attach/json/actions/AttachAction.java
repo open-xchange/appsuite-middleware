@@ -175,7 +175,7 @@ public final class AttachAction extends AbstractAttachmentAction {
 
             final DataSource source = conversionService.getDataSource(datasourceIdentifier);
             if (source == null) {
-                throw AjaxExceptionCodes.InvalidParameterValue.create("datasource", datasourceIdentifier);
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("datasource", datasourceIdentifier);
             }
 
             final List<Class<?>> types = Arrays.asList(source.getTypes());
@@ -224,7 +224,7 @@ public final class AttachAction extends AbstractAttachmentAction {
                 }
 
             } else {
-                throw AjaxExceptionCodes.InvalidParameterValue.create("datasource", datasourceIdentifier);
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("datasource", datasourceIdentifier);
             }
 
             if (attachment.getFilename() == null) {
@@ -254,9 +254,9 @@ public final class AttachAction extends AbstractAttachmentAction {
 
             return new AJAXRequestResult(Integer.valueOf(attachment.getId()), new Date(ts), "int");
         } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSONError.create(e, e.getMessage());
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            throw AjaxExceptionCodes.UnexpectedError.create(e, e.getMessage());
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -299,7 +299,7 @@ public final class AttachAction extends AbstractAttachmentAction {
             throw t;
         } catch (final IOException e) {
             rollback();
-            throw AjaxExceptionCodes.IOError.create(e, e.getMessage());
+            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             try {
                 ATTACHMENT_BASE.finish();

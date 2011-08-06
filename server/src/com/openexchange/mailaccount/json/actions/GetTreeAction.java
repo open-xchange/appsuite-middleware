@@ -109,7 +109,7 @@ public final class GetTreeAction extends AbstractMailAccountTreeAction {
             final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, mailAccount.getId());
             return new AJAXRequestResult(actionValidateTree0(mailAccess, session));
         } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
+            throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
         }
     }
 

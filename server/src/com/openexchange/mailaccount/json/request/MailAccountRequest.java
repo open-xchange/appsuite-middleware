@@ -156,7 +156,7 @@ public final class MailAccountRequest {
         } else if ("get_tree".equalsIgnoreCase(action)) {
             return actionGetTree(jsonObject);
         } else {
-            throw AjaxExceptionCodes.UnknownAction.create( action);
+            throw AjaxExceptionCodes.UNKNOWN_ACTION.create( action);
         }
     }
 

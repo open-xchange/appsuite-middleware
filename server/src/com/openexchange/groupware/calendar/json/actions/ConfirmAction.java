@@ -106,7 +106,7 @@ public final class ConfirmAction extends AbstractAppointmentAction {
         } else if (participant.getType() == Participant.EXTERNAL_USER) {
             timestamp = appointmentSql.setExternalConfirmation(objectId, folderId, participant.getEmailAddress(), confirmStatus, confirmMessage);
         } else {
-            throw AjaxExceptionCodes.InvalidParameterValue.create( AJAXServlet.PARAMETER_TYPE, jData.get(AJAXServlet.PARAMETER_TYPE));
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create( AJAXServlet.PARAMETER_TYPE, jData.get(AJAXServlet.PARAMETER_TYPE));
         }
 
         return new AJAXRequestResult(new JSONObject(), timestamp, "json");

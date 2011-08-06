@@ -236,7 +236,7 @@ public final class SearchAction extends AbstractUserAction {
         } catch (final OXException e) {
             throw new OXException(e);
         } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
+            throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
         }
     }
 

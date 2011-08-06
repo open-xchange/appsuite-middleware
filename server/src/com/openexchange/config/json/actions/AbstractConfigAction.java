@@ -108,13 +108,13 @@ public abstract class AbstractConfigAction implements AJAXActionService {
             }
             return perform(ajaxRequest);
         } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSONError.create(e, e.getMessage());
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         } catch (final IllegalStateException e) {
             final Throwable cause = e.getCause();
             if (cause instanceof OXException) {
                 throw (OXException) cause;
             }
-            throw AjaxExceptionCodes.UnexpectedError.create(e, e.getMessage());
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 

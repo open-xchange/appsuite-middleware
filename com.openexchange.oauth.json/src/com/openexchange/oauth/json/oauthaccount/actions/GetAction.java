@@ -104,7 +104,7 @@ public final class GetAction extends AbstractOAuthAJAXActionService {
              */
             return new AJAXRequestResult(jsonObject);
         } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
+            throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
         }
     }
 

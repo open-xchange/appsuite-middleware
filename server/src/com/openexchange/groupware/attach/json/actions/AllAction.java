@@ -109,9 +109,9 @@ public final class AllAction extends AbstractAttachmentAction {
             final JSONValue jsonValue = all(session, folderId, attachedId, moduleId, columns, sort, order);
             return new AJAXRequestResult(jsonValue, "json");
         } catch (final RuntimeException e) {
-            throw AjaxExceptionCodes.UnexpectedError.create(e, e.getMessage());
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final UnknownColumnException e) {
-            throw AjaxExceptionCodes.UnexpectedError.create(e, e.getMessage());
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
