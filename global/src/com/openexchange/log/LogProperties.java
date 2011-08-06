@@ -114,6 +114,7 @@ public final class LogProperties {
      * Gets the thread-local log properties.
      *
      * @return The log properties
+     * @see #isEnabled()
      */
     public static Map<String, Object> optLogProperties() {
         return THREAD_LOCAL.get(Thread.currentThread());
@@ -130,6 +131,7 @@ public final class LogProperties {
      * Gets the thread-local log properties.
      *
      * @return The log properties
+     * @see #isEnabled()
      */
     public static Map<String, Object> getLogProperties() {
         final Thread thread = Thread.currentThread();
@@ -149,6 +151,7 @@ public final class LogProperties {
      *
      * @param name The property name
      * @param value The property value
+     * @see #isEnabled()
      */
     public static void putLogProperty(final String name, final Object value) {
         if (null == value) {
