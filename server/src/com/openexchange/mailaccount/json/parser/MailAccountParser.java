@@ -61,7 +61,6 @@ import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.json.fields.MailAccountFields;
 import com.openexchange.mailaccount.json.fields.SetSwitch;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
@@ -118,7 +117,7 @@ public class MailAccountParser extends DataParser {
             for (final Attribute attribute : Attribute.MAIL_URL_ATTRIBUTES) {
                 final String name = attribute.getName();
                 if (!json.hasAndNotNull(name)) {
-                    throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
+                    throw OXJSONExceptionCodes.MISSING_FIELD.create(name);
                 }
                 setSwitch.setValue(json.get(name));
                 attribute.doSwitch(setSwitch);
