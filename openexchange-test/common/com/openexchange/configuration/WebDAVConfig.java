@@ -49,6 +49,7 @@
 
 package com.openexchange.configuration;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.conf.AbstractConfig;
 
 /**
@@ -65,11 +66,11 @@ public class WebDAVConfig extends AbstractConfig {
      * {@inheritDoc}
      */
     @Override
-    protected String getPropertyFileName() throws ConfigurationException {
+    protected String getPropertyFileName() throws OXException {
         final String fileName = TestConfig.getProperty(KEY);
         if (null == fileName) {
-            throw new ConfigurationException(ConfigurationException.Code
-                .PROPERTY_MISSING, KEY.getPropertyName());
+            throw ConfigurationExceptionCodes
+                .PROPERTY_MISSING.create(KEY.getPropertyName());
         }
         return fileName;
     }
@@ -78,7 +79,7 @@ public class WebDAVConfig extends AbstractConfig {
      * Reads the configuration.
      * @throws ConfigurationException if reading configuration fails.
      */
-    public static void init() throws ConfigurationException {
+    public static void init() throws OXException {
         TestConfig.init();
         if (null == singleton) {
             singleton = new WebDAVConfig();

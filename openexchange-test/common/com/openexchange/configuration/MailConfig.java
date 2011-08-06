@@ -51,7 +51,7 @@ package com.openexchange.configuration;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.conf.AbstractConfig;
 
 /**
@@ -138,10 +138,10 @@ public final class MailConfig extends AbstractConfig {
 	}
 
 	@Override
-	protected String getPropertyFileName() throws ConfigurationException {
+	protected String getPropertyFileName() throws OXException {
 		final String fileName = TestConfig.getProperty(KEY);
 		if (null == fileName) {
-			throw new ConfigurationException(ConfigurationException.Code.PROPERTY_MISSING, KEY.getPropertyName());
+			throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(KEY.getPropertyName());
 		}
 		return fileName;
 	}
@@ -152,7 +152,7 @@ public final class MailConfig extends AbstractConfig {
 	 * @throws ConfigurationException
 	 *             if reading configuration fails.
 	 */
-	public static void init() throws ConfigurationException {
+	public static void init() throws OXException {
 		TestConfig.init();
 		if (!initialized) {
 			LOCK_INIT.lock();
@@ -171,7 +171,7 @@ public final class MailConfig extends AbstractConfig {
 		if (!initialized) {
 			try {
 				init();
-			} catch (final ConfigurationException e) {
+			} catch (final OXException e) {
 				return null;
 			}
 		}
