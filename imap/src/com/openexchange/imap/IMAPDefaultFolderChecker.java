@@ -59,8 +59,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
 import javax.mail.MethodNotSupportedException;
-import com.openexchange.exception.OXException;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.imap.cache.ListLsubCache;
 import com.openexchange.imap.cache.ListLsubEntry;
@@ -287,11 +287,9 @@ public final class IMAPDefaultFolderChecker {
                                 final Set<Attribute> attributes = EnumSet.noneOf(Attribute.class);
                                 mad.setId(accountId);
                                 {
-                                    final String fn = mailAccount.getConfirmedHamFullname();
-                                    final String name;
-                                    if (null == fn) {
-                                        name = mailAccount.getConfirmedHam();
-                                    } else {
+                                    String name = mailAccount.getConfirmedHam();
+                                    if (null == name) {
+                                        final String fn = mailAccount.getConfirmedHamFullname();
                                         final int pos = fn.lastIndexOf(sep);
                                         name = pos < 0 ? fn : fn.substring(pos + 1);
                                     }
@@ -299,11 +297,9 @@ public final class IMAPDefaultFolderChecker {
                                     attributes.add(Attribute.CONFIRMED_HAM_FULLNAME_LITERAL);
                                 }
                                 {
-                                    final String fn = mailAccount.getConfirmedSpamFullname();
-                                    final String name;
-                                    if (null == fn) {
-                                        name = mailAccount.getConfirmedSpam();
-                                    } else {
+                                    String name = mailAccount.getConfirmedSpam();
+                                    if (null == name) {
+                                        final String fn = mailAccount.getConfirmedSpamFullname();
                                         final int pos = fn.lastIndexOf(sep);
                                         name = pos < 0 ? fn : fn.substring(pos + 1);
                                     }
@@ -311,11 +307,9 @@ public final class IMAPDefaultFolderChecker {
                                     attributes.add(Attribute.CONFIRMED_SPAM_FULLNAME_LITERAL);
                                 }
                                 {
-                                    final String fn = mailAccount.getDraftsFullname();
-                                    final String name;
-                                    if (null == fn) {
-                                        name = mailAccount.getDrafts();
-                                    } else {
+                                    String name = mailAccount.getDrafts();
+                                    if (null == name) {
+                                        final String fn = mailAccount.getDraftsFullname();
                                         final int pos = fn.lastIndexOf(sep);
                                         name = pos < 0 ? fn : fn.substring(pos + 1);
                                     }
@@ -323,11 +317,9 @@ public final class IMAPDefaultFolderChecker {
                                     attributes.add(Attribute.DRAFTS_FULLNAME_LITERAL);
                                 }
                                 {
-                                    final String fn = mailAccount.getSpamFullname();
-                                    final String name;
-                                    if (null == fn) {
-                                        name = mailAccount.getSpam();
-                                    } else {
+                                    String name = mailAccount.getSpam();
+                                    if (null == name) {
+                                        final String fn = mailAccount.getSpamFullname();
                                         final int pos = fn.lastIndexOf(sep);
                                         name = pos < 0 ? fn : fn.substring(pos + 1);
                                     }
@@ -335,11 +327,9 @@ public final class IMAPDefaultFolderChecker {
                                     attributes.add(Attribute.SPAM_FULLNAME_LITERAL);
                                 }
                                 {
-                                    final String fn = mailAccount.getSentFullname();
-                                    final String name;
-                                    if (null == fn) {
-                                        name = mailAccount.getSent();
-                                    } else {
+                                    String name = mailAccount.getSent();
+                                    if (null == name) {
+                                        final String fn = mailAccount.getSentFullname();
                                         final int pos = fn.lastIndexOf(sep);
                                         name = pos < 0 ? fn : fn.substring(pos + 1);
                                     }
@@ -347,11 +337,9 @@ public final class IMAPDefaultFolderChecker {
                                     attributes.add(Attribute.SENT_FULLNAME_LITERAL);
                                 }
                                 {
-                                    final String fn = mailAccount.getTrashFullname();
-                                    final String name;
-                                    if (null == fn) {
-                                        name = mailAccount.getTrash();
-                                    } else {
+                                    String name = mailAccount.getTrash();
+                                    if (null == name) {
+                                        final String fn = mailAccount.getTrashFullname();
                                         final int pos = fn.lastIndexOf(sep);
                                         name = pos < 0 ? fn : fn.substring(pos + 1);
                                     }
