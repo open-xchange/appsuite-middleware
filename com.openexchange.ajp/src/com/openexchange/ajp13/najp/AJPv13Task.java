@@ -354,7 +354,7 @@ public final class AJPv13Task implements Task<Object> {
     public Object call() {
         final Thread t = thread = Thread.currentThread();
         if (!t.isInterrupted() && client != null && !client.isClosed()) {
-            {
+            if (LogProperties.isEnabled()) {
                 /*
                  * Gather logging info
                  */
@@ -494,7 +494,9 @@ public final class AJPv13Task implements Task<Object> {
                 /*
                  * Drop logging info for executing thread
                  */
-                LogProperties.removeLogProperties();
+                if (LogProperties.isEnabled()) {
+                    LogProperties.removeLogProperties();
+                }
             }
             final long duration = System.currentTimeMillis() - start;
             monitor.addUseTime(duration);
