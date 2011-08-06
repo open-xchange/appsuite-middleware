@@ -107,6 +107,8 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 
     private HttpServlet servletInstance;
 
+    private long startTime;
+
     /**
      * Initializes a new {@link HttpServletRequestWrapper}
      *
@@ -397,6 +399,10 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 
     private final ServletContext getServletContext() {
         return ServletConfigLoader.getDefaultInstance().getContext(servletInstance.getClass().getCanonicalName(), servletPath);
+    }
+
+    public void setStartTime(final long currentTimeMillis) {
+        this.startTime = currentTimeMillis;
     }
 
 }
