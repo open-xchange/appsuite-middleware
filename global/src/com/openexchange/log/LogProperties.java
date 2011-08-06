@@ -84,7 +84,9 @@ public final class LogProperties {
      */
     public static void configuredProperties(final Collection<String> propertyNames) {
         PROPERTY_NAMES.clear();
-        PROPERTY_NAMES.addAll(new TreeSet<String>(propertyNames));
+        if (null != propertyNames && !propertyNames.isEmpty()) {
+            PROPERTY_NAMES.addAll(new TreeSet<String>(propertyNames));
+        }
     }
 
     /**
