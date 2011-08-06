@@ -100,6 +100,7 @@ public final class LoggableImpl implements Loggable {
      * Puts specified properties.
      *
      * @param properties The properties
+     * @return This loggable with properties applied
      */
     public LoggableImpl putProperties(final Map<String, Object> properties) {
         if (null != properties) {
