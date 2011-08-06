@@ -153,12 +153,20 @@ public final class LogServiceImpl implements LogService {
 
     @Override
     public Loggable loggableFor(final Level level, final Log log, final String message, final Throwable throwable) {
-        return new LoggableImpl(level, log, message, throwable, new Throwable()).putProperties(LogProperties.optLogProperties());
+        final LoggableImpl loggable = new LoggableImpl(level, log, message, throwable, new Throwable());
+        if (LogProperties.isEnabled()) {
+            loggable.putProperties(LogProperties.optLogProperties());
+        }
+        return loggable;
     }
 
     @Override
     public Loggable loggableFor(final Level level, final Log log, final String message) {
-        return new LoggableImpl(level, log, message, null, new Throwable()).putProperties(LogProperties.optLogProperties());
+        final LoggableImpl loggable = new LoggableImpl(level, log, message, null, new Throwable());
+        if (LogProperties.isEnabled()) {
+            loggable.putProperties(LogProperties.optLogProperties());
+        }
+        return loggable;
     }
 
 }

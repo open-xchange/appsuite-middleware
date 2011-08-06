@@ -255,7 +255,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
                 ajpRequestHandler.setContentLength(contentLength);
             }
         }
-        {
+        if (LogProperties.isEnabled()) {
             /*
              * Gather logging info
              */
