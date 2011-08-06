@@ -65,7 +65,6 @@ import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.servlet.ServletConfigLoader;
 import com.openexchange.ajp13.servlet.http.HttpManagersInit;
-import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.internal.JCSCacheService;
 import com.openexchange.caching.internal.JCSCacheServiceInit;
@@ -95,17 +94,13 @@ import com.openexchange.data.conversion.ical.ical4j.internal.OXResourceResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.OXUserResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.CreatedBy;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.database.internal.DBPoolingExceptionFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.event.impl.AppointmentEventInterface;
 import com.openexchange.event.impl.EventDispatcher;
 import com.openexchange.event.impl.EventQueue;
 import com.openexchange.event.impl.TaskEventInterface;
-import com.openexchange.exceptions.ComponentAlreadyRegisteredException;
-import com.openexchange.exceptions.ComponentRegistry;
-import com.openexchange.exceptions.impl.ComponentRegistryImpl;
+import com.openexchange.exception.OXException;
 import com.openexchange.folder.FolderService;
 import com.openexchange.folder.internal.FolderInitialization;
 import com.openexchange.folder.internal.FolderServiceImpl;
@@ -113,22 +108,18 @@ import com.openexchange.folderstorage.mail.MailServiceRegistry;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.internal.GroupInit;
 import com.openexchange.group.internal.GroupServiceImpl;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.configuration.ParticipantConfig;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.datahandler.ContactInsertDataHandler;
-import com.openexchange.groupware.contact.internal.ContactExceptionFactory;
 import com.openexchange.groupware.contact.internal.ContactInterfaceDiscoveryInitialization;
 import com.openexchange.groupware.contact.internal.ContactInterfaceDiscoveryServiceImpl;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.generic.FolderUpdaterService;
-import com.openexchange.groupware.importexport.internal.ImportExportExceptionFactory;
 import com.openexchange.groupware.reminder.internal.TargetRegistry;
 import com.openexchange.groupware.update.internal.InternalList;
-import com.openexchange.groupware.update.internal.SchemaExceptionFactory;
 import com.openexchange.html.HTMLService;
 import com.openexchange.html.internal.HTMLServiceImpl;
 import com.openexchange.html.osgi.HTMLServiceActivator;
@@ -219,13 +210,13 @@ public final class Init {
          */
         new Initialization() {
 
-            public void start() throws AbstractOXException {
+            public void start() throws OXException {
                 AJPv13Config.getInstance().start();
                 ServletConfigLoader.initDefaultInstance(AJPv13Config.getServletConfigs());
                 HttpManagersInit.getInstance().start();
             }
 
-            public void stop() throws AbstractOXException {
+            public void stop() throws OXException {
                 HttpManagersInit.getInstance().stop();
                 ServletConfigLoader.resetDefaultInstance();
                 AJPv13Config.getInstance().stop();
@@ -394,7 +385,7 @@ public final class Init {
         }
     }
 
-    private static void startAndInjectBasicServices() throws AbstractOXException {
+    private static void startAndInjectBasicServices() throws OXException {
         /*
          * Check for one service which is initialized below
          */
@@ -441,7 +432,7 @@ public final class Init {
         }
     }
 
-    private static final AbstractOXException getWrappingOXException(final Exception cause) {
+    private static final OXException getWrappingOXException(final Exception cause) {
         final String message = cause.getMessage();
         final Component c = new Component() {
             private static final long serialVersionUID = 2411378382745647554L;
@@ -449,12 +440,7 @@ public final class Init {
                 return "TEST";
             }
         };
-        return new AbstractOXException(
-            c,
-            Category.INTERNAL_ERROR,
-            9999,
-            null == message ? "[Not available]" : message,
-            cause);
+        return new OXException(cause);
     }
 
     private static void startAndInjectCalendarServices() {
