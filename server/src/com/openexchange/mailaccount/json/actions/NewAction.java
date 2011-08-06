@@ -149,16 +149,19 @@ public final class NewAction extends AbstractMailAccountAction {
                     name = getName(StorageUtility.INDEX_CONFIRMED_HAM, primaryAccount);
                 }
                 account.setConfirmedHam(name);
-                account.setConfirmedHamFullname((tmp = new StringBuilder(prefix)).append(name).toString());
+                tmp = 0 == prefix.length() ? null : new StringBuilder(prefix);
+                account.setConfirmedHamFullname(null == tmp ? name : tmp.append(name).toString());
             }
             // Confirmed-Ham
             fullName = account.getConfirmedSpamFullname();
             if (null == fullName) {
                 if (null == prefix) {
                     prefix = getPrefix(account, session);
-                    tmp = new StringBuilder(prefix);
+                    tmp = 0 == prefix.length() ? null : new StringBuilder(prefix);
                 } else {
-                    tmp.setLength(prefix.length());
+                    if (null != tmp) {
+                        tmp.setLength(prefix.length());
+                    }
                 }
                 String name = account.getConfirmedSpam();
                 if (null == name) {
@@ -168,16 +171,18 @@ public final class NewAction extends AbstractMailAccountAction {
                     name = getName(StorageUtility.INDEX_CONFIRMED_SPAM, primaryAccount);
                 }
                 account.setConfirmedSpam(name);
-                account.setConfirmedSpamFullname(tmp.append(name).toString());
+                account.setConfirmedSpamFullname(null == tmp ? name : tmp.append(name).toString());
             }
             // Drafts
             fullName = account.getDraftsFullname();
             if (null == fullName) {
                 if (null == prefix) {
                     prefix = getPrefix(account, session);
-                    tmp = new StringBuilder(prefix);
+                    tmp = 0 == prefix.length() ? null : new StringBuilder(prefix);
                 } else {
-                    tmp.setLength(prefix.length());
+                    if (null != tmp) {
+                        tmp.setLength(prefix.length());
+                    }
                 }
                 String name = account.getDrafts();
                 if (null == name) {
@@ -187,16 +192,18 @@ public final class NewAction extends AbstractMailAccountAction {
                     name = getName(StorageUtility.INDEX_DRAFTS, primaryAccount);
                 }
                 account.setDrafts(name);
-                account.setDraftsFullname(tmp.append(name).toString());
+                account.setDraftsFullname(null == tmp ? name : tmp.append(name).toString());
             }
             // Sent
             fullName = account.getSentFullname();
             if (null == fullName) {
                 if (null == prefix) {
                     prefix = getPrefix(account, session);
-                    tmp = new StringBuilder(prefix);
+                    tmp = 0 == prefix.length() ? null : new StringBuilder(prefix);
                 } else {
-                    tmp.setLength(prefix.length());
+                    if (null != tmp) {
+                        tmp.setLength(prefix.length());
+                    }
                 }
                 String name = account.getSent();
                 if (null == name) {
@@ -206,16 +213,18 @@ public final class NewAction extends AbstractMailAccountAction {
                     name = getName(StorageUtility.INDEX_SENT, primaryAccount);
                 }
                 account.setSent(name);
-                account.setSentFullname(tmp.append(name).toString());
+                account.setSentFullname(null == tmp ? name : tmp.append(name).toString());
             }
             // Spam
             fullName = account.getSpamFullname();
             if (null == fullName) {
                 if (null == prefix) {
                     prefix = getPrefix(account, session);
-                    tmp = new StringBuilder(prefix);
+                    tmp = 0 == prefix.length() ? null : new StringBuilder(prefix);
                 } else {
-                    tmp.setLength(prefix.length());
+                    if (null != tmp) {
+                        tmp.setLength(prefix.length());
+                    }
                 }
                 String name = account.getSpam();
                 if (null == name) {
@@ -225,16 +234,18 @@ public final class NewAction extends AbstractMailAccountAction {
                     name = getName(StorageUtility.INDEX_SPAM, primaryAccount);
                 }
                 account.setSpam(name);
-                account.setSpamFullname(tmp.append(name).toString());
+                account.setSpamFullname(null == tmp ? name : tmp.append(name).toString());
             }
             // Trash
             fullName = account.getTrashFullname();
             if (null == fullName) {
                 if (null == prefix) {
                     prefix = getPrefix(account, session);
-                    tmp = new StringBuilder(prefix);
+                    tmp = 0 == prefix.length() ? null : new StringBuilder(prefix);
                 } else {
-                    tmp.setLength(prefix.length());
+                    if (null != tmp) {
+                        tmp.setLength(prefix.length());
+                    }
                 }
                 String name = account.getTrash();
                 if (null == name) {
@@ -244,7 +255,7 @@ public final class NewAction extends AbstractMailAccountAction {
                     name = getName(StorageUtility.INDEX_TRASH, primaryAccount);
                 }
                 account.setTrash(name);
-                account.setTrashFullname(tmp.append(name).toString());
+                account.setTrashFullname(null == tmp ? name : tmp.append(name).toString());
             }
         } catch (final OXException e) {
             /*
