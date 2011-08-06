@@ -375,17 +375,21 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             stmt.setInt(pos++, user);
             stmt.setInt(pos, id);
             rs = stmt.executeQuery();
-            final Map<String, String> properties = new HashMap<String, String>();
-            while (rs.next()) {
-                final String name = rs.getString(1);
-                if (!rs.wasNull()) {
-                    final String value = rs.getString(2);
+            if (rs.next()) {
+                final Map<String, String> properties = new HashMap<String, String>(8, 1);
+                do {
+                    final String name = rs.getString(1);
                     if (!rs.wasNull()) {
-                        properties.put(name, value);
+                        final String value = rs.getString(2);
+                        if (!rs.wasNull()) {
+                            properties.put(name, value);
+                        }
                     }
-                }
+                } while (rs.next());
+                mailAccount.setProperties(properties);
+            } else {
+                mailAccount.setProperties(Collections.<String, String> emptyMap());
             }
-            mailAccount.setProperties(properties);
         } finally {
             closeSQLStuff(rs, stmt);
         }
