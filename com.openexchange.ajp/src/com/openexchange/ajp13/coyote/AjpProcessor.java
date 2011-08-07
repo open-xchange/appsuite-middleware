@@ -1550,7 +1550,7 @@ public class AjpProcessor {
                 responseHeaderMessage.appendByte(Constants.JK_AJP13_SEND_BODY_CHUNK);
                 responseHeaderMessage.appendBytes(chunk.getBytes(), chunk.getOffset() + off, thisTime);
                 // mod_proxy: Terminating 0 (zero) byte
-                responseHeaderMessage.appendByte(0);
+                // responseHeaderMessage.appendByte(0);
                 responseHeaderMessage.end();
                 output.write(responseHeaderMessage.getBuffer(), 0, responseHeaderMessage.getLen());
                 output.flush();
