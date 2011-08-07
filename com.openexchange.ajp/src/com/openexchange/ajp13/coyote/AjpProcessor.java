@@ -406,41 +406,61 @@ public class AjpProcessor {
         if (keepAliveTimeout > 0) {
             soTimeout = socket.getSoTimeout();
         }
+        /*
+         * Set keep-alive on socket
+         */
+        socket.setKeepAlive(true);
 
         // Error flag
         error = false;
 
-        while (started && !error) {
-
-            // Parsing the request header
+        while (started && !error && !socket.isClosed()) {
+            /*
+             * Parsing the request header
+             */
             try {
-                // Set keep alive timeout if enabled
+                /*
+                 * Set keep alive timeout if enabled
+                 */
                 if (keepAliveTimeout > 0) {
                     socket.setSoTimeout(keepAliveTimeout);
                 }
-                // Get first message of the request
+                /*
+                 * Get first message of the request
+                 */
                 if (!readMessage(requestHeaderMessage)) {
-                    // This means a connection timeout
+                    /*
+                     * This means a connection timeout
+                     */
                     stage = STAGE_ENDED;
                     break;
                 }
-                // Set back timeout if keep alive timeout is enabled
+                
+                System.out.println("First AJP message successfully read from stream. Prefix code=" + requestHeaderMessage.peekByte() + "("+Constants.JK_AJP13_CPING_REQUEST+"=CPing,"+Constants.JK_AJP13_FORWARD_REQUEST+"=Forward-Request)");
+                
+                /*
+                 * Set back timeout if keep alive timeout is enabled
+                 */
                 if (keepAliveTimeout > 0) {
                     socket.setSoTimeout(soTimeout);
                 }
-                // Check message type, process right away and break if
-                // not regular request processing
+                /*-
+                 * Check message type, process right away and break if
+                 * not regular request processing
+                 */
                 final int type = requestHeaderMessage.getByte();
                 if (type == Constants.JK_AJP13_CPING_REQUEST) {
                     try {
                         output.write(pongMessageArray);
-                        output.flush();
+                        // output.flush();
                     } catch (final IOException e) {
                         error = true;
                     }
                     continue;
                 } else if (type != Constants.JK_AJP13_FORWARD_REQUEST) {
-                    // Usually the servlet didn't read the previous request body
+                    /*
+                     * Usually the servlet didn't read the previous request body
+                     */
                     if (log.isDebugEnabled()) {
                         log.debug("Unexpected message: " + type);
                     }
@@ -1319,7 +1339,7 @@ public class AjpProcessor {
          */
         responseHeaderMessage.end();
         output.write(responseHeaderMessage.getBuffer(), 0, responseHeaderMessage.getLen());
-        output.flush();
+        // output.flush();
     }
 
     private static final int getNumOfCookieHeader(final String[][] formattedCookies) {
@@ -1365,7 +1385,7 @@ public class AjpProcessor {
 
         // Add the end message
         output.write(endMessageArray);
-        output.flush();
+        // output.flush();
     }
 
     /**
@@ -1424,7 +1444,7 @@ public class AjpProcessor {
 
         // Request more data immediately
         output.write(getBodyMessageArray);
-        output.flush();
+        // output.flush();
 
         final boolean moreData = receive();
         if (!moreData) {
@@ -1476,7 +1496,7 @@ public class AjpProcessor {
     protected void flush() throws IOException {
         // Send the flush message
         output.write(flushMessageArray);
-        output.flush();
+        // output.flush();
     }
 
     // ------------------------------------- InputStreamInputBuffer Inner Class
@@ -1553,7 +1573,7 @@ public class AjpProcessor {
                 // responseHeaderMessage.appendByte(0);
                 responseHeaderMessage.end();
                 output.write(responseHeaderMessage.getBuffer(), 0, responseHeaderMessage.getLen());
-                output.flush();
+                // output.flush();
                 off += thisTime;
             }
 
