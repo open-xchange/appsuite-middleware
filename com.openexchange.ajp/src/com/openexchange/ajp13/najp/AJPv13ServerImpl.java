@@ -58,6 +58,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Server;
+import com.openexchange.ajp13.coyote.sockethandler.CoyoteSocketHandler;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
 import com.openexchange.ajp13.monitoring.AJPv13Monitors;
@@ -83,7 +84,7 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
 
     private final AtomicBoolean running;
 
-    private final AJPv13SocketHandler socketHandler;
+    private final IAJPv13SocketHandler socketHandler;
 
     /**
      * Initializes a new {@link AJPv13ServerImpl}
@@ -91,7 +92,13 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
     public AJPv13ServerImpl() {
         super();
         running = new AtomicBoolean();
-        socketHandler = new AJPv13SocketHandler();
+
+        final boolean coyote = false;
+        if (coyote) {
+            socketHandler = new CoyoteSocketHandler();
+        } else {
+            socketHandler = new AJPv13SocketHandler();
+        }
     }
 
     /**

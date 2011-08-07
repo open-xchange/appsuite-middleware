@@ -47,26 +47,70 @@
  *
  */
 
-package com.openexchange.ajp13.najp.threadpool;
+package com.openexchange.ajp13.coyote.sockethandler;
 
+import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketException;
 import javax.management.NotCompliantMBeanException;
+import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13ServiceRegistry;
+import com.openexchange.ajp13.coyote.ActionCode;
+import com.openexchange.ajp13.coyote.AjpProcessor;
+import com.openexchange.ajp13.coyote.Constants;
 import com.openexchange.ajp13.monitoring.AJPv13Monitors;
-import com.openexchange.ajp13.najp.AJPv13Task;
 import com.openexchange.ajp13.najp.AJPv13TaskMonitor;
 import com.openexchange.ajp13.najp.AJPv13TaskWatcher;
 import com.openexchange.ajp13.najp.IAJPv13SocketHandler;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 
 /**
- * {@link AJPv13SocketHandler} - Handles accepted client sockets by {@link #handleSocket(Socket)} which hands-off to a dedicated AJP task.
- *
+ * {@link CoyoteSocketHandler} - Handles accepted client sockets by {@link #handleSocket(Socket)} which hands-off to a dedicated AJP
+ * processor.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AJPv13SocketHandler implements IAJPv13SocketHandler {
+public final class CoyoteSocketHandler implements IAJPv13SocketHandler {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13SocketHandler.class));
+    private static final class AjpProcessorRunnable implements Runnable {
+
+        /**
+         * The client socket.
+         */
+        private final Socket client;
+
+        /**
+         * The AJP processor.
+         */
+        private final AjpProcessor ajpProcessor;
+
+        /**
+         * Initializes a new {@link AjpProcessorRunnable}.
+         * 
+         * @param client The accepted client socket
+         * @param ajpProcessor The AJP processor dedicated to the socket
+         */
+        protected AjpProcessorRunnable(final Socket client, final AjpProcessor ajpProcessor) {
+            this.client = client;
+            this.ajpProcessor = ajpProcessor;
+        }
+
+        @Override
+        public void run() {
+            try {
+                ajpProcessor.action(ActionCode.ACTION_START, null);
+                ajpProcessor.process(client);
+            } catch (final IOException e) {
+                LOG.error(e.getMessage(), e);
+            } finally {
+                ajpProcessor.action(ActionCode.ACTION_STOP, null);
+            }
+        }
+    }
+
+    protected static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CoyoteSocketHandler.class));
 
     /**
      * The atomic boolean to track started status.
@@ -81,7 +125,7 @@ public final class AJPv13SocketHandler implements IAJPv13SocketHandler {
     /**
      * The refused execution behavior initialized on start-up.
      */
-    private AJPv13RefusedExecutionBehavior behavior;
+    private CoyoteRefusedExecutionBehavior behavior;
 
     /**
      * The AJP task watcher initialized on start-up.
@@ -94,9 +138,19 @@ public final class AJPv13SocketHandler implements IAJPv13SocketHandler {
     private ThreadPoolService pool;
 
     /**
-     * Initializes a new {@link AJPv13SocketHandler}.
+     * The socket read timeout.
      */
-    public AJPv13SocketHandler() {
+    private final int readTimeout;
+
+    /**
+     * The socket connection linger.
+     */
+    private final int linger;
+
+    /**
+     * Initializes a new {@link CoyoteSocketHandler}.
+     */
+    public CoyoteSocketHandler() {
         super();
         AJPv13TaskMonitor tmp = null;
         try {
@@ -105,10 +159,13 @@ public final class AJPv13SocketHandler implements IAJPv13SocketHandler {
             LOG.error(e.getMessage(), e);
         }
         listenerMonitor = tmp;
+        readTimeout = AJPv13Config.getAJPListenerReadTimeout();
+        // TODO: Configure linger
+        linger = Constants.DEFAULT_CONNECTION_LINGER;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.ajp13.najp.threadpool.IAJPv13SocketHandler#startUp()
+    /**
+     * Starts this pool that creates new threads as needed, but will reuse previously constructed threads when they are available.
      */
     @Override
     public void startUp() {
@@ -117,7 +174,7 @@ public final class AJPv13SocketHandler implements IAJPv13SocketHandler {
                 if (!started) {
                     pool = AJPv13ServiceRegistry.getInstance().getService(ThreadPoolService.class);
                     watcher = new AJPv13TaskWatcher(pool);
-                    behavior = new AJPv13RefusedExecutionBehavior(watcher);
+                    behavior = new CoyoteRefusedExecutionBehavior(watcher);
                     AJPv13Monitors.setListenerMonitor(listenerMonitor);
                     started = true;
                 }
@@ -125,8 +182,8 @@ public final class AJPv13SocketHandler implements IAJPv13SocketHandler {
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.ajp13.najp.threadpool.IAJPv13SocketHandler#shutDownNow()
+    /**
+     * Attempts to stop all actively executing tasks and halts the processing of waiting tasks.
      */
     @Override
     public void shutDownNow() {
@@ -148,8 +205,9 @@ public final class AJPv13SocketHandler implements IAJPv13SocketHandler {
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.ajp13.najp.threadpool.IAJPv13SocketHandler#shutDown()
+    /**
+     * Initiates an orderly shutdown in which previously submitted tasks are executed, but no new tasks will be accepted. Invocation has no
+     * additional effect if already shut down.
      */
     @Override
     public void shutDown() {
@@ -187,8 +245,10 @@ public final class AJPv13SocketHandler implements IAJPv13SocketHandler {
         // }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.ajp13.najp.threadpool.IAJPv13SocketHandler#isShutdown()
+    /**
+     * Checks if this socket handler has been shut down or has not been started.
+     * 
+     * @return <code>true</code> if this socket handler has been shut down or has not been started; otherwise <code>false</code>
      */
     @Override
     public boolean isShutdown() {
@@ -198,16 +258,25 @@ public final class AJPv13SocketHandler implements IAJPv13SocketHandler {
         return (null == watcher);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.ajp13.najp.threadpool.IAJPv13SocketHandler#handleSocket(java.net.Socket)
+    /**
+     * Handles given client socket.
+     * 
+     * @param client The client socket to handle
      */
     @Override
     public void handleSocket(final Socket client) {
-        final AJPv13Task task = AJPv13Task.newAJPTask(client, listenerMonitor, watcher);
-        /*
-         * Submit AJP task and set returned Future as its control object
-         */
-        task.setControl(pool.submit(task, behavior));
+        final AjpProcessor ajpProcessor = new AjpProcessor(Constants.MAX_PACKET_SIZE);
+        if (readTimeout > 0) {
+            ajpProcessor.setKeepAliveTimeout(readTimeout);
+        }
+        if (linger > 0) {
+            try {
+                client.setSoLinger(true, linger);
+            } catch (final SocketException e) {
+                // Eh...
+            }
+        }
+        /* final Future<Object> future = */pool.submit(ThreadPools.task(new AjpProcessorRunnable(client, ajpProcessor), "AJP-Processor-"));
     }
 
 }

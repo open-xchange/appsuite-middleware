@@ -5,4 +5,3 @@ open-xchange-config/development/tmp
 open-xchange-config/development/adminTmp
 open-xchange-config/development/commonTmp
 pushall.sh
-com.openexchange.ajp/src/com/openexchange/ajp13/coyote

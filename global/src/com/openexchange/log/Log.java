@@ -71,7 +71,7 @@ public final class Log implements org.apache.commons.logging.Log {
     }
 
     /**
-     * Gets the appropriate {@link Log} for specified {@link org.apache.commons.logging.Log} instance.
+     * Gets the appropriate {@link com.openexchange.log.Log} for specified {@link org.apache.commons.logging.Log} instance.
      *
      * @param log The {@link org.apache.commons.logging.Log} instance
      * @return The appropriate instance

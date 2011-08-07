@@ -60,6 +60,7 @@ import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
 import com.openexchange.ajp13.exception.AJPv13MaxPackgeSizeException;
 import com.openexchange.ajp13.servlet.http.HttpServletRequestWrapper;
 import com.openexchange.ajp13.servlet.http.HttpServletResponseWrapper;
+import com.openexchange.log.Log;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -586,6 +587,21 @@ public class AJPv13Response {
             writeString(name, sink);
         }
         writeString(value, sink);
+    }
+
+    /**
+     * Writes specified header to given byte sink.
+     * 
+     * @param name The header name
+     * @param value The header value
+     * @param sink The byte sink
+     */
+    public static void writeHeaderSafe(final String name, final String value, final ByteArrayOutputStream sink) {
+        try {
+            writeHeader(name, value, sink);
+        } catch (final AJPv13Exception e) {
+            Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13Response.class)).error(e.getMessage(), e);
+        }
     }
 
     private static int writeHeader(final String name, final String value, final byte[] byteArray, final int count) throws AJPv13Exception {

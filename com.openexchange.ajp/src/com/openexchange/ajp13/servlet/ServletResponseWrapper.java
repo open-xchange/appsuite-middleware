@@ -63,6 +63,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletResponse;
 import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.AJPv13ServletOutputStream;
+import com.openexchange.ajp13.util.CharsetValidator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.tools.regex.MatcherReplacer;
 

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajp13.servlet;
+package com.openexchange.ajp13.util;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Locale;
@@ -59,7 +59,7 @@ import java.util.concurrent.ConcurrentMap;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-final class CharsetValidator {
+public final class CharsetValidator {
 
     private static final CharsetValidator INSTANCE = new CharsetValidator();
 
@@ -68,7 +68,7 @@ final class CharsetValidator {
      *
      * @return The {@link CharsetValidator} instance
      */
-    static CharsetValidator getInstance() {
+    public static CharsetValidator getInstance() {
         return INSTANCE;
     }
 
@@ -94,7 +94,7 @@ final class CharsetValidator {
      * @param charset The charset to check
      * @throws UnsupportedEncodingException If charset check fails
      */
-    void checkCharset(final String charset) throws UnsupportedEncodingException {
+    public void checkCharset(final String charset) throws UnsupportedEncodingException {
         final IgnoreCaseString key = IgnoreCaseString.valueOf(charset);
         final Boolean b = map.get(key);
         if (Boolean.FALSE == b) {
