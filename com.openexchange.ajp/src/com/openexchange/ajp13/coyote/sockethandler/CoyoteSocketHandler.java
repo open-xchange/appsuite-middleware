@@ -276,7 +276,7 @@ public final class CoyoteSocketHandler implements IAJPv13SocketHandler {
                 // Eh...
             }
         }
-        /* final Future<Object> future = */pool.submit(ThreadPools.task(new AjpProcessorRunnable(client, ajpProcessor), "AJP-Processor-"));
+        /* final Future<Object> future = */pool.submit(ThreadPools.task(new AjpProcessorRunnable(client, ajpProcessor), "AJP-Processor-"), behavior);
     }
 
 }
