@@ -72,6 +72,7 @@ import com.openexchange.ajp13.coyote.util.ByteChunk;
 import com.openexchange.ajp13.coyote.util.HexUtils;
 import com.openexchange.ajp13.coyote.util.MessageBytes;
 import com.openexchange.ajp13.exception.AJPv13Exception;
+import com.openexchange.ajp13.exception.AJPv13MaxPackgeSizeException;
 import com.openexchange.ajp13.servlet.http.HttpErrorServlet;
 import com.openexchange.ajp13.servlet.http.HttpServletManager;
 import com.openexchange.ajp13.servlet.http.HttpSessionManagement;
@@ -1255,31 +1256,35 @@ public class AjpProcessor {
     private static final String STR_SET_COOKIE = "Set-Cookie";
 
     /**
+     * Data length of SEND_BODY_CHUNK:
+     *
+     * <pre>
+     * prefix(1) + http_status_code(2) + http_status_msg(3) + num_headers(2)
+     * </pre>
+     */
+    private static final int SEND_HEADERS_LENGTH = 8;
+
+    /**
+     * Starting first 4 bytes:
+     *
+     * <pre>
+     * 'A' + 'B' + [data length as 2 byte integer]
+     * </pre>
+     */
+    private static final int RESPONSE_PREFIX_LENGTH = 4;
+
+    /**
      * When committing the response, we have to validate the set of headers, as well as setup the response filters.
      */
     protected void prepareResponse() throws IOException {
         response.setCommitted(true);
         /*
-         * Reset AJP header message and append SEND_HEADERS prefix code
+         * prefix + http_status_code + http_status_msg (empty string) + num_headers (integer)
          */
-        responseHeaderMessage.reset();
-        responseHeaderMessage.appendByte(Constants.JK_AJP13_SEND_HEADERS);
-        /*
-         * HTTP header contents
-         */
-        responseHeaderMessage.appendInt(response.getStatus());
-        String message = null;
-        if (USE_CUSTOM_STATUS_MSG_IN_HEADER && HttpMessages.isSafeInHttpHeader(response.getStatusMsg())) {
-            message = response.getStatusMsg();
+        String statusMsg = response.getStatusMsg();
+        if (null == statusMsg) {
+            statusMsg = "";
         }
-        if (message == null) {
-            message = HttpMessages.getMessage(response.getStatus());
-        }
-        if (message == null) {
-            // mod_jk + httpd 2.x fails with a null status message - bug 45026
-            message = Integer.toString(response.getStatus());
-        }
-        responseHeaderMessage.appendString(message);
         /*-
          * Check for echo header presence
          */
@@ -1291,7 +1296,7 @@ public class AjpProcessor {
             }
         }
         /*
-         * Write headers to SEND_HEADERS message
+         * Write headers&cookies to JK_AJP13_SEND_HEADERS message
          */
         final int numHeaders = response.getNumOfHeaders();
         final byte[] headers;
@@ -1326,19 +1331,24 @@ public class AjpProcessor {
             numCookies = getNumOfCookieHeader(formattedCookies);
         }
         /*
-         * Write total number of headers (headers + cookies)
+         * Calculate data length
          */
-        responseHeaderMessage.appendInt(numHeaders + numCookies);
-        /*
-         * Write headers' and cookies' bytes.
-         */
-        responseHeaderMessage.appendBytes(headers, 0, headers.length);
-        responseHeaderMessage.appendBytes(cookies, 0, cookies.length);
-        /*
-         * Write to buffer
-         */
-        responseHeaderMessage.end();
-        output.write(responseHeaderMessage.getBuffer(), 0, responseHeaderMessage.getLen());
+        final int dataLength = SEND_HEADERS_LENGTH + headers.length + cookies.length + statusMsg.length();
+        try {
+            if (dataLength + RESPONSE_PREFIX_LENGTH > Constants.MAX_PACKET_SIZE) {
+                throw new AJPv13MaxPackgeSizeException((dataLength + RESPONSE_PREFIX_LENGTH));
+            }
+            sink.reset();
+            AJPv13Response.fillStartBytes(Constants.JK_AJP13_SEND_HEADERS, dataLength, sink);
+            AJPv13Response.writeInt(response.getStatus(), sink);
+            AJPv13Response.writeString(statusMsg, sink);
+            AJPv13Response.writeInt(numHeaders + numCookies, sink);
+            AJPv13Response.writeByteArray(headers, sink);
+            AJPv13Response.writeByteArray(cookies, sink);
+        } catch (final AJPv13Exception e) {
+            throw new IOException(e.getMessage(), e);
+        }
+        sink.writeTo(output);
         // output.flush();
     }
 

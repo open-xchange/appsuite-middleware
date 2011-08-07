@@ -633,7 +633,7 @@ public class AJPv13Response {
 //        writeByte(prefixCode, byteArray);
 //    }
 
-    private static final void fillStartBytes(final int prefixCode, final int dataLength, final ByteArrayOutputStream sink) throws AJPv13Exception {
+    public static final void fillStartBytes(final int prefixCode, final int dataLength, final ByteArrayOutputStream sink) throws AJPv13Exception {
         sink.write(PACKAGE_FROM_CONTAINER_TO_SERVER, 0, 2);
         writeInt(dataLength, sink);
         writeByte(prefixCode, sink);
@@ -674,7 +674,7 @@ public class AJPv13Response {
 //        byteArray.write(bytes, 0, bytes.length);
 //    }
 
-    private static final void writeByteArray(final byte[] bytes, final ByteArrayOutputStream sink) {
+    public static final void writeByteArray(final byte[] bytes, final ByteArrayOutputStream sink) {
         sink.write(bytes, 0, bytes.length);
     }
 
@@ -700,7 +700,7 @@ public class AJPv13Response {
 //        byteArray.write((intValue & (255))); // low
 //    }
 
-    private static final void writeInt(final int intValue, final ByteArrayOutputStream sink) throws AJPv13Exception {
+    public static final void writeInt(final int intValue, final ByteArrayOutputStream sink) throws AJPv13Exception {
         if (intValue > MAX_INT_VALUE) {
             throw new AJPv13Exception(AJPCode.INTEGER_VALUE_TOO_BIG, true, Integer.valueOf(intValue));
         }
@@ -747,7 +747,7 @@ public class AJPv13Response {
 //        byteArray.write(0);
 //    }
 
-    private static final void writeString(final String strValue, final ByteArrayOutputStream sink) throws AJPv13Exception {
+    public static final void writeString(final String strValue, final ByteArrayOutputStream sink) throws AJPv13Exception {
         final int strLength = strValue.length();
         writeInt(strLength, sink);
         /*
