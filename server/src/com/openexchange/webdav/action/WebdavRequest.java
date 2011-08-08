@@ -81,7 +81,7 @@ public interface WebdavRequest {
 
 	String getURLPrefix();
 
-	IfHeader getIfHeader() throws IfHeaderParseException;
+	IfHeader getIfHeader() throws OXException;
 
 	WebdavResource getDestination() throws OXException;
 
