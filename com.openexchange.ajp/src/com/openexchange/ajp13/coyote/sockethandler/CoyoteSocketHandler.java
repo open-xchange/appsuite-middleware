@@ -228,7 +228,7 @@ public final class CoyoteSocketHandler implements IAJPv13SocketHandler {
      */
     @Override
     public void handleSocket(final Socket client) {
-        final AjpProcessor ajpProcessor = new AjpProcessor(Constants.MAX_PACKET_SIZE);
+        final AjpProcessor ajpProcessor = new AjpProcessor(Constants.MAX_PACKET_SIZE, listenerMonitor);
         if (readTimeout > 0) {
             ajpProcessor.setKeepAliveTimeout(readTimeout);
         }
@@ -240,7 +240,7 @@ public final class CoyoteSocketHandler implements IAJPv13SocketHandler {
             }
         }
         final Future<Object> future =
-            pool.submit(ThreadPools.task(new CoyoteTask(client, ajpProcessor), "AJP-Processor-"), behavior);
+            pool.submit(ThreadPools.task(new CoyoteTask(client, ajpProcessor, watcher), "AJP-Processor-"), behavior);
         ajpProcessor.setControl(future);
     }
 

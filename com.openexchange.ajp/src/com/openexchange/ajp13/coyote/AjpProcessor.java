@@ -77,6 +77,7 @@ import com.openexchange.ajp13.coyote.util.HexUtils;
 import com.openexchange.ajp13.coyote.util.MessageBytes;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13MaxPackgeSizeException;
+import com.openexchange.ajp13.najp.AJPv13TaskMonitor;
 import com.openexchange.ajp13.servlet.http.HttpErrorServlet;
 import com.openexchange.ajp13.servlet.http.HttpServletManager;
 import com.openexchange.ajp13.servlet.http.HttpSessionManagement;
@@ -260,6 +261,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     private final byte[] getBodyMessageArray;
 
     /**
+     * The listener monitor.
+     */
+    private final AJPv13TaskMonitor listenerMonitor;
+
+    /**
      * Direct buffer used for sending right away a pong message.
      */
     private static final byte[] pongMessageArray;
@@ -307,8 +313,9 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     }
 
-    public AjpProcessor(final int packetSize) {
+    public AjpProcessor(final int packetSize, final AJPv13TaskMonitor listenerMonitor) {
         super();
+        this.listenerMonitor = listenerMonitor;
         this.number = Long.valueOf(NUMBER.incrementAndGet());
         servletId = new StringBuilder(16);
         /*
@@ -536,6 +543,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      */
     public void process(final Socket socket) throws IOException {
         stage = STAGE_PARSE;
+        final long st = System.currentTimeMillis();
         // Setting up the socket
         this.socket = socket;
         input = socket.getInputStream();
@@ -558,6 +566,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
              * Parsing the request header
              */
             try {
+                stage = STAGE_PARSE;
+                listenerMonitor.incrementNumWaiting();
                 /*
                  * Set keep alive timeout if enabled
                  */
@@ -615,6 +625,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 // 400 - Bad Request
                 response.setStatus(400);
                 error = true;
+            } finally {
+                listenerMonitor.decrementNumWaiting();
             }
             /*
              * Setting up filters, and parse some request headers
@@ -639,6 +651,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             if (!error) {
                 try {
                     stage = STAGE_SERVICE;
+                    listenerMonitor.incrementNumProcessing();
                     /*
                      * Form data?
                      */
@@ -666,6 +679,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     }
                     servlet.service(request, response);
                     response.flushBuffer();
+                    listenerMonitor.addProcessingTime(System.currentTimeMillis() - request.getStartTime());
+                    listenerMonitor.incrementNumRequests();
                     // response.getServletOutputStream().flush();
                 } catch (final InterruptedIOException e) {
                     error = true;
@@ -674,6 +689,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     // 500 - Internal Server Error
                     response.setStatus(500);
                     error = true;
+                } finally {
+                    listenerMonitor.decrementNumProcessing();
                 }
             }
             /*
@@ -686,7 +703,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     error = true;
                 }
             }
-
             // If there was an error, make sure the request is counted as
             // and error, and update the statistics counter
             if (error) {
@@ -704,6 +720,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         recycle();
         input = null;
         output = null;
+        final long duration = System.currentTimeMillis() - st;
+        listenerMonitor.addUseTime(duration);
     }
 
     // ----------------------------------------------------- ActionHook Methods

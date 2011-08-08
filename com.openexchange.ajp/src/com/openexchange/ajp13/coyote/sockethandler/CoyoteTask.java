@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.net.Socket;
 import com.openexchange.ajp13.coyote.ActionCode;
 import com.openexchange.ajp13.coyote.AjpProcessor;
+import com.openexchange.ajp13.watcher.AJPv13TaskWatcher;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadRenamer;
 
@@ -74,14 +75,20 @@ public final class CoyoteTask implements Task<Object> {
     private final AjpProcessor ajpProcessor;
 
     /**
+     * The task watcher.
+     */
+    private final AJPv13TaskWatcher watcher;
+
+    /**
      * Initializes a new {@link AjpProcessorRunnable}.
      * 
      * @param client The accepted client socket
      * @param ajpProcessor The AJP processor dedicated to the socket
      */
-    protected CoyoteTask(final Socket client, final AjpProcessor ajpProcessor) {
+    protected CoyoteTask(final Socket client, final AjpProcessor ajpProcessor, final AJPv13TaskWatcher watcher) {
         this.client = client;
         this.ajpProcessor = ajpProcessor;
+        this.watcher = watcher;
     }
 
     /**
