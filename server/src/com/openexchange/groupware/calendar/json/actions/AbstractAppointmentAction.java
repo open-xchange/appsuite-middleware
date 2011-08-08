@@ -49,21 +49,22 @@
 
 package com.openexchange.groupware.calendar.json.actions;
 
-import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.json.AppointmentAJAXRequest;
+import com.openexchange.groupware.calendar.json.AppointmentAJAXRequestFactory;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
@@ -85,9 +86,6 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractAppointmentAction implements AJAXActionService {
-
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AbstractAppointmentAction.class));
 
     private static final AJAXRequestResult RESULT_JSON_NULL = new AJAXRequestResult(JSONObject.NULL, "json");
 
@@ -143,11 +141,7 @@ public abstract class AbstractAppointmentAction implements AJAXActionService {
             throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create("calendar");
         }
         try {
-            final AppointmentAJAXRequest ar = new AppointmentAJAXRequest(request, session);
-            final String sTimeZone = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-            if (null != sTimeZone) {
-                ar.setTimeZone(getTimeZone(sTimeZone));
-            }
+            final AppointmentAJAXRequest ar = AppointmentAJAXRequestFactory.createAppointmentAJAXRequest(request, session);
             return perform(ar);
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
@@ -270,6 +264,16 @@ public abstract class AbstractAppointmentAction implements AJAXActionService {
         }
 
         appointmentObj.setParticipants(participants);
+    }
+    
+    protected void checkAndAddAppointment(final List<Appointment> appointmentList, final Appointment appointmentObj, final Date betweenStart, final Date betweenEnd, final CalendarCollectionService calColl) {
+        if (appointmentObj.getFullTime() && betweenStart != null && betweenEnd != null) {
+            if (calColl.inBetween(appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime(), betweenStart.getTime(), betweenEnd.getTime())) {
+                appointmentList.add(appointmentObj);
+            }
+        } else {
+            appointmentList.add(appointmentObj);
+        }
     }
 
 }

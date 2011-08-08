@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,74 +47,56 @@
  *
  */
 
-package com.openexchange.groupware.calendar.json.actions;
+package com.openexchange.groupware.calendar.json.converters;
 
-import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 import java.util.TimeZone;
-import org.json.JSONException;
-import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.api2.AppointmentSQLInterface;
+import com.openexchange.ajax.requesthandler.Converter;
+import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.json.AppointmentAJAXRequest;
-import com.openexchange.groupware.container.Appointment;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.groupware.calendar.json.AppointmentAJAXRequestFactory;
+import com.openexchange.tools.TimeZoneUtils;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link FreeBusyAction}
+ * {@link AbstractCalendarJSONResultConverter}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public final class FreeBusyAction extends AbstractAppointmentAction {
+public abstract class AbstractCalendarJSONResultConverter implements ResultConverter {
+    
+    protected static final String OUTPUT_FORMAT = "json";
+    
+    private TimeZone timeZone = null;
 
-    /**
-     * Initializes a new {@link FreeBusyAction}.
-     * @param services
-     */
-    public FreeBusyAction(final ServiceLookup services) {
-        super(services);
+
+    @Override
+    public String getOutputFormat() {
+        return OUTPUT_FORMAT;
+    }
+
+
+    @Override
+    public Quality getQuality() {
+        return Quality.GOOD;
     }
 
     @Override
-    protected AJAXRequestResult perform(final AppointmentAJAXRequest req) throws OXException, JSONException {
-        final int userId = req.checkInt(AJAXServlet.PARAMETER_ID);
-        final int type = req.checkInt("type");
-        final TimeZone timeZone;
-        {
-            final String timeZoneId = req.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-            timeZone = null == timeZoneId ? req.getTimeZone() : getTimeZone(timeZoneId);
-        }
-
-        final Date start = req.checkTime(AJAXServlet.PARAMETER_START, timeZone);
-        final Date end = req.checkTime(AJAXServlet.PARAMETER_END, timeZone);
-
-
-        Date timestamp = new Date(0);
-
-        SearchIterator<Appointment> it = null;
-        try {
-            final List<Appointment> appointmentList = new ArrayList<Appointment>();
-            final AppointmentSQLInterface appointmentsql = getService().createAppointmentSql(req.getSession());
-            it = appointmentsql.getFreeBusyInformation(userId, type, start, end);
-            while (it.hasNext()) {
-                final Appointment appointmentObj = it.next();
-                appointmentList.add(appointmentObj);
-                
-                if (null != appointmentObj.getLastModified() && timestamp.before(appointmentObj.getLastModified())) {
-                    timestamp = appointmentObj.getLastModified();
-                }
-            }
-            return new AJAXRequestResult(appointmentList, timestamp, "freebusy_appointments");
-        } finally {
-            if (it != null) {
-                it.close();
-            }
-        }
+    public void convert(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
+        timeZone = TimeZoneUtils.getTimeZone(session.getUser().getTimeZone());
+        convertCalendar(AppointmentAJAXRequestFactory.createAppointmentAJAXRequest(request, session), result, session, converter);
     }
+    
+    protected abstract void convertCalendar(AppointmentAJAXRequest request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException;
 
+    protected TimeZone getTimeZone() {
+        return timeZone;
+    }
+    
+    protected TimeZone getTimeZone(final String timeZoneId) {
+        return TimeZoneUtils.getTimeZone(timeZoneId);
+    }
 }

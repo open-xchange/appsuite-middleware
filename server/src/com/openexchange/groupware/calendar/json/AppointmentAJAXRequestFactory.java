@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,57 +47,29 @@
  *
  */
 
-package com.openexchange.groupware.calendar.json.actions;
+package com.openexchange.groupware.calendar.json;
 
-import java.sql.SQLException;
-import java.util.Date;
+import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.api2.AppointmentSQLInterface;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
-import com.openexchange.groupware.calendar.json.AppointmentAJAXRequest;
-import com.openexchange.groupware.container.Appointment;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link GetAction}
+ * {@link AppointmentAJAXRequestFactory}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public final class GetAction extends AbstractAppointmentAction {
-
-    /**
-     * Initializes a new {@link GetAction}.
-     * @param services
-     */
-    public GetAction(final ServiceLookup services) {
-        super(services);
-    }
-
-    @Override
-    protected AJAXRequestResult perform(final AppointmentAJAXRequest req) throws OXException {
-        Date timestamp = null;
-        final int id = req.checkInt( AJAXServlet.PARAMETER_ID);
-        final int inFolder = req.checkInt( AJAXServlet.PARAMETER_FOLDERID);
-
-        final ServerSession session = req.getSession();
-        final AppointmentSQLInterface appointmentsql = getService().createAppointmentSql(session);
-        
-        try {
-            final Appointment appointmentobject = appointmentsql.getObjectById(id, inFolder);
-            if(appointmentobject.getPrivateFlag() && session.getUserId() != appointmentobject.getCreatedBy()) {
-                anonymize(appointmentobject);
-            }
-            
-            timestamp = appointmentobject.getLastModified();
-
-            return new AJAXRequestResult(appointmentobject, timestamp, "appointment");
-        } catch (final SQLException e) {
-            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, new Object[0]);
+public class AppointmentAJAXRequestFactory {
+    
+    public static AppointmentAJAXRequest createAppointmentAJAXRequest(final AJAXRequestData request, final ServerSession session) {
+        final AppointmentAJAXRequest ar = new AppointmentAJAXRequest(request, session);
+        final String sTimeZone = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
+        if (null != sTimeZone) {
+            ar.setTimeZone(getTimeZone(sTimeZone));
         }
+        
+        return ar;
     }
 
 }

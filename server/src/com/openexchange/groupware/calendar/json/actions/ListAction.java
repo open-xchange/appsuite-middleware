@@ -49,12 +49,14 @@
 
 package com.openexchange.groupware.calendar.json.actions;
 
-import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import gnu.trove.TIntArrayList;
 import gnu.trove.TIntIntHashMap;
 import gnu.trove.TIntObjectHashMap;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.TimeZone;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -63,7 +65,6 @@ import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.request.AppointmentRequest;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -106,12 +107,6 @@ public final class ListAction extends AbstractAppointmentAction {
         SearchIterator<Appointment> it = null;
 
         final TIntObjectHashMap<TIntArrayList> recurrencePositionMap = new TIntObjectHashMap<TIntArrayList>();
-        final TimeZone timeZone;
-        {
-            final String timeZoneId = req.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-            timeZone = null == timeZoneId ? req.getTimeZone() : getTimeZone(timeZoneId);
-        }
-        final int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
         final JSONArray jData = req.getData();
         final boolean bRecurrenceMaster = req.parseBoolean(AppointmentRequest.RECURRENCE_MASTER);
 
@@ -165,15 +160,15 @@ public final class ListAction extends AbstractAppointmentAction {
         final AppointmentSQLInterface appointmentsql = getService().createAppointmentSql(req.getSession());
         final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
         it = appointmentsql.getObjectsById(objectIdAndFolderId, _appointmentFields);
+        final Map<String, List<Appointment>> appointmentMap = new HashMap<String, List<Appointment>>(1);
+        final List<Appointment> appointmentList = new ArrayList<Appointment>();
         try {
-            int counter = 0;
-            final JSONArray jsonResponseArray = new JSONArray();
+            int counter = 0;         
             while (it.hasNext()) {
                 final Appointment appointment = it.next();
                 if (null == appointment) {
                     continue;
                 }
-                final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone);
 
                 final Date startDate = appointment.getStartDate();
                 final Date endDate = appointment.getEndDate();
@@ -185,14 +180,14 @@ public final class ListAction extends AbstractAppointmentAction {
                             recuResults = recColl.calculateFirstRecurring(appointment);
                         } catch (final OXException e) {
                             LOG.error("Can not calculate recurrence " + appointment.getObjectID() + ":" + req.getSession().getContextId(), e);
-                            appointmentwriter.writeArray(appointment, columns, jsonResponseArray);
+                            appointmentList.add(appointment);
                         }
 
                         if (recuResults != null && recuResults.size() == 1) {
                             appointment.setStartDate(new Date(recuResults.getRecurringResult(0).getStart()));
                             appointment.setEndDate(new Date(recuResults.getRecurringResult(0).getEnd()));
 
-                            appointmentwriter.writeArray(appointment, columns, jsonResponseArray);
+                            appointmentList.add(appointment);
                         } else {
                             LOG.warn("cannot load first recurring appointment from appointment object: " + +appointment.getRecurrenceType() + " / " + appointment.getObjectID() + "\n\n\n");
                         }
@@ -220,7 +215,7 @@ public final class ListAction extends AbstractAppointmentAction {
                                     throw OXException.notFound("no recurrence appointment found at pos: " + counter);
                                 }
 
-                                appointmentwriter.writeArray(appointment, columns, jsonResponseArray);
+                                appointmentList.add(appointment);
                             }
                         } else {
                             RecurringResultsInterface recuResults = null;
@@ -228,7 +223,7 @@ public final class ListAction extends AbstractAppointmentAction {
                                 recuResults = recColl.calculateFirstRecurring(appointment);
                             } catch (final OXException e) {
                                 LOG.error("Can not calculate recurrence " + appointment.getObjectID() + ":" + req.getSession().getContextId(), e);
-                                appointmentwriter.writeArray(appointment, columns, jsonResponseArray);
+                                appointmentList.add(appointment);
                             }
                             if (recuResults != null && recuResults.size() > 0) {
                                 final RecurringResultInterface result = recuResults.getRecurringResult(0);
@@ -243,11 +238,11 @@ public final class ListAction extends AbstractAppointmentAction {
                                 appointment.setEndDate(new Date(appointment.getStartDate().getTime() + DAY_MILLIS));
                             }
 
-                            appointmentwriter.writeArray(appointment, columns, jsonResponseArray);
+                            appointmentList.add(appointment);
                         }
                     }
                 } else {
-                    appointmentwriter.writeArray(appointment, columns, jsonResponseArray);
+                    appointmentList.add(appointment);
                 }
 
                 lastModified = appointment.getLastModified();
@@ -259,7 +254,8 @@ public final class ListAction extends AbstractAppointmentAction {
                 counter++;
             }
 
-            return new AJAXRequestResult(jsonResponseArray, timestamp, "json");
+            appointmentMap.put("appointments", appointmentList);
+            return new AJAXRequestResult(appointmentMap, timestamp, "appointments");
         } catch (final SearchIteratorException e) {
             throw e;
         } catch (final OXException e) {
