@@ -69,6 +69,7 @@ import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.ajp13.AJPv13Response;
 import com.openexchange.ajp13.coyote.util.ByteChunk;
+import com.openexchange.ajp13.coyote.util.CookieParser;
 import com.openexchange.ajp13.coyote.util.HexUtils;
 import com.openexchange.ajp13.coyote.util.MessageBytes;
 import com.openexchange.ajp13.exception.AJPv13Exception;
@@ -748,7 +749,6 @@ public class AjpProcessor {
             // two bytes are the length).
             int isc = requestHeaderMessage.peekInt();
             int hId = isc & 0xFF;
-
             isc &= 0xFF00;
             if (0xA000 == isc) {
                 requestHeaderMessage.getInt(); // To advance the read position
@@ -768,15 +768,29 @@ public class AjpProcessor {
              * Check for "Content-Length" and "Content-Type" headers
              */
             if (hId == Constants.SC_REQ_CONTENT_LENGTH || (hId == -1 && hName.equalsIgnoreCase("Content-Length"))) {
-                // just read the content-length header, so set it
+                /*
+                 * Read the content-length header, so set it
+                 */
                 final long cl = Long.parseLong(hValue);
                 if (cl < Integer.MAX_VALUE) {
                     request.setContentLength((int) cl);
                 }
             } else if (hId == Constants.SC_REQ_CONTENT_TYPE || (hId == -1 && hName.equalsIgnoreCase("Content-Type"))) {
-                // just read the content-type header, so set it
+                /*
+                 * Read the content-type header, so set it
+                 */
                 try {
                     request.setContentType(hValue);
+                } catch (final AJPv13Exception e) {
+                    response.setStatus(403);
+                    error = true;
+                }
+            } else if (hId == Constants.SC_REQ_COOKIE || (hId == -1 && hName.equalsIgnoreCase("Cookie"))) {
+                /*
+                 * Read a cookie, so set it
+                 */
+                try {
+                    request.setCookies(CookieParser.parseCookieHeader(hValue));
                 } catch (final AJPv13Exception e) {
                     response.setStatus(403);
                     error = true;
