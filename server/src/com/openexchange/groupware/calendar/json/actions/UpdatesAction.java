@@ -49,16 +49,17 @@
 
 package com.openexchange.groupware.calendar.json.actions;
 
-import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.TimeZone;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.request.AppointmentRequest;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -95,14 +96,8 @@ public final class UpdatesAction extends AbstractAppointmentAction {
 
     @Override
     protected AJAXRequestResult perform(final AppointmentAJAXRequest req) throws OXException, JSONException {
-        final int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
         final Date requestedTimestamp = req.checkDate(AJAXServlet.PARAMETER_TIMESTAMP);
         Date timestamp = new Date(requestedTimestamp.getTime());
-        final TimeZone timeZone;
-        {
-            final String timeZoneId = req.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-            timeZone = null == timeZoneId ? req.getTimeZone() : getTimeZone(timeZoneId);
-        }
 
         final Date startUTC = req.getDate(AJAXServlet.PARAMETER_START);
         final Date endUTC = req.getDate(AJAXServlet.PARAMETER_END);
@@ -135,21 +130,21 @@ public final class UpdatesAction extends AbstractAppointmentAction {
             bIgnoreModified = true;
         }
 
-        final JSONArray jsonResponseArray = new JSONArray();
-
         if (bIgnoreModified && bIgnoreDelete) {
             // nothing requested
 
-            return new AJAXRequestResult(jsonResponseArray, timestamp, "json");
+            return new AJAXRequestResult(new JSONArray(), timestamp, "json");
         }
 
         final ServerSession session = req.getSession();
-        final AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone);
         final AppointmentSQLInterface appointmentsql = getService().createAppointmentSql(session);
         final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
         SearchIterator<Appointment> it = null;
         Date lastModified = null;
         appointmentsql.setIncludePrivateAppointments(showPrivates);
+        final Map<String, List<Appointment>> appointmentMap = new HashMap<String, List<Appointment>>(2);
+        final List<Appointment> modified = new ArrayList<Appointment>();
+        final List<Appointment> deleted = new ArrayList<Appointment>();
         try {
             if (!bIgnoreModified) {
                 if (showAppointmentInAllFolders) {
@@ -188,7 +183,7 @@ public final class UpdatesAction extends AbstractAppointmentAction {
                                 appointmentObj.setStartDate(new Date(recuResults.getRecurringResult(0).getStart()));
                                 appointmentObj.setEndDate(new Date(recuResults.getRecurringResult(0).getEnd()));
 
-                                appointmentWriter.writeArray(appointmentObj, columns, jsonResponseArray);
+                                modified.add(appointmentObj);
                             }
                         } else {
                             // Commented this because this is done in CalendarOperation.next():726 that calls extractRecurringInformation()
@@ -215,9 +210,9 @@ public final class UpdatesAction extends AbstractAppointmentAction {
                                     appointmentObj.setRecurrencePosition(result.getPosition());
 
                                     if (startUTC == null || endUTC == null) {
-                                        appointmentWriter.writeArray(appointmentObj, columns, jsonResponseArray);
+                                        modified.add(appointmentObj);
                                     } else {
-                                        appointmentWriter.writeArray(appointmentObj, columns, startUTC, endUTC, jsonResponseArray);
+                                        checkAndAddAppointment(modified, appointmentObj, startUTC, endUTC, recColl);
                                     }
                                 }
                             }
@@ -225,9 +220,9 @@ public final class UpdatesAction extends AbstractAppointmentAction {
                     }
                     if (!written) {
                         if (startUTC == null || endUTC == null) {
-                            appointmentWriter.writeArray(appointmentObj, columns, jsonResponseArray);
+                            modified.add(appointmentObj);
                         } else {
-                            appointmentWriter.writeArray(appointmentObj, columns, startUTC, endUTC, jsonResponseArray);
+                            checkAndAddAppointment(modified, appointmentObj, startUTC, endUTC, recColl);
                         }
                     }
 
@@ -243,8 +238,7 @@ public final class UpdatesAction extends AbstractAppointmentAction {
                 it = appointmentsql.getDeletedAppointmentsInFolder(folderId, _appointmentFields, requestedTimestamp);
                 while (it.hasNext()) {
                     final Appointment appointmentObj = it.next();
-
-                    jsonResponseArray.put(appointmentObj.getObjectID());
+                    deleted.add(appointmentObj);
 
                     lastModified = appointmentObj.getLastModified();
 
@@ -253,8 +247,10 @@ public final class UpdatesAction extends AbstractAppointmentAction {
                     }
                 }
             }
-
-            return new AJAXRequestResult(jsonResponseArray, timestamp, "json");
+            
+            appointmentMap.put("modified", modified);
+            appointmentMap.put("deleted", deleted);
+            return new AJAXRequestResult(appointmentMap, timestamp, "appointments");
         } catch (final SQLException e) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, new Object[0]);
         } finally {
