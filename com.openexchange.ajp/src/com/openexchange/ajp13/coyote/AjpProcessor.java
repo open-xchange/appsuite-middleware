@@ -62,6 +62,7 @@ import java.net.URLDecoder;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
+import java.util.concurrent.Future;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
@@ -230,6 +231,11 @@ public class AjpProcessor {
     private final StringBuilder servletId;
 
     /**
+     * Control for AJP processor.
+     */
+    private volatile Future<Object> control;
+
+    /**
      * The servlet path (which is not the request path). The servlet path is defined in servlet mapping configuration.
      */
     private String servletPath;
@@ -364,6 +370,64 @@ public class AjpProcessor {
         keepAliveTimeout = timeout;
     }
 
+    /**
+     * Sets the control object.
+     * 
+     * @param control The control
+     */
+    public void setControl(final Future<Object> control) {
+        this.control = control;
+    }
+
+    /**
+     * Checks if this task was canceled before it completed normally.
+     *
+     * @return <code>true</code> if this task was canceled before it completed normally; otherwise <code>false</code>
+     */
+    public boolean isCancelled() {
+        return control.isCancelled();
+    }
+
+    /**
+     * Checks if this task completed. Completion may be due to normal termination, an exception, or cancellation -- in all of these cases,
+     * this method will return <code>true</code>.
+     *
+     * @return <code>true</code> if this task completed; otherwise <code>false</code>
+     */
+    public boolean isDone() {
+        return control.isDone();
+    }
+
+    /**
+     * Cancels this AJP task; meaning to close the client socket and to stop its execution.
+     */
+    public void cancel() {
+        started = false;
+        final Socket s = socket;
+        if (null != s) {
+            try {
+                closeQuitely(s);
+            } finally {
+                socket = null;
+            }
+        }
+        final Future<Object> f = control;
+        if (f != null) {
+            f.cancel(false);
+            control = null;
+        }
+    }
+
+    private static void closeQuitely(final Socket s) {
+        try {
+            s.close();
+        } catch (final IOException e) {
+            if (DEBUG) {
+                LOG.debug("Socket could not be closed. Probably due to a broken socket connection (e.g. broken pipe).", e);
+            }
+        }
+    }
+
     // --------------------------------------------------------- Public Methods
 
     /**
@@ -373,6 +437,15 @@ public class AjpProcessor {
      */
     public HttpServletRequestImpl getRequest() {
         return request;
+    }
+
+    /**
+     * Get the response associated with this processor.
+     * 
+     * @return The response
+     */
+    public HttpServletResponseImpl getResponse() {
+        return response;
     }
 
     /**
@@ -412,11 +485,12 @@ public class AjpProcessor {
          * Set keep-alive on socket
          */
         socket.setKeepAlive(true);
-
-        // Error flag
+        /*
+         * Error flag
+         */
         error = false;
-
-        while (started && !error && !socket.isClosed()) {
+        final Thread thread = Thread.currentThread();
+        while (started && !error && !thread.isInterrupted()) {
             /*
              * Parsing the request header
              */
@@ -1274,7 +1348,7 @@ public class AjpProcessor {
 
     /**
      * Data length of SEND_BODY_CHUNK:
-     *
+     * 
      * <pre>
      * prefix(1) + http_status_code(2) + http_status_msg(3) + num_headers(2)
      * </pre>
@@ -1283,7 +1357,7 @@ public class AjpProcessor {
 
     /**
      * Starting first 4 bytes:
-     *
+     * 
      * <pre>
      * 'A' + 'B' + [data length as 2 byte integer]
      * </pre>
