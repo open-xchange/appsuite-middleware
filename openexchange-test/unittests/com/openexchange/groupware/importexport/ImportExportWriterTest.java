@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.importexport;
 
+import com.openexchange.exception.OXException;
 import java.util.*;
 
 import junit.framework.TestCase;
@@ -60,13 +61,12 @@ import org.json.JSONObject;
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.writer.ImportExportWriter;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 
 public class ImportExportWriterTest extends TestCase {
 
 	public void testWriteObject() throws JSONException {
-		final ImportExportWriter writer = new ImportExportWriter();
+		final ImportExportWriter writer = new ImportExportWriter(null);
 		final ImportResult result = new ImportResult("1", "3" , new Date() );
 		writer.writeObject(result);
 		final JSONObject temp = (JSONObject) writer.getObject();
@@ -76,7 +76,7 @@ public class ImportExportWriterTest extends TestCase {
     }
 
 	public void testWriteObjects() throws JSONException {
-		final ImportExportWriter writer = new ImportExportWriter();
+		final ImportExportWriter writer = new ImportExportWriter(null);
 		final List<ImportResult> results = Arrays.asList(
 				new ImportResult("1", "3" , new Date() ), 
 				new ImportResult("2", "4", new Date() ) );
@@ -94,7 +94,7 @@ public class ImportExportWriterTest extends TestCase {
 
     public void testWarnings() throws JSONException  {
 
-        AbstractOXException exception = new AbstractOXException("EXCEPTION");
+        OXException exception = OXException.general("EXCEPTION");
 
         List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
         warnings.add(new ConversionWarning(1, "Warning 1"));
@@ -102,7 +102,7 @@ public class ImportExportWriterTest extends TestCase {
         warnings.add(new ConversionWarning(1, "Warning 3"));
         warnings.add(new ConversionWarning(1, "Warning 4"));
 
-        final ImportExportWriter writer = new ImportExportWriter();
+        final ImportExportWriter writer = new ImportExportWriter(null);
         final ImportResult result = new ImportResult();
         result.setObjectId("12");
         result.setException(exception);

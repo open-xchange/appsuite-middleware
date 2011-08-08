@@ -6,8 +6,8 @@ import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.parser.GroupParser;
+import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
-import com.openexchange.tools.servlet.OXJSONException;
 
 public abstract class AbstractGroupResponse extends AbstractAJAXResponse {
 
@@ -17,7 +17,7 @@ public abstract class AbstractGroupResponse extends AbstractAJAXResponse {
 		super(response);
 	}
 
-	public Group[] getGroups() throws OXJSONException, JSONException {
+	public Group[] getGroups() throws OXException, JSONException {
 	    if (null == groups) {
 	        final JSONArray json = (JSONArray) getData();
 	        groups = new Group[json.length()];

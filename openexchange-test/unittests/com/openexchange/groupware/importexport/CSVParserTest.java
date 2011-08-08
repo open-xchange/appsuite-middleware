@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.importexport;
 
+import com.openexchange.exception.OXException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -60,7 +61,6 @@ import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
 
 import com.openexchange.groupware.importexport.csv.CSVParser;
-import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 
 /**
  * 
@@ -89,17 +89,17 @@ public class CSVParserTest {
 		assertEquals("content21, content22,content23",parser.getLine(2));
 	}
 	
-	 @Test public void parseUnescaped() throws ImportExportException{
+	 @Test public void parseUnescaped() throws OXException{
 		doAsserts(UNESCAPED_TEST + '\n' , "Un-escaped with final linebreak",2,3, false);
 		doAsserts(UNESCAPED_TEST, "Un-escaped without final linebreak",2,3, false);
 	}
 	
-	 @Test public void parseEscaped() throws ImportExportException{
+	 @Test public void parseEscaped() throws OXException{
 		doAsserts(ESCAPED_TEST + '\n' , "Escaped with final linebreak",2,3, false);
 		doAsserts(ESCAPED_TEST, "Escaped without final linebreak",2,3, false);
 	}
 	
-	 @Test public void parseMixed() throws ImportExportException{
+	 @Test public void parseMixed() throws OXException{
 		doAsserts(UNESCAPED_TEST + '\n' + ESCAPED_TEST , "Un-escaped with final linebreak",4,3, false);
 		doAsserts(UNESCAPED_TEST + '\n' + ESCAPED_TEST + '\n', "Un-escaped without final linebreak",4,3, false);
 	}
@@ -109,7 +109,7 @@ public class CSVParserTest {
 		parser.setTolerant(false);
 		try {
 			parser.parse();
-		} catch (final ImportExportException e){
+		} catch (final OXException e){
 			assertTrue("Exception caught" , true);
 			assertEquals("Correct exception thrown" , "I_E-1000" , e.getErrorCode());
 			return;
@@ -123,7 +123,7 @@ public class CSVParserTest {
 		parser.setTolerant(false);
 		try {
 			parser.parse();
-		} catch (final ImportExportException e){
+		} catch (final OXException e){
 			assertTrue("Exception caught" , true);
 			assertEquals("Correct exception thrown" , "I_E-1000" , e.getErrorCode());
 			return;
@@ -131,19 +131,19 @@ public class CSVParserTest {
 		fail("Unparsable CSV given, but no exception thrown!");
 	}
 	 
-	@Test public void parseBuggedTolerant() throws ImportExportException {
+	@Test public void parseBuggedTolerant() throws OXException {
 		final List<List<String>> result = doAsserts(UNEVEN_TEST , "Bugged lines with tolerant parser", 3, 2, true);
 		assertEquals("checking last element" , "content22" , result.get(2).get(1));
 	}
 	
-	@Test public void umlauts() throws ImportExportException {
+	@Test public void umlauts() throws OXException {
 		final String umlaut = "\u00dcmlaut title\nSonder\u00dfeichen cell";
 		final List<List<String>> result = doAsserts(umlaut, "Checking umlauts", 2, 1, false);
 		assertEquals("\u00dc in title", "\u00dcmlaut title" , result.get(0).get(0));
 		assertEquals("\u00df in cell", "Sonder\u00dfeichen cell" , result.get(1).get(0));
 	}
 	
-	protected List<List<String>> doAsserts(final String line, final String comment, final int lines, final int cells, final boolean isTolerant) throws ImportExportException{
+	protected List<List<String>> doAsserts(final String line, final String comment, final int lines, final int cells, final boolean isTolerant) throws OXException{
 		parser = new CSVParser(line);
 		parser.setTolerant(isTolerant);
 		result = parser.parse();

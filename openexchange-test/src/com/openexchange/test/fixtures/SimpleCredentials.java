@@ -48,6 +48,7 @@
  */
 package com.openexchange.test.fixtures;
 
+import com.openexchange.exception.OXException;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -205,7 +206,7 @@ public class SimpleCredentials implements Cloneable {
         return timezone;
     }
 
-    public Locale getLocale() throws FixtureException {
+    public Locale getLocale() throws OXException {
         if (null == locale) {
             try {
                 final String[] language_country = getConfig().getString(Tree.Language).split("_");

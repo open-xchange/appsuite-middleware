@@ -3,6 +3,7 @@
  */
 package com.openexchange.folder;
 
+import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Properties;
@@ -26,7 +27,6 @@ import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
@@ -851,12 +851,12 @@ public class FolderTest extends TestCase {
     }
 
     public static final UserConfiguration getUserConfiguration(final Context ctx, final int userId)
-            throws UserConfigurationException {
+            throws OXException {
         final UserConfigurationStorage stor = UserConfigurationStorage.getInstance();
         return stor.getUserConfiguration(userId, ctx);
     }
 
-    public static final void saveUserConfiguration(final UserConfiguration uc) throws UserConfigurationException {
+    public static final void saveUserConfiguration(final UserConfiguration uc) throws OXException {
         final UserConfigurationStorage stor = UserConfigurationStorage.getInstance();
         stor.saveUserConfiguration(uc);
     }

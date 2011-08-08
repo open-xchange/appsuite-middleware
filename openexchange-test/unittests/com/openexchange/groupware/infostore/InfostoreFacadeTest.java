@@ -49,11 +49,10 @@
 
 package com.openexchange.groupware.infostore;
 
+import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.server.impl.OCLPermission;
@@ -98,7 +97,7 @@ public class InfostoreFacadeTest extends AbstractInfostoreTest {
     }
 
 
-    private int createFolderWithoutDeletePermissionForSecondUser() throws AbstractOXException {
+    private int createFolderWithoutDeletePermissionForSecondUser() throws OXException {
         final FolderObject folder = new FolderObject();
         folder.setFolderName("bug9555");
         folder.setParentFolderID(folderId);
@@ -143,7 +142,7 @@ public class InfostoreFacadeTest extends AbstractInfostoreTest {
 
     // Bug 11521
 
-    public void testShouldRemoveMIMETypeWhenRemovingLastVersionOfAFile() throws AbstractOXException {
+    public void testShouldRemoveMIMETypeWhenRemovingLastVersionOfAFile() throws OXException {
         DocumentMetadata dm = new DocumentMetadataImpl();
         dm.setFolderId(folderId);
         dm.setTitle("Exists Test");

@@ -1,6 +1,7 @@
 
 package com.openexchange.webdav.action;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
@@ -11,7 +12,6 @@ import com.openexchange.test.XMLCompare;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 public class LockTest extends ActionTestCase {
@@ -205,7 +205,7 @@ public class LockTest extends ActionTestCase {
     }
     
     // Bug 13482
-    public void testLockWithoutXMLBody() throws WebdavProtocolException, UnsupportedEncodingException, JDOMException, IOException {
+    public void testLockWithoutXMLBody() throws OXException, UnsupportedEncodingException, JDOMException, IOException {
         
         final MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
         final MockWebdavResponse res = new MockWebdavResponse();
@@ -238,7 +238,7 @@ public class LockTest extends ActionTestCase {
 
     }
     
-    public void testRelock() throws WebdavProtocolException, UnsupportedEncodingException, JDOMException, IOException {
+    public void testRelock() throws OXException, UnsupportedEncodingException, JDOMException, IOException {
         final String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><lockinfo xmlns=\"DAV:\"><lockscope><exclusive /></lockscope><locktype><write /></locktype><owner>Administrator</owner></lockinfo>";
 
         MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");

@@ -1,11 +1,11 @@
 package com.openexchange.webdav.action;
 
+import com.openexchange.exception.OXException;
 import javax.servlet.http.HttpServletResponse;
 
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavResource;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 import java.io.IOException;
 
@@ -24,7 +24,7 @@ public class MoveTest extends StructureTest {
     }
 
     // Bug 12279
-    public void testRenameToLowerCase() throws IOException, WebdavProtocolException {
+    public void testRenameToLowerCase() throws IOException, OXException {
         final WebdavPath INDEX_HTML_URL = testCollection.dup().append("index.html");
         final WebdavPath MOVED_INDEX_HTML_URL = testCollection.dup().append("InDeX.html");
 
@@ -33,7 +33,7 @@ public class MoveTest extends StructureTest {
     }
 
 
-    private void doMove(WebdavPath INDEX_HTML_URL, WebdavPath MOVED_INDEX_HTML_URL) throws IOException, WebdavProtocolException {
+    private void doMove(WebdavPath INDEX_HTML_URL, WebdavPath MOVED_INDEX_HTML_URL) throws IOException, OXException {
         final String content = getContent(INDEX_HTML_URL);
 
         final MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");

@@ -48,11 +48,10 @@
  */
 package com.openexchange.test.fixtures.transformators;
 
-import com.openexchange.test.fixtures.FixtureException;
-
+import com.openexchange.exception.OXException;
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public interface Transformator {
-    Object transform(String value) throws FixtureException;
+    Object transform(String value) throws OXException;
 }

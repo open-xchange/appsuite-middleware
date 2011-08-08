@@ -49,12 +49,12 @@
 
 package com.openexchange.groupware.calendar;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.tools.CalendarAssertions.assertResourceParticipants;
 import static com.openexchange.groupware.calendar.tools.CalendarAssertions.assertUserParticipants;
 import java.util.ArrayList;
 import java.util.List;
 import junit.framework.TestCase;
-import com.openexchange.api2.OXException;
 import com.openexchange.calendar.ConflictHandler;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.calendar.tools.CommonAppointments;

@@ -49,12 +49,11 @@
 
 package com.openexchange.groupware.infostore;
 
+import com.openexchange.exception.OXException;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.infostore.database.impl.AbstractDocumentListAction;
@@ -79,7 +78,7 @@ public class AbstractDocumentListActionTest extends AbstractInfostoreTest {
         createDocument();
     }
 
-    public void testExists() throws AbstractOXException {
+    public void testExists() throws OXException {
         TestDocumentListAction action = getActionWithDocumentId(existingId);
         action.perform();
         // Hooray! Survived!
@@ -90,7 +89,7 @@ public class AbstractDocumentListActionTest extends AbstractInfostoreTest {
         try {
             action.perform();
             fail("Should have aborted with document ids that don't exist");
-        } catch (AbstractOXException x) {
+        } catch (OXException x) {
             assertTrue("Message does not indicate non existence", x.getMessage().contains("not exist"));
         }
     }
@@ -125,7 +124,7 @@ public class AbstractDocumentListActionTest extends AbstractInfostoreTest {
 
     static final class TestDocumentListAction extends AbstractDocumentListAction {
 
-        public void perform() throws AbstractOXException {
+        public void perform() throws OXException {
             assureExistence();
         }
 

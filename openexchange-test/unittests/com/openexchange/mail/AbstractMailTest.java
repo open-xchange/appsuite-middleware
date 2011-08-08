@@ -49,6 +49,7 @@
 
 package com.openexchange.mail;
 
+import com.openexchange.exception.OXException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FilenameFilter;
@@ -62,13 +63,10 @@ import javax.mail.internet.MimeMessage;
 import junit.framework.TestCase;
 import com.openexchange.configuration.MailConfig;
 import com.openexchange.folderstorage.Folder;
-import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
 import com.openexchange.folderstorage.mail.MailFolderStorage;
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
@@ -151,9 +149,9 @@ public abstract class AbstractMailTest extends TestCase {
      * @param mailAccess The mail access
      * @param fullName The full name
      * @return The message count
-     * @throws MailException If an error occurs
+     * @throws OXException If an error occurs
      */
-    protected int getMessageCount(final MailAccess<?, ?> mailAccess, final String fullName) throws MailException {
+    protected int getMessageCount(final MailAccess<?, ?> mailAccess, final String fullName) throws OXException {
         return getMessageCount(mailAccess.getAccountId(), fullName);
     }
 
@@ -163,38 +161,31 @@ public abstract class AbstractMailTest extends TestCase {
      * @param accountId The account identifier
      * @param fullName The full name
      * @return The message count
-     * @throws MailException If an error occurs
+     * @throws OXException If an error occurs
      */
-    protected int getMessageCount(final int accountId, final String fullName) throws MailException {
+    protected int getMessageCount(final int accountId, final String fullName) throws OXException {
         final MailFolderStorage folderStorage = new MailFolderStorage();
         final StorageParametersImpl storageParameters;
-        try {
-            storageParameters = new StorageParametersImpl(new ServerSessionAdapter(getSession()));
-        } catch (final ContextException e) {
-            throw new MailException(e);
-        }
+           storageParameters = new StorageParametersImpl(new ServerSessionAdapter(getSession()));
         final boolean started;
-        try {
+
             started = folderStorage.startTransaction(storageParameters, false);
-        } catch (final FolderException e) {
-            throw new MailException(e);
-        }
         try {
             final Folder folder = folderStorage.getFolder(MailFolderStorage.REAL_TREE_ID, MailFolderUtility.prepareFullname(accountId, fullName), storageParameters);
             if (started) {
                 folderStorage.commitTransaction(storageParameters);
             }
             return folder.getTotal();
-        } catch (final FolderException e) {
+        } catch (final OXException e) {
             if (started) {
                 folderStorage.rollback(storageParameters);
             }
-            throw new MailException(e);
+            throw e;
         } catch (final RuntimeException e) {
             if (started) {
                 folderStorage.rollback(storageParameters);
             }
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -289,7 +280,7 @@ public abstract class AbstractMailTest extends TestCase {
      *
      * @return The user's mail settings
      */
-    protected final UserSettingMail getUserSettingMail() throws UserConfigurationException {
+    protected final UserSettingMail getUserSettingMail() throws OXException {
         return UserSettingMailStorage.getInstance().getUserSettingMail(getUser(), getCid());
     }
 
@@ -365,11 +356,11 @@ public abstract class AbstractMailTest extends TestCase {
      *             If a messaging error occurs
      * @throws IOException
      *             If an I/O error occurs
-     * @throws MailException
+     * @throws OXException
      *             If conversion from RFC822 message fails
      */
     protected static final MailMessage[] getMessages(final String dir, final int limit) throws MessagingException,
-            IOException, MailException {
+            IOException, OXException {
         final File fdir = new File(dir);
         final File[] messageFiles = fdir.listFiles(new FilenameFilter() {
             public boolean accept(final File dir, final String name) {

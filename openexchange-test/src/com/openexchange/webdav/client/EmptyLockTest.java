@@ -49,6 +49,7 @@
 
 package com.openexchange.webdav.client;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.apache.commons.httpclient.HttpException;
 import com.openexchange.webdav.WebdavClientTest;

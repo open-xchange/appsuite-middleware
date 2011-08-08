@@ -48,6 +48,7 @@
  */
 package com.openexchange.test.fixtures;
 
+import com.openexchange.exception.OXException;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -77,7 +78,7 @@ public class ResourceFixtureFactory implements FixtureFactory<Resource> {
             this.entries = values;
         }
 
-        public Fixture<Resource> getEntry(final String entryName) throws FixtureException {
+        public Fixture<Resource> getEntry(final String entryName) throws OXException {
             if (resourceMap.containsKey(entryName)) {
                 return resourceMap.get(entryName);
             }

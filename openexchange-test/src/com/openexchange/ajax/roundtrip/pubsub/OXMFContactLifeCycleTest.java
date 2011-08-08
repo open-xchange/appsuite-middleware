@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.roundtrip.pubsub;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.ContactTestManager;

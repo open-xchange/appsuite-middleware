@@ -48,6 +48,7 @@
  */
 package com.openexchange.test.fixtures;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.publish.Publication;
 
 import java.util.Map;
@@ -80,7 +81,7 @@ public class PublicationFixtureFactory implements FixtureFactory<Publication> {
             this.entries = entries;
         }
 
-        public Fixture<Publication> getEntry(final String entryName) throws FixtureException {
+        public Fixture<Publication> getEntry(final String entryName) throws OXException {
             if (publications.containsKey(entryName)) {
                 return publications.get(entryName);
             }

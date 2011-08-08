@@ -47,71 +47,55 @@
  *
  */
 
-package com.openexchange.ajax.appointment.helper;
+package com.openexchange.configuration;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.conf.AbstractConfig;
 
 /**
+ * Tests need to be able to find the templates, so this one uses
+ * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class OXError {
+public class PublishConfig extends AbstractConfig {
 
-    private String category;
+    private static final TestConfig.Property KEY = TestConfig.Property.PUBSUB_PROPS;
 
-    private int number;
+    public static final String TEMPLATE_PATH = "publishTemplatePath";
 
-    public void setCategory(String category) {
-        this.category = category;
-    }
+    private static PublishConfig singleton;
 
-    public String getCategory() {
-        return category;
-    }
-
-    public void setNumber(int number) {
-        this.number = number;
-    }
-
-    public int getNumber() {
-        return number;
-    }
-
-    public OXError(String category, int number) {
-        setNumber(number);
-        setCategory(category);
-    }
-
-    public boolean matches(OXError other) {
-        boolean matchesNumber = false, matchesCategory = false;
-
-        if (category == null || other.getCategory() == null)
-            matchesCategory = true;
-        else
-            matchesCategory = category.equals(other.getCategory());
-
-        if (number == -1 || other.getNumber() == -1)
-            matchesNumber = true;
-        else
-            matchesNumber = number == other.getNumber();
-
-        return matchesNumber && matchesCategory;
-    }
-
-    public boolean matches(AbstractOXException exception) {
-        return matches(new OXError(exception.getComponent().getAbbreviation(), exception.getDetailNumber()));
-    }
-
-    public boolean matches(Throwable t) {
-        try {
-            AbstractOXException exception = (AbstractOXException) t;
-            return matches(new OXError(exception.getComponent().getAbbreviation(), exception.getDetailNumber()));
-        } catch (ClassCastException e) {
-            return false;
-        }
-    }
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public String toString() {
-        return String.format("%3s-%04d", category, number);
+    protected String getPropertyFileName() throws OXException {
+        final String fileName = TestConfig.getProperty(KEY);
+        if (null == fileName) {
+<<<<<<< HEAD
+            throw ConfigurationExceptionCodes
+                .PROPERTY_MISSING.create(KEY.getPropertyName());
+=======
+            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(KEY.getPropertyName());
+>>>>>>> exception_refactoring
+        }
+        return fileName;
+    }
+
+    /**
+     * Reads the configuration.
+     * @throws OXException if reading configuration fails.
+     */
+    public static PublishConfig init() throws OXException {
+        TestConfig.init();
+        if (null == singleton) {
+            singleton = new PublishConfig();
+            singleton.loadPropertiesInternal();
+        }
+        return singleton;
+    }
+
+    public static String getProperty(final String key) {
+        return singleton.getPropertyInternal(key);
     }
 }

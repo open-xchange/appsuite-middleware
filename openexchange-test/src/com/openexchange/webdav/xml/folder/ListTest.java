@@ -49,10 +49,10 @@
 
 package com.openexchange.webdav.xml.folder;
 
+import com.openexchange.exception.OXException;
 import java.util.Date;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.FolderTest;
 import com.openexchange.webdav.xml.XmlServlet;
 
@@ -155,7 +155,7 @@ public class ListTest extends FolderTest {
         try {
             loadFolder(getWebConversation(), (objectId+1000), PROTOCOL + getHostName(), getLogin(), getPassword());
             fail("object not found exception expected!");
-        } catch (final TestException exc) {
+        } catch (final OXException exc) {
             assertExceptionMessage(exc.getMessage(), XmlServlet.OBJECT_NOT_FOUND_STATUS);
         }
 

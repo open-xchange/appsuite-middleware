@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.importexport;
 
+import com.openexchange.exception.OXException;
 import static org.junit.Assert.assertEquals;
 
 import java.io.UnsupportedEncodingException;
@@ -58,12 +59,8 @@ import junit.framework.JUnit4TestAdapter;
 
 import org.junit.Test;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.api2.TasksSQLInterface;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
 
@@ -74,7 +71,7 @@ public class Bug8654 extends AbstractICalImportTest {
 		return new JUnit4TestAdapter(Bug8654.class);
 	}
 	
-	@Test public void bug() throws DBPoolingException, UnsupportedEncodingException, SQLException, NumberFormatException, OXException, ContextException, LdapException {
+	@Test public void bug() throws OXException, UnsupportedEncodingException, SQLException, NumberFormatException, OXException, OXException, OXException {
 		final String ical = 
 			"BEGIN:VCALENDAR\n" +
 			"VERSION:2.0\n" +

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.resource.actions;
 
+import com.openexchange.exception.OXException;
 import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONArray;
@@ -58,7 +59,6 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.parser.GroupParser;
 import com.openexchange.group.Group;
-import com.openexchange.tools.servlet.OXJSONException;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -69,19 +69,19 @@ public class ResourceUpdatesResponse extends AbstractAJAXResponse {
         super(response);
     }
 
-    public List<Group> getModified() throws OXJSONException, JSONException {
+    public List<Group> getModified() throws OXException, JSONException {
         return getGroups("modified");
     }
 
-    public List<Group> getNew() throws OXJSONException, JSONException {
+    public List<Group> getNew() throws OXException, JSONException {
         return getGroups("new");
     }
 
-    public List<Group> getDeleted() throws OXJSONException, JSONException {
+    public List<Group> getDeleted() throws OXException, JSONException {
         return getGroups("deleted");
     }
 
-    protected List<Group> getGroups(String field) throws OXJSONException, JSONException {
+    protected List<Group> getGroups(String field) throws OXException, JSONException {
         LinkedList<Group> groups = new LinkedList<Group>();
         JSONObject data = (JSONObject) getData();
         if(data.isNull(field))

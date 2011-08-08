@@ -48,6 +48,7 @@
  */
 package com.openexchange.test.fixtures;
 
+import com.openexchange.exception.OXException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -80,13 +81,13 @@ public class YAMLFixtureLoader implements FixtureLoader {
         }
     }
 
-    public void load(final String... fixtureNames) throws FixtureException {
+    public void load(final String... fixtureNames) throws OXException {
         for (final String fixtureName : fixtureNames) {
             parse(locateFile(fixtureName), fixtureName );
         }
     }
 
-    public <T> Fixtures<T> getFixtures(final String fixtureName, final Class<T> aClass) throws FixtureException {
+    public <T> Fixtures<T> getFixtures(final String fixtureName, final Class<T> aClass) throws OXException {
         if (fixturesCache.containsKey(fixtureName) && fixturesClasses.get(fixtureName).equals(aClass)) {
             return (Fixtures<T>) fixturesCache.get(fixtureName);
         }
@@ -103,7 +104,7 @@ public class YAMLFixtureLoader implements FixtureLoader {
         factories.put(c, factory);
     }   
 
-    private File locateFile(final String fixtureName) throws FixtureException {
+    private File locateFile(final String fixtureName) throws OXException {
         for (final File path : loadPath) {
             File fixtureFile = new File(path, fixtureName).getAbsoluteFile();
             if( fixtureFile.exists()) {
@@ -127,7 +128,7 @@ public class YAMLFixtureLoader implements FixtureLoader {
         throw new FixtureException("Can't find fixture " + fixtureName + " in path: " +sb.toString());
     }
 
-    private void parse(final File file, final String fixtureName) throws FixtureException {
+    private void parse(final File file, final String fixtureName) throws OXException {
     	InputStreamReader reader = null;
         try {
         	reader = new InputStreamReader(new FileInputStream(file), Charset.forName("UTF8"));
@@ -145,7 +146,7 @@ public class YAMLFixtureLoader implements FixtureLoader {
         }
     }
 
-    private <T> FixtureFactory<T> getFixtureFactory(final Class<T> aClass) throws FixtureException {
+    private <T> FixtureFactory<T> getFixtureFactory(final Class<T> aClass) throws OXException {
         if (!factories.containsKey(aClass)) {
             throw new FixtureException("Can't load fixtures of type: "+aClass);
         }

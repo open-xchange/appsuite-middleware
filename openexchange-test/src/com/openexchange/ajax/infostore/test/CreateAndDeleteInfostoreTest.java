@@ -49,17 +49,16 @@
 
 package com.openexchange.ajax.infostore.test;
 
+import com.openexchange.exception.OXException;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.test.TestInit;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -70,7 +69,7 @@ public class CreateAndDeleteInfostoreTest extends AbstractInfostoreTest {
         super(name);
     }
 
-    public void testCreatingOneItem() throws AjaxException, IOException, SAXException, JSONException, OXException {
+    public void testCreatingOneItem() throws OXException, IOException, SAXException, JSONException, OXException {
         FolderObject folder = generateInfostoreFolder("InfostoreCreateDeleteTest Folder");
         fMgr.insertFolderOnServer(folder);
 

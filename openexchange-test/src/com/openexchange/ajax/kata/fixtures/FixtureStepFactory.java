@@ -49,12 +49,12 @@
 
 package com.openexchange.ajax.kata.fixtures;
 
+import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import com.openexchange.ajax.kata.Step;
 import com.openexchange.test.fixtures.Fixture;
-import com.openexchange.test.fixtures.FixtureException;
 import com.openexchange.test.fixtures.FixtureLoader;
 import com.openexchange.test.fixtures.Fixtures;
 
@@ -71,7 +71,7 @@ public class FixtureStepFactory {
         this.loader = loader;
     }
 
-    public <T> List<Step> loadSteps(Class<T> aClass, String... fixtureNames) throws FixtureException {
+    public <T> List<Step> loadSteps(Class<T> aClass, String... fixtureNames) throws OXException {
         List<Step> steps = new ArrayList<Step>();
         for (int i = 0; i < fixtureNames.length; i++) {
             String fixtureName = fixtureNames[i];
@@ -81,7 +81,7 @@ public class FixtureStepFactory {
         return steps;
     }
 
-    private <T> void addFixtures(Class<T> aClass, Fixtures<T> fixtures, List<Step> steps,  String filename) throws FixtureException {
+    private <T> void addFixtures(Class<T> aClass, Fixtures<T> fixtures, List<Step> steps,  String filename) throws OXException {
         List<FixtureTransformer> transformer = getAllTransformers();
         
         List<Entry<T>> entries = new ArrayList<Entry<T>>();

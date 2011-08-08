@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.importexport;
 
+import com.openexchange.exception.OXException;
 import static org.junit.Assert.assertEquals;
 
 import java.io.UnsupportedEncodingException;
@@ -59,17 +60,12 @@ import junit.framework.JUnit4TestAdapter;
 
 import org.junit.Test;
 
-import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.AppointmentSQLInterface;
-import com.openexchange.api2.OXException;
 import com.openexchange.calendar.CalendarSql;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.LdapException;
 
 public class Bug8653 extends AbstractICalImportTest {
 	
@@ -78,7 +74,7 @@ public class Bug8653 extends AbstractICalImportTest {
 		return new JUnit4TestAdapter(Bug8653.class);
 	}
 	
-	@Test public void testImportIntoCorrectFolder() throws DBPoolingException, UnsupportedEncodingException, SQLException, OXObjectNotFoundException, OXException, LdapException, ContextException {
+	@Test public void testImportIntoCorrectFolder() throws OXException, UnsupportedEncodingException, SQLException, OXException, OXException, OXException, OXException {
 		final String ical =
 			"BEGIN:VCALENDAR\n" +
 			"BEGIN:VEVENT\n" +
@@ -101,7 +97,7 @@ public class Bug8653 extends AbstractICalImportTest {
 		assertEquals("Title is correct?","testtermin-\u00dcberschrift",appointmentObj.getTitle());
 	}
 	
-	@Test public void testImportIntoWrongFolder() throws DBPoolingException, UnsupportedEncodingException, SQLException, OXObjectNotFoundException, OXException, ContextException, LdapException {
+	@Test public void testImportIntoWrongFolder() throws OXException, UnsupportedEncodingException, SQLException, OXException, OXException, OXException, OXException {
 		final String ical =
 			"BEGIN:VCALENDAR\n" +
 			"BEGIN:VEVENT\n" +

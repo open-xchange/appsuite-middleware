@@ -49,26 +49,22 @@
 
 package com.openexchange.groupware.importexport;
 
+import com.openexchange.exception.OXException;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import junit.framework.JUnit4TestAdapter;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.importexport.importers.CSVContactImporter;
 import com.openexchange.groupware.importexport.importers.OutlookCSVContactImporter;
-import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.userconfiguration.OverridingUserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 
 public class Bug8681forCSV extends AbstractContactTest {
@@ -87,7 +83,7 @@ public class Bug8681forCSV extends AbstractContactTest {
     }
 
     @Test
-    public void testOurCSV() throws AbstractOXException, OXException, LdapException {
+    public void testOurCSV() throws OXException, OXException, OXException {
         imp = new CSVContactImporter();
         folderId = createTestFolder(FolderObject.CONTACT, sessObj, ctx, "bug8681 for csv");
 
@@ -95,7 +91,7 @@ public class Bug8681forCSV extends AbstractContactTest {
         final OverridingUserConfigurationStorage override = new OverridingUserConfigurationStorage(original) {
 
             @Override
-            public UserConfiguration getOverride(final int userId, final int[] groups, final Context ctx) throws UserConfigurationException {
+            public UserConfiguration getOverride(final int userId, final int[] groups, final Context ctx) throws OXException {
                 final UserConfiguration orig = delegate.getUserConfiguration(userId, ctx);
                 final UserConfiguration copy = (UserConfiguration) orig.clone();
                 copy.setContact(false);
@@ -108,10 +104,8 @@ public class Bug8681forCSV extends AbstractContactTest {
             imp.canImport(sessObj, Format.CSV, _folders(), null);
             imp.importData(sessObj, Format.CSV, new ByteArrayInputStream(csv.getBytes()), _folders(), null);
             fail("Could write contact without rights to use Contact module");
-        } catch (final ImportExportException e) {
-            assertEquals(Category.PERMISSION, e.getCategory());
-            assertEquals(ImportExportExceptionCodes.CONTACTS_DISABLED.getDetailNumber(), e.getDetailNumber());
-            assertEquals(EnumComponent.IMPORT_EXPORT.getAbbreviation(), e.getComponent().getAbbreviation());
+        } catch (final OXException e) {
+            assertTrue(e.similarTo(ImportExportExceptionCodes.CONTACTS_DISABLED.create()));
         } finally {
             override.takeBack();
             deleteTestFolder(folderId);
@@ -119,7 +113,7 @@ public class Bug8681forCSV extends AbstractContactTest {
     }
 
     @Test
-    public void testOutlookCSV() throws AbstractOXException, OXException {
+    public void testOutlookCSV() throws OXException, OXException {
         imp = new OutlookCSVContactImporter();
         folderId = createTestFolder(FolderObject.CONTACT, sessObj, ctx, "bug8681 for Outlook CSV");
 
@@ -127,7 +121,7 @@ public class Bug8681forCSV extends AbstractContactTest {
         final OverridingUserConfigurationStorage override = new OverridingUserConfigurationStorage(original) {
 
             @Override
-            public UserConfiguration getOverride(final int userId, final int[] groups, final Context ctx) throws UserConfigurationException {
+            public UserConfiguration getOverride(final int userId, final int[] groups, final Context ctx) throws OXException {
                 final UserConfiguration orig = delegate.getUserConfiguration(userId, ctx);
                 final UserConfiguration copy = (UserConfiguration) orig.clone();
                 copy.setContact(false);
@@ -141,10 +135,8 @@ public class Bug8681forCSV extends AbstractContactTest {
             imp.canImport(sessObj, Format.OUTLOOK_CSV, _folders(), null);
             imp.importData(sessObj, Format.OUTLOOK_CSV, new ByteArrayInputStream(csv.getBytes()), _folders(), null);
             fail("Could write contact without rights to use Contact module");
-        } catch (final ImportExportException e) {
-            assertEquals(Category.PERMISSION, e.getCategory());
-            assertEquals(ImportExportExceptionCodes.CONTACTS_DISABLED.getDetailNumber(), e.getDetailNumber());
-            assertEquals(EnumComponent.IMPORT_EXPORT.getAbbreviation(), e.getComponent().getAbbreviation());
+        } catch (final OXException e) {
+            assertTrue(e.similarTo(ImportExportExceptionCodes.CONTACTS_DISABLED));
         } finally {
             override.takeBack();
             deleteTestFolder(folderId);

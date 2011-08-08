@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.publish.tests;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.util.Arrays;
@@ -62,10 +63,7 @@ import com.openexchange.ajax.publish.actions.NewPublicationResponse;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.publish.Publication;
-import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.SimPublicationTargetDiscoveryService;
-import com.openexchange.publish.json.PublicationJSONException;
-import com.openexchange.tools.servlet.AjaxException;
 
 
 /**
@@ -79,7 +77,7 @@ public class ListPublicationsTest extends AbstractPublicationTest {
         super(name);
     }
 
-    public void testListExistingPublication() throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException{
+    public void testListExistingPublication() throws OXException, IOException, SAXException, JSONException, OXException, OXException{
         final Contact contact = createDefaultContactFolderWithOneContact();
         String folderID = String.valueOf(contact.getParentFolderID() );
         String module = "contacts";
@@ -109,7 +107,7 @@ public class ListPublicationsTest extends AbstractPublicationTest {
         assertEquals("Should have same target ID", expected.getTarget().getId(), actual.getString(4));
     }
     
-    public void testListExistingPublicationOfEmptyFolder() throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException{
+    public void testListExistingPublicationOfEmptyFolder() throws OXException, IOException, SAXException, JSONException, OXException, OXException{
         final FolderObject contact = createDefaultContactFolder();
         String folderID = String.valueOf(contact.getObjectID() );
         String module = "contacts";

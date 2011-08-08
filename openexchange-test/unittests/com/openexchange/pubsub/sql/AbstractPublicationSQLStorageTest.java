@@ -49,6 +49,7 @@
 
 package com.openexchange.pubsub.sql;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
 import static com.openexchange.sql.schema.Tables.publications;
 import java.io.IOException;
@@ -62,7 +63,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.storage.SimConfigurationStorageService;
-import com.openexchange.exceptions.StringComponent;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.SimContext;
@@ -119,8 +119,6 @@ public class AbstractPublicationSQLStorageTest extends SQLTestCase {
     @Override
     public void setUp() throws Exception {
         Init.startServer();
-        PublicationErrorMessage.EXCEPTIONS.setApplicationId("com.openexchange.publish");
-        PublicationErrorMessage.EXCEPTIONS.setComponent(new StringComponent("PUB"));
         loadProperties();
         super.setUp();
 

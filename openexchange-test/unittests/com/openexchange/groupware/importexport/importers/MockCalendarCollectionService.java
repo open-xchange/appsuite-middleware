@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.importexport.importers;
 
+import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -58,13 +59,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
-import com.openexchange.api2.OXException;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarFolderObject;
 import com.openexchange.groupware.calendar.MBoolean;
-import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.Appointment;
@@ -75,7 +73,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
-import com.openexchange.tools.iterator.SearchIteratorException;
 
 
 /**
@@ -269,7 +266,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
     /* (non-Javadoc)
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#checkRecurringCompleteness(com.openexchange.groupware.container.CalendarObject, boolean)
      */
-    public void checkRecurringCompleteness(CalendarObject cdao, boolean ignoreUntilAndOccurrence) throws OXCalendarException {
+    public void checkRecurringCompleteness(CalendarObject cdao, boolean ignoreUntilAndOccurrence) throws OXException {
         // TODO Auto-generated method stub
         
     }
@@ -437,7 +434,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
     /* (non-Javadoc)
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#getAllVisibleAndReadableFolderObject(int, int[], com.openexchange.groupware.contexts.Context, com.openexchange.groupware.userconfiguration.UserConfiguration, java.sql.Connection)
      */
-    public CalendarFolderObject getAllVisibleAndReadableFolderObject(int uid, int[] groups, Context c, UserConfiguration uc) throws SQLException, DBPoolingException, SearchIteratorException, OXException {
+    public CalendarFolderObject getAllVisibleAndReadableFolderObject(int uid, int[] groups, Context c, UserConfiguration uc) throws SQLException, OXException, OXException, OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -461,7 +458,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
     /* (non-Javadoc)
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#getAppointmentTitle(int, com.openexchange.groupware.contexts.Context)
      */
-    public String getAppointmentTitle(int objectId, Context ctx) throws OXCalendarException {
+    public String getAppointmentTitle(int objectId, Context ctx) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -701,7 +698,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
     /* (non-Javadoc)
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#getVisibleAndReadableFolderObject(int, int[], com.openexchange.groupware.contexts.Context, com.openexchange.groupware.userconfiguration.UserConfiguration, java.sql.Connection)
      */
-    public CalendarFolderObject getVisibleAndReadableFolderObject(int uid, int[] groups, Context c, UserConfiguration uc, Connection readcon) throws SQLException, DBPoolingException, SearchIteratorException, OXException {
+    public CalendarFolderObject getVisibleAndReadableFolderObject(int uid, int[] groups, Context c, UserConfiguration uc, Connection readcon) throws SQLException, OXException, OXException, OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -709,7 +706,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
     /* (non-Javadoc)
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#getVisibleFolderSQLInString(java.lang.StringBuilder, int, int[], com.openexchange.groupware.contexts.Context, com.openexchange.groupware.userconfiguration.UserConfiguration, java.sql.Connection)
      */
-    public void getVisibleFolderSQLInString(StringBuilder sb, int uid, int[] groups, Context c, UserConfiguration uc, Connection readcon) throws SQLException, OXException, OXCalendarException {
+    public void getVisibleFolderSQLInString(StringBuilder sb, int uid, int[] groups, Context c, UserConfiguration uc, Connection readcon) throws SQLException, OXException, OXException {
         // TODO Auto-generated method stub
         
     }
@@ -903,7 +900,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
         
     }
 
-    public void triggerModificationEvent(Session session, CalendarDataObject oldAppointment, CalendarDataObject newAppointment) throws OXCalendarException {
+    public void triggerModificationEvent(Session session, CalendarDataObject oldAppointment, CalendarDataObject newAppointment) throws OXException {
         // TODO Auto-generated method stub
         
     }
@@ -919,7 +916,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
         // TODO Auto-generated method stub
         
     }
-    public CalendarFolderObject getAllVisibleAndReadableFolderObject(int uid, int[] groups, Context c, UserConfiguration uc, Connection con) throws SQLException, DBPoolingException, SearchIteratorException, OXException {
+    public CalendarFolderObject getAllVisibleAndReadableFolderObject(int uid, int[] groups, Context c, UserConfiguration uc, Connection con) throws SQLException, OXException, OXException, OXException {
         // TODO Auto-generated method stub
         return null;
     }

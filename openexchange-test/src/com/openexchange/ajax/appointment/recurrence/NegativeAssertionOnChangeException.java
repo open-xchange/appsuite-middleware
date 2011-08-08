@@ -50,7 +50,7 @@
 package com.openexchange.ajax.appointment.recurrence;
 
 import com.openexchange.ajax.appointment.helper.AbstractNegativeAssertion;
-import com.openexchange.ajax.appointment.helper.OXError;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Changes;
 import com.openexchange.test.CalendarTestManager;
@@ -66,7 +66,7 @@ public class NegativeAssertionOnChangeException extends AbstractNegativeAssertio
     }
 
     @Override
-    public void check(Appointment startWith, Changes changes, OXError expectedError) {
+    public void check(Appointment startWith, Changes changes, OXException expectedError) {
         Appointment copy = startWith.clone();
         if(! startWith.containsObjectID())
             manager.insert(copy);
@@ -79,8 +79,8 @@ public class NegativeAssertionOnChangeException extends AbstractNegativeAssertio
         
         manager.update(update);
         assertTrue("Expected error " + expectedError +" but got nothing", manager.hasLastException());
-        Exception actual = manager.getLastException();
-        assertTrue("Actual error" + actual + " should match expected error " + expectedError , expectedError.matches(actual));
+        OXException actual = (OXException) manager.getLastException();
+        assertTrue("Actual error" + actual + " should match expected error " + expectedError , expectedError.similarTo(actual));
     }
 
 }

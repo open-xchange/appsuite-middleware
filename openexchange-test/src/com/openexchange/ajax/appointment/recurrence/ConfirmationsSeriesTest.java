@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.calendar.storage.ParticipantStorage.extractExternal;
 import java.util.ArrayList;
 import java.util.Arrays;

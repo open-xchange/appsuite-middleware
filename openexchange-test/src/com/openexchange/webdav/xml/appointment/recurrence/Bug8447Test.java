@@ -5,8 +5,8 @@ import java.util.Date;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.XmlServlet;
 
 public class Bug8447Test extends AbstractRecurrenceTest {
@@ -69,7 +69,7 @@ public class Bug8447Test extends AbstractRecurrenceTest {
 		try {
 			loadAppointment(webCon, exceptionObjectId, appointmentFolderId, PROTOCOL + hostName, login, password);
 			fail("object not found exception expected!");
-		} catch (final TestException exc) {
+		} catch (final OXException exc) {
 			assertExceptionMessage(exc.getMessage(), XmlServlet.OBJECT_NOT_FOUND_STATUS);
 		}
 		

@@ -48,6 +48,8 @@
  */
 
 package com.openexchange.ajax.publish.tests;
+
+import com.openexchange.exception.OXException;
 import static com.openexchange.test.OXTestToolkit.assertSameStream;
 import java.io.File;
 import java.io.FileInputStream;

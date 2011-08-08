@@ -47,6 +47,7 @@
 
 package com.openexchange.ajax.kata.contacts;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.ajax.contact.action.UpdateRequest;
 import com.openexchange.ajax.contact.action.UpdateResponse;
 import com.openexchange.ajax.framework.AJAXClient;

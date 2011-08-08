@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.container;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.container.CalendarObject.*;
 
 import java.util.Date;

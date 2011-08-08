@@ -1,9 +1,8 @@
 package com.openexchange.webdav.xml.appointment;
 
-import com.openexchange.groupware.calendar.OXCalendarException;
-import com.openexchange.groupware.calendar.OXCalendarException.Code;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.AppointmentTest;
 
 public class Bug6455Test extends AppointmentTest {
@@ -39,9 +38,8 @@ public class Bug6455Test extends AppointmentTest {
 		try {
 			objectId = insertAppointment(getWebConversation(), appointmentObj, getHostName(), getLogin(), getPassword());
 			fail("permission exception expected!");
-		} catch (final TestException exc) {
-			
-			assertExceptionMessage(exc.getMessage(), new OXCalendarException(Code.TRUNCATED_SQL_ERROR).getErrorCode());
+		} catch (final OXException exc) {
+			assertTrue(exc.similarTo(OXCalendarExceptionCodes.TRUNCATED_SQL_ERROR));
 		}
 		
 		if (objectId > 0) {

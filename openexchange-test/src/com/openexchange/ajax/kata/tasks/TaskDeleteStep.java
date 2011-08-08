@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.kata.tasks;
 
+import com.openexchange.exception.OXException;
 import org.junit.Assert;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonDeleteResponse;

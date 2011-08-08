@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.subscribe.test;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -58,7 +59,6 @@ import org.xml.sax.SAXException;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.Subscription;
-import com.openexchange.tools.servlet.AjaxException;
 
 
 /**
@@ -71,7 +71,7 @@ public class AllSubscriptionsTest extends AbstractSubscriptionTest {
         super(name);
     }
     
-    public void testBasicOXMFAllRequest() throws AjaxException, IOException, SAXException, JSONException{
+    public void testBasicOXMFAllRequest() throws OXException, IOException, SAXException, JSONException{
         FolderObject folder = createDefaultContactFolder();
         DynamicFormDescription formDescription = generateFormDescription();
         Subscription subscription = generateOXMFSubscription(formDescription);
@@ -91,7 +91,7 @@ public class AllSubscriptionsTest extends AbstractSubscriptionTest {
         assertEquals("Should return the same source ID", subscription.getSource().getId(), elements.getString(2)); 
     }
     
-    public void testAllRequestForUser() throws AjaxException, IOException, SAXException, JSONException {
+    public void testAllRequestForUser() throws OXException, IOException, SAXException, JSONException {
         FolderObject folder = createDefaultContactFolder();
         DynamicFormDescription formDescription = generateFormDescription();
         Subscription subscription = generateOXMFSubscription(formDescription);

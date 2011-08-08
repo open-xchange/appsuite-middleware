@@ -49,13 +49,12 @@
 
 package com.openexchange.ajax.publish.tests;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.publish.actions.GetPublicationRequest;
 import com.openexchange.ajax.publish.actions.GetPublicationResponse;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.tools.servlet.AjaxException;
 
 
 /**
@@ -72,11 +71,11 @@ public class GetPublicationTest extends AbstractPublicationTest {
         super(name);
     }
     
-    public void testShouldNotFindNonExistingPublication() throws AjaxException, IOException, SAXException, JSONException{
+    public void testShouldNotFindNonExistingPublication() throws OXException, IOException, SAXException, JSONException{
         GetPublicationRequest req = new GetPublicationRequest(Integer.MAX_VALUE);
         
         GetPublicationResponse res = getClient().execute(req);
-        AbstractOXException exception = res.getException();
+        OXException exception = res.getException();
         assertNotNull("Should contain an exception" , exception);
     }
 

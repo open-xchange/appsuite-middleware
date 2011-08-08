@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.infostore.actions;
 
+import com.openexchange.exception.OXException;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -60,9 +61,7 @@ import java.util.Set;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -110,7 +109,7 @@ public class InfostoreTestManager {
         return lastResponse;
     }
 
-    public void cleanUp() throws AjaxException, IOException, SAXException, JSONException {
+    public void cleanUp() throws OXException, IOException, SAXException, JSONException {
         for (DocumentMetadata data : new HashSet<DocumentMetadata>(getCreatedEntities())) {
             deleteAction(data.getId(), (int) data.getFolderId(), new Date(Long.MAX_VALUE));
         }
@@ -127,7 +126,7 @@ public class InfostoreTestManager {
         }
     }
 
-    public void newAction(DocumentMetadata data) throws AjaxException, IOException, SAXException, JSONException {
+    public void newAction(DocumentMetadata data) throws OXException, IOException, SAXException, JSONException {
         NewInfostoreRequest newRequest = new NewInfostoreRequest(data);
         newRequest.setFailOnError(getFailOnError());
         NewInfostoreResponse newResponse = getClient().execute(newRequest);
@@ -140,7 +139,7 @@ public class InfostoreTestManager {
      * The following is not beautiful, but the request/response framework 
      * doesn't seem to offer a solution to do POST requests containing files.
      */
-    public void newAction(DocumentMetadata data, File upload) throws AjaxException, IOException, SAXException, JSONException {
+    public void newAction(DocumentMetadata data, File upload) throws OXException, IOException, SAXException, JSONException {
         NewInfostoreRequest newRequest = new NewInfostoreRequest(data, upload);
         newRequest.setFailOnError(getFailOnError());
         NewInfostoreResponse newResponse = getClient().execute(newRequest);
@@ -149,7 +148,7 @@ public class InfostoreTestManager {
         createdEntities.add(data);
     }
 
-    public void deleteAction(List<Integer> ids, List<Integer> folders, Date timestamp) throws AjaxException, IOException, SAXException, JSONException {
+    public void deleteAction(List<Integer> ids, List<Integer> folders, Date timestamp) throws OXException, IOException, SAXException, JSONException {
         DeleteInfostoreRequest deleteRequest = new DeleteInfostoreRequest(ids, folders, timestamp);
         deleteRequest.setFailOnError(getFailOnError());
         DeleteInfostoreResponse deleteResponse = getClient().execute(deleteRequest);
@@ -157,15 +156,15 @@ public class InfostoreTestManager {
         removeFromCreatedEntities(ids);
     }
 
-    public void deleteAction(int id, int folder, Date timestamp) throws AjaxException, IOException, SAXException, JSONException {
+    public void deleteAction(int id, int folder, Date timestamp) throws OXException, IOException, SAXException, JSONException {
         deleteAction(Arrays.asList(Integer.valueOf(id)), Arrays.asList(Integer.valueOf(folder)), timestamp);
     }
 
-    public void deleteAction(DocumentMetadata data) throws AjaxException, IOException, SAXException, JSONException {
+    public void deleteAction(DocumentMetadata data) throws OXException, IOException, SAXException, JSONException {
         deleteAction(data.getId(), (Long.valueOf(data.getFolderId()).intValue()), data.getLastModified());
     }
 
-    public DocumentMetadata getAction(int id) throws OXException, JSONException, AjaxException, IOException, SAXException {
+    public DocumentMetadata getAction(int id) throws OXException, JSONException, OXException, IOException, SAXException {
         GetInfostoreRequest getRequest = new GetInfostoreRequest(id);
         getRequest.setFailOnError(getFailOnError());
         GetInfostoreResponse getResponse = getClient().execute(getRequest);

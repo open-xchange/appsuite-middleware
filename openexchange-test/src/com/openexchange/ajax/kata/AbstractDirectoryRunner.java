@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.kata;
 
+import com.openexchange.exception.OXException;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.List;

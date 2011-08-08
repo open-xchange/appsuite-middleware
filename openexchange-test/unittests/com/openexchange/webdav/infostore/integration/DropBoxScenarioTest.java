@@ -1,5 +1,6 @@
 package com.openexchange.webdav.infostore.integration;
 
+import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,14 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 import junit.framework.TestCase;
 import org.junit.Test;
-import com.openexchange.api2.OXException;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.webdav.InfostoreWebdavFactory;
-import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.setuptools.TestContextToolkit;
@@ -25,7 +22,6 @@ import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.webdav.protocol.DummySessionHolder;
 import com.openexchange.webdav.protocol.TestWebdavFactoryBuilder;
 import com.openexchange.webdav.protocol.WebdavPath;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 // Bug #9109
@@ -97,19 +93,10 @@ public class DropBoxScenarioTest extends TestCase{
 			assertEquals(-1, is.read());
 			is.close();
 			
-		} catch (final LdapException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		} catch (final DBPoolingException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
 		} catch (final OXException e) {
 			e.printStackTrace();
 			fail(e.getMessage());
 		} catch (final SQLException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		} catch (final WebdavProtocolException e) {
 			e.printStackTrace();
 			fail(e.getMessage());
 		} catch (final IOException e) {
@@ -132,13 +119,13 @@ public class DropBoxScenarioTest extends TestCase{
 	}
 	
 	
-	private void switchUser(final String username) throws LdapException, DBPoolingException, OXException, SQLException {
+	private void switchUser(final String username) throws OXException, OXException, OXException, SQLException {
 		factory.endRequest(200);
 		factory.setSessionHolder(new DummySessionHolder(username, ctx));
 		factory.beginRequest();
 	}
 	
-	private void createDropBox() throws OXException, WebdavProtocolException, ContextException {
+	private void createDropBox() throws OXException, OXException, OXException {
 		final Session session = factory.getSessionHolder().getSessionObject();
 		final OXFolderManager mgr = OXFolderManager.getInstance(session);
 		final OXFolderAccess acc = new OXFolderAccess(ContextStorage.getInstance().getContext(session.getContextId()));

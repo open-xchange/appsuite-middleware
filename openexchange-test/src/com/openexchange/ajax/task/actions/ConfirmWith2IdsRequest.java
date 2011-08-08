@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.task.actions;
 
+import com.openexchange.exception.OXException;
 import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;

@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.file;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.B;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -62,7 +63,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.tools.file.external.FileStorageException;
 import com.openexchange.tools.file.internal.LocalFileStorage;
 
 /**
@@ -90,7 +90,7 @@ public class InMemoryFileStorage extends LocalFileStorage {
     }
 
    @Override
-    protected void save(final String name, final InputStream input) throws FileStorageException {
+    protected void save(final String name, final InputStream input) throws OXException {
         final List<Byte> bytes = new ArrayList<Byte>();
         final byte[] buffer = new byte[1024];
         int length = -1;
@@ -101,7 +101,7 @@ public class InMemoryFileStorage extends LocalFileStorage {
                 }
             }
         } catch (final IOException e) {
-            throw new FileStorageException(FileStorageException.Code.IOERROR, e);
+            throw new OXException(e);
         }
 
         final byte[] tmpData = new byte[bytes.size()];

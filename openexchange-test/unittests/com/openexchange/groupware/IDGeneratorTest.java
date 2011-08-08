@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware;
 
+import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -61,7 +62,6 @@ import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.impl.IDGenerator;
@@ -177,7 +177,7 @@ public class IDGeneratorTest extends TestCase {
                 Connection con = null;
                 try {
                     con = DBPool.pickupWriteable(context);
-                } catch (DBPoolingException e) {
+                } catch (OXException e) {
                     LOG.error("Can't get writable database connection.", e);
                     return;
                 }

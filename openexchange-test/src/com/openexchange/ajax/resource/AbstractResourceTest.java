@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.resource;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.Date;
 import java.util.TimeZone;
@@ -63,7 +64,6 @@ import com.openexchange.ajax.resource.actions.ResourceGetRequest;
 import com.openexchange.ajax.resource.actions.ResourceGetResponse;
 import com.openexchange.ajax.resource.actions.ResourceNewRequest;
 import com.openexchange.resource.Resource;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * {@link AbstractResourceTest}
@@ -87,7 +87,7 @@ public abstract class AbstractResourceTest extends AbstractAJAXSession {
 	 * Gets the client time zone
 	 * 
 	 * @return The client time zone
-	 * @throws AjaxException
+	 * @throws OXException
 	 *             If an AJAX error occurs
 	 * @throws IOException
 	 *             If an I/O error occurs
@@ -96,7 +96,7 @@ public abstract class AbstractResourceTest extends AbstractAJAXSession {
 	 * @throws JSONException
 	 *             If a JSON error occurs
 	 */
-	protected TimeZone getTimeZone() throws AjaxException, IOException, SAXException, JSONException {
+	protected TimeZone getTimeZone() throws OXException, IOException, SAXException, JSONException {
 		return getClient().getValues().getTimeZone();
 	}
 
@@ -107,7 +107,7 @@ public abstract class AbstractResourceTest extends AbstractAJAXSession {
 	 *            The resource ID
 	 * @return The resource identified through specified <code>resourceId</code>
 	 *         or <code>null</code> on an invalid <code>resourceId</code>
-	 * @throws AjaxException
+	 * @throws OXException
 	 *             If an AJAX error occurs
 	 * @throws JSONException
 	 *             If a JSON error occurs
@@ -116,7 +116,7 @@ public abstract class AbstractResourceTest extends AbstractAJAXSession {
 	 * @throws SAXException
 	 *             If a SAX error occurs
 	 */
-	protected Resource getResource(final int resourceId) throws AjaxException, JSONException, IOException, SAXException {
+	protected Resource getResource(final int resourceId) throws OXException, JSONException, IOException, SAXException {
 		if (resourceId <= 0) {
 			return null;
 		}
@@ -130,7 +130,7 @@ public abstract class AbstractResourceTest extends AbstractAJAXSession {
 	 * 
 	 * @param resourceId
 	 *            The resource ID
-	 * @throws AjaxException
+	 * @throws OXException
 	 *             If an AJAX error occurs
 	 * @throws JSONException
 	 *             If a JSON error occurs
@@ -139,7 +139,7 @@ public abstract class AbstractResourceTest extends AbstractAJAXSession {
 	 * @throws SAXException
 	 *             If a SAX error occurs
 	 */
-	protected void deleteResource(final int resourceId) throws AjaxException, JSONException, IOException, SAXException {
+	protected void deleteResource(final int resourceId) throws OXException, JSONException, IOException, SAXException {
 		if (resourceId <= 0) {
 			return;
 		}
@@ -161,7 +161,7 @@ public abstract class AbstractResourceTest extends AbstractAJAXSession {
 	 * @param toCreate
 	 *            The resource to create
 	 * @return The ID of the newly created resource
-	 * @throws AjaxException
+	 * @throws OXException
 	 *             If an AJAX error occurs
 	 * @throws JSONException
 	 *             If a JSON error occurs
@@ -170,7 +170,7 @@ public abstract class AbstractResourceTest extends AbstractAJAXSession {
 	 * @throws SAXException
 	 *             If a SAX error occurs
 	 */
-	protected int createResource(final Resource toCreate) throws AjaxException, JSONException, IOException,
+	protected int createResource(final Resource toCreate) throws OXException, JSONException, IOException,
 			SAXException {
 		/*
 		 * Perform new request

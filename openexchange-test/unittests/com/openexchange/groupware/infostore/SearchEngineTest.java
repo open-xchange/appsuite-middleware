@@ -48,15 +48,14 @@
  */
 package com.openexchange.groupware.infostore;
 
+import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.TestCase;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.DBProvider;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -71,11 +70,9 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.test.TestInit;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionFactory;
-import com.openexchange.tx.TransactionException;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -150,7 +147,7 @@ public class SearchEngineTest extends TestCase {
 
     // Bug 11569
 
-    public void testSearchForPercent() throws AbstractOXException, SearchIteratorException {
+    public void testSearchForPercent() throws OXException, OXException {
         final DocumentMetadata doc1 = createWithTitle("100%");
                                 createWithTitle("Hallo");
         
@@ -165,7 +162,7 @@ public class SearchEngineTest extends TestCase {
         assertEquals(doc1.getId(), gotDoc.getId());
     }
 
-    private DocumentMetadata createWithTitle(final String title) throws AbstractOXException {
+    private DocumentMetadata createWithTitle(final String title) throws OXException {
         final DocumentMetadata metadata = new DocumentMetadataImpl() ;
         metadata.setTitle(title);
         metadata.setFolderId(folderId);
@@ -177,14 +174,14 @@ public class SearchEngineTest extends TestCase {
         } catch (final OXException x) {
             try {
                 infostore.rollback();
-            } catch (final TransactionException e) {
+            } catch (final OXException e) {
                 e.printStackTrace();
             }
             throw x;
         } finally {
             try {
                 infostore.finish();
-            } catch (final TransactionException e) {
+            } catch (final OXException e) {
                 e.printStackTrace();
             }
         }

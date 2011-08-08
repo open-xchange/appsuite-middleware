@@ -49,9 +49,9 @@
 
 package com.openexchange.webdav.xml.appointment;
 
+import com.openexchange.exception.OXException;
 import java.util.Date;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.AppointmentTest;
 import com.openexchange.webdav.xml.FolderTest;
 
@@ -129,7 +129,7 @@ public class Bug12050Test extends AppointmentTest {
         exceptionUpdate.setObjectID(exception.getObjectID());
         try {
             updateAppointment(getWebConversation(), exceptionUpdate, exception.getObjectID(), appointmentFolderId, getHostName(), getLogin(), getPassword());
-        } catch (TestException e) {
+        } catch (OXException e) {
             fail(e.getMessage());
         }
     }

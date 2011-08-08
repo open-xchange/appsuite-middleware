@@ -37,6 +37,7 @@
 
 package com.openexchange.ajax.task.actions;
 
+import com.openexchange.exception.OXException;
 import java.util.Date;
 
 import org.json.JSONException;
@@ -45,8 +46,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.groupware.search.TaskSearchObject;
-import com.openexchange.groupware.tasks.TaskException;
-import com.openexchange.groupware.tasks.TaskException.Code;
+import com.openexchange.groupware.tasks.TaskExceptionCode;
 
 /**
  * Writes task search object to a JSON.
@@ -65,15 +65,14 @@ public class TaskSearchJSONWriter {
      * Writes a task search object as its JSON representation.
      * @param search task search object.
      * @return a JSON representation of the task search object.
-     * @throws TaskException if the task search object contains invalid values.
+     * @throws OXException if the task search object contains invalid values.
      * @throws JSONException if writing json gives errors.
      */
     public static JSONObject write(final TaskSearchObject search)
-        throws TaskException, JSONException {
+        throws OXException, JSONException {
         final Date[] range = search.getRange();
         if (range != null && range.length != 2) {
-            throw new TaskException(Code.WRONG_DATE_RANGE,
-                Integer.valueOf(range.length));
+            throw TaskExceptionCode.WRONG_DATE_RANGE.create(range.length);
         }
         final JSONObject json = new JSONObject();
         if (TaskSearchObject.NO_FOLDER != search.getFolder()) {

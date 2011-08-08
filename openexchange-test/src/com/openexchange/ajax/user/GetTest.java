@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.user;
 
+import com.openexchange.exception.OXException;
 import org.json.JSONObject;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;

@@ -49,12 +49,12 @@
 
 package com.openexchange.webdav.xml.folder;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.Date;
 
 import org.jdom.JDOMException;
 
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.folder.actions.ListRequest;
@@ -80,11 +80,11 @@ public final class FolderTools {
         this.client = client;
     }
 
-    public FolderObject getDefaultAppointmentFolder() throws IOException, JDOMException, AbstractOXException, TestException {
+    public FolderObject getDefaultAppointmentFolder() throws IOException, JDOMException, OXException, OXException {
         return getDefaultAppointmentFolder(null);
     }
 
-    public FolderObject getDefaultAppointmentFolder(final String host) throws IOException, JDOMException, AbstractOXException, TestException {
+    public FolderObject getDefaultAppointmentFolder(final String host) throws IOException, JDOMException, OXException, OXException {
         if (null == defaultAppointmentFolder) {
             final ListRequest request = new ListRequest(new Date(0));
             final ListResponse response = client.execute(host, request);
@@ -102,11 +102,11 @@ public final class FolderTools {
         return defaultAppointmentFolder;
     }
 
-    public FolderObject getDefaultContactFolder() throws AbstractOXException, IOException, JDOMException, TestException {
+    public FolderObject getDefaultContactFolder() throws OXException, IOException, JDOMException, OXException {
         return getDefaultContactFolder(null);
     }
 
-    public FolderObject getDefaultContactFolder(String host) throws AbstractOXException, IOException, JDOMException, TestException {
+    public FolderObject getDefaultContactFolder(String host) throws OXException, IOException, JDOMException, OXException {
         if (null == defaultContactFolder) {
             final ListRequest request = new ListRequest(new Date(0));
             final ListResponse response = client.execute(host, request);

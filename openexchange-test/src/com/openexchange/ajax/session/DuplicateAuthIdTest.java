@@ -51,20 +51,18 @@ package com.openexchange.ajax.session;
 
 import static com.openexchange.ajax.framework.AJAXClient.User.User1;
 import static com.openexchange.ajax.framework.AJAXClient.User.User2;
+
 import java.util.Arrays;
+
 import junit.framework.TestCase;
+
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.session.actions.LoginRequest;
 import com.openexchange.ajax.session.actions.LoginResponse;
 import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.exceptions.ComponentRegistry;
-import com.openexchange.exceptions.impl.ComponentRegistryImpl;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
+import com.openexchange.exception.OXException;
 import com.openexchange.sessiond.SessionExceptionCodes;
-import com.openexchange.sessiond.SessiondException;
-import com.openexchange.sessiond.exception.SessionExceptionFactory;
 
 /**
  * Checks if the server detects correctly a duplicate used authId.
@@ -90,8 +88,6 @@ public class DuplicateAuthIdTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         AJAXConfig.init();
-        ComponentRegistry componentRegistry = new ComponentRegistryImpl();
-        componentRegistry.registerComponent(EnumComponent.SESSION, "com.openexchange.session", SessionExceptionFactory.getInstance());
         sameAuthId = LoginTools.generateAuthId();
         final AJAXSession session1 = new AJAXSession();
         client1 = new AJAXClient(session1);
@@ -119,13 +115,9 @@ public class DuplicateAuthIdTest extends TestCase {
             client2.logout();
             fail("Duplicate authId not detected.");
         } else {
-            AbstractOXException e = response.getException();
-            SessiondException se = SessionExceptionCodes.DUPLICATE_AUTHID.create(login1, login2);
-            assertEquals("Found wrong exception.", se.getComponent(), e.getComponent());
-            assertEquals("Found wrong exception.", se.getDetailNumber(), e.getDetailNumber());
-            assertEquals("Found wrong exception.", se.getCategory(), e.getCategory());
-            assertEquals("Found wrong exception.", se.getOrigMessage(), e.getOrigMessage());
-            assertEquals("Found wrong exception.", Arrays.asList(se.getMessageArgs()), Arrays.asList(e.getMessageArgs()));
+            OXException e = response.getException();
+            OXException se = SessionExceptionCodes.DUPLICATE_AUTHID.create(login1, login2);
+            assertTrue("Found wrong exception.", se.similarTo(e));
         }
     }
 }

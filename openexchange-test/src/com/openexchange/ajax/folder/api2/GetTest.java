@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.folder.api2;
 
+import com.openexchange.exception.OXException;
 import org.json.JSONObject;
 import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.GetRequest;

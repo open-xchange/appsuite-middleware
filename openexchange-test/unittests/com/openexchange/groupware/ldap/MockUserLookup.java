@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.ldap;
 
+import com.openexchange.exception.OXException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,9 +62,9 @@ public class MockUserLookup {
     private final Map<Integer, User> users = new HashMap<Integer, User>();
 
 
-    public User getUser(final int uid) throws UserException {
+    public User getUser(final int uid) throws OXException {
         if (!users.containsKey(uid)) {
-            throw new UserException(UserException.Code.USER_NOT_FOUND, uid, -1);
+            throw UserExceptionCode.USER_NOT_FOUND.create(uid);
         }
         return users.get(uid);
     }

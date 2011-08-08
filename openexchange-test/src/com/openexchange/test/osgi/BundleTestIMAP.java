@@ -49,6 +49,7 @@
 
 package com.openexchange.test.osgi;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.json.JSONException;
 import org.json.JSONObject;

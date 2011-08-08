@@ -49,6 +49,7 @@
 
 package com.openexchange.test;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.fail;
 
@@ -88,13 +89,9 @@ import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.CommonSearchResponse;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.ajax.parser.ContactParser;
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
-import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.tools.servlet.OXJSONException;
 
 /**
  * This class and ContactObject should be all that is needed to write contact-related tests. If multiple users are needed use multiple
@@ -161,7 +158,7 @@ public class ContactTestManager implements TestManager {
         return contactParser;
     }
 
-    public ContactTestManager(AJAXClient client) throws AjaxException, IOException, SAXException, JSONException {
+    public ContactTestManager(AJAXClient client) throws OXException, IOException, SAXException, JSONException {
         this.setClient(client);
         this.setTimeZone(client.getValues().getTimeZone());
         setCreatedEntities(new LinkedList<Contact>());
@@ -505,7 +502,7 @@ public class ContactTestManager implements TestManager {
         try {
             lastException = exception;
             throw exception;
-        } catch (AjaxException e) {
+        } catch (OXException e) {
             if (getFailOnError()){
             	e.printStackTrace();
                 fail("AjaxException occured during " + action + ": " + e.getMessage());
@@ -525,11 +522,6 @@ public class ContactTestManager implements TestManager {
             	e.printStackTrace();
                 fail("JSONException occured during " + action + ": " + e.getMessage());
             }
-        } catch (AbstractOXException e) {
-            if (getFailOnError()){
-            	e.printStackTrace();
-                fail("AbstractOXException occured during " + action + ": " + e.getMessage());
-            }
         } catch (Exception e) {
             if (getFailOnError()){
             	e.printStackTrace();
@@ -538,7 +530,7 @@ public class ContactTestManager implements TestManager {
         }
     }
     
-    protected void doJanitorialTasks(AbstractAJAXResponse response) throws AbstractOXException{
+    protected void doJanitorialTasks(AbstractAJAXResponse response) throws OXException{
         lastResponse = response;
         if(response.hasError() && failOnError)
             throw response.getException();
@@ -554,7 +546,7 @@ public class ContactTestManager implements TestManager {
         }
     }
 
-    private List<Contact> transform(JSONArray data) throws JSONException, OXException, OXJSONException {
+    private List<Contact> transform(JSONArray data) throws JSONException, OXException, OXException {
     	List<Contact> contacts = new LinkedList<Contact>();
         for (int i = 0; i < data.length(); i++) {
             final JSONArray jsonArray = data.getJSONArray(i);

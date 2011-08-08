@@ -37,6 +37,7 @@
 
 package com.openexchange.webdav.xml.parser;
 
+import com.openexchange.exception.OXException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -44,7 +45,6 @@ import java.util.Map;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.Namespace;
-import com.openexchange.api.OXConflictException;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.Appointment;
@@ -68,11 +68,11 @@ public class ResponseParser {
 
     public static final Namespace webdav = Namespace.getNamespace("D", "DAV:");
 
-    public static Response[] parse(final Document doc, final int module) throws OXConflictException, TestException {
+    public static Response[] parse(final Document doc, final int module) throws OXException, OXException {
         return parse(doc, module, false);
     }
 
-    public static Response[] parse(final Document doc, final int module, final boolean bList) throws OXConflictException, TestException {
+    public static Response[] parse(final Document doc, final int module, final boolean bList) throws OXException, OXException {
         final Element rootElement = doc.getRootElement();
         final List<?> responseElements = rootElement.getChildren("response", webdav);
 
@@ -95,7 +95,7 @@ public class ResponseParser {
         return response;
     }
 
-    protected static Response parseResponse(final Element eResponse, final int module, final boolean bList) throws OXConflictException, TestException {
+    protected static Response parseResponse(final Element eResponse, final int module, final boolean bList) throws OXException, OXException {
         final Response response = new Response();
 
         final Element ePropstat = eResponse.getChild("propstat", webdav);
@@ -235,7 +235,7 @@ public class ResponseParser {
         return response;
     }
 
-    protected static Appointment parseAppointmentResponse(final Element eProp) throws OXConflictException {
+    protected static Appointment parseAppointmentResponse(final Element eProp) throws OXException {
         final Appointment appointmentObj = new Appointment();
         final AppointmentParser appointmentParser = new AppointmentParser();
         appointmentParser.parse(appointmentObj, eProp);
@@ -249,14 +249,14 @@ public class ResponseParser {
         return contactObj;
     }
 
-    protected static FolderObject parseFolderResponse(final Element eProp) throws OXConflictException, TestException {
+    protected static FolderObject parseFolderResponse(final Element eProp) throws OXException, OXException {
         final FolderObject folderObj = new FolderObject();
         final FolderParser folderParser = new FolderParser();
         folderParser.parse(folderObj, eProp);
         return folderObj;
     }
 
-    protected static Task parseTaskResponse(final Element eProp) throws OXConflictException {
+    protected static Task parseTaskResponse(final Element eProp) throws OXException {
         final Task taskObj = new Task();
         final TaskParser taskParser = new TaskParser();
         taskParser.parse(taskObj, eProp);

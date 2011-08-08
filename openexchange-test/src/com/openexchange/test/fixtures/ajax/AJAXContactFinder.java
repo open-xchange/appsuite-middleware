@@ -49,6 +49,7 @@
 
 package com.openexchange.test.fixtures.ajax;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.HashMap;
 import org.json.JSONArray;
@@ -56,14 +57,12 @@ import org.json.JSONException;
 import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonAllResponse;
-import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactSetter;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.fixtures.ContactFinder;
 import com.openexchange.test.fixtures.SimpleCredentials;
-import com.openexchange.tools.servlet.AjaxException;
 
 public class AJAXContactFinder implements ContactFinder {
 
@@ -92,13 +91,11 @@ public class AJAXContactFinder implements ContactFinder {
 				}
 				globalAddressBook.put(contact.getInternalUserId(), contact);
 			}
-		} catch (AjaxException e) {
+		} catch (OXException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (JSONException e) {
-			e.printStackTrace();
-		} catch (ContactException e) {
 			e.printStackTrace();
 		}
 	}

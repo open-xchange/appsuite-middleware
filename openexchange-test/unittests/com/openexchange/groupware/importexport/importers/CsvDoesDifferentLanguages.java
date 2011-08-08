@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.importexport.importers;
 
+import com.openexchange.exception.OXException;
 import java.util.List;
 import junit.framework.TestCase;
 import com.openexchange.groupware.calendar.CalendarCollectionService;

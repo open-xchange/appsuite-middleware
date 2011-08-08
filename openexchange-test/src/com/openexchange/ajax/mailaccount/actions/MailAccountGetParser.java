@@ -49,14 +49,13 @@
 
 package com.openexchange.ajax.mailaccount.actions;
 
+import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.json.parser.MailAccountParser;
-import com.openexchange.tools.servlet.OXJSONException;
 
 
 /**
@@ -77,9 +76,7 @@ public class MailAccountGetParser extends AbstractAJAXParser<MailAccountGetRespo
         final MailAccountDescription account = new MailAccountDescription();
         try {
             new MailAccountParser().parse(account, (JSONObject) response.getData());
-        } catch (final OXJSONException e) {
-            throw new JSONException(e);
-        } catch (final MailAccountException e) {
+        } catch (final OXException e) {
             throw new JSONException(e);
         }
         resp.setDescription(account);

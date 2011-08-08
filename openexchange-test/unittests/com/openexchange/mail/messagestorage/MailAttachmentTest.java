@@ -49,13 +49,13 @@
 
 package com.openexchange.mail.messagestorage;
 
+import com.openexchange.exception.OXException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashSet;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
-import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
@@ -331,14 +331,14 @@ public final class MailAttachmentTest extends MessageStorageTest {
 	}
 
 	    // TODO: Should not be part of "real" MAL tests
-    public void testNoAttachmentMIMEMessageConverter() throws MailException, UnsupportedEncodingException {
+    public void testNoAttachmentMIMEMessageConverter() throws OXException, UnsupportedEncodingException {
         final MailMessage testMail = MIMEMessageConverter.convertMessage(RFC822_WO_ATTACH.getBytes("US-ASCII"));
         assertTrue("Missing hasAttachment", testMail.containsHasAttachment());
         assertFalse("A message w/o attachments is marked to hold attachments", testMail.hasAttachment());
 	}
 
     // TODO: Should not be part of "real" MAL tests
-	public void testHasAttachmentMIMEMessageConverter() throws MailException, UnsupportedEncodingException {
+	public void testHasAttachmentMIMEMessageConverter() throws OXException, UnsupportedEncodingException {
 	    final MailMessage testMail = MIMEMessageConverter.convertMessage(RFC822_WITH_ATTACH.getBytes("US-ASCII"));
         assertTrue("Missing hasAttachment", testMail.containsHasAttachment());
         assertTrue("A message with attachments is marked to NOT hold attachments", testMail.hasAttachment());

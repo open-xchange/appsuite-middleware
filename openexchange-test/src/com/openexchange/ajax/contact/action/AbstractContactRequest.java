@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.contact.action;
 
+import com.openexchange.exception.OXException;
 import java.util.TimeZone;
 
 import org.json.JSONException;

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.simple;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;

@@ -49,6 +49,7 @@
 
 package com.openexchange.data.conversion.ical;
 
+import com.openexchange.exception.OXException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;

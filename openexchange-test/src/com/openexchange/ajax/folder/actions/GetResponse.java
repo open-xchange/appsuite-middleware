@@ -49,14 +49,14 @@
 
 package com.openexchange.ajax.folder.actions;
 
+import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.parser.FolderParser;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.webdav.xml.fields.FolderFields;
 
 /**
@@ -80,9 +80,9 @@ public final class GetResponse extends AbstractAJAXResponse {
 
     /**
      * @return the folder
-     * @throws OXJSONException parsing the folder out of the response fails.
+     * @throws OXException parsing the folder out of the response fails.
      */
-    public FolderObject getFolder() throws OXJSONException, OXException {
+    public FolderObject getFolder() throws OXException, OXException {
         if (hasError()) {
             return null;
         }
@@ -94,7 +94,7 @@ public final class GetResponse extends AbstractAJAXResponse {
                     rearrangeId(data);
                 }
             } catch (JSONException e) {
-                throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, e);
+                throw OXJSONExceptionCodes.JSON_READ_ERROR.create();
             }
             new FolderParser().parse(parsed, data);// .parse(parsed, (JSONObject) getData());
             fillInFullName(data, parsed);

@@ -49,13 +49,12 @@
 
 package com.openexchange.ajax.publish.actions;
 
+import com.openexchange.exception.OXException;
 import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.publish.PublicationException;
-import com.openexchange.publish.json.PublicationJSONException;
 
 
 /**
@@ -67,7 +66,7 @@ public class ListPublicationsResponse extends AbstractPublicationResponse {
         super(response);
     }
 
-    public List<JSONArray> getList() throws PublicationException, PublicationJSONException, JSONException {
+    public List<JSONArray> getList() throws OXException, OXException, JSONException {
         JSONArray all = (JSONArray) getData();
         LinkedList<JSONArray> allPubs = new LinkedList<JSONArray>();
 

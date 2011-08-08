@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment;
 
+import com.openexchange.exception.OXException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -58,7 +59,6 @@ import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.ResourceTest;
 import com.openexchange.ajax.group.GroupTest;
-import com.openexchange.api.OXConflictException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
@@ -646,7 +646,7 @@ public class NewTest extends AppointmentTest {
             final int objectId2 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
             deleteAppointment(getWebConversation(), objectId2, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
             fail("conflict exception expected here!");
-        } catch (final OXConflictException exc) {
+        } catch (final OXException exc) {
             assertTrue(true);
         }
 
@@ -681,7 +681,7 @@ public class NewTest extends AppointmentTest {
             final int objectId2 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
             deleteAppointment(getWebConversation(), objectId2, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
             assertEquals("conflict expected here object id should be 0", 0, objectId2);
-        } catch (final OXConflictException exc) {
+        } catch (final OXException exc) {
             assertTrue(true);
         }
 
@@ -690,7 +690,7 @@ public class NewTest extends AppointmentTest {
             final int objectId2 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
             deleteAppointment(getWebConversation(), objectId2, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
             assertEquals("conflict expected here object id should be 0", 0, objectId2);
-        } catch (final OXConflictException exc) {
+        } catch (final OXException exc) {
             assertTrue(true);
         }
 

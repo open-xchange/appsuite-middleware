@@ -49,13 +49,12 @@
 
 package com.openexchange.ajax.mail;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.mail.contenttypes.MailContentType;
-import com.openexchange.configuration.ConfigurationException;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * {@link ForwardMailTest}
@@ -82,7 +81,7 @@ public class ForwardMailTest extends AbstractReplyTest {
         super.tearDown();
     }
 
-    public void testShouldForwardWithoutNotifyingFormerRecipients() throws AjaxException, IOException, SAXException, JSONException, ConfigurationException {
+    public void testShouldForwardWithoutNotifyingFormerRecipients() throws OXException, IOException, SAXException, JSONException, OXException {
         String mail1 = getClient().getValues().getSendAddress();
 
         JSONObject mySentMail = createEMail(mail1, "Forward test", MailContentType.ALTERNATIVE.toString(), MAIL_TEXT_BODY);
@@ -101,7 +100,7 @@ public class ForwardMailTest extends AbstractReplyTest {
         AbstractReplyTest.assertNullOrEmpty("Blind carbon copy field should be empty", myForwardMail.getBcc());
     }
 
-    public void testShouldForwardUsingTestMailManager() throws AjaxException, IOException, SAXException, JSONException, ConfigurationException {
+    public void testShouldForwardUsingTestMailManager() throws OXException, IOException, SAXException, JSONException, OXException {
 
         String mail1 = getClient().getValues().getSendAddress();
 
@@ -122,7 +121,7 @@ public class ForwardMailTest extends AbstractReplyTest {
         AbstractReplyTest.assertNullOrEmpty("Blind carbon copy field should be empty", myForwardMail.getBcc());
     }
 
-    public void testShouldForwardUsingTestMailManager2() throws AjaxException, IOException, SAXException, JSONException, ConfigurationException {
+    public void testShouldForwardUsingTestMailManager2() throws OXException, IOException, SAXException, JSONException, OXException {
 
         String mail1 = getClient().getValues().getSendAddress();
 

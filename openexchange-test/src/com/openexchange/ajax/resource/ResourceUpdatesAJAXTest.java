@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.resource;
 
+import com.openexchange.exception.OXException;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.ajax.framework.Executor;

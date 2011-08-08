@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.importexport;
 
+import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -98,9 +99,7 @@ import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.test.TestException;
 import com.openexchange.tools.URLParameter;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * @deprecated Use IcalImportRequest/Response or IcalExportRequest/Response
@@ -182,7 +181,7 @@ public class AbstractICalTest extends AbstractAJAXTest {
         };
     }
 
-    public static ImportResult[] importICal(final WebConversation webCon, final Appointment[] appointments, final int folderId, final String host, final String session) throws ConversionError, AjaxException, IOException, SAXException, JSONException {
+    public static ImportResult[] importICal(final WebConversation webCon, final Appointment[] appointments, final int folderId, final String host, final String session) throws ConversionError, OXException, IOException, SAXException, JSONException {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         final ICalEmitter emitter = new ICal4JEmitter();
         final ICalSession icalSession = emitter.createSession();
@@ -199,7 +198,7 @@ public class AbstractICalTest extends AbstractAJAXTest {
         return importICal(webCon, input, folderId, host, session);
     }
 
-    public static ImportResult[] importICal(final WebConversation webCon, final Task[] tasks, final int folderId, final String host, final String session) throws AjaxException, IOException, SAXException, JSONException, ConversionError {
+    public static ImportResult[] importICal(final WebConversation webCon, final Task[] tasks, final int folderId, final String host, final String session) throws OXException, IOException, SAXException, JSONException, ConversionError {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         final ICalEmitter emitter = new ICal4JEmitter();
         final ICalSession icalSession = emitter.createSession();
@@ -211,14 +210,14 @@ public class AbstractICalTest extends AbstractAJAXTest {
         return importICal(webCon, input, folderId, host, session);
     }
 
-    public static ImportResult[] importICal(final WebConversation webCon, final InputStream input, final int folderId, final String host, final String session) throws AjaxException, IOException, SAXException, JSONException {
+    public static ImportResult[] importICal(final WebConversation webCon, final InputStream input, final int folderId, final String host, final String session) throws OXException, IOException, SAXException, JSONException {
         final AJAXSession aSession = new AJAXSession(webCon, host, session);
         final ICalImportRequest request = new ICalImportRequest(folderId, input);
         final ICalImportResponse iResponse = Executor.execute(aSession, request, host);
         return iResponse.getImports();
     }
 
-    public Appointment[] exportAppointment(final WebConversation webCon, final int folderId, final TimeZone timeZone, String host, final String session, final Context ctx) throws IOException, SAXException, ConversionWarning, AjaxException, JSONException {
+    public Appointment[] exportAppointment(final WebConversation webCon, final int folderId, final TimeZone timeZone, String host, final String session, final Context ctx) throws IOException, SAXException, ConversionWarning, OXException, JSONException {
         final AJAXSession aSession = new AJAXSession(webCon, host, session);
         final ICalExportRequest request = new ICalExportRequest(folderId);
         final ICalExportResponse response = Executor.execute(aSession, request);
@@ -236,7 +235,7 @@ public class AbstractICalTest extends AbstractAJAXTest {
         return exportData.toArray(new Appointment[exportData.size()]);
     }
 
-    public Task[] exportTask(final WebConversation webCon, final int inFolder, final String mailaddress, final TimeZone timeZone, String host, final String session, final Context ctx) throws Exception, TestException {
+    public Task[] exportTask(final WebConversation webCon, final int inFolder, final String mailaddress, final TimeZone timeZone, String host, final String session, final Context ctx) throws Exception, OXException {
         host = appendPrefix(host);
 
         final URLParameter parameter = new URLParameter(true);

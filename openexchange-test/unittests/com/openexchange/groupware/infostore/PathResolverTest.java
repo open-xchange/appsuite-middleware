@@ -1,19 +1,16 @@
 package com.openexchange.groupware.infostore;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.webdav.protocol.WebdavPathTest.assertComponents;
 import java.io.ByteArrayInputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import junit.framework.TestCase;
-import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.api2.OXException;
-import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.paths.impl.PathResolverImpl;
@@ -26,9 +23,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.setuptools.TestConfig;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
-import com.openexchange.tools.oxfolder.OXFolderLogicException;
 import com.openexchange.tools.oxfolder.OXFolderManager;
-import com.openexchange.tools.oxfolder.OXFolderPermissionException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -88,13 +83,13 @@ public class PathResolverTest extends TestCase {
 		
 	}
 	
-	private Context getContext() throws ContextException {
+	private Context getContext() throws OXException {
 	    try {
             final TestConfig config = new TestConfig();
             final TestContextToolkit tools = new TestContextToolkit();
             final String ctxName = config.getContextName();
             return null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
-        } catch (final ConfigurationException e) {
+        } catch (final OXException e) {
             e.printStackTrace();
             return null;
         }
@@ -126,7 +121,7 @@ public class PathResolverTest extends TestCase {
             final String userName = config.getUser();
             final int pos = userName.indexOf('@');
             return pos == -1 ? userName : userName.substring(0, pos);
-        } catch (final ConfigurationException e) {
+        } catch (final OXException e) {
             e.printStackTrace();
             return null;
         }
@@ -171,7 +166,7 @@ public class PathResolverTest extends TestCase {
 		try {
 			pathResolver.resolve(root, new WebdavPath("/i/dont/exist"), ctx, user, userConfig);
 			fail("Expected OXObjectNotFoundException");
-		} catch (final OXObjectNotFoundException x) {
+		} catch (final OXException x) {
 			assertTrue(true);
 		}
 	}
@@ -181,13 +176,13 @@ public class PathResolverTest extends TestCase {
         try {
 			pathResolver.resolve(root, new WebdavPath("/this/is/a/nice/path/DoCuMeNt.txt"), ctx, user, userConfig);
 			fail("Expected OXObjectNotFoundException");
-		} catch (final OXObjectNotFoundException x) {
+		} catch (final OXException x) {
 			assertTrue(true);
 		}
         try {
             pathResolver.resolve(root, new WebdavPath("/this/is/a/nice/PaTh"), ctx, user, userConfig);
             fail("Expected OXObjectNotFoundException");
-        } catch (final OXObjectNotFoundException x) {
+        } catch (final OXException x) {
             assertTrue(true);
         }
     }
@@ -213,12 +208,12 @@ public class PathResolverTest extends TestCase {
         try {
             pathResolver.resolve(root, new WebdavPath("this/ALIAS!/a/nice"), ctx, user, userConfig);
             fail("Expected OXObjectNotFoundException");
-        } catch (final OXObjectNotFoundException x) {
+        } catch (final OXException x) {
             assertTrue(true);
         }
     }
 
-    private int mkdir(final int parent, final String name) throws SQLException, OXFolderPermissionException, Exception {
+    private int mkdir(final int parent, final String name) throws SQLException, OXException, Exception {
 	
 		//OXFolderAction oxfa = new OXFolderAction(session);
 		final FolderObject folder = new FolderObject();
@@ -282,7 +277,7 @@ public class PathResolverTest extends TestCase {
 		return m.getId();
 	}
 	
-	private void rmdir(final int id) throws SQLException, OXFolderPermissionException, OXFolderLogicException, Exception {
+	private void rmdir(final int id) throws SQLException, OXException, OXException, Exception {
 //		OXFolderAction oxfa = new OXFolderAction(session);
 //		oxfa.deleteFolder(id, session, true, Long.MAX_VALUE);
 		final OXFolderManager oxma = OXFolderManager.getInstance(session);

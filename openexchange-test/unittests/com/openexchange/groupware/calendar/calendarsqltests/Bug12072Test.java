@@ -49,11 +49,11 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
+import com.openexchange.exception.OXException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.Constants;
 

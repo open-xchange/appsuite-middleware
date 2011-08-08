@@ -49,6 +49,7 @@
 
 package com.openexchange.webdav.action;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedList;
@@ -59,7 +60,6 @@ import junit.framework.TestCase;
 import com.openexchange.webdav.protocol.CollectionTest;
 import com.openexchange.webdav.protocol.TestWebdavFactoryBuilder;
 import com.openexchange.webdav.protocol.WebdavCollection;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavResource;
@@ -103,7 +103,7 @@ public abstract class ActionTestCase extends TestCase {
         }
     }
 
-    public String getContent(final WebdavPath url) throws WebdavProtocolException, IOException {
+    public String getContent(final WebdavPath url) throws OXException, IOException {
         final WebdavResource res = factory.resolveResource(url);
         final byte[] bytes = new byte[(int)res.getLength().longValue()];
         final InputStream in = res.getBody();

@@ -49,6 +49,7 @@
 
 package com.openexchange.contactcollector;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -58,12 +59,10 @@ import java.util.List;
 import java.util.Locale;
 import javax.mail.internet.InternetAddress;
 import junit.framework.TestCase;
-import com.openexchange.api2.OXException;
 import com.openexchange.contactcollector.folder.ContactCollectorFolderCreator;
 import com.openexchange.contactcollector.internal.ContactCollectorServiceImpl;
 import com.openexchange.contactcollector.osgi.CCServiceRegistry;
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.Contact;
@@ -79,7 +78,6 @@ import com.openexchange.session.Session;
 import com.openexchange.setuptools.TestConfig;
 import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 
@@ -227,11 +225,7 @@ public class ContactCollectorTest extends TestCase {
         final List<Contact> contacts = new ArrayList<Contact>();
         while (iterator.hasNext()) {
             Contact foundContact;
-            try {
-                foundContact = iterator.next();
-            } catch (final SearchIteratorException e) {
-                throw new ContactException(e);
-            }
+            foundContact = iterator.next();
             contacts.add(foundContact);
         }
 

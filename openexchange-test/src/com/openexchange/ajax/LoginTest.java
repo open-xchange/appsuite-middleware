@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -63,7 +64,6 @@ import com.openexchange.ajax.session.actions.LoginResponse;
 import com.openexchange.ajax.session.actions.LogoutRequest;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * This class contains the login test. It also contains static methods to made
@@ -97,10 +97,10 @@ public class LoginTest extends AbstractAJAXTest {
      * @param sessionId Session identifier of the user.
      * @throws IOException if the communication with the server fails.
      * @throws JSONException 
-     * @throws AjaxException 
+     * @throws OXException 
      * @throws SAXException if a SAX error occurs. 
      */
-    public static void logout(final WebConversation conversation, final String hostname, final String sessionId) throws IOException, AjaxException, JSONException {
+    public static void logout(final WebConversation conversation, final String hostname, final String sessionId) throws IOException, OXException, JSONException {
     	
         LOG.trace("Logging out.");
         LogoutRequest request = new LogoutRequest();
@@ -121,11 +121,11 @@ public class LoginTest extends AbstractAJAXTest {
      * @throws JSONException if parsing of serialized json fails.
      * @throws SAXException if a SAX error occurs.
      * @throws IOException if the communication with the server fails.
-     * @throws AjaxException
+     * @throws OXException
      * @deprecated use new AJAXClient request and response framework. 
      */
     @Deprecated
-    public static String getSessionId(final WebConversation conversation, final String hostname, final String login, final String password) throws IOException, JSONException, AjaxException {
+    public static String getSessionId(final WebConversation conversation, final String hostname, final String login, final String password) throws IOException, JSONException, OXException {
         LoginRequest request = new LoginRequest(login, password, LoginTools.generateAuthId(), AJAXClient.class.getName(), AJAXClient.VERSION);
         // an empty string is passed to put temporary AJAXSession not in mustLogout mode. Logout is done with above logout() method.
         AJAXClient client = new AJAXClient(new AJAXSession(conversation, hostname, "no logout"));

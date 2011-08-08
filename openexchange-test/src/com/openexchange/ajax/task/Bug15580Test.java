@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.task;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.TimeZone;
 import org.json.JSONException;
@@ -66,8 +67,6 @@ import com.openexchange.groupware.tasks.Create;
 import com.openexchange.groupware.tasks.Mapper;
 import com.openexchange.groupware.tasks.Mapping;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.tools.servlet.OXJSONException;
 
 /**
  * Tests actual and target duration and costs set to 0.
@@ -114,7 +113,7 @@ public class Bug15580Test extends AbstractTaskTest {
         super.tearDown();
     }
 
-    public void testDurationAndCostsSetToZero() throws AjaxException, IOException, SAXException, JSONException, OXJSONException {
+    public void testDurationAndCostsSetToZero() throws OXException, IOException, SAXException, JSONException, OXException {
         GetRequest request = new GetRequest(task);
         GetResponse response = client.execute(request);
         Task toTest = response.getTask(tz);

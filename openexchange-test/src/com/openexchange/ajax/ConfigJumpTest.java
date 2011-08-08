@@ -37,6 +37,7 @@
 
 package com.openexchange.ajax;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.net.URL;
 

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail.actions;
 
+import com.openexchange.exception.OXException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.json.JSONArray;

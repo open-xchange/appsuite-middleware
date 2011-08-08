@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import com.openexchange.exception.OXException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

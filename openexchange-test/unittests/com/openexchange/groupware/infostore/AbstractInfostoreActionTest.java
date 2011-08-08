@@ -7,9 +7,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.DBProvider;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -90,15 +90,15 @@ public abstract class AbstractInfostoreActionTest extends AbstractActionTest {
 		return null;
 	}
 
-	protected void assertNoResult(final String sql, final Object...args) throws DBPoolingException, SQLException {
+	protected void assertNoResult(final String sql, final Object...args) throws OXException, SQLException {
 		assertFalse(hasResult(sql, args));
 	}
 
-	protected void assertResult(final String sql, final Object...args) throws DBPoolingException, SQLException {
+	protected void assertResult(final String sql, final Object...args) throws OXException, SQLException {
 		assertTrue(hasResult(sql, args));
 	}
 
-	protected boolean hasResult(final String sql, final Object[] args) throws DBPoolingException, SQLException {
+	protected boolean hasResult(final String sql, final Object[] args) throws OXException, SQLException {
 		Connection readCon = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;

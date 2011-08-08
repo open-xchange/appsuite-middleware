@@ -49,13 +49,12 @@
 
 package com.openexchange.ajax.publish.actions;
 
+import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.publish.Publication;
-import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
-import com.openexchange.publish.json.PublicationJSONException;
 import com.openexchange.publish.json.PublicationParser;
 
 
@@ -70,7 +69,7 @@ public class GetPublicationResponse extends AbstractPublicationResponse{
         super(response);
     }
 
-    public Publication getPublication(PublicationTargetDiscoveryService service) throws PublicationException, PublicationJSONException, JSONException {
+    public Publication getPublication(PublicationTargetDiscoveryService service) throws OXException, OXException, JSONException {
         PublicationParser parser = new PublicationParser(service);
         return parser.parse( (JSONObject) getData() );
     }

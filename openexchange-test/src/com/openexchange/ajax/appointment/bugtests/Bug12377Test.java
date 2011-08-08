@@ -48,6 +48,7 @@
  */
 package com.openexchange.ajax.appointment.bugtests;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.ajax.framework.*;
 import com.openexchange.ajax.appointment.action.*;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
@@ -62,9 +63,7 @@ import com.openexchange.groupware.container.LinkObject;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentField;
-import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.test.TestInit;
-import com.openexchange.api2.OXException;
 import com.meterware.httpunit.WebConversation;
 import org.json.JSONException;
 import org.json.JSONArray;
@@ -120,7 +119,7 @@ public class Bug12377Test extends AbstractAJAXSession {
         verifyLinkCount();
     }
 
-    private void createAppointmentSeries() throws JSONException, AjaxException, IOException, SAXException {
+    private void createAppointmentSeries() throws JSONException, OXException, IOException, SAXException {
         this.appointment = new Appointment();
         appointment.setTitle("testBug12377");
         appointment.setStartDate(D("12/02/1999 10:00"));
@@ -139,7 +138,7 @@ public class Bug12377Test extends AbstractAJAXSession {
 
     }
 
-    private void createException() throws JSONException, AjaxException, IOException, SAXException {
+    private void createException() throws JSONException, OXException, IOException, SAXException {
         this.exception = new Appointment();
         exception.setStartDate(D("15/02/1999 13:00"));
         exception.setEndDate(D("15/02/1999 15:00"));
@@ -156,7 +155,7 @@ public class Bug12377Test extends AbstractAJAXSession {
 
     }
 
-    private void createAppointmentToLinkTo() throws JSONException, AjaxException, IOException, SAXException {
+    private void createAppointmentToLinkTo() throws JSONException, OXException, IOException, SAXException {
         this.linkedAppointment = new Appointment();
         linkedAppointment.setTitle("testBug12377 link to me");
         linkedAppointment.setStartDate(D("12/02/1999 16:00"));
@@ -182,14 +181,14 @@ public class Bug12377Test extends AbstractAJAXSession {
         AttachmentClient.attach(conversation, sessionId, appointment.getParentFolderID(), appointment.getObjectID(), Types.APPOINTMENT, file );
     }
 
-    private void addLink() throws JSONException, AjaxException, IOException, SAXException {
+    private void addLink() throws JSONException, OXException, IOException, SAXException {
         LinkObject link = new LinkObject();
         link.setLink(appointment.getObjectID(), Types.APPOINTMENT, appointment.getParentFolderID(), linkedAppointment.getObjectID(), Types.APPOINTMENT, linkedAppointment.getParentFolderID(), -1 );
         com.openexchange.ajax.links.actions.InsertRequest request = new com.openexchange.ajax.links.actions.InsertRequest(link, true);
         getClient().execute(request);
     }
 
-    private void removeAppointment(Appointment appointment) throws JSONException, AjaxException, IOException, SAXException {
+    private void removeAppointment(Appointment appointment) throws JSONException, OXException, IOException, SAXException {
         appointment.setLastModified(new Date(Long.MAX_VALUE));
         DeleteRequest delete = new DeleteRequest(appointment);
         getClient().execute(delete);
@@ -216,19 +215,19 @@ public class Bug12377Test extends AbstractAJAXSession {
         assertTrue(found);
     }
 
-    private Appointment reloadException() throws JSONException, AjaxException, IOException, SAXException, OXException {
+    private Appointment reloadException() throws JSONException, OXException, IOException, SAXException, OXException {
         AJAXClient client = getClient();
         GetRequest get = new GetRequest(exception.getParentFolderID(), exception.getObjectID());
         GetResponse response = client.execute(get);
         return response.getAppointment(TimeZone.getTimeZone("UTC"));
     }
 
-    private void verifyAttachmentCount() throws JSONException, AjaxException, IOException, SAXException, OXException {
+    private void verifyAttachmentCount() throws JSONException, OXException, IOException, SAXException, OXException {
         Appointment reloadedException = reloadException();
         assertEquals(1, reloadedException.getNumberOfAttachments());
     }
 
-    private void verifyLinks() throws JSONException, AjaxException, IOException, SAXException {
+    private void verifyLinks() throws JSONException, OXException, IOException, SAXException {
         AllRequest request = new AllRequest(exception.getObjectID(), Types.APPOINTMENT, exception.getParentFolderID(), true);
         AllResponse response = getClient().execute(request);
         LinkObject[] loadedLinks = response.getLinks();
@@ -236,11 +235,11 @@ public class Bug12377Test extends AbstractAJAXSession {
 
     }
 
-    private void verifyLinkCount() throws JSONException, OXException, AjaxException, IOException, SAXException {
+    private void verifyLinkCount() throws JSONException, OXException, OXException, IOException, SAXException {
         // Unused and Dysfunctional
     }
 
-    public int getPrivateAppointmentFolder() throws JSONException, AjaxException, IOException, SAXException {
+    public int getPrivateAppointmentFolder() throws JSONException, OXException, IOException, SAXException {
         return getClient().getValues().getPrivateAppointmentFolder();
     }
 

@@ -48,6 +48,7 @@
  */
 package com.openexchange.test.fixtures;
 
+import com.openexchange.exception.OXException;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -84,7 +85,7 @@ public class CredentialFixtureFactory implements FixtureFactory<SimpleCredential
             this.contactFinder = contactFinder;
         }
 
-        public Fixture<SimpleCredentials> getEntry(final String entryName) throws FixtureException {
+        public Fixture<SimpleCredentials> getEntry(final String entryName) throws OXException {
             if(credentialMap.containsKey(entryName)) {
                 return credentialMap.get(entryName);
             }

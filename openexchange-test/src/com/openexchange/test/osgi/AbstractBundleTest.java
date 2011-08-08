@@ -49,6 +49,7 @@
 
 package com.openexchange.test.osgi;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -68,7 +69,6 @@ import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.parser.FolderParser;
-import com.openexchange.api2.OXException;
 import com.openexchange.control.console.StartBundle;
 import com.openexchange.control.console.StopBundle;
 import com.openexchange.groupware.container.DataObject;
@@ -243,10 +243,10 @@ public abstract class AbstractBundleTest extends TestCase {
         final WebResponse resp = conversation.getResponse(req);
         final JSONObject respObj = new JSONObject(resp.getText());
         if (respObj.has("error") && !respObj.isNull("error")) {
-            throw new OXException("Error occured: " + respObj.getString("error"));
+            throw OXException.general("Error occured: " + respObj.getString("error"));
         }
         if (!respObj.has("data") || respObj.isNull("data")) {
-            throw new OXException("Error occured: Missing key \"data\"");
+            throw OXException.general("Error occured: Missing key \"data\"");
         }
         final JSONArray data = respObj.getJSONArray("data");
         final List<FolderObject> folders = new ArrayList<FolderObject>();

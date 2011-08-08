@@ -111,12 +111,16 @@ public abstract class AbstractWebdavRequest implements WebdavRequest {
     }
 
     @Override
-    public IfHeader getIfHeader() throws IfHeaderParseException {
+    public IfHeader getIfHeader() throws OXException {
         final String ifHeader = getHeader("If");
         if(ifHeader == null) {
             return null;
+        } 
+        try {
+        	return new IfHeaderParser().parse(getHeader("If"));
+        } catch (IfHeaderParseException e) {
+        	throw new OXException(e);
         }
-        return new IfHeaderParser().parse(getHeader("If"));
     }
 
     @Override

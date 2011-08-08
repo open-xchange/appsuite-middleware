@@ -49,6 +49,7 @@
 
 package com.openexchange.data.conversion.ical;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.recalculate;
 import java.util.Arrays;

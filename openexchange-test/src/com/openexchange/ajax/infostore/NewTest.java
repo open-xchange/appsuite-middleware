@@ -1,6 +1,7 @@
 
 package com.openexchange.ajax.infostore;
 
+import com.openexchange.exception.OXException;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;

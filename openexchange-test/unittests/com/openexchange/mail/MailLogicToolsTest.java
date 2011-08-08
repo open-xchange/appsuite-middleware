@@ -49,6 +49,7 @@
 
 package com.openexchange.mail;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.parser.MailMessageParser;
@@ -193,7 +194,7 @@ public final class MailLogicToolsTest extends AbstractMailTest {
 				mailAccess.close(true);
 			}
 
-		} catch (final MailException e) {
+		} catch (final OXException e) {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
@@ -233,7 +234,7 @@ public final class MailLogicToolsTest extends AbstractMailTest {
 				mailConnection.close(true);
 			}
 
-		} catch (final MailException e) {
+		} catch (final OXException e) {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.folder;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.GetResponse;

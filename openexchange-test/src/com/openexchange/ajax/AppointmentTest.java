@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -85,8 +86,6 @@ import com.openexchange.ajax.parser.AppointmentParser;
 import com.openexchange.ajax.parser.ResponseParser;
 import com.openexchange.ajax.request.AppointmentRequest;
 import com.openexchange.ajax.writer.AppointmentWriter;
-import com.openexchange.api.OXConflictException;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
@@ -100,12 +99,12 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceGroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.infostore.ConflictException;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.test.OXTestToolkit;
 import com.openexchange.test.TestException;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.URLParameter;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  *
@@ -275,7 +274,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 
     public static int insertAppointment(final WebConversation webCon,
             final Appointment appointmentObj, final TimeZone userTimeZone,
-            String host, final String session) throws TestException, Exception, OXConflictException {
+            String host, final String session) throws OXException, Exception, OXException {
         host = appendPrefix(host);
 
         int objectId = 0;
@@ -313,7 +312,7 @@ public class AppointmentTest extends AbstractAJAXTest {
         }
 
         if (data.has("conflicts")) {
-            throw new OXConflictException("conflicts found!");
+            throw new ConflictException("conflicts found!");
         }
 
         return objectId;
@@ -367,7 +366,7 @@ public class AppointmentTest extends AbstractAJAXTest {
         }
 
         if (data.has("conflicts")) {
-            throw new OXConflictException("conflicts found!");
+            throw new ConflictException("conflicts found!");
         }
 
         return objectId;
@@ -385,7 +384,7 @@ public class AppointmentTest extends AbstractAJAXTest {
         deleteAppointment(webCon, id, inFolder, recurrencePosition, new Date(System.currentTimeMillis() + APPEND_MODIFIED), host, session);
     }
 
-    public static void deleteAppointment(final WebConversation webCon, final int id, final int inFolder, final int recurrencePosition, final Date modified, String host, final String session) throws TestException, AjaxException, IOException, JSONException {
+    public static void deleteAppointment(final WebConversation webCon, final int id, final int inFolder, final int recurrencePosition, final Date modified, String host, final String session) throws OXException, OXException, IOException, JSONException {
         final AJAXSession ajaxSession = new AJAXSession(webCon, host, session);
         final DeleteRequest deleteRequest = new DeleteRequest(id, inFolder, recurrencePosition, modified);
         deleteRequest.setFailOnError(false);
@@ -396,7 +395,7 @@ public class AppointmentTest extends AbstractAJAXTest {
         }
     }
 
-    public static void deleteAppointment(final WebConversation webCon, final int id, final int inFolder, final Date recurrenceDatePosition, final Date modified, String host, final String session) throws Exception, AjaxException, IOException, SAXException {
+    public static void deleteAppointment(final WebConversation webCon, final int id, final int inFolder, final Date recurrenceDatePosition, final Date modified, String host, final String session) throws Exception, OXException, IOException, SAXException {
         final AJAXSession ajaxSession = new AJAXSession(webCon, host, session);
         final DeleteRequest deleteRequest = new DeleteRequest(id, inFolder, recurrenceDatePosition, modified);
         deleteRequest.setFailOnError(false);
@@ -439,17 +438,17 @@ public class AppointmentTest extends AbstractAJAXTest {
     }
 
     public static Appointment[] listAppointment(final WebConversation webCon, final int inFolder, final int[] cols, final Date start, final Date end, final TimeZone userTimeZone, final boolean showAll, final String host, final String session)
-    throws JSONException, OXConflictException, IOException, SAXException {
+    throws JSONException, OXException, IOException, SAXException {
         return listAppointment(webCon, inFolder, cols, start, end, userTimeZone, showAll, false, host, session);
     }
 
     public static Appointment[] listAppointment(final WebConversation webCon, final int inFolder, final int[] cols, final Date start, final Date end, final TimeZone userTimeZone, final boolean showAll, final boolean recurrenceMaster, final String host, final String session)
-        throws JSONException, OXConflictException, IOException, SAXException {
+        throws JSONException, OXException, IOException, SAXException {
         return listAppointment(webCon, inFolder, cols, start, end, userTimeZone, showAll, recurrenceMaster, -1, -1, host, session);
     }
 
     public static Appointment[] listAppointment(final WebConversation webCon, final int inFolder, final int[] cols, final Date start, final Date end, final TimeZone userTimeZone, final boolean showAll, final boolean recurrenceMaster, final int leftHandLimit, final int rightHandLimit, String host, final String session)
-        throws JSONException, OXConflictException, IOException, SAXException {
+        throws JSONException, OXException, IOException, SAXException {
         host = appendPrefix(host);
 
         final URLParameter parameter = new URLParameter();
@@ -479,7 +478,7 @@ public class AppointmentTest extends AbstractAJAXTest {
     }
 
     public static Appointment[] listAppointment(final WebConversation webCon, final int[] cols, final URLParameter parameter, final TimeZone userTimeZone, String host, final String session)
-        throws JSONException, OXConflictException, IOException, SAXException {
+        throws JSONException, OXException, IOException, SAXException {
         host = appendPrefix(host);
 
         final WebRequest req = new GetMethodWebRequest(host + APPOINTMENT_URL
@@ -647,7 +646,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 
     public static Appointment loadAppointment(final WebConversation webCon,
             final int objectId, final int inFolder, final Date start, final Date end, final int[] cols, final TimeZone userTimeZone, final String host,
-            final String session) throws JSONException, OXConflictException, IOException, SAXException, TestException {
+            final String session) throws JSONException, OXException, IOException, SAXException, OXException {
 
         final boolean showAll = (inFolder == 0);
 
@@ -947,7 +946,7 @@ public class AppointmentTest extends AbstractAJAXTest {
         return appointmentArray;
     }
 
-    public static Appointment[] jsonArray2AppointmentArray(final JSONArray jsonArray, final int[] cols, final TimeZone userTimeZone) throws JSONException, OXConflictException {
+    public static Appointment[] jsonArray2AppointmentArray(final JSONArray jsonArray, final int[] cols, final TimeZone userTimeZone) throws JSONException, OXException {
         final Appointment[] appointmentArray = new Appointment[jsonArray.length()];
 
         for (int a = 0; a < appointmentArray.length; a++) {
@@ -971,7 +970,7 @@ public class AppointmentTest extends AbstractAJAXTest {
     }
 
     private static void parseCols(final int[] cols, final JSONArray jsonArray,
-            final Appointment appointmentObj, final TimeZone userTimeZone) throws JSONException, OXConflictException {
+            final Appointment appointmentObj, final TimeZone userTimeZone) throws JSONException, OXException {
         if (cols.length != jsonArray.length()) {
             LOG.debug("expected cols: "
                     + StringCollection.convertArray2String(cols)
@@ -987,7 +986,7 @@ public class AppointmentTest extends AbstractAJAXTest {
     }
 
     private static void parse(final int pos, final int field, final JSONArray jsonArray,
-            final Appointment appointmentObj, final TimeZone userTimeZone) throws JSONException, OXConflictException {
+            final Appointment appointmentObj, final TimeZone userTimeZone) throws JSONException, OXException {
         switch (field) {
             case Appointment.OBJECT_ID:
                 appointmentObj.setObjectID(jsonArray.getInt(pos));
@@ -1141,7 +1140,7 @@ public class AppointmentTest extends AbstractAJAXTest {
     }
 
     private static Participant[] parseParticipants(final JSONArray jsonArray)
-    throws JSONException, OXConflictException {
+    throws JSONException, OXException {
         final Participant[] participant = new Participant[jsonArray.length()];
         for (int i = 0; i < jsonArray.length(); i++) {
             final JSONObject jparticipant = jsonArray.getJSONObject(i);
@@ -1187,7 +1186,7 @@ public class AppointmentTest extends AbstractAJAXTest {
                     p = new ExternalUserParticipant(mail);
                     break;
                 default:
-                    throw new OXConflictException("invalid type");
+                    throw new OXException(new ConflictException("invalid type"));
             }
             participant[i] = p;
         }
@@ -1220,13 +1219,13 @@ public class AppointmentTest extends AbstractAJAXTest {
         return sb.toString();
     }
 
-    protected void create( Appointment appointment ) throws JSONException, IOException, SAXException, AjaxException {
+    protected void create( Appointment appointment ) throws JSONException, IOException, SAXException, OXException {
         InsertRequest insert = new InsertRequest(appointment, TimeZones.UTC, true);
         getClient().execute(insert).fillAppointment(appointment);
         clean.add( appointment );
     }
 
-    protected void clean() throws JSONException, IOException, SAXException, AjaxException {
+    protected void clean() throws JSONException, IOException, SAXException, OXException {
         AJAXClient client = getClient();
         for(Appointment appointment : clean) {
             DeleteRequest delete = new DeleteRequest(appointment);
@@ -1234,7 +1233,7 @@ public class AppointmentTest extends AbstractAJAXTest {
         }
     }
 
-    protected AJAXClient getClient() throws JSONException, IOException, AjaxException {
+    protected AJAXClient getClient() throws JSONException, IOException, OXException {
         return new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()));
     }
     

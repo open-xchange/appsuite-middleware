@@ -49,11 +49,11 @@
 
 package com.openexchange.ajax.mail;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.UserValues;
-import com.openexchange.tools.servlet.AjaxException;
 
 
 /**
@@ -83,7 +83,7 @@ public class CopyMailTest extends AbstractMailTest {
         super.tearDown();
     }
     
-    public void testShouldCopyFromSentToDrafts() throws AjaxException, IOException, SAXException, JSONException{
+    public void testShouldCopyFromSentToDrafts() throws OXException, IOException, SAXException, JSONException{
         MailTestManager manager = new MailTestManager(client, false);
         
         String mail = values.getSendAddress();

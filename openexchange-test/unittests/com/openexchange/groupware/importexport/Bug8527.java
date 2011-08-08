@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.importexport;
 
+import com.openexchange.exception.OXException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -59,18 +60,13 @@ import junit.framework.JUnit4TestAdapter;
 
 import org.junit.Test;
 
-import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.AppointmentSQLInterface;
-import com.openexchange.api2.OXException;
 import com.openexchange.calendar.CalendarSql;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.LdapException;
 
 public class Bug8527 extends AbstractICalImportTest {
 	
@@ -83,7 +79,7 @@ public class Bug8527 extends AbstractICalImportTest {
         // do nothing
     }
     // FIXME!
-    public void bugritMilleniumHandAndShrimp() throws DBPoolingException, UnsupportedEncodingException, SQLException, OXObjectNotFoundException, NumberFormatException, OXException, ContextException, LdapException {
+    public void bugritMilleniumHandAndShrimp() throws OXException, UnsupportedEncodingException, SQLException, OXException, NumberFormatException, OXException, OXException, OXException {
 		final String ical =
 				"BEGIN:VCALENDAR\n" +
 				"METHOD:REQUEST\n" +

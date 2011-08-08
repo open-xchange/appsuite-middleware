@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -71,9 +72,7 @@ import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.AbstractUploadParser;
 import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.test.AjaxInit;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * This class implements inheritable methods for AJAX tests.
@@ -120,7 +119,7 @@ public abstract class AbstractAJAXTest extends TestCase {
 
         try {
             AJAXConfig.init();
-        } catch (final ConfigurationException ex) {
+        } catch (final OXException ex) {
             ex.printStackTrace();
         }
     }
@@ -194,9 +193,9 @@ public abstract class AbstractAJAXTest extends TestCase {
      * @throws JSONException if parsing of serialized json fails.
      * @throws SAXException if a SAX error occurs.
      * @throws IOException if the communication with the server fails.
-     * @throws AjaxException 
+     * @throws OXException 
      */
-    protected String getSessionId() throws IOException, JSONException, AjaxException {
+    protected String getSessionId() throws IOException, JSONException, OXException {
         if (null == sessionId) {
             sessionId = LoginTest.getSessionId(getWebConversation(),
                     getHostName(), getLogin(), getPassword());

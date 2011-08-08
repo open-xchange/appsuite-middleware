@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment.helper;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Changes;
 import com.openexchange.test.CalendarTestManager;
@@ -63,7 +64,7 @@ public class NegativeAssertionOnCreate extends AbstractNegativeAssertion {
     }
 
     @Override
-    public void check(Changes changes, OXError expectedError) {
+    public void check(Changes changes, OXException expectedError) {
         Appointment app = null;
         try {
             app = generateDefaultAppointment();
@@ -76,7 +77,7 @@ public class NegativeAssertionOnCreate extends AbstractNegativeAssertion {
     }
 
     @Override
-    public void check(Appointment startWith, Changes changes, OXError expectedError) {
+    public void check(Appointment startWith, Changes changes, OXException expectedError) {
         try {
             createAndCheck(startWith, changes, expectedError);
         } finally {

@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
+import com.openexchange.exception.OXException;
 import java.util.Date;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.CalendarSql;

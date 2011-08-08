@@ -49,6 +49,7 @@
 
 package com.openexchange.pubsub;
 
+import com.openexchange.exception.OXException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Arrays;

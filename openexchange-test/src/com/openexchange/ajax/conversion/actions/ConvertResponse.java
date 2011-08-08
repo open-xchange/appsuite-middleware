@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.conversion.actions;
 
+import com.openexchange.exception.OXException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

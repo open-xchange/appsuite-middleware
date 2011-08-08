@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.replyforward;
 
+import com.openexchange.exception.OXException;
 import java.io.BufferedReader;
 import java.io.StringReader;
 import java.text.DateFormat;

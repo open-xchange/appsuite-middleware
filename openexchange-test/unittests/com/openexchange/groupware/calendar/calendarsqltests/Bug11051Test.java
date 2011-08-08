@@ -49,11 +49,11 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
 import java.util.Date;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 
 
 public class Bug11051Test extends CalendarSqlTest {
@@ -77,9 +77,9 @@ public class Bug11051Test extends CalendarSqlTest {
 
         try {
             appointments.save(update);
-        } catch (final OXCalendarException x) {
+        } catch (final OXException x) {
             x.printStackTrace();
-            assertEquals(x.getMessage(), OXCalendarException.Code.RECURRING_MISSING_OR_WRONG_VALUE_DAYS.getDetailNumber(), x.getDetailNumber());
+            assertTrue(x.similarTo(OXCalendarExceptionCodes.RECURRING_MISSING_OR_WRONG_VALUE_DAYS));
         } catch (final Throwable t) {
             t.printStackTrace();
             fail(t.getMessage());

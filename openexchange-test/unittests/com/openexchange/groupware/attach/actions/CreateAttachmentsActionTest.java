@@ -1,6 +1,6 @@
 package com.openexchange.groupware.attach.actions;
 
-import com.openexchange.api2.OXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.impl.CreateAttachmentAction;
 import com.openexchange.tx.UndoableAction;

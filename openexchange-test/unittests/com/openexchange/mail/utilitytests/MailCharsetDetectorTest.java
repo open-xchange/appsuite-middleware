@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.utilitytests;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;

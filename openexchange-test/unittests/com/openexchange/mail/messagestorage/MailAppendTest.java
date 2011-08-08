@@ -49,8 +49,8 @@
 
 package com.openexchange.mail.messagestorage;
 
+import com.openexchange.exception.OXException;
 import java.util.Random;
-import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -93,13 +93,13 @@ public final class MailAppendTest extends MessageStorageTest {
     }
     
     // First the basic tests so that a mail can be appended and deleted
-    public void testMailAppendAndDeleteMails() throws MailException {
+    public void testMailAppendAndDeleteMails() throws OXException {
         this.uids = this.mailAccess.getMessageStorage().appendMessages(INBOX, testmessages);
         mailAccess.getMessageStorage().deleteMessages(INBOX, uids, true);
     }
     
     // Then we test if the get Methods are running correctly
-    public void testMailAppendAndGetOneMessage() throws MailException {
+    public void testMailAppendAndGetOneMessage() throws OXException {
         // At first we should test the append - get - delete operation with one mail only so that we see, that the basic functions
         // are working
         this.uids = this.mailAccess.getMessageStorage().appendMessages(INBOX, new MailMessage[]{testmessages[0]});
@@ -113,7 +113,7 @@ public final class MailAppendTest extends MessageStorageTest {
         }
     }
     
-    public void testMailAppendAndGetMessage() throws MailException {
+    public void testMailAppendAndGetMessage() throws OXException {
         // At first we should test the append - get - delete operation with one mail only so that we see, that the basic functions
         // are working
         this.uids = this.mailAccess.getMessageStorage().appendMessages(INBOX, testmessages);
@@ -129,7 +129,7 @@ public final class MailAppendTest extends MessageStorageTest {
         }
     }
     
-    public void testMailAppendAndGetMessages() throws MailException {
+    public void testMailAppendAndGetMessages() throws OXException {
         this.uids = this.mailAccess.getMessageStorage().appendMessages(INBOX, testmessages);
         try {
             // Check only for the one values here (that is the size of the enum out of all combinations):
@@ -147,7 +147,7 @@ public final class MailAppendTest extends MessageStorageTest {
         }
     }
 
-    public void testMailAppendAndGetMessagesRandomFields() throws MailException {
+    public void testMailAppendAndGetMessagesRandomFields() throws OXException {
         this.uids = this.mailAccess.getMessageStorage().appendMessages(INBOX, testmessages);
         try {
             // Check only for the one values here (that is the size of the enum out of all combinations):
