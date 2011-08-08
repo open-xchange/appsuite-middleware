@@ -62,9 +62,12 @@ import java.net.URLDecoder;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicLong;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.ajp13.AJPv13Response;
@@ -87,11 +90,13 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AjpProcessor {
+public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     private static final org.apache.commons.logging.Log LOG = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AjpProcessor.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
+
+    private static final AtomicLong NUMBER = new AtomicLong();
 
     private static final int STAGE_PARSE = 1;
 
@@ -230,9 +235,24 @@ public class AjpProcessor {
     private final StringBuilder servletId;
 
     /**
+     * Control for AJP processor.
+     */
+    private volatile Future<Object> control;
+
+    /**
+     * The thread currently processing.
+     */
+    private volatile Thread thread;
+
+    /**
      * The servlet path (which is not the request path). The servlet path is defined in servlet mapping configuration.
      */
     private String servletPath;
+
+    /**
+     * Gets this processor's number.
+     */
+    private final Long number;
 
     /**
      * Direct buffer used for sending right away a get body message.
@@ -289,6 +309,7 @@ public class AjpProcessor {
 
     public AjpProcessor(final int packetSize) {
         super();
+        this.number = Long.valueOf(NUMBER.incrementAndGet());
         servletId = new StringBuilder(16);
         /*
          * Create request/response
@@ -328,6 +349,41 @@ public class AjpProcessor {
 
     // ------------------------------------------------------------- Properties
 
+    @Override
+    public boolean isWaitingOnAJPSocket() {
+        return STAGE_PARSE == stage;
+    }
+
+    @Override
+    public boolean isProcessing() {
+        return STAGE_SERVICE == stage;
+    }
+
+    @Override
+    public long getProcessingStartTime() {
+        return request.getStartTime();
+    }
+
+    @Override
+    public boolean isLongRunning() {
+        return isEASPingCommand();
+    }
+
+    @Override
+    public StackTraceElement[] getStackTrace() {
+        return thread.getStackTrace();
+    }
+
+    @Override
+    public String getThreadName() {
+        return thread.getName();
+    }
+
+    @Override
+    public Long getNum() {
+        return number;
+    }
+
     /**
      * Use Tomcat authentication ?
      */
@@ -344,17 +400,21 @@ public class AjpProcessor {
     /**
      * Required secret.
      */
-    protected String requiredSecret = null;
+    private String requiredSecret;
 
+    /**
+     * Sets the required secret.
+     * 
+     * @param requiredSecret The secret
+     */
     public void setRequiredSecret(final String requiredSecret) {
         this.requiredSecret = requiredSecret;
     }
 
     /**
-     * The number of milliseconds Tomcat will wait for a subsequent request before closing the connection. The default is the same as for
-     * Apache HTTP Server (15 000 milliseconds).
+     * The number of milliseconds waiting for a subsequent request before closing the connection.
      */
-    protected int keepAliveTimeout = -1;
+    private int keepAliveTimeout = -1;
 
     public int getKeepAliveTimeout() {
         return keepAliveTimeout;
@@ -362,6 +422,73 @@ public class AjpProcessor {
 
     public void setKeepAliveTimeout(final int timeout) {
         keepAliveTimeout = timeout;
+    }
+
+    /**
+     * Sets the control object.
+     * 
+     * @param control The control
+     */
+    public void setControl(final Future<Object> control) {
+        this.control = control;
+    }
+
+    /**
+     * Checks if this AJP processor was canceled before it completed normally.
+     * 
+     * @return <code>true</code> if this AJP processor was canceled before it completed normally; otherwise <code>false</code>
+     */
+    public boolean isCancelled() {
+        return control.isCancelled();
+    }
+
+    /**
+     * Checks if this AJP processor completed. Completion may be due to normal termination, an exception, or cancellation -- in all of these
+     * cases, this method will return <code>true</code>.
+     * 
+     * @return <code>true</code> if this AJP processor completed; otherwise <code>false</code>
+     */
+    public boolean isDone() {
+        return control.isDone();
+    }
+
+    /**
+     * Cancels this AJP processor; meaning to close the client socket and to stop its execution.
+     */
+    @Override
+    public void cancel() {
+        response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+        action(ActionCode.CLIENT_FLUSH, null);
+        action(ActionCode.CLOSE, null);
+        /*
+         * Drop socket
+         */
+        final Socket s = socket;
+        if (null != s) {
+            try {
+                closeQuitely(s);
+            } finally {
+                socket = null;
+            }
+        }
+        /*
+         * Cancel via control, too
+         */
+        final Future<Object> f = control;
+        if (f != null) {
+            f.cancel(false);
+            control = null;
+        }
+    }
+
+    private static void closeQuitely(final Socket s) {
+        try {
+            s.close();
+        } catch (final IOException e) {
+            if (DEBUG) {
+                LOG.debug("Socket could not be closed. Probably due to a broken socket connection (e.g. broken pipe).", e);
+            }
+        }
     }
 
     // --------------------------------------------------------- Public Methods
@@ -373,6 +500,15 @@ public class AjpProcessor {
      */
     public HttpServletRequestImpl getRequest() {
         return request;
+    }
+
+    /**
+     * Get the response associated with this processor.
+     * 
+     * @return The response
+     */
+    public HttpServletResponseImpl getResponse() {
+        return response;
     }
 
     /**
@@ -412,11 +548,12 @@ public class AjpProcessor {
          * Set keep-alive on socket
          */
         socket.setKeepAlive(true);
-
-        // Error flag
+        /*
+         * Error flag
+         */
         error = false;
-
-        while (started && !error && !socket.isClosed()) {
+        final Thread thread = this.thread = Thread.currentThread();
+        while (started && !error && !thread.isInterrupted()) {
             /*
              * Parsing the request header
              */
@@ -522,7 +659,10 @@ public class AjpProcessor {
                         }
                         final byte[] bytes = baos.toByteArray();
                         parseQueryString(new String(bytes, charEnc));
-                        request.setServletInputStream(new ByteArrayServletInputStream(bytes));
+                        /*
+                         * Apply already read data to request to make them re-available
+                         */
+                        request.dumpToBuffer(bytes);
                     }
                     servlet.service(request, response);
                     response.flushBuffer();
@@ -575,7 +715,7 @@ public class AjpProcessor {
      * @param param The action parameter
      */
     public void action(final ActionCode actionCode, final Object param) {
-        if (actionCode == ActionCode.ACTION_COMMIT) {
+        if (actionCode == ActionCode.COMMIT) {
             if (response.isCommitted()) {
                 return;
             }
@@ -587,8 +727,7 @@ public class AjpProcessor {
                 // Set error flag
                 error = true;
             }
-
-        } else if (actionCode == ActionCode.ACTION_CLIENT_FLUSH) {
+        } else if (actionCode == ActionCode.CLIENT_FLUSH) {
             if (!response.isCommitted()) {
                 // Validate and write response headers
                 try {
@@ -608,7 +747,7 @@ public class AjpProcessor {
                 // Set error flag
                 error = true;
             }
-        } else if (actionCode == ActionCode.ACTION_CLOSE) {
+        } else if (actionCode == ActionCode.CLOSE) {
             // Close
 
             // End the processing of the current request, and stop any further
@@ -622,9 +761,9 @@ public class AjpProcessor {
                 // Set error flag
                 error = true;
             }
-        } else if (actionCode == ActionCode.ACTION_START) {
+        } else if (actionCode == ActionCode.START) {
             started = true;
-        } else if (actionCode == ActionCode.ACTION_STOP) {
+        } else if (actionCode == ActionCode.STOP) {
             started = false;
         }
         /*-
@@ -660,7 +799,7 @@ public class AjpProcessor {
         }
          * 
          */
-        else if (actionCode == ActionCode.ACTION_REQ_HOST_ATTRIBUTE) {
+        else if (actionCode == ActionCode.REQ_HOST_ATTRIBUTE) {
             // Get remote host name using a DNS resolution
             if (request.getRemoteHost() == null) {
                 try {
@@ -669,10 +808,10 @@ public class AjpProcessor {
                     // Ignore
                 }
             }
-        } else if (actionCode == ActionCode.ACTION_REQ_LOCAL_ADDR_ATTRIBUTE) {
+        } else if (actionCode == ActionCode.REQ_LOCAL_ADDR_ATTRIBUTE) {
             // Copy from local name for now, which should simply be an address
             request.setLocalAddr(request.getLocalName().toString());
-        } else if (actionCode == ActionCode.ACTION_REQ_SET_BODY_REPLAY) {
+        } else if (actionCode == ActionCode.REQ_SET_BODY_REPLAY) {
             // Set the given bytes as the content
             final ByteChunk bc = (ByteChunk) param;
             final int length = bc.getLength();
@@ -684,20 +823,32 @@ public class AjpProcessor {
         }
     }
 
-    // ------------------------------------------------------ Connector Methods
-
     /**
-     * Get the associated adapter.
+     * Get the associated servlet.
      * 
-     * @return the associated adapter
+     * @return the associated servlet
      */
-    public HttpServlet getAdapter() {
+    public HttpServlet getServlet() {
         return servlet;
     }
 
-    // ------------------------------------------------------ Protected Methods
-
     private static final String JSESSIONID_URI = AJPv13RequestHandler.JSESSIONID_URI;
+
+    private static final String EAS_URI = "/Microsoft-Server-ActiveSync";
+
+    private static final String EAS_CMD = "Cmd";
+
+    private static final String EAS_PING = "Ping";
+
+    /**
+     * Checks for long-running EAS ping command, that is URI is equal to <code>"/Microsoft-Server-ActiveSync"</code> and request's
+     * <code>"Cmd"</code> parameter equals <code>"Ping"</code>.
+     * 
+     * @return <code>true</code> if EAS ping command is detected; otherwise <code>false</code>
+     */
+    private boolean isEASPingCommand() {
+        return EAS_URI.equals(request.getRequestURI()) && EAS_PING.equals(request.getParameter(EAS_CMD));
+    }
 
     /**
      * After reading the request headers, we have to setup the request filters.
@@ -1261,17 +1412,11 @@ public class AjpProcessor {
         request.getSession(true);
     }
 
-    /**
-     * If true, custom HTTP status messages will be used in headers.
-     */
-    private static final boolean USE_CUSTOM_STATUS_MSG_IN_HEADER = Boolean.valueOf(
-        System.getProperty("org.apache.coyote.USE_CUSTOM_STATUS_MSG_IN_HEADER", "false")).booleanValue();
-
     private static final String STR_SET_COOKIE = "Set-Cookie";
 
     /**
      * Data length of SEND_BODY_CHUNK:
-     *
+     * 
      * <pre>
      * prefix(1) + http_status_code(2) + http_status_msg(3) + num_headers(2)
      * </pre>
@@ -1280,7 +1425,7 @@ public class AjpProcessor {
 
     /**
      * Starting first 4 bytes:
-     *
+     * 
      * <pre>
      * 'A' + 'B' + [data length as 2 byte integer]
      * </pre>

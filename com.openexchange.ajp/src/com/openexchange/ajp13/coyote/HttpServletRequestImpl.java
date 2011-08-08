@@ -175,7 +175,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     private long startTime;
 
-    private ServletInputStream servletInputStream;
+    private ActionAwareServletInputStream servletInputStream;
 
     private String localAddr;
 
@@ -219,12 +219,12 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
     }
 
     /**
-     * Sets the servlet input stream
+     * Dump specified bytes into buffer.
      * 
-     * @param servletInputStream The servlet input stream
+     * @param bytes The bytes
      */
-    public void setServletInputStream(final ServletInputStream servletInputStream) {
-        this.servletInputStream = servletInputStream;
+    public void dumpToBuffer(final byte[] bytes) {
+        servletInputStream.dumpToBuffer(bytes);
     }
 
     /**
@@ -1131,8 +1131,22 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
         return ServletConfigLoader.getDefaultInstance().getContext(servletInstance.getClass().getCanonicalName(), servletPath);
     }
 
-    public void setStartTime(final long currentTimeMillis) {
-        this.startTime = currentTimeMillis;
+    /**
+     * Sets the start time.
+     * 
+     * @param startTime The start time
+     */
+    public void setStartTime(final long startTime) {
+        this.startTime = startTime;
+    }
+
+    /**
+     * Gets the start time for this request.
+     * 
+     * @return The start time
+     */
+    public long getStartTime() {
+        return startTime;
     }
 
 }

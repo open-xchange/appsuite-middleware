@@ -223,9 +223,9 @@ public class Multiple extends SessionServlet {
             jsonObj.put(MultipleHandler.ROUTE, ServerServiceRegistry.getInstance().getService(SystemNameService.class).getSystemName());
             final Dispatcher dispatcher = getDispatcher();
             if (dispatcher.handles(module)) {
-            	final AJAXRequestData request = MultipleAdapter.parse(module, action, jsonObj, session, Tools.considerSecure(req));
-            	final AJAXRequestResult result;
+                final AJAXRequestData request = MultipleAdapter.parse(module, action, jsonObj, session, Tools.considerSecure(req));
                 jsonWriter.object();
+                final AJAXRequestResult result;
                 try {
                     if (action == null || action.length() == 0) {
                     	request.setAction("GET"); // Backwards Compatibility
