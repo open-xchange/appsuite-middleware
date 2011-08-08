@@ -49,6 +49,7 @@
 
 package com.openexchange.test;
 
+import com.openexchange.exception.OXException;
 import static junit.framework.Assert.fail;
 import java.io.IOException;
 import java.util.Date;
@@ -62,7 +63,6 @@ import com.openexchange.ajax.resource.actions.ResourceNewResponse;
 import com.openexchange.ajax.resource.actions.ResourceSearchRequest;
 import com.openexchange.ajax.resource.actions.ResourceSearchResponse;
 import com.openexchange.resource.Resource;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * This was just a quick&dirty implementation to get other tests running that use resources.
@@ -162,7 +162,7 @@ public class ResourceTestManager implements TestManager {
     protected <T extends AbstractAJAXResponse> T execute(final AJAXRequest<T> request) {
         try {
             return getClient().execute(request);
-        } catch (AjaxException e) {
+        } catch (OXException e) {
             setLastException(e);
             if (failOnError)
                 fail("AjaxException during resource creation: " + e.getLocalizedMessage());

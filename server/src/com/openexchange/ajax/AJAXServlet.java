@@ -49,9 +49,9 @@
 
 package com.openexchange.ajax;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
@@ -64,6 +64,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.servlet.ServletException;
+import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -94,6 +95,7 @@ import com.openexchange.groupware.upload.impl.UploadListener;
 import com.openexchange.groupware.upload.impl.UploadRegistry;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * This is a super class of all AJAX servlets providing common methods.
@@ -443,14 +445,14 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     }
 
     /**
-     * 8K buffer
+     * 2K buffer
      */
-    private static final int BUF_SIZE = 0x2000;
+    private static final int BUF_SIZE = 0x800;
 
     /**
-     * Initialize with 16K
+     * Initialize with 8K
      */
-    private static final int SB_SIZE = 0x4000;
+    private static final int SB_SIZE = 0x2000;
 
     /**
      * Returns the complete body as a string. Be careful when getting big request bodies.
@@ -460,25 +462,19 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @throws IOException If an error occurs while reading the body.
      */
     public static String getBody(final HttpServletRequest req) throws IOException {
-        InputStreamReader isr = null;
+        final ServletInputStream inputStream = req.getInputStream();
         try {
-            {
-                final String characterEncoding = req.getCharacterEncoding();
-                isr =
-                    new InputStreamReader(
-                        req.getInputStream(),
-                        null == characterEncoding ? ServerConfig.getProperty(Property.DefaultEncoding) : characterEncoding);
+            final int buflen = BUF_SIZE;
+            final byte[] buf = new byte[buflen];
+            final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(SB_SIZE);
+            for (int read = inputStream.read(buf, 0, buflen); read > 0; read = inputStream.read(buf, 0, buflen)) {
+                baos.write(buf, 0, read);
             }
-            final char[] c = new char[BUF_SIZE];
-            int count = 0;
-            if ((count = isr.read(c)) > 0) {
-                final StringBuilder sb = new StringBuilder(SB_SIZE);
-                do {
-                    sb.append(c, 0, count);
-                } while ((count = isr.read(c)) > 0);
-                return sb.toString();
+            String charEnc = req.getCharacterEncoding();
+            if (charEnc == null) {
+                charEnc = ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding);
             }
-            return STR_EMPTY;
+            return new String(baos.toByteArray(), charEnc);
         } catch (final UnsupportedEncodingException e) {
             /*
              * Should never occur
@@ -486,12 +482,10 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             LOG.error("Unsupported encoding in request", e);
             return STR_EMPTY;
         } finally {
-            if (null != isr) {
-                try {
-                    isr.close();
-                } catch (final IOException e) {
-                    LOG.error(e.getMessage(), e);
-                }
+            try {
+                inputStream.close();
+            } catch (final IOException e) {
+                LOG.debug(e.getMessage(), e);
             }
         }
     }

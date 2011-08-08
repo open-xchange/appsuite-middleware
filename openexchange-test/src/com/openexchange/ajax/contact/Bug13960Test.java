@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.contact;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Date;
 import java.util.TimeZone;

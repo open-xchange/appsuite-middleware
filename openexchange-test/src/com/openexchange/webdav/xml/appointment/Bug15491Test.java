@@ -49,6 +49,7 @@
 
 package com.openexchange.webdav.xml.appointment;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.Date;
 import com.openexchange.groupware.container.Appointment;

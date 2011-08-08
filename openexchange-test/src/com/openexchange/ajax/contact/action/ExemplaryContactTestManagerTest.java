@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.contact.action;
 
+import com.openexchange.exception.OXException;
 import java.util.Date;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;

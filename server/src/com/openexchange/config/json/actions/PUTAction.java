@@ -79,7 +79,7 @@ public final class PUTAction extends AbstractConfigAction {
     @Override
     protected AJAXRequestResult perform(final ConfigAJAXRequest req) throws OXException, JSONException {
         final ServerSession session = req.getSession();
-        String value = req.getData();
+        String value = req.getData().toString(); // Unparse
         if (value.length() > 0 && value.charAt(0) == '"') {
             value = value.substring(1);
         }

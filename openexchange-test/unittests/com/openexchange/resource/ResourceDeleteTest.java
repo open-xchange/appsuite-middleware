@@ -49,6 +49,7 @@
 
 package com.openexchange.resource;
 
+import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -56,12 +57,10 @@ import java.sql.SQLException;
 
 import junit.framework.TestCase;
 
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.resource.storage.ResourceStorage;
@@ -150,7 +149,7 @@ public final class ResourceDeleteTest extends TestCase {
 
 	private static final String SQL_DELETE_DELETE = "DELETE FROM del_resource WHERE cid = ? AND id = ?";
 
-	public void testResourceDelete() throws DBPoolingException, ResourceException, SQLException {
+	public void testResourceDelete() throws OXException, OXException, SQLException {
 		int id = -1;
 		try {
 			final Resource resource = createDummyResource(admin, ctx);
@@ -164,10 +163,10 @@ public final class ResourceDeleteTest extends TestCase {
 			ServerServiceRegistry.getInstance().getService(ResourceService.class).delete(admin, ctx, resource,
 					resource.getLastModified());
 
-			LdapException expected = null;
+			OXException expected = null;
 			try {
 				ResourceStorage.getInstance().getResource(id, ctx);
-			} catch (final LdapException e) {
+			} catch (final OXException e) {
 				expected = e;
 			}
 			assertTrue("Resource has not been deleted", expected != null);
@@ -235,7 +234,7 @@ public final class ResourceDeleteTest extends TestCase {
 					resource.getLastModified());
 
 			fail("Delete succeeded with missing mandatory field");
-		} catch (final ResourceException e) {
+		} catch (final OXException e) {
 		    // Exception is expected
 		} finally {
 			deleteResource(id, ctx.getContextId());
@@ -243,7 +242,7 @@ public final class ResourceDeleteTest extends TestCase {
 
 	}
 
-	private static final Resource createDummyResource(final User admin, final Context ctx) throws ResourceException {
+	private static final Resource createDummyResource(final User admin, final Context ctx) throws OXException {
 		final Resource resource = new Resource();
 		resource.setAvailable(true);
 		resource.setDescription("My test resource");
@@ -263,7 +262,7 @@ public final class ResourceDeleteTest extends TestCase {
 		final Connection writeCon;
 		try {
 			writeCon = Database.get(cid, true);
-		} catch (final DBPoolingException e) {
+		} catch (final OXException e) {
 			e.printStackTrace();
 			return;
 		}

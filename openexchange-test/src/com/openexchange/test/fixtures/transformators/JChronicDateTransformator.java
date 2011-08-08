@@ -48,13 +48,13 @@
  */
 package com.openexchange.test.fixtures.transformators;
 
+import com.openexchange.exception.OXException;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.openexchange.groupware.calendar.TimeTools;
-import com.openexchange.test.fixtures.FixtureException;
 import com.openexchange.test.fixtures.FixtureLoader;
 import com.openexchange.test.fixtures.SimpleCredentials;
 
@@ -72,7 +72,7 @@ public class JChronicDateTransformator implements Transformator{
 		this.fixtureLoader = fixtureLoader;
 	}
 
-	public Object transform(String value) throws FixtureException {
+	public Object transform(String value) throws OXException {
     	if (null == value) {
     		return null;
     	}
@@ -95,7 +95,7 @@ public class JChronicDateTransformator implements Transformator{
         		}
     		}
     		if (null == timeZone) {
-    			throw new FixtureException("unable to parse user / timezone from '" + match.toString() + "'."); 
+    			throw OXException.general("unable to parse user / timezone from '" + match.toString() + "'."); 
     		}
     		value = matcher.replaceFirst("").trim();
     	}
@@ -103,7 +103,7 @@ public class JChronicDateTransformator implements Transformator{
     	Date date = TimeTools.D(value, timeZone);
 
     	if(date == null) {
-    	    throw new FixtureException("Can't parse date '"+value+"'");
+    	    throw OXException.general("Can't parse date '"+value+"'");
     	}
     	
     	return date;

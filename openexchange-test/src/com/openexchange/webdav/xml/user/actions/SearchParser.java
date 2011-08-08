@@ -49,12 +49,11 @@
 
 package com.openexchange.webdav.xml.user.actions;
 
+import com.openexchange.exception.OXException;
 import org.jdom.Document;
 
-import com.openexchange.api.OXConflictException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.framework.AbstractWebDAVParser;
 import com.openexchange.webdav.xml.types.Response;
 
@@ -81,7 +80,7 @@ public final class SearchParser extends AbstractWebDAVParser<SearchResponse> {
      */
     @Override
     protected SearchResponse createResponse(final Document document, final Response[] responses)
-        throws OXConflictException, TestException {
+        throws OXException, OXException {
         final SearchResponse retval = new SearchResponse(document, responses);
         final Contact[] contacts = new Contact[responses.length];
         for (int a = 0; a < contacts.length; a++) {

@@ -1,6 +1,7 @@
 
 package com.openexchange.test;
 
+import com.openexchange.exception.OXException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;

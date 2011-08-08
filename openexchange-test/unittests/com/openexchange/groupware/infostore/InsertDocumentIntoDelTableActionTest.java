@@ -48,6 +48,7 @@
  */
 package com.openexchange.groupware.infostore;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.database.impl.CreateDocumentAction;
 import com.openexchange.groupware.infostore.database.impl.InsertDocumentIntoDelTableAction;
 import com.openexchange.tx.UndoableAction;

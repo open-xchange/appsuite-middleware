@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.group;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
@@ -58,8 +59,6 @@ import com.openexchange.ajax.group.actions.ListRequest;
 import com.openexchange.ajax.group.actions.SearchRequest;
 import com.openexchange.ajax.group.actions.SearchResponse;
 import com.openexchange.group.Group;
-import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.tools.servlet.OXJSONException;
 
 
 /**
@@ -75,13 +74,13 @@ public class GroupResolver {
         this.client = client;
     }
     
-    public Group[] resolveGroup(String pattern) throws AjaxException, IOException, SAXException, JSONException, OXJSONException {
+    public Group[] resolveGroup(String pattern) throws OXException, IOException, SAXException, JSONException, OXException {
         SearchRequest req = new SearchRequest(pattern, false);
         SearchResponse response = client.execute(req);
         return response.getGroups();
     }
     
-    public Group[] loadGroups(int...groupIds) throws AjaxException, IOException, SAXException, JSONException, OXJSONException {
+    public Group[] loadGroups(int...groupIds) throws OXException, IOException, SAXException, JSONException, OXException {
         if(groupIds == null) {
             return new Group[0];
         }

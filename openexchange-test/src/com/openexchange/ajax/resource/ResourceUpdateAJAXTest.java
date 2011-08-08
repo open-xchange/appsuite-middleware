@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.resource;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
@@ -57,7 +58,6 @@ import com.openexchange.ajax.resource.actions.ResourceGetRequest;
 import com.openexchange.ajax.resource.actions.ResourceUpdateRequest;
 import com.openexchange.ajax.resource.actions.ResourceUpdateResponse;
 import com.openexchange.resource.Resource;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * {@link ResourceUpdateAJAXTest} - Tests the UPDATE request on resource servlet
@@ -80,7 +80,7 @@ public final class ResourceUpdateAJAXTest extends AbstractResourceTest {
 	/**
 	 * Tests the <code>action=update</code> request
 	 */
-	public void testUpdate() throws AjaxException, JSONException, IOException, SAXException {
+	public void testUpdate() throws OXException, JSONException, IOException, SAXException {
 		int id = -1;
 		try {
 			/*

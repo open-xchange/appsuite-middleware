@@ -3,8 +3,9 @@ package com.openexchange.webdav.xml.appointment;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.AppointmentTest;
 import com.openexchange.webdav.xml.XmlServlet;
 
@@ -33,7 +34,7 @@ public class DeleteTest extends AppointmentTest {
 		try {
 			deleteAppointment(webCon, objectId, appointmentFolderId, new Date(0), PROTOCOL + hostName, login, password );
 			fail("expected concurent modification exception!");
-		} catch (final TestException exc) {
+		} catch (final OXException exc) {
 			assertExceptionMessage(exc.getMessage(), XmlServlet.MODIFICATION_STATUS);
 		}
 		
@@ -48,7 +49,7 @@ public class DeleteTest extends AppointmentTest {
 		try {
 			deleteAppointment(webCon, (objectId + 1000), appointmentFolderId, PROTOCOL + hostName, login, password );
 			fail("expected object not found exception!");
-		} catch (final TestException exc) {
+		} catch (final OXException exc) {
 			assertExceptionMessage(exc.getMessage(), XmlServlet.OBJECT_NOT_FOUND_STATUS);
 		}
 		

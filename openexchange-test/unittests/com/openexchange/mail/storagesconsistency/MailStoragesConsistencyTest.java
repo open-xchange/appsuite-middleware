@@ -49,11 +49,11 @@
 
 package com.openexchange.mail.storagesconsistency;
 
+import com.openexchange.exception.OXException;
 import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.IndexRange;
-import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.MailSortField;
@@ -151,7 +151,7 @@ public final class MailStoragesConsistencyTest extends AbstractMailTest {
                  */
                 try {
                     mailAccess.getMessageStorage().getAllMessages(fullname, IndexRange.NULL, null, null, FIELDS_ID);
-                } catch (final MailException e) {
+                } catch (final OXException e) {
                     if (e.getCause() != null) {
                         e.printStackTrace();
                         fail("Folder/message storage inconsistency detected: " + e.getCause().getMessage());

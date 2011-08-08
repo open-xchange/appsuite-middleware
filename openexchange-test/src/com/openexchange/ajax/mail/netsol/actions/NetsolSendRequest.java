@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail.netsol.actions;
 
+import com.openexchange.exception.OXException;
 import java.io.InputStream;
 
 import org.json.JSONException;

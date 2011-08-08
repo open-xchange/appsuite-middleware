@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.importexport;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.webdav.xml.AppointmentTest;

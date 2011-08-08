@@ -47,71 +47,36 @@
  *
  */
 
-package com.openexchange.ajax.appointment.helper;
+package com.openexchange.contact.json.osgi;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.contact.json.ContactActionFactory;
+import com.openexchange.contact.json.converters.ContactListResultConverter;
+import com.openexchange.contact.json.converters.ContactResultConverter;
+import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
+import com.openexchange.image.ImageService;
 
 /**
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * {@link ContactJSONActivator} - OSGi Activator for the Contact JSON interface.
+ * 
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class OXError {
+public class ContactJSONActivator extends AJAXModuleActivator {
+    
+    private static final Class<?>[] NEEDED = new Class[] { ContactInterfaceDiscoveryService.class,
+                                                        ImageService.class };
 
-    private String category;
-
-    private int number;
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
-    public String getCategory() {
-        return category;
-    }
-
-    public void setNumber(int number) {
-        this.number = number;
-    }
-
-    public int getNumber() {
-        return number;
-    }
-
-    public OXError(String category, int number) {
-        setNumber(number);
-        setCategory(category);
-    }
-
-    public boolean matches(OXError other) {
-        boolean matchesNumber = false, matchesCategory = false;
-
-        if (category == null || other.getCategory() == null)
-            matchesCategory = true;
-        else
-            matchesCategory = category.equals(other.getCategory());
-
-        if (number == -1 || other.getNumber() == -1)
-            matchesNumber = true;
-        else
-            matchesNumber = number == other.getNumber();
-
-        return matchesNumber && matchesCategory;
-    }
-
-    public boolean matches(AbstractOXException exception) {
-        return matches(new OXError(exception.getComponent().getAbbreviation(), exception.getDetailNumber()));
-    }
-
-    public boolean matches(Throwable t) {
-        try {
-            AbstractOXException exception = (AbstractOXException) t;
-            return matches(new OXError(exception.getComponent().getAbbreviation(), exception.getDetailNumber()));
-        } catch (ClassCastException e) {
-            return false;
-        }
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return NEEDED;
     }
 
     @Override
-    public String toString() {
-        return String.format("%3s-%04d", category, number);
+    protected void startBundle() throws Exception {
+        registerModule(new ContactActionFactory(this), "contacts");
+        registerService(ResultConverter.class, new ContactResultConverter(getService(ImageService.class)));
+        registerService(ResultConverter.class, new ContactListResultConverter(getService(ImageService.class)));
     }
+
 }

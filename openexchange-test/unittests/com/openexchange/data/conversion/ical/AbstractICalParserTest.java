@@ -49,6 +49,7 @@
 
 package com.openexchange.data.conversion.ical;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
 import java.util.ArrayList;
 import java.util.Date;
@@ -66,11 +67,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.MockUserLookup;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.resource.Resource;
-import com.openexchange.resource.ResourceException;
-import com.openexchange.server.ServiceException;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -103,7 +101,7 @@ public abstract class AbstractICalParserTest extends TestCase {
                 return found;
             }
 
-            public User loadUser(final int userId, final Context ctx) throws UserException {
+            public User loadUser(final int userId, final Context ctx) throws OXException {
                 return AbstractICalParserTest.this.users.getUser(userId);
             }
         };
@@ -127,7 +125,7 @@ public abstract class AbstractICalParserTest extends TestCase {
             }};
 
             public List<Resource> find(final List<String> names, final Context ctx)
-                throws ResourceException, ServiceException {
+                throws OXException, OXException {
                 final List<Resource> retval = new ArrayList<Resource>();
                 for(final String name : names) {
                     for(final Resource resource : resources) {
@@ -139,7 +137,7 @@ public abstract class AbstractICalParserTest extends TestCase {
                 return retval;
             }
             public Resource load(final int resourceId, final Context ctx)
-                throws ResourceException, ServiceException {
+                throws OXException, OXException {
                 return null;
             }
         };
@@ -151,7 +149,7 @@ public abstract class AbstractICalParserTest extends TestCase {
         for(final int i : ids) {
             try {
                 found.add( users.getUser(i) );
-            } catch (final UserException e) {
+            } catch (final OXException e) {
                 //IGNORE
             }
         }

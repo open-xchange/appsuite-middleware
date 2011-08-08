@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.reminder;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.TimeZone;
@@ -69,7 +70,6 @@ import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.reminder.ReminderObject;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * This test checks the correctness of reminders that are set to appointment series after they are created.
@@ -193,7 +193,7 @@ public class Bug15776Test extends AbstractAJAXSession {
         return appointment;
     }
     
-    private Appointment createAppointment() throws AjaxException, IOException, SAXException, JSONException {
+    private Appointment createAppointment() throws OXException, IOException, SAXException, JSONException {
         Calendar cal = TimeTools.createCalendar(timezone);
         
         // This yearly series starts 5 years ago.

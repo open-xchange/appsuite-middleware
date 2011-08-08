@@ -51,15 +51,17 @@ package com.openexchange.groupware.calendar.json.actions;
 
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
-import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -101,7 +103,6 @@ public final class NewAppointmentsSearchAction extends AbstractAppointmentAction
             final String timeZoneId = req.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
             timeZone = null == timeZoneId ? req.getTimeZone() : getTimeZone(timeZoneId);
         }
-        final int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
         final Date start = req.checkTime(AJAXServlet.PARAMETER_START, timeZone);
         final Date end = req.checkTime(AJAXServlet.PARAMETER_END, timeZone);
 
@@ -124,14 +125,11 @@ public final class NewAppointmentsSearchAction extends AbstractAppointmentAction
 
         Date timestamp = new Date(0);
 
-        final Date lastModified = null;
-
         final AppointmentSearchObject searchObj = new AppointmentSearchObject();
         searchObj.setRange(new Date[] { start, end });
 
-        final LinkedList<Appointment> appointmentList = new LinkedList<Appointment>();
+        final LinkedList<Appointment> linkedAppointmentList = new LinkedList<Appointment>();
 
-        final JSONArray jsonResponseArray = new JSONArray();
 
         SearchIterator<Appointment> searchIterator = null;
         try {
@@ -139,8 +137,8 @@ public final class NewAppointmentsSearchAction extends AbstractAppointmentAction
             final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
             searchIterator = appointmentsql.getAppointmentsByExtendedSearch(searchObj, orderBy, orderDir, _appointmentFields);
 
-            final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone);
-
+            final Map<String, List<Appointment>> appointmentMap = new HashMap<String, List<Appointment>>(1);
+            final List<Appointment> appointmentList = new ArrayList<Appointment>();
             while (searchIterator.hasNext()) {
                 final Appointment appointmentobject = searchIterator.next();
                 boolean processed = false;
@@ -166,10 +164,10 @@ public final class NewAppointmentsSearchAction extends AbstractAppointmentAction
                                 appointmentobject.getEndDate().getTime(),
                                 startUTC.getTime(),
                                 endUTC.getTime())) {
-                                compareStartDateForList(appointmentList, appointmentobject, limit);
+                                compareStartDateForList(linkedAppointmentList, appointmentobject, limit);
                             }
                         } else {
-                            compareStartDateForList(appointmentList, appointmentobject, limit);
+                            compareStartDateForList(linkedAppointmentList, appointmentobject, limit);
                         }
                     }
                 }
@@ -180,10 +178,10 @@ public final class NewAppointmentsSearchAction extends AbstractAppointmentAction
                             appointmentobject.getEndDate().getTime(),
                             startUTC.getTime(),
                             endUTC.getTime())) {
-                            compareStartDateForList(appointmentList, appointmentobject, limit);
+                            compareStartDateForList(linkedAppointmentList, appointmentobject, limit);
                         }
                     } else {
-                        compareStartDateForList(appointmentList, appointmentobject, limit);
+                        compareStartDateForList(linkedAppointmentList, appointmentobject, limit);
                     }
                 }
 
@@ -192,16 +190,17 @@ public final class NewAppointmentsSearchAction extends AbstractAppointmentAction
                 }
             }
 
-            for (int a = 0; a < appointmentList.size(); a++) {
-                final Appointment appointmentObj = appointmentList.get(a);
+            for (int a = 0; a < linkedAppointmentList.size(); a++) {
+                final Appointment appointmentObj = linkedAppointmentList.get(a);
                 if (appointmentObj.getFullTime()) {
-                    appointmentwriter.writeArray(appointmentObj, columns, startUTC, endUTC, jsonResponseArray);
+                    checkAndAddAppointment(appointmentList, appointmentObj, startUTC, endUTC, recColl);
                 } else {
-                    appointmentwriter.writeArray(appointmentObj, columns, jsonResponseArray);
+                    appointmentList.add(appointmentObj);
                 }
             }
 
-            return new AJAXRequestResult(jsonResponseArray, timestamp, "json");
+            appointmentMap.put("appointments", appointmentList);
+            return new AJAXRequestResult(appointmentMap, timestamp, "appointments");
         } catch (final SQLException e) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, new Object[0]);
         } finally {

@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.kata.appointments;
 
-
+import com.openexchange.exception.OXException;
 import org.junit.Assert;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.kata.NeedExistingStep;

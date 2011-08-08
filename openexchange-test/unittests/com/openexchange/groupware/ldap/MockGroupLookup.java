@@ -3,9 +3,8 @@ package com.openexchange.groupware.ldap;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.ldap.LdapException.Code;
 
 /**
  * MockUserStorage for now contains some testing data relevant to the notification tests.
@@ -15,10 +14,9 @@ public class MockGroupLookup {
 
 	private final Map<Integer,Group> groups = new HashMap<Integer,Group>();
 	
-	public Group getGroup(final int gid) throws LdapException {
+	public Group getGroup(final int gid) throws OXException {
 		if(!groups.containsKey(gid)) {
-			throw new LdapException(EnumComponent.GROUP, Code.GROUP_NOT_FOUND,
-                gid, -1);
+			throw LdapExceptionCode.GROUP_NOT_FOUND.create(gid);
 		}
 		return groups.get(gid);
 	}

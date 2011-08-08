@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mailaccount.actions;
 
+import com.openexchange.exception.OXException;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -57,7 +58,6 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Header;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.json.writer.MailAccountWriter;
 
 /**
@@ -134,7 +134,7 @@ public class MailAccountInsertRequest implements AJAXRequest<MailAccountInsertRe
             public String generateMailServerURL() {
                 try {
                     return acc.generateMailServerURL();
-                } catch (final MailAccountException e) {
+                } catch (final OXException e) {
                     throw new IllegalStateException(e);
                 }
             }
@@ -190,7 +190,7 @@ public class MailAccountInsertRequest implements AJAXRequest<MailAccountInsertRe
             public String generateTransportServerURL() {
                 try {
                     return acc.generateTransportServerURL();
-                } catch (final MailAccountException e) {
+                } catch (final OXException e) {
                     throw new IllegalStateException(e);
                 }
             }

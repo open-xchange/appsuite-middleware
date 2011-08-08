@@ -49,6 +49,7 @@
 
 package com.openexchange.test;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 

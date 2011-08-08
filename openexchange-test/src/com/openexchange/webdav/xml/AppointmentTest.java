@@ -49,6 +49,7 @@
 
 package com.openexchange.webdav.xml;
 
+import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -70,7 +71,6 @@ import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.Appointment;
@@ -595,7 +595,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
         return appointmentArray;
     }
 
-    public static Appointment loadAppointment(final WebConversation webCon, final int objectId, final int inFolder, final Date modified, final String host, final String login, final String password) throws TestException, Exception {
+    public static Appointment loadAppointment(final WebConversation webCon, final int objectId, final int inFolder, final Date modified, final String host, final String login, final String password) throws OXException, Exception {
         final Appointment[] appointmentArray = listAppointment(webCon, inFolder, modified, true, false, host, login, password);
 
         for (int a = 0; a < appointmentArray.length; a++) {

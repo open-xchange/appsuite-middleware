@@ -48,12 +48,13 @@
  */
 package com.openexchange.test.fixtures;
 
+import com.openexchange.exception.OXException;
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public interface FixtureLoader {
     
 	void appendToLoadPath(String...paths);
-    void load(String...fixtureNames) throws FixtureException;
-    <T> Fixtures<T> getFixtures(String fixtureName, Class<T> aClass) throws FixtureException;
+    void load(String...fixtureNames) throws OXException;
+    <T> Fixtures<T> getFixtures(String fixtureName, Class<T> aClass) throws OXException;
 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.test.fixtures;
 
+import com.openexchange.exception.OXException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -84,7 +85,7 @@ public class MultiMailFixtureFactory implements FixtureFactory<CustomMailAccount
             addTransformator(new BooleanTransformator(), "transport_secure");
         }
 
-        public Fixture<CustomMailAccount> getEntry(final String entryName) throws FixtureException {
+        public Fixture<CustomMailAccount> getEntry(final String entryName) throws OXException {
             if (mailaccounts.containsKey(entryName)) {
                 return mailaccounts.get(entryName);
             }

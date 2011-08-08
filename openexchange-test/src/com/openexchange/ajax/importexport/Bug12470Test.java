@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.importexport;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
@@ -67,8 +68,6 @@ import com.openexchange.ajax.task.actions.GetResponse;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.tools.servlet.OXJSONException;
 
 /**
  *
@@ -118,8 +117,8 @@ public final class Bug12470Test extends AbstractAJAXSession {
         super.tearDown();
     }
 
-    public void testDueDate() throws AjaxException, IOException, SAXException,
-        JSONException, OXJSONException {
+    public void testDueDate() throws OXException, IOException, SAXException,
+        JSONException, OXException {
         final GetRequest request = new GetRequest(folderId, objectId);
         final GetResponse response = client.execute(request);
         final Task task = response.getTask(tz);
@@ -133,7 +132,7 @@ public final class Bug12470Test extends AbstractAJAXSession {
         assertEquals("Task due dates are not correctly imported.", expected, due);
     }
     
-    private void importvTodo() throws AjaxException, IOException, SAXException,
+    private void importvTodo() throws OXException, IOException, SAXException,
         JSONException {
         final ICalImportRequest request = new ICalImportRequest(folderId, vTodo);
         final ICalImportResponse response = client.execute(request);
@@ -144,7 +143,7 @@ public final class Bug12470Test extends AbstractAJAXSession {
         objectId = Integer.parseInt(result.getObjectId());
     }
 
-    private void deleteTask() throws AjaxException, IOException, SAXException,
+    private void deleteTask() throws OXException, IOException, SAXException,
         JSONException {
         if (null == lastModified) {
             lastModified = new Date(Long.MAX_VALUE);

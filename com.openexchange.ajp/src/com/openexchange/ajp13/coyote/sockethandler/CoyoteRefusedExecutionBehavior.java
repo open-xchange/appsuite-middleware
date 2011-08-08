@@ -49,15 +49,11 @@
 
 package com.openexchange.ajp13.coyote.sockethandler;
 
-import java.io.IOException;
-import java.net.Socket;
 import java.util.concurrent.RejectedExecutionException;
 import javax.servlet.http.HttpServletResponse;
-import com.openexchange.ajp13.AJPv13Response;
-import com.openexchange.ajp13.exception.AJPv13Exception;
-import com.openexchange.ajp13.najp.AJPv13Task;
-import com.openexchange.ajp13.najp.AJPv13TaskWatcher;
-import com.openexchange.ajp13.servlet.http.HttpServletResponseWrapper;
+import com.openexchange.ajp13.coyote.ActionCode;
+import com.openexchange.ajp13.coyote.AjpProcessor;
+import com.openexchange.ajp13.watcher.AJPv13TaskWatcher;
 import com.openexchange.threadpool.RefusedExecutionBehavior;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -93,7 +89,7 @@ final class CoyoteRefusedExecutionBehavior implements RefusedExecutionBehavior<O
             throw e;
         }
         // Still running, but task rejected (by synchronous queue if used)
-        if (!(task instanceof AJPv13Task)) {
+        if (!(task instanceof CoyoteTask)) {
             // Huh..?! No AJP task? Then run in calling thread
             try {
                 return task.call();
@@ -103,37 +99,15 @@ final class CoyoteRefusedExecutionBehavior implements RefusedExecutionBehavior<O
         }
         // Uncomment this to run in calling thread.
         // r.run();
-        final AJPv13Task rejectedTask = (AJPv13Task) task;
+        final CoyoteTask rejectedTask = (CoyoteTask) task;
         try {
-            final Socket client = rejectedTask.getSocket();
-            if (null != client) {
-                LOG.error(new StringBuilder(64).append("Rejected AJP request from: \"").append(client.getRemoteSocketAddress()).append(
-                    "\". Trying to terminate AJP cycle").toString());
-                try {
-                    final HttpServletResponseWrapper response = new HttpServletResponseWrapper(null);
-                    final byte[] errMsg = response.composeAndSetError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, null);
-                    // Write headers
-                    client.getOutputStream().write(AJPv13Response.getSendHeadersBytes(response));
-                    client.getOutputStream().flush();
-                    // Write error message
-                    client.getOutputStream().write(AJPv13Response.getSendBodyChunkBytes(errMsg));
-                    client.getOutputStream().flush();
-                    // Write END-RESPONSE
-                    client.getOutputStream().write(AJPv13Response.getEndResponseBytes(true));
-                    client.getOutputStream().flush();
-                    // Close socket since Web Server does not reliably close the socket even though END-RESPONSE indicates to
-                    // close the connection.
-                    rejectedTask.cancel();
-                    LOG.info(new StringBuilder("AJP cycle terminated. Closed connection to \"").append(client.getRemoteSocketAddress()).append(
-                        '"').toString());
-                } catch (final AJPv13Exception e) {
-                    LOG.error(new StringBuilder(64).append("Could not terminate AJP cycle: ").append(e.getMessage()).toString(), e);
-                } catch (final IOException e) {
-                    LOG.error(new StringBuilder(64).append("Could not terminate AJP cycle: ").append(e.getMessage()).toString(), e);
-                }
-            }
+            final AjpProcessor ajpProcessor = rejectedTask.getAjpProcessor();
+            ajpProcessor.getResponse().setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+            ajpProcessor.action(ActionCode.CLIENT_FLUSH, null);
+            ajpProcessor.action(ActionCode.CLOSE, null);
         } finally {
-            watcher.removeTask(rejectedTask);
+            // TODO:
+            // watcher.removeTask(rejectedTask);
         }
         return null;
     }

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail.actions;
 
+import com.openexchange.exception.OXException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
@@ -57,7 +58,6 @@ import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.CommonAllResponse;
 
-import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.dataobjects.MIMEMailMessage;
 /**
@@ -68,7 +68,7 @@ public class AllResponse extends CommonAllResponse {
         super(response);
     }
 	
-	public MailMessage[] getMailMessages(int[] columns) throws JSONException, AddressException, MailException{		
+	public MailMessage[] getMailMessages(int[] columns) throws JSONException, AddressException, OXException{		
 		final JSONArray objectsArray = (JSONArray) getData();
 		MailMessage[] messages = new MailMessage[objectsArray.length()];
 		for (int i=0; i<objectsArray.length(); i++){

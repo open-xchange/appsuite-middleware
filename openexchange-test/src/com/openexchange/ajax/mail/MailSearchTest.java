@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -58,7 +59,6 @@ import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.mail.actions.MailSearchRequest;
 import com.openexchange.ajax.mail.actions.MailSearchResponse;
 import com.openexchange.mail.MailListField;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * {@link MailSearchTest}
@@ -106,7 +106,7 @@ public class MailSearchTest extends AbstractMailTest {
         assertEquals("Should still yield two results after being sent a different one", 2, search.length());
     }
 
-    public JSONArray searchBySubject(String pattern) throws AjaxException, IOException, SAXException, JSONException {
+    public JSONArray searchBySubject(String pattern) throws OXException, IOException, SAXException, JSONException {
         JSONArray body = new JSONArray();
         JSONObject obj = new JSONObject();
         obj.put(Mail.PARAMETER_COL, MailListField.SUBJECT.getField());

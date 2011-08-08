@@ -48,6 +48,7 @@
  */
 package com.openexchange.test.fixtures;
 
+import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -102,7 +103,7 @@ public class AppointmentFixtureFactory implements FixtureFactory<Appointment>{
             addTransformator(new RecurrenceTypeTransformator(), "recurrence_type");
         }
 
-        public Fixture<Appointment> getEntry(final String entryName) throws FixtureException {
+        public Fixture<Appointment> getEntry(final String entryName) throws OXException {
             if (appointments.containsKey(entryName)) {
                 return appointments.get(entryName);
             }

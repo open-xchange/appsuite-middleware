@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.importexport;
 
+import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.importexport.ImportResult;

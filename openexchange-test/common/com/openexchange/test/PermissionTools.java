@@ -49,6 +49,7 @@
 
 package com.openexchange.test;
 
+import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.server.impl.OCLPermission;

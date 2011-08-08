@@ -49,6 +49,7 @@
 
 package com.openexchange.cache.impl;
 
+import com.openexchange.exception.OXException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -60,12 +61,11 @@ import com.openexchange.cache.dynamic.impl.OXObjectFactory;
 import com.openexchange.cache.dynamic.impl.Refresher;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheElement;
-import com.openexchange.caching.CacheException;
+import com.openexchange.caching.CacheExceptionCode;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.CacheStatistics;
 import com.openexchange.caching.ElementAttributes;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -141,9 +141,9 @@ public class RefresherTest extends TestCase {
                 public CacheKey newCacheKey(final int contextId, final Serializable... obj) {
                     throw new UnsupportedOperationException();
                 }
-                public void put(final Serializable key, final Serializable obj) throws CacheException {
+                public void put(final Serializable key, final Serializable obj) throws OXException {
                     if (!KEY.equals(key)) {
-                        throw new CacheException(CacheException.Code.CACHE_ERROR, key);
+                        throw CacheExceptionCode.CACHE_ERROR.create(key);
                     }
                     if (!(obj instanceof Condition || obj instanceof Integer)) {
                         fail("Wrong value: " + obj.getClass().getName());
@@ -166,12 +166,12 @@ public class RefresherTest extends TestCase {
                 public void putInGroup(final Serializable key, final String groupName, final Serializable value) {
                     throw new UnsupportedOperationException();
                 }
-                public void putSafe(final Serializable key, final Serializable obj) throws CacheException {
+                public void putSafe(final Serializable key, final Serializable obj) throws OXException {
                     if (!KEY.equals(key)) {
-                        throw new CacheException(CacheException.Code.CACHE_ERROR, key);
+                        throw CacheExceptionCode.CACHE_ERROR.create(key);
                     }
                     if (null != value) {
-                        throw new CacheException(CacheException.Code.FAILED_SAFE_PUT);
+                        throw CacheExceptionCode.FAILED_SAFE_PUT.create();
                     }
                     if (!(obj instanceof Condition || obj instanceof Integer)) {
                         fail("Wrong value: " + obj.getClass().getName());
@@ -185,9 +185,9 @@ public class RefresherTest extends TestCase {
 //                        this.value = null;
 //                    }
                 }
-                public void remove(final Serializable key) throws CacheException {
+                public void remove(final Serializable key) throws OXException {
                     if (!KEY.equals(key)) {
-                        throw new CacheException(CacheException.Code.CACHE_ERROR, key);
+                        throw CacheExceptionCode.CACHE_ERROR.create(key);
                     }
                     if (!(value instanceof Condition)) {
                         // Cache only removes normal object if it times out.
@@ -214,7 +214,7 @@ public class RefresherTest extends TestCase {
             public void loadConfiguration(final String cacheConfigFile) {
                 throw new UnsupportedOperationException();
             }
-            public void loadConfiguration(final InputStream inputStream) throws CacheException {
+            public void loadConfiguration(final InputStream inputStream) throws OXException {
                 throw new UnsupportedOperationException();
             }
             public void loadDefaultConfiguration() {
@@ -272,11 +272,11 @@ public class RefresherTest extends TestCase {
         public Serializable getKey() {
             return KEY;
         }
-        public Integer load() throws AbstractOXException {
+        public Integer load() throws OXException {
             try {
                 Thread.sleep(100);
             } catch (final InterruptedException e) {
-                throw new AbstractOXException(e);
+                throw new OXException(e);
             }
             return Integer.valueOf(1);
         }
@@ -284,7 +284,7 @@ public class RefresherTest extends TestCase {
 
     private static class Refreshed extends Refresher<Integer> {
         private Integer delegate;
-        private Refreshed() throws AbstractOXException {
+        private Refreshed() throws OXException {
             super(factory, KEY);
             delegate = refresh();
         }
@@ -296,7 +296,7 @@ public class RefresherTest extends TestCase {
                 } else {
                     throw new ClassCastException("tmp is an " + tmp.getClass().getName());
                 }
-            } catch (final AbstractOXException e) {
+            } catch (final OXException e) {
                 throw new RuntimeException(e.getMessage(), e);
             }
             return delegate.intValue();

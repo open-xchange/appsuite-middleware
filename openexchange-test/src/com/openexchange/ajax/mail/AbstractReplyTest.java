@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
@@ -62,7 +63,6 @@ import com.openexchange.ajax.mail.actions.ReplyAllResponse;
 import com.openexchange.ajax.mail.actions.ReplyRequest;
 import com.openexchange.ajax.mail.actions.ReplyResponse;
 import com.openexchange.test.ContactTestManager;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * {@link AbstractReplyTest} - test for the Reply/ReplyAll/Forward family of requests.
@@ -101,7 +101,7 @@ public abstract class AbstractReplyTest extends AbstractMailTest {
         return false;
     }
 
-    protected JSONObject getReplyEMail(TestMail testMail) throws AjaxException, IOException, SAXException, JSONException {
+    protected JSONObject getReplyEMail(TestMail testMail) throws OXException, IOException, SAXException, JSONException {
         ReplyRequest reply = new ReplyRequest(testMail.getFolder(), testMail.getId());
         reply.setFailOnError(true);
         client = getClient();
@@ -110,7 +110,7 @@ public abstract class AbstractReplyTest extends AbstractMailTest {
     }
     
 
-    protected JSONObject getReplyAllEMail(TestMail testMail) throws AjaxException, IOException, SAXException, JSONException {
+    protected JSONObject getReplyAllEMail(TestMail testMail) throws OXException, IOException, SAXException, JSONException {
         ReplyRequest reply = new ReplyAllRequest(testMail.getFolder(), testMail.getId());
         reply.setFailOnError(true);
         client = getClient();
@@ -118,7 +118,7 @@ public abstract class AbstractReplyTest extends AbstractMailTest {
         return (JSONObject) response.getData();
     }
     
-    protected JSONObject getForwardMail(TestMail testMail) throws AjaxException, IOException, SAXException, JSONException {
+    protected JSONObject getForwardMail(TestMail testMail) throws OXException, IOException, SAXException, JSONException {
         ReplyRequest reply = new ForwardRequest(testMail.getFolder(), testMail.getId());
         reply.setFailOnError(true);
         client = getClient();

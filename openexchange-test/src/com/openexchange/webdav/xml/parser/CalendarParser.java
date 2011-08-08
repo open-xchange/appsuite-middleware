@@ -45,11 +45,11 @@
 
 package com.openexchange.webdav.xml.parser;
 
+import com.openexchange.exception.OXException;
 import java.util.List;
 
 import org.jdom.Element;
 
-import com.openexchange.api.OXConflictException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.ExternalGroupParticipant;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -69,7 +69,7 @@ import com.openexchange.webdav.xml.fields.CalendarFields;
 
 public abstract class CalendarParser extends CommonParser {
 	
-	protected void parseElementCalendar(final CalendarObject calendarobject, final Element eProp) throws OXConflictException {
+	protected void parseElementCalendar(final CalendarObject calendarobject, final Element eProp) throws OXException {
     if (hasElement(eProp.getChild(CalendarFields.RECURRENCE_ID, XmlServlet.NS))) {
 		calendarobject.setRecurrenceID(getValueAsInt(eProp.getChild(CalendarFields.RECURRENCE_ID, XmlServlet.NS)));
 	}
@@ -133,7 +133,7 @@ public abstract class CalendarParser extends CommonParser {
 	parseElementCommon(calendarobject, eProp);
 	}
 	
-	protected int parseRecurrenceType(final String value) throws OXConflictException {
+	protected int parseRecurrenceType(final String value) throws OXException {
 		if (value.equals("none")) {
 			return CalendarObject.NONE;
 		} else if (value.equals("daily")) {
@@ -145,11 +145,11 @@ public abstract class CalendarParser extends CommonParser {
 		} else if (value.equals("yearly")) {
 			return CalendarObject.YEARLY;
 		} else {
-			throw new OXConflictException("unknown value in " + CalendarFields.RECURRENCE_TYPE + ": " + value);
+			throw OXException.general("unknown value in " + CalendarFields.RECURRENCE_TYPE + ": " + value);
 		}
 	}
 	
-	protected void parseElementParticipants(final CalendarObject calendarObj, final Element eParticipant) throws OXConflictException {
+	protected void parseElementParticipants(final CalendarObject calendarObj, final Element eParticipant) throws OXException {
 		if (eParticipant == null) {
 			return ;
 		}
@@ -190,7 +190,7 @@ public abstract class CalendarParser extends CommonParser {
 	}
 	
 	
-	private void parseElementUser(final Element e, final Participants participants) throws OXConflictException {
+	private void parseElementUser(final Element e, final Participants participants) throws OXException {
 		Participant participant = null;
 		
 		final String external = e.getAttributeValue("external", XmlServlet.NS);
@@ -213,7 +213,7 @@ public abstract class CalendarParser extends CommonParser {
 				} else if (confirm.equals("none")) {
 					userparticipant.setConfirm(CalendarObject.NONE);
 				} else {
-					throw new OXConflictException("unknown value in confirm attribute: " + confirm);
+					throw OXException.general("unknown value in confirm attribute: " + confirm);
 				}
 			}
 			

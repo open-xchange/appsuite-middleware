@@ -1,9 +1,10 @@
 package com.openexchange.webdav.action;
 
+import com.openexchange.exception.OXException;
 import javax.servlet.http.HttpServletResponse;
 
-import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 public class PutTest extends ActionTestCase {

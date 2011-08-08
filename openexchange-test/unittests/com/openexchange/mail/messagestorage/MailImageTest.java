@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.messagestorage;
 
+import com.openexchange.exception.OXException;
 import java.util.HashSet;
 import java.util.Set;
 import org.json.JSONArray;

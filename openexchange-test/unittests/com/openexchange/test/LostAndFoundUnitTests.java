@@ -49,14 +49,13 @@
 
 package com.openexchange.test;
 
+import com.openexchange.exception.OXException;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import com.openexchange.config.internal.ConfigurationImplTest;
 import com.openexchange.consistency.ConsistencyTest;
 import com.openexchange.contactcollector.ContactCollectorTest;
 import com.openexchange.contactcollector.OrderByTest;
-import com.openexchange.exceptions.ComponentRegistryTest;
-import com.openexchange.exceptions.ExceptionsTest;
 import com.openexchange.groupware.AppointmentAttachmentTest;
 import com.openexchange.groupware.AppointmentDeleteNoCommit;
 import com.openexchange.groupware.CalendarDeleteTest;
@@ -108,8 +107,6 @@ public class LostAndFoundUnitTests {
         tests.addTestSuite(CalendarDeleteTest.class);
         tests.addTestSuite(AppointmentDeleteNoCommit.class);
         tests.addTestSuite(AppointmentAttachmentTest.class);
-        tests.addTestSuite(ExceptionsTest.class);
-        tests.addTestSuite(ComponentRegistryTest.class);
         tests.addTestSuite(OrderByTest.class);
         tests.addTestSuite(ContactCollectorTest.class);
         tests.addTestSuite(ConsistencyTest.class);

@@ -128,7 +128,7 @@ public class ReplayWebdavRequest implements WebdavRequest{
 	}
 
 	@Override
-    public IfHeader getIfHeader() throws IfHeaderParseException {
+    public IfHeader getIfHeader() throws OXException {
 		return delegate.getIfHeader();
 	}
 

@@ -63,6 +63,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
@@ -174,7 +175,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     private long startTime;
 
-    private ServletInputStream servletInputStream;
+    private ActionAwareServletInputStream servletInputStream;
 
     private String localAddr;
 
@@ -218,12 +219,12 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
     }
 
     /**
-     * Sets the servlet input stream
+     * Dump specified bytes into buffer.
      * 
-     * @param servletInputStream The servlet input stream
+     * @param bytes The bytes
      */
-    public void setServletInputStream(final ServletInputStream servletInputStream) {
-        this.servletInputStream = servletInputStream;
+    public void dumpToBuffer(final byte[] bytes) {
+        servletInputStream.dumpToBuffer(bytes);
     }
 
     /**
@@ -475,7 +476,12 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     @Override
     public Map<?, ?> getParameterMap() {
-        return Collections.unmodifiableMap(parameters);
+        final Map<String, String[]> retval = new HashMap<String, String[]>(parameters.size());
+        for (final Entry<String, List<String>> entry : parameters.entrySet()) {
+            final List<String> values = entry.getValue();
+            retval.put(entry.getKey(), values.toArray(new String[values.size()]));
+        }
+        return retval;
     }
 
     @Override
@@ -1125,8 +1131,22 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
         return ServletConfigLoader.getDefaultInstance().getContext(servletInstance.getClass().getCanonicalName(), servletPath);
     }
 
-    public void setStartTime(final long currentTimeMillis) {
-        this.startTime = currentTimeMillis;
+    /**
+     * Sets the start time.
+     * 
+     * @param startTime The start time
+     */
+    public void setStartTime(final long startTime) {
+        this.startTime = startTime;
+    }
+
+    /**
+     * Gets the start time for this request.
+     * 
+     * @return The start time
+     */
+    public long getStartTime() {
+        return startTime;
     }
 
 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.publish.tests;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
@@ -63,7 +64,6 @@ import com.openexchange.ajax.publish.actions.NewPublicationResponse;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.SimPublicationTargetDiscoveryService;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * {@link DeletePublicationTest}
@@ -76,7 +76,7 @@ public class DeletePublicationTest extends AbstractPublicationTest {
         super(name);
     }
 
-    public void testDeletingAFolderDeletesThePublication() throws AjaxException, IOException, SAXException, JSONException, InterruptedException {
+    public void testDeletingAFolderDeletesThePublication() throws OXException, IOException, SAXException, JSONException, InterruptedException {
         Contact contact = createDefaultContactFolderWithOneContact();
 
         // publish
@@ -99,7 +99,7 @@ public class DeletePublicationTest extends AbstractPublicationTest {
         assertTrue("Reading a publication of a deleted folder should not work", getResp.hasError());
     }
 
-    public void testDeletionOfPublicationShouldWork() throws AjaxException, IOException, SAXException, JSONException {
+    public void testDeletionOfPublicationShouldWork() throws OXException, IOException, SAXException, JSONException {
         Contact contact = createDefaultContactFolderWithOneContact();
 
         // publish
@@ -122,7 +122,7 @@ public class DeletePublicationTest extends AbstractPublicationTest {
         assertTrue("Reading deleted publication should produce exception", getResp.hasError());
     }
 
-    public void testDeletionOfNonExistingPublicationShouldFail() throws AjaxException, IOException, SAXException, JSONException {
+    public void testDeletionOfNonExistingPublicationShouldFail() throws OXException, IOException, SAXException, JSONException {
         // delete publication
         pubMgr.setFailOnError(false); // We'll provoke an error on purpose
         pubMgr.deleteAction(Arrays.asList(Integer.valueOf(Integer.MAX_VALUE)));

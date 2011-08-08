@@ -1,5 +1,6 @@
 package com.openexchange.webdav.protocol;
 
+import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -229,7 +230,7 @@ public class ResourceTest extends AbstractResourceTest{
 	}
 
 	@Override
-	protected WebdavResource createResource() throws WebdavProtocolException {
+	protected WebdavResource createResource() throws OXException {
 		WebdavResource resource = FACTORY.resolveResource(testCollection+"/testResource"+Math.random());
 		assertFalse(resource.exists());
 		resource.create();	
@@ -325,7 +326,7 @@ public class ResourceTest extends AbstractResourceTest{
 	
 	// TESTS FOR PROPERTIES
 
-	public Object creationDate() throws WebdavProtocolException {
+	public Object creationDate() throws OXException {
 		final Date now = new Date();
 		WebdavResource res = createResource();
 		assertEquals(Utils.convert(res.getCreationDate()), res.getProperty("DAV:", "creationdate").getValue());
@@ -344,7 +345,7 @@ public class ResourceTest extends AbstractResourceTest{
 		return null;
 	}
 
-	public Object displayName() throws WebdavProtocolException {
+	public Object displayName() throws OXException {
 		/*WebdavResource res = createResource();
 		String defaultDispName = res.getUrl().substring(res.getUrl().lastIndexOf("/")+1);
 		assertEquals(res.getDisplayName(), res.getProperty("DAV:", "displayname").getValue());
@@ -368,7 +369,7 @@ public class ResourceTest extends AbstractResourceTest{
 		return null; 
 	}
 
-	public Object contentLanguage() throws WebdavProtocolException {
+	public Object contentLanguage() throws OXException {
 		/*WebdavResource res = createResource();
 		String defaultLanguage = "en";
 		assertEquals(res.getLanguage(), res.getProperty("DAV:", "getcontentlanguage").getValue());
@@ -399,7 +400,7 @@ public class ResourceTest extends AbstractResourceTest{
 		return null;
 	}
 
-	public Object contentLength() throws WebdavProtocolException {
+	public Object contentLength() throws OXException {
 		WebdavResource res = createResource();
 		final Long defaultLength = 0l;
 		assertEquals(""+res.getLength(), res.getProperty("DAV:", "getcontentlength").getValue());
@@ -407,7 +408,7 @@ public class ResourceTest extends AbstractResourceTest{
 		
 		try {
 			res.setLength(1l);
-		} catch (final WebdavProtocolException e) {
+		} catch (final OXException e) {
 			e.printStackTrace();
 			fail(e.toString());
 		}
@@ -440,7 +441,7 @@ public class ResourceTest extends AbstractResourceTest{
 		return null;
 	}
 
-	public Object contentType() throws WebdavProtocolException {
+	public Object contentType() throws OXException {
 		WebdavResource res = createResource();
 		
 		res.setContentType("text/plain");
@@ -460,7 +461,7 @@ public class ResourceTest extends AbstractResourceTest{
 		return null;
 	}
 
-	public Object etag() throws WebdavProtocolException {
+	public Object etag() throws OXException {
 		WebdavResource res = createResource();
 		assertEquals(res.getETag(), res.getProperty("DAV:", "getetag").getValue());
 		
@@ -485,7 +486,7 @@ public class ResourceTest extends AbstractResourceTest{
 		
 		try {
 			res.putBody(new ByteArrayInputStream(bytes));
-		} catch (final WebdavProtocolException e) {
+		} catch (final OXException e) {
 			e.printStackTrace();
 			fail(e.toString());
 		}
@@ -496,7 +497,7 @@ public class ResourceTest extends AbstractResourceTest{
 		return null;
 	}
 
-	public Object lastModified() throws WebdavProtocolException {
+	public Object lastModified() throws OXException {
 		Date now = new Date();
 		final WebdavResource res = createResource();
 		assertEquals(Utils.convert(res.getLastModified()), res.getProperty("DAV:", "getlastmodified").getValue());
@@ -513,7 +514,7 @@ public class ResourceTest extends AbstractResourceTest{
 		return null;
 	}
 
-	public Object resourceType() throws WebdavProtocolException {
+	public Object resourceType() throws OXException {
 		final WebdavResource res = createResource();
 		assertNotNull(res.getProperty("DAV:", "resourcetype"));
 		assertNull(res.getProperty("DAV:", "resourcetype").getValue()); // Is set, but is empty
@@ -522,17 +523,17 @@ public class ResourceTest extends AbstractResourceTest{
 		return null;
 	}
 
-	public Object lockDiscovery() throws WebdavProtocolException {
+	public Object lockDiscovery() throws OXException {
 		// Tested in Lock Test
 		return null;
 	}
 
-	public Object supportedLock() throws WebdavProtocolException {
+	public Object supportedLock() throws OXException {
 		// Tested in Lock Test
 		return null;
 	}
 
-	public Object source() throws WebdavProtocolException {
+	public Object source() throws OXException {
 		/*WebdavResource res = createResource();
 		try {
 			res.setSource("http://localhost/theSecretSource");

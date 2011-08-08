@@ -48,6 +48,7 @@
  */
 package com.openexchange.test.fixtures;
 
+import com.openexchange.exception.OXException;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Comparator;
@@ -67,7 +68,7 @@ public class Fixture<T> {
         this.attributes = attributes;
     }
 
-    public boolean matches(final T other) throws FixtureException {
+    public boolean matches(final T other) throws OXException {
 
     	final Class<?> klass = entry.getClass();
 
@@ -105,7 +106,7 @@ public class Fixture<T> {
         return true;
     }
 
-    private Method getMethod(final String field, final Class<?> klass) throws FixtureException {
+    private Method getMethod(final String field, final Class<?> klass) throws OXException {
         for(Method m : klass.getMethods()) {
             if(m.getName().equalsIgnoreCase(IntrospectionTools.getterName(field)) && m.getParameterTypes().length == 0) {
                 return m;

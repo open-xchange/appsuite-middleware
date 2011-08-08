@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.vcard;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import junit.framework.AssertionFailedError;
 import com.openexchange.tools.versit.converter.ConverterException;

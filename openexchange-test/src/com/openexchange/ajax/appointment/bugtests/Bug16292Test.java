@@ -1,6 +1,7 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
@@ -32,7 +33,6 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
@@ -253,7 +253,7 @@ public class Bug16292Test extends AbstractAJAXSession {
         super.tearDown();
     }
 
-    private Appointment createAppointment() throws AjaxException, IOException, SAXException, JSONException {
+    private Appointment createAppointment() throws OXException, IOException, SAXException, JSONException {
         final Calendar cal = (Calendar) calendar.clone();
         final Appointment appointmentObj = new Appointment();
 
@@ -275,7 +275,7 @@ public class Bug16292Test extends AbstractAJAXSession {
         return appointmentObj;
     }
 
-    private Task createTask() throws AjaxException, IOException, SAXException, JSONException {
+    private Task createTask() throws OXException, IOException, SAXException, JSONException {
         final Calendar cal = (Calendar) calendar.clone();
         final Task taskObj = new Task();
 
@@ -300,7 +300,7 @@ public class Bug16292Test extends AbstractAJAXSession {
         return taskObj;
     }
 
-    private Contact createContact() throws AjaxException, IOException, SAXException, JSONException {
+    private Contact createContact() throws OXException, IOException, SAXException, JSONException {
         final Contact contactObj = new Contact();
 
         contactObj.setSurName("Meier");

@@ -3,6 +3,7 @@
  */
 package com.openexchange.ajax.framework;
 
+import com.openexchange.exception.OXException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;

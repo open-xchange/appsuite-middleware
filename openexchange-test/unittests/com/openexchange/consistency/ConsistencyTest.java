@@ -49,6 +49,7 @@
 
 package com.openexchange.consistency;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.I;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -59,7 +60,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import junit.framework.TestCase;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.InMemoryAttachmentBase;
@@ -131,7 +131,7 @@ public class ConsistencyTest extends TestCase {
 
     // Tests //
 
-    public void testListMissingFilesInContext() throws AbstractOXException {
+    public void testListMissingFilesInContext() throws OXException {
         final ConsistencyMBean consistency = getConsistencyTool();
         final List<String> missing = consistency.listMissingFilesInContext(ctx.getContextId());
         assertNotNull(missing);
@@ -143,25 +143,25 @@ public class ConsistencyTest extends TestCase {
         assertTrue(missing.toString(), expected.isEmpty());
     }
 
-    public void testListMissingFilesInFilestore() throws AbstractOXException {
+    public void testListMissingFilesInFilestore() throws OXException {
         final ConsistencyMBean consistency = getConsistencyTool();
         final Map<Integer, List<String>>  missing = consistency.listMissingFilesInFilestore(1);
         assertContexts(missing, MISSING, ctx, ctx2);
     }
 
-    public void testListMissingFilesInDatabase() throws AbstractOXException {
+    public void testListMissingFilesInDatabase() throws OXException {
         final ConsistencyMBean consistency = getConsistencyTool();
         final Map<Integer, List<String>>  missing = consistency.listMissingFilesInDatabase(1);
         assertContexts(missing, MISSING, ctx, ctx3);
     }
 
-    public void testListAllMissingFiles() throws AbstractOXException {
+    public void testListAllMissingFiles() throws OXException {
         final ConsistencyMBean consistency = getConsistencyTool();
         final Map<Integer, List<String>>  missing = consistency.listAllMissingFiles();
         assertContexts(missing, MISSING, ctx, ctx2, ctx3);
     }
 
-    public void testListUnassignedFilesInContext() throws AbstractOXException {
+    public void testListUnassignedFilesInContext() throws OXException {
         final ConsistencyMBean consistency = getConsistencyTool();
         final List<String> unassigned = consistency.listUnassignedFilesInContext(ctx.getContextId());
         assertNotNull(unassigned);
@@ -174,25 +174,25 @@ public class ConsistencyTest extends TestCase {
 
     }
 
-    public void testListUnassignedFilesInFilestore() throws AbstractOXException {
+    public void testListUnassignedFilesInFilestore() throws OXException {
         final ConsistencyMBean consistency = getConsistencyTool();
         final Map<Integer, List<String>>  unassigned = consistency.listUnassignedFilesInFilestore(1);
         assertContexts(unassigned, UNASSIGNED, ctx, ctx2);
     }
 
-    public void testListUnassignedFilesInDatabase() throws AbstractOXException {
+    public void testListUnassignedFilesInDatabase() throws OXException {
         final ConsistencyMBean consistency = getConsistencyTool();
         final Map<Integer, List<String>>  unassigned = consistency.listUnassignedFilesInDatabase(1);
         assertContexts(unassigned, UNASSIGNED, ctx, ctx3);
     }
 
-    public void testListAllUnassignedFiles() throws AbstractOXException {
+    public void testListAllUnassignedFiles() throws OXException {
         final ConsistencyMBean consistency = getConsistencyTool();
         final Map<Integer, List<String>>  unassigned = consistency.listAllUnassignedFiles();
         assertContexts(unassigned, UNASSIGNED, ctx, ctx2, ctx3);
     }
 
-    public void testCreateDummyFilesForInfoitems() throws AbstractOXException {
+    public void testCreateDummyFilesForInfoitems() throws OXException {
         final ConsistencyMBean consistency = getConsistencyTool();
         database.forgetChanges(ctx);
         consistency.repairFilesInContext(ctx.getContextId(), "missing_file_for_infoitem : create_dummy");
@@ -205,13 +205,13 @@ public class ConsistencyTest extends TestCase {
             assertEquals("text/plain", version.getFileMIMEType());
             //try {
                 assertNotNull(storage.getFile(version.getFilestoreLocation()));
-            /*} catch (final FileStorageException e) {
+            /*} catch (final OXException e) {
                 fail(e.toString());*/
             //}
         }
     }
 
-    public void testCreateDummyFilesForAttachments() throws AbstractOXException {
+    public void testCreateDummyFilesForAttachments() throws OXException {
         final ConsistencyMBean consistency = getConsistencyTool();
         attachments.forgetChanges(ctx);
         consistency.repairFilesInContext(ctx.getContextId(), "missing_file_for_attachment : create_dummy");
@@ -224,14 +224,14 @@ public class ConsistencyTest extends TestCase {
             assertEquals("text/plain", attachment.getFileMIMEType());
             //try {
                 assertNotNull(storage.getFile(attachment.getFileId()));
-            //} catch (final FileStorageException e) {
+            //} catch (final OXException e) {
               //  fail(e.toString());
             //}
         }
 
     }
 
-    public void testDeleteStaleInfoitems() throws AbstractOXException {
+    public void testDeleteStaleInfoitems() throws OXException {
         final ConsistencyMBean consistency = getConsistencyTool();
         database.forgetDeletions(ctx);
         consistency.repairFilesInContext(ctx.getContextId(), "missing_file_for_infoitem : delete");
@@ -247,7 +247,7 @@ public class ConsistencyTest extends TestCase {
 
     }
 
-    public void testDeleteStaleAttachments() throws AbstractOXException {
+    public void testDeleteStaleAttachments() throws OXException {
         final ConsistencyMBean consistency = getConsistencyTool();
         attachments.forgetDeletions(ctx);
         consistency.repairFilesInContext(ctx.getContextId(), "missing_file_for_attachment : delete");
@@ -262,7 +262,7 @@ public class ConsistencyTest extends TestCase {
         assertEquals(2, missing.size());
     }
 
-    public void testCreateInfoitemForUnassignedFile() throws AbstractOXException {
+    public void testCreateInfoitemForUnassignedFile() throws OXException {
         final ConsistencyMBean consistency = getConsistencyTool();
         database.forgetCreated(ctx);
         consistency.repairFilesInContext(1, "missing_entry_for_file : create_admin_infoitem");
@@ -286,7 +286,7 @@ public class ConsistencyTest extends TestCase {
         }
     }
 
-    public void testDeleteUnassignedFile() throws AbstractOXException {
+    public void testDeleteUnassignedFile() throws OXException {
         final ConsistencyMBean consistency = getConsistencyTool();
         storage.forgetDeleted(ctx);
         consistency.repairFilesInContext(1, "missing_entry_for_file : delete");

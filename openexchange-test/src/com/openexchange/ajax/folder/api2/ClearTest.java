@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.folder.api2;
 
+import com.openexchange.exception.OXException;
 import java.util.Date;
 import org.json.JSONArray;
 import com.openexchange.ajax.AppointmentTest;

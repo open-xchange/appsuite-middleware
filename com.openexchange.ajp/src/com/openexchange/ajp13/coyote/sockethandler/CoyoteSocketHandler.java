@@ -49,21 +49,19 @@
 
 package com.openexchange.ajp13.coyote.sockethandler;
 
-import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.concurrent.Future;
 import javax.management.NotCompliantMBeanException;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13ServiceRegistry;
-import com.openexchange.ajp13.coyote.ActionCode;
 import com.openexchange.ajp13.coyote.AjpProcessor;
 import com.openexchange.ajp13.coyote.Constants;
 import com.openexchange.ajp13.monitoring.AJPv13Monitors;
 import com.openexchange.ajp13.najp.AJPv13TaskMonitor;
-import com.openexchange.ajp13.najp.AJPv13TaskWatcher;
 import com.openexchange.ajp13.najp.IAJPv13SocketHandler;
+import com.openexchange.ajp13.watcher.AJPv13TaskWatcher;
 import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.threadpool.ThreadPools;
 
 /**
  * {@link CoyoteSocketHandler} - Handles accepted client sockets by {@link #handleSocket(Socket)} which hands-off to a dedicated AJP
@@ -72,42 +70,6 @@ import com.openexchange.threadpool.ThreadPools;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CoyoteSocketHandler implements IAJPv13SocketHandler {
-
-    private static final class AjpProcessorRunnable implements Runnable {
-
-        /**
-         * The client socket.
-         */
-        private final Socket client;
-
-        /**
-         * The AJP processor.
-         */
-        private final AjpProcessor ajpProcessor;
-
-        /**
-         * Initializes a new {@link AjpProcessorRunnable}.
-         * 
-         * @param client The accepted client socket
-         * @param ajpProcessor The AJP processor dedicated to the socket
-         */
-        protected AjpProcessorRunnable(final Socket client, final AjpProcessor ajpProcessor) {
-            this.client = client;
-            this.ajpProcessor = ajpProcessor;
-        }
-
-        @Override
-        public void run() {
-            try {
-                ajpProcessor.action(ActionCode.ACTION_START, null);
-                ajpProcessor.process(client);
-            } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
-            } finally {
-                ajpProcessor.action(ActionCode.ACTION_STOP, null);
-            }
-        }
-    }
 
     protected static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CoyoteSocketHandler.class));
@@ -265,7 +227,7 @@ public final class CoyoteSocketHandler implements IAJPv13SocketHandler {
      */
     @Override
     public void handleSocket(final Socket client) {
-        final AjpProcessor ajpProcessor = new AjpProcessor(Constants.MAX_PACKET_SIZE);
+        final AjpProcessor ajpProcessor = new AjpProcessor(Constants.MAX_PACKET_SIZE, listenerMonitor);
         if (readTimeout > 0) {
             ajpProcessor.setKeepAliveTimeout(readTimeout);
         }
@@ -276,7 +238,8 @@ public final class CoyoteSocketHandler implements IAJPv13SocketHandler {
                 // Eh...
             }
         }
-        /* final Future<Object> future = */pool.submit(ThreadPools.task(new AjpProcessorRunnable(client, ajpProcessor), "AJP-Processor-"), behavior);
+        final Future<Object> future = pool.submit(new CoyoteTask(client, ajpProcessor, listenerMonitor, watcher), behavior);
+        ajpProcessor.setControl(future);
     }
 
 }

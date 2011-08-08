@@ -49,6 +49,7 @@
 
 package com.openexchange.database;
 
+import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;

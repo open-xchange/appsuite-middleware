@@ -48,6 +48,7 @@
  */
 package com.openexchange.groupware.settings.extensions;
 
+import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

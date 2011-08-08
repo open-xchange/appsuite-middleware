@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mailaccount;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.EnumSet;
 import java.util.List;
@@ -63,9 +64,7 @@ import com.openexchange.ajax.mailaccount.actions.MailAccountListResponse;
 import com.openexchange.ajax.mailaccount.actions.MailAccountUpdateRequest;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.json.fields.GetSwitch;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * {@link MailAccountLifecycleTest}
@@ -92,7 +91,7 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
         super.tearDown();
     }
 
-    public void testLifeCycle() throws AjaxException, IOException, SAXException, JSONException, MailAccountException {
+    public void testLifeCycle() throws OXException, IOException, SAXException, JSONException, OXException {
 
         createMailAccount();
         readByGet();
@@ -106,7 +105,7 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
 
     }
 
-    private void updateMailAccount() throws AjaxException, IOException, JSONException {
+    private void updateMailAccount() throws OXException, IOException, JSONException {
         mailAccountDescription.setName("Other Name");
         mailAccountDescription.setLogin("Other Login");
         mailAccountDescription.setPassword("New Password");
@@ -124,7 +123,7 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
         // *shrugs* don't need the response
     }
 
-    private void readByList() throws AjaxException, IOException, JSONException, MailAccountException {
+    private void readByList() throws OXException, IOException, JSONException, OXException {
 
         final MailAccountListResponse response = getClient().execute(
             new MailAccountListRequest(new int[] { mailAccountDescription.getId() }, allFields()));
@@ -143,7 +142,7 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
         assertTrue("Did not find mail account in response", found);
     }
 
-    private void readByAll() throws AjaxException, IOException, JSONException, MailAccountException {
+    private void readByAll() throws OXException, IOException, JSONException, OXException {
         final int[] fields = allFields();
         final MailAccountAllResponse response = getClient().execute(new MailAccountAllRequest(fields));
 
@@ -169,7 +168,7 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
         return fields;
     }
 
-    private void readByGet() throws AjaxException, IOException, JSONException, MailAccountException {
+    private void readByGet() throws OXException, IOException, JSONException, OXException {
         final MailAccountGetRequest request = new MailAccountGetRequest(mailAccountDescription.getId());
         final MailAccountGetResponse response = getClient().execute(request);
 
@@ -179,7 +178,7 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
 
     }
 
-    private void compare(final MailAccountDescription expectedAcc, final MailAccountDescription actualAcc) throws MailAccountException {
+    private void compare(final MailAccountDescription expectedAcc, final MailAccountDescription actualAcc) throws OXException {
         final GetSwitch expectedSwitch = new GetSwitch(expectedAcc);
         final GetSwitch actualSwitch = new GetSwitch(actualAcc);
 

@@ -1,23 +1,18 @@
 package com.openexchange.groupware.update;
 
-
+import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.openexchange.api2.OXException;
-import com.openexchange.database.DBPoolingException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.impl.AttachmentBaseImpl;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
-import com.openexchange.groupware.filestore.FilestoreException;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.update.tasks.ClearLeftoverAttachmentsUpdateTask;
 import com.openexchange.tools.file.FileStorage;
-import com.openexchange.tools.file.external.FileStorageException;
 
 public class ClearLeftoverAttachmentsTest extends UpdateTest {
     private AttachmentBase attachmentBase;
@@ -46,7 +41,7 @@ public class ClearLeftoverAttachmentsTest extends UpdateTest {
         super.tearDown();
     }
 
-    public void testFixSchema() throws AbstractOXException, SQLException {
+    public void testFixSchema() throws OXException, SQLException {
         createAttachments();
         resetSequenceCounter();
         new ClearLeftoverAttachmentsUpdateTask().perform(schema, existing_ctx_id);
@@ -54,7 +49,7 @@ public class ClearLeftoverAttachmentsTest extends UpdateTest {
         assertRemovedFiles();
     }
 
-    public void testRunMultipleTimesNonDestructively() throws AbstractOXException, SQLException {
+    public void testRunMultipleTimesNonDestructively() throws OXException, SQLException {
         createAttachments();
         resetSequenceCounter();
         new ClearLeftoverAttachmentsUpdateTask().perform(schema, existing_ctx_id);
@@ -63,7 +58,7 @@ public class ClearLeftoverAttachmentsTest extends UpdateTest {
         new ClearLeftoverAttachmentsUpdateTask().perform(schema, existing_ctx_id);
     }
 
-    public void testIgnoreMissingFiles() throws AbstractOXException, SQLException {
+    public void testIgnoreMissingFiles() throws OXException, SQLException {
         createAttachments();
         resetSequenceCounter();
         removeSomeFiles();
@@ -103,27 +98,27 @@ public class ClearLeftoverAttachmentsTest extends UpdateTest {
         attachments.add(copy);
     }
 
-    private void resetSequenceCounter() throws SQLException, DBPoolingException {
+    private void resetSequenceCounter() throws SQLException, OXException {
         exec("UPDATE sequence_attachment SET id = ? WHERE cid = ?",attachments.get(OFFSET).getId(), existing_ctx_id);
     }
 
-    private void removeSomeFiles() throws FileStorageException, FilestoreException {
+    private void removeSomeFiles() throws OXException, OXException {
         final FileStorage fs = FileStorage.getInstance(FilestoreStorage.createURI(ctx));
         fs.deleteFile(attachments.get(OFFSET+2).getFileId());
         fs.deleteFile(attachments.get(OFFSET+3).getFileId());
     }
 
-    private void assertNoLeftoversInDatabase() throws SQLException, DBPoolingException {
+    private void assertNoLeftoversInDatabase() throws SQLException, OXException {
         assertNoResults("SELECT 1 FROM prg_attachment JOIN sequence_attachment ON prg_attachment.cid = sequence_attachment.cid WHERE prg_attachment.id > sequence_attachment.id AND prg_attachment.cid = ?",existing_ctx_id);              
     }
 
-    private void assertRemovedFiles() throws FileStorageException, FilestoreException {
+    private void assertRemovedFiles() throws OXException, OXException {
         final FileStorage fs = FileStorage.getInstance(FilestoreStorage.createURI(ctx));
         for(int i = OFFSET+1; i < attachments.size(); i++) {
             try {
                 fs.getFile(attachments.get(i).getFileId());
                 assertFalse("File of attachment "+i+" was not deleted",true);
-            } catch (final FileStorageException x) {
+            } catch (final OXException x) {
                 assertTrue(true); // Specific enough?
             }
         }

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail.filter;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AJAXClient.User;

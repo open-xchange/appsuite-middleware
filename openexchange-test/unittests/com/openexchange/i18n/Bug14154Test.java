@@ -49,6 +49,7 @@
 
 package com.openexchange.i18n;
 
+import com.openexchange.exception.OXException;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

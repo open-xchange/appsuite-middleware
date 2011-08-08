@@ -49,9 +49,10 @@
 
 package com.openexchange.mail;
 
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -168,7 +169,7 @@ public final class MailMessageTest extends AbstractMailTest {
 		}
 	}
 
-	private void checkSubfolders(final MailFolder parent, final MailAccess<?, ?> mailConnection) throws MailException {
+	private void checkSubfolders(final MailFolder parent, final MailAccess<?, ?> mailConnection) throws OXException {
 		checkMessages(parent, mailConnection);
 		final MailFolder[] subfolders = mailConnection.getFolderStorage().getSubfolders(parent.getFullname(), true);
 		assertTrue("Has Subfolders is wrong!", parent.hasSubfolders() ? subfolders != null && subfolders.length > 0
@@ -185,9 +186,9 @@ public final class MailMessageTest extends AbstractMailTest {
 		try {
 			msgs = mailConnection.getMessageStorage().searchMessages(folder.getFullname(), null,
 					MailSortField.RECEIVED_DATE, OrderDirection.DESC, null, COMMON_LIST_FIELDS);
-		} catch (final MailException e) {
+		} catch (final OXException e) {
 			assertTrue("Error during fetching messages: " + e.getMessage(), e.getCategory().equals(
-					Category.PERMISSION));
+					Category.CATEGORY_PERMISSION_DENIED));
 			return;
 		}
 		if (msgs == null) {

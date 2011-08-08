@@ -48,7 +48,7 @@
  */
 package com.openexchange.test.fixtures.transformators;
 
-import com.openexchange.test.fixtures.FixtureException;
+import com.openexchange.exception.OXException;
 import com.openexchange.test.fixtures.FixtureLoader;
 import com.openexchange.test.fixtures.SimpleCredentials;
 
@@ -64,7 +64,7 @@ public class UserIdTransformator extends CredentialsTransformator {
 	}
 
 	@Override
-    public Object transform(final String value) throws FixtureException {
+    public Object transform(final String value) throws OXException {
 		return ((SimpleCredentials)super.transform(value)).getUserId();
     }
 }

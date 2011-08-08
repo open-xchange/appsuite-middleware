@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.conversion;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.TimeZone;
 
@@ -56,7 +57,6 @@ import org.json.JSONException;
 import org.xml.sax.SAXException;
 
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * {@link AbstractConversionTest}
@@ -77,25 +77,25 @@ public abstract class AbstractConversionTest extends AbstractAJAXSession {
 	/**
 	 * @return the private contact folder of the user.
 	 */
-	protected int getPrivateContactFolder() throws AjaxException, IOException, SAXException, JSONException {
+	protected int getPrivateContactFolder() throws OXException, IOException, SAXException, JSONException {
 		return getClient().getValues().getPrivateContactFolder();
 	}
 
 	/**
 	 * @return the private calendar folder of the user.
 	 */
-	protected int getPrivateCalendarFolder() throws AjaxException, IOException, SAXException, JSONException {
+	protected int getPrivateCalendarFolder() throws OXException, IOException, SAXException, JSONException {
 		return getClient().getValues().getPrivateAppointmentFolder();
 	}
 
 	/**
 	 * @return the private task folder of the user.
 	 */
-	protected int getPrivateTaskFolder() throws AjaxException, IOException, SAXException, JSONException {
+	protected int getPrivateTaskFolder() throws OXException, IOException, SAXException, JSONException {
 		return getClient().getValues().getPrivateTaskFolder();
 	}
 
-	protected TimeZone getTimeZone() throws AjaxException, IOException, SAXException, JSONException {
+	protected TimeZone getTimeZone() throws OXException, IOException, SAXException, JSONException {
 		return getClient().getValues().getTimeZone();
 	}
 

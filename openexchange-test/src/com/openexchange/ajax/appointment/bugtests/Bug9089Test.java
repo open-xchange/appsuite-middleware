@@ -6,10 +6,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajax.AppointmentTest;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.FolderTest;
 
 public class Bug9089Test extends AppointmentTest {
@@ -57,7 +57,7 @@ public class Bug9089Test extends AppointmentTest {
 		try {
 			updateAppointment(getWebConversation(), appointmentObj, objectId, newFolderId, modified, timeZone, getHostName(), getSessionId());
 			fail("exception expected");
-		} catch (final TestException exc) {
+		} catch (final OXException exc) {
 			assertTrue(true);
 		}
 		

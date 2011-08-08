@@ -58,12 +58,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Server;
+import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.coyote.sockethandler.CoyoteSocketHandler;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
 import com.openexchange.ajp13.monitoring.AJPv13Monitors;
 import com.openexchange.ajp13.najp.threadpool.AJPv13SocketHandler;
 import com.openexchange.ajp13.servlet.ServletConfigLoader;
+import com.openexchange.config.ConfigurationService;
 
 /**
  * {@link AJPv13ServerImpl} - The AJP server which accepts incoming socket connections and delegates its processing to a dedicated AJP
@@ -93,7 +95,9 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
         super();
         running = new AtomicBoolean();
 
-        final boolean coyote = true;
+        final ConfigurationService service = AJPv13ServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+        boolean coyote = null == service ? false : service.getBoolProperty("AJP_COYOTE_SOCKET_HANDLER", false);
+        coyote = true;
         if (coyote) {
             socketHandler = new CoyoteSocketHandler();
         } else {

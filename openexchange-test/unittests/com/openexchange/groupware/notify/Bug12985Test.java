@@ -49,18 +49,17 @@
 
 package com.openexchange.groupware.notify;
 
+import com.openexchange.exception.OXException;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.groupware.container.Participant;
-import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.tasks.Task;
 
 
 public class Bug12985Test extends ParticipantNotifyTest {
 
     // Bug 12985
-    public void testShouldNotNotifyOnAlarmChanges() throws LdapException, UserException {
+    public void testShouldNotNotifyOnAlarmChanges() throws OXException, OXException {
         final Participant[] participants = getParticipants(U(2,4,10),G(),S(), R());
         final Task oldTask = getTask(participants);
         final Task newTask = getTask(participants);

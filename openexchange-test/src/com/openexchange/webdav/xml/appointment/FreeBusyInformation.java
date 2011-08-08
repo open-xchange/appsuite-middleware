@@ -49,6 +49,7 @@
 
 package com.openexchange.webdav.xml.appointment;
 
+import com.openexchange.exception.OXException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;

@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware;
 
+import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -58,15 +59,12 @@ import java.util.List;
 import java.util.Properties;
 import java.util.TimeZone;
 import junit.framework.TestCase;
-import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.api2.OXException;
 import com.openexchange.calendar.CalendarSql;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.event.impl.EventConfigImpl;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.Constants;
-import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.calendar.TimeTools;
@@ -1529,7 +1527,7 @@ public class CalendarRecurringTests extends TestCase {
         try {
             new CalendarCollection().calculateRecurring(cdao, 0, 0, 0);
             fail("An error must occur at this time. Fix me!");
-        } catch(final OXCalendarException oxce) {
+        } catch(final OXException oxce) {
             check_if_error_is_thrown = true;
         }
 
@@ -1604,9 +1602,9 @@ public class CalendarRecurringTests extends TestCase {
             try {
                 csql.updateAppointmentObject(test_move_folder, fid, new Date());
                 fail("An exception should not be moved to a different folder");
-            } catch(final OXCalendarException oxca) {
+            } catch(final OXException oxca) {
                 // this is what we want
-                assertEquals("Check correct error code", 66, oxca.getDetailNumber());
+                assertEquals("Check correct error code", 66, oxca.getCode());
             }
 
             final CalendarDataObject test_private_flag = new CalendarDataObject();
@@ -1618,9 +1616,9 @@ public class CalendarRecurringTests extends TestCase {
             try {
                 csql.updateAppointmentObject(test_private_flag, fid, new Date());
                 fail("An exception should not be flagged as private");
-            } catch(final OXCalendarException oxca) {
+            } catch(final OXException oxca) {
                 // this is what we want
-                assertEquals("Check correct error code", 69, oxca.getDetailNumber());
+                assertEquals("Check correct error code", 69, oxca.getCode());
             }
 
         } finally {
@@ -1724,7 +1722,7 @@ public class CalendarRecurringTests extends TestCase {
         try {
             csql.getObjectById(exception_object_id, folder_id);
             fail("The exception still exists but should be deleted!");
-        } catch(final OXObjectNotFoundException e) {
+        } catch(final OXException e) {
         }
 
         assertTrue("Change exception has not been removed in database", test_dao.getChangeException() == null || test_dao.getChangeException().length == 0);
@@ -1827,7 +1825,7 @@ public class CalendarRecurringTests extends TestCase {
         try {
             csql.getObjectById(object_id, folder_id);
             fail("The recurring appointment still exists but should have been deleted!");
-        } catch(final OXObjectNotFoundException e) {
+        } catch(final OXException e) {
         }
     }
 
@@ -1924,7 +1922,7 @@ public class CalendarRecurringTests extends TestCase {
         try {
             final CalendarDataObject check_object = csql.getObjectById(object_id, folder_id);
             fail("The recurring appointment still exists but should have been deleted! " + check_object.getObjectID());
-        } catch(final OXObjectNotFoundException exc) {
+        } catch(final OXException exc) {
         }
 
 

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.kata;
 
+import com.openexchange.exception.OXException;
 import static junit.framework.Assert.fail;
 import java.io.IOException;
 import java.util.TimeZone;
@@ -58,7 +59,6 @@ import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.tools.servlet.AjaxException;
 
 
 /**
@@ -98,14 +98,14 @@ public abstract class AbstractStep implements Step{
         return expectedError != null;
     }
     
-    protected TimeZone getTimeZone() throws AjaxException, IOException, SAXException, JSONException {
+    protected TimeZone getTimeZone() throws OXException, IOException, SAXException, JSONException {
         return client.getValues().getTimeZone();
     }
     
     protected <T extends AbstractAJAXResponse> T execute(final AJAXRequest<T> request) {
         try {
             return client.execute(request);
-        } catch (AjaxException e) {
+        } catch (OXException e) {
             fail("AjaxException during task creation: " + e.getLocalizedMessage());
         } catch (IOException e) {
             fail("IOException during task creation: " + e.getLocalizedMessage());

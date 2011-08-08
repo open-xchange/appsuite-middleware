@@ -49,11 +49,11 @@
 
 package com.openexchange.ajax.mail;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.UserValues;
-import com.openexchange.tools.servlet.AjaxException;
 
 
 /**
@@ -83,7 +83,7 @@ public class MoveMailTest extends AbstractMailTest {
         super.tearDown();
     }
     
-    public void testShouldMoveFromSentToDrafts() throws AjaxException, IOException, SAXException, JSONException{
+    public void testShouldMoveFromSentToDrafts() throws OXException, IOException, SAXException, JSONException{
         MailTestManager manager = new MailTestManager(client, false);
         
         String mail = values.getSendAddress();
@@ -106,7 +106,7 @@ public class MoveMailTest extends AbstractMailTest {
         assertTrue("Should produce errors when trying to get moved e-mail from original place", manager.getLastResponse().hasError() );        
     }
     
-    public void testShouldNotMoveToNonExistentFolder() throws AjaxException, IOException, SAXException, JSONException{
+    public void testShouldNotMoveToNonExistentFolder() throws OXException, IOException, SAXException, JSONException{
         MailTestManager manager = new MailTestManager(client, false);
 
         String mail = values.getSendAddress();

@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.calendar;
 
+import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -59,7 +60,6 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.request.AppointmentRequest;
 import com.openexchange.api2.AppointmentSQLInterface;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
@@ -272,7 +272,7 @@ public class SlowCalendarTests extends AbstractCalendarTest {
 
     }
 
-    private void invalidatePattern(final CalendarDataObject cdao) throws DBPoolingException {
+    private void invalidatePattern(final CalendarDataObject cdao) throws OXException {
         Connection con = null;
         PreparedStatement pstmt = null;
 

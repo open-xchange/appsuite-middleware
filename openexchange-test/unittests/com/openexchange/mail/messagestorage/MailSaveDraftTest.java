@@ -49,11 +49,11 @@
 
 package com.openexchange.mail.messagestorage;
 
+import com.openexchange.exception.OXException;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.mail.AbstractMailTest;
-import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -125,7 +125,7 @@ public final class MailSaveDraftTest extends AbstractMailTest {
                 MailMessage tmp = null;
                 try {
                     tmp = mailAccess.getMessageStorage().getMessage(draftFullname, prevUid, false);
-                } catch (final MailException e) {
+                } catch (final OXException e) {
                     prevUid = null;
                     exc = e;
                 }

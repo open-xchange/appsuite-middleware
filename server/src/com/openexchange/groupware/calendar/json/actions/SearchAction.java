@@ -49,10 +49,11 @@
 
 package com.openexchange.groupware.calendar.json.actions;
 
-import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.TimeZone;
-import org.json.JSONArray;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -60,7 +61,6 @@ import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -95,12 +95,6 @@ public final class SearchAction extends AbstractAppointmentAction {
 
     @Override
     protected AJAXRequestResult perform(final AppointmentAJAXRequest req) throws OXException, JSONException {
-        final TimeZone timeZone;
-        {
-            final String timeZoneId = req.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-            timeZone = null == timeZoneId ? req.getTimeZone() : getTimeZone(timeZoneId);
-        }
-        final int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
         Date timestamp = new Date(0);
 
         final JSONObject jData = req.getData();
@@ -122,12 +116,11 @@ public final class SearchAction extends AbstractAppointmentAction {
         final AppointmentSQLInterface appointmentsql = getService().createAppointmentSql(req.getSession());
         final SearchIterator<Appointment> it = appointmentsql.searchAppointments(searchObj, orderBy, orderDir, _appointmentFields);
 
-        final JSONArray jsonResponseArray = new JSONArray();
 
         try {
             final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
-            final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone);
-
+            final Map<String, List<Appointment>> appointmentMap = new HashMap<String, List<Appointment>>(1);
+            final List<Appointment> appointmentList = new ArrayList<Appointment>();
             while (it.hasNext()) {
                 final Appointment appointment = it.next();
 
@@ -139,19 +132,19 @@ public final class SearchAction extends AbstractAppointmentAction {
                         recuResults = recColl.calculateFirstRecurring(appointment);
                     } catch (final OXException x) {
                         LOG.error("Can not calculate recurrence for appointment " + appointment.getObjectID() + " in context " + req.getSession().getContextId(), x);
-                        appointmentwriter.writeArray(appointment, columns, jsonResponseArray);
+                        appointmentList.add(appointment);
                     }
                     if (recuResults != null && recuResults.size() != 1) {
                         LOG.warn("Can not load first recurring appointment from appointment object " + appointment.getObjectID());
-                        appointmentwriter.writeArray(appointment, columns, jsonResponseArray);
+                        appointmentList.add(appointment);
                     } else if (recuResults != null) {
                         appointment.setStartDate(new Date(recuResults.getRecurringResult(0).getStart()));
                         appointment.setEndDate(new Date(recuResults.getRecurringResult(0).getEnd()));
 
-                        appointmentwriter.writeArray(appointment, columns, jsonResponseArray);
+                        appointmentList.add(appointment);
                     }
                 } else {
-                    appointmentwriter.writeArray(appointment, columns, jsonResponseArray);
+                    appointmentList.add(appointment);
                 }
 
                 if (appointment.getLastModified() != null && timestamp.before(appointment.getLastModified())) {
@@ -159,7 +152,8 @@ public final class SearchAction extends AbstractAppointmentAction {
                 }
             }
 
-            return new AJAXRequestResult(jsonResponseArray, timestamp, "json");
+            appointmentMap.put("appointments", appointmentList);
+            return new AJAXRequestResult(appointmentMap, timestamp, "appointments");
         } finally {
             if (it != null) {
                 it.close();

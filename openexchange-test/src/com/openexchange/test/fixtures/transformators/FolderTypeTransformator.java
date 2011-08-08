@@ -49,8 +49,8 @@
 
 package com.openexchange.test.fixtures.transformators;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.test.fixtures.FixtureException;
 
 
 /**
@@ -62,7 +62,7 @@ import com.openexchange.test.fixtures.FixtureException;
 public class FolderTypeTransformator implements Transformator {
 
     
-    public Object transform(String value) throws FixtureException {
+    public Object transform(String value) throws OXException {
         if("public".equalsIgnoreCase(value)) {
             return FolderObject.PUBLIC;
         }

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
+import com.openexchange.exception.OXException;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 

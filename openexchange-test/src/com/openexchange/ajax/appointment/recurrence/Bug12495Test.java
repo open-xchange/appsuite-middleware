@@ -22,12 +22,10 @@ import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.ajax.framework.AJAXClient.User;
-import com.openexchange.api2.OXException;
-import com.openexchange.configuration.ConfigurationException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * User 1 creates an appointment series, user 2 deletes one exception, check whether
@@ -72,7 +70,7 @@ public class Bug12495Test extends AbstractAJAXSession {
 	 * this test checks whether it is included in a GetRequest and a ListRequest.
 	 * 
 	 */
-	@Test public void testShouldNotLoseRecurrenceDatePositionWhenOtherUserDeletesOneOccurrence() throws AjaxException, IOException, SAXException, JSONException, ConfigurationException, OXException{
+	@Test public void testShouldNotLoseRecurrenceDatePositionWhenOtherUserDeletesOneOccurrence() throws OXException, IOException, SAXException, JSONException, OXException, OXException{
 		//setup
 		AJAXClient client1 = getClient();
 		AJAXClient client2 = new AJAXClient(User.User2);

@@ -66,11 +66,6 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class AppointmentAJAXRequest {
 
-    /**
-     * Constant for not-found number.
-     */
-    public static final int NOT_FOUND = -9999;
-
     private final ServerSession session;
 
     private final AJAXRequestData request;
@@ -168,6 +163,11 @@ public final class AppointmentAJAXRequest {
         return request.getParameter(name);
     }
 
+    /**
+     * Constant for not-found number.
+     */
+    public static final int NOT_FOUND = -9999;
+    
     /**
      * Gets optional <code>int</code> parameter.
      *

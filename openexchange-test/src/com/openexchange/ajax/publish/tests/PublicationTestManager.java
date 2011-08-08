@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.publish.tests;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.util.Collection;
@@ -75,10 +76,7 @@ import com.openexchange.ajax.publish.actions.UpdatePublicationRequest;
 import com.openexchange.ajax.publish.actions.UpdatePublicationResponse;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.publish.Publication;
-import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
-import com.openexchange.publish.json.PublicationJSONException;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  *
@@ -143,7 +141,7 @@ public class PublicationTestManager {
             setClient(client);
         }
 
-        public Publication newAction(Publication publication) throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException {
+        public Publication newAction(Publication publication) throws OXException, IOException, SAXException, JSONException, OXException, OXException {
             NewPublicationRequest newReq = new NewPublicationRequest(publication);
             newReq.setFailOnError(getFailOnError());
             NewPublicationResponse newResp = getClient().execute(newReq);
@@ -155,7 +153,7 @@ public class PublicationTestManager {
             return publication;
         }
 
-        public Publication getAction(int id) throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException {
+        public Publication getAction(int id) throws OXException, IOException, SAXException, JSONException, OXException, OXException {
             GetPublicationRequest getReq = new GetPublicationRequest(id);
             getReq.setFailOnError(getFailOnError());
             GetPublicationResponse getResp = getClient().execute(getReq);
@@ -163,7 +161,7 @@ public class PublicationTestManager {
             return getResp.getPublication(getPublicationTargetDiscoveryService());
         }
 
-        public void deleteAction(Publication publication) throws AjaxException, IOException, SAXException, JSONException {
+        public void deleteAction(Publication publication) throws OXException, IOException, SAXException, JSONException {
             int id = publication.getId();
             DeletePublicationRequest delReq = new DeletePublicationRequest(id);
             delReq.setFailOnError(getFailOnError());
@@ -172,7 +170,7 @@ public class PublicationTestManager {
             lastResponse = delResp;
         }
 
-        public void deleteAction(Collection<Integer> ids) throws AjaxException, IOException, SAXException, JSONException {
+        public void deleteAction(Collection<Integer> ids) throws OXException, IOException, SAXException, JSONException {
             DeletePublicationRequest delReq = new DeletePublicationRequest(ids);
             delReq.setFailOnError(getFailOnError());
             DeletePublicationResponse delResp = getClient().execute(delReq);
@@ -180,7 +178,7 @@ public class PublicationTestManager {
             lastResponse = delResp;
         }
 
-        public List<JSONArray> listAction(List<Integer> ids, List<String> columns) throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException {
+        public List<JSONArray> listAction(List<Integer> ids, List<String> columns) throws OXException, IOException, SAXException, JSONException, OXException, OXException {
             ListPublicationsRequest listReq = new ListPublicationsRequest(ids,columns);
             listReq.setFailOnError(getFailOnError());
             ListPublicationsResponse listResp = getClient().execute(listReq);
@@ -188,7 +186,7 @@ public class PublicationTestManager {
             return listResp.getList();
         }
         
-        public List<JSONArray> listAction(List<Integer> ids, List<String> columns, Map<String,List<String>> dynamicColumns) throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException {
+        public List<JSONArray> listAction(List<Integer> ids, List<String> columns, Map<String,List<String>> dynamicColumns) throws OXException, IOException, SAXException, JSONException, OXException, OXException {
             ListPublicationsRequest listReq = new ListPublicationsRequest(ids,columns,dynamicColumns);
             listReq.setFailOnError(getFailOnError());
             ListPublicationsResponse listResp = getClient().execute(listReq);
@@ -196,7 +194,7 @@ public class PublicationTestManager {
             return listResp.getList();
         }
         
-        public List<JSONArray> allAction(String folder, int id, String entityModule, List<String> columns) throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException{
+        public List<JSONArray> allAction(String folder, int id, String entityModule, List<String> columns) throws OXException, IOException, SAXException, JSONException, OXException, OXException{
             AllPublicationsRequest allReq = new AllPublicationsRequest(folder, id, entityModule, columns);
             allReq.setFailOnError(getFailOnError());
             AllPublicationsResponse allResp = getClient().execute(allReq);
@@ -204,7 +202,7 @@ public class PublicationTestManager {
             return allResp.getAll();
         }
         
-        public List<JSONArray> allAction(String entityModule, int id, List<String> columns) throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException{
+        public List<JSONArray> allAction(String entityModule, int id, List<String> columns) throws OXException, IOException, SAXException, JSONException, OXException, OXException{
             AllPublicationsRequest allReq = new AllPublicationsRequest(id, entityModule, columns);
             allReq.setFailOnError(getFailOnError());
             AllPublicationsResponse allResp = getClient().execute(allReq);
@@ -212,7 +210,7 @@ public class PublicationTestManager {
             return allResp.getAll();
         }
         
-        public List<JSONArray> allAction(List<String> columns) throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException{
+        public List<JSONArray> allAction(List<String> columns) throws OXException, IOException, SAXException, JSONException, OXException, OXException{
             AllPublicationsRequest allReq = new AllPublicationsRequest(columns);
             allReq.setFailOnError(getFailOnError());
             AllPublicationsResponse allResp = getClient().execute(allReq);
@@ -221,7 +219,7 @@ public class PublicationTestManager {
         }
         
         
-        public List<JSONArray> allAction(String folder, int id, String entityModule, List<String> columns, Map<String,List<String>> dynamicColumns) throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException{
+        public List<JSONArray> allAction(String folder, int id, String entityModule, List<String> columns, Map<String,List<String>> dynamicColumns) throws OXException, IOException, SAXException, JSONException, OXException, OXException{
             AllPublicationsRequest allReq = new AllPublicationsRequest(folder, id, entityModule, columns, dynamicColumns);
             allReq.setFailOnError(getFailOnError());
             AllPublicationsResponse allResp = getClient().execute(allReq);
@@ -230,7 +228,7 @@ public class PublicationTestManager {
         }
 
 
-        public void updateAction(Publication publication) throws AjaxException, IOException, SAXException, JSONException {
+        public void updateAction(Publication publication) throws OXException, IOException, SAXException, JSONException {
             UpdatePublicationRequest updReq = new UpdatePublicationRequest(publication);
             updReq.setFailOnError(getFailOnError());
             UpdatePublicationResponse updResp = getClient().execute(updReq);
@@ -238,7 +236,7 @@ public class PublicationTestManager {
         }
 
         
-        public void cleanUp() throws AjaxException, IOException, SAXException, JSONException {
+        public void cleanUp() throws OXException, IOException, SAXException, JSONException {
             boolean failOnError2 = getFailOnError();
             setFailOnError(false);
             if(createdItems.size() > 0)

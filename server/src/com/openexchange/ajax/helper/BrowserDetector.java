@@ -146,6 +146,25 @@ public final class BrowserDetector {
     }
 
     /**
+     * Checks if specified instance is equal by: browser name, browser platform and version.
+     * 
+     * @param other The instance to compare with
+     * @return <code>true</code> if specified instance is equal by: browser name, browser platform and version; otherwise <code>false</code>
+     */
+    public boolean nearlyEquals(final BrowserDetector other) {
+        if (!browserName.equals(other.browserName)) {
+            return false;
+        }
+        if (!browserPlatform.equals(other.browserPlatform)) {
+            return false;
+        }
+        if (browserVersion != other.browserVersion) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * Whether or not CSS works in this browser.
      *
      * @return True if CSS works in this browser.

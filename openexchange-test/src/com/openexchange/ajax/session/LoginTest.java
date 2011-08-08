@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.session;
 
+import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;

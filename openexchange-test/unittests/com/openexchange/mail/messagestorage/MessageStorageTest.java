@@ -1,11 +1,11 @@
 package com.openexchange.mail.messagestorage;
 
+import com.openexchange.exception.OXException;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Set;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.mail.AbstractMailTest;
-import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.api.MailAccess;
@@ -214,9 +214,9 @@ public abstract class MessageStorageTest extends AbstractMailTest {
      * @param session
      * @param mailAccess
      * @return The name of the temporary folder which is created
-     * @throws MailException
+     * @throws OXException
      */
-    protected String createTemporaryFolder(final SessionObject session, final MailAccess<?, ?> mailAccess) throws MailException {
+    protected String createTemporaryFolder(final SessionObject session, final MailAccess<?, ?> mailAccess) throws OXException {
         return createTemporaryFolderAndGetFullname(session, mailAccess, "TemporaryFolder");
     }
     
@@ -227,9 +227,9 @@ public abstract class MessageStorageTest extends AbstractMailTest {
      * @param mailAccess
      * @param tempFolderName
      * @return
-     * @throws MailException
+     * @throws OXException
      */
-    protected String createTemporaryFolderAndGetFullname(final SessionObject session, final MailAccess<?, ?> mailAccess, final String tempFolderName) throws MailException {
+    protected String createTemporaryFolderAndGetFullname(final SessionObject session, final MailAccess<?, ?> mailAccess, final String tempFolderName) throws OXException {
         final String fullname;
         final MailFolder inbox = mailAccess.getFolderStorage().getFolder("INBOX");
         final String parentFullname;
@@ -253,7 +253,7 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         return fullname;
     }
 
-    protected MailAccess<?, ?> getMailAccess() throws MailException {
+    protected MailAccess<?, ?> getMailAccess() throws OXException {
         final SessionObject session = getSession();
 
         final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
@@ -531,7 +531,7 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         		tempFolderName).toString();
     }
 
-    private MailPermission getPermission(final SessionObject session) throws MailException {
+    private MailPermission getPermission(final SessionObject session) throws OXException {
         final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID)
         		.createNewMailPermission();
         p.setEntity(getUser());

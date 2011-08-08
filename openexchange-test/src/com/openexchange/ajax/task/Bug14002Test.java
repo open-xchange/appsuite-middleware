@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.task;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.TimeZone;
 import org.json.JSONException;
@@ -64,8 +65,6 @@ import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.ajax.task.actions.ListRequest;
 import com.openexchange.groupware.tasks.Create;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.tools.servlet.OXJSONException;
 
 /**
  * Tests percentage completed set to 0.
@@ -103,7 +102,7 @@ public class Bug14002Test extends AbstractTaskTest {
         super.tearDown();
     }
 
-    public void testPercentageComplete() throws AjaxException, IOException, SAXException, JSONException, OXJSONException {
+    public void testPercentageComplete() throws OXException, IOException, SAXException, JSONException, OXException {
         GetRequest request = new GetRequest(task.getParentFolderID(), task.getObjectID());
         GetResponse response = client.execute(request);
         Task toTest = response.getTask(tz);

@@ -49,10 +49,10 @@
 
 package com.openexchange.webdav.infostore.integration;
 
+import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.AbstractInfostoreTest;
 import com.openexchange.groupware.infostore.DocumentMetadata;
@@ -68,7 +68,6 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.webdav.protocol.TestWebdavFactoryBuilder;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.WebdavLock.Scope;
 import com.openexchange.webdav.protocol.WebdavLock.Type;
@@ -94,12 +93,12 @@ public class LockExpiryTest extends AbstractInfostoreTest {
     }
     
     @Override
-    public void tearDown() throws WebdavProtocolException {
+    public void tearDown() throws OXException {
         resolveFolder(testCollection).delete();
         factory.endRequest(200);
     }
     
-    public void testExpiredLocksOnInfoitemsHaveThemShowUpInUpdatesResponse() throws WebdavProtocolException, UnsupportedEncodingException, InterruptedException, AbstractOXException {
+    public void testExpiredLocksOnInfoitemsHaveThemShowUpInUpdatesResponse() throws OXException, UnsupportedEncodingException, InterruptedException, OXException {
         FolderCollection folderCollection = resolveFolder(testCollection);
         folderCollection.create();
         
@@ -146,11 +145,11 @@ public class LockExpiryTest extends AbstractInfostoreTest {
     }   
     
     
-    private FolderCollection resolveFolder(WebdavPath url) throws WebdavProtocolException {
+    private FolderCollection resolveFolder(WebdavPath url) throws OXException {
         return (FolderCollection) factory.resolveCollection(url);
     }
 
-    protected DocumentMetadataResource createResource() throws WebdavProtocolException, UnsupportedEncodingException {
+    protected DocumentMetadataResource createResource() throws OXException, UnsupportedEncodingException {
         String name = "/testResource"+Math.random();
         WebdavResource resource = factory.resolveResource(testCollection + name);
         assertFalse(resource.exists());

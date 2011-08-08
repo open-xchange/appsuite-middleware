@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.contact.action;
 
+import com.openexchange.exception.OXException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;

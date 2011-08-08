@@ -48,14 +48,13 @@
  */
 package com.openexchange.test.fixtures.transformators;
 
-import com.openexchange.test.fixtures.FixtureException;
-
+import com.openexchange.exception.OXException;
 public class BooleanTransformator implements Transformator {
-    public Object transform(final String value) throws FixtureException {
+    public Object transform(final String value) throws OXException {
         if("TRUE".equalsIgnoreCase(value)) { return true; }
         else if("FALSE".equalsIgnoreCase(value)) { return false; }
         else {
-            throw new FixtureException("Can not convert '"+value + "' into an boolean");
+            throw OXException.general("Can not convert '"+value + "' into an boolean");
         }
     }
 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.kata.appointments;
 
+import com.openexchange.exception.OXException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import java.io.IOException;
@@ -76,8 +77,6 @@ import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.ajax.kata.NeedExistingStep;
-import com.openexchange.api.OXConflictException;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.DataObject;
@@ -86,7 +85,6 @@ import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.test.CalendarTestManager;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * {@link AppointmentVerificationStep}
@@ -134,7 +132,7 @@ public class AppointmentVerificationStep extends NeedExistingStep<Appointment> {
         checkWithReadMethods(entry);
     }
 
-    private void checkWithReadMethods(Appointment appointment) throws OXException, JSONException, AjaxException, IOException, SAXException {
+    private void checkWithReadMethods(Appointment appointment) throws OXException, JSONException, OXException, IOException, SAXException {
         checkViaGet(appointment);
         checkViaAll(appointment);
         checkViaList(appointment);
@@ -148,13 +146,13 @@ public class AppointmentVerificationStep extends NeedExistingStep<Appointment> {
         compare(appointment, loaded);
     }
 
-    private void checkViaAll(Appointment appointment) throws AjaxException, IOException, SAXException, JSONException {
+    private void checkViaAll(Appointment appointment) throws OXException, IOException, SAXException, JSONException {
         Object[][] rows = getViaAll(appointment);
 
         checkInList(appointment, rows, Appointment.ALL_COLUMNS);
     }
 
-    private void checkViaList(Appointment appointment) throws AjaxException, IOException, SAXException, JSONException {
+    private void checkViaList(Appointment appointment) throws OXException, IOException, SAXException, JSONException {
         ListRequest listRequest = new ListRequest(
             ListIDs.l(new int[] { expectedFolderId, appointment.getObjectID() }),
             Appointment.ALL_COLUMNS);
@@ -165,7 +163,7 @@ public class AppointmentVerificationStep extends NeedExistingStep<Appointment> {
         checkInList(appointment, rows, Appointment.ALL_COLUMNS);
     }
 
-    private void checkViaUpdates(Appointment appointment) throws AjaxException, IOException, SAXException, JSONException, OXConflictException {
+    private void checkViaUpdates(Appointment appointment) throws OXException, IOException, SAXException, JSONException, OXException {
         UpdatesRequest updates = new UpdatesRequest(expectedFolderId, Appointment.ALL_COLUMNS, new Date(0), true);
         UpdatesResponse response = client.execute(updates);
 
@@ -174,12 +172,12 @@ public class AppointmentVerificationStep extends NeedExistingStep<Appointment> {
         checkInList(appointment, appointments);
     }
 
-    private void checkViaSearch(Appointment appointment) throws AjaxException, IOException, SAXException, JSONException {
+    private void checkViaSearch(Appointment appointment) throws OXException, IOException, SAXException, JSONException {
         Object[][] rows = getViaSearch(appointment);
         checkInList(appointment, rows, Appointment.ALL_COLUMNS);
     }
 
-    private void checkViaHas(Appointment appointment) throws AjaxException, IOException, SAXException, JSONException {
+    private void checkViaHas(Appointment appointment) throws OXException, IOException, SAXException, JSONException {
         HasRequest hasRequest = new HasRequest(appointment.getStartDate(), appointment.getEndDate(), getTimeZone());
         HasResponse hasResponse = client.execute(hasRequest);
         boolean[] values = hasResponse.getValues();
@@ -188,7 +186,7 @@ public class AppointmentVerificationStep extends NeedExistingStep<Appointment> {
         }
     }
 
-    private Object[][] getViaAll(Appointment appointment) throws AjaxException, IOException, SAXException, JSONException {
+    private Object[][] getViaAll(Appointment appointment) throws OXException, IOException, SAXException, JSONException {
         long rangeStart = appointment.getStartDate().getTime() - 24 * 3600000;
         long rangeEnd = appointment.getEndDate().getTime() + 24 * 3600000;
         AllRequest all = new AllRequest(
@@ -202,7 +200,7 @@ public class AppointmentVerificationStep extends NeedExistingStep<Appointment> {
         return response.getArray();
     }
 
-    private Object[][] getViaSearch(Appointment appointment) throws AjaxException, IOException, SAXException, JSONException {
+    private Object[][] getViaSearch(Appointment appointment) throws OXException, IOException, SAXException, JSONException {
         SearchRequest searchRequest = new SearchRequest(
             "*",
             expectedFolderId,
@@ -252,7 +250,7 @@ public class AppointmentVerificationStep extends NeedExistingStep<Appointment> {
         }
     }
 
-    private void checkInList(Appointment appointment, Object[][] rows, int[] columns) throws AjaxException, IOException, SAXException, JSONException {
+    private void checkInList(Appointment appointment, Object[][] rows, int[] columns) throws OXException, IOException, SAXException, JSONException {
         int idPos = findIDIndex(columns);
 
         for (int i = 0; i < rows.length; i++) {
@@ -268,7 +266,7 @@ public class AppointmentVerificationStep extends NeedExistingStep<Appointment> {
 
     }
 
-    private void compare(Appointment appointment, Object[] row, int[] columns) throws AjaxException, IOException, SAXException, JSONException {
+    private void compare(Appointment appointment, Object[] row, int[] columns) throws OXException, IOException, SAXException, JSONException {
         for (int i = 0; i < columns.length; i++) {
             int column = columns[i];
             if (column == DataObject.LAST_MODIFIED_UTC || column == DataObject.LAST_MODIFIED) {
@@ -345,7 +343,7 @@ public class AppointmentVerificationStep extends NeedExistingStep<Appointment> {
         return true;
     }
 
-    protected Object transform(int column, Object actual) throws AjaxException, IOException, SAXException, JSONException {
+    protected Object transform(int column, Object actual) throws OXException, IOException, SAXException, JSONException {
         switch (column) {
     
         case Appointment.START_DATE:

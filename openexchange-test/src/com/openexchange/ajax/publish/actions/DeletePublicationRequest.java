@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.publish.actions;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i2I;
 import java.util.Arrays;

@@ -61,24 +61,38 @@ import java.net.Socket;
 import java.net.URLDecoder;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.ajp13.AJPv13Response;
+import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.coyote.util.ByteChunk;
+import com.openexchange.ajp13.coyote.util.CookieParser;
 import com.openexchange.ajp13.coyote.util.HexUtils;
 import com.openexchange.ajp13.coyote.util.MessageBytes;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13MaxPackgeSizeException;
+import com.openexchange.ajp13.najp.AJPv13TaskMonitor;
 import com.openexchange.ajp13.servlet.http.HttpErrorServlet;
 import com.openexchange.ajp13.servlet.http.HttpServletManager;
 import com.openexchange.ajp13.servlet.http.HttpSessionManagement;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.log.Log;
+import com.openexchange.log.LogProperties;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -86,11 +100,13 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AjpProcessor {
+public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
-    private static final org.apache.commons.logging.Log log = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AjpProcessor.class));
+    protected static final org.apache.commons.logging.Log LOG = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AjpProcessor.class));
 
-    private static final boolean DEBUG = log.isDebugEnabled();
+    protected static final boolean DEBUG = LOG.isDebugEnabled();
+
+    private static final AtomicLong NUMBER = new AtomicLong();
 
     private static final int STAGE_PARSE = 1;
 
@@ -174,6 +190,11 @@ public class AjpProcessor {
     protected OutputStream output;
 
     /**
+     * The main read-write-lock.
+     */
+    protected final ReadWriteLock mainLock;
+
+    /**
      * The socket timeout used when reading the first block of the request header.
      */
     private long readTimeout;
@@ -229,14 +250,44 @@ public class AjpProcessor {
     private final StringBuilder servletId;
 
     /**
+     * Control for AJP processor.
+     */
+    private volatile Future<Object> control;
+
+    /**
+     * The thread currently processing.
+     */
+    private volatile Thread thread;
+
+    /**
+     * The scheduled keep-alive task.
+     */
+    private volatile ScheduledTimerTask scheduledKeepAliveTask;
+
+    /**
      * The servlet path (which is not the request path). The servlet path is defined in servlet mapping configuration.
      */
     private String servletPath;
 
     /**
+     * Gets this processor's number.
+     */
+    private final Long number;
+
+    /**
+     * The last write access.
+     */
+    protected long lastWriteAccess;
+
+    /**
      * Direct buffer used for sending right away a get body message.
      */
     private final byte[] getBodyMessageArray;
+
+    /**
+     * The listener monitor.
+     */
+    private final AJPv13TaskMonitor listenerMonitor;
 
     /**
      * Direct buffer used for sending right away a pong message.
@@ -286,8 +337,11 @@ public class AjpProcessor {
 
     }
 
-    public AjpProcessor(final int packetSize) {
+    public AjpProcessor(final int packetSize, final AJPv13TaskMonitor listenerMonitor) {
         super();
+        mainLock = new ReentrantReadWriteLock();
+        this.listenerMonitor = listenerMonitor;
+        this.number = Long.valueOf(NUMBER.incrementAndGet());
         servletId = new StringBuilder(16);
         /*
          * Create request/response
@@ -325,7 +379,66 @@ public class AjpProcessor {
         final int foo = HexUtils.DEC[0];
     }
 
+    public void startKeepAlivePing() {
+        final TimerService timer = AJPv13ServiceRegistry.getInstance().getService(TimerService.class);
+        if (null != timer) {
+            final int max = AJPv13Config.getAJPWatcherMaxRunningTime();
+            scheduledKeepAliveTask =
+                timer.scheduleWithFixedDelay(new KeepAliveRunnable(this, max), max, (long) max / 2, TimeUnit.MILLISECONDS);
+        }
+    }
+
+    public void stopKeepAlivePing() {
+        if (null != scheduledKeepAliveTask) {
+            scheduledKeepAliveTask.cancel(false);
+            scheduledKeepAliveTask = null;
+            /*
+             * Task is automatically purged from TimerService by PurgeRunnable
+             */
+        }
+    }
+
     // ------------------------------------------------------------- Properties
+
+    @Override
+    public boolean isWaitingOnAJPSocket() {
+        return STAGE_PARSE == stage;
+    }
+
+    @Override
+    public boolean isProcessing() {
+        return STAGE_SERVICE == stage;
+    }
+
+    @Override
+    public long getProcessingStartTime() {
+        return request.getStartTime();
+    }
+
+    @Override
+    public boolean isLongRunning() {
+        return isEASPingCommand();
+    }
+
+    @Override
+    public StackTraceElement[] getStackTrace() {
+        return thread.getStackTrace();
+    }
+
+    @Override
+    public String getThreadName() {
+        return thread.getName();
+    }
+
+    @Override
+    public Long getNum() {
+        return number;
+    }
+
+    @Override
+    public long getLastWriteAccess() {
+        return lastWriteAccess;
+    }
 
     /**
      * Use Tomcat authentication ?
@@ -343,17 +456,21 @@ public class AjpProcessor {
     /**
      * Required secret.
      */
-    protected String requiredSecret = null;
+    private String requiredSecret;
 
+    /**
+     * Sets the required secret.
+     * 
+     * @param requiredSecret The secret
+     */
     public void setRequiredSecret(final String requiredSecret) {
         this.requiredSecret = requiredSecret;
     }
 
     /**
-     * The number of milliseconds Tomcat will wait for a subsequent request before closing the connection. The default is the same as for
-     * Apache HTTP Server (15 000 milliseconds).
+     * The number of milliseconds waiting for a subsequent request before closing the connection.
      */
-    protected int keepAliveTimeout = -1;
+    private int keepAliveTimeout = -1;
 
     public int getKeepAliveTimeout() {
         return keepAliveTimeout;
@@ -361,6 +478,73 @@ public class AjpProcessor {
 
     public void setKeepAliveTimeout(final int timeout) {
         keepAliveTimeout = timeout;
+    }
+
+    /**
+     * Sets the control object.
+     * 
+     * @param control The control
+     */
+    public void setControl(final Future<Object> control) {
+        this.control = control;
+    }
+
+    /**
+     * Checks if this AJP processor was canceled before it completed normally.
+     * 
+     * @return <code>true</code> if this AJP processor was canceled before it completed normally; otherwise <code>false</code>
+     */
+    public boolean isCancelled() {
+        return control.isCancelled();
+    }
+
+    /**
+     * Checks if this AJP processor completed. Completion may be due to normal termination, an exception, or cancellation -- in all of these
+     * cases, this method will return <code>true</code>.
+     * 
+     * @return <code>true</code> if this AJP processor completed; otherwise <code>false</code>
+     */
+    public boolean isDone() {
+        return control.isDone();
+    }
+
+    /**
+     * Cancels this AJP processor; meaning to close the client socket and to stop its execution.
+     */
+    @Override
+    public void cancel() {
+        response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+        action(ActionCode.CLIENT_FLUSH, null);
+        action(ActionCode.CLOSE, null);
+        /*
+         * Drop socket
+         */
+        final Socket s = socket;
+        if (null != s) {
+            try {
+                closeQuitely(s);
+            } finally {
+                socket = null;
+            }
+        }
+        /*
+         * Cancel via control, too
+         */
+        final Future<Object> f = control;
+        if (f != null) {
+            f.cancel(false);
+            control = null;
+        }
+    }
+
+    private static void closeQuitely(final Socket s) {
+        try {
+            s.close();
+        } catch (final IOException e) {
+            if (DEBUG) {
+                LOG.debug("Socket could not be closed. Probably due to a broken socket connection (e.g. broken pipe).", e);
+            }
+        }
     }
 
     // --------------------------------------------------------- Public Methods
@@ -372,6 +556,15 @@ public class AjpProcessor {
      */
     public HttpServletRequestImpl getRequest() {
         return request;
+    }
+
+    /**
+     * Get the response associated with this processor.
+     * 
+     * @return The response
+     */
+    public HttpServletResponseImpl getResponse() {
+        return response;
     }
 
     /**
@@ -399,6 +592,7 @@ public class AjpProcessor {
      */
     public void process(final Socket socket) throws IOException {
         stage = STAGE_PARSE;
+        final long st = System.currentTimeMillis();
         // Setting up the socket
         this.socket = socket;
         input = socket.getInputStream();
@@ -411,15 +605,27 @@ public class AjpProcessor {
          * Set keep-alive on socket
          */
         socket.setKeepAlive(true);
-
-        // Error flag
+        /*
+         * Error flag
+         */
         error = false;
-
-        while (started && !error && !socket.isClosed()) {
+        final Thread thread = this.thread = Thread.currentThread();
+        if (LogProperties.isEnabled()) {
+            /*
+             * Gather logging info
+             */
+            final Map<String, Object> properties = LogProperties.getLogProperties();
+            properties.put("com.openexchange.ajp13.threadName", thread.getName());
+            properties.put("com.openexchange.ajp13.remotePort", Integer.valueOf(socket.getPort()));
+            properties.put("com.openexchange.ajp13.remoteAddress", socket.getInetAddress().getHostAddress());
+        }
+        while (started && !error && !thread.isInterrupted()) {
             /*
              * Parsing the request header
              */
             try {
+                stage = STAGE_PARSE;
+                listenerMonitor.incrementNumWaiting();
                 /*
                  * Set keep alive timeout if enabled
                  */
@@ -436,9 +642,9 @@ public class AjpProcessor {
                     stage = STAGE_ENDED;
                     break;
                 }
-                
-                System.out.println("First AJP message successfully read from stream. Prefix code=" + requestHeaderMessage.peekByte() + "("+Constants.JK_AJP13_CPING_REQUEST+"=CPing,"+Constants.JK_AJP13_FORWARD_REQUEST+"=Forward-Request)");
-                
+                if (DEBUG) {
+                    LOG.debug("First AJP message successfully read from stream. Prefix code=" + requestHeaderMessage.peekByte() + "(" + Constants.JK_AJP13_CPING_REQUEST + "=CPing," + Constants.JK_AJP13_FORWARD_REQUEST + "=Forward-Request)");
+                }
                 /*
                  * Set back timeout if keep alive timeout is enabled
                  */
@@ -451,32 +657,38 @@ public class AjpProcessor {
                  */
                 final int type = requestHeaderMessage.getByte();
                 if (type == Constants.JK_AJP13_CPING_REQUEST) {
+                    final Lock softLock = mainLock.readLock();
+                    softLock.lock();
                     try {
                         output.write(pongMessageArray);
                         // output.flush();
                     } catch (final IOException e) {
                         error = true;
+                    } finally {
+                        softLock.unlock();
                     }
                     continue;
                 } else if (type != Constants.JK_AJP13_FORWARD_REQUEST) {
                     /*
                      * Usually the servlet didn't read the previous request body
                      */
-                    if (log.isDebugEnabled()) {
-                        log.debug("Unexpected message: " + type);
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Unexpected message: " + type);
                     }
                     continue;
                 }
                 request.setStartTime(System.currentTimeMillis());
             } catch (final IOException e) {
-                log.debug("ajpprocessor.io.error", e);
+                LOG.debug("ajpprocessor.io.error", e);
                 error = true;
                 break;
             } catch (final Throwable t) {
-                log.debug("ajpprocessor.header.error", t);
+                LOG.debug("ajpprocessor.header.error", t);
                 // 400 - Bad Request
                 response.setStatus(400);
                 error = true;
+            } finally {
+                listenerMonitor.decrementNumWaiting();
             }
             /*
              * Setting up filters, and parse some request headers
@@ -488,7 +700,7 @@ public class AjpProcessor {
                  */
                 prepareRequest();
             } catch (final Throwable t) {
-                log.debug("ajpprocessor.request.prepare", t);
+                LOG.debug("ajpprocessor.request.prepare", t);
                 /*
                  * 400 - Internal Server Error
                  */
@@ -501,6 +713,7 @@ public class AjpProcessor {
             if (!error) {
                 try {
                     stage = STAGE_SERVICE;
+                    listenerMonitor.incrementNumProcessing();
                     /*
                      * Form data?
                      */
@@ -521,18 +734,25 @@ public class AjpProcessor {
                         }
                         final byte[] bytes = baos.toByteArray();
                         parseQueryString(new String(bytes, charEnc));
-                        request.setServletInputStream(new ByteArrayServletInputStream(bytes));
+                        /*
+                         * TODO: Apply already read data to request to make them re-available?
+                         */
+                        // request.dumpToBuffer(bytes);
                     }
                     servlet.service(request, response);
                     response.flushBuffer();
+                    listenerMonitor.addProcessingTime(System.currentTimeMillis() - request.getStartTime());
+                    listenerMonitor.incrementNumRequests();
                     // response.getServletOutputStream().flush();
                 } catch (final InterruptedIOException e) {
                     error = true;
                 } catch (final Throwable t) {
-                    log.error("ajpprocessor.request.process", t);
+                    LOG.error("ajpprocessor.request.process", t);
                     // 500 - Internal Server Error
                     response.setStatus(500);
                     error = true;
+                } finally {
+                    listenerMonitor.decrementNumProcessing();
                 }
             }
             /*
@@ -545,7 +765,6 @@ public class AjpProcessor {
                     error = true;
                 }
             }
-
             // If there was an error, make sure the request is counted as
             // and error, and update the statistics counter
             if (error) {
@@ -563,6 +782,14 @@ public class AjpProcessor {
         recycle();
         input = null;
         output = null;
+        final long duration = System.currentTimeMillis() - st;
+        listenerMonitor.addUseTime(duration);
+        /*
+         * Drop logging info
+         */
+        if (LogProperties.isEnabled()) {
+            LogProperties.removeLogProperties();
+        }
     }
 
     // ----------------------------------------------------- ActionHook Methods
@@ -574,7 +801,7 @@ public class AjpProcessor {
      * @param param The action parameter
      */
     public void action(final ActionCode actionCode, final Object param) {
-        if (actionCode == ActionCode.ACTION_COMMIT) {
+        if (actionCode == ActionCode.COMMIT) {
             if (response.isCommitted()) {
                 return;
             }
@@ -586,8 +813,7 @@ public class AjpProcessor {
                 // Set error flag
                 error = true;
             }
-
-        } else if (actionCode == ActionCode.ACTION_CLIENT_FLUSH) {
+        } else if (actionCode == ActionCode.CLIENT_FLUSH) {
             if (!response.isCommitted()) {
                 // Validate and write response headers
                 try {
@@ -598,16 +824,50 @@ public class AjpProcessor {
                     return;
                 }
             }
+            final Lock softLock = mainLock.readLock();
+            softLock.lock();
             try {
                 /*
                  * Write empty SEND-BODY-CHUNK package
                  */
-                flush();
+                output.write(flushMessageArray);
+                // output.flush();
             } catch (final IOException e) {
                 // Set error flag
                 error = true;
+            } finally {
+                softLock.unlock();
             }
-        } else if (actionCode == ActionCode.ACTION_CLOSE) {
+        } else if (actionCode == ActionCode.CLIENT_PING) {
+            final Lock hardLock = mainLock.writeLock();
+            hardLock.lock();
+            try {
+                if (response.isCommitted()) {
+                    /*
+                     * Write empty SEND-BODY-CHUNK package
+                     */
+                    output.write(flushMessageArray);
+                    // output.flush();
+                } else {
+                    /*
+                     * Not committed, yet. Write an empty GET-BODY-CHUNK package.
+                     */
+                    output.write(AJPv13Response.getGetBodyChunkBytes(0));
+                    output.flush();
+                    /*
+                     * Receive empty body chunk
+                     */
+                    receive();
+                }
+            } catch (final IOException e) {
+                // Set error flag
+                error = true;
+            } catch (final AJPv13Exception e) {
+                // Cannot occur
+            } finally {
+                hardLock.unlock();
+            }
+        } else if (actionCode == ActionCode.CLOSE) {
             // Close
 
             // End the processing of the current request, and stop any further
@@ -621,9 +881,9 @@ public class AjpProcessor {
                 // Set error flag
                 error = true;
             }
-        } else if (actionCode == ActionCode.ACTION_START) {
+        } else if (actionCode == ActionCode.START) {
             started = true;
-        } else if (actionCode == ActionCode.ACTION_STOP) {
+        } else if (actionCode == ActionCode.STOP) {
             started = false;
         }
         /*-
@@ -659,7 +919,7 @@ public class AjpProcessor {
         }
          * 
          */
-        else if (actionCode == ActionCode.ACTION_REQ_HOST_ATTRIBUTE) {
+        else if (actionCode == ActionCode.REQ_HOST_ATTRIBUTE) {
             // Get remote host name using a DNS resolution
             if (request.getRemoteHost() == null) {
                 try {
@@ -668,10 +928,10 @@ public class AjpProcessor {
                     // Ignore
                 }
             }
-        } else if (actionCode == ActionCode.ACTION_REQ_LOCAL_ADDR_ATTRIBUTE) {
+        } else if (actionCode == ActionCode.REQ_LOCAL_ADDR_ATTRIBUTE) {
             // Copy from local name for now, which should simply be an address
             request.setLocalAddr(request.getLocalName().toString());
-        } else if (actionCode == ActionCode.ACTION_REQ_SET_BODY_REPLAY) {
+        } else if (actionCode == ActionCode.REQ_SET_BODY_REPLAY) {
             // Set the given bytes as the content
             final ByteChunk bc = (ByteChunk) param;
             final int length = bc.getLength();
@@ -683,20 +943,32 @@ public class AjpProcessor {
         }
     }
 
-    // ------------------------------------------------------ Connector Methods
-
     /**
-     * Get the associated adapter.
+     * Get the associated servlet.
      * 
-     * @return the associated adapter
+     * @return the associated servlet
      */
-    public HttpServlet getAdapter() {
+    public HttpServlet getServlet() {
         return servlet;
     }
 
-    // ------------------------------------------------------ Protected Methods
-
     private static final String JSESSIONID_URI = AJPv13RequestHandler.JSESSIONID_URI;
+
+    private static final String EAS_URI = "/Microsoft-Server-ActiveSync";
+
+    private static final String EAS_CMD = "Cmd";
+
+    private static final String EAS_PING = "Ping";
+
+    /**
+     * Checks for long-running EAS ping command, that is URI is equal to <code>"/Microsoft-Server-ActiveSync"</code> and request's
+     * <code>"Cmd"</code> parameter equals <code>"Ping"</code>.
+     * 
+     * @return <code>true</code> if EAS ping command is detected; otherwise <code>false</code>
+     */
+    private boolean isEASPingCommand() {
+        return EAS_URI.equals(request.getRequestURI()) && EAS_PING.equals(request.getParameter(EAS_CMD));
+    }
 
     /**
      * After reading the request headers, we have to setup the request filters.
@@ -748,7 +1020,6 @@ public class AjpProcessor {
             // two bytes are the length).
             int isc = requestHeaderMessage.peekInt();
             int hId = isc & 0xFF;
-
             isc &= 0xFF00;
             if (0xA000 == isc) {
                 requestHeaderMessage.getInt(); // To advance the read position
@@ -768,15 +1039,29 @@ public class AjpProcessor {
              * Check for "Content-Length" and "Content-Type" headers
              */
             if (hId == Constants.SC_REQ_CONTENT_LENGTH || (hId == -1 && hName.equalsIgnoreCase("Content-Length"))) {
-                // just read the content-length header, so set it
+                /*
+                 * Read the content-length header, so set it
+                 */
                 final long cl = Long.parseLong(hValue);
                 if (cl < Integer.MAX_VALUE) {
                     request.setContentLength((int) cl);
                 }
             } else if (hId == Constants.SC_REQ_CONTENT_TYPE || (hId == -1 && hName.equalsIgnoreCase("Content-Type"))) {
-                // just read the content-type header, so set it
+                /*
+                 * Read the content-type header, so set it
+                 */
                 try {
                     request.setContentType(hValue);
+                } catch (final AJPv13Exception e) {
+                    response.setStatus(403);
+                    error = true;
+                }
+            } else if (hId == Constants.SC_REQ_COOKIE || (hId == -1 && hName.equalsIgnoreCase("Cookie"))) {
+                /*
+                 * Read a cookie, so set it
+                 */
+                try {
+                    request.setCookies(CookieParser.parseCookieHeader(hValue));
                 } catch (final AJPv13Exception e) {
                     response.setStatus(403);
                     error = true;
@@ -786,6 +1071,18 @@ public class AjpProcessor {
                     request.setHeader(hName, hValue, false);
                 } catch (final AJPv13Exception e) {
                     // Cannot occur
+                }
+            }
+        }
+        if (LogProperties.isEnabled()) {
+            /*
+             * Gather logging info
+             */
+            final String echoHeaderName = AJPv13Response.getEchoHeaderName();
+            if (null != echoHeaderName) {
+                final String echoValue = request.getHeader(echoHeaderName);
+                if (null != echoValue) {
+                    LogProperties.putLogProperty("com.openexchange.ajp13.requestId", echoValue);
                 }
             }
         }
@@ -845,7 +1142,7 @@ public class AjpProcessor {
             } else if (attributeCode == Constants.SC_A_JVM_ROUTE) {
                 final String jvmRoute = requestHeaderMessage.getString();
                 if (!AJPv13Config.getJvmRoute().equals(jvmRoute)) {
-                    log.error("JVM route mismatch. Expected \"" + AJPv13Config.getJvmRoute() + "\", but is \"" + jvmRoute + "\".");
+                    LOG.error("JVM route mismatch. Expected \"" + AJPv13Config.getJvmRoute() + "\", but is \"" + jvmRoute + "\".");
                 }
                 request.setInstanceId(jvmRoute);
             } else if (attributeCode == Constants.SC_A_SSL_CERT) {
@@ -1135,7 +1432,7 @@ public class AjpProcessor {
                              * Different JVM route detected -> Discard
                              */
                             if (DEBUG) {
-                                log.debug(new StringBuilder("\n\tDifferent JVM route detected. Removing JSESSIONID cookie: ").append(id));
+                                LOG.debug(new StringBuilder("\n\tDifferent JVM route detected. Removing JSESSIONID cookie: ").append(id));
                             }
                             current.setMaxAge(0); // delete
                             response.addCookie(current);
@@ -1149,7 +1446,7 @@ public class AjpProcessor {
                              * Invalid cookie
                              */
                             if (DEBUG) {
-                                log.debug(new StringBuilder("\n\tExpired or invalid cookie -> Removing JSESSIONID cookie: ").append(current.getValue()));
+                                LOG.debug(new StringBuilder("\n\tExpired or invalid cookie -> Removing JSESSIONID cookie: ").append(current.getValue()));
                             }
                             current.setMaxAge(0); // delete
                             response.addCookie(current);
@@ -1167,7 +1464,7 @@ public class AjpProcessor {
                              * But this host defines a JVM route
                              */
                             if (DEBUG) {
-                                log.debug(new StringBuilder("\n\tMissing JVM route in JESSIONID cookie").append(current.getValue()));
+                                LOG.debug(new StringBuilder("\n\tMissing JVM route in JESSIONID cookie").append(current.getValue()));
                             }
                             current.setMaxAge(0); // delete
                             response.addCookie(current);
@@ -1181,7 +1478,7 @@ public class AjpProcessor {
                              * Invalid cookie
                              */
                             if (DEBUG) {
-                                log.debug(new StringBuilder("\n\tExpired or invalid cookie -> Removing JSESSIONID cookie: ").append(current.getValue()));
+                                LOG.debug(new StringBuilder("\n\tExpired or invalid cookie -> Removing JSESSIONID cookie: ").append(current.getValue()));
                             }
                             current.setMaxAge(0); // delete
                             response.addCookie(current);
@@ -1247,17 +1544,11 @@ public class AjpProcessor {
         request.getSession(true);
     }
 
-    /**
-     * If true, custom HTTP status messages will be used in headers.
-     */
-    private static final boolean USE_CUSTOM_STATUS_MSG_IN_HEADER = Boolean.valueOf(
-        System.getProperty("org.apache.coyote.USE_CUSTOM_STATUS_MSG_IN_HEADER", "false")).booleanValue();
-
     private static final String STR_SET_COOKIE = "Set-Cookie";
 
     /**
      * Data length of SEND_BODY_CHUNK:
-     *
+     * 
      * <pre>
      * prefix(1) + http_status_code(2) + http_status_msg(3) + num_headers(2)
      * </pre>
@@ -1266,7 +1557,7 @@ public class AjpProcessor {
 
     /**
      * Starting first 4 bytes:
-     *
+     * 
      * <pre>
      * 'A' + 'B' + [data length as 2 byte integer]
      * </pre>
@@ -1348,8 +1639,15 @@ public class AjpProcessor {
         } catch (final AJPv13Exception e) {
             throw new IOException(e.getMessage(), e);
         }
-        sink.writeTo(output);
-        // output.flush();
+        final Lock softLock = mainLock.readLock();
+        softLock.lock();
+        try {
+            sink.writeTo(output);
+            // output.flush();
+        } finally {
+            softLock.unlock();
+        }
+        lastWriteAccess = System.currentTimeMillis();
     }
 
     private static final int getNumOfCookieHeader(final String[][] formattedCookies) {
@@ -1394,8 +1692,14 @@ public class AjpProcessor {
         finished = true;
 
         // Add the end message
-        output.write(endMessageArray);
-        // output.flush();
+        final Lock softLock = mainLock.readLock();
+        softLock.lock();
+        try {
+            output.write(endMessageArray);
+            // output.flush();
+        } finally {
+            softLock.unlock();
+        }
     }
 
     /**
@@ -1453,8 +1757,14 @@ public class AjpProcessor {
         }
 
         // Request more data immediately
-        output.write(getBodyMessageArray);
-        // output.flush();
+        final Lock softLock = mainLock.readLock();
+        softLock.lock();
+        try {
+            output.write(getBodyMessageArray);
+            // output.flush();
+        } finally {
+            softLock.unlock();
+        }
 
         final boolean moreData = receive();
         if (!moreData) {
@@ -1495,18 +1805,10 @@ public class AjpProcessor {
         servlet = null;
         servletPath = null;
         servletId.setLength(0);
+        lastWriteAccess = -1L;
         request.recycle();
         response.recycle();
         certificates.recycle();
-    }
-
-    /**
-     * Callback to write data from the buffer.
-     */
-    protected void flush() throws IOException {
-        // Send the flush message
-        output.write(flushMessageArray);
-        // output.flush();
     }
 
     // ------------------------------------- InputStreamInputBuffer Inner Class
@@ -1582,13 +1884,69 @@ public class AjpProcessor {
                 // mod_proxy: Terminating 0 (zero) byte
                 // responseHeaderMessage.appendByte(0);
                 responseHeaderMessage.end();
-                output.write(responseHeaderMessage.getBuffer(), 0, responseHeaderMessage.getLen());
-                // output.flush();
+                final Lock softLock = mainLock.readLock();
+                softLock.lock();
+                try {
+                    output.write(responseHeaderMessage.getBuffer(), 0, responseHeaderMessage.getLen());
+                    // output.flush();
+                } finally {
+                    softLock.unlock();
+                }
+                lastWriteAccess = System.currentTimeMillis();
                 off += thisTime;
             }
 
             return chunk.getLength();
         }
     }
+
+    private static final class KeepAliveRunnable implements Runnable {
+
+        private final AjpProcessor ajpProcessor;
+
+        private final int max;
+
+        /**
+         * Initializes a new {@link KeepAliveRunnable} to only perform keep-alive on given AJP task.
+         *
+         * @param task The AJP task
+         * @param max The max. processing time when a AJP task is considered as exceeded an keep-alive takes place
+         */
+        public KeepAliveRunnable(final AjpProcessor ajpProcessor, final int max) {
+            super();
+            this.ajpProcessor = ajpProcessor;
+            this.max = max;
+        }
+
+        @Override
+        public void run() {
+            try {
+                if (ajpProcessor.isProcessing() && ((System.currentTimeMillis() - ajpProcessor.getLastWriteAccess()) > max)) {
+                    /*
+                     * Send "keep-alive" package
+                     */
+                    keepAlive();
+                }
+            } catch (final Exception e) {
+                if (DEBUG) {
+                    LOG.error("AJP KEEP-ALIVE failed.", e);
+                }
+            }
+        }
+
+        /**
+         * Performs AJP-style keep-alive poll to web server to avoid connection timeout.
+         *
+         * @throws IOException If an I/O error occurs
+         * @throws AJPv13Exception If an AJP error occurs
+         */
+        private void keepAlive() {
+            /*
+             * Send "keep-alive" package depending on current request handler's state.
+             */
+            ajpProcessor.action(ActionCode.CLIENT_PING, null);
+        }
+
+    } // End of class
 
 }

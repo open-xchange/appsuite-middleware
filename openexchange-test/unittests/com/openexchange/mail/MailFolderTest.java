@@ -49,6 +49,7 @@
 
 package com.openexchange.mail;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.sessiond.impl.SessionObject;
@@ -94,7 +95,7 @@ public class MailFolderTest extends AbstractMailTest {
 		}
 	}
 
-	public void testGetSubfolders() throws MailException {
+	public void testGetSubfolders() throws OXException {
 			final SessionObject session = getSession();
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect(/* mailConfig */);

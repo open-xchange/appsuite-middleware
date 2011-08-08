@@ -1,5 +1,6 @@
 package com.openexchange.tools.oxfolder;
 
+import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.LinkedList;
@@ -7,16 +8,11 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import com.openexchange.api2.OXException;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteFailedException;
-import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
@@ -61,7 +57,7 @@ public class OXFolderDeleteListenerTest extends TestCase {
 	}
 	
 	// Bug 7503
-	public void testPublicFolderTransferPermissionsToAdmin() throws OXException, LdapException, DBPoolingException, DeleteFailedException, SQLException, ContextException{
+	public void testPublicFolderTransferPermissionsToAdmin() throws OXException, OXException, OXException, OXException, SQLException, OXException{
 		
 		FolderObject testFolder = createPublicInfostoreSubfolderWithAdmin(myInfostoreFolder, userWhichWillBeDeletedId);
 		clean.add(testFolder);
@@ -85,7 +81,7 @@ public class OXFolderDeleteListenerTest extends TestCase {
 		fail("Can't find permission for user "+user+" for folder "+fo.getFolderName()+" ("+fo.getObjectID()+")");
 	}
 
-	public void simulateUserDelete(final int deleteMe) throws LdapException, DBPoolingException, DeleteFailedException, SQLException, ContextException {
+	public void simulateUserDelete(final int deleteMe) throws OXException, OXException, OXException, SQLException, OXException {
 		final DeleteEvent delEvent = new DeleteEvent(this, deleteMe, DeleteEvent.TYPE_USER, ContextStorage.getInstance().getContext(session.getContextId()));
 		
 		Connection con = null;

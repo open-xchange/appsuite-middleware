@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.resource.actions;
 
+import com.openexchange.exception.OXException;
 import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONArray;

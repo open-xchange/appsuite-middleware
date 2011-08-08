@@ -49,10 +49,11 @@
 
 package com.openexchange.ajax.updater.actions;
 
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.ProblematicAttribute;
+
 import java.util.Date;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AbstractOXException.ProblematicAttribute;
 
 
 /**
@@ -85,7 +86,7 @@ public class FileResponse extends AbstractAJAXResponse {
      * {@inheritDoc}
      */
     @Override
-    public AbstractOXException getException() {
+    public OXException getException() {
         throw new UnsupportedOperationException();
     }
 

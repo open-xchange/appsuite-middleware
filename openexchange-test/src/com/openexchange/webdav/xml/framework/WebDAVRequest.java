@@ -49,9 +49,9 @@
 
 package com.openexchange.webdav.xml.framework;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.apache.commons.httpclient.methods.RequestEntity;
-import com.openexchange.groupware.AbstractOXException;
 
 /**
  *
@@ -66,7 +66,7 @@ public interface WebDAVRequest<T extends AbstractWebDAVResponse> {
 
     String getServletPath();
 
-    RequestEntity getEntity() throws AbstractOXException, IOException;
+    RequestEntity getEntity() throws OXException, IOException;
 
     AbstractWebDAVParser<T> getParser();
 
