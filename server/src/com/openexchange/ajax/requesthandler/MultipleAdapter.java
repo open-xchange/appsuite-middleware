@@ -87,7 +87,7 @@ public class MultipleAdapter implements MultipleHandler {
         result = new AtomicReference<AJAXRequestResult>();
     }
 
-    public static AJAXRequestData parse(final String module, final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws JSONException {
+    public static AJAXRequestData parse(String module, final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws JSONException {
         final AJAXRequestData request = new AJAXRequestData();
         request.setSecure(secure);
 
@@ -102,10 +102,20 @@ public class MultipleAdapter implements MultipleHandler {
                 request.putParameter(name, entry.getValue().toString());
             }
         }
+        String path = "";
+        
+        if (module.contains("/")) {
+        	int slash = module.indexOf('/');
+			path = module.substring(slash);
+        	module = module.substring(0, slash);
+        }
         request.setModule(module);
         request.setFormat("json");
         request.setAction(action);
-
+        request.setServletRequestURI(path);
+        
+        
+        
         return request;
     }
 

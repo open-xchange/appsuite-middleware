@@ -223,11 +223,12 @@ public class Multiple extends SessionServlet {
             jsonObj.put(MultipleHandler.ROUTE, ServerServiceRegistry.getInstance().getService(SystemNameService.class).getSystemName());
             final Dispatcher dispatcher = getDispatcher();
             if (dispatcher.handles(module)) {
-                final AJAXRequestData request = MultipleAdapter.parse(module, action, jsonObj, session, Tools.considerSecure(req));
-                final AJAXRequestResult result;
+            	final AJAXRequestData request = MultipleAdapter.parse(module, action, jsonObj, session, Tools.considerSecure(req));
+            	final AJAXRequestResult result;
+                jsonWriter.object();
                 try {
-                    if (action == null) {
-                        throw AjaxExceptionCodes.MISSING_PARAMETER.create( PARAMETER_ACTION);
+                    if (action == null || action.length() == 0) {
+                    	request.setAction("GET"); // Backwards Compatibility
                     }
                     if (state == null) {
                         state = dispatcher.begin();
@@ -236,11 +237,12 @@ public class Multiple extends SessionServlet {
 
                     jsonWriter.key(ResponseFields.DATA);
                     jsonWriter.value(result.getResultObject());
-
-
                 } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                     ResponseWriter.writeException(e, jsonWriter);
+                    return state;
+                } finally {
+                	jsonWriter.endObject();
                     return state;
                 }
             }

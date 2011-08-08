@@ -50,6 +50,8 @@
 package com.openexchange.groupware.calendar.json.osgi;
 
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.json.AppointmentActionFactory;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 
@@ -70,7 +72,7 @@ public final class AppointmentJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+        return new Class[]{AppointmentSqlFactoryService.class, CalendarCollectionService.class};
     }
 
     @Override
