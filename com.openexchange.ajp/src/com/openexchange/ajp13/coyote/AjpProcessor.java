@@ -89,9 +89,9 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public class AjpProcessor {
 
-    private static final org.apache.commons.logging.Log log = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AjpProcessor.class));
+    private static final org.apache.commons.logging.Log LOG = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AjpProcessor.class));
 
-    private static final boolean DEBUG = log.isDebugEnabled();
+    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     private static final int STAGE_PARSE = 1;
 
@@ -437,9 +437,9 @@ public class AjpProcessor {
                     stage = STAGE_ENDED;
                     break;
                 }
-                
-                System.out.println("First AJP message successfully read from stream. Prefix code=" + requestHeaderMessage.peekByte() + "("+Constants.JK_AJP13_CPING_REQUEST+"=CPing,"+Constants.JK_AJP13_FORWARD_REQUEST+"=Forward-Request)");
-                
+                if (DEBUG) {
+                    LOG.debug("First AJP message successfully read from stream. Prefix code=" + requestHeaderMessage.peekByte() + "(" + Constants.JK_AJP13_CPING_REQUEST + "=CPing," + Constants.JK_AJP13_FORWARD_REQUEST + "=Forward-Request)");
+                }
                 /*
                  * Set back timeout if keep alive timeout is enabled
                  */
@@ -463,18 +463,18 @@ public class AjpProcessor {
                     /*
                      * Usually the servlet didn't read the previous request body
                      */
-                    if (log.isDebugEnabled()) {
-                        log.debug("Unexpected message: " + type);
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Unexpected message: " + type);
                     }
                     continue;
                 }
                 request.setStartTime(System.currentTimeMillis());
             } catch (final IOException e) {
-                log.debug("ajpprocessor.io.error", e);
+                LOG.debug("ajpprocessor.io.error", e);
                 error = true;
                 break;
             } catch (final Throwable t) {
-                log.debug("ajpprocessor.header.error", t);
+                LOG.debug("ajpprocessor.header.error", t);
                 // 400 - Bad Request
                 response.setStatus(400);
                 error = true;
@@ -489,7 +489,7 @@ public class AjpProcessor {
                  */
                 prepareRequest();
             } catch (final Throwable t) {
-                log.debug("ajpprocessor.request.prepare", t);
+                LOG.debug("ajpprocessor.request.prepare", t);
                 /*
                  * 400 - Internal Server Error
                  */
@@ -530,7 +530,7 @@ public class AjpProcessor {
                 } catch (final InterruptedIOException e) {
                     error = true;
                 } catch (final Throwable t) {
-                    log.error("ajpprocessor.request.process", t);
+                    LOG.error("ajpprocessor.request.process", t);
                     // 500 - Internal Server Error
                     response.setStatus(500);
                     error = true;
@@ -859,7 +859,7 @@ public class AjpProcessor {
             } else if (attributeCode == Constants.SC_A_JVM_ROUTE) {
                 final String jvmRoute = requestHeaderMessage.getString();
                 if (!AJPv13Config.getJvmRoute().equals(jvmRoute)) {
-                    log.error("JVM route mismatch. Expected \"" + AJPv13Config.getJvmRoute() + "\", but is \"" + jvmRoute + "\".");
+                    LOG.error("JVM route mismatch. Expected \"" + AJPv13Config.getJvmRoute() + "\", but is \"" + jvmRoute + "\".");
                 }
                 request.setInstanceId(jvmRoute);
             } else if (attributeCode == Constants.SC_A_SSL_CERT) {
@@ -1149,7 +1149,7 @@ public class AjpProcessor {
                              * Different JVM route detected -> Discard
                              */
                             if (DEBUG) {
-                                log.debug(new StringBuilder("\n\tDifferent JVM route detected. Removing JSESSIONID cookie: ").append(id));
+                                LOG.debug(new StringBuilder("\n\tDifferent JVM route detected. Removing JSESSIONID cookie: ").append(id));
                             }
                             current.setMaxAge(0); // delete
                             response.addCookie(current);
@@ -1163,7 +1163,7 @@ public class AjpProcessor {
                              * Invalid cookie
                              */
                             if (DEBUG) {
-                                log.debug(new StringBuilder("\n\tExpired or invalid cookie -> Removing JSESSIONID cookie: ").append(current.getValue()));
+                                LOG.debug(new StringBuilder("\n\tExpired or invalid cookie -> Removing JSESSIONID cookie: ").append(current.getValue()));
                             }
                             current.setMaxAge(0); // delete
                             response.addCookie(current);
@@ -1181,7 +1181,7 @@ public class AjpProcessor {
                              * But this host defines a JVM route
                              */
                             if (DEBUG) {
-                                log.debug(new StringBuilder("\n\tMissing JVM route in JESSIONID cookie").append(current.getValue()));
+                                LOG.debug(new StringBuilder("\n\tMissing JVM route in JESSIONID cookie").append(current.getValue()));
                             }
                             current.setMaxAge(0); // delete
                             response.addCookie(current);
@@ -1195,7 +1195,7 @@ public class AjpProcessor {
                              * Invalid cookie
                              */
                             if (DEBUG) {
-                                log.debug(new StringBuilder("\n\tExpired or invalid cookie -> Removing JSESSIONID cookie: ").append(current.getValue()));
+                                LOG.debug(new StringBuilder("\n\tExpired or invalid cookie -> Removing JSESSIONID cookie: ").append(current.getValue()));
                             }
                             current.setMaxAge(0); // delete
                             response.addCookie(current);
