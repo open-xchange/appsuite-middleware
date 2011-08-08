@@ -49,13 +49,13 @@
 
 package com.openexchange.groupware.contact;
 
+import com.openexchange.exception.OXException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
-import com.openexchange.api2.OXException;
 import com.openexchange.session.Session;
 
 

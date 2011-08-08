@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.task.actions;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.l;
 import java.util.ArrayList;
 import java.util.Date;

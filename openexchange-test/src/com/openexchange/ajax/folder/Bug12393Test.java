@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.folder;
 
+import com.openexchange.exception.OXException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;

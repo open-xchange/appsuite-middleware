@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware;
 
+import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -58,18 +59,14 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.TimeZone;
 import junit.framework.TestCase;
-import com.openexchange.api.OXPermissionException;
-import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.calendar.CalendarOperation;
 import com.openexchange.calendar.CalendarSql;
 import com.openexchange.calendar.api.CalendarCollection;
-import com.openexchange.configuration.ConfigurationException;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.event.impl.EventConfigImpl;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.Constants;
-import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.calendar.TimeTools;
@@ -157,7 +154,7 @@ public class AppointmentBugTests extends TestCase {
             final TestContextToolkit tools = new TestContextToolkit();
             final String ctxName = config.getContextName();
             return null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
-        } catch (final ConfigurationException e) {
+        } catch (final OXException e) {
             e.printStackTrace();
             return null;
         }
@@ -187,7 +184,7 @@ public class AppointmentBugTests extends TestCase {
         final Connection writecon;
         try {
             writecon = DBPool.pickup(ctx);
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             e.printStackTrace();
             return;
         }
@@ -904,7 +901,7 @@ public class AppointmentBugTests extends TestCase {
             try {
                 csql2.insertAppointmentObject(cdao);
                 object_id = cdao.getObjectID();
-            } catch(final OXPermissionException ope) {
+            } catch(final OXException ope) {
                 // exzellent
                 ope.printStackTrace();
             }
@@ -971,8 +968,8 @@ public class AppointmentBugTests extends TestCase {
 
         try {
             csql2.getObjectById(object_id, fid2);
-            fail("User should get an OXPermissionException ");
-        } catch(final OXPermissionException ope) {
+            fail("User should get an OXException ");
+        } catch(final OXException ope) {
             // Excellent
         }
 
@@ -1552,9 +1549,9 @@ public class AppointmentBugTests extends TestCase {
                 csql.updateAppointmentObject(update, subfolder_id, new Date());
                 update.getObjectID();
                 fail("Test failed. An exception can not be moved into a different folder.");
-            } catch(final OXCalendarException e) {
+            } catch(final OXException e) {
                 // Must fail
-                assertEquals("Check correct error message", 66, e.getDetailNumber());
+                assertEquals("Check correct error message", 66, e.getCode());
             }
 
 
@@ -2273,7 +2270,7 @@ public class AppointmentBugTests extends TestCase {
      5. Change the start and end date to 2007-07-19 and save
      6. Verify the calendar subfolder shared by user A
 
-     Expected result: OXPermissionException
+     Expected result: OXException
     */
     public void testBug8490() throws Throwable {
         final Context context = new ContextImpl(contextid);
@@ -2337,7 +2334,7 @@ public class AppointmentBugTests extends TestCase {
 
             try {
                 csql2.updateAppointmentObject(update, shared_folder_id, new Date());
-            } catch(final OXPermissionException oxpe) {
+            } catch(final OXException oxpe) {
             }
 
             boolean found = false;
@@ -2448,7 +2445,7 @@ public class AppointmentBugTests extends TestCase {
             try {
                 csql.updateAppointmentObject(move, fid, new Date());
                 fail("Move not allowed");
-            } catch(final OXCalendarException oxce) {
+            } catch(final OXException oxce) {
             } catch(final Exception e) {
                 fail("Noooo "+e.getMessage());
             }
@@ -2791,9 +2788,9 @@ public class AppointmentBugTests extends TestCase {
             try {
                 csql.updateAppointmentObject(update, public_folder_id, new Date());
                 fail("Set the private flag is not allowed in a public folder");
-            } catch(final OXCalendarException oxca) {
+            } catch(final OXException oxca) {
                 // this is what we want
-                assertEquals("Check correct error number ", OXCalendarException.Code.PIVATE_FLAG_ONLY_IN_PRIVATE_FOLDER.getDetailNumber(), oxca.getDetailNumber());
+                assertTrue("Check correct error number ", oxca.similarTo(OXCalendarExceptionCodes.PIVATE_FLAG_ONLY_IN_PRIVATE_FOLDER));
             }
         } finally {
             try {
@@ -3422,9 +3419,8 @@ public class AppointmentBugTests extends TestCase {
             try {
                 csql.updateAppointmentObject(update, fid, new Date());
                 fail("Update successfull although private appointment contains multiple participants");
-            } catch (final OXCalendarException e) {
-                assertEquals("", e.getDetailNumber(), OXCalendarException.Code.PRIVATE_FLAG_AND_PARTICIPANTS
-                        .getDetailNumber());
+            } catch (final OXException e) {
+                assertTrue(e.similarTo(OXCalendarExceptionCodes.PRIVATE_FLAG_AND_PARTICIPANTS));
             }
         } finally {
             if (object_id != -1) {

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.framework;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.util.Date;
@@ -59,7 +60,6 @@ import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.i18n.LocaleTools;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * Help and caching class for values of the preferences tree.
@@ -90,49 +90,49 @@ public class UserValues {
         this.client = client;
     }
 
-    public String getInboxFolder() throws AjaxException, IOException, JSONException {
+    public String getInboxFolder() throws OXException, IOException, JSONException {
         if (null == inboxFolder) {
             inboxFolder = client.execute(new GetRequest(Tree.InboxFolder)).getString();
         }
         return inboxFolder;
     }
 
-    public String getSentFolder() throws AjaxException, IOException, JSONException {
+    public String getSentFolder() throws OXException, IOException, JSONException {
         if (null == sentFolder) {
             sentFolder = client.execute(new GetRequest(Tree.SentFolder)).getString();
         }
         return sentFolder;
     }
 
-    public String getTrashFolder() throws AjaxException, IOException, JSONException {
+    public String getTrashFolder() throws OXException, IOException, JSONException {
         if (null == trashFolder) {
             trashFolder = client.execute(new GetRequest(Tree.TrashFolder)).getString();
         }
         return trashFolder;
     }
     
-    public String getDraftsFolder() throws AjaxException, IOException, JSONException {
+    public String getDraftsFolder() throws OXException, IOException, JSONException {
         if (null == draftsFolder) {
             draftsFolder = client.execute(new GetRequest(Tree.DraftsFolder)).getString();
         }
         return draftsFolder;
     }
     
-    public int getPrivateInfostoreFolder() throws AjaxException, IOException, JSONException {
+    public int getPrivateInfostoreFolder() throws OXException, IOException, JSONException {
         if (null == privateInfostoreFolder) {
             privateInfostoreFolder = I(client.execute(new GetRequest(Tree.PrivateInfostoreFolder)).getInteger());
         }
         return privateInfostoreFolder.intValue();
     }
     
-    public String getSendAddress() throws AjaxException, IOException, JSONException {
+    public String getSendAddress() throws OXException, IOException, JSONException {
         if (null == sendAddress) {
             sendAddress = client.execute(new GetRequest(Tree.SendAddress)).getString();
         }
         return sendAddress;
     }
 
-    public Locale getLocale() throws AjaxException, IOException, JSONException {
+    public Locale getLocale() throws OXException, IOException, JSONException {
         if (null == locale) {
             final String localeId = client.execute(new GetRequest(Tree.Language)).getString();
             locale = LocaleTools.getLocale(localeId);
@@ -140,34 +140,34 @@ public class UserValues {
         return locale;
     }
 
-    public int getPrivateAppointmentFolder() throws AjaxException, IOException, JSONException {
+    public int getPrivateAppointmentFolder() throws OXException, IOException, JSONException {
         if (-1 == privateAppointmentFolder) {
             privateAppointmentFolder = client.execute(new GetRequest(Tree.PrivateAppointmentFolder)).getInteger();
         }
         return privateAppointmentFolder;
     }
 
-    public int getPrivateContactFolder() throws AjaxException, IOException, JSONException {
+    public int getPrivateContactFolder() throws OXException, IOException, JSONException {
         if (-1 == privateContactFolder) {
             privateContactFolder = client.execute(new GetRequest(Tree.PrivateContactFolder)).getInteger();
         }
         return privateContactFolder;
     }
 
-    public int getPrivateTaskFolder() throws AjaxException, IOException, JSONException {
+    public int getPrivateTaskFolder() throws OXException, IOException, JSONException {
         if (-1 == privateTaskFolder) {
             privateTaskFolder = client.execute(new GetRequest(Tree.PrivateTaskFolder)).getInteger();
         }
         return privateTaskFolder;
     }
 
-    public Date getServerTime() throws AjaxException, IOException, JSONException {
+    public Date getServerTime() throws OXException, IOException, JSONException {
         long serverTime = client.execute(new GetRequest(Tree.CurrentTime)).getLong();
         serverTime -= getTimeZone().getOffset(serverTime);
         return new Date(serverTime);
     }
 
-    public TimeZone getTimeZone() throws AjaxException, IOException, JSONException {
+    public TimeZone getTimeZone() throws OXException, IOException, JSONException {
         if (null == timeZone) {
             final String tzId = client.execute(new GetRequest(Tree.TimeZone)).getString();
             timeZone = TimeZone.getTimeZone(tzId);
@@ -175,25 +175,25 @@ public class UserValues {
         return timeZone;
     }
     
-    public void setTimeZone(final TimeZone timeZone) throws AjaxException, IOException, JSONException {
+    public void setTimeZone(final TimeZone timeZone) throws OXException, IOException, JSONException {
         client.execute(new SetRequest(Tree.TimeZone, timeZone.getID()));
     }
 
-    public int getUserId() throws AjaxException, IOException, JSONException {
+    public int getUserId() throws OXException, IOException, JSONException {
         if (-1 == userId) {
             userId = client.execute(new GetRequest(Tree.Identifier)).getInteger();
         }
         return userId;
     }
 
-    public int getContextId() throws AjaxException, IOException, JSONException {
+    public int getContextId() throws OXException, IOException, JSONException {
         if (-1 == contextId) {
             contextId = client.execute(new GetRequest(Tree.ContextID)).getInteger();
         }
         return contextId;
     }
 
-    public String getDefaultAddress() throws AjaxException, IOException, JSONException {
+    public String getDefaultAddress() throws OXException, IOException, JSONException {
         if (null == defaultAddress) {
             defaultAddress = client.execute(new GetRequest(Tree.DefaultAddress)).getString();
         }

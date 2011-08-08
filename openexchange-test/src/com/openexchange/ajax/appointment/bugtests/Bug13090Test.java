@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.ajax.folder.Create.ocl;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.Date;
@@ -61,7 +62,7 @@ import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
-import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
@@ -146,7 +147,7 @@ public class Bug13090Test extends AbstractAJAXSession {
         UpdateRequest updateRequest = new UpdateRequest(getClient().getValues().getPrivateAppointmentFolder(), updateAppointment, getClient().getValues().getTimeZone(), false);
         UpdateResponse updateResponse = getClient().execute(updateRequest);
         if (updateResponse.hasError()) {
-            assertEquals("Wrong exception code.", OXCalendarException.Code.RECURRING_FOLDER_MOVE.getDetailNumber(), updateResponse.getException().getDetailNumber());
+            assertTrue("Wrong exception code.", updateResponse.getException().similarTo(OXCalendarExceptionCodes.RECURRING_FOLDER_MOVE.create()));
         } else {
             fail("Error expected.");
         }

@@ -49,6 +49,7 @@
 
 package com.openexchange.mail;
 
+import com.openexchange.exception.OXException;
 import org.json.JSONObject;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;

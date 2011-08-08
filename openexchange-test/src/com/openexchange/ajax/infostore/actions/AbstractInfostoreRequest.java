@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.infostore.actions;
 
+import com.openexchange.exception.OXException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;

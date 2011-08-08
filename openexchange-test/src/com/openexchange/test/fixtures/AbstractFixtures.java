@@ -48,6 +48,7 @@
  */
 package com.openexchange.test.fixtures;
 
+import com.openexchange.exception.OXException;
 import java.util.*;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
@@ -97,7 +98,7 @@ public abstract class AbstractFixtures<T> implements Fixtures<T> {
         return entryNames;
     }
 
-    protected void apply(final T bean, final Map attributes) throws FixtureException {
+    protected void apply(final T bean, final Map attributes) throws OXException {
         for (Object o : attributes.keySet()) {
             String value = null;
             if(attributes.containsKey(o) && null != attributes.get(o)){
@@ -132,7 +133,7 @@ public abstract class AbstractFixtures<T> implements Fixtures<T> {
         }
     }
 
-    private Transformator getTransformator(final Class aClass, final String attribute) throws FixtureException {
+    private Transformator getTransformator(final Class aClass, final String attribute) throws OXException {
         if(attributeTransformators.containsKey(attribute)) {
             return attributeTransformators.get(attribute);
         }
@@ -142,7 +143,7 @@ public abstract class AbstractFixtures<T> implements Fixtures<T> {
         return transformators.get(aClass);
     }
 
-    private Method discoverSetter(final String attribute) throws FixtureException {
+    private Method discoverSetter(final String attribute) throws OXException {
 
     	final List<String> methodNames = new ArrayList<String>();
         methodNames.add( IntrospectionTools.setterName(attribute) );
@@ -161,7 +162,7 @@ public abstract class AbstractFixtures<T> implements Fixtures<T> {
         throw new FixtureException("Don't know how to set attribute "+attribute);
     }
 
-    private Method[] discoverSetters(final String attribute) throws FixtureException {
+    private Method[] discoverSetters(final String attribute) throws OXException {
     	final List<String> methodNames = new ArrayList<String>();
         methodNames.add(IntrospectionTools.setterName(attribute));
         methodNames.add(IntrospectionTools.adderName(attribute));
@@ -193,7 +194,7 @@ public abstract class AbstractFixtures<T> implements Fixtures<T> {
     private class StringConstructorTransformator implements Transformator {
         private Constructor<?> constructor;
 
-        public StringConstructorTransformator(final Class<?> aClass) throws FixtureException {
+        public StringConstructorTransformator(final Class<?> aClass) throws OXException {
             try {
                 this.constructor = aClass.getConstructor(String.class);
             } catch (NoSuchMethodException e) {
@@ -201,7 +202,7 @@ public abstract class AbstractFixtures<T> implements Fixtures<T> {
             }
         }
 
-        public Object transform(final String value) throws FixtureException {
+        public Object transform(final String value) throws OXException {
             try {
                 return constructor.newInstance(value);
             } catch (InstantiationException e) {

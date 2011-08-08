@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.publish.tests;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.test.ContactTestManager;
 import com.openexchange.test.FolderTestManager;
 

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -75,12 +76,10 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.parser.AppointmentParser;
 import com.openexchange.ajax.writer.AppointmentWriter;
-import com.openexchange.api.OXConflictException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.test.TestException;
 import com.openexchange.tools.URLParameter;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * {@link Bug16249Test}
@@ -140,7 +139,7 @@ public class Bug16249Test extends AttachmentTest {
         super.tearDown();
     }
 
-    public int insertAppointment(final WebConversation webCon, final Appointment appointmentObj, final TimeZone userTimeZone, String host, final String session) throws TestException, Exception, OXConflictException {
+    public int insertAppointment(final WebConversation webCon, final Appointment appointmentObj, final TimeZone userTimeZone, String host, final String session) throws OXException, Exception, OXException {
         host = appendPrefix(host);
 
         int objectId = 0;
@@ -176,7 +175,7 @@ public class Bug16249Test extends AttachmentTest {
         }
 
         if (data.has("conflicts")) {
-            throw new OXConflictException("conflicts found!");
+            throw OXException.general("conflicts found!");
         }
 
         return objectId;
@@ -212,7 +211,7 @@ public class Bug16249Test extends AttachmentTest {
         return appointmentObj;
     }
 
-    public void deleteAppointment(final WebConversation webCon, final int id, final int inFolder, String host, final String session) throws Exception, AjaxException, IOException, SAXException {
+    public void deleteAppointment(final WebConversation webCon, final int id, final int inFolder, String host, final String session) throws Exception, OXException, IOException, SAXException {
         host = appendPrefix(host);
 
         final AJAXSession ajaxSession = new AJAXSession(webCon, host, session);

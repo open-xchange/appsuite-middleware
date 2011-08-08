@@ -1,5 +1,6 @@
 package com.openexchange.groupware.ldap;
 
+import com.openexchange.exception.OXException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -143,7 +144,7 @@ public class UserConfigurationFactory {
 		configs.put(10,config);
 		settings.put(10, mailSetting);
 		
-		}  catch (final UserException x){
+		}  catch (final OXException x){
 			throw new RuntimeException(x);
 		}
 	}

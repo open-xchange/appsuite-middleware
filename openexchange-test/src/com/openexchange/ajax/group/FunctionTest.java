@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.group;
 
+import com.openexchange.exception.OXException;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;

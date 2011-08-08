@@ -337,7 +337,16 @@ public final class ImapIdlePushListener implements PushListener {
             try {
                 inbox.open(IMAPFolder.READ_WRITE);
                 if (DEBUG_ENABLED) {
-                    LOG.info("starting IDLE for Context: " + session.getContextId() + ", Login: " + session.getLoginName());
+                    LOG.info("starting IDLE for Context: " + session.getContextId() + ", Login: " + session.getLoginName() + ", Session: " + session.getSessionID());
+                }
+                int deletedCount = 0;
+                int totalCount = 0;
+                int unreadCount = 0;
+                if (PushMode.ALWAYS == pushMode) {
+                    // Operations may be expensive, so only do them in always mode.
+                    deletedCount = inbox.getDeletedMessageCount();
+                    totalCount = inbox.getMessageCount();
+                    unreadCount = inbox.getUnreadMessageCount();
                 }
                 mailAccess.setWaiting(true);
                 try {
@@ -357,10 +366,39 @@ public final class ImapIdlePushListener implements PushListener {
                     break;
                 case ALWAYS:
                 default:
-                    if (DEBUG_ENABLED) {
-                        LOG.info("IDLE: Mail event for Context: " + session.getContextId() + ", Login: " + session.getLoginName());
+                    if (inbox.getNewMessageCount() > 0) {
+                        if (DEBUG_ENABLED) {
+                            final int nmails = inbox.getNewMessageCount();
+                            LOG.info("IDLE: " + nmails + " new mail(s) for Context: " + session.getContextId() + ", Login: " + session.getLoginName());
+                        }
+                        notifyNewMail();
+                        break;
                     }
-                    notifyNewMail();
+                    final int newDeletedCount = inbox.getDeletedMessageCount();
+                    final int newTotalCount = inbox.getMessageCount();
+                    final int newUnreadCount = inbox.getUnreadMessageCount();
+                    if (!(newDeletedCount == deletedCount && newTotalCount == totalCount && newUnreadCount == unreadCount)) {
+                        if (DEBUG_ENABLED) {
+                            StringBuilder sb = new StringBuilder("IDLE: Mail event for Context: ");
+                            sb.append(session.getContextId());
+                            sb.append(", Login: ");
+                            sb.append(session.getLoginName());
+                            sb.append(", Total: ");
+                            sb.append(totalCount);
+                            sb.append(',');
+                            sb.append(newTotalCount);
+                            sb.append(", Unread: ");
+                            sb.append(unreadCount);
+                            sb.append(',');
+                            sb.append(newUnreadCount);
+                            sb.append(", Deleted: ");
+                            sb.append(deletedCount);
+                            sb.append(',');
+                            sb.append(newDeletedCount);
+                            LOG.info(sb.toString());
+                        }
+                        notifyNewMail();
+                    }
                     break;
                 }
                 /*

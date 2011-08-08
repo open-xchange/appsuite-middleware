@@ -49,6 +49,7 @@
 
 package com.openexchange.test;
 
+import com.openexchange.exception.OXException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Iterator;

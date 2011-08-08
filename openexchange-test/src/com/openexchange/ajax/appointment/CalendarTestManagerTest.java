@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.io.IOException;
 import java.util.Date;
@@ -61,7 +62,6 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.CalendarTestManager;
 import com.openexchange.test.FolderTestManager;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * {@link CalendarTestManagerTest}
@@ -238,7 +238,7 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
         try {
             GetResponse response = getClient().execute(get);
             assertFalse(response.hasError());
-        } catch (AjaxException e) {
+        } catch (OXException e) {
             fail(e.toString());
         } catch (IOException e) {
             fail(e.toString());
@@ -253,7 +253,7 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
             GetResponse response = getClient().execute(get);
             assertTrue(response.hasError());
             assertTrue(response.getResponse().getErrorMessage().contains("not found.")); // Brittle
-        } catch (AjaxException e) {
+        } catch (OXException e) {
             fail(e.toString());
         } catch (IOException e) {
             fail(e.toString());

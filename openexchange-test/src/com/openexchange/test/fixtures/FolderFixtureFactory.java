@@ -49,6 +49,7 @@
 
 package com.openexchange.test.fixtures;
 
+import com.openexchange.exception.OXException;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.groupware.container.FolderObject;
@@ -85,7 +86,7 @@ public class FolderFixtureFactory implements FixtureFactory<FolderObject> {
             this.entries = values;
         }
 
-        public Fixture<FolderObject> getEntry(String entryName) throws FixtureException {
+        public Fixture<FolderObject> getEntry(String entryName) throws OXException {
             if (folders.containsKey(entryName)) {
                 return folders.get(entryName);
             }

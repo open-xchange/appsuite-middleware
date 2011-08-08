@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.importexport;
 
+import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
@@ -61,7 +62,6 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.importexport.actions.VCardImportRequest;
 import com.openexchange.ajax.importexport.actions.VCardImportResponse;
 import com.openexchange.tools.RandomString;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * Checks if truncation information is properly handled by importer.
@@ -91,7 +91,7 @@ public final class Bug12414Test extends AbstractAJAXSession {
         folderId = client.getValues().getPrivateContactFolder();
     }
 
-    public void testTruncation() throws AjaxException, IOException,
+    public void testTruncation() throws OXException, IOException,
         SAXException, JSONException {
         final VCardImportRequest request = new VCardImportRequest(folderId, 
             new ByteArrayInputStream(vCard.getBytes("UTF-8")), false);

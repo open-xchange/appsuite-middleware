@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
-import com.openexchange.ajax.appointment.helper.OXError;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Changes;
 
@@ -103,7 +103,7 @@ public class TestsForModifyingChangeExceptions extends ManagedAppointmentTest {
         calendarManager.update(secondUpdate);
 
         assertTrue("Should get exception when trying to make a change exception a series", calendarManager.hasLastException());
-        assertTrue("Should have correct exception", new OXError("APP", 99).matches(calendarManager.getLastException()));
+        assertEquals("Should have correct exception", 99, ((OXException) calendarManager.getLastException()).getCode());
     }
     
     public void testDeletingAChangeException(){

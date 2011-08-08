@@ -49,11 +49,11 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
 import java.util.Date;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 
 
 public class Bug11865Test extends CalendarSqlTest {
@@ -87,9 +87,9 @@ public class Bug11865Test extends CalendarSqlTest {
         try {
             appointments.save(update);
             fail("Could change recurrence position for change exception");
-        } catch (final OXCalendarException e) {
-            if ((OXCalendarException.Code.INVALID_RECURRENCE_POSITION_CHANGE.getDetailNumber() != e.getDetailNumber()) && (OXCalendarException.Code.INVALID_RECURRENCE_TYPE_CHANGE.getDetailNumber() != e.getDetailNumber())) {
-                fail("Unexpected error code: " + e.getDetailNumber());
+        } catch (final OXException e) {
+            if (e.similarTo(OXCalendarExceptionCodes.INVALID_RECURRENCE_POSITION_CHANGE)) {
+                fail("Unexpected error code: " + e.getCode());
             }
         }
 

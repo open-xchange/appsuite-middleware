@@ -766,6 +766,24 @@ public class OXException extends Exception implements OXExceptionConstants {
         return msg;
     }
 
+    public final boolean similarTo(OXExceptionCode other){
+    	if(other.getCategory() == this.getCategory()
+    	&& other.getNumber() == this.getCode())
+    		return true;
+    	return false;
+    	
+    }
+    public final boolean similarTo(OXException other){
+    	if(other == this)
+    		return true;
+    	if(other == null || this == null)
+    		return false;
+    	if(other.getCategory() == this.getCategory()
+    	&& other.getCode() == this.getCode())
+    		return true;
+    	return false;
+    }
+
     @Override
     public String getMessage() {
         return getLogMessage();

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.framework;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import junit.framework.Assert;
 import org.apache.http.HttpResponse;

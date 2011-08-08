@@ -49,6 +49,7 @@
 
 package com.openexchange.test;
 
+import com.openexchange.exception.OXException;
 import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -80,7 +81,6 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.arrays.Arrays;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * This class and FolderObject should be all that is needed to write folder-related tests. If multiple users are needed use multiple
@@ -178,7 +178,7 @@ public class FolderTestManager implements TestManager{
     /**
      * Deletes a folder via HTTP-API
      */
-    public void deleteFolderOnServer(FolderObject folderToDelete) throws AjaxException, IOException, SAXException, JSONException {
+    public void deleteFolderOnServer(FolderObject folderToDelete) throws OXException, IOException, SAXException, JSONException {
         DeleteRequest request = new DeleteRequest(API.OX_OLD, folderToDelete);
         setLastResponse(client.execute(request));
         removeFolderFromCleanupList(folderToDelete);
@@ -187,7 +187,7 @@ public class FolderTestManager implements TestManager{
     /**
      * Deletes a folder via HTTP-API
      */
-    public void deleteFolderOnServer(final int folderID, final Date lastModified) throws AjaxException, IOException, SAXException, JSONException {
+    public void deleteFolderOnServer(final int folderID, final Date lastModified) throws OXException, IOException, SAXException, JSONException {
         FolderObject fo = new FolderObject();
         fo.setObjectID(folderID);
         fo.setLastModified(lastModified);
@@ -460,7 +460,7 @@ public class FolderTestManager implements TestManager{
         try {
             lastException = exception;
             throw exception;
-        } catch (AjaxException e) {
+        } catch (OXException e) {
             if (getFailOnError())
                 fail("AjaxException occured during " + action + ": " + e.getMessage());
         } catch (IOException e) {

@@ -49,6 +49,7 @@
 
 package com.openexchange.webdav;
 
+import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.util.Properties;
 

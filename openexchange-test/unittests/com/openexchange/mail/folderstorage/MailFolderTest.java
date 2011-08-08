@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.folderstorage;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
@@ -56,7 +57,6 @@ import javax.mail.MessagingException;
 import com.openexchange.imap.dataobjects.IMAPMailFolder;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.IndexRange;
-import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.MailSortField;
@@ -183,7 +183,7 @@ public final class MailFolderTest extends AbstractMailTest {
 		}
 	}
 
-	public void testFolderGet() throws MailException {
+	public void testFolderGet() throws OXException {
 			final SessionObject session = getSession();
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
@@ -221,7 +221,7 @@ public final class MailFolderTest extends AbstractMailTest {
 			}
 	}
 
-	public void testFolderCreateAndSubfolders() throws MailException {
+	public void testFolderCreateAndSubfolders() throws OXException {
 			final SessionObject session = getSession();
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
@@ -385,7 +385,7 @@ public final class MailFolderTest extends AbstractMailTest {
 		}
 	}
 
-	public void testFolderUpdate() throws MailException {
+	public void testFolderUpdate() throws OXException {
 			final SessionObject session = getSession();
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
@@ -490,7 +490,7 @@ public final class MailFolderTest extends AbstractMailTest {
 			}
 	}
 
-	public void testFolderMove() throws MailException {
+	public void testFolderMove() throws OXException {
 			final SessionObject session = getSession();
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
@@ -541,7 +541,7 @@ public final class MailFolderTest extends AbstractMailTest {
 				Exception exc = null;
 				try {
 					mailAccess.getFolderStorage().getFolder(fullname);
-				} catch (final MailException e) {
+				} catch (final OXException e) {
 					exc = e;
 				}
 				assertTrue("Moved folder still exists", exc != null);
@@ -563,14 +563,14 @@ public final class MailFolderTest extends AbstractMailTest {
 					exc = null;
 					try {
 						mailAccess.getFolderStorage().moveFolder(fullname, newFullname);
-					} catch (final MailException e) {
+					} catch (final OXException e) {
 						exc = e;
 					}
 					assertTrue("Move below root folder failed", exc == null);
 					exc = null;
 					try {
 						mailAccess.getFolderStorage().getFolder(fullname);
-					} catch (final MailException e) {
+					} catch (final OXException e) {
 						exc = e;
 					}
 					assertTrue("Moved folder still exists", exc != null);
@@ -607,7 +607,7 @@ public final class MailFolderTest extends AbstractMailTest {
 		return false;
 	}
 
-	public void testFolderRename() throws MailException {
+	public void testFolderRename() throws OXException {
 			final SessionObject session = getSession();
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
@@ -655,7 +655,7 @@ public final class MailFolderTest extends AbstractMailTest {
 				Exception exc = null;
 				try {
 					mailAccess.getFolderStorage().getFolder(fullname);
-				} catch (final MailException e) {
+				} catch (final OXException e) {
 					exc = e;
 				}
 				assertTrue("Renamed folder still exists", exc != null);
@@ -679,7 +679,7 @@ public final class MailFolderTest extends AbstractMailTest {
 			}
 	}
 
-	public void testFolderDelete() throws MailException {
+	public void testFolderDelete() throws OXException {
 			final SessionObject session = getSession();
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
@@ -748,7 +748,7 @@ public final class MailFolderTest extends AbstractMailTest {
 				Exception exc = null;
 				try {
 					mailAccess.getFolderStorage().getFolder(fullname);
-				} catch (final MailException e) {
+				} catch (final OXException e) {
 					exc = e;
 				}
 				assertTrue("Deleted folder still exists", exc != null);
@@ -797,7 +797,7 @@ public final class MailFolderTest extends AbstractMailTest {
 
 	private static final MailField[] FIELDS_ID = { MailField.ID };
 
-	public void testFolderClear() throws MailException, MessagingException, IOException {
+	public void testFolderClear() throws OXException, MessagingException, IOException {
 			final SessionObject session = getSession();
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
@@ -906,7 +906,7 @@ public final class MailFolderTest extends AbstractMailTest {
 			}
 	}
 
-	public void testFolderQuota() throws MailException, MessagingException, IOException {
+	public void testFolderQuota() throws OXException, MessagingException, IOException {
 			final SessionObject session = getSession();
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
@@ -972,7 +972,7 @@ public final class MailFolderTest extends AbstractMailTest {
 			}
 	}
 
-	public void testPath2DefaultFolder() throws MailException {
+	public void testPath2DefaultFolder() throws OXException {
 			final SessionObject session = getSession();
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);

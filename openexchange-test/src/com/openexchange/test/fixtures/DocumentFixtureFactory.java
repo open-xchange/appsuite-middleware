@@ -48,6 +48,7 @@
  */
 package com.openexchange.test.fixtures;
 
+import com.openexchange.exception.OXException;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -98,7 +99,7 @@ public class DocumentFixtureFactory implements FixtureFactory<Document> {
             super.addTransformator(new CredentialsTransformator(fixtureLoader), "created_by");
         }
 
-        public Fixture<Document> getEntry(final String entryName) throws FixtureException {
+        public Fixture<Document> getEntry(final String entryName) throws OXException {
             if (knownDocuments.containsKey(entryName)) {
                 return knownDocuments.get(entryName);
             }

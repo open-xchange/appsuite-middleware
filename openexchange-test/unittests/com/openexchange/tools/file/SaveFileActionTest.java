@@ -49,13 +49,13 @@
 
 package com.openexchange.tools.file;
 
+import com.openexchange.exception.OXException;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import com.openexchange.groupware.tx.AbstractActionTest;
-import com.openexchange.tools.file.external.FileStorageException;
 import com.openexchange.tools.file.internal.LocalFileStorageFactory;
 import com.openexchange.tx.UndoableAction;
 
@@ -127,7 +127,7 @@ public class SaveFileActionTest extends AbstractActionTest {
 		try {
 			storage.getFile(saveFile.getId());
 			fail("Expected Exception");
-		} catch (final FileStorageException x) {
+		} catch (final OXException x) {
 			assertTrue(true);
 		}
 	}

@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.appointment.helper;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Changes;
 import com.openexchange.test.CalendarTestManager;
@@ -66,13 +66,13 @@ public abstract class AbstractNegativeAssertion extends AbstractAssertion {
         this.folder = folderToWorkIn;
     }
 
-    public void check(Changes changes, OXError expectedError){
+    public void check(Changes changes, OXException expectedError){
         check(generateDefaultAppointment(), changes, expectedError);
     }
     
-    public abstract void check(Appointment startWith, Changes changes, OXError expectedError);
+    public abstract void check(Appointment startWith, Changes changes, OXException expectedError);
 
-    protected void createAndCheck(Appointment startWith, Changes changes, OXError expectedError) {
+    protected void createAndCheck(Appointment startWith, Changes changes, OXException expectedError) {
         approachUsedForTest = "Create directly";
 
         changes.update(startWith);
@@ -81,7 +81,7 @@ public abstract class AbstractNegativeAssertion extends AbstractAssertion {
         checkForError(expectedError);
     }
 
-    protected void updateAndCheck(Appointment startWith, Changes changes, OXError expectedError) {
+    protected void updateAndCheck(Appointment startWith, Changes changes, OXException expectedError) {
         approachUsedForTest = "Create and update";
 
         create(startWith);
@@ -90,14 +90,14 @@ public abstract class AbstractNegativeAssertion extends AbstractAssertion {
         checkForError(expectedError);
     }
 
-    private void checkForError(OXError expectedError) {
+    private void checkForError(OXException expectedError) {
         methodUsedForTest = "Check lastException field";
         assertTrue(state() + " Expecting exception, did not get one", manager.hasLastException());
         try {
-            AbstractOXException lastException = (AbstractOXException) manager.getLastException();
+            OXException lastException = (OXException) manager.getLastException();
             assertTrue(
                 state() + " Expected error: " + expectedError + ", actual error: " + lastException.getErrorCode(),
-                expectedError.matches(lastException));
+                expectedError.similarTo(lastException));
         } catch (ClassCastException e) {
             fail2("Should have an OXException, but could not cast it into one");
         }

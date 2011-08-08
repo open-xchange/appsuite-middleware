@@ -48,6 +48,7 @@
  */
 package com.openexchange.test.fixtures;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.test.fixtures.transformators.BooleanTransformator;
 import com.openexchange.test.fixtures.transformators.FileToByteArrayTransformator;
@@ -86,7 +87,7 @@ public class ContactFixtureFactory implements FixtureFactory<Contact> {
             addTransformator(new FileToByteArrayTransformator(fixtureLoader), "image1");
         }
 
-        public Fixture<Contact> getEntry(final String entryName) throws FixtureException {
+        public Fixture<Contact> getEntry(final String entryName) throws OXException {
             if (contacts.containsKey(entryName)) {
                 return contacts.get(entryName);
             }

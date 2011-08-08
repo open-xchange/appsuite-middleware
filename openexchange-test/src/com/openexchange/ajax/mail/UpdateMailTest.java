@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.Date;
 import org.json.JSONException;
@@ -70,7 +71,6 @@ import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.tools.servlet.AjaxException;
 
 
 /**
@@ -99,7 +99,7 @@ public class UpdateMailTest extends AbstractMailTest {
         super.tearDown();
     }
 
-    public void testShouldBeAbleToAddFlags() throws AjaxException, IOException, SAXException, JSONException{
+    public void testShouldBeAbleToAddFlags() throws OXException, IOException, SAXException, JSONException{
         final String mail = values.getSendAddress();
         sendMail( createEMail(mail, "Update test for adding and removing a flag", "ALTERNATE", "Just a little bit").toString() );
         final TestMail myMail = new TestMail( getFirstMailInFolder(values.getInboxFolder() ) );
@@ -120,7 +120,7 @@ public class UpdateMailTest extends AbstractMailTest {
         assertTrue("Flag should have been changed back again", (updatedMail.getFlags() & additionalFlag) == 0);
     }
 
-    public void testShouldBeAbleToAddFlags2AllMessages() throws AjaxException, IOException, SAXException, JSONException {
+    public void testShouldBeAbleToAddFlags2AllMessages() throws OXException, IOException, SAXException, JSONException {
         String newId = null;
         try {
             /*
@@ -224,7 +224,7 @@ public class UpdateMailTest extends AbstractMailTest {
         }
     }
 
-    public void testShouldBeAbleToAddFlagsByMessageId() throws AjaxException, IOException, SAXException, JSONException{
+    public void testShouldBeAbleToAddFlagsByMessageId() throws OXException, IOException, SAXException, JSONException{
         final String mail = values.getSendAddress();
         sendMail( createEMail(mail, "Update test for adding and removing a flag by message id", "ALTERNATE", "Just a little bit").toString() );
         final TestMail myMail = new TestMail( getFirstMailInFolder(values.getInboxFolder() ) );
@@ -258,7 +258,7 @@ public class UpdateMailTest extends AbstractMailTest {
     }
 
     
-    public void testShouldBeAbleToSetColors() throws AjaxException, IOException, SAXException, JSONException{
+    public void testShouldBeAbleToSetColors() throws OXException, IOException, SAXException, JSONException{
         final String mail = values.getSendAddress();
         sendMail( createEMail(mail, "Update test for changing colors", "ALTERNATE", "Just a little bit").toString() );
         final TestMail myMail = new TestMail( getFirstMailInFolder(values.getInboxFolder() ) );

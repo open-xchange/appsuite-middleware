@@ -49,21 +49,20 @@
 
 package com.openexchange.ajax.folder.api2;
 
+import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.PathRequest;
 import com.openexchange.ajax.folder.actions.PathResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.folderstorage.FolderExceptionErrorMessage;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 
 /**
- * Verifies that primaty mail account's root folder throws an error when invoking action=path.
+ * Verifies that primary mail account's root folder throws an error when invoking action=path.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -100,8 +99,7 @@ public class Bug16284Test extends AbstractAJAXSession {
             fail("Expected an error that primary account's root folder does not exist in Outllok folder tree.");
             return;
         }
-        final AbstractOXException exception = response.getException();
-        assertEquals("Unexpected error component.", EnumComponent.FOLDER, exception.getComponent());
-        assertEquals("Unexpected error number.", FolderExceptionErrorMessage.NOT_FOUND.getDetailNumber(), exception.getDetailNumber());
+        final OXException exception = response.getException();
+        assertTrue("Unexpected error number.", FolderExceptionErrorMessage.NOT_FOUND.create().similarTo(exception));
     }
 }

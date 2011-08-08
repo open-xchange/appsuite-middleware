@@ -1,8 +1,8 @@
 
 package com.openexchange.tools.session;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
 /**
@@ -31,9 +31,9 @@ public class ServerSessionFactory {
      * @param contextid The context ID
      * @param sessionid The session ID
      * @return A server session.
-     * @throws ContextException If context look-up fails
+     * @throws OXException If context look-up fails
      */
-    public static ServerSession createServerSession(final int userid, final int contextid, final String sessionid) throws ContextException {
+    public static ServerSession createServerSession(final int userid, final int contextid, final String sessionid) throws OXException {
         return new ServerSessionAdapter(SessionObjectWrapper.createSessionObject(userid, contextid, sessionid));
     }
 }

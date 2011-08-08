@@ -48,6 +48,7 @@
  */
 package com.openexchange.test.fixtures;
 
+import com.openexchange.exception.OXException;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -63,7 +64,6 @@ import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -110,7 +110,7 @@ public class EMailFixtureFactory implements FixtureFactory<MailMessage> {
             addTransformator(new BooleanTransformator(), "prev_seen");
         }
 
-        public Fixture<MailMessage> getEntry(final String entryName) throws FixtureException {
+        public Fixture<MailMessage> getEntry(final String entryName) throws OXException {
             if (mails.containsKey(entryName)) {
                 return mails.get(entryName);
             }
@@ -191,7 +191,7 @@ public class EMailFixtureFactory implements FixtureFactory<MailMessage> {
         }
 
         
-    	private MailMessage getMessage(final File fdir) throws FixtureException {
+    	private MailMessage getMessage(final File fdir) throws OXException {
             final MimeMessage msg;
             final Session session = Session.getInstance(getDefaultSessionProperties());
             InputStream in = null;
@@ -215,13 +215,13 @@ public class EMailFixtureFactory implements FixtureFactory<MailMessage> {
             MailMessage retval;
             try {
                 retval = MIMEMessageConverter.convertMessage(msg);
-            } catch (MailException e) {
+            } catch (OXException e) {
                 throw new FixtureException(e);
             }
             return retval;
         }
     	
-        private MailMessage getMessage(final String string) throws FixtureException {
+        private MailMessage getMessage(final String string) throws OXException {
             final MimeMessage msg;
             final Session session = Session.getInstance(getDefaultSessionProperties());
             InputStream in = null;
@@ -243,7 +243,7 @@ public class EMailFixtureFactory implements FixtureFactory<MailMessage> {
             MailMessage retval;
             try {
                 retval = MIMEMessageConverter.convertMessage(msg);
-            } catch (MailException e) {
+            } catch (OXException e) {
                 throw new FixtureException(e);
             }
             return retval;

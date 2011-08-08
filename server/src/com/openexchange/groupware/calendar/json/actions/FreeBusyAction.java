@@ -50,14 +50,13 @@
 package com.openexchange.groupware.calendar.json.actions;
 
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.json.AppointmentAJAXRequest;
@@ -98,24 +97,19 @@ public final class FreeBusyAction extends AbstractAppointmentAction {
         Date timestamp = new Date(0);
 
         SearchIterator<Appointment> it = null;
-
-        final JSONArray jsonResponseArray = new JSONArray();
-
         try {
-            final AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone);
-
+            final List<Appointment> appointmentList = new ArrayList<Appointment>();
             final AppointmentSQLInterface appointmentsql = getService().createAppointmentSql(req.getSession());
             it = appointmentsql.getFreeBusyInformation(userId, type, start, end);
             while (it.hasNext()) {
                 final Appointment appointmentObj = it.next();
-                final JSONObject jsonAppointmentObj = new JSONObject();
-                appointmentWriter.writeAppointment(appointmentObj, jsonAppointmentObj);
-                jsonResponseArray.put(jsonAppointmentObj);
+                appointmentList.add(appointmentObj);
+                
                 if (null != appointmentObj.getLastModified() && timestamp.before(appointmentObj.getLastModified())) {
                     timestamp = appointmentObj.getLastModified();
                 }
             }
-            return new AJAXRequestResult(jsonResponseArray, timestamp, "json");
+            return new AJAXRequestResult(appointmentList, timestamp, "freebusy_appointments");
         } finally {
             if (it != null) {
                 it.close();

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.kata.tasks;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.kata.NeedExistingStep;
 import com.openexchange.ajax.task.actions.UpdateRequest;

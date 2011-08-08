@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.ajax.mail.actions.DeleteRequest;
 import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.ImportMailRequest;

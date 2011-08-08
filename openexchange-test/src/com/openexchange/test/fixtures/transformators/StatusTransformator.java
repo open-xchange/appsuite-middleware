@@ -48,19 +48,19 @@
  */
 package com.openexchange.test.fixtures.transformators;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.test.fixtures.FixtureException;
 
 public class StatusTransformator implements Transformator {
 
-    public Object transform(final String value) throws FixtureException {
+    public Object transform(final String value) throws OXException {
         if("NOT_STARTED".equalsIgnoreCase(value)) { return Task.NOT_STARTED; }
         else if("IN_PROGRESS".equalsIgnoreCase(value) || "IN PROGRESS".equalsIgnoreCase(value)) { return Task.IN_PROGRESS; }
         else if("DONE".equalsIgnoreCase(value)) { return Task.DONE; }
         else if("WAITING".equalsIgnoreCase(value)) { return Task.WAITING; }
         else if("DEFERRED".equalsIgnoreCase(value)) { return Task.DEFERRED; }
         else {
-            throw new FixtureException("Unknown Status: "+value);
+            throw OXException.general("Unknown Status: "+value);
         }
 
     }

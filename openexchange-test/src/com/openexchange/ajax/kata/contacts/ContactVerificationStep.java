@@ -47,6 +47,7 @@
 
 package com.openexchange.ajax.kata.contacts;
 
+import com.openexchange.exception.OXException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import java.io.IOException;
@@ -67,14 +68,11 @@ import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.ajax.kata.NeedExistingStep;
 import com.openexchange.ajax.kata.tasks.TaskVerificationStep;
-import com.openexchange.api.OXConflictException;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.test.ContactTestManager;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * {@link ContactVerificationStep}
@@ -117,7 +115,7 @@ public class ContactVerificationStep extends NeedExistingStep<Contact> {
         checkWithReadMethods(entry);
     }
 
-    private void checkWithReadMethods(Contact contact) throws OXException, JSONException, AjaxException, IOException, SAXException {
+    private void checkWithReadMethods(Contact contact) throws OXException, JSONException, OXException, IOException, SAXException {
         checkViaGet(contact);
         checkViaAll(contact);
         checkViaList(contact);
@@ -130,13 +128,13 @@ public class ContactVerificationStep extends NeedExistingStep<Contact> {
         compare(contact, loaded);
     }
 
-    private void checkViaAll(Contact contact) throws AjaxException, IOException, SAXException, JSONException {
+    private void checkViaAll(Contact contact) throws OXException, IOException, SAXException, JSONException {
         Object[][] rows = getViaAll(contact);
 
         checkInList(contact, rows, Contact.ALL_COLUMNS, "all-");
     }
 
-    private void checkViaList(Contact contact) throws AjaxException, IOException, SAXException, JSONException {
+    private void checkViaList(Contact contact) throws OXException, IOException, SAXException, JSONException {
         ListRequest listRequest = new ListRequest(
             ListIDs.l(new int[] { expectedFolderId, contact.getObjectID() }),
             Contact.ALL_COLUMNS,
@@ -148,7 +146,7 @@ public class ContactVerificationStep extends NeedExistingStep<Contact> {
         checkInList(contact, rows, Contact.ALL_COLUMNS, "list-");
     }
 
-    private void checkViaUpdates(Contact contact) throws AjaxException, IOException, SAXException, JSONException, OXConflictException {
+    private void checkViaUpdates(Contact contact) throws OXException, IOException, SAXException, JSONException, OXException {
         UpdatesRequest updates = new UpdatesRequest(
             expectedFolderId,
             Contact.ALL_COLUMNS,
@@ -161,13 +159,13 @@ public class ContactVerificationStep extends NeedExistingStep<Contact> {
         checkInList(contact, contacts, "updates-");
     }
 
-    private void checkViaSearch(Contact contact) throws AjaxException, IOException, SAXException, JSONException {
+    private void checkViaSearch(Contact contact) throws OXException, IOException, SAXException, JSONException {
         Object[][] rows = getViaSearch(contact);
         checkInList(contact, rows, Contact.ALL_COLUMNS, "search-");
     }
     
 
-    private void checkInList(Contact contact, Object[][] rows, int[] columns, String typeOfAction) throws AjaxException, IOException, SAXException, JSONException {
+    private void checkInList(Contact contact, Object[][] rows, int[] columns, String typeOfAction) throws OXException, IOException, SAXException, JSONException {
         int idPos = findIDIndex(columns);
 
         for (int i = 0; i < rows.length; i++) {
@@ -181,13 +179,13 @@ public class ContactVerificationStep extends NeedExistingStep<Contact> {
         fail("Object not found in " +typeOfAction+ "response. " + name);
     }
 
-    private Object[][] getViaAll(Contact contact) throws AjaxException, IOException, SAXException, JSONException {
+    private Object[][] getViaAll(Contact contact) throws OXException, IOException, SAXException, JSONException {
         AllRequest all = new AllRequest(expectedFolderId, Contact.ALL_COLUMNS);
         CommonAllResponse response = client.execute(all);
         return response.getArray();
     }
 
-    private Object[][] getViaSearch(Contact contact) throws AjaxException, IOException, SAXException, JSONException {
+    private Object[][] getViaSearch(Contact contact) throws OXException, IOException, SAXException, JSONException {
         ContactSearchObject contactSearch = new ContactSearchObject();
         contactSearch.setPattern("*");
         contactSearch.addFolder(expectedFolderId);
@@ -218,7 +216,7 @@ public class ContactVerificationStep extends NeedExistingStep<Contact> {
         }
     }
     
-    private void compare(Contact contact, Object[] row, int[] columns) throws AjaxException, IOException, SAXException, JSONException {
+    private void compare(Contact contact, Object[] row, int[] columns) throws OXException, IOException, SAXException, JSONException {
         assertEquals("Result should contain same number of elements as the request", Integer.valueOf(row.length), Integer.valueOf(columns.length));
         for (int i = 0; i < columns.length; i++) {
             int column = columns[i];
@@ -254,7 +252,7 @@ public class ContactVerificationStep extends NeedExistingStep<Contact> {
         fail("Object not found in response. " + name);
     }
     
-    private Object transform(int column, Object actual) throws AjaxException, IOException, SAXException, JSONException {
+    private Object transform(int column, Object actual) throws OXException, IOException, SAXException, JSONException {
 
         return actual;
     }

@@ -48,8 +48,8 @@
  */
 package com.openexchange.test.fixtures.transformators;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.test.fixtures.FixtureException;
 
 /**
  * @author tfriedrich
@@ -57,7 +57,7 @@ import com.openexchange.test.fixtures.FixtureException;
  */
 public class PriorityTransformator implements Transformator {
     
-	public Object transform(final String value) throws FixtureException {
+	public Object transform(final String value) throws OXException {
         if("low".equalsIgnoreCase(value)) {
             return Task.LOW;
         } else if ("normal".equalsIgnoreCase(value)) {
@@ -65,7 +65,7 @@ public class PriorityTransformator implements Transformator {
         } else if ("high".equalsIgnoreCase(value)) {
             return Task.HIGH;
         } else {
-            throw new FixtureException("Unknown Priority: "+value);
+            throw OXException.general("Unknown Priority: "+value);
         }
     }
 }

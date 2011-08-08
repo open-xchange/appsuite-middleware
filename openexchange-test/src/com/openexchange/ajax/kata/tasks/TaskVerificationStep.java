@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.kata.tasks;
 
+import com.openexchange.exception.OXException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import java.io.IOException;
@@ -75,8 +76,6 @@ import com.openexchange.ajax.task.actions.SearchRequest;
 import com.openexchange.ajax.task.actions.SearchResponse;
 import com.openexchange.ajax.task.actions.TaskUpdatesResponse;
 import com.openexchange.ajax.task.actions.UpdatesRequest;
-import com.openexchange.api.OXConflictException;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.DataObject;
@@ -88,7 +87,6 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.test.TaskTestManager;
-import com.openexchange.tools.servlet.AjaxException;
 
 
 /**
@@ -131,7 +129,7 @@ public class TaskVerificationStep extends NeedExistingStep<Task> {
         checkWithReadMethods(entry);
     }
 
-    private void checkWithReadMethods(Task task) throws OXException, JSONException, AjaxException, IOException, SAXException {
+    private void checkWithReadMethods(Task task) throws OXException, JSONException, OXException, IOException, SAXException {
         checkViaGet(task);
         checkViaAll(task);
         checkViaList(task);
@@ -144,13 +142,13 @@ public class TaskVerificationStep extends NeedExistingStep<Task> {
         compare(task, loaded);
     }
 
-    private void checkViaAll(Task task) throws AjaxException, IOException, SAXException, JSONException {
+    private void checkViaAll(Task task) throws OXException, IOException, SAXException, JSONException {
         Object[][] rows = getViaAll(task);
 
         checkInList(task, rows, Task.ALL_COLUMNS);
     }
 
-    private void checkViaList(Task task) throws AjaxException, IOException, SAXException, JSONException {
+    private void checkViaList(Task task) throws OXException, IOException, SAXException, JSONException {
         ListRequest listRequest = new ListRequest(
             ListIDs.l(new int[] { expectedFolderId, task.getObjectID() }),
             Task.ALL_COLUMNS);
@@ -161,7 +159,7 @@ public class TaskVerificationStep extends NeedExistingStep<Task> {
         checkInList(task, rows, Task.ALL_COLUMNS);
     }
 
-    private void checkViaUpdates(Task task) throws AjaxException, IOException, SAXException, JSONException, OXConflictException {
+    private void checkViaUpdates(Task task) throws OXException, IOException, SAXException, JSONException, OXException {
         UpdatesRequest updates = new UpdatesRequest(expectedFolderId, Task.ALL_COLUMNS, Task.OBJECT_ID, Order.ASCENDING, new Date(0), getTimeZone());
         TaskUpdatesResponse response = client.execute(updates);
 
@@ -170,18 +168,18 @@ public class TaskVerificationStep extends NeedExistingStep<Task> {
 
     }
     
-    private void checkViaSearch(Task task) throws AjaxException, IOException, SAXException, JSONException{
+    private void checkViaSearch(Task task) throws OXException, IOException, SAXException, JSONException{
         Object[][] rows = getViaSearch(task);
         checkInList(task, rows, Task.ALL_COLUMNS);
     }
 
-    private Object[][] getViaAll(Task task) throws AjaxException, IOException, SAXException, JSONException {
+    private Object[][] getViaAll(Task task) throws OXException, IOException, SAXException, JSONException {
         AllRequest all = new AllRequest(expectedFolderId, Task.ALL_COLUMNS, Task.OBJECT_ID, Order.ASCENDING);
         CommonAllResponse response = client.execute(all);
         return response.getArray();
     }
     
-    private Object[][] getViaSearch(Task task) throws AjaxException, IOException, SAXException, JSONException{
+    private Object[][] getViaSearch(Task task) throws OXException, IOException, SAXException, JSONException{
         TaskSearchObject searchObject = new TaskSearchObject();
         searchObject.addFolder(expectedFolderId);
         searchObject.setPattern("*");
@@ -220,7 +218,7 @@ public class TaskVerificationStep extends NeedExistingStep<Task> {
         }
     }
 
-    private void checkInList(Task task, Object[][] rows, int[] columns) throws AjaxException, IOException, SAXException, JSONException {
+    private void checkInList(Task task, Object[][] rows, int[] columns) throws OXException, IOException, SAXException, JSONException {
         int idPos = findIDIndex(columns);
 
         for (int i = 0; i < rows.length; i++) {
@@ -236,7 +234,7 @@ public class TaskVerificationStep extends NeedExistingStep<Task> {
 
     }
 
-    private void compare(Task task, Object[] row, int[] columns) throws AjaxException, IOException, SAXException, JSONException {
+    private void compare(Task task, Object[] row, int[] columns) throws OXException, IOException, SAXException, JSONException {
         for (int i = 0; i < columns.length; i++) {
             int column = columns[i];
             if (column == DataObject.LAST_MODIFIED_UTC || column == DataObject.LAST_MODIFIED) {
@@ -310,7 +308,7 @@ public class TaskVerificationStep extends NeedExistingStep<Task> {
         return -1;
     }
 
-    private Object transform(int column, Object actual) throws AjaxException, IOException, SAXException, JSONException {
+    private Object transform(int column, Object actual) throws OXException, IOException, SAXException, JSONException {
         switch (column) {
         case Task.START_DATE:
         case Task.END_DATE:

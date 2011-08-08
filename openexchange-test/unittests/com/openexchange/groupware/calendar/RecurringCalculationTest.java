@@ -48,6 +48,7 @@
  */
 package com.openexchange.groupware.calendar;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.dateString;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.recalculate;

@@ -1,6 +1,7 @@
 
 package com.openexchange.groupware.update;
 
+import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -8,12 +9,10 @@ import java.sql.SQLException;
 import java.util.SortedSet;
 import java.util.List;
 import junit.framework.TestCase;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.filestore.FilestoreStorage;
-import com.openexchange.groupware.filestore.FilestoreException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
@@ -22,7 +21,6 @@ import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
-import com.openexchange.tools.file.external.FileStorageException;
 
 public abstract class UpdateTest extends TestCase {
 
@@ -59,7 +57,7 @@ public abstract class UpdateTest extends TestCase {
         Init.stopServer();
     }
 
-    protected final void exec(final String sql, final Object... args) throws DBPoolingException, SQLException {
+    protected final void exec(final String sql, final Object... args) throws OXException, SQLException {
         Connection con = null;
         PreparedStatement stmt = null;
 
@@ -84,14 +82,14 @@ public abstract class UpdateTest extends TestCase {
     protected final void execSafe(final String sql, final Object... args) {
         try {
             exec(sql, args);
-        } catch (DBPoolingException x) {
+        } catch (OXException x) {
             x.printStackTrace();
         } catch (SQLException x) {
             x.printStackTrace();
         }
     }
 
-    protected final void assertNoResults(final String sql, final Object... args) throws DBPoolingException, SQLException {
+    protected final void assertNoResults(final String sql, final Object... args) throws OXException, SQLException {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -116,7 +114,7 @@ public abstract class UpdateTest extends TestCase {
         }
     }
 
-    protected final void assertResult(final String sql, final Object... args) throws DBPoolingException, SQLException {
+    protected final void assertResult(final String sql, final Object... args) throws OXException, SQLException {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -141,7 +139,7 @@ public abstract class UpdateTest extends TestCase {
         }
     }
 
-    protected final void assertNotInFilestorage(List<String> paths) throws FileStorageException, FilestoreException {
+    protected final void assertNotInFilestorage(List<String> paths) throws OXException, OXException {
 
         FileStorage fs = QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
         SortedSet<String> existingPaths = fs.getFileList();
@@ -163,7 +161,7 @@ public abstract class UpdateTest extends TestCase {
 
     private class UpdateTaskDBProvider implements DBProvider {
 
-        public Connection getReadConnection(final Context ctx) throws DBPoolingException {
+        public Connection getReadConnection(final Context ctx) throws OXException {
             return Database.get(ctx, false);
         }
 
@@ -171,7 +169,7 @@ public abstract class UpdateTest extends TestCase {
             Database.back(ctx, false, con);
         }
 
-        public Connection getWriteConnection(final Context ctx) throws DBPoolingException {
+        public Connection getWriteConnection(final Context ctx) throws OXException {
             return Database.get(ctx, true);
 
         }

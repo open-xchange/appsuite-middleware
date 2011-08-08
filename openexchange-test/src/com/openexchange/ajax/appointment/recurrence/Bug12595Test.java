@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.TimeZone;
@@ -69,14 +70,12 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.AJAXClient.User;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * Tests if bug 12595 appears again. 
@@ -137,7 +136,7 @@ public final class Bug12595Test extends AbstractAJAXSession {
         assertFalse("Change exception get lost.", response.hasError());
     }
 
-    private void sharePrivateFolder() throws AjaxException, IOException,
+    private void sharePrivateFolder() throws OXException, IOException,
         SAXException, JSONException {
         sharedFolder = new FolderObject(boss.getValues().getPrivateAppointmentFolder());
         sharedFolder.setModule(FolderObject.CALENDAR);
@@ -163,7 +162,7 @@ public final class Bug12595Test extends AbstractAJAXSession {
         sharedFolder.setLastModified(response2.getTimestamp());
     }
 
-    private void createSeries() throws AjaxException, IOException, SAXException,
+    private void createSeries() throws OXException, IOException, SAXException,
         JSONException {
         series = new Appointment();
         series.setParentFolderID(sharedFolder.getObjectID());
@@ -187,7 +186,7 @@ public final class Bug12595Test extends AbstractAJAXSession {
         series.setLastModified(response.getTimestamp());
     }
 
-    private void createException() throws AjaxException, IOException,
+    private void createException() throws OXException, IOException,
         SAXException, JSONException, OXException {
         final GetRequest request = new GetRequest(sharedFolder.getObjectID(),
             series.getObjectID(), 2);
@@ -217,7 +216,7 @@ public final class Bug12595Test extends AbstractAJAXSession {
         exception.setObjectID(response2.getId());
     }
 
-    private void deleteSeries() throws AjaxException, IOException, SAXException,
+    private void deleteSeries() throws OXException, IOException, SAXException,
         JSONException {
         final GetRequest request = new GetRequest(series.getParentFolderID(),
             series.getObjectID());
@@ -227,7 +226,7 @@ public final class Bug12595Test extends AbstractAJAXSession {
         secretary.execute(request2);
     }
 
-    private void unsharePrivateFolder() throws AjaxException, IOException,
+    private void unsharePrivateFolder() throws OXException, IOException,
         SAXException, JSONException {
         final OCLPermission perm1 = Create.ocl(boss.getValues().getUserId(),
             false, true,

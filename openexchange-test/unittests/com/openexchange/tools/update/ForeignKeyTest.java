@@ -48,6 +48,7 @@
  */
 package com.openexchange.tools.update;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.contexts.Context;

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.reminder;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -69,7 +70,6 @@ import com.openexchange.ajax.reminder.actions.RangeResponse;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.reminder.ReminderObject;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
@@ -154,7 +154,7 @@ public class Bug14111Test extends AbstractAJAXSession {
         super.tearDown();
     }
 
-    private Appointment createAppointment() throws AjaxException, IOException, SAXException, JSONException {
+    private Appointment createAppointment() throws OXException, IOException, SAXException, JSONException {
         final Calendar cal = (Calendar) calendar.clone();
         final Appointment appointmentObj = new Appointment();
 

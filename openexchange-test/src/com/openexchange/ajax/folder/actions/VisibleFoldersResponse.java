@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.folder.actions;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -61,7 +62,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
 
 /**

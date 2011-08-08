@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.subscribe.actions;
 
+import com.openexchange.exception.OXException;
 import java.util.Collection;
 import java.util.LinkedList;
 import org.json.JSONException;

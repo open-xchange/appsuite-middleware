@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -84,7 +85,6 @@ import com.openexchange.ajax.parser.ContactParser;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.user.UserTools;
 import com.openexchange.ajax.writer.ContactWriter;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.Contact;
@@ -97,7 +97,6 @@ import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.test.OXTestToolkit;
 import com.openexchange.test.TestException;
 import com.openexchange.tools.URLParameter;
-import com.openexchange.tools.servlet.AjaxException;
 
 public class ContactTest extends AbstractAJAXTest {
 
@@ -835,7 +834,7 @@ public class ContactTest extends AbstractAJAXTest {
         return jsonArray2ContactArray((JSONArray)response.getData(), cols);
     }
 
-    public static Contact loadUser(final WebConversation webCon, final int userId, String host, final String session) throws AjaxException, IOException, SAXException, JSONException {
+    public static Contact loadUser(final WebConversation webCon, final int userId, String host, final String session) throws OXException, IOException, SAXException, JSONException {
         return UserTools.getUserContact(webCon, host, session, userId);
     }
 

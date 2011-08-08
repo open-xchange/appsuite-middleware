@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.config;
 
+import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.TimeZone;
@@ -76,9 +77,7 @@ import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.tools.URLParameter;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * Utility class that contains all methods for making config requests to the
@@ -165,13 +164,13 @@ public final class ConfigTools extends Assert {
     @Deprecated
     public static int getUserId(final WebConversation conversation,
         final String hostName, final String sessionId) throws IOException,
-        SAXException, JSONException, AjaxException, ConfigurationException {
+        SAXException, JSONException, OXException, OXException {
         AJAXConfig.init();
         final AJAXSession session = new AJAXSession(conversation, hostName, sessionId);
         return Executor.execute(session, new GetRequest(Tree.Identifier), hostName).getInteger();
     }
 
-    public static int getUserId(final AJAXClient client) throws AjaxException,
+    public static int getUserId(final AJAXClient client) throws OXException,
         IOException, SAXException, JSONException {
         return client.getValues().getUserId();
     }
@@ -185,11 +184,11 @@ public final class ConfigTools extends Assert {
      * @throws SAXException if parsing of the response fails.
      * @throws IOException if getting the response fails.
      * @throws JSONException if parsing the response fails.
-     * @throws ConfigurationException 
+     * @throws OXException 
      */
     public static TimeZone getTimeZone(final WebConversation conversation,
         final String hostName, final String sessionId) throws IOException,
-        SAXException, JSONException, AjaxException, ConfigurationException {
+        SAXException, JSONException, OXException, OXException {
         AJAXConfig.init();
         final AJAXSession session = new AJAXSession(conversation, hostName, sessionId);
         final String value = ConfigTools.get(session, new GetRequest(Tree
@@ -206,11 +205,11 @@ public final class ConfigTools extends Assert {
      * @throws SAXException if parsing of the response fails.
      * @throws IOException if getting the response fails.
      * @throws JSONException if parsing the response fails.
-     * @throws ConfigurationException 
+     * @throws OXException 
      */
     public static boolean getMailFilterValue(final WebConversation conversation,
         final String hostName, final String sessionId) throws IOException,
-        SAXException, JSONException, AjaxException, ConfigurationException {
+        SAXException, JSONException, OXException, OXException {
         AJAXConfig.init();
         final AJAXSession session = new AJAXSession(conversation, hostName, sessionId);
         final Boolean value = ConfigTools.get(session, new GetRequest(Tree
@@ -222,11 +221,11 @@ public final class ConfigTools extends Assert {
      * @deprecated use {@link UserValues} from {@link AJAXClient} or make directly the request with {@link GetRequest}.
      */
     @Deprecated
-    public static GetResponse get(AJAXClient client, GetRequest request) throws AjaxException, IOException, SAXException, JSONException {
+    public static GetResponse get(AJAXClient client, GetRequest request) throws OXException, IOException, SAXException, JSONException {
         return client.execute(request);
     }
 
-    public static GetResponse get(final AJAXSession session, final GetRequest request) throws AjaxException, IOException, SAXException, JSONException {
+    public static GetResponse get(final AJAXSession session, final GetRequest request) throws OXException, IOException, SAXException, JSONException {
         return Executor.execute(session, request);
     }
 
@@ -234,13 +233,13 @@ public final class ConfigTools extends Assert {
      * @deprecated use {@link AJAXClient#execute(com.openexchange.ajax.framework.AJAXRequest)}.
      */
     @Deprecated
-    public static SetResponse set(final AJAXClient client, final SetRequest request) throws AjaxException, IOException,
+    public static SetResponse set(final AJAXClient client, final SetRequest request) throws OXException, IOException,
         SAXException, JSONException {
         return client.execute(request);
     }
 
     public static GetResponse get(final AJAXSession session,
-        final GetRequest request, String protocol, String hostname) throws AjaxException, IOException,
+        final GetRequest request, String protocol, String hostname) throws OXException, IOException,
         SAXException, JSONException {
         if(protocol != null && hostname != null) {
             return Executor.execute(session, request, protocol, hostname);

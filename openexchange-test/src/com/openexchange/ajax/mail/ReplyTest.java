@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.List;
 import org.json.JSONException;
@@ -57,8 +58,6 @@ import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.mail.contenttypes.MailContentType;
-import com.openexchange.configuration.ConfigurationException;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * {@link ReplyTest}
@@ -71,7 +70,7 @@ public class ReplyTest extends AbstractReplyTest {
         super(name);
     }
 
-    public void testShouldReplyToSenderOnly() throws AjaxException, IOException, SAXException, JSONException, ConfigurationException {
+    public void testShouldReplyToSenderOnly() throws OXException, IOException, SAXException, JSONException, OXException {
         AJAXClient client2 = null;
         try {
             // note: doesn't work the other way around on the dev system, because only the first account is set up correctly.

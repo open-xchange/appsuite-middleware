@@ -48,16 +48,15 @@
  */
 package com.openexchange.test.fixtures.transformators;
 
+import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
-import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
-import com.openexchange.test.fixtures.FixtureException;
 import com.openexchange.test.fixtures.FixtureLoader;
 import com.openexchange.test.fixtures.SimpleCredentials;
 
@@ -77,7 +76,7 @@ public class DistributionListTransformator implements Transformator {
 
 	private FixtureLoader fixtureLoader;
 	
-	public Object transform(final String value) throws FixtureException {
+	public Object transform(final String value) throws OXException {
 		if (null == value || 1 > value.length()) { return null; }
 		String fixtureName = "users";
 		String fixtureEntry = "";
@@ -96,7 +95,7 @@ public class DistributionListTransformator implements Transformator {
 		return distributionListEntries.toArray(new DistributionListEntryObject[distributionListEntries.size()]);
     }
 	
-	private DistributionListEntryObject getDistributionListEntry(final String fixtureName, final String fixtureEntry) throws FixtureException {
+	private DistributionListEntryObject getDistributionListEntry(final String fixtureName, final String fixtureEntry) throws OXException {
 		if ("users".equals(fixtureName)) {
 			return getUserDistributionListEntry(fixtureName, fixtureEntry);
 		} else if ("contacts".equals(fixtureName)) {
@@ -104,11 +103,11 @@ public class DistributionListTransformator implements Transformator {
 		} else if ("custom".equals(fixtureName)) {
 			return getCustomDistributionListEntry(fixtureName, fixtureEntry);
 		} else {
-			throw new FixtureException("Unable to convert " + fixtureName + ":" + fixtureEntry + " into a distribution list entry.");
+			throw OXException.general("Unable to convert " + fixtureName + ":" + fixtureEntry + " into a distribution list entry.");
 		}
 	}
 
-	private DistributionListEntryObject getContactDistributionListEntry(final String fixtureName, final String fixtureEntry) throws FixtureException {
+	private DistributionListEntryObject getContactDistributionListEntry(final String fixtureName, final String fixtureEntry) throws OXException {
 		final Contact contact = fixtureLoader.getFixtures(fixtureName, Contact.class).getEntry(fixtureEntry).getEntry();
 		String email = null;
 		if (contact.containsEmail1()) {
@@ -118,44 +117,33 @@ public class DistributionListTransformator implements Transformator {
 		} else if (contact.containsEmail3()) {
 			email = contact.getEmail3();
 		}
-		if (null == email) { throw new FixtureException("Contacts must contain an email address"); }
-		try {
-			return new DistributionListEntryObject(contact.getDisplayName(), email, DistributionListEntryObject.INDEPENDENT);
-		} catch (final ContactException e) {
-			throw new FixtureException(e);
-		}
+		if (null == email) { throw OXException.general("Contacts must contain an email address"); }
+		return new DistributionListEntryObject(contact.getDisplayName(), email, DistributionListEntryObject.INDEPENDENT);
 	}
 
-	private DistributionListEntryObject getUserDistributionListEntry(final String fixtureName, final String fixtureEntry) throws FixtureException {
+	private DistributionListEntryObject getUserDistributionListEntry(final String fixtureName, final String fixtureEntry) throws OXException {
 		final Contact user = fixtureLoader.getFixtures(fixtureName, SimpleCredentials.class).getEntry(fixtureEntry).getEntry().asContact();
 		DistributionListEntryObject entry = new DistributionListEntryObject();
 		entry.setDisplayname(user.getDisplayName());
-		try {
-			entry.setEmailaddress(user.getEmail1());
-		} catch (final ContactException e) {
-			throw new FixtureException(e);
-		}
+		entry.setEmailaddress(user.getEmail1());
 		entry.setEntryID(DistributionListEntryObject.INDEPENDENT);
 		return entry;
 //		return new DistributionListEntryObject(user.getDisplayName(), user.getEmail1(), DistributionListEntryObject.INDEPENDENT);
 	}
 	
-	private DistributionListEntryObject getCustomDistributionListEntry(final String fixtureName, final String fixtureEntry) throws FixtureException {
+	private DistributionListEntryObject getCustomDistributionListEntry(final String fixtureName, final String fixtureEntry) throws OXException {
 		InternetAddress address = null;
 		try {
 			final InternetAddress[] addresses = InternetAddress.parse(fixtureEntry);
 			if (null == addresses || 1 > addresses.length || null == addresses[0]) {
-				throw new FixtureException("unable to parse custom distributionlist entry from " + fixtureEntry);
+				throw OXException.general("unable to parse custom distributionlist entry from " + fixtureEntry);
 			} else {
 				address = addresses[0];
 			}
 		} catch (AddressException e) {
-			throw new FixtureException("unable to parse custom distributionlist entry from " + fixtureEntry + ": " + e.getMessage());
+			throw OXException.general("unable to parse custom distributionlist entry from " + fixtureEntry + ": " + e.getMessage());
 		}
-		try {
-			return new DistributionListEntryObject(address.getPersonal(), address.getAddress(), DistributionListEntryObject.INDEPENDENT);
-		} catch (final ContactException e) {
-			throw new FixtureException(e);
-		}
+		return new DistributionListEntryObject(address.getPersonal(), address.getAddress(), DistributionListEntryObject.INDEPENDENT);
+
 	}
 }

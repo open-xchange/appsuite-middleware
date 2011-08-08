@@ -52,7 +52,6 @@
 	<classpathentry kind="lib" path="lib/xercesImpl.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.common/jars/javax.servlet_2.4.0.v200706111738.jar" sourcepath="/com.openexchange.common/source/javax.servlet.source_2.4.0.v200706111738.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.common/jars/org.apache.commons.logging_1.0.4.v200706111724.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.common/jars/org.eclipse.osgi.services_3.3.0.v20110513.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.messaging.twitter"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.publish.online.infostore"/>
@@ -70,5 +69,6 @@
 	<classpathentry kind="lib" path="lib/ical4j-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/backport-util-concurrent-3.1.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.folder.json"/>
+	<classpathentry kind="lib" path="/com.openexchange.common/jars/org.eclipse.osgi.services_3.3.0.v20110513.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

@@ -49,8 +49,11 @@
 
 package com.openexchange.groupware.tasks.json.actions;
 
+import java.util.ArrayList;
 import java.util.Date;
-import org.json.JSONArray;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -61,7 +64,6 @@ import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.ajax.parser.CalendarParser;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.writer.TaskWriter;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.DataObject;
@@ -145,20 +147,17 @@ public final class SearchAction extends AbstractTaskAction {
         System.arraycopy(columnsToLoad, 0, internalColumns, 0, columnsToLoad.length);
         internalColumns[columnsToLoad.length] = DataObject.LAST_MODIFIED;
 
-        final JSONArray jsonResponseArray = new JSONArray();
-
+        final Map<String, List<Task>> taskMap = new HashMap<String, List<Task>>(1);
+        final List<Task> taskList = new ArrayList<Task>();
         SearchIterator<Task> it = null;
-
         try {
-            final TaskWriter taskWriter = new TaskWriter(req.getTimeZone());
-
             final TasksSQLInterface taskssql = new TasksSQLImpl(req.getSession());
             it = taskssql.getTasksByExtendedSearch(searchObj, orderBy, order, internalColumns);
 
             while (it.hasNext()) {
                 final Task taskObj = it.next();
-                taskWriter.writeArray(taskObj, columns, jsonResponseArray);
-
+                taskList.add(taskObj);
+                
                 lastModified = taskObj.getLastModified();
 
                 if (timestamp.getTime() < lastModified.getTime()) {
@@ -166,7 +165,8 @@ public final class SearchAction extends AbstractTaskAction {
                 }
             }
 
-            return new AJAXRequestResult(jsonResponseArray, timestamp, "json");
+            taskMap.put("tasks", taskList);
+            return new AJAXRequestResult(taskMap, timestamp, "tasks");
         } finally {
             if (it != null) {
                 it.close();

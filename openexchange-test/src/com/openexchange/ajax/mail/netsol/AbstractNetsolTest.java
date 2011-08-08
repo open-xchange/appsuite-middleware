@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail.netsol;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 
 import org.json.JSONException;
@@ -60,7 +61,6 @@ import com.openexchange.ajax.mail.AbstractMailTest;
 import com.openexchange.ajax.mail.netsol.actions.NetsolAllRequest;
 import com.openexchange.ajax.mail.netsol.actions.NetsolDeleteRequest;
 import com.openexchange.mail.MailListField;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * {@link AbstractNetsolTest}
@@ -81,12 +81,12 @@ public abstract class AbstractNetsolTest extends AbstractMailTest {
 
 	protected static final int[] COLUMNS_ID = new int[] { MailListField.FOLDER_ID.getField(), MailListField.ID.getField() };
 
-	protected final void netsolClearFolder(final String folder) throws AjaxException, IOException, SAXException,
+	protected final void netsolClearFolder(final String folder) throws OXException, IOException, SAXException,
 			JSONException {
 		Executor.execute(getSession(), new NetsolDeleteRequest(getIDs(folder), true));
 	}
 
-	protected final FolderAndID[] getIDs(final String folder) throws AjaxException, IOException, SAXException,
+	protected final FolderAndID[] getIDs(final String folder) throws OXException, IOException, SAXException,
 			JSONException {
 		final CommonAllResponse allR = Executor.execute(getSession(), new NetsolAllRequest(folder,
 				COLUMNS_ID, 0, null));

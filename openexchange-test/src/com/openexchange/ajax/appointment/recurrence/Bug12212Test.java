@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.TimeZone;
@@ -68,10 +69,8 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonInsertResponse;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.tools.servlet.AjaxException;
 
 public class Bug12212Test extends AbstractAJAXSession {
 	final String bugname = "Test for bug 12212";
@@ -108,7 +107,7 @@ public class Bug12212Test extends AbstractAJAXSession {
 		appointment.setEndDate(calendar.getTime());
 	}
 
-	@Test public void testMovingExceptionTwiceShouldNeitherCrashNorDuplicate() throws AjaxException, IOException, SAXException, JSONException, OXException{
+	@Test public void testMovingExceptionTwiceShouldNeitherCrashNorDuplicate() throws OXException, IOException, SAXException, JSONException, OXException{
 		final AJAXClient client = getClient();
 	    final int folderId = client.getValues().getPrivateAppointmentFolder();
 	    final TimeZone tz = client.getValues().getTimeZone();

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.ajax.folder.Create.ocl;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.Date;

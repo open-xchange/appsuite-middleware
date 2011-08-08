@@ -1,5 +1,6 @@
 package com.openexchange.webdav.action;
 
+import com.openexchange.exception.OXException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;

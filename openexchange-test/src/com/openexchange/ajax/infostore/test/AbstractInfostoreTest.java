@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.infostore.test;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
@@ -57,7 +58,6 @@ import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.FolderTestManager;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -84,7 +84,7 @@ public class AbstractInfostoreTest extends AbstractAJAXSession {
         super(name);
     }
     
-    public FolderObject generateInfostoreFolder(String name) throws AjaxException, IOException, SAXException, JSONException{
+    public FolderObject generateInfostoreFolder(String name) throws OXException, IOException, SAXException, JSONException{
         //create a folder
         FolderObject myFolder = new FolderObject();
         myFolder.setFolderName(name);

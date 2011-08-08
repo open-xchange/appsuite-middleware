@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.messagestorage;
 
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
 
@@ -70,7 +70,7 @@ public final class MailFlagsTest extends MessageStorageTest {
 
     private static final MailField[] FIELDS_ID_AND_FLAGS = { MailField.ID, MailField.FLAGS };
 
-    public void testMailFlagsNonExistingIds() throws MailException {
+    public void testMailFlagsNonExistingIds() throws OXException {
         try {
             final long currentTimeMillis = System.currentTimeMillis();
             final String[] nonexistingids = new String[] { String.valueOf(currentTimeMillis), String.valueOf(currentTimeMillis + 1) };
@@ -80,7 +80,7 @@ public final class MailFlagsTest extends MessageStorageTest {
         }
     }
 
-    public void testMailFlagsNonExistingIdsMixed() throws MailException {
+    public void testMailFlagsNonExistingIdsMixed() throws OXException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {
             final long currentTimeMillis = System.currentTimeMillis();
@@ -100,18 +100,18 @@ public final class MailFlagsTest extends MessageStorageTest {
         }
     }
     
-    public void testMailFlagsNotExistingFolder() throws MailException {
+    public void testMailFlagsNotExistingFolder() throws OXException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {
             try {
                 mailAccess.getMessageStorage().updateMessageFlags("MichGibtEsNicht1337", uids, MailMessage.FLAG_SEEN, true);
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 assertTrue("Wrong Exception is thrown.", e.getErrorCode().endsWith("-1002"));
             }
 
             try {
                 mailAccess.getMessageStorage().updateMessageFlags("MichGibtEsNicht1337", uids, MailMessage.FLAG_ANSWERED, true);
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 assertTrue("Wrong Exception is thrown.", e.getErrorCode().endsWith("-1002"));
             }
         } finally {
@@ -119,7 +119,7 @@ public final class MailFlagsTest extends MessageStorageTest {
         }
     }
 
-    public void testMailFlags() throws MailException {
+    public void testMailFlags() throws OXException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {
             mailAccess.getMessageStorage().updateMessageFlags("INBOX", uids, MailMessage.FLAG_SEEN, true);
@@ -138,7 +138,7 @@ public final class MailFlagsTest extends MessageStorageTest {
         }
     }
 
-    public void testMailFlagsUserFlags() throws MailException {
+    public void testMailFlagsUserFlags() throws OXException {
         if (!mailAccess.getFolderStorage().getFolder("INBOX").isSupportsUserFlags()) {
             System.err.println("User flags not supported. Skipping test for user flag $Forwarded...");
             return;
@@ -162,7 +162,7 @@ public final class MailFlagsTest extends MessageStorageTest {
         }
     }
 
-    public void testMailFlagsWith268() throws MailException {
+    public void testMailFlagsWith268() throws OXException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {
             mailAccess.getMessageStorage().updateMessageFlags("INBOX", uids, 268, true);

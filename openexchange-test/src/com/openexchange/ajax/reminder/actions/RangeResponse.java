@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.reminder.actions;
 
+import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
@@ -62,8 +63,7 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.parser.ReminderParser;
 import com.openexchange.ajax.reminder.ReminderTools;
 import com.openexchange.groupware.reminder.ReminderObject;
-import com.openexchange.tools.servlet.OXJSONException;
-import com.openexchange.tools.servlet.OXJSONException.Code;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
  * 
@@ -80,7 +80,7 @@ public class RangeResponse extends AbstractAJAXResponse {
         super(response);
     }
 
-    public ReminderObject[] getReminder(final TimeZone timeZone) throws OXJSONException {
+    public ReminderObject[] getReminder(final TimeZone timeZone) throws OXException {
         if (null == reminders) {
             final ReminderParser parser = new ReminderParser(timeZone);
             final JSONArray array = (JSONArray) getData();
@@ -92,14 +92,14 @@ public class RangeResponse extends AbstractAJAXResponse {
                     parser.parse(reminder, jremind);
                     reminders.add(reminder);
                 } catch (final JSONException e) {
-                    throw new OXJSONException(Code.JSON_READ_ERROR, e, array.toString());
+                    throw OXJSONExceptionCodes.JSON_READ_ERROR.create(array.toString());
                 }
             }
         }
         return reminders.toArray(new ReminderObject[reminders.size()]);
     }
 
-    public ReminderObject getReminderByTarget(final TimeZone timeZone, final int targetId) throws OXJSONException {
+    public ReminderObject getReminderByTarget(final TimeZone timeZone, final int targetId) throws OXException {
         return ReminderTools.searchByTarget(getReminder(timeZone), targetId);
     }
 }

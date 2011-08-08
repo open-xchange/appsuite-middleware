@@ -7,6 +7,7 @@
 
 package com.openexchange.groupware;
 
+import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import junit.framework.TestCase;
 import com.openexchange.calendar.CalendarSql;

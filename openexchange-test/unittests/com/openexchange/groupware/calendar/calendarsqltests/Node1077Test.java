@@ -49,11 +49,10 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.tools.CalendarAssertions.assertResourceParticipants;
 import static com.openexchange.groupware.calendar.tools.CalendarAssertions.assertUserParticipants;
 import java.sql.SQLException;
-import com.openexchange.api2.OXException;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 
 
@@ -128,7 +127,7 @@ public class Node1077Test extends CalendarSqlTest {
     }
 
     // Node 1077
-    public void testShouldSuppressTitleIfPermissionsDenyIt() throws OXException, SQLException, DBPoolingException {
+    public void testShouldSuppressTitleIfPermissionsDenyIt() throws OXException, SQLException, OXException {
         final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(participant1, participant2);
         appointments.save(appointment);
         clean.add(appointment);

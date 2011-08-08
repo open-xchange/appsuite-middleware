@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.contact;
 
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.StringWriter;
 import java.util.TimeZone;
@@ -63,9 +65,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ContactWriter;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.tools.URLParameter;
 
@@ -129,10 +129,9 @@ public class Bug6335Test extends ContactTest {
 		
 		
         assertTrue("Invalid character was not detected.", response.hasError());
-        //final TaskException.Code code = TaskException.Code.INVALID_DATA;
-        final AbstractOXException exc = response.getException();
-        assertEquals("Wrong exception message.", EnumComponent.CONTACT, exc.getComponent());
-        assertEquals("Wrong exception message.", Category.USER_INPUT, exc.getCategory());
-        assertEquals("Wrong exception message.", 168, exc.getDetailNumber());
+        //final OXException.Code code = OXException.Code.INVALID_DATA;
+        final OXException exc = response.getException();
+        assertEquals("Wrong exception message.", Category.CATEGORY_USER_INPUT, exc.getCategory());
+        assertEquals("Wrong exception message.", 168, exc.getCode());
 	}
 }

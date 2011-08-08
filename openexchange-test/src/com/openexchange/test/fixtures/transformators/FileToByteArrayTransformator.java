@@ -49,11 +49,11 @@
 
 package com.openexchange.test.fixtures.transformators;
 
+import com.openexchange.exception.OXException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import com.openexchange.test.fixtures.Document;
-import com.openexchange.test.fixtures.FixtureException;
 import com.openexchange.test.fixtures.FixtureLoader;
 
 /**
@@ -70,7 +70,7 @@ public class FileToByteArrayTransformator implements Transformator {
         this.fixtureLoader = fixtureLoader;
     }
 
-    public byte[] transform(final String value) throws FixtureException {
+    public byte[] transform(final String value) throws OXException {
         if (null == value || 1 > value.length()) {
             return null;
         }
@@ -86,11 +86,11 @@ public class FileToByteArrayTransformator implements Transformator {
         try {
             return getByteArray(getDocument(fixtureName, fixtureEntry).getFile());
         } catch (IOException e) {
-            throw new FixtureException(e);
+            throw new OXException(e);
         }
     }
 
-    private final Document getDocument(final String fixtureName, final String fixtureEntry) throws FixtureException {
+    private final Document getDocument(final String fixtureName, final String fixtureEntry) throws OXException {
         return fixtureLoader.getFixtures(fixtureName, Document.class).getEntry(fixtureEntry).getEntry();
     }
 

@@ -50,11 +50,8 @@
 package com.openexchange.groupware.tasks.json.actions;
 
 import java.util.Date;
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.writer.TaskWriter;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Task;
@@ -79,21 +76,16 @@ public final class GetAction extends AbstractTaskAction {
     }
 
     @Override
-    protected AJAXRequestResult perform(final TaskRequest req) throws OXException, JSONException {
+    protected AJAXRequestResult perform(final TaskRequest req) throws OXException {
         final int id = req.checkInt(AJAXServlet.PARAMETER_ID);
         final int inFolder = req.checkInt(AJAXServlet.PARAMETER_INFOLDER);
         Date timestamp = new Date(0);
 
         final TasksSQLInterface sqlinterface = new TasksSQLImpl(req.getSession());
         final Task task = sqlinterface.getTaskById(id, inFolder);
-        final TaskWriter taskWriter = new TaskWriter(req.getTimeZone());
-
-        final JSONObject jsonResponseObject = new JSONObject();
-        taskWriter.writeTask(task, jsonResponseObject);
-
         timestamp = task.getLastModified();
 
-        return new AJAXRequestResult(jsonResponseObject, timestamp, "json");
+        return new AJAXRequestResult(task, timestamp, "task");
     }
 
 }

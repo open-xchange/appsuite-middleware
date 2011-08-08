@@ -49,8 +49,8 @@
 
 package com.openexchange.mail.folderstorage;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.AbstractMailTest;
-import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -84,7 +84,7 @@ public final class MailFolderSpecialCharsTest extends AbstractMailTest {
 		super(name);
 	}
 
-	public void testFolderCreateAndSubfolders() throws MailException {
+	public void testFolderCreateAndSubfolders() throws OXException {
 			final SessionObject session = getSession();
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
@@ -120,10 +120,10 @@ public final class MailFolderSpecialCharsTest extends AbstractMailTest {
 				p.setFolderAdmin(true);
 				p.setGroupPermission(false);
 				mfd.addPermission(p);
-				MailException me = null;
+				OXException me = null;
 				try {
 					mailAccess.getFolderStorage().createFolder(mfd);
-				} catch (final MailException e) {
+				} catch (final OXException e) {
 					me = e;
 				}
 				assertTrue("Folder created although an invalid name was specified", me != null);
@@ -197,7 +197,7 @@ public final class MailFolderSpecialCharsTest extends AbstractMailTest {
 			}
 	}
 
-	public void testFailIfSeparatorContained() throws MailException {
+	public void testFailIfSeparatorContained() throws OXException {
 			final SessionObject session = getSession();
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
@@ -233,10 +233,10 @@ public final class MailFolderSpecialCharsTest extends AbstractMailTest {
 				p.setFolderAdmin(true);
 				p.setGroupPermission(false);
 				mfd.addPermission(p);
-				MailException me = null;
+				OXException me = null;
 				try {
 					mailAccess.getFolderStorage().createFolder(mfd);
-				} catch (final MailException e) {
+				} catch (final OXException e) {
 					me = e;
 					fullname = null;
 				}
@@ -259,7 +259,7 @@ public final class MailFolderSpecialCharsTest extends AbstractMailTest {
 				me = null;
 				try {
 					mailAccess.getFolderStorage().createFolder(mfd);
-				} catch (final MailException e) {
+				} catch (final OXException e) {
 					me = e;
 					fullname = null;
 				}
@@ -282,7 +282,7 @@ public final class MailFolderSpecialCharsTest extends AbstractMailTest {
 				me = null;
 				try {
 					mailAccess.getFolderStorage().createFolder(mfd);
-				} catch (final MailException e) {
+				} catch (final OXException e) {
 					me = e;
 					fullname = null;
 				}

@@ -49,6 +49,7 @@
 
 package com.openexchange.test.fixtures.ajax;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.json.JSONException;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -58,7 +59,6 @@ import com.openexchange.ajax.session.actions.LoginRequest;
 import com.openexchange.test.fixtures.SimpleCredentials;
 import com.openexchange.test.fixtures.TestUserConfig;
 import com.openexchange.test.fixtures.TestUserConfigFactory;
-import com.openexchange.tools.servlet.AjaxException;
 
 public class AJAXUserConfigFactory implements TestUserConfigFactory {
 
@@ -68,7 +68,7 @@ public class AJAXUserConfigFactory implements TestUserConfigFactory {
             AJAXClient client = new AJAXClient(session);
             session.setId(client.execute(new LoginRequest(credentials.getLogin(), credentials.getPassword(), LoginTools.generateAuthId(), AJAXUserConfigFactory.class.getName(), "6.15.0")).getSessionId());
             return new AJAXUserConfig(client);
-        } catch (AjaxException e) {
+        } catch (OXException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();

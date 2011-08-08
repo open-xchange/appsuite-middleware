@@ -47,71 +47,50 @@
  *
  */
 
-package com.openexchange.ajax.appointment.helper;
+package com.openexchange.groupware.tasks.json.converters;
 
-import com.openexchange.groupware.AbstractOXException;
+import java.util.TimeZone;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.Converter;
+import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.TimeZoneUtils;
+import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * {@link AbstractTaskJSONResultConverter}
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class OXError {
+public abstract class AbstractTaskJSONResultConverter implements ResultConverter {
+    
+    protected static final String OUTPUT_FORMAT = "json";
+    
+    private TimeZone timeZone;
 
-    private String category;
 
-    private int number;
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
-    public String getCategory() {
-        return category;
-    }
-
-    public void setNumber(int number) {
-        this.number = number;
-    }
-
-    public int getNumber() {
-        return number;
-    }
-
-    public OXError(String category, int number) {
-        setNumber(number);
-        setCategory(category);
-    }
-
-    public boolean matches(OXError other) {
-        boolean matchesNumber = false, matchesCategory = false;
-
-        if (category == null || other.getCategory() == null)
-            matchesCategory = true;
-        else
-            matchesCategory = category.equals(other.getCategory());
-
-        if (number == -1 || other.getNumber() == -1)
-            matchesNumber = true;
-        else
-            matchesNumber = number == other.getNumber();
-
-        return matchesNumber && matchesCategory;
-    }
-
-    public boolean matches(AbstractOXException exception) {
-        return matches(new OXError(exception.getComponent().getAbbreviation(), exception.getDetailNumber()));
-    }
-
-    public boolean matches(Throwable t) {
-        try {
-            AbstractOXException exception = (AbstractOXException) t;
-            return matches(new OXError(exception.getComponent().getAbbreviation(), exception.getDetailNumber()));
-        } catch (ClassCastException e) {
-            return false;
-        }
+    @Override
+    public String getOutputFormat() {
+        return OUTPUT_FORMAT;
     }
 
     @Override
-    public String toString() {
-        return String.format("%3s-%04d", category, number);
+    public Quality getQuality() {
+        return Quality.GOOD;
     }
+    
+    @Override
+    public void convert(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
+        timeZone = TimeZoneUtils.getTimeZone(session.getUser().getTimeZone());
+        convertTask(request, result, session, converter);        
+    }
+    
+    protected abstract void convertTask(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException;
+
+    protected TimeZone getTimeZone() {
+        return timeZone;
+    }
+
 }

@@ -1,5 +1,6 @@
 package com.openexchange.groupware.infostore.webdav;
 
+import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -10,9 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import junit.framework.TestCase;
-import com.openexchange.api2.OXException;
 import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
@@ -36,9 +35,7 @@ import com.openexchange.setuptools.TestConfig;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
-import com.openexchange.tools.oxfolder.OXFolderLogicException;
 import com.openexchange.tools.oxfolder.OXFolderManager;
-import com.openexchange.tools.oxfolder.OXFolderPermissionException;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.webdav.protocol.TestWebdavFactoryBuilder;
 import com.openexchange.webdav.protocol.WebdavCollection;
@@ -207,7 +204,7 @@ public class PermissionTest extends TestCase implements SessionHolder {
             resource.putBodyAndGuessLength(new ByteArrayInputStream(new byte[] {1,2,3}));
             resource.save();
             assertTrue(true);
-        } catch (final WebdavProtocolException e) {
+        } catch (final OXException e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -228,7 +225,7 @@ public class PermissionTest extends TestCase implements SessionHolder {
             collection.setDisplayName("rename");
             collection.save();
             assertTrue(true);
-        } catch (final WebdavProtocolException e) {
+        } catch (final OXException e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -337,7 +334,7 @@ public class PermissionTest extends TestCase implements SessionHolder {
         return perm;
     }
 
-    public FolderObject createFolder(final FolderObject parent, final String fname, OCLPermission...permissions) throws OXException, DBPoolingException {
+    public FolderObject createFolder(final FolderObject parent, final String fname, OCLPermission...permissions) throws OXException, OXException {
         if(permissions.length == 0) {
             permissions = new OCLPermission[] {adminPermission(cleanupUser)};
         }
@@ -394,7 +391,7 @@ public class PermissionTest extends TestCase implements SessionHolder {
         }
     }
 
-    protected void rm(final int objectID) throws SQLException, OXFolderPermissionException, OXFolderLogicException, Exception {
+    protected void rm(final int objectID) throws SQLException, OXException, OXException, Exception {
 		//OXFolderAction ofa = new OXFolderAction(session);
 		final OXFolderManager oxma = OXFolderManager.getInstance(session);
 		//ofa.deleteFolder(objectID, session, true, System.currentTimeMillis());

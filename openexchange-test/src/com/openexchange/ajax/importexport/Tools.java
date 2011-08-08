@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.importexport;
 
+import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -68,7 +69,6 @@ import com.openexchange.ajax.importexport.actions.OutlookCSVImportResponse;
 import com.openexchange.ajax.importexport.actions.VCardImportRequest;
 import com.openexchange.ajax.importexport.actions.VCardImportResponse;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.versit.ICalendar;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitObject;
@@ -90,31 +90,31 @@ public final class Tools {
     }
 
     public static CSVImportResponse importCSV(final AJAXClient client,
-        final CSVImportRequest request) throws AjaxException, IOException,
+        final CSVImportRequest request) throws OXException, IOException,
         SAXException, JSONException {
         return Executor.execute(client, request);
     }
 
     public static ICalImportResponse importICal(final AJAXClient client,
-        final ICalImportRequest request) throws AjaxException, IOException,
+        final ICalImportRequest request) throws OXException, IOException,
         SAXException, JSONException {
         return Executor.execute(client, request);
     }
 
     public static VCardImportResponse importVCard(final AJAXClient client,
-        final VCardImportRequest request) throws AjaxException, IOException,
+        final VCardImportRequest request) throws OXException, IOException,
         SAXException, JSONException {
         return Executor.execute(client, request);
     }
 
     public static OutlookCSVImportResponse importOutlookCSV(final AJAXClient client,
-        final OutlookCSVImportRequest request) throws AjaxException, IOException,
+        final OutlookCSVImportRequest request) throws OXException, IOException,
         SAXException, JSONException {
         return (OutlookCSVImportResponse) Executor.execute(client, request);
     }
 
     public static InputStream toICal(final AJAXClient client,
-        final Appointment appointment) throws AjaxException, IOException,
+        final Appointment appointment) throws OXException, IOException,
         SAXException, JSONException, ConverterException {
         final VersitDefinition definition = ICalendar.vEvent2;
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();

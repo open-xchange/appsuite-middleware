@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -70,10 +71,7 @@ import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.parser.ResponseParser;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.test.TestException;
-import com.openexchange.tools.servlet.AjaxException;
 
 public class InfostoreAJAXTest extends AbstractAJAXTest {
 
@@ -122,7 +120,7 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
     }
 
 
-    private int createFolderForTest(final int userId) throws JSONException, OXException, IOException, SAXException, TestException, AjaxException {
+    private int createFolderForTest(final int userId) throws JSONException, OXException, IOException, SAXException, OXException, OXException {
         final int parent = FolderTest.getMyInfostoreFolder(getWebConversation(),getHostName(),sessionId,userId).getObjectID();
         return FolderTest.insertFolder(getWebConversation(), getHostName(), getSessionId(), userId, false,parent,
                 "NewInfostoreFolder"+System.currentTimeMillis(), "infostore", FolderObject.PUBLIC, -1, true);

@@ -49,8 +49,8 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
-import com.openexchange.ajax.appointment.helper.OXError;
-import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Changes;
 import com.openexchange.groupware.container.Expectations;
@@ -91,7 +91,7 @@ public class TestsForChangingAmongYearlyRecurrences extends ManagedAppointmentTe
         changes.put(Appointment.RECURRENCE_TYPE, Appointment.YEARLY);
         changes.put(Appointment.DAYS, Appointment.MONDAY);
 
-        negativeAssertionOnUpdate.check(app, changes, new OXError("APP", -1));
+        negativeAssertionOnUpdate.check(app, changes, new OXException(-1));
     }
 
     public void testShouldChangeFromYearly2ToYearly1With127() throws Exception {
@@ -134,7 +134,7 @@ public class TestsForChangingAmongYearlyRecurrences extends ManagedAppointmentTe
         changes.put(Appointment.INTERVAL, 1);
         changes.put(Appointment.DAY_IN_MONTH, 1);
 
-        negativeAssertionOnUpdate.check(app, changes, new OXError("APP", OXCalendarException.Code.RECURRING_MISSING_YEARLY_MONTH.getDetailNumber()));
+        negativeAssertionOnUpdate.check(app, changes, OXCalendarExceptionCodes.RECURRING_MISSING_YEARLY_MONTH.create());
     }
     
     public void testShouldFailChangingFromYearly2ToYearly1UsingOnlyAdditionalData() throws Exception {
@@ -149,7 +149,7 @@ public class TestsForChangingAmongYearlyRecurrences extends ManagedAppointmentTe
         changes.put(Appointment.RECURRENCE_TYPE, Appointment.YEARLY);
         changes.put(Appointment.DAYS, 127);
 
-        negativeAssertionOnUpdate.check(app, changes, new OXError("APP", -1));
+        negativeAssertionOnUpdate.check(app, changes, new OXException(-1));
     }
 
 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mailaccount.actions;
 
+import com.openexchange.exception.OXException;
 import java.util.EnumSet;
 import java.util.Set;
 import org.json.JSONException;
@@ -58,7 +59,6 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Header;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.json.fields.GetSwitch;
 
 
@@ -104,7 +104,7 @@ public class MailAccountUpdateRequest implements AJAXRequest<MailAccountUpdateRe
             }
             
             return incrementalUpdate;
-        } catch (final MailAccountException e) {
+        } catch (final OXException e) {
             throw new JSONException(e);
         }
     }

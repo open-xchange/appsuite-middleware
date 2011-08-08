@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -59,9 +60,7 @@ import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.mail.contenttypes.MailContentType;
-import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.tools.servlet.AjaxException;
 
 
 /**
@@ -86,7 +85,7 @@ public class ReplyAllTest extends AbstractReplyTest {
         return returnees;
     }
     
-    public void testShouldReplyToSenderAndAllRecipients() throws AjaxException, IOException, SAXException, JSONException, ConfigurationException {
+    public void testShouldReplyToSenderAndAllRecipients() throws OXException, IOException, SAXException, JSONException, OXException {
         AJAXClient client1 = new AJAXClient(User.User1);
         AJAXClient client2 = new AJAXClient(User.User2);
         

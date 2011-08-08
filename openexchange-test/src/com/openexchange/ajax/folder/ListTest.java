@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.folder;
 
+import com.openexchange.exception.OXException;
 import java.util.Iterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

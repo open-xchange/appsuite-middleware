@@ -48,6 +48,7 @@
  */
 package com.openexchange.i18n.impl;
 
+import com.openexchange.exception.OXException;
 import junit.framework.TestCase;
 
 import java.io.FileNotFoundException;

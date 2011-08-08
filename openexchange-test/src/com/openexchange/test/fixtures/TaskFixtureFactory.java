@@ -48,6 +48,7 @@
  */
 package com.openexchange.test.fixtures;
 
+import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -102,7 +103,7 @@ public class TaskFixtureFactory implements FixtureFactory<Task> {
             addTransformator(new ParticipantTransformator(fixtureLoader), "participants");
         }
 
-        public Fixture<Task> getEntry(final String entryName) throws FixtureException {
+        public Fixture<Task> getEntry(final String entryName) throws OXException {
             if (tasks.containsKey(entryName)) {
                 return tasks.get(entryName);
             }

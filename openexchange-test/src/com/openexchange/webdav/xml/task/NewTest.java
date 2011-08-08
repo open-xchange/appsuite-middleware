@@ -49,16 +49,15 @@
 
 package com.openexchange.webdav.xml.task;
 
+import com.openexchange.exception.OXException;
 import java.util.Date;
 
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.tasks.TaskException;
-import com.openexchange.groupware.tasks.TaskException.Code;
+import com.openexchange.groupware.tasks.TaskExceptionCode;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.FolderTest;
 import com.openexchange.webdav.xml.GroupUserTest;
 import com.openexchange.webdav.xml.TaskTest;
@@ -144,8 +143,8 @@ public class NewTest extends TaskTest {
             final int objectId = insertTask(getWebConversation(), taskObj, PROTOCOL + getHostName(), getLogin(), getPassword());
             deleteTask(getWebConversation(), objectId, parentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
             fail("conflict exception expected!");
-        } catch (final TestException exc) {
-            assertExceptionMessage(exc.getMessage(), new TaskException(Code.PRIVATE_FLAG).getErrorCode());
+        } catch (final OXException exc) {
+            assertTrue(exc.similarTo(TaskExceptionCode.PRIVATE_FLAG));
         }
     }
     // Bug 12011

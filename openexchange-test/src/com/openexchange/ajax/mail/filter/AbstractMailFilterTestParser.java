@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail.filter;
 
+import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.mail.filter.fields.RuleFields;

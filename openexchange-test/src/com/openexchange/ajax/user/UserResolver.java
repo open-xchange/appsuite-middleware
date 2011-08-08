@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.user;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.json.JSONException;
 import com.openexchange.ajax.UserTest;
@@ -59,7 +60,6 @@ import com.openexchange.ajax.user.actions.SearchRequest;
 import com.openexchange.ajax.user.actions.SearchResponse;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.ContactSearchObject;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * {@link UserResolver}
@@ -78,7 +78,7 @@ public class UserResolver {
     /**
      * Finds users that match the search pattern.
      */
-    public User[] resolveUser(String searchPattern) throws AjaxException, IOException, JSONException {
+    public User[] resolveUser(String searchPattern) throws OXException, IOException, JSONException {
         final ContactSearchObject search = new ContactSearchObject();
         search.setDisplayName(searchPattern);
         search.setGivenName(searchPattern);
@@ -95,7 +95,7 @@ public class UserResolver {
     /**
      * Loads a user by its user id.
      */
-    public User getUser(int identifier) throws AjaxException, IOException, JSONException {
+    public User getUser(int identifier) throws OXException, IOException, JSONException {
         GetRequest request = new GetRequest(identifier, client.getValues().getTimeZone());
         GetResponse response = client.execute(request);
         return response.getUser();

@@ -6,12 +6,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajax.AppointmentTest;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
-import com.openexchange.test.TestException;
 
 public class Bug8724Test extends AppointmentTest {
 	
@@ -64,7 +64,7 @@ public class Bug8724Test extends AppointmentTest {
 		
 		try {
 			listAppointment(getWebConversation(), new Appointment[] { appointmentListObject }, _appointmentFields, timeZone, getHostName(), getSessionId());
-		} catch (final TestException exc) {
+		} catch (final OXException exc) {
 			assertTrue(true);
 		}
 		
@@ -95,7 +95,7 @@ public class Bug8724Test extends AppointmentTest {
 		
 		try {
 			listAppointment(getWebConversation(), appointmentArray, _appointmentFields, timeZone, getHostName(), getSessionId());
-		} catch (final TestException exc) {
+		} catch (final OXException exc) {
 			assertTrue(true);
 		}
 		

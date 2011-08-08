@@ -1,7 +1,7 @@
 package com.openexchange.groupware.infostore;
 
+import com.openexchange.exception.OXException;
 import java.sql.SQLException;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.infostore.database.impl.CreateDocumentAction;
 import com.openexchange.groupware.infostore.database.impl.CreateVersionAction;
 import com.openexchange.tx.UndoableAction;
@@ -51,11 +51,11 @@ public class CreateVersionActionTest extends AbstractInfostoreActionTest {
         }
     }
 
-    private void checkInVersionTable(final DocumentMetadata doc) throws DBPoolingException, SQLException {
+    private void checkInVersionTable(final DocumentMetadata doc) throws OXException, SQLException {
         assertResult("SELECT 1 FROM infostore_document WHERE infostore_id = ? and cid = ?", doc.getId(), getContext().getContextId());
     }
 
-    private void checkNotInVersionTable(final DocumentMetadata doc) throws DBPoolingException, SQLException {
+    private void checkNotInVersionTable(final DocumentMetadata doc) throws OXException, SQLException {
         assertNoResult("SELECT 1 FROM infostore_document WHERE infostore_id = ? and cid = ?", doc.getId(), getContext().getContextId());    
     }
 

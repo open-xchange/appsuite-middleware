@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.task.actions;
 
+import com.openexchange.exception.OXException;
 import java.util.TimeZone;
 
 import org.json.JSONObject;
@@ -57,7 +58,6 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.parser.TaskParser;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.tools.servlet.OXJSONException;
 
 /**
  * Stores the response of getting a task from the server.
@@ -76,9 +76,9 @@ public class GetResponse extends AbstractAJAXResponse {
 
     /**
      * @return the task
-     * @throws OXJSONException parsing the task out of the response fails.
+     * @throws OXException parsing the task out of the response fails.
      */
-    public Task getTask(final TimeZone timeZone) throws OXJSONException {
+    public Task getTask(final TimeZone timeZone) throws OXException {
         if (null == task) {
             final Task parsed = new Task();
             new TaskParser(true, timeZone).parse(parsed, (JSONObject) getData());

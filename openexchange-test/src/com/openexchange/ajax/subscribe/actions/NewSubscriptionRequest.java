@@ -49,13 +49,13 @@
 
 package com.openexchange.ajax.subscribe.actions;
 
+import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.json.SubscriptionJSONException;
 import com.openexchange.subscribe.json.SubscriptionJSONWriter;
 
 /**
@@ -97,7 +97,7 @@ public class NewSubscriptionRequest extends AbstractSubscriptionRequest<NewSubsc
     public Object getBody() throws JSONException {
         try {
             return new SubscriptionJSONWriter().write(getSubscription(), getFormDescription(), null);
-        } catch (SubscriptionJSONException e) {
+        } catch (OXException e) {
             throw new JSONException(e);
         }
     }

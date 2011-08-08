@@ -49,15 +49,12 @@
 
 package com.openexchange.groupware.contact;
 
+import com.openexchange.exception.OXException;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import junit.framework.TestCase;
-import com.openexchange.api.OXConflictException;
-import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.ContactSQLInterface;
-import com.openexchange.api2.OXConcurrentModificationException;
-import com.openexchange.api2.OXException;
 import com.openexchange.contact.LdapServer;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.SimContext;
@@ -148,7 +145,7 @@ public class ContactSearchMuliplexerTest extends TestCase {
         
         return new ContactSQLInterface() {
 
-            public void deleteContactObject(final int objectId, final int inFolder, final Date clientLastModified) throws OXObjectNotFoundException, OXConflictException, OXException {
+            public void deleteContactObject(final int objectId, final int inFolder, final Date clientLastModified) throws OXException, OXException, OXException {
                 // TODO Auto-generated method stub
                 
             }
@@ -158,7 +155,7 @@ public class ContactSearchMuliplexerTest extends TestCase {
                 
             }
 
-            public void updateContactObject(final Contact contactObj, final int inFolder, final Date clientLastModified) throws OXException, OXConcurrentModificationException {
+            public void updateContactObject(final Contact contactObj, final int inFolder, final Date clientLastModified) throws OXException, OXException {
                 // TODO Auto-generated method stub
                 
             }

@@ -49,6 +49,7 @@
 
 package com.openexchange.webdav.xml.appointment.actions;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.webdav.xml.framework.Constants.NS_DAV;
 
 import java.io.ByteArrayOutputStream;
@@ -60,10 +61,7 @@ import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.output.XMLOutputter;
 
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.webdav.xml.AppointmentWriter;
 import com.openexchange.webdav.xml.framework.RequestTools;
 
@@ -84,20 +82,20 @@ public class InsertRequest extends AbstractAppointmentRequest<InsertResponse> {
         return Method.PUT;
     }
 
-    protected Element createProp() throws AbstractOXException, IOException {
+    protected Element createProp() throws OXException, IOException {
         appointment.removeObjectID();
         final Element eProp = new Element("prop", NS_DAV);
 
         final AppointmentWriter appointmentWriter = new AppointmentWriter();
         try {
             appointmentWriter.addContent2PropElement(eProp, appointment, false, true);
-        } catch (final SearchIteratorException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
         return eProp;
     }
 
-    public RequestEntity getEntity() throws AbstractOXException, IOException {
+    public RequestEntity getEntity() throws OXException, IOException {
         final Document doc = RequestTools.createPropertyUpdate(createProp());
         final XMLOutputter xo = new XMLOutputter();
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
