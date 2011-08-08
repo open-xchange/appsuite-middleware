@@ -789,6 +789,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         recycle();
         input = null;
         output = null;
+        this.thread = null;
+        this.socket = null;
         final long duration = System.currentTimeMillis() - st;
         listenerMonitor.addUseTime(duration);
         /*
