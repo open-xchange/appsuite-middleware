@@ -63,6 +63,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
@@ -475,7 +476,12 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     @Override
     public Map<?, ?> getParameterMap() {
-        return Collections.unmodifiableMap(parameters);
+        final Map<String, String[]> retval = new HashMap<String, String[]>(parameters.size());
+        for (final Entry<String, List<String>> entry : parameters.entrySet()) {
+            final List<String> values = entry.getValue();
+            retval.put(entry.getKey(), values.toArray(new String[values.size()]));
+        }
+        return retval;
     }
 
     @Override
