@@ -108,7 +108,7 @@ public final class CoyoteTask implements Task<Object> {
 
     @Override
     public void setThreadName(final ThreadRenamer threadRenamer) {
-        threadRenamer.renamePrefix("AJP-Processor-");
+        threadRenamer.renamePrefix("AJP-Processor");
     }
 
     /**
