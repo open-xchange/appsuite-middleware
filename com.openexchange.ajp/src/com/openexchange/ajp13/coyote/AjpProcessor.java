@@ -346,6 +346,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         super();
         mainLock = new ReentrantReadWriteLock();
         softLock = mainLock.readLock();
+        lastWriteAccess = Long.MAX_VALUE;
         this.listenerMonitor = listenerMonitor;
         this.number = Long.valueOf(NUMBER.incrementAndGet());
         servletId = new StringBuilder(16);
@@ -1812,7 +1813,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         servlet = null;
         servletPath = null;
         servletId.setLength(0);
-        lastWriteAccess = -1L;
+        lastWriteAccess = Long.MAX_VALUE;
         request.recycle();
         response.recycle();
         certificates.recycle();
