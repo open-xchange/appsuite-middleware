@@ -1,3 +1,7 @@
+* 2011-08-08 - marcus.klein@open-xchange.com
+
+ - Fix for bug 20043: If IMAP IDLE is in always mode try to detect changes by checking count of unread, deleted and total messages.
+
 * 2011-08-04 - marcus.klein@open-xchange.com
 
  - Fix for bug 19991: Fixed possible NullPointerException if Java is not able to determine network interfaces for push sockets.

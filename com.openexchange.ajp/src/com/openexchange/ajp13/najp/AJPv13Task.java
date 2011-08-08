@@ -206,6 +206,7 @@ public final class AJPv13Task implements Task<Object>, com.openexchange.ajp13.wa
      *
      * @return The sequential task number
      */
+    @Override
     public Long getNum() {
         return num;
     }
@@ -213,6 +214,7 @@ public final class AJPv13Task implements Task<Object>, com.openexchange.ajp13.wa
     /**
      * Cancels this AJP task; meaning to close the client socket and to stop its execution.
      */
+    @Override
     public void cancel() {
         final Socket s = client;
         if (null != s) {
@@ -295,6 +297,11 @@ public final class AJPv13Task implements Task<Object>, com.openexchange.ajp13.wa
     @Override
     public long getProcessingStartTime() {
         return processingStart;
+    }
+
+    @Override
+    public long getLastWriteAccess() {
+        return ajpConnection.getLastWriteAccess();
     }
 
     /**
