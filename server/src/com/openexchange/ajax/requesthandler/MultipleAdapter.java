@@ -99,7 +99,9 @@ public class MultipleAdapter implements MultipleHandler {
             if (RequestConstants.DATA.equals(name)) {
                 request.setData(entry.getValue());
             } else {
-                request.putParameter(name, entry.getValue().toString());
+            	if (entry.getValue() != null && entry.getValue() != JSONObject.NULL) {
+                    request.putParameter(name, entry.getValue().toString());
+            	}
             }
         }
         String path = "";

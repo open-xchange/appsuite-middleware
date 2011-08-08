@@ -112,7 +112,11 @@ public final class UpdatesAction extends AbstractAppointmentAction {
 
         final boolean bRecurrenceMaster = Boolean.parseBoolean(req.getParameter(AppointmentRequest.RECURRENCE_MASTER));
         final boolean showPrivates = Boolean.parseBoolean(req.getParameter(AJAXServlet.PARAMETER_SHOW_PRIVATE_APPOINTMENTS));
-        final int folderId = req.optInt(AJAXServlet.PARAMETER_FOLDERID);
+        
+        int folderId = req.optInt(AJAXServlet.PARAMETER_FOLDERID);
+        if (folderId == AppointmentAJAXRequest.NOT_FOUND) {
+        	folderId = 0;
+        }
 
         boolean showAppointmentInAllFolders = false;
 

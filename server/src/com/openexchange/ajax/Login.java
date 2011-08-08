@@ -445,7 +445,7 @@ public class Login extends AJAXServlet {
 
                     final Cookie[] cookies = req.getCookies();
                     if (cookies == null) {
-                        throw OXJSONExceptionCodes.INVALID_COOKIE.create();
+                    	throw OXJSONExceptionCodes.INVALID_COOKIE.create();
                     }
 
                     final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
