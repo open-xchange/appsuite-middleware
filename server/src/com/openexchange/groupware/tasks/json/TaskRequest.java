@@ -51,7 +51,6 @@ package com.openexchange.groupware.tasks.json;
 
 import java.util.Date;
 import java.util.TimeZone;
-import java.util.regex.Pattern;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.TimeZoneUtils;
@@ -153,34 +152,7 @@ public final class TaskRequest {
         }
     }
 
-    /**
-     * Split pattern for CSV.
-     */
-    private static final Pattern SPLIT = Pattern.compile(" *, *");
 
-    /**
-     * Checks for presence of comma-separated <code>int</code> list.
-     *
-     * @param name The parameter name
-     * @return The <code>int</code> array
-     * @throws OXException If an error occurs
-     */
-    public int[] checkIntArray(final String name) throws OXException {
-        final String parameter = request.getParameter(name);
-        if (null == parameter) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
-        }
-        final String[] sa = SPLIT.split(parameter, 0);
-        final int[] ret = new int[sa.length];
-        for (int i = 0; i < sa.length; i++) {
-            try {
-                ret[i] = Integer.parseInt(sa[i].trim());
-            } catch (final NumberFormatException e) {
-                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
-            }
-        }
-        return ret;
-    }
 
     public Date getDate(final String name) throws OXException {
         final String parameter = request.getParameter(name);
@@ -207,35 +179,6 @@ public final class TaskRequest {
     }
 
     /**
-     * Checks for presence of comma-separated <code>String</code> list.
-     *
-     * @param name The parameter name
-     * @return The <code>String</code> array
-     * @throws OXException If parameter is absdent
-     */
-    public String[] checkStringArray(final String name) throws OXException {
-        final String parameter = request.getParameter(name);
-        if (null == parameter) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
-        }
-        return SPLIT.split(parameter, 0);
-    }
-
-    /**
-     * Checks for presence of comma-separated <code>String</code> list.
-     *
-     * @param name The parameter name
-     * @return The <code>String</code> array
-     */
-    public String[] optStringArray(final String name) {
-        final String parameter = request.getParameter(name);
-        if (null == parameter) {
-            return null;
-        }
-        return SPLIT.split(parameter, 0);
-    }
-
-    /**
      * Gets the request.
      *
      * @return The request
@@ -251,5 +194,9 @@ public final class TaskRequest {
      */
     public ServerSession getSession() {
         return session;
+    }
+
+    public int[] checkIntArray(String parameterColumns) throws OXException {
+        return TaskRequestTools.checkIntArray(request, parameterColumns);
     }
 }

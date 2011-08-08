@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,45 +47,50 @@
  *
  */
 
-package com.openexchange.groupware.tasks.json.actions;
+package com.openexchange.groupware.tasks.json.converters;
 
-import java.util.Date;
-import com.openexchange.ajax.AJAXServlet;
+import java.util.TimeZone;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.ajax.requesthandler.Converter;
+import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.tasks.TasksSQLImpl;
-import com.openexchange.groupware.tasks.json.TaskRequest;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.TimeZoneUtils;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link GetAction}
+ * {@link AbstractTaskJSONResultConverter}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public final class GetAction extends AbstractTaskAction {
+public abstract class AbstractTaskJSONResultConverter implements ResultConverter {
+    
+    protected static final String OUTPUT_FORMAT = "json";
+    
+    private TimeZone timeZone;
 
-    /**
-     * Initializes a new {@link GetAction}.
-     * @param services
-     */
-    public GetAction(final ServiceLookup services) {
-        super(services);
+
+    @Override
+    public String getOutputFormat() {
+        return OUTPUT_FORMAT;
     }
 
     @Override
-    protected AJAXRequestResult perform(final TaskRequest req) throws OXException {
-        final int id = req.checkInt(AJAXServlet.PARAMETER_ID);
-        final int inFolder = req.checkInt(AJAXServlet.PARAMETER_INFOLDER);
-        Date timestamp = new Date(0);
+    public Quality getQuality() {
+        return Quality.GOOD;
+    }
+    
+    @Override
+    public void convert(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
+        timeZone = TimeZoneUtils.getTimeZone(session.getUser().getTimeZone());
+        convertTask(request, result, session, converter);        
+    }
+    
+    protected abstract void convertTask(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException;
 
-        final TasksSQLInterface sqlinterface = new TasksSQLImpl(req.getSession());
-        final Task task = sqlinterface.getTaskById(id, inFolder);
-        timestamp = task.getLastModified();
-
-        return new AJAXRequestResult(task, timestamp, "task");
+    protected TimeZone getTimeZone() {
+        return timeZone;
     }
 
 }

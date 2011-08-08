@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,45 +47,47 @@
  *
  */
 
-package com.openexchange.groupware.tasks.json.actions;
+package com.openexchange.groupware.tasks.json.converters;
 
-import java.util.Date;
-import com.openexchange.ajax.AJAXServlet;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.ajax.requesthandler.Converter;
+import com.openexchange.ajax.writer.TaskWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.tasks.TasksSQLImpl;
-import com.openexchange.groupware.tasks.json.TaskRequest;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link GetAction}
+ * {@link TaskResultConverter}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public final class GetAction extends AbstractTaskAction {
+public class TaskResultConverter extends AbstractTaskJSONResultConverter {
+    
+    private static final String INPUT_FORMAT = "task";
 
-    /**
-     * Initializes a new {@link GetAction}.
-     * @param services
-     */
-    public GetAction(final ServiceLookup services) {
-        super(services);
+    @Override
+    public String getInputFormat() {
+        return INPUT_FORMAT;
     }
 
     @Override
-    protected AJAXRequestResult perform(final TaskRequest req) throws OXException {
-        final int id = req.checkInt(AJAXServlet.PARAMETER_ID);
-        final int inFolder = req.checkInt(AJAXServlet.PARAMETER_INFOLDER);
-        Date timestamp = new Date(0);
+    public void convertTask(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
+        final Task task = (Task) result.getResultObject();
+        final TaskWriter taskWriter = new TaskWriter(getTimeZone());
 
-        final TasksSQLInterface sqlinterface = new TasksSQLImpl(req.getSession());
-        final Task task = sqlinterface.getTaskById(id, inFolder);
-        timestamp = task.getLastModified();
+        final JSONObject jsonResponseObject = new JSONObject();
+        try {
+            taskWriter.writeTask(task, jsonResponseObject);
+        } catch (JSONException e) {
+            throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+        }
 
-        return new AJAXRequestResult(task, timestamp, "task");
+        result.setResultObject(jsonResponseObject, OUTPUT_FORMAT);
     }
 
 }

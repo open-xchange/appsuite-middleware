@@ -49,14 +49,17 @@
 
 package com.openexchange.groupware.tasks.json.actions;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.writer.TaskWriter;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.DataObject;
@@ -101,18 +104,16 @@ public final class ListAction extends AbstractTaskAction {
         System.arraycopy(columnsToLoad, 0, internalColumns, 0, columnsToLoad.length);
         internalColumns[columnsToLoad.length] = DataObject.LAST_MODIFIED;
 
+        final Map<String, List<Task>> taskMap = new HashMap<String, List<Task>>(1);
+        final List<Task> taskList = new ArrayList<Task>();
         SearchIterator<Task> it = null;
-
-        final JSONArray jsonResponseArray = new JSONArray();
-
         try {
             final TasksSQLInterface taskssql = new TasksSQLImpl(req.getSession());
-            final TaskWriter taskwriter = new TaskWriter(req.getTimeZone());
             it = taskssql.getObjectsById(objectIdAndFolderId, internalColumns);
 
             while (it.hasNext()) {
                 final Task taskobject = it.next();
-                taskwriter.writeArray(taskobject, columns, jsonResponseArray);
+                taskList.add(taskobject);
 
                 lastModified = taskobject.getLastModified();
 
@@ -121,7 +122,8 @@ public final class ListAction extends AbstractTaskAction {
                 }
             }
 
-            return new AJAXRequestResult(jsonResponseArray, timestamp, "json");
+            taskMap.put("tasks", taskList);
+            return new AJAXRequestResult(taskMap, timestamp, "tasks");
         } finally {
             if(it!=null) {
                 it.close();

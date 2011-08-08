@@ -49,12 +49,14 @@
 
 package com.openexchange.groupware.tasks.json.actions;
 
+import java.util.ArrayList;
 import java.util.Date;
-import org.json.JSONArray;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.writer.TaskWriter;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.DataObject;
@@ -101,7 +103,9 @@ public final class UpdatesAction extends AbstractTaskAction {
 
         Date lastModified = null;
 
-        final JSONArray jsonResponseArray = new JSONArray();
+        final Map<String, List<Task>> taskMap = new HashMap<String, List<Task>>(2);
+        final List<Task> modified = new ArrayList<Task>();
+        final List<Task> deleted = new ArrayList<Task>();
         SearchIterator<Task> it = null;
         try {
             final int[] internalColumns = new int[columnsToLoad.length+1];
@@ -109,13 +113,11 @@ public final class UpdatesAction extends AbstractTaskAction {
             internalColumns[columnsToLoad.length] = DataObject.LAST_MODIFIED;
 
             final TasksSQLInterface taskssql = new TasksSQLImpl(req.getSession());
-            final TaskWriter taskWriter = new TaskWriter(req.getTimeZone());
 
             it = taskssql.getModifiedTasksInFolder(folderId, internalColumns, requestedTimestamp);
             while (it.hasNext()) {
                 final Task taskObj = it.next();
-
-                taskWriter.writeArray(taskObj, columns, jsonResponseArray);
+                modified.add(taskObj);
 
                 lastModified = taskObj.getLastModified();
 
@@ -123,14 +125,14 @@ public final class UpdatesAction extends AbstractTaskAction {
                     timestamp = lastModified;
                 }
             }
+            taskMap.put("modified", modified);
 
             if (!bIgnoreDelete) {
                 it.close();
                 it = taskssql.getDeletedTasksInFolder(folderId, internalColumns, requestedTimestamp);
                 while (it.hasNext()) {
                     final Task taskObj = it.next();
-
-                    jsonResponseArray.put(taskObj.getObjectID());
+                    deleted.add(taskObj);
 
                     lastModified = taskObj.getLastModified();
 
@@ -139,8 +141,9 @@ public final class UpdatesAction extends AbstractTaskAction {
                     }
                 }
             }
+            taskMap.put("deleted", deleted);
 
-            return new AJAXRequestResult(jsonResponseArray, timestamp, "json");
+            return new AJAXRequestResult(taskMap, timestamp, "tasks");
         } finally {
             if(it!=null) {
                 it.close();
