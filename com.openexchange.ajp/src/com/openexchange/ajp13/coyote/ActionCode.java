@@ -132,6 +132,10 @@ public enum ActionCode {
      * Callback for setting FORM auth body replay
      */
     REQ_SET_BODY_REPLAY(20),
+    /**
+     * Deliver a ping-intended message to client
+     */
+    CLIENT_PING(21),
     ;
     
 

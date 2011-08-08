@@ -72,4 +72,6 @@ public interface Task {
     void cancel();
 
     Long getNum();
+
+    long getLastWriteAccess();
 }

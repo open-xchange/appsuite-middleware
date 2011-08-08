@@ -128,12 +128,14 @@ public final class CoyoteTask implements Task<Object> {
     @Override
     public void beforeExecute(final Thread t) {
         watcher.addTask(ajpProcessor);
+        ajpProcessor.startKeepAlivePing();
         listenerMonitor.incrementNumActive();
         changeNumberOfRunningAJPTasks(true);
     }
 
     @Override
     public void afterExecute(final Throwable t) {
+        ajpProcessor.stopKeepAlivePing();
         watcher.removeTask(ajpProcessor);
         changeNumberOfRunningAJPTasks(false);
         listenerMonitor.decrementNumActive();
