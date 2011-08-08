@@ -49,6 +49,7 @@
 
 package com.openexchange.webdav.xml;
 
+import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -67,8 +68,6 @@ import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
-import com.openexchange.api.OXConflictException;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.FolderObject;
@@ -569,7 +568,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
             }
         }
 
-        throw new OXConflictException("no contact default folder found!");
+        throw OXException.general("no contact default folder found!");
     }
 
     public static FolderObject getTaskDefaultFolder(final WebConversation webCon, String host, final String login, final String password) throws Exception {
@@ -587,7 +586,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
             }
         }
 
-        throw new OXConflictException("no task default folder found!");
+        throw OXException.general("no task default folder found!");
     }
 
     protected static void addElementType(final int type, final Element parent) throws Exception {
@@ -610,7 +609,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
                 DataWriter.addElement(FolderFields.MODULE, "task", parent);
                 break;
             default:
-                throw new OXConflictException("invalid module: " + module);
+                throw OXException.general("invalid module: " + module);
         }
     }
 

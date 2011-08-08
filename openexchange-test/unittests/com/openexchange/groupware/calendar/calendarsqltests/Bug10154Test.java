@@ -49,11 +49,11 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.tools.CalendarAssertions.assertUserParticipants;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;

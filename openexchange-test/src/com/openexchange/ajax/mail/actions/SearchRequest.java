@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail.actions;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;

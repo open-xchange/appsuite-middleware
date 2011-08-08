@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment.helper;
 
+import com.openexchange.exception.OXException;
 import java.util.List;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.groupware.container.Appointment;

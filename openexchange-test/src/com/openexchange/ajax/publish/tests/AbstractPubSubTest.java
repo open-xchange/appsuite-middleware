@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.publish.tests;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -71,7 +72,6 @@ import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.test.ContactTestManager;
 import com.openexchange.test.FolderTestManager;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -215,13 +215,13 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
         return pub;
     }
 
-    protected Subscription generateOXMFSubscription(DynamicFormDescription formDescription, String folderID) throws AjaxException, IOException, SAXException, JSONException {
+    protected Subscription generateOXMFSubscription(DynamicFormDescription formDescription, String folderID) throws OXException, IOException, SAXException, JSONException {
         Subscription sub = generateOXMFSubscription(formDescription);
         sub.setFolderId(folderID);
         return sub;
     }
 
-    protected Subscription generateOXMFSubscription(DynamicFormDescription formDescription) throws AjaxException, IOException, SAXException, JSONException {
+    protected Subscription generateOXMFSubscription(DynamicFormDescription formDescription) throws OXException, IOException, SAXException, JSONException {
         Subscription subscription = new Subscription();
 
         subscription.setDisplayName("mySubscription");
@@ -238,7 +238,7 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
         return subscription;
     }
 
-    protected FolderObject createDefaultContactFolder() throws AjaxException, IOException, SAXException, JSONException {
+    protected FolderObject createDefaultContactFolder() throws OXException, IOException, SAXException, JSONException {
         FolderObject folder = getFolderManager().generateFolder(
             "pubsub default contact folder "+System.currentTimeMillis(),
             FolderObject.CONTACT,
@@ -248,11 +248,11 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
         return folder;
     }
 
-    protected FolderObject createDefaultInfostoreFolder() throws AjaxException, IOException, SAXException, JSONException {
+    protected FolderObject createDefaultInfostoreFolder() throws OXException, IOException, SAXException, JSONException {
         return createDefaultInfostoreFolder(null);
     }
     
-    protected FolderObject createDefaultInfostoreFolder(String folderName) throws AjaxException, IOException, SAXException, JSONException {
+    protected FolderObject createDefaultInfostoreFolder(String folderName) throws OXException, IOException, SAXException, JSONException {
     	if (folderName == null) {
     		folderName = "pubsub default infostore folder "+getName()+"-"+System.currentTimeMillis();
     	}
@@ -265,7 +265,7 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
             return folder;
     }
 
-    protected Contact createDefaultContactFolderWithOneContact() throws AjaxException, IOException, SAXException, JSONException {
+    protected Contact createDefaultContactFolderWithOneContact() throws OXException, IOException, SAXException, JSONException {
         FolderObject folder = createDefaultContactFolder();
 
         Contact contact = generateContact("Herbert", "Meier");

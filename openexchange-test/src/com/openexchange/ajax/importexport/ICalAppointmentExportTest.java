@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.importexport;
 
+import com.openexchange.exception.OXException;
 import java.util.Date;
 
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;

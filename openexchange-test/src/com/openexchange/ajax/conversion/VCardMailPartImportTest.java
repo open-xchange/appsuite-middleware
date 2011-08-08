@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.conversion;
 
+import com.openexchange.exception.OXException;
 import java.io.InputStream;
 
 import org.json.JSONArray;

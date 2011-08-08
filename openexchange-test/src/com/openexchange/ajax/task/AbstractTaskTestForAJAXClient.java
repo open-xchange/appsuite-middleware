@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.task;
 
+import com.openexchange.exception.OXException;
 import java.util.HashSet;
 import java.util.Set;
 

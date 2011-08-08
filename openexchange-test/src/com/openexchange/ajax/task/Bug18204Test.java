@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.task;
 
+import com.openexchange.exception.OXException;
 import java.util.Calendar;
 import java.util.TimeZone;
 import com.openexchange.ajax.framework.AJAXClient;

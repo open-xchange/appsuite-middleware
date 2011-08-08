@@ -50,14 +50,16 @@
 package com.openexchange.i18n;
 
 import static com.openexchange.java.Autoboxing.i;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+
 import junit.framework.TestCase;
-import com.openexchange.exceptions.StringComponent;
+
+import com.openexchange.exception.OXException;
 import com.openexchange.i18n.parsing.I18NErrorMessages;
-import com.openexchange.i18n.parsing.I18NException;
 import com.openexchange.i18n.parsing.POParser;
 import com.openexchange.i18n.parsing.Translations;
 
@@ -72,12 +74,9 @@ public class GettextParserTest extends TestCase {
 
     @Override
     public void setUp() {
-        I18NErrorMessages.FACTORY.setApplicationId("com.openexchange.test");
-        I18NErrorMessages.FACTORY.setComponent(new StringComponent("TST"));
+      }
 
-    }
-
-    public void testShouldParseSingleLineEntries() throws I18NException {
+    public void testShouldParseSingleLineEntries() throws OXException {
         final String poText = "msgid \"I am a message.\"\n"
             + "msgstr \"Ich bin eine Nachricht.\"\n"
             + "msgid \"I am another message.\"\n"
@@ -92,7 +91,7 @@ public class GettextParserTest extends TestCase {
             "Ich bin eine andere Nachricht.");
     }
 
-    public void testShouldParseMultiLineEntries() throws I18NException {
+    public void testShouldParseMultiLineEntries() throws OXException {
         final String poText = "msgid \"\"\n"
             + "\"This is part of a longer string\\n\"\n"
             + "\"Typically multiline\"\n" + "msgstr \"\"\n"
@@ -111,7 +110,7 @@ public class GettextParserTest extends TestCase {
             "Dies ist ein Teil einerer l\u00e4ngeren Zeichenkette\nTypischerweise mehrzeilig");
     }
 
-    public void testShouldBeRobustWithCarriageReturns() throws I18NException {
+    public void testShouldBeRobustWithCarriageReturns() throws OXException {
         final String poText = "msgid \"\"\r\n"
                 + "\"This is part of a longer string\\n\"\r\n"
                 + "\"Typically multiline\"\n" + "msgstr \"\"\r\n"
@@ -131,7 +130,7 @@ public class GettextParserTest extends TestCase {
     }
 
 
-    public void testShouldParsePluralForms() throws I18NException {
+    public void testShouldParsePluralForms() throws OXException {
         // Do no die on plurals, but until we need more complex handling
         // this will ignore every value but the first
         final String poText = "msgid \"%d message\"\n"
@@ -147,7 +146,7 @@ public class GettextParserTest extends TestCase {
         assertTranslation(translations, "Another message", "Andere Nachricht");
     }
 
-    public void testShouldParseMultilinePlurals() throws I18NException {
+    public void testShouldParseMultilinePlurals() throws OXException {
         // Do no die on plurals, but until we need more complex handling
         // this will ignore every value but the first
         final String poText = "msgid \"\"\n"
@@ -174,7 +173,7 @@ public class GettextParserTest extends TestCase {
 
     }
 
-    public void testShouldIgnoreComments() throws I18NException {
+    public void testShouldIgnoreComments() throws OXException {
         final String poText = "# This is a comment line.\n"
             + "msgid \"I am a message.\"\n"
             + "msgstr \"Ich bin eine Nachricht.\"\n"
@@ -192,7 +191,7 @@ public class GettextParserTest extends TestCase {
             "Ich bin eine andere Nachricht.");
     }
 
-    public void testShouldIgnoreWhitespace() throws I18NException {
+    public void testShouldIgnoreWhitespace() throws OXException {
         final String poText = "msgid     \"I am a message.\"\n"
             + "msgstr    \"Ich bin eine Nachricht.\"    \n"
             + "msgid   \"I am another message.\"\n"
@@ -207,7 +206,7 @@ public class GettextParserTest extends TestCase {
             "Ich bin eine andere Nachricht.");
     }
 
-    public void testShouldIgnoreEmptyLines() throws I18NException {
+    public void testShouldIgnoreEmptyLines() throws OXException {
         final String poText = "msgid \"I am a message.\"\n\n"
             + "msgstr \"Ich bin eine Nachricht.\"\n\n\n"
             + "msgid \"I am another message.\"\n\n  \n"
@@ -222,7 +221,7 @@ public class GettextParserTest extends TestCase {
             "Ich bin eine andere Nachricht.");
     }
 
-    public void testShouldIgnoreMessageContext() throws I18NException {
+    public void testShouldIgnoreMessageContext() throws OXException {
         final String poText = "msgctxt Testing\n"
             + "msgid \"I am a message.\"\n\n"
             + "msgstr \"Ich bin eine Nachricht.\"\n\n\n" + "msgctxt Testing\n"
@@ -238,7 +237,7 @@ public class GettextParserTest extends TestCase {
             "Ich bin eine andere Nachricht.");
     }
 
-    public void testShouldSurviveRunawayStrings() throws I18NException {
+    public void testShouldSurviveRunawayStrings() throws OXException {
         final String poText = "msgid \"I am a message.\"\n"
             + "msgstr \"Ich bin eine Nachricht.\n"
             + "msgid \"I am another message.\"\n"
@@ -264,10 +263,10 @@ public class GettextParserTest extends TestCase {
         try {
             parse(poText.getBytes("UTF-8"));
             fail("Expected parsing error");
-        } catch (final I18NException x) {
-            assertEquals(I18NErrorMessages.UNEXPECTED_TOKEN.getDetailNumber(), x
-                .getDetailNumber());
-            final Object[] messageArgs = x.getMessageArgs();
+        } catch (final OXException x) {
+            assertEquals(I18NErrorMessages.UNEXPECTED_TOKEN.getNumber(), x
+                .getCode());
+            final Object[] messageArgs = x.getDisplayArgs();
             final String incorrectToken = (String) messageArgs[0];
             final String filename = (String) messageArgs[1];
             final int line = i((Integer) messageArgs[2]);
@@ -292,11 +291,11 @@ public class GettextParserTest extends TestCase {
         try {
             parse(poText.getBytes("UTF-8"));
             fail("Expected parsing error");
-        } catch (final I18NException x) {
+        } catch (final OXException x) {
             assertEquals(
                 com.openexchange.i18n.parsing.I18NErrorMessages.UNEXPECTED_TOKEN_CONSUME
-                    .getDetailNumber(), x.getDetailNumber());
-            final Object[] messageArgs = x.getMessageArgs();
+                    .getNumber(), x.getCode());
+            final Object[] messageArgs = x.getDisplayArgs();
             final String incorrectToken = (String) messageArgs[0];
             final String filename = (String) messageArgs[1];
             final int line = i((Integer) messageArgs[2]);
@@ -319,10 +318,10 @@ public class GettextParserTest extends TestCase {
         try {
             parse(poText.getBytes("UTF-8"));
             fail("Expected parsing error");
-        } catch (final I18NException x) {
-            assertEquals(I18NErrorMessages.EXPECTED_NUMBER.getDetailNumber(), x
-                .getDetailNumber());
-            final Object[] messageArgs = x.getMessageArgs();
+        } catch (final OXException x) {
+            assertEquals(I18NErrorMessages.EXPECTED_NUMBER.getNumber(), x
+                .getCode());
+            final Object[] messageArgs = x.getDisplayArgs();
             final String incorrectToken = (String) messageArgs[0];
             final String filename = (String) messageArgs[1];
             final int line = i((Integer) messageArgs[2]);
@@ -343,10 +342,10 @@ public class GettextParserTest extends TestCase {
         try {
             parse(poText.getBytes("UTF-8"));
             fail("Expected parsing error");
-        } catch (final I18NException x) {
-            assertEquals(I18NErrorMessages.MALFORMED_TOKEN.getDetailNumber(), x
-                .getDetailNumber());
-            final Object[] messageArgs = x.getMessageArgs();
+        } catch (final OXException x) {
+            assertEquals(I18NErrorMessages.MALFORMED_TOKEN.getNumber(), x
+                .getCode());
+            final Object[] messageArgs = x.getDisplayArgs();
             final String incorrectToken = (String) messageArgs[0];
             final String expected = (String) messageArgs[1];
             final String filename = (String) messageArgs[2];
@@ -363,27 +362,27 @@ public class GettextParserTest extends TestCase {
     public void testIOException() {
         try {
             new POParser().parse(new ExceptionThrowingInputStream(), "test.po");
-        } catch (final I18NException e) {
-            assertEquals(I18NErrorMessages.IO_EXCEPTION.getDetailNumber(), e
-                .getDetailNumber());
-            assertEquals("test.po", e.getMessageArgs()[0]);
+        } catch (final OXException e) {
+            assertEquals(I18NErrorMessages.IO_EXCEPTION.getNumber(), e
+                .getCode());
+            assertEquals("test.po", e.getDisplayArgs()[0]);
             assertEquals("BUMM!", e.getCause().getMessage());
         }
     }
 
-    protected Translations parse(final String poText) throws I18NException {
+    protected Translations parse(final String poText) throws OXException {
         final String withContentType = "msgid \"\"\n"
             + "msgstr \"\"\n\"Content-Type: text/plain; charset=UTF-8\\n\"\r\n"
             + poText;
         try {
             return parse(withContentType.getBytes("UTF-8"));
         } catch (final UnsupportedEncodingException e) {
-            I18NErrorMessages.IO_EXCEPTION.throwException(e, "test.po");
+            I18NErrorMessages.IO_EXCEPTION.create(e, "test.po");
         }
         return null;
     }
 
-    protected Translations parse(final byte[] poText) throws I18NException {
+    protected Translations parse(final byte[] poText) throws OXException {
         return new POParser().parse(new ByteArrayInputStream(poText), "test.po");
     }
 

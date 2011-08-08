@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.session;
 
+import com.openexchange.exception.OXException;
 import java.util.Date;
 import org.apache.commons.httpclient.Cookie;
 import com.openexchange.ajax.Login;

@@ -1,5 +1,6 @@
 package com.openexchange.webdav.protocol;
 
+import com.openexchange.exception.OXException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -99,7 +100,7 @@ public static final int SKEW = 1000;
 		assertTrue(true);
 	}
 	
-	public static void assertResources(final Iterable<WebdavResource> resources, final String...displayNames) throws WebdavProtocolException{
+	public static void assertResources(final Iterable<WebdavResource> resources, final String...displayNames) throws OXException{
 		//assertEquals(displayNames.length, resources.size());
 		
 		final Set<String> nameSet = new HashSet<String>(Arrays.asList(displayNames));
@@ -110,7 +111,7 @@ public static final int SKEW = 1000;
 		assertTrue(nameSet.toString(),nameSet.isEmpty());
 	}
 	
-	public static void assertOptions(final Iterable<Protocol.WEBDAV_METHOD> expect, final Protocol.WEBDAV_METHOD...methods) throws WebdavProtocolException{
+	public static void assertOptions(final Iterable<Protocol.WEBDAV_METHOD> expect, final Protocol.WEBDAV_METHOD...methods) throws OXException{
 		//assertEquals(displayNames.length, resources.size());
 		
 		final Set<Protocol.WEBDAV_METHOD> methodSet = new HashSet<Protocol.WEBDAV_METHOD>(Arrays.asList(methods));
@@ -121,7 +122,7 @@ public static final int SKEW = 1000;
 		assertTrue(methodSet.toString(),methodSet.isEmpty());
 	}
 	
-	public void throwEx(final Exception x) throws WebdavProtocolException {
-	    throw new WebdavProtocolException(x, new WebdavPath(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+	public void throwEx(final OXException x) throws OXException {
+	    throw new WebdavProtocolException(new WebdavPath(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR, x);
 	}
 }

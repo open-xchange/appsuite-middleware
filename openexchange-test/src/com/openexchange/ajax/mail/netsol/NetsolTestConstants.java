@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail.netsol;
 
+import com.openexchange.exception.OXException;
 /**
  * {@link NetsolTestConstants}
  * 

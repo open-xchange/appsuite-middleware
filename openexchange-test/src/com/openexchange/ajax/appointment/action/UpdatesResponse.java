@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment.action;
 
+import com.openexchange.exception.OXException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.TimeZone;
@@ -57,7 +58,6 @@ import org.json.JSONException;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractColumnsResponse;
-import com.openexchange.api.OXConflictException;
 import com.openexchange.groupware.container.Appointment;
 
 /**
@@ -70,7 +70,7 @@ public class UpdatesResponse extends AbstractColumnsResponse {
         super(response);
     }
     
-    public List<Appointment> getAppointments(final TimeZone timeZone) throws OXConflictException, JSONException {
+    public List<Appointment> getAppointments(final TimeZone timeZone) throws OXException, JSONException {
         //TODO extract functionality from test...
         Appointment[] objects = AppointmentTest.jsonArray2AppointmentArray((JSONArray)getData(), getColumns(), timeZone);
         return Arrays.asList(objects);

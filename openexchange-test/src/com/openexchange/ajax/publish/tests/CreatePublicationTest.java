@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.publish.tests;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.Date;
 import org.json.JSONException;
@@ -61,10 +62,7 @@ import com.openexchange.ajax.publish.actions.NewPublicationResponse;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.publish.Publication;
-import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.SimPublicationTargetDiscoveryService;
-import com.openexchange.publish.json.PublicationJSONException;
-import com.openexchange.tools.servlet.AjaxException;
 
 
 /**
@@ -76,7 +74,7 @@ public class CreatePublicationTest extends AbstractPublicationTest {
         super(name);
     }
 
-    public void testOnePublicationOfOneContactFolderShouldNotBeAHassle() throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException{
+    public void testOnePublicationOfOneContactFolderShouldNotBeAHassle() throws OXException, IOException, SAXException, JSONException, OXException, OXException{
         //create contact folder
         FolderObject folder = fMgr.generateFolder("publishedContacts"+new Date().getTime(), FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
         fMgr.insertFolderOnServer( folder );
@@ -108,7 +106,7 @@ public class CreatePublicationTest extends AbstractPublicationTest {
         
     }
 
-    public void testOnePublicationOfOneContactFolderWithoutAContactShouldNotBeAHassle() throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException{
+    public void testOnePublicationOfOneContactFolderWithoutAContactShouldNotBeAHassle() throws OXException, IOException, SAXException, JSONException, OXException, OXException{
         //create contact folder
         FolderObject folder = fMgr.generateFolder("publishedContacts"+new Date().getTime(), FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
         fMgr.insertFolderOnServer( folder );

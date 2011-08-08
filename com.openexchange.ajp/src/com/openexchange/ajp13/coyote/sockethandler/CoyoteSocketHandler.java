@@ -59,10 +59,9 @@ import com.openexchange.ajp13.coyote.AjpProcessor;
 import com.openexchange.ajp13.coyote.Constants;
 import com.openexchange.ajp13.monitoring.AJPv13Monitors;
 import com.openexchange.ajp13.najp.AJPv13TaskMonitor;
-import com.openexchange.ajp13.najp.AJPv13TaskWatcher;
 import com.openexchange.ajp13.najp.IAJPv13SocketHandler;
+import com.openexchange.ajp13.watcher.AJPv13TaskWatcher;
 import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.threadpool.ThreadPools;
 
 /**
  * {@link CoyoteSocketHandler} - Handles accepted client sockets by {@link #handleSocket(Socket)} which hands-off to a dedicated AJP
@@ -228,7 +227,7 @@ public final class CoyoteSocketHandler implements IAJPv13SocketHandler {
      */
     @Override
     public void handleSocket(final Socket client) {
-        final AjpProcessor ajpProcessor = new AjpProcessor(Constants.MAX_PACKET_SIZE);
+        final AjpProcessor ajpProcessor = new AjpProcessor(Constants.MAX_PACKET_SIZE, listenerMonitor);
         if (readTimeout > 0) {
             ajpProcessor.setKeepAliveTimeout(readTimeout);
         }
@@ -239,8 +238,7 @@ public final class CoyoteSocketHandler implements IAJPv13SocketHandler {
                 // Eh...
             }
         }
-        final Future<Object> future =
-            pool.submit(ThreadPools.task(new CoyoteTask(client, ajpProcessor), "AJP-Processor-"), behavior);
+        final Future<Object> future = pool.submit(new CoyoteTask(client, ajpProcessor, listenerMonitor, watcher), behavior);
         ajpProcessor.setControl(future);
     }
 

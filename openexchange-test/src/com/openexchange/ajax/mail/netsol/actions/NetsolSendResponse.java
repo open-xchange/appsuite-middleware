@@ -49,10 +49,10 @@
 
 package com.openexchange.ajax.mail.netsol.actions;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailPath;
 
 /**
@@ -91,7 +91,7 @@ public final class NetsolSendResponse extends AbstractAJAXResponse {
 					return new String[] { mp.getFolder(), mp.toString() };
 				}
 				return new String[] { mp.getFolder(), String.valueOf(mp.getMailID()) };
-			} catch (final MailException e) {
+			} catch (final OXException e) {
 				LOG.error(e.getMessage(), e);
 				return null;
 			}

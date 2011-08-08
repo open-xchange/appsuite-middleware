@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.folder;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.i;
 import java.util.List;
 import java.util.Random;

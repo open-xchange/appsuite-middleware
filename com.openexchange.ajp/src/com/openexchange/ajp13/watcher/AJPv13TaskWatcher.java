@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajp13.najp;
+package com.openexchange.ajp13.watcher;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -60,6 +60,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.exception.AJPv13Exception;
+import com.openexchange.ajp13.najp.AJPv13ServerImpl;
 import com.openexchange.log.Log;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -78,7 +79,7 @@ public class AJPv13TaskWatcher {
 
     private ScheduledTimerTask scheduledTimerTask;
 
-    private final ConcurrentMap<Long, AJPv13Task> tasks;
+    private final ConcurrentMap<Long, com.openexchange.ajp13.watcher.Task> tasks;
 
     /**
      * Initializes a new {@link AJPv13TaskWatcher}.
@@ -87,7 +88,7 @@ public class AJPv13TaskWatcher {
      */
     public AJPv13TaskWatcher(final ThreadPoolService threadPoolService) {
         super();
-        tasks = new ConcurrentHashMap<Long, AJPv13Task>();
+        tasks = new ConcurrentHashMap<Long, com.openexchange.ajp13.watcher.Task>();
         /*
          * Start keep-alive task
          */
@@ -109,7 +110,7 @@ public class AJPv13TaskWatcher {
      *
      * @param task The AJP task to add
      */
-    public void addTask(final AJPv13Task task) {
+    public void addTask(final com.openexchange.ajp13.watcher.Task task) {
         if (null != tasks.putIfAbsent(task.getNum(), task)) {
             LOG.error(MessageFormat.format("AJP task with number {0} task could not be added to watcher!", task.getNum()));
         }
@@ -122,7 +123,7 @@ public class AJPv13TaskWatcher {
      *
      * @param task The AJP task to remove
      */
-    public void removeTask(final AJPv13Task task) {
+    public void removeTask(final com.openexchange.ajp13.watcher.Task task) {
         tasks.remove(task.getNum());
     }
 
@@ -130,7 +131,7 @@ public class AJPv13TaskWatcher {
      * Stops this watcher (and cancels all tracked AJP tasks).
      */
     public void stop() {
-        for (final Iterator<AJPv13Task> i = tasks.values().iterator(); i.hasNext();) {
+        for (final Iterator<com.openexchange.ajp13.watcher.Task> i = tasks.values().iterator(); i.hasNext();) {
             i.next().cancel();
             i.remove();
         }
@@ -147,7 +148,7 @@ public class AJPv13TaskWatcher {
 
     private static class TimerTaskRunnable implements Runnable {
 
-        private final Collection<AJPv13Task> tasks;
+        private final Collection<com.openexchange.ajp13.watcher.Task> tasks;
 
         private final org.apache.commons.logging.Log log;
 
@@ -160,7 +161,7 @@ public class AJPv13TaskWatcher {
          * @param threadPoolService The thread pool service
          * @param log The logger instance to use
          */
-        public TimerTaskRunnable(final Collection<AJPv13Task> tasks, final ThreadPoolService threadPoolService, final org.apache.commons.logging.Log log) {
+        public TimerTaskRunnable(final Collection<com.openexchange.ajp13.watcher.Task> tasks, final ThreadPoolService threadPoolService, final org.apache.commons.logging.Log log) {
             super();
             this.tasks = tasks;
             this.log = log;
@@ -180,7 +181,7 @@ public class AJPv13TaskWatcher {
                      */
                     final Collection<com.openexchange.threadpool.Task<Object>> tasks =
                         new ArrayList<com.openexchange.threadpool.Task<Object>>();
-                    for (final AJPv13Task ajPv13Task : this.tasks) {
+                    for (final com.openexchange.ajp13.watcher.Task ajPv13Task : this.tasks) {
                         tasks.add(new TaskRunCallable(ajPv13Task, countWaiting, countProcessing, countExceeded, true, log));
                     }
                     /*
@@ -221,7 +222,7 @@ public class AJPv13TaskWatcher {
                      */
                     final Collection<com.openexchange.threadpool.Task<Object>> tasks =
                         new ArrayList<com.openexchange.threadpool.Task<Object>>();
-                    for (final AJPv13Task ajPv13Task : this.tasks) {
+                    for (final com.openexchange.ajp13.watcher.Task ajPv13Task : this.tasks) {
                         tasks.add(new TaskRunCallable(ajPv13Task, logExceededTasks, log));
                     }
                     /*
@@ -237,7 +238,7 @@ public class AJPv13TaskWatcher {
 
     private static final class TaskRunCallable implements com.openexchange.threadpool.Task<Object> {
 
-        private final AJPv13Task task;
+        private final com.openexchange.ajp13.watcher.Task task;
 
         private final boolean logExceededTasks;
 
@@ -260,7 +261,7 @@ public class AJPv13TaskWatcher {
          * @param logExceededTasks Whether to log exceeded tasks
          * @param log The logger
          */
-        public TaskRunCallable(final AJPv13Task task, final boolean logExceededTasks, final org.apache.commons.logging.Log log) {
+        public TaskRunCallable(final com.openexchange.ajp13.watcher.Task task, final boolean logExceededTasks, final org.apache.commons.logging.Log log) {
             super();
             this.logExceededTasks = logExceededTasks;
             this.task = task;
@@ -282,7 +283,7 @@ public class AJPv13TaskWatcher {
          * @param logExceededTasks Whether to log exceeded tasks
          * @param log The logger
          */
-        public TaskRunCallable(final AJPv13Task task, final AtomicInteger waiting, final AtomicInteger processing, final AtomicInteger exceeded, final boolean logExceededTasks, final org.apache.commons.logging.Log log) {
+        public TaskRunCallable(final com.openexchange.ajp13.watcher.Task task, final AtomicInteger waiting, final AtomicInteger processing, final AtomicInteger exceeded, final boolean logExceededTasks, final org.apache.commons.logging.Log log) {
             super();
             this.logExceededTasks = logExceededTasks;
             this.task = task;

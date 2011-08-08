@@ -1,17 +1,24 @@
+# This tool renames all exceptions in the com.openexchange.* namespace
+# to OXException. It also removes their imports and adds an import for
+# the new class to the top of the imports.
+
 require 'find'
 
-#starting with OXException, because that should be removed from the imports, since it will be added afterwards
+#hack: starting with OXException in the list, because that should be removed from the imports, since it will be added afterwards
 full_names = ["com.openexchange.exception.OXException"]
-#starting with some that were missing imports already:
-short_names = ["AttachmentException"] 
-#exlcuded exceptions that still have own classes:
-excluded_names = ["com.openexchange.calendar.recurrence.RecurringException", "com.openexchange.tools.versit.converter.ConverterException"]
+short_names = [] 
+excluded_names = [
+	"com.openexchange.calendar.recurrence.RecurringException", 
+	"com.openexchange.tools.versit.converter.ConverterException",
+	"com.openexchange.tools.versit.VersitException",
+	"com.openexchange.webdav.protocol.WebdavProtocolException"]
 files_to_change = []
 
+# first pass: find all exceptions used
 Find.find(ARGV[0]) do |filename|
 	next unless File.exists?(filename) && File.file?(filename) && filename.end_with?(".java")
 	
-	content = File.read(filename)
+	content = "\n" + File.read(filename)
 	next unless content =~ /Exception/
 
  	lines = File.readlines(filename)
@@ -30,6 +37,7 @@ end
 full_names = full_names.sort_by{|elem| elem.length}.reverse 
 short_names = short_names.sort_by{|elem| elem.length}.reverse
 
+# second pass: Replace exceptions with new one
 files_to_change.each do |filename|
 	content = File.read(filename)
 	File.open(filename,"w") do |fh|

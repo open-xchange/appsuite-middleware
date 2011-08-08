@@ -50,8 +50,9 @@
 package com.openexchange.ajax.appointment.recurrence;
 
 import java.util.Calendar;
-import com.openexchange.ajax.appointment.helper.OXError;
-import com.openexchange.groupware.calendar.OXCalendarException;
+
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Changes;
 import com.openexchange.groupware.container.Expectations;
@@ -82,8 +83,8 @@ public class TestsToCreateMinimalAppointmentSeries extends ManagedAppointmentTes
         changes.put(Appointment.INTERVAL, 1);
         changes.put(Appointment.DAYS, 127);
 
-        negativeAssertionOnCreate.check(changes, new OXError("APP", 998));
-        negativeAssertionOnUpdate.check(changes, new OXError("APP", 999));
+        negativeAssertionOnCreate.check(changes, new OXException(998));
+        negativeAssertionOnUpdate.check(changes, new OXException(999));
     }
 
     public void testShouldCreateDailyIntervalWithMinimalData() throws Exception {
@@ -126,8 +127,8 @@ public class TestsToCreateMinimalAppointmentSeries extends ManagedAppointmentTes
         changes.put(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
         changes.put(Appointment.INTERVAL, 1);
 
-        negativeAssertionOnCreate.check(changes, new OXError("APP", OXCalendarException.Code.INCOMPLETE_REC_INFOS_MONTHDAY.getDetailNumber()));
-        negativeAssertionOnUpdate.check(changes, new OXError("APP", OXCalendarException.Code.INCOMPLETE_REC_INFOS_MONTHDAY.getDetailNumber()));
+        negativeAssertionOnCreate.check(changes, OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_MONTHDAY.create());
+        negativeAssertionOnUpdate.check(changes, OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_MONTHDAY.create());
     }
 
     public void testShouldFailCreatingMonthly2IntervalWithoutDayInMonthInfo() throws Exception {
@@ -136,8 +137,8 @@ public class TestsToCreateMinimalAppointmentSeries extends ManagedAppointmentTes
         changes.put(Appointment.INTERVAL, 1);
         changes.put(Appointment.DAYS, Appointment.MONDAY);
 
-        negativeAssertionOnCreate.check(changes, new OXError("APP", OXCalendarException.Code.INCOMPLETE_REC_INFOS_MONTHDAY.getDetailNumber()));
-        negativeAssertionOnUpdate.check(changes, new OXError("APP", OXCalendarException.Code.INCOMPLETE_REC_INFOS_MONTHDAY.getDetailNumber()));
+        negativeAssertionOnCreate.check(changes, OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_MONTHDAY.create());
+        negativeAssertionOnUpdate.check(changes, OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_MONTHDAY.create());
     }
 
     // first day every month
@@ -172,8 +173,8 @@ public class TestsToCreateMinimalAppointmentSeries extends ManagedAppointmentTes
         changes.put(Appointment.RECURRENCE_TYPE, Appointment.YEARLY);
         changes.put(Appointment.INTERVAL, 1);
 
-        negativeAssertionOnCreate.check(changes, new OXError("APP", OXCalendarException.Code.INCOMPLETE_REC_INFOS_MONTHDAY.getDetailNumber()));
-        negativeAssertionOnUpdate.check(changes, new OXError("APP", OXCalendarException.Code.INCOMPLETE_REC_INFOS_MONTHDAY.getDetailNumber()));
+        negativeAssertionOnCreate.check(changes, OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_MONTHDAY.create());
+        negativeAssertionOnUpdate.check(changes, OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_MONTHDAY.create());
     }
 
     public void testShouldFailCreatingYearly2IntervalWithoutDayInMonthInfo() throws Exception {
@@ -182,8 +183,8 @@ public class TestsToCreateMinimalAppointmentSeries extends ManagedAppointmentTes
         changes.put(Appointment.INTERVAL, 1);
         changes.put(Appointment.DAYS, Appointment.MONDAY);
 
-        negativeAssertionOnCreate.check(changes, new OXError("APP", OXCalendarException.Code.INCOMPLETE_REC_INFOS_MONTHDAY.getDetailNumber()));
-        negativeAssertionOnUpdate.check(changes, new OXError("APP", OXCalendarException.Code.INCOMPLETE_REC_INFOS_MONTHDAY.getDetailNumber()));
+        negativeAssertionOnCreate.check(changes, OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_MONTHDAY.create());
+        negativeAssertionOnUpdate.check(changes, OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_MONTHDAY.create());
     }
 
     public void testShouldFailCreatingYearlyIntervalWithoutMonth() throws Exception {
@@ -192,8 +193,8 @@ public class TestsToCreateMinimalAppointmentSeries extends ManagedAppointmentTes
         changes.put(Appointment.INTERVAL, 1);
         changes.put(Appointment.DAY_IN_MONTH, 1);
 
-        negativeAssertionOnCreate.check(changes, new OXError("APP", OXCalendarException.Code.RECURRING_MISSING_YEARLY_MONTH.getDetailNumber()));
-        negativeAssertionOnUpdate.check(changes, new OXError("APP", OXCalendarException.Code.RECURRING_MISSING_YEARLY_MONTH.getDetailNumber()));
+        negativeAssertionOnCreate.check(changes, OXCalendarExceptionCodes.RECURRING_MISSING_YEARLY_MONTH.create());
+        negativeAssertionOnUpdate.check(changes, OXCalendarExceptionCodes.RECURRING_MISSING_YEARLY_MONTH.create());
     }
 
     public void testShouldCreateYearlyIntervalWithMinimalData() throws Exception {
@@ -227,8 +228,8 @@ public class TestsToCreateMinimalAppointmentSeries extends ManagedAppointmentTes
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_TYPE, Appointment.DAILY);
 
-        negativeAssertionOnCreate.check(changes, new OXError("APP", OXCalendarException.Code.INCOMPLETE_REC_INFOS_INTERVAL.getDetailNumber()));
-        negativeAssertionOnUpdate.check(changes, new OXError("APP", OXCalendarException.Code.INCOMPLETE_REC_INFOS_INTERVAL.getDetailNumber()));
+        negativeAssertionOnCreate.check(changes, OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_INTERVAL.create());
+        negativeAssertionOnUpdate.check(changes, OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_INTERVAL.create());
     }
 
 }

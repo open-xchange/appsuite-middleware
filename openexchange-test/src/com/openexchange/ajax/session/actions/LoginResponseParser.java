@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.session.actions;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

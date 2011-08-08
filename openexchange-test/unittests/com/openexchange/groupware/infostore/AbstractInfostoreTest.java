@@ -49,10 +49,10 @@
 
 package com.openexchange.groupware.infostore;
 
+import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.List;
 import junit.framework.TestCase;
-import com.openexchange.api2.OXException;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.groupware.Init;

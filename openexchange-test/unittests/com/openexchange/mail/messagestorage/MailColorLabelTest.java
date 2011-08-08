@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.messagestorage;
 
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
 
@@ -70,7 +70,7 @@ public final class MailColorLabelTest extends MessageStorageTest {
 
     private static final MailField[] FIELDS_ID_AND_COLORLABEL = { MailField.ID, MailField.COLOR_LABEL };
 
-    public void testMailColorLabelNonExistingIds() throws MailException {
+    public void testMailColorLabelNonExistingIds() throws OXException {
         if (!mailAccess.getFolderStorage().getFolder("INBOX").isSupportsUserFlags()) {
             System.err.println("User flags not supported. Skipping test for non-exsiting ids");
             return;
@@ -82,7 +82,7 @@ public final class MailColorLabelTest extends MessageStorageTest {
         }
     }
 
-    public void testMailColorLabelNonExistingIdsMixed() throws MailException {
+    public void testMailColorLabelNonExistingIdsMixed() throws OXException {
         if (!mailAccess.getFolderStorage().getFolder("INBOX").isSupportsUserFlags()) {
             System.err.println("User flags not supported. Skipping test for non-exsiting mixed ids");
             return;
@@ -102,13 +102,13 @@ public final class MailColorLabelTest extends MessageStorageTest {
         }
     }
     
-    public void testMailColorLabelNotExistingFolder() throws MailException {
+    public void testMailColorLabelNotExistingFolder() throws OXException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {
             for (int i = 0; i < 11; i++) {
                 try {
                     mailAccess.getMessageStorage().updateMessageColorLabel("MichGibtEsNicht1337", uids, i);
-                } catch (final MailException e) {
+                } catch (final OXException e) {
                     assertTrue("Wrong Exception is thrown.", e.getErrorCode().endsWith("-1002"));
                 }
             }
@@ -117,7 +117,7 @@ public final class MailColorLabelTest extends MessageStorageTest {
         }
     }
 
-    public void testMailColorLabel() throws MailException {
+    public void testMailColorLabel() throws OXException {
         if (!mailAccess.getFolderStorage().getFolder("INBOX").isSupportsUserFlags()) {
             System.err.println("User flags not supported. Skipping test for color labels");
             return;

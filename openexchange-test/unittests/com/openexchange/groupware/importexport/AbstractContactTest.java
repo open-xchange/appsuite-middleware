@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.importexport;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.B;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -64,7 +65,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
 import com.openexchange.api2.ContactSQLInterface;
-import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.calendar.CalendarSql;
 import com.openexchange.groupware.Init;
@@ -73,11 +73,8 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.importexport.exceptions.ImportExportException;
-import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -355,7 +352,7 @@ public class AbstractContactTest {
     public static Importer imp;
     public Format defaultFormat;
 
-    public static int createTestFolder(final int type, final ServerSession sessObj,final Context ctx, final String folderTitle) throws LdapException, OXException {
+    public static int createTestFolder(final int type, final ServerSession sessObj,final Context ctx, final String folderTitle) throws OXException, OXException {
         final User user = UserStorage.getInstance().getUser(sessObj.getUserId(), ctx);
         final FolderObject fo = new FolderObject();
         fo.setFolderName(folderTitle);
@@ -412,16 +409,16 @@ public class AbstractContactTest {
         super();
     }
 
-    protected List<ImportResult> importStuff(final String csv) throws ImportExportException, UnsupportedEncodingException{
+    protected List<ImportResult> importStuff(final String csv) throws OXException, UnsupportedEncodingException{
         return importStuff(csv, "UTF-8");
     }
 
-    protected List<ImportResult> importStuff(final String csv, final String encoding) throws ImportExportException, UnsupportedEncodingException{
+    protected List<ImportResult> importStuff(final String csv, final String encoding) throws OXException, UnsupportedEncodingException{
         final InputStream is = new ByteArrayInputStream( csv.getBytes(encoding) );
         return imp.importData(sessObj, defaultFormat, is, _folders(), null);
     }
 
-    protected boolean existsEntry(final int entryNumber) throws ContextException {
+    protected boolean existsEntry(final int entryNumber) throws OXException {
         final ContactSQLInterface contactSql = new RdbContactSQLImpl(sessObj);
         try {
             final Contact co = contactSql.getObjectById(entryNumber, folderId);
@@ -431,7 +428,7 @@ public class AbstractContactTest {
         }
     }
     
-    protected Contact getEntry(final int entryNumber) throws OXException, ContextException {
+    protected Contact getEntry(final int entryNumber) throws OXException, OXException {
         final ContactSQLInterface contactSql = new RdbContactSQLImpl(sessObj);
         return contactSql.getObjectById(entryNumber, folderId);
     }
@@ -451,7 +448,7 @@ public class AbstractContactTest {
      * @param errorExpected Is an error expected?
      * @return
      */
-    protected ImportResult performOneEntryCheck(final String file, final Format format, final int folderObjectType, final String foldername,final Context ctx, final boolean errorExpected) throws UnsupportedEncodingException, LdapException, OXException {
+    protected ImportResult performOneEntryCheck(final String file, final Format format, final int folderObjectType, final String foldername,final Context ctx, final boolean errorExpected) throws UnsupportedEncodingException, OXException, OXException {
         return performMultipleEntryImport(file, format, folderObjectType, foldername, ctx, B(errorExpected)).get(0);
     }
     
@@ -465,7 +462,7 @@ public class AbstractContactTest {
      * @param expectedErrors Are errors expected? Example: If you expect two ImportResults, which both report failure, write <code>true, true</code>.
      * @return
      */
-    protected List<ImportResult> performMultipleEntryImport(final String file, final Format format, final int folderObjectType, final String foldername, final Context ctx, final Boolean... expectedErrors) throws UnsupportedEncodingException, LdapException, OXException {
+    protected List<ImportResult> performMultipleEntryImport(final String file, final Format format, final int folderObjectType, final String foldername, final Context ctx, final Boolean... expectedErrors) throws UnsupportedEncodingException, OXException, OXException {
         folderId = createTestFolder(folderObjectType, sessObj,ctx, foldername);
 
         assertTrue("Can import?" ,  imp.canImport(sessObj, format, _folders(), null));

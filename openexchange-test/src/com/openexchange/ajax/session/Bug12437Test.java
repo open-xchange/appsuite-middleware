@@ -49,14 +49,14 @@
 
 package com.openexchange.ajax.session;
 
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.session.actions.LoginRequest;
 import com.openexchange.ajax.session.actions.LoginResponse;
 import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.AbstractOXException.Category;
 
 import junit.framework.TestCase;
 
@@ -99,9 +99,8 @@ public final class Bug12437Test extends TestCase {
         LoginRequest request = new LoginRequest(login, password, LoginTools.generateAuthId(), Bug12437Test.class.getName(), "6,15.0", false);
         final LoginResponse response = client.execute(request);
         assertTrue("Wrong credentials are not detected.", response.hasError());
-        final AbstractOXException exc = response.getException();
-        assertEquals("Wrong exception message.", EnumComponent.LOGIN, exc.getComponent());
-        assertEquals("Wrong exception message.", Category.USER_INPUT, exc.getCategory());
-        assertEquals("Wrong exception message.", 6, exc.getDetailNumber());
+        final OXException exc = response.getException();
+        assertEquals("Wrong exception message.", Category.CATEGORY_USER_INPUT, exc.getCategory());
+        assertEquals("Wrong exception message.", 6, exc.getCode());
     }
 }

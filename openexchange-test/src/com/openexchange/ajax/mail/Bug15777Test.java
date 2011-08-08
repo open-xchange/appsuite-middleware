@@ -1,6 +1,7 @@
 
 package com.openexchange.ajax.mail;
 
+import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.util.Date;
 import java.util.TimeZone;

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.importexport;
 
+import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.util.Comparator;
 import java.util.HashSet;

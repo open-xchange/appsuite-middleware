@@ -1,6 +1,7 @@
 
 package com.openexchange.groupware.calendar;
 
+import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -12,7 +13,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.group.Group;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.calendar.tools.CommonAppointments;
 import com.openexchange.groupware.container.Appointment;
@@ -150,7 +150,7 @@ public abstract class AbstractCalendarTest extends TestCase {
         return jsonObject;
     }
 
-    protected void assertContains(final SearchIterator iter, final CalendarDataObject cdao) throws AbstractOXException {
+    protected void assertContains(final SearchIterator iter, final CalendarDataObject cdao) throws OXException {
         boolean found = false;
         while(iter.hasNext()) {
             final CalendarDataObject cdao2 = (CalendarDataObject)iter.next();
@@ -247,7 +247,7 @@ public abstract class AbstractCalendarTest extends TestCase {
             }
         }
 
-    protected List<Appointment> read(final SearchIterator<Appointment> si) throws AbstractOXException {
+    protected List<Appointment> read(final SearchIterator<Appointment> si) throws OXException {
         final List<Appointment> appointments = new ArrayList<Appointment>();
         while(si.hasNext()) { appointments.add( si.next() ); }
         return appointments;

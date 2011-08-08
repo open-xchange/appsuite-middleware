@@ -49,6 +49,7 @@
 
 package com.openexchange.webdav.xml.contact.actions;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.webdav.xml.framework.Constants.NS_DAV;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -58,10 +59,7 @@ import org.apache.commons.httpclient.methods.RequestEntity;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.output.XMLOutputter;
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.webdav.xml.ContactWriter;
 import com.openexchange.webdav.xml.framework.RequestTools;
 
@@ -79,7 +77,7 @@ public class InsertRequest extends AbstractContactRequest<InsertResponse> {
         this.contact = contact;
     }
 
-    public RequestEntity getEntity() throws AbstractOXException, IOException {
+    public RequestEntity getEntity() throws OXException, IOException {
         final Document doc = RequestTools.createPropertyUpdate(createProp());
         final XMLOutputter xo = new XMLOutputter();
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -87,14 +85,14 @@ public class InsertRequest extends AbstractContactRequest<InsertResponse> {
         return new ByteArrayRequestEntity(baos.toByteArray());
     }
 
-    private Element createProp() throws AbstractOXException, IOException {
+    private Element createProp() throws OXException, IOException {
         contact.removeObjectID();
         final Element eProp = new Element("prop", NS_DAV);
 
         final ContactWriter contactWriter = new ContactWriter();
         try {
             contactWriter.addContent2PropElement(eProp, contact, false, true);
-        } catch (final SearchIteratorException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         } catch (AddressException e) {
             throw new OXException(e);

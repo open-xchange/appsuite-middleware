@@ -47,6 +47,7 @@
 
 package com.openexchange.ajax.kata.folders;
 
+import com.openexchange.exception.OXException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import java.io.IOException;
@@ -65,7 +66,6 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.test.FolderTestManager;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
@@ -95,7 +95,7 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
         checkWithReadMethods(entry);
     }
 
-    private void checkWithReadMethods(FolderObject folder) throws  JSONException, AjaxException, IOException, SAXException {
+    private void checkWithReadMethods(FolderObject folder) throws  JSONException, OXException, IOException, SAXException {
         checkViaGet(folder);
         checkViaList(folder);
         checkViaUpdates(folder);
@@ -107,7 +107,7 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
     }
 
 
-    private void checkViaList(FolderObject folder) throws AjaxException, IOException, SAXException, JSONException {
+    private void checkViaList(FolderObject folder) throws OXException, IOException, SAXException, JSONException {
         int[] requestedFields = FolderObject.ALL_COLUMNS;//new int[]{FolderObject.OBJECT_ID, FolderObject.FOLDER_ID}; 
         ListRequest listRequest = new ListRequest(API.OX_OLD, Integer.toString(folder.getParentFolderID()), requestedFields, true );
         ListResponse response = client.execute(listRequest);
@@ -117,7 +117,7 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
         checkInList(folder, rows, requestedFields, "list-");
     }
 
-    private void checkViaUpdates(FolderObject folder) throws AjaxException, IOException, SAXException, JSONException {
+    private void checkViaUpdates(FolderObject folder) throws OXException, IOException, SAXException, JSONException {
         UpdatesRequest updates = new UpdatesRequest(API.OX_OLD,
             folder.getParentFolderID(),
             FolderObject.ALL_COLUMNS,

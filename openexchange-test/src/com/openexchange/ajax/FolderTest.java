@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -83,14 +84,11 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.parser.FolderParser;
-import com.openexchange.api2.OXException;
-import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.TestException;
 import com.openexchange.tools.URLParameter;
-import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 public class FolderTest extends AbstractAJAXTest {
@@ -136,7 +134,7 @@ public class FolderTest extends AbstractAJAXTest {
      * @deprecated use {@link ConfigTools#getUserId(WebConversation, String, String)}.
      */
     @Deprecated
-    public static final int getUserId(final WebConversation conversation, final String hostname, final String entityArg, final String password) throws IOException, SAXException, JSONException, AjaxException, ConfigurationException {
+    public static final int getUserId(final WebConversation conversation, final String hostname, final String entityArg, final String password) throws IOException, SAXException, JSONException, OXException, OXException {
         WebConversation conversation2 = new WebConversation(); // Can't reuse conversations for different sessions!
         final String sessionId = LoginTest.getSessionId(conversation2, hostname, entityArg, password);
         return ConfigTools.getUserId(conversation2, hostname, sessionId);
@@ -172,19 +170,19 @@ public class FolderTest extends AbstractAJAXTest {
         return folders;
     }
 
-    public static List<FolderObject> getSubfolders(final WebConversation conversation, final String hostname, final String sessionId, final String parentIdentifier, final boolean printOutput) throws MalformedURLException, IOException, SAXException, JSONException, OXException, AjaxException {
+    public static List<FolderObject> getSubfolders(final WebConversation conversation, final String hostname, final String sessionId, final String parentIdentifier, final boolean printOutput) throws MalformedURLException, IOException, SAXException, JSONException, OXException, OXException {
         return getSubfolders(conversation, null, hostname, sessionId, parentIdentifier);
     }
 
-    public static List<FolderObject> getSubfolders(final WebConversation conversation, final String protocol, final String hostname, final String sessionId, final String parentIdentifier) throws MalformedURLException, IOException, SAXException, JSONException, OXException, AjaxException {
+    public static List<FolderObject> getSubfolders(final WebConversation conversation, final String protocol, final String hostname, final String sessionId, final String parentIdentifier) throws MalformedURLException, IOException, SAXException, JSONException, OXException, OXException {
         return getSubfolders(conversation, protocol, hostname, sessionId, parentIdentifier, false);
     }
 
-    public static List<FolderObject> getSubfolders(final WebConversation conversation, final String hostname, final String sessionId, final String parentIdentifier, final boolean printOutput, final boolean ignoreMailfolder) throws MalformedURLException, IOException, SAXException, JSONException, OXException, AjaxException {
+    public static List<FolderObject> getSubfolders(final WebConversation conversation, final String hostname, final String sessionId, final String parentIdentifier, final boolean printOutput, final boolean ignoreMailfolder) throws MalformedURLException, IOException, SAXException, JSONException, OXException, OXException {
         return getSubfolders(conversation, null, hostname, sessionId, parentIdentifier, ignoreMailfolder);
     }
 
-    public static List<FolderObject> getSubfolders(WebConversation conversation, String protocol, String hostname, String sessionId, String parentIdentifier, boolean ignoreMailfolder) throws MalformedURLException, IOException, SAXException, JSONException, OXException, AjaxException {
+    public static List<FolderObject> getSubfolders(WebConversation conversation, String protocol, String hostname, String sessionId, String parentIdentifier, boolean ignoreMailfolder) throws MalformedURLException, IOException, SAXException, JSONException, OXException, OXException {
         AJAXClient client = new AJAXClient(new AJAXSession(conversation, hostname, sessionId));
         client.setProtocol(protocol);
         client.setHostname(hostname);
@@ -205,10 +203,10 @@ public class FolderTest extends AbstractAJAXTest {
         final WebResponse resp = conversation.getResponse(req);
         final JSONObject respObj = new JSONObject(resp.getText());
         if (respObj.has("error") && !respObj.isNull("error")) {
-            throw new OXException("Error occured: " + respObj.getString("error"));
+            throw OXException.general("Error occured: " + respObj.getString("error"));
         }
         if (!respObj.has("data") || respObj.isNull("data")) {
-            throw new OXException("Error occured: Missing key \"data\"");
+            throw OXException.general("Error occured: Missing key \"data\"");
         }
         final JSONObject jsonFolder = respObj.getJSONObject("data");
         final FolderObject fo = new FolderObject();
@@ -245,7 +243,7 @@ public class FolderTest extends AbstractAJAXTest {
                 }
                 final int[] permissionBits = parsePermissionBits(elem.getInt(FolderFields.BITS));
                 if (!oclPerm.setAllPermission(permissionBits[0], permissionBits[1], permissionBits[2], permissionBits[3])) {
-                    throw new OXException(
+                    throw OXException.general(
                         "Invalid permission values: fp=" + permissionBits[0] + " orp=" + permissionBits[1] + " owp=" + permissionBits[2] + " odp=" + permissionBits[3]);
                 }
                 oclPerm.setFolderAdmin(permissionBits[4] > 0 ? true : false);
@@ -317,7 +315,7 @@ public class FolderTest extends AbstractAJAXTest {
         final WebResponse resp = conversation.getResponse(req);
         final JSONObject respObj = new JSONObject(resp.getText());
         if (!respObj.has("data") || respObj.has("error")) {
-            throw new OXException("Folder Insert failed" + (respObj.has("error") ? (": " + respObj.getString("error")) : ""));
+            throw OXException.general("Folder Insert failed" + (respObj.has("error") ? (": " + respObj.getString("error")) : ""));
         }
         return respObj.getInt("data");
     }
@@ -374,7 +372,7 @@ public class FolderTest extends AbstractAJAXTest {
         final WebResponse resp = conversation.getResponse(req);
         final JSONObject respObj = new JSONObject(resp.getText());
         if (!respObj.has("data") || respObj.has("error")) {
-            throw new OXException("Folder Insert failed" + (respObj.has("error") ? (": " + respObj.getString("error")) : ""));
+            throw OXException.general("Folder Insert failed" + (respObj.has("error") ? (": " + respObj.getString("error")) : ""));
         }
         return respObj.getInt("data");
     }
@@ -576,7 +574,7 @@ public class FolderTest extends AbstractAJAXTest {
         return retval;
     }
 
-    public static FolderObject getStandardFolder(final int module, final String protocol, final WebConversation conversation, final String hostname, final String sessionId) throws MalformedURLException, OXException, AjaxException, IOException, SAXException, JSONException {
+    public static FolderObject getStandardFolder(final int module, final String protocol, final WebConversation conversation, final String hostname, final String sessionId) throws MalformedURLException, OXException, OXException, IOException, SAXException, JSONException {
         final List<FolderObject> subfolders = getSubfolders(
             conversation,
             protocol,
@@ -591,15 +589,15 @@ public class FolderTest extends AbstractAJAXTest {
                 }
             }
         }
-        throw new OXException(String.format("No standard folder for module '%d' found", module));
+        throw OXException.general(String.format("No standard folder for module '%d' found", module));
     }
 
 
-    public static FolderObject getStandardTaskFolder(final WebConversation conversation, final String hostname, final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException, AjaxException {
+    public static FolderObject getStandardTaskFolder(final WebConversation conversation, final String hostname, final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException, OXException {
         return getStandardTaskFolder(conversation, null, hostname, sessionId);
     }
 
-    public static FolderObject getStandardTaskFolder(final WebConversation conversation, final String protocol, final String hostname, final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException, AjaxException {
+    public static FolderObject getStandardTaskFolder(final WebConversation conversation, final String protocol, final String hostname, final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException, OXException {
         final List<FolderObject> subfolders = getSubfolders(
             conversation,
             protocol,
@@ -613,14 +611,14 @@ public class FolderTest extends AbstractAJAXTest {
                 return subfolder;
             }
         }
-        throw new OXException("No Standard Task Folder found!");
+        throw OXException.general("No Standard Task Folder found!");
     }
 
-    public static FolderObject getStandardCalendarFolder(final WebConversation conversation, final String hostname, final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException, AjaxException {
+    public static FolderObject getStandardCalendarFolder(final WebConversation conversation, final String hostname, final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException, OXException {
         return getStandardCalendarFolder(conversation, null, hostname, sessionId);
     }
 
-    public static FolderObject getStandardCalendarFolder(final WebConversation conversation, final String protocol, final String hostname, final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException, AjaxException {
+    public static FolderObject getStandardCalendarFolder(final WebConversation conversation, final String protocol, final String hostname, final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException, OXException {
         final List<FolderObject> subfolders = getSubfolders(
             conversation,
             protocol,
@@ -634,28 +632,28 @@ public class FolderTest extends AbstractAJAXTest {
                 return subfolder;
             }
         }
-        throw new OXException("No Standard Calendar Folder found!");
+        throw OXException.general("No Standard Calendar Folder found!");
     }
 
-    public static FolderObject getStandardContactFolder(final WebConversation conversation, final String hostname, final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException, AjaxException {
+    public static FolderObject getStandardContactFolder(final WebConversation conversation, final String hostname, final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException, OXException {
         return getStandardContactFolder(conversation, null, hostname, sessionId);
     }
 
-    public static FolderObject getStandardContactFolder(WebConversation conversation, String protocol, String hostname, String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException, AjaxException {
+    public static FolderObject getStandardContactFolder(WebConversation conversation, String protocol, String hostname, String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException, OXException {
         List<FolderObject> subfolders = getSubfolders(conversation, protocol, hostname, sessionId, FolderStorage.PRIVATE_ID, true);
         for (FolderObject subfolder : subfolders) {
             if (subfolder.getModule() == FolderObject.CONTACT && subfolder.isDefaultFolder()) {
                 return subfolder;
             }
         }
-        throw new OXException("No Standard Contact Folder found!");
+        throw OXException.general("No Standard Contact Folder found!");
     }
 
-    public static FolderObject getStandardInfostoreFolder(final WebConversation conversation, final String hostname, final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException, AjaxException {
+    public static FolderObject getStandardInfostoreFolder(final WebConversation conversation, final String hostname, final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException, OXException {
         return getStandardInfostoreFolder(conversation, null, hostname, sessionId);
     }
 
-    public static FolderObject getStandardInfostoreFolder(final WebConversation conversation, final String protocol, final String hostname, final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException, AjaxException {
+    public static FolderObject getStandardInfostoreFolder(final WebConversation conversation, final String protocol, final String hostname, final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException, OXException {
         final List<FolderObject> subfolders = getSubfolders(
             conversation,
             protocol,
@@ -669,14 +667,14 @@ public class FolderTest extends AbstractAJAXTest {
                 return subfolder;
             }
         }
-        throw new OXException("No Standard Infostore Folder found!");
+        throw OXException.general("No Standard Infostore Folder found!");
     }
 
-    public static FolderObject getMyInfostoreFolder(final WebConversation conversation, final String hostname, final String sessionId, final int loginId) throws MalformedURLException, IOException, SAXException, JSONException, OXException, TestException, AjaxException {
+    public static FolderObject getMyInfostoreFolder(final WebConversation conversation, final String hostname, final String sessionId, final int loginId) throws MalformedURLException, IOException, SAXException, JSONException, OXException, OXException, OXException {
         return getMyInfostoreFolder(conversation, null, hostname, sessionId, loginId);
     }
 
-    public static FolderObject getMyInfostoreFolder(final WebConversation conversation, final String protocol, final String hostname, final String sessionId, final int loginId) throws MalformedURLException, IOException, SAXException, JSONException, OXException, TestException, AjaxException {
+    public static FolderObject getMyInfostoreFolder(final WebConversation conversation, final String protocol, final String hostname, final String sessionId, final int loginId) throws MalformedURLException, IOException, SAXException, JSONException, OXException, OXException, OXException {
         FolderObject infostore = null;
         List<FolderObject> l = getRootFolders(conversation, protocol, hostname, sessionId, false);
         for (final Iterator<FolderObject> iter = l.iterator(); iter.hasNext();) {
@@ -723,11 +721,11 @@ public class FolderTest extends AbstractAJAXTest {
 
     }
 
-    public void testGetUserId() throws AjaxException, ConfigurationException, IOException, SAXException, JSONException {
+    public void testGetUserId() throws OXException, OXException, IOException, SAXException, JSONException {
         getUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
     }
 
-    public void testGetRootFolders() throws OXException, IOException, SAXException, JSONException, AjaxException {
+    public void testGetRootFolders() throws OXException, IOException, SAXException, JSONException, OXException {
         final int[] assumedIds = { 1, 2, 3, 9 };
         final List<FolderObject> l = getRootFolders(getWebConversation(), getHostName(), getSessionId(), true);
         assertFalse(l == null || l.size() == 0);
@@ -739,7 +737,7 @@ public class FolderTest extends AbstractAJAXTest {
         }
     }
 
-    public void testDeleteFolder() throws OXException, JSONException, IOException, SAXException, AjaxException, ConfigurationException {
+    public void testDeleteFolder() throws OXException, JSONException, IOException, SAXException, OXException, OXException {
             final int userId = getUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
             final int parent = insertFolder(
                 getWebConversation(),
@@ -797,7 +795,7 @@ public class FolderTest extends AbstractAJAXTest {
             assertTrue((failedIds == null || failedIds.length == 0));
     }
 
-    public void testCheckFolderPermissions() throws AjaxException, ConfigurationException, IOException, SAXException, JSONException, OXException {
+    public void testCheckFolderPermissions() throws OXException, OXException, IOException, SAXException, JSONException, OXException {
         final int userId = getUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
         final int fuid = insertFolder(
             getWebConversation(),
@@ -826,7 +824,7 @@ public class FolderTest extends AbstractAJAXTest {
         deleteFolders(getWebConversation(), getHostName(), getSessionId(), new int[] { fuid }, cal.getTimeInMillis(), true);
     }
 
-    public void testInsertRenameFolder() throws AjaxException, ConfigurationException, IOException, SAXException, JSONException, OXException, TestException {
+    public void testInsertRenameFolder() throws OXException, OXException, IOException, SAXException, JSONException, OXException, OXException {
         int fuid = -1;
         int[] failedIds = null;
         boolean updated = false;
@@ -924,7 +922,7 @@ public class FolderTest extends AbstractAJAXTest {
         }
     }
 
-    public void testSharedFolder() throws AjaxException, ConfigurationException, IOException, SAXException, JSONException, OXException {
+    public void testSharedFolder() throws OXException, OXException, IOException, SAXException, JSONException, OXException {
         int fuid01 = -1;
         int fuid02 = -1;
         String anotherSessionId = null;
@@ -1005,7 +1003,7 @@ public class FolderTest extends AbstractAJAXTest {
         // int[] { fuid01, fuid02 }, false);
     }
 
-    public void testGetSubfolder() throws AjaxException, ConfigurationException, IOException, SAXException, JSONException, OXException {
+    public void testGetSubfolder() throws OXException, OXException, IOException, SAXException, JSONException, OXException {
         int fuid = -1;
         int[] subfuids = null;
         try {
@@ -1089,7 +1087,7 @@ public class FolderTest extends AbstractAJAXTest {
         }
     }
 
-    public void testMoveFolder() throws AjaxException, ConfigurationException, IOException, SAXException, JSONException, OXException {
+    public void testMoveFolder() throws OXException, OXException, IOException, SAXException, JSONException, OXException {
         int parent01 = -1;
         int parent02 = -1;
         int moveFuid = -1;
@@ -1183,7 +1181,7 @@ public class FolderTest extends AbstractAJAXTest {
 
     // Node 2652
 
-    public void testLastModifiedUTCInGet() throws JSONException, AjaxException, IOException, SAXException {
+    public void testLastModifiedUTCInGet() throws JSONException, OXException, IOException, SAXException {
         final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()));
         // Load an existing folder
         final GetRequest getRequest = new GetRequest(API.OX_OLD,
@@ -1195,7 +1193,7 @@ public class FolderTest extends AbstractAJAXTest {
 
     // Node 2652
 
-    public void testLastModifiedUTCInList() throws JSONException, IOException, SAXException, AjaxException {
+    public void testLastModifiedUTCInList() throws JSONException, IOException, SAXException, OXException {
         final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()));
         // List known folder
         final ListRequest listRequest = new ListRequest(API.OX_OLD,
@@ -1216,7 +1214,7 @@ public class FolderTest extends AbstractAJAXTest {
 
     // Node 2652
 
-    public void testLastModifiedUTCInUpdates() throws JSONException, AjaxException, IOException, SAXException {
+    public void testLastModifiedUTCInUpdates() throws JSONException, OXException, IOException, SAXException {
         final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()));
         // List known folder
         final UpdatesRequest updatesRequest = new UpdatesRequest(API.OX_OLD,

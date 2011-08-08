@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.config;
 
+import com.openexchange.exception.OXException;
 import java.util.Arrays;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.GetResponse;

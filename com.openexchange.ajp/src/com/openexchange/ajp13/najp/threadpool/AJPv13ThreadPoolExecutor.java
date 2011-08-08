@@ -53,7 +53,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import com.openexchange.ajp13.AJPv13Config;
-import com.openexchange.ajp13.najp.AJPv13TaskWatcher;
+import com.openexchange.ajp13.watcher.AJPv13TaskWatcher;
 import com.openexchange.monitoring.MonitoringInfo;
 
 /**

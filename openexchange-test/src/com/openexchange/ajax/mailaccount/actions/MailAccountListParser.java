@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mailaccount.actions;
 
+import com.openexchange.exception.OXException;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;

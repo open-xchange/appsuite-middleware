@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.updater;
 
+import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;

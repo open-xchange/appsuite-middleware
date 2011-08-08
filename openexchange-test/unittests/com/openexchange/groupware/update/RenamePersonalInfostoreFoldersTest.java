@@ -1,5 +1,6 @@
 package com.openexchange.groupware.update;
 
+import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -9,9 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.update.tasks.InfostoreRenamePersonalInfostoreFolders;
 
@@ -40,18 +39,18 @@ public class RenamePersonalInfostoreFoldersTest extends UpdateTest {
         super.tearDown();
     }
 
-    public void createNameCollisions() throws DBPoolingException, SQLException {
+    public void createNameCollisions() throws OXException, SQLException {
 		for(int i = 0; i < 3; i++) { createFolder("test test"); }
 		createFolder("normal folder");
 		for(int i = 0; i < 2; i++) { createFolder("test2 test2"); }
 	}
 		
-	public void createSneakyNameCollision() throws DBPoolingException, SQLException {
+	public void createSneakyNameCollision() throws OXException, SQLException {
 		for(int i = 0; i < 3; i++) { createFolder("test test"); }
 		createFolder("test test (2)");
 	}
 	
-	public void createMany() throws DBPoolingException, SQLException{
+	public void createMany() throws OXException, SQLException{
 		for(int i = 0; i < 4000; i++) {
 			for(int j = 0; j < 3; j++) {
 				createFolder("test test "+i);
@@ -59,14 +58,14 @@ public class RenamePersonalInfostoreFoldersTest extends UpdateTest {
 		}
 	}
 	
-	public void testFixSchema() throws AbstractOXException, SQLException{
+	public void testFixSchema() throws OXException, SQLException{
 		createNameCollisions();
 		updateTask.perform(schema, existing_ctx_id);
 		assertNoCollisions();
 		assertFolderNames("test test", "test test (1)", "test test (2)", "normal folder", "test2 test2", "test2 test2 (1)");
 	}
 	
-	public void testNameCollision() throws SQLException, AbstractOXException{
+	public void testNameCollision() throws SQLException, OXException{
 		createSneakyNameCollision();
 		updateTask.perform(schema, existing_ctx_id);
 		assertNoCollisions();
@@ -74,7 +73,7 @@ public class RenamePersonalInfostoreFoldersTest extends UpdateTest {
 		
 	}
 	
-	public void testRunMultipleTimesNonDestructively() throws AbstractOXException, SQLException{
+	public void testRunMultipleTimesNonDestructively() throws OXException, SQLException{
 		createNameCollisions();
 		updateTask.perform(schema, existing_ctx_id);
 		updateTask.perform(schema, existing_ctx_id);
@@ -86,17 +85,17 @@ public class RenamePersonalInfostoreFoldersTest extends UpdateTest {
 		assertFolderNames("test test", "test test (1)", "test test (2)", "normal folder", "test2 test2", "test2 test2 (1)");
 	}
 	
-	public void notestManyManyMany() throws AbstractOXException, SQLException{
+	public void notestManyManyMany() throws OXException, SQLException{
 		createMany();
 		updateTask.perform(schema, existing_ctx_id);
 	}
 	
 	
-	public void assertNoCollisions() throws DBPoolingException, SQLException {
+	public void assertNoCollisions() throws OXException, SQLException {
 		assertEquals(0, countCollisions());
 	}
 	
-	public void assertFolderNames(final String...expected) throws DBPoolingException, SQLException {
+	public void assertFolderNames(final String...expected) throws OXException, SQLException {
 		final List<String> folders = loadFolderNames();
 		assertEquals(folders.toString(), expected.length, folders.size());
 		
@@ -106,11 +105,11 @@ public class RenamePersonalInfostoreFoldersTest extends UpdateTest {
 	}
 	
 	
-	private final void createFolder(final String fname) throws DBPoolingException, SQLException {
+	private final void createFolder(final String fname) throws OXException, SQLException {
 		exec("INSERT INTO oxfolder_tree (fuid, cid, parent, fname, module, type, default_flag,creating_date,changing_date,created_from, changed_from, permission_flag, subfolder_flag) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",idcount++, existing_ctx_id, parent, fname, module, type, 1, 0, 0, user_id, user_id,3,0);
 	}
 	
-	private int countCollisions() throws DBPoolingException, SQLException{
+	private int countCollisions() throws OXException, SQLException{
 		
 		final Set<String> seen = new HashSet<String>();
 		final List<String> folderNames = loadFolderNames();
@@ -124,7 +123,7 @@ public class RenamePersonalInfostoreFoldersTest extends UpdateTest {
 		return collisionCount;
 	}
 	
-	private List<String> loadFolderNames() throws DBPoolingException, SQLException{
+	private List<String> loadFolderNames() throws OXException, SQLException{
 		Connection con = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;

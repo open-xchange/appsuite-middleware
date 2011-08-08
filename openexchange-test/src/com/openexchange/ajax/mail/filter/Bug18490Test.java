@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail.filter;
 
+import com.openexchange.exception.OXException;
 import java.util.Arrays;
 import java.util.List;
 import com.openexchange.ajax.folder.Create;

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.task;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.Date;
 import java.util.TimeZone;
@@ -69,8 +70,6 @@ import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.ajax.task.actions.UpdateResponse;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.tools.servlet.OXJSONException;
 
 public class Bug11190Test extends AbstractAJAXSession {
     
@@ -84,7 +83,7 @@ public class Bug11190Test extends AbstractAJAXSession {
      * results in a broken recurrence.
      */
     @Test
-    public void testSwitchingBetweenMonthlyRecurrencePatternsShouldNotBreakRecurrence() throws AjaxException, IOException, SAXException, JSONException, OXJSONException{
+    public void testSwitchingBetweenMonthlyRecurrencePatternsShouldNotBreakRecurrence() throws OXException, IOException, SAXException, JSONException, OXException{
         AJAXClient ajaxClient = getClient();
         final TimeZone timezone = ajaxClient.getValues().getTimeZone();
         final int folderId = ajaxClient.getValues().getPrivateTaskFolder();

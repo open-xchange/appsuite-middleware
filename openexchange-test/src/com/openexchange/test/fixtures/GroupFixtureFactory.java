@@ -48,6 +48,7 @@
  */
 package com.openexchange.test.fixtures;
 
+import com.openexchange.exception.OXException;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -78,7 +79,7 @@ public class GroupFixtureFactory implements FixtureFactory<Group> {
             this.entries = values;
         }
 
-        public Fixture<Group> getEntry(final String entryName) throws FixtureException {
+        public Fixture<Group> getEntry(final String entryName) throws OXException {
             if (groupMap.containsKey(entryName)) {
                 return groupMap.get(entryName);
             }

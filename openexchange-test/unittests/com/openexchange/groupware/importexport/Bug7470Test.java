@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.importexport;
 
+import com.openexchange.exception.OXException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -64,9 +65,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.AppointmentSQLInterface;
-import com.openexchange.api2.OXException;
 import com.openexchange.calendar.CalendarSql;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.Appointment;
@@ -75,7 +74,6 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.importexport.importers.ICalImporter;
-import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.test.AjaxInit;
 import com.openexchange.tools.session.ServerSessionFactory;
@@ -114,7 +112,7 @@ public class Bug7470Test extends AbstractContactTest {
 	/*
 	 * Imported appointment loses participants
 	 */
-	@Test public void test7470() throws SQLException, UnsupportedEncodingException, OXObjectNotFoundException, NumberFormatException, OXException, LdapException {
+	@Test public void test7470() throws SQLException, UnsupportedEncodingException, OXException, NumberFormatException, OXException, OXException {
 		folderId = createTestFolder(FolderObject.CALENDAR, sessObj, ctx, "ical7470Folder");
 		final String email = "cbartkowiak@oxhemail.open-xchange.com";
 		final String cn = "Camil Bartkowiak (cbartkowiak@oxhemail.open-xchange.com)";

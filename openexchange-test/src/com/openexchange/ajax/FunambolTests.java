@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.ajax.appointment.CalendarTestManagerTest;
 import com.openexchange.ajax.contact.BasicManagedContactTests;
 import com.openexchange.ajax.framework.AbstractAJAXSession;

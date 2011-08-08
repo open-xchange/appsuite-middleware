@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,71 +47,29 @@
  *
  */
 
-package com.openexchange.ajax.appointment.helper;
+package com.openexchange.ajp13.watcher;
 
-import com.openexchange.groupware.AbstractOXException;
 
 /**
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * {@link Task} - A task tracked by watcher.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OXError {
+public interface Task {
 
-    private String category;
+    boolean isWaitingOnAJPSocket();
 
-    private int number;
+    boolean isProcessing();
+    
+    long getProcessingStartTime();
+    
+    boolean isLongRunning();
+    
+    StackTraceElement[] getStackTrace();
+    
+    String getThreadName();
 
-    public void setCategory(String category) {
-        this.category = category;
-    }
+    void cancel();
 
-    public String getCategory() {
-        return category;
-    }
-
-    public void setNumber(int number) {
-        this.number = number;
-    }
-
-    public int getNumber() {
-        return number;
-    }
-
-    public OXError(String category, int number) {
-        setNumber(number);
-        setCategory(category);
-    }
-
-    public boolean matches(OXError other) {
-        boolean matchesNumber = false, matchesCategory = false;
-
-        if (category == null || other.getCategory() == null)
-            matchesCategory = true;
-        else
-            matchesCategory = category.equals(other.getCategory());
-
-        if (number == -1 || other.getNumber() == -1)
-            matchesNumber = true;
-        else
-            matchesNumber = number == other.getNumber();
-
-        return matchesNumber && matchesCategory;
-    }
-
-    public boolean matches(AbstractOXException exception) {
-        return matches(new OXError(exception.getComponent().getAbbreviation(), exception.getDetailNumber()));
-    }
-
-    public boolean matches(Throwable t) {
-        try {
-            AbstractOXException exception = (AbstractOXException) t;
-            return matches(new OXError(exception.getComponent().getAbbreviation(), exception.getDetailNumber()));
-        } catch (ClassCastException e) {
-            return false;
-        }
-    }
-
-    @Override
-    public String toString() {
-        return String.format("%3s-%04d", category, number);
-    }
+    Long getNum();
 }

@@ -48,6 +48,7 @@
  */
 package com.openexchange.groupware.links;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarListener;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.tools.CommonAppointments;
@@ -58,7 +59,6 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.LinkObject;
 import com.openexchange.session.Session;
@@ -123,7 +123,7 @@ public class CopyLinksForChangeExceptionsTest extends TestCase {
 
     // Bug 12377
 
-    public void testShouldCopyLinks() throws AbstractOXException, IOException {
+    public void testShouldCopyLinks() throws OXException, IOException {
         final CalendarDataObject master = appointments.buildBasicAppointment(D("10/02/2008 10:00"), D("10/02/2008 12:00"));
         master.setRecurrenceType(CalendarDataObject.DAILY);
         master.setInterval(1);

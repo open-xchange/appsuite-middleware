@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.group.actions;
 
+import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -56,7 +57,6 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.parser.GroupParser;
 import com.openexchange.group.Group;
-import com.openexchange.tools.servlet.OXJSONException;
 
 /**
  *
@@ -76,9 +76,9 @@ public final class GetResponse extends AbstractAJAXResponse {
     /**
      * @return the group
      * @throws JSONException 
-     * @throws OXJSONException 
+     * @throws OXException 
      */
-    public final Group getGroup() throws OXJSONException, JSONException {
+    public final Group getGroup() throws OXException, JSONException {
         if (null == group) {
             group = new Group();
             new GroupParser().parse(group, (JSONObject) getData());

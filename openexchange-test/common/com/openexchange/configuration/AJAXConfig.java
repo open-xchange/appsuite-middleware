@@ -69,15 +69,14 @@ public class AJAXConfig extends AbstractConfig {
     protected String getPropertyFileName() throws OXException {
         final String fileName = TestConfig.getProperty(KEY);
         if (null == fileName) {
-            throw ConfigurationExceptionCodes
-                .PROPERTY_MISSING.create(KEY.getPropertyName());
+            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(KEY.getPropertyName());
         }
         return fileName;
     }
 
     /**
      * Reads the configuration.
-     * @throws ConfigurationException if reading configuration fails.
+     * @throws OXException if reading configuration fails.
      */
     public static void init() throws OXException {
         TestConfig.init();

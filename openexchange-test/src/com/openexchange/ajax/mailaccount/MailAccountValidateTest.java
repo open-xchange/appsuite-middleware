@@ -49,17 +49,15 @@
 
 package com.openexchange.ajax.mailaccount;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.mailaccount.actions.MailAccountValidateRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountValidateResponse;
-import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.MailConfig;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.mailaccount.MailAccountException;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * {@link MailAccountValidateTest}
@@ -85,7 +83,7 @@ public class MailAccountValidateTest extends AbstractMailAccountTest {
         super.tearDown();
     }
 
-    public void testValidate() throws AjaxException, IOException, JSONException, MailAccountException {
+    public void testValidate() throws OXException, IOException, JSONException, OXException {
         final MailAccountDescription mailAccountDescription = createMailAccountObject();
         MailAccountValidateResponse response = getClient().execute(new MailAccountValidateRequest(mailAccountDescription));
         assertFalse("Invalid IP/hostname in mail account succesfully passed validation but shouldn't", response.isValidated());
@@ -107,7 +105,7 @@ public class MailAccountValidateTest extends AbstractMailAccountTest {
          */
         try {
             MailConfig.init();
-        } catch (final ConfigurationException e) {
+        } catch (final OXException e) {
             e.printStackTrace();
             fail(e.getMessage());
         }

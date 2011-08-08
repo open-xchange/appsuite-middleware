@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.util.Calendar;
@@ -72,7 +73,6 @@ import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.PermissionTools;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * Tests the move from a public folder to a private folder.
@@ -119,7 +119,7 @@ public class Bug16194Test extends AbstractAJAXSession {
         response.fillAppointment(appointment);
     }
 
-    private FolderObject createPublicFolder() throws AjaxException, IOException, SAXException, JSONException {
+    private FolderObject createPublicFolder() throws OXException, IOException, SAXException, JSONException {
         FolderObject folder = new FolderObject();
         folder.setModule(FolderObject.CALENDAR);
         folder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);

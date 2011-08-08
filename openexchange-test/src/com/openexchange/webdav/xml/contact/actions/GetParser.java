@@ -49,10 +49,9 @@
 
 package com.openexchange.webdav.xml.contact.actions;
 
+import com.openexchange.exception.OXException;
 import org.jdom.Document;
-import com.openexchange.api.OXConflictException;
 import com.openexchange.groupware.Types;
-import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.framework.AbstractWebDAVParser;
 import com.openexchange.webdav.xml.types.Response;
 
@@ -64,7 +63,7 @@ import com.openexchange.webdav.xml.types.Response;
 public class GetParser extends AbstractWebDAVParser<GetResponse> {
 
     @Override
-    protected GetResponse createResponse(Document document, Response[] responses) throws OXConflictException, TestException {
+    protected GetResponse createResponse(Document document, Response[] responses) throws OXException, OXException {
         // TODO Auto-generated method stub
         return null;
     }

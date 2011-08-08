@@ -1,11 +1,10 @@
 package com.openexchange.groupware.attach.actions;
 
+import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import com.openexchange.api2.OXException;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.impl.CreateAttachmentAction;
 import com.openexchange.groupware.attach.impl.DeleteAttachmentAction;
@@ -75,7 +74,7 @@ public class RemoveAttachmentsActionTest extends AbstractAttachmentActionTest {
         }
     }
     
-    private int countDel() throws DBPoolingException, SQLException{
+    private int countDel() throws OXException, SQLException{
         final StringBuilder in = new StringBuilder();
         for(final AttachmentMetadata m : getAttachments()) {
             in.append(m.getId()).append(",");
@@ -107,11 +106,11 @@ public class RemoveAttachmentsActionTest extends AbstractAttachmentActionTest {
         }
     }
 
-    private void checkDelTable() throws DBPoolingException, SQLException {
+    private void checkDelTable() throws OXException, SQLException {
         assertEquals(getAttachments().size(), countDel()-delCountStart);
     }
     
-    private void checkRemovedFromDel() throws DBPoolingException, SQLException {
+    private void checkRemovedFromDel() throws OXException, SQLException {
         assertEquals(delCountStart, countDel());
     }
 

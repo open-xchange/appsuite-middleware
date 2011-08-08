@@ -49,10 +49,9 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
-import com.openexchange.ajax.appointment.helper.OXError;
 import com.openexchange.ajax.user.UserResolver;
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Changes;
 import com.openexchange.groupware.container.Expectations;
@@ -291,9 +290,9 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
             "Should get exception when trying to get create delete exception on top of change exception",
             calendarManager.hasLastException());
 
-        OXError expected = new OXError("APP", 11);
-        Exception actual = calendarManager.getLastException();
-        assertTrue("Expecting " + expected + ", but got " + actual, expected.matches(actual));
+        OXException expected = new OXException(11);
+        OXException actual = (OXException) calendarManager.getLastException();
+        assertTrue("Expecting " + expected + ", but got " + actual, expected.similarTo(actual));
     }
 
     public void testShouldFailChangeExceptionIfCreatingOneOnADeleteException() {
@@ -310,7 +309,7 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
         changes.put(Appointment.START_DATE, D("3/1/2008 0:00", utc));
         changes.put(Appointment.END_DATE, D("3/1/2008 24:00", utc));
 
-        negativeAssertionOnChangeException.check(app, changes, new OXError("APP", OXCalendarException.Code.UNABLE_TO_CALCULATE_POSITION.getDetailNumber()));
+        negativeAssertionOnChangeException.check(app, changes, OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_POSITION.create());
     }
 
 }

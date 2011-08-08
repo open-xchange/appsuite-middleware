@@ -49,12 +49,11 @@
 
 package com.openexchange.webdav.xml.folder.actions;
 
+import com.openexchange.exception.OXException;
 import org.jdom.Document;
 
-import com.openexchange.api.OXConflictException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.framework.AbstractWebDAVParser;
 import com.openexchange.webdav.xml.types.Response;
 
@@ -80,7 +79,7 @@ public final class ListParser extends AbstractWebDAVParser<ListResponse> {
      * {@inheritDoc}
      */
     @Override
-    protected ListResponse createResponse(final Document document, final Response[] responses) throws OXConflictException, TestException {
+    protected ListResponse createResponse(final Document document, final Response[] responses) throws OXException, OXException {
         final ListResponse retval = new ListResponse(document, responses);
         final FolderObject[] folders = new FolderObject[responses.length];
         for (int a = 0; a < folders.length; a++) {

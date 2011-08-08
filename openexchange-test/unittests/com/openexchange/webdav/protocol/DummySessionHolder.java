@@ -3,8 +3,8 @@
  */
 package com.openexchange.webdav.protocol;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.sessiond.impl.SessionHolder;
@@ -17,7 +17,7 @@ public class DummySessionHolder implements SessionHolder{
 
 	private final Context ctx;
 	
-	public DummySessionHolder(final String username, final Context ctx) throws LdapException {
+	public DummySessionHolder(final String username, final Context ctx) throws OXException {
 		session =  SessionObjectWrapper.createSessionObject(UserStorage.getInstance().getUserId(username, ctx)  , ctx,"12345");
 		this.ctx = ctx;
 	}

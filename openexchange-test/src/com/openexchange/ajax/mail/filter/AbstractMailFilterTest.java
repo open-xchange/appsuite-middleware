@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail.filter;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Date;
 import com.openexchange.ajax.framework.AJAXSession;

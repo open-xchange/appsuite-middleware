@@ -49,12 +49,12 @@
 
 package com.openexchange.ajax.importexport.actions;
 
+import com.openexchange.exception.OXException;
 import org.json.JSONArray;
 import org.json.JSONException;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractUploadParser;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.importexport.ImportResult;
 
 /**
@@ -90,7 +90,7 @@ public final class ICalImportParser extends AbstractUploadParser<ICalImportRespo
             retval.setImports(results);
             if (failOnError) {
                 for (final ImportResult result : results) {
-                    final AbstractOXException e = result.getException();
+                    final OXException e = result.getException();
                     final String msg = e == null ? null : e.getMessage();
                     assertFalse(msg, result.hasError());
                 }

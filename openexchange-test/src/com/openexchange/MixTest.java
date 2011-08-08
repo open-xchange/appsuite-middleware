@@ -49,6 +49,7 @@
 
 package com.openexchange;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.Random;
 
@@ -68,7 +69,6 @@ import com.openexchange.ajax.session.actions.LoginRequest;
 import com.openexchange.ajax.session.actions.LoginResponse;
 import com.openexchange.ajax.session.actions.LogoutRequest;
 import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.AJAXConfig.Property;
 
 /**
@@ -94,7 +94,7 @@ public final class MixTest {
         final Thread[] webdav = new Thread[count];
         try {
             AJAXConfig.init();
-        } catch (final ConfigurationException e) {
+        } catch (final OXException e) {
             e.printStackTrace();
             return;
         }

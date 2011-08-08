@@ -49,6 +49,7 @@
 
 package com.openexchange.mail;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import javax.mail.MessagingException;
 import com.openexchange.imap.dataobjects.IMAPMailFolder;
@@ -81,7 +82,7 @@ public final class MailIDTest extends AbstractMailTest {
         super(name);
     }
 
-    public void testMailID() throws MailException, MessagingException, IOException {
+    public void testMailID() throws OXException, MessagingException, IOException {
         final SessionObject session = getSession();
         final MailMessage[] mails = getMessages(getTestMailDir(), -1);
 

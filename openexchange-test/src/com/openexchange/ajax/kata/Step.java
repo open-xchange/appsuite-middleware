@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.kata;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.ajax.framework.AJAXClient;
 
 

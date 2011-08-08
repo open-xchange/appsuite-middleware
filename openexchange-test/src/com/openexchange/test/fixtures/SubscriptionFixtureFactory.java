@@ -48,6 +48,7 @@
  */
 package com.openexchange.test.fixtures;
 
+import com.openexchange.exception.OXException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -78,7 +79,7 @@ public class SubscriptionFixtureFactory implements FixtureFactory<Subscription> 
             this.entries = entries;
         }
 
-        public Fixture<Subscription> getEntry(final String entryName) throws FixtureException {
+        public Fixture<Subscription> getEntry(final String entryName) throws OXException {
             if (subscriptions.containsKey(entryName)) {
                 return subscriptions.get(entryName);
             }

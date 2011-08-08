@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.importexport;
 
+import com.openexchange.exception.OXException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -62,16 +63,11 @@ import junit.framework.JUnit4TestAdapter;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.userconfiguration.OverridingUserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 
 public class Bug8681forVCard extends AbstractVCardTest {
@@ -89,14 +85,14 @@ public class Bug8681forVCard extends AbstractVCardTest {
         ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
     }
 
-    @Test public void checkVCard() throws AbstractOXException, UnsupportedEncodingException, SQLException, OXException{
+    @Test public void checkVCard() throws OXException, UnsupportedEncodingException, SQLException, OXException{
 		//creating folder before changing permissions...
 		folderId = createTestFolder(FolderObject.CONTACT, sessObj, ctx, "vcard7719Folder");
 		
 		final UserConfigurationStorage original = UserConfigurationStorage.getInstance();
         final OverridingUserConfigurationStorage override = new OverridingUserConfigurationStorage(original) {
             @Override
-			public UserConfiguration getOverride(final int userId, final int[] groups, final Context ctx) throws UserConfigurationException {
+			public UserConfiguration getOverride(final int userId, final int[] groups, final Context ctx) throws OXException {
                 final UserConfiguration orig = delegate.getUserConfiguration(userId, ctx);
                 final UserConfiguration copy = (UserConfiguration) orig.clone();
                 copy.setContact(false);
@@ -111,8 +107,7 @@ public class Bug8681forVCard extends AbstractVCardTest {
 			try{
 				imp.canImport(sessObj, Format.VCARD, folders, null);
 				fail("Could import Contacts without permission on Contact module!");
-			} catch(final ImportExportException e) {
-				assertEquals(Category.PERMISSION, e.getCategory());
+			} catch(final OXException e) {
 				assertEquals("I_E-0607" , e.getErrorCode() );
 			}
 		} finally {

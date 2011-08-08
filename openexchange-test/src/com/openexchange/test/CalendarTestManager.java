@@ -49,6 +49,7 @@
 
 package com.openexchange.test;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.i2I;
@@ -86,10 +87,8 @@ import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.ListIDs;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CommonObject;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * {@link CalendarTestManager}
@@ -126,7 +125,7 @@ public class CalendarTestManager implements TestManager {
 
         try {
             timezone = client.getValues().getTimeZone();
-        } catch (AjaxException e) {
+        } catch (OXException e) {
             // wait for finally block
         } catch (IOException e) {
             // wait for finally block
@@ -188,7 +187,7 @@ public class CalendarTestManager implements TestManager {
         return lastModification;
     }
 
-    public int getPrivateFolder() throws AjaxException, IOException, SAXException, JSONException {
+    public int getPrivateFolder() throws OXException, IOException, SAXException, JSONException {
         return getClient().getValues().getPrivateAppointmentFolder();
     }
 
@@ -205,7 +204,7 @@ public class CalendarTestManager implements TestManager {
     private <T extends AbstractAJAXResponse> T execute(final AJAXRequest<T> request) {
         try {
             return getClient().execute(request);
-        } catch (AjaxException e) {
+        } catch (OXException e) {
             setLastException(e);
             if (failOnError)
                 fail("AjaxException during task creation: " + e.getLocalizedMessage());

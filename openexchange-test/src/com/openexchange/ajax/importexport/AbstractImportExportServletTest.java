@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.importexport;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.HashSet;
@@ -60,14 +61,11 @@ import org.xml.sax.SAXException;
 
 import com.openexchange.ajax.AbstractAJAXTest;
 import com.openexchange.ajax.ImportExport;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.ContactTestData;
 import com.openexchange.groupware.importexport.Format;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.tools.oxfolder.OXFolderException;
-import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.webdav.xml.FolderTest;
 
 
@@ -105,7 +103,7 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
         super.tearDown();
 	}
 	
-	protected int getUserId_FIXME() throws MalformedURLException, OXException, IOException, SAXException, JSONException, AjaxException {
+	protected int getUserId_FIXME() throws MalformedURLException, OXException, IOException, SAXException, JSONException, OXException {
 		final FolderObject folderObj = com.openexchange.ajax.FolderTest
 		.getStandardCalendarFolder(getWebConversation(),
 		getHostName(), getSessionId());
@@ -113,7 +111,7 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
 		return folderObj.getCreatedBy();
 	}
 
-	public String getUrl(final String servlet, final int folderId, final Format format) throws IOException, JSONException, AjaxException {
+	public String getUrl(final String servlet, final int folderId, final Format format) throws IOException, JSONException, OXException {
 		final StringBuilder bob = new StringBuilder("http://");
 		bob.append(getHostName());
 		bob.append("/ajax/");
@@ -125,7 +123,7 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
 		return bob.toString();
 	}
 	
-	public String getCSVColumnUrl(final String servlet, final int folderId, final Format format) throws IOException, AjaxException, JSONException{
+	public String getCSVColumnUrl(final String servlet, final int folderId, final Format format) throws IOException, OXException, JSONException{
 		final StringBuilder bob = new StringBuilder(getUrl(servlet, folderId, format));
 		
 		addParam(bob, ImportExport.PARAMETER_COLUMNS, ContactField.GIVEN_NAME.getNumber());
@@ -159,7 +157,7 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
 		folderObj.setPermissionsAsArray( permission );
 		try{
 			return FolderTest.insertFolder(getWebConversation(), folderObj, getHostName(), getLogin(), getPassword());
-		} catch(final OXFolderException e){
+		} catch(final OXException e){
 			return -1;
 		}
 	}

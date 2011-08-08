@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.resource;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -60,7 +61,6 @@ import com.openexchange.ajax.resource.actions.ResourceAllResponse;
 import com.openexchange.ajax.resource.actions.ResourceListRequest;
 import com.openexchange.ajax.resource.actions.ResourceListResponse;
 import com.openexchange.resource.Resource;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * {@link ResourceListAJAXTest} - Tests the LIST request on resource servlet
@@ -83,7 +83,7 @@ public final class ResourceListAJAXTest extends AbstractResourceTest {
     /**
      * Tests the <code>action=list</code>
      */
-    public void testList() throws AjaxException, JSONException, IOException, SAXException {
+    public void testList() throws OXException, JSONException, IOException, SAXException {
         int id = -1;
         try {
             /*

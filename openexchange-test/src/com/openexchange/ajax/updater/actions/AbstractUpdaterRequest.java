@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.updater.actions;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.json.JSONException;
 import com.openexchange.ajax.framework.AJAXRequest;

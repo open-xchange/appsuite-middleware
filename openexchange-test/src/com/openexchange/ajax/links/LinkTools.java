@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.links;
 
+import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
@@ -80,7 +81,6 @@ import com.openexchange.ajax.links.actions.DeleteRequest;
 import com.openexchange.ajax.links.actions.InsertRequest;
 import com.openexchange.groupware.container.LinkObject;
 import com.openexchange.tools.URLParameter;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * 
@@ -139,19 +139,19 @@ public final class LinkTools extends Assert {
     }
 
     public static CommonInsertResponse insert(final AJAXClient client,
-        final InsertRequest request) throws AjaxException, IOException,
+        final InsertRequest request) throws OXException, IOException,
         SAXException, JSONException {
         return (CommonInsertResponse) Executor.execute(client, request);
     }
 
     public static AllResponse all(final AJAXClient client,
-        final AllRequest request) throws AjaxException, IOException,
+        final AllRequest request) throws OXException, IOException,
         SAXException, JSONException {
         return Executor.execute(client, request);
     }
 
     public static CommonDeleteResponse delete(final AJAXClient client,
-        final DeleteRequest request) throws AjaxException, IOException,
+        final DeleteRequest request) throws OXException, IOException,
         SAXException, JSONException {
         return (CommonDeleteResponse) Executor.execute(client, request);
     }

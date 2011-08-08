@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.folder;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.List;
 import org.json.JSONArray;
@@ -65,12 +66,8 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.tools.servlet.OXJSONException;
 
 /**
  * {@link FunctionTests}
@@ -99,11 +96,11 @@ public class FunctionTests extends AbstractAJAXSession {
         super.tearDown();
     }
 
-    public void testUnknownAction() throws IOException, JSONException, AjaxException {
+    public void testUnknownAction() throws IOException, JSONException, OXException {
         GetResponse response = client.execute(new UnknownActionRequest(API.OX_OLD, FolderObject.SYSTEM_PUBLIC_FOLDER_ID, false));
         assertTrue("JSON response should contain an error message.", response.hasError());
-        AbstractOXException exception = response.getException();
-        String error = exception.getOrigMessage();
+        OXException exception = response.getException();
+        String error = exception.getMessage(); //was: getOrigMessage, maybe it should be .getCause().getMessage()?
         assertTrue(
             "Error is not the expected one: \"" + error + "\"",
             error.equals("Action \"unknown\" NOT supported via GET on /ajax/folders") || error.equals("Unknown AJAX action: %s."));
@@ -123,7 +120,7 @@ public class FunctionTests extends AbstractAJAXSession {
         }
     }
 
-    public void testInsertUpdateFolder() throws AjaxException, IOException, JSONException, OXException, OXJSONException {
+    public void testInsertUpdateFolder() throws OXException, IOException, JSONException, OXException, OXException {
         FolderObject toDelete = null;
         int userId1 = client.getValues().getUserId();
         int userId2 = client2.getValues().getUserId();
@@ -150,7 +147,7 @@ public class FunctionTests extends AbstractAJAXSession {
         }
     }
 
-    public void testFailDeleteFolder() throws AjaxException, IOException, JSONException, OXJSONException, OXException {
+    public void testFailDeleteFolder() throws OXException, IOException, JSONException, OXException, OXException {
         int userId = client.getValues().getUserId();
         int secId = client2.getValues().getUserId();
         FolderObject parent = null;

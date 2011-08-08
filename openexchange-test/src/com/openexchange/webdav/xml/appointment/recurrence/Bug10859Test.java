@@ -49,11 +49,11 @@
 
 package com.openexchange.webdav.xml.appointment.recurrence;
 
+import com.openexchange.exception.OXException;
 import java.util.Calendar;
 import java.util.TimeZone;
 
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.AppointmentTest;
 
 /**
@@ -93,7 +93,7 @@ public final class Bug10859Test extends AppointmentTest {
             objectId = insertAppointment(getWebConversation(), appointment, PROTOCOL + getHostName(), getLogin(), getPassword());
             deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
             fail("Invalid month value not detected.");
-        } catch (final TestException e) {
+        } catch (final OXException e) {
         }
     }
 }

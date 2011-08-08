@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.participant;
 
+import com.openexchange.exception.OXException;
 import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -69,7 +70,6 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.ContactSearchObject;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * 
@@ -101,7 +101,7 @@ public final class ParticipantTools {
         return participants;
     }
 
-    public static List<Participant> getParticipants(final AJAXClient client) throws AjaxException, IOException, SAXException, JSONException {
+    public static List<Participant> getParticipants(final AJAXClient client) throws OXException, IOException, SAXException, JSONException {
         final ContactSearchObject search = new ContactSearchObject();
         search.setPattern("*");
         search.setFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID);
@@ -135,7 +135,7 @@ public final class ParticipantTools {
         return participants;
     }
 
-    public static List<Participant> getParticipants(final AJAXClient client, final int count, final int creatorId) throws AjaxException, IOException, SAXException, JSONException {
+    public static List<Participant> getParticipants(final AJAXClient client, final int count, final int creatorId) throws OXException, IOException, SAXException, JSONException {
         List<Participant> participants = getParticipants(client);
         if (-1 != creatorId) {
             removeParticipant(participants, creatorId);

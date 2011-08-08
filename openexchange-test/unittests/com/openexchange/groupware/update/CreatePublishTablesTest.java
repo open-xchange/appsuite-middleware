@@ -49,8 +49,8 @@
 
 package com.openexchange.groupware.update;
 
+import com.openexchange.exception.OXException;
 import java.sql.SQLException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.update.tasks.CreatePublicationTablesTask;
 
 /**
@@ -70,7 +70,7 @@ public class CreatePublishTablesTest extends UpdateTest {
         super.tearDown();
     }
     
-    public void testShouldCreatePublicationsTable() throws AbstractOXException {
+    public void testShouldCreatePublicationsTable() throws OXException {
         executeTask();
         try {
             exec("SELECT id, cid, user_id, entity, module, configuration_id, target_id FROM publications");
@@ -79,7 +79,7 @@ public class CreatePublishTablesTest extends UpdateTest {
         }
     }
     
-    public void testShouldCreateSequenceTable() throws AbstractOXException {
+    public void testShouldCreateSequenceTable() throws OXException {
         executeTask();
         try {
             exec("SELECT cid, id FROM sequence_publications");
@@ -88,16 +88,16 @@ public class CreatePublishTablesTest extends UpdateTest {
         }
     }
     
-    public void testShouldCreateEntryInSequenceTableForEveryContext() throws AbstractOXException, SQLException {
+    public void testShouldCreateEntryInSequenceTableForEveryContext() throws OXException, SQLException {
         executeTask();
         assertResult("SELECT 1 FROM sequence_publications WHERE cid = "+existing_ctx_id);
     }
     
-    private void executeTask() throws AbstractOXException {
+    private void executeTask() throws OXException {
         new CreatePublicationTablesTask().perform(schema, existing_ctx_id);
     }
     
-    public void testShouldBeRunnableTwice() throws AbstractOXException {
+    public void testShouldBeRunnableTwice() throws OXException {
         executeTask();
         executeTask();
     }

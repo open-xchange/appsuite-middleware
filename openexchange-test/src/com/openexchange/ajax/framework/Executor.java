@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.framework;
 
+import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -93,7 +94,7 @@ import com.openexchange.ajax.framework.AJAXRequest.Parameter;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.tools.URLParameter;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 public class Executor extends Assert {
     /**
@@ -109,17 +110,17 @@ public class Executor extends Assert {
     }
 
     public static <T extends AbstractAJAXResponse> T execute(final AJAXClient client,
-        final AJAXRequest<T> request) throws AjaxException, IOException,
+        final AJAXRequest<T> request) throws OXException, IOException,
         JSONException {
         return execute(client.getSession(), request);
     }
 
-    public static <T extends AbstractAJAXResponse> T execute(final AJAXClient client, final AJAXRequest<T> request, final String protocol, final String hostname) throws AjaxException, IOException, JSONException {
+    public static <T extends AbstractAJAXResponse> T execute(final AJAXClient client, final AJAXRequest<T> request, final String protocol, final String hostname) throws OXException, IOException, JSONException {
         return execute(client.getSession(), request, protocol, hostname, getSleep());
     }
 
     public static <T extends AbstractAJAXResponse> T execute(final AJAXSession session,
-        final AJAXRequest<T> request) throws AjaxException, IOException,
+        final AJAXRequest<T> request) throws OXException, IOException,
         JSONException {
         return execute(session, request,
             AJAXConfig.getProperty(Property.PROTOCOL),
@@ -127,21 +128,21 @@ public class Executor extends Assert {
     }
 
     public static <T extends AbstractAJAXResponse> T execute(final AJAXSession session,
-        final AJAXRequest<T> request, final String hostname) throws AjaxException,
+        final AJAXRequest<T> request, final String hostname) throws OXException,
         IOException, JSONException {
         return execute(session, request, AJAXConfig
             .getProperty(Property.PROTOCOL), hostname, getSleep());
     }
     
     public static <T extends AbstractAJAXResponse> T execute(final AJAXSession session, final AJAXRequest<T> request,
-        final String protocol, final String hostname) throws AjaxException, IOException,
+        final String protocol, final String hostname) throws OXException, IOException,
         JSONException {
         return execute(session, request, protocol, hostname, getSleep());
     }
     
 
     public static <T extends AbstractAJAXResponse> T execute(final AJAXSession session, final AJAXRequest<T> request,
-            final String protocol, final String hostname, final int sleep) throws AjaxException, IOException,
+            final String protocol, final String hostname, final int sleep) throws OXException, IOException,
             JSONException {
 
         final String urlString = protocol + "://" + hostname + request.getServletPath();
@@ -169,7 +170,7 @@ public class Executor extends Assert {
         	httpRequest = httpPut;
             break;
         default:
-            throw new AjaxException(AjaxException.Code.InvalidParameter, request.getMethod().name());
+            throw AjaxExceptionCodes.InvalidParameter.create(request.getMethod().name());
         }
         for (Header header : request.getHeaders()) {
             httpRequest.addHeader(header.getName(), header.getValue());
@@ -244,7 +245,7 @@ public class Executor extends Assert {
 	}
 
 	public static WebResponse execute4Download(final AJAXSession session, final AJAXRequest<?> request,
-            final String protocol, final String hostname) throws AjaxException, IOException, JSONException {
+            final String protocol, final String hostname) throws OXException, IOException, JSONException {
         final String urlString = protocol + "://" + hostname + request.getServletPath();
         final WebRequest req;
         switch (request.getMethod()) {
@@ -254,7 +255,7 @@ public class Executor extends Assert {
             addURLParameter(get, session, request);
             break;
         default:
-            throw new AjaxException(AjaxException.Code.InvalidParameter, request.getMethod().name());
+            throw AjaxExceptionCodes.InvalidParameter.create(request.getMethod().name());
         }
         final WebConversation conv = session.getConversation();
         final WebResponse resp;

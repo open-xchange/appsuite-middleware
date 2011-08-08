@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.subscribe.test;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -59,7 +60,6 @@ import com.openexchange.ajax.subscribe.actions.ListSubscriptionsResponse;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.Subscription;
-import com.openexchange.tools.servlet.AjaxException;
 
 
 /**
@@ -72,7 +72,7 @@ public class ListSubscriptionsTest extends AbstractSubscriptionTest {
         super(name);
     }
 
-    public void testShouldSurviveBasicOXMFSubscription() throws AjaxException, IOException, SAXException, JSONException{
+    public void testShouldSurviveBasicOXMFSubscription() throws OXException, IOException, SAXException, JSONException{
         FolderObject folder = createDefaultContactFolder();
         
         DynamicFormDescription formDescription = generateFormDescription();

@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.vcard;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.List;
 import com.openexchange.groupware.container.Contact;

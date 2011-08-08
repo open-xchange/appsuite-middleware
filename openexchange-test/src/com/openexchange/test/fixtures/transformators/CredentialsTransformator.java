@@ -48,7 +48,7 @@
  */
 package com.openexchange.test.fixtures.transformators;
 
-import com.openexchange.test.fixtures.FixtureException;
+import com.openexchange.exception.OXException;
 import com.openexchange.test.fixtures.FixtureLoader;
 import com.openexchange.test.fixtures.SimpleCredentials;
 
@@ -67,19 +67,19 @@ public class CredentialsTransformator implements Transformator {
 		this.fixtureLoader = fixtureLoader;
 	}
 
-	public Object transform(final String value) throws FixtureException {
+	public Object transform(final String value) throws OXException {
 		if (null == value || 1 > value.length() || false == value.contains(":")) {
-			throw new FixtureException("Unable to transform '" + value + "' into simple credentials");
+			throw OXException.general("Unable to transform '" + value + "' into simple credentials");
 		}
 		final String[] splitted = value.split(":");
 		if (splitted.length < 2) {
-			throw new FixtureException("Unable to transform '" + value + "' into simple credentials");
+			throw OXException.general("Unable to transform '" + value + "' into simple credentials");
 		} else {
 			return getCredentials(splitted[0], splitted[1]);
 		}
     }
 	
-	private final SimpleCredentials getCredentials(final String fixtureName, final String fixtureEntry) throws FixtureException {
+	private final SimpleCredentials getCredentials(final String fixtureName, final String fixtureEntry) throws OXException {
 		return fixtureLoader.getFixtures(fixtureName, SimpleCredentials.class).getEntry(fixtureEntry).getEntry();
 	}
 }

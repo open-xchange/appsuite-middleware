@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.notify;
 
+import com.openexchange.exception.OXException;
 import java.io.File;
 import java.io.InputStream;
 import java.text.DateFormat;
@@ -80,13 +81,11 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.mail.MailObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.MockGroupLookup;
 import com.openexchange.groupware.ldap.MockResourceLookup;
 import com.openexchange.groupware.ldap.MockUserLookup;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserConfigurationFactory;
-import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
 import com.openexchange.groupware.notify.State.Type;
 import com.openexchange.groupware.tasks.Task;
@@ -201,7 +200,7 @@ public class ParticipantNotifyTest extends TestCase {
     }
 
 
-    public Task getTask(final Participant[] participants) throws LdapException, UserException {
+    public Task getTask(final Participant[] participants) throws OXException, OXException {
         final Task task = new Task();
         task.setStartDate(start);
         task.setEndDate(end);
@@ -237,7 +236,7 @@ public class ParticipantNotifyTest extends TestCase {
         return task;
     }
 
-    public static User[] U(final int...ids) throws UserException {
+    public static User[] U(final int...ids) throws OXException {
         final User[] users = new User[ids.length];
         int i = 0;
         for(final int id : ids) {
@@ -246,7 +245,7 @@ public class ParticipantNotifyTest extends TestCase {
         return users;
     }
 
-    public static final Group[] G(final int...ids) throws LdapException {
+    public static final Group[] G(final int...ids) throws OXException {
         final Group[] groups = new Group[ids.length];
         int i = 0;
         for(final int id : ids) {
@@ -444,20 +443,16 @@ public class ParticipantNotifyTest extends TestCase {
         public boolean realUsers = false;
 
         @Override
-        protected Group[] resolveGroups(final Context ctx, final int... ids) throws LdapException {
+        protected Group[] resolveGroups(final Context ctx, final int... ids) throws OXException {
             return G(ids);
         }
 
         @Override
-        protected User[] resolveUsers(final Context ctx, final int... ids) throws LdapException {
+        protected User[] resolveUsers(final Context ctx, final int... ids) throws OXException {
             if (realUsers) {
                 return super.resolveUsers(ctx, ids);
             }
-            try {
-                return U(ids);
-            } catch (final UserException e) {
-                throw new LdapException(e);
-            }
+            return U(ids);
         }
 
         @Override
@@ -495,7 +490,7 @@ public class ParticipantNotifyTest extends TestCase {
             } else {
                 try {
                     fromAddr = USER_STORAGE.getUser(session.getUserId()).getMail();
-                } catch (UserException e) {
+                } catch (OXException e) {
                     fromAddr = "User not found";
                 }
             }
@@ -509,7 +504,7 @@ public class ParticipantNotifyTest extends TestCase {
             return "FOLDER";
         }
 
-        public Message getMessageForUser(int uid) throws UserException {
+        public Message getMessageForUser(int uid) throws OXException {
             String mailAddress = U(uid)[0].getMail();
             for (Message message : messageCollector) {
                 if(message.addresses.contains(mailAddress)) {

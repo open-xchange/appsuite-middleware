@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.folder;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
@@ -58,7 +59,6 @@ import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * 
@@ -112,13 +112,13 @@ public final class Create {
      * @param name
      * @param module the module (e.g. CONTACT) from FolderObject.java
      * @return
-     * @throws AjaxException
+     * @throws OXException
      * @throws IOException
      * @throws SAXException
      * @throws JSONException
      */
     public static FolderObject createPublicFolder(final AJAXClient client,
-        final String name, final int module) throws AjaxException, IOException,
+        final String name, final int module) throws OXException, IOException,
         SAXException, JSONException {
         final FolderObject folder = setupPublicFolder(name, module, client.getValues().getUserId());
         folder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);

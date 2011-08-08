@@ -49,6 +49,7 @@
 
 package com.openexchange.webdav.action;
 
+import com.openexchange.exception.OXException;
 import java.io.UnsupportedEncodingException;
 import junit.framework.TestCase;
 

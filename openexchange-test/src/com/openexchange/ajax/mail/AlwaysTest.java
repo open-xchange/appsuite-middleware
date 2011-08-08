@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -70,12 +71,10 @@ import com.openexchange.ajax.folder.actions.ListResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.parser.ResponseParser;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.dataobjects.MailFolder;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * @author marcus
@@ -132,7 +131,7 @@ public class AlwaysTest extends AbstractAJAXTest {
 
     public void recListFolder(final String folderId, final String rights)
         throws IOException, SAXException, JSONException, OXException,
-        AjaxException {
+        OXException {
         LOG.trace("Listing " + folderId);
         if (rights.length() > 0) {
             listMails(folderId, MAX);
@@ -151,7 +150,7 @@ public class AlwaysTest extends AbstractAJAXTest {
      * @throws JSONException
      */
     private void listMails(final String folderId, final int max)
-        throws IOException, SAXException, JSONException, AjaxException {
+        throws IOException, SAXException, JSONException, OXException {
         final JSONObject json = MailTest.getAllMails(getWebConversation(),
             getHostName(), getSessionId(), folderId, listAttributes,
             false);
@@ -173,7 +172,7 @@ public class AlwaysTest extends AbstractAJAXTest {
 
     public static Map<String, String> getIMAPRights(final AJAXClient client,
         final String parent) throws IOException,
-        SAXException, JSONException, AjaxException {
+        SAXException, JSONException, OXException {
         final ListResponse listR = client.execute(new ListRequest(API.OX_OLD,
             parent, new int[] { FolderObject.OBJECT_ID, FolderObject.OWN_RIGHTS
             }, false));
@@ -185,7 +184,7 @@ public class AlwaysTest extends AbstractAJAXTest {
     }
 
     public FolderObject getIMAPRootFolder() throws OXException, IOException,
-        SAXException, JSONException, AjaxException {
+        SAXException, JSONException, OXException {
         final ListResponse listR = client.execute(new ListRequest(API.OX_OLD,
             String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID)));
         FolderObject defaultIMAPFolder = null;

@@ -49,12 +49,11 @@
 
 package com.openexchange.groupware.notify;
 
+import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 import javax.mail.internet.MimeMultipart;
-import com.openexchange.api2.OXException;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.tools.CommonAppointments;
 import com.openexchange.groupware.container.FolderObject;
@@ -171,9 +170,6 @@ public class Bug13184Test extends ParticipantNotifyTest {
             fo = oxma.createFolder(fo, true, System.currentTimeMillis());
             return fo;
         } catch (final OXException e) {
-            e.printStackTrace();
-            return null;
-        } catch (final DBPoolingException e) {
             e.printStackTrace();
             return null;
         } finally {

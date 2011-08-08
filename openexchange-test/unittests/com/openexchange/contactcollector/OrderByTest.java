@@ -49,13 +49,12 @@
 
 package com.openexchange.contactcollector;
 
+import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.List;
 import junit.framework.TestCase;
-import com.openexchange.api2.OXException;
 import com.openexchange.contactcollector.osgi.CCServiceRegistry;
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.Contact;
@@ -69,7 +68,6 @@ import com.openexchange.session.Session;
 import com.openexchange.setuptools.TestConfig;
 import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
@@ -151,11 +149,8 @@ public class OrderByTest extends TestCase {
             final List<String> surnames = new ArrayList<String>();
             while (iterator.hasNext()) {
                 Contact foundContact;
-                try {
-                    foundContact = iterator.next();
-                } catch (final SearchIteratorException e) {
-                    throw new ContactException(e);
-                }
+                foundContact = iterator.next();
+
                 if (foundContact.getSurName().startsWith("orderbyTest_")) {
                     surnames.add(foundContact.getSurName());
                 }

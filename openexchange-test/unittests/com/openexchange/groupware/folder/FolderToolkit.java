@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware.folder;
 
-import com.openexchange.api2.OXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.oxfolder.OXFolderAccess;

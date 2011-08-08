@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.session;
 
+import com.openexchange.exception.OXException;
 import java.util.Arrays;
 import org.apache.commons.httpclient.Cookie;
 import org.apache.commons.httpclient.HttpState;

@@ -1,12 +1,12 @@
 package com.openexchange.webdav.xml.task;
 
+import com.openexchange.exception.OXException;
 import java.util.Date;
 
 import com.openexchange.group.Group;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.GroupUserTest;
 import com.openexchange.webdav.xml.TaskTest;
 import com.openexchange.webdav.xml.XmlServlet;
@@ -78,7 +78,7 @@ public class UpdateTest extends TaskTest {
 		try {
 			updateTask(webCon, taskObj, objectId, taskFolderId, new Date(0), PROTOCOL + hostName, login, password);
 			fail("expected concurent modification exception!");
-		} catch (final TestException exc) {
+		} catch (final OXException exc) {
 			assertExceptionMessage(exc.getMessage(), XmlServlet.MODIFICATION_STATUS);
 		}
 		
@@ -95,7 +95,7 @@ public class UpdateTest extends TaskTest {
 		try {
 			updateTask(webCon, taskObj, (objectId + 1000), taskFolderId, new Date(0), PROTOCOL + hostName, login, password);
 			fail("expected object not found exception!");
-		} catch (final TestException exc) {
+		} catch (final OXException exc) {
 			assertExceptionMessage(exc.getMessage(), XmlServlet.OBJECT_NOT_FOUND_STATUS);
 		}
 		
@@ -103,4 +103,3 @@ public class UpdateTest extends TaskTest {
 		deleteTask(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
 	}
 }
-

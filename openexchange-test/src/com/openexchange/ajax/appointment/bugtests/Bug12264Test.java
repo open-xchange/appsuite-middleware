@@ -17,8 +17,8 @@ import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 
@@ -224,8 +224,8 @@ public class Bug12264Test extends AbstractAJAXSession {
            appointment.setUntil(new Date(0));
            UpdateResponse response = updateAppointment(false);
            assertTrue(response.hasError());
-           AbstractOXException exception = response.getException();
-           assertEquals("Wrong exception thrown.", OXCalendarException.Code.UNTIL_BEFORE_START_DATE.getDetailNumber(), exception.getDetailNumber());
+           OXException exception = response.getException();
+           assertTrue("Wrong exception thrown.", exception.similarTo(OXCalendarExceptionCodes.UNTIL_BEFORE_START_DATE));
            assertFalse("No occurrence left.", tempOccurrence == 0);
        } finally {
            cleanUp();

@@ -49,6 +49,7 @@
 
 package com.openexchange.test.osgi;
 
+import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringWriter;

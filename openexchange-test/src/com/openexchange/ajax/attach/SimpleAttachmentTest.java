@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.attach;
 
+import com.openexchange.exception.OXException;
 public class SimpleAttachmentTest extends AbstractAttachmentTest {
 
 	public SimpleAttachmentTest(final String name) {

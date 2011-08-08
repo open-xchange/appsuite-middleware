@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.contact;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.test.ContactTestManager;
 

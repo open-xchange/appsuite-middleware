@@ -49,6 +49,7 @@
 
 package com.openexchange.test;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
@@ -67,10 +68,8 @@ import com.openexchange.ajax.contact.action.GetAssociationResponse;
 import com.openexchange.ajax.contact.action.GetContactByUIDRequest;
 import com.openexchange.ajax.contact.action.GetResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.ContactUnificationState;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.tools.servlet.AjaxException;
 
 
 /**
@@ -80,11 +79,11 @@ public class AggregatingContactTestManager extends ContactTestManager {
 
     private Set<UUID> createdAssociations = new HashSet<UUID>();
     
-    public AggregatingContactTestManager(AJAXClient client) throws AjaxException, IOException, SAXException, JSONException {
+    public AggregatingContactTestManager(AJAXClient client) throws OXException, IOException, SAXException, JSONException {
         super(client);
     }
 
-    public ContactUnificationState getAssociationBetween(Contact contributor, Contact aggregator) throws IOException, SAXException, JSONException, AbstractOXException {
+    public ContactUnificationState getAssociationBetween(Contact contributor, Contact aggregator) throws IOException, SAXException, JSONException, OXException {
         GetAssociationResponse response = getClient().execute(new GetAssociationRequest(contributor, aggregator));
         
         doJanitorialTasks(response);

@@ -47,6 +47,7 @@
 
 package com.openexchange.ajax.kata.folders;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.framework.AJAXClient;

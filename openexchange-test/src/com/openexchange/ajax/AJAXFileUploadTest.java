@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import com.openexchange.exception.OXException;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;

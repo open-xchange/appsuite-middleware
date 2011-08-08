@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail.actions;
 
+import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.ByteBuffer;

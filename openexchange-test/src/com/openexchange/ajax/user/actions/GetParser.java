@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.user.actions;
 
+import com.openexchange.exception.OXException;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -56,7 +57,6 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.user.UserImpl4Test;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.user.json.parser.UserParser;
 
 public class GetParser extends AbstractAJAXParser<GetResponse> {
@@ -89,7 +89,7 @@ public class GetParser extends AbstractAJAXParser<GetResponse> {
             user.setSurname(contact.getSurName());
             user.setMail(contact.getEmail1());
             retval.setUser(user);
-        } catch (AjaxException e) {
+        } catch (OXException e) {
             throw new JSONException(e);
         }
         return retval;

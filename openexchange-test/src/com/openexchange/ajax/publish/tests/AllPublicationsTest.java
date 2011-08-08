@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.publish.tests;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.I;
 
 import java.io.File;
@@ -72,11 +73,8 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.publish.Publication;
-import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.SimPublicationTargetDiscoveryService;
-import com.openexchange.publish.json.PublicationJSONException;
 import com.openexchange.test.TestInit;
-import com.openexchange.tools.servlet.AjaxException;
 
 
 /**
@@ -89,7 +87,7 @@ public class AllPublicationsTest extends AbstractPublicationTest {
         super(name);
     }
     
-    public void testShouldNotFindNonExistingPublication() throws AjaxException, IOException, SAXException, JSONException{
+    public void testShouldNotFindNonExistingPublication() throws OXException, IOException, SAXException, JSONException{
         AJAXClient myClient = getClient();
         
         FolderObject testFolder = getFolderManager().generateFolder("pubsub", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
@@ -102,7 +100,7 @@ public class AllPublicationsTest extends AbstractPublicationTest {
         assertEquals("Array should be empty", I(0), I(data.length()));
     }
 
-    public void testShouldFindOneFreshlyCreatedPublication() throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException{
+    public void testShouldFindOneFreshlyCreatedPublication() throws OXException, IOException, SAXException, JSONException, OXException, OXException{
         Contact contact = createDefaultContactFolderWithOneContact();
         String folderID = String.valueOf(contact.getParentFolderID() );
         String module = "contacts";
@@ -132,7 +130,7 @@ public class AllPublicationsTest extends AbstractPublicationTest {
         assertEquals("Should have same target ID", expected.getTarget().getId(), actual.getString(4));
     }
     
-    public void testShouldFindOneFreshlyCreatedPublicationForEmptyFolder() throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException{
+    public void testShouldFindOneFreshlyCreatedPublicationForEmptyFolder() throws OXException, IOException, SAXException, JSONException, OXException, OXException{
         FolderObject folder = createDefaultContactFolder();
         String folderID = String.valueOf(folder.getObjectID() );
         String module = "contacts";
@@ -161,7 +159,7 @@ public class AllPublicationsTest extends AbstractPublicationTest {
         assertEquals("Should have same target ID", expected.getTarget().getId(), actual.getString(4));
     }
     
-    public void testShouldFindAllPublicationsOfUser() throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException {
+    public void testShouldFindAllPublicationsOfUser() throws OXException, IOException, SAXException, JSONException, OXException, OXException {
     	// create folders
     	FolderObject contactFolder = createDefaultContactFolder();
     	String contactModule = "contacts";

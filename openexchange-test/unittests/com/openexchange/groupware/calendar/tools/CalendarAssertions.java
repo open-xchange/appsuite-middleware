@@ -48,15 +48,13 @@
  */
 package com.openexchange.groupware.calendar.tools;
 
-
-
+import com.openexchange.exception.OXException;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.fail;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
@@ -109,7 +107,7 @@ public class CalendarAssertions {
     }
 
 
-    public static void assertInPrivateFolder(final CommonAppointments appointments , final Appointment appointment) throws AbstractOXException {
+    public static void assertInPrivateFolder(final CommonAppointments appointments , final Appointment appointment) throws OXException {
         for(final Appointment currentAppointment : appointments.getPrivateAppointments()) {
             if(appointment.getObjectID() == currentAppointment.getObjectID()) {
                 return;

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.session;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.UUID;
 import org.json.JSONException;
@@ -57,7 +58,6 @@ import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.session.actions.LoginRequest;
 import com.openexchange.ajax.session.actions.LoginResponse;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.tools.servlet.AjaxException;
 
 public class LoginTools {
 
@@ -65,7 +65,7 @@ public class LoginTools {
         super();
     }
 
-    public static LoginResponse login(final AJAXSession session, final LoginRequest request, final String protocol, final String hostname) throws AjaxException, IOException, JSONException {
+    public static LoginResponse login(final AJAXSession session, final LoginRequest request, final String protocol, final String hostname) throws OXException, IOException, JSONException {
         return Executor.execute(session, request, protocol, hostname);
     }
 

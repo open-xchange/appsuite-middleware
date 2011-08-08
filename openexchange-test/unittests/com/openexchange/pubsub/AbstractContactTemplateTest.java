@@ -49,6 +49,7 @@
 
 package com.openexchange.pubsub;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.subscribe.microformats.FormStrings.FORM_LABEL_URL;
 import java.io.File;
 import java.text.SimpleDateFormat;

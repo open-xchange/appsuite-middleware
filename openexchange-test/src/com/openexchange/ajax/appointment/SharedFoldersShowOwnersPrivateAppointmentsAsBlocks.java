@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.Date;
 import java.util.TimeZone;
@@ -70,7 +71,6 @@ import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.tools.servlet.AjaxException;
 
 
 /**
@@ -178,7 +178,7 @@ public class SharedFoldersShowOwnersPrivateAppointmentsAsBlocks extends ManagedA
         assertFalse("None of the two should be the private title", app1[namePos].equals(privateAppointmentTitle) || app2[namePos].equals(privateAppointmentTitle));
     }
 
-    public void testShouldNotAnonymizeOwnPrivateAppointments() throws AjaxException, IOException, SAXException, JSONException{
+    public void testShouldNotAnonymizeOwnPrivateAppointments() throws OXException, IOException, SAXException, JSONException{
         CommonListResponse response = client1.execute(new ListRequest(ListIDs.l(new int[]{sharedFolder.getObjectID(),publicAppointmentID},new int[]{sharedFolder.getObjectID(),privateAppointmentID}), COLUMNS, true));
         int namePos = response.getColumnPos(Appointment.TITLE);
         Object[][] objects = response.getArray();

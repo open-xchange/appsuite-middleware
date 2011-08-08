@@ -49,6 +49,7 @@
 
 package com.openexchange.webdav.protocol;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.Context;

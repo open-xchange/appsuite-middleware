@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.notify;
 
+import com.openexchange.exception.OXException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import com.openexchange.groupware.Types;
