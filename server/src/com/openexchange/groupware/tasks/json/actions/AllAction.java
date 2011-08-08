@@ -49,13 +49,15 @@
 
 package com.openexchange.groupware.tasks.json.actions;
 
+import java.util.ArrayList;
 import java.util.Date;
-import org.json.JSONArray;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.writer.TaskWriter;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.DataObject;
@@ -100,12 +102,10 @@ public final class AllAction extends AbstractTaskAction {
 
         Date lastModified = null;
 
-        final JSONArray jsonResponseArray = new JSONArray();
+        final Map<String, List<Task>> taskMap = new HashMap<String, List<Task>>(1);
+        final List<Task> taskList = new ArrayList<Task>();
         SearchIterator<Task> it = null;
         try {
-
-            final TaskWriter taskwriter = new TaskWriter(req.getTimeZone());
-
             final TasksSQLInterface taskssql = new TasksSQLImpl(req.getSession());
             if (leftHandLimit == 0) {
                 it = taskssql.getTaskList(folderId, leftHandLimit, -1, orderBy, order, internalColumns);
@@ -115,7 +115,7 @@ public final class AllAction extends AbstractTaskAction {
 
             while (it.hasNext()) {
                 final Task taskobject = it.next();
-                taskwriter.writeArray(taskobject, columns, jsonResponseArray);
+                taskList.add(taskobject);
 
                 lastModified = taskobject.getLastModified();
 
@@ -123,8 +123,9 @@ public final class AllAction extends AbstractTaskAction {
                     timestamp = lastModified;
                 }
             }
-
-            return new AJAXRequestResult(jsonResponseArray, timestamp, "json");
+            
+            taskMap.put("tasks", taskList);
+            return new AJAXRequestResult(taskMap, timestamp, "tasks");
         } finally {
             if(it!=null) {
                 it.close();
