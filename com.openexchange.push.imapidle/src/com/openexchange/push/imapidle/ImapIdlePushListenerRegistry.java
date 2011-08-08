@@ -78,7 +78,7 @@ public final class ImapIdlePushListenerRegistry {
         return instance;
     }
 
-    private final ConcurrentMap<SimpleKey, ConcurrentMap<String, ImapIdlePushListener>> map;
+    private final ConcurrentMap<SimpleKey, ImapIdlePushListener> map;
 
     private final AtomicBoolean enabled;
 
@@ -88,7 +88,7 @@ public final class ImapIdlePushListenerRegistry {
     private ImapIdlePushListenerRegistry() {
         super();
         enabled = new AtomicBoolean(true);
-        map = new ConcurrentHashMap<SimpleKey, ConcurrentMap<String, ImapIdlePushListener>>();
+        map = new ConcurrentHashMap<SimpleKey, ImapIdlePushListener>();
     }
 
     /**
@@ -116,13 +116,8 @@ public final class ImapIdlePushListenerRegistry {
      * <b>Note</b>: {@link ImapIdlePushListener#close()} is called for each instance.
      */
     public void clear() {
-        for (final Iterator<ConcurrentMap<String, ImapIdlePushListener>> i = map.values().iterator(); i.hasNext();) {
-            final ConcurrentMap<String, ImapIdlePushListener> cm = i.next();
-            for (final Iterator<ImapIdlePushListener> i2 = cm.values().iterator(); i2.hasNext();) {
-                i2.next().close();
-                i2.remove();
-            }
-            i.remove();
+        for (final Iterator<ImapIdlePushListener> i = map.values().iterator(); i.hasNext();) {
+            i.next().close();
         }
         map.clear();
     }
@@ -131,11 +126,8 @@ public final class ImapIdlePushListenerRegistry {
      * Closes all listeners contained in this registry.
      */
     public void closeAll() {
-        for (final Iterator<ConcurrentMap<String, ImapIdlePushListener>> i = map.values().iterator(); i.hasNext();) {
-            final ConcurrentMap<String, ImapIdlePushListener> cm = i.next();
-            for (final Iterator<ImapIdlePushListener> i2 = cm.values().iterator(); i2.hasNext();) {
-                i2.next().close();
-            }
+        for (final Iterator<ImapIdlePushListener> i = map.values().iterator(); i.hasNext();) {
+            i.next().close();
         }
     }
 
@@ -146,18 +138,15 @@ public final class ImapIdlePushListenerRegistry {
         if (!enabled.get()) {
             return;
         }
-        for (final Iterator<ConcurrentMap<String, ImapIdlePushListener>> i = map.values().iterator(); i.hasNext();) {
-            final ConcurrentMap<String, ImapIdlePushListener> cm = i.next();
-            for (final Iterator<ImapIdlePushListener> i2 = cm.values().iterator(); i2.hasNext();) {
-                final ImapIdlePushListener l = i2.next();
-                try {
-                    l.open();
-                } catch (final OXException e) {
-                    com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImapIdlePushListenerRegistry.class)).error(
-                        MessageFormat.format("Opening IMAP IDLE listener failed. Removing listener from registry: {0}", l.toString()),
-                        e);
-                    i.remove();
-                }
+        for (final Iterator<ImapIdlePushListener> i = map.values().iterator(); i.hasNext();) {
+            ImapIdlePushListener l = i.next();
+            try {
+                l.open();
+            } catch (final OXException e) {
+                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImapIdlePushListenerRegistry.class)).error(
+                    MessageFormat.format("Opening IMAP IDLE listener failed. Removing listener from registry: {0}", l.toString()),
+                    e);
+                i.remove();
             }
         }
     }
@@ -175,15 +164,7 @@ public final class ImapIdlePushListenerRegistry {
             return false;
         }
         final SimpleKey key = SimpleKey.valueOf(contextId, userId);
-        ConcurrentMap<String, ImapIdlePushListener> cm = map.get(key);
-        if (null == cm) {
-            final ConcurrentMap<String, ImapIdlePushListener> ncm = new ConcurrentHashMap<String, ImapIdlePushListener>();
-            cm = map.putIfAbsent(key, ncm);
-            if (null == cm) {
-                cm = ncm;
-            }
-        }
-        return (null == cm.putIfAbsent(sessionId, pushListener));
+        return (null == map.putIfAbsent(key, pushListener));
     }
 
     /**
@@ -222,32 +203,25 @@ public final class ImapIdlePushListenerRegistry {
      * @return <code>true</code> on success; otherwise <code>false</code>
      */
     public boolean purgeAllPushListener() {
-        for (final Iterator<ConcurrentMap<String, ImapIdlePushListener>> i = map.values().iterator(); i.hasNext();) {
-            final ConcurrentMap<String, ImapIdlePushListener> cm = i.next();
-            for (final Iterator<ImapIdlePushListener> i2 = cm.values().iterator(); i2.hasNext();) {
-                i2.next().close();
-                i2.remove();
-            }
+        for (final Iterator<ImapIdlePushListener> i = map.values().iterator(); i.hasNext();) {
+            i.next().close();
             i.remove();
         }
         return true;
     }
 
     private boolean removeListeners(final SimpleKey key) {
-        final ConcurrentMap<String, ImapIdlePushListener> cm = map.remove(key);
-        if (null != cm) {
-            for (final Iterator<ImapIdlePushListener> i2 = cm.values().iterator(); i2.hasNext();) {
-                i2.next().close();
-            }
+        ImapIdlePushListener listener = map.remove(key);
+        if (null != listener) {
+            listener.close();
         }
         return true;
     }
 
     private boolean removeListener(final SimpleKey key, final String sessionId) {
-        final ConcurrentMap<String, ImapIdlePushListener> cm = map.get(key);
-        if (null != cm) {
-            final ImapIdlePushListener listener = cm.remove(sessionId);
-            if (null != listener) {
+        ImapIdlePushListener listener = map.get(key);
+        if (null != listener) {
+            if (listener.getSession().getSessionID().equals(sessionId)) {
                 listener.close();
             }
         }
@@ -263,12 +237,8 @@ public final class ImapIdlePushListenerRegistry {
      */
     public Iterator<ImapIdlePushListener> getPushListeners() {
         final List<ImapIdlePushListener> list = new LinkedList<ImapIdlePushListener>();
-        for (final Iterator<ConcurrentMap<String, ImapIdlePushListener>> i = map.values().iterator(); i.hasNext();) {
-            final ConcurrentMap<String, ImapIdlePushListener> cm = i.next();
-            for (final Iterator<ImapIdlePushListener> i2 = cm.values().iterator(); i2.hasNext();) {
-                final ImapIdlePushListener l = i2.next();
-                list.add(l);
-            }
+        for (final Iterator<ImapIdlePushListener> i = map.values().iterator(); i.hasNext();) {
+            list.add(i.next());
         }
         return Collections.unmodifiableIterator(list.iterator());
     }
