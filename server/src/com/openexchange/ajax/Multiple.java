@@ -224,6 +224,7 @@ public class Multiple extends SessionServlet {
             final Dispatcher dispatcher = getDispatcher();
             if (dispatcher.handles(module)) {
                 final AJAXRequestData request = MultipleAdapter.parse(module, action, jsonObj, session, Tools.considerSecure(req));
+                jsonWriter.object();
                 final AJAXRequestResult result;
                 try {
                     if (action == null) {
@@ -242,6 +243,8 @@ public class Multiple extends SessionServlet {
                     LOG.error(e.getMessage(), e);
                     ResponseWriter.writeException(e, jsonWriter);
                     return state;
+                } finally {
+                    jsonWriter.endObject();
                 }
             }
             final MultipleHandler multipleHandler = lookUpMultipleHandler(module);
