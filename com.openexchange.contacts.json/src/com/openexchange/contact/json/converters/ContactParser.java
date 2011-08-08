@@ -102,7 +102,7 @@ public class ContactParser {
                             field.doSwitch(cs, contact, value);
                         }                        
                     } catch (final JSONException e) {
-                        throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e);
+                        throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, json);
                     }                             
                 }
             }
@@ -114,34 +114,30 @@ public class ContactParser {
     private void parseSpecial(final ContactField field, final ContactSetter cs, final Contact contact, final Object value) throws OXException {
         final String type = specialColumns.get(field.getNumber());
         if (type.equals("date")) {
-            try {
-                final String timeStr = String.valueOf(value);
+            final String timeStr = String.valueOf(value);
+            try {                
                 final long time = Long.parseLong(timeStr);
                 field.doSwitch(cs, contact, new Date(time));
             } catch (final NumberFormatException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (final OXException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                throw OXJSONExceptionCodes.NUMBER_PARSING.create(e, timeStr, field.getAjaxName());
             }
         } else if (type.equals("distributionlist")) {
+            JSONArray jsonDistributionList = null;
             try {
-                final JSONArray jsonDistributionList = new JSONArray(String.valueOf(value));
+                jsonDistributionList = new JSONArray(String.valueOf(value));
                 final DistributionListEntryObject[] distributionList = parseDistributionList(jsonDistributionList);
                 field.doSwitch(cs, contact, distributionList);
             } catch (final JSONException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, jsonDistributionList);
             }            
         } else if (type.equals("links")) {
+            JSONArray jsonLinks = null;
             try {
-                final JSONArray jsonLinks = new JSONArray(String.valueOf(value));
+                jsonLinks = new JSONArray(String.valueOf(value));
                 final LinkEntryObject[] links = parseLinks(jsonLinks);
                 field.doSwitch(cs, contact, links);
             } catch (final JSONException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, jsonLinks);
             }            
         }
     }
@@ -149,7 +145,7 @@ public class ContactParser {
     private DistributionListEntryObject[] parseDistributionList(final JSONArray jsonDistributionList) throws OXException {
         final DistributionListEntryObject[] distributionList = new DistributionListEntryObject[jsonDistributionList.length()];
         for (int i = 0; i < jsonDistributionList.length(); i++) {
-            JSONObject entry;
+            JSONObject entry = null;
             try {
                 entry = jsonDistributionList.getJSONObject(i);
                 distributionList[i] = new DistributionListEntryObject();
@@ -169,8 +165,7 @@ public class ContactParser {
                 distributionList[i].setEmailaddress(entry.getString(DistributionListFields.MAIL));
                 distributionList[i].setEmailfield(entry.getInt(DistributionListFields.MAIL_FIELD));
             } catch (final JSONException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, entry);
             }            
         }
         

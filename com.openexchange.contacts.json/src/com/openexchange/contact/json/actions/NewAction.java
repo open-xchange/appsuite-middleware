@@ -101,7 +101,7 @@ public class NewAction extends ContactAction {
                     uploadEvent = req.getUploadEvent();
                     final UploadFile file = uploadEvent.getUploadFileByFieldName("file");
                     if (file == null) {
-                        throw AjaxExceptionCodes.NoUploadImage.create();
+                        throw AjaxExceptionCodes.NO_UPLOAD_IMAGE.create();
                     }
                     
                     RequestTools.setImageData(contact, file);

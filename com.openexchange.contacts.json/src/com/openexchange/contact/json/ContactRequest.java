@@ -143,7 +143,7 @@ public class ContactRequest {
             try {
                 return new JSONObject(jsonField);
             } catch (final JSONException e) {
-                throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e);
+                throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, jsonField);
             }
         } else {
             return (JSONObject) request.getData();
@@ -161,7 +161,7 @@ public class ContactRequest {
             data[0] = json.getInt("id");
             data[1] = json.getInt("folder");
         } catch (final JSONException e) {
-            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e);
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, json);
         }
 
         return data;
@@ -179,7 +179,7 @@ public class ContactRequest {
             try {
                 userIdArray[i] = json.getInt(i);
             } catch (final JSONException e) {
-                throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e);
+                throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, json);
             }
         }
 
@@ -191,7 +191,7 @@ public class ContactRequest {
         try {
             return json.getInt("folder_id");
         } catch (final JSONException e) {
-            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e);
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, json);
         }
     }
 

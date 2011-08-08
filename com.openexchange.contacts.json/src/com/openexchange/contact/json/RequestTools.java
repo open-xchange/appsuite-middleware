@@ -85,7 +85,7 @@ public class RequestTools {
             try {
                 values[i] = Integer.parseInt(valueStrArr[i].trim());
             } catch (final NumberFormatException e) {
-                throw AjaxExceptionCodes.InvalidParameterValue.create(e, "columns", valueStr);
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "columns", valueStr);
             }
         }
         
@@ -102,7 +102,7 @@ public class RequestTools {
                 return intParam.intValue();
             }
         } catch (final NumberFormatException e) {
-            throw AjaxExceptionCodes.InvalidParameterValue.create(e, parameter, intParam);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, parameter, intParam);
         } 
     }
 
@@ -135,9 +135,9 @@ public class RequestTools {
             contact.setImage1(tmp.toByteArray());
             contact.setImageContentType(file.getContentType());
         } catch (final FileNotFoundException e) {
-            throw AjaxExceptionCodes.NoUploadImage.create(e);
+            throw AjaxExceptionCodes.NO_UPLOAD_IMAGE.create(e);
         } catch (final IOException e) {
-            throw AjaxExceptionCodes.UnexpectedError.create(e, "I/O error while reading uploaded contact image.");
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, "I/O error while reading uploaded contact image.");
         } finally {
             if (fis != null) {
                 try {
