@@ -7,6 +7,7 @@
 
 package com.openexchange.groupware;
 
+import com.openexchange.exception.OXException;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;

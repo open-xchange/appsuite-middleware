@@ -49,15 +49,14 @@
 
 package com.openexchange.groupware.tasks;
 
+import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.util.Iterator;
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 import com.mysql.jdbc.AssertionFailedException;
-import com.openexchange.api2.OXException;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
@@ -65,7 +64,6 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
-import com.openexchange.groupware.downgrade.DowngradeFailedException;
 import com.openexchange.groupware.folder.FolderToolkit;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserToolkit;
@@ -173,8 +171,8 @@ public class DowngradeTest extends TestCase {
         }
     }
 
-    public void testRemovePrivateTasks() throws OXException, DBPoolingException,
-        DowngradeFailedException {
+    public void testRemovePrivateTasks() throws OXException, OXException,
+        OXException {
         final int folderId = FolderToolkit.getStandardTaskFolder(user.getId(),
             ctx);
         final Task task = Create.createWithDefaults(folderId, "DowngradeTest");
@@ -185,8 +183,8 @@ public class DowngradeTest extends TestCase {
         // Task should be gone by downgrade. No delete necessary.
     }
 
-    public void testRemovePublicTask() throws DBPoolingException, OXException,
-        DowngradeFailedException {
+    public void testRemovePublicTask() throws OXException, OXException,
+        OXException {
         final FolderObject folder = createPublicFolder();
         final int folderId = folder.getObjectID();
         final Task task = Create.createWithDefaults(folderId, "DowngradeTest");
@@ -209,7 +207,7 @@ public class DowngradeTest extends TestCase {
 
     /* ----------------- Test help methods ---------------------*/
     
-    private void downgradeDelegate() throws DBPoolingException, DowngradeFailedException {
+    private void downgradeDelegate() throws OXException, OXException {
         final UserConfiguration userConfig = new UserConfiguration(Integer.MAX_VALUE ^ UserConfiguration.DELEGATE_TASKS, user.getId(), user.getGroups(), ctx);
         final Connection con = Database.get(ctx, true);
         try {
@@ -220,7 +218,7 @@ public class DowngradeTest extends TestCase {
         }
     }
 
-    private void downgradeNoTasks() throws DBPoolingException, DowngradeFailedException {
+    private void downgradeNoTasks() throws OXException, OXException {
         final UserConfiguration userConfig = new UserConfiguration(
             Integer.MAX_VALUE ^ UserConfiguration.DELEGATE_TASKS ^ UserConfiguration.TASKS,
             user.getId(),
@@ -242,7 +240,7 @@ public class DowngradeTest extends TestCase {
             if (null != parts && parts.length > 0) {
                 throw new AssertionFailedError("Task has participants.");
             }
-        } catch (final TaskException e) {
+        } catch (final OXException e) {
             throw new AssertionFailedException(e);
         }
     }
@@ -254,7 +252,7 @@ public class DowngradeTest extends TestCase {
             if (null == parts || parts.length == 0) {
                 throw new AssertionFailedError("Task has no participants.");
             }
-        } catch (final TaskException e) {
+        } catch (final OXException e) {
             throw new AssertionFailedException(e);
         }
     }
@@ -264,14 +262,14 @@ public class DowngradeTest extends TestCase {
             final TaskStorage stor = TaskStorage.getInstance();
             stor.selectTask(ctx, objectId, StorageType.ACTIVE);
             fail("Private task has not been removed on downgrade.");
-        } catch (final TaskException e) {
+        } catch (final OXException e) {
             // Getting the exception is fine.
         }
     }
 
     /* ---------------------- Special tests help methods -----------------*/
 
-    private FolderObject createPublicFolder() throws DBPoolingException, OXException {
+    private FolderObject createPublicFolder() throws OXException, OXException {
         final Connection con = DBPool.pickupWriteable(ctx);
         try {
             final OXFolderManager oxma = OXFolderManager.getInstance(session, con, con);
@@ -305,7 +303,7 @@ public class DowngradeTest extends TestCase {
     }
 
     private void updatePublicFolder(final FolderObject folder)
-        throws DBPoolingException, OXException {
+        throws OXException, OXException {
         final Connection con = DBPool.pickupWriteable(ctx);
         try {
             final OXFolderManager oxma = OXFolderManager.getInstance(session, con, con);
@@ -322,7 +320,7 @@ public class DowngradeTest extends TestCase {
     }
 
     private void deletePublicFolder(final FolderObject folder)
-        throws DBPoolingException, OXException {
+        throws OXException, OXException {
         final Connection con = DBPool.pickupWriteable(ctx);
         try {
             final OXFolderManager oxma = OXFolderManager.getInstance(session, con, con);

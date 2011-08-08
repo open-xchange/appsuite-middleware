@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.importexport;
 
+import com.openexchange.exception.OXException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -59,7 +60,6 @@ import junit.framework.TestCase;
 
 import com.openexchange.ajax.fields.ExtendedContactFields;
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactGetter;
 import com.openexchange.groupware.contact.helpers.ContactSetter;
@@ -79,7 +79,7 @@ import com.openexchange.groupware.importexport.importers.OutlookCSVContactImport
  */
 public class ContactSwitcherTester extends TestCase {
 	
-	public void testSetStringValue() throws ContactException{
+	public void testSetStringValue() throws OXException{
 		// preparations
 		Contact conObj = new Contact();
 		final ContactField field = ContactField.GIVEN_NAME;
@@ -91,7 +91,7 @@ public class ContactSwitcherTester extends TestCase {
 		assertEquals("Setting of String value does work" , conObj.getGivenName(), value);
 	}
 	
-	public void testSetMailValue() throws ContactException{
+	public void testSetMailValue() throws OXException{
 		// preparations
 		Contact conObj = new Contact();
 		final ContactField field = ContactField.EMAIL1;
@@ -103,7 +103,7 @@ public class ContactSwitcherTester extends TestCase {
 		assertEquals("Setting of e-mail does work" , conObj.getEmail1(), value);
 	}
 	
-	public void testSetDateValue() throws ContactException{
+	public void testSetDateValue() throws OXException{
 		// preparations
 		Contact conObj = new Contact();
 		final ContactField field = ContactField.BIRTHDAY;
@@ -115,7 +115,7 @@ public class ContactSwitcherTester extends TestCase {
 		assertEquals("Setting of Date value does work" , conObj.getBirthday(), value);
 	}
 	
-	public void testSetDateValueViaTimestamp() throws ContactException{
+	public void testSetDateValueViaTimestamp() throws OXException{
 		// preparations
 		Contact conObj = new Contact();
 		final ContactField field = ContactField.BIRTHDAY;
@@ -135,7 +135,7 @@ public class ContactSwitcherTester extends TestCase {
 		assertEquals("Setting of date via timestamp (as String) does work" , conObj.getBirthday(), new Date(value));
 	}
 	
-	public void testSetDateValueViaSimpleDate() throws ContactException, ParseException{
+	public void testSetDateValueViaSimpleDate() throws OXException, ParseException{
 		// preparations
 		Contact conObj = new Contact();
 		final ContactField field = ContactField.BIRTHDAY;
@@ -154,7 +154,7 @@ public class ContactSwitcherTester extends TestCase {
 		assertEquals("Setting of date via Outlook-simple-date value does work" , conObj.getBirthday(), sdf.parse(value));
 	}
 	
-	public void testGetDateAndName() throws ContactException{
+	public void testGetDateAndName() throws OXException{
 		//preparations
 		final Contact conObj = new Contact();
 		final Date date = new Date(System.currentTimeMillis());
@@ -173,12 +173,12 @@ public class ContactSwitcherTester extends TestCase {
 		assertEquals("Checking nickname", nickname, compareNickname);
 	}
 	
-	public void testUnkownFieldHandling() throws ContactException{
+	public void testUnkownFieldHandling() throws OXException{
 	    assertFalse("Should return false when getting unknown field", new ContactGetter()._unknownfield(null,"field","value"));
 	    assertFalse("Should return false when setting unknown field", new ContactSetter()._unknownfield(null,"field","value"));
 	}
 	
-	public void testSplitBirthdayFieldHandling() throws ContactException{
+	public void testSplitBirthdayFieldHandling() throws OXException{
 	    SplitBirthdayFieldsSetter switcher = new SplitBirthdayFieldsSetter();
 	    Contact contact = new Contact();
 	    Integer day = 31, month = 12, year = 1970;
@@ -215,7 +215,7 @@ public class ContactSwitcherTester extends TestCase {
 		assertEquals("Setting of date via Outlook-simple-date value does work" , conObj.getBirthday(), OutlookCSVContactImporter.getGermanDateNotation().parse(value));
 	}
 	
-	public void testBooleanSwitchingForBug7710() throws ContactException{
+	public void testBooleanSwitchingForBug7710() throws OXException{
 		//preparations
 		Contact conObj = new Contact();
 		final ContactField field = ContactField.PRIVATE_FLAG;

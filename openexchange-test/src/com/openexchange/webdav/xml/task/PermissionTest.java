@@ -1,9 +1,9 @@
 package com.openexchange.webdav.xml.task;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.FolderTest;
 import com.openexchange.webdav.xml.TaskTest;
 import com.openexchange.webdav.xml.XmlServlet;
@@ -42,7 +42,7 @@ public class PermissionTest extends TaskTest {
 		try {
 			insertTask(getSecondWebConversation(), taskObj, PROTOCOL + getHostName(), getSecondLogin(), getPassword());
 			fail("permission exception expected!");
-		} catch (final TestException exc) {
+		} catch (final OXException exc) {
 			assertExceptionMessage(exc.getMessage(), XmlServlet.PERMISSION_STATUS);
 		}
 		
@@ -73,7 +73,7 @@ public class PermissionTest extends TaskTest {
 		try {
 			insertTask(getSecondWebConversation(), taskObj, PROTOCOL + getHostName(), getSecondLogin(), getPassword());
 			fail("permission exception expected!");
-		} catch (final TestException exc) {
+		} catch (final OXException exc) {
 			assertExceptionMessage(exc.getMessage(), XmlServlet.PERMISSION_STATUS);
 		}
 		
@@ -107,7 +107,7 @@ public class PermissionTest extends TaskTest {
 		try {
 			updateTask(getSecondWebConversation(), taskObj, taskObjectId, parentFolderId, PROTOCOL + getHostName(), getSecondLogin(), getPassword());
 			fail("permission exception expected!");
-		} catch (final TestException exc) {
+		} catch (final OXException exc) {
 			assertExceptionMessage(exc.getMessage(), XmlServlet.PERMISSION_STATUS);
 		}
 		
@@ -141,7 +141,7 @@ public class PermissionTest extends TaskTest {
 		try {
 			updateTask(getSecondWebConversation(), taskObj, taskObjectId, parentFolderId, PROTOCOL + getHostName(), getSecondLogin(), getPassword());
 			fail("permission exception expected!");
-		} catch (final TestException exc) {
+		} catch (final OXException exc) {
 			assertExceptionMessage(exc.getMessage(), XmlServlet.PERMISSION_STATUS);
 		}
 		
@@ -175,7 +175,7 @@ public class PermissionTest extends TaskTest {
 		try {
 			deleteTask(getSecondWebConversation(), taskObjectId, parentFolderId, PROTOCOL + getHostName(), getSecondLogin(), getPassword());
 			fail("permission exception expected!");
-		} catch (final TestException exc) {
+		} catch (final OXException exc) {
 			assertExceptionMessage(exc.getMessage(), XmlServlet.PERMISSION_STATUS);
 		}
 		
@@ -209,7 +209,7 @@ public class PermissionTest extends TaskTest {
 		try {
 			deleteTask(getSecondWebConversation(), taskObjectId, parentFolderId, PROTOCOL + getHostName(), getSecondLogin(), getPassword());
 			fail("permission exception expected!");
-		} catch (final TestException exc) {
+		} catch (final OXException exc) {
 			assertExceptionMessage(exc.getMessage(), XmlServlet.PERMISSION_STATUS);
 		}
 		

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import javax.mail.internet.AddressException;
 import org.apache.commons.logging.Log;
@@ -62,7 +63,6 @@ import com.openexchange.ajax.mail.actions.CopyRequest;
 import com.openexchange.ajax.mail.actions.CopyResponse;
 import com.openexchange.ajax.mail.actions.SendRequest;
 import com.openexchange.ajax.mail.actions.SendResponse;
-import com.openexchange.groupware.AbstractOXException;
 
 /**
  * @author <a href="karsten.will@open-xchange.com">Karsten Will</a>
@@ -106,7 +106,7 @@ public class CopyTest extends AbstractMailTest {
         super.tearDown();
     }
 
-    public void testCopyingOneFolder() throws IOException, SAXException, JSONException, AddressException, AbstractOXException {
+    public void testCopyingOneFolder() throws IOException, SAXException, JSONException, AddressException, OXException {
         String destinationFolderID = getDraftsFolder();
 
         /*

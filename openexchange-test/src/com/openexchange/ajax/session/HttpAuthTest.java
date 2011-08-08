@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.session;
 
+import com.openexchange.exception.OXException;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;

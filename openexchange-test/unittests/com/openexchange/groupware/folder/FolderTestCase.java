@@ -1,5 +1,6 @@
 package com.openexchange.groupware.folder;
 
+import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -20,9 +21,7 @@ import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.setuptools.TestConfig;
 import com.openexchange.test.AjaxInit;
-import com.openexchange.tools.oxfolder.OXFolderLogicException;
 import com.openexchange.tools.oxfolder.OXFolderManager;
-import com.openexchange.tools.oxfolder.OXFolderPermissionException;
 
 public class FolderTestCase extends TestCase {
 	
@@ -67,7 +66,7 @@ public class FolderTestCase extends TestCase {
 		Init.stopServer();
 	}
 	
-	protected FolderObject mkdir(final int parent, final String name) throws SQLException, OXFolderPermissionException, Exception {
+	protected FolderObject mkdir(final int parent, final String name) throws SQLException, OXException, Exception {
 		Connection writecon = null;
         try {
         	writecon = DBPool.pickupWriteable(ctx);
@@ -93,7 +92,7 @@ public class FolderTestCase extends TestCase {
         }
     }
 	
-	protected void rm(final int objectID) throws SQLException, OXFolderPermissionException, OXFolderLogicException, Exception {
+	protected void rm(final int objectID) throws SQLException, OXException, OXException, Exception {
 		//OXFolderAction ofa = new OXFolderAction(session);
 		final OXFolderManager oxma = OXFolderManager.getInstance(session);
 		//ofa.deleteFolder(objectID, session, true, System.currentTimeMillis());

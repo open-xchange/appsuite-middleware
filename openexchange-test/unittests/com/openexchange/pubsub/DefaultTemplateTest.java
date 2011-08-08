@@ -49,6 +49,7 @@
 
 package com.openexchange.pubsub;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.templating.OXTemplate;
 
 

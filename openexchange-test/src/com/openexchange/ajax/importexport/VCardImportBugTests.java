@@ -49,14 +49,13 @@
 
 package com.openexchange.ajax.importexport;
 
+import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.importexport.ImportResult;
-import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.ContactTest;
 
 
@@ -159,7 +158,7 @@ public class VCardImportBugTests extends AbstractVCardImportTest {
         assertTrue("server errors of server", importResult[2].isCorrect());
     }
 
-    public void test6823() throws TestException, IOException, SAXException, JSONException, Exception {
+    public void test6823() throws OXException, IOException, SAXException, JSONException, Exception {
         final String vcard = "BEGIN:VCARD\n" +
                 "VERSION:3.0\n" +
                 "N:;Svetlana;;;\n" +
@@ -181,7 +180,7 @@ public class VCardImportBugTests extends AbstractVCardImportTest {
         assertFalse("No error?", importResult[0].hasError());
     }
 
-    public void test6962followup() throws TestException, IOException, SAXException, JSONException, Exception {
+    public void test6962followup() throws OXException, IOException, SAXException, JSONException, Exception {
         final String vcard = "BEGIN:VCARD\n" +
                 "VERSION:3.0\n" +
                 "N:;Svetlana;;;\n" +
@@ -212,7 +211,7 @@ public class VCardImportBugTests extends AbstractVCardImportTest {
         // assertEquals("Correct error code?", "I_E-0605",ex.getErrorCode());
     }
 
-    public void test7106() throws TestException, IOException, SAXException, JSONException, Exception {
+    public void test7106() throws OXException, IOException, SAXException, JSONException, Exception {
         final String vcard = "BEGIN:VCARD\n" +
                 "VERSION:3.0\n" +
                 "N:;H\u00fcb\u00fcrt;;;\n" +
@@ -243,7 +242,7 @@ public class VCardImportBugTests extends AbstractVCardImportTest {
     /**
      * Deals with N and ADR properties and different amount of semicola used. Also tests an input stream with no terminating newline
      */
-    public void test7248() throws TestException, IOException, SAXException, JSONException, Exception {
+    public void test7248() throws OXException, IOException, SAXException, JSONException, Exception {
         final String vcard = "BEGIN:VCARD\n" +
                 "VERSION:2.1\n" +
                 "N:Colombara;Robert\n" +
@@ -276,7 +275,7 @@ public class VCardImportBugTests extends AbstractVCardImportTest {
     /**
      * Deals with broken E-Mail adresses as encountered in Resources in the example file
      */
-    public void test7249() throws TestException, IOException, SAXException, JSONException, Exception {
+    public void test7249() throws OXException, IOException, SAXException, JSONException, Exception {
         final String vcard = "BEGIN:VCARD\n" +
                 "VERSION:2.1\n" +
                 "FN:Conference_Room_Olpe\n" +
@@ -309,7 +308,7 @@ public class VCardImportBugTests extends AbstractVCardImportTest {
     /**
      * Deals with umlauts
      */
-    public void test7250() throws TestException, IOException, SAXException, JSONException, Exception {
+    public void test7250() throws OXException, IOException, SAXException, JSONException, Exception {
         final String vcard = "BEGIN:VCARD\n" +
                 "VERSION:2.1\n" +
                 "N;CHARSET=Windows-1252:B\u00f6rnig;Anke;;;\n" +
@@ -337,7 +336,7 @@ public class VCardImportBugTests extends AbstractVCardImportTest {
     }
 
     // related to bug15400
-    public void testForDataTruncation() throws TestException, IOException, SAXException, JSONException, Exception {
+    public void testForDataTruncation() throws OXException, IOException, SAXException, JSONException, Exception {
         final String name = "Hadschi Halef Omar Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd al Gossarah Hadschi Halef Omar Ben Hadschi Abul Abbas Ibn Hadschi D...as War Knapp Und Wird Hier Abgeschnitten";
         final String truncatedName = "Hadschi Halef Omar Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd al Gossarah Hadschi Halef Omar Ben Hadschi Abul Abbas Ibn Hadschi D";
         final String vcard = "BEGIN:VCARD\n" +

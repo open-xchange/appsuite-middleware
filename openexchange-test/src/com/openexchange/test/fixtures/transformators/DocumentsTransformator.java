@@ -48,11 +48,11 @@
  */
 package com.openexchange.test.fixtures.transformators;
 
+import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.openexchange.test.fixtures.Document;
-import com.openexchange.test.fixtures.FixtureException;
 import com.openexchange.test.fixtures.FixtureLoader;
 
 /**
@@ -70,7 +70,7 @@ public class DocumentsTransformator implements Transformator {
 		this.fixtureLoader = fixtureLoader;
 	}
 
-	public Document[] transform(final String value) throws FixtureException {
+	public Document[] transform(final String value) throws OXException {
 		if (null == value || 1 > value.length()) { 
 			return null; 
 		}
@@ -91,7 +91,7 @@ public class DocumentsTransformator implements Transformator {
 		return documents.toArray(new Document[documents.size()]);
     }
 
-	private final Document getDocument(final String fixtureName, final String fixtureEntry) throws FixtureException {
+	private final Document getDocument(final String fixtureName, final String fixtureEntry) throws OXException {
 		return fixtureLoader.getFixtures(fixtureName, Document.class).getEntry(fixtureEntry).getEntry(); 
 	}
 }

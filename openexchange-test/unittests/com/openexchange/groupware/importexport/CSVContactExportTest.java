@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.importexport;
 
+import com.openexchange.exception.OXException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -69,7 +70,6 @@ import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.importexport.csv.CSVParser;
-import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.importexport.exporters.CSVContactExporter;
 import com.openexchange.groupware.importexport.importers.CSVContactImporter;
 import com.openexchange.test.OXTestToolkit;
@@ -110,13 +110,13 @@ public class CSVContactExportTest extends AbstractContactTest {
 		return new JUnit4TestAdapter(CSVContactExportTest.class);
 	}
 	
-	@Test public void canExport() throws ImportExportException, IOException{
+	@Test public void canExport() throws OXException, IOException{
 		assertTrue(
 			"Can export?" , 
 			exp.canExport(sessObj, Format.CSV, Integer.toString(folderId), null));
 	}
 	
-	@Test public void exportHead() throws ImportExportException, IOException{
+	@Test public void exportHead() throws OXException, IOException{
 		final InputStream is = exp.exportData(sessObj, Format.CSV, String.valueOf( folderId ), TEST1_BASE, null);
 		assertEquals("Head only", TEST1_RESULT, OXTestToolkit.readStreamAsString(is) );
 	}

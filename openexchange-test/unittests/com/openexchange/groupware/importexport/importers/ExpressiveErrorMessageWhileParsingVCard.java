@@ -50,12 +50,13 @@
 package com.openexchange.groupware.importexport.importers;
 
 import java.io.ByteArrayInputStream;
+
+import junit.framework.TestCase;
+
 import com.openexchange.tools.versit.VCard;
 import com.openexchange.tools.versit.VersionedObjectDefinition;
-import com.openexchange.tools.versit.VersitException;
-import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.VersitDefinition.Reader;
-import junit.framework.TestCase;
+import com.openexchange.tools.versit.VersitException;
 
 
 /**

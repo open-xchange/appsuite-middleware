@@ -1,5 +1,6 @@
 package com.openexchange.ajax.importexport;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
@@ -21,7 +22,6 @@ import com.openexchange.ajax.importexport.actions.ICalExportResponse;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
 import com.openexchange.ajax.importexport.actions.ICalImportResponse;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * These tests document the behavior of exports/imports of ical files
@@ -127,7 +127,7 @@ public class Bug17392Test extends ManagedAppointmentTest {
 	public void testRoundtripBerlin() throws Exception{
 		roundtrip("Europe/Berlin");
 	}
-	private void verifyTimezoneDoesNotGetLost(String tzid) throws AjaxException, IOException, SAXException, JSONException {
+	private void verifyTimezoneDoesNotGetLost(String tzid) throws OXException, IOException, SAXException, JSONException {
 		Appointment app = new Appointment();
 		app.setTimezone(tzid);
 		app.setTitle("Appointment to be exported - this better contain a TZID!");		

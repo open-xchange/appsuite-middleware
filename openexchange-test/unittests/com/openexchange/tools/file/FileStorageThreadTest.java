@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.file;
 
+import com.openexchange.exception.OXException;
 import java.io.File;
 import java.io.FileInputStream;
 

@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.importexport;
 
+import com.openexchange.exception.OXException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -58,14 +59,10 @@ import java.util.Arrays;
 import java.util.List;
 import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
-import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.ContactSQLInterface;
-import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.ldap.LdapException;
 
 public class VCardImportTest extends AbstractVCardTest {
 	//workaround for JUnit 3 runner
@@ -73,7 +70,7 @@ public class VCardImportTest extends AbstractVCardTest {
 		return new JUnit4TestAdapter(VCardImportTest.class);
 	}
 	
-	@Test public void test6825_tooMuchInformation() throws OXObjectNotFoundException, NumberFormatException, OXException, UnsupportedEncodingException, LdapException, ContextException {
+	@Test public void test6825_tooMuchInformation() throws OXException, NumberFormatException, OXException, UnsupportedEncodingException, OXException, OXException {
 		//setup: building an VCard file with a summary longer than 255 characters.
 		folderId = createTestFolder(FolderObject.CONTACT, sessObj,ctx, "vcard6825Folder");
 		final String stringTooLong = "aaaaaaaaaabbbbbbbbbbccccccccccddddddddddeeeeeeeeeeffffffffffgggggggggghhhhhhhhhhiiiiiiiiiijjjjjjjjjjkkkkkkkkkkllllllllllmmmmmmmmmmnnnnnnnnnnooooooooooppppppppppqqqqqqqqqqrrrrrrrrrrttttttttttuuuuuuuuuvvvvvvvvvwwwwwwwwwwxxxxxxxxxxyyyyyyyyyyzzzzzzzzzz00000000001111111111222222222233333333334444444444455555555556666666666777777777788888888889999999999";
@@ -94,7 +91,7 @@ public class VCardImportTest extends AbstractVCardTest {
 	/*
 	 * TELEX is not read.
 	 */
-	@Test public void test7719() throws OXObjectNotFoundException, NumberFormatException, OXException, UnsupportedEncodingException, LdapException, ContextException {
+	@Test public void test7719() throws OXException, NumberFormatException, OXException, UnsupportedEncodingException, OXException, OXException {
 		//setup
 		folderId = createTestFolder(FolderObject.CONTACT, sessObj,ctx, "vcard7719Folder");
 		final String telex = "7787987897897897897";
@@ -112,7 +109,7 @@ public class VCardImportTest extends AbstractVCardTest {
 		assertEquals("Has telex" , telex , co.getTelephoneTelex());
 	}
 	
-	@Test public void testEmpty() throws UnsupportedEncodingException, NumberFormatException, OXException, LdapException, ContextException {
+	@Test public void testEmpty() throws UnsupportedEncodingException, NumberFormatException, OXException, OXException, OXException {
 		folderId = createTestFolder(FolderObject.CONTACT, sessObj,ctx, "vcard7719Folder");
 		final String vcard = "BEGIN:VCARD\nVERSION:2.1\nN:;;;;\nEND:VCARD\n";
 		final List <String> folders = Arrays.asList( Integer.toString(folderId) );

@@ -48,6 +48,7 @@
  */
 package com.openexchange.test.fixtures;
 
+import com.openexchange.exception.OXException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -77,7 +78,7 @@ public class MessagingFixtureFactory implements FixtureFactory<Messaging> {
             this.entries = entries;
         }
 
-        public Fixture<Messaging> getEntry(final String entryName) throws FixtureException {
+        public Fixture<Messaging> getEntry(final String entryName) throws OXException {
             if (messagings.containsKey(entryName)) {
                 return messagings.get(entryName);
             }

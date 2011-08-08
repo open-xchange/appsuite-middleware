@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
@@ -78,7 +79,6 @@ import com.openexchange.ajax.mail.actions.SendResponse;
 import com.openexchange.ajax.mail.actions.UpdateMailRequest;
 import com.openexchange.ajax.mail.actions.UpdateMailResponse;
 import com.openexchange.mail.MailListField;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * {@link MailTestManager}
@@ -120,18 +120,18 @@ public class MailTestManager {
      * Deletes mails that are similar to the given one in the same folder. Similarity is based on the subject. This sets the lastResponse
      * field.
      */
-    public void deleteSimilarMails(TestMail mail, AJAXClient client) throws JSONException, AjaxException, IOException, SAXException {
+    public void deleteSimilarMails(TestMail mail, AJAXClient client) throws JSONException, OXException, IOException, SAXException {
         LinkedList<String[]> similarMails = findSimilarMailsInSameFolder(mail, client);
 
         DeleteRequest deleteRequest = new DeleteRequest(similarMails.toArray(new String[][] {}));
         lastResponse = client.execute(deleteRequest);
     }
 
-    public LinkedList<String[]> findSimilarMailsInSameFolder(TestMail mail, AJAXClient client) throws JSONException, AjaxException, IOException, SAXException {
+    public LinkedList<String[]> findSimilarMailsInSameFolder(TestMail mail, AJAXClient client) throws JSONException, OXException, IOException, SAXException {
         return findSimilarMails(mail, client, mail.getFolder());
     }
 
-    public LinkedList<String[]> findSimilarMails(TestMail mail, AJAXClient client, String folder) throws JSONException, AjaxException, IOException, SAXException {
+    public LinkedList<String[]> findSimilarMails(TestMail mail, AJAXClient client, String folder) throws JSONException, OXException, IOException, SAXException {
         JSONArray pattern = new JSONArray();
         JSONObject param = new JSONObject();
         param.put(Mail.PARAMETER_COL, MailListField.SUBJECT.getField());
@@ -152,7 +152,7 @@ public class MailTestManager {
         return FoldersAndIds;
     }
 
-    public List<TestMail> findAndLoadSimilarMails(TestMail mail, AJAXClient client, String folder) throws JSONException, AjaxException, IOException, SAXException {
+    public List<TestMail> findAndLoadSimilarMails(TestMail mail, AJAXClient client, String folder) throws JSONException, OXException, IOException, SAXException {
         LinkedList<String[]> mailIDs = findSimilarMails(mail, client, folder);
         LinkedList<TestMail> results = new LinkedList<TestMail>();
         for (String[] folderAndId : mailIDs) {
@@ -166,7 +166,7 @@ public class MailTestManager {
      * 
      * @return The mail as placed in the sent box.
      */
-    public TestMail send(TestMail mail) throws JSONException, AjaxException, IOException, SAXException {
+    public TestMail send(TestMail mail) throws JSONException, OXException, IOException, SAXException {
         SendRequest request = new SendRequest(mail.toJSON().toString());
         SendResponse response = client.execute(request);
         lastResponse = response;
@@ -183,7 +183,7 @@ public class MailTestManager {
      * Moves a mail from its own folder to a given one. Returns a new TestMail containing the new, moved object or null if the move didn't
      * work. This method sets the lastResponse field.
      */
-    public TestMail move(TestMail mail, String destination) throws AjaxException, IOException, SAXException, JSONException {
+    public TestMail move(TestMail mail, String destination) throws OXException, IOException, SAXException, JSONException {
         MoveMailRequest request = new MoveMailRequest(mail.getFolder(), destination, mail.getId(), failOnError);
         UpdateMailResponse response = client.execute(request);
         lastResponse = response;
@@ -197,7 +197,7 @@ public class MailTestManager {
     /**
      * Gets a mail from the server or null if it could not be found. This sets the last response field.
      */
-    public TestMail get(String folder, String id) throws AjaxException, IOException, SAXException, JSONException {
+    public TestMail get(String folder, String id) throws OXException, IOException, SAXException, JSONException {
         GetRequest request = new GetRequest(folder, id, failOnError);
         lastResponse = client.execute(request);
         if (lastResponse.hasError())
@@ -208,14 +208,14 @@ public class MailTestManager {
     /**
      * Gets a mail from the server or null if it could not be found. This sets the last response field.
      */
-    public TestMail get(String[] folderAndId) throws AjaxException, IOException, SAXException, JSONException {
+    public TestMail get(String[] folderAndId) throws OXException, IOException, SAXException, JSONException {
         return get(folderAndId[0], folderAndId[1]);
     }
 
     /**
      * Copies a mail from its own folder to another. This method sets the lastResponse field to the result of the CopyRequest
      */
-    public TestMail copy(TestMail original, String destination) throws AjaxException, IOException, SAXException, JSONException {
+    public TestMail copy(TestMail original, String destination) throws OXException, IOException, SAXException, JSONException {
         CopyRequest request = new CopyRequest(original.getId(), original.getFolder(), destination);
         CopyResponse response = client.execute(request);
         String id = response.getID();
@@ -229,7 +229,7 @@ public class MailTestManager {
      * Does not actually send an e-mail, just formats it like a forwarded e-mail. This mirrors the exact behavior of the forward request.
      * This method sets the lastResponse field to the result of the ForwardRequest.
      */
-    public TestMail forwardButDoNotSend(TestMail forwardMe) throws AjaxException, IOException, SAXException, JSONException {
+    public TestMail forwardButDoNotSend(TestMail forwardMe) throws OXException, IOException, SAXException, JSONException {
         ForwardRequest request = new ForwardRequest(forwardMe.getFolderAndId());
         ReplyResponse response = client.execute(request);
         TestMail forwarded = new TestMail((JSONObject) response.getData());
@@ -241,7 +241,7 @@ public class MailTestManager {
      * Convenience method: Takes a mail that is supposed to be forwarded. Sends it, gets its ID, prepares that for forwarding. Does not send
      * the forwarded mail, though. This method sets the lastResponse field to the result of the ForwardRequest.
      */
-    public TestMail forwardAndSendBefore(TestMail forwardMe) throws AjaxException, JSONException, IOException, SAXException {
+    public TestMail forwardAndSendBefore(TestMail forwardMe) throws OXException, JSONException, IOException, SAXException {
         TestMail forwarded = send(forwardMe);
         TestMail mailFormattedForForwarding = forwardButDoNotSend(forwarded);
 
@@ -252,14 +252,14 @@ public class MailTestManager {
     /**
      * Formats a given mail to look like a reply.
      */
-    public TestMail replyAndDoNotSend(TestMail replyToMe) throws AjaxException, IOException, SAXException, JSONException {
+    public TestMail replyAndDoNotSend(TestMail replyToMe) throws OXException, IOException, SAXException, JSONException {
         ReplyRequest request = new ReplyRequest(replyToMe.getFolderAndId());
         ReplyResponse response = client.execute(request);
         lastResponse = response;
         return new TestMail((JSONObject) response.getData());
     }
 
-    public TestMail replyToAllAndDoNotSend(TestMail replyToMe) throws AjaxException, IOException, SAXException, JSONException {
+    public TestMail replyToAllAndDoNotSend(TestMail replyToMe) throws OXException, IOException, SAXException, JSONException {
         ReplyAllRequest request = new ReplyAllRequest(replyToMe.getFolderAndId());
         ReplyResponse response = client.execute(request);
         lastResponse = response;
@@ -309,7 +309,7 @@ public class MailTestManager {
         return recipients;
     }
 
-    private void markCopyInInboxIfNecessary(TestMail mail) throws AjaxException, JSONException, IOException, SAXException {
+    private void markCopyInInboxIfNecessary(TestMail mail) throws OXException, JSONException, IOException, SAXException {
         Set<String> allRecipients = extractAllRecipients(mail);
         String sender = client.getValues().getSendAddress();
         if (containsSomewhat(sender, allRecipients)) {
@@ -333,7 +333,7 @@ public class MailTestManager {
      * Updates a mail identified by folder and id with data in a TestMail. Returns the complete updated mail. Sets lastResponse to the
      * result of the updateRequest.
      */
-    public TestMail update(String folder, String id, TestMail updates, boolean add) throws AjaxException, IOException, SAXException, JSONException {
+    public TestMail update(String folder, String id, TestMail updates, boolean add) throws OXException, IOException, SAXException, JSONException {
         UpdateMailRequest request = new UpdateMailRequest(folder, id);
         if (updates.getColor() != -1)
             request.setColor(updates.getColor());

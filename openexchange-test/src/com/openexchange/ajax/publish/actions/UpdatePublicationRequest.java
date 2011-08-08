@@ -49,12 +49,12 @@
 
 package com.openexchange.ajax.publish.actions;
 
+import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.publish.Publication;
-import com.openexchange.publish.json.PublicationJSONException;
 import com.openexchange.publish.json.PublicationWriter;
 
 
@@ -84,7 +84,7 @@ public class UpdatePublicationRequest extends AbstractPublicationRequest<UpdateP
     public Object getBody() throws JSONException {
         try {
             return new PublicationWriter().write(getPublication(), null);
-        } catch (PublicationJSONException e) {
+        } catch (OXException e) {
             throw new JSONException(e);
         }
     }

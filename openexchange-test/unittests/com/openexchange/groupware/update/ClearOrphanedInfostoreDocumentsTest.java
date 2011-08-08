@@ -48,14 +48,11 @@
  */
 package com.openexchange.groupware.update;
 
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.filestore.FilestoreStorage;
-import com.openexchange.groupware.filestore.FilestoreException;
 import com.openexchange.groupware.update.tasks.ClearOrphanedInfostoreDocuments;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
-import com.openexchange.tools.file.external.FileStorageException;
 import com.openexchange.tools.update.ForeignKeyOld;
 
 import java.io.ByteArrayInputStream;
@@ -92,7 +89,7 @@ public class ClearOrphanedInfostoreDocumentsTest extends UpdateTest {
     }
 
     @Override
-    public void tearDown() throws SQLException, DBPoolingException, FileStorageException, FilestoreException, DBPoolingException {
+    public void tearDown() throws SQLException, OXException, OXException, OXException, OXException {
         exec("DELETE FROM infostore_document WHERE infostore_id = ?", 100000);
         exec("DELETE FROM del_infostore_document WHERE infostore_id = ?", 100001);
 
@@ -121,7 +118,7 @@ public class ClearOrphanedInfostoreDocumentsTest extends UpdateTest {
         }
     }
 
-    public void testShouldClearLeftoverDocuments() throws AbstractOXException, SQLException {
+    public void testShouldClearLeftoverDocuments() throws OXException, SQLException {
         assertNoResults("SELECT * FROM infostore WHERE id = 100000");
         new ClearOrphanedInfostoreDocuments().perform(schema, existing_ctx_id);
 
@@ -129,19 +126,19 @@ public class ClearOrphanedInfostoreDocumentsTest extends UpdateTest {
         assertNotInFilestorage(paths);
     }
   
-    public void testShouldBeRunnableTwice() throws AbstractOXException {
+    public void testShouldBeRunnableTwice() throws OXException {
         new ClearOrphanedInfostoreDocuments().perform(schema, existing_ctx_id);
         new ClearOrphanedInfostoreDocuments().perform(schema, existing_ctx_id);
     }
 
-    public void testShouldCreateIndexOnInfostoreDocument() throws AbstractOXException, SQLException {
+    public void testShouldCreateIndexOnInfostoreDocument() throws OXException, SQLException {
         new ClearOrphanedInfostoreDocuments().perform(schema, existing_ctx_id);
         ForeignKeyOld fk = new ForeignKeyOld("infostore_document", "infostore_id", "infostore", "id");
         List<ForeignKeyOld> keys = ForeignKeyOld.getForeignKeys(getProvider().getWriteConnection(ctx), "infostore_document");
         assertTrue(keys.contains(fk));
     }
 
-    private void createOrphanedInfostoreDocumentEntry(int id, int version) throws FileStorageException, FilestoreException, UnsupportedEncodingException, SQLException, DBPoolingException {
+    private void createOrphanedInfostoreDocumentEntry(int id, int version) throws OXException, OXException, UnsupportedEncodingException, SQLException, OXException {
         FileStorage fs  = QuotaFileStorage.getInstance(
                 FilestoreStorage.createURI(ctx), ctx);
 
@@ -151,7 +148,7 @@ public class ClearOrphanedInfostoreDocumentsTest extends UpdateTest {
         exec("INSERT INTO infostore_document (cid, infostore_id, version_number, file_store_location, creating_date, last_modified, created_by) VALUES (?,?,?,?, 0,0, ?)", ctx.getContextId(), id, version, path, user_id);
     }
 
-    private void createOrphanedInfostoreDelDocumentEntry(int id, int version) throws FileStorageException, FilestoreException, UnsupportedEncodingException, SQLException, DBPoolingException {
+    private void createOrphanedInfostoreDelDocumentEntry(int id, int version) throws OXException, OXException, UnsupportedEncodingException, SQLException, OXException {
         exec("INSERT INTO del_infostore_document (cid, infostore_id, version_number, creating_date, last_modified, created_by) VALUES (?,?,?,0,0, ?)", ctx.getContextId(), id, version, user_id);
     }
 

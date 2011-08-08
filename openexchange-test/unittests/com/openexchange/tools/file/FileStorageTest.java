@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.file;
 
+import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import junit.framework.TestCase;
@@ -56,7 +57,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.tools.RandomString;
 import com.openexchange.tools.file.external.FileStorage;
-import com.openexchange.tools.file.external.FileStorageException;
 import com.openexchange.tools.file.internal.LocalFileStorage;
 
 /**
@@ -128,13 +128,13 @@ public class FileStorageTest extends TestCase {
         try {
             storage.getFile(identifier);
             fail("Expected IOException");
-        } catch (FileStorageException e) {
+        } catch (OXException e) {
             // Everything fine. Error is discovered.
         }
         try {
             storage.saveNewFile(baos);
             fail("Expected IOException");
-        } catch (FileStorageException e) {
+        } catch (OXException e) {
             // Everything fine. Error is discovered.
         }
     }
@@ -149,7 +149,7 @@ public class FileStorageTest extends TestCase {
         try {
             storage.getFile("00/00/01");
             fail("Expected IOException");
-        } catch (FileStorageException e) {
+        } catch (OXException e) {
             // Everything fine. Error is discovered.
         }
         rmdir(tempFile);

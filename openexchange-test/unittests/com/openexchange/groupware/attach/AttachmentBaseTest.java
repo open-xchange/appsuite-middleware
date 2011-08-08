@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.attach;
 
+import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -61,12 +62,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import com.openexchange.api.OXPermissionException;
-import com.openexchange.api2.OXException;
-import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.DBProvider;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.attach.impl.AttachmentBaseImpl;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
@@ -76,6 +73,7 @@ import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.MockUser;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.tx.ConfigurableDBProvider;
@@ -483,56 +481,56 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
                 attachmentBase.attachToObject(attachment,null,MODE.getSession(),MODE.getContext(),MODE.getUser(), null);
                 clean.add(attachment);
                 fail("Disallow failed");
-            } catch (final AttachmentException x) {
+            } catch (final OXException x) {
                 authz.assertMayAttach();
             }
 
             try {
                 attachmentBase.getAttachment(folderId,attachedId,moduleId,-1,MODE.getContext(),MODE.getUser(), null);
                 fail("Disallow failed");
-            } catch (final AttachmentException x) {
+            } catch (final OXException x) {
                 authz.assertMayRead();
             }
 
             try {
                 attachmentBase.getAttachedFile(folderId,attachedId,moduleId,-1,MODE.getContext(),MODE.getUser(), null);
                 fail("Disallow failed");
-            } catch (final AttachmentException x) {
+            } catch (final OXException x) {
                 authz.assertMayRead();
             }
 
             try {
                 attachmentBase.getAttachments(folderId, attachedId, moduleId, MODE.getContext(), MODE.getUser(), null);
                 fail("Disallow failed");
-            } catch (final AttachmentException x) {
+            } catch (final OXException x) {
                 authz.assertMayRead();
             }
 
             try {
                 attachmentBase.getDelta(folderId, attachedId, moduleId, 0, false, MODE.getContext(), MODE.getUser(), null);
                 fail("Disallow failed");
-            } catch (final AttachmentException x) {
+            } catch (final OXException x) {
                 authz.assertMayRead();
             }
 
             try {
                 attachmentBase.getAttachments(folderId, attachedId, moduleId, new AttachmentField[]{AttachmentField.ID_LITERAL}, AttachmentField.ID_LITERAL, AttachmentBase.ASC, MODE.getContext(), MODE.getUser(), null);
                 fail("Disallow failed");
-            } catch (final AttachmentException x) {
+            } catch (final OXException x) {
                 authz.assertMayRead();
             }
 
             try {
                 attachmentBase.getDelta(folderId, attachedId, moduleId, 0, false, new AttachmentField[]{AttachmentField.ID_LITERAL}, AttachmentField.ID_LITERAL, AttachmentBase.ASC, MODE.getContext(), MODE.getUser(), null);
                 fail("Disallow failed");
-            } catch (final AttachmentException x) {
+            } catch (final OXException x) {
                 authz.assertMayRead();
             }
 
             try {
                 attachmentBase.detachFromObject(folderId,attachedId,moduleId,new int[]{},MODE.getSession(),MODE.getContext(), MODE.getUser(), null);
                 fail("Disallow failed");
-            } catch (final AttachmentException x) {
+            } catch (final OXException x) {
                 authz.assertMayDetach();
             }
 
@@ -680,7 +678,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
                 final TestContextToolkit tools = new TestContextToolkit();
                 final String ctxName = config.getContextName();
                 return null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
-            } catch (final ConfigurationException e) {
+            } catch (final OXException e) {
                 e.printStackTrace();
                 return null;
             }
@@ -767,17 +765,17 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 
         public void checkMayAttach(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
             checked = 1;
-            throw new OXPermissionException(EnumComponent.INFOSTORE, AbstractOXException.Category.USER_INPUT,0,"Badaaam!",null);
+            throw OXException.noPermissionForModule(Module.INFOSTORE.getName());
         }
 
         public void checkMayDetach(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
             checked = 2;
-            throw new OXPermissionException(EnumComponent.INFOSTORE, AbstractOXException.Category.USER_INPUT,0,"Badaaam!",null);
+            throw OXException.noPermissionForModule(Module.INFOSTORE.getName());
         }
 
         public void checkMayReadAttachments(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
             checked = 3;
-            throw new OXPermissionException(EnumComponent.INFOSTORE, AbstractOXException.Category.USER_INPUT,0,"Badaaam!",null);
+            throw OXException.noPermissionForModule(Module.INFOSTORE.getName());
         }
 
         public void assertMayAttach(){

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.framework;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.json.JSONException;
 import com.openexchange.ajax.session.LoginTools;
@@ -56,9 +57,7 @@ import com.openexchange.ajax.session.actions.LoginRequest;
 import com.openexchange.ajax.session.actions.LogoutRequest;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
-import com.openexchange.configuration.ConfigurationException;
-import com.openexchange.configuration.ConfigurationException.Code;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.configuration.ConfigurationExceptionCodes;
 
 /**
  * This class implements the temporary memory of an AJAX client and provides some convenience methods to determine user specific values for
@@ -85,22 +84,22 @@ public class AJAXClient {
         this.mustLogout = session.mustLogout();
     }
 
-    public AJAXClient(final User user) throws ConfigurationException, AjaxException, IOException, JSONException {
+    public AJAXClient(final User user) throws OXException, OXException, IOException, JSONException {
         AJAXConfig.init();
         String login = AJAXConfig.getProperty(user.getLogin());
         if (null == login) {
-            throw new ConfigurationException(Code.PROPERTY_MISSING, user.getLogin().getPropertyName());
+            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(user.getLogin().getPropertyName());
         }
         if(!login.contains("@")){
             final String context = AJAXConfig.getProperty(Property.CONTEXTNAME);
             if (null == context) {
-                throw new ConfigurationException(Code.PROPERTY_MISSING, Property.CONTEXTNAME.getPropertyName());
+                throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(Property.CONTEXTNAME.getPropertyName());
             }
             login += "@"+context;
         }
         final String password = AJAXConfig.getProperty(user.getPassword());
         if (null == password) {
-            throw new ConfigurationException(Code.PROPERTY_MISSING, user.getPassword().getPropertyName());
+            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(user.getPassword().getPropertyName());
         }
         session = new AJAXSession();
         session.setId(execute(new LoginRequest(login, password, LoginTools.generateAuthId(), AJAXClient.class.getName(), VERSION)).getSessionId());
@@ -148,7 +147,7 @@ public class AJAXClient {
         }
     }
 
-    public void logout() throws AjaxException, IOException, JSONException {
+    public void logout() throws OXException, IOException, JSONException {
         if (null != session.getId()) {
             execute(new LogoutRequest());
             session.setId(null);
@@ -179,7 +178,7 @@ public class AJAXClient {
         return values;
     }
     
-    public <T extends AbstractAJAXResponse> T execute(final AJAXRequest<T> request, final int sleep) throws AjaxException, IOException, JSONException {
+    public <T extends AbstractAJAXResponse> T execute(final AJAXRequest<T> request, final int sleep) throws OXException, IOException, JSONException {
         if (hostname != null && protocol != null) {
             // TODO: Maybe assume http as default protocol
             if (sleep != -1) {
@@ -192,7 +191,7 @@ public class AJAXClient {
         return Executor.execute(this, request);
     }
 
-    public <T extends AbstractAJAXResponse> T execute(final AJAXRequest<T> request) throws AjaxException, IOException, JSONException {
+    public <T extends AbstractAJAXResponse> T execute(final AJAXRequest<T> request) throws OXException, IOException, JSONException {
         return execute(request, -1);
     }
 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 
 import com.openexchange.ajax.framework.AJAXClient;
@@ -56,7 +57,6 @@ import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.GetResponse;
 import com.openexchange.ajax.mail.actions.SendRequest;
 import com.openexchange.ajax.mail.actions.SendResponse;
-import com.openexchange.groupware.AbstractOXException;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -115,7 +115,7 @@ public class Bug12409Test extends AbstractMailTest {
 		super(name);
 	}
 	
-	public void testSavedDispositionNotificationReturnedWhenEditing() throws IOException, SAXException, JSONException, AbstractOXException {
+	public void testSavedDispositionNotificationReturnedWhenEditing() throws IOException, SAXException, JSONException, OXException {
 		final AJAXClient client = getClient();
 		// load the email to edit it again
 		GetResponse response;

@@ -49,13 +49,13 @@
 
 package com.openexchange.resource;
 
+import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import junit.framework.TestCase;
 
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.Context;
@@ -128,7 +128,7 @@ public final class ResourceCreateTest extends TestCase {
 		Init.stopServer();
 	}
 
-	public void testResourceCreation() throws SQLException, ResourceException {
+	public void testResourceCreation() throws SQLException, OXException {
 		final Resource resource = new Resource();
 		resource.setAvailable(true);
 		resource.setDescription("My test resource");
@@ -165,7 +165,7 @@ public final class ResourceCreateTest extends TestCase {
 			id = resource.getIdentifier();
 
 			fail("Creation succeeded with invalid string identifier");
-		} catch (final ResourceException e) {
+		} catch (final OXException e) {
 		    // Exception is expected
 		} finally {
 			deleteResource(id, ctx.getContextId());
@@ -186,7 +186,7 @@ public final class ResourceCreateTest extends TestCase {
 			id = resource.getIdentifier();
 
 			fail("Creation succeeded with invalid email address");
-		} catch (final ResourceException e) {
+		} catch (final OXException e) {
 		 //   Exception is expected
 		} finally {
 			deleteResource(id, ctx.getContextId());
@@ -220,7 +220,7 @@ public final class ResourceCreateTest extends TestCase {
 
 			fail("Creation succeeded with duplicate identifier");
 
-		} catch (final ResourceException e) {
+		} catch (final OXException e) {
 		    // Exception is expected
 		} finally {
 			deleteResource(id, ctx.getContextId());
@@ -254,7 +254,7 @@ public final class ResourceCreateTest extends TestCase {
 
 			fail("Creation succeeded with duplicate email address");
 
-		} catch (final ResourceException e) {
+		} catch (final OXException e) {
 		    // Exception is expected
 		} finally {
 			deleteResource(id, ctx.getContextId());
@@ -275,7 +275,7 @@ public final class ResourceCreateTest extends TestCase {
 			id = resource.getIdentifier();
 
 			fail("Creation succeeded with missing mandatory field");
-		} catch (final ResourceException e) {
+		} catch (final OXException e) {
 		    // Exception is expected
 		} finally {
 			deleteResource(id, ctx.getContextId());
@@ -291,7 +291,7 @@ public final class ResourceCreateTest extends TestCase {
 		final Connection writeCon;
 		try {
 			writeCon = Database.get(cid, true);
-		} catch (final DBPoolingException e) {
+		} catch (final OXException e) {
 			e.printStackTrace();
 			return;
 		}

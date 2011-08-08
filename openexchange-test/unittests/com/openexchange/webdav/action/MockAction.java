@@ -1,13 +1,12 @@
 package com.openexchange.webdav.action;
 
-import com.openexchange.webdav.protocol.WebdavProtocolException;
-
+import com.openexchange.exception.OXException;
 public class MockAction extends AbstractAction {
 
 	private boolean activated;
 
 	public void perform(final WebdavRequest req, final WebdavResponse res)
-			throws WebdavProtocolException {
+			throws OXException {
 		activated = true;
 	}
 

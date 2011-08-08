@@ -49,6 +49,7 @@
 
 package com.openexchange.webdav.action.ifheader;
 
+import com.openexchange.exception.OXException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Date;
@@ -59,7 +60,6 @@ import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.Protocol.WEBDAV_METHOD;
 
@@ -70,7 +70,7 @@ import com.openexchange.webdav.protocol.Protocol.WEBDAV_METHOD;
  */
 public class StandardIfHeaderApplyTest extends TestCase {
 
-    public void testETagMustMatch() throws WebdavProtocolException {
+    public void testETagMustMatch() throws OXException {
         IfHeaderApply apply = getApply();
 
         IfHeaderEntity entity = new IfHeaderEntity.ETag("1234567");
@@ -90,7 +90,7 @@ public class StandardIfHeaderApplyTest extends TestCase {
         return new StandardIfHeaderApply();
     }
 
-    public void testETagMustNotMatch() throws WebdavProtocolException {
+    public void testETagMustNotMatch() throws OXException {
         IfHeaderApply apply = getApply();
 
         IfHeaderEntity entity = new IfHeaderEntity.ETag("1234567");
@@ -105,7 +105,7 @@ public class StandardIfHeaderApplyTest extends TestCase {
         assertTrue(apply.matches(entity, resource));
     }
 
-    public void testLockMustMatch() throws WebdavProtocolException {
+    public void testLockMustMatch() throws OXException {
         IfHeaderApply apply = getApply();
 
         IfHeaderEntity entity = new IfHeaderEntity.LockToken("1234567");
@@ -120,7 +120,7 @@ public class StandardIfHeaderApplyTest extends TestCase {
         assertFalse(apply.matches(entity, resource));
     }
 
-    public void testLockMustNotMatch() throws WebdavProtocolException {
+    public void testLockMustNotMatch() throws OXException {
         IfHeaderApply apply = getApply();
 
         IfHeaderEntity entity = new IfHeaderEntity.LockToken("1234567");
@@ -140,89 +140,89 @@ public class StandardIfHeaderApplyTest extends TestCase {
             
             
             
-            public String getETag() throws WebdavProtocolException {
+            public String getETag() throws OXException {
                 return eTag;
             }
 
-            public WebdavResource copy(WebdavPath string) throws WebdavProtocolException {
+            public WebdavResource copy(WebdavPath string) throws OXException {
                 return null;
             }
 
-            public WebdavResource copy(WebdavPath string, boolean noroot, boolean overwrite) throws WebdavProtocolException {
+            public WebdavResource copy(WebdavPath string, boolean noroot, boolean overwrite) throws OXException {
                 return null;
             }
 
-            public void create() throws WebdavProtocolException {
+            public void create() throws OXException {
             }
 
-            public void delete() throws WebdavProtocolException {
+            public void delete() throws OXException {
             }
 
-            public boolean exists() throws WebdavProtocolException {
+            public boolean exists() throws OXException {
                 return false;
             }
 
-            public List<WebdavProperty> getAllProps() throws WebdavProtocolException {
+            public List<WebdavProperty> getAllProps() throws OXException {
                 return null;
             }
 
-            public InputStream getBody() throws WebdavProtocolException {
+            public InputStream getBody() throws OXException {
                 return null;
             }
 
-            public String getContentType() throws WebdavProtocolException {
+            public String getContentType() throws OXException {
                 return null;
             }
 
-            public Date getCreationDate() throws WebdavProtocolException {
+            public Date getCreationDate() throws OXException {
                 return null;
             }
 
-            public String getDisplayName() throws WebdavProtocolException {
+            public String getDisplayName() throws OXException {
                 return null;
             }
 
-            public String getLanguage() throws WebdavProtocolException {
+            public String getLanguage() throws OXException {
                 return null;
             }
 
-            public Date getLastModified() throws WebdavProtocolException {
+            public Date getLastModified() throws OXException {
                 return null;
             }
 
-            public Long getLength() throws WebdavProtocolException {
+            public Long getLength() throws OXException {
                 return null;
             }
 
-            public WebdavLock getLock(String token) throws WebdavProtocolException {
+            public WebdavLock getLock(String token) throws OXException {
                 return null;
             }
 
-            public List<WebdavLock> getLocks() throws WebdavProtocolException {
+            public List<WebdavLock> getLocks() throws OXException {
                 return null;
             }
 
-            public WEBDAV_METHOD[] getOptions() throws WebdavProtocolException {
+            public WEBDAV_METHOD[] getOptions() throws OXException {
                 return null;
             }
 
-            public WebdavLock getOwnLock(String token) throws WebdavProtocolException {
+            public WebdavLock getOwnLock(String token) throws OXException {
                 return null;
             }
 
-            public List<WebdavLock> getOwnLocks() throws WebdavProtocolException {
+            public List<WebdavLock> getOwnLocks() throws OXException {
                 return null;
             }
 
-            public WebdavProperty getProperty(String namespace, String name) throws WebdavProtocolException {
+            public WebdavProperty getProperty(String namespace, String name) throws OXException {
                 return null;
             }
 
-            public String getResourceType() throws WebdavProtocolException {
+            public String getResourceType() throws OXException {
                 return null;
             }
 
-            public String getSource() throws WebdavProtocolException {
+            public String getSource() throws OXException {
                 return null;
             }
 
@@ -238,56 +238,56 @@ public class StandardIfHeaderApplyTest extends TestCase {
                 return false;
             }
 
-            public void lock(WebdavLock lock) throws WebdavProtocolException {
+            public void lock(WebdavLock lock) throws OXException {
             }
 
-            public WebdavResource move(WebdavPath newUri) throws WebdavProtocolException {
+            public WebdavResource move(WebdavPath newUri) throws OXException {
                 return null;
             }
 
-            public WebdavResource move(WebdavPath string, boolean noroot, boolean overwrite) throws WebdavProtocolException {
+            public WebdavResource move(WebdavPath string, boolean noroot, boolean overwrite) throws OXException {
                 return null;
             }
 
-            public void putBody(InputStream data) throws WebdavProtocolException {
+            public void putBody(InputStream data) throws OXException {
             }
 
-            public void putBodyAndGuessLength(InputStream body) throws WebdavProtocolException {
+            public void putBodyAndGuessLength(InputStream body) throws OXException {
             }
 
-            public void putProperty(WebdavProperty prop) throws WebdavProtocolException {
+            public void putProperty(WebdavProperty prop) throws OXException {
             }
 
-            public WebdavResource reload() throws WebdavProtocolException {
+            public WebdavResource reload() throws OXException {
                 return null;
             }
 
-            public void removeProperty(String namespace, String name) throws WebdavProtocolException {
+            public void removeProperty(String namespace, String name) throws OXException {
             }
 
-            public void save() throws WebdavProtocolException {
+            public void save() throws OXException {
             }
 
-            public void setContentType(String type) throws WebdavProtocolException {
+            public void setContentType(String type) throws OXException {
             }
 
-            public void setDisplayName(String displayName) throws WebdavProtocolException {
+            public void setDisplayName(String displayName) throws OXException {
             }
 
-            public void setLanguage(String language) throws WebdavProtocolException {
+            public void setLanguage(String language) throws OXException {
             }
 
-            public void setLength(Long length) throws WebdavProtocolException {
+            public void setLength(Long length) throws OXException {
             }
 
-            public void setSource(String source) throws WebdavProtocolException {
+            public void setSource(String source) throws OXException {
             }
 
             public WebdavCollection toCollection() {
                 return null;
             }
 
-            public void unlock(String token) throws WebdavProtocolException {
+            public void unlock(String token) throws OXException {
             }
 
             public Protocol getProtocol() {
@@ -301,7 +301,7 @@ public class StandardIfHeaderApplyTest extends TestCase {
     protected WebdavResource resourceWithLock(final String lock) {
         return new WebdavResource() {
             
-            public WebdavLock getLock(String token) throws WebdavProtocolException {
+            public WebdavLock getLock(String token) throws OXException {
                 if(!lock.equals(token)) {
                     return null;
                 }
@@ -310,85 +310,85 @@ public class StandardIfHeaderApplyTest extends TestCase {
                 return webdavLock;
             }
 
-            public List<WebdavLock> getLocks() throws WebdavProtocolException {
+            public List<WebdavLock> getLocks() throws OXException {
                 return Arrays.asList(getLock(lock));
             }
 
             
-            public String getETag() throws WebdavProtocolException {
+            public String getETag() throws OXException {
                 return null;
             }
 
-            public WebdavResource copy(WebdavPath string) throws WebdavProtocolException {
+            public WebdavResource copy(WebdavPath string) throws OXException {
                 return null;
             }
 
-            public WebdavResource copy(WebdavPath string, boolean noroot, boolean overwrite) throws WebdavProtocolException {
+            public WebdavResource copy(WebdavPath string, boolean noroot, boolean overwrite) throws OXException {
                 return null;
             }
 
-            public void create() throws WebdavProtocolException {
+            public void create() throws OXException {
             }
 
-            public void delete() throws WebdavProtocolException {
+            public void delete() throws OXException {
             }
 
-            public boolean exists() throws WebdavProtocolException {
+            public boolean exists() throws OXException {
                 return false;
             }
 
-            public List<WebdavProperty> getAllProps() throws WebdavProtocolException {
+            public List<WebdavProperty> getAllProps() throws OXException {
                 return null;
             }
 
-            public InputStream getBody() throws WebdavProtocolException {
+            public InputStream getBody() throws OXException {
                 return null;
             }
 
-            public String getContentType() throws WebdavProtocolException {
+            public String getContentType() throws OXException {
                 return null;
             }
 
-            public Date getCreationDate() throws WebdavProtocolException {
+            public Date getCreationDate() throws OXException {
                 return null;
             }
 
-            public String getDisplayName() throws WebdavProtocolException {
+            public String getDisplayName() throws OXException {
                 return null;
             }
 
-            public String getLanguage() throws WebdavProtocolException {
+            public String getLanguage() throws OXException {
                 return null;
             }
 
-            public Date getLastModified() throws WebdavProtocolException {
+            public Date getLastModified() throws OXException {
                 return null;
             }
 
-            public Long getLength() throws WebdavProtocolException {
+            public Long getLength() throws OXException {
                 return null;
             }
-            public WEBDAV_METHOD[] getOptions() throws WebdavProtocolException {
-                return null;
-            }
-
-            public WebdavLock getOwnLock(String token) throws WebdavProtocolException {
+            public WEBDAV_METHOD[] getOptions() throws OXException {
                 return null;
             }
 
-            public List<WebdavLock> getOwnLocks() throws WebdavProtocolException {
+            public WebdavLock getOwnLock(String token) throws OXException {
                 return null;
             }
 
-            public WebdavProperty getProperty(String namespace, String name) throws WebdavProtocolException {
+            public List<WebdavLock> getOwnLocks() throws OXException {
                 return null;
             }
 
-            public String getResourceType() throws WebdavProtocolException {
+            public WebdavProperty getProperty(String namespace, String name) throws OXException {
                 return null;
             }
 
-            public String getSource() throws WebdavProtocolException {
+            public String getResourceType() throws OXException {
+                return null;
+            }
+
+            public String getSource() throws OXException {
                 return null;
             }
 
@@ -404,56 +404,56 @@ public class StandardIfHeaderApplyTest extends TestCase {
                 return false;
             }
 
-            public void lock(WebdavLock lock) throws WebdavProtocolException {
+            public void lock(WebdavLock lock) throws OXException {
             }
 
-            public WebdavResource move(WebdavPath newUri) throws WebdavProtocolException {
+            public WebdavResource move(WebdavPath newUri) throws OXException {
                 return null;
             }
 
-            public WebdavResource move(WebdavPath string, boolean noroot, boolean overwrite) throws WebdavProtocolException {
+            public WebdavResource move(WebdavPath string, boolean noroot, boolean overwrite) throws OXException {
                 return null;
             }
 
-            public void putBody(InputStream data) throws WebdavProtocolException {
+            public void putBody(InputStream data) throws OXException {
             }
 
-            public void putBodyAndGuessLength(InputStream body) throws WebdavProtocolException {
+            public void putBodyAndGuessLength(InputStream body) throws OXException {
             }
 
-            public void putProperty(WebdavProperty prop) throws WebdavProtocolException {
+            public void putProperty(WebdavProperty prop) throws OXException {
             }
 
-            public WebdavResource reload() throws WebdavProtocolException {
+            public WebdavResource reload() throws OXException {
                 return null;
             }
 
-            public void removeProperty(String namespace, String name) throws WebdavProtocolException {
+            public void removeProperty(String namespace, String name) throws OXException {
             }
 
-            public void save() throws WebdavProtocolException {
+            public void save() throws OXException {
             }
 
-            public void setContentType(String type) throws WebdavProtocolException {
+            public void setContentType(String type) throws OXException {
             }
 
-            public void setDisplayName(String displayName) throws WebdavProtocolException {
+            public void setDisplayName(String displayName) throws OXException {
             }
 
-            public void setLanguage(String language) throws WebdavProtocolException {
+            public void setLanguage(String language) throws OXException {
             }
 
-            public void setLength(Long length) throws WebdavProtocolException {
+            public void setLength(Long length) throws OXException {
             }
 
-            public void setSource(String source) throws WebdavProtocolException {
+            public void setSource(String source) throws OXException {
             }
 
             public WebdavCollection toCollection() {
                 return null;
             }
 
-            public void unlock(String token) throws WebdavProtocolException {
+            public void unlock(String token) throws OXException {
             }
 
             public Protocol getProtocol() {

@@ -49,6 +49,7 @@
 
 package com.openexchange.webdav;
 
+import com.openexchange.exception.OXException;
 import java.util.Properties;
 import junit.framework.TestCase;
 import org.jdom.Namespace;

@@ -20,9 +20,9 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.Executor;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.java.util.TimeZones;
-import com.openexchange.tools.servlet.AjaxException;
 
 public class AllTest extends AppointmentTest {
 
@@ -103,7 +103,7 @@ public class AllTest extends AppointmentTest {
         }
     }
 
-    public void testShouldOnlyListAppointmentsInSpecifiedTimeRange() throws JSONException, AjaxException, IOException, SAXException {
+    public void testShouldOnlyListAppointmentsInSpecifiedTimeRange() throws JSONException, OXException, IOException, SAXException {
         final Appointment appointment = new Appointment();
         appointment.setStartDate(D("24/02/1998 12:00"));
         appointment.setEndDate(D("24/02/1998 14:00"));

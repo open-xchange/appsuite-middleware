@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 
 import javax.mail.internet.AddressException;
@@ -63,8 +64,6 @@ import com.openexchange.ajax.mail.actions.AllRequest;
 import com.openexchange.ajax.mail.actions.AllResponse;
 import com.openexchange.ajax.mail.actions.ClearRequest;
 import com.openexchange.ajax.mail.actions.SendRequest;
-import com.openexchange.mail.MailException;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * 
@@ -107,7 +106,7 @@ public class ClearTest extends AbstractMailTest {
 		super.tearDown();
 	}
 	
-	public void testClearingOneFolder() throws AjaxException, IOException, SAXException, JSONException, AddressException, MailException {
+	public void testClearingOneFolder() throws OXException, IOException, SAXException, JSONException, AddressException, OXException {
 		/*
 		 * Insert <numOfMails> mails through a send request
 		 */

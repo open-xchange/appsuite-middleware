@@ -1,9 +1,9 @@
 package com.openexchange.groupware.infostore.validation;
 
+import com.openexchange.exception.OXException;
 import junit.framework.TestCase;
 
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.utils.Metadata;
 
 public class ValidationChainTest extends TestCase{
@@ -20,8 +20,8 @@ public class ValidationChainTest extends TestCase{
 		try {
 			validators.validate(null);
 			fail("No Exception thrown");
-		} catch (final InfostoreException x) {
-			assertEquals("TestValidation2: (title) sucks\nTestValidation3: (title, description) stinks\n", (String)x.getMessageArgs()[0]);
+		} catch (final OXException x) {
+			assertEquals("TestValidation2: (title) sucks\nTestValidation3: (title, description) stinks\n", (String)x.getDisplayArgs()[0]);
 		}
 		
 	}

@@ -48,10 +48,11 @@
  */
 package com.openexchange.test.fixtures;
 
+import com.openexchange.exception.OXException;
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class FixtureException extends Exception{
+public class FixtureException extends OXException{
 
 	private static final long serialVersionUID = -8622938638508531195L;
 
@@ -59,11 +60,11 @@ public class FixtureException extends Exception{
     }
 
     public FixtureException(final String message) {
-        super(message);
+        super(OXException.CODE_DEFAULT,message);
     }
 
     public FixtureException(final String message, final Throwable cause) {
-        super(message, cause);
+    	super(OXException.CODE_DEFAULT, message, cause);
     }
 
     public FixtureException(final Throwable cause) {

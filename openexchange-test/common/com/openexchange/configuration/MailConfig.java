@@ -49,6 +49,7 @@
 
 package com.openexchange.configuration;
 
+import com.openexchange.exception.OXException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.exception.OXException;
@@ -149,7 +150,7 @@ public final class MailConfig extends AbstractConfig {
 	/**
 	 * Reads the mail configuration.
 	 * 
-	 * @throws ConfigurationException
+	 * @throws OXException
 	 *             if reading configuration fails.
 	 */
 	public static void init() throws OXException {

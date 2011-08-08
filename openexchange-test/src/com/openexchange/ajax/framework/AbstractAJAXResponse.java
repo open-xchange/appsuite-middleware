@@ -49,13 +49,14 @@
 
 package com.openexchange.ajax.framework;
 
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.ProblematicAttribute;
+
 import java.util.Date;
 import java.util.List;
 import junit.framework.Assert;
 import com.openexchange.ajax.appointment.action.ConflictObject;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AbstractOXException.ProblematicAttribute;
 
 /**
  * This class implements inheritable methods for AJAX responses.
@@ -122,7 +123,7 @@ public abstract class AbstractAJAXResponse extends Assert {
         return response.getFormattedErrorMessage();
     }
 
-    public AbstractOXException getException() {
+    public OXException getException() {
         return response.getException();
     }
 

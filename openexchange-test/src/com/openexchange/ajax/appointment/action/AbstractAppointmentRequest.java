@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment.action;
 
+import com.openexchange.exception.OXException;
 import java.util.TimeZone;
 
 import org.json.JSONException;

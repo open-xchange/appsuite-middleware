@@ -1,5 +1,6 @@
 package com.openexchange.webdav.action;
 
+import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,7 +18,6 @@ import com.openexchange.webdav.action.ifheader.IfHeader;
 import com.openexchange.webdav.action.ifheader.IfHeaderParseException;
 import com.openexchange.webdav.action.ifheader.IfHeaderParser;
 import com.openexchange.webdav.protocol.WebdavCollection;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavResource;
@@ -44,14 +44,14 @@ public class MockWebdavRequest implements WebdavRequest {
         this.url = url;
     }
 
-    public WebdavResource getResource() throws WebdavProtocolException {
+    public WebdavResource getResource() throws OXException {
 		if(res != null) {
 			return res;
 		}
 		return res = factory.resolveResource(url);
 	}
 	
-	public WebdavResource getDestination() throws WebdavProtocolException {
+	public WebdavResource getDestination() throws OXException {
 		if(null == getHeader("destination")) {
 			return null;
 		}
@@ -61,7 +61,7 @@ public class MockWebdavRequest implements WebdavRequest {
 		return dest = factory.resolveResource(getHeader("destination"));
 	}
 	
-	public WebdavCollection getCollection() throws WebdavProtocolException {
+	public WebdavCollection getCollection() throws OXException {
 		if(res != null) {
 			return (WebdavCollection) res;
 		}
@@ -109,12 +109,16 @@ public class MockWebdavRequest implements WebdavRequest {
 		return uriPrefix;
 	}
 
-	public IfHeader getIfHeader() throws IfHeaderParseException {
+	public IfHeader getIfHeader() throws OXException {
 		final String ifHeader = getHeader("If");
 		if(ifHeader == null) {
 			return null;
 		}
-		return new IfHeaderParser().parse(getHeader("If"));
+		try {
+			return new IfHeaderParser().parse(getHeader("If"));
+		} catch (IfHeaderParseException e) {
+			throw new OXException(e);
+		}
 	}
 
 	public int getDepth(final int def) {
@@ -125,7 +129,7 @@ public class MockWebdavRequest implements WebdavRequest {
 		return "Infinity".equalsIgnoreCase(depth) ? WebdavCollection.INFINITY : new Integer(depth);
 	}
 
-	public WebdavFactory getFactory() throws WebdavProtocolException {
+	public WebdavFactory getFactory() throws OXException {
 		return factory;
 	}
 

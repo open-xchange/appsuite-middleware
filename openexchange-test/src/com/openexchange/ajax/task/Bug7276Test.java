@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.task;
 
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.Generic;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.participant.ParticipantTools;
 import com.openexchange.ajax.task.actions.DeleteRequest;
@@ -58,11 +60,9 @@ import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.ajax.task.actions.UpdateResponse;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.tasks.Create;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.tasks.TaskException;
 
 /**
  * Tests problem described in bug #7276.
@@ -71,6 +71,7 @@ import com.openexchange.groupware.tasks.TaskException;
 public class Bug7276Test extends AbstractTaskTest {
 
     private AJAXClient client2;
+	private Generic expected;
 
     /**
      * @param name
@@ -135,11 +136,9 @@ public class Bug7276Test extends AbstractTaskTest {
                 folder2, task.getObjectID(), false));
             assertTrue("Server does not give exception although it has to.",
                 response.hasError());
-            final TaskException.Code code = TaskException.Code.NO_PERMISSION;
-            final AbstractOXException exc = response.getException();
-            assertEquals("Wrong exception message.", EnumComponent.TASK, exc.getComponent());
-            assertEquals("Wrong exception message.", code.getCategory(), exc.getCategory());
-            assertEquals("Wrong exception message.", code.getNumber(), exc.getDetailNumber());
+            OXException expectedErr = OXException.noPermissionForFolder();
+            OXException actual= response.getException();
+            assertEquals("Wrong exception", actual.similarTo(expectedErr));
         }
         // Clean up
         client1.execute(new DeleteRequest(task));

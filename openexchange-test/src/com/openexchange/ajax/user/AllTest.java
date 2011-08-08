@@ -1,6 +1,7 @@
 
 package com.openexchange.ajax.user;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.I;
 import org.json.JSONArray;
 import com.openexchange.ajax.framework.AbstractAJAXSession;

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.subscribe.actions;
 
+import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
@@ -56,7 +57,6 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Params;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.json.SubscriptionJSONException;
 import com.openexchange.subscribe.json.SubscriptionJSONWriter;
 
 /**
@@ -98,7 +98,7 @@ public class UpdateSubscriptionRequest extends AbstractSubscriptionRequest<Updat
         SubscriptionJSONWriter writer = new SubscriptionJSONWriter();
         try {
             return writer.write(subscription, getFormDescription(), null);
-        } catch (SubscriptionJSONException e) {
+        } catch (OXException e) {
             throw new JSONException(e);
         }
     }

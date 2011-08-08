@@ -49,6 +49,7 @@
 
 package com.openexchange.webdav.xml.folder.actions;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.webdav.xml.framework.RequestTools.addElement2PropFind;
 
 import java.io.ByteArrayOutputStream;

@@ -49,6 +49,7 @@
 
 package com.openexchange.webdav.xml.appointment;
 
+import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.util.Calendar;
 import java.util.Date;
@@ -65,7 +66,6 @@ import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.AppointmentTest;
 import com.openexchange.webdav.xml.AttachmentTest;
 import com.openexchange.webdav.xml.FolderTest;
@@ -366,7 +366,7 @@ public class NewTest extends AppointmentTest {
             final int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword());
             deleteAppointment(getWebConversation(), objectId, parentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
             fail("conflict exception expected!");
-        } catch (final TestException exc) {
+        } catch (final OXException exc) {
             assertExceptionMessage(exc.getMessage(), "APP-0070");
         }
 

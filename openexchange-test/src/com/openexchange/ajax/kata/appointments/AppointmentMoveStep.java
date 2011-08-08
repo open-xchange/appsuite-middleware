@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.kata.appointments;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.framework.AJAXClient;

@@ -48,13 +48,12 @@
  */
 package com.openexchange.setuptools;
 
+import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.calendar.CalendarSql;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;
@@ -115,9 +114,6 @@ public class TestFolderToolkit {
         } catch (final OXException e) {
             e.printStackTrace();
             return null;
-        } catch (final DBPoolingException e) {
-            e.printStackTrace();
-            return null;
         } finally {
         	if(writecon != null) {
                 DBPool.pushWrite(ctx, writecon);
@@ -147,9 +143,6 @@ public class TestFolderToolkit {
             fo = oxma.createFolder(fo, true, System.currentTimeMillis());
             return fo;
         } catch (final OXException e) {
-            e.printStackTrace();
-            return null;
-        } catch (final DBPoolingException e) {
             e.printStackTrace();
             return null;
         } finally {
@@ -241,8 +234,6 @@ public class TestFolderToolkit {
             final OXFolderManager oxma = OXFolderManager.getInstance(session, writecon, writecon);
             oxma.updateFolder(fo, false, System.currentTimeMillis());
         } catch (final OXException e) {
-            e.printStackTrace();
-        } catch (final DBPoolingException e) {
             e.printStackTrace();
         } finally {
             if(writecon != null) {

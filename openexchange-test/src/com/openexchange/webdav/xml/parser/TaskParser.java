@@ -45,9 +45,9 @@
 
 package com.openexchange.webdav.xml.parser;
 
+import com.openexchange.exception.OXException;
 import org.jdom.Element;
 
-import com.openexchange.api.OXConflictException;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.webdav.xml.XmlServlet;
 import com.openexchange.webdav.xml.fields.TaskFields;
@@ -64,7 +64,7 @@ public class TaskParser extends CalendarParser {
 		
 	}
 	
-	protected void parse(final Task taskObj, final Element eProp) throws OXConflictException {
+	protected void parse(final Task taskObj, final Element eProp) throws OXException {
 		if (hasElement(eProp.getChild(TaskFields.STATUS, XmlServlet.NS))) {
 			taskObj.setStatus(getValueAsInt(eProp.getChild(TaskFields.STATUS, XmlServlet.NS)));
 		} 

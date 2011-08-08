@@ -227,8 +227,8 @@ public class Multiple extends SessionServlet {
                 jsonWriter.object();
                 final AJAXRequestResult result;
                 try {
-                    if (action == null) {
-                        throw AjaxExceptionCodes.MISSING_PARAMETER.create( PARAMETER_ACTION);
+                    if (action == null || action.length() == 0) {
+                    	request.setAction("GET"); // Backwards Compatibility
                     }
                     if (state == null) {
                         state = dispatcher.begin();
@@ -237,14 +237,13 @@ public class Multiple extends SessionServlet {
 
                     jsonWriter.key(ResponseFields.DATA);
                     jsonWriter.value(result.getResultObject());
-
-
                 } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                     ResponseWriter.writeException(e, jsonWriter);
                     return state;
                 } finally {
-                    jsonWriter.endObject();
+                	jsonWriter.endObject();
+                    return state;
                 }
             }
             final MultipleHandler multipleHandler = lookUpMultipleHandler(module);

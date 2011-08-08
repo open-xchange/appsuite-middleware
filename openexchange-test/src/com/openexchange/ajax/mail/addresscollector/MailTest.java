@@ -22,10 +22,10 @@ import com.openexchange.ajax.mail.actions.SendRequest;
 import com.openexchange.ajax.mail.contenttypes.MailContentType;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.mail.MailJSONField;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * 
@@ -80,7 +80,7 @@ public class MailTest extends AbstractMailTest {
         }
     }
     
-    private void sendMail() throws AjaxException, JSONException, IOException, SAXException {
+    private void sendMail() throws OXException, JSONException, IOException, SAXException {
         final JSONObject mail = new JSONObject();
         mail.put(MailJSONField.FROM.getKey(), getSendAddress());
         mail.put(MailJSONField.RECIPIENT_TO.getKey(), getSendAddress());
@@ -109,7 +109,7 @@ public class MailTest extends AbstractMailTest {
         assertEquals("Email does not match.", getSendAddress(), contacts[0].getEmail1());
     }
     
-    private FolderObject createContactFolder() throws AjaxException, IOException, SAXException, JSONException {
+    private FolderObject createContactFolder() throws OXException, IOException, SAXException, JSONException {
         final FolderObject folder = Create.createPrivateFolder("ContactCollectionFolder " + System.currentTimeMillis(), FolderObject.CONTACT, client.getValues().getUserId());
         folder.setParentFolderID(client.getValues().getPrivateContactFolder());
         final CommonInsertResponse response = Executor.execute(client, new InsertRequest(API.OX_OLD, folder));
@@ -121,7 +121,7 @@ public class MailTest extends AbstractMailTest {
         return folder;
     }
     
-    private void deleteContactFolder(final FolderObject folder) throws AjaxException, IOException, SAXException, JSONException {
+    private void deleteContactFolder(final FolderObject folder) throws OXException, IOException, SAXException, JSONException {
         Executor.execute(client, new SetRequest(Tree.ContactCollectEnabled, B(false)));
         Executor.execute(client, new DeleteRequest(API.OX_OLD, folder.getObjectID(), folder.getLastModified()));
     }

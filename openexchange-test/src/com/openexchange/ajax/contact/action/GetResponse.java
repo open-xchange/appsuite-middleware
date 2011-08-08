@@ -49,15 +49,14 @@
 
 package com.openexchange.ajax.contact.action;
 
+import com.openexchange.exception.OXException;
 import java.util.TimeZone;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.parser.ContactParser;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.tools.servlet.OXJSONException;
 
 /**
  * 
@@ -80,7 +79,7 @@ public class GetResponse extends AbstractAJAXResponse {
      * @return the contact
      * @throws OXException parsing the contact out of the response fails.
      */
-    public Contact getContact() throws OXException, OXJSONException {
+    public Contact getContact() throws OXException, OXException {
         if (null == contactObj) {
             this.contactObj = new Contact();
             new ContactParser(true, timeZone).parse(contactObj, (JSONObject) getResponse().getData());

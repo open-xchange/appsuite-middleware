@@ -49,9 +49,9 @@
 
 package com.openexchange.mail.messagestorage;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import javax.mail.MessagingException;
-import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -88,7 +88,7 @@ public final class MailMoveTest extends MessageStorageTest {
 
     private static final MailField[] FIELDS_FULL = { MailField.FULL };
 
-    public void testMailMoveNotExistingMails() throws MailException, MessagingException, IOException {
+    public void testMailMoveNotExistingMails() throws OXException, MessagingException, IOException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {
             final String fullname = createTemporaryFolder(getSession(), mailAccess);
@@ -116,7 +116,7 @@ public final class MailMoveTest extends MessageStorageTest {
         }
     }
 
-    public void testMailMoveNotExistingMailsMixed() throws MailException, MessagingException, IOException {
+    public void testMailMoveNotExistingMailsMixed() throws OXException, MessagingException, IOException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {
             final String fullname = createTemporaryFolder(getSession(), mailAccess);
@@ -143,7 +143,7 @@ public final class MailMoveTest extends MessageStorageTest {
         }
     }
 
-    public void testMailMoveToNotExistingFolder() throws MailException, MessagingException, IOException {
+    public void testMailMoveToNotExistingFolder() throws OXException, MessagingException, IOException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {
             /*
@@ -153,7 +153,7 @@ public final class MailMoveTest extends MessageStorageTest {
             final String tmpFolderName = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append("MichGibtEsNicht").toString();
             try {
                 assertNull("No ids should be returned", mailAccess.getMessageStorage().moveMessages("INBOX", tmpFolderName, uids, false));
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 assertTrue("Wrong Exception is thrown.", e.getErrorCode().endsWith("-1002"));
             }
         } finally {
@@ -161,7 +161,7 @@ public final class MailMoveTest extends MessageStorageTest {
         }
     }
 
-    public void testMailMoveFromNotExistingFolder() throws MailException, MessagingException, IOException {
+    public void testMailMoveFromNotExistingFolder() throws OXException, MessagingException, IOException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {
             final String fullname = createTemporaryFolder(getSession(), mailAccess);
@@ -172,7 +172,7 @@ public final class MailMoveTest extends MessageStorageTest {
                  */
                 try {
                     assertNull("No ids should be returned", mailAccess.getMessageStorage().moveMessages("MichGibtEsHoffentlichNicht", fullname, uids, false));
-                } catch (final MailException e) {
+                } catch (final OXException e) {
                     assertTrue("Wrong Exception is thrown.", e.getErrorCode().endsWith("-1002"));
                 }
             } finally {
@@ -183,7 +183,7 @@ public final class MailMoveTest extends MessageStorageTest {
         }
     }
 
-    public void testMailMoveAllOk() throws MailException, MessagingException, IOException {
+    public void testMailMoveAllOk() throws OXException, MessagingException, IOException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {
             final String fullname = createTemporaryFolder(getSession(), mailAccess);

@@ -49,8 +49,8 @@
 
 package com.openexchange.groupware.update;
 
+import com.openexchange.exception.OXException;
 import java.sql.SQLException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.update.tasks.CreateGenconfTablesTask;
 
 /**
@@ -75,7 +75,7 @@ public class CreateGenconfTablesTaskTest extends UpdateTest {
         super.tearDown();
     }
     
-    public void testShouldCreateStringAttributeTable() throws AbstractOXException {
+    public void testShouldCreateStringAttributeTable() throws OXException {
         executeTask();
         try {
             exec("SELECT cid, id, value, name FROM genconf_attributes_strings");
@@ -84,7 +84,7 @@ public class CreateGenconfTablesTaskTest extends UpdateTest {
         }
     }
 
-    public void testShouldCreateBooleanAttributeTable() throws AbstractOXException {
+    public void testShouldCreateBooleanAttributeTable() throws OXException {
         executeTask();
         try {
             exec("SELECT cid, id, value, name FROM genconf_attributes_bools");
@@ -93,12 +93,12 @@ public class CreateGenconfTablesTaskTest extends UpdateTest {
         }
     }
     
-    public void testShouldBeRunnableTwice() throws AbstractOXException {
+    public void testShouldBeRunnableTwice() throws OXException {
         executeTask();
         executeTask();
     }
     
-    public void testShouldCreateSequenceTable() throws AbstractOXException {
+    public void testShouldCreateSequenceTable() throws OXException {
         executeTask();
         try {
             exec("SELECT cid, id FROM sequence_genconf");
@@ -107,13 +107,13 @@ public class CreateGenconfTablesTaskTest extends UpdateTest {
         }
     }
     
-    public void testShouldCreateEntryInSequenceTableForEveryContext() throws AbstractOXException, SQLException {
+    public void testShouldCreateEntryInSequenceTableForEveryContext() throws OXException, SQLException {
         executeTask();
         assertResult("SELECT 1 FROM sequence_genconf WHERE cid = "+existing_ctx_id);
     }
 
     
-    private void executeTask() throws AbstractOXException {
+    private void executeTask() throws OXException {
         new CreateGenconfTablesTask().perform(schema, existing_ctx_id);
     }
 

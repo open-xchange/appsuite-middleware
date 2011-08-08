@@ -49,10 +49,10 @@
 
 package com.openexchange.mail.messagestorage;
 
+import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import javax.activation.DataHandler;
-import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -99,36 +99,36 @@ public final class MailGetTest extends MessageStorageTest {
         }
 
         @Override
-        public Object getContent() throws MailException {
+        public Object getContent() throws OXException {
             // TODO Auto-generated method stub
             return null;
         }
 
         @Override
-        public DataHandler getDataHandler() throws MailException {
+        public DataHandler getDataHandler() throws OXException {
             // TODO Auto-generated method stub
             return null;
         }
 
         @Override
-        public int getEnclosedCount() throws MailException {
+        public int getEnclosedCount() throws OXException {
             // TODO Auto-generated method stub
             return 0;
         }
 
         @Override
-        public MailPart getEnclosedMailPart(final int index) throws MailException {
+        public MailPart getEnclosedMailPart(final int index) throws OXException {
             // TODO Auto-generated method stub
             return null;
         }
 
         @Override
-        public InputStream getInputStream() throws MailException {
+        public InputStream getInputStream() throws OXException {
             return new ByteArrayInputStream(brokenContentTypeMail.getBytes());
         }
 
         @Override
-        public void loadContent() throws MailException {
+        public void loadContent() throws OXException {
             // TODO Auto-generated method stub
             
         }
@@ -200,7 +200,7 @@ public final class MailGetTest extends MessageStorageTest {
 
     private static final MailField[] FIELDS_FULL = { MailField.FULL };
 
-    public void testMailGetNotExistingMails() throws MailException {
+    public void testMailGetNotExistingMails() throws OXException {
         try {
             final MailMessage message = mailAccess.getMessageStorage().getMessage("INBOX", String.valueOf(System.currentTimeMillis()), true);
             assertTrue("The message for an invalid id must be null", null == message);
@@ -209,18 +209,18 @@ public final class MailGetTest extends MessageStorageTest {
         }
     }
     
-    public void testMailGetNotExistingFolder() throws MailException {
+    public void testMailGetNotExistingFolder() throws OXException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {
             assertNull("No mail should be returned on a invalid folder", mailAccess.getMessageStorage().getMessage("Ichbinnichda1337", String.valueOf(System.currentTimeMillis()), true));
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             assertTrue("Wrong Exception is thrown.", e.getErrorCode().endsWith("-1002"));
         } finally {
             mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
         }
     }
     
-    public void testMailGet() throws MailException {
+    public void testMailGet() throws OXException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {
             MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_ID);
@@ -293,7 +293,7 @@ public final class MailGetTest extends MessageStorageTest {
     }
 
     // Added for bug 14276
-    public void testMailGetBrokenContentTypeList() throws MailException {
+    public void testMailGetBrokenContentTypeList() throws OXException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", new MailMessage[]{new TestMailMessage()});
         try {
             final MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_MORE);
@@ -309,7 +309,7 @@ public final class MailGetTest extends MessageStorageTest {
         }
     }
 
-    public void testMailGetBrokenContentTypeGet() throws MailException {
+    public void testMailGetBrokenContentTypeGet() throws OXException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", new MailMessage[]{new TestMailMessage()});
         try {
             final MailMessage fetchedMails = mailAccess.getMessageStorage().getMessage("INBOX", uids[0], true);

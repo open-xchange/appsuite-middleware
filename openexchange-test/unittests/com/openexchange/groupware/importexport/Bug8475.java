@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.importexport;
 
+import com.openexchange.exception.OXException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -59,14 +60,10 @@ import junit.framework.JUnit4TestAdapter;
 
 import org.junit.Test;
 
-import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.api2.OXException;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
-import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
@@ -78,7 +75,7 @@ public class Bug8475 extends AbstractICalImportTest{
 		return new JUnit4TestAdapter(Bug8475.class);
 	}
 	
-	@Test public void testAttendeeNotFound() throws DBPoolingException, UnsupportedEncodingException, SQLException, OXObjectNotFoundException, NumberFormatException, OXException, LdapException {
+	@Test public void testAttendeeNotFound() throws OXException, UnsupportedEncodingException, SQLException, OXException, NumberFormatException, OXException, OXException {
 		final String ical = 
 			"BEGIN:VCALENDAR\n" +
 			"VERSION:2.0\n" +

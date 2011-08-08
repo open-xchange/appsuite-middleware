@@ -2,6 +2,7 @@ package com.openexchange.webdav.action;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -81,7 +82,7 @@ public class NotExistTest extends ActionTestCase {
     }
 
     // Bug 9845
-    public void testNotFoundShouldIncludePayload() {
+    public void testNotFoundShouldIncludePayload() throws OXException {
         final WebdavPath NOT_EXIST_URL = new WebdavPath("notExists.txt");
 
 		final MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
@@ -107,7 +108,7 @@ public class NotExistTest extends ActionTestCase {
 		this.mockAction = new MockAction();
 	}
 
-    private WebdavPath createLockNull() throws WebdavProtocolException {
+    private WebdavPath createLockNull() throws OXException {
         final WebdavPath LOCK_NULL = testCollection.dup().append("lock.txt");
         final WebdavLock lock = new WebdavLock();
 		lock.setDepth(0);

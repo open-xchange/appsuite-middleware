@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.mail;
 
-
+import com.openexchange.exception.OXException;
 /**
  * 
  * {@link CountMailTest} - tests the CountRequest 

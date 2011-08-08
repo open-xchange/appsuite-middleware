@@ -48,6 +48,7 @@
  */
 package com.openexchange.test.fixtures;
 
+import com.openexchange.exception.OXException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -81,7 +82,7 @@ public class InfoItemFixtureFactory implements FixtureFactory<InfoItem> {
             super.addTransformator(new UserIdTransformator(fixtureLoader), "created_by");
         }
 
-        public Fixture<InfoItem> getEntry(final String entryName) throws FixtureException {
+        public Fixture<InfoItem> getEntry(final String entryName) throws OXException {
             if (knownInfoitems.containsKey(entryName)) {
                 return knownInfoitems.get(entryName);
             }

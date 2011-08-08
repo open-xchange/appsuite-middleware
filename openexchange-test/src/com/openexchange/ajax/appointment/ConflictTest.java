@@ -23,7 +23,7 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.parser.AppointmentParser;
 import com.openexchange.ajax.writer.AppointmentWriter;
-import com.openexchange.api.OXConflictException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.tools.URLParameter;
 
@@ -510,7 +510,7 @@ public class ConflictTest extends AppointmentTest {
 	
 	public static Appointment[] insertAppointmentReturnConflicts(final WebConversation webCon,
 			final Appointment appointmentObj, final TimeZone userTimeZone,
-			String host, final String session) throws Exception, OXConflictException {
+			String host, final String session) throws Exception, OXException {
 		host = appendPrefix(host);
 		
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -566,7 +566,7 @@ public class ConflictTest extends AppointmentTest {
 	
 	public static Appointment[] updateAppointmentReturnConflicts(final WebConversation webCon,
 			final Appointment appointmentObj, int objectId, final int inFolder, final Date modified, final TimeZone userTimeZone,
-			String host, final String session) throws Exception, OXConflictException {
+			String host, final String session) throws Exception, OXException {
 		host = appendPrefix(host);
 		
 		final StringWriter stringWriter = new StringWriter();

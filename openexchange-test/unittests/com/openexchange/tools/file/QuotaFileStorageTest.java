@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.file;
 
+import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
@@ -62,8 +63,6 @@ import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.test.DelayedInputStream;
 import com.openexchange.tools.RandomString;
 import com.openexchange.tools.file.external.FileStorage;
-import com.openexchange.tools.file.external.FileStorageException;
-import com.openexchange.tools.file.external.QuotaFileStorageException;
 import com.openexchange.tools.file.internal.DBQuotaFileStorage;
 import com.openexchange.tools.file.internal.LocalFileStorage;
 
@@ -128,7 +127,7 @@ public class QuotaFileStorageTest extends TestCase {
             final ByteArrayInputStream bais = new ByteArrayInputStream(fileContent.getBytes("UTF-8"));
             quotaStorage.saveNewFile(bais);
             fail("Managed to exceed quota");
-        } catch (final QuotaFileStorageException x) {
+        } catch (final OXException x) {
             assertTrue(true);
         }
         rmdir(tempFile);
@@ -199,7 +198,7 @@ public class QuotaFileStorageTest extends TestCase {
 
     public static final class TestQuotaFileStorage extends DBQuotaFileStorage {
 
-        public TestQuotaFileStorage(final Context ctx, final FileStorage fs, final DatabaseService dbs) throws QuotaFileStorageException {
+        public TestQuotaFileStorage(final Context ctx, final FileStorage fs, final DatabaseService dbs) throws OXException {
             super(ctx, fs, dbs);
         }
 
@@ -284,7 +283,7 @@ public class QuotaFileStorageTest extends TestCase {
         public void run() {
             try {
                 fs.saveNewFile(data);
-            } catch (final FileStorageException e) {
+            } catch (final OXException e) {
                 exception = e;
             }
         }

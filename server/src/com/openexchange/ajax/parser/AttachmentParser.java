@@ -50,6 +50,8 @@
 package com.openexchange.ajax.parser;
 
 import org.json.JSONException;
+
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 
@@ -58,7 +60,7 @@ public class AttachmentParser {
     /**
      * TODO Error codes
      */
-    public static final class UnknownColumnException extends Exception {
+    public static final class UnknownColumnException extends OXException {
         private static final long serialVersionUID = -6760923740785771286L;
 
         private final String idString;

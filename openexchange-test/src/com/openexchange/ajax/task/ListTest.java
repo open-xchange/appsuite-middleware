@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.task;
 
+import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;

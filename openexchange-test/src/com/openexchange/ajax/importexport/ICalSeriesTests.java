@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.importexport;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.Date;
 import java.util.TimeZone;
@@ -65,7 +66,6 @@ import com.openexchange.ajax.importexport.actions.ICalImportRequest;
 import com.openexchange.ajax.importexport.actions.ICalImportResponse;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * @author tobiasp
@@ -76,7 +76,7 @@ public class ICalSeriesTests extends ManagedAppointmentTest {
 		super(name);
 	}
 
-	public void testDeleteException() throws AjaxException, IOException, JSONException{
+	public void testDeleteException() throws OXException, IOException, JSONException{
 		String ical = 
 		"BEGIN:VCALENDAR\n"+
 		"VERSION:2.0\n"+

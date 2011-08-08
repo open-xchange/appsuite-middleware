@@ -48,6 +48,7 @@
 
 package com.openexchange.ajax.kata.contacts;
 
+import com.openexchange.exception.OXException;
 import java.util.Date;
 import com.openexchange.ajax.contact.action.InsertRequest;
 import com.openexchange.ajax.contact.action.InsertResponse;

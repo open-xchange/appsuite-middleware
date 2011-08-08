@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.notify;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.tasks.Task;
 

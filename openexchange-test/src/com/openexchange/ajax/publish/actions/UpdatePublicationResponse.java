@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.publish.actions;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.ajax.container.Response;
 
 

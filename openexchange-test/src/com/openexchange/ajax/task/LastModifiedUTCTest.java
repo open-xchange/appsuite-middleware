@@ -48,6 +48,7 @@
  */
 package com.openexchange.ajax.task;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.Date;
 
@@ -70,7 +71,6 @@ import com.openexchange.ajax.task.actions.SearchRequest;
 import com.openexchange.ajax.task.actions.UpdatesRequest;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -86,7 +86,7 @@ public class LastModifiedUTCTest extends AbstractTaskTest {
      *
      * @param name name of the test.
      */
-    public LastModifiedUTCTest(final String name) throws JSONException, AjaxException, IOException, SAXException {
+    public LastModifiedUTCTest(final String name) throws JSONException, OXException, IOException, SAXException {
         super(name);
     }
 
@@ -114,12 +114,12 @@ public class LastModifiedUTCTest extends AbstractTaskTest {
     }
 
 
-    public void testAll() throws JSONException, AjaxException, IOException, SAXException {
+    public void testAll() throws JSONException, OXException, IOException, SAXException {
         final AllRequest request = new AllRequest(getPrivateFolder(), LAST_MODIFIED_UTC, -1, null );
         checkListSyleRequest(request);
     }
 
-    public void testGet() throws JSONException, AjaxException, IOException, SAXException {
+    public void testGet() throws JSONException, OXException, IOException, SAXException {
         final GetRequest getRequest = new GetRequest(getPrivateFolder(), getId());
         final GetResponse getResponse = Executor.execute(getClient(), getRequest);
 
@@ -129,12 +129,12 @@ public class LastModifiedUTCTest extends AbstractTaskTest {
 
     }
 
-    public void testList() throws JSONException, AjaxException, IOException, SAXException {
+    public void testList() throws JSONException, OXException, IOException, SAXException {
         final ListRequest listRequest = new ListRequest(new int[][]{{getPrivateFolder(), getId()}}, LAST_MODIFIED_UTC);
         checkListSyleRequest(listRequest);
     }
 
-    public void testSearch() throws JSONException, AjaxException, IOException, SAXException {
+    public void testSearch() throws JSONException, OXException, IOException, SAXException {
         final TaskSearchObject search = new TaskSearchObject();
         search.setFolder(getPrivateFolder());
         search.setPattern("*");
@@ -142,12 +142,12 @@ public class LastModifiedUTCTest extends AbstractTaskTest {
         checkListSyleRequest(searchRequest);
     }
 
-    public void testUpdates() throws JSONException, AjaxException, IOException, SAXException {
+    public void testUpdates() throws JSONException, OXException, IOException, SAXException {
         final UpdatesRequest updatesRequest = new UpdatesRequest(getPrivateFolder(), LAST_MODIFIED_UTC, -1, null, new Date(0));
         checkListSyleRequest(updatesRequest);
     }
 
-    private void checkListSyleRequest(final AJAXRequest<? extends AbstractAJAXResponse> request) throws JSONException, AjaxException, IOException, SAXException {
+    private void checkListSyleRequest(final AJAXRequest<? extends AbstractAJAXResponse> request) throws JSONException, OXException, IOException, SAXException {
         final AbstractAJAXResponse response = Executor.execute(getClient(), request);
         final JSONArray arr = (JSONArray)response.getData();
         final int size = arr.length();

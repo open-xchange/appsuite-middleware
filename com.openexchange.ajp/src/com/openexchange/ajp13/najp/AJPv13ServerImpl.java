@@ -93,7 +93,7 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
         super();
         running = new AtomicBoolean();
 
-        final boolean coyote = false;
+        final boolean coyote = true;
         if (coyote) {
             socketHandler = new CoyoteSocketHandler();
         } else {

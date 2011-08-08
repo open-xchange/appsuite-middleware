@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.infostore.actions;
 
+import com.openexchange.exception.OXException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;

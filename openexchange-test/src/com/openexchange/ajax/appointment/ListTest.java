@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.ajax.framework.ListIDs.l;
 import java.util.Calendar;
 import java.util.Date;
@@ -65,7 +66,6 @@ import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.group.GroupTest;
-import com.openexchange.api.OXConflictException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
@@ -184,7 +184,7 @@ public class ListTest extends AppointmentTest {
             appointmentObj.setParentFolderID(appointmentFolderId);
             compareObject(appointmentObj, loadAppointment, newStartTime, newEndTime);
 
-        } catch (final OXConflictException exc) {
+        } catch (final OXException exc) {
             LOG.warn("Conflict Exception found. Maybe test result is wrong: " + exc);
         } finally {
             if (objectId != 0)

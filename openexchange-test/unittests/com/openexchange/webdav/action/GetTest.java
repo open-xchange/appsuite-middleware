@@ -5,6 +5,7 @@ import java.io.InputStream;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavPath;
 
@@ -109,7 +110,7 @@ public class GetTest extends ActionTestCase {
 		
 	}
 	
-	private void rangeTest(final WebdavPath url, final String byteHeader, final byte[] expect) throws WebdavProtocolException {
+	private void rangeTest(final WebdavPath url, final String byteHeader, final byte[] expect) throws OXException {
 		final MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
 		final MockWebdavResponse res = new MockWebdavResponse();
 		
@@ -131,7 +132,7 @@ public class GetTest extends ActionTestCase {
 		}
 	}
 	
-	private byte[] getBytes(final WebdavPath url, final int start, final int stop) throws WebdavProtocolException, IOException {
+	private byte[] getBytes(final WebdavPath url, final int start, final int stop) throws OXException, IOException {
 		InputStream is = null;
 		try {
 			is = factory.resolveResource(url).getBody();

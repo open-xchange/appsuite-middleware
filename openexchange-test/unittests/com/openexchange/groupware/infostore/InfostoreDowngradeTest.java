@@ -48,15 +48,14 @@
  */
 package com.openexchange.groupware.infostore;
 
+import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.TestCase;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.groupware.Init;
@@ -64,7 +63,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
-import com.openexchange.groupware.downgrade.DowngradeFailedException;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.ldap.User;
@@ -128,10 +126,7 @@ public class InfostoreDowngradeTest extends TestCase {
             con = DBPool.pickupWriteable(ctx);
             final DowngradeEvent event = new DowngradeEvent(config, con, ctx);
             new InfostoreDowngrade().downgradePerformed(event);
-        } catch (final DBPoolingException x) {
-            x.printStackTrace();
-            fail(x.getMessage());
-        } catch (final DowngradeFailedException x) {
+        } catch (final OXException x) {
             x.printStackTrace();
             fail(x.getMessage());
         } finally {
@@ -171,7 +166,7 @@ public class InfostoreDowngradeTest extends TestCase {
             database.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, ctx, user, userConfig);
             fail("The document still exists!");
         } catch (final OXException e) {
-            assertEquals(e.getMessage(), 300, e.getDetailNumber());    
+            assertEquals(e.getMessage(), 300, e.getCode());    
         }
     }
 

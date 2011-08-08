@@ -395,7 +395,7 @@ public final class Response {
      * @return This response with warning added
      */
     public Response addWarning(final OXException warning) {
-        if (!Category.CATEGORY_WARNING.equals(exception.getCategory())) {
+        if (!Category.CATEGORY_WARNING.equals(warning.getCategory())) {
             warning.setCategory(Category.CATEGORY_WARNING);
         }
         warnings.add(warning);

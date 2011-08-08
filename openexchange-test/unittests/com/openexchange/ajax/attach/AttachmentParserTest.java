@@ -5,7 +5,7 @@ import junit.framework.TestCase;
 import org.json.JSONException;
 
 import com.openexchange.ajax.parser.AttachmentParser;
-import com.openexchange.ajax.parser.AttachmentParser.UnknownColumnException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 
 public class AttachmentParserTest extends TestCase {
@@ -26,7 +26,7 @@ public class AttachmentParserTest extends TestCase {
 		assertEquals(230023, attachment.getCreationDate().getTime());
 	}
 	
-	public void testNullColumns() throws UnknownColumnException {
+	public void testNullColumns() throws OXException {
 		final AttachmentParser parser = new AttachmentParser();
 		assertEquals(null, parser.getColumns(null));
 	}

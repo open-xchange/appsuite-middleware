@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.Date;
 import org.json.JSONException;
@@ -66,12 +67,10 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.participant.ParticipantTools;
-import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -143,14 +142,14 @@ public class Bug13942Test extends AbstractAJAXSession {
         
     }
 
-    private AJAXClient getClientB() throws ConfigurationException, AjaxException, IOException, SAXException, JSONException {
+    private AJAXClient getClientB() throws OXException, OXException, IOException, SAXException, JSONException {
         if (clientB == null) {
             clientB = new AJAXClient(User.User2);
         }
         return clientB;
     }
     
-    private AJAXClient getClientC() throws ConfigurationException, AjaxException, IOException, SAXException, JSONException {
+    private AJAXClient getClientC() throws OXException, OXException, IOException, SAXException, JSONException {
         if (clientC == null) {
             clientC = new AJAXClient(User.User3);
         }

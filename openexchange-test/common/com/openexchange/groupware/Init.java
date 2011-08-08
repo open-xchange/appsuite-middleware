@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware;
 
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.charset.spi.CharsetProvider;
@@ -100,7 +102,6 @@ import com.openexchange.event.impl.AppointmentEventInterface;
 import com.openexchange.event.impl.EventDispatcher;
 import com.openexchange.event.impl.EventQueue;
 import com.openexchange.event.impl.TaskEventInterface;
-import com.openexchange.exception.OXException;
 import com.openexchange.folder.FolderService;
 import com.openexchange.folder.internal.FolderInitialization;
 import com.openexchange.folder.internal.FolderServiceImpl;
@@ -273,6 +274,8 @@ public final class Init {
 
         new GroupInit() };
 
+	private static boolean databaseUpdateinitialized = false;
+
     public static void injectProperty() {
         final String propDir1 = TestInit.getTestProperty("openexchange.propdir");
         if (null != propDir1) {
@@ -312,7 +315,6 @@ public final class Init {
         startAndInjectBasicServices();
         startAndInjectHTMLService();
         startAndInjectCalendarServices();
-        startAndInjectExceptionFramework();
         startAndInjectServerConfiguration();
         startAndInjectNotification();
         startAndInjectCache();
@@ -328,7 +330,6 @@ public final class Init {
         startAndInjectGroupService();
         startAndInjectFolderService();
         startAndInjectResourceService();
-        startAndInjectContactService();
         startAndInjectContactCollector();
         startAndInjectMailAccountStorageService();
         startAndInjectMailBundle();
@@ -440,7 +441,10 @@ public final class Init {
                 return "TEST";
             }
         };
-        return new OXException(cause);
+        return new OXException(
+        		9999, 
+        		null == message ? "[Not available]" : message,
+        		cause);
     }
 
     private static void startAndInjectCalendarServices() {
@@ -463,11 +467,7 @@ public final class Init {
         }
     }
 
-    private static void startAndInjectImportExportServices() throws ComponentAlreadyRegisteredException {
-        final ComponentRegistry registry = (ComponentRegistry) services.get(ComponentRegistry.class);
-        if (null == registry.getExceptionsForComponent(EnumComponent.IMPORT_EXPORT)) {
-            registry.registerComponent(EnumComponent.IMPORT_EXPORT, "com.openexchange.groupware.importexport", ImportExportExceptionFactory.getInstance());
-        }
+    private static void startAndInjectImportExportServices() throws OXException {
     }
 
     private static void startAndInjectSubscribeServices() {
@@ -499,12 +499,6 @@ public final class Init {
         }
     }
 
-    private static void startAndInjectExceptionFramework() {
-        if (null == services.get(ComponentRegistry.class)) {
-            services.put(ComponentRegistry.class, new ComponentRegistryImpl());
-        }
-    }
-
     public static void startAndInjectServerConfiguration() {
         final ConfigurationService config = (ConfigurationService) services.get(ConfigurationService.class);
         /*
@@ -521,10 +515,8 @@ public final class Init {
         ParticipantConfig.getInstance().initialize(config);
     }
 
-    public static void startAndInjectDatabaseBundle() throws DBPoolingException, ComponentAlreadyRegisteredException {
+    public static void startAndInjectDatabaseBundle() throws OXException, OXException {
         if (null == services.get(DatabaseService.class)) {
-            final ComponentRegistry registry = (ComponentRegistry) services.get(ComponentRegistry.class);
-            registry.registerComponent(EnumComponent.DB_POOLING, "com.openexchange.database", DBPoolingExceptionFactory.getInstance());
             final ConfigurationService configurationService = (ConfigurationService) services.get(ConfigurationService.class);
             final TimerService timerService = (TimerService) services.get(TimerService.class);
             final CacheService cacheService = (CacheService) services.get(CacheService.class);
@@ -546,13 +538,11 @@ public final class Init {
         QuotaFileStorage.setQuotaFileStorageStarter(new DBQuotaFileStorageFactory(dbService, fileStorageStarter));
     }
 
-    public static void startAndInjectDatabaseUpdate() throws ComponentAlreadyRegisteredException {
-        final ComponentRegistry registry = (ComponentRegistry) services.get(ComponentRegistry.class);
-        if (null == registry.getExceptionsForComponent(EnumComponent.UPDATE)) {
-            registry.registerComponent(EnumComponent.UPDATE, "com.openexchange.groupware.update", SchemaExceptionFactory.getInstance());
-            // Not configuring configured update task list.
-            InternalList.getInstance().start();
-        }
+    public static void startAndInjectDatabaseUpdate() throws OXException {
+    	if(databaseUpdateinitialized )
+    		return;
+    	InternalList.getInstance().start();
+    	databaseUpdateinitialized = true;
     }
 
     private static void startAndInjectMonitoringBundle() {
@@ -580,13 +570,6 @@ public final class Init {
              * Register IMAP bundle
              */
             MailProviderRegistry.registerMailProvider("imap_imaps", IMAPProvider.getInstance());
-        }
-    }
-
-    private static void startAndInjectContactService() throws ComponentAlreadyRegisteredException {
-        final ComponentRegistry registry = (ComponentRegistry) services.get(ComponentRegistry.class);
-        if (null == registry.getExceptionsForComponent(EnumComponent.CONTACT)) {
-            registry.registerComponent(EnumComponent.CONTACT, "com.openexchange.groupware.contact", ContactExceptionFactory.getInstance());
         }
     }
 
@@ -693,7 +676,7 @@ public final class Init {
         }
     }
 
-    public static void startAndInjectCache() throws CacheException {
+    public static void startAndInjectCache() throws OXException {
         if (null == ServerServiceRegistry.getInstance().getService(CacheService.class)) {
             JCSCacheServiceInit.initInstance();
             JCSCacheServiceInit.getInstance().start((ConfigurationService) services.get(ConfigurationService.class));
@@ -782,8 +765,7 @@ public final class Init {
     public static void stopDatabaseBundle() {
         Database.setDatabaseService(null);
         com.openexchange.database.internal.Initialization.getInstance().stop();
-        final ComponentRegistry registry = (ComponentRegistry) services.get(ComponentRegistry.class);
-        registry.deregisterComponent(EnumComponent.DB_POOLING);
+        databaseUpdateinitialized = false;
     }
 
     public static void stopThreadPoolBundle() throws Exception {

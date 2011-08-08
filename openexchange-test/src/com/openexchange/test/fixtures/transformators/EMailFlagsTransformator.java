@@ -48,8 +48,8 @@
  */
 package com.openexchange.test.fixtures.transformators;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.test.fixtures.FixtureException;
 
 /**
  * Transforms textual representations of email flags to the corresponding integer values defined
@@ -59,7 +59,7 @@ import com.openexchange.test.fixtures.FixtureException;
  */
 public class EMailFlagsTransformator implements Transformator {
 
-	public Object transform(final String value) throws FixtureException {
+	public Object transform(final String value) throws OXException {
 		if (null == value || 1 > value.length()) { return 0; }
 		int flags = 0;
 		final String[] splitted = value.split(",");

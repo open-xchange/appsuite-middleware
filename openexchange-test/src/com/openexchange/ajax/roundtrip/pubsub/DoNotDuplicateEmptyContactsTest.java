@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.roundtrip.pubsub;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
@@ -58,11 +59,8 @@ import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.publish.Publication;
-import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.SimPublicationTargetDiscoveryService;
-import com.openexchange.publish.json.PublicationJSONException;
 import com.openexchange.subscribe.Subscription;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * {@link DoNotDuplicateEmptyContactsTest}
@@ -75,7 +73,7 @@ public class DoNotDuplicateEmptyContactsTest extends OXMFContactLifeCycleTest {
         super(name);
     }
 
-    public void testShouldNotDuplicateEmptyContacts() throws AjaxException, PublicationException, PublicationJSONException, IOException, SAXException, JSONException{
+    public void testShouldNotDuplicateEmptyContacts() throws OXException, OXException, OXException, IOException, SAXException, JSONException{
         Contact emptyContact = new Contact();
         emptyContact.setParentFolderID(pubFolder.getObjectID());
         cMgr.newAction(emptyContact);

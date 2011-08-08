@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.subscribe.test;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.util.Collection;
@@ -78,7 +79,6 @@ import com.openexchange.ajax.subscribe.actions.UpdateSubscriptionResponse;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * {@link SubscriptionTestManager}
@@ -144,7 +144,7 @@ public class SubscriptionTestManager {
         setClient(client);
     }
 
-    public Subscription newAction(Subscription sub) throws AjaxException, IOException, SAXException, JSONException {
+    public Subscription newAction(Subscription sub) throws OXException, IOException, SAXException, JSONException {
         NewSubscriptionRequest newReq = new NewSubscriptionRequest(sub, getFormDescription());
         newReq.setFailOnError(getFailOnError());
         NewSubscriptionResponse newResp = getClient().execute(newReq);
@@ -154,7 +154,7 @@ public class SubscriptionTestManager {
         return sub;
     }
 
-    public Subscription getAction(int id) throws AjaxException, IOException, SAXException, JSONException {
+    public Subscription getAction(int id) throws OXException, IOException, SAXException, JSONException {
         GetSubscriptionRequest getReq = new GetSubscriptionRequest(id);
         getReq.setFailOnError(getFailOnError());
         GetSubscriptionResponse getResp = getClient().execute(getReq);
@@ -162,7 +162,7 @@ public class SubscriptionTestManager {
         return getResp.getSubscription(getSubscriptionSourceRecoveryService());
     }
 
-    public void deleteAction(Subscription sub) throws AjaxException, IOException, SAXException, JSONException {
+    public void deleteAction(Subscription sub) throws OXException, IOException, SAXException, JSONException {
         int id = sub.getId();
         DeleteSubscriptionRequest delReq = new DeleteSubscriptionRequest(id);
         delReq.setFailOnError(getFailOnError());
@@ -171,7 +171,7 @@ public class SubscriptionTestManager {
         lastResponse = delResp;
     }
 
-    public void deleteAction(Collection<Integer> ids) throws AjaxException, IOException, SAXException, JSONException {
+    public void deleteAction(Collection<Integer> ids) throws OXException, IOException, SAXException, JSONException {
         DeleteSubscriptionRequest delReq = new DeleteSubscriptionRequest(ids);
         delReq.setFailOnError(getFailOnError());
         DeleteSubscriptionResponse delResp = getClient().execute(delReq);
@@ -179,7 +179,7 @@ public class SubscriptionTestManager {
         lastResponse = delResp;
     }
 
-    public JSONArray listAction(List<Integer> ids, List<String> columns) throws AjaxException, IOException, SAXException, JSONException {
+    public JSONArray listAction(List<Integer> ids, List<String> columns) throws OXException, IOException, SAXException, JSONException {
         ListSubscriptionsRequest listReq = new ListSubscriptionsRequest(ids,columns);
         listReq.setFailOnError(getFailOnError());
         ListSubscriptionsResponse listResp = getClient().execute(listReq);
@@ -187,7 +187,7 @@ public class SubscriptionTestManager {
         return listResp.getList();
     }
     
-    public JSONArray listAction(List<Integer> ids, List<String> columns, Map<String,List<String>> dynamicColumns) throws AjaxException, IOException, SAXException, JSONException {
+    public JSONArray listAction(List<Integer> ids, List<String> columns, Map<String,List<String>> dynamicColumns) throws OXException, IOException, SAXException, JSONException {
         ListSubscriptionsRequest listReq = new ListSubscriptionsRequest(ids,columns,dynamicColumns);
         listReq.setFailOnError(getFailOnError());
         ListSubscriptionsResponse listResp = getClient().execute(listReq);
@@ -195,7 +195,7 @@ public class SubscriptionTestManager {
         return listResp.getList();
     }
     
-    public JSONArray allAction(String folder, List<String> columns) throws AjaxException, IOException, SAXException, JSONException{
+    public JSONArray allAction(String folder, List<String> columns) throws OXException, IOException, SAXException, JSONException{
         AllSubscriptionsRequest allReq = null;
         if (folder == null) {
             allReq = new AllSubscriptionsRequest(columns);
@@ -209,15 +209,15 @@ public class SubscriptionTestManager {
         return allResp.getAll();
     }
     
-    public JSONArray allAction(int folder, List<String> columns) throws AjaxException, IOException, SAXException, JSONException{
+    public JSONArray allAction(int folder, List<String> columns) throws OXException, IOException, SAXException, JSONException{
         return allAction(String.valueOf(folder), columns);
     }
     
-    public JSONArray allAction(List<String> columns) throws AjaxException, IOException, SAXException, JSONException{
+    public JSONArray allAction(List<String> columns) throws OXException, IOException, SAXException, JSONException{
         return allAction(null, columns);
     }
     
-    public JSONArray allAction(String folder, List<String> columns, Map<String,List<String>> dynamicColumns) throws AjaxException, IOException, SAXException, JSONException{
+    public JSONArray allAction(String folder, List<String> columns, Map<String,List<String>> dynamicColumns) throws OXException, IOException, SAXException, JSONException{
         AllSubscriptionsRequest allReq = new AllSubscriptionsRequest(folder, columns, dynamicColumns);
         allReq.setFailOnError(getFailOnError());
         AllSubscriptionsResponse allResp = getClient().execute(allReq);
@@ -225,25 +225,25 @@ public class SubscriptionTestManager {
         return allResp.getAll();
     }
 
-    public JSONArray allAction(int folder, List<String> columns, Map<String,List<String>> dynamicColumns) throws AjaxException, IOException, SAXException, JSONException{
+    public JSONArray allAction(int folder, List<String> columns, Map<String,List<String>> dynamicColumns) throws OXException, IOException, SAXException, JSONException{
         return allAction(String.valueOf(folder), columns, dynamicColumns);
     }
 
-    public void updateAction(Subscription subscription) throws AjaxException, IOException, SAXException, JSONException {
+    public void updateAction(Subscription subscription) throws OXException, IOException, SAXException, JSONException {
         UpdateSubscriptionRequest updReq = new UpdateSubscriptionRequest(subscription, formDescription);
         updReq.setFailOnError(getFailOnError());
         UpdateSubscriptionResponse updResp = getClient().execute(updReq);
         lastResponse = updResp;
     }
     
-    public void refreshAction(int id) throws AjaxException, IOException, SAXException, JSONException{
+    public void refreshAction(int id) throws OXException, IOException, SAXException, JSONException{
         RefreshSubscriptionRequest refreshReq = new RefreshSubscriptionRequest(id, null);
         refreshReq.setFailOnError(getFailOnError());
         RefreshSubscriptionResponse refreshResponse = getClient().execute(refreshReq);
         lastResponse = refreshResponse;
     }
     
-    public void cleanUp() throws AjaxException, IOException, SAXException, JSONException {
+    public void cleanUp() throws OXException, IOException, SAXException, JSONException {
         if(createdItems.size() > 0)
             deleteAction(createdItems);
     }

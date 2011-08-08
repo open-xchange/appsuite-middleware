@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.ajax.folder.Create.ocl;
 import java.util.Date;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
@@ -63,7 +64,7 @@ import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.participant.ParticipantTools;
-import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
@@ -130,7 +131,7 @@ public class Bug13826Test extends AbstractAJAXSession {
             currentFolder = updateAppointment.getParentFolderID();
             fail("Expected error.");
         } else {
-            assertEquals("Wrong error message", OXCalendarException.Code.RECURRING_FOLDER_MOVE.getDetailNumber(), updateResponse.getException().getDetailNumber());
+            assertTrue("Wrong error message", updateResponse.getException().similarTo(OXCalendarExceptionCodes.RECURRING_FOLDER_MOVE.create()));
         }
         Appointment loadedAppointment = getClient().execute(new GetRequest(sourceFolderId, appointment.getObjectID(), true)).getAppointment(getClient().getValues().getTimeZone());
         setCurrentValues(loadedAppointment);

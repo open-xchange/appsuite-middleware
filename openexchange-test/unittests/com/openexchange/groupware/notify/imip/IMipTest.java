@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.notify.imip;
 
+import com.openexchange.exception.OXException;
 import javax.mail.BodyPart;
 import javax.mail.internet.MimeMultipart;
 import com.openexchange.data.conversion.ical.ITipMethod;

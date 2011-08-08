@@ -49,6 +49,7 @@
 
 package com.openexchange.test;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
@@ -82,8 +83,6 @@ import com.openexchange.groupware.tasks.Mapper;
 import com.openexchange.groupware.tasks.Mapping;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TestTask;
-import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.tools.servlet.OXJSONException;
 
 /**
  * {@link TaskTestManager}
@@ -117,7 +116,7 @@ public class TaskTestManager implements TestManager{
         }
         try {
             timezone = client.getValues().getTimeZone();
-        } catch (AjaxException e) {
+        } catch (OXException e) {
             //no matter, fix it in finally block
         } catch (IOException e) {
             //no matter, fix it in finally block
@@ -380,7 +379,7 @@ public class TaskTestManager implements TestManager{
     /**
      * Constructs a new TestTask with the given title and time zone, parent folder created by and modified by already initialized
      */
-    public TestTask newTask(String title) throws AjaxException, IOException, SAXException, JSONException {
+    public TestTask newTask(String title) throws OXException, IOException, SAXException, JSONException {
         TestTask task = new TestTask();
         task.setTitle(title);
 
@@ -397,7 +396,7 @@ public class TaskTestManager implements TestManager{
         try {
             lastException = exc;
             throw exc;
-        } catch (AjaxException e) {
+        } catch (OXException e) {
             if (getFailOnError())
                 fail("AJAXException during " + action + ": " + e.getMessage());
         } catch (IOException e) {
@@ -409,9 +408,6 @@ public class TaskTestManager implements TestManager{
         } catch (JSONException e) {
             if (getFailOnError())
                 fail("JSONException during " + action + ": " + e.getMessage());
-        } catch (OXJSONException e) {
-            if (getFailOnError())
-                fail("OXJSONException during " + action + ": " + e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
             if (getFailOnError())

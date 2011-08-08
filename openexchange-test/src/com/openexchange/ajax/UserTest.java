@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
@@ -71,7 +72,6 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.URLParameter;
-import com.openexchange.tools.servlet.AjaxException;
 
 public class UserTest extends AbstractAJAXTest {
 
@@ -169,7 +169,7 @@ public class UserTest extends AbstractAJAXTest {
         return user;
     }
 
-    public static User loadUser(WebConversation webCon, int userId, String host, String session) throws AjaxException, IOException, SAXException, JSONException {
+    public static User loadUser(WebConversation webCon, int userId, String host, String session) throws OXException, IOException, SAXException, JSONException {
         return UserTools.getUser(webCon, host, session, userId);
     }
 }

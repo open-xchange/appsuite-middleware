@@ -20,7 +20,7 @@ import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
-import com.openexchange.api2.OXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
@@ -571,7 +571,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		if (response[0].hasError()) {
 			throw new TestException(response[0].getErrorMessage());
 		}
-		// This status must be checked after throwing TestException.
+		// This status must be checked after throwing OXException.
         assertEquals("check response status", 200, response[0].getStatus());
 		return (Contact) response[0].getDataObject();
 	}

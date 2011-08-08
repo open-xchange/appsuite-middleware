@@ -45,12 +45,12 @@
 
 package com.openexchange.webdav.xml.parser;
 
+import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.jdom.Element;
 
-import com.openexchange.api.OXConflictException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.TestException;
@@ -77,10 +77,10 @@ public class FolderParser extends FolderChildParser {
 	 * 
 	 * @param folder The folder to fill
 	 * @param eProp The folder element
-	 * @throws OXConflictException If a conflict occurs
-	 * @throws TestException If a test error occurs
+	 * @throws OXException If a conflict occurs
+	 * @throws OXException If a test error occurs
 	 */
-	public void parse(final FolderObject folder, final Element eProp) throws OXConflictException, TestException {
+	public void parse(final FolderObject folder, final Element eProp) throws OXException, OXException {
 		if (hasElement(eProp.getChild(FolderFields.TITLE, XmlServlet.NS))) {
 			folder.setFolderName(getValue(eProp.getChild(FolderFields.TITLE, XmlServlet.NS)));
 		}
@@ -92,7 +92,7 @@ public class FolderParser extends FolderChildParser {
 			} else if (type.equals("public")) {
 				folder.setType(FolderObject.PUBLIC);
 			} else {
-				throw new OXConflictException("unknown value in " + FolderFields.TYPE + ": " + type);
+				throw OXException.general("unknown value in " + FolderFields.TYPE + ": " + type);
 			}
 		}
 		
@@ -107,7 +107,7 @@ public class FolderParser extends FolderChildParser {
 			} else if (module.equals("unbound")) {
 				folder.setModule(FolderObject.UNBOUND);
 			} else {
-				throw new OXConflictException("unknown value in " + FolderFields.MODULE + ": " + module);
+				throw OXException.general("unknown value in " + FolderFields.MODULE + ": " + module);
 			}
 		}
 		
@@ -127,9 +127,9 @@ public class FolderParser extends FolderChildParser {
 	 * 
 	 * @param folder The folder to fill
 	 * @param ePermissions The folder permissions element
-	 * @throws TestException If a test error occurs
+	 * @throws OXException If a test error occurs
 	 */
-	protected void parseElementPermissions(final FolderObject folder, final Element ePermissions) throws TestException {
+	protected void parseElementPermissions(final FolderObject folder, final Element ePermissions) throws OXException {
 		final List<OCLPermission> permissions = new ArrayList<OCLPermission>();
 		
 		try {
@@ -151,12 +151,12 @@ public class FolderParser extends FolderChildParser {
 					parseEntity(oclp, e);
 					oclp.setGroupPermission(true);
 				} else {
-					throw new OXConflictException("unknown xml tag in permissions!");
+					throw OXException.general("unknown xml tag in permissions!");
 				}
 				
 				permissions.add(oclp);
 			}
-		} catch (final OXConflictException e) {
+		} catch (final OXException e) {
             throw new TestException(e);
         }
 		

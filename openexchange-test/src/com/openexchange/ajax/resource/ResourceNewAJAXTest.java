@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.resource;
 
+import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
@@ -56,7 +57,6 @@ import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.resource.actions.ResourceNewRequest;
 import com.openexchange.ajax.resource.actions.ResourceNewResponse;
 import com.openexchange.resource.Resource;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * {@link ResourceNewAJAXTest} - Tests the NEW request on resource servlet
@@ -79,7 +79,7 @@ public final class ResourceNewAJAXTest extends AbstractResourceTest {
 	/**
 	 * Tests the <code>action=new</code> request
 	 */
-	public void testNew() throws AjaxException, JSONException, IOException, SAXException {
+	public void testNew() throws OXException, JSONException, IOException, SAXException {
 		int id = -1;
 		try {
 			/*

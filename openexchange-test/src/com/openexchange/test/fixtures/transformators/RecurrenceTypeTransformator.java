@@ -48,12 +48,12 @@
  */
 package com.openexchange.test.fixtures.transformators;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.test.fixtures.FixtureException;
 
 public class RecurrenceTypeTransformator implements Transformator {
 
-	public Object transform(final String value) throws FixtureException {
+	public Object transform(final String value) throws OXException {
         if ("NONE".equalsIgnoreCase(value) || "NO_RECURRENCE".equalsIgnoreCase(value)) { 
         	return Appointment.NO_RECURRENCE; 
         } else if ("DAILY".equalsIgnoreCase(value)) { 
@@ -65,7 +65,7 @@ public class RecurrenceTypeTransformator implements Transformator {
         } else if("YEARLY".equalsIgnoreCase(value)) { 
         	return Appointment.YEARLY; 
         } else {
-            throw new FixtureException("Unknown recurrence type: " + value);
+            throw OXException.general("Unknown recurrence type: " + value);
         }
     }
 }

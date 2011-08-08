@@ -10,8 +10,8 @@ import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.exception.OXException;
 import com.openexchange.test.fixtures.TestUserConfig;
-import com.openexchange.tools.servlet.AjaxException;
 
 public class AJAXUserConfig implements TestUserConfig {
 
@@ -25,7 +25,7 @@ public class AJAXUserConfig implements TestUserConfig {
 		try {
 			return ConfigTools.get(client,
 			        new GetRequest(tree)).getData();
-		} catch (AjaxException e) {
+		} catch (OXException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -56,7 +56,7 @@ public class AJAXUserConfig implements TestUserConfig {
 	public void set(Tree tree, Object value) {
 		try {
 			ConfigTools.set(client, new SetRequest(tree, value));
-		} catch (AjaxException e) {
+		} catch (OXException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();

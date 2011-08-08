@@ -48,8 +48,8 @@
  */
 package com.openexchange.setuptools;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.configuration.ConfigurationException;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -67,7 +67,7 @@ public class TestConfig {
 
     private final String contextName;
 
-    public TestConfig() throws ConfigurationException {
+    public TestConfig() throws OXException {
         AJAXConfig.init();
         user = AJAXConfig.getProperty(AJAXConfig.Property.LOGIN);
         secondUser = AJAXConfig.getProperty(AJAXConfig.Property.SECONDUSER);

@@ -48,6 +48,7 @@
  */
 package com.openexchange.test.fixtures.transformators;
 
+import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,7 +60,6 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.resource.Resource;
-import com.openexchange.test.fixtures.FixtureException;
 import com.openexchange.test.fixtures.FixtureLoader;
 import com.openexchange.test.fixtures.SimpleCredentials;
 
@@ -79,7 +79,7 @@ public class ParticipantTransformator implements Transformator {
 		this.fixtureLoader = fixtureLoader;
 	}
 
-	public Object transform(final String value) throws FixtureException {
+	public Object transform(final String value) throws OXException {
 		if (null == value || 1 > value.length()) { return null; }
 		String fixtureName = "users";
 		String fixtureEntry = "";
@@ -98,7 +98,7 @@ public class ParticipantTransformator implements Transformator {
 		return participants;
     }
 	
-	private Participant getParticipant(final String fixtureName, final String fixtureEntry) throws FixtureException {
+	private Participant getParticipant(final String fixtureName, final String fixtureEntry) throws OXException {
 		if ("users".equals(fixtureName)) {
 			return getUserParticipant(fixtureName, fixtureEntry);
 		} else if ("groups".equals(fixtureName)) {
@@ -108,11 +108,11 @@ public class ParticipantTransformator implements Transformator {
 		} else if ("resources".equals(fixtureName)) {
 			return getResourceParticipant(fixtureName, fixtureEntry);
 		} else {
-			throw new FixtureException("Unable to convert " + fixtureName + ":" + fixtureEntry + " into a participant.");
+			throw OXException.general("Unable to convert " + fixtureName + ":" + fixtureEntry + " into a participant.");
 		}
 	}
 
-	private Participant getExternalUserParticipant(final String fixtureName, final String fixtureEntry) throws FixtureException {
+	private Participant getExternalUserParticipant(final String fixtureName, final String fixtureEntry) throws OXException {
 		final Contact contact = fixtureLoader.getFixtures(fixtureName, Contact.class).getEntry(fixtureEntry).getEntry();
 		String email = null;
 		if (contact.containsEmail1()) {
@@ -122,21 +122,21 @@ public class ParticipantTransformator implements Transformator {
 		} else if (contact.containsEmail3()) {
 			email = contact.getEmail3();
 		}
-		if (null == email) { throw new FixtureException("External participants must contain an email address"); }
+		if (null == email) { throw OXException.general("External participants must contain an email address"); }
 		final ExternalUserParticipant participant = new ExternalUserParticipant(email);
 		participant.setDisplayName(contact.getDisplayName());
 		participant.setIdentifier(contact.getObjectID());
 		return participant;
 	}
 
-	private GroupParticipant getGroupParticipant(final String fixtureName, final String fixtureEntry) throws FixtureException {
+	private GroupParticipant getGroupParticipant(final String fixtureName, final String fixtureEntry) throws OXException {
 		final Group group = fixtureLoader.getFixtures(fixtureName, Group.class).getEntry(fixtureEntry).getEntry();
 		final GroupParticipant participant = new GroupParticipant(group.getIdentifier());
 		participant.setDisplayName(group.getDisplayName());
 		return participant;
 	}
 
-	private UserParticipant getUserParticipant(final String fixtureName, final String fixtureEntry) throws FixtureException {
+	private UserParticipant getUserParticipant(final String fixtureName, final String fixtureEntry) throws OXException {
 		final Contact user = fixtureLoader.getFixtures(fixtureName, SimpleCredentials.class)
 		    .getEntry(fixtureEntry)
 		        .getEntry()
@@ -147,7 +147,7 @@ public class ParticipantTransformator implements Transformator {
 		return participant;
 	}
 	
-	private ResourceParticipant getResourceParticipant(final String fixtureName, final String fixtureEntry) throws FixtureException {
+	private ResourceParticipant getResourceParticipant(final String fixtureName, final String fixtureEntry) throws OXException {
 		final Resource resource = fixtureLoader.getFixtures(fixtureName, Resource.class).getEntry(fixtureEntry).getEntry();
 		final ResourceParticipant participant = new ResourceParticipant(resource.getIdentifier());
 		participant.setDisplayName(resource.getDisplayName());

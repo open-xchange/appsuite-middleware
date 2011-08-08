@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.conversion;
 
+import com.openexchange.exception.OXException;
 import java.util.Date;
 import java.util.UUID;
 import org.json.JSONArray;

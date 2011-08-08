@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.infostore.actions;
 
+import com.openexchange.exception.OXException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;

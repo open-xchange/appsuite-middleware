@@ -1,6 +1,7 @@
 
 package com.openexchange.server;
 
+import com.openexchange.exception.OXException;
 import java.sql.Connection;
 
 import junit.framework.TestCase;

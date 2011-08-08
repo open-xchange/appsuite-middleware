@@ -1,6 +1,7 @@
 
 package com.openexchange.test;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;

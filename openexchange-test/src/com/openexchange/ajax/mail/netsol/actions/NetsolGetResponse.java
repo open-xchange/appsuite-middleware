@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail.netsol.actions;
 
+import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -64,8 +65,7 @@ import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -97,9 +97,9 @@ public class NetsolGetResponse extends AbstractAJAXResponse {
 	 *            The user time zone
 	 * @return The parsed instance of {@link MailMessage}
 	 * @throws JSONException
-	 * @throws AbstractOXException
+	 * @throws OXException
 	 */
-	public MailMessage getMail(final TimeZone timeZone) throws JSONException, AbstractOXException {
+	public MailMessage getMail(final TimeZone timeZone) throws JSONException, OXException {
 		if (null == mail) {
 			final MailMessage parsed = new MIMEMailMessage();
 			final JSONObject jsonObject;
@@ -115,7 +115,7 @@ public class NetsolGetResponse extends AbstractAJAXResponse {
 	}
 
 	private static void parse(final JSONObject jsonObj, final MailMessage mail, final TimeZone timeZone)
-			throws MailException {
+			throws OXException {
 		try {
 			/*
 			 * System flags
@@ -258,7 +258,7 @@ public class NetsolGetResponse extends AbstractAJAXResponse {
 			 * TODO: Parse attachments
 			 */
 		} catch (final JSONException e) {
-			throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+			throw MailExceptionCode.JSON_ERROR.create();
 		}
 	}
 
