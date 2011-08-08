@@ -522,7 +522,10 @@ public class AjpProcessor {
                         }
                         final byte[] bytes = baos.toByteArray();
                         parseQueryString(new String(bytes, charEnc));
-                        request.setServletInputStream(new ByteArrayServletInputStream(bytes));
+                        /*
+                         * Apply already read data to request to make them re-available
+                         */
+                        request.dumpToBuffer(bytes);
                     }
                     servlet.service(request, response);
                     response.flushBuffer();

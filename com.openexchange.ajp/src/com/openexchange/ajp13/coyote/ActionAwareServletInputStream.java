@@ -77,6 +77,20 @@ public final class ActionAwareServletInputStream extends ServletInputStream {
     }
 
     @Override
+    public void close() throws IOException {
+        // Nothing to do
+    }
+
+    /**
+     * Dump specified bytes into buffer.
+     * 
+     * @param bytes The bytes
+     */
+    public void dumpToBuffer(final byte[] bytes) {
+        byteChunk.setBytes(bytes, 0, bytes.length);
+    }
+
+    @Override
     public int read() throws IOException {
         if (byteChunk.getLength() > 0) {
             return byteChunk.substract();
