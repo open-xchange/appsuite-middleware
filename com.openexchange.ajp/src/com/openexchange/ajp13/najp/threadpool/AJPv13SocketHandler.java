@@ -55,8 +55,8 @@ import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.monitoring.AJPv13Monitors;
 import com.openexchange.ajp13.najp.AJPv13Task;
 import com.openexchange.ajp13.najp.AJPv13TaskMonitor;
-import com.openexchange.ajp13.najp.AJPv13TaskWatcher;
 import com.openexchange.ajp13.najp.IAJPv13SocketHandler;
+import com.openexchange.ajp13.watcher.AJPv13TaskWatcher;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**

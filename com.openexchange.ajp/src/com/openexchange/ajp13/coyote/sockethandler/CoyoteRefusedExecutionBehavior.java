@@ -53,7 +53,7 @@ import java.util.concurrent.RejectedExecutionException;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajp13.coyote.ActionCode;
 import com.openexchange.ajp13.coyote.AjpProcessor;
-import com.openexchange.ajp13.najp.AJPv13TaskWatcher;
+import com.openexchange.ajp13.watcher.AJPv13TaskWatcher;
 import com.openexchange.threadpool.RefusedExecutionBehavior;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;

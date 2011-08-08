@@ -1131,8 +1131,22 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
         return ServletConfigLoader.getDefaultInstance().getContext(servletInstance.getClass().getCanonicalName(), servletPath);
     }
 
-    public void setStartTime(final long currentTimeMillis) {
-        this.startTime = currentTimeMillis;
+    /**
+     * Sets the start time.
+     * 
+     * @param startTime The start time
+     */
+    public void setStartTime(final long startTime) {
+        this.startTime = startTime;
+    }
+
+    /**
+     * Gets the start time for this request.
+     * 
+     * @return The start time
+     */
+    public long getStartTime() {
+        return startTime;
     }
 
 }

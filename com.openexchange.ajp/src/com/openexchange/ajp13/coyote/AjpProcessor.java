@@ -63,9 +63,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicLong;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.ajp13.AJPv13Response;
@@ -88,11 +90,13 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AjpProcessor {
+public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     private static final org.apache.commons.logging.Log LOG = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AjpProcessor.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
+
+    private static final AtomicLong NUMBER = new AtomicLong();
 
     private static final int STAGE_PARSE = 1;
 
@@ -236,9 +240,19 @@ public class AjpProcessor {
     private volatile Future<Object> control;
 
     /**
+     * The thread currently processing.
+     */
+    private volatile Thread thread;
+
+    /**
      * The servlet path (which is not the request path). The servlet path is defined in servlet mapping configuration.
      */
     private String servletPath;
+
+    /**
+     * Gets this processor's number.
+     */
+    private final Long number;
 
     /**
      * Direct buffer used for sending right away a get body message.
@@ -295,6 +309,7 @@ public class AjpProcessor {
 
     public AjpProcessor(final int packetSize) {
         super();
+        this.number = Long.valueOf(NUMBER.incrementAndGet());
         servletId = new StringBuilder(16);
         /*
          * Create request/response
@@ -334,6 +349,41 @@ public class AjpProcessor {
 
     // ------------------------------------------------------------- Properties
 
+    @Override
+    public boolean isWaitingOnAJPSocket() {
+        return STAGE_PARSE == stage;
+    }
+
+    @Override
+    public boolean isProcessing() {
+        return STAGE_SERVICE == stage;
+    }
+
+    @Override
+    public long getProcessingStartTime() {
+        return request.getStartTime();
+    }
+
+    @Override
+    public boolean isLongRunning() {
+        return isEASPingCommand();
+    }
+
+    @Override
+    public StackTraceElement[] getStackTrace() {
+        return thread.getStackTrace();
+    }
+
+    @Override
+    public String getThreadName() {
+        return thread.getName();
+    }
+
+    @Override
+    public Long getNum() {
+        return number;
+    }
+
     /**
      * Use Tomcat authentication ?
      */
@@ -350,15 +400,19 @@ public class AjpProcessor {
     /**
      * Required secret.
      */
-    protected String requiredSecret = null;
+    private String requiredSecret;
 
+    /**
+     * Sets the required secret.
+     * 
+     * @param requiredSecret The secret
+     */
     public void setRequiredSecret(final String requiredSecret) {
         this.requiredSecret = requiredSecret;
     }
 
     /**
-     * The number of milliseconds Tomcat will wait for a subsequent request before closing the connection. The default is the same as for
-     * Apache HTTP Server (15 000 milliseconds).
+     * The number of milliseconds waiting for a subsequent request before closing the connection.
      */
     private int keepAliveTimeout = -1;
 
@@ -380,29 +434,35 @@ public class AjpProcessor {
     }
 
     /**
-     * Checks if this task was canceled before it completed normally.
+     * Checks if this AJP processor was canceled before it completed normally.
      * 
-     * @return <code>true</code> if this task was canceled before it completed normally; otherwise <code>false</code>
+     * @return <code>true</code> if this AJP processor was canceled before it completed normally; otherwise <code>false</code>
      */
     public boolean isCancelled() {
         return control.isCancelled();
     }
 
     /**
-     * Checks if this task completed. Completion may be due to normal termination, an exception, or cancellation -- in all of these cases,
-     * this method will return <code>true</code>.
+     * Checks if this AJP processor completed. Completion may be due to normal termination, an exception, or cancellation -- in all of these
+     * cases, this method will return <code>true</code>.
      * 
-     * @return <code>true</code> if this task completed; otherwise <code>false</code>
+     * @return <code>true</code> if this AJP processor completed; otherwise <code>false</code>
      */
     public boolean isDone() {
         return control.isDone();
     }
 
     /**
-     * Cancels this AJP task; meaning to close the client socket and to stop its execution.
+     * Cancels this AJP processor; meaning to close the client socket and to stop its execution.
      */
+    @Override
     public void cancel() {
-        started = false;
+        response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+        action(ActionCode.CLIENT_FLUSH, null);
+        action(ActionCode.CLOSE, null);
+        /*
+         * Drop socket
+         */
         final Socket s = socket;
         if (null != s) {
             try {
@@ -411,6 +471,9 @@ public class AjpProcessor {
                 socket = null;
             }
         }
+        /*
+         * Cancel via control, too
+         */
         final Future<Object> f = control;
         if (f != null) {
             f.cancel(false);
@@ -489,7 +552,7 @@ public class AjpProcessor {
          * Error flag
          */
         error = false;
-        final Thread thread = Thread.currentThread();
+        final Thread thread = this.thread = Thread.currentThread();
         while (started && !error && !thread.isInterrupted()) {
             /*
              * Parsing the request header
@@ -770,6 +833,22 @@ public class AjpProcessor {
     }
 
     private static final String JSESSIONID_URI = AJPv13RequestHandler.JSESSIONID_URI;
+
+    private static final String EAS_URI = "/Microsoft-Server-ActiveSync";
+
+    private static final String EAS_CMD = "Cmd";
+
+    private static final String EAS_PING = "Ping";
+
+    /**
+     * Checks for long-running EAS ping command, that is URI is equal to <code>"/Microsoft-Server-ActiveSync"</code> and request's
+     * <code>"Cmd"</code> parameter equals <code>"Ping"</code>.
+     * 
+     * @return <code>true</code> if EAS ping command is detected; otherwise <code>false</code>
+     */
+    private boolean isEASPingCommand() {
+        return EAS_URI.equals(request.getRequestURI()) && EAS_PING.equals(request.getParameter(EAS_CMD));
+    }
 
     /**
      * After reading the request headers, we have to setup the request filters.

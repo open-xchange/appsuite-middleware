@@ -71,6 +71,7 @@ import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13SocketClosedException;
 import com.openexchange.ajp13.exception.AJPv13TimeoutException;
 import com.openexchange.ajp13.servlet.http.HttpServletResponseWrapper;
+import com.openexchange.ajp13.watcher.AJPv13TaskWatcher;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogProperties;
@@ -86,7 +87,7 @@ import com.openexchange.tools.servlet.UploadServletException;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AJPv13Task implements Task<Object> {
+public final class AJPv13Task implements Task<Object>, com.openexchange.ajp13.watcher.Task {
 
     /**
      * The logger constant.
@@ -275,21 +276,24 @@ public final class AJPv13Task implements Task<Object> {
     /**
      * @return <code>true</code> if task is currently listening to client socket's input stream, otherwise <code>false</code>
      */
-    boolean isWaitingOnAJPSocket() {
+    @Override
+    public boolean isWaitingOnAJPSocket() {
         return waitingOnAJPSocket;
     }
 
     /**
      * @return <code>true</code> if task is currently processing, otherwise <code>false</code>
      */
-    boolean isProcessing() {
+    @Override
+    public boolean isProcessing() {
         return processing;
     }
 
     /**
      * @return The processing start time stamp
      */
-    long getProcessingStartTime() {
+    @Override
+    public long getProcessingStartTime() {
         return processingStart;
     }
 
@@ -298,7 +302,8 @@ public final class AJPv13Task implements Task<Object> {
      *
      * @return <code>true</code> if this task is long-running; otherwise <code>false</code>
      */
-    boolean isLongRunning() {
+    @Override
+    public boolean isLongRunning() {
         return longRunning;
     }
 
@@ -316,7 +321,8 @@ public final class AJPv13Task implements Task<Object> {
      *
      * @return The currently executing thread's stack trace or an empty stack trace if no thread processes this task.
      */
-    StackTraceElement[] getStackTrace() {
+    @Override
+    public StackTraceElement[] getStackTrace() {
         if (null == thread) {
             return new StackTraceElement[0];
         }
@@ -328,7 +334,8 @@ public final class AJPv13Task implements Task<Object> {
      *
      * @return The currently executing thread's name or an empty string if no threads processes this task.
      */
-    String getThreadName() {
+    @Override
+    public String getThreadName() {
         if (null == thread) {
             return "";
         }
