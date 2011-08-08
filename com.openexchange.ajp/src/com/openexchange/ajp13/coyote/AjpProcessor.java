@@ -1074,6 +1074,18 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 }
             }
         }
+        if (LogProperties.isEnabled()) {
+            /*
+             * Gather logging info
+             */
+            final String echoHeaderName = AJPv13Response.getEchoHeaderName();
+            if (null != echoHeaderName) {
+                final String echoValue = request.getHeader(echoHeaderName);
+                if (null != echoValue) {
+                    LogProperties.putLogProperty("com.openexchange.ajp13.requestId", echoValue);
+                }
+            }
+        }
         /*
          * Decode extra attributes
          */
