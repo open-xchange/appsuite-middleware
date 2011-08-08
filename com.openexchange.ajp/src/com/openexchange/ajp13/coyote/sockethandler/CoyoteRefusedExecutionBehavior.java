@@ -103,8 +103,8 @@ final class CoyoteRefusedExecutionBehavior implements RefusedExecutionBehavior<O
         try {
             final AjpProcessor ajpProcessor = rejectedTask.getAjpProcessor();
             ajpProcessor.getResponse().setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
-            ajpProcessor.action(ActionCode.ACTION_CLIENT_FLUSH, null);
-            ajpProcessor.action(ActionCode.ACTION_CLOSE, null);
+            ajpProcessor.action(ActionCode.CLIENT_FLUSH, null);
+            ajpProcessor.action(ActionCode.CLOSE, null);
         } finally {
             // TODO:
             // watcher.removeTask(rejectedTask);

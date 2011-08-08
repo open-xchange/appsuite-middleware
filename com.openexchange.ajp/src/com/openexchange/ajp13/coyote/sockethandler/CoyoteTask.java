@@ -111,12 +111,12 @@ public final class CoyoteTask implements Task<Object> {
     @Override
     public Object call() throws Exception {
         try {
-            ajpProcessor.action(ActionCode.ACTION_START, null);
+            ajpProcessor.action(ActionCode.START, null);
             ajpProcessor.process(client);
         } catch (final IOException e) {
             CoyoteSocketHandler.LOG.error(e.getMessage(), e);
         } finally {
-            ajpProcessor.action(ActionCode.ACTION_STOP, null);
+            ajpProcessor.action(ActionCode.STOP, null);
         }
         return null;
     }

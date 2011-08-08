@@ -360,7 +360,7 @@ public class AjpProcessor {
      * The number of milliseconds Tomcat will wait for a subsequent request before closing the connection. The default is the same as for
      * Apache HTTP Server (15 000 milliseconds).
      */
-    protected int keepAliveTimeout = -1;
+    private int keepAliveTimeout = -1;
 
     public int getKeepAliveTimeout() {
         return keepAliveTimeout;
@@ -381,7 +381,7 @@ public class AjpProcessor {
 
     /**
      * Checks if this task was canceled before it completed normally.
-     *
+     * 
      * @return <code>true</code> if this task was canceled before it completed normally; otherwise <code>false</code>
      */
     public boolean isCancelled() {
@@ -391,7 +391,7 @@ public class AjpProcessor {
     /**
      * Checks if this task completed. Completion may be due to normal termination, an exception, or cancellation -- in all of these cases,
      * this method will return <code>true</code>.
-     *
+     * 
      * @return <code>true</code> if this task completed; otherwise <code>false</code>
      */
     public boolean isDone() {
@@ -652,7 +652,7 @@ public class AjpProcessor {
      * @param param The action parameter
      */
     public void action(final ActionCode actionCode, final Object param) {
-        if (actionCode == ActionCode.ACTION_COMMIT) {
+        if (actionCode == ActionCode.COMMIT) {
             if (response.isCommitted()) {
                 return;
             }
@@ -664,8 +664,7 @@ public class AjpProcessor {
                 // Set error flag
                 error = true;
             }
-
-        } else if (actionCode == ActionCode.ACTION_CLIENT_FLUSH) {
+        } else if (actionCode == ActionCode.CLIENT_FLUSH) {
             if (!response.isCommitted()) {
                 // Validate and write response headers
                 try {
@@ -685,7 +684,7 @@ public class AjpProcessor {
                 // Set error flag
                 error = true;
             }
-        } else if (actionCode == ActionCode.ACTION_CLOSE) {
+        } else if (actionCode == ActionCode.CLOSE) {
             // Close
 
             // End the processing of the current request, and stop any further
@@ -699,9 +698,9 @@ public class AjpProcessor {
                 // Set error flag
                 error = true;
             }
-        } else if (actionCode == ActionCode.ACTION_START) {
+        } else if (actionCode == ActionCode.START) {
             started = true;
-        } else if (actionCode == ActionCode.ACTION_STOP) {
+        } else if (actionCode == ActionCode.STOP) {
             started = false;
         }
         /*-
@@ -737,7 +736,7 @@ public class AjpProcessor {
         }
          * 
          */
-        else if (actionCode == ActionCode.ACTION_REQ_HOST_ATTRIBUTE) {
+        else if (actionCode == ActionCode.REQ_HOST_ATTRIBUTE) {
             // Get remote host name using a DNS resolution
             if (request.getRemoteHost() == null) {
                 try {
@@ -746,10 +745,10 @@ public class AjpProcessor {
                     // Ignore
                 }
             }
-        } else if (actionCode == ActionCode.ACTION_REQ_LOCAL_ADDR_ATTRIBUTE) {
+        } else if (actionCode == ActionCode.REQ_LOCAL_ADDR_ATTRIBUTE) {
             // Copy from local name for now, which should simply be an address
             request.setLocalAddr(request.getLocalName().toString());
-        } else if (actionCode == ActionCode.ACTION_REQ_SET_BODY_REPLAY) {
+        } else if (actionCode == ActionCode.REQ_SET_BODY_REPLAY) {
             // Set the given bytes as the content
             final ByteChunk bc = (ByteChunk) param;
             final int length = bc.getLength();
@@ -761,18 +760,14 @@ public class AjpProcessor {
         }
     }
 
-    // ------------------------------------------------------ Connector Methods
-
     /**
-     * Get the associated adapter.
+     * Get the associated servlet.
      * 
-     * @return the associated adapter
+     * @return the associated servlet
      */
-    public HttpServlet getAdapter() {
+    public HttpServlet getServlet() {
         return servlet;
     }
-
-    // ------------------------------------------------------ Protected Methods
 
     private static final String JSESSIONID_URI = AJPv13RequestHandler.JSESSIONID_URI;
 
@@ -1337,12 +1332,6 @@ public class AjpProcessor {
          */
         request.getSession(true);
     }
-
-    /**
-     * If true, custom HTTP status messages will be used in headers.
-     */
-    private static final boolean USE_CUSTOM_STATUS_MSG_IN_HEADER = Boolean.valueOf(
-        System.getProperty("org.apache.coyote.USE_CUSTOM_STATUS_MSG_IN_HEADER", "false")).booleanValue();
 
     private static final String STR_SET_COOKIE = "Set-Cookie";
 

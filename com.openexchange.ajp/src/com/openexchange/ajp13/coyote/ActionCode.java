@@ -54,114 +54,111 @@ package com.openexchange.ajp13.coyote;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ActionCode {
-
-    // -------------------------------------------------------------- Constants
-
-    public static final ActionCode ACTION_ACK = new ActionCode(1);
-
-    public static final ActionCode ACTION_CLOSE = new ActionCode(2);
-
-    public static final ActionCode ACTION_COMMIT = new ActionCode(3);
+public enum ActionCode {
 
     /**
-     * A flush() operation originated by the client ( i.e. a flush() on the servlet output stream or writer, called by a servlet ). Argument
-     * is the Response.
+     * The close action.
      */
-    public static final ActionCode ACTION_CLIENT_FLUSH = new ActionCode(4);
-
-    public static final ActionCode ACTION_CUSTOM = new ActionCode(5);
-
-    public static final ActionCode ACTION_RESET = new ActionCode(6);
-
-    public static final ActionCode ACTION_START = new ActionCode(7);
-
-    public static final ActionCode ACTION_STOP = new ActionCode(8);
-
-    public static final ActionCode ACTION_WEBAPP = new ActionCode(9);
-
+    CLOSE(1),
     /**
-     * Hook called after request, but before recycling. Can be used for logging, to update counters, custom cleanup - the request is still
-     * visible
+     * The commit action.
      */
-    public static final ActionCode ACTION_POST_REQUEST = new ActionCode(10);
-
+    COMMIT(2),
     /**
-     * Callback for lazy evaluation - extract the remote host address.
+     * The client-flush action.
      */
-    public static final ActionCode ACTION_REQ_HOST_ATTRIBUTE = new ActionCode(11);
-
+    CLIENT_FLUSH(4),
     /**
-     * Callback for lazy evaluation - extract the remote host infos (address, name, port) and local address.
+     * The custom action.
      */
-    public static final ActionCode ACTION_REQ_HOST_ADDR_ATTRIBUTE = new ActionCode(12);
-
+    CUSTOM(5),
     /**
-     * Callback for lazy evaluation - extract the SSL-related attributes.
+     * The custom action.
      */
-    public static final ActionCode ACTION_REQ_SSL_ATTRIBUTE = new ActionCode(13);
-
+    RESET(6),
     /**
-     * Chain for request creation. Called each time a new request is created ( requests are recycled ).
+     * The start action.
      */
-    public static final ActionCode ACTION_NEW_REQUEST = new ActionCode(14);
-
+    START(7),
     /**
-     * Callback for lazy evaluation - extract the SSL-certificate (including forcing a re-handshake if necessary)
+     * The stop action.
      */
-    public static final ActionCode ACTION_REQ_SSL_CERTIFICATE = new ActionCode(15);
-
+    STOP(8),
     /**
-     * Callback for lazy evaluation - socket remote port.
-     **/
-    public static final ActionCode ACTION_REQ_REMOTEPORT_ATTRIBUTE = new ActionCode(16);
-
+     * The webapp action.
+     */
+    WEBAPP(9),
     /**
-     * Callback for lazy evaluation - socket local port.
-     **/
-    public static final ActionCode ACTION_REQ_LOCALPORT_ATTRIBUTE = new ActionCode(17);
-
+     * Post request.
+     */
+    POST_REQUEST(10),
     /**
-     * Callback for lazy evaluation - local address.
-     **/
-    public static final ActionCode ACTION_REQ_LOCAL_ADDR_ATTRIBUTE = new ActionCode(18);
-
+     * Request host name.
+     */
+    REQ_HOST_ATTRIBUTE(11),
     /**
-     * Callback for lazy evaluation - local address.
-     **/
-    public static final ActionCode ACTION_REQ_LOCAL_NAME_ATTRIBUTE = new ActionCode(19);
-
+     * Request host address.
+     */
+    REQ_HOST_ADDR_ATTRIBUTE(12),
+    /**
+     * Extract the SSL-related attributes.
+     */
+    REQ_REQ_SSL_ATTRIBUTE(13),
+    /**
+     * Create a new request.
+     */
+    REQ_NEW_REQUEST(14),
+    /**
+     * Extract the SSL-certificate (including forcing a re-handshake if necessary)
+     */
+    REQ_SSL_CERTIFICATE(15),
+    /**
+     * Socket remote port.
+     */
+    REQ_REMOTEPORT_ATTRIBUTE(16),
+    /**
+     * Socket local port.
+     */
+    REQ_LOCALPORT_ATTRIBUTE(17),
+    /**
+     * Local host address
+     */
+    REQ_LOCAL_ADDR_ATTRIBUTE(18),
+    /**
+     * Local host name.
+     */
+    REQ_LOCAL_NAME_ATTRIBUTE(19),
     /**
      * Callback for setting FORM auth body replay
      */
-    public static final ActionCode ACTION_REQ_SET_BODY_REPLAY = new ActionCode(20);
+    REQ_SET_BODY_REPLAY(20),
+    ;
+    
 
-    /**
-     * Callback for begin Comet processing
-     */
-    public static final ActionCode ACTION_COMET_BEGIN = new ActionCode(21);
-
-    /**
-     * Callback for end Comet processing
-     */
-    public static final ActionCode ACTION_COMET_END = new ActionCode(22);
-
-    /**
-     * Callback for getting the amount of available bytes
-     */
-    public static final ActionCode ACTION_AVAILABLE = new ActionCode(23);
-
-    /**
-     * Callback for an asynchronous close of the Comet event
-     */
-    public static final ActionCode ACTION_COMET_CLOSE = new ActionCode(24);
-
-    /**
-     * Callback for setting the timeout asynchronously
-     */
-    public static final ActionCode ACTION_COMET_SETTIMEOUT = new ActionCode(25);
-
-    // ----------------------------------------------------------- Constructors
+//    /**
+//     * Callback for begin Comet processing
+//     */
+//    public static final ActionCode ACTION_COMET_BEGIN = new ActionCode(21);
+//
+//    /**
+//     * Callback for end Comet processing
+//     */
+//    public static final ActionCode ACTION_COMET_END = new ActionCode(22);
+//
+//    /**
+//     * Callback for getting the amount of available bytes
+//     */
+//    public static final ActionCode ACTION_AVAILABLE = new ActionCode(23);
+//
+//    /**
+//     * Callback for an asynchronous close of the Comet event
+//     */
+//    public static final ActionCode ACTION_COMET_CLOSE = new ActionCode(24);
+//
+//    /**
+//     * Callback for setting the timeout asynchronously
+//     */
+//    public static final ActionCode ACTION_COMET_SETTIMEOUT = new ActionCode(25);
 
     private final int code;
 
