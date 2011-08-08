@@ -445,14 +445,14 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     }
 
     /**
-     * 8K buffer
+     * 2K buffer
      */
-    private static final int BUF_SIZE = 0x2000;
+    private static final int BUF_SIZE = 0x800;
 
     /**
-     * Initialize with 16K
+     * Initialize with 8K
      */
-    private static final int SB_SIZE = 0x4000;
+    private static final int SB_SIZE = 0x2000;
 
     /**
      * Returns the complete body as a string. Be careful when getting big request bodies.
@@ -462,11 +462,11 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @throws IOException If an error occurs while reading the body.
      */
     public static String getBody(final HttpServletRequest req) throws IOException {
-        final int buflen = 2048;
-        final byte[] buf = new byte[buflen];
-        final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(8192);
         final ServletInputStream inputStream = req.getInputStream();
         try {
+            final int buflen = BUF_SIZE;
+            final byte[] buf = new byte[buflen];
+            final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(SB_SIZE);
             for (int read = inputStream.read(buf, 0, buflen); read > 0; read = inputStream.read(buf, 0, buflen)) {
                 baos.write(buf, 0, read);
             }
