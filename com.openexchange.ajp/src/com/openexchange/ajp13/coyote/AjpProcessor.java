@@ -61,6 +61,7 @@ import java.net.Socket;
 import java.net.URLDecoder;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -89,6 +90,7 @@ import com.openexchange.ajp13.servlet.http.HttpSessionManagement;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.log.Log;
+import com.openexchange.log.LogProperties;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -608,6 +610,15 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
          */
         error = false;
         final Thread thread = this.thread = Thread.currentThread();
+        if (LogProperties.isEnabled()) {
+            /*
+             * Gather logging info
+             */
+            final Map<String, Object> properties = LogProperties.getLogProperties();
+            properties.put("com.openexchange.ajp13.threadName", thread.getName());
+            properties.put("com.openexchange.ajp13.remotePort", Integer.valueOf(socket.getPort()));
+            properties.put("com.openexchange.ajp13.remoteAddress", socket.getInetAddress().getHostAddress());
+        }
         while (started && !error && !thread.isInterrupted()) {
             /*
              * Parsing the request header
@@ -773,6 +784,12 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         output = null;
         final long duration = System.currentTimeMillis() - st;
         listenerMonitor.addUseTime(duration);
+        /*
+         * Drop logging info
+         */
+        if (LogProperties.isEnabled()) {
+            LogProperties.removeLogProperties();
+        }
     }
 
     // ----------------------------------------------------- ActionHook Methods
