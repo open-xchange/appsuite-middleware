@@ -51,9 +51,12 @@ package com.openexchange.ajp13.coyote.sockethandler;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.concurrent.atomic.AtomicInteger;
 import com.openexchange.ajp13.coyote.ActionCode;
 import com.openexchange.ajp13.coyote.AjpProcessor;
+import com.openexchange.ajp13.najp.AJPv13TaskMonitor;
 import com.openexchange.ajp13.watcher.AJPv13TaskWatcher;
+import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadRenamer;
 
@@ -79,16 +82,19 @@ public final class CoyoteTask implements Task<Object> {
      */
     private final AJPv13TaskWatcher watcher;
 
+    private final AJPv13TaskMonitor listenerMonitor;
+
     /**
      * Initializes a new {@link AjpProcessorRunnable}.
      * 
      * @param client The accepted client socket
      * @param ajpProcessor The AJP processor dedicated to the socket
      */
-    protected CoyoteTask(final Socket client, final AjpProcessor ajpProcessor, final AJPv13TaskWatcher watcher) {
+    protected CoyoteTask(final Socket client, final AjpProcessor ajpProcessor, final AJPv13TaskMonitor listenerMonitor, final AJPv13TaskWatcher watcher) {
         this.client = client;
         this.ajpProcessor = ajpProcessor;
         this.watcher = watcher;
+        this.listenerMonitor = listenerMonitor;
     }
 
     /**
@@ -105,14 +111,32 @@ public final class CoyoteTask implements Task<Object> {
         threadRenamer.renamePrefix("AJP-Processor-");
     }
 
+    /**
+     * The atomic integer to count active AJP tasks.
+     */
+    private static final AtomicInteger numRunning = new AtomicInteger();
+
+    /**
+     * Increments/decrements the number of running AJP tasks.
+     *
+     * @param increment whether to increment or to decrement
+     */
+    private static void changeNumberOfRunningAJPTasks(final boolean increment) {
+        MonitoringInfo.setNumberOfRunningAJPListeners(increment ? numRunning.incrementAndGet() : numRunning.decrementAndGet());
+    }
+
     @Override
     public void beforeExecute(final Thread t) {
-        // TODO: Add to task watcher & start keep-alive ping
+        watcher.addTask(ajpProcessor);
+        listenerMonitor.incrementNumActive();
+        changeNumberOfRunningAJPTasks(true);
     }
 
     @Override
     public void afterExecute(final Throwable t) {
-        // Drop from task watcher and drop keep-alive ping
+        watcher.removeTask(ajpProcessor);
+        changeNumberOfRunningAJPTasks(false);
+        listenerMonitor.decrementNumActive();
     }
 
     @Override
