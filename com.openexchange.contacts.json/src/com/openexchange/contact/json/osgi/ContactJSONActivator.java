@@ -47,76 +47,36 @@
  *
  */
 
-package com.openexchange.image.internal;
+package com.openexchange.contact.json.osgi;
 
-import com.openexchange.conversion.DataArguments;
-import com.openexchange.image.ImageData;
-import com.openexchange.image.ImageDataSource;
+import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.contact.json.ContactActionFactory;
+import com.openexchange.contact.json.converters.ContactListResultConverter;
+import com.openexchange.contact.json.converters.ContactResultConverter;
+import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.image.ImageService;
-import com.openexchange.session.Session;
 
 /**
- * {@link ImageServiceImpl} - Implementation of {@link ImageService} using {@link ImageRegistry}.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link ContactJSONActivator} - OSGi Activator for the Contact JSON interface.
+ * 
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public final class ImageServiceImpl implements ImageService {
+public class ContactJSONActivator extends AJAXModuleActivator {
+    
+    private static final Class<?>[] NEEDED = new Class[] { ContactInterfaceDiscoveryService.class,
+                                                        ImageService.class };
 
-    /**
-     * Initializes a new {@link ImageServiceImpl}
-     */
-    public ImageServiceImpl() {
-        super();
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return NEEDED;
     }
 
     @Override
-    public ImageData addImageData(final Session session, final ImageDataSource imageSource, final DataArguments imageArguments, final int timeToLive) {
-        return ImageRegistry.getInstance().addImageData(session, imageSource, imageArguments, timeToLive);
-    }
-
-    @Override
-    public ImageData addImageData(final Session session, final ImageDataSource imageSource, final DataArguments imageArguments) {
-        return ImageRegistry.getInstance().addImageData(session, imageSource, imageArguments);
-    }
-
-    @Override
-    public void addImageData(final Session session, final ImageData imageData) {
-        ImageRegistry.getInstance().addImageData(session, imageData);
-    }
-
-    @Override
-    public void clearRegistry() {
-        ImageRegistry.getInstance().clearRegistry();
-    }
-
-    @Override
-    public boolean containsImageData(final Session session, final String uniqueId) {
-        return ImageRegistry.getInstance().containsImageData(session, uniqueId);
-    }
-
-    @Override
-    public ImageData[] getImageData(final Session session) {
-        return ImageRegistry.getInstance().getImageData(session);
-    }
-
-    @Override
-    public ImageData getImageData(final Session session, final String uniqueId) {
-        return ImageRegistry.getInstance().getImageData(session, uniqueId);
-    }
-
-    @Override
-    public String getSessionForUID(final String uniqueId) {
-        return ImageRegistry.getInstance().getSessionForUID(uniqueId);
-    }
-
-    @Override
-    public ImageData getSessionBoundImageData(final String uniqueID) {
-        return ImageRegistry.getInstance().getSessionBoundImageData(uniqueID);
-    }
-
-    @Override
-    public void removeImageData(final Session session) {
-        ImageRegistry.getInstance().removeImageToSessionMappings(session);
+    protected void startBundle() throws Exception {
+        registerModule(new ContactActionFactory(this), "contacts");
+        registerService(ResultConverter.class, new ContactResultConverter(getService(ImageService.class)));
+        registerService(ResultConverter.class, new ContactListResultConverter(getService(ImageService.class)));
     }
 
 }

@@ -651,10 +651,21 @@ public class ContactStringGetter implements ContactSwitcher {
     public Object userfield20(final Object... objects) throws OXException {
 		return stringify(delegate.userfield20(objects));
 	}
+	
+    public Object numberofimages(Object... objects) throws OXException {
+        return stringify(delegate.numberofimages(objects));
+    }
+
+    public Object lastmodifiedofnewestattachment(Object... objects) throws OXException {
+        return stringifyTimestamp((Date)delegate.lastmodifiedofnewestattachment(objects));
+    }
+
+    public Object usecount(Object... objects) throws OXException {
+        return stringify(delegate.usecount(objects));
+    }
 
     @Override
     public boolean _unknownfield(final Contact contact, final String fieldname, final Object value, final Object... additionalObjects) throws OXException {
         return delegate._unknownfield(contact, fieldname, value, additionalObjects);
     }
-
 }
