@@ -133,9 +133,16 @@ public class MailAttachment extends AJAXServlet {
             /*
              * At least expect the same user agent as the one which created the attachment token
              */
-            if (null != token.getUserAgent() && !token.getUserAgent().equals(req.getHeader("user-agent"))) {
-                AttachmentTokenRegistry.getInstance().removeToken(id);
-                throw MailExceptionCode.ATTACHMENT_EXPIRED.create();
+            if (null != token.getUserAgent()) {
+                final String requestUserAgent = req.getHeader("user-agent");
+                if (null == requestUserAgent) {
+                    AttachmentTokenRegistry.getInstance().removeToken(id);
+                    throw MailExceptionCode.ATTACHMENT_EXPIRED.create();
+                }
+                if (!new BrowserDetector(token.getUserAgent()).nearlyEquals(new BrowserDetector(requestUserAgent))) {
+                    AttachmentTokenRegistry.getInstance().removeToken(id);
+                    throw MailExceptionCode.ATTACHMENT_EXPIRED.create();
+                }
             }
             /*
              * Write part to output stream
