@@ -65,38 +65,38 @@ public class UpdateTest extends FolderTest {
 
     public void testRenameFolder() throws Throwable {
         FolderObject folderObj = createFolderObject(userId, "testInsertRenameFolder", FolderObject.TASK, true);
-        int objectId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
+        int objectId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password, context);
 
         folderObj = new FolderObject();
         folderObj.setFolderName("testRenameFolder" + System.currentTimeMillis());
         folderObj.setObjectID(objectId);
         folderObj.setParentFolderID(2);
-        updateFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
+        updateFolder(webCon, folderObj, PROTOCOL + hostName, login, password, context);
 
-        FolderObject loadFolder = loadFolder(webCon, objectId, PROTOCOL + hostName, login, password);
+        FolderObject loadFolder = loadFolder(webCon, objectId, PROTOCOL + hostName, login, password, context);
         compareFolder(folderObj, loadFolder);
     }
 
     public void testMoveFolder() throws Exception {
         FolderObject folderObj = createFolderObject(userId, "testMoveFolder1", FolderObject.TASK, true);
-        final int parentFolderId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
+        final int parentFolderId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password, context);
 
         folderObj = createFolderObject(userId, "testMoveFolder2", FolderObject.TASK, true);
-        final int objectId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
+        final int objectId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password, context);
         folderObj.setObjectID(objectId);
         folderObj.setParentFolderID(parentFolderId);
-        updateFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
+        updateFolder(webCon, folderObj, PROTOCOL + hostName, login, password, context);
 
-        final FolderObject loadFolder = loadFolder(webCon, objectId, PROTOCOL + hostName, login, password);
+        final FolderObject loadFolder = loadFolder(webCon, objectId, PROTOCOL + hostName, login, password, context);
         compareFolder(folderObj, loadFolder);
     }
 
     public void testChangePermissionsOfPrivateFolder() throws Exception {
-        final int userParticipantId = GroupUserTest.searchUser(webCon, userParticipant2, new Date(0), PROTOCOL + hostName, login, password)[0].getInternalUserId();
-        final int groupParticipantId = GroupUserTest.searchGroup(webCon, groupParticipant, new Date(0), PROTOCOL + hostName, login, password)[0].getIdentifier();
+        final int userParticipantId = GroupUserTest.searchUser(webCon, userParticipant2, new Date(0), PROTOCOL + hostName, login, password, context)[0].getInternalUserId();
+        final int groupParticipantId = GroupUserTest.searchGroup(webCon, groupParticipant, new Date(0), PROTOCOL + hostName, login, password, context)[0].getIdentifier();
 
         final FolderObject folderObj = createFolderObject(userId, "testChangePermissionOfPrivateFolder", FolderObject.TASK, false);
-        final int objectId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
+        final int objectId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password, context);
         folderObj.setObjectID(objectId);
 
         final OCLPermission oclp[] = new OCLPermission[3];
@@ -106,18 +106,18 @@ public class UpdateTest extends FolderTest {
 
         folderObj.setPermissionsAsArray( oclp );
 
-        updateFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
+        updateFolder(webCon, folderObj, PROTOCOL + hostName, login, password, context);
 
-        final FolderObject loadFolder = loadFolder(webCon, objectId, PROTOCOL + hostName, login, password);
+        final FolderObject loadFolder = loadFolder(webCon, objectId, PROTOCOL + hostName, login, password, context);
         compareFolder(folderObj, loadFolder);
     }
 
     public void testChangePermissionsOfPublicFolder() throws Exception {
-        final int userParticipantId = GroupUserTest.searchUser(webCon, userParticipant2, new Date(0), PROTOCOL + hostName, login, password)[0].getInternalUserId();
-        final int groupParticipantId = GroupUserTest.searchGroup(webCon, groupParticipant, new Date(0), PROTOCOL + hostName, login, password)[0].getIdentifier();
+        final int userParticipantId = GroupUserTest.searchUser(webCon, userParticipant2, new Date(0), PROTOCOL + hostName, login, password, context)[0].getInternalUserId();
+        final int groupParticipantId = GroupUserTest.searchGroup(webCon, groupParticipant, new Date(0), PROTOCOL + hostName, login, password, context)[0].getIdentifier();
 
         final FolderObject folderObj = createFolderObject(userId, "testChangePermissionOfPublicFolder", FolderObject.TASK, true);
-        final int objectId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
+        final int objectId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password, context);
         folderObj.setObjectID(objectId);
 
         final OCLPermission oclp[] = new OCLPermission[3];
@@ -127,9 +127,9 @@ public class UpdateTest extends FolderTest {
 
         folderObj.setPermissionsAsArray( oclp );
 
-        updateFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
+        updateFolder(webCon, folderObj, PROTOCOL + hostName, login, password, context);
 
-        final FolderObject loadFolder = loadFolder(webCon, objectId, PROTOCOL + hostName, login, password);
+        final FolderObject loadFolder = loadFolder(webCon, objectId, PROTOCOL + hostName, login, password, context);
         compareFolder(folderObj, loadFolder);
     }
 }

@@ -48,7 +48,7 @@ public class Bug6960Test extends AbstractRecurrenceTest {
 		appointmentObj.setUntil(until);
 		appointmentObj.setIgnoreConflicts(true);
 		
-		final int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword());
+		final int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 		
 		final Calendar calendarException = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 		calendarException.setTime(recurrenceDatePosition);
@@ -69,14 +69,14 @@ public class Bug6960Test extends AbstractRecurrenceTest {
 		exceptionAppointmentObject.setParentFolderID(appointmentFolderId);
 		exceptionAppointmentObject.setIgnoreConflicts(true);
 
-		final int exceptionObjectId = updateAppointment(getWebConversation(), exceptionAppointmentObject, objectId, appointmentFolderId, getHostName(), getLogin(), getPassword());
+		final int exceptionObjectId = updateAppointment(getWebConversation(), exceptionAppointmentObject, objectId, appointmentFolderId, getHostName(), getLogin(), getPassword(), context);
 		
-		final Appointment loadAppointment = loadAppointment(getWebConversation(), exceptionObjectId, appointmentFolderId, getHostName(), getLogin(), getPassword());
+		final Appointment loadAppointment = loadAppointment(getWebConversation(), exceptionObjectId, appointmentFolderId, getHostName(), getLogin(), getPassword(), context);
 		final Date modified = loadAppointment.getLastModified();
 		
-		deleteAppointment(getWebConversation(), exceptionObjectId, appointmentFolderId, recurrenceDatePosition, getHostName(), getLogin(), getPassword());
+		deleteAppointment(getWebConversation(), exceptionObjectId, appointmentFolderId, recurrenceDatePosition, getHostName(), getLogin(), getPassword(), context);
 		
-		final Appointment[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, modified, true, true, getHostName(), getLogin(), getPassword());
+		final Appointment[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, modified, true, true, getHostName(), getLogin(), getPassword(), context);
 		boolean found = false;
 		
 		for (int a = 0; a < appointmentArray.length; a++) {
@@ -90,6 +90,6 @@ public class Bug6960Test extends AbstractRecurrenceTest {
 		
 		assertTrue("object id " + exceptionObjectId + " not found in response", found);
 
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 	}
 }

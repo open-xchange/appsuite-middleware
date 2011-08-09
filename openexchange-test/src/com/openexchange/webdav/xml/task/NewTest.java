@@ -70,15 +70,15 @@ public class NewTest extends TaskTest {
 
     public void testNewTask() throws Exception {
         final Task taskObj = createTask("testNewTask");
-        insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
+        insertTask(webCon, taskObj, PROTOCOL + hostName, login, password, context);
     }
 
     public void testNewTaskWithParticipants() throws Exception {
         final Task taskObj = createTask("testNewTaskWithParticipants");
 
-        final int userParticipantId2 = GroupUserTest.getUserId(getWebConversation(), PROTOCOL + getHostName(), userParticipant2, getPassword());
+        final int userParticipantId2 = GroupUserTest.getUserId(getWebConversation(), PROTOCOL + getHostName(), userParticipant2, getPassword(), context);
         assertTrue("user participant not found", userParticipantId2 != -1);
-        final int userParticipantId3 = GroupUserTest.getUserId(getWebConversation(), PROTOCOL + getHostName(), userParticipant3, getPassword());
+        final int userParticipantId3 = GroupUserTest.getUserId(getWebConversation(), PROTOCOL + getHostName(), userParticipant3, getPassword(), context);
         assertTrue("user participant not found", userParticipantId3 != -1);
 
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[1];
@@ -89,24 +89,24 @@ public class NewTest extends TaskTest {
 
         taskObj.setParticipants(participants);
 
-        insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
+        insertTask(webCon, taskObj, PROTOCOL + hostName, login, password, context);
     }
 
     public void testNewTaskWithAlarm() throws Exception {
         final Task taskObj = createTask("testNewTaskWithAlarm");
         taskObj.setAlarm(new Date(startTime.getTime()-(2*dayInMillis)));
-        final int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
+        final int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password, context);
         taskObj.setObjectID(objectId);
-        final Task loadTask = loadTask(getWebConversation(), objectId, taskFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+        final Task loadTask = loadTask(getWebConversation(), objectId, taskFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
         compareObject(taskObj, loadTask);
         final int[][] objectIdAndFolderId = { {objectId, taskFolderId } };
-        deleteTask(getWebConversation(), objectIdAndFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+        deleteTask(getWebConversation(), objectIdAndFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
     }
 
     public void testNewTaskWithUsers() throws Exception {
         final Task taskObj = createTask("testNewTaskWithUsers");
 
-        final int userParticipantId = GroupUserTest.getUserId(getWebConversation(), PROTOCOL + getHostName(), userParticipant2, getPassword());
+        final int userParticipantId = GroupUserTest.getUserId(getWebConversation(), PROTOCOL + getHostName(), userParticipant2, getPassword(), context);
         assertTrue("user participant not found", userParticipantId != -1);
 
         final UserParticipant[] users = new UserParticipant[1];
@@ -116,7 +116,7 @@ public class NewTest extends TaskTest {
 
         taskObj.setUsers(users);
 
-        insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
+        insertTask(webCon, taskObj, PROTOCOL + hostName, login, password, context);
     }
 
     public void testTaskWithPrivateFlagInPublicFolder() throws Exception {
@@ -132,7 +132,7 @@ public class NewTest extends TaskTest {
 
         folderObj.setPermissionsAsArray( permission );
 
-        final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword());
+        final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 
         final Task taskObj = new Task();
         taskObj.setTitle("testTaskWithPrivateFlagInPublicFolder");
@@ -140,8 +140,8 @@ public class NewTest extends TaskTest {
         taskObj.setParentFolderID(parentFolderId);
 
         try {
-            final int objectId = insertTask(getWebConversation(), taskObj, PROTOCOL + getHostName(), getLogin(), getPassword());
-            deleteTask(getWebConversation(), objectId, parentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+            final int objectId = insertTask(getWebConversation(), taskObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+            deleteTask(getWebConversation(), objectId, parentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
             fail("conflict exception expected!");
         } catch (final OXException exc) {
             assertTrue(exc.similarTo(TaskExceptionCode.PRIVATE_FLAG));
@@ -160,12 +160,12 @@ public class NewTest extends TaskTest {
 
         try {
 
-            objectIds = insertTasks(webCon, PROTOCOL + hostName, login, password, tasks);
+            objectIds = insertTasks(webCon, PROTOCOL + hostName, login, password, context, tasks);
 
             int i = 0;
 
             for(final int objectId : objectIds) {
-                final Task task = loadTask(getWebConversation(), objectId, tasks[i].getParentFolderID(), PROTOCOL + getHostName(), getLogin(), getPassword());
+                final Task task = loadTask(getWebConversation(), objectId, tasks[i].getParentFolderID(), PROTOCOL + getHostName(), getLogin(), getPassword(), context);
                 tasks[i].setObjectID(objectId);
                 compareObject(task, tasks[i]);
                 i++;
@@ -177,7 +177,7 @@ public class NewTest extends TaskTest {
                 int i = 0;
                 try {
                     for(final int objectId : objectIds) {
-                        deleteTask(getWebConversation(), objectId, tasks[i].getParentFolderID(), PROTOCOL + getHostName(), getLogin(), getPassword());
+                        deleteTask(getWebConversation(), objectId, tasks[i].getParentFolderID(), PROTOCOL + getHostName(), getLogin(), getPassword(), context);
                         i++;
                     }
                 } catch (final Exception x) {

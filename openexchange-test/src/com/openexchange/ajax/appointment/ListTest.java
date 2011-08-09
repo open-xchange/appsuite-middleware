@@ -207,7 +207,7 @@ public class ListTest extends AppointmentTest {
 
         folderObj.setPermissionsAsArray( permission );
 
-        final int publicFolderId = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, getHostName(), getLogin(), getPassword());
+        final int publicFolderId = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, getHostName(), getLogin(), getPassword(), "");
 
         final Calendar c = Calendar.getInstance();
         c.setTimeZone(TimeZone.getTimeZone("UTC"));

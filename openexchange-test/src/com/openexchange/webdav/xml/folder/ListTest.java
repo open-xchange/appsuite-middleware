@@ -64,35 +64,35 @@ public class ListTest extends FolderTest {
 
     public void testPropFindWithModified() throws Exception {
         FolderObject folderObj = createFolderObject(userId, "testPropFindWithModified1", FolderObject.CONTACT, false);
-        final int objectId1 = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
+        final int objectId1 = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password, context);
         folderObj = createFolderObject(userId, "testPropFindWithModified2", FolderObject.TASK, false);
-        insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
+        insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password, context);
 
-        final FolderObject loadFolder = loadFolder(webCon, objectId1, getHostName(), getLogin(), getPassword());
+        final FolderObject loadFolder = loadFolder(webCon, objectId1, getHostName(), getLogin(), getPassword(), context);
         final Date modified = loadFolder.getLastModified();
 
-        final FolderObject[] folderArray = listFolder(webCon, decrementDate(modified), true, false, PROTOCOL + hostName, login, password);
+        final FolderObject[] folderArray = listFolder(webCon, decrementDate(modified), true, false, PROTOCOL + hostName, login, password, context);
 
         assertTrue("expected response size is >= 2", folderArray.length >= 2);
     }
 
     public void testPropFindWithDeleted() throws Exception {
         FolderObject folderObj = createFolderObject(userId, "testPropFindWithDeleted1", FolderObject.CALENDAR, false);
-        final int objectId1 = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
+        final int objectId1 = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password, context);
         folderObj = createFolderObject(userId, "testPropFindWithDeleted2", FolderObject.CONTACT, false);
-        final int objectId2 = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
+        final int objectId2 = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password, context);
 
         // prevent master/slave problem
         Thread.sleep(1000);
 
-        final FolderObject loadFolder = loadFolder(webCon, objectId1, getHostName(), getLogin(), getPassword());
+        final FolderObject loadFolder = loadFolder(webCon, objectId1, getHostName(), getLogin(), getPassword(), context);
         final Date modified = loadFolder.getLastModified();
 
         final int[] id = { objectId1, objectId2 };
 
-        deleteFolder(webCon, id, PROTOCOL + hostName, login, password);
+        deleteFolder(webCon, id, PROTOCOL + hostName, login, password, context);
 
-        final FolderObject[] folderArray = listFolder(webCon, decrementDate(modified), false, true, PROTOCOL + hostName, login, password);
+        final FolderObject[] folderArray = listFolder(webCon, decrementDate(modified), false, true, PROTOCOL + hostName, login, password, context);
 
         assertTrue("expected response size is < 2", folderArray.length >= 2);
     }
@@ -110,11 +110,11 @@ public class ListTest extends FolderTest {
 
         folderObj.setPermissionsAsArray( permission );
 
-        final int objectId = insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword());
+        final int objectId = insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 
-        loadFolder(getWebConversation(), objectId, PROTOCOL + getHostName(), getLogin(), getPassword());
+        loadFolder(getWebConversation(), objectId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 
-        deleteFolder(getWebConversation(), new int[] { objectId }, PROTOCOL + getHostName(), getLogin(), getPassword());
+        deleteFolder(getWebConversation(), new int[] { objectId }, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
     }
 
     public void testPropFindWithObjectIdOnPublicFolder() throws Exception {
@@ -130,11 +130,11 @@ public class ListTest extends FolderTest {
 
         folderObj.setPermissionsAsArray( permission );
 
-        final int objectId = insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword());
+        final int objectId = insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 
-        loadFolder(getWebConversation(), objectId, PROTOCOL + getHostName(), getLogin(), getPassword());
+        loadFolder(getWebConversation(), objectId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 
-        deleteFolder(getWebConversation(), new int[] { objectId }, PROTOCOL + getHostName(), getLogin(), getPassword());
+        deleteFolder(getWebConversation(), new int[] { objectId }, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
     }
 
     public void testObjectNotFound() throws Exception {
@@ -150,16 +150,16 @@ public class ListTest extends FolderTest {
 
         folderObj.setPermissionsAsArray( permission );
 
-        final int objectId = insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword());
+        final int objectId = insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 
         try {
-            loadFolder(getWebConversation(), (objectId+1000), PROTOCOL + getHostName(), getLogin(), getPassword());
+            loadFolder(getWebConversation(), (objectId+1000), PROTOCOL + getHostName(), getLogin(), getPassword(), context);
             fail("object not found exception expected!");
         } catch (final OXException exc) {
             assertExceptionMessage(exc.getMessage(), XmlServlet.OBJECT_NOT_FOUND_STATUS);
         }
 
-        deleteFolder(getWebConversation(), new int[] { objectId }, PROTOCOL + getHostName(), getLogin(), getPassword());
+        deleteFolder(getWebConversation(), new int[] { objectId }, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
     }
 
     public void testList() throws Exception {
@@ -174,7 +174,7 @@ public class ListTest extends FolderTest {
         };
         folderObj.setPermissionsAsArray(permission);
 
-        final int objectId = insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword());
+        final int objectId = insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 
         final int[] idArray = listFolder(getWebConversation(), getHostName(), getLogin(), getPassword());
 
@@ -187,6 +187,6 @@ public class ListTest extends FolderTest {
         }
 
         assertTrue("id " + objectId + " not found in response", found);
-        deleteFolder(getWebConversation(), new int[] { objectId }, PROTOCOL + getHostName(), getLogin(), getPassword());
+        deleteFolder(getWebConversation(), new int[] { objectId }, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
     }
 }

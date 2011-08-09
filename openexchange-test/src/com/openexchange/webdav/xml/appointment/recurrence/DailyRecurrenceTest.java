@@ -25,18 +25,18 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
 		appointmentObj.setInterval(1);
 		appointmentObj.setUntil(until);
 		appointmentObj.setIgnoreConflicts(true);
-		final int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword());
+		final int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 		
 		appointmentObj.setObjectID(objectId);
-		Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+		Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 		compareObject(appointmentObj, loadAppointment);
 		
 		final Date modified = loadAppointment.getLastModified();
 		
-		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, decrementDate(modified), getHostName(), getLogin(), getPassword());
+		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, decrementDate(modified), getHostName(), getLogin(), getPassword(), context);
 		compareObject(appointmentObj, loadAppointment);
 		
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 	}	
 	
 	public void testDailyRecurrenceFromSummer2WinterTime() throws Exception {
@@ -55,17 +55,17 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
 		appointmentObj.setInterval(1);
 		appointmentObj.setUntil(until);
 		appointmentObj.setIgnoreConflicts(true);
-		final int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword());
+		final int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 		
 		appointmentObj.setObjectID(objectId);
-		Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+		Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 		compareObject(appointmentObj, loadAppointment);
 		
 		final Date modified = loadAppointment.getLastModified();
 		
-		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, decrementDate(modified), getHostName(), getLogin(), getPassword());
+		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, decrementDate(modified), getHostName(), getLogin(), getPassword(), context);
 		compareObject(appointmentObj, loadAppointment);
 		
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 	}	
 }

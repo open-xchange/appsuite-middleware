@@ -73,7 +73,7 @@ public class Bug12050Test extends AppointmentTest {
     public void setUp() throws Exception {
         super.setUp();
 
-        FolderTest.clearFolder(webCon, new int[] {appointmentFolderId}, new String[] {"calendar"}, new Date(), PROTOCOL + hostName, login, password);
+        FolderTest.clearFolder(webCon, new int[] {appointmentFolderId}, new String[] {"calendar"}, new Date(), PROTOCOL + hostName, login, password, context);
         
         appointment = new Appointment();
         appointment.setTitle("testBug12050");
@@ -107,20 +107,20 @@ public class Bug12050Test extends AppointmentTest {
     @Override
     public void tearDown() throws Exception {
         if (objectId  != -1) {
-            deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+            deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
         }
         
         super.tearDown();
     }
     
     private void createAppointment() throws Exception {
-        objectId = insertAppointment(getWebConversation(), appointment, PROTOCOL + getHostName(), getLogin(), getPassword());
+        objectId = insertAppointment(getWebConversation(), appointment, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
         appointment.setObjectID(objectId);
     }
     
     private void createException() throws Exception {
         exception.setLastModified(appointment.getLastModified());
-        int exceptionId = updateAppointment(getWebConversation(), exception, objectId, appointmentFolderId, getHostName(), getLogin(), getPassword());
+        int exceptionId = updateAppointment(getWebConversation(), exception, objectId, appointmentFolderId, getHostName(), getLogin(), getPassword(), context);
         exception.setObjectID(exceptionId);
     }
     
@@ -128,7 +128,7 @@ public class Bug12050Test extends AppointmentTest {
         exceptionUpdate.setLastModified(exception.getLastModified());
         exceptionUpdate.setObjectID(exception.getObjectID());
         try {
-            updateAppointment(getWebConversation(), exceptionUpdate, exception.getObjectID(), appointmentFolderId, getHostName(), getLogin(), getPassword());
+            updateAppointment(getWebConversation(), exceptionUpdate, exception.getObjectID(), appointmentFolderId, getHostName(), getLogin(), getPassword(), context);
         } catch (OXException e) {
             fail(e.getMessage());
         }

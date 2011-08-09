@@ -107,11 +107,11 @@ public class NewTest extends ContactTest {
         attachmentObj.setFileMIMEType("plain/text");
 
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream("t1".getBytes());
-        com.openexchange.webdav.xml.AttachmentTest.insertAttachment(getWebConversation(), attachmentObj, byteArrayInputStream, getHostName(), getLogin(), getPassword());
+        com.openexchange.webdav.xml.AttachmentTest.insertAttachment(getWebConversation(), attachmentObj, byteArrayInputStream, getHostName(), getLogin(), getPassword(), "");
         contactObj.setNumberOfAttachments(1);
 
         byteArrayInputStream = new ByteArrayInputStream("t2".getBytes());
-        com.openexchange.webdav.xml.AttachmentTest.insertAttachment(getWebConversation(), attachmentObj, byteArrayInputStream, getHostName(), getLogin(), getPassword());
+        com.openexchange.webdav.xml.AttachmentTest.insertAttachment(getWebConversation(), attachmentObj, byteArrayInputStream, getHostName(), getLogin(), getPassword(), "");
         contactObj.setNumberOfAttachments(2);
 
         final Contact loadContact = ContactTest.loadContact(getWebConversation(), objectId, contactFolderId, PROTOCOL, getHostName(), getSessionId());

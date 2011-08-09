@@ -36,13 +36,13 @@ public class Bug5933Test extends AppointmentTest {
 		
 		folderObj.setPermissionsAsArray( permission );
 		
-		final int newFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, getHostName(), getLogin(), getPassword());
+		final int newFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, getHostName(), getLogin(), getPassword(), context);
 		
 		final Appointment appointmentObj = createAppointmentObject("Bug5933Test");
 		appointmentObj.setParentFolderID(newFolderId);
 		appointmentObj.setIgnoreConflicts(true);
 		
-		folderObj = FolderTest.getAppointmentDefaultFolder(getSecondWebConversation(), getHostName(), getSecondLogin(), getPassword());
+		folderObj = FolderTest.getAppointmentDefaultFolder(getSecondWebConversation(), getHostName(), getSecondLogin(), getPassword(), context);
 		final int secondUserId = folderObj.getCreatedBy();
 				
 		final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[1];
@@ -51,13 +51,13 @@ public class Bug5933Test extends AppointmentTest {
 		
 		appointmentObj.setParticipants(participants);
 		
-		final int objectId = insertAppointment(getWebConversation(), appointmentObj, getHostName(), getLogin(), getPassword());
+		final int objectId = insertAppointment(getWebConversation(), appointmentObj, getHostName(), getLogin(), getPassword(), context);
 		appointmentObj.setObjectID(objectId);
 		
-		final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, newFolderId, getHostName(), getLogin(), getPassword());
+		final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, newFolderId, getHostName(), getLogin(), getPassword(), context);
 		compareObject(appointmentObj, loadAppointment);
 	
-		deleteAppointment(getWebConversation(), objectId, newFolderId, getHostName(), getLogin(), getPassword());
-		FolderTest.deleteFolder(getWebConversation(), new int[] { newFolderId }, getHostName(), getLogin(), getPassword());
+		deleteAppointment(getWebConversation(), objectId, newFolderId, getHostName(), getLogin(), getPassword(), context);
+		FolderTest.deleteFolder(getWebConversation(), new int[] { newFolderId }, getHostName(), getLogin(), getPassword(), context);
 	}
 }

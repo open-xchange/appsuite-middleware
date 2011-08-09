@@ -17,7 +17,7 @@ public class ConfirmTest extends TaskTest {
 	}
 	
 	public void testConfirm() throws Exception {
-		final FolderObject sharedFolderObject = FolderTest.getTaskDefaultFolder(getSecondWebConversation(), PROTOCOL + getHostName(), getSecondLogin(), getPassword());
+		final FolderObject sharedFolderObject = FolderTest.getTaskDefaultFolder(getSecondWebConversation(), PROTOCOL + getHostName(), getSecondLogin(), getPassword(), context);
 		final int secondUserId = sharedFolderObject.getCreatedBy();
 		
         final Task TaskObj = createTask("testConfirm");
@@ -27,11 +27,11 @@ public class ConfirmTest extends TaskTest {
 		
 		TaskObj.setParticipants(participants);
 
-        final int objectId = insertTask(getWebConversation(), TaskObj, PROTOCOL + getHostName(), getLogin(), getPassword());
+        final int objectId = insertTask(getWebConversation(), TaskObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 
-        confirmTask(getSecondWebConversation(), objectId, Task.ACCEPT, null, PROTOCOL + getHostName(), getSecondLogin(), getPassword());
+        confirmTask(getSecondWebConversation(), objectId, Task.ACCEPT, null, PROTOCOL + getHostName(), getSecondLogin(), getPassword(), context);
 		
-		final Task loadTask = loadTask(getWebConversation(), objectId, taskFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+		final Task loadTask = loadTask(getWebConversation(), objectId, taskFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 		
 		boolean found = false;
 		
@@ -45,7 +45,7 @@ public class ConfirmTest extends TaskTest {
 		
 		assertTrue("user participant with id " + secondUserId + " not found", found);
 		
-        deleteTask(getWebConversation(), new int[][] { { objectId, taskFolderId } }, PROTOCOL + getHostName(), getLogin(), getPassword());
+        deleteTask(getWebConversation(), new int[][] { { objectId, taskFolderId } }, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 	}
 	
 }
