@@ -167,12 +167,12 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     /**
      * State flag.
      */
-    private boolean started = false;
+    private volatile boolean started = false;
 
     /**
      * Error flag.
      */
-    protected boolean error = false;
+    protected volatile boolean error = false;
 
     /**
      * Socket associated with the current connection.
@@ -222,22 +222,22 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     /**
      * Body empty flag.
      */
-    protected boolean empty = true;
+    protected volatile boolean empty = true;
 
     /**
      * First read.
      */
-    protected boolean first = true;
+    protected volatile boolean first = true;
 
     /**
      * Replay read.
      */
-    private boolean replay = false;
+    private volatile boolean replay = false;
 
     /**
      * Finished response.
      */
-    private boolean finished = false;
+    private volatile boolean finished = false;
 
     /**
      * The HTTP session (JSESSIONID) cookie.
