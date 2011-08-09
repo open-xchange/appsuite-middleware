@@ -121,7 +121,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     /**
      * The current processor stage.
      */
-    private int stage;
+    private volatile int stage;
 
     /**
      * Associated servlet.
