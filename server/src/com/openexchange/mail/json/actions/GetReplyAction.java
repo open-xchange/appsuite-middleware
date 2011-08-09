@@ -49,9 +49,7 @@
 
 package com.openexchange.mail.json.actions;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -59,13 +57,11 @@ import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.Log;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailRequest;
-import com.openexchange.mail.json.writer.MessageWriter;
 import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
@@ -75,11 +71,6 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class GetReplyAction extends AbstractMailAction {
-
-    private static final org.apache.commons.logging.Log LOG =
-        Log.valueOf(org.apache.commons.logging.LogFactory.getLog(GetReplyAction.class));
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     /**
      * Initializes a new {@link GetReplyAction}.
@@ -142,24 +133,14 @@ public final class GetReplyAction extends AbstractMailAction {
             /*
              * Overwrite settings with request's parameters
              */
-            final DisplayMode displayMode = detectDisplayMode(true, view, usmNoSave);
+            detectDisplayMode(true, view, usmNoSave);
             /*
              * Get mail interface
              */
             final MailServletInterface mailInterface = getMailInterface(req);
-            final List<OXException> warnings = new ArrayList<OXException>(2);
-            final AJAXRequestResult data =
-                new AJAXRequestResult(MessageWriter.writeMailMessage(
-                    mailInterface.getAccountID(),
-                    mailInterface.getReplyMessageForDisplay(folderPath, uid, false, usmNoSave),
-                    displayMode,
-                    session,
-                    usmNoSave,
-                    warnings,
-                    false,
-                    -1), "json");
-            data.addWarnings(warnings);
-            return data;
+            final MailMessage mail = mailInterface.getReplyMessageForDisplay(folderPath, uid, false, usmNoSave);
+            mail.setAccountId(mailInterface.getAccountID());
+            return new AJAXRequestResult(mail, "mail");
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }

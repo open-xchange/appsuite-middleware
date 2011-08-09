@@ -268,6 +268,20 @@ public final class GetAction extends AbstractMailAction {
                     }
                 }
             } else {
+//                tmp = req.getParameter(Mail.PARAMETER_EDIT_DRAFT);
+//                final boolean editDraft = ("1".equals(tmp) || Boolean.parseBoolean(tmp));
+//                tmp = req.getParameter(Mail.PARAMETER_VIEW);
+//                final String view = null == tmp ? null : tmp.toLowerCase(Locale.ENGLISH);
+//                tmp = null;
+//                final UserSettingMail usmNoSave = (UserSettingMail) session.getUserSettingMail().clone();
+//                /*
+//                 * Deny saving for this request-specific settings
+//                 */
+//                usmNoSave.setNoSave(true);
+//                /*
+//                 * Overwrite settings with request's parameters
+//                 */
+//                detectDisplayMode(editDraft, view, usmNoSave);
                 /*
                  * Get message
                  */
@@ -275,6 +289,7 @@ public final class GetAction extends AbstractMailAction {
                 if (mail == null) {
                     throw MailExceptionCode.MAIL_NOT_FOUND.create(uid, folderPath);
                 }
+                mail.setAccountId(mailInterface.getAccountID());
                 data = new AJAXRequestResult(mail, "mail");
             }
             data.addWarnings(warnings);

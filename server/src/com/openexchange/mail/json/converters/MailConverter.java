@@ -119,12 +119,16 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                 result.setResultObject(JSONObject.NULL, "json");
                 return;
             }
+            final String action = request.getParameter("action");
             if (resultObject instanceof MailMessage) {
-                convertSingle((MailMessage) resultObject, request, result, session);
+                final MailMessage mail = (MailMessage) resultObject;
+                if (Mail.ACTION_GET.equals(action)) {
+                    convertSingle4Get(mail, request, result, session);
+                } else {
+                    convertSingle(mail, request, result, session);
+                }
             } else {
-                @SuppressWarnings("unchecked")
-                final Collection<MailMessage> mails = (Collection<MailMessage>) resultObject;
-                final String action = request.getParameter("action");
+                @SuppressWarnings("unchecked") final Collection<MailMessage> mails = (Collection<MailMessage>) resultObject;
                 if (Mail.ACTION_ALL.equalsIgnoreCase(action)) {
                     convertMultiple4All(mails, request, result, session);
                 } else if (Mail.ACTION_LIST.equalsIgnoreCase(action)) {
@@ -234,7 +238,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         result.setResultObject(jsonWriter.getObject(), "json");
     }
 
-    private void convertSingle(final MailMessage mail, final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session) throws OXException {
+    private void convertSingle4Get(final MailMessage mail, final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session) throws OXException {
         String tmp = request.getParameter(Mail.PARAMETER_EDIT_DRAFT);
         final boolean editDraft = ("1".equals(tmp) || Boolean.parseBoolean(tmp));
         tmp = request.getParameter(Mail.PARAMETER_VIEW);
@@ -274,7 +278,8 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         final MailServletInterface mailInterface = getMailInterface(request, session);
         final List<OXException> warnings = new ArrayList<OXException>(2);
         result.setResultObject(
-            MessageWriter.writeMailMessage(mailInterface.getAccountID(), mail, displayMode, session, usmNoSave, warnings, token, ttlMillis), "json");
+            MessageWriter.writeMailMessage(mail.getAccountId(), mail, displayMode, session, usmNoSave, warnings, token, ttlMillis),
+            "json");
         if (doUnseen) {
             /*-
              * Leave mail as unseen
@@ -309,7 +314,25 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                 LOG.warn("Contact collector could not be triggered.", e);
             }
         }
+    }
 
+    private void convertSingle(final MailMessage mail, final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session) throws OXException {
+        String view = request.getParameter(Mail.PARAMETER_VIEW);
+        view = null == view ? null : view.toLowerCase(Locale.US);
+        final UserSettingMail usmNoSave = (UserSettingMail) session.getUserSettingMail().clone();
+        /*
+         * Deny saving for this request-specific settings
+         */
+        usmNoSave.setNoSave(true);
+        /*
+         * Overwrite settings with request's parameters
+         */
+        final DisplayMode displayMode = AbstractMailAction.detectDisplayMode(true, view, usmNoSave);
+        final List<OXException> warnings = new ArrayList<OXException>(2);
+        final JSONObject jsonObject =
+            MessageWriter.writeMailMessage(mail.getAccountId(), mail, displayMode, session, usmNoSave, warnings, false, -1);
+        result.addWarnings(warnings);
+        result.setResultObject(jsonObject, "json");
     }
 
     private MailServletInterface getMailInterface(final AJAXRequestData request, final ServerSession session) throws OXException {
