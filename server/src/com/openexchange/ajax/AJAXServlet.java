@@ -446,7 +446,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         return (req.getParameter(name) != null);
     }
 
-    private static final boolean BYTE_BASED_READING = false;
+    private static final boolean BYTE_BASED_READING = true;
 
     /**
      * 2K buffer
@@ -461,7 +461,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     /**
      * Returns the complete body as a string. Be careful when getting big request bodies.
      *
-     * @param req The HTTP servlet request.
+     * @param req The HTTP servlet request to read from
      * @return A string with the complete body.
      * @throws IOException If an error occurs while reading the body.
      */
