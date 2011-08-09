@@ -67,7 +67,7 @@ public final class TaskRequest {
     /**
      * Constant for not-found number.
      */
-    public static final int NOT_FOUND = -9999;
+    public static final int NOT_FOUND = -1;
 
     private final ServerSession session;
 
@@ -196,7 +196,7 @@ public final class TaskRequest {
         return session;
     }
 
-    public int[] checkIntArray(String parameterColumns) throws OXException {
+    public int[] checkIntArray(final String parameterColumns) throws OXException {
         return TaskRequestTools.checkIntArray(request, parameterColumns);
     }
 }
