@@ -326,7 +326,7 @@ public class AJAXRequestData {
         } catch (final RuntimeException e) {
             /*
              * Auto-unboxing may lead to NullPointerExceptions or NumberFormatExceptions if e.g. null or "Hello" should be coerced to an
-             * integer value.
+             * integer value. Handle RuntimeException here to cover all possible non-declarable exceptions.
              */
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, null == value ? "null" : value);
         }
