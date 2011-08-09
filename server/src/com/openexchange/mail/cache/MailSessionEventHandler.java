@@ -155,13 +155,6 @@ public final class MailSessionEventHandler implements EventHandler {
             } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             }
-            /*
-             * JSON message cache
-             */
-            final JSONMessageCache cache = JSONMessageCache.getInstance();
-            if (null != cache) {
-                cache.removeUser(userId, contextId);
-            }
             if (DEBUG) {
                 LOG.debug(new StringBuilder("All session-related caches cleared for removed session ").append(session.getSessionID()).toString());
             }
