@@ -58,7 +58,9 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.exception.OXException;
 import com.openexchange.push.PushListener;
+import com.openexchange.push.PushUtility;
 import com.openexchange.push.imapidle.services.ImapIdleServiceRegistry;
+import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.Collections;
 
@@ -159,7 +161,7 @@ public final class ImapIdlePushListenerRegistry {
      * @param pushListener The push listener to add
      * @return <code>true</code> if push listener service could be successfully added; otherwise <code>false</code>
      */
-    public boolean addPushListener(final int contextId, final int userId, final String sessionId, final ImapIdlePushListener pushListener) {
+    public boolean addPushListener(final int contextId, final int userId, final ImapIdlePushListener pushListener) {
         if (!enabled.get()) {
             return false;
         }
@@ -174,16 +176,28 @@ public final class ImapIdlePushListenerRegistry {
      * @param contextId The context identifier
      * @param userId The user identifier
      * @return <code>true</code> if a push listener for given user-context-pair was found and removed; otherwise <code>false</code>
+     * @throws PushException 
      */
-    public boolean removePushListener(final int contextId, final int userId, final String sessionId) {
+    public boolean removePushListener(final int contextId, final int userId) throws OXException {
         final SessiondService sessiondService = ImapIdleServiceRegistry.getServiceRegistry().getService(SessiondService.class);
-        if (null == sessiondService || 0 == sessiondService.getUserSessions(userId, contextId)) {
-            /*
-             * No sessions left associated with user.
-             */
-            return removeListeners(SimpleKey.valueOf(contextId, userId));
+        SimpleKey key = SimpleKey.valueOf(contextId, userId);
+        // Bind ImapIdlePushListener to another session because of password change issues.
+        Session session = null;
+        Iterator<Session> iter = sessiondService.getSessions(userId, contextId).iterator();
+        while (iter.hasNext() && session == null) {
+            final Session tmp = iter.next();
+            if (PushUtility.allowedClient(tmp.getClient())) {
+                session = tmp;
+            }
         }
-        return removeListener(SimpleKey.valueOf(contextId, userId), sessionId);
+        if (null != session) {
+            removeListener(key);
+            final ImapIdlePushListener pushListener = ImapIdlePushListener.newInstance(session);
+            final ImapIdlePushListener removed = map.putIfAbsent(key, pushListener);
+            pushListener.open();
+            return null == removed;
+        }
+        return removeListener(key);
     }
 
     /**
@@ -194,7 +208,7 @@ public final class ImapIdlePushListenerRegistry {
      * @return <code>true</code> if a push listener for given user-context-pair was found and purged; otherwise <code>false</code>
      */
     public boolean purgeUserPushListener(final int contextId, final int userId) {
-        return removeListeners(SimpleKey.valueOf(contextId, userId));
+        return removeListener(SimpleKey.valueOf(contextId, userId));
     }
 
     /**
@@ -210,20 +224,10 @@ public final class ImapIdlePushListenerRegistry {
         return true;
     }
 
-    private boolean removeListeners(final SimpleKey key) {
+    private boolean removeListener(final SimpleKey key) {
         ImapIdlePushListener listener = map.remove(key);
         if (null != listener) {
             listener.close();
-        }
-        return true;
-    }
-
-    private boolean removeListener(final SimpleKey key, final String sessionId) {
-        ImapIdlePushListener listener = map.get(key);
-        if (null != listener) {
-            if (listener.getSession().getSessionID().equals(sessionId)) {
-                listener.close();
-            }
         }
         return true;
     }
