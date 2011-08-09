@@ -56,6 +56,7 @@ import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.Lock;
@@ -195,9 +196,10 @@ public abstract class SessionServlet extends AJAXServlet {
         final String sessionId = getSessionId(req);
         final ServerSession session = getSession(req, sessionId, sessiondService);
         if (LogProperties.isEnabled()) {
-            LogProperties.putLogProperty("com.openexchange.session.sessionId", sessionId);
-            LogProperties.putLogProperty("com.openexchange.session.userId", Integer.valueOf(session.getUserId()));
-            LogProperties.putLogProperty("com.openexchange.session.contextId", Integer.valueOf(session.getContextId()));
+            final Map<String, Object> properties = LogProperties.getLogProperties();
+            properties.put("com.openexchange.session.sessionId", sessionId);
+            properties.put("com.openexchange.session.userId", Integer.valueOf(session.getUserId()));
+            properties.put("com.openexchange.session.contextId", Integer.valueOf(session.getContextId()));
         }
         if (!sessionId.equals(session.getSessionID())) {
             throw SessionExceptionCodes.WRONG_SESSION.create();
