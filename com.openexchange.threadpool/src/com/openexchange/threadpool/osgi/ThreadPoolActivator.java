@@ -59,6 +59,8 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogProperties;
+import com.openexchange.log.LogPropertyName;
+import com.openexchange.log.LogPropertyName.LogLevel;
 import com.openexchange.log.LogService;
 import com.openexchange.log.internal.LogServiceImpl;
 import com.openexchange.management.ManagementService;
@@ -155,10 +157,44 @@ public final class ThreadPoolActivator extends DeferredActivator {
         final ConfigurationService service = getService(ConfigurationService.class);
         final String property = service.getProperty("com.openexchange.log.propertyNames");
         if (null == property) {
-            LogProperties.configuredProperties(Collections.<String> emptyList());
+            LogProperties.configuredProperties(Collections.<LogPropertyName> emptyList());
         } else {
-            LogProperties.configuredProperties(Arrays.asList(property.split(" *, *")));
+            final List<String> list = Arrays.asList(property.split(" *, *"));
+            final List<LogPropertyName> names = new ArrayList<LogPropertyName>(list.size());
+            for (final String configuredName : list) {
+                if (!isEmpty(configuredName)) {
+                    final int pos = configuredName.indexOf('(');
+                    if (pos < 0) {
+                        names.add(new LogPropertyName(configuredName, LogLevel.ALL));
+                    } else {
+                        final String propertyName = configuredName.substring(0, pos);
+                        if (!isEmpty(propertyName)) {
+                            final int closing = configuredName.indexOf(')', pos + 1);
+                            if (closing < 0) { // No closing parenthesis
+                                names.add(new LogPropertyName(propertyName, LogLevel.ALL));
+                            } else {
+                                names.add(new LogPropertyName(
+                                    propertyName,
+                                    LogLevel.logLevelFor(configuredName.substring(pos + 1, closing))));
+                            }
+                        }
+                    }
+                }
+            }
+            LogProperties.configuredProperties(names);
         }
+    }
+
+    private static boolean isEmpty(final String s) {
+        if (s.length() == 0) {
+            return true;
+        }
+        boolean retval = true;
+        final char[] chars = s.toCharArray();
+        for (int i = 0; i < chars.length && retval; i++) {
+            retval = Character.isWhitespace(chars[i]);
+        }
+        return retval;
     }
 
     @Override
