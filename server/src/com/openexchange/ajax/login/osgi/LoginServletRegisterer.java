@@ -125,6 +125,7 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer {
             addProperty(params, ConfigurationProperty.HTTP_AUTH_VERSION);
             addProperty(params, ConfigurationProperty.ERROR_PAGE_TEMPLATE);
             addProperty(params, ConfigurationProperty.INSECURE);
+            addProperty(params, ConfigurationProperty.REDIRECT_IP_CHANGE_ALLOWED);
             try {
                 LOG.info("Registering login servlet.");
                 httpService.registerServlet(SERVLET_PATH, new Login(), params, null);
