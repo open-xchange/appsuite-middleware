@@ -617,19 +617,19 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
          */
         error = false;
         final Thread thread = this.thread = Thread.currentThread();
-        if (LogProperties.isEnabled()) {
-            /*
-             * Gather logging info
-             */
-            final Map<String, Object> properties = LogProperties.getLogProperties();
-            properties.put("com.openexchange.ajp13.threadName", thread.getName());
-            properties.put("com.openexchange.ajp13.remotePort", Integer.valueOf(socket.getPort()));
-            properties.put("com.openexchange.ajp13.remoteAddress", socket.getInetAddress().getHostAddress());
-        }
         while (started && !error && !thread.isInterrupted()) {
             /*
              * Parsing the request header
              */
+            if (LogProperties.isEnabled()) {
+                /*
+                 * Gather logging info
+                 */
+                final Map<String, Object> properties = LogProperties.getLogProperties();
+                properties.put("com.openexchange.ajp13.threadName", thread.getName());
+                properties.put("com.openexchange.ajp13.remotePort", Integer.valueOf(socket.getPort()));
+                properties.put("com.openexchange.ajp13.remoteAddress", socket.getInetAddress().getHostAddress());
+            }
             try {
                 stage = STAGE_AWAIT;
                 listenerMonitor.incrementNumWaiting();
@@ -781,6 +781,12 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             // request.updateCounters();
             stage = STAGE_KEEPALIVE;
             recycle();
+            /*
+             * Drop logging info
+             */
+            if (LogProperties.isEnabled()) {
+                LogProperties.removeLogProperties();
+            }
         }
         /*
          * Terminate AJP connection
