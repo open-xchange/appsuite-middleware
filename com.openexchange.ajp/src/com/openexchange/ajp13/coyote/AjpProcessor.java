@@ -1147,6 +1147,9 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 request.setQueryString(queryString);
                 try {
                     parseQueryString(queryString);
+                    if (DEBUG && isEASPingCommand()) {
+                        LOG.debug("Incoming long-running EAS ping request.");
+                    }
                 } catch (final UnsupportedEncodingException e) {
                     throw new IllegalStateException(e.getMessage(), e);
                 }
