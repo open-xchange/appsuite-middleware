@@ -55,16 +55,16 @@ import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 
 
 /**
- * {@link ManagedfFileJSONActivator}
+ * {@link ManagedFileJSONActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ManagedfFileJSONActivator extends AJAXModuleActivator {
+public final class ManagedFileJSONActivator extends AJAXModuleActivator {
 
     /**
-     * Initializes a new {@link ManagedfFileJSONActivator}.
+     * Initializes a new {@link ManagedFileJSONActivator}.
      */
-    public ManagedfFileJSONActivator() {
+    public ManagedFileJSONActivator() {
         super();
     }
 
