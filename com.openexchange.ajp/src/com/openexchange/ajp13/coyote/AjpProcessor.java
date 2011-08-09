@@ -650,7 +650,10 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     break;
                 }
                 if (DEBUG) {
-                    LOG.debug("First AJP message successfully read from stream. Prefix code=" + requestHeaderMessage.peekByte() + "(" + Constants.JK_AJP13_CPING_REQUEST + "=CPing," + Constants.JK_AJP13_FORWARD_REQUEST + "=Forward-Request)");
+                    final byte prefixCode = requestHeaderMessage.peekByte();
+                    final String ajpReqName =
+                        Constants.JK_AJP13_CPING_REQUEST == prefixCode ? "CPing" : (Constants.JK_AJP13_FORWARD_REQUEST == prefixCode ? "Forward-Request" : "unknown");
+                    LOG.debug("First " + ajpReqName + " AJP message successfully read from stream.");
                 }
                 /*
                  * Set back timeout if keep alive timeout is enabled
