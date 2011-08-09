@@ -316,10 +316,20 @@ public class AJAXRequestData {
      * 
      * @param name The parameter name
      * @param coerceTo The type the parameter should be interpreted as
-     * @return
+     * @return The coerced value
+     * @throws OXException if coercion fails
      */
-    public <T> T getParameter(final String name, final Class<T> coerceTo) {
-        return ServerServiceRegistry.getInstance().getService(StringParser.class).parse(getParameter(name), coerceTo);
+    public <T> T getParameter(final String name, final Class<T> coerceTo) throws OXException {
+        final String value = getParameter(name);
+        try {
+            return ServerServiceRegistry.getInstance().getService(StringParser.class).parse(value, coerceTo);
+        } catch (final RuntimeException e) {
+            /*
+             * Auto-unboxing may lead to NullPointerExceptions or NumberFormatExceptions if e.g. null or "Hello" should be coerced to an
+             * integer value.
+             */
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, null == value ? "null" : value);
+        }
     }
 
     /**
