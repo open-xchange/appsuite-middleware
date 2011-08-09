@@ -49,8 +49,6 @@
 
 package com.openexchange.mail.json.actions;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,10 +58,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailRequest;
-import com.openexchange.mail.json.writer.MessageWriter;
 import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
@@ -112,24 +109,14 @@ public final class GetForwardAction extends AbstractMailAction {
             /*
              * Overwrite settings with request's parameters
              */
-            final DisplayMode displayMode = detectDisplayMode(true, view, usmNoSave);
+            detectDisplayMode(true, view, usmNoSave);
             /*
              * Get mail interface
              */
             final MailServletInterface mailInterface = getMailInterface(req);
-            final List<OXException> warnings = new ArrayList<OXException>(2);
-            final AJAXRequestResult data =
-                new AJAXRequestResult(MessageWriter.writeMailMessage(
-                    mailInterface.getAccountID(),
-                    mailInterface.getForwardMessageForDisplay(new String[] { folderPath }, new String[] { uid }, usmNoSave),
-                    displayMode,
-                    session,
-                    usmNoSave,
-                    warnings,
-                    false,
-                    -1), "json");
-            data.addWarnings(warnings);
-            return data;
+            final MailMessage mailMessage = mailInterface.getForwardMessageForDisplay(new String[] { folderPath }, new String[] { uid }, usmNoSave);
+            mailMessage.setAccountId(mailInterface.getAccountID());
+            return new AJAXRequestResult(mailMessage, "mail");
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -172,19 +159,9 @@ public final class GetForwardAction extends AbstractMailAction {
                 }
             }
             final MailServletInterface mailInterface = getMailInterface(req);
-            final List<OXException> warnings = new ArrayList<OXException>(2);
-            final AJAXRequestResult result =
-                new AJAXRequestResult(MessageWriter.writeMailMessage(
-                    mailInterface.getAccountID(),
-                    mailInterface.getForwardMessageForDisplay(folders, ids, usmNoSave),
-                    DisplayMode.MODIFYABLE,
-                    session,
-                    usmNoSave,
-                    warnings,
-                    false,
-                    -1), "json");
-            result.addWarnings(warnings);
-            return result;
+            final MailMessage mail = mailInterface.getForwardMessageForDisplay(folders, ids, usmNoSave);
+            mail.setAccountId(mailInterface.getAccountID());
+            return new AJAXRequestResult(mail, "mail");
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
