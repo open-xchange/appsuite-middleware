@@ -49,42 +49,40 @@
 
 package com.openexchange.tools.strings;
 
-
 /**
  * {@link BasicTypesStringParser}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class BasicTypesStringParser implements StringParser {
 
     @Override
-    public <T> T parse(String s, Class<T> t) {
-        if(s == null) {
+    public <T> T parse(final String s, final Class<T> t) {
+        if (s == null) {
             return null;
         }
-        if(t == String.class) {
+        if (t == String.class) {
             return (T) s;
         }
         try {
-            if(t == Integer.class || t == int.class) {
-                return (T) new Integer(s);
+            if (t == Integer.class || t == int.class) {
+                return (T) Integer.valueOf(s.trim());
             } else if (t == Long.class || t == long.class) {
-                return (T) new Long(s);
+                return (T) Long.valueOf(s.trim());
             } else if (t == Short.class || t == short.class) {
-                return (T) new Short(s);
+                return (T) Short.valueOf(s.trim());
             } else if (t == Float.class || t == float.class) {
-                return (T) new Float(s);
+                return (T) Float.valueOf(s.trim());
             } else if (t == Double.class || t == double.class) {
-                return (T) new Double(s);
+                return (T) Double.valueOf(s.trim());
             } else if (t == Byte.class || t == byte.class) {
-                return (T) new Byte(s);
+                return (T) Byte.valueOf(s.trim());
             } else if (t == Boolean.class || t == boolean.class) {
-                return (T) new Boolean(s);
+                return (T) Boolean.valueOf(s.trim());
             }
-        } catch (NumberFormatException x) {
+        } catch (final NumberFormatException x) {
             return null;
         }
-
         return null;
     }
 
