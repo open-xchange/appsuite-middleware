@@ -156,7 +156,7 @@ public final class ActionAwareServletInputStream extends ServletInputStream {
         int res = 0;
         while (read < len) {
             if (inputBuffer.doRead(byteChunk, request) <= 0) {
-                return read;
+                return 0 == read ? -1 : read;
             }
             res = byteChunk.substract(b, read + off, len - read);
             read += res;

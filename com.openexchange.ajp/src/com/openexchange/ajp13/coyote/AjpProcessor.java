@@ -1856,7 +1856,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                  * Handle special first-body-chunk
                  */
                 if (!receive()) {
-                    return -1;
+                    return 0;
                 }
             } else if (empty) {
                 if (!refillReadBuffer()) {
@@ -1866,8 +1866,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             final ByteChunk bc = bodyBytes.getByteChunk();
             chunk.setBytes(bc.getBuffer(), bc.getStart(), bc.getLength());
             empty = true;
-            final int length = chunk.getLength();
-            return 0 == length ? -1 : length;
+            return chunk.getLength();
         }
     }
 
