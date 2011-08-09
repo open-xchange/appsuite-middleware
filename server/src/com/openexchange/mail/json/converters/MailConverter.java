@@ -127,6 +127,8 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                 final String action = request.getParameter("action");
                 if (Mail.ACTION_ALL.equalsIgnoreCase(action)) {
                     convertMultiple4All(mails, request, result, session);
+                } else if (Mail.ACTION_LIST.equalsIgnoreCase(action)) {
+                    convertMultiple4All(mails, request, result, session);
                 }
             }
         } catch (final JSONException e) {
@@ -148,39 +150,33 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         /*
          * Get mail interface
          */
-        final MailServletInterface mailInterface = getMailInterface(req);
         final OXJSONWriter jsonWriter = new OXJSONWriter();
         /*
          * Start response
          */
-        final long start = DEBUG ? System.currentTimeMillis() : 0L;
         jsonWriter.array();
-        final int userId = session.getUserId();
-        final int contextId = session.getContextId();
-        for (final MailMessage mail : mails) {
-            if (mail != null) {
-                final JSONArray ja = new JSONArray();
-                final int accountID = mail.getAccountId();
-                for (int j = 0; j < writers.length; j++) {
-                    writers[j].writeField(ja, mail, 0, false, accountID, userId, contextId);
-                }
-                if (null != headerWriters) {
-                    for (int j = 0; j < headerWriters.length; j++) {
-                        headerWriters[j].writeField(ja, mail, 0, false, accountID, userId, contextId);
+        try {
+            final int userId = session.getUserId();
+            final int contextId = session.getContextId();
+            for (final MailMessage mail : mails) {
+                if (mail != null) {
+                    final JSONArray ja = new JSONArray();
+                    final int accountID = mail.getAccountId();
+                    for (int j = 0; j < writers.length; j++) {
+                        writers[j].writeField(ja, mail, 0, false, accountID, userId, contextId);
                     }
+                    if (null != headerWriters) {
+                        for (int j = 0; j < headerWriters.length; j++) {
+                            headerWriters[j].writeField(ja, mail, 0, false, accountID, userId, contextId);
+                        }
+                    }
+                    jsonWriter.value(ja);
                 }
-                jsonWriter.value(ja);
             }
+        } finally {
+            jsonWriter.endArray();
         }
-        /*
-         * Close response and flush print writer
-         */
-        jsonWriter.endArray();
-        if (DEBUG) {
-            final long d = System.currentTimeMillis() - start;
-            LOG.debug(new StringBuilder(32).append("/ajax/mail?action=list performed in ").append(d).append("msec"));
-        }
-        return new AJAXRequestResult(jsonWriter.getObject(), "json");
+        result.setResultObject(jsonWriter.getObject(), "json");
     }
 
     private void convertMultiple4All(final Collection<MailMessage> mails, final AJAXRequestData req, final AJAXRequestResult result, final ServerSession session) throws OXException, JSONException {

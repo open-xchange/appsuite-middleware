@@ -53,6 +53,7 @@ import static com.openexchange.tools.Collections.newHashMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONArray;
@@ -61,21 +62,16 @@ import org.json.JSONObject;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailRequest;
-import com.openexchange.mail.json.writer.MessageWriter;
-import com.openexchange.mail.json.writer.MessageWriter.MailFieldWriter;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link ListAction}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ListAction extends AbstractMailAction {
@@ -87,6 +83,7 @@ public final class ListAction extends AbstractMailAction {
 
     /**
      * Initializes a new {@link ListAction}.
+     * 
      * @param services
      */
     public ListAction(final ServiceLookup services) {
@@ -103,11 +100,6 @@ public final class ListAction extends AbstractMailAction {
             final int[] columns = req.checkIntArray(Mail.PARAMETER_COLUMNS);
             final String[] headers = req.optStringArray(Mail.PARAMETER_HEADERS);
             /*
-             * Pre-Select field writers
-             */
-            final MailFieldWriter[] writers = MessageWriter.getMailFieldWriter(MailListField.getFields(columns));
-            final MailFieldWriter[] headerWriters = null == headers ? null : MessageWriter.getHeaderFieldWriter(headers);
-            /*
              * Get map
              */
             final Map<String, List<String>> idMap = fillMapByArray((JSONArray) req.getRequest().getData());
@@ -115,23 +107,16 @@ public final class ListAction extends AbstractMailAction {
                 /*
                  * Request body is an empty JSON array
                  */
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn("Empty JSON array detected in request body.", new Throwable());
-                }
-                return new AJAXRequestResult(new JSONArray(), "json");
+                return new AJAXRequestResult(Collections.<MailMessage> emptyList(), "mail");
             }
             /*
              * Get mail interface
              */
             final MailServletInterface mailInterface = getMailInterface(req);
-            final OXJSONWriter jsonWriter = new OXJSONWriter();
             /*
              * Start response
              */
-            final long start = DEBUG ? System.currentTimeMillis() : 0L;
-            jsonWriter.array();
-            final int userId = session.getUserId();
-            final int contextId = session.getContextId();
+            final List<MailMessage> list = new LinkedList<MailMessage>();
             for (final Map.Entry<String, List<String>> entry : idMap.entrySet()) {
                 final MailMessage[] mails = mailInterface.getMessageList(entry.getKey(), toArray(entry.getValue()), columns, headers);
                 final int accountID = mailInterface.getAccountID();
@@ -139,18 +124,11 @@ public final class ListAction extends AbstractMailAction {
                     final MailMessage mail = mails[i];
                     if (mail != null) {
                         mail.setAccountId(accountID);
+                        list.add(mail);
                     }
                 }
             }
-            /*
-             * Close response and flush print writer
-             */
-            jsonWriter.endArray();
-            if (DEBUG) {
-                final long d = System.currentTimeMillis() - start;
-                LOG.debug(new StringBuilder(32).append("/ajax/mail?action=list performed in ").append(d).append("msec"));
-            }
-            return new AJAXRequestResult(jsonWriter.getObject(), "json");
+            return new AJAXRequestResult(list, "mail");
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {

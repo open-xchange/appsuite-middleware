@@ -1848,12 +1848,15 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             if (endOfStream) {
                 return -1;
             }
+            /*-
+             * ----- /!\ Don't return zero, because sun.nio.cs.StreamDecoder doesn't like that /!\ ------
+             */
             if (first && req.getContentLengthLong() > 0) {
                 /*
                  * Handle special first-body-chunk
                  */
                 if (!receive()) {
-                    return 0;
+                    return -1;
                 }
             } else if (empty) {
                 if (!refillReadBuffer()) {
@@ -1863,7 +1866,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             final ByteChunk bc = bodyBytes.getByteChunk();
             chunk.setBytes(bc.getBuffer(), bc.getStart(), bc.getLength());
             empty = true;
-            return chunk.getLength();
+            final int length = chunk.getLength();
+            return 0 == length ? -1 : length;
         }
     }
 
