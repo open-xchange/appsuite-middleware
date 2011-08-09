@@ -53,6 +53,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -60,11 +62,14 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.exception.OXException;
+import com.openexchange.json.OXJSONWriter;
+import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailActionConstants;
 import com.openexchange.mail.json.actions.AbstractMailAction;
 import com.openexchange.mail.json.writer.MessageWriter;
+import com.openexchange.mail.json.writer.MessageWriter.MailFieldWriter;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.preferences.ServerUserSetting;
@@ -105,25 +110,135 @@ public final class MailConverter implements ResultConverter, MailActionConstants
 
     @Override
     public void convert(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
-        final Object resultObject = result.getResultObject();
-        if (null == resultObject) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn("Result object is null.");
+        try {
+            final Object resultObject = result.getResultObject();
+            if (null == resultObject) {
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn("Result object is null.");
+                }
+                result.setResultObject(JSONObject.NULL, "json");
+                return;
             }
-            result.setResultObject(JSONObject.NULL, "json");
-            return;
-        }
-        if (resultObject instanceof MailMessage) {
-            convertSingle((MailMessage) resultObject, request, result, session, converter);
-        } else {
-            // TODO: Convert multiple
-            @SuppressWarnings("unchecked")
-            final Collection<MailMessage> collection = (Collection<MailMessage>) resultObject;
-            
+            if (resultObject instanceof MailMessage) {
+                convertSingle((MailMessage) resultObject, request, result, session);
+            } else {
+                @SuppressWarnings("unchecked")
+                final Collection<MailMessage> mails = (Collection<MailMessage>) resultObject;
+                final String action = request.getParameter("action");
+                if (Mail.ACTION_ALL.equalsIgnoreCase(action)) {
+                    convertMultiple4All(mails, request, result, session);
+                }
+            }
+        } catch (final JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    private void convertSingle(final MailMessage mail, final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
+    private void convertMultiple4List(final Collection<MailMessage> mails, final AJAXRequestData req, final AJAXRequestResult result, final ServerSession session) throws OXException, JSONException {
+        /*
+         * Read in parameters
+         */
+        final int[] columns = req.checkIntArray(Mail.PARAMETER_COLUMNS);
+        final String[] headers = req.getParameterValues(Mail.PARAMETER_HEADERS);
+        /*
+         * Pre-Select field writers
+         */
+        final MailFieldWriter[] writers = MessageWriter.getMailFieldWriter(MailListField.getFields(columns));
+        final MailFieldWriter[] headerWriters = null == headers ? null : MessageWriter.getHeaderFieldWriter(headers);
+        /*
+         * Get mail interface
+         */
+        final MailServletInterface mailInterface = getMailInterface(req);
+        final OXJSONWriter jsonWriter = new OXJSONWriter();
+        /*
+         * Start response
+         */
+        final long start = DEBUG ? System.currentTimeMillis() : 0L;
+        jsonWriter.array();
+        final int userId = session.getUserId();
+        final int contextId = session.getContextId();
+        for (final MailMessage mail : mails) {
+            if (mail != null) {
+                final JSONArray ja = new JSONArray();
+                final int accountID = mail.getAccountId();
+                for (int j = 0; j < writers.length; j++) {
+                    writers[j].writeField(ja, mail, 0, false, accountID, userId, contextId);
+                }
+                if (null != headerWriters) {
+                    for (int j = 0; j < headerWriters.length; j++) {
+                        headerWriters[j].writeField(ja, mail, 0, false, accountID, userId, contextId);
+                    }
+                }
+                jsonWriter.value(ja);
+            }
+        }
+        /*
+         * Close response and flush print writer
+         */
+        jsonWriter.endArray();
+        if (DEBUG) {
+            final long d = System.currentTimeMillis() - start;
+            LOG.debug(new StringBuilder(32).append("/ajax/mail?action=list performed in ").append(d).append("msec"));
+        }
+        return new AJAXRequestResult(jsonWriter.getObject(), "json");
+    }
+
+    private void convertMultiple4All(final Collection<MailMessage> mails, final AJAXRequestData req, final AJAXRequestResult result, final ServerSession session) throws OXException, JSONException {
+        final int[] columns = req.checkIntArray(Mail.PARAMETER_COLUMNS);
+        final String sort = req.getParameter(Mail.PARAMETER_SORT);
+        /*
+         * Get mail interface
+         */
+        final MailServletInterface mailInterface = getMailInterface(req, session);
+        /*
+         * Pre-Select field writers
+         */
+        final MailFieldWriter[] writers = MessageWriter.getMailFieldWriter(MailListField.getFields(columns));
+        final int userId = session.getUserId();
+        final int contextId = session.getContextId();
+        final OXJSONWriter jsonWriter = new OXJSONWriter();
+        /*
+         * Start response
+         */
+        jsonWriter.array();
+        try {
+            /*
+             * Check for thread-sort
+             */
+            if (("thread".equalsIgnoreCase(sort))) {
+                for (final MailMessage mail : mails) {
+                    final JSONArray ja = new JSONArray();
+                    if (mail != null) {
+                        final int accountId = mail.getAccountId();
+                        for (final MailFieldWriter writer : writers) {
+                            writer.writeField(ja, mail, mail.getThreadLevel(), false, accountId, userId, contextId);
+                        }
+
+                    }
+                    jsonWriter.value(ja);
+                }
+            } else {
+                /*
+                 * Get iterator
+                 */
+                for (final MailMessage mail : mails) {
+                    final JSONArray ja = new JSONArray();
+                    if (mail != null) {
+                        final int accountId = mail.getAccountId();
+                        for (final MailFieldWriter writer : writers) {
+                            writer.writeField(ja, mail, 0, false, accountId, userId, contextId);
+                        }
+                    }
+                    jsonWriter.value(ja);
+                }
+            }
+        } finally {
+            jsonWriter.endArray();
+        }
+        result.setResultObject(jsonWriter.getObject(), "json");
+    }
+
+    private void convertSingle(final MailMessage mail, final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session) throws OXException {
         String tmp = request.getParameter(Mail.PARAMETER_EDIT_DRAFT);
         final boolean editDraft = ("1".equals(tmp) || Boolean.parseBoolean(tmp));
         tmp = request.getParameter(Mail.PARAMETER_VIEW);

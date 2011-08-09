@@ -187,6 +187,28 @@ public class AJAXRequestData {
     }
 
     /**
+     * Gets optional <code>int</code> parameter.
+     * 
+     * @param name The parameter name
+     * @return The <code>int</code> value or <code>-1</code> if absent
+     * @throws OXException If parameter value is not a number
+     */
+    public int getIntParameter(final String name) throws OXException {
+        if (null == name) {
+            throw new NullPointerException("name is null");
+        }
+        final String value = params.get(name);
+        if (null == value) {
+            return -1;
+        }
+        try {
+            return Integer.parseInt(value.trim());
+        } catch (final NumberFormatException e) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, value);
+        }
+    }
+
+    /**
      * Gets this request's parameters as a {@link Map map}
      * 
      * @return The parameters as a {@link Map map}
@@ -201,7 +223,7 @@ public class AJAXRequestData {
     private static final Pattern SPLIT = Pattern.compile(" *, *");
 
     /**
-     * Gets the comma-sperated value.
+     * Gets the comma-separated value.
      * 
      * @param name The parameter name
      * @return The values as an array
@@ -279,26 +301,12 @@ public class AJAXRequestData {
      * 
      * @param name The parameter name
      * @return The <code>String</code> array
-     * @throws OXException If parameter is absdent
+     * @throws OXException If parameter is absent
      */
-    public String[] checkStringArray(final String name) throws OXException {
+    public String[] checkParameterArray(final String name) throws OXException {
         final String parameter = getParameter(name);
         if (null == parameter) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
-        }
-        return SPLIT.split(parameter, 0);
-    }
-
-    /**
-     * Checks for presence of comma-separated <code>String</code> list.
-     * 
-     * @param name The parameter name
-     * @return The <code>String</code> array
-     */
-    public String[] getStringArray(final String name) {
-        final String parameter = getParameter(name);
-        if (null == parameter) {
-            return null;
         }
         return SPLIT.split(parameter, 0);
     }

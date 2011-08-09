@@ -138,16 +138,7 @@ public final class ListAction extends AbstractMailAction {
                 for (int i = 0; i < mails.length; i++) {
                     final MailMessage mail = mails[i];
                     if (mail != null) {
-                        final JSONArray ja = new JSONArray();
-                        for (int j = 0; j < writers.length; j++) {
-                            writers[j].writeField(ja, mail, 0, false, accountID, userId, contextId);
-                        }
-                        if (null != headerWriters) {
-                            for (int j = 0; j < headerWriters.length; j++) {
-                                headerWriters[j].writeField(ja, mail, 0, false, accountID, userId, contextId);
-                            }
-                        }
-                        jsonWriter.value(ja);
+                        mail.setAccountId(accountID);
                     }
                 }
             }
