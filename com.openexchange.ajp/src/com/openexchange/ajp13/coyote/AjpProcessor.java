@@ -1848,9 +1848,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             if (endOfStream) {
                 return -1;
             }
-            /*-
-             * ----- /!\ Don't return zero, because sun.nio.cs.StreamDecoder doesn't like that /!\ ------
-             */
+
             if (first && req.getContentLengthLong() > 0) {
                 /*
                  * Handle special first-body-chunk
