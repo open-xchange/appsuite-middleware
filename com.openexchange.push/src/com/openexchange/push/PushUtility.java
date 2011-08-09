@@ -59,6 +59,7 @@ import com.openexchange.event.CommonEvent;
 import com.openexchange.event.EventFactoryService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
+import com.openexchange.push.internal.PushClientWhitelist;
 import com.openexchange.push.internal.ServiceRegistry;
 import com.openexchange.session.Session;
 
@@ -136,4 +137,8 @@ public final class PushUtility {
         }
     }
 
+    public static final boolean allowedClient(String client) {
+        final PushClientWhitelist clientWhitelist = PushClientWhitelist.getInstance();
+        return clientWhitelist.isEmpty() || clientWhitelist.isAllowed(client);
+    }
 }
