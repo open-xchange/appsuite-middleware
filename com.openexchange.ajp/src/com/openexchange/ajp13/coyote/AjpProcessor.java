@@ -1848,7 +1848,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             if (endOfStream) {
                 return -1;
             }
-
             if (first && req.getContentLengthLong() > 0) {
                 /*
                  * Handle special first-body-chunk
