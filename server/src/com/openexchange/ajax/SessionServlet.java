@@ -160,10 +160,10 @@ public abstract class SessionServlet extends AJAXServlet {
             rangesLoaded = true;
             if (text != null) {
                 LOG.info("Exceptions from IP Check have been defined.");
+                RANGE_LOCK.lock();
                 try {
                     // Serialize range parsing. This might happen more than once, but shouldn't matter, since the list
                     // is accessed exclusively, so it winds up correct.
-                    RANGE_LOCK.lock();
                     RANGES.clear();
                     final String[] lines = text.split("\n");
                     for (String line : lines) {
