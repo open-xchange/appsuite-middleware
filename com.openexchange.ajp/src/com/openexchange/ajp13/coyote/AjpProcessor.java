@@ -108,7 +108,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     private static final AtomicLong NUMBER = new AtomicLong();
 
-    private static final int STAGE_PARSE = 1;
+    private static final int STAGE_AWAIT = 1;
 
     private static final int STAGE_PREPARE = 2;
 
@@ -409,7 +409,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     @Override
     public boolean isWaitingOnAJPSocket() {
-        return STAGE_PARSE == stage;
+        return STAGE_AWAIT == stage;
     }
 
     @Override
@@ -598,7 +598,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      * @throws IOException If an error occurs during an I/O operation
      */
     public void process(final Socket socket) throws IOException {
-        stage = STAGE_PARSE;
+        stage = STAGE_AWAIT;
         final long st = System.currentTimeMillis();
         // Setting up the socket
         this.socket = socket;
@@ -631,7 +631,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
              * Parsing the request header
              */
             try {
-                stage = STAGE_PARSE;
+                stage = STAGE_AWAIT;
                 listenerMonitor.incrementNumWaiting();
                 /*
                  * Set keep alive timeout if enabled
