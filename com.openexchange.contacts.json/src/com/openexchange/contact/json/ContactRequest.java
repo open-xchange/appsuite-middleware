@@ -168,8 +168,7 @@ public class ContactRequest {
     }
 
     public long getTimestamp() throws OXException {
-        final long timestamp = request.getParameter("timestamp", long.class);
-        return timestamp;
+        return request.getParameter("timestamp", long.class);
     }
 
     public int[] getUserIds() throws OXException {
