@@ -163,7 +163,7 @@ public final class AllAction extends AbstractMailAction {
                     it.close();
                 }
             }
-            return new AJAXRequestResult(mails, "mails");
+            return new AJAXRequestResult(mails, "mail");
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
