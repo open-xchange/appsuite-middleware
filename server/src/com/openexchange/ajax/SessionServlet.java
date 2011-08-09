@@ -193,10 +193,12 @@ public abstract class SessionServlet extends AJAXServlet {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
         }
         final String sessionId = getSessionId(req);
+        final ServerSession session = getSession(req, sessionId, sessiondService);
         if (LogProperties.isEnabled()) {
             LogProperties.putLogProperty("com.openexchange.session.sessionId", sessionId);
+            LogProperties.putLogProperty("com.openexchange.session.userId", Integer.valueOf(session.getUserId()));
+            LogProperties.putLogProperty("com.openexchange.session.contextId", Integer.valueOf(session.getContextId()));
         }
-        final ServerSession session = getSession(req, sessionId, sessiondService);
         if (!sessionId.equals(session.getSessionID())) {
             throw SessionExceptionCodes.WRONG_SESSION.create();
         }
