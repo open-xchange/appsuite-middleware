@@ -70,7 +70,6 @@ public abstract class AbstractCalendarJSONResultConverter implements ResultConve
     
     protected static final String OUTPUT_FORMAT = "json";
     
-    private TimeZone timeZone = null;
 
 
     @Override
@@ -86,15 +85,12 @@ public abstract class AbstractCalendarJSONResultConverter implements ResultConve
 
     @Override
     public void convert(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
-        timeZone = TimeZoneUtils.getTimeZone(session.getUser().getTimeZone());
-        convertCalendar(AppointmentAJAXRequestFactory.createAppointmentAJAXRequest(request, session), result, session, converter);
+        TimeZone timeZone = TimeZoneUtils.getTimeZone(session.getUser().getTimeZone());
+        convertCalendar(AppointmentAJAXRequestFactory.createAppointmentAJAXRequest(request, session), result, session, converter, timeZone);
     }
     
-    protected abstract void convertCalendar(AppointmentAJAXRequest request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException;
+    protected abstract void convertCalendar(AppointmentAJAXRequest request, AJAXRequestResult result, ServerSession session, Converter converter, TimeZone userTimeZone) throws OXException;
 
-    protected TimeZone getTimeZone() {
-        return timeZone;
-    }
     
     protected TimeZone getTimeZone(final String timeZoneId) {
         return TimeZoneUtils.getTimeZone(timeZoneId);

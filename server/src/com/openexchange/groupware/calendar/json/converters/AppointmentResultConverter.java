@@ -87,7 +87,7 @@ public class AppointmentResultConverter extends AbstractCalendarJSONResultConver
     }
 
     @Override
-    protected void convertCalendar(final AppointmentAJAXRequest request, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
+    protected void convertCalendar(final AppointmentAJAXRequest request, final AJAXRequestResult result, final ServerSession session, final Converter converter, TimeZone userTimeZone) throws OXException {
         final Appointment appointmentobject = (Appointment) result.getResultObject();
         final JSONObject jsonResponseObj = new JSONObject();
         final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
@@ -96,7 +96,7 @@ public class AppointmentResultConverter extends AbstractCalendarJSONResultConver
         final TimeZone timeZone;
         {
             final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-            timeZone = null == timeZoneId ? getTimeZone() : getTimeZone(timeZoneId);
+            timeZone = null == timeZoneId ? userTimeZone : getTimeZone(timeZoneId);
         }
         final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone);
         appointmentwriter.setSession(session);

@@ -113,7 +113,7 @@ public final class ListAction extends AbstractAttachmentAction {
             }
             final AttachmentField[] columns = PARSER.getColumns(request.getParameterValues(AJAXServlet.PARAMETER_COLUMNS));
             final JSONValue jsonValue = list(session, folderId, attachedId, moduleId, ids, columns);
-            return new AJAXRequestResult(jsonValue, "json");
+            return new AJAXRequestResult(jsonValue, "apiResponse");
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
