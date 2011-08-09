@@ -312,7 +312,7 @@ public abstract class SessionServlet extends AJAXServlet {
         }
     }
 
-    private static boolean isWhitelistedFromIPCheck(final String actual, final Queue<IPRange> ranges) {
+    public static boolean isWhitelistedFromIPCheck(final String actual, final Queue<IPRange> ranges) {
         for (final IPRange range : ranges) {
             if (range.contains(actual)) {
                 return true;
