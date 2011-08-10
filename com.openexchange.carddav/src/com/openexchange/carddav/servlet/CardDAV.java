@@ -50,21 +50,17 @@
 package com.openexchange.carddav.servlet;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
+import javax.security.auth.login.LoginException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.authentication.LoginException;
 import com.openexchange.carddav.servlet.CarddavPerformer.Action;
 import com.openexchange.config.cascade.ComposedConfigProperty;
-import com.openexchange.config.cascade.ConfigCascadeException;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.exception.OXException;
 import com.openexchange.login.Interface;
-import com.openexchange.login.LoginRequest;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.http.Tools;
@@ -172,7 +168,7 @@ public class CardDAV extends OXServlet {
                 resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
                 return;
             }
-        } catch (final ContextException exc) {
+        } catch (final OXException exc) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return;
         }
@@ -190,7 +186,7 @@ public class CardDAV extends OXServlet {
             ComposedConfigProperty<Boolean> property = services.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId()).property("com.openexchange.carddav.enabled", boolean.class);
             return property.isDefined() && property.get();
 
-        } catch (ConfigCascadeException e) {
+        } catch (OXException e) {
             return false;
         }
     }
@@ -199,7 +195,7 @@ public class CardDAV extends OXServlet {
         removeCookie(req, resp);
         try {
             LoginPerformer.getInstance().doLogout(session.getSessionID());
-        } catch (final LoginException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
     }

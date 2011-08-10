@@ -49,19 +49,10 @@
 
 package com.openexchange.carddav;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -69,12 +60,8 @@ import java.util.TimeZone;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.api.OXConflictException;
-import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.api2.OXConcurrentModificationException;
-import com.openexchange.api2.OXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.Versit;
@@ -83,12 +70,12 @@ import com.openexchange.tools.versit.VersitException;
 import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
+import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
-import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.helpers.AbstractResource;
 
 /**
@@ -196,13 +183,13 @@ public class CarddavResource extends AbstractResource {
             contact = newContact;                       
         } catch (final VersitException e) {
             LOG.error(e.getMessage(), e);
-            throw new WebdavProtocolException(getUrl(), 500);
+            throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), 500);
         } catch (final ConverterException e) {
             LOG.error(e.getMessage(), e);
-            throw new WebdavProtocolException(getUrl(), 500);
+            throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), 500);
         } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
-            throw new WebdavProtocolException(getUrl(), 500);
+            throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), 500);
         } finally {
             try {
                 body.close();
@@ -224,8 +211,6 @@ public class CarddavResource extends AbstractResource {
             this.url = parent.getUrl().dup().append(contact.getObjectID()+".vcf");
         } catch (OXException e) {
             LOG.error(e);
-        } catch (ContextException e) {
-            LOG.error(e);
         }
     }
 
@@ -233,13 +218,7 @@ public class CarddavResource extends AbstractResource {
         // delete contact
         try {
             factory.getContactInterface().deleteContactObject(contact.getObjectID(), contact.getParentFolderID(), contact.getLastModified());
-        } catch (OXObjectNotFoundException e) {
-            LOG.error(e);
-        } catch (OXConflictException e) {
-            LOG.error(e);
         } catch (OXException e) {
-            LOG.error(e);
-        } catch (ContextException e) {
             LOG.error(e);
         }
     }
@@ -353,15 +332,9 @@ public class CarddavResource extends AbstractResource {
     public void save() throws WebdavProtocolException {
         try {
             factory.getContactInterface().updateContactObject(contact, parent.getStandardFolder(), contact.getLastModified());
-        } catch (OXConcurrentModificationException e) {
-            LOG.error(e.getMessage(), e);
-            throw new WebdavProtocolException(getUrl(), 500);
         } catch (OXException e) {
             LOG.error(e.getMessage(), e);
-            throw new WebdavProtocolException(getUrl(), 500);
-        } catch (ContextException e) {
-            LOG.error(e.getMessage(), e);
-            throw new WebdavProtocolException(getUrl(), 500);
+            throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), 500);
         }
     }
 

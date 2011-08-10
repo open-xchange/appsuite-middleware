@@ -51,14 +51,11 @@ package com.openexchange.carddav;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.api2.OXException;
 import com.openexchange.carddav.GroupwareCarddavFactory.State;
 import com.openexchange.carddav.mixins.CTag;
 import com.openexchange.carddav.mixins.SupportedReportSet;
-import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.webdav.acl.mixins.CurrentUserPrivilegeSet;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
@@ -83,8 +80,6 @@ public class AggregatedCollection extends AbstractCarddavCollection {
 
         try {
             includeProperties(new SupportedReportSet(), new CTag(factory.getState().getAggregatedContacts(), factory.getSession().getUserId()));
-        } catch (ContextException e) {
-            throw internalError(e);
         } catch (OXException e) {
             throw internalError(e);
         }
@@ -108,8 +103,6 @@ public class AggregatedCollection extends AbstractCarddavCollection {
             }
 
             return children;
-        } catch (ContextException e) {
-            throw internalError(e);
         } catch (OXException e) {
             throw internalError(e);
         }
@@ -132,7 +125,11 @@ public class AggregatedCollection extends AbstractCarddavCollection {
 
     @Override
     public String getResourceType() throws WebdavProtocolException {
-        return super.getResourceType() + CarddavProtocol.ADDRESSBOOK;
+        try {
+            return super.getResourceType() + CarddavProtocol.ADDRESSBOOK;
+        } catch (OXException e) {
+            throw internalError(e);
+        }
     }
 
     public int getStandardFolder() {
