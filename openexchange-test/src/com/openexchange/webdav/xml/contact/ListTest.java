@@ -15,80 +15,80 @@ public class ListTest extends ContactTest {
 
 	public void testPropFindWithModified() throws Exception {
 		final Contact contactObj = createContactObject("testPropFindWithModified");
-		final int objectId1 = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
-		final int objectId2 = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
+		final int objectId1 = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password, context);
+		final int objectId2 = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password, context);
 		
 		// prevent master/slave problem
 		Thread.sleep(1000);
 		
-		final Contact loadContact = loadContact(getWebConversation(), objectId1, contactFolderId, getHostName(), getLogin(), getPassword());
+		final Contact loadContact = loadContact(getWebConversation(), objectId1, contactFolderId, getHostName(), getLogin(), getPassword(), context);
 		final Date modified = loadContact.getLastModified();
 		
-		final Contact[] contactArray = listContact(webCon, contactFolderId, decrementDate(modified), true, false, PROTOCOL + hostName, login, password);
+		final Contact[] contactArray = listContact(webCon, contactFolderId, decrementDate(modified), true, false, PROTOCOL + hostName, login, password, context);
 		
 		assertTrue("check response", contactArray.length >= 2);
-		deleteContact(getWebConversation(), objectId1, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
-		deleteContact(getWebConversation(), objectId2, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+		deleteContact(getWebConversation(), objectId1, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+		deleteContact(getWebConversation(), objectId2, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 	}
 	
 	public void testPropFindWithDelete() throws Exception {
 		final Contact contactObj = createContactObject("testPropFindWithModified");
-		final int objectId1 = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
-		final int objectId2 = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
+		final int objectId1 = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password, context);
+		final int objectId2 = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password, context);
 		
 		final int[][] objectIdAndFolderId = { { objectId1, contactFolderId }, { objectId2, contactFolderId } };
 		
-		final Contact loadContact = loadContact(getWebConversation(), objectId1, contactFolderId, getHostName(), getLogin(), getPassword());
+		final Contact loadContact = loadContact(getWebConversation(), objectId1, contactFolderId, getHostName(), getLogin(), getPassword(), context);
 		final Date modified = loadContact.getLastModified();
 		
-		deleteContact(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password);
+		deleteContact(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password, context);
 		
 		// prevent master/slave problem
 		Thread.sleep(1000);
 		
-		final Contact[] appointmentArray = listContact(webCon, contactFolderId, decrementDate(modified), false, true, PROTOCOL + hostName, login, password);
+		final Contact[] appointmentArray = listContact(webCon, contactFolderId, decrementDate(modified), false, true, PROTOCOL + hostName, login, password, context);
 		
 		assertTrue("wrong response array length", appointmentArray.length >= 2);
 	}
 	
 	public void testPropFindWithObjectId() throws Exception {
 		final Contact contactObj = createContactObject("testPropFindWithObjectId");
-		final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
+		final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password, context);
 		
-		final Contact loadContact = loadContact(webCon, objectId, contactFolderId, PROTOCOL + hostName, login, password);
+		final Contact loadContact = loadContact(webCon, objectId, contactFolderId, PROTOCOL + hostName, login, password, context);
 		
 		contactObj.setObjectID(objectId);
 		compareObject(contactObj, loadContact);
-		deleteContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+		deleteContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 	}
 	
 	public void testObjectNotFound() throws Exception {
 		final Contact contactObj = createContactObject("testObjectNotFound");
-		final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
+		final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password, context);
 		
 		try {
-			loadContact(webCon, (objectId+1000), contactFolderId, PROTOCOL + hostName, login, password);
+			loadContact(webCon, (objectId+1000), contactFolderId, PROTOCOL + hostName, login, password, context);
 			fail("object not found exception expected!");
 		} catch (final OXException exc) {
 			assertExceptionMessage(exc.getMessage(), XmlServlet.OBJECT_NOT_FOUND_STATUS);
 		}
 		
 		final int[][] objectIdAndFolderId = { { objectId ,contactFolderId } };
-		deleteContact(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
+		deleteContact(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password, context );
 	}
 	
 	public void testListWithAllFields() throws Exception {
 		final Contact contactObj = createCompleteContactObject();
 
-		final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
+		final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password, context);
 
 		// prevent master/slave problem
 		Thread.sleep(1000);
 		
-		Contact loadContact = loadContact(getWebConversation(), objectId, contactFolderId, getHostName(), getLogin(), getPassword());
+		Contact loadContact = loadContact(getWebConversation(), objectId, contactFolderId, getHostName(), getLogin(), getPassword(), context);
 		final Date modified = loadContact.getLastModified();		
 		
-		final Contact[] appointmentArray = listContact(webCon, contactFolderId, decrementDate(modified), true, false, PROTOCOL + hostName, login, password);
+		final Contact[] appointmentArray = listContact(webCon, contactFolderId, decrementDate(modified), true, false, PROTOCOL + hostName, login, password, context);
 		
 		assertTrue("wrong response array length", appointmentArray.length >= 1);
 		
@@ -96,12 +96,12 @@ public class ListTest extends ContactTest {
 		contactObj.setObjectID(objectId);
 		
 		compareObject(contactObj, loadContact);
-		deleteContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+		deleteContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 	}
 	
 	public void testList() throws Exception {
 		final Contact contactObj = createContactObject("testObjectNotFound");
-		final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
+		final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password, context);
 		
 		final int[] idArray = listContact(getWebConversation(), contactFolderId, getHostName(), getLogin(), getPassword());
 		
@@ -114,6 +114,6 @@ public class ListTest extends ContactTest {
 		}
 		
 		assertTrue("id " + objectId + " not found in response", found);
-		deleteContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+		deleteContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 	}	
 }

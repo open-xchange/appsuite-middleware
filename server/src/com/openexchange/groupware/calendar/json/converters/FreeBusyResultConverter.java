@@ -80,7 +80,7 @@ public class FreeBusyResultConverter extends AbstractCalendarJSONResultConverter
     }
 
     @Override
-    protected void convertCalendar(final AppointmentAJAXRequest req, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
+    protected void convertCalendar(final AppointmentAJAXRequest req, final AJAXRequestResult result, final ServerSession session, final Converter converter, TimeZone userTimeZone) throws OXException {
         final List<Appointment> appointmentList = (List<Appointment>) result.getResultObject();
         final TimeZone timeZone;
         {

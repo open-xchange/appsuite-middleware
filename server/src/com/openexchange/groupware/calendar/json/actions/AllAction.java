@@ -112,8 +112,7 @@ public final class AllAction extends AbstractAppointmentAction {
         final Date endUTC = req.checkDate(AJAXServlet.PARAMETER_END);
         final Date start = req.applyTimeZone2Date(startUTC.getTime());
         final Date end = req.applyTimeZone2Date(endUTC.getTime());
-        final int folderId = req.optInt(AJAXServlet.PARAMETER_FOLDERID);
-
+        final int folderId = req.getFolderId();
         final int orderBy = req.optInt(AJAXServlet.PARAMETER_SORT);
         final boolean showPrivateAppointments = Boolean.parseBoolean(req.getParameter(AJAXServlet.PARAMETER_SHOW_PRIVATE_APPOINTMENTS));
         final boolean listOrder;

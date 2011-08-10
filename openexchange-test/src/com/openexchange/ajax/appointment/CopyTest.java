@@ -46,10 +46,11 @@ public class CopyTest extends AppointmentTest {
 		final int objectId1 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
 		final String login = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "login", "");
+		final String context = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "contextName", "defaultContext");
 		final String password = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "password", "");
 		
 		final FolderObject folderObj = com.openexchange.webdav.xml.FolderTest.createFolderObject(userId, "testCopy" + System.currentTimeMillis(), FolderObject.CALENDAR, false);
-		final int targetFolder = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), login, password);
+		final int targetFolder = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), login, password, context);
 		
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, getSessionId());

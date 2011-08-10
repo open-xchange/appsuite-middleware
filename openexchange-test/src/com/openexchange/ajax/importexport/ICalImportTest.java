@@ -106,7 +106,7 @@ public class ICalImportTest extends AbstractICalTest {
 		
 		assertTrue("inserted object not found in response", found);
 		
-		AppointmentTest.deleteAppointment(getWebConversation(), Integer.parseInt(importResult[0].getObjectId()), appointmentFolderId, getHostName(), getLogin(), getPassword());
+		AppointmentTest.deleteAppointment(getWebConversation(), Integer.parseInt(importResult[0].getObjectId()), appointmentFolderId, getHostName(), getLogin(), getPassword(), "");
 	}
 	
 	public void testImportICalWithTask() throws Exception {
@@ -138,7 +138,7 @@ public class ICalImportTest extends AbstractICalTest {
 		
 		assertTrue("inserted object not found in response", found);
 		
-		TaskTest.deleteTask(getWebConversation(), Integer.parseInt(importResult[0].getObjectId()), taskFolderId, getHostName(), getLogin(), getPassword());
+		TaskTest.deleteTask(getWebConversation(), Integer.parseInt(importResult[0].getObjectId()), taskFolderId, getHostName(), getLogin(), getPassword(), "");
 	}
     // Bug 12177
     public void testWarnings() throws JSONException, OXException, IOException, SAXException {
@@ -234,8 +234,8 @@ public class ICalImportTest extends AbstractICalTest {
 		
 		exportAppointment(getWebConversation(), appointmentFolderId, timeZone, getHostName(), getSessionId(), null);
 		
-		AppointmentTest.deleteAppointment(getWebConversation(), Integer.parseInt(importResult[0].getObjectId()), appointmentFolderId, getHostName(), getLogin(), getPassword());
-		AppointmentTest.deleteAppointment(getWebConversation(), Integer.parseInt(importResult[2].getObjectId()), appointmentFolderId, getHostName(), getLogin(), getPassword());
+		AppointmentTest.deleteAppointment(getWebConversation(), Integer.parseInt(importResult[0].getObjectId()), appointmentFolderId, getHostName(), getLogin(), getPassword(), "");
+		AppointmentTest.deleteAppointment(getWebConversation(), Integer.parseInt(importResult[2].getObjectId()), appointmentFolderId, getHostName(), getLogin(), getPassword(), "");
 	}
 	
 }

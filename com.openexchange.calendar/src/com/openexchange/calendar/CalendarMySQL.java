@@ -3761,6 +3761,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } finally {
             collection.closePreparedStatement(pst);
+            collection.closePreparedStatement(prep);
             if (writecon != null) {
                 try {
                     writecon.setAutoCommit(true);

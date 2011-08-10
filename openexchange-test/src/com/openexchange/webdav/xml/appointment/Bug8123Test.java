@@ -27,7 +27,7 @@ public class Bug8123Test extends AppointmentTest {
 	}
 	
 	public void testBug8123() throws Exception {
-		final Resource[] resource = GroupUserTest.searchResource(getWebConversation(), "*", new Date(0), getHostName(), getLogin(), getPassword());
+		final Resource[] resource = GroupUserTest.searchResource(getWebConversation(), "*", new Date(0), getHostName(), getLogin(), getPassword(), context);
 		
 		if (resource.length == 0) {
 			fail("no resource found for this test");
@@ -49,17 +49,17 @@ public class Bug8123Test extends AppointmentTest {
 		
 		appointmentObj.setParticipants(participant);
 
-		final int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword());
+		final int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 		
 		appointmentObj.setObjectID(objectId);
-		Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+		Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 		compareObject(appointmentObj, loadAppointment);
 		
 		final Date modified = new Date(loadAppointment.getCreationDate().getTime()-1000);
 		
-		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getLogin(), getPassword());
+		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getLogin(), getPassword(), context);
 		compareObject(appointmentObj, loadAppointment);
 		
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 	}
 }

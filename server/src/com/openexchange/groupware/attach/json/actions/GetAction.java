@@ -98,7 +98,7 @@ public final class GetAction extends AbstractAttachmentAction {
             final int moduleId = requireNumber(request, AJAXServlet.PARAMETER_MODULE);
             final int id = requireNumber(request, AJAXServlet.PARAMETER_ID);
 
-            return new AJAXRequestResult(get(folderId, attachedId, moduleId, id, session), "json");
+            return new AJAXRequestResult(get(folderId, attachedId, moduleId, id, session), "apiResponse");
         } catch (final RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }

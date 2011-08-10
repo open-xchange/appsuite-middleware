@@ -156,7 +156,7 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
 		
 		folderObj.setPermissionsAsArray( permission );
 		try{
-			return FolderTest.insertFolder(getWebConversation(), folderObj, getHostName(), getLogin(), getPassword());
+			return FolderTest.insertFolder(getWebConversation(), folderObj, getHostName(), getLogin(), getPassword(), "");
 		} catch(final OXException e){
 			return -1;
 		}
@@ -166,7 +166,7 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
 		if(folderId == -1){
 			return;
 		}
-		FolderTest.deleteFolder(getWebConversation(), new int[] { folderId }, getHostName(), getLogin(), getPassword());
+		FolderTest.deleteFolder(getWebConversation(), new int[] { folderId }, getHostName(), getLogin(), getPassword(), "");
 	}
 	
 

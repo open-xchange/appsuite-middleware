@@ -35,9 +35,9 @@ public class TestConfig extends AbstractConfig {
      */
     @Override
     protected String getPropertyFileName() throws OXException {
-        final String fileName = System.getProperty(KEY);
+        String fileName = System.getProperty(KEY);
         if (null == fileName) {
-            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(KEY);
+        	fileName = "conf/test.properties";
         }
     	return fileName;
     }

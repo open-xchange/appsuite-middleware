@@ -74,21 +74,25 @@ public class CalendarAttachments implements  AttachmentListener, AttachmentAutho
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarAttachments.class));
 
-    private static AppointmentSqlFactoryService appointmentSqlFactory = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class);
+    //private static AppointmentSqlFactoryService appointmentSqlFactory = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class);
 
     @Override
     public long attached(final AttachmentEvent e) throws Exception {
-        final AppointmentSQLInterface csql = appointmentSqlFactory.createAppointmentSql(null);
+        final AppointmentSQLInterface csql = getInterface();
         return csql.attachmentAction(e.getFolderId(), e.getAttachedId(), e.getUser().getId(), e.getSession(), e.getContext(), 1);
     }
 
     @Override
     public long detached(final AttachmentEvent e) throws Exception {
-        final AppointmentSQLInterface csql = appointmentSqlFactory.createAppointmentSql(null);
+        final AppointmentSQLInterface csql = getInterface();
         return csql.attachmentAction(e.getFolderId(), e.getAttachedId(), e.getUser().getId(), e.getSession(), e.getContext(), -(e.getDetached().length));
     }
 
-    @Override
+    private AppointmentSQLInterface getInterface() {
+		return ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(null);
+	}
+
+	@Override
     public void checkMayAttach(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
         try {
             final CalendarCollectionService collection = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);

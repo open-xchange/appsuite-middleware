@@ -235,7 +235,7 @@ public class VCardImportBugTests extends AbstractVCardImportTest {
             contactFolderId,
             getHostName(),
             getLogin(),
-            getPassword());
+            getPassword(), "");
         assertEquals("Checking surname:", "H\u00fcb\u00fcrt S\u00f6nderzeich\u00f6n", myImport.getDisplayName());
     }
 
@@ -268,7 +268,7 @@ public class VCardImportBugTests extends AbstractVCardImportTest {
             contactFolderId,
             getHostName(),
             getLogin(),
-            getPassword());
+            getPassword(), "");
         assertEquals("Checking surname:", "Colombara", myImport.getSurName());
     }
 
@@ -298,7 +298,7 @@ public class VCardImportBugTests extends AbstractVCardImportTest {
             contactFolderId,
             getHostName(),
             getLogin(),
-            getPassword());
+            getPassword(), "");
         assertEquals("Checking surname:", "Conference_Room_Olpe", myImport.getDisplayName());
         assertEquals("Checking email1 (must be null):", null, myImport.getEmail1());
         assertEquals("Checking email2 (must be null):", null, myImport.getEmail2());
@@ -331,7 +331,7 @@ public class VCardImportBugTests extends AbstractVCardImportTest {
             contactFolderId,
             getHostName(),
             getLogin(),
-            getPassword());
+            getPassword(), "");
         assertEquals("Checking surname:", "B\u00f6rnig", myImport.getSurName());
     }
 
@@ -360,7 +360,7 @@ public class VCardImportBugTests extends AbstractVCardImportTest {
             contactFolderId,
             getHostName(),
             getLogin(),
-            getPassword());
+            getPassword(), "");
         assertEquals("Checking surname:", truncatedName, myImport.getSurName());
     }
 

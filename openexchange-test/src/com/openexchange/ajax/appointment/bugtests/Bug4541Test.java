@@ -36,7 +36,7 @@ public class Bug4541Test extends AppointmentTest {
 		
 		folderObj.setPermissionsAsArray( permission );
 		
-		final int newFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, getHostName(), getLogin(), getPassword());
+		final int newFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, getHostName(), getLogin(), getPassword(), "");
 
 		final Appointment appointmentObj = createAppointmentObject("testBug4541");
 		appointmentObj.setParentFolderID(newFolderId);
@@ -64,6 +64,6 @@ public class Bug4541Test extends AppointmentTest {
 		compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
 		
 		deleteAppointment(getWebConversation(), objectId, newFolderId, getHostName(), getSessionId());
-		FolderTest.deleteFolder(getWebConversation(), new int[] { newFolderId }, getHostName(), getLogin(), getPassword());
+		FolderTest.deleteFolder(getWebConversation(), new int[] { newFolderId }, getHostName(), getLogin(), getPassword(), "");
 	}
 }

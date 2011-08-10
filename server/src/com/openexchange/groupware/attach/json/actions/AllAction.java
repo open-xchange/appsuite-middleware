@@ -107,7 +107,7 @@ public final class AllAction extends AbstractAttachmentAction {
                 order = AttachmentBase.DESC;
             }
             final JSONValue jsonValue = all(session, folderId, attachedId, moduleId, columns, sort, order);
-            return new AJAXRequestResult(jsonValue, "json");
+            return new AJAXRequestResult(jsonValue, "apiResponse");
         } catch (final RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final UnknownColumnException e) {

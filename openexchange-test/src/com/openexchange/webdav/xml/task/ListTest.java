@@ -65,60 +65,60 @@ public class ListTest extends TaskTest {
 
     public void testPropFindWithModified() throws Exception {
         final Task taskObj = createTask("testPropFindWithModified");
-        final int objectId1 = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
-        insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
+        final int objectId1 = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password, context);
+        insertTask(webCon, taskObj, PROTOCOL + hostName, login, password, context);
 
         // prevent master/slave problem
         Thread.sleep(1000);
 
-        final Task loadTask = loadTask(getWebConversation(), objectId1, taskFolderId, getHostName(), getLogin(), getPassword());
+        final Task loadTask = loadTask(getWebConversation(), objectId1, taskFolderId, getHostName(), getLogin(), getPassword(), context);
         final Date modified = loadTask.getLastModified();
 
-        final Task[] taskArray = listTask(webCon, taskFolderId, decrementDate(modified), true, false, PROTOCOL + hostName, login, password);
+        final Task[] taskArray = listTask(webCon, taskFolderId, decrementDate(modified), true, false, PROTOCOL + hostName, login, password, context);
 
         assertTrue("check response", taskArray.length >= 2);
     }
 
     public void testPropFindWithDelete() throws Exception {
         final Task taskObj = createTask("testPropFindWithModified");
-        final int objectId1 = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
-        final int objectId2 = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
+        final int objectId1 = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password, context);
+        final int objectId2 = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password, context);
 
         // prevent master/slave problem
         Thread.sleep(1000);
 
-        final Task loadTask = loadTask(getWebConversation(), objectId1, taskFolderId, getHostName(), getLogin(), getPassword());
+        final Task loadTask = loadTask(getWebConversation(), objectId1, taskFolderId, getHostName(), getLogin(), getPassword(), context);
         final Date modified = loadTask.getLastModified();
 
         final int[][] objectIdAndFolderId = { { objectId1, taskFolderId }, { objectId2, taskFolderId } };
 
-        deleteTask(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password);
+        deleteTask(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password, context);
 
-        final Task[] taskArray = listTask(webCon, taskFolderId, decrementDate(modified), false, true, PROTOCOL + hostName, login, password);
+        final Task[] taskArray = listTask(webCon, taskFolderId, decrementDate(modified), false, true, PROTOCOL + hostName, login, password, context);
 
         assertTrue("wrong response array length", taskArray.length >= 2);
     }
 
     public void testPropFindWithObjectId() throws Exception {
         final Task taskObj = createTask("testPropFindWithObjectId");
-        final int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
+        final int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password, context);
 
-        loadTask(webCon, objectId, taskFolderId, PROTOCOL + hostName, login, password);
+        loadTask(webCon, objectId, taskFolderId, PROTOCOL + hostName, login, password, context);
     }
 
     public void testObjectNotFound() throws Exception {
         final Task taskObj = createTask("testObjectNotFound");
-        final int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
+        final int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password, context);
 
         try {
-            loadTask(webCon, (objectId+1000), taskFolderId, PROTOCOL + hostName, login, password);
+            loadTask(webCon, (objectId+1000), taskFolderId, PROTOCOL + hostName, login, password, context);
             fail("object not found exception expected!");
         } catch (final OXException exc) {
             assertExceptionMessage(exc.getMessage(), XmlServlet.OBJECT_NOT_FOUND_STATUS);
         }
 
         final int[][] objectIdAndFolderId = { { objectId ,taskFolderId } };
-        deleteTask(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
+        deleteTask(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password, context );
     }
 
     public void testListWithAllFields() throws Exception {
@@ -144,15 +144,15 @@ public class ListTest extends TaskTest {
         taskObj.setTargetDuration(L(450));
         taskObj.setTripMeter("trip meter");
 
-        final int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
+        final int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password, context);
 
         // prevent master/slave problem
         Thread.sleep(1000);
 
-        Task loadTask = loadTask(getWebConversation(), objectId, taskFolderId, getHostName(), getLogin(), getPassword());
+        Task loadTask = loadTask(getWebConversation(), objectId, taskFolderId, getHostName(), getLogin(), getPassword(), context);
         final Date modified = loadTask.getLastModified();
 
-        final Task[] taskArray = listTask(webCon, taskFolderId, decrementDate(modified), true, false, PROTOCOL + hostName, login, password);
+        final Task[] taskArray = listTask(webCon, taskFolderId, decrementDate(modified), true, false, PROTOCOL + hostName, login, password, context);
 
         assertEquals("wrong response array length", 1, taskArray.length);
 
@@ -166,9 +166,9 @@ public class ListTest extends TaskTest {
 
     public void testListWithAllFieldsOnUpdate() throws Exception {
         Task taskObj = createTask("testListWithAllFieldsOnUpdate");
-        final int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
+        final int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password, context);
 
-        Task loadTask = loadTask(getWebConversation(), objectId, taskFolderId, getHostName(), getLogin(), getPassword());
+        Task loadTask = loadTask(getWebConversation(), objectId, taskFolderId, getHostName(), getLogin(), getPassword(), context);
         final Date modified = loadTask.getLastModified();
 
         taskObj = new Task();
@@ -193,9 +193,9 @@ public class ListTest extends TaskTest {
         taskObj.setTripMeter("trip meter");
         taskObj.setParentFolderID(taskFolderId);
 
-        updateTask(webCon, taskObj, objectId, taskFolderId, PROTOCOL + hostName, login, password);
+        updateTask(webCon, taskObj, objectId, taskFolderId, PROTOCOL + hostName, login, password, context);
 
-        final Task[] taskArray = listTask(webCon, taskFolderId, decrementDate(modified), true, false, PROTOCOL + hostName, login, password);
+        final Task[] taskArray = listTask(webCon, taskFolderId, decrementDate(modified), true, false, PROTOCOL + hostName, login, password, context);
 
         loadTask = null;
         for (int i = 0; i < taskArray.length && loadTask == null; i++) {
@@ -214,7 +214,7 @@ public class ListTest extends TaskTest {
 
     public void testList() throws Exception {
         final Task taskObj = createTask("testList");
-        final int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
+        final int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password, context);
 
         final int[] idArray = listTask(getWebConversation(), taskFolderId, getHostName(), getLogin(), getPassword());
 
@@ -227,6 +227,6 @@ public class ListTest extends TaskTest {
         }
 
         assertTrue("id " + objectId + " not found in response", found);
-        deleteTask(getWebConversation(), objectId, taskFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+        deleteTask(getWebConversation(), objectId, taskFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
     }
 }
