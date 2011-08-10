@@ -82,6 +82,13 @@ public final class ActionAwareServletInputStream extends ServletInputStream {
     }
 
     /**
+     * Recycles this stream.
+     */
+    public void recycle() {
+        byteChunk.recycle();
+    }
+
+    /**
      * Dump specified bytes into buffer.
      * 
      * @param bytes The bytes
