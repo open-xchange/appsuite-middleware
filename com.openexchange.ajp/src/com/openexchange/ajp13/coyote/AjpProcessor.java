@@ -732,7 +732,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                      */
                     if (request.isFormData()) {
                         /*
-                         * Read all data from servlet input stream...
+                         * Read all form data from servlet input stream...
                          */
                         final int buflen = 2048;
                         final byte[] buf = new byte[buflen];
