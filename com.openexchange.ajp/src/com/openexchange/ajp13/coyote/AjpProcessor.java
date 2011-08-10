@@ -1164,8 +1164,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 }
             } else if (attributeCode == Constants.SC_A_JVM_ROUTE) {
                 final String jvmRoute = requestHeaderMessage.getString();
-                if (!AJPv13Config.getJvmRoute().equals(jvmRoute)) {
-                    LOG.error("JVM route mismatch. Expected \"" + AJPv13Config.getJvmRoute() + "\", but is \"" + jvmRoute + "\".");
+                if (DEBUG && !AJPv13Config.getJvmRoute().equals(jvmRoute)) {
+                    LOG.debug("JVM route mismatch. Expected \"" + AJPv13Config.getJvmRoute() + "\", but is \"" + jvmRoute + "\".");
                 }
                 request.setInstanceId(jvmRoute);
             } else if (attributeCode == Constants.SC_A_SSL_CERT) {
