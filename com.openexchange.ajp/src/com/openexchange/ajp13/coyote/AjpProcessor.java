@@ -1256,8 +1256,12 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
              */
             checkJSessionIDCookie();
         } else {
-            final int dot = jsessionID.lastIndexOf('.');
-            if ((dot == -1) || (AJPv13Config.getJvmRoute().equals(jsessionID.substring(dot + 1)))) {
+            String thisJVMRoute = request.getInstanceId();
+            if (null == thisJVMRoute) {
+                final int dot = jsessionID.lastIndexOf('.');
+                thisJVMRoute = -1 == dot ? null : jsessionID.substring(dot + 1);
+            }
+            if ((null == thisJVMRoute) || (AJPv13Config.getJvmRoute().equals(thisJVMRoute))) {
                 addJSessionIDCookie(jsessionID);
             } else {
                 /*
