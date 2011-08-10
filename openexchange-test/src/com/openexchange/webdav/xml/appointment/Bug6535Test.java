@@ -56,7 +56,7 @@ public class Bug6535Test extends AppointmentTest {
 		
 		appointmentObj.setUsers(users);
 
-		final int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword());
+		final int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 		
 		final Appointment recurrenceUpdate = new Appointment();
 		recurrenceUpdate.setTitle("testBug6535 - exception");
@@ -68,17 +68,17 @@ public class Bug6535Test extends AppointmentTest {
 		recurrenceUpdate.setIgnoreConflicts(true);
 		recurrenceUpdate.setUsers(users);
 
-		updateAppointment(getWebConversation(), recurrenceUpdate, objectId, appointmentFolderId, getHostName(), getLogin(), getPassword());
+		updateAppointment(getWebConversation(), recurrenceUpdate, objectId, appointmentFolderId, getHostName(), getLogin(), getPassword(), context);
 		
 		appointmentObj.setObjectID(objectId);
-		Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+		Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 		compareObject(appointmentObj, loadAppointment);
 		
 		final Date modified = loadAppointment.getLastModified();
 		
-		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, decrementDate(modified), getHostName(), getLogin(), getPassword());
+		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, decrementDate(modified), getHostName(), getLogin(), getPassword(), context);
 		compareObject(appointmentObj, loadAppointment);
 		
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 	}
 }

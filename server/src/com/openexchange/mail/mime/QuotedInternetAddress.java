@@ -1166,6 +1166,9 @@ public final class QuotedInternetAddress extends InternetAddress {
         }
         String s = str;
         int length = s.length();
+        if (1 == length) {
+            return str;
+        }
         if ('"' == s.charAt(0) && '"' == s.charAt(length - 1)) {
             s = s.substring(1, length - 1);
             // check for any escaped characters

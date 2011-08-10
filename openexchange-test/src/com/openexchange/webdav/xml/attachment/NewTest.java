@@ -18,12 +18,12 @@ public class NewTest extends AttachmentTest {
 	}
 	
 	public void testInsertAttachment() throws Exception {
-		final FolderObject folderObj = FolderTest.getContactDefaultFolder(webCon, PROTOCOL + hostName, login, password);
+		final FolderObject folderObj = FolderTest.getContactDefaultFolder(webCon, PROTOCOL + hostName, login, password, context);
 		final int contactFolderId = folderObj.getObjectID();
 		final Contact contactObj = new Contact();
 		contactObj.setSurName("testInsertAttachment");
 		contactObj.setParentFolderID(contactFolderId);
-		final int objectId = ContactTest.insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
+		final int objectId = ContactTest.insertContact(webCon, contactObj, PROTOCOL + hostName, login, password, context);
 		
 		final AttachmentMetadata attachmentObj = new AttachmentImpl();
 		attachmentObj.setFilename(System.currentTimeMillis() + "test.txt");
@@ -35,7 +35,7 @@ public class NewTest extends AttachmentTest {
 		
 		final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(data);
 		
-		final int attachmentId = insertAttachment(webCon, attachmentObj, byteArrayInputStream, getHostName(), getLogin(), getPassword());
+		final int attachmentId = insertAttachment(webCon, attachmentObj, byteArrayInputStream, getHostName(), getLogin(), getPassword(), context);
 		assertTrue("attachment is 0", attachmentId > 0);
 	}	
 }

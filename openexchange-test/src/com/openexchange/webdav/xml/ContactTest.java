@@ -51,7 +51,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 	protected void setUp() throws Exception {
 		super.setUp();
 		
-		final FolderObject folderObj = FolderTest.getContactDefaultFolder(webCon, PROTOCOL + hostName, login, password);
+		final FolderObject folderObj = FolderTest.getContactDefaultFolder(webCon, PROTOCOL + hostName, login, password, context);
 		contactFolderId = folderObj.getObjectID();
 		userId = folderObj.getCreatedBy();
 		
@@ -286,9 +286,9 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		
 		final Contact link1 = createContactObject("link1");
 		final Contact link2 = createContactObject("link2");
-		final int linkId1 = insertContact(webCon, link1, PROTOCOL + hostName, login, password);
+		final int linkId1 = insertContact(webCon, link1, PROTOCOL + hostName, login, password, context);
 		link1.setObjectID(linkId1);
-		final int linkId2 = insertContact(webCon, link2, PROTOCOL + hostName, login, password);
+		final int linkId2 = insertContact(webCon, link2, PROTOCOL + hostName, login, password, context);
 		link2.setObjectID(linkId2);
 		
 		final LinkEntryObject[] links = new LinkEntryObject[2];
@@ -311,7 +311,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		return contactObj;
 	}
 	
-	public static int insertContact(final WebConversation webCon, final Contact contactObj, String host, final String login, final String password) throws OXException, Exception {
+	public static int insertContact(final WebConversation webCon, final Contact contactObj, String host, final String login, final String password, String context) throws OXException, Exception {
 		host = AbstractWebdavXMLTest.appendPrefix(host);
 		contactObj.removeObjectID();
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -323,7 +323,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		xo.output(doc, baos);
 		final ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 		final WebRequest req = new PutMethodWebRequest(host + CONTACT_URL, bais, "text/xml");
-		req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password));
+		req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password, context));
 		final WebResponse resp = webCon.getResource(req);
 		assertEquals(207, resp.getResponseCode());
 		final InputStream input = resp.getInputStream();
@@ -341,11 +341,11 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		return objectId;
 	}
 	
-	public static void updateContact(final WebConversation webCon, final Contact contactObj, final int objectId, final int inFolder, final String host, final String login, final String password) throws OXException, Exception {
-		updateContact(webCon, contactObj, objectId, inFolder, new Date(System.currentTimeMillis() + APPEND_MODIFIED), host, login, password);
+	public static void updateContact(final WebConversation webCon, final Contact contactObj, final int objectId, final int inFolder, final String host, final String login, final String password, String context) throws OXException, Exception {
+		updateContact(webCon, contactObj, objectId, inFolder, new Date(System.currentTimeMillis() + APPEND_MODIFIED), host, login, password, context);
 	}
 	
-	public static void updateContact(final WebConversation webCon, Contact contactObj, int objectId, final int inFolder, final Date lastModified, String host, final String login, final String password) throws OXException, Exception {
+	public static void updateContact(final WebConversation webCon, Contact contactObj, int objectId, final int inFolder, final Date lastModified, String host, final String login, final String password, String context) throws OXException, Exception {
 		host = AbstractWebdavXMLTest.appendPrefix(host);
 		
 		contactObj.setObjectID(objectId);
@@ -369,7 +369,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 		final WebRequest req = new PutMethodWebRequest(host + CONTACT_URL, bais, "text/javascript");
-		req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password));
+		req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password, context));
 		final WebResponse resp = webCon.getResponse(req);
 		
 		assertEquals(207, resp.getResponseCode());
@@ -392,11 +392,11 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		assertEquals("check response status", 200, response[0].getStatus());
 	}
 	
-	public static int[] deleteContact(final WebConversation webCon, final int[][] objectIdAndFolderId, final String host, final String login, final String password) throws Exception {
+	public static int[] deleteContact(final WebConversation webCon, final int[][] objectIdAndFolderId, final String host, final String login, final String password, String context) throws Exception {
 		new ArrayList();
 		
 		for (int a = 0; a < objectIdAndFolderId.length; a++) {
-			deleteContact(webCon, objectIdAndFolderId[a][0], objectIdAndFolderId[a][1], host, login, password);
+			deleteContact(webCon, objectIdAndFolderId[a][0], objectIdAndFolderId[a][1], host, login, password, context);
 		}
 		
 		return new int[] { };
@@ -406,11 +406,11 @@ public class ContactTest extends AbstractWebdavXMLTest {
 	 * @deprecated use {@link #deleteContact(WebConversation, int, int, Date, String, String, String)}
 	 */
 	@Deprecated
-    public static void deleteContact(final WebConversation webCon, final int objectId, final int inFolder, final String host, final String login, final String password) throws OXException, Exception {
-		deleteContact(webCon, objectId, inFolder, new Date(System.currentTimeMillis() + APPEND_MODIFIED), host, login, password);
+    public static void deleteContact(final WebConversation webCon, final int objectId, final int inFolder, final String host, final String login, final String password, String context) throws OXException, Exception {
+		deleteContact(webCon, objectId, inFolder, new Date(System.currentTimeMillis() + APPEND_MODIFIED), host, login, password, context);
 	}
 	
-	public static void deleteContact(final WebConversation webCon, final int objectId, final int inFolder, final Date lastModified, String host, final String login, final String password) throws OXException, Exception {
+	public static void deleteContact(final WebConversation webCon, final int objectId, final int inFolder, final Date lastModified, String host, final String login, final String password, String context) throws OXException, Exception {
 		host = AbstractWebdavXMLTest.appendPrefix(host);
 		final Element rootElement = new Element("multistatus", webdav);
 		rootElement.addNamespaceDeclaration(XmlServlet.NS);
@@ -431,7 +431,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		xo.output(doc, baos);
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 		final WebRequest req = new PutMethodWebRequest(host + CONTACT_URL, bais, "text/xml");
-		req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password));
+		req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password, context));
 		final WebResponse resp = webCon.getResource(req);
 		assertEquals(207, resp.getResponseCode());
 		bais = new ByteArrayInputStream(resp.getText().getBytes());
@@ -490,7 +490,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		return (int[])response[0].getDataObject();
 	}
 	
-	public static Contact[] listContact(final WebConversation webCon, final int inFolder, final Date modified, final boolean changed, final boolean deleted, String host, final String login, final String password) throws Exception {
+	public static Contact[] listContact(final WebConversation webCon, final int inFolder, final Date modified, final boolean changed, final boolean deleted, String host, final String login, final String password, String context) throws Exception {
 		host = AbstractWebdavXMLTest.appendPrefix(host);
 		if (!changed && !deleted) {
 			return new Contact[] { };
@@ -523,7 +523,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		xo.output(doc, baos);
 		baos.flush();
 		final HttpClient httpclient = new HttpClient();
-		httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
+		httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login+"@"+context, password));
 		final PropFindMethod propFindMethod = new PropFindMethod(host + CONTACT_URL);
 		propFindMethod.setDoAuthentication(true);
 		propFindMethod.setRequestEntity(new ByteArrayRequestEntity(baos.toByteArray(), "text/xml"));
@@ -542,7 +542,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		return contactArray;
 	}
 	
-	public static Contact loadContact(final WebConversation webCon, final int objectId, final int inFolder, String host, final String login, final String password) throws OXException, Exception {
+	public static Contact loadContact(final WebConversation webCon, final int objectId, final int inFolder, String host, final String login, final String password, String context) throws OXException, Exception {
 		host = AbstractWebdavXMLTest.appendPrefix(host);
 		final Element ePropfind = new Element("propfind", webdav);
 		final Element eProp = new Element("prop", webdav);
@@ -559,7 +559,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		xo.output(doc, baos);
 		baos.flush();
 		final HttpClient httpclient = new HttpClient();
-		httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
+		httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login+"@"+context, password));
 		final PropFindMethod propFindMethod = new PropFindMethod(host + CONTACT_URL);
 		propFindMethod.setDoAuthentication(true);
 		propFindMethod.setRequestEntity(new ByteArrayRequestEntity(baos.toByteArray(), "text/xml"));

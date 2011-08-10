@@ -82,11 +82,11 @@ public class ContactRequest {
         this.session = session;
     }
 
-    public int getId() {
+    public int getId() throws OXException {
         return request.getParameter("id", int.class);
     }
 
-    public int getFolder() {
+    public int getFolder() throws OXException {
         return request.getParameter("folder", int.class);
     }
 
@@ -167,9 +167,8 @@ public class ContactRequest {
         return data;
     }
 
-    public long getTimestamp() {
-        final long timestamp = request.getParameter("timestamp", long.class);
-        return timestamp;
+    public long getTimestamp() throws OXException {
+        return request.getParameter("timestamp", long.class);
     }
 
     public int[] getUserIds() throws OXException {

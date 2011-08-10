@@ -81,10 +81,10 @@ public class AppointmentListResultConverter extends AbstractCalendarJSONResultCo
     }
 
     @Override
-    protected void convertCalendar(final AppointmentAJAXRequest req, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
+    protected void convertCalendar(final AppointmentAJAXRequest req, final AJAXRequestResult result, final ServerSession session, final Converter converter, TimeZone userTimeZone) throws OXException {
         final Map<String, List<Appointment>> appointmentMap = (Map<String, List<Appointment>>) result.getResultObject();
-        final Date startUTC = req.checkDate(AJAXServlet.PARAMETER_START);
-        final Date endUTC = req.checkDate(AJAXServlet.PARAMETER_END);
+        final Date startUTC = req.optDate(AJAXServlet.PARAMETER_START);
+        final Date endUTC = req.optDate(AJAXServlet.PARAMETER_END);
         final int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
         final List<Appointment> appointmentList;
         final boolean putDeleted;
@@ -100,7 +100,7 @@ public class AppointmentListResultConverter extends AbstractCalendarJSONResultCo
         final TimeZone timeZone;
         {
             final String timeZoneId = req.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-            timeZone = null == timeZoneId ? req.getTimeZone() : getTimeZone(timeZoneId);
+            timeZone = null == timeZoneId ? userTimeZone : getTimeZone(timeZoneId);
         }
         final JSONArray jsonResponseArray = new JSONArray();
         final AppointmentWriter writer = new AppointmentWriter(timeZone);

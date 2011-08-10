@@ -175,8 +175,9 @@ public class FileResponseRenderer implements ResponseRenderer {
      * @param file
      * @return
      * @throws IOException
+     * @throws OXException
      */
-    private IFileHolder scaleIfImage(final AJAXRequestData request, final IFileHolder file) throws IOException {
+    private IFileHolder scaleIfImage(final AJAXRequestData request, final IFileHolder file) throws IOException, OXException {
         if (scaler == null) {
             return file;
         }

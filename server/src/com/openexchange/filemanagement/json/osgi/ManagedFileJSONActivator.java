@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,53 +47,35 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.converters;
+package com.openexchange.filemanagement.json.osgi;
 
-import java.util.Collection;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.Converter;
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.filemanagement.json.ManagedFileActionFactory;
+import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 
 
 /**
- * {@link JSONResponseConverter}
+ * {@link ManagedFileJSONActivator}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class JSONResponseConverter implements ResultConverter {
+public final class ManagedFileJSONActivator extends AJAXModuleActivator {
 
-
-    @Override
-    public String getInputFormat() {
-        return "json";
+    /**
+     * Initializes a new {@link ManagedFileJSONActivator}.
+     */
+    public ManagedFileJSONActivator() {
+        super();
     }
 
     @Override
-    public String getOutputFormat() {
-        return "apiResponse";
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[0];
     }
 
     @Override
-    public Quality getQuality() {
-        return Quality.GOOD;
-    }
-
-    @Override
-    public void convert(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
-        final Response response = new Response(session);
-        response.setData(result.getResultObject());
-        response.setTimestamp(result.getTimestamp());
-        final Collection<OXException> warnings = result.getWarnings();
-        if (null != warnings && !warnings.isEmpty()) {
-            for (final OXException warning : warnings) {
-                response.addWarning(warning);
-            }
-        }
-        result.setResultObject(response);
+    protected void startBundle() throws Exception {
+        registerModule(new ManagedFileActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "file");
     }
 
 }

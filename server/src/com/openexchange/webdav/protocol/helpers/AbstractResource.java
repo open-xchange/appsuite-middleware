@@ -189,7 +189,7 @@ public abstract class AbstractResource implements WebdavResource {
 
     @Override
     public List<WebdavProperty> getAllProps() throws OXException{
-		final List<WebdavProperty> props = internalGetAllProps();
+		final List<WebdavProperty> props = new ArrayList<WebdavProperty>(internalGetAllProps());
 		props.addAll(getAllFromMixin());
 		for(final Property p : getFactory().getProtocol().getKnownProperties()){
 			final WebdavProperty prop = getProperty(p.getNamespace(),p.getName());

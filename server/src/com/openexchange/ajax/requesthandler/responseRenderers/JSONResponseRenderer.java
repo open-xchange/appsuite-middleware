@@ -124,12 +124,10 @@ public class JSONResponseRenderer implements ResponseRenderer {
         return Boolean.parseBoolean(req.getParameter("respondWithHTML"));
     }
 
-    private static final Pattern PATTERN_JSON = Pattern.compile("**json**", Pattern.LITERAL);
-
-    private static final Pattern PATTERN_ACTION = Pattern.compile("**action**", Pattern.LITERAL);
 
     private static String substituteJS(final String json, final String action) {
-        return PATTERN_JSON.matcher(PATTERN_ACTION.matcher(AJAXServlet.JS_FRAGMENT).replaceAll(action)).replaceFirst(json);
+    	return AJAXServlet.JS_FRAGMENT.replace("**json**", json).replace("**action**",
+				action);
     }
 
 }

@@ -23,7 +23,7 @@ public class Bug4395Test extends AppointmentTest {
 	}
 	
 	public void testBug4395() throws Exception {
-		final FolderObject sharedFolderObject = FolderTest.getAppointmentDefaultFolder(getSecondWebConversation(), PROTOCOL + getHostName(), getSecondLogin(), getPassword());
+		final FolderObject sharedFolderObject = FolderTest.getAppointmentDefaultFolder(getSecondWebConversation(), PROTOCOL + getHostName(), getSecondLogin(), getPassword(), context);
 		final int secondUserId = sharedFolderObject.getCreatedBy();
 		
 		final FolderObject folderObj = new FolderObject();
@@ -39,7 +39,7 @@ public class Bug4395Test extends AppointmentTest {
 		
 		folderObj.setPermissionsAsArray( permission );
 		
-		final int parentFolderId = FolderTest.insertFolder(getSecondWebConversation(), folderObj, PROTOCOL + getHostName(), getSecondLogin(), getPassword());
+		final int parentFolderId = FolderTest.insertFolder(getSecondWebConversation(), folderObj, PROTOCOL + getHostName(), getSecondLogin(), getPassword(), context);
 		
 		permission = new OCLPermission[] { 
 			FolderTest.createPermission( userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, false),
@@ -49,7 +49,7 @@ public class Bug4395Test extends AppointmentTest {
 		folderObj.setPermissionsAsArray( permission );
 		folderObj.setObjectID(parentFolderId);
 		
-		FolderTest.updateFolder(getSecondWebConversation(), folderObj, getHostName(), getSecondLogin(), getPassword());
+		FolderTest.updateFolder(getSecondWebConversation(), folderObj, getHostName(), getSecondLogin(), getPassword(), context);
 		
 		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle("testBug4395");
@@ -59,12 +59,12 @@ public class Bug4395Test extends AppointmentTest {
 		appointmentObj.setParentFolderID(parentFolderId);
 		appointmentObj.setIgnoreConflicts(true);
 		
-		final int appointmentObjectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword());
+		final int appointmentObjectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 		appointmentObj.setObjectID(appointmentObjectId);
 
-		final Appointment loadAppointment = loadAppointment(getWebConversation(), appointmentObjectId, parentFolderId, getHostName(), getLogin(), getPassword());
+		final Appointment loadAppointment = loadAppointment(getWebConversation(), appointmentObjectId, parentFolderId, getHostName(), getLogin(), getPassword(), context);
 		compareObject(appointmentObj, loadAppointment);
 		
-		FolderTest.deleteFolder(getSecondWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getSecondLogin(), getPassword());
+		FolderTest.deleteFolder(getSecondWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getSecondLogin(), getPassword(), context);
 	}
 }

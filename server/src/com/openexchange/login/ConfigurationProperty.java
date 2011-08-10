@@ -93,13 +93,22 @@ public enum ConfigurationProperty {
      * WARNING! Setting this parameter to true may result in users seeing a different users content if the infrastructure around OX does not
      * work correctly.
      */
-    INSECURE("com.openexchange.ajax.login.insecure", "false"),
+    INSECURE("com.openexchange.ajax.login.insecure", Boolean.FALSE.toString()),
 
     /**
      * Whether autologin is allowed or not.
      */
     SESSIOND_AUTOLOGIN(SessiondProperty.SESSIOND_AUTOLOGIN.getPropertyName(), SessiondProperty.SESSIOND_AUTOLOGIN.getDefaultValue()),
-    NO_IP_CHECK_RANGE("com.openexchange.noIPCheckRange", null);
+    NO_IP_CHECK_RANGE("com.openexchange.noIPCheckRange", null),
+
+    /**
+     * This option has only an effect if com.openexchange.ajax.login.insecure is configured to true.
+     * This option allows to enable the IP check for /ajax/login?action=redirect requests. This request is mostly used to create a session
+     * without using the OX web UI login screen. The previous behavior allowed to change the IP for this request. Configure this option to
+     * false to have an IP check during this request. Additionally you can white list IP addresses from that an IP change is still allowed.
+     * This is useful if other systems in the infrastructure around OX want to create the session. 
+     */
+    REDIRECT_IP_CHANGE_ALLOWED("com.openexchange.ajax.login.redirect.changeIPAllowed", Boolean.TRUE.toString());
 
     private final String propertyName;
 

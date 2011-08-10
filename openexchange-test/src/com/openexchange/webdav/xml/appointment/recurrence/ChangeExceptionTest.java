@@ -25,7 +25,7 @@ public class ChangeExceptionTest extends AbstractRecurrenceTest {
             appointmentObj.setRecurrenceType(Appointment.DAILY);
             appointmentObj.setInterval(1);
             appointmentObj.setIgnoreConflicts(true);
-            objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword());
+            objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
             
             final Date startDateException = simpleDateFormatUTC.parse("2009-01-03 10:00:00");
             final Date endDateException = simpleDateFormatUTC.parse("2009-01-03 12:00:00");
@@ -35,10 +35,10 @@ public class ChangeExceptionTest extends AbstractRecurrenceTest {
             exception.setStartDate(startDateException);
             exception.setEndDate(endDateException);
             exception.setIgnoreConflicts(true);
-            updateAppointment(getWebConversation(), exception, objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+            updateAppointment(getWebConversation(), exception, objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
         } finally {
             if (objectId != 0) {
-                deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+                deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
             }
         }
     }

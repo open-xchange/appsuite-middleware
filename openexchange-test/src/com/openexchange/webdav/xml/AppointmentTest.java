@@ -157,7 +157,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 
         resourceParticipant = AbstractConfigWrapper.parseProperty(webdavProps, "resource_participant", "");
 
-        final FolderObject folderObj = FolderTest.getAppointmentDefaultFolder(webCon, PROTOCOL + hostName, login, password);
+        final FolderObject folderObj = FolderTest.getAppointmentDefaultFolder(webCon, PROTOCOL + hostName, login, password, context);
         appointmentFolderId = folderObj.getObjectID();
         userId = folderObj.getCreatedBy();
     }
@@ -204,7 +204,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
         return appointmentobject;
     }
 
-    public static int insertAppointment(final WebConversation webCon, Appointment appointmentObj, String host, final String login, final String password) throws OXException, Exception {
+    public static int insertAppointment(final WebConversation webCon, Appointment appointmentObj, String host, final String login, final String password, String context) throws OXException, Exception {
         host = AbstractWebdavXMLTest.appendPrefix(host);
 
         int objectId = 0;
@@ -226,7 +226,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
         final WebRequest req = new PutMethodWebRequest(host + AbstractAppointmentRequest.URL, bais, "text/xml");
-        req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password));
+        req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password, context));
         final WebResponse resp = webCon.getResource(req);
 
         assertEquals(207, resp.getResponseCode());
@@ -253,7 +253,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
         return objectId;
     }
 
-    public static int updateAppointment(final WebConversation webCon, final Appointment appointmentObj, final int objectId, final int inFolder, final String host, final String login, final String password) throws OXException, Exception {
+    public static int updateAppointment(final WebConversation webCon, final Appointment appointmentObj, final int objectId, final int inFolder, final String host, final String login, final String password, String context) throws OXException, Exception {
         return updateAppointment(
             webCon,
             appointmentObj,
@@ -262,10 +262,11 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
             new Date(System.currentTimeMillis() + APPEND_MODIFIED),
             host,
             login,
-            password);
+            password,
+            context);
     }
 
-    public static int updateAppointment(final WebConversation webCon, Appointment appointmentObj, int objectId, final int inFolder, final Date lastModified, String host, final String login, final String password) throws OXException, Exception {
+    public static int updateAppointment(final WebConversation webCon, Appointment appointmentObj, int objectId, final int inFolder, final Date lastModified, String host, final String login, final String password, String context) throws OXException, Exception {
         host = AbstractWebdavXMLTest.appendPrefix(host);
 
         appointmentObj.setObjectID(objectId);
@@ -286,7 +287,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
         final WebRequest req = new PutMethodWebRequest(host + AbstractAppointmentRequest.URL, bais, "text/javascript");
-        req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password));
+        req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password, context));
         final WebResponse resp = webCon.getResource(req);
 
         assertEquals(207, resp.getResponseCode());
@@ -311,7 +312,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
         return objectId;
     }
 
-    public static void deleteAppointment(final WebConversation webCon, final int objectId, final int inFolder, final Date lastModified, final Date recurrenceDatePosition, String host, final String login, final String password) throws OXException, Exception {
+    public static void deleteAppointment(final WebConversation webCon, final int objectId, final int inFolder, final Date lastModified, final Date recurrenceDatePosition, String host, final String login, final String password, String context) throws OXException, Exception {
         host = AbstractWebdavXMLTest.appendPrefix(host);
 
         host = AbstractWebdavXMLTest.appendPrefix(host);
@@ -344,7 +345,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 
         ByteArrayInputStream bais = new UnsynchronizedByteArrayInputStream(baos.toByteArray());
         final WebRequest req = new PutMethodWebRequest(host + AbstractAppointmentRequest.URL, bais, "text/xml");
-        req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password));
+        req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password, context));
         final WebResponse resp = webCon.getResponse(req);
 
         assertEquals(207, resp.getResponseCode());
@@ -357,21 +358,21 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
         }
     }
 
-    public static int[] deleteAppointment(final WebConversation webCon, final int[][] objectIdAndFolderId, final String host, final String login, final String password) throws Exception {
+    public static int[] deleteAppointment(final WebConversation webCon, final int[][] objectIdAndFolderId, final String host, final String login, final String password, String context) throws Exception {
         new ArrayList();
 
         for (int a = 0; a < objectIdAndFolderId.length; a++) {
-            deleteAppointment(webCon, objectIdAndFolderId[a][0], objectIdAndFolderId[a][1], host, login, password);
+            deleteAppointment(webCon, objectIdAndFolderId[a][0], objectIdAndFolderId[a][1], host, login, password, context);
         }
 
         return new int[] {};
     }
 
-    public static void deleteAppointment(final WebConversation webCon, final int objectId, final int inFolder, final String host, final String login, final String password) throws OXException, Exception {
-        deleteAppointment(webCon, objectId, inFolder, new Date(System.currentTimeMillis() + APPEND_MODIFIED), host, login, password);
+    public static void deleteAppointment(final WebConversation webCon, final int objectId, final int inFolder, final String host, final String login, final String password, String context) throws OXException, Exception {
+        deleteAppointment(webCon, objectId, inFolder, new Date(System.currentTimeMillis() + APPEND_MODIFIED), host, login, password, context);
     }
 
-    public static void deleteAppointment(final WebConversation webCon, final int objectId, final int inFolder, final Date lastModified, String host, final String login, final String password) throws OXException, Exception {
+    public static void deleteAppointment(final WebConversation webCon, final int objectId, final int inFolder, final Date lastModified, String host, final String login, final String password, String context) throws OXException, Exception {
         host = AbstractWebdavXMLTest.appendPrefix(host);
 
         final Element rootElement = new Element("multistatus", webdav);
@@ -403,7 +404,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
         final WebRequest req = new PutMethodWebRequest(host + AbstractAppointmentRequest.URL, bais, "text/xml");
-        req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password));
+        req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password, context));
         final WebResponse resp = webCon.getResource(req);
 
         assertEquals(207, resp.getResponseCode());
@@ -416,7 +417,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
         }
     }
 
-    public static void confirmAppointment(final WebConversation webCon, final int objectId, final int confirm, final String confirmMessage, String host, final String login, final String password) throws Exception {
+    public static void confirmAppointment(final WebConversation webCon, final int objectId, final int confirm, final String confirmMessage, String host, final String login, final String password, String context) throws Exception {
         host = AbstractWebdavXMLTest.appendPrefix(host);
 
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -457,7 +458,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
         final WebRequest req = new PutMethodWebRequest(host + AbstractAppointmentRequest.URL, bais, "text/javascript");
-        req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password));
+        req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password, context));
         final WebResponse resp = webCon.getResponse(req);
 
         assertEquals(207, resp.getResponseCode());
@@ -474,7 +475,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
         assertEquals("check response status", 200, response[0].getStatus());
     }
 
-    public static int[] listAppointment(final WebConversation webCon, final int inFolder, String host, final String login, final String password) throws Exception {
+    public static int[] listAppointment(final WebConversation webCon, final int inFolder, String host, final String login, final String password, String context) throws Exception {
         host = AbstractWebdavXMLTest.appendPrefix(host);
 
         final Element ePropfind = new Element("propfind", webdav);
@@ -502,7 +503,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 
         final HttpClient httpclient = new HttpClient();
 
-        httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
+        httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login+"@"+context, password));
         final PropFindMethod propFindMethod = new PropFindMethod(host + AbstractAppointmentRequest.URL);
         propFindMethod.setDoAuthentication(true);
 
@@ -521,7 +522,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
         return (int[]) response[0].getDataObject();
     }
 
-    public static Appointment[] listAppointment(final WebConversation webCon, final int inFolder, final Date modified, final boolean changed, final boolean deleted, String host, final String login, final String password) throws Exception {
+    public static Appointment[] listAppointment(final WebConversation webCon, final int inFolder, final Date modified, final boolean changed, final boolean deleted, String host, final String login, final String password, String context) throws Exception {
         host = AbstractWebdavXMLTest.appendPrefix(host);
 
         if (!changed && !deleted) {
@@ -568,7 +569,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 
         final HttpClient httpclient = new HttpClient();
 
-        httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
+        httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login+"@"+context, password));
         final PropFindMethod propFindMethod = new PropFindMethod(host + AbstractAppointmentRequest.URL);
         propFindMethod.setDoAuthentication(true);
 
@@ -594,9 +595,8 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 
         return appointmentArray;
     }
-
-    public static Appointment loadAppointment(final WebConversation webCon, final int objectId, final int inFolder, final Date modified, final String host, final String login, final String password) throws OXException, Exception {
-        final Appointment[] appointmentArray = listAppointment(webCon, inFolder, modified, true, false, host, login, password);
+    public static Appointment loadAppointment(final WebConversation webCon, final int objectId, final int inFolder, final Date modified, final String host, final String login, final String password, String context) throws OXException, Exception {
+        final Appointment[] appointmentArray = listAppointment(webCon, inFolder, modified, true, false, host, login, password, context);
 
         for (int a = 0; a < appointmentArray.length; a++) {
             if (appointmentArray[a].getObjectID() == objectId) {
@@ -607,7 +607,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
         throw new TestException("object not found");
     }
 
-    public static Appointment loadAppointment(final WebConversation webCon, final int objectId, final int inFolder, String host, final String login, final String password) throws OXException, Exception {
+    public static Appointment loadAppointment(final WebConversation webCon, final int objectId, final int inFolder, String host, final String login, final String password, String context) throws OXException, Exception {
         host = AbstractWebdavXMLTest.appendPrefix(host);
 
         final Element ePropfind = new Element("propfind", webdav);

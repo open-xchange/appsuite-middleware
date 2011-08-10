@@ -96,7 +96,7 @@ import com.openexchange.timer.TimerService;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
- * {@link AjpProcessor}
+ * {@link AjpProcessor} - The AJP processor adapted from Tomcat's Coyote AJP connector.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -108,7 +108,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     private static final AtomicLong NUMBER = new AtomicLong();
 
-    private static final int STAGE_PARSE = 1;
+    private static final int STAGE_AWAIT = 1;
 
     private static final int STAGE_PREPARE = 2;
 
@@ -121,7 +121,12 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     /**
      * The current processor stage.
      */
-    private int stage;
+    private volatile int stage;
+
+    /**
+     * Required secret.
+     */
+    private String requiredSecret;
 
     /**
      * Associated servlet.
@@ -162,17 +167,17 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     /**
      * Body message.
      */
-    protected final MessageBytes bodyBytes = MessageBytes.newInstance();
+    protected final MessageBytes bodyBytes;
 
     /**
      * State flag.
      */
-    private boolean started = false;
+    private volatile boolean started = false;
 
     /**
      * Error flag.
      */
-    protected boolean error = false;
+    protected volatile boolean error = false;
 
     /**
      * Socket associated with the current connection.
@@ -190,9 +195,24 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     protected OutputStream output;
 
     /**
+     * The number of milliseconds waiting for a subsequent request before closing the connection.
+     */
+    private int keepAliveTimeout = -1;
+
+    /**
      * The main read-write-lock.
      */
-    protected final ReadWriteLock mainLock;
+    private final ReadWriteLock mainLock;
+
+    /**
+     * The soft lock for non-blocking access to output stream.
+     */
+    protected final Lock softLock;
+
+    /**
+     * Use Tomcat authentication ?
+     */
+    private boolean tomcatAuthentication = true;
 
     /**
      * The socket timeout used when reading the first block of the request header.
@@ -202,12 +222,12 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     /**
      * The byte sink used for processing.
      */
-    private final ByteArrayOutputStream sink = new UnsynchronizedByteArrayOutputStream(Constants.MAX_PACKET_SIZE);
+    private final ByteArrayOutputStream sink;
 
     /**
      * Byte chunk for certs.
      */
-    private final MessageBytes certificates = MessageBytes.newInstance();
+    private final MessageBytes certificates;
 
     /**
      * End of stream flag.
@@ -217,22 +237,22 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     /**
      * Body empty flag.
      */
-    protected boolean empty = true;
+    protected volatile boolean empty = true;
 
     /**
      * First read.
      */
-    protected boolean first = true;
+    protected volatile boolean first = true;
 
     /**
      * Replay read.
      */
-    private boolean replay = false;
+    private volatile boolean replay = false;
 
     /**
      * Finished response.
      */
-    private boolean finished = false;
+    private volatile boolean finished = false;
 
     /**
      * The HTTP session (JSESSIONID) cookie.
@@ -277,7 +297,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     /**
      * The last write access.
      */
-    protected long lastWriteAccess;
+    protected volatile long lastWriteAccess;
 
     /**
      * Direct buffer used for sending right away a get body message.
@@ -339,7 +359,12 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     public AjpProcessor(final int packetSize, final AJPv13TaskMonitor listenerMonitor) {
         super();
+        bodyBytes = MessageBytes.newInstance();
+        sink = new UnsynchronizedByteArrayOutputStream(Constants.MAX_PACKET_SIZE);
+        certificates = MessageBytes.newInstance();
         mainLock = new ReentrantReadWriteLock();
+        softLock = mainLock.readLock();
+        lastWriteAccess = Long.MAX_VALUE;
         this.listenerMonitor = listenerMonitor;
         this.number = Long.valueOf(NUMBER.incrementAndGet());
         servletId = new StringBuilder(16);
@@ -402,7 +427,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     @Override
     public boolean isWaitingOnAJPSocket() {
-        return STAGE_PARSE == stage;
+        return STAGE_AWAIT == stage;
     }
 
     @Override
@@ -440,11 +465,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         return lastWriteAccess;
     }
 
-    /**
-     * Use Tomcat authentication ?
-     */
-    protected boolean tomcatAuthentication = true;
-
     public boolean getTomcatAuthentication() {
         return tomcatAuthentication;
     }
@@ -454,11 +474,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     }
 
     /**
-     * Required secret.
-     */
-    private String requiredSecret;
-
-    /**
      * Sets the required secret.
      * 
      * @param requiredSecret The secret
@@ -466,11 +481,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     public void setRequiredSecret(final String requiredSecret) {
         this.requiredSecret = requiredSecret;
     }
-
-    /**
-     * The number of milliseconds waiting for a subsequent request before closing the connection.
-     */
-    private int keepAliveTimeout = -1;
 
     public int getKeepAliveTimeout() {
         return keepAliveTimeout;
@@ -591,7 +601,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      * @throws IOException If an error occurs during an I/O operation
      */
     public void process(final Socket socket) throws IOException {
-        stage = STAGE_PARSE;
+        stage = STAGE_AWAIT;
         final long st = System.currentTimeMillis();
         // Setting up the socket
         this.socket = socket;
@@ -610,21 +620,21 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
          */
         error = false;
         final Thread thread = this.thread = Thread.currentThread();
-        if (LogProperties.isEnabled()) {
-            /*
-             * Gather logging info
-             */
-            final Map<String, Object> properties = LogProperties.getLogProperties();
-            properties.put("com.openexchange.ajp13.threadName", thread.getName());
-            properties.put("com.openexchange.ajp13.remotePort", Integer.valueOf(socket.getPort()));
-            properties.put("com.openexchange.ajp13.remoteAddress", socket.getInetAddress().getHostAddress());
-        }
         while (started && !error && !thread.isInterrupted()) {
             /*
              * Parsing the request header
              */
+            if (LogProperties.isEnabled()) {
+                /*
+                 * Gather logging info
+                 */
+                final Map<String, Object> properties = LogProperties.getLogProperties();
+                properties.put("com.openexchange.ajp13.threadName", thread.getName());
+                properties.put("com.openexchange.ajp13.remotePort", Integer.valueOf(socket.getPort()));
+                properties.put("com.openexchange.ajp13.remoteAddress", socket.getInetAddress().getHostAddress());
+            }
             try {
-                stage = STAGE_PARSE;
+                stage = STAGE_AWAIT;
                 listenerMonitor.incrementNumWaiting();
                 /*
                  * Set keep alive timeout if enabled
@@ -643,7 +653,10 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     break;
                 }
                 if (DEBUG) {
-                    LOG.debug("First AJP message successfully read from stream. Prefix code=" + requestHeaderMessage.peekByte() + "(" + Constants.JK_AJP13_CPING_REQUEST + "=CPing," + Constants.JK_AJP13_FORWARD_REQUEST + "=Forward-Request)");
+                    final byte prefixCode = requestHeaderMessage.peekByte();
+                    final String ajpReqName =
+                        Constants.JK_AJP13_CPING_REQUEST == prefixCode ? "CPing" : (Constants.JK_AJP13_FORWARD_REQUEST == prefixCode ? "Forward-Request" : "unknown");
+                    LOG.debug("First " + ajpReqName + " AJP message successfully read from stream.");
                 }
                 /*
                  * Set back timeout if keep alive timeout is enabled
@@ -657,10 +670,10 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                  */
                 final int type = requestHeaderMessage.getByte();
                 if (type == Constants.JK_AJP13_CPING_REQUEST) {
-                    final Lock softLock = mainLock.readLock();
                     softLock.lock();
                     try {
                         output.write(pongMessageArray);
+                        lastWriteAccess = System.currentTimeMillis();
                         // output.flush();
                     } catch (final IOException e) {
                         error = true;
@@ -774,6 +787,12 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             // request.updateCounters();
             stage = STAGE_KEEPALIVE;
             recycle();
+            /*
+             * Drop logging info
+             */
+            if (LogProperties.isEnabled()) {
+                LogProperties.removeLogProperties();
+            }
         }
         /*
          * Terminate AJP connection
@@ -782,6 +801,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         recycle();
         input = null;
         output = null;
+        this.thread = null;
+        this.socket = null;
         final long duration = System.currentTimeMillis() - st;
         listenerMonitor.addUseTime(duration);
         /*
@@ -824,13 +845,13 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     return;
                 }
             }
-            final Lock softLock = mainLock.readLock();
             softLock.lock();
             try {
                 /*
                  * Write empty SEND-BODY-CHUNK package
                  */
                 output.write(flushMessageArray);
+                lastWriteAccess = System.currentTimeMillis();
                 // output.flush();
             } catch (final IOException e) {
                 // Set error flag
@@ -847,6 +868,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                      * Write empty SEND-BODY-CHUNK package
                      */
                     output.write(flushMessageArray);
+                    lastWriteAccess = System.currentTimeMillis();
                     // output.flush();
                 } else {
                     /*
@@ -854,6 +876,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                      */
                     output.write(AJPv13Response.getGetBodyChunkBytes(0));
                     output.flush();
+                    lastWriteAccess = System.currentTimeMillis();
                     /*
                      * Receive empty body chunk
                      */
@@ -1136,6 +1159,9 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 request.setQueryString(queryString);
                 try {
                     parseQueryString(queryString);
+                    if (DEBUG && isEASPingCommand()) {
+                        LOG.debug("Incoming long-running EAS ping request.");
+                    }
                 } catch (final UnsupportedEncodingException e) {
                     throw new IllegalStateException(e.getMessage(), e);
                 }
@@ -1639,7 +1665,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         } catch (final AJPv13Exception e) {
             throw new IOException(e.getMessage(), e);
         }
-        final Lock softLock = mainLock.readLock();
         softLock.lock();
         try {
             sink.writeTo(output);
@@ -1692,7 +1717,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         finished = true;
 
         // Add the end message
-        final Lock softLock = mainLock.readLock();
         softLock.lock();
         try {
             output.write(endMessageArray);
@@ -1700,6 +1724,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         } finally {
             softLock.unlock();
         }
+        lastWriteAccess = System.currentTimeMillis();
     }
 
     /**
@@ -1757,7 +1782,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         }
 
         // Request more data immediately
-        final Lock softLock = mainLock.readLock();
         softLock.lock();
         try {
             output.write(getBodyMessageArray);
@@ -1765,6 +1789,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         } finally {
             softLock.unlock();
         }
+        lastWriteAccess = System.currentTimeMillis();
 
         final boolean moreData = receive();
         if (!moreData) {
@@ -1805,7 +1830,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         servlet = null;
         servletPath = null;
         servletId.setLength(0);
-        lastWriteAccess = -1L;
+        lastWriteAccess = Long.MAX_VALUE;
         request.recycle();
         response.recycle();
         certificates.recycle();
@@ -1884,7 +1909,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 // mod_proxy: Terminating 0 (zero) byte
                 // responseHeaderMessage.appendByte(0);
                 responseHeaderMessage.end();
-                final Lock softLock = mainLock.readLock();
                 softLock.lock();
                 try {
                     output.write(responseHeaderMessage.getBuffer(), 0, responseHeaderMessage.getLen());

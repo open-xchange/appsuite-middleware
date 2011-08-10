@@ -52,7 +52,9 @@ package com.openexchange.ajax;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URLDecoder;
@@ -444,6 +446,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         return (req.getParameter(name) != null);
     }
 
+    private static final boolean BYTE_BASED_READING = true;
+
     /**
      * 2K buffer
      */
@@ -457,11 +461,44 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     /**
      * Returns the complete body as a string. Be careful when getting big request bodies.
      *
-     * @param req The HTTP servlet request.
+     * @param req The HTTP servlet request to read from
      * @return A string with the complete body.
      * @throws IOException If an error occurs while reading the body.
      */
     public static String getBody(final HttpServletRequest req) throws IOException {
+        return BYTE_BASED_READING ? byteBasedBodyReading(req) : decoderBasedBodyReading(req);
+    }
+
+    private static String decoderBasedBodyReading(final HttpServletRequest req) throws IOException {
+        String charEnc = req.getCharacterEncoding();
+        if (charEnc == null) {
+            charEnc = ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding);
+        }
+        final Reader reader = new InputStreamReader(req.getInputStream(), charEnc);
+        try {
+            final int buflen = BUF_SIZE;
+            final char[] cbuf = new char[buflen];
+            final StringBuilder builder = new StringBuilder(SB_SIZE);
+            for (int read = reader.read(cbuf, 0, buflen); read > 0; read = reader.read(cbuf, 0, buflen)) {
+                builder.append(cbuf, 0, read);
+            }
+            return builder.toString();
+        } catch (final UnsupportedEncodingException e) {
+            /*
+             * Should never occur
+             */
+            LOG.error("Unsupported encoding in request", e);
+            return STR_EMPTY;
+        } finally {
+            try {
+                reader.close();
+            } catch (final IOException e) {
+                LOG.debug(e.getMessage(), e);
+            }
+        }
+    }
+
+    private static String byteBasedBodyReading(final HttpServletRequest req) throws IOException {
         final ServletInputStream inputStream = req.getInputStream();
         try {
             final int buflen = BUF_SIZE;

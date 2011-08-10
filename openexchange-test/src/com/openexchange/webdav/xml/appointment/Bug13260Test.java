@@ -98,7 +98,7 @@ public class Bug13260Test extends AppointmentTest {
                 appointmentObj.setOccurrence(10);
             }
             appointmentObj.setIgnoreConflicts(true);
-            objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword());
+            objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 
             // Create DeleteException with update
             Calendar delExceptionDate = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
@@ -109,7 +109,7 @@ public class Bug13260Test extends AppointmentTest {
             delExceptionDate.set(Calendar.MILLISECOND, 0);
 
             appointmentObj.setDeleteExceptions(new Date[] { delExceptionDate.getTime() });
-            updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, getHostName(), getLogin(), getPassword());
+            updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, getHostName(), getLogin(), getPassword(), context);
 
             // Load Appointment
             Appointment loadApointment = loadAppointment(
@@ -118,14 +118,14 @@ public class Bug13260Test extends AppointmentTest {
                 appointmentFolderId,
                 getHostName(),
                 getLogin(),
-                getPassword());
+                getPassword(), context);
 
             // Checks
             assertNotNull("DeleteException expected.", loadApointment.getDeleteException());
             assertEquals("Exact 1 DeleteException expected.", 1, loadApointment.getDeleteException().length);
         } finally {
             if (objectId != -1) {
-                deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+                deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
             }
         }
     }

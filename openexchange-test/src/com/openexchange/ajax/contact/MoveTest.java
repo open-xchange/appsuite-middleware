@@ -76,7 +76,7 @@ public class MoveTest extends ContactTest {
         final String password = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "password", "");
 
         final FolderObject folderObj = com.openexchange.webdav.xml.FolderTest.createFolderObject(userId, "testMove2PrivateFolder" + System.currentTimeMillis(), FolderObject.CONTACT, false);
-        final int targetFolder = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), login, password);
+        final int targetFolder = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), login, password, "");
 
         contactObj.setParentFolderID(targetFolder);
         updateContact(getWebConversation(), contactObj, objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
@@ -98,7 +98,7 @@ public class MoveTest extends ContactTest {
         final String password = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "password", "");
 
         final FolderObject folderObj = com.openexchange.webdav.xml.FolderTest.createFolderObject(userId, "testMove2PublicFolder" + System.currentTimeMillis(), FolderObject.CONTACT, true);
-        final int targetFolder = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), login, password);
+        final int targetFolder = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), login, password, "");
 
         contactObj.setParentFolderID(targetFolder);
         updateContact(getWebConversation(), contactObj, objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());

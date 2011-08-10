@@ -82,6 +82,8 @@ public abstract class AbstractWebdavTest extends TestCase {
     protected String password = null;
 
     protected String secondlogin = null;
+    
+	protected String context;
 
     protected int userId = -1;
 
@@ -96,6 +98,7 @@ public abstract class AbstractWebdavTest extends TestCase {
     protected WebConversation webCon = null;
 
     protected WebConversation secondWebCon = null;
+
 
     protected static final int dayInMillis = 86400000;
 
@@ -118,23 +121,26 @@ public abstract class AbstractWebdavTest extends TestCase {
 
         login = AbstractConfigWrapper.parseProperty(webdavProps, "login", "");
         password = AbstractConfigWrapper.parseProperty(webdavProps, "password", "");
+        context = AbstractConfigWrapper.parseProperty(webdavProps, "contextName", "defaultcontext");
 
         secondlogin = AbstractConfigWrapper.parseProperty(webdavProps, "secondlogin", "");
 
         hostName = AbstractConfigWrapper.parseProperty(webdavProps, "hostname", "localhost");
 
-        userId = GroupUserTest.getUserId(getWebConversation(), PROTOCOL + getHostName(), getLogin(), getPassword());
+        userId = GroupUserTest.getUserId(getWebConversation(), PROTOCOL + getHostName(), getLogin(), getPassword(), context);
         assertTrue("user not found", userId != -1);
 
-        authData = getAuthData(login, password);
+        authData = getAuthData(login, password, context);
     }
 
-    protected static String getAuthData(final String login, String password) throws Exception {
+    protected static String getAuthData(String login, String password, String context) throws Exception {
         if (password == null) {
             password = "";
         }
-
-        return new String(Base64.encode(login + ":" + password));
+        if (context != null && context.length() > 0) {
+        	login = login+"@"+context;
+        }
+        return new String(Base64.encode(login+":"+ password)); 
     }
 
     protected WebConversation getWebConversation() {

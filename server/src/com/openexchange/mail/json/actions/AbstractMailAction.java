@@ -168,7 +168,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      * @param session The session
      * @param mail The mail
      */
-    protected static void triggerContactCollector(final ServerSession session, final MailMessage mail) {
+    public static void triggerContactCollector(final ServerSession session, final MailMessage mail) {
         final ContactCollectorService ccs = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
         if (null != ccs) {
             final Set<InternetAddress> addrs = new HashSet<InternetAddress>();
@@ -249,21 +249,29 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
     protected static final String VIEW_HTML_BLOCKED_IMAGES = "noimg";
 
-    protected static DisplayMode detectDisplayMode(final boolean modifyable, final String view, final UserSettingMail usmNoSave) {
+    /**
+     * Detects the display mode.
+     * 
+     * @param modifyable whether modifiable.
+     * @param view the view
+     * @param usm The user mail settings
+     * @return The display mode
+     */
+    public static DisplayMode detectDisplayMode(final boolean modifyable, final String view, final UserSettingMail usm) {
         final DisplayMode displayMode;
         if (null != view) {
             if (VIEW_RAW.equals(view)) {
                 displayMode = DisplayMode.RAW;
             } else if (VIEW_TEXT.equals(view)) {
-                usmNoSave.setDisplayHtmlInlineContent(false);
+                usm.setDisplayHtmlInlineContent(false);
                 displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
             } else if (VIEW_HTML.equals(view)) {
-                usmNoSave.setDisplayHtmlInlineContent(true);
-                usmNoSave.setAllowHTMLImages(true);
+                usm.setDisplayHtmlInlineContent(true);
+                usm.setAllowHTMLImages(true);
                 displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
             } else if (VIEW_HTML_BLOCKED_IMAGES.equals(view)) {
-                usmNoSave.setDisplayHtmlInlineContent(true);
-                usmNoSave.setAllowHTMLImages(false);
+                usm.setDisplayHtmlInlineContent(true);
+                usm.setAllowHTMLImages(false);
                 displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
             } else {
                 LOG.warn(new StringBuilder(64).append("Unknown value in parameter ").append(Mail.PARAMETER_VIEW).append(": ").append(view).append(

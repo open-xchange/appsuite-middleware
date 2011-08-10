@@ -38,7 +38,7 @@ public class VCardExportTest extends AbstractVCardTest {
 		contactObj.setBirthday(simpleDateFormat.parse("2007-04-04"));
 		contactObj.setParentFolderID(contactFolderId);
 		
-		final int objectId = ContactTest.insertContact(getWebConversation(), contactObj, getHostName(), getLogin(), getPassword());
+		final int objectId = ContactTest.insertContact(getWebConversation(), contactObj, getHostName(), getLogin(), getPassword(), "");
 
 		final Contact[] contactArray = exportContact(getWebConversation(), contactFolderId, emailaddress, timeZone, getHostName(), getSessionId());
 		
@@ -52,6 +52,6 @@ public class VCardExportTest extends AbstractVCardTest {
 		
 		assertTrue("contact with surname: " + surname + " not found", found);
 		
-		ContactTest.deleteContact(getWebConversation(), objectId, contactFolderId, getHostName(), getLogin(), getPassword());
+		ContactTest.deleteContact(getWebConversation(), objectId, contactFolderId, getHostName(), getLogin(), getPassword(), "");
 	}
 }

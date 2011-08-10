@@ -78,6 +78,7 @@ public class FireAttachedEventAction extends AttachmentEventAction {
         try {
             fireAttached(getAttachments(), processed, getUser(), getUserConfiguration(), getSession(), getContext(), getProvider());
         } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
             try {
                 fireDetached(processed, getUser(), getUserConfiguration(), getSession(), getContext(), getProvider());
             } catch (final Exception e1) {
@@ -88,6 +89,7 @@ public class FireAttachedEventAction extends AttachmentEventAction {
                 final OXException aoe = (OXException) e;
                 throw aoe;
             }
+            
             throw AttachmentExceptionCodes.ATTACH_FAILED.create(e);
         }
     }

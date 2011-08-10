@@ -59,9 +59,15 @@ import com.openexchange.event.CommonEvent;
 import com.openexchange.event.EventFactoryService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
+import com.openexchange.push.internal.PushClientWhitelist;
 import com.openexchange.push.internal.ServiceRegistry;
 import com.openexchange.session.Session;
 
+/**
+ * {@link PushUtility}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 /**
  * {@link PushUtility}
  *
@@ -136,4 +142,14 @@ public final class PushUtility {
         }
     }
 
+    /**
+     * Checks if specified client identifier is allowed according to white-list filter.
+     * 
+     * @param client The client identifier
+     * @return <code>true</code> if client identifier is allowed; otherwise <code>false</code>
+     */
+    public static final boolean allowedClient(final String client) {
+        final PushClientWhitelist clientWhitelist = PushClientWhitelist.getInstance();
+        return clientWhitelist.isEmpty() || clientWhitelist.isAllowed(client);
+    }
 }

@@ -75,17 +75,17 @@ public final class LogProperties {
     /**
      * The copy-on-write list containing sorted property names.
      */
-    private static final List<String> PROPERTY_NAMES = new CopyOnWriteArrayList<String>();
+    private static final List<LogPropertyName> PROPERTY_NAMES = new CopyOnWriteArrayList<LogPropertyName>();
 
     /**
      * Sets the configured log property names.
      *
      * @param propertyNames The log property names
      */
-    public static void configuredProperties(final Collection<String> propertyNames) {
+    public static void configuredProperties(final Collection<LogPropertyName> propertyNames) {
         PROPERTY_NAMES.clear();
         if (null != propertyNames && !propertyNames.isEmpty()) {
-            PROPERTY_NAMES.addAll(new TreeSet<String>(propertyNames));
+            PROPERTY_NAMES.addAll(new TreeSet<LogPropertyName>(propertyNames));
         }
     }
 
@@ -94,7 +94,7 @@ public final class LogProperties {
      *
      * @return The list containing sorted property names
      */
-    public static List<String> getPropertyNames() {
+    public static List<LogPropertyName> getPropertyNames() {
         return PROPERTY_NAMES;
     }
 

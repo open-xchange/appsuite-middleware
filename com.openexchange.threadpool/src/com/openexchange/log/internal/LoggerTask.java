@@ -57,6 +57,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogProperties;
+import com.openexchange.log.LogPropertyName;
 import com.openexchange.log.Loggable;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadRenamer;
@@ -175,54 +176,54 @@ final class LoggerTask extends AbstractTask<Object> {
                         case FATAL:
                             if (log.isFatalEnabled()) {
                                 if (null == t) {
-                                    log.fatal(message.startsWith(PREFIX) ? message : prependLocation(message, loggable));
+                                    log.fatal(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.ERROR));
                                 } else {
-                                    log.fatal(message.startsWith(PREFIX) ? message : prependLocation(message, loggable), t);
+                                    log.fatal(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.ERROR), t);
                                 }
                             }
                             break;
                         case ERROR:
                             if (log.isErrorEnabled()) {
                                 if (null == t) {
-                                    log.error(message.startsWith(PREFIX) ? message : prependLocation(message, loggable));
+                                    log.error(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.ERROR));
                                 } else {
-                                    log.error(message.startsWith(PREFIX) ? message : prependLocation(message, loggable), t);
+                                    log.error(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.ERROR), t);
                                 }
                             }
                             break;
                         case WARNING:
                             if (log.isWarnEnabled()) {
                                 if (null == t) {
-                                    log.warn(message.startsWith(PREFIX) ? message : prependLocation(message, loggable));
+                                    log.warn(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.WARNING));
                                 } else {
-                                    log.warn(message.startsWith(PREFIX) ? message : prependLocation(message, loggable), t);
+                                    log.warn(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.WARNING), t);
                                 }
                             }
                             break;
                         case INFO:
                             if (log.isInfoEnabled()) {
                                 if (null == t) {
-                                    log.info(message.startsWith(PREFIX) ? message : prependLocation(message, loggable));
+                                    log.info(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.INFO));
                                 } else {
-                                    log.info(message.startsWith(PREFIX) ? message : prependLocation(message, loggable), t);
+                                    log.info(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.INFO), t);
                                 }
                             }
                             break;
                         case DEBUG:
                             if (log.isDebugEnabled()) {
                                 if (null == t) {
-                                    log.debug(message.startsWith(PREFIX) ? message : prependLocation(message, loggable));
+                                    log.debug(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.DEBUG));
                                 } else {
-                                    log.debug(message.startsWith(PREFIX) ? message : prependLocation(message, loggable), t);
+                                    log.debug(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.DEBUG), t);
                                 }
                             }
                             break;
                         case TRACE:
                             if (log.isTraceEnabled()) {
                                 if (null == t) {
-                                    log.trace(message.startsWith(PREFIX) ? message : prependLocation(message, loggable));
+                                    log.trace(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.DEBUG));
                                 } else {
-                                    log.trace(message.startsWith(PREFIX) ? message : prependLocation(message, loggable), t);
+                                    log.trace(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.DEBUG), t);
                                 }
                             }
                             break;
@@ -244,7 +245,7 @@ final class LoggerTask extends AbstractTask<Object> {
         return null;
     }
 
-    private static String prependLocation(final String message, final Loggable loggable) {
+    private static String prependLocation(final String message, final Loggable loggable, final LogPropertyName.LogLevel logLevel) {
         final StringBuilder sb = new StringBuilder(64);
         final StackTraceElement[] trace = loggable.getCallerTrace();
         String logClass = null;
@@ -277,13 +278,16 @@ final class LoggerTask extends AbstractTask<Object> {
         if (null != message) {
             sb.append(message);
         }
-        final List<String> names = LogProperties.getPropertyNames();
+        final List<LogPropertyName> names = LogProperties.getPropertyNames();
         if (!names.isEmpty()) {
             final Map<String, Object> properties = loggable.properties();
-            for (final String name : names) {
-                final Object value = properties.get(name);
-                if (null != value) {
-                    sb.append('\n').append(name).append('=').append(value.toString());
+            for (final LogPropertyName name : names) {
+                if (name.implies(logLevel)) {
+                    final String propertyName = name.getPropertyName();
+                    final Object value = properties.get(propertyName);
+                    if (null != value) {
+                        sb.append('\n').append(propertyName).append('=').append(value.toString());
+                    }
                 }
             }
         }

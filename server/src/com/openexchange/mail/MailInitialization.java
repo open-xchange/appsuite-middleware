@@ -58,8 +58,6 @@ import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.attachment.AttachmentTokenRegistry;
 import com.openexchange.mail.cache.EnqueueingMailAccessCache;
-import com.openexchange.mail.cache.JSONMessageCache;
-import com.openexchange.mail.cache.JSONMessageCacheConfiguration;
 import com.openexchange.mail.cache.MailCacheConfiguration;
 import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.cache.SingletonMailAccessCache;
@@ -122,20 +120,6 @@ public final class MailInitialization implements Initialization, CacheAvailabili
                 public void stop() {
                     MailAccessWatcher.stop();
                 }
-            }, startedStack);
-            startUp(new Initialization() {
-
-                @Override
-                public void start() throws OXException {
-                    JSONMessageCacheConfiguration.initInstance();
-                    JSONMessageCacheConfiguration.getInstance().loadProperties();
-                }
-
-                @Override
-                public void stop() throws OXException {
-                    JSONMessageCacheConfiguration.releaseInstance();
-                }
-
             }, startedStack);
 //            startUp(new Initialization() {
 //
@@ -247,8 +231,6 @@ public final class MailInitialization implements Initialization, CacheAvailabili
          */
         AttachmentTokenRegistry.releaseInstance();
         EventPool.releaseInstance();
-        JSONMessageCache.releaseInstance();
-        JSONMessageCacheConfiguration.releaseInstance();
         MIMEType2ExtMap.reset();
         EnqueueingMailAccessCache.releaseInstance();
         SingletonMailAccessCache.releaseInstance();

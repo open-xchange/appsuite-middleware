@@ -50,6 +50,7 @@
 package com.openexchange.groupware.attach.osgi;
 
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.groupware.attach.json.AttachmentActionFactory;
 import com.openexchange.mail.json.MailActionFactory;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 
@@ -71,6 +72,6 @@ public final class AttachmentActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        registerModule(new MailActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "attachment");
+        registerModule(new AttachmentActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "attachment");
     }
 }

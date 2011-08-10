@@ -50,6 +50,7 @@
 package com.openexchange.ajax.parser;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -129,7 +130,11 @@ public final class ResponseParser {
                 }
                 Collections.sort(categories);
             } else {
-                categories = Collections.singletonList(Categories.getKnownCategoryByName(jsonCategories.toString()));
+            	if (jsonCategories != null) {
+                    categories = Collections.singletonList(Categories.getKnownCategoryByName(jsonCategories.toString()));
+            	} else {
+            		categories = Arrays.asList(Category.CATEGORY_ERROR);
+            	}
             }
             final Object[] args = parseErrorMessageArgs(json.optJSONArray(ResponseFields.ERROR_PARAMS));
             final OXException exception;

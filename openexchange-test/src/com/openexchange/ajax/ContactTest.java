@@ -743,8 +743,6 @@ public class ContactTest extends AbstractAJAXTest {
             throw new TestException(response.getErrorMessage());
         }
 
-        assertNotNull("timestamp", response.getTimestamp());
-
         assertEquals(200, resp.getResponseCode());
 
         return jsonArray2ContactArray((JSONArray)response.getData(), cols);

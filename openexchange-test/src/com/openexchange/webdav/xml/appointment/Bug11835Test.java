@@ -85,20 +85,20 @@ public class Bug11835Test extends AppointmentTest {
     
             appointmentObj.setUsers(users);
     
-            objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword());
+            objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
             
             appointmentObj.removeRecurrenceType();
             appointmentObj.removeInterval();
             appointmentObj.removeOccurrence();
             
-            updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+            updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
             
-            Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+            Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
             
             assertEquals("No recurrence type expected.", Appointment.NO_RECURRENCE, loadAppointment.getRecurrenceType());
         } finally {
             if (objectId != -1) {
-                deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+                deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
             }
         }
     }

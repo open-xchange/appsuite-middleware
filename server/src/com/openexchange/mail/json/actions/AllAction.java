@@ -49,12 +49,11 @@
 
 package com.openexchange.mail.json.actions;
 
-import org.json.JSONArray;
-import org.json.JSONException;
+import java.util.LinkedList;
+import java.util.List;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
@@ -62,11 +61,8 @@ import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailRequest;
-import com.openexchange.mail.json.writer.MessageWriter;
-import com.openexchange.mail.json.writer.MessageWriter.MailFieldWriter;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -76,14 +72,10 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class AllAction extends AbstractMailAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AllAction.class));
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
     /**
      * Initializes a new {@link AllAction}.
-     * @param services
+     * 
+     * @param services The service look-up
      */
     public AllAction(final ServiceLookup services) {
         super(services);
@@ -92,7 +84,6 @@ public final class AllAction extends AbstractMailAction {
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
         try {
-            final ServerSession session = req.getSession();
             /*
              * Read in parameters
              */
@@ -117,12 +108,6 @@ public final class AllAction extends AbstractMailAction {
              * Get mail interface
              */
             final MailServletInterface mailInterface = getMailInterface(req);
-            /*
-             * Pre-Select field writers
-             */
-            final MailFieldWriter[] writers = MessageWriter.getMailFieldWriter(MailListField.getFields(columns));
-            final int userId = session.getUserId();
-            final int contextId = session.getContextId();
             int orderDir = OrderDirection.ASC.getOrder();
             if (order != null) {
                 if (order.equalsIgnoreCase("asc")) {
@@ -133,12 +118,10 @@ public final class AllAction extends AbstractMailAction {
                     throw MailExceptionCode.INVALID_INT_VALUE.create(Mail.PARAMETER_ORDER);
                 }
             }
-            final OXJSONWriter jsonWriter = new OXJSONWriter();
             /*
              * Start response
              */
-            final long start = DEBUG ? System.currentTimeMillis() : 0L;
-            jsonWriter.array();
+            final List<MailMessage> mails = new LinkedList<MailMessage>();
             SearchIterator<MailMessage> it = null;
             try {
                 /*
@@ -154,15 +137,11 @@ public final class AllAction extends AbstractMailAction {
                             fromToIndices);
                     final int size = it.size();
                     for (int i = 0; i < size; i++) {
-                        final MailMessage mail = it.next();
-                        final JSONArray ja = new JSONArray();
-                        if (mail != null) {
-                            for (final MailFieldWriter writer : writers) {
-                                writer.writeField(ja, mail, mail.getThreadLevel(), false, mailInterface.getAccountID(), userId, contextId);
-                            }
-
+                        final MailMessage mm = it.next();
+                        if (null != mm) {
+                            mm.setAccountId(mailInterface.getAccountID());
+                            mails.add(mm);
                         }
-                        jsonWriter.value(ja);
                     }
                 } else {
                     final int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
@@ -172,14 +151,11 @@ public final class AllAction extends AbstractMailAction {
                     it = mailInterface.getAllMessages(folderId, sortCol, orderDir, columns, fromToIndices);
                     final int size = it.size();
                     for (int i = 0; i < size; i++) {
-                        final MailMessage mail = it.next();
-                        final JSONArray ja = new JSONArray();
-                        if (mail != null) {
-                            for (final MailFieldWriter writer : writers) {
-                                writer.writeField(ja, mail, 0, false, mailInterface.getAccountID(), userId, contextId);
-                            }
+                        final MailMessage mm = it.next();
+                        if (null != mm) {
+                            mm.setAccountId(mailInterface.getAccountID());
+                            mails.add(mm);
                         }
-                        jsonWriter.value(ja);
                     }
                 }
             } finally {
@@ -187,17 +163,7 @@ public final class AllAction extends AbstractMailAction {
                     it.close();
                 }
             }
-            /*
-             * Close response and flush print writer
-             */
-            jsonWriter.endArray();
-            if (DEBUG) {
-                final long d = System.currentTimeMillis() - start;
-                LOG.debug(new StringBuilder(32).append("/ajax/mail?action=all performed in ").append(d).append("msec"));
-            }
-            return new AJAXRequestResult(jsonWriter.getObject(), "json");
-        } catch (final JSONException e) {
-            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+            return new AJAXRequestResult(mails, "mail");
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }

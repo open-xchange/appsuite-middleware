@@ -141,6 +141,11 @@ public final class ActionAwareServletInputStream extends ServletInputStream {
      * @throws IOException OIf an I/O error occurs
      */
     private int read0(final byte[] b, final int off, final int len) throws IOException {
+        /*-
+         * 
+         * ----- /!\ Don't return zero, because sun.nio.cs.StreamDecoder doesn't like that /!\ ------
+         * 
+         */
         final int bLength = byteChunk.getLength();
         if (bLength >= len) {
             return byteChunk.substract(b, off, len);
@@ -156,7 +161,7 @@ public final class ActionAwareServletInputStream extends ServletInputStream {
         int res = 0;
         while (read < len) {
             if (inputBuffer.doRead(byteChunk, request) <= 0) {
-                return read;
+                return 0 == read ? -1 : read;
             }
             res = byteChunk.substract(b, read + off, len - read);
             read += res;

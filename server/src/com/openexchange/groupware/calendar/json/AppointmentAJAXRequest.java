@@ -52,6 +52,8 @@ package com.openexchange.groupware.calendar.json;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
+
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.TimeZoneUtils;
@@ -143,16 +145,24 @@ public final class AppointmentAJAXRequest {
         }
     }
 
-    public Date checkDate(final String name) throws OXException {
+    public Date optDate(String name) throws OXException {
         final String parameter = request.getParameter(name);
         if (null == parameter) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
+            return null;
         }
         try {
             return new Date(Long.parseLong(parameter.trim()));
         } catch (final NumberFormatException e) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
         }
+    }
+
+    public Date checkDate(final String name) throws OXException {
+        Date date = optDate(name);
+        if (null == date) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
+        }
+        return date;
     }
 
     public String checkParameter(final String name) throws OXException {
@@ -314,5 +324,14 @@ public final class AppointmentAJAXRequest {
             throw OXJSONExceptionCodes.INVALID_VALUE.create(exc, name, tmp);
         }
     }
+
+	public int getFolderId() throws OXException {
+		int optInt = optInt(AJAXServlet.PARAMETER_FOLDERID);
+		if (optInt == NOT_FOUND) {
+			return 0;
+		}
+		return optInt;
+	}
+
 
 }
