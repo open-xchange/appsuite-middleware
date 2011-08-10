@@ -169,17 +169,14 @@ public class CarddavResource extends AbstractResource {
     @Override
     public void putBody(InputStream body, boolean guessSize) throws WebdavProtocolException {
         // parse vcard
-        StringBuilder writer = new StringBuilder();
-        char[] buffer = new char[1024];
-
         try {
-            Reader reader = new BufferedReader(new InputStreamReader(body, "UTF-8"));
-            int n;
-            while ((n = reader.read(buffer)) != -1) {
-                writer.append(buffer, 0, n);
+            final int buflen = 2048;
+            final byte[] buf = new byte[buflen];
+            final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(8192);
+            for (int read = body.read(buf, 0, buflen); read > 0; read = body.read(buf, 0, buflen)) {
+                baos.write(buf, 0, read);
             }
-            String vcardString = writer.toString();            
-            final byte[] vcard = vcardString.getBytes("UTF-8");
+            final byte[] vcard = baos.toByteArray();
             final VersitDefinition def = Versit.getDefinition("text/x-vcard");
             VersitDefinition.Reader versitReader;
             versitReader = def.getReader(new ByteArrayInputStream(vcard), "UTF-8");
