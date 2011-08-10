@@ -35,10 +35,11 @@ public class MoveTest extends AppointmentTest {
 		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
 		final String login = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "login", "");
+		final String context = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "contextName", "defaultcontext");
 		final String password = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "password", "");
 		
 		final FolderObject folderObj = com.openexchange.webdav.xml.FolderTest.createFolderObject(userId, "testMove2PrivateFolder" + System.currentTimeMillis(), FolderObject.CALENDAR, false);
-		final int targetFolder = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), login, password);
+		final int targetFolder = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), login, password, context);
 
 		appointmentObj.setParentFolderID(targetFolder);
 		updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
@@ -47,7 +48,7 @@ public class MoveTest extends AppointmentTest {
 		compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
 		
 		deleteAppointment(getWebConversation(), objectId, targetFolder, PROTOCOL + getHostName(), getSessionId());
-		com.openexchange.webdav.xml.FolderTest.deleteFolder(getWebConversation(), new int[] { targetFolder }, PROTOCOL + getHostName(), login, password);
+		com.openexchange.webdav.xml.FolderTest.deleteFolder(getWebConversation(), new int[] { targetFolder }, PROTOCOL + getHostName(), login, password, context);
 	}	
 	
 	public void testMove2PublicFolder() throws Exception {
@@ -62,10 +63,11 @@ public class MoveTest extends AppointmentTest {
 		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
 		final String login = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "login", "");
+		final String context = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "contextName", "defaultcontext");
 		final String password = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "password", "");
 		
 		final FolderObject folderObj = com.openexchange.webdav.xml.FolderTest.createFolderObject(userId, "testMove2PublicFolder" + System.currentTimeMillis(), FolderObject.CALENDAR, true);
-		final int targetFolder = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), login, password);
+		final int targetFolder = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), login, password, context);
 
 		appointmentObj.setParentFolderID(targetFolder);
 		updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
@@ -74,7 +76,7 @@ public class MoveTest extends AppointmentTest {
 		compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
 		
 		deleteAppointment(getWebConversation(), objectId, targetFolder, PROTOCOL + getHostName(), getSessionId());
-		com.openexchange.webdav.xml.FolderTest.deleteFolder(getWebConversation(), new int[] { targetFolder }, PROTOCOL + getHostName(), login, password);
+		com.openexchange.webdav.xml.FolderTest.deleteFolder(getWebConversation(), new int[] { targetFolder }, PROTOCOL + getHostName(), login, password, context);
 	}
 }
 

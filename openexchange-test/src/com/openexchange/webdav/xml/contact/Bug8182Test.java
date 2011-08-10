@@ -62,14 +62,14 @@ public class Bug8182Test extends ContactTest {
 
     public void testBug8182() throws Throwable {
         final Contact contactObj = createContactObject("testPropFindWithModified");
-        final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
-        final Contact loadContact = loadContact(getWebConversation(), objectId, contactFolderId, getHostName(), getLogin(), getPassword());
+        final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password, context);
+        final Contact loadContact = loadContact(getWebConversation(), objectId, contactFolderId, getHostName(), getLogin(), getPassword(), context);
         final Date modified = loadContact.getLastModified();
         assertTrue("Can't get last modified of contact.", modified.getTime() > 0);
-        deleteContact(getWebConversation(), objectId, contactFolderId, modified, PROTOCOL + getHostName(), getLogin(), getPassword());
+        deleteContact(getWebConversation(), objectId, contactFolderId, modified, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
         // prevent master/slave problem
         Thread.sleep(1000);
-        final Contact[] contactArray = listContact(webCon, contactFolderId, modified, true, false, PROTOCOL + hostName, login, password);
+        final Contact[] contactArray = listContact(webCon, contactFolderId, modified, true, false, PROTOCOL + hostName, login, password, context);
         boolean found = true;
         if (contactArray.length == 0) {
             found = false;

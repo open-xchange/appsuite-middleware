@@ -36,14 +36,14 @@ public class Bug6455Test extends AppointmentTest {
 		int objectId = 0;
 		
 		try {
-			objectId = insertAppointment(getWebConversation(), appointmentObj, getHostName(), getLogin(), getPassword());
+			objectId = insertAppointment(getWebConversation(), appointmentObj, getHostName(), getLogin(), getPassword(), context);
 			fail("permission exception expected!");
 		} catch (final OXException exc) {
 			assertTrue(exc.similarTo(OXCalendarExceptionCodes.TRUNCATED_SQL_ERROR));
 		}
 		
 		if (objectId > 0) {
-			deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getLogin(), getPassword());
+			deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getLogin(), getPassword(), context);
 		}
 	}
 }

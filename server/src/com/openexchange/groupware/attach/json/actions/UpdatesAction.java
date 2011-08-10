@@ -136,7 +136,7 @@ public final class UpdatesAction extends AbstractAttachmentAction {
                 columns,
                 sort,
                 order,
-                timeZoneId), "json");
+                timeZoneId), "apiResponse");
         } catch (final RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final UnknownColumnException e) {

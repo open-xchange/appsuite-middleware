@@ -19,8 +19,8 @@ public class PushRegisterTestSuite extends TestSuite{
 	
 	public static Test suite() throws Exception {
 		final WebConversation webConversation = new WebConversation();
-		final int userId = GroupUserTest.getUserId(webConversation, "localhost", "offspring", "netline");
-		final int contextId = GroupUserTest.getContextId(webConversation, "localhost", "offspring", "netline");
+		final int userId = GroupUserTest.getUserId(webConversation, "localhost", "offspring", "netline", "defaultcontext");
+		final int contextId = GroupUserTest.getContextId(webConversation, "localhost", "offspring", "netline", "defaultcontext");
 
 		final long maxElapsedTime = 10000;
 		

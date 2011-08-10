@@ -89,6 +89,13 @@ public final class ActionAwareServletOutputStream extends ServletOutputStream {
     }
 
     /**
+     * Recycles this stream.
+     */
+    public void recycle() {
+        byteChunk.recycle();
+    }
+
+    /**
      * Resets the underlying buffer.
      */
     public void resetBuffer() {

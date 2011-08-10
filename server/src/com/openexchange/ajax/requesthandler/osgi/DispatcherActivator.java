@@ -64,8 +64,8 @@ import com.openexchange.ajax.requesthandler.DefaultDispatcher;
 import com.openexchange.ajax.requesthandler.DispatcherServlet;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.ajax.requesthandler.converters.BasicTypeAPIResponseConverter;
 import com.openexchange.ajax.requesthandler.converters.DebugConverter;
-import com.openexchange.ajax.requesthandler.converters.JSONResponseConverter;
 import com.openexchange.ajax.requesthandler.customizer.ConversionCustomizer;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.JSONResponseRenderer;
@@ -93,8 +93,11 @@ public class DispatcherActivator extends HousekeepingActivator {
         final DefaultDispatcher dispatcher = new DefaultDispatcher();
 
         final DefaultConverter defaultConverter = new DefaultConverter();
-        defaultConverter.addConverter(new JSONResponseConverter());
         defaultConverter.addConverter(new DebugConverter());
+        
+        for(ResultConverter converter : BasicTypeAPIResponseConverter.CONVERTERS) {
+        	defaultConverter.addConverter(converter);
+        }
 
         track(ResultConverter.class, new SimpleRegistryListener<ResultConverter>() {
 

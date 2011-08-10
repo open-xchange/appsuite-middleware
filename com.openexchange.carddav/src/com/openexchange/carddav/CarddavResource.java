@@ -49,19 +49,10 @@
 
 package com.openexchange.carddav;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -69,24 +60,22 @@ import java.util.TimeZone;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.api.OXConflictException;
-import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.api2.OXConcurrentModificationException;
-import com.openexchange.api2.OXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitException;
 import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
+import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
-import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.helpers.AbstractResource;
 
 /**
@@ -169,20 +158,17 @@ public class CarddavResource extends AbstractResource {
     @Override
     public void putBody(InputStream body, boolean guessSize) throws WebdavProtocolException {
         // parse vcard
-        Writer writer = new StringWriter();
-        char[] buffer = new char[1024];
-
         try {
-            Reader reader = new BufferedReader(new InputStreamReader(body, "UTF-8"));
-            int n;
-            while ((n = reader.read(buffer)) != -1) {
-                writer.write(buffer, 0, n);
+            final int buflen = 2048;
+            final byte[] buf = new byte[buflen];
+            final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(8192);
+            for (int read = body.read(buf, 0, buflen); read > 0; read = body.read(buf, 0, buflen)) {
+                baos.write(buf, 0, read);
             }
-            String vcardString = writer.toString();            
-            final byte[] vcard = vcardString.getBytes("UTF-8");
+            final byte[] vcard = baos.toByteArray();
             final VersitDefinition def = Versit.getDefinition("text/x-vcard");
             VersitDefinition.Reader versitReader;
-            versitReader = def.getReader(new ByteArrayInputStream(vcard), "UTF-8");
+            versitReader = def.getReader(new UnsynchronizedByteArrayInputStream(vcard), "UTF-8");
             final VersitObject versitObject = def.parse(versitReader);
             Contact newContact = converter.convertContact(versitObject);
             if (exists) {
@@ -197,13 +183,13 @@ public class CarddavResource extends AbstractResource {
             contact = newContact;                       
         } catch (final VersitException e) {
             LOG.error(e.getMessage(), e);
-            throw new WebdavProtocolException(getUrl(), 500);
+            throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), 500);
         } catch (final ConverterException e) {
             LOG.error(e.getMessage(), e);
-            throw new WebdavProtocolException(getUrl(), 500);
+            throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), 500);
         } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
-            throw new WebdavProtocolException(getUrl(), 500);
+            throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), 500);
         } finally {
             try {
                 body.close();
@@ -225,8 +211,6 @@ public class CarddavResource extends AbstractResource {
             this.url = parent.getUrl().dup().append(contact.getObjectID()+".vcf");
         } catch (OXException e) {
             LOG.error(e);
-        } catch (ContextException e) {
-            LOG.error(e);
         }
     }
 
@@ -234,13 +218,7 @@ public class CarddavResource extends AbstractResource {
         // delete contact
         try {
             factory.getContactInterface().deleteContactObject(contact.getObjectID(), contact.getParentFolderID(), contact.getLastModified());
-        } catch (OXObjectNotFoundException e) {
-            LOG.error(e);
-        } catch (OXConflictException e) {
-            LOG.error(e);
         } catch (OXException e) {
-            LOG.error(e);
-        } catch (ContextException e) {
             LOG.error(e);
         }
     }
@@ -354,15 +332,9 @@ public class CarddavResource extends AbstractResource {
     public void save() throws WebdavProtocolException {
         try {
             factory.getContactInterface().updateContactObject(contact, parent.getStandardFolder(), contact.getLastModified());
-        } catch (OXConcurrentModificationException e) {
-            LOG.error(e.getMessage(), e);
-            throw new WebdavProtocolException(getUrl(), 500);
         } catch (OXException e) {
             LOG.error(e.getMessage(), e);
-            throw new WebdavProtocolException(getUrl(), 500);
-        } catch (ContextException e) {
-            LOG.error(e.getMessage(), e);
-            throw new WebdavProtocolException(getUrl(), 500);
+            throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), 500);
         }
     }
 

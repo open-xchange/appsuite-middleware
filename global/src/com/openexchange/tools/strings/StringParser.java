@@ -51,10 +51,18 @@ package com.openexchange.tools.strings;
 
 
 /**
- * {@link StringParser}
+ * {@link StringParser} - Parses a specified string value to a given type.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface StringParser {
+
+    /**
+     * Parses specified string value to given type.
+     * 
+     * @param s The string value
+     * @param t The type to parse to
+     * @return The parsed value
+     */
     public <T> T parse(String s, Class<T> t);
 }

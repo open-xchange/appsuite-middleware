@@ -68,6 +68,11 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+/**
+ * {@link PushUtility}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 public final class PushUtility {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(PushUtility.class));
@@ -137,7 +142,13 @@ public final class PushUtility {
         }
     }
 
-    public static final boolean allowedClient(String client) {
+    /**
+     * Checks if specified client identifier is allowed according to white-list filter.
+     * 
+     * @param client The client identifier
+     * @return <code>true</code> if client identifier is allowed; otherwise <code>false</code>
+     */
+    public static final boolean allowedClient(final String client) {
         final PushClientWhitelist clientWhitelist = PushClientWhitelist.getInstance();
         return clientWhitelist.isEmpty() || clientWhitelist.isAllowed(client);
     }

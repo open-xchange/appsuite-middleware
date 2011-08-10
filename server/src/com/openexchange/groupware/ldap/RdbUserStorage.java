@@ -122,7 +122,7 @@ public class RdbUserStorage extends UserStorage {
         try {
             con = DBPool.pickup(context);
         } catch (final OXException e) {
-            throw LdapExceptionCode.NO_CONNECTION.create("USR", e);
+            throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("USR");
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -135,10 +135,10 @@ public class RdbUserStorage extends UserStorage {
             if (result.next()) {
                 userId = result.getInt(1);
             } else {
-                throw LdapExceptionCode.USER_NOT_FOUND.create("USR", uid, I(context.getContextId()));
+                throw LdapExceptionCode.USER_NOT_FOUND.create(uid, I(context.getContextId())).setPrefix("USR");
             }
         } catch (final SQLException e) {
-            throw LdapExceptionCode.SQL_ERROR.create("USR", e, e.getMessage());
+            throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);
@@ -152,7 +152,7 @@ public class RdbUserStorage extends UserStorage {
         try {
             con = DBPool.pickup(context);
         } catch (final OXException e) {
-            throw LdapExceptionCode.NO_CONNECTION.create("USR", e);
+            throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("USR");
         }
         try {
             return getUser(context, con, new int[] { userId })[0];
@@ -431,7 +431,7 @@ public class RdbUserStorage extends UserStorage {
         try {
             con = DBPool.pickupWriteable(context);
         } catch (final OXException e) {
-            throw LdapExceptionCode.NO_CONNECTION.create("USR", e);
+            throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("USR");
         }
         try {
             con.setAutoCommit(false);
@@ -477,7 +477,7 @@ public class RdbUserStorage extends UserStorage {
             con.commit();
         } catch (final SQLException e) {
             rollback(con);
-            throw LdapExceptionCode.SQL_ERROR.create("USR", e, e.getMessage());
+            throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
         } catch (final OXException e) {
             rollback(con);
             throw new OXException(e);
@@ -496,13 +496,13 @@ public class RdbUserStorage extends UserStorage {
     @Override
     public void setAttribute(final String name, final String value, final int userId, final Context context) throws OXException {
         if (null == name) {
-            throw LdapExceptionCode.UNEXPECTED_ERROR.create("USR", "Attribute name is null.");
+            throw LdapExceptionCode.UNEXPECTED_ERROR.create("Attribute name is null.").setPrefix("USR");
         }
         final Connection con;
         try {
             con = DBPool.pickupWriteable(context);
         } catch (final OXException e) {
-            throw LdapExceptionCode.NO_CONNECTION.create("USR", e);
+            throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("USR");
         }
         try {
             con.setAutoCommit(false);
@@ -510,10 +510,10 @@ public class RdbUserStorage extends UserStorage {
             con.commit();
         } catch (final SQLException e) {
             rollback(con);
-            throw LdapExceptionCode.SQL_ERROR.create("USR", e, e.getMessage());
+            throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
         } catch (final Exception e) {
             rollback(con);
-            throw LdapExceptionCode.UNEXPECTED_ERROR.create("USR", e, e.getMessage());
+            throw LdapExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage()).setPrefix("USR");
         } finally {
             autocommit(con);
             DBPool.closeWriterSilent(context, con);
@@ -551,16 +551,16 @@ public class RdbUserStorage extends UserStorage {
     @Override
     public String getUserAttribute(final String name, final int userId, final Context context) throws OXException {
         if (null == name) {
-            throw LdapExceptionCode.UNEXPECTED_ERROR.create("USR", "Attribute name is null.");
+            throw LdapExceptionCode.UNEXPECTED_ERROR.create("Attribute name is null.").setPrefix("USR");
         }
         final Connection con = DBPool.pickup(context);
         try {
             final String attrName = new StringBuilder("attr_").append(name).toString();
             return getAttribute(context.getContextId(), con, userId, attrName);
         } catch (final SQLException e) {
-            throw LdapExceptionCode.SQL_ERROR.create("USR", e, e.getMessage());
+            throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
         } catch (final Exception e) {
-            throw LdapExceptionCode.UNEXPECTED_ERROR.create("USR", e, e.getMessage());
+            throw LdapExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage()).setPrefix("USR");
         } finally {
             DBPool.closeWriterSilent(context, con);
         }
@@ -763,7 +763,7 @@ public class RdbUserStorage extends UserStorage {
         try {
             con = DBPool.pickup(context);
         } catch (final OXException e) {
-            throw LdapExceptionCode.NO_CONNECTION.create("USR", e);
+            throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("USR");
         }
         try {
             final String pattern = StringCollection.prepareForSearch(email, false, true);
@@ -779,7 +779,7 @@ public class RdbUserStorage extends UserStorage {
                     userId = result.getInt(1);
                 }
             } catch (final SQLException e) {
-                throw LdapExceptionCode.SQL_ERROR.create("USR", e, e.getMessage());
+                throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
             } finally {
                 closeSQLStuff(result, stmt);
             }
@@ -797,11 +797,11 @@ public class RdbUserStorage extends UserStorage {
                     }
                 }
                 if (userId == -1) {
-                    throw LdapExceptionCode.NO_USER_BY_MAIL.create("USR", email);
+                    throw LdapExceptionCode.NO_USER_BY_MAIL.create(email).setPrefix("USR");
                 }
                 return getUser(context, con, new int[] { userId })[0];
             } catch (final SQLException e) {
-                throw LdapExceptionCode.SQL_ERROR.create("USR", e, e.getMessage());
+                throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
             } finally {
                 closeSQLStuff(result, stmt);
             }
@@ -819,7 +819,7 @@ public class RdbUserStorage extends UserStorage {
         try {
             con = DBPool.pickup(context);
         } catch (final Exception e) {
-            throw LdapExceptionCode.NO_CONNECTION.create("USR", e);
+            throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("USR");
         }
         final String sql = "SELECT id FROM user LEFT JOIN prg_contacts ON (user.cid=prg_contacts.cid AND user.contactId=prg_contacts.intfield01) WHERE cid=? AND changing_date>=?";
         int[] users;
@@ -839,8 +839,7 @@ public class RdbUserStorage extends UserStorage {
                 users[i] = tmp.get(i).intValue();
             }
         } catch (final SQLException e) {
-            throw LdapExceptionCode.SQL_ERROR.create("USR", e,
-                e.getMessage());
+            throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);

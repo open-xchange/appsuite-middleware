@@ -12,11 +12,9 @@ public class TestInit {
         if (!testPropertiesLoaded) {
             testProps = new Properties();
             try {
-                final String propfile = System.getProperty("test.propfile");
+                String propfile = System.getProperty("test.propfile");
                 if (null == propfile) {
-                    throw new RuntimeException("Test properties file "
-                            + "test.propfile is not defined as a JVM "
-                            + "system property.");
+                    propfile = "conf/test.properties";
                 }
                 testProps.load(new FileInputStream(propfile));
             }

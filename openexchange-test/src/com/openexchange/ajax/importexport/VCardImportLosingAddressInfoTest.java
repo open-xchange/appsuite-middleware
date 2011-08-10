@@ -103,7 +103,7 @@ public class VCardImportLosingAddressInfoTest extends AbstractVCardImportTest {
             testFolder.getObjectID(),
             getHostName(),
             getLogin(),
-            getPassword());
+            getPassword(), "");
 
         assertEquals("Checking name:", "Prinz", actual.getSurName());
 

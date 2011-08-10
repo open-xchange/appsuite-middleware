@@ -35,7 +35,7 @@ public class ICalTest extends AbstractWebdavTest {
 	
 	public void testUpload() throws Exception {
 		final WebRequest initRequest = new GetMethodWebRequest(PROTOCOL + hostName + ICAL_URL);
-		initRequest.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password));
+		initRequest.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password, context));
 		final WebResponse initresponse = webCon.getResponse(initRequest);
 		
 		assertEquals(200, initresponse.getResponseCode());
@@ -76,7 +76,7 @@ public class ICalTest extends AbstractWebdavTest {
 		
 		final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
 		final WebRequest req = new PutMethodWebRequest(PROTOCOL + hostName + ICAL_URL, byteArrayInputStream, "text/calendar");
-		req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password));
+		req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password, context));
 		final WebResponse resp = webCon.getResponse(req);
 		
 		assertEquals(200, resp.getResponseCode());
@@ -84,7 +84,7 @@ public class ICalTest extends AbstractWebdavTest {
 	
 	public void testDownload() throws Exception {
 		final WebRequest req = new GetMethodWebRequest(PROTOCOL + hostName + ICAL_URL);
-		req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password));
+		req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password, context));
 		final WebResponse resp = webCon.getResponse(req);
 		
 		assertEquals(200, resp.getResponseCode());

@@ -91,10 +91,10 @@ public class AttachmentTest extends AbstractWebdavXMLTest {
         super.setUp();
     }
 
-    public static int insertAttachment(final WebConversation webCon, final AttachmentMetadata attachmentObj, final InputStream is, String host, final String login, final String password) throws Exception {
+    public static int insertAttachment(final WebConversation webCon, final AttachmentMetadata attachmentObj, final InputStream is, String host, final String login, final String password, String context) throws Exception {
         host = AbstractWebdavXMLTest.appendPrefix(host);
         final WebRequest webRequest = new PutMethodWebRequest(host + ATTACHMENT_URL, is, attachmentObj.getFileMIMEType());
-        webRequest.setHeaderField("Authorization", "Basic " + getAuthData(login, password));
+        webRequest.setHeaderField("Authorization", "Basic " + getAuthData(login, password, context));
         webRequest.setHeaderField(attachments.FILENAME, attachmentObj.getFilename());
         webRequest.setHeaderField(attachments.MODULE, String.valueOf(attachmentObj.getModuleId()));
         webRequest.setHeaderField(attachments.TARGET_ID, String.valueOf(attachmentObj.getAttachedId()));
@@ -113,10 +113,10 @@ public class AttachmentTest extends AbstractWebdavXMLTest {
         return parseResponse(doc, false);
     }
 
-    public static InputStream loadAttachment(final WebConversation webCon, final AttachmentMetadata attachmentObj, String host, final String login, final String password) throws Exception {
+    public static InputStream loadAttachment(final WebConversation webCon, final AttachmentMetadata attachmentObj, String host, final String login, final String password, String context) throws Exception {
         host = AbstractWebdavXMLTest.appendPrefix(host);
         final WebRequest webRequest = new GetMethodWebRequest(host + ATTACHMENT_URL);
-        webRequest.setHeaderField("Authorization", "Basic " + getAuthData(login, password));
+        webRequest.setHeaderField("Authorization", "Basic " + getAuthData(login, password, context));
         webRequest.setHeaderField(attachments.MODULE, String.valueOf(attachmentObj.getModuleId()));
         webRequest.setHeaderField(attachments.TARGET_ID, String.valueOf(attachmentObj.getAttachedId()));
         webRequest.setHeaderField(attachments.TARGET_FOLDER_ID, String.valueOf(attachmentObj.getFolderId()));

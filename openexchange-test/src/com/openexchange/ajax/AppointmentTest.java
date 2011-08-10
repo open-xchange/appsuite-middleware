@@ -99,7 +99,6 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceGroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.groupware.infostore.ConflictException;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.test.OXTestToolkit;
 import com.openexchange.test.TestException;
@@ -274,7 +273,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 
     public static int insertAppointment(final WebConversation webCon,
             final Appointment appointmentObj, final TimeZone userTimeZone,
-            String host, final String session) throws OXException, Exception, OXException {
+            String host, final String session) throws OXException, Exception {
         host = appendPrefix(host);
 
         int objectId = 0;
@@ -312,7 +311,7 @@ public class AppointmentTest extends AbstractAJAXTest {
         }
 
         if (data.has("conflicts")) {
-            throw new ConflictException("conflicts found!");
+            throw new OXException().setLogMessage("conflicts found!");
         }
 
         return objectId;
@@ -366,7 +365,7 @@ public class AppointmentTest extends AbstractAJAXTest {
         }
 
         if (data.has("conflicts")) {
-            throw new ConflictException("conflicts found!");
+            throw new OXException().setLogMessage("conflicts found!");
         }
 
         return objectId;
@@ -1186,7 +1185,7 @@ public class AppointmentTest extends AbstractAJAXTest {
                     p = new ExternalUserParticipant(mail);
                     break;
                 default:
-                    throw new OXException(new ConflictException("invalid type"));
+                    throw new OXException().setLogMessage("invalidType");
             }
             participant[i] = p;
         }

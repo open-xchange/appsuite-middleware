@@ -44,7 +44,7 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 	}
 	
 	public void testSearchUser() throws Exception {
-		final Contact[] contactObj = searchUser(webCon, "*", new Date(0), PROTOCOL + hostName, login, password);
+		final Contact[] contactObj = searchUser(webCon, "*", new Date(0), PROTOCOL + hostName, login, password, context);
 		for (int a = 0; a < contactObj.length; a++) {
 			assertTrue("id > 0 expected", contactObj[a].getInternalUserId() > 0);
 			assertNotNull("last modified is null", contactObj[a].getLastModified());
@@ -52,14 +52,14 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 	}
 	
 	public void testSearchGroup() throws Exception {
-		final Group group[] = searchGroup(webCon, "*", new Date(0), PROTOCOL + hostName, login, password);
+		final Group group[] = searchGroup(webCon, "*", new Date(0), PROTOCOL + hostName, login, password, context);
 		for (int a = 0; a < group.length; a++) {
 			assertNotNull("last modified is null", group[a].getLastModified());
 		} 
 	}
 	
 	public void testSearchResource() throws Exception {
-		final Resource[] resource = searchResource(getWebConversation(), "*", new Date(0), PROTOCOL + hostName, login, password);
+		final Resource[] resource = searchResource(getWebConversation(), "*", new Date(0), PROTOCOL + hostName, login, password, context);
 		for (int a = 0; a < resource.length; a++) {
 			assertTrue("id > 0 expected", resource[a].getIdentifier() > 0);
 			assertNotNull("last modified is null", resource[a].getLastModified());
@@ -67,7 +67,7 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 	}
 	
 	public void testSearchGroupWithLastModifed() throws Exception {
-		Group group[] = searchGroup(getWebConversation(), "*", new Date(0), PROTOCOL + hostName, login, password);
+		Group group[] = searchGroup(getWebConversation(), "*", new Date(0), PROTOCOL + hostName, login, password, context);
 		assertTrue("no group found in response (group array length == 0)", group.length > 0);
 
 		int posInArray = -1;
@@ -82,7 +82,7 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 		final String displayName = group[posInArray].getDisplayName();
 		final Date lastModifed = group[posInArray].getLastModified();
 
-		group = searchGroup(getWebConversation(), displayName, new Date(lastModifed.getTime()+5000), PROTOCOL + getHostName(), getLogin(), getPassword());
+		group = searchGroup(getWebConversation(), displayName, new Date(lastModifed.getTime()+5000), PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 
 		boolean found = false;
 
@@ -97,7 +97,7 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 	}
 	
 	public void testSearchResourceWithLastModifed() throws Exception {
-		Resource resource[] = searchResource(getWebConversation(), "*", new Date(0), PROTOCOL + getHostName(), getLogin(), getPassword());
+		Resource resource[] = searchResource(getWebConversation(), "*", new Date(0), PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 		assertTrue("no group found in response (group array length == 0)", resource.length > 0);
 		
 		int posInArray = 0;
@@ -114,7 +114,7 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 		final Date lastModifed = resource[posInArray].getLastModified();
 		
 		
-		resource = searchResource(getWebConversation(), displayName, new Date(lastModifed.getTime()+5000), PROTOCOL + getHostName(), getLogin(), getPassword());
+		resource = searchResource(getWebConversation(), displayName, new Date(lastModifed.getTime()+5000), PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 		
 		boolean found = false;
 		
@@ -133,16 +133,16 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 	}
 	
 	public void testGetUserId() throws Exception {
-		final int userId = getUserId(getWebConversation(), PROTOCOL + getHostName(), getLogin(), getPassword());
+		final int userId = getUserId(getWebConversation(), PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 		assertTrue("user id for login user not found", userId != -1);
 	}
 	
 	public void testGetContextId() throws Exception {
-		final int contextId = getContextId(getWebConversation(), PROTOCOL + getHostName(), getLogin(), getPassword());
+		final int contextId = getContextId(getWebConversation(), PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 		assertTrue("context id for login user not found", contextId != -1);
 	}
 	
-	public static Contact[] searchUser(final WebConversation webCon, final String searchpattern, final Date modified, String host, final String login, final String password) throws Exception {
+	public static Contact[] searchUser(final WebConversation webCon, final String searchpattern, final Date modified, String host, final String login, final String password, String context) throws Exception {
 		host = AbstractWebdavXMLTest.appendPrefix(host);
 		
 		final Element eUsers = new Element("user", XmlServlet.NS);
@@ -159,7 +159,7 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 		
 		final HttpClient httpclient = new HttpClient();
 		
-		httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
+		httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login+"@"+context, password));
 		final PropFindMethod propFindMethod = new PropFindMethod(host + GROUPUSER_URL);
 		propFindMethod.setDoAuthentication( true );
 		
@@ -189,7 +189,7 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 		return contactArray;
 	}
 	
-	public static Group[] searchGroup(final WebConversation webCon, final String searchpattern, final Date modified, String host, final String login, final String password) throws Exception {
+	public static Group[] searchGroup(final WebConversation webCon, final String searchpattern, final Date modified, String host, final String login, final String password, String context) throws Exception {
 		host = AbstractWebdavXMLTest.appendPrefix(host);
 		
 		final Element eGroups = new Element("group", XmlServlet.NS);
@@ -206,7 +206,7 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 		
 		final HttpClient httpclient = new HttpClient();
 		
-		httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
+		httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login+"@"+context, password));
 		final PropFindMethod propFindMethod = new PropFindMethod(host + GROUPUSER_URL);
 		propFindMethod.setDoAuthentication( true );
 		
@@ -232,7 +232,7 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 		return groupArray;
 	}
 	
-	public static Resource[] searchResource(final WebConversation webCon, final String searchpattern, final Date modified, String host, final String login, final String password) throws Exception {
+	public static Resource[] searchResource(final WebConversation webCon, final String searchpattern, final Date modified, String host, final String login, final String password, String context) throws Exception {
 		host = AbstractWebdavXMLTest.appendPrefix(host);
 		
 		final Element eResources = new Element("resource", XmlServlet.NS);
@@ -249,7 +249,7 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 		
 		final HttpClient httpclient = new HttpClient();
 		
-		httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
+		httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login+"@"+context, password));
 		final PropFindMethod propFindMethod = new PropFindMethod(host + GROUPUSER_URL);
 		propFindMethod.setDoAuthentication( true );
 		
@@ -318,10 +318,10 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 		return resourcegroupArray;
 	}
 	
-	public static int getUserId(final WebConversation webCon, String host, final String login, final String password) throws Exception {
+	public static int getUserId(final WebConversation webCon, String host, final String login, final String password, String context) throws Exception {
 		host = AbstractWebdavXMLTest.appendPrefix(host);
 		
-		final Contact[] contactArray = searchUser(webCon, "*", new Date(0), host, login, password);
+		final Contact[] contactArray = searchUser(webCon, "*", new Date(0), host, login, password, context);
 		for (int a = 0; a < contactArray.length; a++) {
 			final Contact contactObj = contactArray[a];
 			final Map m = contactObj.getMap();
@@ -332,10 +332,10 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 		return -1;
 	}
 	
-	public static int getContextId(final WebConversation webCon, String host, final String login, final String password) throws Exception {
+	public static int getContextId(final WebConversation webCon, String host, final String login, final String password, String context) throws Exception {
 		host = AbstractWebdavXMLTest.appendPrefix(host);
 		
-		final Contact[] contactArray = searchUser(webCon, "*", new Date(0), host, login, password);
+		final Contact[] contactArray = searchUser(webCon, "*", new Date(0), host, login, password, context);
 		for (int a = 0; a < contactArray.length; a++) {
 			final Contact contactObj = contactArray[a];
 			final Map m = contactObj.getMap();

@@ -259,6 +259,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
      * Recycles this response.
      */
     public void recycle() {
+        servletOutputStream.recycle();
         headers.clear();
         outputSelection = OUTPUT_NOT_SELECTED;
         writer = null;

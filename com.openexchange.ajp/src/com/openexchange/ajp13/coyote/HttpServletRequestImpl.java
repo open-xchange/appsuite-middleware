@@ -240,6 +240,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
      * Recycles this request.
      */
     public void recycle() {
+        servletInputStream.recycle();
         attributes.clear();
         parameters.clear();
         headers.clear();

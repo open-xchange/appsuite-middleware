@@ -23,10 +23,10 @@ public class PushTestSuite extends TestSuite{
 	
 	public static Test suite() throws Exception {
 		final WebConversation webConversation = new WebConversation();
-		final int userId = GroupUserTest.getUserId(webConversation, "localhost", "offspring", "netline");
-		final int contextId = GroupUserTest.getContextId(webConversation, "localhost", "offspring", "netline");
+		final int userId = GroupUserTest.getUserId(webConversation, "localhost", "offspring", "netline", "defaultcontext");
+		final int contextId = GroupUserTest.getContextId(webConversation, "localhost", "offspring", "netline", "defaultcontext");
 		
-		final int appointmentFolderId = FolderTest.getAppointmentDefaultFolder(webConversation, "localhost", "offspring", "netline").getObjectID();
+		final int appointmentFolderId = FolderTest.getAppointmentDefaultFolder(webConversation, "localhost", "offspring", "netline", "defaultcontext").getObjectID();
 				
 		final long maxElapsedTime = 10000;
 		
@@ -42,7 +42,7 @@ public class PushTestSuite extends TestSuite{
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setShownAs(Appointment.ABSENT);		
 		
-		AppointmentTest.insertAppointment(webConversation, appointmentObj, "localhost", "offspring", "netline");
+		AppointmentTest.insertAppointment(webConversation, appointmentObj, "localhost", "offspring", "netline", "defaultcontext");
 		
 		final long maxResponseTime = 20000;
 		

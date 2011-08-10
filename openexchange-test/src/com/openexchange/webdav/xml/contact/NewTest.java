@@ -22,15 +22,15 @@ public class NewTest extends ContactTest {
 	
 	public void testNewContact() throws Exception {
 		final Contact contactObj = createContactObject("testNewContact");
-		final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
+		final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password, context);
 		contactObj.setObjectID(objectId);
-		final Contact loadContact = ContactTest.loadContact(getWebConversation(), objectId, contactFolderId, getHostName(), getLogin(), getPassword());
+		final Contact loadContact = ContactTest.loadContact(getWebConversation(), objectId, contactFolderId, getHostName(), getLogin(), getPassword(), context);
 		compareObject(contactObj, loadContact);		
 	}
 	
 	public void testNewContactWithAttachment() throws Exception {
 		final Contact contactObj = createContactObject("testNewContactWithAttachment");
-		final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
+		final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password, context);
 		contactObj.setNumberOfAttachments(2);
 		contactObj.setObjectID(objectId);
 		
@@ -44,12 +44,12 @@ public class NewTest extends ContactTest {
 		
 		ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream("t1".getBytes());
 		
-		AttachmentTest.insertAttachment(webCon, attachmentObj, byteArrayInputStream, getHostName(), getLogin(), getPassword());
+		AttachmentTest.insertAttachment(webCon, attachmentObj, byteArrayInputStream, getHostName(), getLogin(), getPassword(), context);
 		
 		byteArrayInputStream = new ByteArrayInputStream("t2".getBytes());
-		AttachmentTest.insertAttachment(webCon, attachmentObj, byteArrayInputStream, getHostName(), getLogin(), getPassword());
+		AttachmentTest.insertAttachment(webCon, attachmentObj, byteArrayInputStream, getHostName(), getLogin(), getPassword(), context);
 		
-		final Contact loadContact = ContactTest.loadContact(getWebConversation(), objectId, contactFolderId, getHostName(), getLogin(), getPassword());
+		final Contact loadContact = ContactTest.loadContact(getWebConversation(), objectId, contactFolderId, getHostName(), getLogin(), getPassword(), context);
 		compareObject(contactObj, loadContact);	
 	}
 	
@@ -66,7 +66,7 @@ public class NewTest extends ContactTest {
 		
 		folderObj.setPermissionsAsArray( permission );
 		
-		final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword());
+		final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 		
 		final Contact contactObj = new Contact();
 		contactObj.setSurName("testContactInPrivateFlagInPublicFolder");
@@ -74,8 +74,8 @@ public class NewTest extends ContactTest {
 		contactObj.setParentFolderID(parentFolderId);
 
 		try {
-			final int objectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getLogin(), getPassword());
-			deleteContact(getWebConversation(), objectId, parentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+			final int objectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+			deleteContact(getWebConversation(), objectId, parentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 			fail("conflict exception expected!");
 		} catch (final OXException exc) {
 			assertTrue(exc.similarTo(ContactExceptionCodes.PFLAG_IN_PUBLIC_FOLDER.create()));
@@ -84,7 +84,7 @@ public class NewTest extends ContactTest {
 	
 	public void testContactWithAttachment() throws Exception {
 		final Contact contactObj = createContactObject("testContactWithAttachment");
-		final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
+		final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password, context);
 		contactObj.setObjectID(objectId);
 		contactObj.setNumberOfAttachments(1);
 		
@@ -96,10 +96,10 @@ public class NewTest extends ContactTest {
 		attachmentMeta.setFilename("test.txt");
 		
 		final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream("test".getBytes());
-		AttachmentTest.insertAttachment(webCon, attachmentMeta, byteArrayInputStream, getHostName(), getLogin(), getPassword());
+		AttachmentTest.insertAttachment(webCon, attachmentMeta, byteArrayInputStream, getHostName(), getLogin(), getPassword(), context);
 		
-		final Contact loadContact = loadContact(getWebConversation(), objectId, contactFolderId, getHostName(), getLogin(), getPassword());
-		final Contact[] contactArray = listContact(getWebConversation(), contactFolderId, decrementDate(loadContact.getLastModified()), true, false, getHostName(), getLogin(), getPassword());
+		final Contact loadContact = loadContact(getWebConversation(), objectId, contactFolderId, getHostName(), getLogin(), getPassword(), context);
+		final Contact[] contactArray = listContact(getWebConversation(), contactFolderId, decrementDate(loadContact.getLastModified()), true, false, getHostName(), getLogin(), getPassword(), context);
 		
 		boolean found = false;
 		for (int a = 0; a < contactArray.length; a++) {

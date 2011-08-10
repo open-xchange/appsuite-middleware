@@ -1,7 +1,6 @@
 package com.openexchange.polling.json.actions;
 
 import org.json.JSONObject;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.polling.Poll;
@@ -15,7 +14,7 @@ public class PollRequest {
 
 	private static final PollParser PARSER = new PollParser();
 
-	public PollRequest(AJAXRequestData request, ServerSession session) {
+	public PollRequest(final AJAXRequestData request, final ServerSession session) {
 		this.session = session;
 		this.request = request;
 	}
@@ -25,11 +24,11 @@ public class PollRequest {
 	}
 
 	public Poll getPoll() throws OXException {
-		JSONObject bodyObj = (JSONObject) request.getData();
+		final JSONObject bodyObj = (JSONObject) request.getData();
 		return PARSER.parse(bodyObj);
 	}
 
-	public int getId() {
+	public int getId() throws OXException {
 		return request.getParameter("id", int.class);
 	}
 

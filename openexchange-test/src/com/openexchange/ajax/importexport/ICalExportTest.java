@@ -77,7 +77,7 @@ public class ICalExportTest extends AbstractICalTest {
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setIgnoreConflicts(true);
 
-		final int objectId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, getHostName(), getLogin(), getPassword());
+		final int objectId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, getHostName(), getLogin(), getPassword(), "");
 
 		final Appointment[] appointmentArray = exportAppointment(getWebConversation(), appointmentFolderId, timeZone, getHostName(), getSessionId(), null);
 
@@ -93,7 +93,7 @@ public class ICalExportTest extends AbstractICalTest {
 
 		assertTrue("appointment with title: " + title + " not found", found);
 
-		AppointmentTest.deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getLogin(), getPassword());
+		AppointmentTest.deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getLogin(), getPassword(), "");
 	}
 
 	public void testExportICalTask() throws Exception {
@@ -103,7 +103,7 @@ public class ICalExportTest extends AbstractICalTest {
 		taskObj.setStartDate(startTime);
 		taskObj.setEndDate(endTime);
 		taskObj.setParentFolderID(taskFolderId);
-		final int objectId = TaskTest.insertTask(getWebConversation(), taskObj, getHostName(), getLogin(), getPassword());
+		final int objectId = TaskTest.insertTask(getWebConversation(), taskObj, getHostName(), getLogin(), getPassword(), "");
 		final Task[] taskArray = exportTask(getWebConversation(), taskFolderId, emailaddress, timeZone, getHostName(), getSessionId(), null);
 		boolean found = false;
 		for (int a = 0; a < taskArray.length; a++) {
@@ -115,6 +115,6 @@ public class ICalExportTest extends AbstractICalTest {
 			}
 		}
 		assertTrue("task with id: " + objectId + " not found", found);
-		TaskTest.deleteTask(getWebConversation(), objectId, taskFolderId, getHostName(), getLogin(), getPassword());
+		TaskTest.deleteTask(getWebConversation(), objectId, taskFolderId, getHostName(), getLogin(), getPassword(), "");
 	}
 }

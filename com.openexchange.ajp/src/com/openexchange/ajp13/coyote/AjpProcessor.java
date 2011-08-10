@@ -96,7 +96,7 @@ import com.openexchange.timer.TimerService;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
- * {@link AjpProcessor}
+ * {@link AjpProcessor} - The AJP processor adapted from Tomcat's Coyote AJP connector.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -122,6 +122,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      * The current processor stage.
      */
     private volatile int stage;
+
+    /**
+     * Required secret.
+     */
+    private String requiredSecret;
 
     /**
      * Associated servlet.
@@ -162,7 +167,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     /**
      * Body message.
      */
-    protected final MessageBytes bodyBytes = MessageBytes.newInstance();
+    protected final MessageBytes bodyBytes;
 
     /**
      * State flag.
@@ -190,6 +195,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     protected OutputStream output;
 
     /**
+     * The number of milliseconds waiting for a subsequent request before closing the connection.
+     */
+    private int keepAliveTimeout = -1;
+
+    /**
      * The main read-write-lock.
      */
     private final ReadWriteLock mainLock;
@@ -200,6 +210,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     protected final Lock softLock;
 
     /**
+     * Use Tomcat authentication ?
+     */
+    private boolean tomcatAuthentication = true;
+
+    /**
      * The socket timeout used when reading the first block of the request header.
      */
     private long readTimeout;
@@ -207,12 +222,12 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     /**
      * The byte sink used for processing.
      */
-    private final ByteArrayOutputStream sink = new UnsynchronizedByteArrayOutputStream(Constants.MAX_PACKET_SIZE);
+    private final ByteArrayOutputStream sink;
 
     /**
      * Byte chunk for certs.
      */
-    private final MessageBytes certificates = MessageBytes.newInstance();
+    private final MessageBytes certificates;
 
     /**
      * End of stream flag.
@@ -344,6 +359,9 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     public AjpProcessor(final int packetSize, final AJPv13TaskMonitor listenerMonitor) {
         super();
+        bodyBytes = MessageBytes.newInstance();
+        sink = new UnsynchronizedByteArrayOutputStream(Constants.MAX_PACKET_SIZE);
+        certificates = MessageBytes.newInstance();
         mainLock = new ReentrantReadWriteLock();
         softLock = mainLock.readLock();
         lastWriteAccess = Long.MAX_VALUE;
@@ -447,11 +465,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         return lastWriteAccess;
     }
 
-    /**
-     * Use Tomcat authentication ?
-     */
-    protected boolean tomcatAuthentication = true;
-
     public boolean getTomcatAuthentication() {
         return tomcatAuthentication;
     }
@@ -461,11 +474,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     }
 
     /**
-     * Required secret.
-     */
-    private String requiredSecret;
-
-    /**
      * Sets the required secret.
      * 
      * @param requiredSecret The secret
@@ -473,11 +481,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     public void setRequiredSecret(final String requiredSecret) {
         this.requiredSecret = requiredSecret;
     }
-
-    /**
-     * The number of milliseconds waiting for a subsequent request before closing the connection.
-     */
-    private int keepAliveTimeout = -1;
 
     public int getKeepAliveTimeout() {
         return keepAliveTimeout;
@@ -1164,8 +1167,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 }
             } else if (attributeCode == Constants.SC_A_JVM_ROUTE) {
                 final String jvmRoute = requestHeaderMessage.getString();
-                if (!AJPv13Config.getJvmRoute().equals(jvmRoute)) {
-                    LOG.error("JVM route mismatch. Expected \"" + AJPv13Config.getJvmRoute() + "\", but is \"" + jvmRoute + "\".");
+                if (DEBUG && !AJPv13Config.getJvmRoute().equals(jvmRoute)) {
+                    LOG.debug("JVM route mismatch. Expected \"" + AJPv13Config.getJvmRoute() + "\", but is \"" + jvmRoute + "\".");
                 }
                 request.setInstanceId(jvmRoute);
             } else if (attributeCode == Constants.SC_A_SSL_CERT) {
@@ -1253,8 +1256,12 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
              */
             checkJSessionIDCookie();
         } else {
-            final int dot = jsessionID.lastIndexOf('.');
-            if ((dot == -1) || (AJPv13Config.getJvmRoute().equals(jsessionID.substring(dot + 1)))) {
+            String thisJVMRoute = request.getInstanceId();
+            if (null == thisJVMRoute) {
+                final int dot = jsessionID.lastIndexOf('.');
+                thisJVMRoute = -1 == dot ? null : jsessionID.substring(dot + 1);
+            }
+            if ((null == thisJVMRoute) || (AJPv13Config.getJvmRoute().equals(thisJVMRoute))) {
                 addJSessionIDCookie(jsessionID);
             } else {
                 /*
