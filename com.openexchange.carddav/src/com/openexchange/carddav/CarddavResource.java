@@ -75,6 +75,7 @@ import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
@@ -180,7 +181,7 @@ public class CarddavResource extends AbstractResource {
             final byte[] vcard = baos.toByteArray();
             final VersitDefinition def = Versit.getDefinition("text/x-vcard");
             VersitDefinition.Reader versitReader;
-            versitReader = def.getReader(new ByteArrayInputStream(vcard), "UTF-8");
+            versitReader = def.getReader(new UnsynchronizedByteArrayInputStream(vcard), "UTF-8");
             final VersitObject versitObject = def.parse(versitReader);
             Contact newContact = converter.convertContact(versitObject);
             if (exists) {
