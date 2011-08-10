@@ -93,10 +93,10 @@ public class RdbResourceStorage extends ResourceStorage {
     public ResourceGroup getGroup(final int groupId, final Context context) throws OXException {
         final ResourceGroup[] groups = getGroups(new int[] { groupId }, context);
         if (null == groups || groups.length == 0) {
-            throw LdapExceptionCode.RESOURCEGROUP_NOT_FOUND.create("RES", Integer.valueOf(groupId));
+            throw LdapExceptionCode.RESOURCEGROUP_NOT_FOUND.create(Integer.valueOf(groupId)).setPrefix("RES");
         }
         if (groups.length > 1) {
-            throw LdapExceptionCode.RESOURCEGROUP_CONFLICT.create("RES", Integer.valueOf(groupId));
+            throw LdapExceptionCode.RESOURCEGROUP_CONFLICT.create(Integer.valueOf(groupId)).setPrefix("RES");
         }
         return groups[0];
     }
@@ -109,7 +109,7 @@ public class RdbResourceStorage extends ResourceStorage {
         try {
             con = DBPool.pickup(context);
         } catch (final Exception e) {
-            throw LdapExceptionCode.NO_CONNECTION.create("RES", e);
+            throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("RES");
         }
         final List<ResourceGroup> groups = new ArrayList<ResourceGroup>();
         PreparedStatement stmt = null;
@@ -129,7 +129,7 @@ public class RdbResourceStorage extends ResourceStorage {
                 groups.add(group);
             }
         } catch (final SQLException e) {
-            throw LdapExceptionCode.SQL_ERROR.create("RES", e, e.getMessage());
+            throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("RES");
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);
@@ -154,7 +154,7 @@ public class RdbResourceStorage extends ResourceStorage {
         try {
             con = DBPool.pickup(context);
         } catch (final Exception e) {
-            throw LdapExceptionCode.NO_CONNECTION.create("RES", e);
+            throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("RES");
         }
         final StringBuilder ids = new StringBuilder(16);
         ids.append('(').append(groupId[0]);
@@ -180,7 +180,7 @@ public class RdbResourceStorage extends ResourceStorage {
                 groups.add(group);
             }
         } catch (final SQLException e) {
-            throw LdapExceptionCode.SQL_ERROR.create("RES", e, e.getMessage());
+            throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("RES");
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);
@@ -227,10 +227,10 @@ public class RdbResourceStorage extends ResourceStorage {
     public Resource getResource(final int resourceId, final Context context) throws OXException {
         final Resource[] resources = getResources(new int[] { resourceId }, context);
         if (resources.length == 0) {
-            throw LdapExceptionCode.RESOURCE_NOT_FOUND.create("RES", Integer.valueOf(resourceId));
+            throw LdapExceptionCode.RESOURCE_NOT_FOUND.create(Integer.valueOf(resourceId)).setPrefix("RES");
         }
         if (resources.length > 1) {
-            throw LdapExceptionCode.RESOURCE_CONFLICT.create("RES", Integer.valueOf(resourceId));
+            throw LdapExceptionCode.RESOURCE_CONFLICT.create(Integer.valueOf(resourceId)).setPrefix("RES");
         }
         return resources[0];
     }
@@ -252,7 +252,7 @@ public class RdbResourceStorage extends ResourceStorage {
         try {
             con = DBPool.pickup(context);
         } catch (final Exception e) {
-            throw LdapExceptionCode.NO_CONNECTION.create("RES", e);
+            throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("RES");
         }
         final StringBuilder ids = new StringBuilder(16);
         ids.append('(').append(resourceId[0]);
@@ -271,7 +271,7 @@ public class RdbResourceStorage extends ResourceStorage {
                 resources.add(createResourceFromEntry(result));
             }
         } catch (final SQLException e) {
-            throw LdapExceptionCode.SQL_ERROR.create("RES", e, e.getMessage());
+            throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("RES");
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);
@@ -287,7 +287,7 @@ public class RdbResourceStorage extends ResourceStorage {
         try {
             con = DBPool.pickup(context);
         } catch (final Exception e) {
-            throw LdapExceptionCode.NO_CONNECTION.create("RES", e);
+            throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("RES");
         }
         final List<ResourceGroup> groups = new ArrayList<ResourceGroup>();
         PreparedStatement stmt = null;
@@ -308,7 +308,7 @@ public class RdbResourceStorage extends ResourceStorage {
                 groups.add(group);
             }
         } catch (final SQLException e) {
-            throw LdapExceptionCode.SQL_ERROR.create("RES", e, e.getMessage());
+            throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("RES");
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);
@@ -324,7 +324,7 @@ public class RdbResourceStorage extends ResourceStorage {
         try {
             con = DBPool.pickup(context);
         } catch (final Exception e) {
-            throw LdapExceptionCode.NO_CONNECTION.create("RES", e);
+            throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("RES");
         }
         final List<Resource> resources = new ArrayList<Resource>();
         PreparedStatement stmt = null;
@@ -339,7 +339,7 @@ public class RdbResourceStorage extends ResourceStorage {
                 resources.add(createResourceFromEntry(result));
             }
         } catch (final SQLException e) {
-            throw LdapExceptionCode.SQL_ERROR.create("RES", e, e.getMessage());
+            throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("RES");
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);
@@ -355,7 +355,7 @@ public class RdbResourceStorage extends ResourceStorage {
         try {
             con = DBPool.pickup(context);
         } catch (final Exception e) {
-            throw LdapExceptionCode.NO_CONNECTION.create("RES", e);
+            throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("RES");
         }
         final List<Resource> resources = new ArrayList<Resource>();
         PreparedStatement stmt = null;
@@ -369,7 +369,7 @@ public class RdbResourceStorage extends ResourceStorage {
                 resources.add(createResourceFromEntry(result));
             }
         } catch (final SQLException e) {
-            throw LdapExceptionCode.SQL_ERROR.create("RES", e, e.getMessage());
+            throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("RES");
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);
@@ -390,12 +390,12 @@ public class RdbResourceStorage extends ResourceStorage {
         return listModifiedOrDeleted(modifiedSince, context, SQL_SELECT_DELETED_RESOURCE);
     }
 
-    private Resource[] listModifiedOrDeleted(final Date modifiedSince, final Context context, String statement) throws OXException {
+    private Resource[] listModifiedOrDeleted(final Date modifiedSince, final Context context, final String statement) throws OXException {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
         } catch (final Exception e) {
-            throw LdapExceptionCode.NO_CONNECTION.create("RES", e);
+            throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("RES");
         }
         final List<Resource> resources = new ArrayList<Resource>();
         PreparedStatement stmt = null;
@@ -409,7 +409,7 @@ public class RdbResourceStorage extends ResourceStorage {
                 resources.add(createResourceFromEntry(result));
             }
         } catch (final SQLException e) {
-            throw LdapExceptionCode.SQL_ERROR.create("RES", e, e.getMessage());
+            throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("RES");
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);
