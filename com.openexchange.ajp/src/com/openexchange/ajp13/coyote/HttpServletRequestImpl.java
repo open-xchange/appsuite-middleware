@@ -189,6 +189,8 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     private boolean formData;
 
+    private long contentLength;
+
     /**
      * Initializes a new {@link ServletRequestWrapper}.
      */
@@ -279,6 +281,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
         requestedSessionIdFromURL = false;
         servletInstance = null;
         startTime = 0L;
+        contentLength = -1L;
     }
 
     /**
@@ -343,6 +346,9 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
         }
         final List<String> prevValues = headers.get(name);
         if (null == prevValues || SINGLE_VALUE_HEADERS.contains(name)) {
+            if (CONTENT_LENGTH.equals(name)) {
+                contentLength = Long.parseLong(value);
+            }
             headers.put(name, Collections.singletonList(value));
         } else {
             /*
@@ -586,7 +592,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     @Override
     public int getContentLength() {
-        return (int) Long.parseLong(getHeader(CONTENT_LENGTH));
+        return (int) contentLength;
     }
 
     /**
@@ -595,7 +601,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
      * @return The content length's <code>long</code> value
      */
     public long getContentLengthLong() {
-        return Long.parseLong(getHeader(CONTENT_LENGTH));
+        return contentLength;
     }
 
     @Override
