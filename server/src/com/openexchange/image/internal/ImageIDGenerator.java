@@ -49,12 +49,13 @@
 
 package com.openexchange.image.internal;
 
-import java.io.UnsupportedEncodingException;
 import java.util.regex.Pattern;
-import org.apache.commons.codec.binary.Base64;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.DataArguments;
+import com.openexchange.crypto.CryptoService;
+import com.openexchange.exception.OXException;
 import com.openexchange.image.ImageDataSource;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link ImageIDGenerator} - The ID generator.
@@ -66,7 +67,9 @@ final class ImageIDGenerator {
     /**
      * The delimiter.
      */
-    private static final String DELIM = "?==?";
+    private static final char DELIM = '#';
+
+    private static final String SECRET = String.valueOf(OXException.getServerId());
 
     /**
      * Initializes a new {@link ImageIDGenerator}.
@@ -77,7 +80,7 @@ final class ImageIDGenerator {
 
     /**
      * Generates an image ID from specified arguments.
-     *
+     * 
      * @param imageSource The image data source
      * @param imageArguments The data arguments for image data source
      * @param authId The auth id of the session that needs the generated id
@@ -92,34 +95,32 @@ final class ImageIDGenerator {
         }
         sb.append(DELIM).append(authId);
         try {
-            return new String(Base64.encodeBase64(sb.toString().getBytes("UTF-8"), false), "US-ASCII");
-        } catch (final UnsupportedEncodingException e) {
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageIDGenerator.class)).error("Unsupported encoding: " + e.getMessage(), e);
+            final CryptoService cryptoService = ServerServiceRegistry.getInstance().getService(CryptoService.class);
+            return cryptoService.encrypt(sb.toString(), SECRET);
+        } catch (final OXException e) {
+            // Cannot occur
             return sb.toString();
         }
     }
 
-    private static final Pattern SPLIT = Pattern.compile(Pattern.quote(ImageIDGenerator.DELIM));
+    private static final Pattern SPLIT = Pattern.compile(Pattern.quote(String.valueOf(DELIM)));
 
     /**
      * Parses specified ID to appropriate data source and data arguments.
-     *
+     * 
      * @param uniqueId The ID
      * @param service The conversion service
      * @return The data source and data arguments wrapped (in this order) in an array or <code>null</code>
      */
     static Object[] parseId(final String uniqueId, final ConversionService service) {
         final String[] args;
-        {
-            String toSplit;
-            try {
-                final byte[] plain = Base64.decodeBase64(uniqueId.getBytes("US-ASCII"));
-                toSplit = new String(plain, "UTF-8");
-            } catch (final UnsupportedEncodingException e) {
-                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageIDGenerator.class)).error("Unsupported encoding: " + e.getMessage(), e);
-                toSplit = uniqueId;
-            }
+        try {
+            final CryptoService cryptoService = ServerServiceRegistry.getInstance().getService(CryptoService.class);
+            final String toSplit = cryptoService.decrypt(uniqueId, SECRET);
             args = SPLIT.split(toSplit, 0);
+        } catch (final OXException e) {
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageIDGenerator.class)).warn(e.getMessage(), e);
+            return null;
         }
         /*
          * Get data source from conversion service
@@ -128,7 +129,7 @@ final class ImageIDGenerator {
         try {
             dataSource = (ImageDataSource) service.getDataSource(args[0]);
         } catch (final ClassCastException e) {
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageIDGenerator.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageIDGenerator.class)).warn(e.getMessage(), e);
             return null;
         }
         if (null == dataSource) {
