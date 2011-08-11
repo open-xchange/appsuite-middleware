@@ -416,9 +416,10 @@ public final class AjpMessage {
      * Dump the contents of the message, prefixed with the given String.
      */
     public void dump(final String msg) {
-        if (log.isDebugEnabled()) {
-            log.debug(msg + ": " + buf + " " + pos + "/" + (len + 4));
+        if (!log.isDebugEnabled()) {
+            return;
         }
+        log.debug(msg + ": " + buf + " " + pos + "/" + (len + 4));
         int max = pos;
         if (len + 4 > pos) {
             max = len + 4;
@@ -426,17 +427,18 @@ public final class AjpMessage {
         if (max > 1000) {
             max = 1000;
         }
-        if (log.isDebugEnabled()) {
-            for (int j = 0; j < max; j += 16) {
-                log.debug(hexLine(buf, j, len));
-            }
+
+        final StringBuilder temp = new StringBuilder(8192);
+        for (int j = 0; j < max; j += 16) {
+            hexLine(buf, j, len, temp);
+            temp.append('\n');
         }
+        log.debug(temp.toString());
     }
 
     // ------------------------------------------------------ Protected Methods
 
-    protected static String hexLine(final byte buf[], final int start, final int len) {
-        final StringBuffer sb = new StringBuffer();
+    protected static void hexLine(final byte buf[], final int start, final int len, final StringBuilder sb) {
         for (int i = start; i < start + 16; i++) {
             if (i < len + 4) {
                 sb.append(hex(buf[i]) + " ");
@@ -452,7 +454,6 @@ public final class AjpMessage {
                 sb.append(".");
             }
         }
-        return sb.toString();
     }
 
     protected static String hex(final int x) {
