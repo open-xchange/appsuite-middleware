@@ -419,7 +419,7 @@ public final class AjpMessage {
         if (!log.isDebugEnabled()) {
             return;
         }
-        log.debug(msg + ": " + buf + " " + pos + "/" + (len + 4));
+        log.debug(msg + ": " + pos + "/" + (len + 4));
         int max = pos;
         if (len + 4 > pos) {
             max = len + 4;
