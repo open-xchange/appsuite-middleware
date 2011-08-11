@@ -64,6 +64,7 @@ import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 import com.openexchange.ajp13.AJPv13Config;
+import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.servlet.OXServletException;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.exception.OXException;
@@ -100,6 +101,10 @@ public final class HttpManagersInit implements Initialization {
 
     @Override
     public void start() throws OXException {
+        AJPv13Server ajpServer;
+        while (null == (ajpServer = AJPv13Server.getInstance()) || !ajpServer.isRunning()) {
+            // Do nothing
+        }
         if (!started.compareAndSet(false, true)) {
             LOG.error(this.getClass().getName() + " already started");
             return;
