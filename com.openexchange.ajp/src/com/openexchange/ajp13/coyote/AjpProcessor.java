@@ -312,7 +312,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     /**
      * The ping counter.
      */
-    private int pingCount;
+    private volatile int pingCount;
 
     /**
      * Direct buffer used for sending right away a pong message.
