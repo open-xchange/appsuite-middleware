@@ -783,8 +783,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             if (error) {
                 response.setStatus(500);
             }
-            // TODO:
-            // request.updateCounters();
             stage = STAGE_KEEPALIVE;
             recycle();
             /*
