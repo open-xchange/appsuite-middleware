@@ -413,7 +413,7 @@ public final class AjpMessage {
             return -1;
         }
         if (log.isDebugEnabled()) {
-            log.debug("Received " + len + " " + buf[0]);
+            log.debug("Received AJP message of length " + len + ". First payload byte is: " + buf[0]);
         }
         return len;
     }
