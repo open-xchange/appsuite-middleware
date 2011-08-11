@@ -652,12 +652,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     stage = STAGE_ENDED;
                     break;
                 }
-                if (DEBUG) {
-                    final byte prefixCode = requestHeaderMessage.peekByte();
-                    final String ajpReqName =
-                        Constants.JK_AJP13_CPING_REQUEST == prefixCode ? "CPing" : (Constants.JK_AJP13_FORWARD_REQUEST == prefixCode ? "Forward-Request" : "unknown");
-                    LOG.debug("First " + ajpReqName + " AJP message successfully read from stream.");
-                }
                 /*
                  * Set back timeout if keep alive timeout is enabled
                  */
@@ -669,7 +663,13 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                  * not regular request processing
                  */
                 final int type = requestHeaderMessage.getByte();
-                if (type == Constants.JK_AJP13_CPING_REQUEST) {
+                if (DEBUG) {
+                    final String ajpReqName =
+                        Constants.JK_AJP13_CPING_REQUEST == type ? "CPing" : (Constants.JK_AJP13_FORWARD_REQUEST == type ? "Forward-Request" : "unknown");
+                    LOG.debug("First " + ajpReqName + " AJP message successfully read from stream.");
+                }
+                final int dataLength = requestHeaderMessage.getLen();
+                if (type == Constants.JK_AJP13_CPING_REQUEST && 1 == dataLength) {
                     softLock.lock();
                     try {
                         output.write(pongMessageArray);
@@ -690,6 +690,22 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     }
                     continue;
                 }
+                /*
+                 * Check method code before parsing forward-request
+                 */
+                final byte methodCode = requestHeaderMessage.peekByte();
+                if (methodCode < 0 || methodCode >= Constants.methodTransArray.length) {
+                    /*
+                     * Usually the servlet didn't read the previous request body
+                     */
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Unexpected message. Invalid method code: " + methodCode);
+                    }
+                    continue;
+                }
+                /*
+                 * So far a valid forward-request package
+                 */
                 request.setStartTime(System.currentTimeMillis());
             } catch (final IOException e) {
                 LOG.debug("ajpprocessor.io.error", e);
