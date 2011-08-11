@@ -713,7 +713,10 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                  */
                 prepareRequest();
             } catch (final Throwable t) {
-                LOG.debug("ajpprocessor.request.prepare", t);
+                final StringBuilder sb = new StringBuilder(512);
+                sb.append("ajpprocessor.request.prepare: ").append(t.getMessage()).append("\n");
+                appendStackTrace(t.getStackTrace(), sb);
+                LOG.debug(sb.toString());
                 /*
                  * 400 - Internal Server Error
                  */
@@ -1974,5 +1977,33 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         }
 
     } // End of class
+
+    private static void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb) {
+        if (null == trace) {
+            return;
+        }
+        for (final StackTraceElement ste : trace) {
+            final String className = ste.getClassName();
+            if (null != className) {
+                sb.append("\tat ").append(className).append('.').append(ste.getMethodName());
+                if (ste.isNativeMethod()) {
+                    sb.append("(Native Method)");
+                } else {
+                    final String fileName = ste.getFileName();
+                    if (null == fileName) {
+                        sb.append("(Unknown Source)");
+                    } else {
+                        final int lineNumber = ste.getLineNumber();
+                        sb.append('(').append(fileName);
+                        if (lineNumber >= 0) {
+                            sb.append(':').append(lineNumber);
+                        }
+                        sb.append(')');
+                    }
+                }
+                sb.append("\n");
+            }
+        }
+    }
 
 }
