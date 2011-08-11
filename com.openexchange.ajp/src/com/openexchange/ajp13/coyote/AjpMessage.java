@@ -322,11 +322,11 @@ public final class AjpMessage {
      * byte first, and, as far as I can tell, in little-endian order within each byte.
      */
     public int getInt() {
-        return (buf[pos++] & 0xFF << 8) + buf[pos++] & 0xFF;
+        return ((buf[pos++] & 0xFF) << 8) + (buf[pos++] & 0xFF);
     }
 
     public int peekInt() {
-        return (buf[pos] & 0xFF << 8) + buf[pos + 1] & 0xFF;
+        return ((buf[pos] & 0xFF) << 8) + (buf[pos + 1] & 0xFF);
     }
 
     public byte getByte() {
