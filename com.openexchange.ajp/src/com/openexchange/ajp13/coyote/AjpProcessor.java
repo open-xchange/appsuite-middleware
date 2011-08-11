@@ -108,6 +108,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     private static final AtomicLong NUMBER = new AtomicLong();
 
+    private static final String HTTPS = "https";
+
     private static final int STAGE_AWAIT = 1;
 
     private static final int STAGE_PREPARE = 2;
@@ -1085,7 +1087,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         final boolean isSSL = requestHeaderMessage.getByte() != 0;
         if (isSSL) {
             request.setSecure(isSSL);
-            request.setScheme("https");
+            request.setScheme(HTTPS);
         }
 
         // Decode headers
@@ -1226,14 +1228,14 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 }
                 request.setInstanceId(jvmRoute);
             } else if (attributeCode == Constants.SC_A_SSL_CERT) {
-                request.setScheme("https");
+                request.setScheme(HTTPS);
                 // SSL certificate extraction is lazy, moved to JkCoyoteHandler
                 requestHeaderMessage.getBytes(certificates);
             } else if (attributeCode == Constants.SC_A_SSL_CIPHER) {
-                request.setScheme("https");
+                request.setScheme(HTTPS);
                 request.setAttribute("javax.servlet.request.cipher_suite", requestHeaderMessage.getString(temp));
             } else if (attributeCode == Constants.SC_A_SSL_SESSION) {
-                request.setScheme("https");
+                request.setScheme(HTTPS);
                 request.setAttribute("javax.servlet.request.ssl_session", requestHeaderMessage.getString(temp));
             } else if (attributeCode == Constants.SC_A_SSL_KEY_SIZE) {
                 request.setAttribute("javax.servlet.request.key_size", new Integer(requestHeaderMessage.getInt()));
@@ -1362,7 +1364,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
          * Colon detected?
          */
         if (colonPos < 0) {
-            if (request.getScheme().equalsIgnoreCase("https")) {
+            if (request.getScheme().equalsIgnoreCase(HTTPS)) {
                 /*
                  * 443 - Default HTTPS port
                  */
