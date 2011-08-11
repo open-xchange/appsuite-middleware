@@ -310,6 +310,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     private final AJPv13TaskMonitor listenerMonitor;
 
     /**
+     * The ping counter.
+     */
+    private int pingCount;
+
+    /**
      * Direct buffer used for sending right away a pong message.
      */
     private static final byte[] pongMessageArray;
@@ -843,6 +848,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     // ----------------------------------------------------- ActionHook Methods
 
+    private static final int MAX_PING_COUNT = 3;
+
     /**
      * Send an action to the connector.
      * 
@@ -891,6 +898,15 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             final Lock hardLock = mainLock.writeLock();
             hardLock.lock();
             try {
+                if (++pingCount > MAX_PING_COUNT) {
+                    /*
+                     * Exceeded task
+                     */
+                    response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+                    action(ActionCode.CLIENT_FLUSH, null);
+                    action(ActionCode.CLOSE, null);
+                    return;
+                }
                 if (response.isCommitted()) {
                     /*
                      * Write empty SEND-BODY-CHUNK package
@@ -1857,6 +1873,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         empty = true;
         replay = false;
         finished = false;
+        pingCount = 0;
         httpSessionCookie = null;
         httpSessionJoined = false;
         servlet = null;
