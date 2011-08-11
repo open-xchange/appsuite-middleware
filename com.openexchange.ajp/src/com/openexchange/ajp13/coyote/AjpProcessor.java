@@ -325,6 +325,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     private static final byte[] endMessageArray;
 
     /**
+     * End message array with "reuse" flag set to <code>false</code>.
+     */
+    private static final byte[] endMessageArrayNoReuse;
+
+    /**
      * Flush message array.
      */
     private static final byte[] flushMessageArray;
@@ -349,6 +354,15 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         endMessage.end();
         endMessageArray = new byte[endMessage.getLen()];
         System.arraycopy(endMessage.getBuffer(), 0, endMessageArray, 0, endMessage.getLen());
+
+        // Allocate the end message array
+        final AjpMessage endMessageNoReuse = new AjpMessage(16);
+        endMessageNoReuse.reset();
+        endMessageNoReuse.appendByte(Constants.JK_AJP13_END_RESPONSE);
+        endMessageNoReuse.appendByte(1);
+        endMessageNoReuse.end();
+        endMessageArrayNoReuse = new byte[endMessageNoReuse.getLen()];
+        System.arraycopy(endMessageNoReuse.getBuffer(), 0, endMessageArrayNoReuse, 0, endMessageNoReuse.getLen());
 
         // Allocate the flush message array
         final AjpMessage flushMessage = new AjpMessage(16);
@@ -530,7 +544,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     public void cancel() {
         response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
         action(ActionCode.CLIENT_FLUSH, null);
-        action(ActionCode.CLOSE, null);
+        action(ActionCode.CLOSE, Boolean.FALSE);
         /*
          * Drop socket
          */
@@ -547,7 +561,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
          */
         final Future<Object> f = control;
         if (f != null) {
-            f.cancel(false);
+            f.cancel(true);
             control = null;
         }
     }
@@ -899,12 +913,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             hardLock.lock();
             try {
                 if (++pingCount > MAX_PING_COUNT) {
-                    /*
-                     * Exceeded task
-                     */
-                    response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
-                    action(ActionCode.CLIENT_FLUSH, null);
-                    action(ActionCode.CLOSE, null);
+                    cancel();
                     return;
                 }
                 if (response.isCommitted()) {
@@ -943,7 +952,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 /*
                  * Write END-RESPONSE package
                  */
-                finish();
+                finish(null == param || !(param instanceof Boolean) ? true : ((Boolean) param).booleanValue());
             } catch (final IOException e) {
                 // Set error flag
                 error = true;
@@ -1747,6 +1756,13 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      * Finish AJP response.
      */
     protected void finish() throws IOException {
+        finish(true);
+    }
+
+    /**
+     * Finish AJP response.
+     */
+    protected void finish(final boolean reuse) throws IOException {
 
         if (!response.isCommitted()) {
             // Validate and write response headers
@@ -1767,7 +1783,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         // Add the end message
         softLock.lock();
         try {
-            output.write(endMessageArray);
+            output.write(reuse ? endMessageArray : endMessageArrayNoReuse);
             // output.flush();
         } finally {
             softLock.unlock();
