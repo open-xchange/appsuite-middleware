@@ -419,7 +419,7 @@ public final class AjpMessage {
         if (!log.isDebugEnabled()) {
             return;
         }
-        log.debug(msg + ": " + pos + "/" + (len + 4));
+        final StringBuilder temp = new StringBuilder(8192).append(msg + ": " + pos + "/" + (len + 4)).append('\n');
         int max = pos;
         if (len + 4 > pos) {
             max = len + 4;
@@ -428,7 +428,6 @@ public final class AjpMessage {
             max = 1000;
         }
 
-        final StringBuilder temp = new StringBuilder(8192);
         for (int j = 0; j < max; j += 16) {
             hexLine(buf, j, len, temp);
             temp.append('\n');
