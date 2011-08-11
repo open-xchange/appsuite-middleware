@@ -714,7 +714,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 prepareRequest();
             } catch (final Throwable t) {
                 final StringBuilder sb = new StringBuilder(512);
-                sb.append("ajpprocessor.request.prepare: ").append(t.getMessage()).append("\n");
+                sb.append("ajpprocessor.request.prepare: ").append(t.getClass().getName());
+                sb.append(" message=").append(t.getMessage()).append("\n");
                 appendStackTrace(t.getStackTrace(), sb);
                 LOG.debug(sb.toString());
                 /*
