@@ -282,7 +282,7 @@ public final class AjpMessage {
      * 
      * @return The read string
      */
-    public String getString() {
+    public String getString(final StringBuilder builder) {
         final int strLength = getInt();
         if ((strLength == 0xFFFF) || (strLength == -1)) {
             /*
@@ -291,7 +291,13 @@ public final class AjpMessage {
             return "";
         }
         boolean encoded = false;
-        final StringBuilder sb = new StringBuilder(strLength);
+        final StringBuilder sb;
+        if (null == builder) {
+            sb = new StringBuilder(strLength);
+        } else {
+            sb = builder;
+            sb.setLength(0);
+        }
         for (int strIndex = 0; strIndex < strLength; strIndex++) {
             final int b = buf[pos++] & 0xFF;
             if (b > ASCII_LIMIT) { // non-ascii character
@@ -314,7 +320,6 @@ public final class AjpMessage {
             }
         }
         return sb.toString();
-        
     }
 
     /**

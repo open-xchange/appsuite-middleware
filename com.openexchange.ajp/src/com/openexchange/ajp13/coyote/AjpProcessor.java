@@ -1056,10 +1056,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             final String methodName = Constants.methodTransArray[methodCode - 1];
             request.setMethod(methodName);
         }
-        request.setProtocol(requestHeaderMessage.getString());
+        final StringBuilder temp = new StringBuilder(16);
+        request.setProtocol(requestHeaderMessage.getString(temp));
         String jsessionID = null;
         {
-            final String requestURI = requestHeaderMessage.getString();
+            final String requestURI = requestHeaderMessage.getString(temp);
             final int pos = requestURI.toLowerCase(Locale.ENGLISH).indexOf(JSESSIONID_URI);
             if (pos > -1) {
                 jsessionID = requestURI.substring(pos + JSESSIONID_URI.length());
@@ -1068,10 +1069,10 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             }
             request.setRequestURI(requestURI);
         }
-        request.setRemoteAddr(requestHeaderMessage.getString());
-        request.setRemoteHost(requestHeaderMessage.getString());
+        request.setRemoteAddr(requestHeaderMessage.getString(temp));
+        request.setRemoteHost(requestHeaderMessage.getString(temp));
         {
-            final String serverName = requestHeaderMessage.getString();
+            final String serverName = requestHeaderMessage.getString(temp);
             request.setLocalName(serverName);
             request.setServerName(serverName);
         }
@@ -1108,9 +1109,9 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 // SC_REQ_CONTENT_LENGTH=8 - leading to unexpected
                 // behaviour. see bug 5861 for more information.
                 hId = -1;
-                hName = requestHeaderMessage.getString();
+                hName = requestHeaderMessage.getString(temp);
             }
-            final String hValue = requestHeaderMessage.getString();
+            final String hValue = requestHeaderMessage.getString(temp);
             /*
              * Check for "Content-Length" and "Content-Type" headers
              */
@@ -1170,8 +1171,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         while ((attributeCode = requestHeaderMessage.getByte()) != Constants.SC_A_ARE_DONE) {
 
             if (attributeCode == Constants.SC_A_REQ_ATTRIBUTE) {
-                final String n = requestHeaderMessage.getString();
-                final String v = requestHeaderMessage.getString();
+                final String n = requestHeaderMessage.getString(temp);
+                final String v = requestHeaderMessage.getString(temp);
                 /*
                  * AJP13 misses to forward the remotePort. Allow the AJP connector to add this info via a private request attribute. We will
                  * accept the forwarded data as the remote port, and remove it from the public list of request attributes.
@@ -1186,29 +1187,29 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     request.setAttribute(n, v);
                 }
             } else if (attributeCode == Constants.SC_A_CONTEXT) {
-                final String context = requestHeaderMessage.getString();
+                final String context = requestHeaderMessage.getString(temp);
                 request.setAttribute(Constants.attributeNameArray[attributeCode - 1], context);
                 request.setContextPath(context);
             } else if (attributeCode == Constants.SC_A_SERVLET_PATH) {
-                final String servletPath = requestHeaderMessage.getString();
+                final String servletPath = requestHeaderMessage.getString(temp);
                 request.setAttribute(Constants.attributeNameArray[attributeCode - 1], servletPath);
                 request.setServletPath(servletPath);
             } else if (attributeCode == Constants.SC_A_REMOTE_USER) {
                 if (tomcatAuthentication) {
                     // ignore server
-                    requestHeaderMessage.getString();
+                    requestHeaderMessage.getString(temp);
                 } else {
-                    request.setRemoteUser(requestHeaderMessage.getString());
+                    request.setRemoteUser(requestHeaderMessage.getString(temp));
                 }
             } else if (attributeCode == Constants.SC_A_AUTH_TYPE) {
                 if (tomcatAuthentication) {
                     // ignore server
-                    requestHeaderMessage.getString();
+                    requestHeaderMessage.getString(temp);
                 } else {
-                    request.setAuthType(requestHeaderMessage.getString());
+                    request.setAuthType(requestHeaderMessage.getString(temp));
                 }
             } else if (attributeCode == Constants.SC_A_QUERY_STRING) {
-                final String queryString = requestHeaderMessage.getString();
+                final String queryString = requestHeaderMessage.getString(temp);
                 request.setQueryString(queryString);
                 try {
                     parseQueryString(queryString);
@@ -1219,7 +1220,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     throw new IllegalStateException(e.getMessage(), e);
                 }
             } else if (attributeCode == Constants.SC_A_JVM_ROUTE) {
-                final String jvmRoute = requestHeaderMessage.getString();
+                final String jvmRoute = requestHeaderMessage.getString(temp);
                 if (DEBUG && !AJPv13Config.getJvmRoute().equals(jvmRoute)) {
                     LOG.debug("JVM route mismatch. Expected \"" + AJPv13Config.getJvmRoute() + "\", but is \"" + jvmRoute + "\".");
                 }
@@ -1230,16 +1231,16 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 requestHeaderMessage.getBytes(certificates);
             } else if (attributeCode == Constants.SC_A_SSL_CIPHER) {
                 request.setScheme("https");
-                request.setAttribute("javax.servlet.request.cipher_suite", requestHeaderMessage.getString());
+                request.setAttribute("javax.servlet.request.cipher_suite", requestHeaderMessage.getString(temp));
             } else if (attributeCode == Constants.SC_A_SSL_SESSION) {
                 request.setScheme("https");
-                request.setAttribute("javax.servlet.request.ssl_session", requestHeaderMessage.getString());
+                request.setAttribute("javax.servlet.request.ssl_session", requestHeaderMessage.getString(temp));
             } else if (attributeCode == Constants.SC_A_SSL_KEY_SIZE) {
                 request.setAttribute("javax.servlet.request.key_size", new Integer(requestHeaderMessage.getInt()));
             } else if (attributeCode == Constants.SC_A_STORED_METHOD) {
-                request.setMethod(requestHeaderMessage.getString());
+                request.setMethod(requestHeaderMessage.getString(temp));
             } else if (attributeCode == Constants.SC_A_SECRET) {
-                final String value = requestHeaderMessage.getString();
+                final String value = requestHeaderMessage.getString(temp);
                 if (requiredSecret != null) {
                     secret = true;
                     if (!value.equals(requiredSecret)) {
