@@ -736,16 +736,16 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                          */
                         final int buflen = 2048;
                         final byte[] buf = new byte[buflen];
-                        final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(8192);
+                        sink.reset();
                         final ServletInputStream inputStream = request.getInputStream();
                         for (int read = inputStream.read(buf, 0, buflen); read > 0; read = inputStream.read(buf, 0, buflen)) {
-                            baos.write(buf, 0, read);
+                            sink.write(buf, 0, read);
                         }
                         String charEnc = request.getCharacterEncoding();
                         if (charEnc == null) {
                             charEnc = ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding);
                         }
-                        final byte[] bytes = baos.toByteArray();
+                        final byte[] bytes = sink.toByteArray();
                         parseQueryString(new String(bytes, charEnc));
                         /*
                          * Apply already read data to request to make them re-available?
