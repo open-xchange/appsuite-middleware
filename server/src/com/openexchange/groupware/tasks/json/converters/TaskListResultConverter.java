@@ -71,6 +71,7 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
  * {@link TaskListResultConverter}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class TaskListResultConverter extends TaskResultConverter {
 
