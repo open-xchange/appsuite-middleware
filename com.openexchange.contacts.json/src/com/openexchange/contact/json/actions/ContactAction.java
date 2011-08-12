@@ -88,11 +88,10 @@ public abstract class ContactAction implements AJAXActionService {
     protected abstract AJAXRequestResult perform(ContactRequest req) throws OXException;
     
     protected ContactInterfaceDiscoveryService getContactInterfaceDiscoveryService() throws OXException {
-        final ContactInterfaceDiscoveryService service = serviceLookup.getService(ContactInterfaceDiscoveryService.class);
-        if (service != null) {
-            return service;
-        } else {
-            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create("ContactInterfaceDiscoveryService");
+        try {
+            return serviceLookup.getService(ContactInterfaceDiscoveryService.class);
+        } catch (final IllegalStateException e) {
+            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(ContactInterfaceDiscoveryService.class.getName());
         }
     }
     

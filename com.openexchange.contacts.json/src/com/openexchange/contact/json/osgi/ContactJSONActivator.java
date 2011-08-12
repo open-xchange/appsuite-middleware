@@ -57,6 +57,7 @@ import com.openexchange.contact.json.converters.ContactListResultConverter;
 import com.openexchange.contact.json.converters.ContactResultConverter;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.image.ImageService;
+import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 
 /**
  * {@link ContactJSONActivator} - OSGi Activator for the Contact JSON interface.
@@ -75,7 +76,7 @@ public class ContactJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        registerModule(new ContactActionFactory(this), AJAXServlet.MODULE_CONTACT);
+        registerModule(new ContactActionFactory(new ExceptionOnAbsenceServiceLookup(this)), AJAXServlet.MODULE_CONTACT);
         registerService(ResultConverter.class, new ContactResultConverter(getService(ImageService.class)));
         registerService(ResultConverter.class, new ContactListResultConverter(getService(ImageService.class)));
     }
