@@ -619,11 +619,13 @@ public final class CacheFolderStorage implements FolderStorage {
     }
 
     private static void removeFromSubfolderIds(final String subfolderId, final Folder cachedFolder) {
-        final String[] subfolderIDs = cachedFolder.getSubfolderIDs();
-        if (null != subfolderIDs) {
-            final List<String> temp = new ArrayList<String>(Arrays.asList(subfolderIDs));
-            if (temp.remove(subfolderId)) {
-                cachedFolder.setSubfolderIDs(temp.toArray(new String[temp.size()]));
+        if (null != cachedFolder) {
+            final String[] subfolderIDs = cachedFolder.getSubfolderIDs();
+            if (null != subfolderIDs) {
+                final List<String> temp = new ArrayList<String>(Arrays.asList(subfolderIDs));
+                if (temp.remove(subfolderId)) {
+                    cachedFolder.setSubfolderIDs(temp.toArray(new String[temp.size()]));
+                }
             }
         }
     }

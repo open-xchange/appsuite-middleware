@@ -312,12 +312,14 @@ public final class FolderCache {
         final FolderMap folderMap = entry.getValue();
         if (null != folderMap) {
             final MailFolder mailFolder = folderMap.get(fullName);
-            final String parentFullname = mailFolder.getParentFullname();
-            folderMap.remove(parentFullname);
-            if (parentFullname.equals(MailFolder.DEFAULT_FOLDER_ID)) {
-                folderMap.remove("");
+            if (null != mailFolder) {
+                final String parentFullname = mailFolder.getParentFullname();
+                folderMap.remove(parentFullname);
+                if (parentFullname.equals(MailFolder.DEFAULT_FOLDER_ID)) {
+                    folderMap.remove("");
+                }
+                folderMap.remove(fullName);
             }
-            folderMap.remove(fullName);
         }
     }
 
