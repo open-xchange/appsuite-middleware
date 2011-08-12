@@ -53,10 +53,8 @@ import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.TimeZone;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
@@ -137,7 +135,6 @@ public final class NewAppointmentsSearchAction extends AbstractAppointmentAction
             final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
             searchIterator = appointmentsql.getAppointmentsByExtendedSearch(searchObj, orderBy, orderDir, _appointmentFields);
 
-            final Map<String, List<Appointment>> appointmentMap = new HashMap<String, List<Appointment>>(1);
             final List<Appointment> appointmentList = new ArrayList<Appointment>();
             while (searchIterator.hasNext()) {
                 final Appointment appointmentobject = searchIterator.next();
@@ -199,8 +196,7 @@ public final class NewAppointmentsSearchAction extends AbstractAppointmentAction
                 }
             }
 
-            appointmentMap.put("appointments", appointmentList);
-            return new AJAXRequestResult(appointmentMap, timestamp, "appointments");
+            return new AJAXRequestResult(appointmentList, timestamp, "appointment");
         } catch (final SQLException e) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, new Object[0]);
         } finally {
