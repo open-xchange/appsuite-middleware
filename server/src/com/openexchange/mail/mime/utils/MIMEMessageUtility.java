@@ -624,6 +624,13 @@ public final class MIMEMessageUtility {
                             decodeWord = MimeUtility.decodeWord(encodedWord.replaceFirst(Pattern.quote(charset), "Big5-HKSCS"));
                         }
                         sb.append(decodeWord);
+                    } else if (MessageUtility.isGB2312(charset)) {
+                        final String encodedWord = m.group();
+                        String decodeWord = MimeUtility.decodeWord(encodedWord);
+                        if (decodeWord.indexOf(MessageUtility.UNKNOWN) >= 0) {
+                            decodeWord = MimeUtility.decodeWord(encodedWord.replaceFirst(Pattern.quote(charset), "GB18030"));
+                        }
+                        sb.append(decodeWord);
                     } else {
                         sb.append(MimeUtility.decodeWord(m.group()));
                     }
