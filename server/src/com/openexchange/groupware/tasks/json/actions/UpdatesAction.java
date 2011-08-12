@@ -57,6 +57,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.CommonObject.Marker;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
@@ -127,9 +128,8 @@ public final class UpdatesAction extends AbstractTaskAction {
                 it = taskssql.getDeletedTasksInFolder(folderId, internalColumns, requestedTimestamp);
                 while (it.hasNext()) {
                     final Task taskObj = it.next();
-                    final Task onlyId = new Task();
-                    onlyId.setObjectID(taskObj.getObjectID());
-                    taskList.add(onlyId);
+                    taskObj.setMarker(Marker.ID_ONLY);
+                    taskList.add(taskObj);
 
                     lastModified = taskObj.getLastModified();
 

@@ -61,6 +61,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.writer.TaskWriter;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.json.TaskRequestTools;
@@ -152,6 +153,9 @@ public class TaskListResultConverter extends TaskResultConverter {
     private static boolean hasOnlyId(final Task task, final int[] columns) {
         if (!task.containsObjectID()) {
             return false;
+        }
+        if (CommonObject.Marker.ID_ONLY.equals(task.getMarker())) {
+            return true;
         }
         for (final int column : columns) {
             if (DataObject.OBJECT_ID != column && task.contains(column)) {
