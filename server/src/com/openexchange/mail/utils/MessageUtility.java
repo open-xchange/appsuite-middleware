@@ -309,7 +309,7 @@ public final class MessageUtility {
         }
         if (isGB2312(charset)) {
             /*
-             * Special treatment for possible BIG5 encoded stream
+             * Special treatment for possible GB2312 encoded stream
              */
             final byte[] bytes = getBytesFrom(inStream);
             if (bytes.length == 0) {
