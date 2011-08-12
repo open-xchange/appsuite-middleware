@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.calendar.json.osgi;
 
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
@@ -79,7 +80,7 @@ public final class AppointmentJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        registerModule(new AppointmentActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "calendar");
+        registerModule(new AppointmentActionFactory(new ExceptionOnAbsenceServiceLookup(this)), AJAXServlet.MODULE_CALENDAR);
         registerService(ResultConverter.class, new AppointmentResultConverter());
     }
 
