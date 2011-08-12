@@ -72,6 +72,8 @@ import com.openexchange.contacts.ldap.property.Mappings;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactUnificationState;
+import com.openexchange.groupware.contact.helpers.SpecialAlphanumSortContactComparator;
+import com.openexchange.groupware.contact.helpers.UseCountComparator;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
@@ -760,7 +762,20 @@ public class LdapContactInterface implements ContactInterface {
 
     private void sorting(final int orderBy, final Order order, final List<Contact> subList) {
         if (Order.NO_ORDER != order && folderprop.getSorting().equals(Sorting.groupware)) {
-            Collections.sort(subList, new ContactComparator(orderBy, order));
+            final boolean specialSort = !(orderBy > 0 && orderBy != Contact.SPECIAL_SORTING && orderBy != Contact.USE_COUNT_GLOBAL_FIRST && !Order.NO_ORDER.equals(order));
+            if (orderBy == Contact.USE_COUNT_GLOBAL_FIRST) {
+                java.util.Collections.sort(subList, new UseCountComparator(specialSort));
+                if (Order.DESCENDING.equals(order)) {
+                    java.util.Collections.reverse(subList);
+                }
+            } else if (specialSort) {
+                java.util.Collections.sort(subList, new SpecialAlphanumSortContactComparator());
+                if (Order.DESCENDING.equals(order)) {
+                    java.util.Collections.reverse(subList);
+                }
+            } else {
+                Collections.sort(subList, new ContactComparator(orderBy, order));
+            }
         } else {
             // Default sorting
             Collections.sort(subList, new ContactComparator(-1, order));
