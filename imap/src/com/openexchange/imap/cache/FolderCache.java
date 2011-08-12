@@ -311,6 +311,12 @@ public final class FolderCache {
         SessionMailCache.getInstance(session, accountId).get(entry);
         final FolderMap folderMap = entry.getValue();
         if (null != folderMap) {
+            final MailFolder mailFolder = folderMap.get(fullName);
+            final String parentFullname = mailFolder.getParentFullname();
+            folderMap.remove(parentFullname);
+            if (parentFullname.equals(MailFolder.DEFAULT_FOLDER_ID)) {
+                folderMap.remove("");
+            }
             folderMap.remove(fullName);
         }
     }
