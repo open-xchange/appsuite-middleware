@@ -1252,6 +1252,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 }
             }
             FolderCache.removeCachedFolders(session, accountId);
+            ListLsubCache.clearCache(accountId, session);
             /*
              * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
              */
