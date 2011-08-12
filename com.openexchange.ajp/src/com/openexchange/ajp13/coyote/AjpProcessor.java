@@ -941,7 +941,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 /*
                  * Write END-RESPONSE package
                  */
-                finish(null == param || !(param instanceof Boolean) ? true : ((Boolean) param).booleanValue());
+                final Boolean reuseFlag = (param instanceof Boolean) ? ((Boolean) param) : Boolean.TRUE;
+                finish(reuseFlag.booleanValue());
             } catch (final IOException e) {
                 // Set error flag
                 error = true;
