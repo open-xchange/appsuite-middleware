@@ -67,6 +67,7 @@ import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.CommonObject.Marker;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -231,12 +232,8 @@ public final class UpdatesAction extends AbstractAppointmentAction {
                 it = appointmentsql.getDeletedAppointmentsInFolder(folderId, _appointmentFields, requestedTimestamp);
                 while (it.hasNext()) {
                     final Appointment appointmentObj = it.next();
-                    /*
-                     * Add a clone only carrying appointment's identifier
-                     */
-                    final Appointment onlyId = new Appointment();
-                    onlyId.setObjectID(appointmentObj.getObjectID());
-                    appointments.add(onlyId);
+                    appointmentObj.setMarker(Marker.ID_ONLY);
+                    appointments.add(appointmentObj);
 
                     lastModified = appointmentObj.getLastModified();
 
