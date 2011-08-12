@@ -154,6 +154,15 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
         return categories;
     }
 
+    /**
+     * Gets the marker
+     *
+     * @return The marker
+     */
+    public Marker getMarker() {
+        return marker;
+    }
+
     public int getPersonalFolderID() {
         return personal_folder_id;
     }
@@ -182,6 +191,15 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
     public void setCategories(final String categories) {
         this.categories = categories;
         b_categories = true;
+    }
+
+    /**
+     * Sets the marker
+     *
+     * @param marker The marker to set
+     */
+    public void setMarker(final Marker marker) {
+        this.marker = marker;
     }
 
     public void setPersonalFolderID(final int personal_folder_id) {
