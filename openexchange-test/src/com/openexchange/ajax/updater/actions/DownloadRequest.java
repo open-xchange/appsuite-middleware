@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.updater.actions;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.json.JSONException;
 
@@ -62,7 +61,7 @@ import org.json.JSONException;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class DownloadRequest extends AbstractUpdaterRequest<DownloadResponse> {
-    
+
     public DownloadRequest() {
         super("/ajax/updater/installer/installer.exe");
     }

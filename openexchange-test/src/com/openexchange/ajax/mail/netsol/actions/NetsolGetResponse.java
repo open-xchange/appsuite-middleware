@@ -75,9 +75,9 @@ import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 
 /**
  * {@link NetsolGetResponse}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public class NetsolGetResponse extends AbstractAJAXResponse {
 
@@ -92,7 +92,7 @@ public class NetsolGetResponse extends AbstractAJAXResponse {
 
 	/**
 	 * Parses an instance of {@link MailMessage} from response's data
-	 * 
+	 *
 	 * @param timeZone
 	 *            The user time zone
 	 * @return The parsed instance of {@link MailMessage}

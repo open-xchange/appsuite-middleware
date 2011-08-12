@@ -11,7 +11,7 @@ import com.openexchange.test.fixtures.Fixture;
 
 /**
  * {@link ContactFixtureTransformer}
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class ContactFixtureTransformer extends AbstractFixtureTransformer<Contact> {

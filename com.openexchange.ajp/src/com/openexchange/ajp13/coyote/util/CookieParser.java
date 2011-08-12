@@ -83,7 +83,7 @@ public final class CookieParser {
 
     /**
      * Parses specified cookie value.
-     * 
+     *
      * @param headerValue The cookie value
      * @return The parsed cookie(s) from passed header value
      * @throws AJPv13Exception If parsing fails

@@ -85,13 +85,13 @@ public final class GetAction extends AbstractAppointmentAction {
 
         final ServerSession session = req.getSession();
         final AppointmentSQLInterface appointmentsql = getService().createAppointmentSql(session);
-        
+
         try {
             final Appointment appointmentobject = appointmentsql.getObjectById(id, inFolder);
             if(appointmentobject.getPrivateFlag() && session.getUserId() != appointmentobject.getCreatedBy()) {
                 anonymize(appointmentobject);
             }
-            
+
             timestamp = appointmentobject.getLastModified();
 
             return new AJAXRequestResult(appointmentobject, timestamp, "appointment");

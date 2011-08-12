@@ -13,19 +13,19 @@ import junit.framework.TestCase;
 public class TestTaskTest extends TestCase {
 	protected TestTask task;
 	protected TimeZone timezone = TimeZone.getTimeZone("Europe/Berlin");
-	
+
 	protected TestTask getNewTask(){
 		TestTask newTask = new TestTask();
 		newTask.setTimezone(timezone);
 		return newTask;
 	}
-	
+
 	@Override
     @Before public void setUp(){
 		task = new TestTask();
 		task.setTimezone(timezone);
 	}
-	
+
 	@Test public void testCalendarUsedShouldBeLenientWhenOverflowing(){
 		Calendar cal = Calendar.getInstance(timezone);
 		cal.set(Calendar.MONTH, Calendar.JANUARY);
@@ -37,8 +37,8 @@ public class TestTaskTest extends TestCase {
 		assertEquals("Should be the 1st day of the month" , 1 , cal.get(Calendar.DAY_OF_MONTH));
 		assertEquals("Should be February" , Calendar.FEBRUARY , cal.get(Calendar.MONTH));
 	}
-	
-	
+
+
 	@Test public void testCalendarUsedShouldBeLenientWhenUnderrunning(){
 		Calendar cal = Calendar.getInstance(timezone);
 		cal.set(Calendar.MONTH, Calendar.FEBRUARY);
@@ -50,7 +50,7 @@ public class TestTaskTest extends TestCase {
 		assertEquals("Should be the 31st day of the month" , 31 , cal.get(Calendar.DAY_OF_MONTH));
 		assertEquals("Should be January" , Calendar.JANUARY , cal.get(Calendar.MONTH));
 	}
-	
+
 	@Test public void testOXandJavaConventionsShouldBeTheSame(){
 		assertEquals("This will only work if an OX-monday is the same as a Java-monday", Calendar.MONDAY, TestTask.MONDAY);
 	}
@@ -61,14 +61,14 @@ public class TestTaskTest extends TestCase {
 			.startsTheFollowingDay()
 			.everyDay();
 		Date now = new Date();
-		/* this is the difference in milliseconds - note that due to DST, noon of 
-		 * tomorrow might be less (more more) than 12 hours away. Luckily, we're 
+		/* this is the difference in milliseconds - note that due to DST, noon of
+		 * tomorrow might be less (more more) than 12 hours away. Luckily, we're
 		 * testing in the Europe/Berlin timezone for both dates.
 		 **/
-		long dateDiff = task.getStartDate().getTime() - now.getTime(); 
+		long dateDiff = task.getStartDate().getTime() - now.getTime();
 		assertTrue("Should be at least 12 hours difference between now and noon, tomorrow", dateDiff > 12*60*60*1000);
 	}
-	
+
 	@Test public void testShouldNotBreakIfGivenStartDateButNotEndDate(){
 		task.startsAtNoon();
 		assertNull(task.getEndDate());
@@ -91,7 +91,7 @@ public class TestTaskTest extends TestCase {
 		task.checkConsistencyOf(TestTask.DATES);
 		assertTrue( task.getEndDate().compareTo(task.getStartDate()) >= 0);
 	}
-	
+
 	@Test public void testShouldNotBreakWhenToldToOccurTheFollowingDayWhileMissingStartDate(){
 		task
 			.startsTheFollowingDay();
@@ -99,7 +99,7 @@ public class TestTaskTest extends TestCase {
 		Date now = new Date();
 		TaskAsserts.assertFirstDateOccursLaterThanSecond(task.getStartDate(), now);
 	}
-	
+
 	@Test public void testTomorrowAndTheNextDayFromNowShouldBeTheSame(){
 		Date now = new Date();
 		TestTask task1 = getNewTask();
@@ -107,13 +107,13 @@ public class TestTaskTest extends TestCase {
 		task1.setEndDate(now);
 		task1.startsTheFollowingDay();
 		task1.endsTheFollowingDay();
-		
+
 		TestTask task2 = getNewTask();
 		task2.setStartDate(now);
 		task2.setEndDate(now);
 		task2.startsTomorrow();
 		task2.endsTomorrow();
-		
+
 		assertTrue(
 			"Start dates should be equal", TaskAsserts.checkOXDatesAreEqual(
 				task1.getStartDate(), task2.getStartDate()));
@@ -121,7 +121,7 @@ public class TestTaskTest extends TestCase {
 			"End dates should be equal", TaskAsserts.checkOXDatesAreEqual(
 				task1.getEndDate(), task2.getEndDate()));
 	}
-	
+
 	@Test public void testShouldCopyNecessaryInformationForUpdate(){
 		TestTask task1 = getNewTask();
 		task1.setObjectID(666);
@@ -138,7 +138,7 @@ public class TestTaskTest extends TestCase {
 		Calendar tomorrow = Calendar.getInstance(timezone);
 		tomorrow.setTime(now.getTime());
 		tomorrow.set(Calendar.DAY_OF_MONTH, now.get(Calendar.DAY_OF_MONTH) +1); //works because another test assures that overflowing works
-		assertEquals("the shiftByDay-method should produce the same result as adding one to the date of a calendar", tomorrow.getTimeInMillis(), shiftedDate.getTime());		
+		assertEquals("the shiftByDay-method should produce the same result as adding one to the date of a calendar", tomorrow.getTimeInMillis(), shiftedDate.getTime());
 	}
-	
+
 }

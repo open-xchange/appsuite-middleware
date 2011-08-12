@@ -58,7 +58,7 @@ import com.openexchange.conversion.engine.internal.ConversionEngineRegistry;
 
 /**
  * {@link DataSourceTracker} - The service tracker customizer for {@link DataSource}s.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DataSourceTracker implements ServiceTrackerCustomizer<DataSource, DataSource> {
@@ -72,7 +72,7 @@ public final class DataSourceTracker implements ServiceTrackerCustomizer<DataSou
 
     /**
      * Initializes a new {@link DataSourceTracker}
-     * 
+     *
      * @param context The bundle context
      */
     public DataSourceTracker(final BundleContext context) {

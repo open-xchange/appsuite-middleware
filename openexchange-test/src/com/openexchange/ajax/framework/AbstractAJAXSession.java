@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.framework;
 
-import com.openexchange.exception.OXException;
 import junit.framework.TestCase;
 
 import com.openexchange.ajax.framework.AJAXClient.User;

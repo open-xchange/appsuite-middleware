@@ -53,7 +53,7 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 
 /**
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public class InsertResponse extends CommonInsertResponse {

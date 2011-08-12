@@ -49,7 +49,6 @@
 
 package com.openexchange.test.osgi;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
@@ -64,7 +63,7 @@ import com.openexchange.ajax.LoginTest;
 
 /**
  * {@link BundleTestConfigJump} - Test absence of generic config-jump bundle
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class BundleTestConfigJump extends AbstractBundleTest {

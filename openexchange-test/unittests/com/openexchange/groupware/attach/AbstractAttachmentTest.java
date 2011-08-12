@@ -12,7 +12,7 @@ public abstract class AbstractAttachmentTest extends TestCase {
 		  super.setUp();
 		  mode().setUp();
 	}
-	
+
     @Override
     protected void tearDown() throws Exception {
         mode().tearDown();
@@ -27,13 +27,13 @@ public abstract class AbstractAttachmentTest extends TestCase {
 	}
 
 	public abstract Mode getMode();
-	
+
 	public static interface Mode {
 		public void setUp() throws Exception;
         public void tearDown() throws Exception;
 	}
-	
-	
+
+
 	public static class INTEGRATION implements Mode {
 		public void setUp() throws Exception {
 	        Init.startServer();
@@ -42,7 +42,7 @@ public abstract class AbstractAttachmentTest extends TestCase {
             Init.stopServer();
         }
 	}
-	
+
 	public static class ISOLATION implements Mode {
 		public void setUp() throws Exception {
 	    }

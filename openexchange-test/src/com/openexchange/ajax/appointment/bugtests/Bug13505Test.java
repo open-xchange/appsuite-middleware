@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
-import com.openexchange.exception.OXException;
 import java.util.Calendar;
 import java.util.TimeZone;
 import org.json.JSONException;
@@ -129,24 +128,24 @@ public class Bug13505Test extends AbstractAJAXSession {
     @Override
     public void tearDown() throws Exception {
         getClient().execute(new DeleteRequest(appointment.getObjectID(), appointment.getParentFolderID(), appointment.getLastModified()));
-        
+
         super.tearDown();
     }
-    
+
     protected class SpecialUpdateRequest extends UpdateRequest {
 
         public SpecialUpdateRequest(Appointment appointmentObj, TimeZone timeZone) {
             super(appointmentObj, timeZone);
         }
-        
+
         public SpecialUpdateRequest(Appointment appointment, TimeZone timezone, boolean failOnError) {
             super(appointment, timezone, failOnError);
         }
-        
+
         public SpecialUpdateRequest(int originFolder, Appointment appointment, TimeZone timezone, boolean failOnError) {
             super(originFolder, appointment, timezone, failOnError);
         }
-        
+
         @Override
         public JSONObject getBody() throws JSONException {
             JSONObject retval = super.getBody();
@@ -156,6 +155,6 @@ public class Bug13505Test extends AbstractAJAXSession {
             }
             return retval;
         }
-        
+
     }
 }

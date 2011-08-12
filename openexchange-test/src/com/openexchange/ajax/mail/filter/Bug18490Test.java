@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.filter;
 
-import com.openexchange.exception.OXException;
 import java.util.Arrays;
 import java.util.List;
 import com.openexchange.ajax.folder.Create;
@@ -70,9 +69,9 @@ import com.openexchange.groupware.container.FolderObject;
 
 /**
  * {@link Bug18490Test}
- * 
+ *
  * Important: This test should work as long as the mail server is cyrus older than 2.3.11 with mailfilter property com.openexchange.mail.filter.useUTF7FolderEncoding=true
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class Bug18490Test extends AbstractMailFilterTest {
@@ -83,7 +82,7 @@ public class Bug18490Test extends AbstractMailFilterTest {
 
     /**
      * Initializes a new {@link Bug18490Test}.
-     * 
+     *
      * @param name
      */
     public Bug18490Test(final String name) {

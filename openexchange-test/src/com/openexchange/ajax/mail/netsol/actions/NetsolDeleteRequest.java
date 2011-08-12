@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.netsol.actions;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -65,9 +64,9 @@ import com.openexchange.ajax.mail.netsol.FolderAndID;
 
 /**
  * {@link NetsolDeleteRequest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class NetsolDeleteRequest implements AJAXRequest<NetsolDeleteRequest.NetsolDeleteResponse> {
 
@@ -77,7 +76,7 @@ public final class NetsolDeleteRequest implements AJAXRequest<NetsolDeleteReques
 
     /**
      * Initializes a new {@link NetsolDeleteRequest}
-     * 
+     *
      * @param mailPaths
      *            The mail paths of messages to delete
      */
@@ -123,7 +122,7 @@ public final class NetsolDeleteRequest implements AJAXRequest<NetsolDeleteReques
 
         /**
          * Initializes a new {@link DeleteParser}
-         * 
+         *
          * @param failOnError
          *            <code>true</code> if fail on error; otherwise
          *            <code>false</code>
@@ -143,7 +142,7 @@ public final class NetsolDeleteRequest implements AJAXRequest<NetsolDeleteReques
 
         /**
          * Initializes a new {@link NetsolDeleteResponse}
-         * 
+         *
          * @param response
          *            The response
          */

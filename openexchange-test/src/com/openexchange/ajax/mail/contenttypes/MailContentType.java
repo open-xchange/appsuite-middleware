@@ -51,12 +51,12 @@ package com.openexchange.ajax.mail.contenttypes;
 
 /**
  * {@link MailContentType}
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public enum MailContentType {
-    ALTERNATIVE("ALTERNATIVE"), 
-    PLAIN("text/plain"), 
+    ALTERNATIVE("ALTERNATIVE"),
+    PLAIN("text/plain"),
     HTML("text/html");
 
     private String text;

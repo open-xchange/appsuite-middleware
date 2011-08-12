@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.utilitytests;
 
-import com.openexchange.exception.OXException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -65,14 +64,14 @@ import com.openexchange.mail.mime.MIMETypes;
 
 /**
  * {@link MailMessageSerializationTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class MailMessageSerializationTest extends AbstractMailTest {
 
 	/**
-	 * 
+	 *
 	 */
 	public MailMessageSerializationTest() {
 		super();

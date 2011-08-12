@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.actions;
 
-import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -66,7 +65,7 @@ import com.openexchange.webdav.xml.fields.CommonFields;
 
 /**
  * {@link ImportMailRequest} - The request for <code>/ajax/mail?action=import</code>.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class ImportMailRequest extends AbstractMailRequest<ImportMailResponse> {

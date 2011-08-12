@@ -64,18 +64,18 @@ public class MailAccountDeleteRequest implements AJAXRequest<MailAccountDeleteRe
 
     private JSONArray ids = new JSONArray();
     private boolean failOnError;
-    
+
     public MailAccountDeleteRequest(boolean failOnError, int...ids) {
         this.failOnError = failOnError;
         for(int id : ids) {
             this.ids.put(id);
         }
     }
-    
+
     public MailAccountDeleteRequest(int...ids) {
         this(true, ids);
     }
-    
+
     public Object getBody() {
         return ids;
     }

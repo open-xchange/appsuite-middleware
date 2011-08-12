@@ -59,7 +59,7 @@ import com.openexchange.ajax.parser.ContactParser;
 import com.openexchange.groupware.container.Contact;
 
 /**
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public class GetResponse extends AbstractAJAXResponse {

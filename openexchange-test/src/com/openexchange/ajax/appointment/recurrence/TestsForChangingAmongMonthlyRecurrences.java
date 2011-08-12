@@ -102,7 +102,7 @@ public class TestsForChangingAmongMonthlyRecurrences extends ManagedAppointmentT
 
         positiveAssertionOnCreate.check(app, changes, new Expectations(changes));
     }
-    
+
 
     public void testShouldFailChangingFromMonthly1ToMonthly2UsingOnlyAdditionalData() throws Exception {
         Appointment app = generateMonthlyAppointment();
@@ -146,7 +146,7 @@ public class TestsForChangingAmongMonthlyRecurrences extends ManagedAppointmentT
 
         positiveAssertionOnCreateAndUpdate.check(app, changes, expectations);
     }
-    
+
     public void testShouldChangeFromMonthly2ToMonthly1WithNullDuringCreation() throws Exception {
         Appointment app = generateMonthlyAppointment();
 
@@ -160,8 +160,8 @@ public class TestsForChangingAmongMonthlyRecurrences extends ManagedAppointmentT
         expectations.put(Appointment.DAYS, 127);
 
         positiveAssertionOnCreate.check(app, changes, expectations);
-    }    
-    
+    }
+
     public void testShouldChangeFromMonthly2ToMonthly1WithNullWhenUpdating() throws Exception {
         Appointment app = generateMonthlyAppointment();
 

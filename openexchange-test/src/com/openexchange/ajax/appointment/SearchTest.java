@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment;
 
-import com.openexchange.exception.OXException;
 import java.util.Date;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

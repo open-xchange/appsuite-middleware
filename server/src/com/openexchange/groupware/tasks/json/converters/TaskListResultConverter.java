@@ -97,8 +97,8 @@ public class TaskListResultConverter extends TaskResultConverter {
          * Create JSON array
          */
         final JSONArray jsonResponseArray = new JSONArray();
-        
-        final TaskWriter taskwriter = new TaskWriter(getTimeZone());        
+
+        final TaskWriter taskwriter = new TaskWriter(getTimeZone());
         for (final Task task : tasks) {
             try {
                 taskwriter.writeArray(task, columns, jsonResponseArray);
@@ -131,8 +131,8 @@ public class TaskListResultConverter extends TaskResultConverter {
          * Create JSON array
          */
         final JSONArray jsonResponseArray = new JSONArray();
-        
-        final TaskWriter taskwriter = new TaskWriter(getTimeZone());        
+
+        final TaskWriter taskwriter = new TaskWriter(getTimeZone());
         for (final Task task : taskList) {
             try {
                 taskwriter.writeArray(task, columns, jsonResponseArray);
@@ -140,7 +140,7 @@ public class TaskListResultConverter extends TaskResultConverter {
                 throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             }
         }
-        
+
         if (!deletedTasks.isEmpty()) {
             for (final Task task : deletedTasks) {
                 jsonResponseArray.put(task.getObjectID());

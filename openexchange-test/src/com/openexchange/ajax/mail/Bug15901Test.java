@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail;
 
-import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -69,7 +68,7 @@ import com.openexchange.mail.MailListField;
 
 /**
  * {@link Bug15901Test}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class Bug15901Test extends AbstractAJAXSession {

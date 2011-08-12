@@ -48,7 +48,6 @@
  */
 package com.openexchange.tools.update;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.contexts.Context;
@@ -110,7 +109,7 @@ public class ForeignKeyTest extends TestCase {
     public void testDropForeignKey() throws SQLException {
         new ForeignKeyOld("test_child", "parent_id", "test_parent", "id").drop(con);
         List<ForeignKeyOld> foreignKeys = ForeignKeyOld.getForeignKeys(con, "test_child");
-        assertTrue(foreignKeys.isEmpty());       
+        assertTrue(foreignKeys.isEmpty());
     }
 
     public void testCreateForeignKey() throws SQLException {
@@ -135,7 +134,7 @@ public class ForeignKeyTest extends TestCase {
         assertEquals(key, foreignKeys.get(0));
     }
 
-    
+
     public void _sql_update(final String sql) throws Exception {
 		Statement stmt = null;
 		try {

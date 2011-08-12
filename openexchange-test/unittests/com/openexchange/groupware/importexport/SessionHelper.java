@@ -61,11 +61,11 @@ import com.openexchange.test.AjaxInit;
 /**
  * This class gets you a SessionObject, since nearly everything within
  * the OX needs one and it is hard to get one.
- * 
+ *
  * What you need is a proper property file containing the login data.
- * 
- * FIXME: If released, this class might be in need of renaming. 
- * 
+ *
+ * FIXME: If released, this class might be in need of renaming.
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  *
  */
@@ -76,10 +76,10 @@ public class SessionHelper {
 	    int contextId = contextStorage.getContextId(AjaxInit.getAJAXProperty("contextName"));
 	    Context context = contextStorage.getContext(contextId);
 
-	    final UserStorage uStorage = UserStorage.getInstance();		
+	    final UserStorage uStorage = UserStorage.getInstance();
 	    final int userId = uStorage.getUserId(AjaxInit.getAJAXProperty("login"), context);
-	    
+
 	    return SessionObjectWrapper.createSessionObject(userId, contextId, "sessionhelper");
 	}
-	
+
 }

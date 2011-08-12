@@ -49,14 +49,13 @@
 
 package com.openexchange.ajax.contact.action;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public class UpdateParser extends AbstractAJAXParser<UpdateResponse> {
@@ -65,7 +64,7 @@ public class UpdateParser extends AbstractAJAXParser<UpdateResponse> {
      * Remembers if this parser fails out with an error.
      */
     private final boolean failOnError;
-	
+
     /**
      * Default constructor.
      */
@@ -74,7 +73,7 @@ public class UpdateParser extends AbstractAJAXParser<UpdateResponse> {
         this.failOnError = failOnError;
     }
 
-	
+
     /**
      * {@inheritDoc}
      */

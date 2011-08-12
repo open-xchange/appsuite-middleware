@@ -62,14 +62,14 @@ import com.openexchange.webdav.protocol.WebdavResource;
 
 /**
  * {@link CarddavCollection}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class AggregatedCollection extends AbstractCarddavCollection {
 
     /**
      * Initializes a new {@link CarddavCollection}.
-     * 
+     *
      * @param rootCollection
      * @param folder
      * @param factory
@@ -108,7 +108,7 @@ public class AggregatedCollection extends AbstractCarddavCollection {
         }
     }
 
- 
+
     public String getDisplayName() throws WebdavProtocolException {
         return "Contacts";
     }

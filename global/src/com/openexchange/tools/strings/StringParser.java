@@ -59,7 +59,7 @@ public interface StringParser {
 
     /**
      * Parses specified string value to given type.
-     * 
+     *
      * @param s The string value
      * @param t The type to parse to
      * @return The parsed value

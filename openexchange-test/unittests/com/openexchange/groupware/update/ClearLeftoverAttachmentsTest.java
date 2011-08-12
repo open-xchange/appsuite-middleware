@@ -89,7 +89,7 @@ public class ClearLeftoverAttachmentsTest extends UpdateTest {
         createCopy(original);
         createCopy(original);
 
-        
+
     }
 
     private void createCopy(final AttachmentImpl original) throws OXException {
@@ -109,7 +109,7 @@ public class ClearLeftoverAttachmentsTest extends UpdateTest {
     }
 
     private void assertNoLeftoversInDatabase() throws SQLException, OXException {
-        assertNoResults("SELECT 1 FROM prg_attachment JOIN sequence_attachment ON prg_attachment.cid = sequence_attachment.cid WHERE prg_attachment.id > sequence_attachment.id AND prg_attachment.cid = ?",existing_ctx_id);              
+        assertNoResults("SELECT 1 FROM prg_attachment JOIN sequence_attachment ON prg_attachment.cid = sequence_attachment.cid WHERE prg_attachment.id > sequence_attachment.id AND prg_attachment.cid = ?",existing_ctx_id);
     }
 
     private void assertRemovedFiles() throws OXException, OXException {

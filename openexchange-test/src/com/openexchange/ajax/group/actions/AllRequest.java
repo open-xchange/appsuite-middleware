@@ -18,7 +18,7 @@ public class AllRequest extends AbstractGroupRequest<AllResponse>{
 		this.failOnError = failOnError;
 		this.columns = columns;
 	}
-	
+
 	public Object getBody() throws IOException, JSONException {
 		return null;
 	}

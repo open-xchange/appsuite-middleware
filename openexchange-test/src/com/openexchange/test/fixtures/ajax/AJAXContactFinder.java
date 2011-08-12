@@ -68,14 +68,14 @@ public class AJAXContactFinder implements ContactFinder {
 
 	private AJAXClient client;
 	private HashMap<Integer, Contact> globalAddressBook;
-	
+
 	public AJAXContactFinder(AJAXClient client) {
 		this.client = client;
 	}
-	
+
 	private void loadGlobalAddressBook() {
 		AllRequest all = new AllRequest(FolderObject.SYSTEM_LDAP_FOLDER_ID, Contact.ALL_COLUMNS);
-		
+
 		try {
 			CommonAllResponse response = client.execute(all);
 			globalAddressBook = new HashMap<Integer, Contact>();
@@ -99,15 +99,15 @@ public class AJAXContactFinder implements ContactFinder {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public Contact getContact(SimpleCredentials credentials) {
 		return getContact( credentials.getUserId() );
 	}
 
 	public Contact getContact(int userId){
 		if(globalAddressBook == null) {
-			loadGlobalAddressBook(); 
-		}		
+			loadGlobalAddressBook();
+		}
 		return globalAddressBook.get(userId);
 	}
 }

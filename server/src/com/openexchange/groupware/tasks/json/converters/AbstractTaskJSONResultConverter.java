@@ -65,9 +65,9 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public abstract class AbstractTaskJSONResultConverter implements ResultConverter {
-    
+
     protected static final String OUTPUT_FORMAT = "json";
-    
+
     private TimeZone timeZone;
 
 
@@ -80,13 +80,13 @@ public abstract class AbstractTaskJSONResultConverter implements ResultConverter
     public Quality getQuality() {
         return Quality.GOOD;
     }
-    
+
     @Override
     public void convert(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
         timeZone = TimeZoneUtils.getTimeZone(session.getUser().getTimeZone());
-        convertTask(request, result, session, converter);        
+        convertTask(request, result, session, converter);
     }
-    
+
     protected abstract void convertTask(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException;
 
     protected TimeZone getTimeZone() {

@@ -13,7 +13,7 @@ import com.openexchange.groupware.reminder.ReminderObject;
 public class DeleteRequest extends AbstractReminderRequest<CommonDeleteResponse> {
     private ReminderObject reminder;
     private boolean failOnError;
-    
+
     public DeleteRequest(ReminderObject reminder, boolean failOnError) {
         super();
         this.reminder = reminder;
@@ -24,7 +24,7 @@ public class DeleteRequest extends AbstractReminderRequest<CommonDeleteResponse>
         JSONObject json = new JSONObject();
         json.put(CalendarFields.RECURRENCE_POSITION, reminder.getRecurrencePosition());
         json.put(ReminderFields.ID, reminder.getObjectId());
-        
+
         return json;
     }
 

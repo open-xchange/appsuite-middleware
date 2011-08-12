@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.user.actions;
 
-import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -65,7 +64,7 @@ import com.openexchange.ajax.AJAXServlet;
 
 /**
  * {@link ListRequest}
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class ListRequest extends AbstractUserRequest<ListResponse> {
@@ -85,7 +84,7 @@ public class ListRequest extends AbstractUserRequest<ListResponse> {
 
     /**
      * Adds an attribute parameter; e.g prefix="com.custom.tpl",name="address" would be attribute "com.custom.tpl/address".
-     * 
+     *
      * @param prefix The prefix
      * @param name The name
      */

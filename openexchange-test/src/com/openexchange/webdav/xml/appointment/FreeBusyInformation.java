@@ -49,7 +49,6 @@
 
 package com.openexchange.webdav.xml.appointment;
 
-import com.openexchange.exception.OXException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -58,7 +57,7 @@ import com.openexchange.groupware.container.Appointment;
 
 /**
  * {@link FreeBusyInformation}
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 class FreeBusyInformation {

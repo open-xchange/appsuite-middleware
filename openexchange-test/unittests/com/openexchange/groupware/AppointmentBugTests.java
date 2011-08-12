@@ -141,7 +141,7 @@ public class AppointmentBugTests extends TestCase {
     private static Date decrementDate(final Date d) {
         return new Date(d.getTime() - 1);
     }
-    
+
     public static int getUserId() throws Exception {
 
         final String user = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant2", "");
@@ -406,10 +406,10 @@ public class AppointmentBugTests extends TestCase {
         final int userid2 = resolveUser(user2);
         final int fid = getPrivateFolder(userid);
         final int fid2 = getPrivateFolder(userid2);
-        
+
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestIdentifier");
         final SessionObject so2 = SessionObjectWrapper.createSessionObject(userid2, getContext().getContextId(), "myTestIdentifier");
-        
+
         // Clean up appointments
         FolderObject fo = new FolderObject();
         fo.setObjectID(fid);
@@ -421,7 +421,7 @@ public class AppointmentBugTests extends TestCase {
         fo.setModule(FolderObject.CALENDAR);
         fo.setType(FolderObject.PRIVATE);
         new RdbFolderSQLInterface(new ServerSessionAdapter(so2)).clearFolder(fo, new Date());
-        
+
 
         final CalendarDataObject cdao = new CalendarDataObject();
         cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
@@ -1339,7 +1339,7 @@ public class AppointmentBugTests extends TestCase {
         check_week_start = calc.getTimeInMillis();
         calc.setTimeInMillis(check_week_end);
         calc.add(Calendar.WEEK_OF_YEAR, 1);
-        
+
         check_week_end = calc.getTimeInMillis();
 
         final RecurringResultsInterface m4 = new CalendarCollection().calculateRecurring(cdao, check_week_start, check_week_end, 0);
@@ -1359,7 +1359,7 @@ public class AppointmentBugTests extends TestCase {
      Note: The server should not move such an appointment because the current user would be removed
      and the shared folder owner must be added as participant.
      */
-    
+
      /*
       * This test is no longer valid due to bug #12923
       */
@@ -1932,7 +1932,7 @@ public class AppointmentBugTests extends TestCase {
 
         final int fid = getPrivateFolder(userid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
-        
+
         // Clean up appointments
         final FolderObject fo = new FolderObject();
         fo.setObjectID(fid);

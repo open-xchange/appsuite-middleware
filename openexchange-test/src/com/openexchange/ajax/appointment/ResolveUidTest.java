@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment;
 
-import com.openexchange.exception.OXException;
 import java.util.Date;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.groupware.container.Appointment;
@@ -65,7 +64,7 @@ public class ResolveUidTest extends AppointmentTest {
     public ResolveUidTest(String name) {
         super(name);
     }
-    
+
     public void testWithUid() throws Exception {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testSimple");
@@ -77,14 +76,14 @@ public class ResolveUidTest extends AppointmentTest {
         appointmentObj.setUid("1234567890abcdefgh");
         int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
         appointmentObj.setObjectID(objectId);
-        
+
         int loadId = resolveUid(getWebConversation(), PROTOCOL + getHostName(), getSessionId(), "1234567890abcdefgh");
-        
+
         assertEquals("Wrong id", objectId, loadId);
-        
+
         deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
     }
-    
+
     public void testWithoutUid() throws Exception {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testSimple");
@@ -95,16 +94,16 @@ public class ResolveUidTest extends AppointmentTest {
         appointmentObj.setIgnoreConflicts(true);
         int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
         appointmentObj.setObjectID(objectId);
-        
+
         Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
-        
+
         int loadId = resolveUid(getWebConversation(), PROTOCOL + getHostName(), getSessionId(), loadAppointment.getUid());
-        
+
         assertEquals("Wrong id", objectId, loadId);
-        
+
         deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
     }
-    
+
     public void testInsertSameUidTwice() throws Exception {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testSimple");
@@ -115,14 +114,14 @@ public class ResolveUidTest extends AppointmentTest {
         appointmentObj.setIgnoreConflicts(true);
         appointmentObj.setUid("1234567890abcdefgh");
         int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-        
+
         try {
             insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
             fail("Exception expected.");
         } catch (Exception e) {
             // Expected.
         }
-        
+
         deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
     }
 

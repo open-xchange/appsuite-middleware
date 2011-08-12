@@ -61,7 +61,7 @@ import com.openexchange.ajax.mail.contenttypes.MailContentType;
 
 /**
  * {@link ReplyTest}
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class ReplyTest extends AbstractReplyTest {
@@ -76,18 +76,18 @@ public class ReplyTest extends AbstractReplyTest {
             // note: doesn't work the other way around on the dev system, because only the first account is set up correctly.
             client2 = new AJAXClient(User.User2);
             String mail2 = client2.getValues().getSendAddress();
-    
+
             JSONObject mySentMail = createEMail(client2, getSendAddress(), "Reply test", MailContentType.ALTERNATIVE.toString(), MAIL_TEXT_BODY);
             sendMail(client2, mySentMail.toString());
-    
+
             JSONObject myReceivedMail = getFirstMailInFolder(getInboxFolder());
             TestMail myReplyMail = new TestMail(getReplyEMail(new TestMail(myReceivedMail)));
-    
+
             assertTrue("Should contain indicator that this is a reply in the subject line", myReplyMail.getSubject().startsWith("Re:"));
-    
+
             List<String> to = myReplyMail.getTo();
             assertTrue("Sender of original message should become recipient in reply", contains(to, mail2));
-    
+
             List<String> from = myReplyMail.getFrom();
             assertNullOrEmpty("New sender field should be empty, because GUI offers selection there", from);
         } finally {

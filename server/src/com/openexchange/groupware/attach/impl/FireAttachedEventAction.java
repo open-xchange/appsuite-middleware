@@ -89,7 +89,7 @@ public class FireAttachedEventAction extends AttachmentEventAction {
                 final OXException aoe = (OXException) e;
                 throw aoe;
             }
-            
+
             throw AttachmentExceptionCodes.ATTACH_FAILED.create(e);
         }
     }

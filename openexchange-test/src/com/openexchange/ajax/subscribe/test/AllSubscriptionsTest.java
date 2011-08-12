@@ -70,13 +70,13 @@ public class AllSubscriptionsTest extends AbstractSubscriptionTest {
     public AllSubscriptionsTest(String name) {
         super(name);
     }
-    
+
     public void testBasicOXMFAllRequest() throws OXException, IOException, SAXException, JSONException{
         FolderObject folder = createDefaultContactFolder();
         DynamicFormDescription formDescription = generateFormDescription();
         Subscription subscription = generateOXMFSubscription(formDescription);
         subscription.setFolderId(folder.getObjectID());
-        
+
         subMgr.newAction(subscription);
         assertFalse("Precondition: Creation of test file should work", subMgr.getLastResponse().hasError());
         List<String> columns = Arrays.asList("id","folder", "source");
@@ -88,21 +88,21 @@ public class AllSubscriptionsTest extends AbstractSubscriptionTest {
         assertEquals("Should have three elements", 3, elements.length());
         assertEquals("Should return the same ID", subscription.getId(), elements.getInt(0));
         assertEquals("Should return the same folder", subscription.getFolderId(), elements.getString(1));
-        assertEquals("Should return the same source ID", subscription.getSource().getId(), elements.getString(2)); 
+        assertEquals("Should return the same source ID", subscription.getSource().getId(), elements.getString(2));
     }
-    
+
     public void testAllRequestForUser() throws OXException, IOException, SAXException, JSONException {
         FolderObject folder = createDefaultContactFolder();
         DynamicFormDescription formDescription = generateFormDescription();
         Subscription subscription = generateOXMFSubscription(formDescription);
         subscription.setFolderId(folder.getObjectID());
-        
+
         subMgr.newAction(subscription);
         assertFalse("Precondition: Creation of test file should work", subMgr.getLastResponse().hasError());
         List<String> columns = Arrays.asList("id","folder", "source");
         JSONArray all = subMgr.allAction(columns);
         assertFalse("Should be able to handle all request", subMgr.getLastResponse().hasError());
-        
+
         boolean containsSubscription = false;
         checkID : for (int i = 0; i < all.length(); i++) {
             JSONArray actual = all.getJSONArray(i);
@@ -111,7 +111,7 @@ public class AllSubscriptionsTest extends AbstractSubscriptionTest {
                 break checkID;
             }
         }
-        
+
         assertTrue("Subscription is not contained in all request.", containsSubscription);
     }
 

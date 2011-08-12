@@ -73,12 +73,12 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 /**
  * This class tests whether security checks for modularisation work
  * for all Importers.
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  *
  */
 public class Bug8681forICAL extends AbstractICalImportTest {
-	
+
 	//workaround for JUnit 3 runner
 	public static junit.framework.Test suite() {
 		return new JUnit4TestAdapter(Bug8681forICAL.class);
@@ -96,7 +96,7 @@ public class Bug8681forICAL extends AbstractICalImportTest {
 
     @Test public void checkAppointment() throws OXException, UnsupportedEncodingException, SQLException, OXException, OXException {
 		folderId = createTestFolder(FolderObject.CALENDAR, sessObj,ctx, "bug8681 for ical appointments");
-		
+
 		final UserConfigurationStorage original = UserConfigurationStorage.getInstance();
         final OverridingUserConfigurationStorage override = new OverridingUserConfigurationStorage(original) {
             @Override
@@ -108,7 +108,7 @@ public class Bug8681forICAL extends AbstractICalImportTest {
             }
         };
         override.override();
-		
+
 		try {
 			final String ical = //from bug 7732
 				"BEGIN:VCALENDAR\n" +
@@ -143,12 +143,12 @@ public class Bug8681forICAL extends AbstractICalImportTest {
 			override.takeBack();
 			deleteTestFolder(folderId);
 		}
-		
+
 	}
 
     @Test public void checkTask() throws OXException, UnsupportedEncodingException, SQLException, OXException, OXException {
 		folderId = createTestFolder(FolderObject.TASK, sessObj,ctx, "bug8681 for ical tasks");
-		
+
 		final UserConfigurationStorage original = UserConfigurationStorage.getInstance();
         final OverridingUserConfigurationStorage override = new OverridingUserConfigurationStorage(original) {
             @Override
@@ -192,6 +192,6 @@ public class Bug8681forICAL extends AbstractICalImportTest {
 			override.takeBack();
 			deleteTestFolder(folderId);
 		}
-		
+
 	}
 }

@@ -69,12 +69,12 @@ public class UpdatesRequest  extends AbstractGroupRequest<UpdatesResponse>{
     public Object getBody(){
         return null;
     }
-    
+
     public UpdatesRequest(Date since, boolean failOnError){
         this.failOnError = failOnError;
         this.lastModified = since;
     }
-    
+
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
         return Method.GET;
     }
@@ -92,7 +92,7 @@ public class UpdatesRequest  extends AbstractGroupRequest<UpdatesResponse>{
             protected UpdatesResponse createResponse(Response response) {
                 return new UpdatesResponse(response);
             }
-            
+
         };
     }
 

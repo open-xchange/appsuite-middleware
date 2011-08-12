@@ -83,6 +83,6 @@ public final class PublishTestSuite extends TestSuite {
         suite.addTestSuite(OXMFInfostoreTest.class);
         suite.addTestSuite(PublishFolderIconTest.class);
         return suite;
-        
+
     }
 }

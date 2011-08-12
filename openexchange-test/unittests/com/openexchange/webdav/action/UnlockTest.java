@@ -11,28 +11,28 @@ import com.openexchange.webdav.protocol.WebdavLock.Type;
 public class UnlockTest extends ActionTestCase {
 	public void testUnlock() throws Exception {
 		final WebdavPath INDEX_HTML = testCollection.dup().append("index.html");
-		
+
 		final WebdavResource resource = factory.resolveResource(INDEX_HTML);
-		
+
 		final WebdavLock lock = new WebdavLock();
 		lock.setTimeout(WebdavLock.NEVER);
 		lock.setDepth(0);
 		lock.setOwner("me");
 		lock.setScope(Scope.EXCLUSIVE_LITERAL);
 		lock.setType(Type.WRITE_LITERAL);
-		
+
 		resource.lock(lock);
-		
+
 		final MockWebdavRequest req = new MockWebdavRequest(factory,"http://localhost/");
 		final MockWebdavResponse res = new MockWebdavResponse();
-		
+
 		req.setUrl(INDEX_HTML);
 		req.setHeader("Lock-Token","<"+lock.getToken()+">");
-		
+
 		final WebdavAction action = new WebdavUnlockAction();
-		
+
 		action.perform(req,res);
-		
+
 		assertEquals(HttpServletResponse.SC_OK, res.getStatus());
 		assertTrue(resource.getLocks().isEmpty());
 	}

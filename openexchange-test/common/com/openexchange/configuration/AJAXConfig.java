@@ -53,7 +53,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.tools.conf.AbstractConfig;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class AJAXConfig extends AbstractConfig {

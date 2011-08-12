@@ -65,7 +65,7 @@ public abstract class AbstractFixtures<T> implements Fixtures<T> {
     private Class<T> klass = null;
     private final Map<Class, Transformator> transformators = new HashMap<Class, Transformator>();
     private final Map<String, Transformator> attributeTransformators = new HashMap<String, Transformator>();
-    
+
     private final Map<String, List<String>> synonyms = new HashMap<String, List<String>>();
     private List<String> entryNames;
 
@@ -138,7 +138,7 @@ public abstract class AbstractFixtures<T> implements Fixtures<T> {
             return attributeTransformators.get(attribute);
         }
         if(!transformators.containsKey(aClass)) {
-            transformators.put(aClass, new StringConstructorTransformator(aClass));    
+            transformators.put(aClass, new StringConstructorTransformator(aClass));
         }
         return transformators.get(aClass);
     }
@@ -155,7 +155,7 @@ public abstract class AbstractFixtures<T> implements Fixtures<T> {
         for(Method method : klass.getMethods()) {
             for(String acceptableName : methodNames) {
                 if(method.getName().equalsIgnoreCase(acceptableName) && method.getParameterTypes().length == 1) {
-                    return method;    
+                    return method;
                 }
             }
         }

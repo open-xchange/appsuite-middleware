@@ -1624,7 +1624,8 @@ public class ContactSetter implements ContactSwitcher {
         contact.setMarkAsDistributionlist(b(value));
         return true;
     }
-    
+
+    @Override
     public Object numberofimages(Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("NumberOfImages");
@@ -1638,6 +1639,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object lastmodifiedofnewestattachment(Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Anniversary");
@@ -1651,6 +1653,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object usecount(Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UseCount");

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.publish.actions;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.ajax.container.Response;
 
 
@@ -61,7 +60,7 @@ public class UpdatePublicationResponse extends AbstractPublicationResponse {
     protected UpdatePublicationResponse(Response response) {
         super(response);
     }
-    
+
     public boolean wasSuccessful(){
         try {
             return (((Integer)getData()).intValue() == 1);

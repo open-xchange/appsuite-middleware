@@ -89,13 +89,13 @@ public class PublicationFixtureFactory implements FixtureFactory<Publication> {
             if (null == values) {
                 throw new FixtureException("Entry with name " + entryName + " not found");
             }
-            
+
             defaults(values);
-            
+
             final Publication publication = new Publication();
-            
+
             Map<String, Object> config = new HashMap<String, Object>();
-            
+
             if (values.containsKey("target")) {
                 config.put("target", values.get("target"));
                 values.remove("target");
@@ -108,9 +108,9 @@ public class PublicationFixtureFactory implements FixtureFactory<Publication> {
                 config.put("secret", values.get("secret"));
                 values.remove("secret");
             }
-            
+
             publication.setConfiguration(config);
-                        
+
             apply(publication,values);
 
             final Fixture<Publication> fixture = new Fixture<Publication>(publication, values.keySet().toArray(new String[values.size()]), values);

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.filter.parser.action;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -62,7 +61,7 @@ import com.openexchange.ajax.mail.filter.action.Move;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class MoveParserImpl implements ActionParser {
-    
+
     public AbstractAction parseAction(final String name, final JSONObject jsonObject) throws JSONException {
         final String folder = jsonObject.getString("into");
         return new Move(folder);

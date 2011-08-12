@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.folder;
 
-import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import com.openexchange.ajax.folder.actions.API;
@@ -72,7 +71,7 @@ public class Bug16899Test extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link Bug16899Test}.
-     * 
+     *
      * @param name name of the test.
      */
     public Bug16899Test(String name) {
@@ -94,7 +93,7 @@ public class Bug16899Test extends AbstractAJAXSession {
         execute.fillObject(folder);
 
         String inbox = client.getValues().getInboxFolder();
-        
+
         ArrayList<FolderObject> folders = performListRequest(inbox);
         boolean firstMatch = false;
         for (FolderObject f : folders) {
@@ -103,13 +102,13 @@ public class Bug16899Test extends AbstractAJAXSession {
         		break;
         	}
         }
-        
+
         assertTrue("Testfolder not found in inbox.", firstMatch);
         folders = null;
-        
+
         DeleteRequest deleteFolder = new DeleteRequest(API.OX_OLD, folder);
         CommonDeleteResponse deleteResponse = client.execute(deleteFolder);
-        
+
         assertNull("Error during folder deletion", deleteResponse.getException());
 
         folders = performListRequest(inbox);
@@ -121,24 +120,24 @@ public class Bug16899Test extends AbstractAJAXSession {
         		break;
         	}
         }
-        
-        assertFalse("Testfolder was not deleted.", secondMatch);     
+
+        assertFalse("Testfolder was not deleted.", secondMatch);
     }
-    
+
     private ArrayList<FolderObject> performListRequest(String inFolder) throws Exception {
     	ArrayList<FolderObject> folderList = new ArrayList<FolderObject>();
-    	
+
     	ListRequest request = new ListRequest(API.OUTLOOK, inFolder, FolderObject.ALL_COLUMNS, false, false);
         ListResponse response = client.execute(request);
         assertNull("Error during ListRequest.", response.getException());
-        
+
         Iterator<FolderObject> iter = response.getFolder();
 
         while (iter.hasNext()) {
             final FolderObject fo = iter.next();
             folderList.add(fo);
         }
-    	
+
     	return folderList;
     }
 

@@ -55,14 +55,14 @@ import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
  * {@link MailFlagsTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  */
 public final class MailFlagsTest extends MessageStorageTest {
 
     /**
-	 * 
+	 *
 	 */
     public MailFlagsTest() {
         super();
@@ -89,7 +89,7 @@ public final class MailFlagsTest extends MessageStorageTest {
             mailAccess.getMessageStorage().updateMessageFlags("INBOX", mixednonexistingids, MailMessage.FLAG_SEEN, true);
             MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", fetchIds, FIELDS_ID_AND_FLAGS);
             assertTrue("Mail is not marked as \\Seen", fetchedMails[0].isSeen());
-            
+
             mailAccess.getMessageStorage().updateMessageFlags("INBOX", mixednonexistingids, MailMessage.FLAG_ANSWERED, true);
             fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", fetchIds, FIELDS_ID_AND_FLAGS);
             assertTrue("Mail is not marked as \\Answered", fetchedMails[0].isAnswered());
@@ -99,7 +99,7 @@ public final class MailFlagsTest extends MessageStorageTest {
             mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
         }
     }
-    
+
     public void testMailFlagsNotExistingFolder() throws OXException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {

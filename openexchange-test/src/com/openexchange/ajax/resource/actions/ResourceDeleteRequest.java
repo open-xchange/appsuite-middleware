@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.resource.actions;
 
-import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,9 +63,9 @@ import com.openexchange.resource.json.ResourceWriter;
 
 /**
  * {@link ResourceDeleteRequest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class ResourceDeleteRequest extends AbstractResourceRequest<ResourceDeleteResponse> {
 
@@ -78,7 +77,7 @@ public final class ResourceDeleteRequest extends AbstractResourceRequest<Resourc
 
 	/**
 	 * Initializes a new {@link ResourceDeleteRequest}
-	 * 
+	 *
 	 * @param deleteMe
 	 *            The resource to delete
 	 * @param clientLastModified
@@ -104,7 +103,7 @@ public final class ResourceDeleteRequest extends AbstractResourceRequest<Resourc
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
 	 */
 	public Object getBody() throws JSONException {
@@ -113,7 +112,7 @@ public final class ResourceDeleteRequest extends AbstractResourceRequest<Resourc
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
 	 */
 	public Method getMethod() {
@@ -122,7 +121,7 @@ public final class ResourceDeleteRequest extends AbstractResourceRequest<Resourc
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
 	 */
 	public Parameter[] getParameters() {
@@ -134,7 +133,7 @@ public final class ResourceDeleteRequest extends AbstractResourceRequest<Resourc
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
 	 */
 	public ResourceDeleteParser getParser() {

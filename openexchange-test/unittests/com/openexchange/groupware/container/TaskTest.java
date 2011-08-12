@@ -178,11 +178,11 @@ public class TaskTest extends CalendarObjectTest {
             Task.TRIP_METER);
 
     }
-    
+
     @Override
     public void testAttrAccessors() {
         Task object = new Task();
-        
+
         // STATUS
         assertFalse(object.contains(STATUS));
         assertFalse(object.containsStatus());
@@ -308,7 +308,7 @@ public class TaskTest extends CalendarObjectTest {
         assertFalse(object.containsAlarm());
 
 
-        
+
         // PERCENT_COMPLETED
         assertFalse(object.contains(PERCENT_COMPLETED));
         assertFalse(object.containsPercentComplete());
@@ -434,7 +434,7 @@ public class TaskTest extends CalendarObjectTest {
         assertFalse(object.containsActualDuration());
 
     }
-    
+
 
     public Task getTask() {
         Task task = new Task();

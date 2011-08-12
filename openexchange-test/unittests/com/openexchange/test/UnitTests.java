@@ -49,7 +49,6 @@
 
 package com.openexchange.test;
 
-import com.openexchange.exception.OXException;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -76,7 +75,7 @@ public class UnitTests {
         tests.addTestSuite(com.openexchange.groupware.CalendarRecurringTests.class);
         tests.addTestSuite(com.openexchange.groupware.AppointmentBugTests.class);
         tests.addTestSuite(com.openexchange.groupware.notify.AttachedIcalFileTests.class);
-        
+
         tests.addTest(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTestSuite.suite());
         tests.addTestSuite(com.openexchange.groupware.calendar.ConflictHandlerTest.class);
         tests.addTestSuite(com.openexchange.groupware.calendar.CalendarDowngradeUserTest.class);
@@ -158,17 +157,17 @@ public class UnitTests {
         tests.addTestSuite(com.openexchange.groupware.contact.UseCountGlobalFirstComparatorTest.class);
         tests.addTestSuite(com.openexchange.groupware.contact.DefaultContactComparatorTest.class);
         tests.addTestSuite(com.openexchange.groupware.contact.ContactSearchMuliplexerTest.class);
-        
-        
+
+
         tests.addTestSuite(com.openexchange.sessiond.SessiondTest.class);
         tests.addTestSuite(com.openexchange.groupware.infostore.PathResolverTest.class);
         tests.addTestSuite(com.openexchange.webdav.infostore.integration.DropBoxScenarioTest.class);
         tests.addTestSuite(com.openexchange.webdav.infostore.integration.LockExpiryTest.class);
-        
+
         tests.addTestSuite(com.openexchange.l10n.SuperCollatorTest.class);
         tests.addTest(com.openexchange.groupware.importexport.ImportExportStandaloneSuite.suite());
         tests.addTest(com.openexchange.pubsub.TemplateTestSuite.suite());
-        
+
         // Slow Tests
         tests.addTest(com.openexchange.webdav.protocol.ProtocolTestSuite.suite());
         tests.addTest(com.openexchange.webdav.action.ActionTestSuite.suite());

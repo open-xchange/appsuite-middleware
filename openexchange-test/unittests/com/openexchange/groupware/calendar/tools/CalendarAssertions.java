@@ -119,7 +119,7 @@ public class CalendarAssertions {
     private static String stringify(final Set<? extends Participant> unexpected) {
         final StringBuilder bob = new StringBuilder();
         for(final Participant p : unexpected) {
-            bob.append(p.getIdentifier()).append(": ").append(p.getDisplayName()).append(" | ");    
+            bob.append(p.getIdentifier()).append(": ").append(p.getDisplayName()).append(" | ");
         }
         return bob.toString();
     }

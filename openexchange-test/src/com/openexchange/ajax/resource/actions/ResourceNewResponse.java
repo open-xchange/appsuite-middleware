@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.resource.actions;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -59,15 +58,15 @@ import com.openexchange.resource.json.ResourceFields;
 
 /**
  * {@link ResourceNewResponse} - The response corresponding to NEW request
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class ResourceNewResponse extends AbstractAJAXResponse {
 
 	/**
 	 * Initializes a new {@link ResourceNewResponse}
-	 * 
+	 *
 	 * @param response
 	 *            The JSON response container
 	 */
@@ -77,7 +76,7 @@ public final class ResourceNewResponse extends AbstractAJAXResponse {
 
 	/**
 	 * Parses the ID out of this NEW response
-	 * 
+	 *
 	 * @return The ID of the newly created resource
 	 * @throws JSONException
 	 *             If a JSON error occurs

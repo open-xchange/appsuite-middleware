@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.filter.writer.comparison;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -63,20 +62,20 @@ import com.openexchange.ajax.mail.filter.comparison.SizeComparison;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class SizeComparisonWriterImpl implements ComparisonWriter {
-	
+
 	public JSONObject writeComparison(final String name, final AbstractComparison abstractComparison, final JSONObject jsonObj) throws JSONException {
 		final SizeComparison sizeComparison = (SizeComparison)abstractComparison;
-		
+
 		jsonObj.put("comparison", name);
 		jsonObj.put("size", sizeComparison.getSize());
-		
+
 		final int comparator = sizeComparison.getComparator();
 		if (comparator == SizeComparison.HIGHER) {
 			jsonObj.put("comperator", "higher");
 		} else {
 			jsonObj.put("comperator", "lower");
 		}
-		
+
 		return jsonObj;
 	}
 }

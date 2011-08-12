@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.Date;
 import java.util.TimeZone;

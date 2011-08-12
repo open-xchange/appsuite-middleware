@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.task;
 
-import com.openexchange.exception.OXException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -105,7 +104,7 @@ public abstract class AbstractTaskTestForAJAXClient extends AbstractAJAXSession 
      * Does an insert and an update and compares data from both get and all request
      * @param insertTask Task to insert at first
      * @param updateTask Task used to update insertTask - this tasks gets changed to have the correct LAST_MODIFIED, PARENT_FOLDER and OBJECT_ID, otherwise the update wouldn't work at all
-     * @param fieldsThatChange Fields that are expected to change. These are not checked for being equal but for being changed - they are not ignored. The following fields are always ignored: CREATION_DATE, LAST_MODIFIED 
+     * @param fieldsThatChange Fields that are expected to change. These are not checked for being equal but for being changed - they are not ignored. The following fields are always ignored: CREATION_DATE, LAST_MODIFIED
      */
     public void runInsertAndUpdateTest(Task insertTask, Task updateTask, int... fieldsThatChange) {
         Set<Integer> changingFields = new HashSet<Integer>();
@@ -114,10 +113,10 @@ public abstract class AbstractTaskTestForAJAXClient extends AbstractAJAXSession 
         }
         changingFields.add( Integer.valueOf( Task.CREATION_DATE ) );
         changingFields.add( Integer.valueOf( Task.LAST_MODIFIED ) ); //must be different afterwards
-        
+
         TaskTestManager testManager = new TaskTestManager(getClient());
         testManager.insertTaskOnServer(insertTask);
-        
+
         updateTask.setLastModified(insertTask.getLastModified());
         updateTask.setParentFolderID(insertTask.getParentFolderID());
         updateTask.setObjectID(insertTask.getObjectID());
@@ -126,12 +125,12 @@ public abstract class AbstractTaskTestForAJAXClient extends AbstractAJAXSession 
         Task getResult = testManager.getTaskFromServer(insertTask);
         TaskAsserts.assertAllTaskFieldsMatchExcept(insertTask, getResult, changingFields);
         TaskAsserts.assertTaskFieldsDiffer(insertTask, getResult, changingFields);
-        
+
         Task[] allResults = testManager.getAllTasksOnServer(insertTask.getParentFolderID());
         Task allResult = testManager.findTaskByID(insertTask.getObjectID(), allResults);
         TaskAsserts.assertAllTaskFieldsMatchExcept(insertTask, allResult, changingFields);
         TaskAsserts.assertTaskFieldsDiffer(insertTask, getResult, changingFields);
-        
+
         testManager.cleanUp();
     }
 }

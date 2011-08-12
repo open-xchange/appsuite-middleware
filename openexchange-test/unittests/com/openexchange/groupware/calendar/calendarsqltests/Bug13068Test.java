@@ -65,7 +65,7 @@ public class Bug13068Test extends CalendarSqlTest {
         final long oneHour = 3600000;
         final long tomorrow = System.currentTimeMillis() + 24 * 3600000;
         final long yesterday = System.currentTimeMillis() - 24 * 3600000;
-        
+
         CalendarDataObject appointment = appointments.buildBasicAppointment(new Date(tomorrow), new Date(tomorrow + oneHour));
         appointment.setTitle("Bug 13068 Test");
         appointment.setAlarm(5);
@@ -73,19 +73,19 @@ public class Bug13068Test extends CalendarSqlTest {
         appointment.setIgnoreConflicts(true);
         appointments.save(appointment);
         clean.add(appointment);
-        
+
         final ReminderService reminderInterface = new ReminderHandler(ctx);
         SearchIterator<?> iterator = reminderInterface.listReminder(Types.APPOINTMENT, appointment.getObjectID());
-        
+
         assertTrue("Reminder expected", iterator.hasNext());
-        
+
         CalendarDataObject updateAppointment = appointments.createIdentifyingCopy(appointment);
         updateAppointment.setStartDate(new Date(yesterday));
         updateAppointment.setEndDate(new Date(yesterday + oneHour));
         appointments.save(updateAppointment);
-        
+
         iterator = reminderInterface.listReminder(Types.APPOINTMENT, appointment.getObjectID());
-        
+
         assertFalse("No Reminder expected", iterator.hasNext());
     }
 }

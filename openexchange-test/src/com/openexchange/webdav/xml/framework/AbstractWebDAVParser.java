@@ -79,7 +79,7 @@ public abstract class AbstractWebDAVParser<T extends AbstractWebDAVResponse> ext
     }
 
     public void checkResponse(final int status) {
-        assertEquals("Response code is not okay.", 207, status);        
+        assertEquals("Response code is not okay.", 207, status);
     }
 
     public T parse(final HttpMethodBase method) throws JDOMException, IOException, OXException, OXException {

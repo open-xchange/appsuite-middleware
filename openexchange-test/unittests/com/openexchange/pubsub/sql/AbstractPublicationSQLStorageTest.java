@@ -49,7 +49,6 @@
 
 package com.openexchange.pubsub.sql;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
 import static com.openexchange.sql.schema.Tables.publications;
 import java.io.IOException;
@@ -67,7 +66,6 @@ import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.publish.Publication;
-import com.openexchange.publish.PublicationErrorMessage;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.SimPublicationTargetDiscoveryService;
 import com.openexchange.publish.sql.PublicationSQLStorage;
@@ -105,7 +103,7 @@ public class AbstractPublicationSQLStorageTest extends SQLTestCase {
 
     protected PublicationSQLStorage storage;
 
-    
+
     @Override
     protected void loadProperties() throws IOException {
         final ConfigurationService confService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
@@ -151,7 +149,7 @@ public class AbstractPublicationSQLStorageTest extends SQLTestCase {
         Map<String, Object> config1 = new HashMap<String, Object>();
         config1.put("key1.1", 123);
         config1.put("key1.2", "Hello World!");
-        
+
         pub1 = new Publication();
         pub1.setContext(ctx);
         pub1.setEntityId(entityId1);
@@ -159,7 +157,7 @@ public class AbstractPublicationSQLStorageTest extends SQLTestCase {
         pub1.setUserId(userId);
         pub1.setTarget(target1);
         pub1.setConfiguration(config1);
-        
+
         // Second
         FormElement formElementLogin2 = new FormElement();
         formElementLogin2.setName("login2");
@@ -190,7 +188,7 @@ public class AbstractPublicationSQLStorageTest extends SQLTestCase {
         pub2.setModule(module2);
         pub2.setUserId(userId);
         pub2.setTarget(target1);
-        
+
         SimPublicationTargetDiscoveryService discoveryService = new SimPublicationTargetDiscoveryService();
         discoveryService.addTarget(target1);
         discoveryService.addTarget(target1);
@@ -203,15 +201,15 @@ public class AbstractPublicationSQLStorageTest extends SQLTestCase {
             List<Expression> placeholder = new ArrayList<Expression>();
             for (int delId : publicationsToDelete) {
                 placeholder.add(PLACEHOLDER);
-                
+
                 Publication publicationToDelete = new Publication();
                 publicationToDelete.setId(delId);
                 publicationToDelete.setContext(ctx);
                 storage.forgetPublication(publicationToDelete);
             }
-            
+
             DELETE delete = new DELETE().FROM(publications).WHERE(new EQUALS("cid", PLACEHOLDER).AND(new IN("id", new LIST(placeholder))));
-            
+
             Connection writeConnection = getDBProvider().getWriteConnection(ctx);
             List<Integer> values = new ArrayList<Integer>();
             values.add(ctx.getContextId());
@@ -219,11 +217,11 @@ public class AbstractPublicationSQLStorageTest extends SQLTestCase {
             new StatementBuilder().executeStatement(writeConnection, delete, values);
             getDBProvider().releaseWriteConnection(ctx, writeConnection);
         }
-        
+
         super.tearDown();
     }
-    
-    
+
+
     protected void assertEquals(Publication expected, Publication actual) {
         assertEquals(expected.getEntityId(), actual.getEntityId());
         assertEquals(expected.getId(), actual.getId());
@@ -231,7 +229,7 @@ public class AbstractPublicationSQLStorageTest extends SQLTestCase {
         assertEquals(expected.getUserId(), actual.getUserId());
         assertEquals(expected.getTarget(), actual.getTarget());
     }
-    
+
     protected void assertEquals(PublicationTarget expected, PublicationTarget actual) {
         assertEquals(expected.getDisplayName(), actual.getDisplayName());
         assertEquals(expected.getIcon(), actual.getIcon());
@@ -239,7 +237,7 @@ public class AbstractPublicationSQLStorageTest extends SQLTestCase {
         assertEquals(expected.getModule(), actual.getModule());
         assertEquals(expected.getFormDescription(), actual.getFormDescription());
     }
-    
+
     protected void assertEquals(DynamicFormDescription expected, DynamicFormDescription actual) {
         assertEquals("Form Element size does notg match", expected.getFormElements().size(), actual.getFormElements().size());
         for (FormElement formElementExpected : expected.getFormElements()) {
@@ -255,27 +253,27 @@ public class AbstractPublicationSQLStorageTest extends SQLTestCase {
             }
         }
     }
-    
+
     protected void removePublicationsForTarget(String targetId) throws Exception {
         Connection writeConnection = getDBProvider().getWriteConnection(ctx);
-        
+
         DELETE delete = new DELETE().FROM(publications).WHERE(new EQUALS("target_id", PLACEHOLDER));
         List<Object> values = new ArrayList<Object>();
         values.add(targetId);
         new StatementBuilder().executeStatement(writeConnection, delete, values);
-        
+
         getDBProvider().releaseWriteConnection(ctx, writeConnection);
     }
-    
+
     protected void removePublicationsForEntity(String entity, String module) throws Exception {
         Connection writeConnection = getDBProvider().getWriteConnection(ctx);
-        
+
         DELETE delete = new DELETE().FROM(publications).WHERE(new EQUALS("entity", PLACEHOLDER).AND(new EQUALS("module", PLACEHOLDER)));
         List<Object> values = new ArrayList<Object>();
         values.add(entity);
         values.add(module);
         new StatementBuilder().executeStatement(writeConnection, delete, values);
-        
+
         getDBProvider().releaseWriteConnection(ctx, writeConnection);
     }
 }

@@ -83,7 +83,7 @@ public class Bug12380RecoveryParserTest extends TestCase {
             registry.addService(CalendarCollectionService.class, new CalendarCollection());
         }
     }
-    
+
     public void testMultiplexes() throws ConversionError {
         CalendarDataObject appointment = new CalendarDataObject();
         appointment.setTitle("I start on a different date than my series settings suggest");
@@ -92,28 +92,28 @@ public class Bug12380RecoveryParserTest extends TestCase {
         appointment.setRecurrenceType(CalendarDataObject.WEEKLY);
         appointment.setInterval(1);
         appointment.setDays(CalendarDataObject.TUESDAY);
-    
+
         parser.setAppointments(Arrays.asList(appointment));
-    
+
         List<CalendarDataObject> parsed = bugParser.parseAppointments((String)null, null, null, null, null);
-        
+
         assertEquals("Expected appointment to be split into two", 2, parsed.size());
         CalendarDataObject app1 = parsed.get(0);
         CalendarDataObject app2 = parsed.get(1);
-        
+
         assertEquals("Start date was not as expected", appointment.getStartDate(), app1.getStartDate());
         assertEquals("Start date was not as expected", appointment.getStartDate(), app2.getStartDate());
-         
+
         assertEquals("End date was not as expected", appointment.getEndDate(), app1.getEndDate());
         assertEquals("End date was not as expected", appointment.getEndDate(), app2.getEndDate());
- 
+
         assertEquals("Title was not as expected", appointment.getTitle(), app1.getTitle());
         assertEquals("Title was not as expected", appointment.getTitle(), app2.getTitle());
-        
+
         assertTrue("One of app1 and app2 has to be a recurrence, the other one not.", (app1.getRecurrenceType() == CalendarDataObject.NO_RECURRENCE) ^ (app2.getRecurrenceType() == CalendarDataObject.NO_RECURRENCE));
-        
+
     }
-    
+
     public void testDoesntMultiplexWhenSeriesMasterIsOnStart() throws ConversionError {
         CalendarDataObject appointment = new CalendarDataObject();
         appointment.setTitle("I start on a date inside my series parameters");
@@ -122,15 +122,15 @@ public class Bug12380RecoveryParserTest extends TestCase {
         appointment.setRecurrenceType(CalendarDataObject.WEEKLY);
         appointment.setInterval(1);
         appointment.setDays(CalendarDataObject.TUESDAY);
-    
+
         parser.setAppointments(Arrays.asList(appointment));
-    
+
         List<CalendarDataObject> parsed = bugParser.parseAppointments((String)null, null, null, null, null);
-        
+
         assertEquals("Expected appointment to be left as one", 1, parsed.size());
-        
+
     }
-    
+
     public void testDoesntMultiplexWhenSeriesMasterIsOccurrence() throws ConversionError {
         CalendarDataObject appointment = new CalendarDataObject();
         appointment.setTitle("I start on a date inside my series parameters");
@@ -139,11 +139,11 @@ public class Bug12380RecoveryParserTest extends TestCase {
         appointment.setRecurrenceType(CalendarDataObject.WEEKLY);
         appointment.setInterval(1);
         appointment.setDays(CalendarDataObject.TUESDAY);
-    
+
         parser.setAppointments(Arrays.asList(appointment));
-    
+
         List<CalendarDataObject> parsed = bugParser.parseAppointments((String)null, null, null, null, null);
-        
+
         assertEquals("Expected appointment to be left as one", 1, parsed.size());
     }
 }

@@ -65,35 +65,35 @@ public interface FolderNode {
      * @return The underlying FolderObject
      */
     public FolderObject getFolder();
-    
+
     /**
      * @return The parent in the folder hierarchy or null if this node is the root node.
      */
     public FolderNode getParent();
-    
+
     /**
      * @return The subnodes of this FolderNode
      */
     public List<FolderNode> getChildren();
-    
+
     /**
      * Tries to resolve the given path parameters as subfolder names relative to this folder.
      * @param path, a list of folder names to resolve along
      * @return the FolderNode the resolver arrived at, or null if this path is unknown
      */
     public FolderNode resolve(String...path);
-    
+
     /**
      * Utility method that links to #resolve(String[])
      */
     public FolderNode resolve(Collection<String> path);
-    
+
     /**
      * Recurses breadth first through this subtree
      * @param visitor
      */
     public void recurse(FolderNodeVisitor visitor);
-    
+
     public boolean isRoot();
 
 }

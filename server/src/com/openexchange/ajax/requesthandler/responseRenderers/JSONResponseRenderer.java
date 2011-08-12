@@ -51,7 +51,6 @@ package com.openexchange.ajax.requesthandler.responseRenderers;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.fileupload.FileUploadBase;

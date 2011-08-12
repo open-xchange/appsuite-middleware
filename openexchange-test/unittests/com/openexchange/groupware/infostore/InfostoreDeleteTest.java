@@ -20,7 +20,7 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionFactory;
 
 public class InfostoreDeleteTest extends TestCase {
-	
+
 	ServerSession session = null;
 	DBProvider provider = new DBPoolProvider();
 	InfostoreFacade database;
@@ -30,7 +30,7 @@ public class InfostoreDeleteTest extends TestCase {
     @Override
 	public void setUp() throws Exception {
 		Init.startServer();
-		
+
 		final TestConfig config = new TestConfig();
         final String userName = config.getUser();
         final TestContextToolkit tools = new TestContextToolkit();
@@ -41,20 +41,20 @@ public class InfostoreDeleteTest extends TestCase {
 		session = ServerSessionFactory.createServerSession(user, ctx, "Blubb");
 		database = new InfostoreFacadeImpl(provider);
 		database.setTransactional(true);
-		
+
 		final OXFolderAccess oxfa = new OXFolderAccess(ctx);
 		myFolder = oxfa.getDefaultFolder(session.getUserId(), FolderObject.INFOSTORE).getObjectID();
 	}
-	
+
 	@Override
 	public void tearDown() throws Exception {
 		Init.stopServer();
 	}
-	
+
 	public void testDeleteUser() throws Exception {
 		final DocumentMetadata metadata = createMetadata();
 		final DeleteEvent delEvent = new DeleteEvent(this, session.getUserId(), DeleteEvent.TYPE_USER,ContextStorage.getInstance().getContext(session.getContextId()));
-		
+
 		Connection con = null;
 		try {
 			con = provider.getWriteConnection(ContextStorage.getInstance().getContext(session.getContextId()));
@@ -66,9 +66,9 @@ public class InfostoreDeleteTest extends TestCase {
 		}
         final UserStorage userStorage = UserStorage.getInstance();
         final UserConfigurationStorage userConfigStorage = UserConfigurationStorage.getInstance();
-        
+
         assertFalse(database.exists(metadata.getId(), InfostoreFacade.CURRENT_VERSION, ContextStorage.getInstance().getContext(session.getContextId()), userStorage.getUser(session.getUserId(), ctx), userConfigStorage.getUserConfiguration(session.getUserId(),ctx)));
-	
+
 	}
 
 	private DocumentMetadataImpl createMetadata() throws Exception {

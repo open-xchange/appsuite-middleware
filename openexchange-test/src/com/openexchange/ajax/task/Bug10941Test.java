@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.task;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TestTask;
@@ -57,7 +56,7 @@ import com.openexchange.test.TaskTestManager;
 
 /**
  * Test that we can remove start and end date from tasks with an update.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class Bug10941Test extends AbstractAJAXSession {
@@ -83,14 +82,14 @@ public class Bug10941Test extends AbstractAJAXSession {
 
     public void testRemoveStartAndEndDateOnUpdate() {
         TestTask update = new TestTask().relatedTo( task );
-        
+
         update.setStartDate(null);
         update.setEndDate(null);
-        
+
         taskManager.updateTaskOnServer( update );
-        
+
         Task saved = taskManager.getTaskFromServer(update);
-    
+
         assertEquals(null, saved.getStartDate());
         assertEquals(null, saved.getEndDate());
     }

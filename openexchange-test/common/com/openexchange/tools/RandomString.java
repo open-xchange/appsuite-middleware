@@ -71,7 +71,7 @@ public class RandomString {
         }
         return new String(value);
     }
-    
+
     public static String generateLetter(final int maxLength) {
         return generateFixLetter(rand.nextInt(maxLength) + 1);
     }

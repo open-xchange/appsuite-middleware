@@ -69,7 +69,7 @@ public class CreatePublishTablesTest extends UpdateTest {
         execSafe("DROP TABLE sequence_publications");
         super.tearDown();
     }
-    
+
     public void testShouldCreatePublicationsTable() throws OXException {
         executeTask();
         try {
@@ -78,7 +78,7 @@ public class CreatePublishTablesTest extends UpdateTest {
             fail("Expected table publications, but doesn't seem to exist: "+x.toString());
         }
     }
-    
+
     public void testShouldCreateSequenceTable() throws OXException {
         executeTask();
         try {
@@ -87,16 +87,16 @@ public class CreatePublishTablesTest extends UpdateTest {
             fail("Expected table sequence_publications, but doesn't seem to exist: "+x.toString());
         }
     }
-    
+
     public void testShouldCreateEntryInSequenceTableForEveryContext() throws OXException, SQLException {
         executeTask();
         assertResult("SELECT 1 FROM sequence_publications WHERE cid = "+existing_ctx_id);
     }
-    
+
     private void executeTask() throws OXException {
         new CreatePublicationTablesTask().perform(schema, existing_ctx_id);
     }
-    
+
     public void testShouldBeRunnableTwice() throws OXException {
         executeTask();
         executeTask();

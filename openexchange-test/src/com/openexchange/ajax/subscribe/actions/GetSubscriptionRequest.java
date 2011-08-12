@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.subscribe.actions;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
@@ -61,7 +60,7 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 public class GetSubscriptionRequest extends AbstractSubscriptionRequest<GetSubscriptionResponse> {
 
     private int id;
-    
+
     public void setId(int id) {
         this.id = id;
     }
@@ -73,12 +72,12 @@ public class GetSubscriptionRequest extends AbstractSubscriptionRequest<GetSubsc
     public GetSubscriptionRequest() {
         super();
     }
-    
+
     public GetSubscriptionRequest(int id) {
         this();
         setId(id);
     }
-    
+
     public Object getBody() throws JSONException {
         return null;
     }
@@ -88,8 +87,8 @@ public class GetSubscriptionRequest extends AbstractSubscriptionRequest<GetSubsc
     }
 
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
-        return new Parameter[] { 
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET), 
+        return new Parameter[] {
+            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET),
             new Parameter(AJAXServlet.PARAMETER_ID, getId())
         };
     }

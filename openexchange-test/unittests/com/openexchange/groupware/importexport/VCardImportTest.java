@@ -69,7 +69,7 @@ public class VCardImportTest extends AbstractVCardTest {
 	public static junit.framework.Test suite() {
 		return new JUnit4TestAdapter(VCardImportTest.class);
 	}
-	
+
 	@Test public void test6825_tooMuchInformation() throws OXException, NumberFormatException, OXException, UnsupportedEncodingException, OXException, OXException {
 		//setup: building an VCard file with a summary longer than 255 characters.
 		folderId = createTestFolder(FolderObject.CONTACT, sessObj,ctx, "vcard6825Folder");
@@ -87,7 +87,7 @@ public class VCardImportTest extends AbstractVCardTest {
 	    final Contact co = contacts.getObjectById(Integer.parseInt( res.getObjectId()), Integer.parseInt( res.getFolder() ) );
 	    assertEquals("Should have truncated name", expected, co.getSurName());
 	}
-	
+
 	/*
 	 * TELEX is not read.
 	 */
@@ -108,7 +108,7 @@ public class VCardImportTest extends AbstractVCardTest {
 		final Contact co = contacts.getObjectById(Integer.parseInt( res.getObjectId()), Integer.parseInt( res.getFolder() ) );
 		assertEquals("Has telex" , telex , co.getTelephoneTelex());
 	}
-	
+
 	@Test public void testEmpty() throws UnsupportedEncodingException, NumberFormatException, OXException, OXException, OXException {
 		folderId = createTestFolder(FolderObject.CONTACT, sessObj,ctx, "vcard7719Folder");
 		final String vcard = "BEGIN:VCARD\nVERSION:2.1\nN:;;;;\nEND:VCARD\n";

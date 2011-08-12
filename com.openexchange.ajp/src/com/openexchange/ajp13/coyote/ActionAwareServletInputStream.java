@@ -55,7 +55,7 @@ import com.openexchange.ajp13.coyote.util.ByteChunk;
 
 /**
  * {@link ActionAwareServletInputStream}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ActionAwareServletInputStream extends ServletInputStream {
@@ -90,7 +90,7 @@ public final class ActionAwareServletInputStream extends ServletInputStream {
 
     /**
      * Dump specified bytes into buffer.
-     * 
+     *
      * @param bytes The bytes
      */
     public void dumpToBuffer(final byte[] bytes) {
@@ -140,7 +140,7 @@ public final class ActionAwareServletInputStream extends ServletInputStream {
 
     /**
      * Fills up to <code>len</code> bytes into specified byte array starting from given <code>off</code>.
-     * 
+     *
      * @param b The byte array
      * @param off The offset
      * @param len The max. number of bytes to fill
@@ -149,9 +149,9 @@ public final class ActionAwareServletInputStream extends ServletInputStream {
      */
     private int read0(final byte[] b, final int off, final int len) throws IOException {
         /*-
-         * 
+         *
          * ----- /!\ Don't return zero, because sun.nio.cs.StreamDecoder doesn't like that /!\ ------
-         * 
+         *
          */
         final int bLength = byteChunk.getLength();
         if (bLength >= len) {

@@ -49,7 +49,6 @@
 
 package com.openexchange.test.osgi;
 
-import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -72,7 +71,7 @@ import com.openexchange.tools.URLParameter;
 
 /**
  * {@link BundleTestEventAdmin} - Test absence of event admin bundle
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class BundleTestEventAdmin extends AbstractBundleTest {

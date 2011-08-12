@@ -17,43 +17,43 @@ public class MaxUploadSizeActionTest extends ActionTestCase {
 		mockAction = new MockAction();
         INDEX_HTML_URL = testCollection.dup().append("index_new.html");
     }
-	
+
 	public void testPassThru() throws OXException{
 		final MockWebdavRequest req = new MockWebdavRequest(factory,"http://localhost/");
 		final MockWebdavResponse res = new MockWebdavResponse();
-		
+
 		req.setUrl(INDEX_HTML_URL);
 		req.setHeader("content-length", "9");
-		
+
 		final WebdavMaxUploadSizeAction action = new TestMaxUploadSizeAction();
 		action.setNext(mockAction);
-		
+
 		action.perform(req,res);
-		
+
 		assertTrue(mockAction.wasActivated());
 	}
-	
+
 	public void testDeny() throws OXException{
 		final MockWebdavRequest req = new MockWebdavRequest(factory,"http://localhost/");
 		final MockWebdavResponse res = new MockWebdavResponse();
-		
+
 		req.setUrl(INDEX_HTML_URL);
 		req.setHeader("content-length", "11");
-		
+
 		final WebdavMaxUploadSizeAction action = new TestMaxUploadSizeAction();
 		action.setNext(mockAction);
-		
+
 		try {
 			action.perform(req,res);
 		} catch (final WebdavProtocolException x) {
 			assertEquals(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, x.getStatus());
 		}
-			
-		
+
+
 		assertFalse(mockAction.wasActivated());
 	}
-	
-	
+
+
 	public static final class TestMaxUploadSizeAction extends WebdavMaxUploadSizeAction {
 		@Override
 		public boolean fits(final WebdavRequest req) {

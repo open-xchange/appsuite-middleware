@@ -56,20 +56,19 @@ import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.resource.actions.ResourceGetRequest;
 import com.openexchange.ajax.resource.actions.ResourceUpdateRequest;
-import com.openexchange.ajax.resource.actions.ResourceUpdateResponse;
 import com.openexchange.resource.Resource;
 
 /**
  * {@link ResourceUpdateAJAXTest} - Tests the UPDATE request on resource servlet
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class ResourceUpdateAJAXTest extends AbstractResourceTest {
 
 	/**
 	 * Initializes a new {@link ResourceUpdateAJAXTest}
-	 * 
+	 *
 	 * @param name
 	 *            The test name
 	 */

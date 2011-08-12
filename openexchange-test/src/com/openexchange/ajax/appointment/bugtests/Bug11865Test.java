@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
-import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.Calendar;
@@ -64,7 +63,6 @@ import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.databaseold.Database;
@@ -95,13 +93,13 @@ public final class Bug11865Test extends AbstractAJAXSession {
 	    super.setUp();
 	    Init.startServer();
 	}
-	
+
 	@Override
 	protected void tearDown() throws Exception {
 	    super.tearDown();
 	    Init.stopServer();
 	}
-	
+
 	/**
 	 * Creates an appointment series and modifies one appointment of the series
 	 * to be an exception.
@@ -183,16 +181,16 @@ public final class Bug11865Test extends AbstractAJAXSession {
                 series.getLastModified()));
 		}
 	}
-	
+
 	public void testDeleteBadData() throws Throwable {
 	    AJAXClient client = null;
         int objectId = 0;
         int folderId = 0;
-        
+
         client = getClient();
         final TimeZone tz = client.getValues().getTimeZone();
         folderId = client.getValues().getPrivateAppointmentFolder();
-        
+
         //Create an objectId, which does not longer exist in the database.
         final Appointment dummyAppointment = new Appointment();
         dummyAppointment.setTitle("bug 11865 dummy appointment");
@@ -206,17 +204,17 @@ public final class Bug11865Test extends AbstractAJAXSession {
         dummyAppointment.setStartDate(calendar.getTime());
         calendar.set(Calendar.HOUR_OF_DAY, 9);
         dummyAppointment.setEndDate(calendar.getTime());
-        
+
         InsertRequest request = new InsertRequest(dummyAppointment, tz);
         CommonInsertResponse response = client.execute(request);
         dummyAppointment.setObjectID(response.getId());
         dummyAppointment.setLastModified(response.getTimestamp());
-        
+
         final int dummyId = dummyAppointment.getObjectID();
-        
+
         DeleteRequest deleteRequest = new DeleteRequest(dummyAppointment.getObjectID(), folderId, dummyAppointment.getLastModified());
         client.execute(deleteRequest);
-        
+
         //Create an Appointment
         final Appointment appointment = new Appointment();
         appointment.setTitle("Bug 11865 Corrupted Data Appointment.");
@@ -230,14 +228,14 @@ public final class Bug11865Test extends AbstractAJAXSession {
         appointment.setStartDate(calendar.getTime());
         calendar.set(Calendar.HOUR_OF_DAY, 9);
         appointment.setEndDate(calendar.getTime());
-        
+
         request = new InsertRequest(appointment, tz);
         response = client.execute(request);
         appointment.setObjectID(response.getId());
         appointment.setLastModified(response.getTimestamp());
-        
+
         objectId = appointment.getObjectID();
-        
+
         //Manipulate Database to invalidate the appointment
         calendar = TimeTools.createCalendar(TimeZone.getTimeZone("GMT"));
         final ContextStorage ctxStorage = ContextStorage.getInstance();
@@ -252,7 +250,7 @@ public final class Bug11865Test extends AbstractAJAXSession {
         pstmt.execute();
         pstmt.close();
         Database.back(contextId, true, writeCon);
-        
+
         //Try to delete the appointment
         deleteRequest = new DeleteRequest(appointment.getObjectID(), folderId, appointment.getLastModified());
         try {
@@ -260,7 +258,7 @@ public final class Bug11865Test extends AbstractAJAXSession {
         } catch (final Exception e) {
             fail("Exception during deletion of corrupted appointment.");
         }
-        
+
         //Check if appointment still exists
         final GetRequest getRequest = new GetRequest(folderId, appointment.getObjectID(), false);
         // No call with failOnError=true
@@ -269,5 +267,5 @@ public final class Bug11865Test extends AbstractAJAXSession {
         assertTrue(r.hasError());
         assertTrue(r.getErrorMessage().contains("Object not found"));
 	}
-	
+
 }

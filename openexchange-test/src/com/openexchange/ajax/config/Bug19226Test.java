@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.config;
 
-import com.openexchange.exception.OXException;
 import java.util.Arrays;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.GetResponse;
@@ -64,7 +63,7 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class Bug19226Test extends AbstractAJAXSession {
-    
+
     AJAXClient client;
 
     /**
@@ -74,28 +73,28 @@ public class Bug19226Test extends AbstractAJAXSession {
     public Bug19226Test(String name) {
         super(name);
     }
-    
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
     }
-    
+
     public void testOXUpdaterConfig() throws Exception {
         GetRequest getAvailableModulesReq = new GetRequest(Tree.AvailableModules);
         GetResponse getAvailableModulesResp = client.execute(getAvailableModulesReq);
         String availableModulesStr = Arrays.toString(getAvailableModulesResp.getArray());
-        
+
         assertTrue("com.openexchange.oxupdater was not found in available modules.", availableModulesStr.contains("com.openexchange.oxupdater"));
-        
+
         GetRequest getNodesReq = new GetRequest(Tree.OXUpdater);
         GetResponse getNodesResp = client.execute(getNodesReq);
         String nodesStr = getNodesResp.getData().toString();
-        
+
         assertTrue("Node module was not found.", nodesStr.contains("module"));
         assertTrue("Node active was not found", nodesStr.contains("active"));
     }
-    
+
     @Override
     public void tearDown() throws Exception {
         super.tearDown();

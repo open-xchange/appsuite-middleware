@@ -55,7 +55,7 @@ package com.openexchange.ajax.mail.filter.action;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public abstract class AbstractAction {
-	
+
 	protected String name;
 
 	public String getName() {

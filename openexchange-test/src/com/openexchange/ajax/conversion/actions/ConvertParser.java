@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.conversion.actions;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 
 import com.openexchange.ajax.container.Response;
@@ -57,15 +56,15 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
  * {@link ConvertParser}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class ConvertParser extends AbstractAJAXParser<ConvertResponse> {
 
 	/**
 	 * Initializes a new {@link ConvertParser}
-	 * 
+	 *
 	 * @param failOnError
 	 */
 	public ConvertParser(final boolean failOnError) {

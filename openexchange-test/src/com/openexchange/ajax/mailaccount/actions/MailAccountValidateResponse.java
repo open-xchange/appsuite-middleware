@@ -55,7 +55,7 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
  * {@link MailAccountValidateResponse}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MailAccountValidateResponse extends AbstractAJAXResponse {
@@ -66,7 +66,7 @@ public class MailAccountValidateResponse extends AbstractAJAXResponse {
 
     /**
      * Initializes a new {@link MailAccountValidateResponse}.
-     * 
+     *
      * @param response
      */
     protected MailAccountValidateResponse(final Response response) {
@@ -74,7 +74,7 @@ public class MailAccountValidateResponse extends AbstractAJAXResponse {
     }
 
     // public void fillObject(final MailAccountDescription mailAccountDescription) {
-    // 
+    //
     // mailAccountDescription.setId(id);
     // }
 

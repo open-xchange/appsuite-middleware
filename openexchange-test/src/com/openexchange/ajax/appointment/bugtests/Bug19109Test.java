@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.Date;
 import com.openexchange.ajax.appointment.action.AllRequest;
@@ -63,7 +62,7 @@ import com.openexchange.groupware.container.Appointment;
 
 /**
  * {@link Bug19109Test}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Bug19109Test extends AbstractAJAXSession {
@@ -113,7 +112,7 @@ public class Bug19109Test extends AbstractAJAXSession {
         AllRequest allRequest = new AllRequest(getClient().getValues().getPrivateAppointmentFolder(), new int[] {Appointment.OBJECT_ID}, new Date(1313452800000L), new Date(1313539200000L), getClient().getValues().getTimeZone());
         CommonAllResponse allResponse = getClient().execute(allRequest);
         assertTrue("Expected a result.", allResponse.getArray().length > 0);
-        
+
         boolean found = false;
         Object[][] objects = allResponse.getArray();
         for (Object[] object : objects) {
@@ -121,7 +120,7 @@ public class Bug19109Test extends AbstractAJAXSession {
                 found = true;
             }
         }
-        
+
         assertTrue("Expected Appointment Occurrence", found);
     }
 

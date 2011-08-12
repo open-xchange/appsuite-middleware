@@ -28,14 +28,14 @@ public class AdvancedSearchTest extends AbstractManagedContactTest{
 		super.setUp();
 		Contact alice = ContactTestManager.generateContact(folderID);
 		alice.setGivenName("Alice");
-		
+
 		Contact bob = ContactTestManager.generateContact(folderID);
 		bob.setGivenName("Bob");
 		bob.setSurName(BOB_LASTNAME);
-		
+
 		Contact charlie = ContactTestManager.generateContact(folderID);
 		charlie.setGivenName("Charlie");
-		
+
 		manager.newAction(alice,bob,charlie);
 	}
 
@@ -44,78 +44,78 @@ public class AdvancedSearchTest extends AbstractManagedContactTest{
 	public void tearDown() throws Exception {
 		super.tearDown();
 	}
-	
+
 
 	public void testSearchWithEquals() throws Exception {
 		ContactField field = ContactField.GIVEN_NAME;
-		ContactField folderField = ContactField.FOLDER_ID; 
+		ContactField folderField = ContactField.FOLDER_ID;
 		JSONObject filter = new JSONObject(
 			"{'filter' : [ 'and', " +
 				"['=' , {'field' : '"+field.getAjaxName()+"'} , 'Bob'], " +
 				"['=' , {'field' : '"+folderField.getAjaxName()+"'}, "+folderID+"]" +
 			"]})");
-		
+
 		AdvancedSearchRequest request = new AdvancedSearchRequest(filter, new int[]{Contact.GIVEN_NAME}, -1, null);
 		CommonSearchResponse response = getClient().execute(request);
 		assertFalse("Should work", response.hasError());
-		
+
 		Object[][] resultTable = response.getArray();
 		assertNotNull("Should find a result", resultTable);
 		assertEquals("Should find one result", 1, resultTable.length);
-		
+
 		int columnPos = response.getColumnPos(field.getNumber());
 		String actual = (String) resultTable[0][columnPos];
-		
+
 		assertEquals("Bob", actual);
 	}
 
-	
+
 	public void testSearchWithEqualsInAllFolders() throws Exception {
 		ContactField field = ContactField.SUR_NAME;
 		JSONObject filter = new JSONObject(
 			"{'filter' : [ '=' , {'field' : '"+field.getAjaxName()+"'} , '"+BOB_LASTNAME+"']}");
-		
+
 		AdvancedSearchRequest request = new AdvancedSearchRequest(filter, Contact.ALL_COLUMNS, -1, null);
 		CommonSearchResponse response = getClient().execute(request);
 		assertFalse("Should work", response.hasError());
-		
+
 		Object[][] resultTable = response.getArray();
 		assertNotNull("Should find a result", resultTable);
 		assertEquals("Should find one result", 1, resultTable.length);
-		
+
 		int columnPos = response.getColumnPos(field.getNumber());
 		String actual = (String) resultTable[0][columnPos];
-		
+
 		assertEquals(BOB_LASTNAME, actual);
 	}
-	
+
 	/**
 	 * Tests a SQL injection using our good friend Bobby, from 'Exploits of a mom', http://xkcd.com/327/
 	 */
 	public void testLittleBobbyTables() throws Exception {
 		ContactField field = ContactField.SUR_NAME;
 		String bobby = "Robert\\\"); DROP TABLE prg_contacts; --";
-		
+
 		JSONObject filter = new JSONObject(
 					"{'filter' : [ 'or', " +
 						"['=' , {'field' : '"+field.getAjaxName()+"'} , '"+BOB_LASTNAME+"'], " +
 						"['=' , {'field' : '"+field.getAjaxName()+"'}, '"+bobby+"']" +
 					"]})");
-		
+
 		AdvancedSearchRequest request = new AdvancedSearchRequest(filter, Contact.ALL_COLUMNS, -1, null);
 		CommonSearchResponse response = getClient().execute(request);
 		assertFalse("Should work", response.hasError());
-		
+
 		Object[][] resultTable = response.getArray();
 		assertNotNull("Should find a result", resultTable);
 		assertEquals("Should find one result", 1, resultTable.length);
-		
+
 		int columnPos = response.getColumnPos(field.getNumber());
 		String actual = (String) resultTable[0][columnPos];
-		
+
 		assertEquals(BOB_LASTNAME, actual);
 	}
-	
+
 	public void testSearchAlphabetRange() throws Exception{
 		ContactField field = ContactField.GIVEN_NAME;
 		JSONObject filter = new JSONObject(
@@ -124,20 +124,20 @@ public class AdvancedSearchTest extends AbstractManagedContactTest{
 					"['<' , {'field' : '"+field.getAjaxName()+"'}, 'C'], " +
 					"['=' , {'field' : '"+ContactField.FOLDER_ID.getAjaxName()+"'}, "+folderID+"]" +
 				"]})");
-		
+
 		AdvancedSearchRequest request = new AdvancedSearchRequest(filter, new int[]{field.getNumber()}, -1, null);
 		CommonSearchResponse response = getClient().execute(request);
 		assertFalse("Should work", response.hasError());
-		
+
 		Object[][] resultTable = response.getArray();
 		assertNotNull("Should find at least a result", resultTable);
 		assertEquals("Should find two results", 2, resultTable.length);
-		
+
 		int columnPos = response.getColumnPos(field.getNumber());
 		Set<String> names = new HashSet<String>();
 		names.add( (String) resultTable[0][columnPos] );
 		names.add( (String) resultTable[1][columnPos] );
-		
+
 		assertTrue(names.contains("Bob"));
 		assertTrue(names.contains("Alice"));
 	}
@@ -158,40 +158,40 @@ public class AdvancedSearchTest extends AbstractManagedContactTest{
 					"['NOT' , ['=' , {'field' : '"+field.getAjaxName()+"'}, 'Geena']], " +
 					"['=' , {'field' : '"+ContactField.FOLDER_ID.getAjaxName()+"'}, "+folderID+"]" +
 				"]})");
-		
+
 		AdvancedSearchRequest request = new AdvancedSearchRequest(filter, new int[]{field.getNumber()}, field.getNumber(), "asc");
 		CommonSearchResponse response = getClient().execute(request);
 		assertFalse("Should work", response.hasError());
-		
+
 		Object[][] resultTable = response.getArray();
 		assertNotNull("Should find at least a result", resultTable);
 		assertEquals("Should find four results", 4, resultTable.length);
-		
+
 		int columnPos = response.getColumnPos(field.getNumber());
-		
+
 		assertTrue("Result should appear in the right order", resultTable[0][columnPos].equals("Elvis"));
 		assertTrue("Result should appear in the right order", resultTable[1][columnPos].equals("Feelvis"));
 		assertTrue("Result should appear in the right order", resultTable[2][columnPos].equals("Gelvis"));
 		assertTrue("Result should appear in the right order", resultTable[3][columnPos].equals("Hellvis"));
-		
+
 		/* invert it */
 		request = new AdvancedSearchRequest(filter, new int[]{field.getNumber()}, field.getNumber(), "desc");
 		response = getClient().execute(request);
 		assertFalse("Should work", response.hasError());
-		
+
 		resultTable = response.getArray();
 		assertNotNull("Should find at least a result", resultTable);
 		assertEquals("Should find four results", 4, resultTable.length);
-		
+
 		columnPos = response.getColumnPos(field.getNumber());
-		
+
 		assertTrue("Result should appear in the right order", resultTable[0][columnPos].equals("Hellvis"));
 		assertTrue("Result should appear in the right order", resultTable[1][columnPos].equals("Gelvis"));
 		assertTrue("Result should appear in the right order", resultTable[2][columnPos].equals("Feelvis"));
 		assertTrue("Result should appear in the right order", resultTable[3][columnPos].equals("Elvis"));
 
 	}
-	
+
 	public void testSearchOrderingWithKana() throws Exception{
 		manager.newAction(
 				ContactTestManager.generateContact(folderID, "\u30ef"),
@@ -214,9 +214,9 @@ public class AdvancedSearchTest extends AbstractManagedContactTest{
 				ContactTestManager.generateContact(folderID, "\u30a3"),
 				ContactTestManager.generateContact(folderID, "\u30a2")
 		);
-		
+
 		String[] letters = new String[]{"\u30a2", "\u30ab", "\u30b5", "\u30bf", "\u30ca", "\u30cf", "\u30de", "\u30e4", "\u30e9", "\u30ef"};
-		
+
 		ContactField field = ContactField.SUR_NAME;
 		LinkedList<JSONObject> filters = new LinkedList<JSONObject>();
 		for(int i = 0; i < letters.length -1; i++)
@@ -226,24 +226,24 @@ public class AdvancedSearchTest extends AbstractManagedContactTest{
 					"['<' , {'field' : '"+field.getAjaxName()+"'}, '"+letters[i+1]+"'], " +
 					"['=' , {'field' : '"+ContactField.FOLDER_ID.getAjaxName()+"'}, "+folderID+"]" +
 				"]})"));
-		
+
 		int currentPosition = 0;
 		for(JSONObject filter: filters){
 			String ident = "Step #"+currentPosition + " from "+letters[currentPosition]+" to "+letters[currentPosition+1]+": ";
 			AdvancedSearchRequest request = new AdvancedSearchRequest(filter, new int[]{field.getNumber()}, field.getNumber(), "asc");
 			CommonSearchResponse response = getClient().execute(request);
 			assertFalse(ident+"Should work", response.hasError());
-			
+
 			Object[][] resultTable = response.getArray();
 			assertNotNull(ident+"Should find at least a result", resultTable);
 			assertEquals(ident+"Should find two results", 2, resultTable.length);
-			
+
 			int columnPos = response.getColumnPos(field.getNumber());
 			HashSet<String> names = new HashSet<String>();
 			names.add((String) resultTable[0][columnPos]);
 			names.add((String) resultTable[1][columnPos]);
 			assertTrue(ident+"Should be contained", names.contains(letters[currentPosition]));
-			
+
 			currentPosition++;
 		}
 	}
@@ -253,8 +253,8 @@ public class AdvancedSearchTest extends AbstractManagedContactTest{
 		for(String graphem: sinograph){
 			manager.newAction(ContactTestManager.generateContact(folderID, graphem));
 		}
-		
-		
+
+
 		ContactField field = ContactField.SUR_NAME;
 		LinkedList<JSONObject> filters = new LinkedList<JSONObject>();
 		for(int i = 0; i < sinograph.size() - 1; i++)
@@ -264,26 +264,26 @@ public class AdvancedSearchTest extends AbstractManagedContactTest{
 					"['<' , {'field' : '"+field.getAjaxName()+"'}, '"+sinograph.get(i+1)+"'], " +
 					"['=' , {'field' : '"+ContactField.FOLDER_ID.getAjaxName()+"'}, "+folderID+"]" +
 				"]})"));
-		
+
 		int currentPosition = 0;
 		for(JSONObject filter: filters){
 			String ident = "Step #"+currentPosition + " from "+sinograph.get(currentPosition)+" to "+sinograph.get(currentPosition+1)+": ";
 			AdvancedSearchRequest request = new AdvancedSearchRequest(filter, new int[]{field.getNumber()}, field.getNumber(), "asc", "gb2312");
 			CommonSearchResponse response = getClient().execute(request);
 			assertFalse(ident+"Should work", response.hasError());
-			
+
 			Object[][] resultTable = response.getArray();
 			assertNotNull(ident+"Should find at least a result", resultTable);
 			assertEquals(ident+"Should find one result", 1, resultTable.length);
-			
+
 			int columnPos = response.getColumnPos(field.getNumber());
 			String actualName = (String) resultTable[0][columnPos];
 			assertEquals(ident+"Should be contained", sinograph.get(currentPosition), actualName);
-			
+
 			currentPosition++;
 		}
 	}
-	
+
 	public void testOrderByWithCollation() throws Exception{
 		ContactField field = ContactField.SUR_NAME;
 
@@ -293,17 +293,17 @@ public class AdvancedSearchTest extends AbstractManagedContactTest{
 		for(String graphem: randomized){
 			manager.newAction(ContactTestManager.generateContact(folderID, graphem));
 		}
-		
+
 		JSONObject filter = new JSONObject("{'filter' : [ '>=' , {'field':'"+field.getAjaxName()+"'}, '\u963f' ]})");
-		
+
 		AdvancedSearchRequest request = new AdvancedSearchRequest(filter, new int[]{field.getNumber()}, field.getNumber(), "asc", "gb2312");
 		CommonSearchResponse response = getClient().execute(request);
 		assertFalse("Should work", response.hasError());
-		
+
 		Object[][] resultTable = response.getArray();
 		assertNotNull("Should find at least a result", resultTable);
 		int columnPos = response.getColumnPos(field.getNumber());
-		
+
 		LinkedList<String> actuals = new LinkedList<String>();
 		for(int i = 0; i < resultTable.length; i++){
 			String actualName = (String) resultTable[i][columnPos];
@@ -313,7 +313,7 @@ public class AdvancedSearchTest extends AbstractManagedContactTest{
 		for(int i = 0; i < actuals.size(); i++)
 			assertEquals("Graphen #"+i+" is wrong", sinograph.get(i), actuals.get(i));
 	}
-	
+
 	public void testNameThatAppearedTwice() throws Exception{
 		String name = "\u7802\u7cd6";
 		manager.newAction(ContactTestManager.generateContact(folderID, name));
@@ -329,14 +329,14 @@ public class AdvancedSearchTest extends AbstractManagedContactTest{
 					"['<' , {'field' : '"+field.getAjaxName()+"'}, '"+sinograph.get(i+1)+"'], " +
 					"['=' , {'field' : '"+ContactField.FOLDER_ID.getAjaxName()+"'}, "+folderID+"]" +
 				"]})"));
-		
+
 		int occurences = 0;
 		for(JSONObject filter: filters){
 			AdvancedSearchRequest request = new AdvancedSearchRequest(filter, new int[]{field.getNumber()}, field.getNumber(), "asc", "gb2312");
 			CommonSearchResponse response = getClient().execute(request);
 			Object[][] resultTable = response.getArray();
 			occurences += resultTable.length;
-		}		
+		}
 		assertEquals("Should only appear once", 1, occurences);
 	}
 
@@ -345,5 +345,5 @@ public class AdvancedSearchTest extends AbstractManagedContactTest{
 	 * sql inject
 	*/
 
-	
+
 }

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.ArrayList;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
@@ -130,11 +129,11 @@ public class Bug12509Test extends AbstractAJAXSession {
         appointment.setOccurrence(5);
         appointment.setParticipants(ParticipantTools.createParticipants(clientA.getValues().getUserId(), clientB.getValues().getUserId()));
         appointment.setIgnoreConflicts(true);
-        
+
         InsertRequest appointmentInsertRequest = new InsertRequest(appointment, clientA.getValues().getTimeZone());
         AppointmentInsertResponse appointmentInsertResponse = clientA.execute(appointmentInsertRequest);
         appointmentInsertResponse.fillAppointment(appointment);
-        
+
         exception = new Appointment();
         exception.setObjectID(appointment.getObjectID());
         exception.setParentFolderID(clientB.getValues().getPrivateAppointmentFolder());
@@ -153,7 +152,7 @@ public class Bug12509Test extends AbstractAJAXSession {
         exception.setLastModified(appointmentUpdateResponse.getTimestamp());
         exception.setObjectID(appointmentUpdateResponse.getId());
         appointment.setLastModified(appointmentUpdateResponse.getTimestamp());
-        
+
         GetRequest appointmentGetRequest = new GetRequest(folder.getObjectID(), exception.getObjectID(), true);
         clientA.execute(appointmentGetRequest);
     }

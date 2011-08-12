@@ -48,7 +48,6 @@
  */
 package com.openexchange.data.conversion.ical;
 
-import com.openexchange.exception.OXException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
@@ -202,7 +201,7 @@ public class ICALFixtures {
         }
 
         endStandardAppFields(bob);
-        return bob.toString();        
+        return bob.toString();
     }
 
     public String veventWithResources(final Date start, final Date end, final String[] resources) {
@@ -493,7 +492,7 @@ public class ICALFixtures {
             bob.append(name).append(":").append(value).append("\n");
         }
 
-        
+
         endTodo(bob);
         endCalendar(bob);
 
@@ -556,7 +555,7 @@ public class ICALFixtures {
         bob.append("ACTION:DISPLAY\n");
         bob.append("DESCRIPTION:").append(description).append("\n");
         bob.append("END:VALARM\n");
-        
+
         endTodo(bob);
         endCalendar(bob);
 
@@ -575,7 +574,7 @@ public class ICALFixtures {
 
         return bob.toString();
     }
-    
+
     public String vtodoWithDueDateWithoutTZ(final Date due) {
         final StringBuilder bob = new StringBuilder();
         beginCalendar(bob);
@@ -604,7 +603,7 @@ public class ICALFixtures {
 
 
     //Error Cases
-    
+
     public String veventWithEnd(final Date date) {
         return veventWithOneDate("DTEND", date);
     }
@@ -633,7 +632,7 @@ public class ICALFixtures {
 
         beginCalendar(bob);
 
-        
+
         beginEvent(bob);
 
         customTimezoneDTStartAndDTEnd(bob, start, end);

@@ -69,7 +69,7 @@ public class SimContactInterfaceDiscoveryService implements ContactInterfaceDisc
 
     private Map<Integer, ContactInterface> registered = new HashMap<Integer, ContactInterface>();
     private ContactInterface defaultContactInterface;
-    
+
     public ContactInterfaceProvider getContactInterfaceProvider(int folderId, int contextId) throws OXException {
         return new StaticContactInterfaceProvider(newContactInterface(folderId, null));
     }
@@ -85,26 +85,26 @@ public class SimContactInterfaceDiscoveryService implements ContactInterfaceDisc
     public ContactInterface newDefaultContactInterface(Session session) throws OXException {
         return defaultContactInterface;
     }
-    
+
     public void register(ContactInterface contacts, int folderId) {
         this.registered.put(folderId, contacts);
     }
-    
+
     public void setDefaultContactInterface(ContactInterface defaultContactInterface) {
         this.defaultContactInterface = defaultContactInterface;
     }
-    
+
     private static final class StaticContactInterfaceProvider implements ContactInterfaceProvider {
         private ContactInterface contacts;
-        
+
         public StaticContactInterfaceProvider(ContactInterface contacts) {
             this.contacts = contacts;
         }
-        
+
         public ContactInterface newContactInterface(Session session) throws OXException {
             return contacts;
         }
-        
+
     }
 
     public List<ContactInterfaceProviderRegistration> getRegistrations(int contextId) {
@@ -113,7 +113,7 @@ public class SimContactInterfaceDiscoveryService implements ContactInterfaceDisc
         for (Entry<Integer, ContactInterface> entry : entrySet) {
            registrations.add(new ContactInterfaceProviderRegistration(entry.getKey(), new StaticContactInterfaceProvider(entry.getValue())));
         }
-        
+
         return registrations;
     }
 

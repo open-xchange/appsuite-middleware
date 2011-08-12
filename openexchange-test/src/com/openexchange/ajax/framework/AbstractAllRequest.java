@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.framework;
 
-import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.ajax.AJAXServlet;
@@ -141,7 +140,7 @@ public abstract class AbstractAllRequest<T extends AbstractColumnsResponse> impl
 
     /**
      * Sets the leftHandLimit
-     * 
+     *
      * @param leftHandLimit the leftHandLimit to set
      */
     public void setLeftHandLimit(final int leftHandLimit) {
@@ -150,7 +149,7 @@ public abstract class AbstractAllRequest<T extends AbstractColumnsResponse> impl
 
     /**
      * Sets the rightHandLimit
-     * 
+     *
      * @param rightHandLimit the rightHandLimit to set
      */
     public void setRightHandLimit(final int rightHandLimit) {

@@ -57,17 +57,17 @@ import java.util.Arrays;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class Vacation extends AbstractAction {
-	
+
 	public static final String VACATION = "vacation";
-	
+
 	protected int days;
-	
+
 	protected String[] addresses;
-	
+
 	protected String subject;
-	
+
 	protected String text;
-	
+
 	public Vacation(final int days, final String[] addresses) {
 		this(days, addresses, null, null);
 	}
@@ -134,7 +134,7 @@ public class Vacation extends AbstractAction {
 				return false;
 		} else if (!text.equals(other.text))
 			return false;
-		
+
 		if (name == null) {
 			if (other.getName() != null)
 				return false;

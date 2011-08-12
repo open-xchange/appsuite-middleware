@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.importexport;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.Executor;
@@ -57,7 +56,6 @@ import com.openexchange.ajax.importexport.actions.ICalImportRequest;
 import com.openexchange.ajax.importexport.actions.ICalImportResponse;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ConversionWarning.Code;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.importexport.ImportResult;
 
 /**
@@ -88,7 +86,7 @@ public final class Bug9840Test extends AbstractAJAXSession {
         assertEquals(code.getCategory(), exception.getCategory());
     }
 
-    private static final String ICAL = 
+    private static final String ICAL =
         "BEGIN:VCALENDAR\n" +
         "VERSION:2.0\n" +
         "BEGIN:VEVENT\n" +

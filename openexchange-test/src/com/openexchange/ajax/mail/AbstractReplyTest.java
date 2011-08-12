@@ -108,7 +108,7 @@ public abstract class AbstractReplyTest extends AbstractMailTest {
         ReplyResponse response = client.execute(reply);
         return (JSONObject) response.getData();
     }
-    
+
 
     protected JSONObject getReplyAllEMail(TestMail testMail) throws OXException, IOException, SAXException, JSONException {
         ReplyRequest reply = new ReplyAllRequest(testMail.getFolder(), testMail.getId());
@@ -117,7 +117,7 @@ public abstract class AbstractReplyTest extends AbstractMailTest {
         ReplyAllResponse response = (ReplyAllResponse) client.execute(reply);
         return (JSONObject) response.getData();
     }
-    
+
     protected JSONObject getForwardMail(TestMail testMail) throws OXException, IOException, SAXException, JSONException {
         ReplyRequest reply = new ForwardRequest(testMail.getFolder(), testMail.getId());
         reply.setFailOnError(true);

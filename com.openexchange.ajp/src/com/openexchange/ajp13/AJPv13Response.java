@@ -406,7 +406,7 @@ public class AJPv13Response {
 
     /**
      * Creates the <code>END_RESPONSE</code> response bytes.
-     * 
+     *
      * @return an array of <code>byte</code> containing the <code>END_RESPONSE</code> response bytes
      */
     public static final byte[] getEndResponseBytes() {
@@ -415,7 +415,7 @@ public class AJPv13Response {
 
     /**
      * Data length of END_RESPONSE:
-     * 
+     *
      * <pre>
      * prefix(1) + close_connection_boolean(1)
      * </pre>
@@ -425,7 +425,7 @@ public class AJPv13Response {
     private static final byte[] END_RESPONSE_REUSE;
 
     private static final byte[] END_RESPONSE_CLOSE;
-    
+
     static {
         final ByteArrayOutputStream sink = new UnsynchronizedByteArrayOutputStream(6);
         sink.write('A');
@@ -448,7 +448,7 @@ public class AJPv13Response {
 
     /**
      * Creates the <code>END_RESPONSE</code> response bytes.
-     * 
+     *
      * @param closeConnection - whether or not to signal connection closure
      * @return an array of <code>byte</code> containing the <code>END_RESPONSE</code> response bytes
      */
@@ -591,7 +591,7 @@ public class AJPv13Response {
 
     /**
      * Writes specified header to given byte sink.
-     * 
+     *
      * @param name The header name
      * @param value The header value
      * @param sink The byte sink

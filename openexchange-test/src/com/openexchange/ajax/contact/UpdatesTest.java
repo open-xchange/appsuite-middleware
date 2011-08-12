@@ -17,16 +17,16 @@ import com.openexchange.groupware.container.Contact;
 public class UpdatesTest extends ContactTest {
 
 	private static final Log LOG = LogFactory.getLog(UpdateTest.class);
-	
+
 	public UpdatesTest(final String name) {
 		super(name);
 	}
-	
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
-	
+
 	public void testUpdates() throws Exception {
 		listModifiedAppointment(getWebConversation(), contactFolderId, new Date(0), PROTOCOL + getHostName(), getSessionId());
 	}

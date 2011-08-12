@@ -10,27 +10,27 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.container.Appointment;
 
 public class WeeklyRecurrenceTest extends AbstractRecurrenceTest {
-	
+
 	private static final Log LOG = LogFactory.getLog(WeeklyRecurrenceTest.class);
-	
+
 	public WeeklyRecurrenceTest(final String name) {
 		super(name);
 		simpleDateFormatUTC.setTimeZone(timeZoneUTC);
 	}
-	
+
 	public void testDummy() {
-		
+
 	}
-	
+
 	public void _notestWeeklyRecurrenceFromWinter2SummerTime() throws Exception {
 		final Date until = simpleDateFormatUTC.parse("2007-04-01 00:00:00");
-		
+
 		final Date start = simpleDateFormatUTC.parse("2007-02-01 00:00:00");
 		final Date end = simpleDateFormatUTC.parse("2007-05-01 00:00:00");
-		
+
 		final Date startDate = simpleDateFormatUTC.parse("2007-03-05 08:00:00");
 		final Date endDate = simpleDateFormatUTC.parse("2007-03-05 10:00:00");
-		
+
 		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle("testWeeklyRecurrenceFromWinter2SummerTime");
 		appointmentObj.setStartDate(startDate);
@@ -46,11 +46,11 @@ public class WeeklyRecurrenceTest extends AbstractRecurrenceTest {
 		appointmentObj.setObjectID(objectId);
 		final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
 		compareObject(appointmentObj, loadAppointment, startDate.getTime(), endDate.getTime());
-		
+
 		boolean found = false;
-		
+
 		final List<Occurrence> occurrenceList = new ArrayList<Occurrence>();
-		
+
 		final Appointment[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, _fields, start, end, timeZone, true, getHostName(), getSessionId());
 		for (int a = 0; a < appointmentArray.length; a++) {
 			if (appointmentArray[a].getObjectID() == objectId) {
@@ -58,9 +58,9 @@ public class WeeklyRecurrenceTest extends AbstractRecurrenceTest {
 				found = true;
 			}
 		}
-		
+
 		assertTrue("appointment not found in response", found);
-		
+
 		final Occurrence[] occurrenceArray = occurrenceList.toArray(new Occurrence[occurrenceList.size()]);
 
 		Occurrence occurrence = getOccurrenceByPosition(occurrenceArray, 1);
@@ -74,19 +74,19 @@ public class WeeklyRecurrenceTest extends AbstractRecurrenceTest {
 
 		occurrence = getOccurrenceByPosition(occurrenceArray, 4);
 		assertOccurrence(4, simpleDateFormatUTC.parse("2007-03-26 08:00:00"), simpleDateFormatUTC.parse("2007-03-26 10:00:00"), occurrence);
-		
+
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
-	
+
 	public void _notestWeeklyRecurrenceFromSummer2WinterTime() throws Exception {
 		final Date until = simpleDateFormatUTC.parse("2007-11-01 00:00:00");
-		
+
 		final Date start = simpleDateFormatUTC.parse("2007-9-01 00:00:00");
 		final Date end = simpleDateFormatUTC.parse("2007-12-01 00:00:00");
-		
+
 		final Date startDate = simpleDateFormatUTC.parse("2007-10-01 08:00:00");
 		final Date endDate = simpleDateFormatUTC.parse("2007-10-01 10:00:00");
-		
+
 		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle("testWeeklyRecurrenceFromSummer2WinterTime");
 		appointmentObj.setStartDate(startDate);
@@ -102,11 +102,11 @@ public class WeeklyRecurrenceTest extends AbstractRecurrenceTest {
 		appointmentObj.setObjectID(objectId);
 		final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
 		compareObject(appointmentObj, loadAppointment, startDate.getTime(), endDate.getTime());
-		
+
 		boolean found = false;
-		
+
 		final List<Occurrence> occurrenceList = new ArrayList<Occurrence>();
-		
+
 		final Appointment[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, _fields, start, end, timeZone, true, getHostName(), getSessionId());
 		for (int a = 0; a < appointmentArray.length; a++) {
 			if (appointmentArray[a].getObjectID() == objectId) {
@@ -114,9 +114,9 @@ public class WeeklyRecurrenceTest extends AbstractRecurrenceTest {
 				found = true;
 			}
 		}
-		
+
 		assertTrue("appointment not found in response", found);
-		
+
 		final Occurrence[] occurrenceArray = occurrenceList.toArray(new Occurrence[occurrenceList.size()]);
 
 		Occurrence occurrence = getOccurrenceByPosition(occurrenceArray, 1);
@@ -134,7 +134,7 @@ public class WeeklyRecurrenceTest extends AbstractRecurrenceTest {
 		occurrence = getOccurrenceByPosition(occurrenceArray, 5);
 		assertOccurrence(5, simpleDateFormatUTC.parse("2007-10-29 08:00:00"), simpleDateFormatUTC.parse("2007-10-29 10:00:00"), occurrence);
 
-		
+
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 }

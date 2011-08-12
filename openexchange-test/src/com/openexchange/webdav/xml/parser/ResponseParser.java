@@ -60,7 +60,7 @@ import com.openexchange.webdav.xml.types.Response;
 
 /**
  * Parses a Webdav XML response into the Response object.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 
@@ -194,7 +194,7 @@ public class ResponseParser {
                 response[counter] = new Response();
                 response[counter].setDataObject(parseUserResponse((Element) userList.get(a)));
                 response[counter].setStatus(200);
-    
+
                 counter++;
             }
         }
@@ -205,7 +205,7 @@ public class ResponseParser {
                 response[counter] = new Response();
                 response[counter].setDataObject(parseGroupResponse((Element) groupList.get(a)));
                 response[counter].setStatus(200);
-    
+
                 counter++;
             }
         }
@@ -216,7 +216,7 @@ public class ResponseParser {
                 response[counter] = new Response();
                 response[counter].setDataObject(parseResourceResponse((Element) resourceList.get(a)));
                 response[counter].setStatus(200);
-    
+
                 counter++;
             }
         }
@@ -227,7 +227,7 @@ public class ResponseParser {
                 response[counter] = new Response();
                 response[counter].setDataObject(parseResourceGroupResponse((Element) resourcegroupList.get(a)));
                 response[counter].setStatus(200);
-    
+
                 counter++;
             }
         }

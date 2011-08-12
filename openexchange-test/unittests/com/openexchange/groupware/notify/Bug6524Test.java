@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.notify;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.tasks.Task;
 
@@ -60,11 +59,11 @@ public class Bug6524Test extends ParticipantNotifyTest {
     public void testAlphabetical() throws Exception {
         final Participant[] participants = getParticipants(U(2,3,4),G(),S(), R());
         final Task t = getTask(participants);
-        
+
         notify.taskCreated(t,session);
-        
+
         final Message msg = notify.getMessages().get(0);
-        
+
         final String[] participantNames = parseParticipants( msg );
         assertEquals("Can't find 3 participants in " + guessLanguage(msg)
             + "message \"" + msg + "\"", 3, participantNames.length);

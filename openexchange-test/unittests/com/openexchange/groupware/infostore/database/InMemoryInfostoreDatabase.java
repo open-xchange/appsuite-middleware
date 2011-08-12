@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.infostore.database;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.I;
 import java.io.InputStream;
 import java.sql.Connection;

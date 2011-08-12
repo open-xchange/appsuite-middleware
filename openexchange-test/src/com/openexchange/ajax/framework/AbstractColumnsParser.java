@@ -49,14 +49,13 @@
 
 package com.openexchange.ajax.framework;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.I;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class AbstractColumnsParser<T extends AbstractColumnsResponse> extends AbstractAJAXParser<T> {

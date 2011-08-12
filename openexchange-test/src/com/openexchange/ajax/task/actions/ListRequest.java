@@ -53,7 +53,7 @@ import com.openexchange.ajax.framework.CommonListRequest;
 import com.openexchange.ajax.framework.ListIDs;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class ListRequest extends CommonListRequest {

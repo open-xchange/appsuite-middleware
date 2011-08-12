@@ -54,7 +54,7 @@ import com.openexchange.ajax.mail.TestMail;
 /**
  * {@link FallbackStrategy} - sanitizes all mails by treating them
  * as content-type "alternative" mails.
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class FallbackStrategy extends AlternativeStrategy {

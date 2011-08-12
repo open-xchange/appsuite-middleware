@@ -57,9 +57,9 @@ import com.openexchange.mail.MailPath;
 
 /**
  * {@link SendResponse}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class SendResponse extends AbstractAJAXResponse {
 

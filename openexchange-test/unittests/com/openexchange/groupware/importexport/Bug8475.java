@@ -69,14 +69,14 @@ import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
 
 public class Bug8475 extends AbstractICalImportTest{
-	
+
 	//workaround for JUnit 3 runner
 	public static junit.framework.Test suite() {
 		return new JUnit4TestAdapter(Bug8475.class);
 	}
-	
+
 	@Test public void testAttendeeNotFound() throws OXException, UnsupportedEncodingException, SQLException, OXException, NumberFormatException, OXException, OXException {
-		final String ical = 
+		final String ical =
 			"BEGIN:VCALENDAR\n" +
 			"VERSION:2.0\n" +
 			"PRODID:-//Apple Computer\\, Inc//iCal 1.5//EN\n" +
@@ -91,10 +91,10 @@ public class Bug8475 extends AbstractICalImportTest{
 			"END:VTODO\n" +
 			"END:VCALENDAR";
 		final ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.TASK, "8475", ctx, false);
-		
+
 		final TasksSQLInterface tasks = new TasksSQLImpl(sessObj);
 		final Task task = tasks.getTaskById(Integer.valueOf( res.getObjectId()), Integer.valueOf(res.getFolder()) );
-		
+
 		final Participant[] participants = task.getParticipants();
 		assertEquals("One participant?" , 1, participants.length);
 		boolean found = false;
@@ -105,10 +105,10 @@ public class Bug8475 extends AbstractICalImportTest{
 		}
 		assertTrue("Found attendee?" , found);
 	}
-	
+
 	@Test public void testInternalAttendee() throws Exception{
 		final User testUser = getUserParticipant();
-		final String ical = 
+		final String ical =
 			"BEGIN:VCALENDAR\n" +
 			"VERSION:2.0\n" +
 			"PRODID:-//Apple Computer\\, Inc//iCal 1.5//EN\n" +
@@ -123,10 +123,10 @@ public class Bug8475 extends AbstractICalImportTest{
 			"END:VTODO\n" +
 			"END:VCALENDAR";
 		final ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.TASK, "8475", ctx, false);
-		
+
 		final TasksSQLInterface tasks = new TasksSQLImpl(sessObj);
 		final Task task = tasks.getTaskById(Integer.valueOf( res.getObjectId()), Integer.valueOf(res.getFolder()) );
-		
+
 		final Participant[] participants = task.getParticipants();
 		assertEquals("One participant?" , 1, participants.length);
 		final Participant p =  participants[0];

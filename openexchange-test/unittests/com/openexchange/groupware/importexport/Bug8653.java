@@ -54,8 +54,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
-import java.util.List;
-
 import junit.framework.JUnit4TestAdapter;
 
 import org.junit.Test;
@@ -68,12 +66,12 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 
 public class Bug8653 extends AbstractICalImportTest {
-	
+
 	//workaround for JUnit 3 runner
 	public static junit.framework.Test suite() {
 		return new JUnit4TestAdapter(Bug8653.class);
 	}
-	
+
 	@Test public void testImportIntoCorrectFolder() throws OXException, UnsupportedEncodingException, SQLException, OXException, OXException, OXException, OXException {
 		final String ical =
 			"BEGIN:VCALENDAR\n" +
@@ -96,7 +94,7 @@ public class Bug8653 extends AbstractICalImportTest {
 		final Appointment appointmentObj = appointmentSql.getObjectById(oid, folderId);
 		assertEquals("Title is correct?","testtermin-\u00dcberschrift",appointmentObj.getTitle());
 	}
-	
+
 	@Test public void testImportIntoWrongFolder() throws OXException, UnsupportedEncodingException, SQLException, OXException, OXException, OXException, OXException {
 		final String ical =
 			"BEGIN:VCALENDAR\n" +

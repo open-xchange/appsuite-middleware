@@ -6,7 +6,7 @@ import com.openexchange.ajax.importexport.actions.ICalImportResponse;
 
 /** @author Tobias Prinz */
 public class Bug17393Test extends ManagedAppointmentTest {
-	
+
 	public Bug17393Test(String name) {
 		super(name);
 	}
@@ -69,7 +69,7 @@ public class Bug17393Test extends ManagedAppointmentTest {
 		+ "ATTENDEE;ROLE=REQ-PARTICIPANT;CUTYPE=INDIVIDUAL:mailto:wolf@idmt.fraunhofer.de\n"
 		+ "END:VEVENT\n"
 		+ "END:VCALENDAR\n";
-			
+
 	public void testChangeException() throws Exception{
 		ICalImportRequest request = new ICalImportRequest(folder.getObjectID(), CULPRIT);
 		ICalImportResponse response = getClient().execute(request);

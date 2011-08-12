@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.tasks;
 
-import com.openexchange.exception.OXException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;

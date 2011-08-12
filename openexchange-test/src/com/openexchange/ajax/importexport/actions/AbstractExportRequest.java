@@ -56,7 +56,7 @@ import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.importexport.actions.AbstractImportRequest.Action;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class AbstractExportRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {

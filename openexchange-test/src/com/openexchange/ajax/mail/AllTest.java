@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail;
 
-import com.openexchange.exception.OXException;
 import javax.mail.internet.InternetAddress;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -61,7 +60,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
  * {@link AllTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="karsten.will@open-xchange.com">Karsten Will</a>
  */
@@ -73,7 +72,7 @@ public final class AllTest extends AbstractMailTest {
 
     /**
      * Default constructor.
-     * 
+     *
      * @param name Name of this test.
      */
     public AllTest(final String name) {
@@ -109,7 +108,7 @@ public final class AllTest extends AbstractMailTest {
 
     /**
      * Tests the <code>action=all</code> request on INBOX folder
-     * 
+     *
      * @throws Throwable
      */
     public void testAll() throws Throwable {
@@ -137,7 +136,7 @@ public final class AllTest extends AbstractMailTest {
 
     /**
      * Tests the <code>action=all</code> request on INBOX folder
-     * 
+     *
      * @throws Throwable
      */
     public void testAllLimit() throws Throwable {

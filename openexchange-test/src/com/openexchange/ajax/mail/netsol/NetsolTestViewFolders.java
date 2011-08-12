@@ -55,15 +55,15 @@ import com.openexchange.ajax.mail.netsol.actions.NetsolFolderResponse;
 
 /**
  * {@link NetsolTestViewFolders}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class NetsolTestViewFolders extends AbstractNetsolTest {
 
 	/**
 	 * Initializes a new {@link NetsolTestViewFolders}
-	 * 
+	 *
 	 * @param name
 	 */
 	public NetsolTestViewFolders(final String name) {
@@ -88,7 +88,7 @@ public final class NetsolTestViewFolders extends AbstractNetsolTest {
 			requestTracker.addDuration(response.getRequestDuration());
 			parseTracker.addDuration(response.getParseDuration());
 		}
-		
+
 		for (int i = 0; i < runs; i++) {
 			/*
 			 * Get first level folders
@@ -99,7 +99,7 @@ public final class NetsolTestViewFolders extends AbstractNetsolTest {
 			requestTracker.addDuration(response.getRequestDuration());
 			parseTracker.addDuration(response.getParseDuration());
 		}
-		
+
 		for (int i = 0; i < runs; i++) {
 			/*
 			 * Get INBOX subfolders
@@ -110,8 +110,8 @@ public final class NetsolTestViewFolders extends AbstractNetsolTest {
 			requestTracker.addDuration(response.getRequestDuration());
 			parseTracker.addDuration(response.getParseDuration());
 		}
-		
-		
+
+
 		/*
 		 * Clean everything
 		 */

@@ -49,17 +49,15 @@
 
 package com.openexchange.mail.structure;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONObject;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.structure.handler.MIMEStructureHandler;
-import com.openexchange.sessiond.impl.SessionObject;
 
 /**
  * {@link Bug16174StructureTest} - Test for output of structured JSON mail object.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Bug16174StructureTest extends AbstractMailTest {
@@ -73,23 +71,23 @@ public class Bug16174StructureTest extends AbstractMailTest {
 
     /**
      * Initializes a new {@link Bug16174StructureTest}.
-     * 
+     *
      * @param name The test name
      */
     public Bug16174StructureTest(final String name) {
         super(name);
     }
 
-    
 
-    private static final byte[] SIMPLE = ("From: postmaster@integralis.com\n" + 
-    		"To: martin.kauss@open-xchange.com\n" + 
-    		"Date: May 21, 2010 12:11:08 PM CEST\n" + 
-    		"MIME-Version: 1.0\n" + 
-    		"Subject: Test\n" + 
-    		"Content-Type: text/plain; charset=UTF-8\n" + 
-    		"\n" + 
-    		"This is a text message.\n" + 
+
+    private static final byte[] SIMPLE = ("From: postmaster@integralis.com\n" +
+    		"To: martin.kauss@open-xchange.com\n" +
+    		"Date: May 21, 2010 12:11:08 PM CEST\n" +
+    		"MIME-Version: 1.0\n" +
+    		"Subject: Test\n" +
+    		"Content-Type: text/plain; charset=UTF-8\n" +
+    		"\n" +
+    		"This is a text message.\n" +
     		"\n").getBytes();
 
     public void testMIMEStructure() {
@@ -115,7 +113,7 @@ public class Bug16174StructureTest extends AbstractMailTest {
                 assertTrue("Body object is not a JSON object.", (bodyObject instanceof JSONObject));
                 jsonBodyObject = (JSONObject) bodyObject;
             }
-            
+
             assertTrue("Missing \"data\" key.", jsonBodyObject.hasAndNotNull("data"));
         } catch (final Exception e) {
             e.printStackTrace();

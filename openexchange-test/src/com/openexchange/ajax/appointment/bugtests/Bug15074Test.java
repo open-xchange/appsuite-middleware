@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.Calendar;
 import java.util.TimeZone;
@@ -63,7 +62,7 @@ import com.openexchange.groupware.container.Appointment;
 
 /**
  * {@link Bug15074Test}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Bug15074Test extends AbstractAJAXSession {
@@ -72,7 +71,7 @@ public class Bug15074Test extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link Bug15074Test}.
-     * 
+     *
      * @param name
      */
     public Bug15074Test(String name) {
@@ -126,7 +125,7 @@ public class Bug15074Test extends AbstractAJAXSession {
             D("01.01.2010 00:00", TimeZone.getTimeZone("UTC")),
             TimeZone.getTimeZone("UTC"),
             true);
-        
+
         CommonAllResponse allResponse = client.execute(allRequest);
         Object[][] objects = allResponse.getArray();
         boolean found = false;
@@ -136,7 +135,7 @@ public class Bug15074Test extends AbstractAJAXSession {
                 break;
             }
         }
-        
+
         assertTrue("Unable to find appointment in this month.", found);
 
     }

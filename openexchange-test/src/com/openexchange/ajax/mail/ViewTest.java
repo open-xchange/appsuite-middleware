@@ -59,14 +59,14 @@ import com.openexchange.ajax.mail.actions.GetRequest.View;
 
 /**
  * {@link ViewTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ViewTest extends AbstractMailTest {
 
     /**
      * Default constructor.
-     * 
+     *
      * @param name Name of this test.
      */
     public ViewTest(final String name) {
@@ -75,7 +75,7 @@ public final class ViewTest extends AbstractMailTest {
 
     /**
      * Tests the <code>action=get</code> with <code>view</code> parameter set.
-     * 
+     *
      * @throws Throwable
      */
     public void testGet() throws Throwable {

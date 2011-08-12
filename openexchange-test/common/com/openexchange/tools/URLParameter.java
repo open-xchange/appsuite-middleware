@@ -3,7 +3,6 @@
  */
 package com.openexchange.tools;
 
-import com.openexchange.exception.OXException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -20,22 +19,22 @@ import com.openexchange.tools.encoding.URLCoder;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class URLParameter {
-	
+
 	/**
 	 * enables multivalues for the url parameter
 	 **/
 	private boolean multivalue = false;
-	
+
 	/**
 	 * Container for the parameters.
 	 */
 	private final transient Map parameters;
-	
+
 	/**
 	 * Container for the parameters with multi values
 	 */
 	private final transient Map<String, List<String>> multivalueParameters;
-	
+
 	/**
 	 * Default constructor.
 	 */
@@ -44,34 +43,34 @@ public class URLParameter {
 		parameters = new HashMap();
 		multivalueParameters = new HashMap<String, List<String>>();
 	}
-	
+
 	public URLParameter(final boolean multivalue) {
 		super();
 		this.multivalue = multivalue;
 		parameters = new HashMap();
 		multivalueParameters = new HashMap<String, List<String>>();
 	}
-	
+
 	public void setParameter(final String name, final String value) {
 		setParameter2Map(name, value);
 	}
-	
+
 	public void setParameter(final String name, final int value) {
 		setParameter2Map(name, String.valueOf(value));
 	}
-	
+
 	public void setParameter(final String name, final long value) {
 		setParameter2Map(name, String.valueOf(value));
 	}
-	
+
 	public void setParameter(final String name, final boolean value) {
 		setParameter2Map(name, String.valueOf(value));
 	}
-	
+
 	public void setParameter(final String name, final Date value) {
 		setParameter2Map(name, String.valueOf(value.getTime()));
 	}
-	
+
 	private void setParameter2Map(final String name, final String value) {
 		if (multivalue) {
 			if (multivalueParameters.containsKey(name)) {
@@ -80,27 +79,27 @@ public class URLParameter {
 			} else {
 				final List<String> l = new ArrayList<String>();
 				l.add(value);
-				
+
 				multivalueParameters.put(name, l);
 			}
 		} else {
 			parameters.put(name, value);
 		}
 	}
-	
+
 	public String getURLParameters() throws UnsupportedEncodingException {
 		final StringBuffer sb = new StringBuffer();
-		
+
 		if (multivalue) {
 			if (multivalueParameters.size() > 0) {
 				sb.append('?');
 			}
-			
+
 			final Iterator iter = multivalueParameters.keySet().iterator();
 			while (iter.hasNext()) {
 				final String name = (String) iter.next();
 				final List l = multivalueParameters.get(name);
-				
+
 				for (int a = 0; a < l.size(); a++) {
 					sb.append(URLCoder.encode(name, Charsets.UTF_8));
 					sb.append('=');
@@ -114,7 +113,7 @@ public class URLParameter {
 			if (parameters.size() > 0) {
 				sb.append('?');
 			}
-			
+
 			final Iterator iter = parameters.keySet().iterator();
 			while (iter.hasNext()) {
 				final String name = (String) iter.next();
@@ -128,7 +127,7 @@ public class URLParameter {
 		}
 		return sb.toString();
 	}
-	
+
 	public static String colsArray2String(final int cols[]) {
 		final StringBuffer sb = new StringBuffer();
 		for (int a = 0; a  < cols.length; a++) {
@@ -140,7 +139,7 @@ public class URLParameter {
 				sb.append(cols[a]);
 			}
 		}
-		
+
 		return sb.toString();
 	}
 }

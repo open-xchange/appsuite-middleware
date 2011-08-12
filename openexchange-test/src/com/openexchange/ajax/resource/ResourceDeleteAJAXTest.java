@@ -60,15 +60,15 @@ import com.openexchange.resource.Resource;
 
 /**
  * {@link ResourceDeleteAJAXTest} - Tests the DELETE request on resource servlet
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class ResourceDeleteAJAXTest extends AbstractResourceTest {
 
 	/**
 	 * Initializes a new {@link ResourceDeleteAJAXTest}
-	 * 
+	 *
 	 * @param name
 	 *            The test name
 	 */

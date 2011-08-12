@@ -79,7 +79,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractWebdavFactory;
 
 /**
  * {@link GroupwareCarddavFactory}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class GroupwareCarddavFactory extends AbstractWebdavFactory {
@@ -171,7 +171,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
     public State getState() {
         return stateHolder.get();
     }
-    
+
     public OXFolderAccess getOXFolderAccess() {
         return new OXFolderAccess(getContext());
     }
@@ -181,7 +181,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 
         private final static int[] FIELDS_FOR_ALL_REQUEST = { DataObject.OBJECT_ID };
 
-        
+
 
         private GroupwareCarddavFactory factory;
 
@@ -240,10 +240,10 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 
             //TODO: Karsten: Merge all of these
             // ContactSimilarity.areSimilar(original, candidate);
-            
+
             contacts.addAll(getFolder(getStandardContactFolderId()));
             contacts.addAll(getFolder(6));
-            
+
             return contacts;
         }
 

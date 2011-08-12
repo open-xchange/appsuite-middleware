@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.folder.api2;
 
-import com.openexchange.exception.OXException;
 import java.util.Date;
 import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
@@ -62,7 +61,7 @@ import com.openexchange.server.impl.OCLPermission;
 
 /**
  * {@link CreateTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class CreateTest extends AbstractAJAXSession {
@@ -71,7 +70,7 @@ public class CreateTest extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link CreateTest}.
-     * 
+     *
      * @param name The name of the test.
      */
     public CreateTest(final String name) {

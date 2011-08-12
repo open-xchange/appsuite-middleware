@@ -56,9 +56,9 @@ import com.openexchange.sessiond.impl.SessionObject;
 
 /**
  * {@link MailFolderTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public class MailFolderTest extends AbstractMailTest {
 

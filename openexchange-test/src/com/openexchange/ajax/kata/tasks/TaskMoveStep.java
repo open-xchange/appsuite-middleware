@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.kata.tasks;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.kata.NeedExistingStep;
 import com.openexchange.ajax.task.actions.UpdateRequest;
@@ -67,7 +66,7 @@ import com.openexchange.groupware.tasks.Task;
 public class TaskMoveStep extends NeedExistingStep<Task> {
 
     private int destinationFolder;
-    
+
     /**
      * Initializes a new {@link TaskMoveStep}.
      * @param name
@@ -89,15 +88,15 @@ public class TaskMoveStep extends NeedExistingStep<Task> {
      */
     public void perform(AJAXClient client) throws Exception {
         this.client = client;
-        
+
         Task entry = new Task();
         assumeIdentity(entry);
         int inFolder = entry.getParentFolderID();
         entry.setParentFolderID(destinationFolder);
-        
+
         UpdateRequest updateRequest = new UpdateRequest(inFolder, entry, getTimeZone(), false);
         UpdateResponse updateResponse = execute(updateRequest);
-        
+
         if(!updateResponse.hasError()) {
             entry.setLastModified(updateResponse.getTimestamp());
             rememberIdentityValues(entry);

@@ -59,7 +59,7 @@ import com.openexchange.test.fixtures.transformators.LongTransformator;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public abstract class DefaultFixtures<T> extends AbstractFixtures<T> {
-    
+
 	public DefaultFixtures(final Class<T> klass, final Map<String, Map<String, String>> values, FixtureLoader fixtureLoader) {
         super(klass, values);
         addTransformator(new JChronicDateTransformator(fixtureLoader), Date.class);

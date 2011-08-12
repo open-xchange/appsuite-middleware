@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.folder.api2;
 
-import com.openexchange.exception.OXException;
 import java.util.Date;
 import org.json.JSONArray;
 import com.openexchange.ajax.folder.actions.API;
@@ -65,7 +64,7 @@ import com.openexchange.server.impl.OCLPermission;
 
 /**
  * {@link PathTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class PathTest extends AbstractAJAXSession {
@@ -76,7 +75,7 @@ public class PathTest extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link PathTest}.
-     * 
+     *
      * @param name name of the test.
      */
     public PathTest(final String name) {

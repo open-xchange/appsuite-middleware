@@ -49,21 +49,20 @@
 
 package com.openexchange.mail.utilitytests;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
  * {@link MailCharsetDetectorTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class MailCharsetDetectorTest extends AbstractMailTest {
 
 	/**
-	 * 
+	 *
 	 */
 	public MailCharsetDetectorTest() {
 		super();

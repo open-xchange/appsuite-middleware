@@ -57,7 +57,7 @@ import com.openexchange.groupware.container.FolderObject;
 
 /**
  * Request to get a folder from the server.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */

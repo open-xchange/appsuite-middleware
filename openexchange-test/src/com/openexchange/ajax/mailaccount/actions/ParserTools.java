@@ -61,7 +61,7 @@ import com.openexchange.mailaccount.json.fields.SetSwitch;
 
 /**
  * {@link ParserTools}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ParserTools {

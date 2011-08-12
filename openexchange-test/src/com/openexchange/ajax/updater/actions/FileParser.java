@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.updater.actions;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -67,7 +66,7 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class FileParser extends AbstractAJAXParser<FileResponse> {
-    
+
     private byte[] fileBytes;
 
     /**
@@ -77,7 +76,7 @@ public class FileParser extends AbstractAJAXParser<FileResponse> {
     protected FileParser(boolean failOnError) {
         super(failOnError);
     }
-    
+
     /**
      * @see com.openexchange.ajax.framework.AbstractAJAXParser#checkResponse(org.apache.http.HttpResponse)
      */
@@ -87,7 +86,7 @@ public class FileParser extends AbstractAJAXParser<FileResponse> {
         HttpEntity entity = resp.getEntity();
         assertEquals("Response contained wrong mime type.", "application/octet-stream", EntityUtils.getContentMimeType(entity));
         fileBytes = EntityUtils.toByteArray(entity);
-        
+
         return null;
     }
 
@@ -98,7 +97,7 @@ public class FileParser extends AbstractAJAXParser<FileResponse> {
     protected FileResponse createResponse(Response response) throws JSONException {
         return null;
     }
-    
+
     /**
      * @see com.openexchange.ajax.framework.AbstractAJAXParser#parse(java.lang.String)
      */

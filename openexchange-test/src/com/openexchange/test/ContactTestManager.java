@@ -96,7 +96,7 @@ import com.openexchange.groupware.search.Order;
 /**
  * This class and ContactObject should be all that is needed to write contact-related tests. If multiple users are needed use multiple
  * instances of this class. Examples of tests using this class can be found in ExemplaryContactTestManagerTest.java
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.org">Karsten Will</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - refactoring a bit.
  */
@@ -117,7 +117,7 @@ public class ContactTestManager implements TestManager {
     protected AbstractAJAXResponse lastResponse;
 
     private int sleep = 500;
-    
+
     public void setFailOnError(boolean failOnError) {
         this.failOnError = failOnError;
     }
@@ -170,7 +170,7 @@ public class ContactTestManager implements TestManager {
         contact.removeParentFolderID();
         return contact;
     }
-    
+
     public static Contact generateContact(int folderId){
     	return generateContact(folderId, "surname");
     }
@@ -193,11 +193,11 @@ public class ContactTestManager implements TestManager {
     }
 
     /**
-     * Creates a contact with all possible string, int and date fields 
-     * set to the value of their column number. Sorry, if you want to 
+     * Creates a contact with all possible string, int and date fields
+     * set to the value of their column number. Sorry, if you want to
      * check the date fields, you have to do a bit of parsing.
-     * 
-     * Warning: objectID is being set, too. You might want to change 
+     *
+     * Warning: objectID is being set, too. You might want to change
      * that for all but the most basic tests.
      */
     public static Contact generateFullContact(int folderID){
@@ -220,7 +220,7 @@ public class ContactTestManager implements TestManager {
     	contact.setEmail1("email1@hostinvalid");
     	contact.setEmail2("email2@hostinvalid");
     	contact.setEmail3("email3@hostinvalid");
-    	
+
     	contact.removeObjectID();
     	contact.setParentFolderID(folderID);
     	return contact;
@@ -339,7 +339,7 @@ public class ContactTestManager implements TestManager {
         }
         return allContacts.toArray(new Contact[]{});
     }
-    
+
     public Contact[] allAction(int folderId, int[] columns) {
         List<Contact> allContacts = new LinkedList<Contact>();
         AllRequest request = new AllRequest(folderId, columns);
@@ -392,7 +392,7 @@ public class ContactTestManager implements TestManager {
     public Contact[] searchAction(String pattern, int folderId, int orderBy, Order order, String collation, int... columns) {
         List<Contact> allContacts = new LinkedList<Contact>();
         String orderDir = order == null ? "ASC" : order.equals(Order.ASCENDING) ? "ASC" : "DESC";
-        
+
         SearchRequest request = new SearchRequest(pattern, false, folderId, columns, orderBy, orderDir, collation, failOnError);
         try {
             SearchResponse response = getClient().execute(request, getSleep());
@@ -407,7 +407,7 @@ public class ContactTestManager implements TestManager {
         return allContacts.toArray(new Contact[]{});
     }
 
-    
+
     public Contact[] searchFirstletterAction(String firstLetter, int folderId) {
         List<Contact> allContacts = new LinkedList<Contact>();
         SearchRequest request = new SearchRequest(firstLetter, true, folderId, Contact.ALL_COLUMNS, -1, null, true);
@@ -423,15 +423,15 @@ public class ContactTestManager implements TestManager {
         }
         return allContacts.toArray(new Contact[]{});
     }
-    
+
     public Contact[] searchAction(ContactSearchObject search) {
     	return searchAction(search, Contact.ALL_COLUMNS);
     }
-    
+
     public Contact[] searchAction(ContactSearchObject search, int[] columns) {
     	return searchAction(search, columns, -1, null, null);
     }
-    
+
     public Contact[] searchAction(ContactSearchObject search, int[] columns, int orderBy, Order order, String collation) {
         List<Contact> allContacts = new LinkedList<Contact>();
         SearchRequest request = new SearchRequest(search, columns, orderBy, order, collation, getFailOnError());
@@ -447,7 +447,7 @@ public class ContactTestManager implements TestManager {
         }
         return allContacts.toArray(new Contact[]{});
     }
-    
+
     /**
      * Search for contacts in a folder via the HTTP-API. Use "-1" as folderId to search all available folders
      */
@@ -466,7 +466,7 @@ public class ContactTestManager implements TestManager {
         }
         return allContacts.toArray(new Contact[]{});
     }
-    
+
     public Contact[] searchAction(JSONObject filter, int[] columns, int orderBy, Order order){
         List<Contact> contacts = new LinkedList<Contact>();
 		AdvancedSearchRequest request = new AdvancedSearchRequest(filter, columns, orderBy, order == Order.DESCENDING ? "DESC" : "ASC");
@@ -529,7 +529,7 @@ public class ContactTestManager implements TestManager {
             }
         }
     }
-    
+
     protected void doJanitorialTasks(AbstractAJAXResponse response) throws OXException{
         lastResponse = response;
         if(response.hasError() && failOnError)
@@ -713,7 +713,7 @@ final class ContactMapping extends TestCase {
             put(ContactFields.MODIFIED_BY, Contact.MODIFIED_BY);
             put(ContactFields.NUMBER_OF_ATTACHMENTS, Contact.NUMBER_OF_ATTACHMENTS);
             put(ContactFields.PRIVATE_FLAG, Contact.PRIVATE_FLAG);
-         
+
             put(ContactFields.YOMI_COMPANY, Contact.YOMI_COMPANY);
             put(ContactFields.YOMI_FIRST_NAME, Contact.YOMI_FIRST_NAME);
             put(ContactFields.YOMI_LAST_NAME, Contact.YOMI_LAST_NAME);

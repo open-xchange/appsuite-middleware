@@ -182,7 +182,7 @@ public abstract class AbstractAJAXTest extends TestCase {
     protected WebConversation newWebConversation() {
         HttpUnitOptions.setDefaultCharacterSet("UTF-8");
         HttpUnitOptions.setScriptingEnabled(false);
-        
+
         WebConversation conv = new WebConversation();
         conv.setUserAgent(AJAXSession.USER_AGENT);
         return conv;
@@ -193,7 +193,7 @@ public abstract class AbstractAJAXTest extends TestCase {
      * @throws JSONException if parsing of serialized json fails.
      * @throws SAXException if a SAX error occurs.
      * @throws IOException if the communication with the server fails.
-     * @throws OXException 
+     * @throws OXException
      */
     protected String getSessionId() throws IOException, JSONException, OXException {
         if (null == sessionId) {

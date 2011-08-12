@@ -56,8 +56,6 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.GetResponse;
 import com.openexchange.ajax.mail.actions.SendRequest;
-import com.openexchange.ajax.mail.actions.SendResponse;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
@@ -67,24 +65,24 @@ import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
  * Title of Bug: The option "Delivery receipt" is no longer checked when editing a draft
- * 
+ *
  * Description of Bug: When loading a draft with this option enabled the field
  * "Disposition-Notification-To" is missing in the server response. But it's
  * needed to re-select this field again.
- * 
+ *
  * Steps to Reproduce:
  * 1. Create a new e-mail and check "Delivery receipt"
  * 2. Save the message as draft
  * 3. Open the saved draft
  * 4. Check the field "Delivery receipt"
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.org">Karsten Will</a>
  *
  */
 public class Bug12409Test extends AbstractMailTest {
-	
+
 	private String[] folderAndID;
-	
+
 	@Override
     public void setUp() throws Exception {
 		super.setUp();
@@ -99,12 +97,12 @@ public class Bug12409Test extends AbstractMailTest {
 		mailObject.put(MailJSONField.FLAGS.getKey(), Integer.toString(MailMessage.FLAG_DRAFT));
 		// convert it to a string for the SaveRequest
 		final String mailObject_string = mailObject.toString();
-		
+
 		folderAndID = client.execute(new SendRequest(mailObject_string)).getFolderAndID();
-		
-		
+
+
 	}
-	
+
 	@Override
 	public void tearDown() throws Exception {
 		// clean the drafts folder
@@ -114,7 +112,7 @@ public class Bug12409Test extends AbstractMailTest {
 	public Bug12409Test(final String name) {
 		super(name);
 	}
-	
+
 	public void testSavedDispositionNotificationReturnedWhenEditing() throws IOException, SAXException, JSONException, OXException {
 		final AJAXClient client = getClient();
 		// load the email to edit it again

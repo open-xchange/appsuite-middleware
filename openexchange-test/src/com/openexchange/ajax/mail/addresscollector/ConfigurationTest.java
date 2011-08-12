@@ -19,34 +19,34 @@ public class ConfigurationTest extends AbstractAJAXSession {
         SetRequest setRequest = new SetRequest(Tree.ContactCollectEnabled, true);
         SetResponse setResponse = client.execute(setRequest);
         assertFalse(setResponse.hasError());
-        
+
         GetRequest getRequest = new GetRequest(Tree.ContactCollectEnabled);
         GetResponse getResponse = client.execute(getRequest);
         assertTrue(getResponse.getBoolean());
-        
+
         setRequest = new SetRequest(Tree.ContactCollectEnabled, false);
         setResponse = client.execute(setRequest);
         assertFalse(setResponse.hasError());
-        
+
         getRequest = new GetRequest(Tree.ContactCollectEnabled);
         getResponse = client.execute(getRequest);
         assertFalse(getResponse.getBoolean());
     }
-    
+
     public void testFolderId() throws Throwable {
         final AJAXClient client = getClient();
         SetRequest setRequest = new SetRequest(Tree.ContactCollectFolder, 100);
         SetResponse setResponse = client.execute(setRequest);
         assertFalse(setResponse.hasError());
-        
+
         GetRequest getRequest = new GetRequest(Tree.ContactCollectFolder);
         GetResponse getResponse = client.execute(getRequest);
         assertEquals(100, getResponse.getInteger());
-        
+
         setRequest = new SetRequest(Tree.ContactCollectFolder, 123);
         setResponse = client.execute(setRequest);
         assertFalse(setResponse.hasError());
-        
+
         getRequest = new GetRequest(Tree.ContactCollectFolder);
         getResponse = client.execute(getRequest);
         assertEquals(123, getResponse.getInteger());

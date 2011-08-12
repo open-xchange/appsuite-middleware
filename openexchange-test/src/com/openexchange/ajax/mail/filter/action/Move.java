@@ -55,20 +55,20 @@ package com.openexchange.ajax.mail.filter.action;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class Move extends AbstractAction {
-	
+
 	public static final String MOVE = "move";
-	
+
 	public String folder;
-	
+
 	public Move(final String folder) {
 		name = MOVE;
 		this.folder = folder;
 	}
-	
+
 	public String getFolder() {
 		return folder;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -92,7 +92,7 @@ public class Move extends AbstractAction {
 				return false;
 		} else if (!folder.equals(other.folder))
 			return false;
-		
+
 		if (name == null) {
 			if (other.getName() != null)
 				return false;

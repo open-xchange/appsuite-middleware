@@ -61,14 +61,14 @@ import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
  * {@link MailDeleteTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  */
 public final class MailDeleteTest extends MessageStorageTest {
 
     /**
-	 * 
+	 *
 	 */
     public MailDeleteTest() {
         super();
@@ -101,7 +101,7 @@ public final class MailDeleteTest extends MessageStorageTest {
         try {
             final long currentTimeMillis = System.currentTimeMillis();
             mailAccess.getMessageStorage().deleteMessages("INBOX", new String[] { String.valueOf(currentTimeMillis), uids[0] }, true);
-            
+
             final MailMessage message = mailAccess.getMessageStorage().getMessage("INBOX", uids[0], true);
             assertTrue("The message which should be deleted in the mixed delete test, isn't deleted.", null == message);
         } catch (final Exception e) {
@@ -110,7 +110,7 @@ public final class MailDeleteTest extends MessageStorageTest {
             mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
         }
     }
-    
+
     public void testMailDeleteNonExistingFolder() throws OXException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         /*

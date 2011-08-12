@@ -1,7 +1,6 @@
 
 package com.openexchange.server;
 
-import com.openexchange.exception.OXException;
 import java.sql.Connection;
 
 import junit.framework.TestCase;
@@ -13,20 +12,20 @@ import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.server.impl.DBPool;
 
 public class SimpleDBPoolTest extends TestCase {
-    
-    
+
+
     @Override
-	protected void setUp() throws Exception {        
+	protected void setUp() throws Exception {
         super.setUp();
         Init.startServer();
     }
-    
+
     @Override
 	protected void tearDown() throws Exception {
         Init.stopServer();
         super.tearDown();
     }
-    
+
     public void testBasicPoolFunctions() throws Throwable {
         final Context context = new ContextImpl(CalendarTest.contextid);
 
@@ -34,23 +33,23 @@ public class SimpleDBPoolTest extends TestCase {
         final Connection con[] = new Connection[testsize];
         for (int a = 0; a < con.length; a++) {
             try {
-                con[a] = DBPool.pickup(context);                
+                con[a] = DBPool.pickup(context);
             } catch(final Exception e) {
                 e.printStackTrace();
             }
         }
         for (int a = 0; a < con.length; a++) {
-            try {                
+            try {
                 final Connection tc = con[a];
                 DBPool.push(context, tc);
             } catch(final Exception e) {
                 e.printStackTrace();
             }
-        }              
-        
+        }
+
         // assertEquals("Check pool size ", testsize, DBPool.getSize(context, true));
     }
-    
+
     public void testClosedConnectionsInPool() throws Throwable {
         final Context context = new ContextImpl(CalendarTest.contextid);
 
@@ -66,29 +65,29 @@ public class SimpleDBPoolTest extends TestCase {
             }
         }
         for (int a = 0; a < con.length; a++) {
-            try {                
+            try {
                 Connection tc = con[a];
                 DBPool.push(context, tc);
                 tc = null;
             } catch(final Exception e) {
                 e.printStackTrace();
             }
-        }              
-        
+        }
+
         for (int a = 0; a < con.length; a++) {
-            try {                
+            try {
                 assertTrue(con != null);
             } catch(final Exception e) {
                 e.printStackTrace();
             }
-        }              
-                
+        }
+
 //        if (DBPool.isPreFill(context, true)) {
 //            assertEquals("Check that pool is  not emtpy", testsize, DBPool.getSize(context, true));
 //        } else if (DBPool.isPostFill(context, true)) {
 //            assertEquals("Check that pool is  not emtpy", 0, DBPool.getSize(context, true));
 //        }
 
-    }    
-    
+    }
+
 }

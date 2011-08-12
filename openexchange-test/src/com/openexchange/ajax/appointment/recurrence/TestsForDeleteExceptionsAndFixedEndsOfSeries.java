@@ -55,10 +55,10 @@ import com.openexchange.groupware.container.Changes;
 import com.openexchange.groupware.container.Expectations;
 
 /**
- * There are two ways to limit an appointment series: One is by date, one is by number of 
- * occurrences. Currently, removal of an occurrence by creating a delete exception does 
+ * There are two ways to limit an appointment series: One is by date, one is by number of
+ * occurrences. Currently, removal of an occurrence by creating a delete exception does
  * not reduce the number of occurrences, also called "recurrence_count".
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class TestsForDeleteExceptionsAndFixedEndsOfSeries extends ManagedAppointmentTest {
@@ -71,7 +71,7 @@ public class TestsForDeleteExceptionsAndFixedEndsOfSeries extends ManagedAppoint
     public void testShouldNotReduceNumberOfOccurrencesWhenDeletingOneInYearlySeries() throws Exception {
         Appointment app = generateYearlyAppointment();
         app.setOccurrence(5);
-        
+
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_POSITION, 5);
 
@@ -81,21 +81,21 @@ public class TestsForDeleteExceptionsAndFixedEndsOfSeries extends ManagedAppoint
 
         positiveAssertionOnDeleteException.check(app, changes, expectations);
     }
-    
+
     public void testShouldFailWhenDeletingBeyondScopeOfSeriesInYearlySeries() throws Exception {
         Appointment app = generateYearlyAppointment();
         app.setOccurrence(5);
-        
+
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_POSITION, 6);
 
         negativeAssertionOnDeleteException.check(app, changes, new OXException(11));
     }
-    
+
     public void testShouldNotReduceNumberOfOccurrencesWhenDeletingOneInMonthlySeries() throws Exception {
         Appointment app = generateMonthlyAppointment();
         app.setOccurrence(6);
-        
+
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_POSITION, 6);
 
@@ -104,14 +104,14 @@ public class TestsForDeleteExceptionsAndFixedEndsOfSeries extends ManagedAppoint
 
         positiveAssertionOnDeleteException.check(app, changes, expectations);
     }
-    
+
     public void testShouldRemoveWholeSeriesIfEverySingleOccurrenceIsDeleted(){
         Appointment app = generateMonthlyAppointment();
         int numberOfOccurences = 3;
         app.setOccurrence(numberOfOccurences );
-        
+
         calendarManager.insert(app);
-        
+
         for(int i = 0; i < numberOfOccurences; i++){
             calendarManager.createDeleteException(app, i+1);
             assertFalse("Should not fail while creating delete exception #"+i, calendarManager.hasLastException());

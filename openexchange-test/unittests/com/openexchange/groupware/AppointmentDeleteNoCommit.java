@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware;
 
-import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.util.Date;
 import java.util.Properties;
@@ -72,25 +71,25 @@ import com.openexchange.tools.iterator.SearchIterator;
 
 
 public class AppointmentDeleteNoCommit extends TestCase {
-     
+
     int cols[] = new int[] { Appointment.START_DATE, Appointment.END_DATE, Appointment.TITLE, Appointment.RECURRENCE_ID, Appointment.RECURRENCE_POSITION, Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.USERS, Appointment.FULL_TIME };
     public static final long SUPER_END = 253402210800000L; // 31.12.9999 00:00:00 (GMT)
     public static final String TIMEZONE = "Europe/Berlin";
  // Override these in setup
     private static int userid = 11; // bishoph
     public final static int contextid = 1;
-    
+
     private static boolean init = false;
-    
+
     @Override
-	protected void setUp() throws Exception {        
+	protected void setUp() throws Exception {
         super.setUp();
         final EventConfigImpl event = new EventConfigImpl();
         event.setEventQueueEnabled(false);
         this.userid = getUserId();
         ContextStorage.start();
     }
-    
+
     @Override
 	protected void tearDown() throws Exception {
         if (init) {
@@ -99,62 +98,62 @@ public class AppointmentDeleteNoCommit extends TestCase {
         }
         super.tearDown();
     }
-    
+
     private static Properties getAJAXProperties() {
         final Properties properties = AjaxInit.getAJAXProperties();
         return properties;
-    }        
-    
+    }
+
     private static int resolveUser(final String u) throws Exception {
         final UserStorage uStorage = UserStorage.getInstance();
         return uStorage.getUserId(u, getContext());
     }
-    
+
     public static int getUserId() throws Exception {
         if (!init) {
             Init.startServer();
             init = true;
         }
-        final String user = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");        
+        final String user = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");
         return resolveUser(user);
     }
-    
+
     public static Context getContext() {
         return new ContextImpl(contextid);
     }
-    
+
     void deleteAllAppointments() throws Exception  {
         final Connection readcon = DBPool.pickup(getContext());
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "deleteAllApps");
-        final CalendarSql csql = new CalendarSql(so);        
+        final CalendarSql csql = new CalendarSql(so);
         final SearchIterator<Appointment> si = csql.getAppointmentsBetween(userid, new Date(0), new Date(SUPER_END), cols, 0,  null);
         while (si.hasNext()) {
             final Appointment cdao = si.next();
             CalendarTest.testDelete(cdao);
         }
         si.close();
-        DBPool.push(context, readcon);                
-    }    
-    
+        DBPool.push(context, readcon);
+    }
+
     public static int getPrivateFolder(final int userid) throws Exception {
         int privatefolder = 0;
         final Context context = getContext();
         final Connection readcon = DBPool.pickup(context);
         privatefolder = CalendarTest.getCalendarDefaultFolderForUser(userid, context);
         DBPool.push(context, readcon);
-        return privatefolder;        
+        return privatefolder;
     }
-    
+
     /*
      when i open a multi participant appt and add one resource to the appt, the
      following error is thrown:
     */
     public void testDeleteAll() throws Exception {
-        
+
         // Clean up appointments
         deleteAllAppointments();
-        
+
     }
-    
+
 }

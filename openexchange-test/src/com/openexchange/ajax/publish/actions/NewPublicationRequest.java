@@ -60,7 +60,7 @@ import com.openexchange.publish.json.PublicationWriter;
 
 /**
  * {@link NewPublicationRequest}
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class NewPublicationRequest extends AbstractPublicationRequest<NewPublicationResponse> {

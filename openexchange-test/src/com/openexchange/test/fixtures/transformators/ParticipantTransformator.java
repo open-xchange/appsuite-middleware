@@ -65,7 +65,7 @@ import com.openexchange.test.fixtures.SimpleCredentials;
 
 /**
  * Transforms strings of the kind "users:user_a,user_b,user_c,groups:test_group_01,resources:beamer"
- * into a list of user-, group- or external participants, where the entries refer to the "users", 
+ * into a list of user-, group- or external participants, where the entries refer to the "users",
  * "groups", "resources" or "contacts" fixture files.
  *
  * @author tfriedrich
@@ -73,7 +73,7 @@ import com.openexchange.test.fixtures.SimpleCredentials;
 public class ParticipantTransformator implements Transformator {
 
 	private final FixtureLoader fixtureLoader;
-	
+
 	public ParticipantTransformator(FixtureLoader fixtureLoader) {
 		super();
 		this.fixtureLoader = fixtureLoader;
@@ -97,7 +97,7 @@ public class ParticipantTransformator implements Transformator {
 		}
 		return participants;
     }
-	
+
 	private Participant getParticipant(final String fixtureName, final String fixtureEntry) throws OXException {
 		if ("users".equals(fixtureName)) {
 			return getUserParticipant(fixtureName, fixtureEntry);
@@ -146,7 +146,7 @@ public class ParticipantTransformator implements Transformator {
 		participant.setEmailAddress(user.getEmail1());
 		return participant;
 	}
-	
+
 	private ResourceParticipant getResourceParticipant(final String fixtureName, final String fixtureEntry) throws OXException {
 		final Resource resource = fixtureLoader.getFixtures(fixtureName, Resource.class).getEntry(fixtureEntry).getEntry();
 		final ResourceParticipant participant = new ResourceParticipant(resource.getIdentifier());

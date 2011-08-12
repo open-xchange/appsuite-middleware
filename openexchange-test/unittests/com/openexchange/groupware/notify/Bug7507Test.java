@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.notify;
 
-import com.openexchange.exception.OXException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import com.openexchange.groupware.Types;
@@ -72,26 +71,26 @@ public class Bug7507Test extends ParticipantNotifyTest {
         } catch (final UnknownHostException e) {
             fail("Don't know my hostname");
         }
-    
-    
+
+
         final TestLinkableState state = new TestLinkableState();
         state.setTemplateString("[hostname]");
         state.setModule(Types.TASK);
         String link = state.generateLink(task, p);
         assertEquals(hostname,link);
-        
+
         state.setTemplateString("[module]");
         link = state.generateLink(task, p);
         assertEquals("task",link);
-        
+
         state.setTemplateString("[object]");
         link = state.generateLink(task, p);
         assertEquals("42",link);
-        
+
         state.setTemplateString("[folder]");
         link = state.generateLink(task, p);
         assertEquals("23",link);
-        
+
         state.setModule(Types.APPOINTMENT);
         state.setTemplateString("[hostname]");
         link = state.generateLink(appointment, p);
@@ -100,26 +99,26 @@ public class Bug7507Test extends ParticipantNotifyTest {
         state.setTemplateString("[module]");
         link = state.generateLink(appointment, p);
         assertEquals("calendar",link);
-        
+
         state.setTemplateString("[object]");
         link = state.generateLink(appointment, p);
         assertEquals("43",link);
-        
+
         state.setTemplateString("[folder]");
         link = state.generateLink(appointment, p);
         assertEquals("23",link);
-        
+
         state.setTemplateString("http://[hostname]/ox6/#m=[module]&i=[object]&f=[folder]");
         link = state.generateLink(appointment, p);
         assertEquals("http://"+hostname+"/ox6/#m=calendar&i=43&f=23",link);
-        
+
         p.folderId = -1;
         appointment.setParentFolderID(25);
         state.setTemplateString("[folder]");
         link = state.generateLink(appointment, p);
         assertEquals("25",link);
-        
-        
-        
+
+
+
     }
 }

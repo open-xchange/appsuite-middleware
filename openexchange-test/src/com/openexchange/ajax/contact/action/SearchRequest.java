@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.contact.action;
 
-import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONException;
@@ -80,7 +79,7 @@ public class SearchRequest extends AbstractContactRequest<SearchResponse> {
     public SearchRequest(final String pattern, final boolean firstLetterOnly, final int inFolder, final int[] columns, final int orderBy, final String orderDir, final boolean failOnError)  {
     	this(pattern, firstLetterOnly, inFolder, columns, orderBy, orderDir, null, failOnError);
     }
-    
+
     public SearchRequest(final String pattern, final boolean firstLetterOnly, final int inFolder, final int[] columns, final int orderBy, final String orderDir, final String collation, final boolean failOnError)  {
         searchParser = new SearchParser(failOnError, columns);
 
@@ -91,7 +90,7 @@ public class SearchRequest extends AbstractContactRequest<SearchResponse> {
         if (orderDir != null)
             param(AJAXServlet.PARAMETER_ORDER, orderDir);
         if (collation != null)
-        	param(AJAXServlet.PARAMETER_COLLATION, collation);        
+        	param(AJAXServlet.PARAMETER_COLLATION, collation);
         try {
         	if(firstLetterOnly){
         		body.put("startletter", true);
@@ -109,7 +108,7 @@ public class SearchRequest extends AbstractContactRequest<SearchResponse> {
             throw new IllegalStateException(e); // Shouldn't happen
         }
     }
-    
+
     public SearchRequest(final String pattern, final int inFolder, final int[] columns, final int orderBy, final String orderDir, final boolean failOnError) {
     	this(pattern, false, inFolder, columns, orderBy, orderDir, failOnError);
     }

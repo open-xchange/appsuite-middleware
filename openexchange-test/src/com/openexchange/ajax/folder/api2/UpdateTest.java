@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.folder.api2;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.ajax.folder.actions.API;
@@ -66,7 +65,7 @@ import com.openexchange.server.impl.OCLPermission;
 
 /**
  * {@link UpdateTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class UpdateTest extends AbstractAJAXSession {
@@ -75,7 +74,7 @@ public class UpdateTest extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link UpdateTest}.
-     * 
+     *
      * @param name The name of the test.
      */
     public UpdateTest(final String name) {

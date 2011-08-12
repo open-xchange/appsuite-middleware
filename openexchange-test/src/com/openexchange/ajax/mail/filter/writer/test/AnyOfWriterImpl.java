@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.filter.writer.test;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -64,11 +63,11 @@ import com.openexchange.ajax.mail.filter.test.AllOfTest;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class AnyOfWriterImpl implements TestWriter {
-	
+
 	public JSONObject writeTest(final String name, final AbstractTest abstractTest) throws JSONException {
 		final JSONObject jsonObj = new JSONObject();
 		final AllOfTest allOfTest = (AllOfTest)abstractTest;
-		
+
 		final JSONArray jsonArrayTests = new JSONArray();
 		final AbstractTest[] abstractTests = allOfTest.getTests();
 		for (int a = 0; a < abstractTests.length; a++) {
@@ -77,10 +76,10 @@ public class AnyOfWriterImpl implements TestWriter {
 			final JSONObject jsonSubTest = testWriter.writeTest(subtestname, abstractTests[a]);
 			jsonArrayTests.put(jsonSubTest);
 		}
-		
+
 		jsonObj.put("id", name);
 		jsonObj.put("tests", jsonArrayTests);
-		
+
 		return jsonObj;
 	}
 }

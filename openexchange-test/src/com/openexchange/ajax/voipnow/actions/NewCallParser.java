@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.voipnow.actions;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
@@ -58,7 +57,7 @@ public class NewCallParser extends AbstractAJAXParser<NewCallResponse> {
 
     /**
      * Default constructor.
-     * @param userId 
+     * @param userId
      */
     public NewCallParser(final boolean failOnError) {
         super(failOnError);

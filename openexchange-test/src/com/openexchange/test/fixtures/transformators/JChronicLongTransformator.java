@@ -57,7 +57,7 @@ import com.openexchange.test.fixtures.FixtureLoader;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class JChronicLongTransformator extends JChronicDateTransformator {
-    
+
     public JChronicLongTransformator(FixtureLoader fixtureLoader) {
 		super(fixtureLoader);
 	}

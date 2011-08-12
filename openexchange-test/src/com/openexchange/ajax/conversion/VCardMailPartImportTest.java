@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.conversion;
 
-import com.openexchange.exception.OXException;
 import java.io.InputStream;
 
 import org.json.JSONArray;
@@ -72,9 +71,9 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
  * {@link VCardMailPartImportTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class VCardMailPartImportTest extends AbstractConversionTest {
 
@@ -90,7 +89,7 @@ public final class VCardMailPartImportTest extends AbstractConversionTest {
 
 	/**
 	 * Initializes a new {@link VCardMailPartImportTest}
-	 * 
+	 *
 	 * @param name
 	 *            The name
 	 */
@@ -100,7 +99,7 @@ public final class VCardMailPartImportTest extends AbstractConversionTest {
 
 	/**
 	 * Tests the <code>action=convert</code> request
-	 * 
+	 *
 	 * @throws Throwable
 	 */
 	public void testVCardImport() throws Throwable {

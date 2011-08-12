@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.kata.tasks;
 
-import com.openexchange.exception.OXException;
 import org.junit.Assert;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
@@ -60,7 +59,7 @@ import com.openexchange.test.TaskTestManager;
 
 /**
  * {@link TaskDeleteStep}
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class TaskDeleteStep extends NeedExistingStep<Task> {
@@ -94,7 +93,7 @@ public class TaskDeleteStep extends NeedExistingStep<Task> {
             Assert.assertNull("Should not have found task after deletion", manager.getTaskFromServer(this.entry));
             manager.setFailOnError(old);
         }
-        
+
         if (!response.hasError()) {
             forgetIdentity(entry);
         }

@@ -68,7 +68,7 @@ import com.openexchange.subscribe.Subscription;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class DoNotDuplicateEmptyContactsTest extends OXMFContactLifeCycleTest {
-    
+
     public DoNotDuplicateEmptyContactsTest(String name) {
         super(name);
     }

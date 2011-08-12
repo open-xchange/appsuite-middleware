@@ -51,9 +51,9 @@ package com.openexchange.ajax.mail.netsol;
 
 /**
  * {@link FolderAndID}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class FolderAndID {
 

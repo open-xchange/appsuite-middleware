@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.subscribe.actions;
 
-import com.openexchange.exception.OXException;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONException;
@@ -75,7 +74,7 @@ public class AllSubscriptionsRequest extends AbstractBulkSubscriptionRequest<All
 
     public AllSubscriptionsRequest(){
     }
-    
+
     public AllSubscriptionsRequest(String folder, List<String> columns) {
         this();
         setFolderID(folder);
@@ -86,12 +85,12 @@ public class AllSubscriptionsRequest extends AbstractBulkSubscriptionRequest<All
         this(folder, columns);
         setDynamicColumns(dynamicColumns);
     }
-    
+
     public AllSubscriptionsRequest(List<String> columns) {
         this(null, columns);
     }
 
-    
+
     public Object getBody() throws JSONException {
         return null;
     }
@@ -104,7 +103,7 @@ public class AllSubscriptionsRequest extends AbstractBulkSubscriptionRequest<All
         Params params = new Params(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL);
         if (getFolderID() != null)
             params.add("folder",getFolderID());
-        
+
         if (getColumns() != null) {
             params.add(getColumnsAsParameter());
         }

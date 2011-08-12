@@ -79,7 +79,7 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
 
     /**
      * Initializes a new {@link FolderVerificationStep}.
-     * 
+     *
      * @param name
      * @param expectedError
      */
@@ -108,7 +108,7 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
 
 
     private void checkViaList(FolderObject folder) throws OXException, IOException, SAXException, JSONException {
-        int[] requestedFields = FolderObject.ALL_COLUMNS;//new int[]{FolderObject.OBJECT_ID, FolderObject.FOLDER_ID}; 
+        int[] requestedFields = FolderObject.ALL_COLUMNS;//new int[]{FolderObject.OBJECT_ID, FolderObject.FOLDER_ID};
         ListRequest listRequest = new ListRequest(API.OX_OLD, Integer.toString(folder.getParentFolderID()), requestedFields, true );
         ListResponse response = client.execute(listRequest);
 
@@ -128,7 +128,7 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
         List<FolderObject> folders = response.getFolders();
         checkInList(folder, folders);
     }
-    
+
     private void checkInList(FolderObject folder, Object[][] rows, int[] columns, String typeOfAction) {
         int idPos = findIDIndex(columns);
 
@@ -159,12 +159,12 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
             }
         }
     }
-    
+
     private boolean isIgnoredColumn(int col) {
         return col == FolderObject.OWN_RIGHTS
         || col == FolderObject.PERMISSIONS_BITS
         || col == FolderObject.SUMMARY
-        || col == FolderObject.STANDARD_FOLDER 
+        || col == FolderObject.STANDARD_FOLDER
         || col == FolderObject.TOTAL
         || col == FolderObject.NEW
         || col == FolderObject.UNREAD
@@ -213,7 +213,7 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
         }
         fail("Object not found in response: (" + folder.getObjectID() + ") " + name);
     }
-    
+
     private Object transform(Object actual)  {
         return actual;
     }

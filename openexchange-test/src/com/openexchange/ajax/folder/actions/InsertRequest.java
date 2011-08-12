@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.folder.actions;
 
-import com.openexchange.exception.OXException;
 import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
@@ -94,7 +93,7 @@ public class InsertRequest extends AbstractFolderRequest<InsertResponse> {
     @Override
     protected void addParameters(List<Parameter> params) {
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW));
-        
+
         if (folder.containsModule() && folder.getModule() == FolderObject.MAIL) {
             final String[] parts = folder.getFullName().split("/");
             final StringBuilder parentBuilder = new StringBuilder();

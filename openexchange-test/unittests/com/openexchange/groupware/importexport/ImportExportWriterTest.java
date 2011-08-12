@@ -78,14 +78,14 @@ public class ImportExportWriterTest extends TestCase {
 	public void testWriteObjects() throws JSONException {
 		final ImportExportWriter writer = new ImportExportWriter(null);
 		final List<ImportResult> results = Arrays.asList(
-				new ImportResult("1", "3" , new Date() ), 
+				new ImportResult("1", "3" , new Date() ),
 				new ImportResult("2", "4", new Date() ) );
 		writer.writeObjects(results);
 		final JSONArray resArr = (JSONArray) writer.getObject();
-		JSONObject temp = resArr.getJSONObject(0); 
+		JSONObject temp = resArr.getJSONObject(0);
 		assertEquals("ID is incorrect" , "1" , temp.get(DataFields.ID) );
 		assertEquals("Folder is incorrect" , "3" , temp.get(CommonFields.FOLDER_ID) );
-		temp = resArr.getJSONObject(1); 
+		temp = resArr.getJSONObject(1);
 		assertEquals("ID is incorrect" , "2" , temp.get(DataFields.ID) );
 		assertEquals("Folder is incorrect" , "4" , temp.get(CommonFields.FOLDER_ID) );
 
@@ -114,7 +114,7 @@ public class ImportExportWriterTest extends TestCase {
         assertFalse(temp.isNull("error"));
 
         JSONArray jsonWarnings = temp.optJSONArray("warnings");
-        
+
         assertNotNull(jsonWarnings);
 
         Set<String> expectedStrings = new HashSet<String>(Arrays.asList("Warning 1", "Warning 2", "Warning 3","Warning 4")) ;

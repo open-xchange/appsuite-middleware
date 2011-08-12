@@ -83,13 +83,13 @@ public class IDGeneratorTest extends TestCase {
     private static final int THREADS = 10;
 
     private static final int TIME = 20;
-    
+
     static final Log LOG = LogFactory.getLog(IDGeneratorTest.class);
 
     static final Random rand = new Random(System.currentTimeMillis());
 
     Context context;
-    
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -171,7 +171,7 @@ public class IDGeneratorTest extends TestCase {
     class Inserter implements Runnable {
 
         boolean run = true;
-        
+
         public void run() {
             while (run) {
                 Connection con = null;

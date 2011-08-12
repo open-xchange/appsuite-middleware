@@ -49,13 +49,12 @@
 
 package com.openexchange.test.osgi;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONObject;
 import com.openexchange.ajax.LoginTest;
 
 /**
  * {@link BundleTestConfiguration} - Test absence of configuration bundle
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class BundleTestConfiguration extends AbstractBundleTest {

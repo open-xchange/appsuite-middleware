@@ -133,13 +133,13 @@ public class Executor extends Assert {
         return execute(session, request, AJAXConfig
             .getProperty(Property.PROTOCOL), hostname, getSleep());
     }
-    
+
     public static <T extends AbstractAJAXResponse> T execute(final AJAXSession session, final AJAXRequest<T> request,
         final String protocol, final String hostname) throws OXException, IOException,
         JSONException {
         return execute(session, request, protocol, hostname, getSleep());
     }
-    
+
 
     public static <T extends AbstractAJAXResponse> T execute(final AJAXSession session, final AJAXRequest<T> request,
             final String protocol, final String hostname, final int sleep) throws OXException, IOException,
@@ -280,24 +280,24 @@ public class Executor extends Assert {
     /*************************************
      *** Rewrite for HttpClient: Start ***
      *************************************/
-    
+
     private static String addQueryParamsToUri(String uri, List<NameValuePair> queryParams){
-    	
+
     	java.util.Collections.sort(queryParams, new Comparator<NameValuePair>(){
 			public int compare(NameValuePair o1, NameValuePair o2) {
 				return (o1.getName().compareTo(o2.getName()));
 			}}); //sorting the query params alphabetically
-    	
+
     	if(uri.contains("?"))
     		uri += "&";
     	else
-    		uri += "?";		
+    		uri += "?";
     	return uri + URLEncodedUtils.format(queryParams, "UTF-8");
     }
-    
+
     private static List<NameValuePair> getGETParameter(AJAXSession session, AJAXRequest<?> ajaxRequest) throws IOException, JSONException{ //new
     	List<NameValuePair> pairs = new LinkedList<NameValuePair>();
-    	
+
         if (session.getId() != null)
         	pairs.add( new BasicNameValuePair(AJAXServlet.PARAMETER_SESSION, session.getId()));
 
@@ -307,15 +307,15 @@ public class Executor extends Assert {
             }
         }
 
-        return pairs;    	    	
+        return pairs;
     }
-        
+
     private static void addUPLOADParameter(HttpPost postMethod, AJAXRequest<?> request) throws IOException, JSONException {
         MultipartEntity parts = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
-    	
+
         for (final Parameter param : request.getParameters()) {
             if (param instanceof FieldParameter) {
-                
+
                 final FieldParameter fparam = (FieldParameter) param;
                 final StringBody body = new StringBody(fparam.getFieldContent(), Charset.forName("UTF-8"));
                 parts.addPart(new FormBodyPart(fparam.getFieldName(), body));
@@ -333,9 +333,9 @@ public class Executor extends Assert {
             }
         }
         postMethod.setEntity(parts);
-        
+
     }
-    
+
     private static HttpEntity getBodyParameters(AJAXRequest<?> request) throws IOException, JSONException {
     	List<NameValuePair> pairs = new LinkedList<NameValuePair>();
 
@@ -345,7 +345,7 @@ public class Executor extends Assert {
                 pairs.add( new BasicNameValuePair(fparam.getFieldName(), fparam.getFieldContent()));
             }
         }
-        
+
         return new UrlEncodedFormEntity(pairs);
     }
     /*************************************

@@ -8,7 +8,7 @@ import com.openexchange.tx.UndoableAction;
 public class UpdateDocumentActionTest extends AbstractInfostoreActionTest {
 
 	CreateDocumentAction create = new CreateDocumentAction();
-	
+
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
@@ -18,13 +18,13 @@ public class UpdateDocumentActionTest extends AbstractInfostoreActionTest {
 		create.setQueryCatalog(getQueryCatalog());
 		create.perform();
 	}
-	
+
 	@Override
 	public void tearDown() throws Exception {
 		create.undo();
 		super.tearDown();
 	}
-	
+
 	@Override
 	protected UndoableAction getAction() throws Exception {
 		final UpdateDocumentAction update = new UpdateDocumentAction();

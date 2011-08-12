@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.Date;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
@@ -64,7 +63,7 @@ import com.openexchange.groupware.container.Appointment;
 
 /**
  * {@link Bug19489Test}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Bug19489Test extends AbstractAJAXSession {
@@ -75,7 +74,7 @@ public class Bug19489Test extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link Bug19489Test}.
-     * 
+     *
      * @param name
      */
     public Bug19489Test(String name) {
@@ -108,7 +107,7 @@ public class Bug19489Test extends AbstractAJAXSession {
         updateAppointment.setIgnoreConflicts(true);
         updateAppointment.setLastModified(new Date(Long.MAX_VALUE));
     }
-    
+
     public void testBug19489() throws Exception {
         UpdateRequest updateRequest = new UpdateRequest(updateAppointment, getClient().getValues().getTimeZone());
         UpdateResponse updateResponse = getClient().execute(updateRequest);
@@ -117,7 +116,7 @@ public class Bug19489Test extends AbstractAJAXSession {
         GetRequest getRequest = new GetRequest(appointment);
         GetResponse getResponse = getClient().execute(getRequest);
         Appointment loadedAppointment = getResponse.getAppointment(getClient().getValues().getTimeZone());
-        
+
         assertEquals("Wrong start date", appointment.getStartDate(), loadedAppointment.getStartDate());
         assertEquals("Wrong end date", appointment.getEndDate(), loadedAppointment.getEndDate());
     }

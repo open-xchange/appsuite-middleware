@@ -54,7 +54,7 @@ import static com.openexchange.java.Autoboxing.L;
 import java.util.Date;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class Create {

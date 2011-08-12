@@ -65,7 +65,7 @@ public class CTag extends SingleXMLPropertyMixin {
 
     public CTag(List<Contact> contacts, int folderId) {
         super("http://calendarserver.org/ns/", "getctag");
-        
+
         Contact youngest = null;
         for (Contact contact : contacts) {
             if (youngest == null || youngest.getLastModified().before(contact.getLastModified())) {
@@ -76,7 +76,7 @@ public class CTag extends SingleXMLPropertyMixin {
             value = "http://www.open-xchange.com/carddav/ctag/"+folderId+"_"+youngest.getLastModified().getTime();
         } else {
             value = "http://www.open-xchange.com/carddav/ctag/"+folderId;
-            
+
         }
     }
 

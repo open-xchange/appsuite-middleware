@@ -24,9 +24,9 @@ import com.openexchange.ajax.AJAXServlet;
 public abstract class AJAXTest {
 
     public class WebconversationAndSessionID {
-        
+
         private final WebConversation webConversation;
-        
+
         private final String sessionid;
 
         /**
@@ -45,7 +45,7 @@ public abstract class AJAXTest {
         public final String getSessionid() {
             return sessionid;
         }
-        
+
     }
 
     public static final String PROTOCOL = "http://";
@@ -63,7 +63,7 @@ public abstract class AJAXTest {
             logout(login);
         }
     }
-    
+
     @Test
     public void MailfilterlistTest() throws MalformedURLException, IOException, SAXException, JSONException {
         final WebconversationAndSessionID login = login();
@@ -116,7 +116,7 @@ public abstract class AJAXTest {
             action.append("addresses", "dennis.sieben@open-xchange.com");
             action.put("text", "I'm out of office");
             base.append("actioncmds", action);
-            
+
             final String newid = mailfilternew(login, getHostname(), getUsername(), base.toString(), null);
             System.out.println("Rule created with newid: " + newid);
             //mailfilterdelete(login, getHostname(), getUsername(), Integer.parseInt(newid));
@@ -137,7 +137,7 @@ public abstract class AJAXTest {
             logout(login);
         }
     }
-    
+
     @Test
     public void MailfilternewVacationPlainInBetweenTest() throws MalformedURLException, IOException, SAXException, JSONException {
         final WebconversationAndSessionID login = login();
@@ -149,7 +149,7 @@ public abstract class AJAXTest {
             logout(login);
         }
     }
-    
+
     @Test
     public void MailfilternewVacationTest() throws MalformedURLException, IOException, SAXException, JSONException {
         final WebconversationAndSessionID login = login();
@@ -161,10 +161,10 @@ public abstract class AJAXTest {
             logout(login);
         }
     }
-    
+
     /**
      * This test case is used for testing the bug that the subject was written as text
-     * 
+     *
      * @throws MalformedURLException
      * @throws IOException
      * @throws SAXException
@@ -181,7 +181,7 @@ public abstract class AJAXTest {
             logout(login);
         }
     }
-    
+
     @Test
     public void MailfilternewVacation3Test() throws MalformedURLException, IOException, SAXException, JSONException {
         final WebconversationAndSessionID login = login();
@@ -205,7 +205,7 @@ public abstract class AJAXTest {
             logout(login);
         }
     }
-    
+
     @Test
     public void MailfilternewVacationDeactiveInBetweenTest() throws MalformedURLException, IOException, SAXException, JSONException {
         final WebconversationAndSessionID login = login();
@@ -217,7 +217,7 @@ public abstract class AJAXTest {
             logout(login);
         }
     }
-    
+
     /**
      * This test is used to check the correct operation of the size test, this was dealt in bug 11519
      * @throws MalformedURLException
@@ -281,7 +281,7 @@ public abstract class AJAXTest {
         currentdate2.put("datepart", "date");
         return currentdate2;
     }
-    
+
     @Test
     public void MailfilternewTestMissingHeaders() throws MalformedURLException, IOException, SAXException, JSONException {
         final WebconversationAndSessionID login = login();
@@ -292,7 +292,7 @@ public abstract class AJAXTest {
             logout(login);
         }
     }
-    
+
     @Test
     public void MailfilternewTestWithoutPosition() throws MalformedURLException, IOException, SAXException, JSONException {
         final WebconversationAndSessionID login = login();
@@ -303,7 +303,7 @@ public abstract class AJAXTest {
             logout(login);
         }
     }
-    
+
     @Test
     public void MailfilterreorderTest() throws MalformedURLException, IOException, SAXException, JSONException {
         final WebconversationAndSessionID login = login();
@@ -314,7 +314,7 @@ public abstract class AJAXTest {
             logout(login);
         }
     }
-    
+
     @Test
     public void MailfilterupdateTest() throws MalformedURLException, IOException, SAXException, JSONException {
         final WebconversationAndSessionID login = login();
@@ -325,7 +325,7 @@ public abstract class AJAXTest {
             logout(login);
         }
     }
-    
+
     @Test
     public void MailfilterupdateTest2() throws MalformedURLException, IOException, SAXException, JSONException {
         final WebconversationAndSessionID login = login();
@@ -336,7 +336,7 @@ public abstract class AJAXTest {
             logout(login);
         }
     }
-    
+
     @Test
     public void MailfiltergetScriptTest() throws MalformedURLException, IOException, SAXException, JSONException {
         final WebconversationAndSessionID login = login();
@@ -346,7 +346,7 @@ public abstract class AJAXTest {
             logout(login);
         }
     }
-    
+
     @Test
     public void MailfilterdeleteScriptTest() throws MalformedURLException, IOException, SAXException, JSONException {
         final WebconversationAndSessionID login = login();
@@ -356,13 +356,13 @@ public abstract class AJAXTest {
             logout(login);
         }
     }
-    
+
     protected abstract String getHostname();
-    
+
     protected abstract String getUsername();
-    
+
     protected abstract WebconversationAndSessionID login() throws MalformedURLException, IOException, SAXException, JSONException;
-    
+
     private void logout(final WebconversationAndSessionID conversation) throws MalformedURLException, IOException, SAXException, JSONException {
         final WebRequest req = new GetMethodWebRequest(PROTOCOL + getHostname() + LOGOUT_URL);
         req.setParameter("action", "logout");
@@ -458,7 +458,7 @@ public abstract class AJAXTest {
         }
         System.out.println("Actioncommands:" + json.getJSONObject("data").getJSONArray("actioncommands"));
     }
-    
+
     private String mailfilternew(final WebconversationAndSessionID conversation, final String hostname, final String username, String jsonString, String errorfound) throws MalformedURLException, IOException, SAXException, JSONException {
         final byte[] bytes = jsonString.getBytes("UTF-8");
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
@@ -509,7 +509,7 @@ public abstract class AJAXTest {
         assertFalse(String.format(json.optString("error"), json.opt("error_params")), json.has("error"));
         System.out.println(json);
     }
-    
+
     private void mailfilterupdate(final WebconversationAndSessionID conversation, final String hostname, final String username, String test) throws MalformedURLException, IOException, SAXException, JSONException {
         final byte[] bytes = test.getBytes("UTF-8");
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);

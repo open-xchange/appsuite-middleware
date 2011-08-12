@@ -132,7 +132,7 @@ public class SlowCalendarTests extends AbstractCalendarTest {
             AppointmentSearchObject searchObj = new AppointmentSearchObject();
             searchObj.setPattern("*");
             searchObj.addFolder(cdao.getParentFolderID());
-            
+
             iter = sqlInterface.searchAppointments(searchObj, Appointment.OBJECT_ID, null, COLS);
             assertContains(iter, cdao);
 

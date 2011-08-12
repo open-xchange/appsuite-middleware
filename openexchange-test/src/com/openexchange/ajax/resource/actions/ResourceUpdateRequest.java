@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.resource.actions;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -62,9 +61,9 @@ import com.openexchange.resource.json.ResourceWriter;
 
 /**
  * {@link ResourceUpdateRequest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class ResourceUpdateRequest extends AbstractResourceRequest {
 
@@ -78,7 +77,7 @@ public final class ResourceUpdateRequest extends AbstractResourceRequest {
 
 	/**
 	 * Initializes a new {@link ResourceUpdateRequest}
-	 * 
+	 *
 	 * @param resource
 	 *            The resource containing values to update
 	 * @param clientLastModified
@@ -101,7 +100,7 @@ public final class ResourceUpdateRequest extends AbstractResourceRequest {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
 	 */
 	public Object getBody() throws JSONException {
@@ -110,7 +109,7 @@ public final class ResourceUpdateRequest extends AbstractResourceRequest {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
 	 */
 	public Method getMethod() {
@@ -119,7 +118,7 @@ public final class ResourceUpdateRequest extends AbstractResourceRequest {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
 	 */
 	public Parameter[] getParameters() {
@@ -132,7 +131,7 @@ public final class ResourceUpdateRequest extends AbstractResourceRequest {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
 	 */
 	public ResourceUpdateParser getParser() {

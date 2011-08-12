@@ -57,15 +57,15 @@ import com.openexchange.ajax.spellcheck.actions.suggestions.SuggestionsResponse;
 
 /**
  * {@link SuggestionsTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class SuggestionsTest extends AbstractSpellCheckTest {
 
 	/**
 	 * Initializes a new {@link SuggestionsTest}
-	 * 
+	 *
 	 * @param name
 	 */
 	public SuggestionsTest(final String name) {
@@ -74,7 +74,7 @@ public final class SuggestionsTest extends AbstractSpellCheckTest {
 
 	/**
 	 * Tests the <code>action=suggestions</code> request
-	 * 
+	 *
 	 * @throws Throwable
 	 */
 	public void testCheck() throws Throwable {
@@ -84,7 +84,7 @@ public final class SuggestionsTest extends AbstractSpellCheckTest {
 		 */
 		String htmlContent = "lvoe";
 		SuggestionsResponse suggestionsResponse = (SuggestionsResponse) Executor.execute(getSession(), new SuggestionsRequest(htmlContent, "en", true));
-		
+
 		String[] mw = suggestionsResponse.getSuggestions();
 		assertTrue("No suggestions retrieved: " + Arrays.toString(mw), mw.length > 0);
 		/*
@@ -93,10 +93,10 @@ public final class SuggestionsTest extends AbstractSpellCheckTest {
 		htmlContent = "leibe";
 		suggestionsResponse = (SuggestionsResponse) Executor.execute(getSession(), new SuggestionsRequest(htmlContent, "de", true));
 		assertFalse("Error occured!", suggestionsResponse.hasError());
-		
+
 		mw = suggestionsResponse.getSuggestions();
 		assertTrue("No suggestions retrieved: " + Arrays.toString(mw), mw.length > 0);
-		
+
 	}
-	
+
 }

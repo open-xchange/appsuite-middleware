@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail;
 
-import com.openexchange.exception.OXException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.framework.Executor;
@@ -60,7 +59,7 @@ import com.openexchange.groupware.search.Order;
 
 /**
  * {@link ThreadSortTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="karsten.will@open-xchange.com">Karsten Will</a>
  */
@@ -72,7 +71,7 @@ public final class ThreadSortTest extends AbstractMailTest {
 
     /**
      * Default constructor.
-     * 
+     *
      * @param name Name of this test.
      */
     public ThreadSortTest(final String name) {
@@ -108,7 +107,7 @@ public final class ThreadSortTest extends AbstractMailTest {
 
     /**
      * Tests the <code>action=all</code> request with thread-sort enabled on INBOX folder
-     * 
+     *
      * @throws Throwable
      */
     public void testAllThreadSort() throws Throwable {

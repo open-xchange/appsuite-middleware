@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.notify;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.tasks.Task;
 
@@ -62,7 +61,7 @@ public class Bug9256Test extends ParticipantNotifyTest {
         final Task t = getTask(participants);
         t.setTitle(null);
         notify.taskCreated(t,session);
-        
+
         final Message msg = notify.getMessages().get(0);
         assertFalse(msg.messageTitle, msg.messageTitle.contains("null"));
     }

@@ -47,7 +47,6 @@
 
 package com.openexchange.ajax.kata.folders;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -76,7 +75,7 @@ public class FolderUpdateStep extends NeedExistingStep<FolderObject>{
         assumeIdentity(entry);
         UpdateRequest updateRequest = new UpdateRequest(API.OX_OLD, entry, false);
         CommonInsertResponse updateResponse = execute(updateRequest);
-        
+
         if(!updateResponse.hasError()) {
             entry.setLastModified(updateResponse.getTimestamp());
             rememberIdentityValues(entry);

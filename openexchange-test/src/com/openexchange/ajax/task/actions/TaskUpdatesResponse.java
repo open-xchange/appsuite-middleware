@@ -57,7 +57,7 @@ import com.openexchange.groupware.tasks.Task;
 
 /**
  * {@link TaskUpdatesResponse}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class TaskUpdatesResponse extends AbstractColumnsResponse {

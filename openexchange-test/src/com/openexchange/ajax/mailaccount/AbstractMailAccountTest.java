@@ -95,12 +95,12 @@ public class AbstractMailAccountTest extends AbstractAJAXSession {
 
     protected void createMailAccount() throws OXException, IOException, SAXException, JSONException, OXException {
         mailAccountDescription = createMailAccountObject();
-        
+
         final MailAccountInsertResponse response = getClient().execute(new MailAccountInsertRequest(mailAccountDescription));
         response.fillObject(mailAccountDescription);
-        
+
     }
-    
+
     protected void deleteMailAccount() throws OXException, IOException, SAXException, JSONException {
         getClient().execute(new MailAccountDeleteRequest(mailAccountDescription.getId()));
     }

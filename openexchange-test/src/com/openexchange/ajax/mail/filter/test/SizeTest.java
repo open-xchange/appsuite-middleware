@@ -58,17 +58,17 @@ import com.openexchange.ajax.mail.filter.comparison.SizeComparison;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class SizeTest extends AbstractTest {
-	
+
 	public static final String SIZE = "size";
-	
+
 	protected SizeComparison comp;
-	
+
 	public SizeTest(final SizeComparison comp) {
 		name = SIZE;
 		this.comp = comp;
 	}
-	
+
 	public SizeComparison getComparison() {
 		return comp;
-	}	
+	}
 }

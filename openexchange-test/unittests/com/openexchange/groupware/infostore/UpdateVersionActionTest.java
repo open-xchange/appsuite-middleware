@@ -10,7 +10,7 @@ public class UpdateVersionActionTest extends AbstractInfostoreActionTest {
 
 	CreateDocumentAction create = new CreateDocumentAction();
 	CreateVersionAction create2 = new CreateVersionAction();
-	
+
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
@@ -19,22 +19,22 @@ public class UpdateVersionActionTest extends AbstractInfostoreActionTest {
 		create.setDocuments(getDocuments());
 		create.setQueryCatalog(getQueryCatalog());
 		create.perform();
-		
+
 		create2.setProvider(getProvider());
 		create2.setContext(getContext());
 		create2.setDocuments(getDocuments());
 		create2.setQueryCatalog(getQueryCatalog());
 		create2.perform();
-		
+
 	}
-	
+
 	@Override
 	public void tearDown() throws Exception {
 		create2.undo();
 		create.undo();
 		super.tearDown();
 	}
-	
+
 	@Override
 	protected UndoableAction getAction() throws Exception {
 		final UpdateVersionAction update = new UpdateVersionAction();

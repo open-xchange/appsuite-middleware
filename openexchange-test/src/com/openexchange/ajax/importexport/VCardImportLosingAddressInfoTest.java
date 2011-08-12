@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.importexport;
 
-import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.importexport.ImportResult;
@@ -71,7 +70,7 @@ public class VCardImportLosingAddressInfoTest extends AbstractVCardImportTest {
     public VCardImportLosingAddressInfoTest(String name) throws Exception {
         super(name);
     }
-    
+
     public void test14350() throws Exception {
         String vcard = "BEGIN:VCARD\n"
             + "VERSION:3.0\n"

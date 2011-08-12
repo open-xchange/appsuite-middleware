@@ -49,7 +49,6 @@
 
 package com.openexchange.webdav.action;
 
-import com.openexchange.exception.OXException;
 import java.io.UnsupportedEncodingException;
 import junit.framework.TestCase;
 
@@ -61,12 +60,12 @@ import junit.framework.TestCase;
  *
  */
 public class ApacheURLDecoderTest extends TestCase {
-    
+
     ApacheURLDecoder decoder = new ApacheURLDecoder();
-    
+
     public void testDecodePlus() throws UnsupportedEncodingException {
         // Apache likes to decode plus itself, so we have to make sure to preserve them.
-        
+
         assertDecodes("Hallo","Hallo");
         assertDecodes("Hallo%20Welt","Hallo Welt");
         assertDecodes("Hallo+Welt", "Hallo+Welt");

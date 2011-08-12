@@ -9,28 +9,28 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.container.Appointment;
 
 /**
- * 
+ *
  * {@link Bug9497Test}
  * @author Offspring
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - fixes
  *
  */
 public class Bug9497Test extends AbstractRecurrenceTest {
-	
+
 	private static final Log LOG = LogFactory.getLog(Bug9497Test.class);
     private int objectId = -1;
-	
+
 	public Bug9497Test(final String name) {
 		super(name);
 	}
-	
+
 	/**
 	 * This test case checks the calculation for appointments starting before 01.01.1970
 	 */
 	public void testBug9497() throws Exception {
 		final Date startDate = simpleDateFormatUTC.parse("1969-12-28 00:00:00");
 		final Date endDate = simpleDateFormat.parse("1969-12-29 00:00:00");
-		
+
 		final String title = "testBug9497";
 		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle(title);
@@ -54,6 +54,6 @@ public class Bug9497Test extends AbstractRecurrenceTest {
         super.tearDown();
         deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL+getHostName(), getSessionId());
     }
-	
-	
+
+
 }

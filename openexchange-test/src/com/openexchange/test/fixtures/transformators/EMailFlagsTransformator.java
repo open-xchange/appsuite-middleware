@@ -70,7 +70,7 @@ public class EMailFlagsTransformator implements Transformator {
 		}
 		return flags;
     }
-	
+
 	private int getFlag(final String flag) {
         if ("FLAG_ANSWERED".equalsIgnoreCase(flag) || "ANSWERED".equalsIgnoreCase(flag)) {
             return MailMessage.FLAG_ANSWERED;

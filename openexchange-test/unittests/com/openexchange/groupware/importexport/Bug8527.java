@@ -69,7 +69,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 
 public class Bug8527 extends AbstractICalImportTest {
-	
+
 	//workaround for JUnit 3 runner
 	public static junit.framework.Test suite() {
 		return new JUnit4TestAdapter(Bug8527.class);
@@ -145,7 +145,7 @@ public class Bug8527 extends AbstractICalImportTest {
 				"END:VCALENDAR";
         final Context ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext")) ;
         final ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "8475",ctx, false);
-		
+
 		final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
 		final int oid = Integer.valueOf( res.getObjectId() );
 		final Appointment appointmentObj = appointmentSql.getObjectById(oid, folderId);
@@ -161,9 +161,9 @@ public class Bug8527 extends AbstractICalImportTest {
 				foundStephan = true;
 			}
 		}
-		
+
 		assertTrue("Found attendee #1" , foundSteve);
 		assertTrue("Found attendee #2" , foundStephan);
-		
+
 	}
 }

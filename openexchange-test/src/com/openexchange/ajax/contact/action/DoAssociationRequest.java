@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.contact.action;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
@@ -66,7 +65,7 @@ import com.openexchange.groupware.container.Contact;
 public class DoAssociationRequest extends AbstractContactRequest<DoAssociationResponse> {
 
     private Contact contributor, aggregator;
-    
+
     public DoAssociationRequest(Contact contributor, Contact aggregator) {
         super();
         this.contributor = contributor;
@@ -89,24 +88,24 @@ public class DoAssociationRequest extends AbstractContactRequest<DoAssociationRe
             AJAXServlet.PARAMETER_ACTION,
             FinalContactConstants.ACTION_ASSOCIATE.getName()
         );
-        
+
             if(contributor.containsUserField20()){
                 params.add(FinalContactConstants.PARAMETER_UUID1.getName(), contributor.getUserField20());
             } else {
                 params.add(
-                    FinalContactConstants.PARAMETER_FOLDER_ID1.getName(), 
-                    String.valueOf(contributor.getParentFolderID()), 
-                    FinalContactConstants.PARAMETER_CONTACT_ID1.getName(), 
+                    FinalContactConstants.PARAMETER_FOLDER_ID1.getName(),
+                    String.valueOf(contributor.getParentFolderID()),
+                    FinalContactConstants.PARAMETER_CONTACT_ID1.getName(),
                     String.valueOf(contributor.getObjectID()));
             }
-            
+
             if(aggregator.containsUserField20()){
                 params.add(FinalContactConstants.PARAMETER_UUID2.getName(), aggregator.getUserField20());
             } else {
                 params.add(
-                    FinalContactConstants.PARAMETER_FOLDER_ID2.getName(), 
-                    String.valueOf(aggregator.getParentFolderID()), 
-                    FinalContactConstants.PARAMETER_CONTACT_ID2.getName(), 
+                    FinalContactConstants.PARAMETER_FOLDER_ID2.getName(),
+                    String.valueOf(aggregator.getParentFolderID()),
+                    FinalContactConstants.PARAMETER_CONTACT_ID2.getName(),
                     String.valueOf(aggregator.getObjectID()));
             }
 

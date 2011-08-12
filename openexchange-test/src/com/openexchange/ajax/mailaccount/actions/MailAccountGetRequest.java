@@ -55,18 +55,18 @@ import com.openexchange.ajax.framework.Header;
 
 /**
  * {@link MailAccountGetRequest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class MailAccountGetRequest implements AJAXRequest<MailAccountGetResponse> {
 
     private String id;
     private boolean failOnError;
-    
+
     public MailAccountGetRequest(int id) {
         this(id, true);
     }
-    
+
     public MailAccountGetRequest(int id, boolean failOnError) {
         this.id = String.valueOf(id);
         this.failOnError = failOnError;

@@ -49,24 +49,23 @@
 
 package com.openexchange.ajax.publish.tests;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.test.ContactTestManager;
 import com.openexchange.test.FolderTestManager;
 
 /**
  * {@link AbstractPublicationTest}
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public abstract class AbstractPublicationTest extends AbstractPubSubTest {
 
     protected FolderTestManager fMgr;
-    
+
     protected ContactTestManager cMgr;
-    
+
     protected PublicationTestManager pubMgr;
-    
-    
+
+
     public AbstractPublicationTest(String name) {
         super(name);
     }
@@ -78,7 +77,7 @@ public abstract class AbstractPublicationTest extends AbstractPubSubTest {
     public PublicationTestManager getPublishManager() {
         return pubMgr;
     }
-    
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();

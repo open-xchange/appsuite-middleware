@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.updater;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -64,7 +63,7 @@ import com.openexchange.ajax.updater.actions.DownloadResponse;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class UpdaterDownloadTest extends AbstractAJAXSession {
-    
+
     private AJAXClient client;
 
     /**
@@ -72,22 +71,22 @@ public class UpdaterDownloadTest extends AbstractAJAXSession {
      * @param name
      */
     public UpdaterDownloadTest(String name) {
-        super(name);        
+        super(name);
     }
-    
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
         this.client = getClient();
     }
-    
+
     public void testUpdaterDownload() throws Exception {
         DownloadRequest downloadRequest = new DownloadRequest();
         DownloadResponse response = client.execute(downloadRequest);
         byte[] downloaderBytes = response.getDownloaderBytes();
         assertTrue("Downloades file was empty.", downloaderBytes.length > 0);
     }
-    
+
     public void testUpdaterDownloadWithWrongLocale() throws Exception {
         SetRequest setRequest = new SetRequest(Tree.Language, "wx_YZ");
         client.execute(setRequest);
@@ -99,7 +98,7 @@ public class UpdaterDownloadTest extends AbstractAJAXSession {
             client.execute(setBackRequest);
         }
     }
-    
+
     @Override
     public void tearDown() throws Exception {
         super.tearDown();

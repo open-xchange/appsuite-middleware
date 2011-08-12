@@ -203,10 +203,10 @@ public class LockTest extends ActionTestCase {
         assertTrue(compare.compare(expect, res.getResponseBodyAsString()));
 
     }
-    
+
     // Bug 13482
     public void testLockWithoutXMLBody() throws OXException, UnsupportedEncodingException, JDOMException, IOException {
-        
+
         final MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
         final MockWebdavResponse res = new MockWebdavResponse();
 
@@ -237,7 +237,7 @@ public class LockTest extends ActionTestCase {
         r.save();
 
     }
-    
+
     public void testRelock() throws OXException, UnsupportedEncodingException, JDOMException, IOException {
         final String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><lockinfo xmlns=\"DAV:\"><lockscope><exclusive /></lockscope><locktype><write /></locktype><owner>Administrator</owner></lockinfo>";
 
@@ -250,24 +250,24 @@ public class LockTest extends ActionTestCase {
 
         WebdavAction action = new WebdavLockAction();
         action.perform(req, res);
-        
+
         String lockToken = res.getHeader("Lock-Token");
-        
+
         req = new MockWebdavRequest(factory, "http://localhost/");
         req.setUrl(INDEX_HTML_URL);
         req.setHeader("Timeout", "infinite");
         req.setHeader("If", "(<"+lockToken+">)");
         req.getUserInfo().put("mentionedLocks", Arrays.asList(lockToken));
         res = new MockWebdavResponse();
-        
+
         action = new WebdavLockAction();
         action.perform(req, res);
-        
+
         assertEquals(HttpServletResponse.SC_OK, res.getStatus());
 
         // LockToken Header
         assertEquals(1, factory.resolveResource(INDEX_HTML_URL).getLocks().size());
-        
+
         final String expect = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><prop xmlns=\"DAV:\"><lockdiscovery><activelock><lockscope><exclusive /></lockscope><locktype><write /></locktype><owner>Administrator</owner><depth>0</depth><locktoken><href>" + lockToken + "</href></locktoken><timeout>Infinite</timeout></activelock></lockdiscovery></prop>";
 
         final XMLCompare compare = new XMLCompare();

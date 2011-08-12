@@ -58,7 +58,7 @@ import com.openexchange.ajax.framework.Header;
 
 /**
  * {@link MailSearchRequest}
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class MailSearchRequest implements AJAXRequest<MailSearchResponse> {
@@ -73,8 +73,8 @@ public class MailSearchRequest implements AJAXRequest<MailSearchResponse> {
      * This constructor allows to set the parameters of the request.
      * For it to work properly, you also have to set the body of the
      * PUT request afterwards.
-     * 
-     * @see #setBody(JSONArray) 
+     *
+     * @see #setBody(JSONArray)
      */
     public MailSearchRequest(final String folder, final int[] columns, final int orderBy, final String orderDir, final boolean failOnError) {
         params = new LinkedList<Parameter>();
@@ -92,11 +92,11 @@ public class MailSearchRequest implements AJAXRequest<MailSearchResponse> {
             param(AJAXServlet.PARAMETER_ORDER, orderDir);
         }
     }
-    
+
     /**
      * Convenience constructor that allows the body to be passed on a
      * argument.
-     * 
+     *
      */
     public MailSearchRequest(final JSONArray body, final String folder, final int[] columns, final int orderBy, final String orderDir, final boolean failOnError) {
         this(folder, columns, orderBy, orderDir, failOnError);
@@ -106,7 +106,7 @@ public class MailSearchRequest implements AJAXRequest<MailSearchResponse> {
     public Object getBody() {
         return body;
     }
-    
+
     public void setBody(JSONArray body){
         this.body = body;
         param(AJAXServlet.PARAMETER_DATA, body.toString());

@@ -62,32 +62,32 @@ import junit.framework.TestCase;
  *
  */
 public class UseCountGlobalFirstComparatorTest extends TestCase {
-    
+
     public void testGlobalUserFolderBeforeRegularFolder() {
         Contact inGlobalFolder = new Contact();
         inGlobalFolder.setObjectID(1);
         inGlobalFolder.setParentFolderID(FolderObject.SYSTEM_LDAP_FOLDER_ID);
         inGlobalFolder.setUseCount(0);
-        
+
         Contact notInGlobalFolder = new Contact();
         notInGlobalFolder.setObjectID(2);
         notInGlobalFolder.setParentFolderID(23);
         notInGlobalFolder.setUseCount(200000);
-        
+
         assertBigger(inGlobalFolder, notInGlobalFolder);
     }
-    
+
     public void testGlobalUserFoldersByUseCount() {
         Contact lowUseCount = new Contact();
         lowUseCount.setObjectID(1);
         lowUseCount.setParentFolderID(FolderObject.SYSTEM_LDAP_FOLDER_ID);
         lowUseCount.setUseCount(0);
-        
+
         Contact highUseCount = new Contact();
         highUseCount.setObjectID(2);
         highUseCount.setParentFolderID(FolderObject.SYSTEM_LDAP_FOLDER_ID);
         highUseCount.setUseCount(200000);
-        
+
         assertBigger(highUseCount, lowUseCount);
     }
 
@@ -96,16 +96,16 @@ public class UseCountGlobalFirstComparatorTest extends TestCase {
         lowUseCount.setObjectID(1);
         lowUseCount.setParentFolderID(23);
         lowUseCount.setUseCount(0);
-        
+
         Contact highUseCount = new Contact();
         highUseCount.setObjectID(2);
         highUseCount.setParentFolderID(23);
         highUseCount.setUseCount(200000);
-        
+
         assertBigger(highUseCount, lowUseCount);
     }
 
-    
+
     private void assertBigger(Contact c1, Contact c2) {
         assertTrue("c1 was lower or equal than c2", 0 < new UseCountGlobalFirstComparator().compare(c1, c2));
     }

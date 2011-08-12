@@ -74,7 +74,7 @@ import com.openexchange.test.fixtures.SimpleCredentials;
 public class InternetAddressTransformator implements Transformator {
 
 	private FixtureLoader fixtureLoader;
-	
+
 	public InternetAddressTransformator(FixtureLoader fixtureLoader) {
 		super();
 		this.fixtureLoader = fixtureLoader;
@@ -89,19 +89,19 @@ public class InternetAddressTransformator implements Transformator {
 		String fixtureName = "users";
 		String fixtureEntry = "";
 		final String[] splitted = value.split(",");
-		
+
 		final Pattern patFlags = Pattern.compile("\\((\\w+)\\)");
 		final String plainMarker = "(plain)";
 		final boolean[] plainFLags = new boolean[splitted.length];
-		
-		for (int i = 0; i < splitted.length; i++) {		
+
+		for (int i = 0; i < splitted.length; i++) {
 	        Matcher mFlag = patFlags.matcher(splitted[i]);
 	        if(mFlag.find() && mFlag.group().contains(plainMarker)) {
 	        	plainFLags[i] = true;
 	        	splitted[i] = splitted[i].replace(plainMarker, "").replace(" ", "");
 	        }
 		}
-        
+
 		final List<InternetAddress> addresses = new ArrayList<InternetAddress>(splitted.length);
 		for (int i = 0; i < splitted.length; i++) {
 			final int idx = splitted[i].indexOf(':');
@@ -115,7 +115,7 @@ public class InternetAddressTransformator implements Transformator {
 		}
 		return addresses.toArray(new InternetAddress[addresses.size()]);
     }
-	
+
 	private InternetAddress getAddress(final String address) throws OXException {
 		try {
 			return InternetAddress.parse(address)[0];
@@ -123,9 +123,9 @@ public class InternetAddressTransformator implements Transformator {
 			throw OXException.general("Unable to parse e-mail address from " + address);
 		}
 	}
-	
+
 	private List<InternetAddress> getAddresses(final String fixtureName, final String fixtureEntry, final boolean plainFlags) throws OXException {
-		final Contact contact = ("users".equals(fixtureName)) 
+		final Contact contact = ("users".equals(fixtureName))
 			? fixtureLoader.getFixtures(fixtureName, SimpleCredentials.class).getEntry(fixtureEntry).getEntry().asContact() //users
 			: fixtureLoader.getFixtures(fixtureName, Contact.class).getEntry(fixtureEntry).getEntry(); //contacts
 		if (null == contact) {
@@ -158,7 +158,7 @@ public class InternetAddressTransformator implements Transformator {
 					} else {
 						addresses.add(new InternetAddress(contact.getEmail1()));
 					}
-					
+
 				} else if (contact.containsEmail2()) {
 					if (false == plainFlags) {
 						addresses.add(new InternetAddress(contact.getEmail2(), contact.getDisplayName()));

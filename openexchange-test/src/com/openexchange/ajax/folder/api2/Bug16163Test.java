@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.folder.api2;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Date;
 import com.openexchange.ajax.folder.actions.API;
@@ -82,7 +81,7 @@ public class Bug16163Test extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link Bug16163Test}.
-     * 
+     *
      * @param name The name
      */
     public Bug16163Test(final String name) {

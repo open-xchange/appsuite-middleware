@@ -58,7 +58,7 @@ import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.groupware.tasks.Task;
 
 /**
- * Verifies that the charset handling is correct. 
+ * Verifies that the charset handling is correct.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class CharsetTest extends AbstractTaskTest {

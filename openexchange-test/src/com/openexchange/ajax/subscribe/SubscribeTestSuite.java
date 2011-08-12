@@ -61,7 +61,7 @@ import junit.framework.TestSuite;
 
 /**
  * {@link SubscribeTestSuite}
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class SubscribeTestSuite extends TestSuite {

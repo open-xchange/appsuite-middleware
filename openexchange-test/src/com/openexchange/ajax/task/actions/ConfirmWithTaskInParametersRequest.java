@@ -56,7 +56,7 @@ import com.openexchange.groupware.tasks.Task;
 
 /**
  * {@link ConfirmWithTaskInParametersRequest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ConfirmWithTaskInParametersRequest extends AbstractConfirmRequest {

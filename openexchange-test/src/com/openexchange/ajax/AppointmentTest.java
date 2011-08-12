@@ -1235,7 +1235,7 @@ public class AppointmentTest extends AbstractAJAXTest {
     protected AJAXClient getClient() throws JSONException, IOException, OXException {
         return new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()));
     }
-    
+
     protected Appointment link(Appointment base, Appointment update){
         update.setLastModified(base.getLastModified());
         update.setParentFolderID(base.getParentFolderID());

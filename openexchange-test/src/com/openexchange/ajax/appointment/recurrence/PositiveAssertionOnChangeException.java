@@ -87,7 +87,7 @@ public class PositiveAssertionOnChangeException extends AbstractPositiveAssertio
     public void check(Appointment startAppointment, Changes changes, Expectations expectations) throws OXException {
         approachUsedForTest = "Create change exception";
         Appointment copy = startAppointment.clone();
-        
+
         if(! startAppointment.containsObjectID())
             manager.insert(copy);
 
@@ -101,7 +101,7 @@ public class PositiveAssertionOnChangeException extends AbstractPositiveAssertio
         manager.update(update);
         checkViaGet(update.getParentFolderID(), update.getObjectID(), expectations);
         checkViaList(update.getParentFolderID(), update.getObjectID(), expectations);
-        
+
         setChangeException(manager.get(update));
         setSeries(manager.get(copy));
     }

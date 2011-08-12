@@ -9,18 +9,18 @@ import com.openexchange.webdav.protocol.WebdavPath;
 
 public class NotExistTest extends ActionTestCase {
 	private MockAction mockAction;
-	
+
 	public void testNotExists() throws Exception {
 		final WebdavPath NOT_EXIST_URL = new WebdavPath("notExists.txt");
-		
+
 		final MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
 		final MockWebdavResponse res = new MockWebdavResponse();
-		
+
 		req.setUrl(NOT_EXIST_URL);
-		
+
 		final AbstractAction action = new WebdavExistsAction();
 		action.setNext(mockAction);
-		
+
 		try {
 			action.perform(req,res);
 			fail("Expected 404 Not Found");
@@ -29,18 +29,18 @@ public class NotExistTest extends ActionTestCase {
 			assertFalse(mockAction.wasActivated());
 		}
 	}
-	
+
 	public void testExists() throws Exception {
 		final WebdavPath INDEX_HTML_URL = testCollection.dup().append("index.html");
-		
+
 		final MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
 		final MockWebdavResponse res = new MockWebdavResponse();
-		
+
 		req.setUrl(INDEX_HTML_URL);
-		
+
 		final AbstractAction action = new WebdavExistsAction();
 		action.setNext(mockAction);
-		
+
 		action.perform(req,res);
 		assertTrue(mockAction.wasActivated());
 	}
@@ -70,7 +70,7 @@ public class NotExistTest extends ActionTestCase {
         req.setUrl(LOCK_NULL);
 
         final WebdavExistsAction action = new WebdavExistsAction();
-       
+
         action.setNext(mockAction);
         try {
             action.perform(req,res);
@@ -98,7 +98,7 @@ public class NotExistTest extends ActionTestCase {
 			fail("Expected 404 Not Found");
 		} catch (final WebdavProtocolException x) {
 	        assertNotNull(res.getResponseBytes());
-            assertFalse(0 == res.getResponseBytes().length);        
+            assertFalse(0 == res.getResponseBytes().length);
         }
     }
 

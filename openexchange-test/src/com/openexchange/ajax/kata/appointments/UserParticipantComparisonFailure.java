@@ -68,17 +68,17 @@ public class UserParticipantComparisonFailure extends ParticipantComparisonFailu
      */
     public UserParticipantComparisonFailure(String message, UserParticipant[] expected, UserParticipant[] actual) {
         super(
-            message, 
+            message,
             expected == null ? new UserParticipant[0] : expected,
             actual == null ? new UserParticipant[0]: actual
         );
     }
-    
+
     @Override
     public UserParticipant[] getExpectedParticipants() {
         return (UserParticipant[]) super.getExpectedParticipants();
     }
-    
+
     @Override
     public UserParticipant[] getActualParticipants() {
         return (UserParticipant[]) super.getActualParticipants();

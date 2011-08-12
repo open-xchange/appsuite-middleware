@@ -114,11 +114,11 @@ public class AppointmentObjectTest extends CalendarObjectTest {
             Appointment.TIMEZONE);
 
     }
-    
+
     @Override
     public void testAttrAccessors() {
         Appointment object = new Appointment();
-        
+
         // SHOWN_AS
         assertFalse(object.contains(SHOWN_AS));
         assertFalse(object.containsShownAs());
@@ -197,7 +197,7 @@ public class AppointmentObjectTest extends CalendarObjectTest {
 
         long start = D("24/02/2008 00:00").getTime();
         long otherStart = D("24/03/2008 00:00").getTime();
-        
+
         object.setRecurringStart(start);
         assertTrue(object.contains(RECURRENCE_START));
         assertTrue(object.containsRecurringStart());
@@ -229,7 +229,7 @@ public class AppointmentObjectTest extends CalendarObjectTest {
         assertFalse(object.containsLocation());
 
     }
-    
+
 
     public Appointment getAppointmentObject() {
         Appointment object = new Appointment();

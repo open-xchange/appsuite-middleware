@@ -60,7 +60,7 @@ import com.openexchange.ajax.framework.Header;
 public abstract class AbstractSubscriptionRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T>{
 
     private boolean failOnError;
-    
+
     public String getServletPath() {
         return "/ajax/subscriptions";
     }

@@ -79,22 +79,22 @@ import com.openexchange.test.TestInit;
 
 /**
  * {@link AllPublicationsTest}
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class AllPublicationsTest extends AbstractPublicationTest {
 	public AllPublicationsTest(String name) {
         super(name);
     }
-    
+
     public void testShouldNotFindNonExistingPublication() throws OXException, IOException, SAXException, JSONException{
         AJAXClient myClient = getClient();
-        
+
         FolderObject testFolder = getFolderManager().generateFolder("pubsub", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
         getFolderManager().insertFolderOnServer( testFolder );
-        
+
         AllPublicationsRequest req = new AllPublicationsRequest(String.valueOf(testFolder.getObjectID()), Integer.MAX_VALUE, "calendar", new LinkedList<String>());
-        
+
         AllPublicationsResponse res = myClient.execute(req);
         JSONArray data = (JSONArray) res.getData();
         assertEquals("Array should be empty", I(0), I(data.length()));
@@ -104,7 +104,7 @@ public class AllPublicationsTest extends AbstractPublicationTest {
         Contact contact = createDefaultContactFolderWithOneContact();
         String folderID = String.valueOf(contact.getParentFolderID() );
         String module = "contacts";
-        
+
         // publish
         SimPublicationTargetDiscoveryService discovery = new SimPublicationTargetDiscoveryService();
 
@@ -121,7 +121,7 @@ public class AllPublicationsTest extends AbstractPublicationTest {
         AllPublicationsResponse resp = getClient().execute(req);
         assertFalse("Should work", resp.hasError());
         assertEquals("Should have exactly one result", 1, resp.getAll().size());
-        
+
         JSONArray actual = resp.getAll().get(0);
         assertEquals("Should have same publication ID", expected.getId(), actual.getInt(0));
         assertEquals(expected.getEntityId(), actual.getJSONObject(1).get("folder"));
@@ -129,19 +129,19 @@ public class AllPublicationsTest extends AbstractPublicationTest {
         assertFalse("Should change display name", expected.getDisplayName().equals(actual.getString(3)));
         assertEquals("Should have same target ID", expected.getTarget().getId(), actual.getString(4));
     }
-    
+
     public void testShouldFindOneFreshlyCreatedPublicationForEmptyFolder() throws OXException, IOException, SAXException, JSONException, OXException, OXException{
         FolderObject folder = createDefaultContactFolder();
         String folderID = String.valueOf(folder.getObjectID() );
         String module = "contacts";
-        
+
         // publish
         SimPublicationTargetDiscoveryService discovery = new SimPublicationTargetDiscoveryService();
         pubMgr.setPublicationTargetDiscoveryService(discovery);
-        
+
         Publication expected = generatePublication(module, folderID, discovery);
         expected.setDisplayName("This will be changed");
-        
+
         pubMgr.newAction(expected);
         assertFalse("Precondition: Should be able to create a publication", pubMgr.getLastResponse().hasError());
 
@@ -150,7 +150,7 @@ public class AllPublicationsTest extends AbstractPublicationTest {
         AllPublicationsResponse resp = (AllPublicationsResponse) pubMgr.getLastResponse();
         assertFalse("Should work", resp.hasError());
         assertEquals("Should have exactly one result", 1, resp.getAll().size());
-        
+
         JSONArray actual = resp.getAll().get(0);
         assertEquals("Should have same publication ID", expected.getId(), actual.getInt(0));
         assertEquals(expected.getEntityId(), actual.getJSONObject(1).get("folder"));
@@ -158,15 +158,15 @@ public class AllPublicationsTest extends AbstractPublicationTest {
         assertFalse("Should change display name", expected.getDisplayName().equals(actual.getString(3)));
         assertEquals("Should have same target ID", expected.getTarget().getId(), actual.getString(4));
     }
-    
+
     public void testShouldFindAllPublicationsOfUser() throws OXException, IOException, SAXException, JSONException, OXException, OXException {
     	// create folders
     	FolderObject contactFolder = createDefaultContactFolder();
     	String contactModule = "contacts";
-    	
+
     	FolderObject infostoreFolder = createDefaultInfostoreFolder("Folder for Publication-"+System.currentTimeMillis());
-    	
-    	// create and upload a new Infostore item.       
+
+    	// create and upload a new Infostore item.
     	InfostoreTestManager infoMgr = getInfostoreManager();
         FolderObject infostorePublicationFolder = createDefaultInfostoreFolder("Second Folder for Publication-"+System.currentTimeMillis());
 
@@ -178,63 +178,63 @@ public class AllPublicationsTest extends AbstractPublicationTest {
         File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
         infoMgr.newAction(data, upload);
-    	
+
     	// publish
     	ArrayList<Publication> expectedPublications = new ArrayList<Publication>();
     	SimPublicationTargetDiscoveryService discovery = new SimPublicationTargetDiscoveryService();
         pubMgr.setPublicationTargetDiscoveryService(discovery);
-        
+
         Publication contactPublication = generatePublication(contactModule, String.valueOf(contactFolder.getObjectID()), discovery);
         contactPublication.setDisplayName("My Contact Publication");
         expectedPublications.add(contactPublication);
-        
+
         Publication infostorePublication = generateInfostoreFolderPublication(String.valueOf(infostoreFolder.getObjectID()), discovery);
         infostorePublication.setDisplayName("My InfostoreFolder Publication");
-        expectedPublications.add(infostorePublication);        
+        expectedPublications.add(infostorePublication);
 
         Publication infostoreItemPublication = generateInfostoreItemPublication(String.valueOf(data.getId()), discovery);
         expectedPublications.add(infostoreItemPublication);
-        
+
         for (Publication p : expectedPublications) {
         	pubMgr.newAction(p);
         	assertFalse("Precondition: Should be able to create a publication", pubMgr.getLastResponse().hasError());
         }
-        
+
         // get all publications
         pubMgr.allAction(Arrays.asList(new String[] {"id", "entity", "entityModule", "displayName", "target"}));
         AllPublicationsResponse resp = (AllPublicationsResponse) pubMgr.getLastResponse();
         List<JSONArray> all = resp.getAll();
         List<Integer> foundIds = new ArrayList<Integer>();
-        
+
         for (JSONArray c : all) {
         	int id = c.getInt(0);
         	foundIds.add(id);
         }
-        
+
         boolean foundAllContacts = true;
         for (Publication p : expectedPublications) {
         	if (!foundIds.contains(p.getId())) {
         		foundAllContacts = false;
         	}
         }
-        
+
         assertTrue("Did not get all contact publications.", foundAllContacts);
-        
-        // get all contact publications        
+
+        // get all contact publications
         pubMgr.allAction(contactModule, -1, Arrays.asList(new String[]{"id","entity", "entityModule", "displayName", "target"}));
         resp = (AllPublicationsResponse) pubMgr.getLastResponse();
         assertFalse("Should work", resp.hasError());
         List<JSONArray> allContacts = resp.getAll();
-        
+
         foundIds.clear();
-        
+
         for (JSONArray c : allContacts) {
         	int id = c.getInt(0);
         	foundIds.add(id);
         }
-        
+
         assertTrue("Did not get published contact.", foundIds.contains(contactPublication.getId()));
-        
+
         infoMgr.cleanUp();
     }
 }

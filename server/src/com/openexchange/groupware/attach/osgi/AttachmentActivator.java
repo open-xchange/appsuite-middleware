@@ -51,7 +51,6 @@ package com.openexchange.groupware.attach.osgi;
 
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.groupware.attach.json.AttachmentActionFactory;
-import com.openexchange.mail.json.MailActionFactory;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 
 /**

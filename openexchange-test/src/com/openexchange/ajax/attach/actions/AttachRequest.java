@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.attach.actions;
 
-import com.openexchange.exception.OXException;
 import java.io.InputStream;
 import org.json.JSONException;
 import org.json.JSONObject;

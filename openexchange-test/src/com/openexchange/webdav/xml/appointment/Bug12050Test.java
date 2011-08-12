@@ -68,13 +68,13 @@ public class Bug12050Test extends AppointmentTest {
     public Bug12050Test(String name) {
         super(name);
     }
-    
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
 
         FolderTest.clearFolder(webCon, new int[] {appointmentFolderId}, new String[] {"calendar"}, new Date(), PROTOCOL + hostName, login, password, context);
-        
+
         appointment = new Appointment();
         appointment.setTitle("testBug12050");
         appointment.setStartDate(startTime);
@@ -84,12 +84,12 @@ public class Bug12050Test extends AppointmentTest {
         appointment.setInterval(1);
         appointment.setOccurrence(3);
         appointment.setIgnoreConflicts(true);
-        
+
         exception = new Appointment();
         exception.setParentFolderID(appointmentFolderId);
         exception.setRecurrencePosition(2);
         exception.setTitle("testBug12050 - Exception");
-        
+
         exceptionUpdate = new Appointment();
         exceptionUpdate.setParentFolderID(appointmentFolderId);
         Date exceptionStart = new Date(startTime.getTime() + 3600 * 25 * 1000);
@@ -97,33 +97,33 @@ public class Bug12050Test extends AppointmentTest {
         Date exceptionEnd = new Date(endTime.getTime() + 3600 * 25 * 1000);
         exceptionUpdate.setEndDate(exceptionEnd);
     }
-    
+
     public void testBug12050() throws Exception {
         createAppointment();
         createException();
         updateException();
     }
-    
+
     @Override
     public void tearDown() throws Exception {
         if (objectId  != -1) {
             deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
         }
-        
+
         super.tearDown();
     }
-    
+
     private void createAppointment() throws Exception {
         objectId = insertAppointment(getWebConversation(), appointment, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
         appointment.setObjectID(objectId);
     }
-    
+
     private void createException() throws Exception {
         exception.setLastModified(appointment.getLastModified());
         int exceptionId = updateAppointment(getWebConversation(), exception, objectId, appointmentFolderId, getHostName(), getLogin(), getPassword(), context);
         exception.setObjectID(exceptionId);
     }
-    
+
     private void updateException() throws Exception {
         exceptionUpdate.setLastModified(exception.getLastModified());
         exceptionUpdate.setObjectID(exception.getObjectID());

@@ -94,7 +94,7 @@ public class Bug16284Test extends AbstractAJAXSession {
     public void testListWithoutInfoStore() throws Throwable {
         PathRequest request = new PathRequest(API.OUTLOOK, MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, MailFolder.DEFAULT_FOLDER_ID), COLUMNS, false);
         PathResponse response = client.execute(request);
-        
+
         if (!response.hasError()) {
             fail("Expected an error that primary account's root folder does not exist in Outllok folder tree.");
             return;

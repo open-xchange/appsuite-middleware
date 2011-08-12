@@ -60,13 +60,13 @@ public interface Task {
     boolean isWaitingOnAJPSocket();
 
     boolean isProcessing();
-    
+
     long getProcessingStartTime();
-    
+
     boolean isLongRunning();
-    
+
     StackTraceElement[] getStackTrace();
-    
+
     String getThreadName();
 
     void cancel();

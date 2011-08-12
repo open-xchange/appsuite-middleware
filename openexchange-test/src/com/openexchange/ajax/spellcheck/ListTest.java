@@ -58,15 +58,15 @@ import com.openexchange.ajax.spellcheck.actions.list.ListResponse;
 
 /**
  * {@link ListTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class ListTest extends AbstractSpellCheckTest {
 
 	/**
 	 * Initializes a new {@link ListTest}
-	 * 
+	 *
 	 * @param name
 	 */
 	public ListTest(final String name) {
@@ -75,20 +75,20 @@ public final class ListTest extends AbstractSpellCheckTest {
 
 	/**
 	 * Tests the <code>action=list</code> request
-	 * 
+	 *
 	 * @throws Throwable
 	 */
 	public void testList() throws Throwable {
 
 		final String userWord = "clazz";
 		Executor.execute(getSession(), new UserWordRequest(userWord, true, true));
-		
+
 		final ListResponse listResponse = (ListResponse) Executor.execute(getSession(), new ListRequest(true));
 		final String[] uw = listResponse.getUserWords();
 		assertTrue("No user words: " + Arrays.toString(uw), uw.length > 0);
-		
+
 		Executor.execute(getSession(), new UserWordRequest(userWord, false, true));
-		
+
 	}
-	
+
 }

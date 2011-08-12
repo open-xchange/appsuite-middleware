@@ -55,7 +55,7 @@ import com.openexchange.groupware.container.FolderObject;
 
 /**
  * {@link UpdateRequest}
- * 
+ *
  * @author Karsten Will <a href="mailto:karsten.will@open-xchange.com">karsten.will@open-xchange.com</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

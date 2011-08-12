@@ -372,7 +372,7 @@ public class ICalImportTest extends AbstractICalImportTest {
         }
         assertTrue("Found attendee?", found);
     }
-    
+
     @Test
     public void test16895() throws Exception{
        	String ical = "BEGIN:VCALENDAR\n"

@@ -60,7 +60,7 @@ public class Bug8681Suite extends TestSuite {
 		tests.addTest( Bug8681forICAL.suite() );
 		tests.addTest( Bug8681forVCard.suite() );
 		tests.addTest( Bug8681forCSV.suite() );
-		
+
 		return tests;
 	}
 }

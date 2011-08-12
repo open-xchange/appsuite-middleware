@@ -10,7 +10,7 @@ public class ConflictObject {
     private long startDate;
     private long endDate;
     private List<Participant> participants;
-    
+
     public String getTitle() {
         return title;
     }

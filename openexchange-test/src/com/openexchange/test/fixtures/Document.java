@@ -7,11 +7,11 @@ import java.io.File;
  * Documents are intended to be used as attachments for groupware objects.
  * This could either be a regular attachment to an appointment, a task or
  * a contact, or one specific version of an infoitem.
- * 
+ *
  * @author Tobias Friedrich <tobias.friedrich@open-xchange.com>
  */
 public class Document {
-	
+
 	private String path;
 	private File file;
 	private String mimeType;
@@ -36,14 +36,14 @@ public class Document {
 	}
 
 	/**
-	 * Gets the filename of this document's file. This is just the last name in 
-	 * the pathname's name sequence.  
+	 * Gets the filename of this document's file. This is just the last name in
+	 * the pathname's name sequence.
 	 * @return the filename, or null if the document doesn't contain a file
 	 */
 	public String getName() {
 		if (this.containsFile()) {
 			return this.getFile().getName();
-		} else {     
+		} else {
 			return null;
 		}
 	}
@@ -122,7 +122,7 @@ public class Document {
 	public SimpleCredentials getCreatedBy() {
 		return createdBy;
 	}
-	
+
 	public void setSeleniumConfiguration(String seleniumDataPath, String seleniumSeparator) {
 		this.seleniumDataPath = seleniumDataPath;
 		this.seleniumSeparator = seleniumSeparator;
@@ -162,15 +162,15 @@ public class Document {
 					return i + 1;
 				}
 			}
-		} 
+		}
 		return 0;
 	}
 
 	/**
-	 * Returns a path to this document's file on the local filesystem, using the current 
+	 * Returns a path to this document's file on the local filesystem, using the current
 	 * relative path in the local testdata directory.
-	 *  
-	 * @return the path to the local file, if a relative path is set, or null, otherwise 
+	 *
+	 * @return the path to the local file, if a relative path is set, or null, otherwise
 	 */
 	public String getLocalPath() {
 		if (this.containsPath()) {
@@ -180,13 +180,13 @@ public class Document {
 			return null;
 		}
 	}
-	
+
 
 	/**
-	 * Returns a path to this document's file on the remote filesystem, using the current 
+	 * Returns a path to this document's file on the remote filesystem, using the current
 	 * relative path in the remote testdata directory.
-	 *  
-	 * @return the path to the local file, if a relative path is set, or null, otherwise 
+	 *
+	 * @return the path to the local file, if a relative path is set, or null, otherwise
 	 */
 	public String getRemotePath() {
 		if(seleniumDataPath == null) {
@@ -217,7 +217,7 @@ public class Document {
 	public String getPath() {
 		return path;
 	}
-	
+
 	public File getDatapath() {
 		return datapath;
 	}
@@ -226,5 +226,5 @@ public class Document {
     public String toString() {
 		return containsPath() ? getPath() : super.toString();
 	}
-	
+
 }

@@ -7,25 +7,25 @@ import junit.framework.TestCase;
 
 
 public class AbstractTimedResultTest extends TestCase{
-    
+
     private TestTimedResult results;
 
     public void testExtractsLargestTimestampAfterIteration() throws Exception {
         consume(results, 1,2,6,4,3);
         assertEquals(6, results.sequenceNumber());
     }
-    
+
     public void testExtractsTimestampBeforeIteration() throws Exception {
         assertEquals(6, results.sequenceNumber());
         consume(results, 1,2,6,4,3);
     }
-    
+
     public void testExtractsTimestampInIteration() throws Exception {
         consume(results, 1,2,6);
         assertEquals(6, results.sequenceNumber());
         consume(results, 4,3);
     }
-    
+
     private void consume(TestTimedResult ttr, long...values) throws Exception {
         SearchIterator<Thing> iter = ttr.results();
         for(int i = 0; i < values.length; i++) {
@@ -34,7 +34,7 @@ public class AbstractTimedResultTest extends TestCase{
             assertEquals(iter.next().getSequenceNumber(), timestamp);
         }
     }
-    
+
     @Override
     public void setUp() {
         SearchIterator<Thing> iterator = new SearchIteratorAdapter<Thing>(new ArrayList<Thing>() {{
@@ -46,19 +46,19 @@ public class AbstractTimedResultTest extends TestCase{
         }}.iterator());
         results = new TestTimedResult(iterator);
     }
-    
+
     private static final class Thing {
         private long sequenceNumber;
 
         public Thing(long sequenceNumber) {
             this.sequenceNumber = sequenceNumber;
         }
-        
+
         private long getSequenceNumber() {
             return sequenceNumber;
         }
     }
-    
+
     private static class TestTimedResult extends AbstractTimedResult<Thing> {
 
         public TestTimedResult(SearchIterator<Thing> results) {
@@ -69,8 +69,8 @@ public class AbstractTimedResultTest extends TestCase{
         protected long extractTimestamp(Thing object) {
             return object.getSequenceNumber();
         }
-        
+
     }
-    
+
 
 }

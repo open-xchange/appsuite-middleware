@@ -73,13 +73,13 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class RequestTools {
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RequestTools.class));
-    
+
     public static int[] getColumnsAsIntArray(final AJAXRequestData request, final String parameter) throws OXException {
         final String valueStr = request.getParameter("columns");
         final String[] valueStrArr = valueStr.split(",");
-        
+
         final int[] values = new int[valueStrArr.length];
         for (int i = 0; i < values.length; i++) {
             try {
@@ -88,10 +88,10 @@ public class RequestTools {
                 throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "columns", valueStr);
             }
         }
-        
+
         return values;
     }
-    
+
     public static int getNullableIntParameter(final AJAXRequestData request, final String parameter) throws OXException {
         Integer intParam = null;
         try {
@@ -103,7 +103,7 @@ public class RequestTools {
             }
         } catch (final NumberFormatException e) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, parameter, intParam);
-        } 
+        }
     }
 
     public static int[][] buildObjectIdAndFolderId(final JSONArray json) throws OXException {
@@ -118,10 +118,10 @@ public class RequestTools {
                 throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             }
         }
-        
+
         return objectIdAndFolderId;
     }
-    
+
     public static void setImageData(final Contact contact, final UploadFile file) throws OXException {
         FileInputStream fis = null;
         try {
@@ -146,7 +146,7 @@ public class RequestTools {
                     LOG.warn("Error while closing FileInputStream for contact image upload.", e);
                 }
             }
-        }        
+        }
     }
 
 }

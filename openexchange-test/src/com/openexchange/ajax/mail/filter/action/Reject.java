@@ -51,20 +51,20 @@ package com.openexchange.ajax.mail.filter.action;
 
 /**
  * Redirect
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class Reject extends AbstractAction {
-	
+
 	public static final String REJECT = "reject";
-	
+
 	protected String text;
-	
+
 	public Reject(final String text) {
 		name = REJECT;
 		this.text = text;
 	}
-	
+
 	public String getText() {
 		return text;
 	}
@@ -92,7 +92,7 @@ public class Reject extends AbstractAction {
 				return false;
 		} else if (!text.equals(other.text))
 			return false;
-		
+
 		if (name == null) {
 			if (other.getName() != null)
 				return false;

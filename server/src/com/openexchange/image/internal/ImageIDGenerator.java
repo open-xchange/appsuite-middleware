@@ -80,7 +80,7 @@ final class ImageIDGenerator {
 
     /**
      * Generates an image ID from specified arguments.
-     * 
+     *
      * @param imageSource The image data source
      * @param imageArguments The data arguments for image data source
      * @param authId The auth id of the session that needs the generated id
@@ -107,7 +107,7 @@ final class ImageIDGenerator {
 
     /**
      * Parses specified ID to appropriate data source and data arguments.
-     * 
+     *
      * @param uniqueId The ID
      * @param service The conversion service
      * @return The data source and data arguments wrapped (in this order) in an array or <code>null</code>

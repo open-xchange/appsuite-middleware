@@ -78,7 +78,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link JSONResultConverter}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public abstract class JSONResultConverter implements ResultConverter {
@@ -106,7 +106,7 @@ public abstract class JSONResultConverter implements ResultConverter {
 
     /**
      * Initializes a new {@link JSONResultConverter}.
-     * 
+     *
      * @param imageService
      */
     public JSONResultConverter(final ImageService imageService) {
@@ -144,7 +144,7 @@ public abstract class JSONResultConverter implements ResultConverter {
                 final Date date = (Date) value;
                 return date.getTime();
             }
-            
+
             return null;
         } else if (type.equals("date_utc")) {
             // Set last_modified_utc
@@ -153,7 +153,7 @@ public abstract class JSONResultConverter implements ResultConverter {
             calendar.setTime(lastModified);
             final int offset = calendar.get(Calendar.ZONE_OFFSET) + calendar.get(Calendar.DST_OFFSET);
             calendar.add(Calendar.MILLISECOND, -offset);
-            
+
             return calendar.getTime().getTime();
         } else if (type.equals("image")) {
             String imageUrl = null;
@@ -171,7 +171,7 @@ public abstract class JSONResultConverter implements ResultConverter {
                     imageUrl = imageService.addImageData(session, imgSource, args).getImageURL();
                 }
             }
-            
+
             return imageUrl;
         } else if (type.equals("distributionlist")) {
             JSONArray distributionList = null;
@@ -180,7 +180,7 @@ public abstract class JSONResultConverter implements ResultConverter {
             } catch (final JSONException e) {
                 throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             }
-            
+
             return distributionList;
         } else if (type.equals("links")) {
             JSONArray links = null;
@@ -189,25 +189,25 @@ public abstract class JSONResultConverter implements ResultConverter {
             } catch (final JSONException e) {
                 throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             }
-            
+
             return links;
         } else {
             return null;
         }
     }
-    
+
     private JSONArray getDistributionListAsJSONArray(final Contact contact) throws JSONException {
         final DistributionListEntryObject[] distributionList = contact.getDistributionList();
         if (distributionList == null) {
             return null;
         }
-        
+
         final JSONArray jsonArray = new JSONArray();
         for (int i = 0; i < distributionList.length; i++) {
             final JSONObject entry = new JSONObject();
             final int emailField = distributionList[i].getEmailfield();
 
-            if (!(emailField == DistributionListEntryObject.INDEPENDENT)) { 
+            if (!(emailField == DistributionListEntryObject.INDEPENDENT)) {
                 entry.put(DistributionListFields.ID, distributionList[i].getEntryID());
             }
 
@@ -217,10 +217,10 @@ public abstract class JSONResultConverter implements ResultConverter {
 
             jsonArray.put(entry);
         }
-        
+
         return jsonArray;
     }
-    
+
     private JSONArray getLinksAsJSONArray(final Contact contact) throws JSONException {
         final LinkEntryObject[] links = contact.getLinks();
 
@@ -229,15 +229,15 @@ public abstract class JSONResultConverter implements ResultConverter {
             for (int i = 0; i < links.length; i++) {
                 final LinkEntryObject link = links[i];
                 final JSONObject jsonLink = new JSONObject();
-                
+
                 if (link.containsLinkID()) {
                     jsonLink.put(ContactFields.ID, link.getLinkID());
                 }
-                
+
                 jsonLink.put(ContactFields.DISPLAY_NAME, link.getLinkDisplayname());
                 jsonLinks.put(jsonLink);
             }
-            
+
             return jsonLinks;
         }
         return null;

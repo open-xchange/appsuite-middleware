@@ -55,13 +55,13 @@ package com.openexchange.ajax.mail.filter.action;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class Discard extends AbstractAction {
-	
+
 	public static final String DISCARD = "discard";
-	
+
 	public Discard() {
 		name = DISCARD;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

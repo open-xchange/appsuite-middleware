@@ -94,7 +94,7 @@ public class DispatcherActivator extends HousekeepingActivator {
 
         final DefaultConverter defaultConverter = new DefaultConverter();
         defaultConverter.addConverter(new DebugConverter());
-        
+
         for(ResultConverter converter : BasicTypeAPIResponseConverter.CONVERTERS) {
         	defaultConverter.addConverter(converter);
         }
@@ -164,7 +164,7 @@ public class DispatcherActivator extends HousekeepingActivator {
         private final DispatcherServlet servlet;
 
         private Set<String> registrationGuardian = new HashSet<String>();
-        
+
         private final Map<String, SessionServletRegistration> registrations = new HashMap<String, SessionServletRegistration>();
         private final Map<String, ServiceRegistration<AJAXActionServiceFactory>> serviceRegistrations = new HashMap<String, ServiceRegistration<AJAXActionServiceFactory>>();
 
@@ -179,12 +179,12 @@ public class DispatcherActivator extends HousekeepingActivator {
         public void added(final ServiceReference<AJAXActionServiceFactory> ref, final AJAXActionServiceFactory thing) {
             final String module = (String) ref.getProperty("module");
             dispatcher.register(module, thing);
-            
+
             if (registrationGuardian.contains(module)) {
             	return;
             }
             registrationGuardian.add(module);
-            
+
             final SessionServletRegistration registration = new SessionServletRegistration(rcontext, servlet, "/ajax/"+module);
             registrations.put(module, registration);
             rememberTracker(registration);

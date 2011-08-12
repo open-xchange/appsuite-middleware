@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.simple;
 
-import com.openexchange.exception.OXException;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -69,37 +68,37 @@ import junit.framework.TestCase;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class AbstractSimpleClientTest extends TestCase {
-    
+
     protected static final String USER1 = "login";
     protected static final String USER2 = "seconduser";
     protected static final String USER3 = "thirdlogin";
     protected static final String USER4 = "fourthlogin";
-    
+
     protected Properties ajaxProperties;
-    
+
     protected SimpleOXClient currentClient;
     protected SimpleOXModule currentModule;
     protected SimpleResponse lastResponse;
-    
-    
+
+
     private Map<String, SimpleOXClient> authenticatedClients = new HashMap<String, SimpleOXClient>();
     protected JSONObject rawResponse;
-    
+
     public AbstractSimpleClientTest() {
-        
+
     }
-    
+
     public AbstractSimpleClientTest(String name) {
         super(name);
     }
-    
+
     public SimpleOXClient createClient() throws Exception{
         Properties properties = getAJAXProperties();
         String host = properties.getProperty("hostname");
         boolean secure = "https".equalsIgnoreCase(properties.getProperty("protocol"));
         return currentClient = new SimpleOXClient(host, secure);
     }
-    
+
     public SimpleOXClient as(String user) throws Exception {
         if(authenticatedClients.containsKey(user)) {
             currentClient = authenticatedClients.get(user);
@@ -111,19 +110,19 @@ public class AbstractSimpleClientTest extends TestCase {
         }
         return currentClient;
     }
-    
+
     public SimpleOXClient asUser(String user) throws Exception{
         return as(user);
     }
-    
+
     public JSONObject raw(String action, Object...parameters) throws Exception {
         return rawResponse = currentModule.raw(action, parameters);
     }
-    
+
     public JSONObject rawGeneral(String module, String action, Object...parameters) throws Exception {
         return rawResponse = currentClient.raw(module, action, parameters);
     }
-    
+
     public SimpleResponse call(String action, Object...parameters) throws Exception {
         return lastResponse = currentModule.call(action, parameters);
     }
@@ -131,43 +130,43 @@ public class AbstractSimpleClientTest extends TestCase {
     public SimpleResponse callGeneral(String module, String action, Object...parameters) throws Exception {
         return lastResponse = currentClient.call(module, action, parameters);
     }
-    
+
     public SimpleOXModule module(String module) {
         return currentModule = currentClient.getModule(module);
     }
-    
+
     public SimpleOXModule inModule(String module) {
         return module(module);
     }
-    
+
     public static void assertNoError(SimpleResponse response) {
         assertFalse(response.getError(), response.hasError());
     }
-    
+
     public void assertNoError() {
         assertNoError(lastResponse);
     }
-    
+
     public static void assertError(SimpleResponse response) {
         assertTrue(response.hasError());
     }
-    
+
     public void assertError() {
         assertError(lastResponse);
     }
-    
+
     public Map<String, Object> details() {
         return lastResponse.getObjectData();
     }
-    
+
     public List<List<Object>> list() {
         return lastResponse.getListData();
     }
-    
+
     public void assertDataIs(Object expected) {
         assertEquals(expected, lastResponse.getData());
     }
-    
+
     public String[] credentials(String user) throws Exception {
         Properties properties = getAJAXProperties();
         return new String[] {
@@ -175,7 +174,7 @@ public class AbstractSimpleClientTest extends TestCase {
             properties.getProperty("password")
         };
     }
-    
+
     protected Properties getAJAXProperties() throws Exception {
         if(ajaxProperties != null) {
             return ajaxProperties;
@@ -197,9 +196,9 @@ public class AbstractSimpleClientTest extends TestCase {
             }
         }
     }
-    
+
     public void assertRaw(JSONAssertion assertion) {
         JSONAssertion.assertValidates(assertion, rawResponse);
     }
-    
+
 }

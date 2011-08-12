@@ -55,16 +55,16 @@ package com.openexchange.ajax.mail.filter.test;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class NotTest extends AbstractTest {
-	
+
 	public static final String NOT = "not";
-	
+
 	protected AbstractTest test;
-	
+
 	public NotTest(final AbstractTest test) {
 		name = NOT;
 		this.test = test;
 	}
-	
+
 	public AbstractTest getTest() {
 		return test;
 	}

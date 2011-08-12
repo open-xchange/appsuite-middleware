@@ -57,12 +57,12 @@ import com.openexchange.webdav.xml.fields.CommonFields;
  */
 
 public abstract class FolderChildParser extends DataParser {
-	
-	protected void parseElementFolderChildObject(final FolderChildObject folderchildobject, final Element eProp) {		
+
+	protected void parseElementFolderChildObject(final FolderChildObject folderchildobject, final Element eProp) {
 		if (hasElement(eProp.getChild(CommonFields.FOLDER_ID, XmlServlet.NS))) {
 			folderchildobject.setParentFolderID(getValueAsInt(eProp.getChild(CommonFields.FOLDER_ID, XmlServlet.NS)));
-		} 
-		
+		}
+
 		parseElement(folderchildobject, eProp);
 	}
 }

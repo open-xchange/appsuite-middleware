@@ -60,7 +60,7 @@ import com.openexchange.test.fixtures.Fixtures;
 
 /**
  * {@link FixtureStepFactory}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FixtureStepFactory {
@@ -83,14 +83,14 @@ public class FixtureStepFactory {
 
     private <T> void addFixtures(Class<T> aClass, Fixtures<T> fixtures, List<Step> steps,  String filename) throws OXException {
         List<FixtureTransformer> transformer = getAllTransformers();
-        
+
         List<Entry<T>> entries = new ArrayList<Entry<T>>();
         for (String name : fixtures.getEntryNames()) {
             Fixture<T> entry = fixtures.getEntry(name);
             entries.add(new Entry<T>(name, entry));
         }
         Collections.sort(entries);
-        
+
         for(Entry<T> entry : entries) {
             for(FixtureTransformer trans : transformer) {
                 if(trans.handles(aClass, entry.name, entry.fixture)) {
@@ -98,7 +98,7 @@ public class FixtureStepFactory {
                 }
             }
         }
-        
+
         for (FixtureTransformer trans : transformer) {
             trans.resolveAll();
         }
@@ -112,11 +112,11 @@ public class FixtureStepFactory {
             add(new FolderFixtureTransformer());
         }};
     }
-    
+
     private static final class Entry<T> implements Comparable<Entry<T>>{
         public String name;
         public Fixture<T> fixture;
-        
+
         public Entry(String name, Fixture<T> fixture) {
             this.name = name;
             this.fixture = fixture;
@@ -127,7 +127,7 @@ public class FixtureStepFactory {
             Long otherStep = o.fixture.getAttribute("step") != null ? (Long)o.fixture.getAttribute("step") : Long.valueOf(0);
             return new Long(myStep.longValue() - otherStep.longValue()).intValue();
         }
-        
+
         @Override
         public String toString() {
             return name;

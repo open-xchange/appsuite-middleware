@@ -95,7 +95,7 @@ public abstract class AJPv13Server {
 
     /**
      * Gets the instance.
-     * 
+     *
      * @return The instance
      */
     public static AJPv13Server getInstance() {

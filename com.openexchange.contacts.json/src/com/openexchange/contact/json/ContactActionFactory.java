@@ -76,9 +76,9 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class ContactActionFactory implements AJAXActionServiceFactory {
-    
+
     private static final Map<String, ContactAction> ACTIONS = new ConcurrentHashMap<String, ContactAction>();
-    
+
     public ContactActionFactory(final ServiceLookup serviceLookup) {
         super();
         ACTIONS.put("get", new GetAction(serviceLookup));
@@ -92,7 +92,7 @@ public class ContactActionFactory implements AJAXActionServiceFactory {
         ACTIONS.put("getuser", new GetUserAction(serviceLookup));
         ACTIONS.put("copy", new CopyAction(serviceLookup));
         ACTIONS.put("search", new SearchAction(serviceLookup));
-        ACTIONS.put("advancedSearch", new AdvancedSearchAction(serviceLookup));        
+        ACTIONS.put("advancedSearch", new AdvancedSearchAction(serviceLookup));
     }
 
     @Override

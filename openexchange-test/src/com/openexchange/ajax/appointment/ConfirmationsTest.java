@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.calendar.storage.ParticipantStorage.extractExternal;
 import java.util.ArrayList;
 import java.util.Arrays;

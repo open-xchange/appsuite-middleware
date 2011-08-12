@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.notify.imip;
 
-import com.openexchange.exception.OXException;
 import java.util.List;
 import javax.mail.internet.MimeMultipart;
 import com.openexchange.data.conversion.ical.ITipMethod;
@@ -71,7 +70,7 @@ public class IMipDeleteAppointmentTest extends IMipTest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        
+
         appointment = appointments.buildAppointmentWithUserParticipants(user, secondUser);
         Participant external = new ExternalUserParticipant("external@example.invalid");
 
@@ -91,14 +90,14 @@ public class IMipDeleteAppointmentTest extends IMipTest {
     public void tearDown() throws Exception {
         super.tearDown();
     }
-    
+
     public void testMailForParticipants() throws Exception {
         notify.appointmentDeleted(appointment, so);
         List<Message> messages = notify.getMessages();
-        
+
         boolean foundSecond = false;
         boolean foundThird = false;
-        
+
         for (Message message : messages) {
             if (message.addresses.contains(userMail)) {
                 fail("owner should not get delete mail");
@@ -112,7 +111,7 @@ public class IMipDeleteAppointmentTest extends IMipTest {
                 checkState(message.message, ITipMethod.CANCEL);
             }
         }
-        
+
         assertTrue("missing user", foundSecond);
         assertTrue("missing user", foundThird);
     }

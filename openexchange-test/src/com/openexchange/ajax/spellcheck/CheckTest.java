@@ -57,15 +57,15 @@ import com.openexchange.ajax.spellcheck.actions.check.CheckResponse;
 
 /**
  * {@link CheckTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class CheckTest extends AbstractSpellCheckTest {
 
 	/**
 	 * Initializes a new {@link CheckTest}
-	 * 
+	 *
 	 * @param name
 	 */
 	public CheckTest(final String name) {
@@ -74,7 +74,7 @@ public final class CheckTest extends AbstractSpellCheckTest {
 
 	/**
 	 * Tests the <code>action=check</code> request
-	 * 
+	 *
 	 * @throws Throwable
 	 */
 	public void testCheck() throws Throwable {
@@ -84,7 +84,7 @@ public final class CheckTest extends AbstractSpellCheckTest {
 		 */
 		String htmlContent = "<html><head><title>quetsche</title></head><body>I lvoe you</body></html>";
 		CheckResponse checkResponse = (CheckResponse) Executor.execute(getSession(), new CheckRequest(htmlContent, "en", true));
-		
+
 		String[] mw = checkResponse.getMisspeltWords();
 		assertTrue("Too many misspelt words: " + Arrays.toString(mw), mw.length == 1);
 		assertTrue("Unexpected misspelt word: " + mw[0], "lvoe".equals(mw[0]));
@@ -94,11 +94,11 @@ public final class CheckTest extends AbstractSpellCheckTest {
 		htmlContent = "<html><head><title>quetsche</title></head><body>Ich leibe Dich</body></html>";
 		checkResponse = (CheckResponse) Executor.execute(getSession(), new CheckRequest(htmlContent, "de", true));
 		assertFalse("Error occured!", checkResponse.hasError());
-		
+
 		mw = checkResponse.getMisspeltWords();
 		assertTrue("Too many misspelt words: " + Arrays.toString(mw), mw.length == 1);
 		assertTrue("Unexpected misspelt word: " + mw[0], "leibe".equals(mw[0]));
-		
+
 	}
-	
+
 }

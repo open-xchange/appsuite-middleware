@@ -56,7 +56,7 @@ import javax.servlet.ServletOutputStream;
 
 /**
  * {@link ActionAwarePrintWriter} - The {@link PrintWriter} backed by a {@link ServletOutputStream} instance.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ActionAwarePrintWriter extends PrintWriter {
@@ -67,7 +67,7 @@ public final class ActionAwarePrintWriter extends PrintWriter {
 
     /**
      * Initializes a new {@link ActionAwarePrintWriter}.
-     * 
+     *
      * @param out
      */
     public ActionAwarePrintWriter(final ActionAwareServletOutputStream outputStream) {
@@ -225,7 +225,7 @@ public final class ActionAwarePrintWriter extends PrintWriter {
      * This {@link Writer} writes all data to the famous <b>/dev/null</b>.
      * <p>
      * This <code>Writer</code> has no destination (file/socket etc.) and all characters written to it are ignored and lost.
-     * 
+     *
      * @version $Id: NullWriter.java 610010 2008-01-08 14:50:59Z niallp $
      */
     private static final class NullWriter extends Writer {
@@ -239,7 +239,7 @@ public final class ActionAwarePrintWriter extends PrintWriter {
 
         /**
          * Does nothing - output to <code>/dev/null</code>.
-         * 
+         *
          * @param idx The character to write
          */
         @Override
@@ -249,7 +249,7 @@ public final class ActionAwarePrintWriter extends PrintWriter {
 
         /**
          * Does nothing - output to <code>/dev/null</code>.
-         * 
+         *
          * @param chr The characters to write
          */
         @Override
@@ -259,7 +259,7 @@ public final class ActionAwarePrintWriter extends PrintWriter {
 
         /**
          * Does nothing - output to <code>/dev/null</code>.
-         * 
+         *
          * @param chr The characters to write
          * @param st The start offset
          * @param end The number of characters to write
@@ -271,7 +271,7 @@ public final class ActionAwarePrintWriter extends PrintWriter {
 
         /**
          * Does nothing - output to <code>/dev/null</code>.
-         * 
+         *
          * @param str The string to write
          */
         @Override
@@ -281,7 +281,7 @@ public final class ActionAwarePrintWriter extends PrintWriter {
 
         /**
          * Does nothing - output to <code>/dev/null</code>.
-         * 
+         *
          * @param str The string to write
          * @param st The start offset
          * @param end The number of characters to write

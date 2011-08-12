@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.task;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.exception.OXException.Truncated;
 import com.openexchange.ajax.task.actions.InsertRequest;

@@ -62,14 +62,14 @@ public class CreateSubscribeTableTest extends UpdateTest {
     public void setUp() throws Exception {
         super.setUp();
     }
-    
+
     @Override
     public void tearDown() throws Exception {
         execSafe("DROP TABLE subscriptions");
         execSafe("DROP TABLE sequence_subscriptions");
         super.tearDown();
     }
-    
+
     public void testShouldCreateSubscriptionsTable() throws OXException {
         executeTask();
         try {
@@ -78,7 +78,7 @@ public class CreateSubscribeTableTest extends UpdateTest {
             fail("Expected table subscriptions, but doesn't seem to exist: "+x.toString());
         }
     }
-    
+
     public void testShouldCreateSequenceTable() throws OXException {
         executeTask();
         try {
@@ -87,16 +87,16 @@ public class CreateSubscribeTableTest extends UpdateTest {
             fail("Expected table sequence_subscriptions, but doesn't seem to exist: "+x.toString());
         }
     }
-    
+
     public void testShouldCreateEntryInSequenceTableForEveryContext() throws OXException, SQLException {
         executeTask();
         assertResult("SELECT 1 FROM sequence_subscriptions WHERE cid = "+existing_ctx_id);
     }
-    
+
     private void executeTask() throws OXException {
         new CreateSubscribeTableTask().perform(schema, existing_ctx_id);
     }
-    
+
     public void testShouldBeRunnableTwice() throws OXException {
         executeTask();
         executeTask();

@@ -25,11 +25,11 @@ public class Bug19681_TimezoneForUtcProperties extends ManagedAppointmentTest {
 		+"PRIORITY:5\n"
 		+"END:VEVENT\n"
 		+"END:VCALENDAR\n";
-	
+
 	public Bug19681_TimezoneForUtcProperties(String name) {
 		super(name);
 	}
-	
+
 	public void testErroneousFile() throws Exception {
 		ICalImportResponse response = getClient().execute(new ICalImportRequest(folder.getObjectID(), ical, false));
 		assertTrue("Needs to fail because TZID is not allowed with DTSTAMP", response.hasError());
@@ -41,6 +41,6 @@ public class Bug19681_TimezoneForUtcProperties extends ManagedAppointmentTest {
 		assertFalse("Should run smoothly with correct DTSTAMP", response.hasError());
 		assertFalse("Should run smoothly with correct DTSTAMP", response.hasConflicts());
 	}
-	
+
 
 }

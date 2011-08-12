@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.contact;
 
-import com.openexchange.exception.OXException;
 import java.util.Date;
 import java.util.TimeZone;
 import com.openexchange.ajax.ContactTest;
@@ -67,7 +66,7 @@ import com.openexchange.groupware.container.Contact;
 
 /**
  * {@link Bug16618Test}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Bug16618Test extends AbstractAJAXSession {

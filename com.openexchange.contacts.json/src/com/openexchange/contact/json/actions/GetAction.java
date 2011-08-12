@@ -77,15 +77,15 @@ public class GetAction extends ContactAction {
         final int folder = req.getFolder();
         final TimeZone timeZone = req.getTimeZone();
         final ServerSession session = req.getSession();
-        
+
         final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
-        final Contact contact = contactInterface.getObjectById(id, folder);     
+        final Contact contact = contactInterface.getObjectById(id, folder);
         final Date lastModified = contact.getLastModified();
-        
+
         // Correct last modified and creation date with users timezone
         contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
         contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
-        
+
         return new AJAXRequestResult(contact, lastModified, "contact");
     }
 }

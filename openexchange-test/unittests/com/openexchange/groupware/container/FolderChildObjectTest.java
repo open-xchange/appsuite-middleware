@@ -7,12 +7,12 @@ public class FolderChildObjectTest extends DataObjectTest {
     public void testFindDifferingFields() {
         FolderChildObject dataObject = getFolderChildObject();
         FolderChildObject otherDataObject = getFolderChildObject();
-        
+
         otherDataObject.setParentFolderID(42);
         assertDifferences(dataObject, otherDataObject , FolderChildObject.FOLDER_ID);
 
     }
-    
+
     @Override
     public void testAttrAccessors() {
         FolderChildObject object = new FolderChildObject(){};
@@ -33,7 +33,7 @@ public class FolderChildObjectTest extends DataObjectTest {
         assertFalse(object.containsParentFolderID());
 
     }
-    
+
     private FolderChildObject getFolderChildObject() {
         FolderChildObject fco = new FolderChildObject(){};
         fillFolderChildObject(fco);
@@ -44,5 +44,5 @@ public class FolderChildObjectTest extends DataObjectTest {
         super.fillDataObject(fco);
         fco.setParentFolderID(23);
     }
-    
+
 }

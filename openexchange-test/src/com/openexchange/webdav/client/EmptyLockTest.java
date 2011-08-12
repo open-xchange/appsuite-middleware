@@ -49,7 +49,6 @@
 
 package com.openexchange.webdav.client;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.apache.commons.httpclient.HttpException;
 import com.openexchange.webdav.WebdavClientTest;
@@ -66,13 +65,13 @@ public class EmptyLockTest extends WebdavClientTest {
         mkdir("test");
         clean.add("test");
         assertContent("", "test");
-        
-        
+
+
         save("test/test.txt", "Hallo Welt");
-       
+
         // Survive Lock without body without errors
         lock("test/test.txt", 180);
-        
-        
+
+
     }
 }

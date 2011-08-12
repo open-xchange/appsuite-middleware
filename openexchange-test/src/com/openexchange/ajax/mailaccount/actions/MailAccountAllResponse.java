@@ -72,7 +72,7 @@ public class MailAccountAllResponse extends AbstractAJAXResponse {
     public List<MailAccountDescription> getDescriptions() {
         return descriptions;
     }
-    
+
     public void setDescriptions(List<MailAccountDescription> descriptions) {
         this.descriptions = descriptions;
     }

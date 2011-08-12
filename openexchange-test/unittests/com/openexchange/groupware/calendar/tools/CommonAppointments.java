@@ -97,9 +97,9 @@ public class CommonAppointments {
     }
 
 	/**
-	 * 
+	 *
 	 * Returns the folder ID of user's private calendar folder
-	 * 
+	 *
 	 * @return The folder ID of user's private calendar folder
 	 */
 	public int getPrivateFolder() {
@@ -119,11 +119,11 @@ public class CommonAppointments {
         cdao.setDayInMonth(3);
         cdao.setInterval(2);
         cdao.setDays(CalendarObject.TUESDAY);
-        
+
         cdao.setContext(ctx);
         return cdao;
     }
-    
+
     public void copyRecurringInformation(CalendarDataObject source, CalendarDataObject target) {
         Set<Integer> recurrenceFields = new HashSet<Integer>() {
 
@@ -137,7 +137,7 @@ public class CommonAppointments {
                 add(CalendarObject.UNTIL);
             }
         };
-        
+
         for (int recurrenceField : recurrenceFields) {
             if (source.contains(recurrenceField)) {
                 if (recurrenceField == CalendarObject.UNTIL && target.contains(CalendarObject.RECURRENCE_COUNT))
@@ -209,7 +209,7 @@ public class CommonAppointments {
         cdao.setParticipants(participants);
         cdao.setUsers(userParticipants);
         cdao.setContainsResources(resources.length > 0);
-        
+
         return cdao;
     }
 
@@ -236,7 +236,7 @@ public class CommonAppointments {
         }
         return conflicts;
     }
-    
+
     public CalendarDataObject[] save(final CalendarDataObject cdao) throws OXException {
         CalendarDataObject[] conflicts = null;
         if(cdao.containsObjectID()) {
@@ -276,10 +276,10 @@ public class CommonAppointments {
             }
         } finally {
             if(stmt != null) {
-                stmt.close();                    
+                stmt.close();
             }
             if(writeCon != null) {
-                DBPool.closeWriterSilent(ctx, writeCon);                    
+                DBPool.closeWriterSilent(ctx, writeCon);
             }
         }
 
@@ -293,7 +293,7 @@ public class CommonAppointments {
     public List<Appointment> getAppointmentsInFolder(final int folderId) throws OXException {
         return getAppointmentsInFolder(folderId, new int[]{CalendarDataObject.OBJECT_ID});
     }
-    
+
     public List<Appointment> getAppointmentsInFolder(final int folderId, int[] columns) throws OXException {
         final List<Appointment> cdao = new ArrayList<Appointment>();
         try {
@@ -374,11 +374,11 @@ public class CommonAppointments {
     public AppointmentSQLInterface getCurrentAppointmentSQLInterface() {
         return calendar;
     }
-    
+
     public CalendarDataObject load(final int objectId, final int inFolder) throws OXException, SQLException {
         return calendar.getObjectById(objectId, inFolder);
     }
-    
+
     public void confirm(int objectId, int userId, int status, String message) throws OXException {
         calendar.setUserConfirmation(objectId, getPrivateFolder(), userId, status, message);
     }

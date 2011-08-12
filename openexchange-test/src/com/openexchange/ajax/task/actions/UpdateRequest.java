@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.task.actions;
 
-import com.openexchange.exception.OXException;
 import java.util.TimeZone;
 
 import org.json.JSONException;
@@ -86,7 +85,7 @@ public class UpdateRequest extends AbstractTaskRequest<UpdateResponse> {
     public UpdateRequest(final Task task, final TimeZone timeZone) {
         this(task.getParentFolderID(), true, task, timeZone);
     }
-    
+
     public UpdateRequest(final Task task, final TimeZone timeZone, boolean failOnError) {
         this(task.getParentFolderID(), true, task, timeZone, failOnError);
     }
@@ -103,7 +102,7 @@ public class UpdateRequest extends AbstractTaskRequest<UpdateResponse> {
         final TimeZone timeZone) {
         this(folderId, false, task, timeZone);
     }
-    
+
     public UpdateRequest(final int folderId, final Task task,
         final TimeZone timeZone, boolean failOnError) {
         this(folderId, false, task, timeZone, failOnError);
@@ -113,7 +112,7 @@ public class UpdateRequest extends AbstractTaskRequest<UpdateResponse> {
         final Task task, final TimeZone timeZone) {
         this(folderId, removeFolderId, task, timeZone, true);
     }
-    
+
     private UpdateRequest(final int folderId, final boolean removeFolderId,
         final Task task, final TimeZone timeZone, boolean failOnError) {
         super();
@@ -133,7 +132,7 @@ public class UpdateRequest extends AbstractTaskRequest<UpdateResponse> {
         if (removeFolderId) {
             json.remove(TaskFields.FOLDER_ID);
         }
-        
+
         return json;
     }
 

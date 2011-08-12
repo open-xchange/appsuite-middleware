@@ -62,7 +62,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AbstractCalendarJSONResultConverter}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public abstract class AbstractCalendarJSONResultConverter implements ResultConverter {

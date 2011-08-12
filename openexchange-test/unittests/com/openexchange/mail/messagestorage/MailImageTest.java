@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.messagestorage;
 
-import com.openexchange.exception.OXException;
 import java.util.HashSet;
 import java.util.Set;
 import org.json.JSONArray;
@@ -69,9 +68,9 @@ import com.openexchange.sessiond.impl.SessionObject;
 
 /**
  * {@link MailImageTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class MailImageTest extends AbstractMailTest {
 
@@ -160,7 +159,7 @@ public final class MailImageTest extends AbstractMailTest {
 			+ "------=_Part_0_295964671.1199717561565--\n" + "\n";
 
 	/**
-	 * 
+	 *
 	 */
 	public MailImageTest() {
 		super();
@@ -209,7 +208,7 @@ public final class MailImageTest extends AbstractMailTest {
 					fail("Missing attachments");
 				}
 				assertTrue("No Content-Id header(s) found", cids.size() > 0);
-				
+
 				for (final String cid : cids) {
 					final MailPart imgPart = mailAccess.getMessageStorage().getImageAttachment("INBOX", uid, cid);
 					assertFalse("No image part found for Content-Id: " + cid, null == imgPart);

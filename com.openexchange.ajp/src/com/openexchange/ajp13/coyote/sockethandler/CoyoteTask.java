@@ -62,7 +62,7 @@ import com.openexchange.threadpool.ThreadRenamer;
 
 /**
  * {@link CoyoteTask} - The coyote task.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CoyoteTask implements Task<Object> {
@@ -86,7 +86,7 @@ public final class CoyoteTask implements Task<Object> {
 
     /**
      * Initializes a new {@link AjpProcessorRunnable}.
-     * 
+     *
      * @param client The accepted client socket
      * @param ajpProcessor The AJP processor dedicated to the socket
      */
@@ -99,7 +99,7 @@ public final class CoyoteTask implements Task<Object> {
 
     /**
      * Gets the associated AJP processor.
-     * 
+     *
      * @return The AJP processor
      */
     public AjpProcessor getAjpProcessor() {

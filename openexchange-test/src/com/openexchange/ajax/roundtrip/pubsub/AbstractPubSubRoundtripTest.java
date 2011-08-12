@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.roundtrip.pubsub;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.ajax.publish.tests.AbstractPubSubTest;
 import com.openexchange.ajax.publish.tests.PublicationTestManager;
 import com.openexchange.ajax.subscribe.test.SubscriptionTestManager;
@@ -118,5 +117,5 @@ public class AbstractPubSubRoundtripTest extends AbstractPubSubTest{
         }
     }
 
-    
+
 }

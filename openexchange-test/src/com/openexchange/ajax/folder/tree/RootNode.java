@@ -62,11 +62,11 @@ import com.openexchange.groupware.container.FolderObject;
  *
  */
 public class RootNode extends AbstractFolderNode {
-    
+
     public RootNode(AJAXClient client) {
         super(null, client);
     }
-    
+
     public List<FolderNode> getChildren() {
         List<FolderNode> folders = new ArrayList<FolderNode>();
         for(FolderObject folder : getManager().listRootFoldersOnServer()) {

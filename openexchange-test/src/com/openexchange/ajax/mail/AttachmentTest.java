@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -60,22 +59,21 @@ import com.openexchange.ajax.mail.actions.DeleteRequest;
 import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.GetResponse;
 import com.openexchange.ajax.mail.actions.SendRequest;
-import com.openexchange.ajax.mail.actions.SendResponse;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 
 /**
  * {@link AttachmentTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class AttachmentTest extends AbstractMailTest {
 
 	/**
 	 * Default constructor.
-	 * 
+	 *
 	 * @param name
 	 *            Name of this test.
 	 */
@@ -85,7 +83,7 @@ public final class AttachmentTest extends AbstractMailTest {
 
 	/**
 	 * Tests the <code>action=attachment</code> request on INBOX folder
-	 * 
+	 *
 	 * @throws Throwable
 	 */
 	public void testGet() throws Throwable {
@@ -143,7 +141,7 @@ public final class AttachmentTest extends AbstractMailTest {
 			 * Some assertions
 			 */
 			assertTrue("Web response does not indicate HTML content", webResponse.isHTML());
-			
+
 
 		} catch (final Exception e) {
 			e.printStackTrace();

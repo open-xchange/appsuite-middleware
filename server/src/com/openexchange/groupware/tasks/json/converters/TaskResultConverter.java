@@ -70,7 +70,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class TaskResultConverter extends AbstractTaskJSONResultConverter {
-    
+
     private static final String INPUT_FORMAT = "task";
 
     private final TaskListResultConverter listConverter;

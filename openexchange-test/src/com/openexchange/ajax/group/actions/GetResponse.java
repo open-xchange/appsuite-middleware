@@ -75,8 +75,8 @@ public final class GetResponse extends AbstractAJAXResponse {
 
     /**
      * @return the group
-     * @throws JSONException 
-     * @throws OXException 
+     * @throws JSONException
+     * @throws OXException
      */
     public final Group getGroup() throws OXException, JSONException {
         if (null == group) {

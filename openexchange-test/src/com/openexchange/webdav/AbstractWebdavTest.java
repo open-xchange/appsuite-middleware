@@ -49,7 +49,6 @@
 
 package com.openexchange.webdav;
 
-import com.openexchange.exception.OXException;
 import java.util.Properties;
 import junit.framework.TestCase;
 import org.jdom.Namespace;
@@ -82,7 +81,7 @@ public abstract class AbstractWebdavTest extends TestCase {
     protected String password = null;
 
     protected String secondlogin = null;
-    
+
 	protected String context;
 
     protected int userId = -1;
@@ -140,7 +139,7 @@ public abstract class AbstractWebdavTest extends TestCase {
         if (context != null && context.length() > 0) {
         	login = login+"@"+context;
         }
-        return new String(Base64.encode(login+":"+ password)); 
+        return new String(Base64.encode(login+":"+ password));
     }
 
     protected WebConversation getWebConversation() {

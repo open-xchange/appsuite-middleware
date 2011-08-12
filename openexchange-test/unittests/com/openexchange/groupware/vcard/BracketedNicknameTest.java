@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.vcard;
 
-import com.openexchange.exception.OXException;
 import java.util.List;
 import com.openexchange.groupware.container.Contact;
 
@@ -71,7 +70,7 @@ public class BracketedNicknameTest extends AbstractVCardUnitTest {
     		"REV:20090902T125118.045Z\n" +
     		"UID:39614@192.168.33.100\n" +
     		"END:VCARD\n";
-    
+
     public void testShouldNotPutBracketsAroundNickname() throws Exception{
         List<Contact> list = performTest("Bracket-Test", vcard, mime2);
         Contact contact = list.get(0);

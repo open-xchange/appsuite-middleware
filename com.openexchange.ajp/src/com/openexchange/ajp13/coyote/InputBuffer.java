@@ -23,7 +23,7 @@ import com.openexchange.ajp13.coyote.util.ByteChunk;
 /**
  * Input buffer. This class is used only in the protocol implementation. All reading from tomcat ( or adapter ) should be done using
  * Request.doRead().
- * 
+ *
  * @author Remy Maucherat
  */
 public interface InputBuffer {

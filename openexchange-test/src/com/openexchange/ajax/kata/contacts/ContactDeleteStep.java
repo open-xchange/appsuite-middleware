@@ -47,7 +47,6 @@
 
 package com.openexchange.ajax.kata.contacts;
 
-import com.openexchange.exception.OXException;
 import org.junit.Assert;
 
 import com.openexchange.ajax.framework.AJAXClient;
@@ -60,7 +59,7 @@ import com.openexchange.test.ContactTestManager;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class ContactDeleteStep extends NeedExistingStep<Contact> {
-	
+
 	private Contact entry;
 
     public ContactDeleteStep(Contact entry, String name, String expectedError) {

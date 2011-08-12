@@ -59,7 +59,7 @@ import com.openexchange.group.Group;
  */
 public class GroupFixtureFactory implements FixtureFactory<Group> {
     private FixtureLoader fixtureLoader;
-    
+
 	public GroupFixtureFactory(FixtureLoader fixtureLoader) {
 		super();
 		this.fixtureLoader = fixtureLoader;

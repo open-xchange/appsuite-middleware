@@ -54,7 +54,7 @@ import java.util.Set;
 
 /**
  * {@link MailFlag}
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public enum MailFlag {

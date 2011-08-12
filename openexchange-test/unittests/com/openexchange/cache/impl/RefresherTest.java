@@ -133,7 +133,7 @@ public class RefresherTest extends TestCase {
                     throw new UnsupportedOperationException();
                 }
                 public void invalidateGroup(final String group) {
-                    throw new UnsupportedOperationException();                        
+                    throw new UnsupportedOperationException();
                 }
                 public CacheKey newCacheKey(final int contextId, final int objectId) {
                     throw new UnsupportedOperationException();

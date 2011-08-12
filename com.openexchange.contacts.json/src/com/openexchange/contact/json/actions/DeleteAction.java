@@ -80,10 +80,10 @@ public class DeleteAction extends ContactAction {
         final long timestamp = req.getTimestamp();
         final int[] deleteRequestData = req.getDeleteRequestData();
         final Date date = new Date(timestamp);
-        
+
         final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(deleteRequestData[1], session);
         contactInterface.deleteContactObject(deleteRequestData[0], deleteRequestData[1], date);
-        
+
         final JSONObject response = new JSONObject();
         return new AJAXRequestResult(response, date, "json");
     }

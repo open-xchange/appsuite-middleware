@@ -102,7 +102,7 @@ public class YAMLFixtureLoader implements FixtureLoader {
 
     public <T> void addFixtureFactory(final FixtureFactory<T> factory, final Class<T> c) {
         factories.put(c, factory);
-    }   
+    }
 
     private File locateFile(final String fixtureName) throws OXException {
         for (final File path : loadPath) {
@@ -152,5 +152,5 @@ public class YAMLFixtureLoader implements FixtureLoader {
         }
         return (FixtureFactory<T>) factories.get(aClass);
     }
-    
+
 }

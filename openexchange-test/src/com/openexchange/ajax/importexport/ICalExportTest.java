@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.importexport;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.webdav.xml.AppointmentTest;
@@ -110,7 +109,7 @@ public class ICalExportTest extends AbstractICalTest {
 			if (title.equals(taskArray[a].getTitle())) {
 				found = true;
 				taskObj.setStartDate(taskArray[a].getStartDate());
-				taskArray[a].setParentFolderID(taskFolderId);		
+				taskArray[a].setParentFolderID(taskFolderId);
 				TaskTest.compareObject(taskObj, taskArray[a]);
 			}
 		}

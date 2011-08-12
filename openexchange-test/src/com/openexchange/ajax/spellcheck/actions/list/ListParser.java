@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.spellcheck.actions.list;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -58,15 +57,15 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
  * {@link ListParser}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class ListParser extends AbstractAJAXParser<ListResponse> {
 
 	/**
 	 * Initializes a new {@link ListParser}
-	 * 
+	 *
 	 * @param failOnError
 	 */
 	public ListParser(final boolean failOnError) {
@@ -75,7 +74,7 @@ public final class ListParser extends AbstractAJAXParser<ListResponse> {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
 	 */
 	@Override

@@ -117,7 +117,7 @@ public class WebDAVClient {
         public Property getLogin() {
             return login;
         }
-        
+
         public Property getPassword() {
             return password;
         }
@@ -137,7 +137,7 @@ public class WebDAVClient {
     protected void finalize() throws Throwable {
         try {
             logout();
-        } finally {  
+        } finally {
             super.finalize();
         }
     }

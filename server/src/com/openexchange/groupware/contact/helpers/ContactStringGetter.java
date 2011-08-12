@@ -651,15 +651,18 @@ public class ContactStringGetter implements ContactSwitcher {
     public Object userfield20(final Object... objects) throws OXException {
 		return stringify(delegate.userfield20(objects));
 	}
-	
+
+    @Override
     public Object numberofimages(Object... objects) throws OXException {
         return stringify(delegate.numberofimages(objects));
     }
 
+    @Override
     public Object lastmodifiedofnewestattachment(Object... objects) throws OXException {
         return stringifyTimestamp((Date)delegate.lastmodifiedofnewestattachment(objects));
     }
 
+    @Override
     public Object usecount(Object... objects) throws OXException {
         return stringify(delegate.usecount(objects));
     }

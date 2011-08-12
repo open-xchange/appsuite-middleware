@@ -9,33 +9,33 @@ import com.openexchange.groupware.attach.impl.UpdateAttachmentAction;
 import com.openexchange.tx.UndoableAction;
 
 public class UpdateAttachmentsActionTest  extends AbstractAttachmentActionTest{
-	
+
 	private final CreateAttachmentAction createAction = new CreateAttachmentAction();
 	private AttachmentMetadata update;
 	private AttachmentMetadata original;
-	
+
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
-		
+
 		createAction.setAttachments(getAttachments());
 		createAction.setQueryCatalog(getQueryCatalog());
 		createAction.setProvider(getProvider());
 		createAction.setContext(getContext());
-		
+
 		createAction.perform();
-		
+
 		original = getAttachments().get(0);
 		update = new AttachmentImpl(original);
 		update.setFilename("otherfile.txt");
 	}
-	
+
 	@Override
 	public void tearDown() throws Exception {
 		createAction.undo();
 		super.tearDown();
 	}
-	
+
 	@Override
 	protected UndoableAction getAction() throws Exception {
 		final UpdateAttachmentAction updateAction = new UpdateAttachmentAction();
@@ -44,7 +44,7 @@ public class UpdateAttachmentsActionTest  extends AbstractAttachmentActionTest{
 		updateAction.setQueryCatalog(getQueryCatalog());
 		updateAction.setProvider(getProvider());
 		updateAction.setContext(getContext());
-		
+
 		return updateAction;
 	}
 

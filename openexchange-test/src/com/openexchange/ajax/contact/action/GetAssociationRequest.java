@@ -84,27 +84,27 @@ public class GetAssociationRequest extends AbstractContactRequest<GetAssociation
         Params params = new Params(
             AJAXServlet.PARAMETER_ACTION,
             FinalContactConstants.ACTION_GET_ASSOCIATION.getName());
-        
+
         if(contributor.containsUserField20()){
             params.add(FinalContactConstants.PARAMETER_UUID1.getName(), contributor.getUserField20());
         } else {
             params.add(
-                FinalContactConstants.PARAMETER_FOLDER_ID1.getName(), 
-                String.valueOf(contributor.getParentFolderID()), 
-                FinalContactConstants.PARAMETER_CONTACT_ID1.getName(), 
+                FinalContactConstants.PARAMETER_FOLDER_ID1.getName(),
+                String.valueOf(contributor.getParentFolderID()),
+                FinalContactConstants.PARAMETER_CONTACT_ID1.getName(),
                 String.valueOf(contributor.getObjectID()));
         }
-        
+
         if(aggregator.containsUserField20()){
             params.add(FinalContactConstants.PARAMETER_UUID2.getName(), aggregator.getUserField20());
         } else {
             params.add(
-                FinalContactConstants.PARAMETER_FOLDER_ID2.getName(), 
-                String.valueOf(aggregator.getParentFolderID()), 
-                FinalContactConstants.PARAMETER_CONTACT_ID2.getName(), 
+                FinalContactConstants.PARAMETER_FOLDER_ID2.getName(),
+                String.valueOf(aggregator.getParentFolderID()),
+                FinalContactConstants.PARAMETER_CONTACT_ID2.getName(),
                 String.valueOf(aggregator.getObjectID()));
         }
-        
+
         return params.toArray();
     }
 

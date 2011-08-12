@@ -57,11 +57,11 @@ package com.openexchange.ajax.mail.filter.comparison;
 public class MatchesComparison extends AbstractComparison {
 
 	public static final String MATCHES = "matches";
-	
+
 	public MatchesComparison() {
 		name = MATCHES;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.tx;
 
-import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -66,7 +65,7 @@ public class ConfigurableDBProvider implements DBProvider {
 	private String driver;
 	private String login;
 	private String password;
-	
+
 	public Connection getReadConnection(final Context ctx) {
 		try {
 			return DriverManager.getConnection(url,login,password);

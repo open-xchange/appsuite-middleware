@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.importexport;
 
-import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -71,11 +70,11 @@ import com.openexchange.java.Strings;
 import com.openexchange.test.ContactTestManager;
 
 /**
- * This test is related to bug 18094: When exporting a VCard, then importing 
+ * This test is related to bug 18094: When exporting a VCard, then importing
  * it again, several fields are lost. That is not much of a surprise, since
  * the OX data format and the VCard format don't match perfectly. This test
  * ensures that at least a big amount is transfered.
- * 
+ *
  * @author tobiasp
  *
  */
@@ -93,26 +92,26 @@ public class Bug18094Test_VCardRoundtrip extends AbstractManagedContactTest {
 		contact = ContactTestManager.generateFullContact(folderID);
 		manager.newAction(contact);
 	}
-	
+
 	public void testFullVCardRoundtrip() throws Exception{
 		VCardExportRequest exportRequest = new VCardExportRequest(folderID, false);
 		VCardExportResponse exportResponse = manager.getClient().execute(exportRequest);
-		
+
 		String vcard = exportResponse.getVCard();
 		manager.deleteAction(contact);
-		
+
 		VCardImportRequest importRequest = new VCardImportRequest(folderID, new ByteArrayInputStream(vcard.getBytes()));
 		VCardImportResponse importResponse = manager.getClient().execute(importRequest);
-		
+
 		JSONArray response = (JSONArray) importResponse.getData();
 		assertEquals("Precondition: Should only find one contact in there", 1, response.length());
-		
+
 		JSONObject jsonObject = response.getJSONObject(0);
-		
+
 		Contact actual = manager.getAction(
-				jsonObject.getInt("folder_id"), 
+				jsonObject.getInt("folder_id"),
 				jsonObject.getInt("id"));
-		
+
 		Set<ContactField> excluded = new HashSet<ContactField>(){{
 			add(ContactField.FOLDER_ID);
 			add(ContactField.OBJECT_ID);
@@ -123,27 +122,27 @@ public class Bug18094Test_VCardRoundtrip extends AbstractManagedContactTest {
 			add(ContactField.INTERNAL_USERID);
 			add(ContactField.MARK_AS_DISTRIBUTIONLIST);
 			add(ContactField.NUMBER_OF_ATTACHMENTS);
-			add(ContactField.NUMBER_OF_DISTRIBUTIONLIST);  
+			add(ContactField.NUMBER_OF_DISTRIBUTIONLIST);
 			add(ContactField.NUMBER_OF_LINKS);
-			
+
 		}};
-		
+
 		List<ContactField> mismatches = new LinkedList<ContactField>();
-		
+
 		for(ContactField field: ContactField.values()){
 			if(excluded.contains(field))
 				continue;
 			int number = field.getNumber();
 			Object actualValue = actual.get(number);
 			Object expectedValue = contact.get(number);
-			
+
 			if(expectedValue == null && actualValue == null)
 				continue;
-			
+
 			if(expectedValue == null || !expectedValue.equals(actualValue))
 				mismatches.add(field);
 		}
-		
+
 		java.util.Collections.sort(mismatches, new Comparator<ContactField>(){
 			public int compare(ContactField o1, ContactField o2) {
 				return o1.toString().compareTo(o2.toString());

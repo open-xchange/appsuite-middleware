@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.folder.api2;
 
-import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.util.Date;
 import com.openexchange.ajax.folder.actions.API;
@@ -101,7 +100,7 @@ public class Bug15752Test extends AbstractAJAXSession {
         // Unfortunately no timestamp when creating a mail folder through Outlook folder tree.
         testFolder.setLastModified(new Date());
         UpdateMailResponse uResp = client.execute(new MoveMailRequest(inboxFolder, testFolder.getFullName(), mailIds[1], true));
-        mailIds = new String[] { uResp.getFolder(), uResp.getID() }; 
+        mailIds = new String[] { uResp.getFolder(), uResp.getID() };
     }
 
     @Override

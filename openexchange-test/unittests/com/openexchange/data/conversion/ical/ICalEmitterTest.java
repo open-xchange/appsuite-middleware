@@ -294,9 +294,9 @@ public class ICalEmitterTest extends TestCase {
         Appointment appointment = getDefault();
         appointment.setRecurrenceID(12);
         appointment.setRecurrenceDatePosition(D("26/06/2011 00:00"));
-        
+
         ICalFile ical = serialize(appointment);
-        
+
         assertProperty(ical, "RECURRENCE-ID", "20110626");
     }
 
@@ -453,31 +453,31 @@ public class ICalEmitterTest extends TestCase {
         assertProperty(ical, "EXDATE", "20090225T100000Z");
         assertProperty(ical, "EXDATE", "20090228T120000Z");
     }
-    
+
     public void testAppUid() throws IOException {
         Appointment appointment = getDefault();
         appointment.setUid("nexn787n478478onzwo87nwiuhi");
-        
+
         ICalFile ical = serialize(appointment);
-        
+
         assertProperty(ical, "UID", "nexn787n478478onzwo87nwiuhi");
     }
-    
+
     public void testAppOrganizer() throws IOException {
         Appointment appointment = getDefault();
         appointment.setOrganizer("organizer");
-        
+
         ICalFile ical = serialize(appointment);
-        
+
         assertProperty(ical, "ORGANIZER", "mailto:organizer");
     }
-    
+
     public void testAppSequence() throws IOException {
         Appointment appointment = getDefault();
         appointment.setSequence(5);
-        
+
         ICalFile ical = serialize(appointment);
-        
+
         assertProperty(ical, "SEQUENCE", "5");
     }
 
@@ -545,28 +545,28 @@ public class ICalEmitterTest extends TestCase {
         final ICalFile ical = serialize(task);
         assertStandardAppFields(ical, start, end);
     }
-    
+
     public void testTaskUid() throws IOException {
         Task task = new Task();
         task.setUid("nexn787n478478onzwo87nwiuhi");
-        
+
         ICalFile ical = serialize(task);
-        
+
         assertProperty(ical, "UID", "nexn787n478478onzwo87nwiuhi");
     }
-    
+
     public void testShouldNotUseDTENDasEndForIndividualAppointmentsInASeries() throws IOException{
         int occurences = 4;
-        
+
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Date());
         cal.add(Calendar.DAY_OF_MONTH, 1);
         cal.set(Calendar.HOUR_OF_DAY, 8);
         Date start = cal.getTime();
-        
+
         cal.add(Calendar.HOUR, 1);
         Date end = cal.getTime();
-        
+
         Appointment app = new Appointment();
         app.setStartDate(start);
         app.setEndDate(end);
@@ -574,19 +574,19 @@ public class ICalEmitterTest extends TestCase {
         app.setOccurrence(occurences);
         app.setInterval(1);
         app.setDays(127);
-        
+
         ICalFile ical = serialize(app);
         String dtend = ical.getValue("DTEND");
         assertEquals("Recurrence rule should be 'daily, for four days, every day'.", "FREQ=DAILY;COUNT=4;INTERVAL=1", ical.getValue("RRULE"));
         assertTrue("Reccurence rule should point to the next day, not the end of the recurences", dtend.startsWith(new SimpleDateFormat("yyyyMMdd").format(end)));
     }
-    
+
     public void no_testTaskOrganizer() throws IOException {
         Task task = new Task();
         task.setOrganizer("organizer");
-        
+
         ICalFile ical = serialize(task);
-        
+
         assertProperty(ical, "ORGANIZER", "mailto:organizer");
     }
 

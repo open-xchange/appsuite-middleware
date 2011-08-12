@@ -92,7 +92,7 @@ import com.openexchange.groupware.container.CommonObject;
 
 /**
  * {@link CalendarTestManager}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a> - basic design
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - extension
  */
@@ -111,11 +111,11 @@ public class CalendarTestManager implements TestManager {
     private Exception lastException;
 
     private Date lastModification;
-    
+
     public TimeZone getTimezone() {
         return timezone;
     }
-    
+
     public void setTimezone(TimeZone timezone) {
         this.timezone = timezone;
     }
@@ -346,7 +346,7 @@ public class CalendarTestManager implements TestManager {
 			return null;
 		}
     }
-    
+
     private void fixDates(Appointment temp) {
         if (temp.getFullTime())
             return;
@@ -414,8 +414,8 @@ public class CalendarTestManager implements TestManager {
         return appointments.toArray(new Appointment[appointments.size()]);
 
     }
-        
-        
+
+
     public Appointment[] all(int parentFolderID, Date start, Date end) {
         AllRequest request = new AllRequest(parentFolderID, Appointment.ALL_COLUMNS, start, end, timezone);
         CommonAllResponse response = execute(request);
@@ -456,7 +456,7 @@ public class CalendarTestManager implements TestManager {
                 appointment.getParentFolderID(),
                 appointment.getRecurrencePosition(),
                 new Date(Long.MAX_VALUE),
-                failOnErrorOverride); 
+                failOnErrorOverride);
         } else {
             deleteRequest = new DeleteRequest(
                 appointment.getObjectID(),
@@ -482,7 +482,7 @@ public class CalendarTestManager implements TestManager {
         createDeleteException(master.getParentFolderID(), master.getObjectID(), recurrencePos);
         master.setLastModified(getLastModification());
     }
-    
+
     public boolean[] has(Date startInclusive, Date endExclusive){
         HasResponse response = execute( new HasRequest(startInclusive, endExclusive, getTimezone()));
         lastResponse = response;

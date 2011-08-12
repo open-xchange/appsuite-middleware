@@ -82,7 +82,7 @@ import com.openexchange.mail.MailListField;
 
 /**
  * {@link MailTestManager}
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class MailTestManager {
@@ -163,7 +163,7 @@ public class MailTestManager {
 
     /**
      * Sends a mail. This methods also sets the lastResponse field.
-     * 
+     *
      * @return The mail as placed in the sent box.
      */
     public TestMail send(TestMail mail) throws JSONException, OXException, IOException, SAXException {
@@ -282,7 +282,7 @@ public class MailTestManager {
 
     /**
      * Updates the cleanup structure and replaces one mail to cleanup with another (e.g. the given one with a moved one)
-     * 
+     *
      * @param originalMail
      * @param modifiedMail
      */

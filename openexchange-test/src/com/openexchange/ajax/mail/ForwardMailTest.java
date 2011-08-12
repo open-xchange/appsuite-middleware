@@ -58,7 +58,7 @@ import com.openexchange.ajax.mail.contenttypes.MailContentType;
 
 /**
  * {@link ForwardMailTest}
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class ForwardMailTest extends AbstractReplyTest {

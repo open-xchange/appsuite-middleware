@@ -94,7 +94,7 @@ public class GetContactByUIDRequest extends AbstractContactRequest<GetResponse> 
             protected GetResponse createResponse(Response response) {
                 return new GetResponse(response, tz);
             }
-            
+
         };
     }
 

@@ -11,9 +11,9 @@ public class Bug19046Test_SeriesWithExtraneousStartDate extends
 	public Bug19046Test_SeriesWithExtraneousStartDate(String name) {
 		super(name);
 	}
-	
+
 	public void testExtraneousStartDate() throws Exception{
-		String ical = 
+		String ical =
 		"BEGIN:VCALENDAR\n"+
 		"PRODID:Open-Xchange\n"+
 		"VERSION:2.0\n"+
@@ -27,7 +27,7 @@ public class Bug19046Test_SeriesWithExtraneousStartDate extends
 		"RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=WE\n"+
 		"END:VEVENT\n"+
 		"END:VCALENDAR\n";
-		
+
 		ICalImportRequest request = new ICalImportRequest(folder.getObjectID(), ical);
 		ICalImportResponse response = getClient().execute(request);
 		ImportResult[] imports = response.getImports();

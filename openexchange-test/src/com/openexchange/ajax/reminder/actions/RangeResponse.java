@@ -66,13 +66,13 @@ import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class RangeResponse extends AbstractAJAXResponse {
 
     private List<ReminderObject> reminders;
-    
+
     /**
      * @param response
      */

@@ -51,7 +51,7 @@ package com.openexchange.tools.strings;
 
 /**
  * {@link BasicTypesStringParser}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class BasicTypesStringParser implements StringParser {

@@ -71,7 +71,7 @@ public class ListRequest extends AbstractFolderRequest<ListResponse> {
     private final boolean ignoreMail;
 
     private final Modules[] allowedModules;
-    
+
     private final boolean failOnError;
 
     public ListRequest(API api, String parentFolder, int[] columns, boolean ignoreMail, Modules[] allowedModules, boolean failOnError) {
@@ -86,7 +86,7 @@ public class ListRequest extends AbstractFolderRequest<ListResponse> {
     public ListRequest(API api, String parentFolder, int[] columns, boolean ignoreMail, boolean failOnError) {
         this(api, parentFolder, columns, ignoreMail, null, failOnError);
     }
-    
+
     public ListRequest(API api, String parentFolder, int[] columns, boolean ignoreMail) {
         this(api, parentFolder, columns, ignoreMail, null, true);
     }

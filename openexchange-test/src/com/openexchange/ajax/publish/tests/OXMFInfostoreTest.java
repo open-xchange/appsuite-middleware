@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.publish.tests;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.test.OXTestToolkit.assertSameStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -65,7 +64,7 @@ import com.openexchange.test.TestInit;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
- */     
+ */
 public class OXMFInfostoreTest extends AbstractPublicationTest {
 
     public OXMFInfostoreTest(String name) {
@@ -90,7 +89,7 @@ public class OXMFInfostoreTest extends AbstractPublicationTest {
         Publication publication = generatePublication("infostore", String.valueOf(folder.getObjectID()), pubDiscovery);
         PublicationTestManager pubMgr = getPublishManager();
         pubMgr.setPublicationTargetDiscoveryService(pubDiscovery);
-        
+
         pubMgr.newAction(publication);
         String pubUrl = (String) publication.getConfiguration().get("url");
         String website = getWebsite(pubUrl);
@@ -99,10 +98,10 @@ public class OXMFInfostoreTest extends AbstractPublicationTest {
         Matcher matcher = urlPattern.matcher(website);
         boolean found = matcher.find();
         assertTrue("Should contain reference to a published infostore item", found);
-        String downloadUrl = matcher.group(1);  
+        String downloadUrl = matcher.group(1);
         assertSameStream(new FileInputStream(upload), getDownload(downloadUrl));
     }
-    
+
     public void testLifeCycleOfInfostoreItemPublication() throws Exception{
         InfostoreTestManager infoMgr = getInfostoreManager();
         FolderObject folder = createDefaultInfostoreFolder();
@@ -122,7 +121,7 @@ public class OXMFInfostoreTest extends AbstractPublicationTest {
         PublicationTestManager pubMgr = getPublishManager();
 
         pubMgr.setPublicationTargetDiscoveryService(pubDiscovery);
-        
+
         pubMgr.newAction(publication);
         String pubUrl = (String) publication.getConfiguration().get("url");
 

@@ -58,7 +58,7 @@ import org.json.JSONValue;
 
 /**
  * {@link GenJSONRequest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -78,7 +78,7 @@ public class GenJSONRequest extends AbstractFolderRequest<GenJSONResponse> {
 
     /**
      * Initializes a new {@link GenJSONRequest} with method set to <code>PUT</code>.
-     * 
+     *
      * @param failOnError Whether to fail on error
      */
     public GenJSONRequest(API api, final boolean failOnError) {

@@ -49,15 +49,14 @@
 
 package com.openexchange.pubsub;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.templating.OXTemplate;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class FullHCardTemplateTest extends 
+public class FullHCardTemplateTest extends
 BasicContactTemplateTest {
-    
+
     @Override
     protected OXTemplate getTemplate() throws Exception {
         String templateName = "contacts_hcard_uncensored.tmpl";

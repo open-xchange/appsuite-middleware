@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.filter.parser.action;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -64,7 +63,7 @@ import com.openexchange.ajax.mail.filter.action.Vacation;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class VacationParserImpl implements ActionParser {
-	
+
 	public AbstractAction parseAction(final String name, final JSONObject jsonObject) throws JSONException {
 		final int days = jsonObject.getInt("days");
 		final JSONArray jsonAddressArray = jsonObject.getJSONArray("addresses");
@@ -72,17 +71,17 @@ public class VacationParserImpl implements ActionParser {
 		for (int a = 0; a < addresses.length; a++) {
 			addresses[a] = jsonAddressArray.getString(a);
 		}
-		
+
 		String subject = null;
 		if (jsonObject.has("text")) {
 			subject = jsonObject.getString("subject");
 		}
-		
+
 		String text = null;
 		if (jsonObject.has("text")) {
 			text = jsonObject.getString("text");
 		}
-		
+
 		return new Vacation(days, addresses, subject, text);
 	}
 }

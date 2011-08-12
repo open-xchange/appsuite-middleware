@@ -56,9 +56,9 @@ import com.openexchange.test.fixtures.Document;
 import com.openexchange.test.fixtures.FixtureLoader;
 
 /**
- * Transforms strings of the kind document:big_image,small_image into a 
+ * Transforms strings of the kind document:big_image,small_image into a
  * Document[] array.
- * 
+ *
  * @author Tobias Friedrich <tobias.friedrich@open-xchange.com>
  */
 public class DocumentsTransformator implements Transformator {
@@ -71,8 +71,8 @@ public class DocumentsTransformator implements Transformator {
 	}
 
 	public Document[] transform(final String value) throws OXException {
-		if (null == value || 1 > value.length()) { 
-			return null; 
+		if (null == value || 1 > value.length()) {
+			return null;
 		}
 		String fixtureName = "documents";
 		String fixtureEntry = "";
@@ -92,6 +92,6 @@ public class DocumentsTransformator implements Transformator {
     }
 
 	private final Document getDocument(final String fixtureName, final String fixtureEntry) throws OXException {
-		return fixtureLoader.getFixtures(fixtureName, Document.class).getEntry(fixtureEntry).getEntry(); 
+		return fixtureLoader.getFixtures(fixtureName, Document.class).getEntry(fixtureEntry).getEntry();
 	}
 }

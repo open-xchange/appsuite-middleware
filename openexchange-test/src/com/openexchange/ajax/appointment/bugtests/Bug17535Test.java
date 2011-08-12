@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.Calendar;
 import java.util.Date;
@@ -65,7 +64,7 @@ import com.openexchange.groupware.container.Appointment;
 
 /**
  * {@link Bug17535Test}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Bug17535Test extends AbstractAJAXSession {
@@ -75,7 +74,7 @@ public class Bug17535Test extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link Bug17535Test}.
-     * 
+     *
      * @param name
      */
     public Bug17535Test(String name) {
@@ -85,7 +84,7 @@ public class Bug17535Test extends AbstractAJAXSession {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        
+
         appointment = new Appointment();
         appointment.setStartDate(D("19.01.2010 00:00"));
         appointment.setEndDate(D("20.01.2010 00:00"));
@@ -97,11 +96,11 @@ public class Bug17535Test extends AbstractAJAXSession {
         appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         appointment.setIgnoreConflicts(true);
         appointment.setTitle("Bug 17599 Test");
-        
+
         InsertRequest insertRequest = new InsertRequest(appointment, getClient().getValues().getTimeZone());
         AppointmentInsertResponse insertResponse = getClient().execute(insertRequest);
         insertResponse.fillAppointment(appointment);
-        
+
         updateAppointment = new Appointment();
         updateAppointment.setObjectID(appointment.getObjectID());
         updateAppointment.setStartDate(D("19.01.2010 00:00"));
@@ -119,12 +118,12 @@ public class Bug17535Test extends AbstractAJAXSession {
         updateAppointment.setShownAs(Appointment.FREE);
         updateAppointment.setLastModified(new Date(Long.MAX_VALUE));
     }
-    
+
     public void testBug17599() throws Exception {
         UpdateRequest updateRequest = new UpdateRequest(updateAppointment, getClient().getValues().getTimeZone());
         UpdateResponse updateResponse = getClient().execute(updateRequest);
         updateResponse.fillObject(appointment);
-        
+
         GetRequest getRequest = new GetRequest(appointment);
         GetResponse getResponse = getClient().execute(getRequest);
         Appointment loadedAppointment = getResponse.getAppointment(getClient().getValues().getTimeZone());

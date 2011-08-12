@@ -49,7 +49,6 @@
 
 package com.openexchange.test;
 
-import com.openexchange.ajp13.servlet.OXServletException.Code;
 import com.openexchange.exception.OXException;
 /**
  * Exception only for tests. This should be only used if some test is not able

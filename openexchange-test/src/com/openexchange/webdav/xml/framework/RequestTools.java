@@ -87,24 +87,24 @@ public final class RequestTools {
         final Element ePropfind = new Element(PROPFIND, NS_DAV);
         final Element eProp = new Element(PROP, NS_DAV);
         ePropfind.addContent(eProp);
-        
+
         final Element eLastSync = new Element(LASTSYNC, NS);
         eProp.addContent(eLastSync);
         eLastSync.addContent(String.valueOf(modified.getTime()));
-        
+
         eProp.addContent(e);
-        
+
         return new Document(ePropfind);
     }
 
     public static Document createPropertyUpdate(final Element e) {
         final Element ePropertyUpdate = new Element(PROPERTYUPDATE, NS_DAV);
         ePropertyUpdate.addNamespaceDeclaration(XmlServlet.NS);
-        
+
         final Element eSet = new Element(SET, NS_DAV);
         ePropertyUpdate.addContent(eSet);
         eSet.addContent(e);
-        
+
         return new Document(ePropertyUpdate);
     }
 }

@@ -51,7 +51,7 @@ package com.openexchange.log;
 
 /**
  * {@link LogPropertyName} - A log property name.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class LogPropertyName implements Comparable<LogPropertyName> {
@@ -83,7 +83,7 @@ public final class LogPropertyName implements Comparable<LogPropertyName> {
 
         /**
          * Gets the appropriate log level for specified naming.
-         * 
+         *
          * @param logLevel The log level naming
          * @return The appropriate log level
          */
@@ -109,7 +109,7 @@ public final class LogPropertyName implements Comparable<LogPropertyName> {
 
     /**
      * Initializes a new {@link LogPropertyName}.
-     * 
+     *
      * @param propertyName The name
      * @param logLevel The log level when property shall be logged ("ALL","FINE","INFO","WARNING","ERROR")
      */
@@ -149,7 +149,7 @@ public final class LogPropertyName implements Comparable<LogPropertyName> {
 
     /**
      * Whether property name is applicable for any logging.
-     * 
+     *
      * @return <code>true</code> if property name is applicable for any logging, otherwise <code>false</code>
      */
     public boolean isAll() {
@@ -158,7 +158,7 @@ public final class LogPropertyName implements Comparable<LogPropertyName> {
 
     /**
      * Whether property name is only applicable for ERROR logging.
-     * 
+     *
      * @return <code>true</code> if property name is only applicable for ERROR logging, otherwise <code>false</code>
      */
     public boolean isError() {
@@ -167,7 +167,7 @@ public final class LogPropertyName implements Comparable<LogPropertyName> {
 
     /**
      * Whether property name is only applicable for WARNING logging.
-     * 
+     *
      * @return <code>true</code> if property name is only applicable for WARNING logging, otherwise <code>false</code>
      */
     public boolean isWarning() {
@@ -176,7 +176,7 @@ public final class LogPropertyName implements Comparable<LogPropertyName> {
 
     /**
      * Whether property name is only applicable for INFO logging.
-     * 
+     *
      * @return <code>true</code> if property name is only applicable for INFO logging, otherwise <code>false</code>
      */
     public boolean isInfo() {
@@ -185,7 +185,7 @@ public final class LogPropertyName implements Comparable<LogPropertyName> {
 
     /**
      * Whether property name is only applicable for DEBUG logging.
-     * 
+     *
      * @return <code>true</code> if property name is only applicable for DEBUG logging, otherwise <code>false</code>
      */
     public boolean isDebug() {
@@ -194,7 +194,7 @@ public final class LogPropertyName implements Comparable<LogPropertyName> {
 
     /**
      * Checks if this name's log level implies specified log level
-     * 
+     *
      * @param logLevel The log level to check against
      * @return <code>true</code> if log level is implied; otherwise <code>false</code>
      */
@@ -204,7 +204,7 @@ public final class LogPropertyName implements Comparable<LogPropertyName> {
 
     /**
      * Gets the log level.
-     * 
+     *
      * @return The log level
      */
     public LogLevel getLogLevel() {
@@ -213,7 +213,7 @@ public final class LogPropertyName implements Comparable<LogPropertyName> {
 
     /**
      * Gets the property name.
-     * 
+     *
      * @return The property name
      */
     public String getPropertyName() {

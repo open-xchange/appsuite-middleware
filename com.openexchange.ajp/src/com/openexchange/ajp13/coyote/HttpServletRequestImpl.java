@@ -90,7 +90,7 @@ import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * {@link HttpServletRequestImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HttpServletRequestImpl implements HttpServletRequest {
@@ -213,7 +213,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     /**
      * Sets the input buffer
-     * 
+     *
      * @param inputBuffer The input buffer
      */
     public void setInputBuffer(final InputBuffer inputBuffer) {
@@ -222,7 +222,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     /**
      * Dump specified bytes into buffer.
-     * 
+     *
      * @param bytes The bytes
      */
     public void dumpToBuffer(final byte[] bytes) {
@@ -231,7 +231,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     /**
      * Checks if this request's content type indicates the form data: <code>"application/x-www-form-urlencoded"</code>
-     * 
+     *
      * @return <code>true</code> if form data; otherwise <code>false</code>
      */
     public boolean isFormData() {
@@ -286,7 +286,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     /**
      * Sets the <code>Content-Length</code> header.
-     * 
+     *
      * @param contentLength The content length
      */
     public void setContentLength(final long contentLength) {
@@ -299,7 +299,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     /**
      * Sets the <code>Content-Type</code> header.
-     * 
+     *
      * @param contentType The content type
      * @throws AJPv13Exception If setting <code>Content-Type</code> header fails
      */
@@ -309,7 +309,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     /**
      * Sets a parameter.
-     * 
+     *
      * @param name The parameter name
      * @param value The parameter value
      */
@@ -330,7 +330,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     /**
      * Sets a header value bound to given header name.
-     * 
+     *
      * @param name The header name
      * @param value The header value
      * @param isContentType <code>true</code> if <tt>name</tt> denotes the <code>Content-Type</code> header; otherwise <code>false</code>
@@ -410,7 +410,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     /**
      * Gets the header value associated with specified name.
-     * 
+     *
      * @param name The header name
      * @return The header name
      */
@@ -422,7 +422,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     /**
      * Checks if this servlet request contains a header associated with specified name.
-     * 
+     *
      * @param name The header name
      * @return <code>true</code> if this servlet request contains such a header; otherwise <code>false</code>
      */
@@ -432,7 +432,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     /**
      * Gets the header values associated with specified header name.
-     * 
+     *
      * @param name The header name
      * @return The header values as an {@link Enumeration}
      */
@@ -443,7 +443,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     /**
      * Gets the header names contained in this servlet request.
-     * 
+     *
      * @return The header names as an {@link Enumeration}
      */
     @Override
@@ -453,7 +453,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     /**
      * Sets a parameter's values.
-     * 
+     *
      * @param name The parameter name to which the values shall be bound
      * @param values The parameter values
      */
@@ -498,7 +498,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     /**
      * Checks if this servlet request contains specified attribute.
-     * 
+     *
      * @param name The attribute name
      * @return <code>true</code> if this servlet request contains specified attribute; otherwise <code>false</code>
      */
@@ -555,7 +555,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
     /**
      * Sets the protocol. The name and version of the protocol the request uses in the form <i>protocol/majorVersion.minorVersion</i>, for
      * example, HTTP/1.1.
-     * 
+     *
      * @param protocol The protocol to set
      */
     public void setProtocol(final String protocol) {
@@ -597,7 +597,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     /**
      * Gets the content length's <code>long</code> value.
-     * 
+     *
      * @return The content length's <code>long</code> value
      */
     public long getContentLengthLong() {
@@ -620,7 +620,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     /**
      * Sets the remote address of this request.
-     * 
+     *
      * @param remoteAddr The remote address; either a machine name, such as "java.sun.com", or a textual representation of an IP address
      */
     public void setRemoteAddr(final String remoteAddr) {
@@ -634,7 +634,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     /**
      * Sets the remote host; the fully qualified name of the client or the last proxy that sent the request.
-     * 
+     *
      * @param remoteHost The remote host denoting the fully qualified name of the client
      */
     public void setRemoteHost(final String remoteHost) {
@@ -663,7 +663,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     /**
      * Sets the scheme
-     * 
+     *
      * @param scheme The scheme to set
      */
     public void setScheme(final String scheme) {
@@ -672,7 +672,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     /**
      * Sets the host name of the server to which the request was sent.
-     * 
+     *
      * @param serverName The host name of the server to which the request was sent
      */
     public void setServerName(final String serverName) {
@@ -700,7 +700,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     /**
      * Sets the port number to which the request was sent.
-     * 
+     *
      * @param serverPort The server port
      */
     public void setServerPort(final int serverPort) {
@@ -714,7 +714,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     /**
      * Sets whether this request was made using a secure channel, such as HTTPS.
-     * 
+     *
      * @param secure <code>true</code> if this request uses a secure channel; otherwise <code>false</code>
      */
     public void setSecure(final boolean secure) {
@@ -728,7 +728,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     /**
      * Gets the first {@link String} element contained in given array or <code>null</code> if array is <code>null</code> or empty.
-     * 
+     *
      * @param values The array
      * @return The first {@link String} element or <code>null</code>
      */
@@ -741,7 +741,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     /**
      * Creates a new {@link Enumeration} for specified array.
-     * 
+     *
      * @param <T> The list's element type
      * @param list The list
      * @return A new {@link Enumeration}
@@ -772,7 +772,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     /**
      * Sets the remote port
-     * 
+     *
      * @param remotePort The remote port to set
      */
     public void setRemotePort(final int remotePort) {
@@ -786,7 +786,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     /**
      * Sets the local name
-     * 
+     *
      * @param localName The local name to set
      */
     public void setLocalName(final String localName) {
@@ -800,7 +800,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     /**
      * Sets the local address
-     * 
+     *
      * @param localAddr The local address to set
      */
     public void setLocalAddr(final String localAddr) {
@@ -814,7 +814,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     /**
      * Sets the local port
-     * 
+     *
      * @param localPort The local port to set
      */
     public void setLocalPort(final int localPort) {
@@ -886,7 +886,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     /**
      * Gets the instance identifier aka JVM route
-     * 
+     *
      * @return The instance identifier aka JVM route
      */
     public String getInstanceId() {
@@ -895,7 +895,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     /**
      * Sets the instance identifier aka JVM route
-     * 
+     *
      * @param The instance identifier
      */
     public void setInstanceId(final String instanceId) {
@@ -1140,7 +1140,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     /**
      * Sets the start time.
-     * 
+     *
      * @param startTime The start time
      */
     public void setStartTime(final long startTime) {
@@ -1149,7 +1149,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     /**
      * Gets the start time for this request.
-     * 
+     *
      * @return The start time
      */
     public long getStartTime() {

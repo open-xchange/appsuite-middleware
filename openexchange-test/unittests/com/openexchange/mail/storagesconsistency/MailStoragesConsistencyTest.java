@@ -70,7 +70,7 @@ import com.openexchange.sessiond.impl.SessionObject;
 /**
  * {@link MailStoragesConsistencyTest} - This test class checks if changes made by folder storage are notified by corresponding message
  * storage, so that both storages reflects the same view on mailing system.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailStoragesConsistencyTest extends AbstractMailTest {
@@ -82,7 +82,7 @@ public final class MailStoragesConsistencyTest extends AbstractMailTest {
     private static final MailField[] FIELDS_ID = { MailField.ID };
 
     /**
-	 * 
+	 *
 	 */
     public MailStoragesConsistencyTest() {
         super();

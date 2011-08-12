@@ -58,7 +58,7 @@ public class Messaging extends DefaultMessagingAccount {
 	 * @author Martin Braun <martin.braun@open-xchange.com>
 	 */
 	private static final long serialVersionUID = 1337L;
-    
+
 	private Map<String, Object> configuration;
 
     public Messaging() {
@@ -72,7 +72,7 @@ public class Messaging extends DefaultMessagingAccount {
 
     /**
      * Sets the configuration.
-     * 
+     *
      * @param configuration The configuration to set
      */
     @Override

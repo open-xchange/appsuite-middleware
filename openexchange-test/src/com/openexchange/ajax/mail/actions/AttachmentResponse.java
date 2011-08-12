@@ -54,9 +54,9 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
  * {@link AttachmentResponse}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public class AttachmentResponse extends AbstractAJAXResponse {
 

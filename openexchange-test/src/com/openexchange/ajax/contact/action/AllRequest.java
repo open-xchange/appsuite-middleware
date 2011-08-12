@@ -75,7 +75,7 @@ public class AllRequest extends CommonAllRequest {
     public static final Order GUI_ORDER = Order.ASCENDING;
 
 	private String collation;
-    
+
     /**
      * Default constructor.
      */
@@ -83,7 +83,7 @@ public class AllRequest extends CommonAllRequest {
         super(AbstractContactRequest.URL, folderId, addGUIColumns(columns),
             0, null, true);
     }
-    
+
     public AllRequest(final int folderId, final int[] columns, int orderBy, Order order, String collation) {
         super(AbstractContactRequest.URL, folderId, addGUIColumns(columns), orderBy, order, true);
         this.collation = collation;

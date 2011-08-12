@@ -55,14 +55,14 @@ import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
  * {@link MailColorLabelTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  */
 public final class MailColorLabelTest extends MessageStorageTest {
 
     /**
-	 * 
+	 *
 	 */
     public MailColorLabelTest() {
         super();
@@ -87,7 +87,7 @@ public final class MailColorLabelTest extends MessageStorageTest {
             System.err.println("User flags not supported. Skipping test for non-exsiting mixed ids");
             return;
         }
-        
+
         final long currentTimeMillis = System.currentTimeMillis();
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {
@@ -101,7 +101,7 @@ public final class MailColorLabelTest extends MessageStorageTest {
             mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
         }
     }
-    
+
     public void testMailColorLabelNotExistingFolder() throws OXException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {

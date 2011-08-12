@@ -96,7 +96,7 @@ public class DowngradeTest extends TestCase {
     public DowngradeTest(final String name) {
         super(name);
     }
-    
+
     private static String getUsername(final String un) {
         final int pos = un.indexOf('@');
         return pos == -1 ? un : un.substring(0, pos);
@@ -110,7 +110,7 @@ public class DowngradeTest extends TestCase {
         super.setUp();
         Init.startServer();
         AJAXConfig.init();
-        
+
         final TestConfig config = new TestConfig();
         final String userName = config.getUser();
         final TestContextToolkit tools = new TestContextToolkit();
@@ -206,7 +206,7 @@ public class DowngradeTest extends TestCase {
     }
 
     /* ----------------- Test help methods ---------------------*/
-    
+
     private void downgradeDelegate() throws OXException, OXException {
         final UserConfiguration userConfig = new UserConfiguration(Integer.MAX_VALUE ^ UserConfiguration.DELEGATE_TASKS, user.getId(), user.getGroups(), ctx);
         final Connection con = Database.get(ctx, true);

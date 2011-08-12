@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import com.openexchange.exception.OXException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -57,7 +56,7 @@ import static com.openexchange.groupware.calendar.TimeTools.D;
 
 /**
  * {@link Bug15031Test}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Bug15031Test extends CalendarSqlTest {
@@ -69,9 +68,9 @@ public class Bug15031Test extends CalendarSqlTest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        
+
         String nextYear = Integer.toString(new GregorianCalendar().get(Calendar.YEAR) + 1);
-        
+
         appointment = appointments.buildAppointmentWithResourceParticipants(resource1);
         appointment.setParentFolderID(appointments.getPrivateFolder());
         appointment.setStartDate(D("01.01."+nextYear+" 08:00"));
@@ -79,9 +78,9 @@ public class Bug15031Test extends CalendarSqlTest {
         appointment.setIgnoreConflicts(true);
         appointments.save(appointment);
         clean.add(appointment);
-        
+
         appointments.switchUser(secondUser);
-        
+
         appointment2 = appointments.buildAppointmentWithResourceParticipants(resource1);
         appointment2.setParentFolderID(appointments.getPrivateFolder());
         appointment2.setStartDate(D("02.01."+nextYear+" 08:00"));
@@ -89,18 +88,18 @@ public class Bug15031Test extends CalendarSqlTest {
         appointment2.setIgnoreConflicts(true);
         appointments.save(appointment2);
         clean.add(appointment2);
-        
+
         appointment2Update = appointments.load(appointment2.getObjectID(), appointment2.getParentFolderID());
         appointment2Update.setStartDate(D("01.01."+nextYear+" 08:00"));
         appointment2Update.setEndDate(D("01.01."+nextYear+" 09:00"));
     }
-    
+
     public void testBug15031() throws Exception {
         CalendarDataObject[] conflicts = appointments.save(appointment2Update);
-        
+
         if (conflicts == null || conflicts.length != 1)
             fail("Excpected conflicts");
-        
+
         assertEquals("Wrong conflic", appointment.getObjectID(), conflicts[0].getObjectID());
     }
 

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.kata.appointments;
 
-import com.openexchange.exception.OXException;
 import junit.framework.Assert;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.ConflictObject;
@@ -82,7 +81,7 @@ public class AppointmentCreateStep extends AbstractStep implements IdentitySourc
         this.entry = entry;
         this.expectedError = expectedError;
     }
-    
+
     public void cleanUp() throws Exception {
         if(!inserted) {
             return;
@@ -91,10 +90,10 @@ public class AppointmentCreateStep extends AbstractStep implements IdentitySourc
     }
 
     public void perform(AJAXClient client) throws Exception {
-        
+
         this.client = client;
         this.manager = new CalendarTestManager(client);
-        
+
         InsertRequest insertRequest = new InsertRequest(entry, getTimeZone(), false);
         inserted = false;
         AppointmentInsertResponse insertResponse = execute(insertRequest);
@@ -125,10 +124,10 @@ public class AppointmentCreateStep extends AbstractStep implements IdentitySourc
     public void forgetIdentity(Appointment entry) {
         inserted = false;
     }
-    
+
     public Class<Appointment> getType() {
         return Appointment.class;
     }
-    
- 
+
+
 }

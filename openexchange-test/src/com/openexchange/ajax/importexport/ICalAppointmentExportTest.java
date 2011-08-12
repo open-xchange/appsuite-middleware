@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.importexport;
 
-import com.openexchange.exception.OXException;
 import java.util.Date;
 
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
@@ -82,10 +81,10 @@ public class ICalAppointmentExportTest extends ManagedAppointmentTest {
 		calendarManager.insert(appointmentObj);
 		ICalExportRequest exportRequest = new ICalExportRequest(folderID);
 		ICalExportResponse response = getClient().execute(exportRequest);
-		
-		
+
+
 		String iCal = response.getICal();
-		
+
 		assertTrue(iCal.contains(title));
 	}
 

@@ -56,13 +56,12 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
 import com.openexchange.ajax.importexport.actions.ICalImportResponse;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.importexport.ImportExportExceptionCodes;
 
 /**
  * Test class for bug 10382.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class Bug10382Test extends AbstractAJAXSession {
@@ -90,7 +89,7 @@ public class Bug10382Test extends AbstractAJAXSession {
 
     /**
      * Tries to import an iCal. TODO Use a user in a context with only webmail package available.
-     * 
+     *
      * @throws Throwable if an exception occurs.
      */
     public void testBug() throws Throwable {

@@ -65,7 +65,7 @@ import com.openexchange.groupware.reminder.ReminderObject;
 public class RemindAgainResponse extends AbstractAJAXResponse {
 
     private ReminderObject reminder;
-    
+
     /**
      * @param response
      */

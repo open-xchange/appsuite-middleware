@@ -50,14 +50,13 @@
 
 package com.openexchange.ajax.mail.actions;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * 
+ *
  * {@link CountRequest}
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -81,8 +80,8 @@ public class CountRequest extends AbstractMailRequest<CountResponse>{
     }
 
     public Parameter[] getParameters() {
-        return  new Parameter[] { 
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_COUNT), 
+        return  new Parameter[] {
+            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_COUNT),
             new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderID)
         };
     }

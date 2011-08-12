@@ -49,7 +49,6 @@
 
 package com.openexchange.webdav.xml.user.actions;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.webdav.xml.XmlServlet.NS;
 import static com.openexchange.webdav.xml.framework.RequestTools.addElement2PropFind;
 

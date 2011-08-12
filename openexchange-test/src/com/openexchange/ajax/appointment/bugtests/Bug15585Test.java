@@ -49,9 +49,7 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
-import com.openexchange.exception.OXException;
 import java.util.Calendar;
-import java.util.List;
 import java.util.TimeZone;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.ConflictObject;

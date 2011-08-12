@@ -66,19 +66,19 @@ import com.openexchange.ajax.mail.actions.ClearRequest;
 import com.openexchange.ajax.mail.actions.SendRequest;
 
 /**
- * 
+ *
  * @author <a href="karsten.will@open-xchange.com">Karsten Will</a>
  *
  */
 public class ClearTest extends AbstractMailTest {
-	
+
 	private static final Log LOG = LogFactory.getLog(ClearTest.class);
 	private String mailObject_25kb;
-	
+
 	public ClearTest(final String name) {
 		super(name);
 	}
-	
+
 	@Override
     public void setUp() throws Exception{
 		super.setUp();
@@ -88,13 +88,13 @@ public class ClearTest extends AbstractMailTest {
 		clearFolder(getInboxFolder());
 		clearFolder(getSentFolder());
 		clearFolder(getTrashFolder());
-		
+
 		/*
 		 * Create JSON mail object
 		 */
 		mailObject_25kb = createSelfAddressed25KBMailObject().toString();
 	}
-	
+
 	@Override
     public void tearDown() throws Exception{
 		/*
@@ -105,7 +105,7 @@ public class ClearTest extends AbstractMailTest {
 		clearFolder(getTrashFolder());
 		super.tearDown();
 	}
-	
+
 	public void testClearingOneFolder() throws OXException, IOException, SAXException, JSONException, AddressException, OXException {
 		/*
 		 * Insert <numOfMails> mails through a send request
@@ -116,7 +116,7 @@ public class ClearTest extends AbstractMailTest {
 		    getClient().execute(new SendRequest(mailObject_25kb));
 			LOG.info("Sent " + (i + 1) + ". mail of " + numOfMails);
 		}
-		
+
 		// Assert that there are 5 Mails in the folder
 		AllResponse allR = Executor.execute(getSession(), new AllRequest(
 				getInboxFolder(), COLUMNS_DEFAULT_LIST, 0, null, true));
@@ -124,11 +124,11 @@ public class ClearTest extends AbstractMailTest {
             fail(allR.getException().toString());
         }
         assertEquals("There should be 5 messages in the folder", allR.getMailMessages(COLUMNS_DEFAULT_LIST).length, 5);
-        
+
         // Send the clear request
         String [] array = {getInboxFolder()};
         getClient().execute(new ClearRequest(array));
-        
+
         // Assert there are no messages in the folder
         allR = Executor.execute(getSession(), new AllRequest(
 				getInboxFolder(), COLUMNS_DEFAULT_LIST, 0, null, true));

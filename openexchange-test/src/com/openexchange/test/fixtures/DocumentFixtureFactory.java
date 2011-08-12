@@ -59,12 +59,12 @@ import com.openexchange.test.fixtures.transformators.CredentialsTransformator;
  * @author Tobias Friedrich <tobias.friedrich@open-xchange.com>
  */
 public class DocumentFixtureFactory implements FixtureFactory<Document> {
-    
+
 	private File datapath;
 	private String seleniumDataPath;
 	private String seleniumSeparator;
 	private FixtureLoader fixtureLoader;
-	
+
 	public DocumentFixtureFactory(File datapath, FixtureLoader fixtureLoader) {
 		super();
 		this.datapath = datapath;
@@ -78,7 +78,7 @@ public class DocumentFixtureFactory implements FixtureFactory<Document> {
          }
          return documentFixtures;
     }
-	
+
 	public void setSeleniumConfiguration(String seleniumDataPath, String seleniumSeparator) {
     	this.seleniumDataPath = seleniumDataPath;
     	this.seleniumSeparator = seleniumSeparator;
@@ -95,7 +95,7 @@ public class DocumentFixtureFactory implements FixtureFactory<Document> {
             super(Document.class, values, fixtureLoader);
             this.entries = values;
             this.datapath = datapath;
-            
+
             super.addTransformator(new CredentialsTransformator(fixtureLoader), "created_by");
         }
 
@@ -109,17 +109,17 @@ public class DocumentFixtureFactory implements FixtureFactory<Document> {
             }
             final Document document = new Document(datapath);
             apply(document, values);
-            
+
             if(seleniumDataPath != null) {
             	document.setSeleniumConfiguration(seleniumDataPath, seleniumSeparator);
             }
-            
-            final Fixture<Document> fixture = new Fixture<Document>(document, 
+
+            final Fixture<Document> fixture = new Fixture<Document>(document,
             		values.keySet().toArray(new String[values.size()]), values);
             knownDocuments.put(entryName, fixture);
             return fixture;
         }
-        
+
         public void setSeleniumConfiguration(String seleniumDataPath, String seleniumSeparator) {
         	this.seleniumDataPath = seleniumDataPath;
         	this.seleniumSeparator = seleniumSeparator;

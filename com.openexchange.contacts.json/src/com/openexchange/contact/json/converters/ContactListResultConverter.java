@@ -70,8 +70,8 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ContactListResultConverter extends JSONResultConverter {    
-    
+public class ContactListResultConverter extends JSONResultConverter {
+
     public ContactListResultConverter(final ImageService imageService) {
         super(imageService);
     }
@@ -92,42 +92,42 @@ public class ContactListResultConverter extends JSONResultConverter {
             contacts = contactMap.get("modified");
             deleted = contactMap.get("deleted");
         }
-        
+
         final int[] columns = RequestTools.getColumnsAsIntArray(request, "columns");
-        
+
         final JSONArray resultArray = new JSONArray();
         for (final Contact contact : contacts) {
             final JSONArray contactArray = new JSONArray();
-            
+
             final ContactGetter cg = new ContactGetter();
             for (final int column : columns) {
                 final ContactField field = ContactField.getByValue(column);
-                if (field != null && !field.getAjaxName().isEmpty()) {                
+                if (field != null && !field.getAjaxName().isEmpty()) {
                     final Object value = field.doSwitch(cg, contact);
                     if (value == null) {
                         contactArray.put(JSONObject.NULL);
                     } else if (isSpecial(column)) {
                         final Object special = convertSpecial(field, contact, cg);
                         if (special == null) {
-                            contactArray.put(JSONObject.NULL);                            
+                            contactArray.put(JSONObject.NULL);
                         } else {
                             contactArray.put(special);
-                        }                        
+                        }
                     } else {
                         contactArray.put(value);
                     }
                 }
             }
-            
+
             resultArray.put(contactArray);
         }
-        
+
         if (deleted != null) {
             for (final Contact contact : deleted) {
                 resultArray.put(contact.getObjectID());
             }
         }
-        
+
         result.setResultObject(resultArray, "json");
     }
 

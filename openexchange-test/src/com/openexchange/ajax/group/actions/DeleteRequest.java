@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.group.actions;
 
-import com.openexchange.exception.OXException;
 import java.util.Date;
 
 import org.json.JSONException;
@@ -82,7 +81,7 @@ public final class DeleteRequest extends AbstractGroupRequest<DeleteResponse> {
     public DeleteRequest(final int groupId, final Date lastModified) {
         this(groupId, lastModified, true);
     }
-    
+
     public DeleteRequest(Group group, boolean failOnError) {
         this(group.getIdentifier(), group.getLastModified(), failOnError);
     }

@@ -49,7 +49,6 @@
 
 package com.openexchange.test;
 
-import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.server.impl.OCLPermission;
@@ -57,7 +56,7 @@ import static com.openexchange.server.impl.OCLPermission.*;
 
 /**
  * {@link PermissionTools}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class PermissionTools {
@@ -69,34 +68,34 @@ public class PermissionTools {
     /**
      * Creates an OCLPermission out of a String definition. The definition consists of two parts separated by a '/'
      * The first part is the permission specification, the second part are options. [permissions]/[options]
-     * 
+     *
      * The permissions consist of:
-     * 
+     *
      * Folder Permission:
      * 'a' -> Admin
      * 'v' -> View Folder
      * 'c' -> Create Objects in Folder
      * 's' -> Create Subfolders
      *  omitted -> no permissions
-     *  
+     *
      * Read Permission
      * 'r' -> read all
-     * 'ro'-> read own 
+     * 'ro'-> read own
      * 'ra' -> Admin
      * omitted -> no permissions
-     * 
-     * Write permissions 
+     *
+     * Write permissions
      * 'w' -> write all
      * 'wo' -> write own
      * 'wa' -> Admin
      * omitted -> no permissions
-     * 
+     *
      * Delete Permissions:
      * 'd' -> delete all
      * 'do' -> delete own
      * 'da' -> Admin
      *  omitted -> no permissions
-     *  
+     *
      *  The options are:
      * 'a' -> Admin Flag
      * 'g' -> Group Flag
@@ -118,44 +117,44 @@ public class PermissionTools {
 
         return permission;
     }
-    
+
     /**
-     * Creates OCLPermissions out of a String definitions. The arguments must be entity ids and permission definitions alternately. 
-     * 
+     * Creates OCLPermissions out of a String definitions. The arguments must be entity ids and permission definitions alternately.
+     *
      * The definition consists of two parts separated by a '/'
      * The first part is the permission specification, the second part are options. [permissions]/[options]
-     * 
+     *
      * The permissions consist of:
-     * 
+     *
      * Folder Permission:
      * 'a' -> Admin
      * 'v' -> View Folder
      * 'c' -> Create Objects in Folder
      * 's' -> Create Subfolders
      *  omitted -> no permissions
-     *  
+     *
      * Read Permission
      * 'r' -> read all
-     * 'ro'-> read own 
+     * 'ro'-> read own
      * 'ra' -> Admin
      * omitted -> no permissions
-     * 
-     * Write permissions 
+     *
+     * Write permissions
      * 'w' -> write all
      * 'wo' -> write own
      * 'wa' -> Admin
      * omitted -> no permissions
-     * 
+     *
      * Delete Permissions:
      * 'd' -> delete all
      * 'do' -> delete own
      * 'da' -> Admin
      *  omitted -> no permissions
-     *  
+     *
      *  The options are:
      * 'a' -> Admin Flag
      * 'g' -> Group Flag
-     * 
+     *
      * @param entity
      * @param permissionDef
      * @return

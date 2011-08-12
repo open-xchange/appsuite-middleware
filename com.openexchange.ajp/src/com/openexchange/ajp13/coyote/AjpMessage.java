@@ -61,7 +61,7 @@ import com.openexchange.tools.codec.QuotedPrintable;
 
 /**
  * {@link AjpMessage}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AjpMessage {
@@ -254,7 +254,7 @@ public final class AjpMessage {
     /**
      * Copy a chunk of bytes into the packet, starting at the current write position. The chunk of bytes is encoded with the length in two
      * bytes first, then the data itself, and finally a terminating \0 (which is <B>not</B> included in the encoded length).
-     * 
+     *
      * @param b The array from which to copy bytes.
      * @param off The offset into the array at which to start copying
      * @param numBytes The number of bytes to copy.
@@ -279,7 +279,7 @@ public final class AjpMessage {
 
     /**
      * Reads a string from packet and advance the read position past it.
-     * 
+     *
      * @return The read string
      */
     public String getString(final StringBuilder builder) {
@@ -356,7 +356,7 @@ public final class AjpMessage {
     /**
      * Copy a chunk of bytes from the packet into an array and advance the read position past the chunk. See appendBytes() for details on
      * the encoding.
-     * 
+     *
      * @return The number of bytes copied.
      */
     public int getBytes(final byte[] dest) {

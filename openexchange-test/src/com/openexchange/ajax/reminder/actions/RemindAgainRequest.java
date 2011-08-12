@@ -49,14 +49,13 @@
 
 package com.openexchange.ajax.reminder.actions;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.groupware.reminder.ReminderObject;
 
 /**
  * {@link RemindAgainRequest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class RemindAgainRequest extends AbstractReminderRequest<RemindAgainResponse> {
@@ -65,7 +64,7 @@ public class RemindAgainRequest extends AbstractReminderRequest<RemindAgainRespo
 
     /**
      * Default constructor.
-     * 
+     *
      * @param reminder The reminder with new alarm date set
      */
     public RemindAgainRequest(final ReminderObject reminder) {

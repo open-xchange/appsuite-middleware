@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.contact;
 
-import com.openexchange.exception.OXException;
 import java.util.Date;
 import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.GetRequest;
@@ -62,7 +61,7 @@ import com.openexchange.groupware.container.Contact;
 
 /**
  * {@link YomiTest}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class YomiTest extends AbstractAJAXSession {

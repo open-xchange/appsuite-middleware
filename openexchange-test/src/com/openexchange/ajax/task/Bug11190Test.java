@@ -72,14 +72,14 @@ import com.openexchange.ajax.task.actions.UpdateResponse;
 import com.openexchange.groupware.tasks.Task;
 
 public class Bug11190Test extends AbstractAJAXSession {
-    
+
     public Bug11190Test(String name) {
         super(name);
     }
 
     /*
-     * Changing a monthly recurring appointment in the GUI from one 
-     * style (every Xth day) to another (every Monday/Tuesday...) 
+     * Changing a monthly recurring appointment in the GUI from one
+     * style (every Xth day) to another (every Monday/Tuesday...)
      * results in a broken recurrence.
      */
     @Test
@@ -87,7 +87,7 @@ public class Bug11190Test extends AbstractAJAXSession {
         AJAXClient ajaxClient = getClient();
         final TimeZone timezone = ajaxClient.getValues().getTimeZone();
         final int folderId = ajaxClient.getValues().getPrivateTaskFolder();
-        
+
         //new task
         Task taskWithRecurrence = new Task();
         taskWithRecurrence.setTitle("Reproducing bug 11190");
@@ -105,10 +105,10 @@ public class Bug11190Test extends AbstractAJAXSession {
         InsertRequest insertRequest = new InsertRequest(taskWithRecurrence, timezone);
         InsertResponse insertResponse = ajaxClient.execute(insertRequest);
         taskWithRecurrence.setLastModified(insertResponse.getTimestamp());
-        
+
         try {
             //refresh task
-            insertResponse.fillTask(taskWithRecurrence);            
+            insertResponse.fillTask(taskWithRecurrence);
             //update task with new pattern for recurrence
             //...every two months
             taskWithRecurrence.setRecurrenceType(Task.MONTHLY);
@@ -116,11 +116,11 @@ public class Bug11190Test extends AbstractAJAXSession {
             //...every twelfth day
             taskWithRecurrence.setDayInMonth(12);
             // TODO The remove method clears the value in the object. If the value should be cleared over the AJAX interface it must be set to null. This is currently not possible with the int primitive type.
-            taskWithRecurrence.removeDays(); //otherwise, the old value (Monday) will be kept, which then means "the twelfth Monday every two months" (which then is reduced to every 5th Monday)  
+            taskWithRecurrence.removeDays(); //otherwise, the old value (Monday) will be kept, which then means "the twelfth Monday every two months" (which then is reduced to every 5th Monday)
             //send
             UpdateRequest updateRequest = new IntToNullSettingUpdateRequest(taskWithRecurrence,timezone);
             UpdateResponse updateResponse = ajaxClient.execute(updateRequest);
-            taskWithRecurrence.setLastModified(updateResponse.getTimestamp());            
+            taskWithRecurrence.setLastModified(updateResponse.getTimestamp());
             //get data
             GetRequest getRequest = new GetRequest(folderId, taskWithRecurrence.getObjectID());
             GetResponse getResponse = ajaxClient.execute(getRequest);

@@ -30,25 +30,25 @@ public abstract class AbstractAttachmentActionTest extends AbstractActionTest {
 	private AttachmentBase attachmentBase = null;
 	private AttachmentQueryCatalog queryCatalog = new AttachmentQueryCatalog();
 	private DBProvider provider;
-	
+
 	@Override
 	public void setUp() throws Exception {
 		Init.startServer();
 		provider = new DBPoolProvider();
 		queryCatalog = new AttachmentQueryCatalog();
-		
+
 		final TestConfig config = new TestConfig();
 		final String userName = config.getUser();
         final TestContextToolkit tools = new TestContextToolkit();
         final String ctxName = config.getContextName();
         ctx = null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
 		user = UserStorage.getInstance().getUser(tools.resolveUser(userName, ctx), ctx);
-		
+
 		attachmentBase = new AttachmentBaseImpl(provider);
-		
+
 		initAttachments();
 	}
-	
+
 	@Override
 	public void tearDown() throws Exception {
 		Init.stopServer();
@@ -61,7 +61,7 @@ public abstract class AbstractAttachmentActionTest extends AbstractActionTest {
 	protected Context getContext() {
 		return ctx;
 	}
-	
+
 	protected Session getSession() throws Exception {
 	    return SessionObjectWrapper.createSessionObject(user.getId(), getContext().getContextId(), String.valueOf(System.currentTimeMillis()));
 	}
@@ -73,7 +73,7 @@ public abstract class AbstractAttachmentActionTest extends AbstractActionTest {
 	protected AttachmentBase getAttachmentBase() {
 		return attachmentBase;
 	}
-	
+
 	protected AttachmentQueryCatalog getQueryCatalog() {
 		return queryCatalog;
 	}
@@ -82,7 +82,7 @@ public abstract class AbstractAttachmentActionTest extends AbstractActionTest {
 		return provider;
 	}
 
-	
+
 	private void initAttachments() {
 		// TODO: Get Real IDs
 		AttachmentMetadata m = new AttachmentImpl();
@@ -97,7 +97,7 @@ public abstract class AbstractAttachmentActionTest extends AbstractActionTest {
 		m.setId(1024);
 		m.setCreationDate(new Date());
 		attachments.add(m);
-		
+
 		m = new AttachmentImpl();
 		m.setFileMIMEType("text/plain");
 		m.setFilesize(2048);
@@ -110,7 +110,7 @@ public abstract class AbstractAttachmentActionTest extends AbstractActionTest {
 		m.setId(2048);
 		m.setCreationDate(new Date());
 		attachments.add(m);
-		
+
 		m = new AttachmentImpl();
 		m.setFileMIMEType("text/plain");
 		m.setFilesize(4096);
@@ -123,14 +123,14 @@ public abstract class AbstractAttachmentActionTest extends AbstractActionTest {
 		m.setId(4096);
 		m.setCreationDate(new Date());
 		attachments.add(m);
-		
+
 	}
 
-	
+
 	public static final void assertEquals(final AttachmentMetadata m1, final AttachmentMetadata m2) {
 		final GetSwitch get1 = new GetSwitch(m1);
 		final GetSwitch get2 = new GetSwitch(m2);
-		
+
 		for(final AttachmentField field : AttachmentField.VALUES) {
 			assertEquals(field.doSwitch(get1), field.doSwitch(get2));
 		}

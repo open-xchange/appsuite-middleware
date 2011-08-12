@@ -64,7 +64,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ContactResultConverter}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class ContactResultConverter extends JSONResultConverter {
@@ -93,13 +93,13 @@ public class ContactResultConverter extends JSONResultConverter {
             if (field != null && !field.getAjaxName().isEmpty()) {
                 try {
                     final Object value = field.doSwitch(cg, contact);
-                    
+
                     if (isSpecial(column)) {
                         final Object special = convertSpecial(field, contact, cg);
                         if (special != null && !String.valueOf(special).isEmpty()) {
                             final String jsonKey = field.getAjaxName();
                             json.put(jsonKey, special);
-                        }                            
+                        }
                     } else {
                         if (value != null && !String.valueOf(value).isEmpty()) {
                             final String jsonKey = field.getAjaxName();
@@ -111,7 +111,7 @@ public class ContactResultConverter extends JSONResultConverter {
                 }
             }
         }
-        
+
         return json;
     }
 

@@ -59,7 +59,7 @@ import com.openexchange.webdav.protocol.WebdavResource;
 
 /**
  * {@link RootCollection}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class RootCollection extends AbstractCarddavCollection {

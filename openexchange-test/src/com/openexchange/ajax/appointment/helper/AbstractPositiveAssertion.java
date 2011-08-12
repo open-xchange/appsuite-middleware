@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.helper;
 
-import com.openexchange.exception.OXException;
 import java.util.List;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.groupware.container.Appointment;
@@ -67,14 +66,14 @@ public abstract class AbstractPositiveAssertion extends AbstractAssertion{
         this.manager = manager;
         this.folder = folder;
     }
-    
+
     public void check(Changes changes, Expectations expectations) throws Exception{
         approachUsedForTest = null;
         check(generateDefaultAppointment(), changes, expectations);
     }
-    
+
     public abstract void check(Appointment startAppointment, Changes changes, Expectations expectations) throws Exception;
-    
+
     protected void createAndUpdateAndCheck(Appointment startAppointment, Changes changes, Expectations expectations) {
         approachUsedForTest = "Create, then update";
         Appointment copy = startAppointment.clone();
@@ -91,7 +90,7 @@ public abstract class AbstractPositiveAssertion extends AbstractAssertion{
         base.setLastModified(startAppointment.getLastModified());
         base.setObjectID(startAppointment.getObjectID());
         base.setParentFolderID(startAppointment.getParentFolderID());
-        
+
         update(base, changes);
         checkViaGet(base.getParentFolderID(), base.getObjectID(), expectations);
         checkViaList(base.getParentFolderID(), base.getObjectID(), expectations);
@@ -120,7 +119,7 @@ public abstract class AbstractPositiveAssertion extends AbstractAssertion{
             fail2("Exception occurred: ", e);
             return;
         }
-        
+
     }
 
     protected void checkViaGet(int folderId, int appointmentId, Expectations expectations) {

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.ajax.folder.Create.ocl;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import org.json.JSONArray;
@@ -70,7 +69,7 @@ import com.openexchange.server.impl.OCLPermission;
 
 /**
  * {@link Bug16476Test}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Bug16476Test extends AbstractAJAXSession {
@@ -82,7 +81,7 @@ public class Bug16476Test extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link Bug16476Test}.
-     * 
+     *
      * @param name
      */
     public Bug16476Test(String name) {
@@ -95,7 +94,7 @@ public class Bug16476Test extends AbstractAJAXSession {
         super.setUp();
         clientA = getClient();
         clientB = new AJAXClient(User.User2);
-        
+
         folder = Create.folder(
             FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
             "Folder to test bug 16476",
@@ -114,7 +113,7 @@ public class Bug16476Test extends AbstractAJAXSession {
 
         CommonInsertResponse response = clientA.execute(new com.openexchange.ajax.folder.actions.InsertRequest(API.OX_OLD, folder));
         response.fillObject(folder);
-        
+
         appointment = new Appointment();
         appointment.setStartDate(D("01.06.2010 08:00"));
         appointment.setEndDate(D("01.06.2010 09:00"));

@@ -56,11 +56,11 @@ import java.util.HashMap;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class CredentialFixtureFactory implements FixtureFactory<SimpleCredentials>{
-	
+
 	private TestUserConfigFactory userConfigFactory;
 	private ContactFinder contactFinder;
 	private FixtureLoader fixtureLoader;
-	
+
     public CredentialFixtureFactory(TestUserConfigFactory userConfigFactory, ContactFinder contactFinder, FixtureLoader fixtureLoader) {
 		super();
 		this.userConfigFactory = userConfigFactory;

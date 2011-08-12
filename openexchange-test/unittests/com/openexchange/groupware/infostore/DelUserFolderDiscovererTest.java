@@ -22,20 +22,20 @@ import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderTools;
 
 public class DelUserFolderDiscovererTest extends TestCase{
-	
+
 	private DelUserFolderDiscoverer discoverer = null;
 	private Context ctx;
 	private int userIdA;
 	private int userIdB;
-	
+
 	private User userA;
 	private User userB;
-	
+
 	private UserConfiguration userConfigA;
 	private UserConfiguration userConfigB;
-	
+
 	private SessionObject session;
-	
+
 	private FolderObject privateInfostoreFolder;
 	private FolderObject folderWithOtherEntity;
 
@@ -43,7 +43,7 @@ public class DelUserFolderDiscovererTest extends TestCase{
         final int pos = un.indexOf('@');
         return pos == -1 ? un : un.substring(0, pos);
     }
-   
+
     @Override
 	public void setUp() throws Exception {
 		Init.startServer();
@@ -52,27 +52,27 @@ public class DelUserFolderDiscovererTest extends TestCase{
         final TestContextToolkit tools = new TestContextToolkit();
         final String ctxName = config.getContextName();
         ctx = null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
-		
+
 		final String userNameA = AjaxInit.getAJAXProperty("login");
 		final String userNameB = AjaxInit.getAJAXProperty("seconduser");
-		
+
 		userIdA = UserStorage.getInstance().getUserId(getUsername(userNameA), ctx);
 		userIdB = UserStorage.getInstance().getUserId(getUsername(userNameB), ctx);
-		
+
 		userA = UserStorage.getInstance().getUser(userIdA, ctx);
 		userB = UserStorage.getInstance().getUser(userIdB, ctx);
-		
+
 		userConfigA = RdbUserConfigurationStorage.loadUserConfiguration(userIdA, ctx);
 		userConfigB = RdbUserConfigurationStorage.loadUserConfiguration(userIdB, ctx);
-		
-		
+
+
 		session = SessionObjectWrapper.createSessionObject(userIdA, ctx, "blupp");
-		
+
 		final SearchIterator iter = OXFolderTools
         .getAllVisibleFoldersIteratorOfModule(userIdA,
             userA.getGroups(), userConfigA.getAccessibleModules(),
             FolderObject.INFOSTORE, ctx);
-		
+
 		try {
 			while(privateInfostoreFolder == null && iter.hasNext()) {
 				final FolderObject f = (FolderObject) iter.next();
@@ -88,9 +88,9 @@ public class DelUserFolderDiscovererTest extends TestCase{
 		} finally {
 			iter.close();
 		}
-		
+
 		assertTrue("Can't find suitable infostore folder",null != privateInfostoreFolder);
-		
+
 		folderWithOtherEntity = new FolderObject();
 		addDefaults(folderWithOtherEntity);
 		folderWithOtherEntity.setFolderName("Folder with other entity");
@@ -113,7 +113,7 @@ public class DelUserFolderDiscovererTest extends TestCase{
 		manager.deleteFolder(folderWithOtherEntity, true, System.currentTimeMillis());
 		Init.stopServer();
 	}
-	
+
 	public void testDiscoverFolders() throws Exception{
 		final List<FolderObject> folders = discoverer.discoverFolders(userIdA, ctx);
         boolean privateFolderFound = false;
@@ -145,7 +145,7 @@ public class DelUserFolderDiscovererTest extends TestCase{
 		folder.setModule(FolderObject.INFOSTORE);
 		folder.setParentFolderID(this.privateInfostoreFolder.getObjectID());
 	}
-	
+
 	private OCLPermission buildReadAll(final int userId,final boolean admin) {
 		final OCLPermission perm = new OCLPermission();
 		perm.setFolderAdmin(admin);
@@ -154,7 +154,7 @@ public class DelUserFolderDiscovererTest extends TestCase{
 		} else {
 			perm.setFolderPermission(OCLPermission.CREATE_SUB_FOLDERS);
 		}
-		
+
 		perm.setReadObjectPermission(OCLPermission.READ_ALL_OBJECTS);
 		perm.setWriteObjectPermission(OCLPermission.WRITE_ALL_OBJECTS);
 		perm.setDeleteObjectPermission(OCLPermission.DELETE_ALL_OBJECTS);
@@ -162,17 +162,17 @@ public class DelUserFolderDiscovererTest extends TestCase{
 		perm.setEntity(userId);
 		return perm;
 	}
-	
+
 	private OCLPermission buildReadOwn(final int userId, final boolean admin) {
 		final OCLPermission perm = new OCLPermission();
-		
+
 		perm.setFolderAdmin(admin);
 		if(admin) {
 			perm.setFolderPermission(OCLPermission.ADMIN_PERMISSION);
 		} else {
 			perm.setFolderPermission(OCLPermission.CREATE_SUB_FOLDERS);
 		}
-		
+
 		perm.setFolderPermission(OCLPermission.ADMIN_PERMISSION);
 		perm.setReadObjectPermission(OCLPermission.READ_OWN_OBJECTS);
 		perm.setWriteObjectPermission(OCLPermission.WRITE_OWN_OBJECTS);
@@ -181,5 +181,5 @@ public class DelUserFolderDiscovererTest extends TestCase{
 		perm.setEntity(userId);
 		return perm;
 	}
-	
+
 }

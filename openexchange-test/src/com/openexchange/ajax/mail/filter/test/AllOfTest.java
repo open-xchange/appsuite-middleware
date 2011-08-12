@@ -55,16 +55,16 @@ package com.openexchange.ajax.mail.filter.test;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class AllOfTest extends AbstractTest {
-	
+
 	public static final String ALLOF = "allof";
-	
+
 	protected AbstractTest[] tests;
-	
+
 	public AllOfTest(final AbstractTest[] tests) {
 		name = ALLOF;
 		this.tests = tests;
 	}
-	
+
 	public AbstractTest[] getTests() {
 		return tests;
 	}

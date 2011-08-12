@@ -65,7 +65,7 @@ import com.openexchange.test.FolderTestManager;
 public class AbstractInfostoreTest extends AbstractAJAXSession {
     protected FolderTestManager fMgr;
     protected InfostoreTestManager infoMgr;
-    
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -83,7 +83,7 @@ public class AbstractInfostoreTest extends AbstractAJAXSession {
     public AbstractInfostoreTest(String name) {
         super(name);
     }
-    
+
     public FolderObject generateInfostoreFolder(String name) throws OXException, IOException, SAXException, JSONException{
         //create a folder
         FolderObject myFolder = new FolderObject();

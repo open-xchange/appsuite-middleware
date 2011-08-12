@@ -55,7 +55,7 @@ import java.util.Date;
 
 /**
  * {@link MessageBytes}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MessageBytes {
@@ -102,7 +102,7 @@ public final class MessageBytes {
 
     /**
      * Creates a new, uninitialized MessageBytes object.
-     * 
+     *
      * @deprecated Use static newInstance() in order to allow future hooks.
      */
     @Deprecated
@@ -157,7 +157,7 @@ public final class MessageBytes {
 
     /**
      * Sets the content to the specified subarray of bytes.
-     * 
+     *
      * @param b the bytes
      * @param off the start offset of the bytes
      * @param len the length of the bytes
@@ -187,7 +187,7 @@ public final class MessageBytes {
 
     /**
      * Sets the content to be a char[]
-     * 
+     *
      * @param c the bytes
      * @param off the start offset of the bytes
      * @param len the length of the bytes
@@ -338,7 +338,7 @@ public final class MessageBytes {
 
     /**
      * Compares the message bytes to the specified String object.
-     * 
+     *
      * @param s the String to compare
      * @return true if the comparison succeeded, false otherwise
      */
@@ -363,7 +363,7 @@ public final class MessageBytes {
 
     /**
      * Compares the message bytes to the specified String object.
-     * 
+     *
      * @param s the String to compare
      * @return true if the comparison succeeded, false otherwise
      */
@@ -416,7 +416,7 @@ public final class MessageBytes {
 
     /**
      * Returns true if the message bytes starts with the specified string.
-     * 
+     *
      * @param s the string
      */
     public boolean startsWith(final String s) {
@@ -434,7 +434,7 @@ public final class MessageBytes {
 
     /**
      * Returns true if the message bytes starts with the specified string.
-     * 
+     *
      * @param s the string
      * @param pos The start position
      */
@@ -544,7 +544,7 @@ public final class MessageBytes {
 
     /**
      * Returns true if the message bytes starts with the specified string.
-     * 
+     *
      * @param c the character
      * @param starting The start position
      */

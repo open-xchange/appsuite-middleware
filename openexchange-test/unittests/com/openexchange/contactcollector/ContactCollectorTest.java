@@ -93,7 +93,7 @@ public class ContactCollectorTest extends TestCase {
     private Context ctx;
 
     private Session session;
-    
+
     private TestContextToolkit tools;
 
     private FolderObject contactFolder;
@@ -130,7 +130,7 @@ public class ContactCollectorTest extends TestCase {
         Init.stopServer();
         deleteContactFromFolder(mail);
     }
-    
+
     public void testNoFolder() throws Throwable {
         ServerUserSetting.getInstance().setContactCollectOnMailAccess(ctx.getContextId(), userId, true);
         setFolderNULL();
@@ -157,7 +157,7 @@ public class ContactCollectorTest extends TestCase {
     public void testNewContact() throws Throwable {
         ServerUserSetting.getInstance().setContactCollectionFolder(ctx.getContextId(), userId, I(contactFolder.getObjectID()));
         ServerUserSetting.getInstance().setContactCollectOnMailAccess(ctx.getContextId(), userId, true);
-        
+
         final ContactCollectorServiceImpl collector = new ContactCollectorServiceImpl();
         collector.start();
         try {
@@ -176,7 +176,7 @@ public class ContactCollectorTest extends TestCase {
     public void testExistingContact() throws Throwable {
         ServerUserSetting.getInstance().setContactCollectionFolder(ctx.getContextId(), userId, I(contactFolder.getObjectID()));
         ServerUserSetting.getInstance().setContactCollectOnMailAccess(ctx.getContextId(), userId, true);
-        
+
         final ContactCollectorServiceImpl collector = new ContactCollectorServiceImpl();
         collector.start();
         try {
@@ -242,7 +242,7 @@ public class ContactCollectorTest extends TestCase {
             contactInterface.deleteContactObject(contact.getObjectID(), contact.getParentFolderID(), contact.getLastModified());
         }
     }
-    
+
     private void removeUserEntry() throws Throwable {
         Connection con = DBPool.pickupWriteable(ctx);
         PreparedStatement stmt = con.prepareStatement("DELETE FROM user_setting_server WHERE cid = ? AND user = ?");
@@ -252,7 +252,7 @@ public class ContactCollectorTest extends TestCase {
         stmt.close();
         DBPool.closeWriterSilent(ctx, con);
     }
-    
+
     private void setFolderNULL() throws Throwable {
         Connection con = DBPool.pickupWriteable(ctx);
         PreparedStatement stmt = con.prepareStatement("UPDATE user_setting_server SET contact_collect_folder = ? WHERE cid = ? AND user = ?");
@@ -271,7 +271,7 @@ public class ContactCollectorTest extends TestCase {
         }
         DBPool.closeWriterSilent(ctx, con);
     }
-    
+
     private FolderObject createSubFolder() throws Throwable {
         FolderObject fo = new FolderObject();
         fo.setFolderName("Contact Collect Folder" + System.currentTimeMillis());
@@ -289,7 +289,7 @@ public class ContactCollectorTest extends TestCase {
         fo.setObjectID(fuid);
         return fo;
     }
-    
+
     private void deleteFolder(FolderObject fo) throws Throwable {
         OXFolderManager oxma = OXFolderManager.getInstance(session);
         oxma.deleteFolder(new FolderObject(fo.getObjectID()), true, System.currentTimeMillis());

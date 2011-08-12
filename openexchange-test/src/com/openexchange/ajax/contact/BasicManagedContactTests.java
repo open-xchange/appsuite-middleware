@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.contact;
 
-import com.openexchange.exception.OXException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -113,7 +112,7 @@ public class BasicManagedContactTests extends AbstractManagedContactTest {
 
         assertEquals("Should find exactly one more contact", numberBefore + 1, allContactsOnServer.length);
 
-        
+
         Contact actual = null;
         for(Contact temp: allContactsOnServer){
             if(temp.getObjectID() == expected.getObjectID())
@@ -125,10 +124,10 @@ public class BasicManagedContactTests extends AbstractManagedContactTest {
         assertTrue("Should contain field #5", actual.contains(5));
         assertTrue("Should contain field #20", actual.contains(20));
     }
-    
+
     public void testGetAllContactsOrderedByCollationAscending() {
 		List<String> sinograph = Arrays.asList( "\u963f", "\u6ce2","\u6b21","\u7684","\u9e45","\u5bcc","\u54e5","\u6cb3","\u6d01","\u79d1","\u4e86","\u4e48","\u5462","\u54e6","\u6279","\u4e03","\u5982","\u56db","\u8e22","\u5c4b","\u897f","\u8863","\u5b50");
-		
+
 		for(String graphem: sinograph){
 			manager.newAction( manager.generateContact(folderID, graphem) );
 		}
@@ -141,10 +140,10 @@ public class BasicManagedContactTests extends AbstractManagedContactTest {
         	assertEquals("Element #"+i, expected, allContacts[i].getSurName());
         }
     }
-    
+
     public void testGetAllContactsOrderedByCollationDescending() {
 		List<String> sinograph = Arrays.asList( "\u963f", "\u6ce2","\u6b21","\u7684","\u9e45","\u5bcc","\u54e5","\u6cb3","\u6d01","\u79d1","\u4e86","\u4e48","\u5462","\u54e6","\u6279","\u4e03","\u5982","\u56db","\u8e22","\u5c4b","\u897f","\u8863","\u5b50");
-		
+
 		for(String graphem: sinograph){
 			manager.newAction( manager.generateContact(folderID, graphem) );
 		}
@@ -158,7 +157,7 @@ public class BasicManagedContactTests extends AbstractManagedContactTest {
         }
     }
 
-    
+
     /**
      * The "wonder field" is 607, which implies sorting by last name, company name, email1, email2 and display name.
      * Currently not testing e-mail since it is not supported yet.
@@ -171,10 +170,10 @@ public class BasicManagedContactTests extends AbstractManagedContactTest {
     	List<String> companyNames = Arrays.asList( "\u54e5","\u6cb3","\u6d01");
     	//List<String> email1s = Arrays.asList( "\u79d1@somewhere.invalid","\u4e86@somewhere.invalid","\u4e48@somewhere.invalid");
     	//List<String> email2s = Arrays.asList( "\u5462@somewhere.invalid","\u54e6@somewhere.invalid","\u6279@somewhere.invalid","\u4e03@somewhere.invalid");
-    	
+
     	List<List<String>> values = Arrays.asList(lastNames, displayNames, companyNames); //,email1s, email2s);
     	List<ContactField> fields = Arrays.asList( ContactField.SUR_NAME, ContactField.DISPLAY_NAME, ContactField.COMPANY); //ContactField.EMAIL1, ContactField.EMAIL2 );
-    	
+
     	int valPos = 0;
 		for(ContactField field: fields) {
 			List<String> values2 = values.get(valPos++);
@@ -195,7 +194,7 @@ public class BasicManagedContactTests extends AbstractManagedContactTest {
         	assertEquals("Element #"+i, expected, allContacts[i].getInfo());
         }
     }
-	
+
     public void testUpdateContactAndGetUpdates() {
         Contact expected = generateContact();
 

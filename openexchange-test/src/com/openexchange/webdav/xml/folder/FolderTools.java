@@ -71,7 +71,7 @@ public final class FolderTools {
 
     private FolderObject defaultAppointmentFolder;
     private FolderObject defaultContactFolder;
-    
+
     /**
      * Default constructor.
      */

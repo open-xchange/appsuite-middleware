@@ -20,34 +20,34 @@ public class SizedInputStreamTest {
 	public static junit.framework.Test suite() {
 		return new JUnit4TestAdapter(SizedInputStreamTest.class);
 	}
-	
-	
-	
+
+
+
 	public byte[] testString = null;
 	public SizedInputStream testStream = null;
 	public static final String ENCODING = "UTF-8";
 	public static final String TEXT = "Blabla";
-	
-	
+
+
 
 	@Before public void setup() throws UnsupportedEncodingException{
 		testString = TEXT.getBytes(ENCODING);
 		testStream = new SizedInputStream(
-				new ByteArrayInputStream(testString), 
+				new ByteArrayInputStream(testString),
 				testString.length,
 				Format.CSV);
 	}
-	
+
 	@After public void tearDown() throws IOException{
 		testStream.close();
 	}
-	
+
 	@Test public void sizing() throws UnsupportedEncodingException{
 		assertTrue("First" , testStream.getSize() == testString.length);
 		assertTrue("Second", testStream.getSize() == testString.length);
 		assertTrue("Third" , testStream.getSize() == testString.length);
 	}
-	
+
 	@Test public void normalReading() throws IOException{
 		int l;
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -60,7 +60,7 @@ public class SizedInputStreamTest {
 		assertTrue("", testStream.getSize() == testString.length);
 		//assertEquals("", testStream.getSize() , testString.length);
 	}
-	
+
 	@Test public void readingViaGetSize() throws IOException{
 		final byte[] buffer = new byte[(int) testStream.getSize()];
 		testStream.read(buffer);

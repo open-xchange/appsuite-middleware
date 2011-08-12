@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.structure;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -57,11 +56,10 @@ import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.structure.handler.MIMEStructureHandler;
-import com.openexchange.sessiond.impl.SessionObject;
 
 /**
  * {@link MailNestedMessageStructureTest} - Test for output of structured JSON mail object.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MailNestedMessageStructureTest extends AbstractMailTest {
@@ -75,77 +73,77 @@ public class MailNestedMessageStructureTest extends AbstractMailTest {
 
     /**
      * Initializes a new {@link MailNestedMessageStructureTest}.
-     * 
+     *
      * @param name The test name
      */
     public MailNestedMessageStructureTest(final String name) {
         super(name);
     }
 
-    private static final byte[] MP_NESTED_MESSAGE = ("Date: Sat, 14 Nov 2009 17:34:32 +0100 (CET)\n" + 
-    		"From: alice@foobar.com\n" + 
-    		"To: bob@foobar.com\n" + 
-    		"Message-ID: <1043855276.4621.1258216472739.JavaMail.foobar@foobar.com>\n" + 
-    		"Subject: Mail subject\n" + 
-    		"MIME-Version: 1.0\n" + 
-    		"Content-Type: multipart/mixed; boundary=\"----=_Part_4619_202988661.1258216472662\"\n" + 
-    		"X-Priority: 3\n" + 
-    		"\n" + 
-    		"------=_Part_4619_202988661.1258216472662\n" + 
-    		"Content-Type: multipart/alternative;  boundary=\"----=_Part_4620_1426393991.1258216472662\"\n" + 
-    		"\n" + 
-    		"------=_Part_4620_1426393991.1258216472662\n" + 
-    		"MIME-Version: 1.0\n" + 
-    		"Content-Type: text/plain; charset=UTF-8\n" + 
-    		"Content-Transfer-Encoding: 7bit\n" + 
-    		"\n" + 
-    		"Some text here.\n" + 
-    		"\n" + 
-    		"------=_Part_4620_1426393991.1258216472662\n" + 
-    		"MIME-Version: 1.0\n" + 
-    		"Content-Type: text/html; charset=UTF-8\n" + 
-    		"Content-Transfer-Encoding: 7bit\n" + 
-    		"\n" + 
-    		"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n" + 
-    		"\n" + 
-    		"<html xmlns=\"http://www.w3.org/1999/xhtml\">\n" + 
-    		"  <head>\n" + 
-    		"    <meta content=\"text/html; charset=UTF-8\" http-equiv=\"Content-Type\" />\n" + 
-    		"    <title></title>\n" + 
-    		"  </head>\n" + 
-    		"\n" + 
-    		"  <body>\n" + 
-    		"    <p style=\"margin: 0px;\">Some text here.<span></span></p>\n" + 
-    		"\n" + 
-    		"    <p style=\"margin: 0px;\">&#160;</p>\n" + 
-    		"  </body>\n" + 
-    		"</html>\n" + 
-    		"\n" + 
-    		"------=_Part_4620_1426393991.1258216472662--\n" + 
-    		"\n" + 
-    		"------=_Part_4619_202988661.1258216472662\n" + 
-    		"Content-Type: message/rfc822; name=simple.eml\n" + 
-    		"Content-Transfer-Encoding: 7bit\n" + 
-    		"Content-Disposition: INLINE; filename=simple.eml\n" + 
-    		"\n" + 
-    		"Date: Sat, 14 Nov 2009 17:03:09 +0100 (CET)\n" + 
-    		"From: alice@foobar.com\n" + 
-    		"To: bob@foobar.com\n" + 
-    		"Message-ID: <1837640730.5.1258214590077.JavaMail.foobar@foobar>\n" + 
-    		"Subject: Simple mail subject\n" + 
-    		"MIME-Version: 1.0\n" + 
-    		"Content-Type: text/plain; charset=UTF-8\n" + 
-    		"X-Priority: 3\n" + 
-    		"\n" + 
-    		"Mail text.\n" + 
-    		"\n" + 
-    		"People have been asking for support for the IMAP IDLE command for quite\n" + 
-    		"a few years and I think I've finally figured out how to provide such\n" + 
-    		"support safely. The difficulty isn't in executing the command, which\n" + 
-    		"is quite straightforward, the difficulty is in deciding how to expose\n" + 
-    		"it to applications, and inhandling the multithreading issues that\n" + 
-    		"arise.\n" + 
-    		"\n" + 
+    private static final byte[] MP_NESTED_MESSAGE = ("Date: Sat, 14 Nov 2009 17:34:32 +0100 (CET)\n" +
+    		"From: alice@foobar.com\n" +
+    		"To: bob@foobar.com\n" +
+    		"Message-ID: <1043855276.4621.1258216472739.JavaMail.foobar@foobar.com>\n" +
+    		"Subject: Mail subject\n" +
+    		"MIME-Version: 1.0\n" +
+    		"Content-Type: multipart/mixed; boundary=\"----=_Part_4619_202988661.1258216472662\"\n" +
+    		"X-Priority: 3\n" +
+    		"\n" +
+    		"------=_Part_4619_202988661.1258216472662\n" +
+    		"Content-Type: multipart/alternative;  boundary=\"----=_Part_4620_1426393991.1258216472662\"\n" +
+    		"\n" +
+    		"------=_Part_4620_1426393991.1258216472662\n" +
+    		"MIME-Version: 1.0\n" +
+    		"Content-Type: text/plain; charset=UTF-8\n" +
+    		"Content-Transfer-Encoding: 7bit\n" +
+    		"\n" +
+    		"Some text here.\n" +
+    		"\n" +
+    		"------=_Part_4620_1426393991.1258216472662\n" +
+    		"MIME-Version: 1.0\n" +
+    		"Content-Type: text/html; charset=UTF-8\n" +
+    		"Content-Transfer-Encoding: 7bit\n" +
+    		"\n" +
+    		"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n" +
+    		"\n" +
+    		"<html xmlns=\"http://www.w3.org/1999/xhtml\">\n" +
+    		"  <head>\n" +
+    		"    <meta content=\"text/html; charset=UTF-8\" http-equiv=\"Content-Type\" />\n" +
+    		"    <title></title>\n" +
+    		"  </head>\n" +
+    		"\n" +
+    		"  <body>\n" +
+    		"    <p style=\"margin: 0px;\">Some text here.<span></span></p>\n" +
+    		"\n" +
+    		"    <p style=\"margin: 0px;\">&#160;</p>\n" +
+    		"  </body>\n" +
+    		"</html>\n" +
+    		"\n" +
+    		"------=_Part_4620_1426393991.1258216472662--\n" +
+    		"\n" +
+    		"------=_Part_4619_202988661.1258216472662\n" +
+    		"Content-Type: message/rfc822; name=simple.eml\n" +
+    		"Content-Transfer-Encoding: 7bit\n" +
+    		"Content-Disposition: INLINE; filename=simple.eml\n" +
+    		"\n" +
+    		"Date: Sat, 14 Nov 2009 17:03:09 +0100 (CET)\n" +
+    		"From: alice@foobar.com\n" +
+    		"To: bob@foobar.com\n" +
+    		"Message-ID: <1837640730.5.1258214590077.JavaMail.foobar@foobar>\n" +
+    		"Subject: Simple mail subject\n" +
+    		"MIME-Version: 1.0\n" +
+    		"Content-Type: text/plain; charset=UTF-8\n" +
+    		"X-Priority: 3\n" +
+    		"\n" +
+    		"Mail text.\n" +
+    		"\n" +
+    		"People have been asking for support for the IMAP IDLE command for quite\n" +
+    		"a few years and I think I've finally figured out how to provide such\n" +
+    		"support safely. The difficulty isn't in executing the command, which\n" +
+    		"is quite straightforward, the difficulty is in deciding how to expose\n" +
+    		"it to applications, and inhandling the multithreading issues that\n" +
+    		"arise.\n" +
+    		"\n" +
     		"------=_Part_4619_202988661.1258216472662--\n").getBytes();
 
     public void testMIMEStructure() {
@@ -231,5 +229,5 @@ public class MailNestedMessageStructureTest extends AbstractMailTest {
             }
         }
     }
-    
+
 }

@@ -62,7 +62,7 @@ import com.openexchange.ajax.mail.contenttypes.MailContentType;
 
 /**
  * {@link SendTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - tests with manager
  */
@@ -72,7 +72,7 @@ public final class SendTest extends AbstractMailTest {
 
     /**
      * Default constructor.
-     * 
+     *
      * @param name Name of this test.
      */
     public SendTest(final String name) {
@@ -93,7 +93,7 @@ public final class SendTest extends AbstractMailTest {
 
     /**
      * Tests the <code>action=new</code> request on INBOX folder
-     * 
+     *
      * @throws Throwable
      */
     public void testSend() throws Throwable {

@@ -131,6 +131,6 @@ public final class Bug12727Test extends AbstractTaskTestForAJAXClient {
         task.setParentFolderID(client.getValues().getPrivateTaskFolder());
         task.everyDay();
         task.occurs(5);
-        manager.insertTaskOnServer(task); 
+        manager.insertTaskOnServer(task);
     }
 }

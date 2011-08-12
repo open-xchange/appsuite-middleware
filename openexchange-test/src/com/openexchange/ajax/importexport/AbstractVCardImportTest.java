@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.importexport;
 
-import com.openexchange.exception.OXException;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
 import com.openexchange.ajax.framework.AJAXClient;

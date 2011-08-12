@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.netsol;
 
-import com.openexchange.exception.OXException;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -68,15 +67,15 @@ import com.openexchange.mail.MailJSONField;
 
 /**
  * {@link NetsolTestMailMessageSendAttachment}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class NetsolTestMailMessageSendAttachment extends AbstractNetsolTest {
 
 	/**
 	 * Initializes a new {@link NetsolTestMailMessageSendAttachment}
-	 * 
+	 *
 	 * @param name
 	 */
 	public NetsolTestMailMessageSendAttachment(final String name) {

@@ -133,7 +133,7 @@ public final class Bug12099Test extends AbstractAJAXSession {
             final GetResponse response = myClient.execute(request);
             series.setLastModified(response.getTimestamp());
             final Appointment test = response.getAppointment(tz);
-            assertEquals("Editor of appointment series must not be 0.", 
+            assertEquals("Editor of appointment series must not be 0.",
                 myClient.getValues().getUserId(), test.getModifiedBy());
         }
         } finally {

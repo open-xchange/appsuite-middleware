@@ -101,11 +101,11 @@ public final class TaskTools extends Assert {
     private static final Log LOG = LogFactory.getLog(TaskTools.class);
     private static final String ENCODING = "UTF-8";
     private static final String TASKS_URL = "/ajax/tasks";
-    
+
     private TaskTools() {
         super();
     }
-    
+
     /**
      * @return the identifier of the private task folder of the primary user.
      * @throws IOException if the communication with the server fails.
@@ -246,13 +246,13 @@ public final class TaskTools extends Assert {
         }
     }
 
-    public static CommonDeleteResponse delete(final WebConversation conversation, 
-        final String hostName, final String sessionId, final String protocol, 
+    public static CommonDeleteResponse delete(final WebConversation conversation,
+        final String hostName, final String sessionId, final String protocol,
         final DeleteRequest request) throws OXException, IOException,
         SAXException, JSONException {
         return Executor.execute(new AJAXSession(conversation, hostName, sessionId), request, protocol, hostName);
     }
-    
+
     /**
      * @deprecated use {@link #all(AJAXSession, AllRequest)}.
      */
@@ -295,8 +295,8 @@ public final class TaskTools extends Assert {
         return client.execute(request);
     }
 
-    public static CommonAllResponse all(final WebConversation conversation, 
-        final String hostName, final String sessionId, final String protocol, 
+    public static CommonAllResponse all(final WebConversation conversation,
+        final String hostName, final String sessionId, final String protocol,
         final AllRequest request) throws OXException, IOException,
         SAXException, JSONException {
         return Executor.execute(new AJAXSession(conversation, hostName, sessionId), request, protocol, hostName);

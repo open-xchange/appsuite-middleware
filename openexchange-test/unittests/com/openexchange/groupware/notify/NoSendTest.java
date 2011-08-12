@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.notify;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.tasks.Task;
 
@@ -59,13 +58,13 @@ public class NoSendTest extends ParticipantNotifyTest {
     public void testNoSend() throws Exception{
         final Participant[] participants = getParticipants(U(6,2),G(),S(), R());
         final Task t = getTask(participants);
-        
+
         notify.taskCreated(t,session);
-        
+
         final Message msg = notify.getMessages().get(0);
-        
+
         final String[] participantNames = parseParticipants( msg );
-        
+
         assertNames( msg.addresses, "user1@test.invalid" );
         assertLanguage( EN , msg );
         assertNames( participantNames,"User 5 (waiting)", "User 1 (waiting)" );

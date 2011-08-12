@@ -63,11 +63,11 @@ import com.openexchange.groupware.tasks.Create;
 import com.openexchange.groupware.tasks.Task;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class InsertTest extends AbstractTaskTest {
-    
+
     /**
      * @param name
      */

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.filter.parser.test;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -63,7 +62,7 @@ import com.openexchange.ajax.mail.filter.test.SizeTest;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class SizeTestParserImpl implements TestParser {
-	
+
 	public AbstractTest parseTest(String name, JSONObject jsonObject) throws JSONException {
 		// TODO: parse comparator and size
 		return new SizeTest(null);

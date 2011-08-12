@@ -1,7 +1,6 @@
 
 package com.openexchange.ajax.user;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.I;
 import org.json.JSONArray;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -11,14 +10,14 @@ import com.openexchange.ajax.user.actions.AllResponse;
 
 /**
  * {@link AllTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AllTest extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link AllTest}.
-     * 
+     *
      * @param name
      */
     public AllTest(final String name) {
@@ -52,7 +51,7 @@ public class AllTest extends AbstractAJAXSession {
 
         System.out.println(users);
     }
-    
+
     public void testAllWithSort2() throws Exception {
 
         final AllRequest request = new AllRequest(new int[] { 555 });

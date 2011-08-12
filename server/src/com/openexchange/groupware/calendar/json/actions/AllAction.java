@@ -155,7 +155,7 @@ public final class AllAction extends AbstractAppointmentAction {
                 it = appointmentsql.getAppointmentsBetweenInFolder(folderId, _appointmentFields, start, end, orderBy, orderDir);
                 appointmentsql.setIncludePrivateAppointments(old);
             }
-            
+
             Date lastModified = new Date(0);
             final List<Appointment> appointmentList = new ArrayList<Appointment>();
             while (it.hasNext()) {

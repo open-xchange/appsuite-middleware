@@ -12,12 +12,12 @@ import java.io.IOException;
 public class MoveTest extends StructureTest {
 
     //TODO noroot
-    
+
     @Override
     public void testResource() throws Exception {
         final WebdavPath INDEX_HTML_URL = testCollection.dup().append("index.html");
         final WebdavPath MOVED_INDEX_HTML_URL = testCollection.dup().append("moved_index.html");
-        
+
         doMove(INDEX_HTML_URL, MOVED_INDEX_HTML_URL);
         doMove(MOVED_INDEX_HTML_URL, INDEX_HTML_URL);
 

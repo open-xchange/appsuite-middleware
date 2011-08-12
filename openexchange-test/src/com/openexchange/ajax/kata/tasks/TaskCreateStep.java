@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.kata.tasks;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.kata.AbstractStep;
 import com.openexchange.ajax.kata.IdentitySource;
@@ -97,7 +96,7 @@ public class TaskCreateStep extends AbstractStep implements IdentitySource<Task>
         if(task.containsParentFolderID())
             entry.setParentFolderID(task.getParentFolderID());
     }
-    
+
     /* (non-Javadoc)
      * @see com.openexchange.ajax.kata.IdentitySource#rememberIdentityValues(java.lang.Object)
      */
@@ -121,7 +120,7 @@ public class TaskCreateStep extends AbstractStep implements IdentitySource<Task>
     public void perform(AJAXClient client) throws Exception {
         this.client = client;
         this.manager = new TaskTestManager(client);
-        
+
         InsertRequest insertRequest = new InsertRequest(entry, getTimeZone(), false);
         InsertResponse insertResponse = execute(insertRequest);
         insertResponse.fillTask(entry);

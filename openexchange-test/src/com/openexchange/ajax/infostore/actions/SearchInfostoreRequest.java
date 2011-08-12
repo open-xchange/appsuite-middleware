@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.infostore.actions;
 
-import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONException;
@@ -62,7 +61,7 @@ import com.openexchange.groupware.search.Order;
 
 /**
  * Stores the parameter for searching for infoitems.
- * 
+ *
  * @author <a href="mailto:markus.wagner@open-xchange.org">Markus Wagner</a>
  */
 public class SearchInfostoreRequest extends AbstractInfostoreRequest<SearchInfostoreResponse> {

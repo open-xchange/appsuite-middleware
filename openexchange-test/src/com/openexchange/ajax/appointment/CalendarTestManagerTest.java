@@ -65,7 +65,7 @@ import com.openexchange.test.FolderTestManager;
 
 /**
  * {@link CalendarTestManagerTest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CalendarTestManagerTest extends AbstractAJAXSession {
@@ -78,7 +78,7 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link CalendarTestManagerTest}.
-     * 
+     *
      * @param name
      */
     public CalendarTestManagerTest(String name) {

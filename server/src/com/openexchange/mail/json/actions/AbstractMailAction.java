@@ -251,7 +251,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
     /**
      * Detects the display mode.
-     * 
+     *
      * @param modifyable whether modifiable.
      * @param view the view
      * @param usm The user mail settings

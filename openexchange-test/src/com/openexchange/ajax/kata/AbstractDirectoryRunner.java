@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.kata;
 
-import com.openexchange.exception.OXException;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.List;
@@ -67,7 +66,7 @@ import com.openexchange.test.fixtures.ajax.FixtureLoaderFactory;
  *
  */
 public abstract class AbstractDirectoryRunner extends AbstractAJAXSession {
-    
+
     private String dirName;
     private Class aClass;
 
@@ -76,15 +75,15 @@ public abstract class AbstractDirectoryRunner extends AbstractAJAXSession {
         this.dirName = dirName;
         this.aClass = aClass;
     }
-    
+
     public void testRunKata() throws Exception {
         FixtureLoader loader = buildLoader();
         String[] filenames = scanDirectory();
-        
+
         AJAXClient client = getClient();
-        
+
         FixtureStepFactory stepFactory = new FixtureStepFactory(loader);
-        
+
         for(String filename : filenames) {
             List<Step> steps = stepFactory.loadSteps(aClass, filename);
             try {

@@ -54,7 +54,7 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.Header;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 abstract class AbstractConfigRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {

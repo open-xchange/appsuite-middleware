@@ -58,7 +58,7 @@ import com.openexchange.groupware.search.Order;
 
 /**
  * {@link AllRequest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="karsten.will@open-xchange.com">Karsten Will</a>
  */
@@ -100,7 +100,7 @@ public class AllRequest extends AbstractAllRequest<AllResponse> {
 
     /**
      * Enables thread-sort.
-     * 
+     *
      * @param threadSort <code>true</code> to enable thread-sort; otherwise <code>false</code>
      * @return This ALL request with thread-sort enabled/disabled
      */

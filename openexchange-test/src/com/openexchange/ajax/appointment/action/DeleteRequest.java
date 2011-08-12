@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.action;
 
-import com.openexchange.exception.OXException;
 import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -90,7 +89,7 @@ public class DeleteRequest extends AbstractAppointmentRequest<CommonDeleteRespon
     public DeleteRequest(final Appointment appointment) {
         this(appointment.getObjectID(), appointment.getParentFolderID(), appointment.getLastModified());
     }
-    
+
 
     public DeleteRequest(final Appointment appointment, boolean failOnError) {
         this(appointment.getObjectID(), appointment.getParentFolderID(), appointment.getLastModified(), failOnError);

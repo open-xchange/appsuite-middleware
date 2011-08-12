@@ -80,7 +80,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractResource;
 
 /**
  * {@link CarddavResource}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CarddavResource extends AbstractResource {
@@ -180,7 +180,7 @@ public class CarddavResource extends AbstractResource {
                 newContact.setParentFolderID(parent.getStandardFolder());
                 newContact.setContextId(factory.getSession().getContextId());
             }
-            contact = newContact;                       
+            contact = newContact;
         } catch (final VersitException e) {
             LOG.error(e.getMessage(), e);
             throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), 500);
@@ -229,8 +229,8 @@ public class CarddavResource extends AbstractResource {
 
     public InputStream getBody() throws WebdavProtocolException {
         // generate VCard File
-        String outputString = generateVCard();        
-        
+        String outputString = generateVCard();
+
         return new ByteArrayInputStream(outputString.getBytes());
     }
 
@@ -259,7 +259,7 @@ public class CarddavResource extends AbstractResource {
         }
         return "";
     }
-    
+
     Pattern customAttributes = Pattern.compile("^X-OPEN-XCHANGE.*?\\r?\\n", Pattern.MULTILINE);
     private String removeXOPENXCHANGEAttributes(String outputString) {
         return customAttributes.matcher(outputString).replaceAll("");

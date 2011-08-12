@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Calendar;
 import java.util.Date;

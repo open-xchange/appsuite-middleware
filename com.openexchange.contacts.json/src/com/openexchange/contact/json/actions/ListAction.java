@@ -86,7 +86,7 @@ public class ListAction extends ContactAction {
         final int[] columns = req.getColumns();
         final int[][] objectIdsAndFolderIds = req.getListRequestData();
         final TimeZone timeZone = req.getTimeZone();
-        
+
         boolean allInSameFolder = true;
         int lastFolder = -1;
         for (final int[] objectIdAndFolderId : objectIdsAndFolderIds) {
@@ -96,7 +96,7 @@ public class ListAction extends ContactAction {
             }
             lastFolder = folder;
         }
-        
+
         Date timestamp = new Date(0);
         Date lastModified = null;
         SearchIterator<Contact> it = null;
@@ -106,16 +106,16 @@ public class ListAction extends ContactAction {
             if (allInSameFolder) {
                 final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(lastFolder, session);
                 it = contactInterface.getObjectsById(objectIdsAndFolderIds, columns);
-                
+
                 while (it.hasNext()) {
                     final Contact contact = it.next();
                     contacts.add(contact);
-                    
+
                     lastModified = contact.getLastModified();
                     // Correct last modified and creation date with users timezone
                     contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
                     contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
-                    
+
                     if (lastModified != null && timestamp.before(lastModified)) {
                         timestamp = lastModified;
                     }
@@ -125,30 +125,30 @@ public class ListAction extends ContactAction {
                     final int folder = objectIdAndFolderId[1];
                     final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
                     it = contactInterface.getObjectsById(new int[][] { objectIdAndFolderId }, columns);
-                    
+
                     while (it.hasNext()) {
-                        final Contact contact = it.next();                        
+                        final Contact contact = it.next();
                         lastModified = contact.getLastModified();
-                        
+
                         // Correct last modified and creation date with users timezone
                         contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
                         contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
                         contacts.add(contact);
                     }
-                    
+
                     if ((lastModified != null) && (timestamp.getTime() < lastModified.getTime())) {
                         timestamp = lastModified;
                     }
-                }            
+                }
             }
-            
+
             contactMap.put("contacts", contacts);
         } finally {
             if (it != null) {
                 it.close();
             }
         }
-        
+
         return new AJAXRequestResult(contactMap, timestamp, "contacts");
     }
 }

@@ -49,18 +49,16 @@
 
 package com.openexchange.mail.structure;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.structure.handler.MIMEStructureHandler;
-import com.openexchange.sessiond.impl.SessionObject;
 
 /**
  * {@link MailMultipartAlternativeStructureTest} - Test for output of structured JSON mail object.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MailMultipartAlternativeStructureTest extends AbstractMailTest {
@@ -74,65 +72,65 @@ public class MailMultipartAlternativeStructureTest extends AbstractMailTest {
 
     /**
      * Initializes a new {@link MailMultipartAlternativeStructureTest}.
-     * 
+     *
      * @param name The test name
      */
     public MailMultipartAlternativeStructureTest(final String name) {
         super(name);
     }
 
-    
 
-    private static final byte[] MP_ALTERNATIVE = ("Date: Sat, 14 Nov 2009 17:03:09 +0100 (CET)\n" + 
-    		"From: alice@foobar.com\n" + 
-    		"To: bob@foobar.com\n" + 
-    		"Message-ID: <1837640730.5.1258214590077.JavaMail.foobar@foobar>\n" + 
-    		"Subject: The mail subject\n" + 
-    		"MIME-Version: 1.0\n" + 
-    		"Content-Type: multipart/alternative; \n" + 
-    		"    boundary=\"----=_Part_4_2138910064.1258214589840\"\n" + 
-    		"X-Priority: 3\n" + 
-    		"\n" + 
-    		"------=_Part_4_2138910064.1258214589840\n" + 
-    		"MIME-Version: 1.0\n" + 
-    		"Content-Type: text/plain; charset=UTF-8\n" + 
-    		"Content-Transfer-Encoding: 7bit\n" + 
-    		"\n" + 
-    		"Mail text.\n" + 
-    		"\n" + 
-    		"People have been asking for support for the IMAP IDLE command for quite\n" + 
-    		"a few years and I think I've finally figured out how to provide such\n" + 
-    		"support safely. The difficulty isn't in executing the command, which\n" + 
-    		"is quite straightforward, the difficulty is in deciding how to expose\n" + 
-    		"it to applications, and inhandling the multithreading issues that\n" + 
-    		"arise.\n" + 
-    		"\n" + 
-    		"------=_Part_4_2138910064.1258214589840\n" + 
-    		"MIME-Version: 1.0\n" + 
-    		"Content-Type: text/html; charset=UTF-8\n" + 
-    		"Content-Transfer-Encoding: 7bit\n" + 
-    		"\n" + 
-    		"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n" + 
-    		"\n" + 
-    		"<html xmlns=\"http://www.w3.org/1999/xhtml\">\n" + 
-    		"  <head>\n" + 
-    		"    <meta content=\"text/html; charset=UTF-8\" http-equiv=\"Content-Type\" />\n" + 
-    		"    <title></title>\n" + 
-    		"  </head>\n" + 
-    		"\n" + 
-    		"  <body>\n" + 
-    		"    Mail text.<br />\n" + 
-    		"    <br />\n" + 
-    		"    People have been asking for support for the IMAP IDLE command for quite<br />\n" + 
-    		"    a few years and I think I&#39;ve finally figured out how to provide such<br />\n" + 
-    		"    support safely. The difficulty isn&#39;t in executing the command, which<br />\n" + 
-    		"    is quite straightforward, the difficulty is in deciding how to expose<br />\n" + 
-    		"    it to applications, and inhandling the multithreading issues that<br />\n" + 
-    		"    arise.<br />\n" + 
-    		"    <br />\n" + 
-    		"  </body>\n" + 
-    		"</html>\n" + 
-    		"\n" + 
+
+    private static final byte[] MP_ALTERNATIVE = ("Date: Sat, 14 Nov 2009 17:03:09 +0100 (CET)\n" +
+    		"From: alice@foobar.com\n" +
+    		"To: bob@foobar.com\n" +
+    		"Message-ID: <1837640730.5.1258214590077.JavaMail.foobar@foobar>\n" +
+    		"Subject: The mail subject\n" +
+    		"MIME-Version: 1.0\n" +
+    		"Content-Type: multipart/alternative; \n" +
+    		"    boundary=\"----=_Part_4_2138910064.1258214589840\"\n" +
+    		"X-Priority: 3\n" +
+    		"\n" +
+    		"------=_Part_4_2138910064.1258214589840\n" +
+    		"MIME-Version: 1.0\n" +
+    		"Content-Type: text/plain; charset=UTF-8\n" +
+    		"Content-Transfer-Encoding: 7bit\n" +
+    		"\n" +
+    		"Mail text.\n" +
+    		"\n" +
+    		"People have been asking for support for the IMAP IDLE command for quite\n" +
+    		"a few years and I think I've finally figured out how to provide such\n" +
+    		"support safely. The difficulty isn't in executing the command, which\n" +
+    		"is quite straightforward, the difficulty is in deciding how to expose\n" +
+    		"it to applications, and inhandling the multithreading issues that\n" +
+    		"arise.\n" +
+    		"\n" +
+    		"------=_Part_4_2138910064.1258214589840\n" +
+    		"MIME-Version: 1.0\n" +
+    		"Content-Type: text/html; charset=UTF-8\n" +
+    		"Content-Transfer-Encoding: 7bit\n" +
+    		"\n" +
+    		"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n" +
+    		"\n" +
+    		"<html xmlns=\"http://www.w3.org/1999/xhtml\">\n" +
+    		"  <head>\n" +
+    		"    <meta content=\"text/html; charset=UTF-8\" http-equiv=\"Content-Type\" />\n" +
+    		"    <title></title>\n" +
+    		"  </head>\n" +
+    		"\n" +
+    		"  <body>\n" +
+    		"    Mail text.<br />\n" +
+    		"    <br />\n" +
+    		"    People have been asking for support for the IMAP IDLE command for quite<br />\n" +
+    		"    a few years and I think I&#39;ve finally figured out how to provide such<br />\n" +
+    		"    support safely. The difficulty isn&#39;t in executing the command, which<br />\n" +
+    		"    is quite straightforward, the difficulty is in deciding how to expose<br />\n" +
+    		"    it to applications, and inhandling the multithreading issues that<br />\n" +
+    		"    arise.<br />\n" +
+    		"    <br />\n" +
+    		"  </body>\n" +
+    		"</html>\n" +
+    		"\n" +
     		"------=_Part_4_2138910064.1258214589840--").getBytes();
 
     public void testMIMEStructure() {

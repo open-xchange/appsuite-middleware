@@ -58,17 +58,17 @@ import java.util.HashMap;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class TestParserFactory {
-	
-	final static HashMap<String, TestParser> parserMap = new HashMap<String, TestParser>(); 
-	
+
+	final static HashMap<String, TestParser> parserMap = new HashMap<String, TestParser>();
+
 	public TestParserFactory() {
 
 	}
-	
+
 	public static void addParser(final String name, final TestParser actionWriter) {
 		parserMap.put(name, actionWriter);
 	}
-	
+
 	public static TestParser getParser(String name) {
 		return parserMap.get(name);
 	}

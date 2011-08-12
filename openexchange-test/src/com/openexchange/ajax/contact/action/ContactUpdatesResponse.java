@@ -57,7 +57,7 @@ import com.openexchange.groupware.container.Contact;
 
 /**
  * {@link ContactUpdatesResponse}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ContactUpdatesResponse extends AbstractColumnsResponse {
@@ -67,11 +67,11 @@ public class ContactUpdatesResponse extends AbstractColumnsResponse {
     public ContactUpdatesResponse(Response response) {
         super(response);
     }
-    
+
     public void setContacts(List<Contact> contacts) {
         this.contacts = contacts;
     }
-    
+
     public List<Contact> getContacts() {
         return contacts;
     }

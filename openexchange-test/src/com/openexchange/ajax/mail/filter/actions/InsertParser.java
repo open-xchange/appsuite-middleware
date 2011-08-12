@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.filter.actions;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -57,7 +56,7 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public class InsertParser extends AbstractAJAXParser {

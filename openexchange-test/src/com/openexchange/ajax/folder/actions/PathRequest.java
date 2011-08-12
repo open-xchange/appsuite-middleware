@@ -58,7 +58,7 @@ import com.openexchange.groupware.container.FolderObject;
 
 /**
  * {@link PathRequest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class PathRequest extends AbstractFolderRequest<PathResponse> {

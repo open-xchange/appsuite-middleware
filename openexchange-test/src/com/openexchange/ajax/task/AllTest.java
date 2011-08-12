@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.task;
 
-import com.openexchange.exception.OXException;
 import java.util.Date;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.MultipleRequest;
@@ -63,14 +62,14 @@ import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.groupware.tasks.Task;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class AllTest extends AbstractTaskTest {
 
     private static final int NUMBER = 10;
     private AJAXClient client;
-    
+
     public AllTest(final String name) {
         super(name);
     }
@@ -106,6 +105,6 @@ public final class AllTest extends AbstractTaskTest {
             final GetResponse get = mGet.getResponse(i);
             deletes[i] = new DeleteRequest(get.getTask(getTimeZone()));
         }
-        client.execute(MultipleRequest.create(deletes)); 
+        client.execute(MultipleRequest.create(deletes));
     }
 }

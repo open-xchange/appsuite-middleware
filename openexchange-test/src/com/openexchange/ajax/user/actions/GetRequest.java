@@ -54,7 +54,7 @@ import com.openexchange.ajax.AJAXServlet;
 
 /**
  * {@link GetRequest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class GetRequest extends AbstractUserRequest<GetResponse> {

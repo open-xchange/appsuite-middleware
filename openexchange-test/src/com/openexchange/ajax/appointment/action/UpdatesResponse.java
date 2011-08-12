@@ -61,7 +61,7 @@ import com.openexchange.ajax.framework.AbstractColumnsResponse;
 import com.openexchange.groupware.container.Appointment;
 
 /**
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public class UpdatesResponse extends AbstractColumnsResponse {
@@ -69,7 +69,7 @@ public class UpdatesResponse extends AbstractColumnsResponse {
     protected UpdatesResponse(Response response) {
         super(response);
     }
-    
+
     public List<Appointment> getAppointments(final TimeZone timeZone) throws OXException, JSONException {
         //TODO extract functionality from test...
         Appointment[] objects = AppointmentTest.jsonArray2AppointmentArray((JSONArray)getData(), getColumns(), timeZone);

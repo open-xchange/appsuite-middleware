@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.action;
 
-import com.openexchange.exception.OXException;
 import java.util.TimeZone;
 
 import org.json.JSONArray;
@@ -60,15 +59,15 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.groupware.container.Appointment;
 
 /**
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public class NewAppointmentSearchResponse extends AbstractAJAXResponse {
 
 	private Appointment[] appointmentObj;
-	
+
 	private final int[] columns;
-	
+
 	private final TimeZone timeZone;
 
     /**
@@ -79,7 +78,7 @@ public class NewAppointmentSearchResponse extends AbstractAJAXResponse {
 		this.columns = columns;
 		this.timeZone = timeZone;
     }
-	
+
 	public Appointment[] getAppointments() throws Exception {
 		final JSONArray jsonArray = (JSONArray)getResponse().getData();
 		return AppointmentTest.jsonArray2AppointmentArray(jsonArray, columns, timeZone);

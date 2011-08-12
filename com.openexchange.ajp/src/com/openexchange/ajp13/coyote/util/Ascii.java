@@ -51,7 +51,7 @@ package com.openexchange.ajp13.coyote.util;
 
 /**
  * {@link Ascii}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Ascii {
@@ -169,7 +169,7 @@ public final class Ascii {
 
     /**
      * Parses an unsigned integer from the specified subarray of bytes.
-     * 
+     *
      * @param b the bytes to parse
      * @param off the start offset of the bytes
      * @param len the length of the bytes
@@ -215,7 +215,7 @@ public final class Ascii {
 
     /**
      * Parses an unsigned long from the specified subarray of bytes.
-     * 
+     *
      * @param b the bytes to parse
      * @param off the start offset of the bytes
      * @param len the length of the bytes

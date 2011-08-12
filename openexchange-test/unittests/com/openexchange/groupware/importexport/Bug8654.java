@@ -65,14 +65,14 @@ import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
 
 public class Bug8654 extends AbstractICalImportTest {
-	
+
 	//workaround for JUnit 3 runner
 	public static junit.framework.Test suite() {
 		return new JUnit4TestAdapter(Bug8654.class);
 	}
-	
+
 	@Test public void bug() throws OXException, UnsupportedEncodingException, SQLException, NumberFormatException, OXException, OXException, OXException {
-		final String ical = 
+		final String ical =
 			"BEGIN:VCALENDAR\n" +
 			"VERSION:2.0\n" +
 			"X-WR-CALNAME:Test\n" +
@@ -110,7 +110,7 @@ public class Bug8654 extends AbstractICalImportTest {
 			"END:VCALENDAR";
 
 		final ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.TASK, "8654", ctx, false);
-		
+
 		final TasksSQLInterface tasks = new TasksSQLImpl(sessObj);
 		final Task task = tasks.getTaskById(Integer.valueOf( res.getObjectId()), Integer.valueOf(res.getFolder()) );
 		assertEquals("Teste Task Import von OX" , task.getTitle());

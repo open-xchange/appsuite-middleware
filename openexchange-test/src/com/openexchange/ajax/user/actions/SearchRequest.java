@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.user.actions;
 
-import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONException;
@@ -73,7 +72,7 @@ public final class SearchRequest extends AbstractUserRequest<SearchResponse> {
     private final int[] columns;
 
     private final boolean failOnError;
-    
+
     private List<Parameter> parameters;
 
     /**
@@ -92,7 +91,7 @@ public final class SearchRequest extends AbstractUserRequest<SearchResponse> {
     public SearchRequest(final ContactSearchObject search, final int[] columns, final boolean failOnError) {
         this(search, columns, failOnError, null);
     }
-    
+
     public SearchRequest(ContactSearchObject search, int[] columns, boolean failOnError, List<Parameter> parameters) {
         super();
         this.search = search;

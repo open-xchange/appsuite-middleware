@@ -58,25 +58,25 @@ public class ContactFieldTester extends TestCase {
 		assertEquals(517, ContactField.ANNIVERSARY.getNumber());
 		assertEquals(ContactField.ANNIVERSARY, ContactField.getByValue(517));
 	}
-	
+
 	public void testAjax(){
 		final String value = "anniversary";
 		assertEquals(value, ContactField.ANNIVERSARY.getAjaxName());
 		assertEquals(ContactField.ANNIVERSARY, ContactField.getByAjaxName(value));
 	}
-	
+
 	public void testDatabase(){
 		final String value = "ANNIVERSARY";
 		assertEquals(value, ContactField.ANNIVERSARY.getDBName());
 		assertEquals(ContactField.ANNIVERSARY, ContactField.getByDBFieldName(value));
 	}
-	
+
 	public void testReadableName(){
 		final String value = "Anniversary";
 		assertEquals(value, ContactField.ANNIVERSARY.getReadableName());
 		assertEquals(ContactField.ANNIVERSARY, ContactField.getByDisplayName(value));
 	}
-	
+
 	public void testFieldName(){
 		final String value = "timestampfield02";
 		assertEquals(value, ContactField.ANNIVERSARY.getFieldName());

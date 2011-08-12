@@ -49,14 +49,13 @@
 
 package com.openexchange.ajax.mail.actions;
 
-import com.openexchange.exception.OXException;
 import java.util.Iterator;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
  * {@link ImportMailResponse} - Response received by <code>/ajax/mail?action=new</code>.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ImportMailResponse extends AbstractAJAXResponse implements Iterable<String[]> {

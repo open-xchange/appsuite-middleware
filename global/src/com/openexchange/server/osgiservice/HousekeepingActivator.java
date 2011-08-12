@@ -188,7 +188,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
      * Creates and remembers a new {@link ServiceTracker} instance for specified filter.
      * <p>
      * <b>NOTE</b>: Don't forget to open tracker(s) with {@link #openTrackers()}.
-     * 
+     *
      * @param filter The filter to apply
      * @return The newly created {@link ServiceTracker} instance
      */

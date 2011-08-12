@@ -74,9 +74,9 @@ public class VisibleFoldersResponse extends AbstractAJAXResponse {
     private final int[] columns;
 
     private final Collection<Object[]> privateFolders;
-    
+
     private final Collection<Object[]> publicFolders;
-    
+
     private final Collection<Object[]> sharedFolders;
 
     public VisibleFoldersResponse(final Response response, final int[] columns) throws JSONException {
@@ -91,10 +91,10 @@ public class VisibleFoldersResponse extends AbstractAJAXResponse {
     private List<List<Object[]>> parseResponse() throws JSONException {
         final JSONObject object = (JSONObject) getResponse().getData();
         List<List<Object[]>> ret = new ArrayList<List<Object[]>>(3);
-        // Parse private folders 
+        // Parse private folders
         final Object[][] privateArray = parseData(object.getJSONArray("private"));
         ret.add(Collections.unmodifiableList(Arrays.asList(privateArray)));
-        // Parse public folders 
+        // Parse public folders
         if (object.has("public")) {
             final Object[][] publicArray = parseData(object.getJSONArray("public"));
             ret.add(Collections.unmodifiableList(Arrays.asList(publicArray)));
@@ -111,7 +111,7 @@ public class VisibleFoldersResponse extends AbstractAJAXResponse {
         // Return
         return ret;
     }
-    
+
     private static Object[][] parseData(final JSONArray array) throws JSONException {
         final Object[][] values = new Object[array.length()][];
         for (int i = 0; i < array.length(); i++) {
@@ -136,7 +136,7 @@ public class VisibleFoldersResponse extends AbstractAJAXResponse {
 
     /**
      * Gets the private folders.
-     * 
+     *
      * @return The private folders
      * @throws OXException If parsing response to folders fails
      */
@@ -146,17 +146,17 @@ public class VisibleFoldersResponse extends AbstractAJAXResponse {
 
     /**
      * Gets the public folders.
-     * 
+     *
      * @return The public folders
      * @throws OXException If parsing response to folders fails
      */
     public Iterator<FolderObject> getPublicFolders() throws OXException {
         return getFoldersFrom(publicFolders);
     }
-    
+
     /**
      * Gets the shared folders.
-     * 
+     *
      * @return The shared folders
      * @throws OXException If parsing response to folders fails
      */
@@ -175,5 +175,5 @@ public class VisibleFoldersResponse extends AbstractAJAXResponse {
         }
         return folders.iterator();
     }
-    
+
 }

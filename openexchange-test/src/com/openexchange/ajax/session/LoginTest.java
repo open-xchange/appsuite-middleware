@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.session;
 
-import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -77,17 +76,17 @@ public class LoginTest extends AbstractLoginTest {
     protected void tearDown() throws Exception {
         // Nothing to do.
     }
-    
+
     // Success Cases
 
     public void testSuccessfulLoginReturnsSession() throws Exception {
         assertResponseContains("session");
     }
-    
+
     public void testSuccessfulLoginReturnsRandom() throws Exception {
         assertResponseContains("random");
     }
-  
+
     public void testSuccessfulLoginSetsSecretCookie() throws Exception {
         rawLogin(USER1);
         Cookie[] cookies = currentClient.getClient().getState().getCookies();
@@ -98,10 +97,10 @@ public class LoginTest extends AbstractLoginTest {
             cookieNames.add(name);
             found = found || name.startsWith("open-xchange-secret");
         }
-        
+
         assertTrue("Missing secret cookie: "+cookieNames.toString(), found);
     }
-    
+
     public void testSuccessfulLoginDoesNotSetSessionCookie() throws Exception {
         // Note: This will fail a while, until UI uses new store action and we can get rid of the session cookie after login
         rawLogin(USER1);
@@ -113,27 +112,27 @@ public class LoginTest extends AbstractLoginTest {
             cookieNames.add(name);
             found = found || name.startsWith("open-xchange-session");
         }
-        
+
         assertFalse("Found session cookie, but shouldn't have: "+cookieNames.toString(), found);
     }
-    
+
     public void testSecretCookiesDifferPerClientID() throws Exception {
         String[] credentials = credentials(USER1);
-        
+
         inModule("login");
-        
-        raw("login", 
+
+        raw("login",
                 "name", credentials[0],
                 "password", credentials[1],
                 "client" , "testclient1"
                  );
-        
-        raw("login", 
+
+        raw("login",
             "name", credentials[0],
             "password", credentials[1],
             "client" , "testclient2"
              );
-    
+
         Cookie[] cookies = currentClient.getClient().getState().getCookies();
         int counter = 0;
         List<String> cookieNames = new ArrayList<String>(cookies.length);
@@ -144,11 +143,11 @@ public class LoginTest extends AbstractLoginTest {
                 counter++;
             }
         }
-        
+
         assertTrue("Missing secret cookie: "+cookieNames.toString(), counter == 2);
-        
+
     }
-    
+
     public void testSecretCookieLifetimeIsLongerThanADay() throws Exception {
         rawLogin(USER1);
         Cookie[] cookies = currentClient.getClient().getState().getCookies();
@@ -163,14 +162,14 @@ public class LoginTest extends AbstractLoginTest {
               }
         }
     }
-    
+
     public void testSuccessfulLoginAllowsSubsequentRequests() throws Exception {
         as(USER1);
         inModule("quota"); call("filestore"); // Send some request.
 
         assertNoError();
     }
-    
+
     public void testRefreshSecretActionResetsSecretCookieLifetime() throws Exception {
         rawLogin(USER1);
         Date oldCookie = null, newCookie = null;
@@ -184,60 +183,60 @@ public class LoginTest extends AbstractLoginTest {
         Thread.sleep(1000);
         raw(AJAXServlet.ACTION_REFRESH_SECRET, AJAXServlet.PARAMETER_SESSION, rawResponse.getString(AJAXServlet.PARAMETER_SESSION));
         cookies = currentClient.getClient().getState().getCookies();
-        
+
         for(int i = 0; i < cookies.length; i++)
         	if(cookies[i].getName().startsWith("open-xchange-secret"))
         		newCookie = cookies[i].getExpiryDate();
-        
+
         assertNotNull("Precondition: Should find secret cookie after renewal", newCookie);
         assertNotNull("Precondition: Should find secret cookie first", oldCookie);
-        
+
         assertTrue("Refreshed secret cookie should have newer expiry date", newCookie.compareTo(oldCookie) > 0);
     }
-    
+
     // Error Cases
-    
+
     public void testWrongCredentials() throws Exception {
-        inModule("login"); 
-        call("login", 
+        inModule("login");
+        call("login",
                "name", "foo",
                "password", "bar");
- 
+
         assertError();
     }
-    
+
     public void testNonExistingSessionIDOnSubsequentRequests() throws Exception {
         as(USER1);
         inModule("quota"); call("filestore", "session", "1234567"); // Send some request, and override the sessionID.
-        
+
         assertError();
     }
-    
+
     public void testSessionIDAndSecretMismatch() throws Exception {
         as(USER1);
         String sessionID = currentClient.getSessionID();
-        
+
         as(USER2);
         inModule("quota"); call("filestore", "session", sessionID); // Send some request with user 1 session. Secrets will differ.
-        
+
         assertError();
     }
-    
+
     private void assertResponseContains(String key) throws Exception {
         rawLogin(USER1);
         assertRaw(new JSONAssertion().isObject().hasKey(key));
     }
-    
+
     private void rawLogin(String user) throws Exception{
         String[] credentials = credentials(user);
-        
+
         inModule("login");
-        
-        raw("login", 
+
+        raw("login",
                 "name", credentials[0],
                 "password", credentials[1]
                  );
-        
+
     }
 
 }

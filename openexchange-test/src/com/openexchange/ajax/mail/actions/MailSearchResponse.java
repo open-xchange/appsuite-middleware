@@ -54,7 +54,7 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.CommonSearchResponse;
 
 /**
- * 
+ *
  * {@link MailSearchResponse}
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -69,7 +69,7 @@ public class MailSearchResponse extends CommonSearchResponse {
         super(response);
     }
 
-    
+
     public JSONArray getDataAsJSONArray() {
         if(data == null){
             data = (JSONArray) super.getData();

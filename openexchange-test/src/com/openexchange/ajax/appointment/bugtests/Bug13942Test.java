@@ -78,9 +78,9 @@ import com.openexchange.groupware.container.UserParticipant;
 public class Bug13942Test extends AbstractAJAXSession {
 
     private Appointment appointment, updateAppointment;
-    
+
     private int userIdA, userIdB, userIdC;
-    
+
     private AJAXClient clientB, clientC;
 
     public Bug13942Test(String name) {
@@ -90,11 +90,11 @@ public class Bug13942Test extends AbstractAJAXSession {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        
+
         userIdA = getClient().getValues().getUserId();
         userIdB = getClientB().getValues().getUserId();
         userIdC = getClientC().getValues().getUserId();
-        
+
         appointment = new Appointment();
         appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         appointment.setTitle("Test Bug 13942");
@@ -102,15 +102,15 @@ public class Bug13942Test extends AbstractAJAXSession {
         appointment.setEndDate(new Date(TimeTools.getHour(1, getClient().getValues().getTimeZone())));
         appointment.setParticipants(ParticipantTools.createParticipants(userIdA, userIdB, userIdC));
         appointment.setIgnoreConflicts(true);
-        
+
         InsertRequest request = new InsertRequest(appointment, getClient().getValues().getTimeZone());
         AppointmentInsertResponse response = getClient().execute(request);
         response.fillObject(appointment);
-        
+
         ConfirmRequest confirmRequest = new ConfirmRequest(getClientB().getValues().getPrivateAppointmentFolder(), appointment.getObjectID(), CalendarObject.ACCEPT, "yap", true);
         ConfirmResponse confirmResponse = getClientB().execute(confirmRequest);
         appointment.setLastModified(confirmResponse.getTimestamp());
-        
+
         updateAppointment = new Appointment();
         updateAppointment.setObjectID(appointment.getObjectID());
         updateAppointment.setParentFolderID(getClientB().getValues().getPrivateAppointmentFolder());
@@ -126,7 +126,7 @@ public class Bug13942Test extends AbstractAJAXSession {
         }
         super.tearDown();
     }
-    
+
     public void testBug13942() throws Exception {
         UpdateRequest updateRequest = new UpdateRequest(updateAppointment, getClientB().getValues().getTimeZone());
         UpdateResponse updateResponse = getClientB().execute(updateRequest);
@@ -139,7 +139,7 @@ public class Bug13942Test extends AbstractAJAXSession {
                 assertEquals("Lost confirmation status", CalendarObject.ACCEPT, user.getConfirm());
             }
         }
-        
+
     }
 
     private AJAXClient getClientB() throws OXException, OXException, IOException, SAXException, JSONException {
@@ -148,7 +148,7 @@ public class Bug13942Test extends AbstractAJAXSession {
         }
         return clientB;
     }
-    
+
     private AJAXClient getClientC() throws OXException, OXException, IOException, SAXException, JSONException {
         if (clientC == null) {
             clientC = new AJAXClient(User.User3);

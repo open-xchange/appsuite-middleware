@@ -62,7 +62,7 @@ import com.openexchange.configuration.ConfigurationExceptionCodes;
 /**
  * This class implements the temporary memory of an AJAX client and provides some convenience methods to determine user specific values for
  * running some tests more easily.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class AJAXClient {
@@ -177,7 +177,7 @@ public class AJAXClient {
     public UserValues getValues() {
         return values;
     }
-    
+
     public <T extends AbstractAJAXResponse> T execute(final AJAXRequest<T> request, final int sleep) throws OXException, IOException, JSONException {
         if (hostname != null && protocol != null) {
             // TODO: Maybe assume http as default protocol
@@ -187,7 +187,7 @@ public class AJAXClient {
                 return Executor.execute(getSession(), request, getProtocol(), getHostname());
             }
         }
-        
+
         return Executor.execute(this, request);
     }
 

@@ -59,7 +59,7 @@ import com.openexchange.test.CalendarTestManager;
 
 /**
  * {@link AbstractAssertion}
- * 
+ *
  * @author <a href="mailto:firstname.lastname@open-xchange.com">Firstname Lastname</a>
  */
 public class AbstractAssertion extends Assert {
@@ -89,7 +89,7 @@ public class AbstractAssertion extends Assert {
         t.printStackTrace();
         Assert.fail(state() + message);
     }
-    
+
     protected Appointment find(List<Appointment> appointments, int folderToSearch, int id) {
         for (Appointment app : appointments)
             if (app.getParentFolderID() == folderToSearch && app.getObjectID() == id)

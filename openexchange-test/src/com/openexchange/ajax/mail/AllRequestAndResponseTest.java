@@ -19,14 +19,14 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
- * 
- * {@link AllRequestAndResponseTest} - tests the AllRequest and -Response 
+ *
+ * {@link AllRequestAndResponseTest} - tests the AllRequest and -Response
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  *
  */
 public class AllRequestAndResponseTest extends AbstractMailTest {
-	
+
 	private static final Log LOG = LogFactory.getLog(AllTest.class);
 	protected String folder;
 	String mailObject_25kb;
@@ -35,7 +35,7 @@ public class AllRequestAndResponseTest extends AbstractMailTest {
         super(name);
         this.client = new AJAXClient(User.User1);
     }
-    
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
@@ -52,9 +52,9 @@ public class AllRequestAndResponseTest extends AbstractMailTest {
         clearFolder(folder);
         super.tearDown();
     }
-    
+
     public void testAllResponseGetMailObjects() throws Exception {
-    	
+
     	/*
 		 * Insert <numOfMails> mails through a send request
 		 */
@@ -64,7 +64,7 @@ public class AllRequestAndResponseTest extends AbstractMailTest {
 		    getClient().execute(new SendRequest(mailObject_25kb));
 			LOG.info("Sent " + (i + 1) + ". mail of " + numOfMails);
 		}
-    	
+
     	AllResponse allR = Executor.execute(getSession(), new AllRequest(
 				getInboxFolder(), COLUMNS_DEFAULT_LIST, 0, null, true));
         if (allR.hasError()) {

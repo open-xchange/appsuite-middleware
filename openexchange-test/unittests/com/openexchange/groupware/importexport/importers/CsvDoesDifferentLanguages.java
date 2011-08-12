@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.importexport.importers;
 
-import com.openexchange.exception.OXException;
 import java.util.List;
 import junit.framework.TestCase;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -67,7 +66,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public class CsvDoesDifferentLanguages extends TestCase {
 
-    private String dutch = 
+    private String dutch =
         "Voornaam,Achternaam,Weergavenaam,Bijnaam," +
         "Eerste e-mail,Tweede e-mail,Telefoon werk,Telefoon thuis,Faxnummer,Piepernummer,Mobiel nummer," +
         "Adres,Adres 2,Woonplaats,Provincie,Postcode,Land," +
@@ -76,7 +75,7 @@ public class CsvDoesDifferentLanguages extends TestCase {
         "Webpagina 1,Webpagina 2," +
         "Geboortejaar,Geboortemaand,Geboortedag," +
         "Overig 1,Overig 2,Overig 3,Overig 4,Aantekeningen,\n"
-        + 
+        +
         "Vorname1,Nachname1,,," +
         "email1@open-xchange.com,email2@open-xchange.com,phone_work1,phone_home1,fax,beeper,mobile," +
         "home_street1,home_street2,home_city,home_state,555,home_country," +
@@ -85,9 +84,9 @@ public class CsvDoesDifferentLanguages extends TestCase {
         "website1,website2," +
         "1981,2,1," +
         "add1,add2,add3,add4,notes,\n";
-    
+
     private CalendarCollectionService oldInstance;
-    
+
     private void assertBasicFields(String message, Contact c) {
         Expectations expectations = new Expectations();
         expectations.put(Contact.GIVEN_NAME, "Vorname1");
@@ -101,7 +100,7 @@ public class CsvDoesDifferentLanguages extends TestCase {
         expectations.put(Contact.STATE_HOME, "home_state");
         expectations.put(Contact.COUNTRY_HOME, "home_country");
         expectations.put(Contact.POSTAL_CODE_HOME, "555");
-        
+
         expectations.put(Contact.COMPANY, "company");
         expectations.put(Contact.DEPARTMENT, "department");
         expectations.put(Contact.STREET_BUSINESS, "business_street1");
@@ -109,23 +108,23 @@ public class CsvDoesDifferentLanguages extends TestCase {
         expectations.put(Contact.STATE_BUSINESS, "business_state");
         expectations.put(Contact.COUNTRY_BUSINESS, "business_country");
         expectations.put(Contact.POSTAL_CODE_BUSINESS, "666");
-        
+
         expectations.put(Contact.URL, "website1");
         expectations.put(Contact.NOTE, "notes");
         expectations.verify(message, c);
     }
 
     public void testBug15231WithDutch() throws Throwable{
-        Contact c = makeContact(dutch); 
+        Contact c = makeContact(dutch);
         assertBasicFields("Dutch", c);
     }
 
-    
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
         Class<CalendarCollectionService> myClass = CalendarCollectionService.class;
-        
+
         this.oldInstance = ServerServiceRegistry.getInstance().getService(myClass);
         ServerServiceRegistry.getInstance().addService(myClass, new MockCalendarCollectionService());
     }
@@ -141,17 +140,17 @@ public class CsvDoesDifferentLanguages extends TestCase {
         CSVParser parser = new CSVParser();
         List<List<String>> list = parser.parse(csv);
         assertEquals("Should have one header + one one data row",2, list.size());
-        
+
         List<String> header = list.get(0);
         List<String> data = list.get(1);
-        
+
         CSVContactImporter importer = new OutlookCSVContactImporter();
         boolean[] atLeastOneFieldInserted = new boolean[]{false};
         ContactSwitcher conSet = importer.getContactSwitcher();
         ImportResult result = new ImportResult();
-        
+
         assertTrue("The importer should consider itself", importer.checkFields(header));
-        return importer.convertCsvToContact(header, data, conSet, 1, result , atLeastOneFieldInserted );        
+        return importer.convertCsvToContact(header, data, conSet, 1, result , atLeastOneFieldInserted );
     }
-    
+
 }

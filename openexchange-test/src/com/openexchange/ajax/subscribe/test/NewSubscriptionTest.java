@@ -72,20 +72,20 @@ public class NewSubscriptionTest extends AbstractSubscriptionTest {
     public NewSubscriptionTest(String name) {
         super(name);
     }
-    
+
     public void testShouldSurviveBasicOXMFSubscriptionCreation() throws OXException, IOException, SAXException, JSONException{
         //setup
         FolderObject folder = getFolderManager().generateFolder("subscriptionTest", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
         getFolderManager().insertFolderOnServer(folder);
-        
-        DynamicFormDescription form = generateFormDescription();        
+
+        DynamicFormDescription form = generateFormDescription();
         Subscription expected = generateOXMFSubscription(form);
         expected.setFolderId( String.valueOf( folder.getObjectID() ) );
 
        //new request
         NewSubscriptionRequest newReq = new NewSubscriptionRequest(expected, form);
         NewSubscriptionResponse newResp = getClient().execute(newReq);
-        
+
         assertFalse("Should succeed creating the subscription: "+newResp.getException(), newResp.hasError());
         expected.setId( newResp.getId() );
 
@@ -95,9 +95,9 @@ public class NewSubscriptionTest extends AbstractSubscriptionTest {
 
         GetSubscriptionRequest getReq = new GetSubscriptionRequest( newResp.getId() );
         GetSubscriptionResponse getResp = getClient().execute(getReq);
-        
+
         Subscription actual = getResp.getSubscription(discovery);
-        
+
         assertEquals("Should have same source ID", expected.getSource().getId(), actual.getSource().getId());
         assertEquals("Should have same ID", expected.getId(), actual.getId());
         assertEquals("Should have same user ID", expected.getUserId(), actual.getUserId());

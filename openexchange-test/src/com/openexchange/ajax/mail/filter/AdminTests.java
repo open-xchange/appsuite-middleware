@@ -24,7 +24,7 @@ public class AdminTests extends AJAXTest {
     private static final String AUTHNAME = "oxadmin";
 
     private static final String LOGIN_URL_ADMIN = "/oxadmin/login";
-    
+
     private static final String USER_ADMIN = "/oxadmin/users";
 
     private static final String USERNAME = "test3.test3";
@@ -61,7 +61,7 @@ public class AdminTests extends AJAXTest {
             throw e;
         }
         System.out.println(json);
-        
+
         final WebRequest requsers = new GetMethodWebRequest(PROTOCOL + getHostname() + USER_ADMIN);
         requsers.setParameter("action", "all");
         final WebResponse userresp = conversation.getResponse(requsers);
@@ -73,7 +73,7 @@ public class AdminTests extends AJAXTest {
             throw e;
         }
         System.out.println(json);
-        
+
         return new WebconversationAndSessionID(conversation, null);
     }
 

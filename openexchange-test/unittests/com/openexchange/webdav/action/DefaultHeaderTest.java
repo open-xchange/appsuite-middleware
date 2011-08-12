@@ -9,10 +9,10 @@ public class DefaultHeaderTest extends ActionTestCase{
 		final MockWebdavRequest req = new MockWebdavRequest(factory,"http://localhost/");
 		final MockWebdavResponse res = new MockWebdavResponse();
 		final MockAction mockAction = new MockAction();
-		
+
 		final AbstractAction action = new WebdavDefaultHeaderAction();
 		action.setNext(mockAction);
-		
+
 		final Date now = new Date();
 		action.perform(req, res);
 		assertEquals(Utils.convert(now), res.getHeader("Date"));

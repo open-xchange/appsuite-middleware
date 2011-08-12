@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.actions;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
@@ -66,7 +65,7 @@ public class UpdateMailResponse extends AbstractAJAXResponse {
     public UpdateMailResponse(Response response) {
         super(response);
     }
-    
+
     public String getFolder() throws JSONException{
         JSONObject data = (JSONObject) getData();
         return data.getString("folder_id");

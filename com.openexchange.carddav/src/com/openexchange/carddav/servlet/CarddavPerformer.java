@@ -96,7 +96,7 @@ import com.openexchange.webdav.protocol.helpers.PropertyMixin;
 
 /**
  * The {@link CarddavPerformer} contains all the wiring for Carddav actions. This is the central entry point for Carddav requests.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CarddavPerformer implements SessionHolder {
@@ -113,7 +113,7 @@ public class CarddavPerformer implements SessionHolder {
 
     /**
      * Gets the instance of {@link InfostorePerformer}.
-     * 
+     *
      * @return The instance of {@link InfostorePerformer}.
      */
     public static CarddavPerformer getInstance() {
@@ -151,11 +151,11 @@ public class CarddavPerformer implements SessionHolder {
         WebdavAction head;
         WebdavAction put;
         WebdavAction trace;
-        
+
         this.factory = new GroupwareCarddavFactory(services.getService(FolderService.class), this);
 
-        
-        
+
+
         unlock = prepare(new WebdavUnlockAction(), true, true, new WebdavIfAction(0, false, false));
         propPatch = prepare(new WebdavProppatchAction(protocol), true, true, new WebdavExistsAction(), new WebdavIfAction(0, true, false));
         propFind = prepare(new WebdavPropfindAction(protocol), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, false));

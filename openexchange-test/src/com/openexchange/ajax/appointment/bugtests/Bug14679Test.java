@@ -1,7 +1,6 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.TimeZone;
 import com.openexchange.ajax.appointment.action.AllRequest;
@@ -15,7 +14,7 @@ import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.groupware.container.Appointment;
 
 /*
- * 
+ *
  */
 public class Bug14679Test extends AbstractAJAXSession {
 
@@ -63,14 +62,14 @@ public class Bug14679Test extends AbstractAJAXSession {
         appointment.setLastModified(updateResponse.getTimestamp());
 
         int[] columns = new int[] { Appointment.OBJECT_ID };
-        
+
         AllRequest allRequest = new AllRequest(client.getValues().getPrivateAppointmentFolder(),
             columns,
             D("01.11.2009 00:00", TimeZone.getTimeZone("UTC")),
             D("01.12.2009 00:00", TimeZone.getTimeZone("UTC")),
             TimeZone.getTimeZone("UTC"),
             false);
-        
+
         CommonAllResponse allResponse = client.execute(allRequest);
         Object[][] objects = allResponse.getArray();
         int count = 0;
@@ -79,7 +78,7 @@ public class Bug14679Test extends AbstractAJAXSession {
                 count++;
             }
         }
-        
+
         assertEquals("Wrong amount of occurrences.", 5, count);
     }
 
@@ -87,7 +86,7 @@ public class Bug14679Test extends AbstractAJAXSession {
     protected void tearDown() throws Exception {
         DeleteRequest appointmentDeleteRequest = new DeleteRequest(appointment);
         getClient().execute(appointmentDeleteRequest);
-        
+
         super.tearDown();
     }
 

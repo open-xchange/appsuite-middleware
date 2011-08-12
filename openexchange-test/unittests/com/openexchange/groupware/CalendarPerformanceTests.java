@@ -7,7 +7,6 @@
 
 package com.openexchange.groupware;
 
-import com.openexchange.exception.OXException;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -26,7 +25,6 @@ import junit.framework.TestCase;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.event.impl.EventConfigImpl;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
@@ -38,20 +36,20 @@ import com.openexchange.test.AjaxInit;
  *
  * @author bishoph
  */
-public class CalendarPerformanceTests extends TestCase { 
-    
+public class CalendarPerformanceTests extends TestCase {
+
     public static final long SUPER_END = 253402210800000L; // 31.12.9999 00:00:00 (GMT)
     public static final String TIMEZONE = "Europe/Berlin";
-    
+
     // Override these in setup
     private static int userid = 11; // bishoph
     public static int contextid = 1;
-    
+
     private static boolean init = false;
-    
+
     private static final String testfile = "/home/bishoph/tmp/supertemp/sqloutput"; // "/home/bishoph/tmp/supertemp/sql_dump_dev_prototype"
-    
-    
+
+
     @Override
 	protected void setUp() throws Exception {
         super.setUp();
@@ -64,7 +62,7 @@ public class CalendarPerformanceTests extends TestCase {
         userid = getUserId();
         ContextStorage.start();
     }
-    
+
     @Override
 	protected void tearDown() throws Exception {
         if (init) {
@@ -73,17 +71,17 @@ public class CalendarPerformanceTests extends TestCase {
         }
         super.tearDown();
     }
-    
+
     private static Properties getAJAXProperties() {
         final Properties properties = AjaxInit.getAJAXProperties();
         return properties;
     }
-    
+
     private static int resolveUser(final String u) throws Exception {
         final UserStorage uStorage = UserStorage.getInstance();
         return uStorage.getUserId(u, getContext());
     }
-    
+
     public static int getUserId() throws Exception {
         if (!init) {
             Init.startServer();
@@ -92,24 +90,24 @@ public class CalendarPerformanceTests extends TestCase {
         final String user = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant2", "");
         return resolveUser(user);
     }
-    
+
     public static Context getContext() {
         return new ContextImpl(contextid);
     }
-    
+
     public static int getPrivateFolder() throws Exception {
         int privatefolder = 0;
         final Context context = getContext();
         privatefolder = CalendarTest.getCalendarDefaultFolderForUser(userid, context);
         return privatefolder;
     }
-    
-    
+
+
     public void testSimple() throws Throwable {
     	final File f = new File(testfile);
     	calc(f, 0);
     }
-    
+
     public void testThreaded() throws Throwable {
     	final Runner[] runner = new Runner[100];
     	final Thread[] thread = new Thread[runner.length];
@@ -120,13 +118,13 @@ public class CalendarPerformanceTests extends TestCase {
         }
         for (int b = 0; b < thread.length; b++) {
             thread[b].join();
-        }        
+        }
     }
-    
-    public void calc(final File f, final int number) throws Throwable {    	
+
+    public void calc(final File f, final int number) throws Throwable {
     	final Reader r = new BufferedReader(new FileReader(f));
     	final LineNumberReader lnr = new LineNumberReader(r);
-    	String line; 
+    	String line;
     	long all = 0L;
     	long high = 0L;
     	final long all_start = System.currentTimeMillis();
@@ -158,7 +156,7 @@ public class CalendarPerformanceTests extends TestCase {
     	        cdao.setStartDate(sdate);
     	        cdao.setEndDate(edate);
     	        new CalendarCollection().fillDAO(cdao);
-    	        new CalendarCollection().calculateRecurring(cdao, 0L, 5709135600000L, 0);    	        
+    	        new CalendarCollection().calculateRecurring(cdao, 0L, 5709135600000L, 0);
     	        final long end = System.currentTimeMillis();
     	        final long duration = end-start;
     	        all = all + duration;
@@ -177,17 +175,17 @@ public class CalendarPerformanceTests extends TestCase {
     			hit = check;
     		}
     	}
-    }    
-    
-    
+    }
+
+
     private class Runner implements Runnable  {
-    	
-    	int current; 
-    	
+
+    	int current;
+
     	public Runner(final int current) {
     		this.current = current;
     	}
-    	
+
         boolean run = true;
         public void run() {
             while (run) {
@@ -197,9 +195,9 @@ public class CalendarPerformanceTests extends TestCase {
             	} catch(final Throwable t) {
             		t.printStackTrace();
             	}
-            }  
+            }
         }
-    }    
-    
-    
+    }
+
+
 }

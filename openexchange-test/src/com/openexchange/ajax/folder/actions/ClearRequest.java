@@ -59,7 +59,7 @@ import com.openexchange.groupware.container.FolderObject;
 
 /**
  * {@link ClearRequest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ClearRequest extends AbstractFolderRequest<CommonDeleteResponse> {

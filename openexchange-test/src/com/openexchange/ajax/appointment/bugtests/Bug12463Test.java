@@ -29,7 +29,7 @@ public final class Bug12463Test extends AbstractAJAXSession {
     public Bug12463Test(String name) {
         super(name);
     }
-    
+
     public void testBugAsWritte() throws Throwable {
         final AJAXClient client = getClient();
         final int folderId = client.getValues().getPrivateAppointmentFolder();
@@ -37,9 +37,9 @@ public final class Bug12463Test extends AbstractAJAXSession {
         final Appointment sequence = new Appointment();
         int objectId = 0;
         Date lastModified = null;
-        
+
         try {
-            
+
             //Step 1
             //Prepare appointment
             sequence.setTitle("Bug 12463 Test - Sequence");
@@ -52,7 +52,7 @@ public final class Bug12463Test extends AbstractAJAXSession {
             sequence.setEndDate(calendar.getTime());
             sequence.setRecurrenceType(Appointment.DAILY);
             sequence.setInterval(1);
-            
+
             //Insert
             final InsertRequest insertRequest = new InsertRequest(sequence, tz);
             final CommonInsertResponse insertResponse = client.execute(insertRequest);
@@ -61,13 +61,13 @@ public final class Bug12463Test extends AbstractAJAXSession {
             objectId = sequence.getObjectID();
             sequence.setObjectID(objectId);
             lastModified = sequence.getLastModified();
-            
+
             //Step 2
             //Load occurrence for changing
             GetRequest getRequest= new GetRequest(folderId, sequence.getObjectID(), 3);
             GetResponse getResponse = client.execute(getRequest);
             Appointment occurrence = getResponse.getAppointment(tz);
-            
+
             //Create exception
             Appointment exception = new Appointment();
             exception.setObjectID(occurrence.getObjectID());
@@ -79,14 +79,14 @@ public final class Bug12463Test extends AbstractAJAXSession {
             exception.setStartDate(calendar.getTime());
             calendar.add(Calendar.HOUR, 1);
             exception.setEndDate(calendar.getTime());
-            
+
             //Update occurrence
             UpdateRequest updateRequest = new UpdateRequest(exception, tz);
             UpdateResponse updateResponse = client.execute(updateRequest);
             exception.setLastModified(updateResponse.getTimestamp());
             Date lastModifiedOfOccurenceUpdate = exception.getLastModified();
             lastModified = exception.getLastModified();
-            
+
             //Step 3
             //Create whole sequence change
             Appointment changeSequence = new Appointment();
@@ -102,18 +102,18 @@ public final class Bug12463Test extends AbstractAJAXSession {
             calendar.setTime(sequence.getEndDate());
             calendar.add(Calendar.HOUR_OF_DAY, -1);
             changeSequence.setEndDate(calendar.getTime());
-            
+
             //Update sequence
             updateRequest = new UpdateRequest(changeSequence, tz);
             updateResponse = client.execute(updateRequest);
             changeSequence.setLastModified(updateResponse.getTimestamp());
             lastModified = changeSequence.getLastModified();
-            
+
             //Load occurrence again
             getRequest= new GetRequest(folderId, sequence.getObjectID(), 3);
             getResponse = client.execute(getRequest);
             occurrence = getResponse.getAppointment(tz);
-            
+
             //Check time of occurrence
             calendar.setTime(changeSequence.getStartDate());
             final int sequenceStartTime = calendar.get(Calendar.HOUR_OF_DAY);
@@ -125,7 +125,7 @@ public final class Bug12463Test extends AbstractAJAXSession {
             final int occurrenceEndTime = calendar.get(Calendar.HOUR_OF_DAY);
             assertEquals("Start time does not match sequence start time", sequenceStartTime, occurrenceStartTime);
             assertEquals("End time does not match sequence end time", sequenceEndTime, occurrenceEndTime);
-            
+
             //Check if sequence still has any exceptions
             int[] columns = new int[]{
                 Appointment.START_DATE,
@@ -141,14 +141,14 @@ public final class Bug12463Test extends AbstractAJAXSession {
                     fail("Found exception of sequence.");
                 }
             }
-            
+
         } finally {
-            
+
             if(objectId != 0 && lastModified != null) {
                 final DeleteRequest deleteRequest = new DeleteRequest(objectId, folderId, lastModified);
                 client.execute(deleteRequest);
             }
-            
+
         }
     }
 

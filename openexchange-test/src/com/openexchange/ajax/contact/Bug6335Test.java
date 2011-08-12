@@ -65,7 +65,6 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ContactWriter;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.tools.URLParameter;
 
@@ -82,52 +81,52 @@ public class Bug6335Test extends ContactTest {
         super(name);
     }
 
-    
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
-	
+
 	public void testBug6335() throws Exception {
-		
+
 		final Contact contactObj = new Contact();
 		contactObj.setSurName("\u001f");
 		contactObj.setParentFolderID(contactFolderId);
-		
+
 		//final int objectId = insertContact(getWebConversation(), contactObj, getHostName(), getSessionId());
 		final WebConversation webCon = getWebConversation();
 		String host = getHostName();
 		host = appendPrefix(host);
-		
-		final StringWriter stringWriter = new StringWriter();		
+
+		final StringWriter stringWriter = new StringWriter();
 		final JSONObject jsonObj = new JSONObject();
 		final ContactWriter contactWriter = new ContactWriter(TimeZone.getDefault());
 		contactWriter.writeContact(contactObj, jsonObj, null);
-		
+
 		stringWriter.write(jsonObj.toString());
 		stringWriter.flush();
 
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, getSessionId());
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW);
-		
+
 		WebRequest req = null;
 		WebResponse resp = null;
-		
+
 		JSONObject jResponse = null;
-		
+
 		final ByteArrayInputStream bais = new ByteArrayInputStream(stringWriter.toString().getBytes("UTF-8"));
-			
+
 		req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), bais, "text/javascript");
 		resp = webCon.getResponse(req);
-			
+
 		jResponse = new JSONObject(resp.getText());
-		
+
 		assertEquals(200, resp.getResponseCode());
-		
+
 		final Response response = Response.parse(jResponse.toString());
-		
-		
+
+
         assertTrue("Invalid character was not detected.", response.hasError());
         //final OXException.Code code = OXException.Code.INVALID_DATA;
         final OXException exc = response.getException();

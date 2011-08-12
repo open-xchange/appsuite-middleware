@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mailaccount.actions;
 
-import com.openexchange.exception.OXException;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -78,11 +77,11 @@ public class MailAccountAllParser extends AbstractAJAXParser<MailAccountAllRespo
         MailAccountAllResponse resp = new MailAccountAllResponse(response);
         JSONArray arrayOfArrays = (JSONArray) resp.getData();
         List<MailAccountDescription> accounts = ParserTools.parseList(arrayOfArrays, cols);
-        
+
         resp.setDescriptions(accounts);
         return resp;
     }
 
-    
+
 
 }

@@ -56,7 +56,7 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public abstract class DocumentMetadataTest extends TestCase {
-    
+
     public void testDefaultMimetype() {
         final DocumentMetadata impl = getImplementation();
         impl.setFileMIMEType(null);

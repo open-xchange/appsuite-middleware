@@ -61,7 +61,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Create {
@@ -127,7 +127,7 @@ public final class Create {
         response.fillObject(folder);
         return folder;
     }
-    
+
     /**
      * This method creates a private folder object. Admin user gets full access
      * permissions.

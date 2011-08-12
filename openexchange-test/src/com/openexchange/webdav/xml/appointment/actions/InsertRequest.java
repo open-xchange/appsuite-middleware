@@ -100,7 +100,7 @@ public class InsertRequest extends AbstractAppointmentRequest<InsertResponse> {
         final XMLOutputter xo = new XMLOutputter();
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         xo.output(doc, baos);
-        
+
         return new ByteArrayRequestEntity(baos.toByteArray());
     }
 

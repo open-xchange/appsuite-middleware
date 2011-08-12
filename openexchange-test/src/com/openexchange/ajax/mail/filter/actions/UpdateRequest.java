@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.filter.actions;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 
 import com.openexchange.ajax.AJAXServlet;
@@ -58,7 +57,7 @@ import com.openexchange.ajax.mail.filter.Rule;
 /**
  * Implements creating the necessary values for a rule update request. All
  * necessary values are read from the rule object.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public class UpdateRequest extends AbstractMailFilterRequest {
@@ -66,12 +65,12 @@ public class UpdateRequest extends AbstractMailFilterRequest {
 	private final Rule rule;
 
 	private String forUser;
-	
+
 	private boolean failOnError = true;
 
 	/**
 	 * Default constructor.
-	 * 
+	 *
 	 * @param rule
 	 *            Rule object with updated attributes.
 	 */
@@ -81,7 +80,7 @@ public class UpdateRequest extends AbstractMailFilterRequest {
 
 	/**
 	 * Default constructor.
-	 * 
+	 *
 	 * @param rule
 	 *            Rule object with updated attributes.
 	 */

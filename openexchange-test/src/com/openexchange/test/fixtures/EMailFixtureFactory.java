@@ -79,18 +79,18 @@ import com.openexchange.test.fixtures.transformators.JChronicDateTransformator;
 public class EMailFixtureFactory implements FixtureFactory<MailMessage> {
 	private File datapath;
 	private FixtureLoader fixtureLoader;
-	
+
 	public EMailFixtureFactory(final File datapath, FixtureLoader fixtureLoader){
 		this.datapath = datapath;
 		this.fixtureLoader = fixtureLoader;
 	}
-	
+
     public Fixtures<MailMessage> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
         return new EMailFixture(fixtureName, entries, datapath, fixtureLoader);
     }
 
     private class EMailFixture extends DefaultFixtures<MailMessage> implements Fixtures<MailMessage> {
-    	private File dataPath; 
+    	private File dataPath;
     	final Map<String, Fixture<MailMessage>> mails = new HashMap<String, Fixture<MailMessage>>();
         private Map<String, Map<String, String>> entries;
 
@@ -119,15 +119,15 @@ public class EMailFixtureFactory implements FixtureFactory<MailMessage> {
             if(values == null) {
                 throw new FixtureException("Entry with name " + entryName + " not found");
             }
-            
+
             if (false == values.containsKey("eml")) {
                 throw new FixtureException("Mandatory value \"eml\" missing in entry " + entryName);
             }
-            
+
             final File mailpath =  new File(new File(dataPath, "emails"), values.get("eml"));
-            
+
             final MailMessage mail;
-            
+
             if (values.containsKey("append_v_card") && "true".equals(String.valueOf(values.get("append_v_card")))) {
                 final String emlAsString;
                 try {
@@ -140,7 +140,7 @@ public class EMailFixtureFactory implements FixtureFactory<MailMessage> {
                 final Contact contact = fixtureLoader.getFixtures("users", SimpleCredentials.class).getEntry(from).getEntry().asContact();
 
                 final String displayName;
-                
+
                 if (contact.containsDisplayName()) {
                     displayName = contact.getDisplayName();
                 } else {
@@ -162,8 +162,8 @@ public class EMailFixtureFactory implements FixtureFactory<MailMessage> {
             if (values.containsKey("bcc")) { mail.removeBcc(); }
             if (values.containsKey("from")) { mail.removeFrom(); }
             if (values.containsKey("sent_date")) { mail.removeSentDate(); }
-            if (values.containsKey("received_date")) { 
-            	mail.removeReceivedDate(); 
+            if (values.containsKey("received_date")) {
+            	mail.removeReceivedDate();
             	mail.removeHeader(MessageHeaders.HDR_RECEIVED);
             }
             apply(mail, values);
@@ -171,10 +171,10 @@ public class EMailFixtureFactory implements FixtureFactory<MailMessage> {
             mails.put(entryName, fixture);
             return fixture;
         }
-        
+
         /**
          * Reads a file and converts it into a String
-         * 
+         *
          * @param filePath the name of the file to open.
          * @throws IOException
          */
@@ -190,7 +190,7 @@ public class EMailFixtureFactory implements FixtureFactory<MailMessage> {
             return fileData.toString();
         }
 
-        
+
     	private MailMessage getMessage(final File fdir) throws OXException {
             final MimeMessage msg;
             final Session session = Session.getInstance(getDefaultSessionProperties());
@@ -220,7 +220,7 @@ public class EMailFixtureFactory implements FixtureFactory<MailMessage> {
             }
             return retval;
         }
-    	
+
         private MailMessage getMessage(final String string) throws OXException {
             final MimeMessage msg;
             final Session session = Session.getInstance(getDefaultSessionProperties());
@@ -248,18 +248,18 @@ public class EMailFixtureFactory implements FixtureFactory<MailMessage> {
             }
             return retval;
         }
-    	
+
     	/**
 		 * Gets the default session properties
-		 * 
+		 *
 		 * @return The default session properties
 		 */
     	protected final Properties getDefaultSessionProperties() {
-            
+
     		Properties sessionProperties = null;
     		final String STR_TRUE = "true";
     		final String STR_FALSE = "false";
-    		
+
     		synchronized (EMailFixture.class) {
     			if (sessionProperties == null) {
     				/*
@@ -297,6 +297,6 @@ public class EMailFixtureFactory implements FixtureFactory<MailMessage> {
     			return sessionProperties;
     		}
     	}
-        
+
     }
 }

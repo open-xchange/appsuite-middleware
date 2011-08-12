@@ -71,12 +71,12 @@ public abstract class AbstractStep implements Step{
     protected String name;
     protected String expectedError;
     protected AJAXClient client;
-    
+
     public AbstractStep(String name, String expectedError) {
         this.name = name;
         this.expectedError = expectedError;
     }
-    
+
     protected void checkError(AbstractAJAXResponse response) {
         if(response.hasError()) {
             String message = response.getResponse().getErrorMessage();
@@ -87,21 +87,21 @@ public abstract class AbstractStep implements Step{
             }
 
         } else {
-            
+
             if(expectedError != null) {
                 Assert.fail(name+" expected error "+expectedError+" but didn't get any errors");
             }
         }
     }
-    
+
     protected boolean expectsError() {
         return expectedError != null;
     }
-    
+
     protected TimeZone getTimeZone() throws OXException, IOException, SAXException, JSONException {
         return client.getValues().getTimeZone();
     }
-    
+
     protected <T extends AbstractAJAXResponse> T execute(final AJAXRequest<T> request) {
         try {
             return client.execute(request);

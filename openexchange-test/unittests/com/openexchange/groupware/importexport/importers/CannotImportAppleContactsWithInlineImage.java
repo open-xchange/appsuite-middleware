@@ -62,9 +62,9 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 /**
  * Bug 15241 - if an image is embedded into the vcard, our parser fails.
- * Which makes sense because what Apple Adressbook sends is complete 
+ * Which makes sense because what Apple Adressbook sends is complete
  * bullshit - not conforming to both rfc2426 and to common sense.
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class CannotImportAppleContactsWithInlineImage extends TestCase {
@@ -117,23 +117,23 @@ public class CannotImportAppleContactsWithInlineImage extends TestCase {
         +"CATEGORIES:Piraten\n"
         +"X-ABUID:0C13691C-A7E6-4DC2-BD53-D6B1A9797509\\:ABPerson\n"
         +"END:VCARD\n";
-        
+
 
     public void testBug15241() throws Throwable{
         String charset = "UTF-8";
         ByteArrayInputStream stream = new ByteArrayInputStream(vcard.getBytes(charset));
         VersionedObjectDefinition def = VCard.definition;
-        
+
         //from string to VersitObject
         Reader reader = def.getReader(stream, charset);
         VersitObject versitObject = def.parse(reader);
-        
-        //from VersitObject to 
+
+        //from VersitObject to
         OXContainerConverter converter = new OXContainerConverter(TimeZone.getDefault(), "tobias.prinz@open-xchange.com");
         Contact contact = converter.convertContact(versitObject);
         assertTrue("Should not have failed with exception until here", true);
         assertTrue("Should have imported inline image", contact.containsImage1());
         assertEquals("Should have right MIME type", "image/jpeg", contact.getImageContentType());
     }
-    
+
 }

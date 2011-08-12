@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.filter.parser.test;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -64,20 +63,20 @@ import com.openexchange.ajax.mail.filter.test.EnvelopeTest;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class EnvelopeParserImpl implements TestParser {
-	
+
 	public AbstractTest parseTest(String name, JSONObject jsonObject) throws JSONException {
 		final JSONArray jsonHeaderArray = jsonObject.getJSONArray("headers");
 		final String[] headers = new String[jsonHeaderArray.length()];
 		for (int a = 0; a < headers.length; a++) {
 			headers[a] = jsonHeaderArray.getString(a);
 		}
-		
+
 		final JSONArray jsonValueArray = jsonObject.getJSONArray("values");
 		final String[] values = new String[jsonHeaderArray.length()];
 		for (int a = 0; a < headers.length; a++) {
 			values[a] = jsonValueArray.getString(a);
 		}
-		
+
 		return new EnvelopeTest(null, headers, values);
 	}
 }

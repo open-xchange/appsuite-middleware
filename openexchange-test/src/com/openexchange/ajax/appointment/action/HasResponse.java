@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.action;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;

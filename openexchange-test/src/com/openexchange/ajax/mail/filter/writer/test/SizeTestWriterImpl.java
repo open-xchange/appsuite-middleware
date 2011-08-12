@@ -49,12 +49,10 @@
 
 package com.openexchange.ajax.mail.filter.writer.test;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.mail.filter.test.AbstractTest;
-import com.openexchange.ajax.mail.filter.test.SizeTest;
 
 
 /**
@@ -63,18 +61,18 @@ import com.openexchange.ajax.mail.filter.test.SizeTest;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class SizeTestWriterImpl implements TestWriter {
-	
+
 	public JSONObject writeTest(final String name, final AbstractTest abstractTest) throws JSONException {
 		final JSONObject jsonObj = new JSONObject();
-		
-		
+
+
 		// TODO: write comparison
 		//final ComparisonWriter comparisonWriter = ComparisonWriterFactory.getWriter(test.getName());
 		//final JSONObject jsonTestObj = testWriter.writeTest(test.getName(), test);
-		
+
 		//jsonObj.put("name", name);
 		//jsonObj.put("test", jsonTestObj);
-		
+
 		return jsonObj;
 	}
 }

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.Calendar;
 import java.util.Date;
@@ -134,7 +133,7 @@ public class Bug14357Test extends AbstractAJAXSession {
             position,
             appointment.getObjectID(),
             getClient().getValues().getUserId());
-        
+
         CommonListResponse listResponse = getClient().execute(listRequest);
 
         JSONArray foundAppointment = null;

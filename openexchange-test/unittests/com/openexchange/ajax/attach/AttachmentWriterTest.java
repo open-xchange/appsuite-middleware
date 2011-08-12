@@ -22,9 +22,9 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
 public class AttachmentWriterTest extends TestCase {
 	private static final List<AttachmentMetadata> DUMMY_VALUES = new ArrayList<AttachmentMetadata>();
 	static {
-		
+
 		AttachmentMetadata m = new AttachmentImpl();
-		
+
 		m.setAttachedId(1);
 		m.setCreatedBy(2);
 		m.setCreationDate(new Date(230023));
@@ -35,28 +35,28 @@ public class AttachmentWriterTest extends TestCase {
 		m.setId(10);
 		m.setModuleId(23);
 		m.setRtfFlag(true);
-		
+
 		DUMMY_VALUES.add(m);
-		
+
 		m = new AttachmentImpl(m);
 		m.setId(11);
 		m.setFilename("test2.txt");
-		
+
 		DUMMY_VALUES.add(m);
-		
+
 		m = new AttachmentImpl(m);
 		m.setId(12);
 		m.setFilename("test3.txt");
 	}
-	
+
 	public void testWriteList() throws Exception{
 		final StringWriter result = new StringWriter();
 		final AttachmentWriter writer = new AttachmentWriter(new JSONWriter(new PrintWriter(result)));
-		
+
 		writer.writeAttachments(new SearchIteratorAdapter(DUMMY_VALUES.iterator()), new AttachmentField[]{AttachmentField.ID_LITERAL, AttachmentField.FILENAME_LITERAL, AttachmentField.CREATION_DATE_LITERAL},TimeZone.getTimeZone("utc"));
-		
+
 		final JSONArray arrayOfarrays = new JSONArray(result.toString());
-		
+
 		for(int i = 0; i < arrayOfarrays.length(); i++) {
 			final JSONArray array = arrayOfarrays.getJSONArray(i);
 			assertEquals(10+i,array.getInt(0));
@@ -64,15 +64,15 @@ public class AttachmentWriterTest extends TestCase {
 			assertEquals(230023,array.getLong(2));
 		}
 	}
-	
+
 	public void testWriteObject() throws Exception {
 		final StringWriter result = new StringWriter();
 		final AttachmentWriter writer = new AttachmentWriter(new JSONWriter(new PrintWriter(result)));
-		
+
 		writer.write(DUMMY_VALUES.get(0),TimeZone.getTimeZone("utc"));
-		
+
 		final JSONObject object = new JSONObject(result.toString());
-		
+
 		assertEquals(1, object.getInt(AttachmentField.ATTACHED_ID_LITERAL.getName()));
 		assertEquals(2, object.getInt(AttachmentField.CREATED_BY_LITERAL.getName()));
 		assertEquals(3, object.getInt(AttachmentField.FOLDER_ID_LITERAL.getName()));
@@ -84,15 +84,15 @@ public class AttachmentWriterTest extends TestCase {
 		assertEquals("test1.txt", object.getString(AttachmentField.FILENAME_LITERAL.getName()));
 		assertTrue(object.getBoolean(AttachmentField.RTF_FLAG_LITERAL.getName()));
 	}
-	
+
 	public void testTimeZone() throws Exception {
 		final StringWriter result = new StringWriter();
 		final AttachmentWriter writer = new AttachmentWriter(new JSONWriter(new PrintWriter(result)));
 		writer.write(DUMMY_VALUES.get(0),TimeZone.getTimeZone("Europe/Berlin"));
-		
+
 		final JSONObject object = new JSONObject(result.toString());
-		
+
 		assertEquals(3830023, object.getInt(AttachmentField.CREATION_DATE_LITERAL.toString()));
-		
+
 	}
 }

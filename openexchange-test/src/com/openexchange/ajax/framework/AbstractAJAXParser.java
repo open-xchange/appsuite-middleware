@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.framework;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import junit.framework.Assert;
 import org.apache.http.HttpResponse;
@@ -72,7 +71,7 @@ public abstract class AbstractAJAXParser<T extends AbstractAJAXResponse> extends
      * Should this parser fail if the response contains an error.
      */
     private final boolean failOnError;
-    
+
     /**
      * Default constructor.
      * @param failOnError <code>true</code> and this parser checks the server

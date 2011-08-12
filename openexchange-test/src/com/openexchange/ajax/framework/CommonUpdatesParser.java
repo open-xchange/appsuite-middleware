@@ -52,7 +52,7 @@ package com.openexchange.ajax.framework;
 import com.openexchange.ajax.container.Response;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class CommonUpdatesParser<T extends CommonUpdatesResponse> extends AbstractColumnsParser<T> {
@@ -64,7 +64,7 @@ public class CommonUpdatesParser<T extends CommonUpdatesResponse> extends Abstra
     /**
      * This method must be overwritten if some more detailed response class should be used instead of the common updates response class.
      * @param response the general response object containing methods and data for handling the general JSON response object.
-     * @return a detailed response object corresponding to the request and NEVER <code>null</code>. 
+     * @return a detailed response object corresponding to the request and NEVER <code>null</code>.
      */
     @SuppressWarnings("unchecked")
     @Override

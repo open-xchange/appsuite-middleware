@@ -60,15 +60,15 @@ import com.openexchange.resource.Resource;
 
 /**
  * {@link ResourceNewAJAXTest} - Tests the NEW request on resource servlet
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class ResourceNewAJAXTest extends AbstractResourceTest {
 
 	/**
 	 * Initializes a new {@link ResourceNewAJAXTest}
-	 * 
+	 *
 	 * @param name
 	 *            The test name
 	 */

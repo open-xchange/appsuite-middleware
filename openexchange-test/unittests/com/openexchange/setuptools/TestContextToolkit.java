@@ -140,7 +140,7 @@ public class TestContextToolkit {
 
     public Session getSessionForUser(final String user, final Context ctx) {
         final int userId = resolveUser(user, ctx);
-        return SessionObjectWrapper.createSessionObject(userId,ctx,"session for "+user);    
+        return SessionObjectWrapper.createSessionObject(userId,ctx,"session for "+user);
     }
 
     public Group loadGroup(final int id, final Context ctx) {

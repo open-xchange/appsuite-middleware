@@ -62,9 +62,9 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class DownloadResponse extends AbstractAJAXResponse {
-    
+
     private byte[] downloaderBytes;
-    
+
     /**
      * Initializes a new {@link DownloadResponse}.
      * @param response
@@ -113,7 +113,7 @@ public class DownloadResponse extends AbstractAJAXResponse {
     public boolean hasError() {
         throw new UnsupportedOperationException();
     }
-    
+
     public byte[] getDownloaderBytes() {
         return downloaderBytes;
     }

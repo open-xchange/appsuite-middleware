@@ -72,7 +72,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 
 public class Bug8681forVCard extends AbstractVCardTest {
 
-	
+
 	//workaround for JUnit 3 runner
 	public static junit.framework.Test suite() {
 		return new JUnit4TestAdapter(Bug8681forVCard.class);
@@ -88,7 +88,7 @@ public class Bug8681forVCard extends AbstractVCardTest {
     @Test public void checkVCard() throws OXException, UnsupportedEncodingException, SQLException, OXException{
 		//creating folder before changing permissions...
 		folderId = createTestFolder(FolderObject.CONTACT, sessObj, ctx, "vcard7719Folder");
-		
+
 		final UserConfigurationStorage original = UserConfigurationStorage.getInstance();
         final OverridingUserConfigurationStorage override = new OverridingUserConfigurationStorage(original) {
             @Override
@@ -103,7 +103,7 @@ public class Bug8681forVCard extends AbstractVCardTest {
         try {
 			//uploading
 			final List <String> folders = Arrays.asList( Integer.toString(folderId) );
-	
+
 			try{
 				imp.canImport(sessObj, Format.VCARD, folders, null);
 				fail("Could import Contacts without permission on Contact module!");

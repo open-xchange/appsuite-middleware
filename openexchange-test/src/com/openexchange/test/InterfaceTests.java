@@ -73,7 +73,7 @@ public final class InterfaceTests {
         tests.addTestSuite(com.openexchange.ajax.LinkTest.class);
         tests.addTestSuite(com.openexchange.ajax.MultipleTest.class);
         tests.addTestSuite(com.openexchange.ajax.UserTest.class);
- 
+
         tests.addTest(com.openexchange.ajax.mailaccount.MailAccountSuite.suite());
         tests.addTest(com.openexchange.ajax.appointment.AppointmentAJAXSuite.suite());
         tests.addTestSuite(com.openexchange.ajax.attach.SimpleAttachmentTest.class);
@@ -101,7 +101,7 @@ public final class InterfaceTests {
         tests.addTest(com.openexchange.webdav.xml.task.TaskWebdavSuite.suite());
         tests.addTest(com.openexchange.webdav.xml.attachment.AttachmentWebdavSuite.suite());
         tests.addTest(com.openexchange.ajax.resource.ResourceSuite.suite());
-        
+
         tests.addTest(com.openexchange.ajax.roundtrip.pubsub.PubSubSuite.suite());
         tests.addTestSuite(com.openexchange.webdav.xml.GroupUserTest.class);
         /* TODO Enable the following test again. But this requires fixing the server. Currently the request fails.

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.user;
 
-import com.openexchange.exception.OXException;
 import java.util.Random;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -65,7 +64,7 @@ import com.openexchange.groupware.search.ContactSearchObject;
 
 /**
  * {@link Bug13911Test}
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class Bug13911Test extends AbstractAJAXSession {
@@ -97,7 +96,7 @@ public class Bug13911Test extends AbstractAJAXSession {
      * {"module":"contacts","action":"search","columns":"1,20,500,555,602,524,556,557"
      * ,"sort":"500","order":"asc","data":{"display_name":"e",
      * "email1":"e","email2":"e","email3":"e","last_name":"e","first_name":"e","orSearch":true}}
-     * 
+     *
      * @throws Throwable
      */
     public void testPatternSearchMultiple() throws Throwable {

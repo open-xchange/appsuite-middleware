@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.voipnow;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.Executor;
@@ -61,7 +60,7 @@ public class ExtensionDetailsTest extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link ExtensionDetailsTest}.
-     * 
+     *
      * @param name The test name
      */
     public ExtensionDetailsTest(final String name) {

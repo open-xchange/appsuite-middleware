@@ -771,7 +771,7 @@ public class OXException extends Exception implements OXExceptionConstants {
     	&& other.getNumber() == this.getCode())
     		return true;
     	return false;
-    	
+
     }
     public final boolean similarTo(OXException other){
     	if(other == this)

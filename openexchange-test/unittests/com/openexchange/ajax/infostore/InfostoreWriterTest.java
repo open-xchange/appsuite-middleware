@@ -24,19 +24,19 @@ import com.openexchange.tools.iterator.ArrayIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
 public class InfostoreWriterTest extends TestCase {
-	
+
 	private static final List<DocumentMetadata> DUMMY_DATA = new ArrayList<DocumentMetadata>();
-	
+
 	private static final Date now = new Date(1153481105872l);
-	
-	
+
+
 	static {
 		// Create some Dummy Values
-		
+
 		DocumentMetadataImpl dm = new DocumentMetadataImpl();
 		dm.setFolderId(22);
 		dm.setModifiedBy(1);
-		
+
 		dm = new DocumentMetadataImpl(dm);
 		dm.setCreationDate(now);
 		dm.setCreatedBy(1);
@@ -47,7 +47,7 @@ public class InfostoreWriterTest extends TestCase {
 		dm.setVersion(0);
 		dm.setId(1);
 		DUMMY_DATA.add(dm);
-		
+
 		dm = new DocumentMetadataImpl(dm);
 		dm.setURL(null);
 		dm.setCreationDate(new Date(now.getTime()-24*3600000));
@@ -56,7 +56,7 @@ public class InfostoreWriterTest extends TestCase {
 		dm.setTitle("Knowledge");
 		dm.setId(2);
 		DUMMY_DATA.add(dm);
-		
+
 		dm = new DocumentMetadataImpl(dm);
 		dm.setURL("http://www.nice-files.de");
 		dm.setVersion(3);
@@ -68,20 +68,20 @@ public class InfostoreWriterTest extends TestCase {
 		dm.setLastModified(new Date(now.getTime()-6*3600000));
 		dm.setId(3);
 		DUMMY_DATA.add(dm);
-	
-		
+
+
 	}
-	
+
 	public void testWriteList() throws Exception{
 		final StringWriter results = new StringWriter();
 		final InfostoreWriter w = new InfostoreWriter(new JSONWriter(new PrintWriter(results)));
-		
+
 		w.writeMetadata(new SearchIteratorAdapter(DUMMY_DATA.iterator()), new Metadata[]{Metadata.URL_LITERAL, Metadata.TITLE_LITERAL, Metadata.CREATED_BY_LITERAL}, TimeZone.getTimeZone("utc"));
-		
+
 		final JSONArray listOfArrays = new JSONArray(results.toString());
-		
+
 		assertEquals(3, listOfArrays.length());
-		
+
 		final Set<String> urls = new HashSet<String>(Arrays.asList("http://www.nice-files.de", "http://www.google.de"));
 		final Set<String> titles = new HashSet<String>(Arrays.asList("Google", "Knowledge", "File Attached"));
 		final String createdBy = "1";
@@ -92,68 +92,68 @@ public class InfostoreWriterTest extends TestCase {
 			assertTrue(titles.remove(result.getString(1)));
 			urls.remove(result.getString(0));
 		}
-		
+
 		assertTrue(urls.isEmpty());
 		assertTrue(titles.isEmpty());
 	}
-	
+
 	public void testCategories() throws Exception{
 		StringWriter results = new StringWriter();
 		InfostoreWriter w = new InfostoreWriter(new JSONWriter(new PrintWriter(results)));
-		
+
 		final DocumentMetadata m = new DocumentMetadataImpl();
 		m.setCategories("cat1, cat2, cat3");
-		
+
 		w.writeMetadata(new ArrayIterator(new DocumentMetadata[]{m}),new Metadata[]{Metadata.CATEGORIES_LITERAL},TimeZone.getTimeZone("utc"));
 		JSONArray listOfArrays = new JSONArray(results.toString());
 		JSONArray metadata1 = listOfArrays.getJSONArray(0);
 		JSONArray categories = metadata1.getJSONArray(0);
-		
+
 		assertEquals("cat1",categories.get(0));
 		assertEquals("cat2",categories.get(1));
 		assertEquals("cat3",categories.get(2));
-		
+
 		results = new StringWriter();
 		w = new InfostoreWriter(new JSONWriter(new PrintWriter(results)));
 		w.write(m,TimeZone.getTimeZone("utc"));
-		
-		
+
+
 		JSONObject o = new JSONObject(results.toString());
 		categories = o.getJSONArray("categories");
-		
+
 		assertEquals("cat1",categories.get(0));
 		assertEquals("cat2",categories.get(1));
 		assertEquals("cat3",categories.get(2));
-		
-		
+
+
 		m.setCategories(null);
-		
+
 		results = new StringWriter();
 		w = new InfostoreWriter(new JSONWriter(new PrintWriter(results)));
 		w.writeMetadata(new ArrayIterator(new DocumentMetadata[]{m}),new Metadata[]{Metadata.CATEGORIES_LITERAL},TimeZone.getTimeZone("utc"));
-		
+
 		listOfArrays = new JSONArray(results.toString());
 		metadata1 = listOfArrays.getJSONArray(0);
 		categories = metadata1.getJSONArray(0);
-		
+
 		assertEquals(0,categories.length());
-		
+
 		results = new StringWriter();
 		w = new InfostoreWriter(new JSONWriter(new PrintWriter(results)));
 		w.write(m,TimeZone.getTimeZone("utc"));
-		
+
 		o = new JSONObject(results.toString());
 		categories = o.getJSONArray("categories");
 		assertEquals(0,categories.length());
-		
-		
+
+
 	}
-	
+
 	public void testWriteObject() throws Exception{
 		DocumentMetadataImpl dm = new DocumentMetadataImpl();
 		dm.setFolderId(22);
 		dm.setModifiedBy(1);
-		
+
 		dm = new DocumentMetadataImpl(dm);
 		dm.setCreationDate(now);
 		dm.setCreatedBy(1);
@@ -163,24 +163,24 @@ public class InfostoreWriterTest extends TestCase {
 		dm.setURL("http://www.google.de");
 		dm.setVersion(0);
 		dm.setId(1);
-		
+
 		final StringWriter result = new StringWriter();
 		final InfostoreWriter w = new InfostoreWriter(new JSONWriter(new PrintWriter(result)));
-		
+
 		w.write(dm,TimeZone.getTimeZone("utc"));
-		
+
 		final JSONObject o = new JSONObject(result.toString());
-		
+
 		assertEquals(dm.getDescription(), o.getString("description"));
 		assertEquals(dm.getTitle(), o.getString("title"));
 		assertEquals(dm.getURL(), o.getString("url"));
 	}
-	
+
 	public void testLocked() throws Exception{
 		DocumentMetadataImpl dm = new DocumentMetadataImpl();
 		dm.setFolderId(22);
 		dm.setModifiedBy(1);
-		
+
 		dm = new DocumentMetadataImpl(dm);
 		dm.setCreationDate(now);
 		dm.setCreatedBy(1);
@@ -191,45 +191,45 @@ public class InfostoreWriterTest extends TestCase {
 		dm.setVersion(0);
 		dm.setId(1);
 		dm.setLockedUntil(new Date(System.currentTimeMillis()-1000));
-		
+
 		StringWriter result = new StringWriter();
 		InfostoreWriter w = new InfostoreWriter(new JSONWriter(new PrintWriter(result)));
-		
+
 		w.write(dm,TimeZone.getTimeZone("utc"));
-		
+
 		JSONObject o = new JSONObject(result.toString());
-		
+
 		assertEquals(0,o.getLong(Metadata.LOCKED_UNTIL_LITERAL.getName()));
-		
+
 		final long later = System.currentTimeMillis()+1000;
-		
+
 		dm.setLockedUntil(new Date(later));
-		
+
 		result = new StringWriter();
 		w = new InfostoreWriter(new JSONWriter(new PrintWriter(result)));
-		
+
 		w.write(dm,TimeZone.getTimeZone("utc"));
-		
+
 		o = new JSONObject(result.toString());
-		
+
 		assertEquals(later,o.getLong(Metadata.LOCKED_UNTIL_LITERAL.getName()));
-		
+
 	}
-	
+
 	public void testTimeZone() throws Exception {
 		final DocumentMetadataImpl dm = new DocumentMetadataImpl();
-		
+
 		dm.setLastModified(new Date(230023));
-		
+
 		final StringWriter result = new StringWriter();
 		final InfostoreWriter w = new InfostoreWriter(new JSONWriter(new PrintWriter(result)));
-		
+
 		w.write(dm,TimeZone.getTimeZone("Europe/Berlin"));
-		
+
 		final JSONObject o = new JSONObject(result.toString());
-		
+
 		assertEquals(3830023,o.getLong(Metadata.LAST_MODIFIED_LITERAL.getName()));
-		
+
 	}
-	
+
 }

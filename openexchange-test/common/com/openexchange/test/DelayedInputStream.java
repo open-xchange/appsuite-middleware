@@ -6,7 +6,7 @@ import java.io.InputStream;
 public class DelayedInputStream extends InputStream {
 	private long delay = 0;
 	private final InputStream delegate;
-	
+
 	public DelayedInputStream(final InputStream delegate, final long delay) {
 		this.delegate = delegate;
 		this.delay = delay;

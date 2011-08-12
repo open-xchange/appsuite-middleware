@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import com.openexchange.exception.OXException;
 import java.util.Date;
 import java.util.TimeZone;
 import com.openexchange.api2.AppointmentSQLInterface;

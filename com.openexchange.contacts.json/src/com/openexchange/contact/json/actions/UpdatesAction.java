@@ -89,7 +89,7 @@ public class UpdatesAction extends ContactAction {
         Date timestamp = new Date(timestampLong);
         Date lastModified = null;
         final TimeZone timeZone = req.getTimeZone();
-        
+
         final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
         final List<Contact> modifiedList = new ArrayList<Contact>();
         final List<Contact> deletedList = new ArrayList<Contact>();
@@ -100,32 +100,32 @@ public class UpdatesAction extends ContactAction {
             while (it.hasNext()) {
                 final Contact contact = it.next();
                 lastModified = contact.getLastModified();
-                
+
                 // Correct last modified and creation date with users timezone
                 contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
                 contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
-                modifiedList.add(contact);                
-                
+                modifiedList.add(contact);
+
                 if ((lastModified != null) && (timestamp.getTime() < lastModified.getTime())) {
                     timestamp = lastModified;
                 }
             }
-            
+
             it = contactInterface.getDeletedContactsInFolder(folder, columns, timestamp);
             while (it.hasNext()) {
                 final Contact contact = it.next();
                 lastModified = contact.getLastModified();
-                
+
                 // Correct last modified and creation date with users timezone
                 contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
                 contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
-                deletedList.add(contact);                
-                
+                deletedList.add(contact);
+
                 if ((lastModified != null) && (timestamp.getTime() < lastModified.getTime())) {
                     timestamp = lastModified;
                 }
             }
-            
+
             responseMap.put("modified", modifiedList);
             responseMap.put("deleted", deletedList);
         } finally {
@@ -136,7 +136,7 @@ public class UpdatesAction extends ContactAction {
 
         return new AJAXRequestResult(responseMap, timestamp, "contacts");
     }
-    
-    
+
+
 
 }

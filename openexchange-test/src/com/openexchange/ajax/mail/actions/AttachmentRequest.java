@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.actions;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 
 import com.openexchange.ajax.AJAXServlet;
@@ -59,9 +58,9 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
  * {@link AttachmentRequest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class AttachmentRequest extends AbstractMailRequest {
 
@@ -100,7 +99,7 @@ public final class AttachmentRequest extends AbstractMailRequest {
 
 	/**
 	 * Initializes a new {@link AttachmentRequest}
-	 * 
+	 *
 	 * @param mailPath
 	 */
 	public AttachmentRequest(final String[] folderAndIDAndSequenceID) {
@@ -109,7 +108,7 @@ public final class AttachmentRequest extends AbstractMailRequest {
 
 	/**
 	 * Initializes a new {@link AttachmentRequest}
-	 * 
+	 *
 	 * @param mailPath
 	 * @param failOnError
 	 */
@@ -121,7 +120,7 @@ public final class AttachmentRequest extends AbstractMailRequest {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
 	 */
 	public Object getBody() throws JSONException {
@@ -130,7 +129,7 @@ public final class AttachmentRequest extends AbstractMailRequest {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
 	 */
 	public Method getMethod() {
@@ -139,7 +138,7 @@ public final class AttachmentRequest extends AbstractMailRequest {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
 	 */
 	public Parameter[] getParameters() {
@@ -153,7 +152,7 @@ public final class AttachmentRequest extends AbstractMailRequest {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
 	 */
 	public AbstractAJAXParser<?> getParser() {

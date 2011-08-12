@@ -49,14 +49,13 @@
 
 package com.openexchange.ajax.reminder.actions;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class RangeParser extends AbstractAJAXParser<RangeResponse> {

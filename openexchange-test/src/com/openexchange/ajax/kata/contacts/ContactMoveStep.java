@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.kata.contacts;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.ajax.contact.action.UpdateRequest;
 import com.openexchange.ajax.contact.action.UpdateResponse;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -66,26 +65,26 @@ import com.openexchange.groupware.container.Contact;
 public class ContactMoveStep extends NeedExistingStep<Contact>{
 
     private int destinationFolder;
-    
+
     public ContactMoveStep(int destinationFolder, String name, String expectedError) {
         super(name, expectedError);
         this.destinationFolder = destinationFolder;
     }
-    
+
     public void cleanUp() throws Exception {
     }
 
     public void perform(AJAXClient client) throws Exception {
         this.client = client;
-        
+
         Contact entry = new Contact();
         assumeIdentity(entry);
         int inFolder = entry.getParentFolderID();
         entry.setParentFolderID(destinationFolder);
-        
+
         UpdateRequest updateRequest = new UpdateRequest(inFolder, entry, false);
         UpdateResponse updateResponse = execute(updateRequest);
-        
+
         if(!updateResponse.hasError()) {
             entry.setLastModified(updateResponse.getTimestamp());
             rememberIdentityValues(entry);

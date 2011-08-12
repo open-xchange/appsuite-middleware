@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.vcard;
 
-import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.LinkedList;
@@ -69,8 +68,8 @@ public class AbstractVCardUnitTest extends TestCase {
 
     public final String mime1  = "text/x-vcard";
     public final String mime2  = "text/vcard";
-    
-	
+
+
 	public List<Contact> performTest(final String testName, final String vcard, final String mime) throws ConverterException, IOException{
 		final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
 		final VersitDefinition def = Versit.getDefinition(mime);

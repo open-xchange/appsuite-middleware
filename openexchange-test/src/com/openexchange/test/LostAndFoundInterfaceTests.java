@@ -75,11 +75,11 @@ public class LostAndFoundInterfaceTests {
     public static Test suite() {
         final TestSuite tests = new TestSuite();
 
-        
+
         tests.addTestSuite(EmptyLockTest.class);
         tests.addTestSuite(BundleTestSessionD.class);
         tests.addTestSuite(BundleTestIMAP.class);
-        tests.addTestSuite(BundleTestAuthentication.class);        
+        tests.addTestSuite(BundleTestAuthentication.class);
         tests.addTestSuite(BasicManagedTaskTests.class);
         tests.addTestSuite(Bug14450Test.class);
         tests.addTestSuite(Bug10941Test.class);
@@ -88,7 +88,7 @@ public class LostAndFoundInterfaceTests {
         tests.addTestSuite(ICalImportExportServletTest.class);
         tests.addTestSuite(Bug12280Test.class);
         tests.addTestSuite(AJAXFileUploadTest.class);
-        
+
         return tests;
     }
 }

@@ -48,8 +48,6 @@
  */
 
 package com.openexchange.ajax.kata;
-
-import com.openexchange.exception.OXException;
 /**
  * {@link Cleanable}
  *

@@ -8,15 +8,15 @@ public class Bug18608Test_SpecialCharsInEmailTest extends AbstractManagedContact
 	public Bug18608Test_SpecialCharsInEmailTest(String name) {
 		super(name);
 	}
-	
+
 	public void testUmlaut(){
 		testEMail("california\u00fcberalles@host.invalid");
 	}
-	
+
 	public void testHanCharacter(){
 		testEMail("\u6279@somewhere.invalid");
 	}
-	
+
 	private void testEMail(String email1){
 		manager.setFailOnError(false);
 		Contact c = generateContact();

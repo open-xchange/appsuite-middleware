@@ -185,7 +185,7 @@ public class PublicationTestManager {
             lastResponse = listResp;
             return listResp.getList();
         }
-        
+
         public List<JSONArray> listAction(List<Integer> ids, List<String> columns, Map<String,List<String>> dynamicColumns) throws OXException, IOException, SAXException, JSONException, OXException, OXException {
             ListPublicationsRequest listReq = new ListPublicationsRequest(ids,columns,dynamicColumns);
             listReq.setFailOnError(getFailOnError());
@@ -193,7 +193,7 @@ public class PublicationTestManager {
             lastResponse = listResp;
             return listResp.getList();
         }
-        
+
         public List<JSONArray> allAction(String folder, int id, String entityModule, List<String> columns) throws OXException, IOException, SAXException, JSONException, OXException, OXException{
             AllPublicationsRequest allReq = new AllPublicationsRequest(folder, id, entityModule, columns);
             allReq.setFailOnError(getFailOnError());
@@ -201,7 +201,7 @@ public class PublicationTestManager {
             lastResponse = allResp;
             return allResp.getAll();
         }
-        
+
         public List<JSONArray> allAction(String entityModule, int id, List<String> columns) throws OXException, IOException, SAXException, JSONException, OXException, OXException{
             AllPublicationsRequest allReq = new AllPublicationsRequest(id, entityModule, columns);
             allReq.setFailOnError(getFailOnError());
@@ -209,7 +209,7 @@ public class PublicationTestManager {
             lastResponse = allResp;
             return allResp.getAll();
         }
-        
+
         public List<JSONArray> allAction(List<String> columns) throws OXException, IOException, SAXException, JSONException, OXException, OXException{
             AllPublicationsRequest allReq = new AllPublicationsRequest(columns);
             allReq.setFailOnError(getFailOnError());
@@ -217,8 +217,8 @@ public class PublicationTestManager {
             lastResponse = allResp;
             return allResp.getAll();
         }
-        
-        
+
+
         public List<JSONArray> allAction(String folder, int id, String entityModule, List<String> columns, Map<String,List<String>> dynamicColumns) throws OXException, IOException, SAXException, JSONException, OXException, OXException{
             AllPublicationsRequest allReq = new AllPublicationsRequest(folder, id, entityModule, columns, dynamicColumns);
             allReq.setFailOnError(getFailOnError());
@@ -235,7 +235,7 @@ public class PublicationTestManager {
             lastResponse = updResp;
         }
 
-        
+
         public void cleanUp() throws OXException, IOException, SAXException, JSONException {
             boolean failOnError2 = getFailOnError();
             setFailOnError(false);

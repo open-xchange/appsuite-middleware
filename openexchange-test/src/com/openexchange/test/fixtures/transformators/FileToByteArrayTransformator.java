@@ -58,7 +58,7 @@ import com.openexchange.test.fixtures.FixtureLoader;
 
 /**
  * Transforms strings of the kind document:big_image into a byte[] array.
- * 
+ *
  * @author Tobias Friedrich <tobias.friedrich@open-xchange.com>
  */
 public class FileToByteArrayTransformator implements Transformator {

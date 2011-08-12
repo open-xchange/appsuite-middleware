@@ -69,7 +69,7 @@ public class VCardImportBugTests extends AbstractVCardImportTest {
     public VCardImportBugTests(String name) throws Exception {
         super(name);
     }
-    
+
 
     public void testImportVCard() throws Exception {
         final Contact contactObj = new Contact();

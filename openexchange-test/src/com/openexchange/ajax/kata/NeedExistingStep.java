@@ -67,15 +67,15 @@ public abstract class NeedExistingStep<T> extends AbstractStep{
     public void setIdentitySource(IdentitySource<T> idSource) {
         this.idSource = idSource;
     }
-    
+
     protected void assumeIdentity(T thing) {
         idSource.assumeIdentity(thing);
     }
-    
+
     protected void rememberIdentityValues(T thing) {
         idSource.rememberIdentityValues(thing);
     }
-    
+
     protected void forgetIdentity(T thing){
         idSource.forgetIdentity(thing);
     }

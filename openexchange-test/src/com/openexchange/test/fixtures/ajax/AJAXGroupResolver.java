@@ -63,7 +63,7 @@ import com.openexchange.test.fixtures.GroupResolver;
 public class AJAXGroupResolver implements GroupResolver {
 	private AJAXClient client;
 	private AJAXContactFinder contactFinder;
-	
+
 	public AJAXGroupResolver(AJAXClient client) {
 		super();
 		this.client = client;

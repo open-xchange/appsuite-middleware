@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import com.openexchange.exception.OXException;
 import java.util.Date;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
@@ -84,7 +83,7 @@ public class Bug15155Test extends CalendarSqlTest {
         changeAppointment.setRecurrenceType(Appointment.DAILY);
         changeAppointment.setInterval(1);
     }
-    
+
     public void testBugStartChange() throws Exception {
         appointments.save(changeAppointment);
         CalendarDataObject loadAppointment = appointments.load(appointment.getObjectID(), appointment.getParentFolderID());

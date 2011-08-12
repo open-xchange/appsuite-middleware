@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.publish.tests;
 
-import com.openexchange.exception.OXException;
 import java.util.Date;
 
 import org.json.JSONArray;
@@ -70,13 +69,13 @@ import com.openexchange.publish.SimPublicationTargetDiscoveryService;
 
 /**
  * Test to check whether field 3010 does properly indicate a published folder
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class PublishFolderIconTest extends AbstractPublicationTest {
 
     private static final int FLAG_PUBLISHED = 3010;
-    
+
     private FolderObject folder;
 
     public PublishFolderIconTest(String name) {
@@ -122,7 +121,7 @@ public class PublishFolderIconTest extends AbstractPublicationTest {
         assertFalse(
             "Key 'com.openexchange.publish.publicationFlag' should have 'false' value before publication",
             data.getBoolean("com.openexchange.publish.publicationFlag"));
-        
+
         // publish
         publish();
 
@@ -155,7 +154,7 @@ public class PublishFolderIconTest extends AbstractPublicationTest {
             }
         }
         assertTrue("Should find folder " + folder.getObjectID() +" as a subfolder of " + folder.getParentFolderID() + ".", found);
-        
+
         // publish
         publish();
 
@@ -175,14 +174,14 @@ public class PublishFolderIconTest extends AbstractPublicationTest {
             }
         }
         assertTrue("Should find folder " + folder.getObjectID() +" as a subfolder of " + folder.getParentFolderID() + ".", found);
-   
+
     }
 
     public void testShouldSetTheIconViaUpdates() throws Exception {
         //  check negative
         fMgr.getFolderFromServer(folder);
         Date lastModified = new Date(fMgr.getLastResponse().getTimestamp().getTime() - 1);
-        
+
         fMgr.getUpdatedFoldersOnServer(folder.getParentFolderID(), lastModified, new int[] { 3010 });
         FolderUpdatesResponse response = (FolderUpdatesResponse) fMgr.getLastResponse();
         int idPos = findPositionOfColumn(response.getColumns(), CalendarObject.OBJECT_ID);
@@ -192,12 +191,12 @@ public class PublishFolderIconTest extends AbstractPublicationTest {
         int folderPos = findPosition(arr,folder.getObjectID(), idPos);
         JSONArray data = arr.getJSONArray(folderPos);
         assertFalse("Should be false if not published", data.getBoolean(flagPos));
-        
+
         // publish
         publish();
 
         // check positive
-        
+
         fMgr.getUpdatedFoldersOnServer(folder.getParentFolderID(), lastModified, new int[] { 3010 });
         response = (FolderUpdatesResponse) fMgr.getLastResponse();
         arr = (JSONArray) response.getData();

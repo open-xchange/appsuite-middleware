@@ -85,7 +85,7 @@ public class UpdateMailTest extends AbstractMailTest {
     public UpdateMailTest(final String name) {
         super(name);
     }
-    
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -103,19 +103,19 @@ public class UpdateMailTest extends AbstractMailTest {
         final String mail = values.getSendAddress();
         sendMail( createEMail(mail, "Update test for adding and removing a flag", "ALTERNATE", "Just a little bit").toString() );
         final TestMail myMail = new TestMail( getFirstMailInFolder(values.getInboxFolder() ) );
-        
+
         final UpdateMailRequest updateRequest = new UpdateMailRequest( myMail.getFolder(), myMail.getId() );
         final int additionalFlag = MailMessage.FLAG_FLAGGED; //note: doesn't work for 16 (recent) and 64 (user)
         updateRequest.setFlags( additionalFlag );
         updateRequest.updateFlags();
         UpdateMailResponse updateResponse = getClient().execute(updateRequest);
-        
+
         TestMail updatedMail = getMail(updateResponse.getFolder(), updateResponse.getID());
         assertTrue("Flag should have been changed", (updatedMail.getFlags() & additionalFlag) == additionalFlag);
-        
+
         updateRequest.removeFlags();
         updateResponse = getClient().execute(updateRequest);
-        
+
         updatedMail = getMail(updateResponse.getFolder(), updateResponse.getID());
         assertTrue("Flag should have been changed back again", (updatedMail.getFlags() & additionalFlag) == 0);
     }
@@ -158,17 +158,17 @@ public class UpdateMailTest extends AbstractMailTest {
              */
             {
                 final String eml =
-                    "Message-Id: <4A002517.4650.0059.1@deployfast.com>\n" + 
-                    "X-Mailer: Novell GroupWise Internet Agent 8.0.0 \n" + 
-                    "Date: Tue, 05 May 2009 11:37:58 -0500\n" + 
-                    "To: #TOADDR#\n" + 
-                    "Subject: Re: Your order for East Texas Lighthouse\n" + 
-                    "Mime-Version: 1.0\n" + 
-                    "Content-Type: text/plain; charset=\"UTF-8\"\n" + 
-                    "Content-Transfer-Encoding: 8bit\n" + 
-                    "\n" + 
-                    "This is a MIME message. If you are reading this text, you may want to \n" + 
-                    "consider changing to a mail reader or gateway that understands how to \n" + 
+                    "Message-Id: <4A002517.4650.0059.1@deployfast.com>\n" +
+                    "X-Mailer: Novell GroupWise Internet Agent 8.0.0 \n" +
+                    "Date: Tue, 05 May 2009 11:37:58 -0500\n" +
+                    "To: #TOADDR#\n" +
+                    "Subject: Re: Your order for East Texas Lighthouse\n" +
+                    "Mime-Version: 1.0\n" +
+                    "Content-Type: text/plain; charset=\"UTF-8\"\n" +
+                    "Content-Transfer-Encoding: 8bit\n" +
+                    "\n" +
+                    "This is a MIME message. If you are reading this text, you may want to \n" +
+                    "consider changing to a mail reader or gateway that understands how to \n" +
                     "properly handle MIME multipart messages.".replaceFirst("#TOADDR#", values.getSendAddress());
 
                 for (int i = 0; i < 10; i++) {
@@ -228,7 +228,7 @@ public class UpdateMailTest extends AbstractMailTest {
         final String mail = values.getSendAddress();
         sendMail( createEMail(mail, "Update test for adding and removing a flag by message id", "ALTERNATE", "Just a little bit").toString() );
         final TestMail myMail = new TestMail( getFirstMailInFolder(values.getInboxFolder() ) );
-        
+
         final String messageId;
         {
             final Object obj = myMail.getHeader("Message-ID");
@@ -240,41 +240,41 @@ public class UpdateMailTest extends AbstractMailTest {
         }
         assertNotNull("Message-ID header not found.", messageId);
 
-        
+
         final UpdateMailRequest updateRequest = new UpdateMailRequest( myMail.getFolder(), messageId ).setMessageId(true);
         final int additionalFlag = MailMessage.FLAG_FLAGGED; //note: doesn't work for 16 (recent) and 64 (user)
         updateRequest.setFlags( additionalFlag );
         updateRequest.updateFlags();
         UpdateMailResponse updateResponse = getClient().execute(updateRequest);
-        
+
         TestMail updatedMail = getMail(updateResponse.getFolder(), updateResponse.getID());
         assertTrue("Flag should have been changed", (updatedMail.getFlags() & additionalFlag) == additionalFlag);
-        
+
         updateRequest.removeFlags();
         updateResponse = getClient().execute(updateRequest);
-        
+
         updatedMail = getMail(updateResponse.getFolder(), updateResponse.getID());
         assertTrue("Flag should have been changed back again", (updatedMail.getFlags() & additionalFlag) == 0);
     }
 
-    
+
     public void testShouldBeAbleToSetColors() throws OXException, IOException, SAXException, JSONException{
         final String mail = values.getSendAddress();
         sendMail( createEMail(mail, "Update test for changing colors", "ALTERNATE", "Just a little bit").toString() );
         final TestMail myMail = new TestMail( getFirstMailInFolder(values.getInboxFolder() ) );
-        
+
         final UpdateMailRequest updateRequest = new UpdateMailRequest( myMail.getFolder(), myMail.getId() );
         int myColor = 8;
         updateRequest.setColor(myColor );
         UpdateMailResponse updateResponse = getClient().execute(updateRequest);
-        
+
         TestMail updatedMail = getMail(updateResponse.getFolder(), updateResponse.getID());
         assertEquals("Color should have been changed", myColor, updatedMail.getColor());
-        
+
         myColor = 4;
         updateRequest.setColor(myColor );
         updateResponse = getClient().execute(updateRequest);
-        
+
         updatedMail = getMail(updateResponse.getFolder(), updateResponse.getID());
         assertEquals("Color should have been changed again", myColor, updatedMail.getColor());
     }

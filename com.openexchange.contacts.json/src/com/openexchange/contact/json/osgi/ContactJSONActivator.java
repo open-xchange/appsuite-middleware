@@ -61,11 +61,11 @@ import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 
 /**
  * {@link ContactJSONActivator} - OSGi Activator for the Contact JSON interface.
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class ContactJSONActivator extends AJAXModuleActivator {
-    
+
     private static final Class<?>[] NEEDED = new Class[] { ContactInterfaceDiscoveryService.class,
                                                         ImageService.class };
 

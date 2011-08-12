@@ -28,29 +28,29 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.tools.URLParameter;
 
 public class ConflictTest extends AppointmentTest {
-	
+
 	private static final Log LOG = LogFactory.getLog(ConflictTest.class);
-	
+
 	public ConflictTest(final String name) {
 		super(name);
 	}
-	
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		
+
 		final Calendar c = Calendar.getInstance();
 		c.setTimeZone(timeZone);
 		c.set(Calendar.HOUR_OF_DAY, 8);
 		c.set(Calendar.MINUTE, 0);
 		c.set(Calendar.SECOND, 0);
 		c.set(Calendar.MILLISECOND, 0);
-		
+
 		startTime = c.getTimeInMillis();
 		startTime += timeZone.getOffset(startTime);
 		endTime = startTime + 7200000;
 	}
-	
+
 	/**
 	 * Test case for conflict
 	 * Appointment Start: 8:00
@@ -66,13 +66,13 @@ public class ConflictTest extends AppointmentTest {
 		calendar.set(Calendar.MINUTE, 0);
 		calendar.set(Calendar.SECOND, 0);
 		calendar.set(Calendar.MILLISECOND, 0);
-		
+
 		final Date rangeStart = calendar.getTime();
-		
+
 		calendar.add(Calendar.DAY_OF_MONTH, 1);
-		
+
 		final Date rangeEnd = calendar.getTime();
-		
+
 		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle("testConflict1 - insert");
 		appointmentObj.setStartDate(new Date(startTime));
@@ -81,24 +81,24 @@ public class ConflictTest extends AppointmentTest {
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setIgnoreConflicts(true);
 		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-		
+
 		appointmentObj.setIgnoreConflicts(false);
 		Appointment[] appointmentConflicts = insertAppointmentReturnConflicts(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		assertNotNull("conflicts expected!", appointmentConflicts);
-		
+
 		boolean found = false;
-		
+
 		for (int a = 0; a < appointmentConflicts.length; a++) {
 			if (appointmentConflicts[a].getObjectID() == objectId) {
 				found = true;
 			}
 		}
-		
+
 		assertTrue("appointment id " + objectId + " not found in conflicts", found);
-		
+
 		appointmentObj.setIgnoreConflicts(true);
 		final int secondObjectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-		
+
 		Appointment loadAppointment = loadAppointment(getWebConversation(), secondObjectId, appointmentFolderId, rangeStart, rangeEnd, APPOINTMENT_FIELDS, timeZone, getHostName(), getSessionId());
 		Date modified = loadAppointment.getCreationDate();
 
@@ -115,21 +115,21 @@ public class ConflictTest extends AppointmentTest {
 		appointmentObj.setTitle("testConflict1 - update");
 		appointmentConflicts = updateAppointmentReturnConflicts(getWebConversation(), appointmentObj, secondObjectId, appointmentFolderId, modified, timeZone, getHostName(), getSessionId());
 		assertNotNull("conflicts expected!", appointmentConflicts);
-		
+
 		found = false;
-		
+
 		for (int a = 0; a < appointmentConflicts.length; a++) {
 			if (appointmentConflicts[a].getObjectID() == objectId) {
 				found = true;
 			}
 		}
-		
-		assertTrue("appointment id " + objectId + " not found in conflicts", found);		
+
+		assertTrue("appointment id " + objectId + " not found in conflicts", found);
 
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, modified, PROTOCOL + getHostName(), getSessionId());
 		deleteAppointment(getWebConversation(), secondObjectId, appointmentFolderId, modified, PROTOCOL + getHostName(), getSessionId());
 	}
-	
+
 	/**
 	 * Test case for conflict
 	 * Appointment Start: 8:00
@@ -147,26 +147,26 @@ public class ConflictTest extends AppointmentTest {
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setIgnoreConflicts(true);
 		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-		
+
 		appointmentObj.setIgnoreConflicts(false);
 		appointmentObj.setEndDate(new Date(endTime-3600000));
-		
+
 		final Appointment[] appointmentConflicts = insertAppointmentReturnConflicts(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		assertNotNull("conflicts expected!", appointmentConflicts);
-		
+
 		boolean found = false;
-		
+
 		for (int a = 0; a < appointmentConflicts.length; a++) {
 			if (appointmentConflicts[a].getObjectID() == objectId) {
 				found = true;
 			}
 		}
-		
+
 		assertTrue("appointment id " + objectId + " not found in conflicts", found);
-		
+
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
-	
+
 	/**
 	 * Test case for conflict
 	 * Appointment Start: 8:00
@@ -184,26 +184,26 @@ public class ConflictTest extends AppointmentTest {
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setIgnoreConflicts(true);
 		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-		
+
 		appointmentObj.setIgnoreConflicts(false);
 		appointmentObj.setEndDate(new Date(endTime+3600000));
-		
+
 		final Appointment[] appointmentConflicts = insertAppointmentReturnConflicts(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		assertNotNull("conflicts expected!", appointmentConflicts);
-		
+
 		boolean found = false;
-		
+
 		for (int a = 0; a < appointmentConflicts.length; a++) {
 			if (appointmentConflicts[a].getObjectID() == objectId) {
 				found = true;
 			}
 		}
-		
+
 		assertTrue("appointment id " + objectId + " not found in conflicts", found);
-		
+
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
-	
+
 	/**
 	 * Test case for conflict
 	 * Appointment Start: 8:00
@@ -221,26 +221,26 @@ public class ConflictTest extends AppointmentTest {
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setIgnoreConflicts(true);
 		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-		
+
 		appointmentObj.setIgnoreConflicts(false);
 		appointmentObj.setStartDate(new Date(startTime-3600000));
-		
+
 		final Appointment[] appointmentConflicts = insertAppointmentReturnConflicts(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		assertNotNull("conflicts expected!", appointmentConflicts);
-		
+
 		boolean found = false;
-		
+
 		for (int a = 0; a < appointmentConflicts.length; a++) {
 			if (appointmentConflicts[a].getObjectID() == objectId) {
 				found = true;
 			}
 		}
-		
+
 		assertTrue("appointment id " + objectId + " not found in conflicts", found);
-		
+
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
-	
+
 	/**
 	 * Test case for conflict
 	 * Appointment Start: 8:00
@@ -258,26 +258,26 @@ public class ConflictTest extends AppointmentTest {
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setIgnoreConflicts(true);
 		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-		
+
 		appointmentObj.setIgnoreConflicts(false);
 		appointmentObj.setStartDate(new Date(startTime+3600000));
-		
+
 		final Appointment[] appointmentConflicts = insertAppointmentReturnConflicts(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		assertNotNull("conflicts expected!", appointmentConflicts);
-		
+
 		boolean found = false;
-		
+
 		for (int a = 0; a < appointmentConflicts.length; a++) {
 			if (appointmentConflicts[a].getObjectID() == objectId) {
 				found = true;
 			}
 		}
-		
+
 		assertTrue("appointment id " + objectId + " not found in conflicts", found);
-		
+
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
-	
+
 	/**
 	 * Test case for conflict
 	 * Appointment Start: 8:00
@@ -295,27 +295,27 @@ public class ConflictTest extends AppointmentTest {
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setIgnoreConflicts(true);
 		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-		
+
 		appointmentObj.setIgnoreConflicts(false);
 		appointmentObj.setStartDate(new Date(startTime+3600000));
 		appointmentObj.setEndDate(new Date(endTime-1800000));
-		
+
 		final Appointment[] appointmentConflicts = insertAppointmentReturnConflicts(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		assertNotNull("conflicts expected!", appointmentConflicts);
-		
+
 		boolean found = false;
-		
+
 		for (int a = 0; a < appointmentConflicts.length; a++) {
 			if (appointmentConflicts[a].getObjectID() == objectId) {
 				found = true;
 			}
 		}
-		
+
 		assertTrue("appointment id " + objectId + " not found in conflicts", found);
-		
+
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
-	
+
 	/**
 	 * Test case for conflict
 	 * Appointment Start: 8:00
@@ -333,27 +333,27 @@ public class ConflictTest extends AppointmentTest {
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setIgnoreConflicts(true);
 		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-		
+
 		appointmentObj.setIgnoreConflicts(false);
 		appointmentObj.setStartDate(new Date(startTime-3600000));
 		appointmentObj.setEndDate(new Date(endTime+3600000));
-		
+
 		final Appointment[] appointmentConflicts = insertAppointmentReturnConflicts(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		assertNotNull("conflicts expected!", appointmentConflicts);
-		
+
 		boolean found = false;
-		
+
 		for (int a = 0; a < appointmentConflicts.length; a++) {
 			if (appointmentConflicts[a].getObjectID() == objectId) {
 				found = true;
 			}
 		}
-		
+
 		assertTrue("appointment id " + objectId + " not found in conflicts", found);
-		
+
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
-	
+
 	/**
 	 * Test case for conflict
 	 * Appointment Start: 8:00
@@ -371,15 +371,15 @@ public class ConflictTest extends AppointmentTest {
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setIgnoreConflicts(true);
 		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-		
+
 		appointmentObj.setIgnoreConflicts(false);
 		appointmentObj.setStartDate(new Date(startTime-3600000));
 		appointmentObj.setEndDate(new Date(endTime-7200000));
-		
+
 		final Appointment[] appointmentConflicts = insertAppointmentReturnConflicts(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-		
+
 		boolean found = false;
-		
+
 		if (appointmentConflicts != null) {
 			for (int a = 0; a < appointmentConflicts.length; a++) {
 				if (appointmentConflicts[a].getObjectID() == objectId) {
@@ -387,12 +387,12 @@ public class ConflictTest extends AppointmentTest {
 				}
 			}
 		}
-		
+
 		assertFalse("appointment id " + objectId + " found in conflicts", found);
-		
+
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
-	
+
 	/**
 	 * Test case for conflict
 	 * Appointment Start: 8:00
@@ -410,15 +410,15 @@ public class ConflictTest extends AppointmentTest {
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setIgnoreConflicts(true);
 		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-		
+
 		appointmentObj.setIgnoreConflicts(false);
 		appointmentObj.setStartDate(new Date(startTime+7200000));
 		appointmentObj.setEndDate(new Date(endTime+3600000));
-		
+
 		final Appointment[] appointmentConflicts = insertAppointmentReturnConflicts(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-		
+
 		boolean found = false;
-		
+
 		if (appointmentConflicts != null) {
 			for (int a = 0; a < appointmentConflicts.length; a++) {
 				if (appointmentConflicts[a].getObjectID() == objectId) {
@@ -426,12 +426,12 @@ public class ConflictTest extends AppointmentTest {
 				}
 			}
 		}
-		
+
 		assertFalse("appointment id " + objectId + " found in conflicts", found);
-		
+
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
-	
+
 	/**
 	 * Test case for conflict
 	 * Appointment Start: Today FullTime
@@ -450,27 +450,27 @@ public class ConflictTest extends AppointmentTest {
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setIgnoreConflicts(true);
 		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-		
+
 		appointmentObj.setIgnoreConflicts(false);
 		appointmentObj.setStartDate(new Date(startTime));
 		appointmentObj.setEndDate(new Date(endTime));
-		
+
 		final Appointment[] appointmentConflicts = insertAppointmentReturnConflicts(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		assertNotNull("conflicts expected!", appointmentConflicts);
-		
+
 		boolean found = false;
-		
+
 		for (int a = 0; a < appointmentConflicts.length; a++) {
 			if (appointmentConflicts[a].getObjectID() == objectId) {
 				found = true;
 			}
 		}
-		
+
 		assertTrue("appointment id " + objectId + " not found in conflicts", found);
-		
+
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
-	
+
 	/**
 	 * Test case for conflict
 	 * Appointment Start: Today FullTime
@@ -489,94 +489,94 @@ public class ConflictTest extends AppointmentTest {
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setIgnoreConflicts(true);
 		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-		
+
 		appointmentObj.setIgnoreConflicts(false);
-		
+
 		final Appointment[] appointmentConflicts = insertAppointmentReturnConflicts(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		assertNotNull("conflicts expected!", appointmentConflicts);
-		
+
 		boolean found = false;
-		
+
 		for (int a = 0; a < appointmentConflicts.length; a++) {
 			if (appointmentConflicts[a].getObjectID() == objectId) {
 				found = true;
 			}
 		}
-		
+
 		assertTrue("appointment id " + objectId + " not found in conflicts", found);
-		
+
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
-	
+
 	public static Appointment[] insertAppointmentReturnConflicts(final WebConversation webCon,
 			final Appointment appointmentObj, final TimeZone userTimeZone,
 			String host, final String session) throws Exception, OXException {
 		host = appendPrefix(host);
-		
+
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		final PrintWriter pw = new PrintWriter(baos, true);
 
 		final JSONObject jsonObj = new JSONObject();
 		final AppointmentWriter appointmentwriter = new AppointmentWriter(userTimeZone);
 		appointmentwriter.writeAppointment(appointmentObj, jsonObj);
-		
-		pw.print(jsonObj.toString());		
+
+		pw.print(jsonObj.toString());
 		pw.flush();
-		
+
 		baos.toByteArray();
-		
+
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION,
 				AJAXServlet.ACTION_NEW);
-		
+
 		final ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 		final WebRequest req = new PutMethodWebRequest(host + APPOINTMENT_URL
 				+ parameter.getURLParameters(), bais, "text/javascript");
 		final WebResponse resp = webCon.getResponse(req);
-		
+
 		assertEquals(200, resp.getResponseCode());
-		
+
 		final Response response = Response.parse(resp.getText());
-		
+
 		if (response.hasError()) {
 			fail("json error: " + response.getErrorMessage());
 		}
-		
+
 		final JSONObject data = (JSONObject) response.getData();
 		if (data.has(DataFields.ID)) {
 			data.getInt(DataFields.ID);
 		}
-		
+
 		if (data.has("conflicts")) {
 			final AppointmentParser appointmentParser = new AppointmentParser(userTimeZone);
-			
+
 			final JSONArray jsonArray = data.getJSONArray("conflicts");
 			final Appointment[] appointmentArray = new Appointment[jsonArray.length()];
 			for (int a = 0; a < jsonArray.length(); a++) {
 				appointmentArray[a] = new Appointment();
 				appointmentParser.parse(appointmentArray[a], jsonArray.getJSONObject(a));
 			}
-			
+
 			return appointmentArray;
 		}
-		
+
 		return null;
 	}
-	
+
 	public static Appointment[] updateAppointmentReturnConflicts(final WebConversation webCon,
 			final Appointment appointmentObj, int objectId, final int inFolder, final Date modified, final TimeZone userTimeZone,
 			String host, final String session) throws Exception, OXException {
 		host = appendPrefix(host);
-		
+
 		final StringWriter stringWriter = new StringWriter();
 		final JSONObject jsonObj = new JSONObject();
 		final AppointmentWriter appointmentwriter = new AppointmentWriter(userTimeZone);
 		appointmentwriter.writeAppointment(appointmentObj, jsonObj);
-		
+
 		stringWriter.write(jsonObj.toString());
 		stringWriter.flush();
-		
+
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION,
@@ -590,33 +590,33 @@ public class ConflictTest extends AppointmentTest {
 		final WebRequest req = new PutMethodWebRequest(host + APPOINTMENT_URL
 				+ parameter.getURLParameters(), bais, "text/javascript");
 		final WebResponse resp = webCon.getResponse(req);
-		
+
 		assertEquals(200, resp.getResponseCode());
-		
+
 		final Response response = Response.parse(resp.getText());
-		
+
 		if (response.hasError()) {
 			fail("json error: " + response.getErrorMessage());
 		}
-		
+
 		final JSONObject data = (JSONObject) response.getData();
 		if (data.has(DataFields.ID)) {
 			objectId = data.getInt(DataFields.ID);
 		}
-		
+
 		if (data.has("conflicts")) {
 			final AppointmentParser appointmentParser = new AppointmentParser(userTimeZone);
-			
+
 			final JSONArray jsonArray = data.getJSONArray("conflicts");
 			final Appointment[] appointmentArray = new Appointment[jsonArray.length()];
 			for (int a = 0; a < jsonArray.length(); a++) {
 				appointmentArray[a] = new Appointment();
 				appointmentParser.parse(appointmentArray[a], jsonArray.getJSONObject(a));
 			}
-			
+
 			return appointmentArray;
 		}
-		
+
 		return null;
 	}
 }

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.contact;
 
-import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.groupware.Types;

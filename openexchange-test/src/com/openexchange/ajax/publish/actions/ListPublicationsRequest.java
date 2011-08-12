@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.publish.actions;
 
-import com.openexchange.exception.OXException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;

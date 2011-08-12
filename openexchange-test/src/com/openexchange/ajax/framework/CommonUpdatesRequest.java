@@ -53,7 +53,7 @@ import java.util.Date;
 import com.openexchange.groupware.search.Order;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class CommonUpdatesRequest<T extends CommonUpdatesResponse> extends AbstractUpdatesRequest<T> {

@@ -24,26 +24,26 @@ import com.openexchange.test.AjaxInit;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 
 public class FolderTestCase extends TestCase {
-	
+
 	protected Context ctx = new ContextImpl(1);
 	protected User user = null;
 	protected UserConfiguration userConfig;
 	protected SessionObject session;
-	
+
 	protected List<FolderObject> clean = new ArrayList<FolderObject>();
-	
-	
-	
+
+
+
 	@Override
 	public void setUp() throws Exception {
 		Init.startServer();
 
         final UserStorage userStorage = UserStorage.getInstance();
         final UserConfigurationStorage userConfigStorage = UserConfigurationStorage.getInstance();
-        
+
         final TestConfig config = new TestConfig();
         final TestContextToolkit tools = new TestContextToolkit();
-        
+
         final String ctxName = config.getContextName();
         ctx = null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
 
@@ -51,7 +51,7 @@ public class FolderTestCase extends TestCase {
 		user = userStorage.getUser(session.getUserId(), ctx);
 		userConfig = userConfigStorage.getUserConfiguration(session.getUserId(),ctx);
 	}
-	
+
 	private String getUsername() {
 		final String userName = AjaxInit.getAJAXProperty("login");
 		final int pos = userName.indexOf('@');
@@ -65,7 +65,7 @@ public class FolderTestCase extends TestCase {
 		}
 		Init.stopServer();
 	}
-	
+
 	protected FolderObject mkdir(final int parent, final String name) throws SQLException, OXException, Exception {
 		Connection writecon = null;
         try {
@@ -91,7 +91,7 @@ public class FolderTestCase extends TestCase {
 			}
         }
     }
-	
+
 	protected void rm(final int objectID) throws SQLException, OXException, OXException, Exception {
 		//OXFolderAction ofa = new OXFolderAction(session);
 		final OXFolderManager oxma = OXFolderManager.getInstance(session);

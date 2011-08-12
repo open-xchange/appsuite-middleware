@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.publish.actions;
 
-import com.openexchange.exception.OXException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -61,15 +60,15 @@ import com.openexchange.java.Strings;
 
 /**
  * {@link AllPublicationsRequest}
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class AllPublicationsRequest extends AbstractPublicationRequest<AllPublicationsResponse> {
 
     private int id;
-    
+
     private String Folder;
-    
+
     private String entityModule; // the module of the entity.
 
     private List<String> columns; // a list of column names to load (id, entityId, entityModule, url, target)
@@ -94,11 +93,11 @@ public class AllPublicationsRequest extends AbstractPublicationRequest<AllPublic
         this(folder, id, entityModule, columns);
         setDynamicColumns(dynamicColumns);
     }
-    
+
     public AllPublicationsRequest(List<String> columns) {
     	this(null, -1, null, columns);
     }
-    
+
     public AllPublicationsRequest(int id, String entityModule, List<String> columns) {
     	this(null, id, entityModule, columns);
     }
@@ -154,26 +153,26 @@ public class AllPublicationsRequest extends AbstractPublicationRequest<AllPublic
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
         LinkedList<Parameter> params = new LinkedList<Parameter>();
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL));
-        
+
         if( getId() > -1)
             params.add(new Parameter("id", getId()));
-        
+
         if( getFolder() != null)
             params.add(new Parameter("folder", getFolder()));
-        
+
         if( getEntityModule() != null)
         	params.add(new Parameter("entityModule", getEntityModule()));
-        
+
         if(getColumns() != null){
             params.add(new Parameter("columns", Strings.join(getColumns(), ",")));
         }
-        
+
         if(getDynamicColumns() != null){
             for (String plugin : getDynamicColumns().keySet()) {
                 params.add(new Parameter(plugin, Strings.join(getDynamicColumns().get(plugin), ",")));
             }
         }
-        
+
         return params.toArray(new Parameter[0]);
     }
 

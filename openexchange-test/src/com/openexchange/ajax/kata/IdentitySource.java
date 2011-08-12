@@ -63,5 +63,5 @@ public interface IdentitySource<T> {
     public void rememberIdentityValues(T entry);
     public void forgetIdentity(T entry);
     public Class<T> getType();
-    
+
 }

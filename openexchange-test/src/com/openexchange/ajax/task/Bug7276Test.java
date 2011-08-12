@@ -60,7 +60,6 @@ import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.ajax.task.actions.UpdateResponse;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.tasks.Create;
 import com.openexchange.groupware.tasks.Task;
 

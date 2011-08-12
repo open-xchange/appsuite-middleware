@@ -70,12 +70,12 @@ public class CarddavProtocol extends Protocol {
     public static final String CARD_NAMESPACE = "CARD:";
 
     public static final String ADDRESSBOOK = "<CARD:addressbook />";
-    
+
     @Override
     public List<Namespace> getAdditionalNamespaces() {
         return ADDITIONAL_NAMESPACES;
     }
-    
+
     @Override
     public WebdavAction getReportAction(String ns, String name) {
         if (ns.equals(AddressbookMultigetReport.NAMESPACE) && name.equals(AddressbookMultigetReport.NAME)) {

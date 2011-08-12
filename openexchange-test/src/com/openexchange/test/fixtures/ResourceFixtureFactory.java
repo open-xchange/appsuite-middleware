@@ -59,7 +59,7 @@ import com.openexchange.resource.Resource;
  */
 public class ResourceFixtureFactory implements FixtureFactory<Resource> {
     private FixtureLoader fixtureLoader;
-    
+
 	public ResourceFixtureFactory(FixtureLoader fixtureLoader) {
 		super();
 		this.fixtureLoader = fixtureLoader;

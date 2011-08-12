@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.subscribe.actions;
 
-import com.openexchange.exception.OXException;
 import java.util.Collection;
 import java.util.LinkedList;
 import org.json.JSONException;
@@ -67,7 +66,7 @@ import com.openexchange.java.JSON;
 public class DeleteSubscriptionRequest extends AbstractSubscriptionRequest<DeleteSubscriptionResponse> {
 
     private Collection<Integer> IDs;
-    
+
     public void setIDs(Collection<Integer> iDs) {
         IDs = iDs;
     }
@@ -75,7 +74,7 @@ public class DeleteSubscriptionRequest extends AbstractSubscriptionRequest<Delet
     public Collection<Integer> getIDs() {
         return IDs;
     }
-    
+
     public DeleteSubscriptionRequest(){
         super();
     }
@@ -90,7 +89,7 @@ public class DeleteSubscriptionRequest extends AbstractSubscriptionRequest<Delet
         this();
         setIDs(IDs);
     }
-    
+
     public Object getBody() throws JSONException {
         if(IDs == null)
             throw new JSONException("Cannot create DeleteRequest: No IDs given for deletion!");

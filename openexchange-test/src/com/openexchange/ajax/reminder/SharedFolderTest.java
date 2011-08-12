@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.reminder;
 
-import com.openexchange.exception.OXException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
@@ -80,7 +79,7 @@ import com.openexchange.server.impl.OCLPermission;
  * and to update an appointments reminder. But also the person the folder is shared to must have the right to set and change an appointments
  * reminder. In this case the reminder has to be set/changed for the folder owner. The reminders must be found through a RangeRequest and
  * the alarm field of an appointment must be set correctly in a GetResponse.
- * 
+ *
  * @author <a href="steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SharedFolderTest extends AbstractAJAXSession {
@@ -92,7 +91,7 @@ public class SharedFolderTest extends AbstractAJAXSession {
     FolderObject sharedFolder;
 
     Appointment firstAppointment;
-    
+
     Appointment secondAppointment;
 
     TimeZone tz;
@@ -172,17 +171,17 @@ public class SharedFolderTest extends AbstractAJAXSession {
             remCal.add(Calendar.MINUTE, -30);
             assertEquals("Reminder date was not set correctly.", remCal.getTime(), reminder.getDate());
         }
-        
+
         client.execute(new DeleteRequest(firstAppointment));
     }
-    
+
     public void testSecretaryCanChangeReminder() throws Exception {
         // Create appointment
         secondAppointment = createAppointment();
         secondAppointment.setAlarm(15);
         final AppointmentInsertResponse appointmentInsertResponse = client2.execute(new InsertRequest(secondAppointment, tz, true));
         appointmentInsertResponse.fillAppointment(secondAppointment);
-        
+
         // Get Appointment and Reminder to check reminder and alarm field
         {
             final GetResponse getResponse = client.execute(new GetRequest(secondAppointment));
@@ -220,13 +219,13 @@ public class SharedFolderTest extends AbstractAJAXSession {
             remCal.add(Calendar.MINUTE, -30);
             assertEquals("Reminder date was not set correctly.", remCal.getTime(), reminder.getDate());
         }
-        
+
         client2.execute(new DeleteRequest(secondAppointment));
     }
 
     @Override
-    public void tearDown() throws Exception {        
-        client.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(API.OUTLOOK, sharedFolder));        
+    public void tearDown() throws Exception {
+        client.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(API.OUTLOOK, sharedFolder));
         client2.logout();
 
         super.tearDown();

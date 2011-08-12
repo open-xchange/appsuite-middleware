@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.actions;
 
-import com.openexchange.exception.OXException;
 import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONException;
@@ -61,7 +60,7 @@ import com.openexchange.webdav.xml.fields.CommonFields;
 
 /**
  * {@link NewMailRequest} - The request for <code>/ajax/mail?action=new</code>.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class NewMailRequest extends AbstractMailRequest<NewMailResponse> {

@@ -21,58 +21,58 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.URLParameter;
 
 public class CopyTest extends ContactTest {
-	
+
 	private static final Log LOG = LogFactory.getLog(CopyTest.class);
-	
+
 	public CopyTest(final String name) {
 		super(name);
 	}
-	
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
-	
+
 	public void testCopy() throws Exception {
 		final Contact contactObj = new Contact();
 		contactObj.setSurName("testCopy");
 		contactObj.setParentFolderID(contactFolderId);
 		final int objectId1 = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
-		
+
 		final String login = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "login", "");
 		final String password = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "password", "");
-		
+
 		final FolderObject folderObj = com.openexchange.webdav.xml.FolderTest.createFolderObject(userId, "testCopy" + System.currentTimeMillis(), FolderObject.CONTACT, false);
 		final int targetFolder = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), login, password, "");
-		
+
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, getSessionId());
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_COPY);
 		parameter.setParameter(AJAXServlet.PARAMETER_ID, objectId1);
 		parameter.setParameter(AJAXServlet.PARAMETER_FOLDERID, contactFolderId);
 		parameter.setParameter(AppointmentFields.IGNORE_CONFLICTS, true);
-		
+
 		final JSONObject jsonObj = new JSONObject();
 		jsonObj.put(FolderChildFields.FOLDER_ID, targetFolder);
 		final ByteArrayInputStream bais = new ByteArrayInputStream(jsonObj.toString().getBytes("UTF-8"));
 		final WebRequest req = new PutMethodWebRequest(PROTOCOL + getHostName() + CONTACT_URL + parameter.getURLParameters(), bais, "text/javascript");
 		final WebResponse resp = getWebConversation().getResponse(req);
-		
+
 		assertEquals(200, resp.getResponseCode());
-		
+
 		final Response response = Response.parse(resp.getText());
-		
+
 		if (response.hasError()) {
 			fail("json error: " + response.getErrorMessage());
 		}
-		
+
 		int objectId2 = 0;
-		
+
 		final JSONObject data = (JSONObject)response.getData();
 		if (data.has(DataFields.ID)) {
 			objectId2 = data.getInt(DataFields.ID);
 		}
-		
+
 		deleteContact(getWebConversation(), objectId1, contactFolderId, PROTOCOL + getHostName(), getSessionId());
 		if (objectId2 > 0) {
 			deleteContact(getWebConversation(), objectId2, targetFolder, PROTOCOL + getHostName(), getSessionId());

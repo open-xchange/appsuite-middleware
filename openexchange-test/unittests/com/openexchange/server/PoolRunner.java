@@ -7,7 +7,6 @@
 
 package com.openexchange.server;
 
-import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -20,34 +19,34 @@ import com.openexchange.server.impl.DBPool;
  * @author bishoph
  */
 public class PoolRunner implements Runnable {
-    
+
     private final Context c;
     private final boolean close_connections;
     private Thread run;
     private int current_run = 0;
-    
+
     public static final int TEST_RUNS = 200;
     public static final int WAIT_TIME = 10;
     public static final String TEST_QUERY = "SELECT 1 as test";
-    
+
     private boolean isrunning = true;
     private int modrunner = 0;
 
-    
+
     public PoolRunner(final Context c, final boolean close_connections) {
         this.c = c;
         this.close_connections = close_connections;
         this.start();
     }
-    
+
     public void start() {
         run = new Thread(this);
         run.start();
     }
-    
+
     public void run() {
         while (current_run < TEST_RUNS) {
-            try {                
+            try {
                 final Connection con = DBPool.pickup(c);
                 try {
                     run.sleep(WAIT_TIME);
@@ -63,8 +62,8 @@ public class PoolRunner implements Runnable {
                 modrunner++;
                 simpleAction(con);
                 DBPool.push(c, con);
-                
-                current_run++;                
+
+                current_run++;
             } catch(final Exception e) {
                 e.printStackTrace();
             }
@@ -84,9 +83,9 @@ public class PoolRunner implements Runnable {
     boolean isTestDone() {
         return isrunning;
     }
-    
+
     Thread getRunnerThread() {
         return run;
     }
-    
+
 }

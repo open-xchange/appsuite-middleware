@@ -70,7 +70,7 @@ import com.openexchange.webdav.xml.resources.ResourceMarshaller;
 
 /**
  * A {@link CaldavMultigetReport} allows clients to retrieve properties of certain named resources. It is conceptually similar to a propfind.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class AddressbookMultigetReport extends WebdavPropfindAction {
@@ -82,7 +82,7 @@ public class AddressbookMultigetReport extends WebdavPropfindAction {
     public AddressbookMultigetReport(Protocol protocol) {
         super(protocol);
     }
-    
+
     @Override
     public void perform(WebdavRequest req, WebdavResponse res) throws WebdavProtocolException {
         final Element response = new Element("multistatus", DAV_NS);

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.roundtrip.pubsub;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.ContactTestManager;
@@ -57,7 +56,7 @@ import com.openexchange.test.FolderTestManager;
 
 /**
  * This is a roundtrip test, doing Create-(verify)-update-(verify)-delete-(verify) for a publication and subscription of OXMF.
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class OXMFContactLifeCycleTest extends AbstractPubSubRoundtripTest {

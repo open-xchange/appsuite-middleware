@@ -96,12 +96,12 @@ public class LoginTest extends AbstractAJAXTest {
      * @param hostname hostname of the server running the server.
      * @param sessionId Session identifier of the user.
      * @throws IOException if the communication with the server fails.
-     * @throws JSONException 
-     * @throws OXException 
-     * @throws SAXException if a SAX error occurs. 
+     * @throws JSONException
+     * @throws OXException
+     * @throws SAXException if a SAX error occurs.
      */
     public static void logout(final WebConversation conversation, final String hostname, final String sessionId) throws IOException, OXException, JSONException {
-    	
+
         LOG.trace("Logging out.");
         LogoutRequest request = new LogoutRequest();
         AJAXClient client = new AJAXClient(new AJAXSession(conversation, hostname, sessionId));
@@ -122,7 +122,7 @@ public class LoginTest extends AbstractAJAXTest {
      * @throws SAXException if a SAX error occurs.
      * @throws IOException if the communication with the server fails.
      * @throws OXException
-     * @deprecated use new AJAXClient request and response framework. 
+     * @deprecated use new AJAXClient request and response framework.
      */
     @Deprecated
     public static String getSessionId(final WebConversation conversation, final String hostname, final String login, final String password) throws IOException, JSONException, OXException {

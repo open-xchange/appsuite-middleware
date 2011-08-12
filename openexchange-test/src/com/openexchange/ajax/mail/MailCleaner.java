@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.kata.Cleanable;
 import com.openexchange.ajax.mail.actions.DeleteRequest;
@@ -67,22 +66,22 @@ public class MailCleaner implements Cleanable {
     private TestMail mail;
     private AJAXClient client;
 
-    
+
     public TestMail getMail() {
         return mail;
     }
 
-    
+
     public void setMail(TestMail mail) {
         this.mail = mail;
     }
 
-    
+
     public AJAXClient getClient() {
         return client;
     }
 
-    
+
     public void setClient(AJAXClient client) {
         this.client = client;
     }

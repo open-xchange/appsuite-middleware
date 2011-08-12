@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import com.openexchange.exception.OXException;
 import java.util.Arrays;
 import java.util.Date;
 import com.openexchange.api2.AppointmentSQLInterface;
@@ -64,9 +63,9 @@ public class ParticipantsAgreeViaDifferentLoadMethods extends CalendarSqlTest {
         final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(participant1);
         appointments.save(appointment);
         clean.add(appointment);
-        
+
         AppointmentSQLInterface appointmentSql = appointments.getCurrentAppointmentSQLInterface();
-        
+
         SearchIterator<Appointment> appointmentsBetweenInFolder = appointmentSql.getAppointmentsBetweenInFolder(appointment.getParentFolderID(), new int[]{Appointment.OBJECT_ID, Appointment.PARTICIPANTS}, new Date(0), new Date(appointment.getEndDate().getTime()+1000),-1, null);
         Appointment loadedViaFolderListing = null;
         while(appointmentsBetweenInFolder.hasNext()) {
@@ -75,11 +74,11 @@ public class ParticipantsAgreeViaDifferentLoadMethods extends CalendarSqlTest {
                 loadedViaFolderListing = temp;
             }
         }
-        
+
         CalendarDataObject loadedViaID = appointments.reload(appointment);
-        
+
         System.out.println(Arrays.asList(loadedViaFolderListing.getParticipants()));
         System.out.println(Arrays.asList(loadedViaID.getParticipants()));
-          
+
     }
 }

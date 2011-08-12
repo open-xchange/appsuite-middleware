@@ -48,7 +48,6 @@
  */
 package com.openexchange.groupware.attach;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.I;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -72,7 +71,7 @@ public class InMemoryAttachmentBase implements AttachmentBase{
     private final Map<Context, Map<Integer, AttachmentMetadata>> data = new HashMap<Context, Map<Integer, AttachmentMetadata>>();
     private final Map<Context, List<AttachmentMetadata>> changes = new HashMap<Context, List<AttachmentMetadata>>();
     private final Map<Context, List<AttachmentMetadata>> deletions = new HashMap<Context, List<AttachmentMetadata>>();
-    
+
     public long attachToObject(final AttachmentMetadata attachment, final InputStream input, Session session, final Context ctx, final User user, final UserConfiguration userConfig) {
         throw new UnsupportedOperationException();
     }

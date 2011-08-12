@@ -54,7 +54,7 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
  * {@link GenJSONResponse}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -62,7 +62,7 @@ public class GenJSONResponse extends AbstractAJAXResponse {
 
     /**
      * Initializes a new {@link GenJSONResponse}
-     * 
+     *
      * @param response The response
      */
     public GenJSONResponse(final Response response) {

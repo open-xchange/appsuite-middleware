@@ -58,7 +58,7 @@ import junit.framework.TestCase;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 
 public class DefaultContactComparatorTest extends TestCase {
- 
+
     private Contact c1;
     private Contact c2;
 
@@ -66,60 +66,60 @@ public class DefaultContactComparatorTest extends TestCase {
     public void setUp() {
         c1 = new Contact();
         c2 = new Contact();
-        
+
         c1.setObjectID(10);
         c2.setObjectID(11);
     }
-    
+
     public void testIntegerField() {
-        
+
         assertBigger(c2, c1, Contact.OBJECT_ID);
     }
-    
+
     public void testStringField() {
         c1.setGivenName("Alpha");
         c2.setGivenName("Beta");
-        
+
         assertBigger(c2, c1, Contact.GIVEN_NAME);
     }
-    
+
     public void testDateField() {
         c1.setBirthday(D("03.03.1981 00:00"));
         c2.setBirthday(D("04.01.1981 00:00"));
-        
+
         assertBigger(c1, c2, Contact.BIRTHDAY);
     }
-    
+
     public void testDesc() {
         assertBigger(c1, c2, Contact.OBJECT_ID, Order.DESCENDING);
     }
-    
+
     public void testSpecial() {
-        
+
         c1.setGivenName("Anne123");
         c2.setSurName("Anne2000");
-        
+
         assertBigger(c2, c1, Contact.SPECIAL_SORTING);
     }
-    
+
     public void testUseCountGlobalFirst() {
         c1.setUseCount(0);
         c1.setParentFolderID(FolderObject.SYSTEM_LDAP_FOLDER_ID);
-        
+
         c2.setUseCount(23);
         c2.setParentFolderID(23);
-        
+
         assertBigger(c1, c2, Contact.USE_COUNT_GLOBAL_FIRST);
     }
-    
-    
-    
+
+
+
     private void assertBigger(Contact c1, Contact c2, int field) {
         assertBigger(c1, c2, field, Order.ASCENDING);
     }
-    
+
     private void assertBigger(Contact c1, Contact c2, int field, Order order) {
         assertTrue("c1 was lower or equal than c2", 0 < new DefaultContactComparator(field, order).compare(c1, c2));
     }
-    
+
 }

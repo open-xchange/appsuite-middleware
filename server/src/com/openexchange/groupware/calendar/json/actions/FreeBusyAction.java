@@ -104,7 +104,7 @@ public final class FreeBusyAction extends AbstractAppointmentAction {
             while (it.hasNext()) {
                 final Appointment appointmentObj = it.next();
                 appointmentList.add(appointmentObj);
-                
+
                 if (null != appointmentObj.getLastModified() && timestamp.before(appointmentObj.getLastModified())) {
                     timestamp = appointmentObj.getLastModified();
                 }

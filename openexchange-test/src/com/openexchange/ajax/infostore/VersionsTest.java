@@ -20,11 +20,11 @@ import com.openexchange.test.TestInit;
 
 public class VersionsTest extends InfostoreAJAXTest {
 
-	
+
 	public VersionsTest(final String name) {
 		super(name);
 	}
-	
+
 	public void testVersions() throws Exception{
 		final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 		Response res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),Long.MAX_VALUE,m("version_comment" , "Comment 1"), upload, "text/plain");
@@ -33,27 +33,27 @@ public class VersionsTest extends InfostoreAJAXTest {
 		assertNoError(res);
 		res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),Long.MAX_VALUE,m("version_comment" , "Comment 3"), upload, "text/plain");
 		assertNoError(res);
-		
+
 		res = versions(getWebConversation(),getHostName(), sessionId, clean.get(0), new int[]{Metadata.VERSION, Metadata.CURRENT_VERSION});
 		assertNoError(res);
 
 		assureVersions(new Integer[]{1,2,3},res,3);
-		
+
 		res = versions(getWebConversation(), getHostName(), sessionId, clean.get(0), new int[]{Metadata.VERSION, Metadata.VERSION_COMMENT});
 		assertNoError(res);
-		
+
 		final Map<Integer, String> comments = new HashMap<Integer, String>();
 		comments.put(1,"Comment 1");
 		comments.put(2,"Comment 2");
 		comments.put(3,"Comment 3");
-		
+
 		final JSONArray arrayOfarrays = (JSONArray) res.getData();
-		
+
 		for(int i = 0; i < arrayOfarrays.length(); i++) {
 			final JSONArray payload = arrayOfarrays.getJSONArray(i);
 			assertEquals(comments.remove(payload.getInt(0)),payload.getString(1));
 		}
-		
+
 	}
 	// Bug 13627
 	public void testVersionSorting() throws Exception {
@@ -64,13 +64,13 @@ public class VersionsTest extends InfostoreAJAXTest {
         assertNoError(res);
         res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),Long.MAX_VALUE,m("version_comment" , "Comment 3"), upload, "text/plain");
         assertNoError(res);
-        
+
         res = versions(getWebConversation(),getHostName(), sessionId, clean.get(0), new int[]{Metadata.VERSION, Metadata.CURRENT_VERSION}, Metadata.VERSION, "desc");
         assertNoError(res);
 
         assureVersions(new Integer[]{3,2,1},res,3);
 	}
-	
+
 	public void testUniqueVersions() throws Exception{
 		final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 		Response res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),Long.MAX_VALUE,m("version_comment" , "Comment 1"), upload, "text/plain");
@@ -79,24 +79,24 @@ public class VersionsTest extends InfostoreAJAXTest {
 		assertNoError(res);
 		res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),Long.MAX_VALUE,m("version_comment" , "Comment 3"), upload, "text/plain");
 		assertNoError(res);
-		
+
 		res = versions(getWebConversation(),getHostName(), sessionId, clean.get(0), new int[]{Metadata.VERSION, Metadata.CURRENT_VERSION});
 		assertNoError(res);
 
 		assureVersions(new Integer[]{1,2,3},res,3);
-		
+
 		final int[] nd = detach(getWebConversation(), getHostName(), sessionId, res.getTimestamp().getTime(), clean.get(0), new int[]{3});
 		assertEquals(0, nd.length);
-		
+
 		res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),Long.MAX_VALUE,m("version_comment" , "Comment 3"), upload, "text/plain");
 		assertNoError(res);
-		
+
 		res = versions(getWebConversation(),getHostName(), sessionId, clean.get(0), new int[]{Metadata.VERSION, Metadata.CURRENT_VERSION});
 		assertNoError(res);
 
 		assureVersions(new Integer[]{1,2,4},res,4);
 
-		
+
 	}
 
     public void testLastModifiedUTC() throws JSONException, IOException, SAXException {
@@ -127,7 +127,7 @@ public class VersionsTest extends InfostoreAJAXTest {
     public static final void assureVersions(final Integer[] ids, final Response res, final Integer current) throws JSONException{
 		final Set<Integer> versions = new HashSet<Integer>(Arrays.asList(ids));
 		final JSONArray arrayOfarrays = (JSONArray) res.getData();
-		
+
 		int numberOfVersions = versions.size();
 		for(int i = 0; i < arrayOfarrays.length(); i++) {
 			final JSONArray comp = arrayOfarrays.getJSONArray(i);

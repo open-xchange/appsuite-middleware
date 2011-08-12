@@ -86,7 +86,7 @@ public class AllRequest extends CommonAllRequest {
 
     private boolean showPrivates;
 
-    
+
     public AllRequest(final int folderId, final int[] columns, final Date start,
         final Date end, final TimeZone tz) {
         this(folderId, columns, start, end, tz, true);
@@ -116,7 +116,7 @@ public class AllRequest extends CommonAllRequest {
     public String getTimeZoneId() {
         return timeZoneId;
     }
-    
+
     /**
      * Sets the time zone of the response.
      *
@@ -159,7 +159,7 @@ public class AllRequest extends CommonAllRequest {
     @Override
     public Parameter[] getParameters() {
         List<Parameter> params = new LinkedList<Parameter>( Arrays.asList(super.getParameters()));
-        
+
         if (null != timeZoneId)
             params.add(new Parameter(AJAXServlet.PARAMETER_TIMEZONE, timeZoneId));
 

@@ -131,7 +131,7 @@ public class ConflictHandlerTest extends TestCase {
         assertNotNull(conflicts);
         assertEquals(1, conflicts.length);
         final CalendarDataObject conflict = conflicts[0];
-                
+
         assertEquals(appointment.getObjectID(), conflict.getObjectID());
         assertUserParticipants(conflict, user, participant1);
     }
@@ -210,7 +210,7 @@ public class ConflictHandlerTest extends TestCase {
         final CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithUserParticipants(user);
         conflictingAppointment.setIgnoreConflicts(false);
         final CalendarDataObject[] conflicts = getConflicts( conflictingAppointment );
-        
+
         assertNotNull(conflicts);
         assertEquals(1, conflicts.length);
         final CalendarDataObject conflict = conflicts[0];

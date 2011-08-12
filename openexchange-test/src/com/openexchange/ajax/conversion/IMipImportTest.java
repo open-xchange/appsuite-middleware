@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.conversion;
 
-import com.openexchange.exception.OXException;
 import java.util.Date;
 import java.util.UUID;
 import org.json.JSONArray;
@@ -83,7 +82,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class IMipImportTest extends AbstractConversionTest {
-    
+
     private AJAXClient client1;
     private AJAXClient client2;
     private String uuid;
@@ -97,19 +96,19 @@ public class IMipImportTest extends AbstractConversionTest {
     public IMipImportTest(String name) {
         super(name);
     }
-    
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        
+
         client1 = getClient();
         client2 = new AJAXClient(User.User2);
-        
+
         uuid = UUID.randomUUID().toString();
-        
+
         mailFolderAndMailID = createMail(client1);
         mailFolderAndMailID2 = createMail(client2);
-        
+
         sequenceId = getSequenceIdForMail(client1, mailFolderAndMailID);
         sequenceId2 = getSequenceIdForMail(client2, mailFolderAndMailID2);
     }
@@ -117,29 +116,29 @@ public class IMipImportTest extends AbstractConversionTest {
     @Override
     protected void tearDown() throws Exception {
         client.execute(new DeleteRequest(objectId, folder, new Date(Long.MAX_VALUE)));
-        
+
         super.tearDown();
     }
-    
+
     public void testIMIP() throws Exception {
         String[][] folderIdFirst = confirm(client1, mailFolderAndMailID, sequenceId, CalendarObject.ACCEPT, "Positive");
         String[][] folderIdSecond = confirm(client2, mailFolderAndMailID2, sequenceId2, CalendarObject.DECLINE, "Negative");
-        
+
         assertEquals("Wrong amount of appointments", 1, folderIdFirst.length);
-        
+
         folder = Integer.valueOf(folderIdFirst[0][0]);
         objectId = Integer.valueOf(folderIdFirst[0][1]);
-        
+
         GetRequest getRequest = new GetRequest(folder, objectId);
         GetResponse getResponse = client.execute(getRequest);
         Appointment appointment = getResponse.getAppointment(client.getValues().getTimeZone());
-        
+
         boolean foundFirst = false;
         boolean foundSecond = false;
-        
+
         assertEquals("Wrong amount of participants", 2, appointment.getUsers().length);
         assertEquals("No new objectId for update", 0, folderIdSecond.length);
-        
+
         for (UserParticipant user : appointment.getUsers()) {
             if (user.getIdentifier() == client1.getValues().getUserId()) {
                 foundFirst = true;
@@ -151,11 +150,11 @@ public class IMipImportTest extends AbstractConversionTest {
                 assertEquals("Wrong message", "Negative", user.getConfirmMessage());
             }
         }
-        
+
         assertTrue("Missing user", foundFirst);
         assertTrue("Missing user", foundSecond);
     }
-    
+
     protected String[][] confirm(AJAXClient c, String[] folderAndId, String seq, int confirm, String message) throws Exception {
         JSONObject jsonBody = new JSONObject();
         JSONObject jsonSource = new JSONObject().put("identifier", "com.openexchange.mail.ical");
@@ -173,10 +172,10 @@ public class IMipImportTest extends AbstractConversionTest {
         jsonBody.put("datahandler", jsonHandler);
         ConvertResponse convertResponse = (ConvertResponse) Executor.execute(c.getSession(),
                 new ConvertRequest(jsonBody, true));
-        
+
         return convertResponse.getFoldersAndIDs();
     }
-    
+
     protected String[] createMail(AJAXClient c) throws Exception {
         byte[] ICAL_BYTES = new StringBuilder()
             .append("BEGIN:VCALENDAR\n")
@@ -196,7 +195,7 @@ public class IMipImportTest extends AbstractConversionTest {
             .append("END:VEVENT\n")
             .append("END:VCALENDAR")
             .toString().getBytes();
-    
+
         JSONObject mail = new JSONObject();
         mail.put(MailJSONField.FROM.getKey(), c.getValues().getSendAddress());
         mail.put(MailJSONField.RECIPIENT_TO.getKey(), client2.getValues().getSendAddress() + "," + client2.getValues().getSendAddress());
@@ -204,28 +203,28 @@ public class IMipImportTest extends AbstractConversionTest {
         mail.put(MailJSONField.RECIPIENT_BCC.getKey(), "");
         mail.put(MailJSONField.SUBJECT.getKey(), "New Event");
         mail.put(MailJSONField.PRIORITY.getKey(), "3");
-        
+
         JSONObject bodyObject = new JSONObject();
         bodyObject.put(MailJSONField.CONTENT_TYPE.getKey(), MailContentType.ALTERNATIVE.toString());
         bodyObject.put(MailJSONField.CONTENT.getKey(), NetsolTestConstants.MAIL_TEXT_BODY);
-        
+
         JSONArray attachments = new JSONArray();
         attachments.put(bodyObject);
-        
+
         mail.put(MailJSONField.ATTACHMENTS.getKey(), attachments);
-        
+
         UnsynchronizedByteArrayInputStream in = new UnsynchronizedByteArrayInputStream(ICAL_BYTES);
-    
+
         NetsolSendResponse response = Executor.execute(c.getSession(), new NetsolSendRequest(mail.toString(), in, "text/calendar; charset=US-ASCII", "ical.ics"));
         assertTrue("Send failed", response.getFolderAndID() != null);
         assertTrue("Duration corrupt", response.getRequestDuration() > 0);
         String[] mailFolderAndMailID = response.getFolderAndID();
-        
+
         mailFolderAndMailID[1] = parseMailId(mailFolderAndMailID[1]);
 
         return mailFolderAndMailID;
     }
-    
+
     protected String getSequenceIdForMail(AJAXClient c, String[] mailFolderAndMailID) throws Exception {
         FolderAndID fai = new FolderAndID(mailFolderAndMailID[0], mailFolderAndMailID[1]);
         NetsolGetResponse resp = Executor.execute(c.getSession(), new NetsolGetRequest(fai, true));
@@ -239,7 +238,7 @@ public class IMipImportTest extends AbstractConversionTest {
                 sequenceId = attachObj.getString(MailListField.ID.getKey());
             }
         }
-        
+
         return sequenceId;
     }
 

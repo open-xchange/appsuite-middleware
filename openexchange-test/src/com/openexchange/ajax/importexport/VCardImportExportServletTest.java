@@ -49,11 +49,8 @@
 
 package com.openexchange.ajax.importexport;
 
-import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-
-import org.json.JSONObject;
 
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
@@ -81,7 +78,7 @@ public class VCardImportExportServletTest extends AbstractImportExportServletTes
 		final String insertedCSV = IMPORT_VCARD;
 		final Format format = Format.VCARD;
 		final int folderId = createFolder("vcard-contact-roundtrip-" + System.currentTimeMillis(),FolderObject.CONTACT);
-		
+
 		try {
 			//test: import
 			InputStream is = new ByteArrayInputStream(insertedCSV.getBytes());
@@ -91,9 +88,9 @@ public class VCardImportExportServletTest extends AbstractImportExportServletTes
 					true);
 			req.selectFile("file", "contact.vcf", is, format.getMimeType());
 			WebResponse webRes = webconv.getResource(req);
-			
+
 			extractFromCallback( webRes.getText() );
-			
+
 			//test: export
 			webconv =  getWebConversation();
 			req = new GetMethodWebRequest( getUrl(EXPORT_SERVLET, folderId, format) );

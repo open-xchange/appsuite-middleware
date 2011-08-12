@@ -49,7 +49,6 @@
 
 package com.openexchange.webdav;
 
-import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.util.Properties;
 
@@ -65,7 +64,7 @@ import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.test.WebdavInit;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class TestUpload2 extends TestCase {
@@ -77,7 +76,7 @@ public class TestUpload2 extends TestCase {
     private String password;
 
     private String hostname;
-    
+
     /**
      * @param name
      */

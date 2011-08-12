@@ -85,14 +85,14 @@ import com.openexchange.tools.arrays.Arrays;
 /**
  * This class and FolderObject should be all that is needed to write folder-related tests. If multiple users are needed use multiple
  * instances of this class. Examples of tests using this class can be found in ExemplaryFolderTestManagerTest.java.
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.org">Karsten Will</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - refactoring
  */
 public class FolderTestManager implements TestManager{
 
     private AbstractAJAXResponse lastResponse;
-    
+
     private List<FolderObject> createdItems;
 
     private AJAXClient client;
@@ -227,7 +227,7 @@ public class FolderTestManager implements TestManager{
             return getFolderFromServer(folder.getFullName(), failOnErrorOverride);
         return getFolderFromServer(folder.getObjectID(), failOnErrorOverride);
     }
-    
+
     public FolderObject getFolderFromServer(int folderID, boolean failOnErrorOverride, int[] additionalColumns) {
         boolean oldValue = getFailOnError();
         setFailOnError(failOnErrorOverride);
@@ -332,7 +332,7 @@ public class FolderTestManager implements TestManager{
         allFolders.copyInto(folderArray);
         return folderArray;
     }
-    
+
     /**
      * get all folders in one parent folder via the HTTP-API
      */
@@ -358,7 +358,7 @@ public class FolderTestManager implements TestManager{
         allFolders.copyInto(folderArray);
         return folderArray;
     }
-    
+
     public FolderObject[] listRootFoldersOnServer() {
         Vector<FolderObject> allFolders = new Vector<FolderObject>();
         // FolderObject parentFolder = this.getFolderFromServer(parentFolderId);
@@ -385,7 +385,7 @@ public class FolderTestManager implements TestManager{
     public FolderObject[] getUpdatedFoldersOnServer(int folderId, Date lastModified) {
         return getUpdatedFoldersOnServer(folderId, lastModified, null);
     }
-    
+
     public FolderObject[] getUpdatedFoldersOnServer(int folderId, Date lastModified, int[] additionalFields) {
         Vector<FolderObject> allFolders = new Vector<FolderObject>();
         UpdatesRequest request = new UpdatesRequest(API.OX_OLD, folderId, Arrays.addUniquely(new int[] { FolderObject.OBJECT_ID }, additionalFields), -1, null, lastModified);
@@ -477,7 +477,7 @@ public class FolderTestManager implements TestManager{
             e.printStackTrace();
         }
     }
-    
+
     /**
      * Generates a folder with admin permissions for all given userIDs.
      * @param name Name of the folder
@@ -510,7 +510,7 @@ public class FolderTestManager implements TestManager{
         folder.setPermissions(allPermissions);
         return folder;
     }
-    
+
     public FolderObject generateSharedFolder(String name, int moduleID, int parentID, int... userIDs){
         //create a folder
         FolderObject folder = new FolderObject();

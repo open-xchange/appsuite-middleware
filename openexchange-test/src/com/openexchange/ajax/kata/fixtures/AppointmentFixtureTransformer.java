@@ -59,13 +59,13 @@ import com.openexchange.test.fixtures.Fixture;
 
 /**
  * {@link AppointmentFixtureTransformer}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class AppointmentFixtureTransformer extends AbstractFixtureTransformer<Appointment> {
 
-   
+
     public boolean handles(Class aClass, String fixtureName, Fixture fixture) {
         return aClass == Appointment.class;
     }
@@ -94,4 +94,3 @@ public class AppointmentFixtureTransformer extends AbstractFixtureTransformer<Ap
         return null;
     }
 }
- 

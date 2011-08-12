@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.action;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 
 import com.openexchange.ajax.container.Response;
@@ -67,7 +66,7 @@ public class DeleteParser extends AbstractAJAXParser<CommonDeleteResponse> {
     DeleteParser() {
         super(true);
     }
-	
+
     /**
      * Default constructor with parameter failOnError
      */

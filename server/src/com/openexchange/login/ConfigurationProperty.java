@@ -106,7 +106,7 @@ public enum ConfigurationProperty {
      * This option allows to enable the IP check for /ajax/login?action=redirect requests. This request is mostly used to create a session
      * without using the OX web UI login screen. The previous behavior allowed to change the IP for this request. Configure this option to
      * false to have an IP check during this request. Additionally you can white list IP addresses from that an IP change is still allowed.
-     * This is useful if other systems in the infrastructure around OX want to create the session. 
+     * This is useful if other systems in the infrastructure around OX want to create the session.
      */
     REDIRECT_IP_CHANGE_ALLOWED("com.openexchange.ajax.login.redirect.changeIPAllowed", Boolean.TRUE.toString());
 

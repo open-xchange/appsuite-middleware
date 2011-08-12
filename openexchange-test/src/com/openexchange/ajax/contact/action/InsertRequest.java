@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.contact.action;
 
-import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 
 import org.json.JSONException;
@@ -63,26 +62,26 @@ import com.openexchange.groupware.container.Contact;
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public class InsertRequest extends AbstractContactRequest<InsertResponse> {
-	
+
 	/**
 	 * Contact to insert.
 	 */
 	Contact contactObj;
 
 	JSONObject jsonObj;
-	
+
 	final boolean withImage;
-	
+
 	String fieldContent;
 
 	final int folderID;
-	
+
 	/**
 	 * Should the parser fail on error in server response.
 	 */
 	final boolean failOnError;
-	
-	
+
+
 	/**
 	 * Default constructor.
 	 * @param contactObj contact to insert.
@@ -90,7 +89,7 @@ public class InsertRequest extends AbstractContactRequest<InsertResponse> {
 	public InsertRequest(final Contact contactObj) {
 		this(contactObj, true);
 	}
-	
+
 	/**
 	 * More detailed constructor.
 	 * @param contactObj contact to insert.
@@ -104,7 +103,7 @@ public class InsertRequest extends AbstractContactRequest<InsertResponse> {
 		this.jsonObj = null;
 		this.failOnError = failOnError;
 		this.withImage = contactObj.containsImage1() && (null != contactObj.getImage1());
-		
+
 		if (withImage) {
 		    try {
                 fieldContent = convert(contactObj).toString();
@@ -113,7 +112,7 @@ public class InsertRequest extends AbstractContactRequest<InsertResponse> {
             }
         }
 	}
-	
+
 	public InsertRequest(final String json) throws JSONException{
 		super();
 		this.contactObj = null;
@@ -122,7 +121,7 @@ public class InsertRequest extends AbstractContactRequest<InsertResponse> {
 		this.folderID = jsonObj.getInt("folder_id");
 		this.failOnError = true;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -131,14 +130,14 @@ public class InsertRequest extends AbstractContactRequest<InsertResponse> {
 			return jsonObj;
 		return convert(contactObj);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public Method getMethod() {
 		return withImage ? Method.UPLOAD : Method.PUT;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -156,7 +155,7 @@ public class InsertRequest extends AbstractContactRequest<InsertResponse> {
 			new Parameter(AJAXServlet.PARAMETER_FOLDERID, String.valueOf(folderID))
 		};
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */

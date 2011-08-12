@@ -154,7 +154,7 @@ public final class SearchAction extends AbstractTaskAction {
             while (it.hasNext()) {
                 final Task taskObj = it.next();
                 taskList.add(taskObj);
-                
+
                 lastModified = taskObj.getLastModified();
 
                 if (timestamp.getTime() < lastModified.getTime()) {

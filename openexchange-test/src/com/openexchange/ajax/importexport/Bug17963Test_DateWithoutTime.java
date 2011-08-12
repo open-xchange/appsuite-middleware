@@ -12,7 +12,7 @@ public class Bug17963Test_DateWithoutTime extends ManagedAppointmentTest{
 	}
 
 	public void testDateWithoutTime() throws Exception{
-		String ical = 
+		String ical =
 		"BEGIN:VCALENDAR\n"+
 		"VERSION:2.0\n"+
 		"BEGIN:VEVENT\n"+
@@ -23,7 +23,7 @@ public class Bug17963Test_DateWithoutTime extends ManagedAppointmentTest{
 		"DTSTAMP:20110105T174810Z\n"+
 		"SUMMARY:Team-Meeting\n"+
 		"END:VEVENT\n";
-		
+
 		ICalImportRequest request = new ICalImportRequest(folder.getObjectID(), ical);
 		ICalImportResponse response = getClient().execute(request);
 		ImportResult[] imports = response.getImports();

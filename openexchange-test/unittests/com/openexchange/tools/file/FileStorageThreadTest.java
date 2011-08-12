@@ -49,7 +49,6 @@
 
 package com.openexchange.tools.file;
 
-import com.openexchange.exception.OXException;
 import java.io.File;
 import java.io.FileInputStream;
 
@@ -132,14 +131,14 @@ public class FileStorageThreadTest extends TestCase {
         }
 
         public void run() {
-        	try {        	
+        	try {
                 final File testfile = File.createTempFile("filestorage", ".test");
                 final FileStorage fm = new LocalFileStorage(tempFile.toURI());
             	SortedSet<String> set = new TreeSet<String>();
             	while (run) {
             		for (int i = 0; i < 10; i++) {
-            			InputStream is = new FileInputStream(testfile); 		
-            			String str = fm.saveNewFile(is);            	    	
+            			InputStream is = new FileInputStream(testfile);
+            			String str = fm.saveNewFile(is);
             	    	is.close();
             	    	set.add(str);
             	    	System.out.println("Thread: " + Thread.currentThread().getName() + ", speichern: " + str);

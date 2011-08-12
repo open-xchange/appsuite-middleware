@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.ajax.folder.Create.ocl;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.Date;
@@ -74,12 +73,12 @@ import com.openexchange.server.impl.OCLPermission;
 
 /**
  * {@link Bug18558Test}
- * 
+ *
  * User A shares his calendar to User D.
  * User B shares his calendar to User D.
  * User C creates an appointment with A and B.
  * D should be able to access this appointment twice.
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Bug18558Test extends AbstractAJAXSession {
@@ -123,7 +122,7 @@ public class Bug18558Test extends AbstractAJAXSession {
                 OCLPermission.ADMIN_PERMISSION,
                 OCLPermission.ADMIN_PERMISSION,
                 OCLPermission.ADMIN_PERMISSION) });
-        
+
         CommonInsertResponse response = clientA.execute(new com.openexchange.ajax.folder.actions.UpdateRequest(API.OX_OLD, folderA));
         response.fillObject(folderA);
 
@@ -147,10 +146,10 @@ public class Bug18558Test extends AbstractAJAXSession {
                 OCLPermission.ADMIN_PERMISSION,
                 OCLPermission.ADMIN_PERMISSION,
                 OCLPermission.ADMIN_PERMISSION) });
-        
+
         response = clientB.execute(new com.openexchange.ajax.folder.actions.UpdateRequest(API.OX_OLD, folderB));
         response.fillObject(folderB);
-        
+
         appointment = new Appointment();
         appointment.setTitle("Bug18558Test" + System.currentTimeMillis());
         appointment.setStartDate(D("01.04.2011 08:00"));
@@ -189,7 +188,7 @@ public class Bug18558Test extends AbstractAJAXSession {
         assertTrue("Did not find appointment in folder of first user.", foundA);
         assertTrue("Did not find appointment in folder of second user.", foundB);
     }
-    
+
     private void checkGet(int objectId, int folderId) throws Exception {
         GetRequest getRequest = new GetRequest(folderId, objectId);
         GetResponse getResponse = clientD.execute(getRequest);

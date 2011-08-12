@@ -49,7 +49,6 @@
 
 package com.openexchange.data.conversion.ical;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
 import java.util.ArrayList;
 import java.util.Date;
@@ -98,16 +97,16 @@ public class ICalParserBugTests extends AbstractICalParserTest {
 
         assertNull(appointment.getParticipants());
     }
-    
+
 
     public void testAppShouldInterpretConfidentialAsPrivate() throws ConversionError {
         final String icalText = fixtures.veventWithSimpleProperties(D("24/02/1981 10:00"), D("24/02/1981 12:00"), "CLASS", "CONFIDENTIAL");
         final Appointment appointment = parseAppointment(icalText);
-        
+
         assertTrue("CLASS:CONFIDENTIAL should resolve to private appointments", appointment.getPrivateFlag());
     }
 
-    
+
 
     // Bug 11958 - a timezone element in a file should be relevant for all data, even if listed afterwards
     public void testTimezoneShouldBeRelevantForAllData() throws ConversionError{
@@ -116,14 +115,14 @@ public class ICalParserBugTests extends AbstractICalParserTest {
         final String icalText2 = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\nBEGIN:VEVENT\nCREATED:20080216T152600Z\nLAST-MODIFIED:20080216T152600Z\nDTSTAMP:20080216T152600Z\nUID:3a289f91-f83a-4614-83c6-660c7740abd8\nSUMMARY:New York, 2008-08-31 09:00 - 10:00 (EST)\nDTSTART;TZID=/mozilla.org/20050126_1/America/New_York:20080831T090000\nDTEND;TZID=/mozilla.org/20050126_1/America/New_York:20080831T100000\nEND:VEVENT\n"+ timezone + "END:VCALENDAR\n";
         final Appointment appointmentThatTroublesUs = parseAppointment(icalText1);
         final Appointment appointmentAsExpected = parseAppointment(icalText2);
-        assertEquals("Start dates should be equal, independent of the placement of the timezone information", 
-                appointmentAsExpected.getStartDate(), 
+        assertEquals("Start dates should be equal, independent of the placement of the timezone information",
+                appointmentAsExpected.getStartDate(),
                 appointmentThatTroublesUs.getStartDate());
-        assertEquals("End dates should be equal, independent of the placement of the timezone information", 
-                appointmentAsExpected.getEndDate(), 
+        assertEquals("End dates should be equal, independent of the placement of the timezone information",
+                appointmentAsExpected.getEndDate(),
                 appointmentThatTroublesUs.getEndDate());
     }
-    
+
     /* Bug 7470 - part III: Multiple line arguments are supposed to be 'unfolded'
      * according to RFC 2445 - iCal4J does not seem to do this. This test is meant to confirm
      * the wrapping parser does handle the case.
@@ -135,7 +134,7 @@ public class ICalParserBugTests extends AbstractICalParserTest {
         final Appointment appointment = parseAppointment(icalText);
         assertEquals("Unfolded summary does not match transformed title", unfoldedSummary, appointment.getTitle());
     }
-    
+
     // Bug 16110
     public void testBug16110() throws Exception{
             String ical = "BEGIN:VCALENDAR\n"
@@ -246,7 +245,7 @@ public class ICalParserBugTests extends AbstractICalParserTest {
             assertTrue("Should contain CHoeger", choegerFound);
             assertTrue("Should contain Holger", holgerFound);
     }
-    
+
     public void testBug16237() throws Exception {
         String ical = "BEGIN:VCALENDAR\n"
                     + "METHOD:REQUEST\n"
@@ -314,7 +313,7 @@ public class ICalParserBugTests extends AbstractICalParserTest {
 
         parseAppointment(ical);
     }
-    
+
     public void testBug16613() throws Exception{
         String ical = "BEGIN:VCALENDAR\n"
         +"VERSION:2.0\n"
@@ -400,7 +399,7 @@ public class ICalParserBugTests extends AbstractICalParserTest {
         parseAppointment(ical);
         assertTrue("Should not fail ith parsing error before this", true);
     }
-    
+
     //this is bug16895
     public void testDoesNotLikeEmailElementFromZimbra() throws Exception{
     	String ical = "BEGIN:VCALENDAR\n"
@@ -450,7 +449,7 @@ public class ICalParserBugTests extends AbstractICalParserTest {
         parseAppointment(ical);
         assertTrue("Should not fail with parsing error before this", true);
     }
-    
+
     //bug 17562
     public void testShouldNotGetConfusedByDifferentlyCapitalizedAddresses() throws Exception{
     	User user = users.getUser(1);
@@ -458,10 +457,10 @@ public class ICalParserBugTests extends AbstractICalParserTest {
     	String localPart = parts[0];
     	String capitalizedLocalPart = localPart.toUpperCase();
     	String differentMail = capitalizedLocalPart + "@" + parts[1];
-    	
+
     	assertFalse("Precondition: New address should not match old address", differentMail.equals(user.getMail()));
     	assertTrue("Precondition: New address should match old address if ignoring capitalization", differentMail.equalsIgnoreCase(user.getMail()));
-    	
+
     	String ical = "BEGIN:VCALENDAR\n"
 		+"PRODID:Open-Xchange\n"
 		+"VERSION:2.0\n"
@@ -486,8 +485,8 @@ public class ICalParserBugTests extends AbstractICalParserTest {
     	Participant[] participants = appointment.getParticipants();
     	assertEquals("Should find one participant", 1, participants.length);
     	Participant participant = participants[0];
-    	assertEquals("Should find a user, not an external participant" , Participant.USER, participant.getType()); 
+    	assertEquals("Should find a user, not an external participant" , Participant.USER, participant.getType());
     }
-    
+
 
 }

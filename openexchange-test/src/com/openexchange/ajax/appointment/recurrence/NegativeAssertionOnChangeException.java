@@ -70,13 +70,13 @@ public class NegativeAssertionOnChangeException extends AbstractNegativeAssertio
         Appointment copy = startWith.clone();
         if(! startWith.containsObjectID())
             manager.insert(copy);
-        
+
         Appointment update = new Appointment();
         update.setParentFolderID(copy.getParentFolderID());
         update.setObjectID(copy.getObjectID());
         update.setLastModified(copy.getLastModified());
         changes.update(update);
-        
+
         manager.update(update);
         assertTrue("Expected error " + expectedError +" but got nothing", manager.hasLastException());
         OXException actual = (OXException) manager.getLastException();

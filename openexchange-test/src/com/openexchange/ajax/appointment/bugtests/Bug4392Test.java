@@ -16,7 +16,7 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 
 public class Bug4392Test extends AppointmentTest {
-	
+
 	private final static int[] _appointmentFields = {
 		DataObject.OBJECT_ID,
 		DataObject.CREATED_BY,
@@ -41,16 +41,16 @@ public class Bug4392Test extends AppointmentTest {
 	};
 
 	private static final Log LOG = LogFactory.getLog(Bug4392Test.class);
-	
+
 	public Bug4392Test(final String name) {
 		super(name);
 	}
-	
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
-	
+
 	/**
 	 * This test case check the until date of recurrence appointments
 	 */
@@ -63,10 +63,10 @@ public class Bug4392Test extends AppointmentTest {
 		calendar.set(Calendar.MINUTE, 0);
 		calendar.set(Calendar.SECOND, 0);
 		calendar.set(Calendar.MILLISECOND, 0);
-		
+
 		calendar.add(Calendar.DAY_OF_MONTH, occurrences-1);
 		final Date until = calendar.getTime();
-		
+
 		final Appointment appointmentObj = createAppointmentObject("testBug4392");
 		appointmentObj.setRecurrenceType(Appointment.DAILY);
 		appointmentObj.setInterval(1);
@@ -75,7 +75,7 @@ public class Bug4392Test extends AppointmentTest {
 		appointmentObj.setIgnoreConflicts(true);
 		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
 		appointmentObj.setObjectID(objectId);
-		
+
 		final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, getHostName(), getSessionId());
 		try {
 			compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());

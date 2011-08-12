@@ -53,7 +53,7 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractSearchParser;
 
 /**
- * 
+ *
  * {@link MailSearchParser}
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>

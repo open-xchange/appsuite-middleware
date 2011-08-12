@@ -53,7 +53,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class SmokeTestSuite {

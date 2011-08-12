@@ -7,7 +7,7 @@ import com.openexchange.tx.UndoableAction;
 public class DeleteDocumentActionTest extends AbstractInfostoreActionTest {
 
 	CreateDocumentAction create = new CreateDocumentAction();
-	
+
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
@@ -17,13 +17,13 @@ public class DeleteDocumentActionTest extends AbstractInfostoreActionTest {
 		create.setQueryCatalog(getQueryCatalog());
 		create.perform();
 	}
-	
+
 	@Override
 	public void tearDown() throws Exception {
 		create.undo();
 		super.tearDown();
 	}
-	
+
 	@Override
 	protected UndoableAction getAction() throws Exception {
 		final DeleteDocumentAction deleteAction = new DeleteDocumentAction();
@@ -48,7 +48,7 @@ public class DeleteDocumentActionTest extends AbstractInfostoreActionTest {
 			assertResult("SELECT 1 FROM infostore WHERE cid = ? and id = ?", getContext().getContextId(), doc.getId());
 		}
 	}
-	
+
 	// Bug 9061
 	public void testPossibleToTryMoreThanOnce() throws Exception {
 		final UndoableAction action = getAction();

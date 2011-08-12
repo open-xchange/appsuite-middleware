@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
 import com.openexchange.groupware.calendar.CalendarConfig;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -61,22 +60,22 @@ import com.openexchange.groupware.calendar.ConfigHook;
 public class UserStory1906Test extends CalendarSqlTest {
 
     private CalendarDataObject appointment;
-    
+
     private boolean parameterValue;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        
+
         parameterValue = CalendarConfig.getUndefinedStatusConflict();
-        
+
         CalendarDataObject app1 = appointments.buildAppointmentWithUserParticipants(user);
         app1.setStartDate(D("01.07.2020 08:00"));
         app1.setEndDate(D("01.07.2020 09:00"));
         app1.setIgnoreConflicts(false);
         appointments.save(app1);
         clean.add(app1);
-        
+
         appointments.switchUser(secondUser);
         appointment = appointments.buildAppointmentWithUserParticipants(user, secondUser);
         appointment.setStartDate(D("01.07.2020 08:00"));
@@ -90,7 +89,7 @@ public class UserStory1906Test extends CalendarSqlTest {
         assertNotNull("Expected conflicts", conflicts);
         assertTrue("Expected conflicts", conflicts.length > 0);
     }
-    
+
     public void testFalse() throws Exception {
         ConfigHook.setUndefinedStatusConflict(false);
         CalendarDataObject[] conflicts = appointments.save(appointment);
@@ -100,11 +99,11 @@ public class UserStory1906Test extends CalendarSqlTest {
     @Override
     public void tearDown() throws Exception {
         ConfigHook.setUndefinedStatusConflict(parameterValue);
-        
+
         if (appointment.getObjectID() > 0) {
             clean.add(appointment);
         }
-        
+
         super.tearDown();
     }
 }

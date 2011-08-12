@@ -89,8 +89,8 @@ public final class ConfigTools extends Assert {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(ConfigTools.class); 
-    
+    private static final Log LOG = LogFactory.getLog(ConfigTools.class);
+
     /**
      * URL of the AJAX config interface.
      */
@@ -102,7 +102,7 @@ public final class ConfigTools extends Assert {
     private ConfigTools() {
         super();
     }
-    
+
     /**
      * Reads a configuration setting. A tree of configuration settings can also
      * be read. This tree will be returned as a string in JSON.
@@ -184,7 +184,7 @@ public final class ConfigTools extends Assert {
      * @throws SAXException if parsing of the response fails.
      * @throws IOException if getting the response fails.
      * @throws JSONException if parsing the response fails.
-     * @throws OXException 
+     * @throws OXException
      */
     public static TimeZone getTimeZone(final WebConversation conversation,
         final String hostName, final String sessionId) throws IOException,
@@ -195,7 +195,7 @@ public final class ConfigTools extends Assert {
             .TimeZone)).getString();
         return TimeZone.getTimeZone(value);
     }
-    
+
     /**
      * Reads the mail filter value.
      * @param conversation web conversation.
@@ -205,7 +205,7 @@ public final class ConfigTools extends Assert {
      * @throws SAXException if parsing of the response fails.
      * @throws IOException if getting the response fails.
      * @throws JSONException if parsing the response fails.
-     * @throws OXException 
+     * @throws OXException
      */
     public static boolean getMailFilterValue(final WebConversation conversation,
         final String hostName, final String sessionId) throws IOException,

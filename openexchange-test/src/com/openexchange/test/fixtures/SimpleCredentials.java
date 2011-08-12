@@ -135,7 +135,7 @@ public class SimpleCredentials implements Cloneable {
         }
         return userId;
     }
-    
+
     public int getContactId() {
         if(0 == contactId) {
             contactId = getConfig().getInt(Tree.Identifier);
@@ -227,11 +227,11 @@ public class SimpleCredentials implements Cloneable {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) { 
-        	return true; 
+        if (this == o) {
+        	return true;
         }
-        if (o == null || getClass() != o.getClass()) { 
-        	return false; 
+        if (o == null || getClass() != o.getClass()) {
+        	return false;
         }
         final SimpleCredentials that = (SimpleCredentials) o;
         return (null != this.login ? this.login.equals(that.login) : null == that.login) &&

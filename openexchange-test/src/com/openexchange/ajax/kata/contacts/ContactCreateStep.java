@@ -48,7 +48,6 @@
 
 package com.openexchange.ajax.kata.contacts;
 
-import com.openexchange.exception.OXException;
 import java.util.Date;
 import com.openexchange.ajax.contact.action.InsertRequest;
 import com.openexchange.ajax.contact.action.InsertResponse;
@@ -59,7 +58,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.test.ContactTestManager;
 
 /**
- * 
+ *
  * {@link ContactCreateStep}
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -70,7 +69,7 @@ public class ContactCreateStep extends AbstractStep implements IdentitySource<Co
     private Contact entry;
     private boolean inserted;
     private ContactTestManager manager;
-    
+
     public ContactCreateStep(Contact entry, String name, String expectedError) {
         super(name, expectedError);
         this.entry = entry;
@@ -87,29 +86,29 @@ public class ContactCreateStep extends AbstractStep implements IdentitySource<Co
     public void perform(AJAXClient client) throws Exception {
         this.client = client;
         this.manager = new ContactTestManager(client);
-        
+
         InsertRequest insertRequest = new InsertRequest(entry, false);
         InsertResponse insertResponse = execute(insertRequest);
         insertResponse.fillObject(entry);
         inserted = !insertResponse.hasError();
-        checkError(insertResponse);        
+        checkError(insertResponse);
     }
 
     public void assumeIdentity(Contact contact) {
         contact.setObjectID( entry.getObjectID() );
         contact.setParentFolderID( entry.getParentFolderID());
-        contact.setLastModified( entry.getLastModified());        
+        contact.setLastModified( entry.getLastModified());
     }
 
     public void rememberIdentityValues(Contact contact) {
-        contact.setLastModified( entry.getLastModified());  
+        contact.setLastModified( entry.getLastModified());
         contact.setParentFolderID(entry.getParentFolderID());
     }
 
     public void forgetIdentity(Contact entry) {
         inserted = false;
     }
-    
+
     public Class<Contact> getType() {
         return Contact.class;
     }

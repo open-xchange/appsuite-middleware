@@ -58,7 +58,7 @@ import com.openexchange.groupware.container.Expectations;
 
 /**
  * Bug 15645
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class UsmFailureDuringRecurrenceTest extends ManagedAppointmentTest {
@@ -69,7 +69,7 @@ public class UsmFailureDuringRecurrenceTest extends ManagedAppointmentTest {
         super(name);
     }
 
-    
+
   @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -86,9 +86,9 @@ public class UsmFailureDuringRecurrenceTest extends ManagedAppointmentTest {
         changes.put(Appointment.DAY_IN_MONTH, 23);
         changes.put(Appointment.MONTH, 3);
         changes.put(Appointment.UNTIL,D("31/12/2025 00:00"));
-        failTest(changes, "Incomplete recurring information: Missing interval"); 
+        failTest(changes, "Incomplete recurring information: Missing interval");
     }
-    
+
   //I think it should be an exception like "Bullshit, you cannot make a change exception a series"
     public void testShouldFailWhenTryingToMakeAChangeExceptionASeriesButDoesNot() throws Exception {
         Changes changes = new Changes();
@@ -98,17 +98,17 @@ public class UsmFailureDuringRecurrenceTest extends ManagedAppointmentTest {
         changes.put(Appointment.MONTH, 3);
         changes.put(Appointment.UNTIL,D("31/12/2025 00:00"));
         changes.put(Appointment.INTERVAL, 1);
-        
+
         Expectations expectationsForSeries = new Expectations();
         expectationsForSeries.put(Appointment.RECURRENCE_TYPE, Appointment.YEARLY);
-        
+
         Expectations expectationsForException= new Expectations();
         expectationsForException.put(Appointment.RECURRENCE_POSITION, 1);
         expectationsForException.put(Appointment.RECURRENCE_TYPE, 0);
-        
+
         succeedTest(changes, expectationsForSeries , expectationsForException);
     }
-    
+
     public void testFailOnAChangeExceptionWithoutInterval() throws Exception {
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_POSITION, 1);
@@ -120,7 +120,7 @@ public class UsmFailureDuringRecurrenceTest extends ManagedAppointmentTest {
         expectationsForException.put(Appointment.MONTH, null);
         expectationsForException.put(Appointment.UNTIL,null);
         expectationsForException.put(Appointment.INTERVAL, null);
-        
+
         failTest(changes, "Incomplete recurring information: Missing interval.");
     }
 
@@ -140,25 +140,25 @@ public class UsmFailureDuringRecurrenceTest extends ManagedAppointmentTest {
         expectationsForException.put(Appointment.INTERVAL, null);
         expectationsForException.put(Appointment.MONTH, null);
         expectationsForException.put(Appointment.DAY_IN_MONTH, null);
-        
+
         succeedTest(changes, null, expectationsForException);
     }
-    
+
     public void testShouldFailWhenTryingToDeleteExceptionOnNormalAppointment() throws Exception {
         app = new Appointment();
         app.setParentFolderID(folder.getObjectID());
         app.setStartDate( D("31.12.2025 00:00") );
         app.setEndDate( D("31.12.2025 01:00") );
-        
+
         calendarManager.insert(app);
         app.setRecurrencePosition(1);
         calendarManager.delete(app, false);
-        assertTrue("Should fail", calendarManager.hasLastException()); 
-        /* won't go further because exception is not wrapped nicely, 
+        assertTrue("Should fail", calendarManager.hasLastException());
+        /* won't go further because exception is not wrapped nicely,
          * so this is just a boring JSON exception on the client side.
          */
     }
-    
+
 
     private void succeedTest(Changes changes, Expectations expectationsForSeries, Expectations expectationsForException) throws OXException {
         calendarManager.insert(app);
@@ -168,20 +168,20 @@ public class UsmFailureDuringRecurrenceTest extends ManagedAppointmentTest {
         update.setParentFolderID( app.getParentFolderID() );
         update.setObjectID( app.getObjectID() );
         update.setLastModified(app.getLastModified());
-        changes.update(update);        
+        changes.update(update);
         calendarManager.update(update);
-        
+
         if(update.containsRecurrencePosition())
             assertFalse("Appointment and change exception should have different IDs", app.getObjectID() == update.getObjectID() );
-        
+
         assertFalse("Update was expected to work", calendarManager.hasLastException());
-        
+
         if(expectationsForSeries != null){
             Appointment actualSeries = calendarManager.get(app);
             assertFalse("Getting the series was expected to work", calendarManager.hasLastException());
             expectationsForSeries.verify("[series]", actualSeries);
         }
-        
+
         if(expectationsForException != null){
             Appointment actualChangeException = calendarManager.get(update);
             assertFalse("Getting the update was expected to work", calendarManager.hasLastException());
@@ -191,17 +191,17 @@ public class UsmFailureDuringRecurrenceTest extends ManagedAppointmentTest {
 
     private void failTest(Changes changes, String errorCode){
         calendarManager.insert(app);
-        
+
         Appointment update = new Appointment();
         update.setParentFolderID( app.getParentFolderID() );
         update.setObjectID( app.getObjectID() );
         update.setLastModified(app.getLastModified());
-        changes.update(update);        
+        changes.update(update);
         calendarManager.update(update);
-        
+
         assertTrue("Was expected to fail", calendarManager.hasLastException());
         Exception exception = calendarManager.getLastException();
         assertTrue("Expected message was "+errorCode+", but got: " + exception.getMessage(), exception.getMessage().contains(errorCode));
     }
-    
+
 }

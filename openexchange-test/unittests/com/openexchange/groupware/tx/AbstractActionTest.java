@@ -15,5 +15,5 @@ public abstract class AbstractActionTest extends TestCase {
 	protected abstract void verifyPerformed() throws Exception;
 	protected abstract void verifyUndone() throws Exception;
 	protected abstract UndoableAction getAction() throws Exception;
-	
+
 }

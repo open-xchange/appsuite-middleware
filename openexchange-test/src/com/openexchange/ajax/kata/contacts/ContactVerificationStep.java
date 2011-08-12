@@ -76,7 +76,7 @@ import com.openexchange.test.ContactTestManager;
 
 /**
  * {@link ContactVerificationStep}
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class ContactVerificationStep extends NeedExistingStep<Contact> {
@@ -89,7 +89,7 @@ public class ContactVerificationStep extends NeedExistingStep<Contact> {
 
     /**
      * Initializes a new {@link TaskVerificationStep}.
-     * 
+     *
      * @param name
      * @param expectedError
      */
@@ -107,11 +107,11 @@ public class ContactVerificationStep extends NeedExistingStep<Contact> {
             expectedFolderId = entry.getParentFolderID();
         }
     }
-    
+
     public void perform(AJAXClient client) throws Exception {
         this.client = client;
         this.manager = new ContactTestManager(client);
-        assumeIdentity(entry); 
+        assumeIdentity(entry);
         checkWithReadMethods(entry);
     }
 
@@ -163,7 +163,7 @@ public class ContactVerificationStep extends NeedExistingStep<Contact> {
         Object[][] rows = getViaSearch(contact);
         checkInList(contact, rows, Contact.ALL_COLUMNS, "search-");
     }
-    
+
 
     private void checkInList(Contact contact, Object[][] rows, int[] columns, String typeOfAction) throws OXException, IOException, SAXException, JSONException {
         int idPos = findIDIndex(columns);
@@ -215,7 +215,7 @@ public class ContactVerificationStep extends NeedExistingStep<Contact> {
             }
         }
     }
-    
+
     private void compare(Contact contact, Object[] row, int[] columns) throws OXException, IOException, SAXException, JSONException {
         assertEquals("Result should contain same number of elements as the request", Integer.valueOf(row.length), Integer.valueOf(columns.length));
         for (int i = 0; i < columns.length; i++) {
@@ -251,7 +251,7 @@ public class ContactVerificationStep extends NeedExistingStep<Contact> {
         }
         fail("Object not found in response. " + name);
     }
-    
+
     private Object transform(int column, Object actual) throws OXException, IOException, SAXException, JSONException {
 
         return actual;

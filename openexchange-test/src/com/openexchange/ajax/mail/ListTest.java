@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.DeleteRequest;
@@ -59,7 +58,7 @@ import com.openexchange.mail.MailListField;
 
 /**
  * {@link ListTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ListTest extends AbstractMailTest {
@@ -68,7 +67,7 @@ public final class ListTest extends AbstractMailTest {
 
     /**
      * Default constructor.
-     * 
+     *
      * @param name Name of this test.
      */
     public ListTest(final String name) {
@@ -77,7 +76,7 @@ public final class ListTest extends AbstractMailTest {
 
     /**
      * Tests the <code>action=list</code> request on INBOX folder
-     * 
+     *
      * @throws Throwable
      */
     public void testList() throws Throwable {

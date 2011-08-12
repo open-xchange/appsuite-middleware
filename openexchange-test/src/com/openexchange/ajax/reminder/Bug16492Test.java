@@ -73,8 +73,8 @@ import com.openexchange.groupware.reminder.ReminderObject;
  * This test checks the correctness of reminders that are set to appointment series while the series is going to be created.
  * The series starts in the past and ends in the future. Another series even ends in the past.
  * If a series has occurrences in the future a reminder should be set for the next occurring appointment.
- * If a series even ends in the past it should not be possible to set an reminder. 
- * 
+ * If a series even ends in the past it should not be possible to set an reminder.
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class Bug16492Test extends AbstractAJAXSession {
@@ -97,8 +97,8 @@ public class Bug16492Test extends AbstractAJAXSession {
         appointment = createAppointment();
         pastAppointment = createSeriesInThePast();
     }
-    
-    public void testReminder() throws Exception {        
+
+    public void testReminder() throws Exception {
         // Request the reminder
         Calendar cal = (Calendar) calendar.clone();
         int diff = 24 - cal.get(Calendar.HOUR_OF_DAY);
@@ -106,13 +106,13 @@ public class Bug16492Test extends AbstractAJAXSession {
         RangeRequest rangeReq = new RangeRequest(cal.getTime());
         RangeResponse rangeResp = client.execute(rangeReq);
         ReminderObject reminder = ReminderTools.searchByTarget(rangeResp.getReminder(timezone), appointment.getObjectID());
-        
+
         assertNotNull("No reminder was found.", reminder);
-        
+
         Calendar checkCal = (Calendar) calendar.clone();
-        checkCal.setTime(reminder.getDate());        
+        checkCal.setTime(reminder.getDate());
         assertEquals("Reminder is set to the wrong appointment.", cal.get(Calendar.YEAR), calendar.get(Calendar.YEAR));
-        
+
         // Request reminder for the next occurrence
         cal.add(Calendar.YEAR, 1);
         com.openexchange.ajax.reminder.actions.DeleteRequest delReminderReq = new com.openexchange.ajax.reminder.actions.DeleteRequest(reminder, false);
@@ -120,15 +120,15 @@ public class Bug16492Test extends AbstractAJAXSession {
         rangeReq = new RangeRequest(cal.getTime());
         rangeResp = client.execute(rangeReq);
         reminder = ReminderTools.searchByTarget(rangeResp.getReminder(timezone), appointment.getObjectID());
-        
-        assertNotNull("No reminder was found.", reminder);        
+
+        assertNotNull("No reminder was found.", reminder);
     }
-    
-    public void testAlarmForReminderInThePast() throws Exception {        
+
+    public void testAlarmForReminderInThePast() throws Exception {
         GetRequest getApp = new GetRequest(pastAppointment);
         GetResponse getAppResp = client.execute(getApp);
         Appointment app = getAppResp.getAppointment(timezone);
-        
+
         assertFalse("Series in the past contains alarm.", app.containsAlarm());
     }
 
@@ -140,7 +140,7 @@ public class Bug16492Test extends AbstractAJAXSession {
         client.execute(new DeleteRequest(toDelete, false));
         super.tearDown();
     }
-    
+
     private Appointment createSeriesInThePast() throws Exception {
         // This yearly series starts 5 years ago.
         // The last occurrence was 1 year ago.
@@ -153,7 +153,7 @@ public class Bug16492Test extends AbstractAJAXSession {
         appointment.setStartDate(cal.getTime());
         cal.add(Calendar.HOUR, 1);
         appointment.setEndDate(cal.getTime());
-        
+
         appointment.setAlarm(15);
         appointment.setShownAs(Appointment.ABSENT);
         appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
@@ -165,7 +165,7 @@ public class Bug16492Test extends AbstractAJAXSession {
         appointment.setRecurrenceType(Appointment.YEARLY);
         appointment.setMonth(cal.get(Calendar.MONTH));
         appointment.setDayInMonth(cal.get(Calendar.DAY_OF_MONTH));
-        
+
         appointment.setInterval(1);
         appointment.setOccurrence(4);
 
@@ -178,7 +178,7 @@ public class Bug16492Test extends AbstractAJAXSession {
 
         return appointment;
     }
-    
+
     private Appointment createAppointment() throws OXException, IOException, SAXException, JSONException {
         // This yearly series starts 5 years ago.
         // The next occurrence will be in 2 hours and will last for one hour.
@@ -204,7 +204,7 @@ public class Bug16492Test extends AbstractAJAXSession {
         appointment.setRecurrenceType(Appointment.YEARLY);
         appointment.setMonth(cal.get(Calendar.MONTH));
         appointment.setDayInMonth(cal.get(Calendar.DAY_OF_MONTH));
-        
+
         appointment.setInterval(1);
         appointment.setOccurrence(25);
 
@@ -217,7 +217,7 @@ public class Bug16492Test extends AbstractAJAXSession {
 
         return appointment;
     }
-    
-    
-    
+
+
+
 }

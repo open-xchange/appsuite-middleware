@@ -22,7 +22,7 @@ public class ContactSearchTests extends AbstractManagedContactTest {
 		Contact c2 = generateContact();
 		c2.setSurName(BOB_LASTNAME);
 		c2.setDisplayName(BOB_DISPLAYNAME);
-		
+
 		manager.newAction(c1,c2);
 	}
 
@@ -31,7 +31,7 @@ public class ContactSearchTests extends AbstractManagedContactTest {
 		super.tearDown();
 	}
 
-	
+
 	public void testSearchByInitial(){
 		Contact[] results = manager.searchFirstletterAction("B", folderID);
 		assertEquals(1, results.length);
@@ -43,16 +43,16 @@ public class ContactSearchTests extends AbstractManagedContactTest {
 		Contact[] results = manager.searchAction("*", folderID);
 		assertEquals("Should find two contacts", 2, results.length);
 	}
-	
+
 	public void testSearchWorksOnlyOnDisplayNameByDefault(){
 		Contact[] results = manager.searchAction("*" + BOB_LASTNAME + "*", folderID);
 		assertEquals("Should find no contact when searching for last name", 0, results.length);
-		
+
 		results = manager.searchAction("*" + BOB_DISPLAYNAME+ "*", folderID);
 		assertEquals("Should find one contact when searching for display_name", 1, results.length);
 	}
 
-	
+
 	public void testGuiLikeSearch(){
 		ContactSearchObject search = new ContactSearchObject();
 		search.setFolder(folderID);

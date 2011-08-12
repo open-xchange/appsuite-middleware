@@ -53,7 +53,7 @@ import java.io.ByteArrayOutputStream;
 
 /**
  * {@link HexUtils}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HexUtils {
@@ -84,7 +84,7 @@ public final class HexUtils {
 
     /**
      * Convert a String of hexadecimal digits into the corresponding byte array by encoding each two hexadecimal digits as a byte.
-     * 
+     *
      * @param digits Hexadecimal digits representation
      * @exception IllegalArgumentException if an invalid hexadecimal digit is found, or the input string contains an odd number of
      *                hexadecimal digits
@@ -125,7 +125,7 @@ public final class HexUtils {
 
     /**
      * Convert a byte array into a printable format containing a String of hexadecimal digit characters (two per byte).
-     * 
+     *
      * @param bytes Byte array representation
      */
     public static String convert(final byte bytes[]) {
@@ -141,7 +141,7 @@ public final class HexUtils {
 
     /**
      * Convert 4 hex digits to an int, and return the number of converted bytes.
-     * 
+     *
      * @param hex Byte array containing exactly four hexadecimal digits
      * @exception IllegalArgumentException if an invalid hexadecimal digit is included
      */
@@ -178,7 +178,7 @@ public final class HexUtils {
 
     /**
      * [Private] Convert the specified value (0 .. 15) to the corresponding hexadecimal digit.
-     * 
+     *
      * @param value Value to be converted
      */
     private static char convertDigit(int value) {

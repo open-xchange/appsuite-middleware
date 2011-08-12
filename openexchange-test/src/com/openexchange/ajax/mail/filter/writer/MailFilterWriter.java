@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.filter.writer;
 
-import com.openexchange.exception.OXException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
@@ -68,7 +67,7 @@ import com.openexchange.ajax.writer.DataWriter;
 
 /**
  * MailFilterWriter
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 
@@ -92,7 +91,7 @@ public class MailFilterWriter extends DataWriter {
 		if (flagsArray != null) {
 			jsonObj.put(RuleFields.FLAGS, flagsArray);
 		}
-		
+
 		final JSONArray actionCommandObj = getActionCommandsAsJSON(rule.getActioncmds());
 		if (actionCommandObj != null) {
 			jsonObj.put(RuleFields.ACTIONCMDS, actionCommandObj);
@@ -103,13 +102,13 @@ public class MailFilterWriter extends DataWriter {
 			jsonObj.put(RuleFields.TEST, testObj);
 		}
 	}
-	
+
 	public void writeMailFilterAsArray(final Rule rule, final JSONArray jsonArray, final int[] cols) throws JSONException {
 		for (int a = 0; a < cols.length; a++) {
 			write(cols[a], rule, jsonArray);
 		}
 	}
-	
+
 	public void write(final int field, final Rule rule, final JSONArray jsonArray) throws JSONException {
 		switch (field) {
 			case Rule.ID:
@@ -161,7 +160,7 @@ public class MailFilterWriter extends DataWriter {
 			}
 
 			return jsonArray;
-		} 
+		}
 		return null;
 	}
 
@@ -177,10 +176,10 @@ public class MailFilterWriter extends DataWriter {
 				final JSONObject jsonCommandObj = actionWriter.writeAction(name, abstractAction);
 				jsonArray.put(jsonCommandObj);
 			}
-			
+
 			return jsonArray;
 		}
-		
+
 		return null;
 	}
 

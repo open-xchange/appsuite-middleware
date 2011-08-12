@@ -51,7 +51,7 @@ import com.openexchange.webdav.xml.XmlServlet;
 
 /**
  * {@link ResourceGroupParser} - The WebDAV/XML resource group parser.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 
@@ -66,7 +66,7 @@ public class ResourceGroupParser extends DataParser {
 
     /**
      * Parses specified resource group element into given resource group.
-     * 
+     *
      * @param resourceGroup The resource group to fill
      * @param eProp The resource group element to parse
      */
@@ -78,7 +78,7 @@ public class ResourceGroupParser extends DataParser {
 
     /**
      * Parses specified resource group members element into given resource group.
-     * 
+     *
      * @param resourceGroup The resource group to fill
      * @param eMembers The resource group members element to parse
      */

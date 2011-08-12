@@ -74,15 +74,15 @@ import com.openexchange.groupware.container.Appointment;
 
 public class Bug12212Test extends AbstractAJAXSession {
 	final String bugname = "Test for bug 12212";
-	
+
 	public Bug12212Test(final String name) {
 		super(name);
 	}
-	
+
 	public Appointment createDailyRecurringAppointment(final TimeZone timezone, final int folderId){
 		final Calendar calendar = TimeTools.createCalendar(timezone);
 		final Appointment series = new Appointment();
-		
+
 		series.setTitle(bugname);
 		series.setParentFolderID(folderId);
 		series.setIgnoreConflicts(true);
@@ -95,13 +95,13 @@ public class Bug12212Test extends AbstractAJAXSession {
 		series.setOccurrence(5);
 		return series;
 	}
-	
+
 	public void shiftAppointmentDateOneHour(final Appointment appointment, final TimeZone tz){
 		final Calendar calendar = TimeTools.createCalendar(tz);
 		calendar.setTime(appointment.getStartDate());
 		calendar.add(Calendar.HOUR, 1);
 		appointment.setStartDate(calendar.getTime());
-		
+
 		calendar.setTime(appointment.getEndDate());
 		calendar.add(Calendar.HOUR, 1);
 		appointment.setEndDate(calendar.getTime());
@@ -114,7 +114,7 @@ public class Bug12212Test extends AbstractAJAXSession {
 
 	    //create appointment
 		final Appointment appointmentSeries = createDailyRecurringAppointment(tz, folderId);
-	    
+
 		{//send appointment
 			final InsertRequest request = new InsertRequest(appointmentSeries, tz);
         	final CommonInsertResponse response = client.execute(request);
@@ -130,7 +130,7 @@ public class Bug12212Test extends AbstractAJAXSession {
 				final GetResponse response = client.execute(request);
 				occurrence = response.getAppointment(tz);
 			}
-	        
+
 			//make an exception out of the occurrence
 	        Appointment exception = new Appointment();
 	        exception.setObjectID(occurrence.getObjectID());
@@ -158,7 +158,7 @@ public class Bug12212Test extends AbstractAJAXSession {
 			}
 			//move it again
 			shiftAppointmentDateOneHour(exception, tz);
-			
+
 			{//send exception again
 				exception.setIgnoreConflicts(true);
 				final UpdateRequest request = new UpdateRequest(exception, tz);
@@ -166,7 +166,7 @@ public class Bug12212Test extends AbstractAJAXSession {
 				exceptionId = response.getId();
 				appointmentSeries.setLastModified(response.getTimestamp());
 			}
-	
+
 			{//assert no duplicate exists
 				final AllRequest request = new AllRequest(folderId, new int[] { Appointment.TITLE , Appointment.START_DATE, Appointment.END_DATE},
 						exception.getStartDate(), exception.getEndDate(),

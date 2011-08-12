@@ -114,13 +114,13 @@ public class TestConfig {
     public void setThirdUser(final String thirdUser) {
         this.thirdUser = thirdUser;
     }
-    
-    
+
+
     public String getFourthUser() {
         return fourthUser;
     }
 
-    
+
     public void setFourthUser(final String fourthUser) {
         this.fourthUser = fourthUser;
     }

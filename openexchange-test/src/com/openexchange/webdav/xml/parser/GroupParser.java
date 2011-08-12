@@ -52,7 +52,7 @@ import com.openexchange.webdav.xml.fields.DataFields;
 
 /**
  * {@link GroupParser} - The WebDAV/XML group parser.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 public class GroupParser extends DataParser {
@@ -66,7 +66,7 @@ public class GroupParser extends DataParser {
 
     /**
      * Parses specified group element into given group.
-     * 
+     *
      * @param group The group to fill
      * @param eProp The group element to parse
      */
@@ -80,7 +80,7 @@ public class GroupParser extends DataParser {
 
     /**
      * Parses specified group members element into given group.
-     * 
+     *
      * @param group The group to fill
      * @param eMembers The group members element to parse
      */

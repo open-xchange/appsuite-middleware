@@ -38,7 +38,7 @@ public class Bug12495Test extends AbstractAJAXSession {
 	private TimeZone myLocalTimeZone = null;
 	private int privateFolderOfUser1;
 	private int privateFolderOfUser2;
-	
+
 	public Bug12495Test(String name) {
 		super(name);
 	}
@@ -56,7 +56,7 @@ public class Bug12495Test extends AbstractAJAXSession {
 		appointment.setIgnoreConflicts(true);
 		return appointment;
 	}
-	
+
 	public Appointment makeAppointmentRecurrDaily(Appointment appointment, int numberOfTimes){
 		appointment.setRecurrenceType(Appointment.DAILY);
 		appointment.setInterval(1);
@@ -64,11 +64,11 @@ public class Bug12495Test extends AbstractAJAXSession {
 		appointment.setDays(127);
 		return appointment;
 	}
-	
+
 	/**
 	 * Assuming that recurrence_date_position is included in an AllRequest,
 	 * this test checks whether it is included in a GetRequest and a ListRequest.
-	 * 
+	 *
 	 */
 	@Test public void testShouldNotLoseRecurrenceDatePositionWhenOtherUserDeletesOneOccurrence() throws OXException, IOException, SAXException, JSONException, OXException, OXException{
 		//setup
@@ -77,12 +77,12 @@ public class Bug12495Test extends AbstractAJAXSession {
 		myLocalTimeZone = client1.getValues().getTimeZone();
 		privateFolderOfUser1 = client1.getValues().getPrivateAppointmentFolder();
 		privateFolderOfUser2 = client2.getValues().getPrivateAppointmentFolder();
-		
+
 		//appointment
 		Appointment series = createAppointmentInOneHour("Bug 12495");
 		makeAppointmentRecurrDaily(series,3);
 		series.addParticipant(new UserParticipant( client2.getValues().getUserId() ) );
-		
+
 		//insert series
 		InsertRequest insertRequest = new InsertRequest(series, myLocalTimeZone);
 		AppointmentInsertResponse insertResponse = client1.execute(insertRequest);
@@ -92,10 +92,10 @@ public class Bug12495Test extends AbstractAJAXSession {
 			//delete with user2
 			int occurenceToBeChanged = 2;
 
-			DeleteRequest deleteRequest = new DeleteRequest(seriesId, privateFolderOfUser2,  
+			DeleteRequest deleteRequest = new DeleteRequest(seriesId, privateFolderOfUser2,
 					occurenceToBeChanged, series.getLastModified());
 			client2.execute(deleteRequest);
-			
+
 			//find exception id via all request
 	        int columns[] = new int[]{ Appointment.OBJECT_ID, Appointment.RECURRENCE_DATE_POSITION};
 			AllRequest allRequest = new AllRequest(privateFolderOfUser1, columns, series.getStartDate(), new Date(Long.MAX_VALUE), myLocalTimeZone);
@@ -111,20 +111,20 @@ public class Bug12495Test extends AbstractAJAXSession {
 				}
 			}
 			assertTrue("Should be able to find both a recurrence_date_position and an exception_id", (exceptionId != -1) && (recurrenceDatePosition != -1) );
-            
+
             //list exception with user1 by using exception_id, then compare to recurrence_date_position
             ListIDs ids = ListIDs.l(new int[] {privateFolderOfUser1, exceptionId});
             ListRequest listRequest = new ListRequest(ids , columns);
             CommonListResponse listResponse = client1.execute(listRequest);
             long recurrence_date_position_in_result = ((Long)listResponse.getArray()[0][1]).longValue();
             assertEquals("Must contain matching recurrence_date_position in list request", recurrenceDatePosition, recurrence_date_position_in_result);
-			
+
 			//get exception with user1
 			GetRequest getRequest = new GetRequest(privateFolderOfUser1, exceptionId);
 			GetResponse getResponse = client1.execute(getRequest);
 			Appointment exception = getResponse.getAppointment(myLocalTimeZone);
 			assertTrue("Must contain recurrence_date_position in get request", exception.containsRecurrenceDatePosition());
-			
+
 		} finally {
 			GetRequest getRequest = new GetRequest(series);
 			series = client1.execute(getRequest).getAppointment(myLocalTimeZone);

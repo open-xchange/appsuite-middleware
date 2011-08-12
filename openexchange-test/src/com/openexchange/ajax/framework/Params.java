@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.framework;
 
-import com.openexchange.exception.OXException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -59,7 +58,7 @@ import com.openexchange.ajax.framework.AJAXRequest.Parameter;
  * This is a shortcut to creating a parameter array with losts of parameter arguments, which usually uses a lot of boiler plate code, like
  * creating a list, creating new parameters, adding them, thn converting them to an array. Plus correcting the word "paramter" all the time,
  * which is why this class is called "Params" and not "Parameters".
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class Params {
@@ -104,7 +103,7 @@ public class Params {
     public void add(Params params) {
         add(params.toArray());
     }
-    
+
     public void add(String... items){
         if (items.length % 2 == 1)
             throw new IllegalArgumentException("The number of arguments should be even: key, value, key, value...");
@@ -124,7 +123,7 @@ public class Params {
     public List<Parameter> toList() {
         return parameters;
     }
-    
+
     @Override
     public String toString(){
     	StringBuffer buffy = new StringBuffer();

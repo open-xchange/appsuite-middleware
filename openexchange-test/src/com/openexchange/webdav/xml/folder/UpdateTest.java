@@ -49,7 +49,6 @@
 
 package com.openexchange.webdav.xml.folder;
 
-import com.openexchange.exception.OXException;
 import java.util.Date;
 
 import com.openexchange.groupware.container.FolderObject;

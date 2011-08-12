@@ -62,16 +62,16 @@ import com.openexchange.sessiond.impl.SessionObject;
 
 /**
  * {@link MailFolderSpecialCharsTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class MailFolderSpecialCharsTest extends AbstractMailTest {
 
 	private static final String INBOX = "INBOX";
 
 	/**
-	 * 
+	 *
 	 */
 	public MailFolderSpecialCharsTest() {
 		super();

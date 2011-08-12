@@ -77,9 +77,9 @@ import com.openexchange.sessiond.impl.SessionObject;
 
 /**
  * {@link MailFolderTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class MailFolderTest extends AbstractMailTest {
 
@@ -90,7 +90,7 @@ public final class MailFolderTest extends AbstractMailTest {
 	private static final String INBOX = "INBOX";
 
 	/**
-	 * 
+	 *
 	 */
 	public MailFolderTest() {
 		super();

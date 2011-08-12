@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.contact.action;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 
 import com.openexchange.ajax.AJAXServlet;
@@ -76,7 +75,7 @@ public class UpdateRequest extends AbstractContactRequest<UpdateResponse> {
     public UpdateRequest(final Contact contactObj) {
         this(contactObj, true);
     }
-    
+
     public UpdateRequest(final Contact contactObj, boolean failOnError) {
         this(contactObj.getParentFolderID(), contactObj, failOnError);
     }
@@ -86,7 +85,7 @@ public class UpdateRequest extends AbstractContactRequest<UpdateResponse> {
         this.contactObj = entry;
         this.failOnError = failOnError;
         this.originFolder = inFolder;
-        
+
     }
 
     /**

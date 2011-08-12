@@ -72,20 +72,20 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class ContactParser {
-    
+
     private static final Map<Integer, String> specialColumns = new HashMap<Integer, String>();
-    
+
     static {
         specialColumns.put(Contact.ANNIVERSARY, "date");
         specialColumns.put(Contact.BIRTHDAY, "date");
         specialColumns.put(Contact.DISTRIBUTIONLIST, "distributionlist");
         specialColumns.put(Contact.LINKS, "links");
     }
-    
+
     protected boolean isSpecial(final int column) {
         return specialColumns.containsKey(column);
     }
-    
+
     public Contact parse(final JSONObject json) throws OXException {
         final ContactSetter cs = new ContactSetter();
         final Contact contact = new Contact();
@@ -100,22 +100,22 @@ public class ContactParser {
                             parseSpecial(field, cs, contact, value);
                         } else {
                             field.doSwitch(cs, contact, value);
-                        }                        
+                        }
                     } catch (final JSONException e) {
                         throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, json);
-                    }                             
+                    }
                 }
             }
         }
-        
-        return contact;        
+
+        return contact;
     }
-    
+
     private void parseSpecial(final ContactField field, final ContactSetter cs, final Contact contact, final Object value) throws OXException {
         final String type = specialColumns.get(field.getNumber());
         if (type.equals("date")) {
             final String timeStr = String.valueOf(value);
-            try {                
+            try {
                 final long time = Long.parseLong(timeStr);
                 field.doSwitch(cs, contact, new Date(time));
             } catch (final NumberFormatException e) {
@@ -129,7 +129,7 @@ public class ContactParser {
                 field.doSwitch(cs, contact, distributionList);
             } catch (final JSONException e) {
                 throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, jsonDistributionList);
-            }            
+            }
         } else if (type.equals("links")) {
             JSONArray jsonLinks = null;
             try {
@@ -138,10 +138,10 @@ public class ContactParser {
                 field.doSwitch(cs, contact, links);
             } catch (final JSONException e) {
                 throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, jsonLinks);
-            }            
+            }
         }
     }
-    
+
     private DistributionListEntryObject[] parseDistributionList(final JSONArray jsonDistributionList) throws OXException {
         final DistributionListEntryObject[] distributionList = new DistributionListEntryObject[jsonDistributionList.length()];
         for (int i = 0; i < jsonDistributionList.length(); i++) {
@@ -166,9 +166,9 @@ public class ContactParser {
                 distributionList[i].setEmailfield(entry.getInt(DistributionListFields.MAIL_FIELD));
             } catch (final JSONException e) {
                 throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, entry);
-            }            
+            }
         }
-        
+
         return distributionList;
     }
 

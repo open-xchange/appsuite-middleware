@@ -89,7 +89,7 @@ import com.openexchange.tools.regex.MatcherReplacer;
 
 /**
  * {@link HttpServletResponseImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HttpServletResponseImpl implements HttpServletResponse {
@@ -239,7 +239,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
 
     /**
      * Sets the output buffer
-     * 
+     *
      * @param outputBuffer The output buffer to set
      */
     public void setOutputBuffer(final OutputBuffer outputBuffer) {
@@ -248,7 +248,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
 
     /**
      * Gets the AJP processor.
-     * 
+     *
      * @return The AJP processor
      */
     public AjpProcessor getAjpProcessor() {
@@ -330,7 +330,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
 
     /**
      * Sets the character encoding
-     * 
+     *
      * @param characterEncoding
      */
     @Override
@@ -346,7 +346,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
 
     /**
      * Sets the character encoding
-     * 
+     *
      * @param characterEncoding
      * @param checkContentType
      */
@@ -394,7 +394,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
         if (null == writer) {
             servletOutputStream.resetBuffer();
         } else {
-            // TODO: 
+            // TODO:
         }
     }
 
@@ -445,7 +445,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
 
     /**
      * Sets the committed flag
-     * 
+     *
      * @param committed
      */
     public void setCommitted(final boolean committed) {
@@ -502,7 +502,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
 
     /**
      * Gets the associated HTTP request.
-     * 
+     *
      * @return The associated HTTP request
      */
     public HttpServletRequestImpl getRequest() {
@@ -642,7 +642,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
 
     /**
      * Removes specified cookie from cookie set
-     * 
+     *
      * @param cookie The cookie to remove
      */
     public void removeCookie(final Cookie cookie) {
@@ -654,7 +654,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
      * response's cookies.
      * <p>
      * For each cookie its HTTP header format is generated and added to corresponding array of {@link String}
-     * 
+     *
      * @return A two dimensional array of {@link String} containing the <tt>Set-Cookie</tt>/<tt>Set-Cookie2</tt> headers
      */
     public String[][] getFormatedCookies() {
@@ -680,7 +680,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
 
     /**
      * Gets the HTTP header format for specified instance of {@link Cookie}
-     * 
+     *
      * @param cookie The cookie whose HTTP header format shall be returned
      * @param composer A string builder used for composing
      * @return A string representing the HTTP header format
@@ -825,7 +825,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
 
     /**
      * Composes and sets appropriate error in this HTTP servlet response wrapper.
-     * 
+     *
      * @param status The status to set
      * @param statusMsg The (optional) status message or <code>null</code>
      * @return The error message in bytes
@@ -863,7 +863,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
 
     /**
      * Gets the default error page.
-     * 
+     *
      * @return The default error page
      * @throws IOException If an I/O error occurs
      */

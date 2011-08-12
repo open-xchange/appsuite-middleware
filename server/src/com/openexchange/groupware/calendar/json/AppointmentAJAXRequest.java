@@ -177,7 +177,7 @@ public final class AppointmentAJAXRequest {
      * Constant for not-found number.
      */
     public static final int NOT_FOUND = -9999;
-    
+
     /**
      * Gets optional <code>int</code> parameter.
      *

@@ -16,15 +16,15 @@ import com.meterware.httpunit.WebResponse;
 import com.openexchange.groupware.container.FolderObject;
 
 public class TestFolder extends TestCase {
-	
+
 	private String sessionId = null;
-	
+
 	private WebConversation wc = null;
-	
+
 	private WebRequest req = null;
-	
+
 	private WebResponse resp = null;
-	
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -36,13 +36,13 @@ public class TestFolder extends TestCase {
 	protected void tearDown() throws Exception {
 		super.tearDown();
 	}
-	
+
 	public void testGetRootFolders() throws IOException, SAXException {
 		req = new GetMethodWebRequest("http://127.0.0.1/ajax/folders?session=" + sessionId);
 		resp = wc.getResponse(req);
 		assertFalse(resp.getText().indexOf("error") > -1);
 	}
-	
+
 	public void testGetSubfolders() throws IOException, SAXException {
 		req = new GetMethodWebRequest("http://127.0.0.1/ajax/folders?session=" + sessionId + "&gparent=127");
 		resp = wc.getResponse(req);
@@ -51,7 +51,7 @@ public class TestFolder extends TestCase {
 		resp = wc.getResponse(req);
 		assertFalse(resp.getText().indexOf("error") > -1);
 	}
-	
+
 	public void testGetFolder() throws IOException, SAXException {
 		req = new GetMethodWebRequest("http://127.0.0.1/ajax/folders?session=" + sessionId + "&id=290");
 		resp = wc.getResponse(req);
@@ -60,7 +60,7 @@ public class TestFolder extends TestCase {
 		resp = wc.getResponse(req);
 		assertFalse(resp.getText().indexOf("error") > -1);
 	}
-	
+
 	public void testCreateUpdateDeleteFolder() throws IOException, SAXException {
 		final String oxFolderName = "CalendarFolder07";
 		final String mailFolderName = "MyMailFolder25";

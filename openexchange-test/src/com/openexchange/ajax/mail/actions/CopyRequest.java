@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.actions;
 
-import com.openexchange.exception.OXException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -62,17 +61,17 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
  * {@link ClearRequest}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
- * 
+ *
  */
 public class CopyRequest extends AbstractMailRequest<CopyResponse> {
-	
+
 	private String sourceFolderID;
 	private String destinationFolderID;
 	private boolean failOnError = true;
     private String mailID;
-    
+
     public CopyRequest(String mailID, String sourceFolderID, String destinationFolderID){
     	this.mailID = mailID;
     	this.sourceFolderID = sourceFolderID;
@@ -82,7 +81,7 @@ public class CopyRequest extends AbstractMailRequest<CopyResponse> {
 	public Object getBody() throws JSONException {
         JSONObject jso = new JSONObject();
         jso.put("folder_id", destinationFolderID);
-        return jso;        
+        return jso;
 	}
 
 	public Method getMethod() {
@@ -95,7 +94,7 @@ public class CopyRequest extends AbstractMailRequest<CopyResponse> {
         list.add(new Parameter(Mail.PARAMETER_ACTION, Mail.ACTION_COPY));
         list.add(new Parameter(Mail.PARAMETER_FOLDERID, sourceFolderID));
         list.add(new Parameter(Mail.PARAMETER_ID, mailID));
-        
+
         return list.toArray(new Parameter[list.size()]);
 	}
 

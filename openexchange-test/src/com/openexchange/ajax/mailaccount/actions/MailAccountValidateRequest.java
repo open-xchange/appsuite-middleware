@@ -62,7 +62,7 @@ import com.openexchange.mailaccount.json.writer.MailAccountWriter;
 
 /**
  * {@link MailAccountValidateRequest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MailAccountValidateRequest implements AJAXRequest<MailAccountValidateResponse> {
@@ -166,7 +166,7 @@ public class MailAccountValidateRequest implements AJAXRequest<MailAccountValida
             public String getName() {
                 return acc.getName();
             }
-            
+
             public String getReplyTo() {
                 return acc.getReplyTo();
             }

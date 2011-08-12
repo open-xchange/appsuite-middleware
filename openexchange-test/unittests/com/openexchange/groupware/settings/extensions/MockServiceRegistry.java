@@ -48,7 +48,6 @@
  */
 package com.openexchange.groupware.settings.extensions;
 
-import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -74,7 +73,7 @@ public class MockServiceRegistry implements ServicePublisher {
 
     public void removeService(final Class clazz, final Object service) {
         getAllServices(clazz).remove(service);
-        getRemoved(clazz).add(service);     
+        getRemoved(clazz).add(service);
     }
 
     public void removeAllServices() {

@@ -106,7 +106,7 @@ public class LastModifiedUTCTest extends AbstractTaskTest {
 	public void tearDown() throws Exception {
         final DeleteRequest deleteRequest = new DeleteRequest(getPrivateFolder(), getId(), lastModified);
         Executor.execute(getClient(), deleteRequest);
-        super.tearDown();    
+        super.tearDown();
     }
 
     public int getId() {

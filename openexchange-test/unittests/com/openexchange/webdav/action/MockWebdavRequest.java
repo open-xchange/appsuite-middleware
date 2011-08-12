@@ -31,14 +31,14 @@ public class MockWebdavRequest implements WebdavRequest {
 	private final Map<String,String> headers = new HashMap<String,String>();
 	private WebdavResource res = null;
 	private WebdavResource dest;
-	
+
 	private Map<String, Object> userInfo = new HashMap<String,Object>();
-	
+
 	public MockWebdavRequest(final WebdavFactory factory, final String prefix) {
 		this.factory = factory;
 		this.uriPrefix = prefix;
 	}
-	
+
 
     public void setUrl(final WebdavPath url) {
         this.url = url;
@@ -50,7 +50,7 @@ public class MockWebdavRequest implements WebdavRequest {
 		}
 		return res = factory.resolveResource(url);
 	}
-	
+
 	public WebdavResource getDestination() throws OXException {
 		if(null == getHeader("destination")) {
 			return null;
@@ -60,14 +60,14 @@ public class MockWebdavRequest implements WebdavRequest {
 		}
 		return dest = factory.resolveResource(getHeader("destination"));
 	}
-	
+
 	public WebdavCollection getCollection() throws OXException {
 		if(res != null) {
 			return (WebdavCollection) res;
 		}
 		return (WebdavCollection) (res = factory.resolveCollection(url));
 	}
-	
+
 	public WebdavPath getDestinationUrl(){
 		return new WebdavPath(getHeader("destination"));
 	}
@@ -79,7 +79,7 @@ public class MockWebdavRequest implements WebdavRequest {
 	public void setBodyAsString(final String content) {
 		this.content = content;
 	}
-	
+
 	public InputStream getBody(){
 		try {
 			return new ByteArrayInputStream((content == null) ? new byte[0] : content.getBytes("UTF-8"));
@@ -133,7 +133,7 @@ public class MockWebdavRequest implements WebdavRequest {
 		return factory;
 	}
 
-	
+
 	public String getCharset() {
 		return "UTF-8";
 	}

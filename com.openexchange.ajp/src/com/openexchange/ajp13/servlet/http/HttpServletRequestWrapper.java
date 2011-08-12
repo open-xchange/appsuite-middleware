@@ -354,7 +354,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 
     @Override
     public boolean isRequestedSessionIdValid() {
-        return !HttpSessionManagement.isHttpSessionExpired((HttpSessionWrapper) getSession());
+        return !HttpSessionManagement.isHttpSessionExpired(getSession());
     }
 
     @Override

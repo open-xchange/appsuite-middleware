@@ -62,12 +62,12 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizerTest;
 
 /**
  * This suite is meant for tests without a running OX instance
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  *
  */
 public class ImportExportStandaloneSuite extends TestSuite {
-	
+
 	public static Test suite(){
 		final TestSuite tests = new TestSuite();
 		//basics
@@ -87,7 +87,7 @@ public class ImportExportStandaloneSuite extends TestSuite {
         tests.addTestSuite(com.openexchange.groupware.importexport.importers.CannotImportAppleContactsWithInlineImage.class);
         tests.addTestSuite(CsvDoesDifferentLanguages.class);
         tests.addTestSuite(PropertyDrivenMapperTest.class);
-        
+
 		//ICAL
 		tests.addTest( ICalImportTest.suite() );
 
@@ -95,7 +95,7 @@ public class ImportExportStandaloneSuite extends TestSuite {
 		tests.addTest( VCardImportTest.suite() );
 		tests.addTestSuite( BracketedNicknameTest.class );
 		tests.addTestSuite(ExpressiveErrorMessageWhileParsingVCard.class);
-		
+
 		//separate tests for reported bugs
 		tests.addTest( Bug7732Test.suite() );
 //		tests.addTest( Bug7470Test.suite() ); //FIXME
@@ -106,7 +106,7 @@ public class ImportExportStandaloneSuite extends TestSuite {
 		tests.addTest( Bug8681Suite.suite() );
 		tests.addTestSuite( VCardMimeTypeTest.class);
 		tests.addTestSuite( MissingAddressesAfterImportTest.class);
-		
+
 		return tests;
 	}
 }

@@ -52,9 +52,9 @@ package com.openexchange.ajax.mail.netsol;
 /**
  * {@link DurationTracker} - Tracks execution times and provides maximum,
  * minimum, and average times.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class DurationTracker {
 
@@ -78,7 +78,7 @@ public final class DurationTracker {
 
 	/**
 	 * Adds a duration time to this duration tracker
-	 * 
+	 *
 	 * @param duration
 	 *            The duration time
 	 */
@@ -94,7 +94,7 @@ public final class DurationTracker {
 
 	/**
 	 * Get max. duration
-	 * 
+	 *
 	 * @return Max. duration
 	 */
 	public long getMaxDuration() {
@@ -103,7 +103,7 @@ public final class DurationTracker {
 
 	/**
 	 * Get min. duration
-	 * 
+	 *
 	 * @return Min. duration
 	 */
 	public long getMinDuration() {
@@ -112,7 +112,7 @@ public final class DurationTracker {
 
 	/**
 	 * Compute the average duration
-	 * 
+	 *
 	 * @return The average duration
 	 */
 	public double computeAvgDuration() {

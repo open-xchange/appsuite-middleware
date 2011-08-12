@@ -49,27 +49,26 @@
 
 package com.openexchange.ajax.mail.contenttypes;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import com.openexchange.ajax.mail.TestMail;
 
 /**
  * {@link MailTypeStrategy}
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public interface MailTypeStrategy {
 
     /**
      * Set the values of a given mail so that it conforms to one of the content types of mail.
-     * 
+     *
      * @param mail Mail that is going to be changed
      */
     public void sanitize(TestMail mail) throws JSONException;
 
     /**
      * checks whether this strategy is responsible for this mail, usually be checking the content type.
-     * 
+     *
      * @param mail Mail that is going to be changed
      * @return true if so, false otherwise
      */

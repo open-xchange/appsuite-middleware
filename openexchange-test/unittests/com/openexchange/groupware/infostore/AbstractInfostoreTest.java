@@ -85,10 +85,10 @@ public class AbstractInfostoreTest extends TestCase{
     protected Context ctx = null;
     protected User user = null;
     protected User user2 = null;
-    
+
     protected UserConfiguration userConfig = null;
     protected UserConfiguration userConfig2 = null;
-    
+
     protected int folderId;
     protected int folderId2;
 
@@ -97,9 +97,9 @@ public class AbstractInfostoreTest extends TestCase{
 
     protected List<DocumentMetadata> clean;
     protected List<FolderObject> cleanFolders = null;
-    
+
     protected DBProvider provider = null;
-    
+
     @Override
     public void setUp() throws Exception {
         clean = new ArrayList<DocumentMetadata>();
@@ -107,10 +107,10 @@ public class AbstractInfostoreTest extends TestCase{
 
         TestInit.loadTestProperties();
         Init.startServer();
-        
+
         ContextStorage.getInstance();
         final UserConfigurationStorage userConfigStorage = UserConfigurationStorage.getInstance();
-        
+
         final TestConfig config = new TestConfig();
         final String userName = config.getUser();
         final String userName2 = config.getSecondUser();
@@ -119,22 +119,22 @@ public class AbstractInfostoreTest extends TestCase{
         ctx = null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
         user = UserStorage.getInstance().getUser(tools.resolveUser(userName, ctx), ctx);
         user2 = UserStorage.getInstance().getUser(tools.resolveUser(userName2, ctx), ctx);
-        
-        
+
+
         session = ServerSessionFactory.createServerSession(user.getId(), ctx, "blupp");
         session2 = ServerSessionFactory.createServerSession(user2.getId(), ctx, "blupp2");
-        
+
         userConfig = userConfigStorage.getUserConfiguration(session.getUserId(), ctx);
         userConfig2 =  userConfigStorage.getUserConfiguration(session2.getUserId(), ctx);;
-        
+
         folderId = getPrivateInfostoreFolder(ctx,user,session);
         folderId2 = getPrivateInfostoreFolder(ctx, user2, session2);
-        
+
         provider = new DBPoolProvider();
         infostore = new InfostoreFacadeImpl(provider);
-        
+
     }
-    
+
     public int getPrivateInfostoreFolder(final Context context, final User usr, final ServerSession sess) throws OXException {
         final OXFolderAccess oxfa = new OXFolderAccess(context);
         return oxfa.getDefaultFolder(usr.getId(), FolderObject.INFOSTORE).getObjectID();
@@ -145,31 +145,31 @@ public class AbstractInfostoreTest extends TestCase{
         for(final DocumentMetadata dm : clean) {
             infostore.removeDocument(new int[]{dm.getId()}, System.currentTimeMillis(), session);
         }
-        
+
         final OXFolderManager oxma = OXFolderManager.getInstance(session);
         for(final FolderObject folder : cleanFolders) {
             oxma.deleteFolder(folder, false, System.currentTimeMillis());
         }
-        
+
         Init.stopServer();
     }
-    
+
     protected InfostoreFacade getInfostore(){
         return infostore;
     }
-    
+
     protected ServerSession getSession() {
         return session;
     }
-    
+
     public ServerSession getSession2() {
         return session2;
     }
-    
+
     public Context getCtx() {
         return ctx;
     }
-    
+
     public int getFolderId() {
         return folderId;
     }
@@ -177,26 +177,26 @@ public class AbstractInfostoreTest extends TestCase{
     public User getUser() {
         return user;
     }
-    
+
     public User getUser2() {
         return user2;
     }
-    
+
     public UserConfiguration getUserConfig() {
         return userConfig;
     }
-    
+
     public UserConfiguration getUserConfig2() {
         return userConfig2;
     }
-    
+
     public int getFolderId2() {
         return folderId2;
     }
-    
+
     public DBProvider getProvider() {
         return provider;
     }
-    
-    
+
+
 }

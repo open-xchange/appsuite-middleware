@@ -80,7 +80,7 @@ public final class Bug12470Test extends AbstractAJAXSession {
     private int folderId;
 
     private TimeZone tz;
-    
+
     private TimeZone utc;
 
     private int objectId = -1;
@@ -131,7 +131,7 @@ public final class Bug12470Test extends AbstractAJAXSession {
         final Date expected = calendar.getTime();
         assertEquals("Task due dates are not correctly imported.", expected, due);
     }
-    
+
     private void importvTodo() throws OXException, IOException, SAXException,
         JSONException {
         final ICalImportRequest request = new ICalImportRequest(folderId, vTodo);

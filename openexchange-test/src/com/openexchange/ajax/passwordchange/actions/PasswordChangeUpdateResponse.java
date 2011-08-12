@@ -54,15 +54,15 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
  * {@link PasswordChangeUpdateResponse} - The response corresponding to UPDATE request
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class PasswordChangeUpdateResponse extends AbstractAJAXResponse {
 
 	/**
 	 * Initializes a new {@link PasswordChangeUpdateResponse}
-	 * 
+	 *
 	 * @param response
 	 *            The JSON response container
 	 */

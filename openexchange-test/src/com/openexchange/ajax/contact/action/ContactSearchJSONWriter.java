@@ -37,7 +37,6 @@
 
 package com.openexchange.ajax.contact.action;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -46,7 +45,7 @@ import com.openexchange.groupware.search.ContactSearchObject;
 
 /**
  * Writes contact search object to a JSON.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - putSearchFields
  */
@@ -61,7 +60,7 @@ public class ContactSearchJSONWriter {
 
     /**
      * Writes a contact search object as its JSON representation. This writer only supports the pattern and the folder.
-     * 
+     *
      * @param search context search object.
      * @return a JSON representation of the task search object.
      * @throws JSONException if writing json gives errors.

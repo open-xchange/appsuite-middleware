@@ -31,14 +31,14 @@ public class AdvancedSearchRequest extends AbstractContactRequest<SearchResponse
 	public void setColumns(int[] columns) {
 		this.columns = columns;
 	}
-	
+
 	public void setCollation(String collation){
 		this.collation = collation;
 	}
-	
-	
-	
-	
+
+
+
+
 	public Object getBody() throws IOException, JSONException {
 		return filter;
 	}
@@ -70,7 +70,7 @@ public class AdvancedSearchRequest extends AbstractContactRequest<SearchResponse
 	public AdvancedSearchRequest() {
 		super();
 	}
-	
+
 	public AdvancedSearchRequest(JSONObject filter, int[] columns, int orderBy, String orderDir){
 		this();
 		setFilter(filter);
@@ -78,7 +78,7 @@ public class AdvancedSearchRequest extends AbstractContactRequest<SearchResponse
 		setOrderBy(orderBy);
 		setOrderDir(orderDir);
 	}
-	
+
 	public AdvancedSearchRequest(JSONObject filter, int[] columns, int orderBy, String orderDir, String collation){
 		this(filter,columns,orderBy,orderDir);
 		setCollation(collation);

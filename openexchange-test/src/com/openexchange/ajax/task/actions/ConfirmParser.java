@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.task.actions;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import com.openexchange.ajax.task.actions.ConfirmResponse;
 import com.openexchange.ajax.container.Response;
@@ -57,7 +56,7 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
  * {@link ConfirmParser}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ConfirmParser extends AbstractAJAXParser<ConfirmResponse> {

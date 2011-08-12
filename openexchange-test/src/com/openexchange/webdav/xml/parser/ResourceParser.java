@@ -51,7 +51,7 @@ import com.openexchange.webdav.xml.fields.DataFields;
 
 /**
  * {@link ResourceParser} - The WebDAV/XML resource parser.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 public class ResourceParser extends DataParser {
@@ -65,7 +65,7 @@ public class ResourceParser extends DataParser {
 
     /**
      * Parses specified resource element into given resource.
-     * 
+     *
      * @param resource The resource to fill
      * @param eProp The resource element to parse
      */

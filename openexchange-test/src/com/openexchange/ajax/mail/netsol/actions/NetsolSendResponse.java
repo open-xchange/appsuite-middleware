@@ -57,9 +57,9 @@ import com.openexchange.mail.MailPath;
 
 /**
  * {@link NetsolSendResponse}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class NetsolSendResponse extends AbstractAJAXResponse {
 

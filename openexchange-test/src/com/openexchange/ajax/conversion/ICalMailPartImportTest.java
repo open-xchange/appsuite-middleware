@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.conversion;
 
-import com.openexchange.exception.OXException;
 import java.io.InputStream;
 import java.util.UUID;
 
@@ -73,9 +72,9 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
  * {@link ICalMailPartImportTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public class ICalMailPartImportTest extends AbstractConversionTest {
 
@@ -86,7 +85,7 @@ public class ICalMailPartImportTest extends AbstractConversionTest {
 
 	/**
 	 * Initializes a new {@link ICalMailPartImportTest}
-	 * 
+	 *
 	 * @param name
 	 *            The name
 	 */
@@ -96,7 +95,7 @@ public class ICalMailPartImportTest extends AbstractConversionTest {
 
 	/**
 	 * Tests the <code>action=convert</code> request
-	 * 
+	 *
 	 * @throws Throwable
 	 */
 	public void testICalImport() throws Throwable {

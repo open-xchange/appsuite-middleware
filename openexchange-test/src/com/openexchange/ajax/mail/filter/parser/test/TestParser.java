@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.filter.parser.test;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -62,7 +61,7 @@ import com.openexchange.ajax.mail.filter.test.AbstractTest;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public interface TestParser {
-	
+
 	public AbstractTest parseTest(final String name, final JSONObject jsonObject) throws JSONException;
 
 }

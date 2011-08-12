@@ -56,10 +56,10 @@ import com.openexchange.groupware.container.Expectations;
 
 
 /**
- * These tests document a strange behaviour of the HTTP API: If you ask 
+ * These tests document a strange behaviour of the HTTP API: If you ask
  * a series for the nth element, you always get a freshly calculated
  * one, even if it should not exist due to a change exception there.
- *  
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class TestsForUsingRecurrencePositionToGetChangeExceptions extends ManagedAppointmentTest {
@@ -71,8 +71,8 @@ public class TestsForUsingRecurrencePositionToGetChangeExceptions extends Manage
     public TestsForUsingRecurrencePositionToGetChangeExceptions(String name) {
         super(name);
     }
-    
-    
+
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -80,16 +80,16 @@ public class TestsForUsingRecurrencePositionToGetChangeExceptions extends Manage
         app.setOccurrence(3);
 
         calendarManager.insert(app);
-        
+
         changes = new Changes();
         changes.put(Appointment.RECURRENCE_POSITION, 2);
         changes.put(Appointment.START_DATE, D("2/1/2008 1:00", utc));
         changes.put(Appointment.END_DATE, D("2/1/2008 2:00", utc));
-        
+
         update = app.clone();
         changes.update(update);
         calendarManager.update(update);
-        
+
     }
 
     public void testShouldFindUnchangedFirstOccurrence() throws OXException{

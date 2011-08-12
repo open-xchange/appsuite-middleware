@@ -61,23 +61,23 @@ import junit.framework.TestCase;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class PropertyDrivenMapperTest extends TestCase {
-    
+
     public void testReadingPropery(){
         ContactField myField = ContactField.SUR_NAME;
         ContactField notMyField = ContactField.GIVEN_NAME;
-        
+
         Properties props = new Properties();
         props.put(myField.getAjaxName(), "Surname");
-        
+
         PropertyDrivenMapper mapper = new PropertyDrivenMapper(props);
-        
+
         assertTrue("Surname should be a supported field", mapper.getSupportedFields().contains(myField));
         assertFalse("Given name should not be a supported field", mapper.getSupportedFields().contains(notMyField));
-        
+
         assertEquals(myField, mapper.getFieldByName("Surname"));
         assertEquals("Surname", mapper.getNameOfField(myField));
         assertNull(mapper.getNameOfField(notMyField));
         assertNull(mapper.getFieldByName("Given name"));
     }
-    
+
 }

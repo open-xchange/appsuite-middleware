@@ -49,7 +49,6 @@
 
 package com.openexchange.webdav.xml.folder.actions;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.webdav.xml.framework.RequestTools.addElement2PropFind;
 
 import java.io.ByteArrayOutputStream;
@@ -65,7 +64,7 @@ import org.jdom.output.XMLOutputter;
 import com.openexchange.webdav.xml.XmlServlet;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class ListRequest extends AbstractFolderRequest<ListResponse> {

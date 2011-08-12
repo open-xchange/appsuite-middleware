@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.user;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.user.actions.ListRequest;
 import com.openexchange.ajax.user.actions.ListResponse;

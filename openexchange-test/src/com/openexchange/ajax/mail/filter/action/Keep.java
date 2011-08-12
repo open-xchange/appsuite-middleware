@@ -55,13 +55,13 @@ package com.openexchange.ajax.mail.filter.action;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class Keep extends AbstractAction {
-	
+
 	public static final String KEEP = "keep";
-	
+
 	public Keep() {
-		name = KEEP; 
+		name = KEEP;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

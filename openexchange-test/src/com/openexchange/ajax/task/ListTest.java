@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.task;
 
-import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -69,7 +68,7 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.tasks.Task;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class ListTest extends AbstractTaskTest {
@@ -97,7 +96,7 @@ public class ListTest extends AbstractTaskTest {
             inserts[i] = new InsertRequest(task, getTimeZone());
         }
         final MultipleResponse<InsertResponse> mInsert = client.execute(MultipleRequest.create(inserts));
-        
+
         final int[][] tasks = new int[NUMBER][2];
         for (int i = 0; i < tasks.length; i++) {
             final InsertResponse insertR = mInsert.getResponse(i);
@@ -109,7 +108,7 @@ public class ListTest extends AbstractTaskTest {
         for (int i = 0; i < inserts.length; i++) {
             deletes[i] = new DeleteRequest(tasks[i][0], tasks[i][1], listR.getTimestamp());
         }
-        client.execute(MultipleRequest.create(deletes)); 
+        client.execute(MultipleRequest.create(deletes));
     }
 
     public void oldRemovedObjectHandling() throws Throwable {
@@ -141,11 +140,11 @@ public class ListTest extends AbstractTaskTest {
         // A now gets all of the folder.
         final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID, Task.FOLDER_ID };
         final CommonAllResponse allR = client.execute(new AllRequest(folderA, columns, Task.TITLE, Order.ASCENDING));
-        
+
         // Now B deletes some of them.
         final DeleteRequest[] deletes1 = new DeleteRequest[DELETES];
         for (int i = 0; i < deletes1.length; i++) {
-            final InsertResponse insertR = toDelete.remove((NUMBER - DELETES)/2 + i); 
+            final InsertResponse insertR = toDelete.remove((NUMBER - DELETES)/2 + i);
             deletes1[i] = new DeleteRequest(folderB, insertR.getId(), insertR.getTimestamp());
         }
         clientB.execute(MultipleRequest.create(deletes1));
@@ -153,12 +152,12 @@ public class ListTest extends AbstractTaskTest {
         // List request of A must now not contain the deleted objects and give
         // no error.
         final CommonListResponse listR = client.execute(new ListRequest(allR.getListIDs(), columns, true));
-        
+
         final DeleteRequest[] deletes2 = new DeleteRequest[toDelete.size()];
         for (int i = 0; i < deletes2.length; i++) {
             final InsertResponse insertR = toDelete.get(i);
             deletes2[i] = new DeleteRequest(insertR.getFolderId(), insertR.getId(), listR.getTimestamp());
         }
-        client.execute(MultipleRequest.create(deletes2)); 
+        client.execute(MultipleRequest.create(deletes2));
     }
 }

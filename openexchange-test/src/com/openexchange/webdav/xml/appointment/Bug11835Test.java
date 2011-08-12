@@ -54,7 +54,7 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.webdav.xml.AppointmentTest;
 
 /**
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  *
  */
@@ -63,7 +63,7 @@ public class Bug11835Test extends AppointmentTest {
     public Bug11835Test(String name) {
         super(name);
     }
-    
+
     public void testBug() throws Throwable {
         int objectId = -1;
 
@@ -78,23 +78,23 @@ public class Bug11835Test extends AppointmentTest {
             appointmentObj.setInterval(1);
             appointmentObj.setOccurrence(3);
             appointmentObj.setIgnoreConflicts(true);
-    
+
             final UserParticipant[] users = new UserParticipant[1];
             users[0] = new UserParticipant(userId);
             users[0].setConfirm(Appointment.ACCEPT);
-    
+
             appointmentObj.setUsers(users);
-    
+
             objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
-            
+
             appointmentObj.removeRecurrenceType();
             appointmentObj.removeInterval();
             appointmentObj.removeOccurrence();
-            
+
             updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
-            
+
             Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
-            
+
             assertEquals("No recurrence type expected.", Appointment.NO_RECURRENCE, loadAppointment.getRecurrenceType());
         } finally {
             if (objectId != -1) {

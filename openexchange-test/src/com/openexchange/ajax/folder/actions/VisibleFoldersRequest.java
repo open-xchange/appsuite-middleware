@@ -56,7 +56,7 @@ import com.openexchange.groupware.container.FolderObject;
 
 /**
  * {@link VisibleFoldersRequest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class VisibleFoldersRequest extends AbstractFolderRequest<VisibleFoldersResponse> {
@@ -71,7 +71,7 @@ public class VisibleFoldersRequest extends AbstractFolderRequest<VisibleFoldersR
 
     /**
      * Initializes a new {@link VisibleFoldersRequest}.
-     * 
+     *
      * @param api The API version to use
      * @param contentType The content type as a string; e.g. "calendar", "contacts", or "tasks"
      * @param columns The columns which shall be available in returned folder objects
@@ -84,7 +84,7 @@ public class VisibleFoldersRequest extends AbstractFolderRequest<VisibleFoldersR
 
     /**
      * Initializes a new {@link VisibleFoldersRequest} with default columns.
-     * 
+     *
      * @param api The API version to use
      * @param contentType The content type as a string; e.g. "calendar", "contacts", or "tasks"
      */

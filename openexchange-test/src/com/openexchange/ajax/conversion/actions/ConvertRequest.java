@@ -58,9 +58,9 @@ import com.openexchange.ajax.framework.Header;
 
 /**
  * {@link ConvertRequest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class ConvertRequest implements AJAXRequest {
 

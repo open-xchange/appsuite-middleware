@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
-import com.openexchange.exception.OXException;
 import java.util.Date;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
@@ -102,11 +101,11 @@ public class Bug13447Test extends AbstractAJAXSession {
         updateAppointment.setParentFolderID(appointment.getParentFolderID());
         updateAppointment.setRecurrenceType(Appointment.NO_RECURRENCE);
         updateAppointment.setIgnoreConflicts(true);
-        
+
         UpdateRequest update = new UpdateRequest(updateAppointment, getClient().getValues().getTimeZone(), true);
         UpdateResponse response = getClient().execute(update);
         appointment.setLastModified(response.getTimestamp());
-        
+
         updateAppointment = new Appointment();
         updateAppointment.setObjectID(appointment.getObjectID());
         updateAppointment.setLastModified(appointment.getLastModified());
@@ -115,7 +114,7 @@ public class Bug13447Test extends AbstractAJAXSession {
         updateAppointment.setInterval(1);
         updateAppointment.setOccurrence(3);
         updateAppointment.setIgnoreConflicts(true);
-        
+
         update = new UpdateRequest(updateAppointment, getClient().getValues().getTimeZone(), true);
         response = getClient().execute(update);
         appointment.setLastModified(response.getTimestamp());
@@ -124,7 +123,7 @@ public class Bug13447Test extends AbstractAJAXSession {
     @Override
     public void tearDown() throws Exception {
         getClient().execute(new DeleteRequest(appointment.getObjectID(), appointment.getParentFolderID(), appointment.getLastModified()));
-        
+
         super.tearDown();
     }
 }

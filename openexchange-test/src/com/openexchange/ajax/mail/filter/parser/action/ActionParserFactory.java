@@ -61,19 +61,19 @@ import org.apache.commons.logging.LogFactory;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class ActionParserFactory {
-	
+
 	private static final Log LOG = LogFactory.getLog(ActionParserFactory.class);
-	
-	final static HashMap<String, ActionParser> parserMap = new HashMap<String, ActionParser>(); 
-	
+
+	final static HashMap<String, ActionParser> parserMap = new HashMap<String, ActionParser>();
+
 	public ActionParserFactory() {
 
 	}
-	
+
 	public static void addParser(final String name, final ActionParser actionParser) {
 		parserMap.put(name, actionParser);
 	}
-	
+
 	public static ActionParser getWriter(String name) {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("getWriter for action: " + name);

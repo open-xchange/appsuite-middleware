@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.conversion;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -68,15 +67,15 @@ import com.openexchange.mail.MailJSONField;
 
 /**
  * {@link VCardMailPartAttachTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class VCardMailPartAttachTest extends AbstractConversionTest {
 
     /**
      * Initializes a new {@link VCardMailPartAttachTest}
-     * 
+     *
      * @param name
      *            The name
      */
@@ -86,7 +85,7 @@ public final class VCardMailPartAttachTest extends AbstractConversionTest {
 
     /**
      * Tests the <code>action=convert</code> request
-     * 
+     *
      * @throws Throwable
      */
     public void testVCardAttach() throws Throwable {

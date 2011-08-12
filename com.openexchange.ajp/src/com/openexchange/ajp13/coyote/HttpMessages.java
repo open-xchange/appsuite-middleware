@@ -51,7 +51,7 @@ package com.openexchange.ajp13.coyote;
 
 /**
  * {@link HttpMessages}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HttpMessages {
@@ -101,7 +101,7 @@ public final class HttpMessages {
     /**
      * Filter the specified message string for characters that are sensitive in HTML. This avoids potential attacks caused by including
      * JavaScript codes in the request URL that is often reported in error messages.
-     * 
+     *
      * @param message The message string to be filtered
      */
     public static String filter(final String message) {
@@ -137,7 +137,7 @@ public final class HttpMessages {
     /**
      * Is the provided message safe to use in an HTTP header. Safe messages must meet the requirements of RFC2616 - i.e. must consist only
      * of TEXT.
-     * 
+     *
      * @param msg The message to test
      * @return <code>true</code> if the message is safe to use in an HTTP header else <code>false</code>
      */

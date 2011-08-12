@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.action;
 
-import com.openexchange.exception.OXException;
 import java.util.Iterator;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
@@ -61,7 +60,7 @@ import com.openexchange.groupware.container.Appointment;
 
 /**
  * TODO: This is buggy when given FolderObject.ALL_COLUMNS
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class AllParser extends CommonAllParser {

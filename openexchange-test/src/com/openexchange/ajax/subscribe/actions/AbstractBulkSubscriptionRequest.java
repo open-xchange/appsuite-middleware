@@ -56,7 +56,7 @@ import com.openexchange.java.Strings;
 
 /**
  * A superclass for the bulk request type subscriptions that can request different kinds of fields
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public abstract class AbstractBulkSubscriptionRequest<T extends AbstractSubscriptionResponse> extends AbstractSubscriptionRequest<T> {
@@ -72,7 +72,7 @@ public abstract class AbstractBulkSubscriptionRequest<T extends AbstractSubscrip
     public List<String> getColumns() {
         return columns;
     }
-    
+
     public Parameter getColumnsAsParameter(){
         if(getColumns() == null)
             return null;
@@ -90,13 +90,13 @@ public abstract class AbstractBulkSubscriptionRequest<T extends AbstractSubscrip
     public Params getDynamicColumnsAsParameter(){
         if(getDynamicColumns() == null)
             return null;
-        
+
         Params params = new Params();
         for (String plugin : getDynamicColumns().keySet()) {
             params.add(plugin, Strings.join(getDynamicColumns().get(plugin), ","));
         }
         return params;
     }
-    
+
 
 }

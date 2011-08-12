@@ -160,7 +160,7 @@ public final class ListAction extends AbstractAppointmentAction {
         it = appointmentsql.getObjectsById(objectIdAndFolderId, _appointmentFields);
         final List<Appointment> appointmentList = new ArrayList<Appointment>(16);
         try {
-            int counter = 0;         
+            int counter = 0;
             while (it.hasNext()) {
                 final Appointment appointment = it.next();
                 if (null == appointment) {

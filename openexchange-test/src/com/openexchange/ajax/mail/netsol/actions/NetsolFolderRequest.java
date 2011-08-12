@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.netsol.actions;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 
 import com.openexchange.ajax.AJAXServlet;
@@ -59,9 +58,9 @@ import com.openexchange.ajax.mail.actions.AbstractMailRequest;
 
 /**
  * {@link NetsolFolderRequest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class NetsolFolderRequest extends AbstractMailRequest {
 
@@ -125,7 +124,7 @@ public final class NetsolFolderRequest extends AbstractMailRequest {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
 	 */
 	public Object getBody() throws JSONException {
@@ -134,7 +133,7 @@ public final class NetsolFolderRequest extends AbstractMailRequest {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
 	 */
 	public Method getMethod() {
@@ -143,7 +142,7 @@ public final class NetsolFolderRequest extends AbstractMailRequest {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
 	 */
 	public Parameter[] getParameters() {
@@ -153,7 +152,7 @@ public final class NetsolFolderRequest extends AbstractMailRequest {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
 	 */
 	public AbstractAJAXParser<NetsolFolderResponse> getParser() {
