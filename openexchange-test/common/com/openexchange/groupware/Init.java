@@ -64,6 +64,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.service.event.EventAdmin;
 import org.w3c.tidy.Report;
 import com.openexchange.ajp13.AJPv13Config;
+import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.servlet.ServletConfigLoader;
 import com.openexchange.ajp13.servlet.http.HttpManagersInit;
@@ -214,11 +215,15 @@ public final class Init {
             public void start() throws OXException {
                 AJPv13Config.getInstance().start();
                 ServletConfigLoader.initDefaultInstance(AJPv13Config.getServletConfigs());
+                AJPv13Server.setInstance(new com.openexchange.ajp13.najp.AJPv13ServerImpl());
+                AJPv13Server.startAJPServer();
                 HttpManagersInit.getInstance().start();
             }
 
             public void stop() throws OXException {
                 HttpManagersInit.getInstance().stop();
+                AJPv13Server.stopAJPServer();
+                AJPv13Server.releaseInstrance();
                 ServletConfigLoader.resetDefaultInstance();
                 AJPv13Config.getInstance().stop();
             }
@@ -539,8 +544,9 @@ public final class Init {
     }
 
     public static void startAndInjectDatabaseUpdate() throws OXException {
-    	if(databaseUpdateinitialized )
-    		return;
+    	if(databaseUpdateinitialized ) {
+            return;
+        }
     	InternalList.getInstance().start();
     	databaseUpdateinitialized = true;
     }
