@@ -171,6 +171,9 @@ public class AppointmentState extends LinkableState {
         tr.setChanged(oldObj == null ? false : !ParticipantNotify.compareStrings(location, ((Appointment) oldObj)
                 .getLocation()));
         renderMap.put(tr);
+        if (!obj.containsUid() && null != oldObj && oldObj.containsUid()) {
+            obj.setUid(oldObj.getUid());
+        }
     }
 
     @Override
