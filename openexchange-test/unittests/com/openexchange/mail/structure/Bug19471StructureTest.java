@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.structure;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -256,19 +257,23 @@ public class Bug19471StructureTest extends AbstractMailTest {
             final JSONObject jsonMailObject = handler.getJSONMailObject();
             assertNotNull("Structured JSON mail object is null.", jsonMailObject);
 
-            System.out.println(jsonMailObject.toString(2));
+            // System.out.println(jsonMailObject.toString(2));
 
-            final JSONObject jsonBodyObject;
+            final JSONArray jsonBodyArray;
             {
                 final Object bodyObject = jsonMailObject.opt("body");
                 assertNotNull("Missing mail body.", bodyObject);
 
                 // {"data":"This is a text message.\n\n","id":"1"}
-                assertTrue("Body object is not a JSON object.", (bodyObject instanceof JSONObject));
-                jsonBodyObject = (JSONObject) bodyObject;
+                assertTrue("Body object is not a JSON object.", (bodyObject instanceof JSONArray));
+                jsonBodyArray = (JSONArray) bodyObject;
+                
             }
             
-            assertTrue("Missing \"data\" key.", jsonBodyObject.hasAndNotNull("data"));
+            final JSONObject icalObject = jsonBodyArray.getJSONObject(1);
+            final JSONObject ct = icalObject.getJSONObject("headers").getJSONObject("content-type");
+            final JSONObject param = ct.getJSONObject("params");
+            assertTrue(param.hasAndNotNull("method") && "REQUEST".equals(param.getString("method")));
         } catch (final Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
