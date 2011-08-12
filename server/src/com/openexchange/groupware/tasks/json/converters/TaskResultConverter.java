@@ -49,8 +49,10 @@
 
 package com.openexchange.groupware.tasks.json.converters;
 
+import java.util.Collection;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
@@ -70,20 +72,40 @@ public class TaskResultConverter extends AbstractTaskJSONResultConverter {
     
     private static final String INPUT_FORMAT = "task";
 
+    private final TaskListResultConverter listConverter;
+
+    /**
+     * Initializes a new {@link TaskResultConverter}.
+     */
+    public TaskResultConverter() {
+        super();
+        listConverter = new TaskListResultConverter();
+    }
+
     @Override
     public String getInputFormat() {
         return INPUT_FORMAT;
     }
 
     @Override
-    public void convertTask(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
-        final Task task = (Task) result.getResultObject();
+    public void convertTask(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
+        final Object resultObject = result.getResultObject();
+        final String action = request.getParameter(AJAXServlet.PARAMETER_ACTION);
+        if (resultObject instanceof Task) {
+            convertTask((Task) resultObject, result);
+        } else {
+            @SuppressWarnings("unchecked") final Collection<Task> tasks = (Collection<Task>) resultObject;
+            listConverter.convertTask(action, tasks, request, result);
+        }
+    }
+
+    private void convertTask(final Task task, final AJAXRequestResult result) throws OXException {
         final TaskWriter taskWriter = new TaskWriter(getTimeZone());
 
         final JSONObject jsonResponseObject = new JSONObject();
         try {
             taskWriter.writeTask(task, jsonResponseObject);
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }
 

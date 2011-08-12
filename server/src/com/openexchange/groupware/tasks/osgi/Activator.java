@@ -58,7 +58,6 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.reminder.TargetService;
 import com.openexchange.groupware.tasks.ModifyThroughDependant;
 import com.openexchange.groupware.tasks.json.TaskActionFactory;
-import com.openexchange.groupware.tasks.json.converters.TaskListResultConverter;
 import com.openexchange.groupware.tasks.json.converters.TaskResultConverter;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 
@@ -81,7 +80,6 @@ public class Activator extends AJAXModuleActivator {
 
         registerModule(new TaskActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "tasks");
         registerService(ResultConverter.class, new TaskResultConverter());
-        registerService(ResultConverter.class, new TaskListResultConverter());
     }
 
     @Override

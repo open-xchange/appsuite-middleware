@@ -49,20 +49,22 @@
 
 package com.openexchange.groupware.tasks.json.converters;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.writer.TaskWriter;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.json.TaskRequestTools;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -70,48 +72,92 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class TaskListResultConverter extends AbstractTaskJSONResultConverter {
+public class TaskListResultConverter extends TaskResultConverter {
 
-    private static final String INPUT_FORMAT = "tasks";
-
-    @Override
-    public String getInputFormat() {
-        return INPUT_FORMAT;
+    /**
+     * Initializes a new {@link TaskListResultConverter}.
+     */
+    public TaskListResultConverter() {
+        super();
     }
-    
-    @Override
-    public void convertTask(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
-        final Map<String, List<Task>> taskMap = (Map<String, List<Task>>) result.getResultObject();
-        final boolean putDeleted;
-        final List<Task> taskList;
-        if (taskMap.size() > 1) {
-            putDeleted = true;
-            taskList = taskMap.get("modified");
+
+    protected void convertTask(final String action, final Collection<Task> tasks, final AJAXRequestData request, final AJAXRequestResult result) throws OXException {
+        if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATES)) {
+            convertTasks4Updates(tasks, request, result);
         } else {
-            putDeleted = false;
-            taskList = taskMap.get("tasks");
+            convertTasks(tasks, request, result);
         }
-        
+    }
+
+    protected void convertTasks(final Collection<Task> tasks, final AJAXRequestData request, final AJAXRequestResult result) throws OXException {
         final int[] columns = TaskRequestTools.checkIntArray(request, AJAXServlet.PARAMETER_COLUMNS);
+        /*
+         * Create JSON array
+         */
+        final JSONArray jsonResponseArray = new JSONArray();
+        
+        final TaskWriter taskwriter = new TaskWriter(getTimeZone());        
+        for (final Task task : tasks) {
+            try {
+                taskwriter.writeArray(task, columns, jsonResponseArray);
+            } catch (final JSONException e) {
+                throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+            }
+        }
+
+        result.setResultObject(jsonResponseArray, OUTPUT_FORMAT);
+    }
+
+    protected void convertTasks4Updates(final Collection<Task> tasks, final AJAXRequestData request, final AJAXRequestResult result) throws OXException {
+        final int[] columns = TaskRequestTools.checkIntArray(request, AJAXServlet.PARAMETER_COLUMNS);
+        /*
+         * Create list with support for Iterator.remove()
+         */
+        final List<Task> taskList = new ArrayList<Task>(tasks);
+        /*
+         * Any deleted tasks?
+         */
+        final List<Task> deletedTasks = new LinkedList<Task>();
+        for (final Iterator<Task> iter = taskList.iterator(); iter.hasNext();) {
+            final Task task = iter.next();
+            if (hasOnlyId(task, columns)) {
+                deletedTasks.add(task);
+                iter.remove();
+            }
+        }
+        /*
+         * Create JSON array
+         */
         final JSONArray jsonResponseArray = new JSONArray();
         
         final TaskWriter taskwriter = new TaskWriter(getTimeZone());        
         for (final Task task : taskList) {
             try {
                 taskwriter.writeArray(task, columns, jsonResponseArray);
-            } catch (JSONException e) {
+            } catch (final JSONException e) {
                 throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             }
         }
         
-        if (putDeleted) {
-            final List<Task> deleted = taskMap.get("deleted");
-            for (final Task task : deleted) {
+        if (!deletedTasks.isEmpty()) {
+            for (final Task task : deletedTasks) {
                 jsonResponseArray.put(task.getObjectID());
             }
         }
 
         result.setResultObject(jsonResponseArray, OUTPUT_FORMAT);
+    }
+
+    private static boolean hasOnlyId(final Task task, final int[] columns) {
+        if (!task.containsObjectID()) {
+            return false;
+        }
+        for (final int column : columns) {
+            if (DataObject.OBJECT_ID != column && task.contains(column)) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }
