@@ -65,6 +65,7 @@ import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
@@ -187,6 +188,9 @@ public class AppointmentListResultConverter extends AppointmentResultConverter {
     private static boolean hasOnlyId(final Appointment appointment, final int[] columns) {
         if (!appointment.containsObjectID()) {
             return false;
+        }
+        if (CommonObject.Marker.ID_ONLY.equals(appointment.getMarker())) {
+            return true;
         }
         for (final int column : columns) {
             if (DataObject.OBJECT_ID != column && appointment.contains(column)) {
