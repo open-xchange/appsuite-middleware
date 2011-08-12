@@ -54,9 +54,7 @@ import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.json.AppointmentActionFactory;
-import com.openexchange.groupware.calendar.json.converters.AppointmentListResultConverter;
 import com.openexchange.groupware.calendar.json.converters.AppointmentResultConverter;
-import com.openexchange.groupware.calendar.json.converters.FreeBusyResultConverter;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 
 
@@ -83,8 +81,6 @@ public final class AppointmentJSONActivator extends AJAXModuleActivator {
     protected void startBundle() throws Exception {
         registerModule(new AppointmentActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "calendar");
         registerService(ResultConverter.class, new AppointmentResultConverter());
-        registerService(ResultConverter.class, new AppointmentListResultConverter());
-        registerService(ResultConverter.class, new FreeBusyResultConverter());
     }
 
 }

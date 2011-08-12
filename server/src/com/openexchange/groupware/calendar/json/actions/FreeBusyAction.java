@@ -109,7 +109,7 @@ public final class FreeBusyAction extends AbstractAppointmentAction {
                     timestamp = appointmentObj.getLastModified();
                 }
             }
-            return new AJAXRequestResult(appointmentList, timestamp, "freebusy_appointments");
+            return new AJAXRequestResult(appointmentList, timestamp, "appointment");
         } finally {
             if (it != null) {
                 it.close();

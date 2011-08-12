@@ -54,9 +54,7 @@ import gnu.trove.TIntIntHashMap;
 import gnu.trove.TIntObjectHashMap;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -160,8 +158,7 @@ public final class ListAction extends AbstractAppointmentAction {
         final AppointmentSQLInterface appointmentsql = getService().createAppointmentSql(req.getSession());
         final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
         it = appointmentsql.getObjectsById(objectIdAndFolderId, _appointmentFields);
-        final Map<String, List<Appointment>> appointmentMap = new HashMap<String, List<Appointment>>(1);
-        final List<Appointment> appointmentList = new ArrayList<Appointment>();
+        final List<Appointment> appointmentList = new ArrayList<Appointment>(16);
         try {
             int counter = 0;         
             while (it.hasNext()) {
@@ -254,8 +251,7 @@ public final class ListAction extends AbstractAppointmentAction {
                 counter++;
             }
 
-            appointmentMap.put("appointments", appointmentList);
-            return new AJAXRequestResult(appointmentMap, timestamp, "appointments");
+            return new AJAXRequestResult(appointmentList, timestamp, "appointment");
         } catch (final SearchIteratorException e) {
             throw e;
         } catch (final OXException e) {

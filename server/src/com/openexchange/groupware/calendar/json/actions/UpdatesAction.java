@@ -52,9 +52,7 @@ package com.openexchange.groupware.calendar.json.actions;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
@@ -108,7 +106,7 @@ public final class UpdatesAction extends AbstractAppointmentAction {
         final boolean bRecurrenceMaster = Boolean.parseBoolean(req.getParameter(AppointmentRequest.RECURRENCE_MASTER));
         final boolean showPrivates = Boolean.parseBoolean(req.getParameter(AJAXServlet.PARAMETER_SHOW_PRIVATE_APPOINTMENTS));
         
-        int folderId = req.getFolderId();
+        final int folderId = req.getFolderId();
 
         boolean showAppointmentInAllFolders = false;
 
@@ -139,9 +137,7 @@ public final class UpdatesAction extends AbstractAppointmentAction {
         SearchIterator<Appointment> it = null;
         Date lastModified = null;
         appointmentsql.setIncludePrivateAppointments(showPrivates);
-        final Map<String, List<Appointment>> appointmentMap = new HashMap<String, List<Appointment>>(2);
-        final List<Appointment> modified = new ArrayList<Appointment>();
-        final List<Appointment> deleted = new ArrayList<Appointment>();
+        final List<Appointment> appointments = new ArrayList<Appointment>(16);
         try {
             if (!bIgnoreModified) {
                 if (showAppointmentInAllFolders) {
@@ -180,7 +176,7 @@ public final class UpdatesAction extends AbstractAppointmentAction {
                                 appointmentObj.setStartDate(new Date(recuResults.getRecurringResult(0).getStart()));
                                 appointmentObj.setEndDate(new Date(recuResults.getRecurringResult(0).getEnd()));
 
-                                modified.add(appointmentObj);
+                                appointments.add(appointmentObj);
                             }
                         } else {
                             // Commented this because this is done in CalendarOperation.next():726 that calls extractRecurringInformation()
@@ -207,9 +203,9 @@ public final class UpdatesAction extends AbstractAppointmentAction {
                                     appointmentObj.setRecurrencePosition(result.getPosition());
 
                                     if (startUTC == null || endUTC == null) {
-                                        modified.add(appointmentObj);
+                                        appointments.add(appointmentObj);
                                     } else {
-                                        checkAndAddAppointment(modified, appointmentObj, startUTC, endUTC, recColl);
+                                        checkAndAddAppointment(appointments, appointmentObj, startUTC, endUTC, recColl);
                                     }
                                 }
                             }
@@ -217,9 +213,9 @@ public final class UpdatesAction extends AbstractAppointmentAction {
                     }
                     if (!written) {
                         if (startUTC == null || endUTC == null) {
-                            modified.add(appointmentObj);
+                            appointments.add(appointmentObj);
                         } else {
-                            checkAndAddAppointment(modified, appointmentObj, startUTC, endUTC, recColl);
+                            checkAndAddAppointment(appointments, appointmentObj, startUTC, endUTC, recColl);
                         }
                     }
 
@@ -235,7 +231,12 @@ public final class UpdatesAction extends AbstractAppointmentAction {
                 it = appointmentsql.getDeletedAppointmentsInFolder(folderId, _appointmentFields, requestedTimestamp);
                 while (it.hasNext()) {
                     final Appointment appointmentObj = it.next();
-                    deleted.add(appointmentObj);
+                    /*
+                     * Add a clone only carrying appointment's identifier
+                     */
+                    final Appointment onlyId = new Appointment();
+                    onlyId.setObjectID(appointmentObj.getObjectID());
+                    appointments.add(onlyId);
 
                     lastModified = appointmentObj.getLastModified();
 
@@ -244,10 +245,8 @@ public final class UpdatesAction extends AbstractAppointmentAction {
                     }
                 }
             }
-            
-            appointmentMap.put("modified", modified);
-            appointmentMap.put("deleted", deleted);
-            return new AJAXRequestResult(appointmentMap, timestamp, "appointments");
+
+            return new AJAXRequestResult(appointments, timestamp, "appointment");
         } catch (final SQLException e) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, new Object[0]);
         } finally {
