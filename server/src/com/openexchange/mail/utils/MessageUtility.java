@@ -79,6 +79,8 @@ public final class MessageUtility {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MessageUtility.class));
 
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
     /**
      * No instantiation.
      */
@@ -322,7 +324,12 @@ public final class MessageUtility {
             /*
              * Detect the charset
              */
-            return new String(bytes, CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(bytes)));
+            if (!DEBUG) {
+                return new String(bytes, CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(bytes)));
+            }
+            final String detectedCharset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(bytes));
+            LOG.debug("Mapped \"GB2312\" charset to \"" + detectedCharset + "\".");
+            return new String(bytes, detectedCharset);
         }
         return readStream0(inStream, charset);
     }
