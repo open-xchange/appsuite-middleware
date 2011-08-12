@@ -309,6 +309,9 @@ public final class MessageUtility {
                 throw error;
             }
         }
+        /*
+         * TODO: Re-think to make this the default case...
+         */
         if (isGB2312(charset)) {
             /*
              * Special treatment for possible GB2312 encoded stream
