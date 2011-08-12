@@ -51,9 +51,7 @@ package com.openexchange.groupware.calendar.json.actions;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -119,7 +117,6 @@ public final class SearchAction extends AbstractAppointmentAction {
 
         try {
             final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
-            final Map<String, List<Appointment>> appointmentMap = new HashMap<String, List<Appointment>>(1);
             final List<Appointment> appointmentList = new ArrayList<Appointment>();
             while (it.hasNext()) {
                 final Appointment appointment = it.next();
@@ -152,8 +149,7 @@ public final class SearchAction extends AbstractAppointmentAction {
                 }
             }
 
-            appointmentMap.put("appointments", appointmentList);
-            return new AJAXRequestResult(appointmentMap, timestamp, "appointments");
+            return new AJAXRequestResult(appointmentList, timestamp, "appointment");
         } finally {
             if (it != null) {
                 it.close();
