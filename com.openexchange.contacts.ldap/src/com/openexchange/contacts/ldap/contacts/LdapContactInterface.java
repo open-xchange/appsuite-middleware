@@ -136,7 +136,7 @@ public class LdapContactInterface implements ContactInterface {
          * @param field
          * @param sort
          */
-        private SortInfo(final int field, final Order sort) {
+        protected SortInfo(final int field, final Order sort) {
             this.field = field;
             this.sort = sort;
         }
