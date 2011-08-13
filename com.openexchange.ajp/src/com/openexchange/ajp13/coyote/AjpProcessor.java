@@ -718,18 +718,21 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     }
                     continue;
                 }
-                final byte methodCode = requestHeaderMessage.peekByte();
-                if (Constants.SC_M_JK_STORED != methodCode && (methodCode < 1 || methodCode > Constants.methodTransArray.length)) {
-                    /*-
-                     * Invalid method code.
-                     * 
-                     * Usually the servlet didn't read the previous request body
-                     */
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Unexpected message: " + type);
-                    }
-                    continue;
-                }
+//                /*
+//                 * Check HTTP method code
+//                 */
+//                final byte methodCode = requestHeaderMessage.peekByte();
+//                if (Constants.SC_M_JK_STORED != methodCode && (methodCode < 1 || methodCode > Constants.methodTransArray.length)) {
+//                    /*-
+//                     * Invalid method code.
+//                     * 
+//                     * Usually the servlet didn't read the previous request body
+//                     */
+//                    if (LOG.isDebugEnabled()) {
+//                        LOG.debug("Unexpected message: " + type);
+//                    }
+//                    continue;
+//                }
                 /*
                  * So far a valid forward-request package
                  */
