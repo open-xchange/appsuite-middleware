@@ -68,11 +68,11 @@ import com.openexchange.groupware.update.internal.InternalList;
  */
 public class Activator implements BundleActivator {
 
-    private static final String APPLICATION_ID = "com.openexchange.groupware.update";
+    // private static final String APPLICATION_ID = "com.openexchange.groupware.update";
 
     private final Stack<ServiceTracker<?, ?>> trackers = new Stack<ServiceTracker<?, ?>>();
 
-    private ServiceRegistration createTableRegistration;
+    private ServiceRegistration<CreateTableService> createTableRegistration;
 
     public Activator() {
         super();
@@ -80,7 +80,7 @@ public class Activator implements BundleActivator {
 
     @Override
     public void start(final BundleContext context) throws Exception {
-        createTableRegistration = context.registerService(CreateTableService.class.getName(), new CreateUpdateTaskTable(), null);
+        createTableRegistration = context.registerService(CreateTableService.class, new CreateUpdateTaskTable(), null);
         trackers.push(new ServiceTracker<ConfigurationService, ConfigurationService>(
             context,
             ConfigurationService.class,
