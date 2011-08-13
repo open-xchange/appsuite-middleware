@@ -62,20 +62,20 @@ import com.openexchange.groupware.delete.DeleteListener;
 
 public class Activator implements BundleActivator {
 
-    private ServiceRegistration serviceRegistration;
+    private ServiceRegistration<GenericConfigurationStorageService> serviceRegistration;
 
-    private ServiceRegistration clearTablesServiceRegistration;
+    private ServiceRegistration<DeleteListener> clearTablesServiceRegistration;
 
-    private ServiceRegistration createTablesServiceRegistration;
+    private ServiceRegistration<CreateTableService> createTablesServiceRegistration;
 
     @Override
     public void start(final BundleContext context) throws Exception {
         final MySQLGenericConfigurationStorage mySQLGenericConfigurationStorage = new MySQLGenericConfigurationStorage();
         mySQLGenericConfigurationStorage.setDBProvider(new WhiteboardDBProvider(context));
-        clearTablesServiceRegistration = context.registerService(DeleteListener.class.getName(), new ClearGenConfTables(), null);
-        createTablesServiceRegistration = context.registerService(CreateTableService.class.getName(), new CreateGenConfTables(), null);
+        clearTablesServiceRegistration = context.registerService(DeleteListener.class, new ClearGenConfTables(), null);
+        createTablesServiceRegistration = context.registerService(CreateTableService.class, new CreateGenConfTables(), null);
         serviceRegistration = context.registerService(
-            GenericConfigurationStorageService.class.getName(),
+            GenericConfigurationStorageService.class,
             mySQLGenericConfigurationStorage,
             null);
     }
