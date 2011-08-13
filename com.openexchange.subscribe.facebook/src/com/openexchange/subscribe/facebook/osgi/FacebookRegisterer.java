@@ -70,7 +70,7 @@ import com.openexchange.subscribe.facebook.groupware.FacebookSubscriptionsOAuthA
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class FacebookRegisterer implements ServiceTrackerCustomizer {
+public class FacebookRegisterer implements ServiceTrackerCustomizer<Object,Object> {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FacebookRegisterer.class));
 
@@ -78,8 +78,8 @@ public class FacebookRegisterer implements ServiceTrackerCustomizer {
 
     private final Lock lock = new ReentrantLock();
 
-    private ServiceRegistration registration;
-    private ServiceRegistration registration2;
+    private ServiceRegistration<SubscribeService> registration;
+    private ServiceRegistration<OAuthAccountDeleteListener> registration2;
 
     private OAuthServiceMetaData facebookMetaData;
 
@@ -87,13 +87,13 @@ public class FacebookRegisterer implements ServiceTrackerCustomizer {
 
     private ContextService contextService;
 
-    public FacebookRegisterer(BundleContext context) {
+    public FacebookRegisterer(final BundleContext context) {
         super();
         this.context = context;
     }
 
     @Override
-    public Object addingService(ServiceReference reference) {
+    public Object addingService(final ServiceReference<Object> reference) {
         final Object obj = context.getService(reference);
         final boolean needsRegistration;
         lock.lock();
@@ -115,22 +115,22 @@ public class FacebookRegisterer implements ServiceTrackerCustomizer {
         }
         if (needsRegistration) {
             LOG.info("Registering facebook subscribe service.");
-            FacebookSubscribeService facebookSubscribeService = new FacebookSubscribeService(facebookMetaData, facebookService);
-            FacebookSubscriptionsOAuthAccountDeleteListener deleteListener = new FacebookSubscriptionsOAuthAccountDeleteListener(facebookSubscribeService, contextService);
-            registration = context.registerService(SubscribeService.class.getName(), facebookSubscribeService, null);
-            registration2 = context.registerService(OAuthAccountDeleteListener.class.getName(), deleteListener, null);
+            final FacebookSubscribeService facebookSubscribeService = new FacebookSubscribeService(facebookMetaData, facebookService);
+            final FacebookSubscriptionsOAuthAccountDeleteListener deleteListener = new FacebookSubscriptionsOAuthAccountDeleteListener(facebookSubscribeService, contextService);
+            registration = context.registerService(SubscribeService.class, facebookSubscribeService, null);
+            registration2 = context.registerService(OAuthAccountDeleteListener.class, deleteListener, null);
         }
         return obj;
     }
 
     @Override
-    public void modifiedService(ServiceReference reference, Object service) {
+    public void modifiedService(final ServiceReference<Object> reference, final Object service) {
         // Nothing to do.
     }
 
     @Override
-    public void removedService(ServiceReference reference, Object service) {
-        ServiceRegistration unregister = null;
+    public void removedService(final ServiceReference<Object> reference, final Object service) {
+        ServiceRegistration<?> unregister = null;
         lock.lock();
         try {
             if (service instanceof OAuthServiceMetaData) {
