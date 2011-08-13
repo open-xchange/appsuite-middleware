@@ -62,11 +62,11 @@ import com.openexchange.publish.database.CreatePublicationTables;
  */
 public class CreateTableActivator implements BundleActivator {
 
-    ServiceRegistration registration;
+    private ServiceRegistration<CreateTableService> registration;
 
     @Override
     public void start(final BundleContext context) throws Exception {
-        registration = context.registerService(CreateTableService.class.getName(), new CreatePublicationTables(), null);
+        registration = context.registerService(CreateTableService.class, new CreatePublicationTables(), null);
     }
 
     @Override
