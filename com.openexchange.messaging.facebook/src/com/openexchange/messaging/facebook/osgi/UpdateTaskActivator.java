@@ -61,20 +61,20 @@ import com.openexchange.database.DatabaseService;
  */
 public class UpdateTaskActivator implements BundleActivator {
 
-    private ServiceTracker tracker;
+    private ServiceTracker<DatabaseService,DatabaseService> tracker;
 
     public UpdateTaskActivator() {
         super();
     }
 
     @Override
-    public void start(BundleContext context) throws Exception {
-        tracker = new ServiceTracker(context, DatabaseService.class.getName(), new UpdateTaskRegisterer(context));
+    public void start(final BundleContext context) throws Exception {
+        tracker = new ServiceTracker<DatabaseService,DatabaseService>(context, DatabaseService.class, new UpdateTaskRegisterer(context));
         tracker.open();
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    public void stop(final BundleContext context) throws Exception {
         tracker.close();
     }
 }
