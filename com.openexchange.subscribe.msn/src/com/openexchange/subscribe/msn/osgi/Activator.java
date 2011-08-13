@@ -48,7 +48,6 @@
  */
 package com.openexchange.subscribe.msn.osgi;
 
-import java.util.Stack;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.util.tracker.ServiceTracker;
@@ -62,10 +61,6 @@ import com.openexchange.subscribe.msn.MSNSubscribeService;
 
 public class Activator extends HousekeepingActivator {
 
-    private static final Class[] NEEDED = new Class[] { OAuthService.class, ContextService.class, MSNService.class};
-
-    private final Stack<ServiceTracker> trackers = new Stack<ServiceTracker>();
-
     private OAuthServiceMetaData oAuthServiceMetaData;
 
     private MSNService msnService;
@@ -74,14 +69,13 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED;
+        return new Class[] { OAuthService.class, ContextService.class, MSNService.class};
     }
 
     @Override
     protected void startBundle() throws Exception {
         // react dynamically to the appearance/disappearance of OAuthMetaDataService for MSN
-        ServiceTracker metaDataTracker = new ServiceTracker(context, OAuthServiceMetaData.class.getName(), new OAuthServiceMetaDataRegisterer(context, this));
-        rememberTracker(metaDataTracker);
+        rememberTracker(new ServiceTracker<OAuthServiceMetaData, OAuthServiceMetaData>(context, OAuthServiceMetaData.class.getName(), new OAuthServiceMetaDataRegisterer(context, this)));
         openTrackers();
         msnService = getService(MSNService.class);
     }
@@ -91,7 +85,7 @@ public class Activator extends HousekeepingActivator {
     }
 
 
-    public void setOAuthServiceMetaData(OAuthServiceMetaData authServiceMetaData) {
+    public void setOAuthServiceMetaData(final OAuthServiceMetaData authServiceMetaData) {
         oAuthServiceMetaData = authServiceMetaData;
     }
 
@@ -112,7 +106,7 @@ public class Activator extends HousekeepingActivator {
     }
 
 
-    public void setMsnService(MSNService msnService) {
+    public void setMsnService(final MSNService msnService) {
         this.msnService = msnService;
     }
 
