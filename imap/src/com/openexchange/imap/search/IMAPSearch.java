@@ -229,15 +229,20 @@ public final class IMAPSearch {
      * @throws MessagingException If a messaging error occurs
      */
     private static int[] issueNonWildcardSearch(final SearchTerm term, final IMAPFolder imapFolder) throws MessagingException {
+        /*-
+         * JavaMail already searches dependent on whether pattern contains non-ascii characters. If yes a charset is used:
+         * SEARCH CHARSET UTF-8 <one or more search criteria>
+         */
+        if (!LOG.isDebugEnabled()) {
+            return search(term, imapFolder);
+        }
         final long start = System.currentTimeMillis();
         /*-
          * JavaMail already searches dependent on whether pattern contains non-ascii characters. If yes a charset is used:
          * SEARCH CHARSET UTF-8 <one or more search criteria>
          */
         final int[] seqNums = search(term, imapFolder);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(new StringBuilder(128).append("IMAP search took ").append((System.currentTimeMillis() - start)).append("msec").toString());
-        }
+        LOG.debug(new StringBuilder(128).append("IMAP search took ").append((System.currentTimeMillis() - start)).append("msec").toString());
         return seqNums;
     }
 
