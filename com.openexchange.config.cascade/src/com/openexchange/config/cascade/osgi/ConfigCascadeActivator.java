@@ -51,6 +51,7 @@ package com.openexchange.config.cascade.osgi;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -90,28 +91,28 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
     protected void startBundle() throws Exception {
         configCascade = new ConfigCascade();
 
-        final ServiceTracker stringParsers = track(StringParser.class);
+        final ServiceTracker<StringParser, StringParser> stringParsers = track(StringParser.class);
 
         configCascade.setStringParser(new StringParser() {
 
             @Override
             public <T> T parse(final String s, final Class<T> t) {
-                final Object service = stringParsers.getService();
-                if(service == null) {
+                final StringParser parser = stringParsers.getService();
+                if(parser == null) {
                     LOG.fatal("Could not find suitable string parser in OSGi system");
                     return null;
                 }
-                final StringParser parser = (StringParser) service;
                 return parser.parse(s, t);
             }
 
         });
 
-        final ServiceTracker serverProviders = track(createFilter("server"), new ServiceTrackerCustomizer() {
+        final BundleContext context = this.context;
+        track(createFilter("server"), new ServiceTrackerCustomizer<ConfigProviderService, ConfigProviderService>() {
 
             @Override
-            public Object addingService(final ServiceReference reference) {
-                final ConfigProviderService provider = (ConfigProviderService) context.getService(reference);
+            public ConfigProviderService addingService(final ServiceReference<ConfigProviderService> reference) {
+                final ConfigProviderService provider = context.getService(reference);
                 if (isServerProvider(reference)) {
                     final String scopes = getScopes(provider);
                     configure(scopes, configCascade);
@@ -122,22 +123,18 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
             }
 
             @Override
-            public void modifiedService(final ServiceReference reference, final Object service) {
+            public void modifiedService(final ServiceReference<ConfigProviderService> reference, final ConfigProviderService service) {
                 // IGNORE
             }
 
             @Override
-            public void removedService(final ServiceReference reference, final Object service) {
-
+            public void removedService(final ServiceReference<ConfigProviderService> reference, final ConfigProviderService service) {
+                context.ungetService(reference);
             }
 
         });
 
-
         openTrackers();
-
-
-
     }
 
 
