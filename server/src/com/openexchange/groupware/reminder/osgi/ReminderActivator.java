@@ -56,13 +56,13 @@ import com.openexchange.groupware.reminder.json.ReminderActionFactory;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 
 /**
- * {@link Activator}
+ * {@link ReminderActivator}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator extends AJAXModuleActivator {
+public class ReminderActivator extends AJAXModuleActivator {
 
-    public Activator() {
+    public ReminderActivator() {
         super();
     }
 
