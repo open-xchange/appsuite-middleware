@@ -63,13 +63,13 @@ import com.openexchange.groupware.tasks.json.converters.TaskResultConverter;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 
 /**
- * {@link Activator}
+ * {@link TaskActivator}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator extends AJAXModuleActivator {
+public class TaskActivator extends AJAXModuleActivator {
 
-    public Activator() {
+    public TaskActivator() {
         super();
     }
 
