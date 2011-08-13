@@ -64,16 +64,16 @@ import com.openexchange.groupware.reminder.TargetService;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 
 /**
- * {@link Activator}
+ * {@link CalendarActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Activator extends HousekeepingActivator {
+public class CalendarActivator extends HousekeepingActivator {
 
     /**
-     * Initializes a new {@link Activator}.
+     * Initializes a new {@link CalendarActivator}.
      */
-    public Activator() {
+    public CalendarActivator() {
         super();
     }
 
