@@ -77,7 +77,7 @@ public class ContactListResultConverter extends ContactResultConverter {
 
     @Override
     public String getInputFormat() {
-        return "contacts";
+        return "contact";
     }
 
     /**
