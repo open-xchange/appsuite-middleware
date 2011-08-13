@@ -72,14 +72,14 @@ import com.openexchange.userconf.UserConfigurationService;
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class Activator extends HousekeepingActivator {
+public class ContactCollectorActivator extends HousekeepingActivator {
 
     private ContactCollectorServiceImpl collectorInstance;
 
     /**
-     * Initializes a new {@link Activator}.
+     * Initializes a new {@link ContactCollectorActivator}.
      */
-    public Activator() {
+    public ContactCollectorActivator() {
         super();
     }
 
