@@ -89,7 +89,7 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
 
     @Override
     protected void startBundle() throws Exception {
-        configCascade = new ConfigCascade();
+        final ConfigCascade configCascade = this.configCascade = new ConfigCascade();
 
         final ServiceTracker<StringParser, StringParser> stringParsers = track(StringParser.class);
 
