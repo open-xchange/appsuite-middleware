@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.json.converters;
 
+import java.util.Collection;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -69,8 +70,11 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class ContactResultConverter extends JSONResultConverter {
 
+    private final ContactListResultConverter listConverter;
+
     public ContactResultConverter(final ImageService imageService) {
         super(imageService);
+        listConverter = new ContactListResultConverter(imageService);
     }
 
     @Override
@@ -80,8 +84,15 @@ public class ContactResultConverter extends JSONResultConverter {
 
     @Override
     public void convertResult(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
-        final Contact contact = (Contact) result.getResultObject();
-        result.setResultObject(convert(contact, session), "json");
+        final Object resultObject = result.getResultObject();
+        if (resultObject instanceof Contact) {
+            final Contact contact = (Contact) resultObject;
+            result.setResultObject(convert(contact, session), "json");
+        } else {
+            @SuppressWarnings("unchecked")
+            final Collection<Contact> contacts = (Collection<Contact>) resultObject;
+            listConverter.convertResult(contacts, request, result);
+        }
     }
 
     private Object convert(final Contact contact, final ServerSession session) throws OXException {

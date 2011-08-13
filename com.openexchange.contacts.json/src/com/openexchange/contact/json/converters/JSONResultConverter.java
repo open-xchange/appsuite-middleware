@@ -109,7 +109,7 @@ public abstract class JSONResultConverter implements ResultConverter {
      *
      * @param imageService
      */
-    public JSONResultConverter(final ImageService imageService) {
+    protected JSONResultConverter(final ImageService imageService) {
         super();
         this.imageService = imageService;
     }

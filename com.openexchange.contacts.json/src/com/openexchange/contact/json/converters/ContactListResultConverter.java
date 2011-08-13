@@ -49,20 +49,19 @@
 
 package com.openexchange.contact.json.converters;
 
-import java.util.List;
-import java.util.Map;
+import java.util.Collection;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.contact.json.RequestTools;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactGetter;
+import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.DataObject;
 import com.openexchange.image.ImageService;
-import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -70,7 +69,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ContactListResultConverter extends JSONResultConverter {
+public class ContactListResultConverter extends ContactResultConverter {
 
     public ContactListResultConverter(final ImageService imageService) {
         super(imageService);
@@ -81,54 +80,63 @@ public class ContactListResultConverter extends JSONResultConverter {
         return "contacts";
     }
 
-    @Override
-    public void convertResult(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
-        final Map<String, List<Contact>> contactMap = (Map<String, List<Contact>>) result.getResultObject();
-        List<Contact> contacts = null;
-        List<Contact> deleted = null;
-        if (contactMap.size() == 1) {
-            contacts = contactMap.get("contacts");
-        } else {
-            contacts = contactMap.get("modified");
-            deleted = contactMap.get("deleted");
-        }
-
+    /**
+     * Converts specified contact collection to an appropriate JSON array.
+     * 
+     * @param contacts The contact collection
+     * @param request The request data
+     * @param result The result
+     * @throws OXException If conversion fails
+     */
+    public void convertResult(final Collection<Contact> contacts, final AJAXRequestData request, final AJAXRequestResult result) throws OXException {
         final int[] columns = RequestTools.getColumnsAsIntArray(request, "columns");
 
         final JSONArray resultArray = new JSONArray();
         for (final Contact contact : contacts) {
-            final JSONArray contactArray = new JSONArray();
-
-            final ContactGetter cg = new ContactGetter();
-            for (final int column : columns) {
-                final ContactField field = ContactField.getByValue(column);
-                if (field != null && !field.getAjaxName().isEmpty()) {
-                    final Object value = field.doSwitch(cg, contact);
-                    if (value == null) {
-                        contactArray.put(JSONObject.NULL);
-                    } else if (isSpecial(column)) {
-                        final Object special = convertSpecial(field, contact, cg);
-                        if (special == null) {
+            if (hasOnlyId(contact, columns)) {
+                resultArray.put(contact.getObjectID());
+            } else {
+                final JSONArray contactArray = new JSONArray();
+    
+                final ContactGetter cg = new ContactGetter();
+                for (final int column : columns) {
+                    final ContactField field = ContactField.getByValue(column);
+                    if (field != null && !field.getAjaxName().isEmpty()) {
+                        final Object value = field.doSwitch(cg, contact);
+                        if (value == null) {
                             contactArray.put(JSONObject.NULL);
+                        } else if (isSpecial(column)) {
+                            final Object special = convertSpecial(field, contact, cg);
+                            if (special == null) {
+                                contactArray.put(JSONObject.NULL);
+                            } else {
+                                contactArray.put(special);
+                            }
                         } else {
-                            contactArray.put(special);
+                            contactArray.put(value);
                         }
-                    } else {
-                        contactArray.put(value);
                     }
                 }
-            }
-
-            resultArray.put(contactArray);
-        }
-
-        if (deleted != null) {
-            for (final Contact contact : deleted) {
-                resultArray.put(contact.getObjectID());
+                resultArray.put(contactArray);
             }
         }
 
         result.setResultObject(resultArray, "json");
+    }
+
+    private static boolean hasOnlyId(final Contact contact, final int[] columns) {
+        if (!contact.containsObjectID()) {
+            return false;
+        }
+        if (CommonObject.Marker.ID_ONLY.equals(contact.getMarker())) {
+            return true;
+        }
+        for (final int column : columns) {
+            if (DataObject.OBJECT_ID != column && contact.contains(column)) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }

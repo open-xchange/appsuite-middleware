@@ -51,9 +51,7 @@ package com.openexchange.contact.json.actions;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.TimeZone;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.RdbContactSQLImpl;
@@ -91,7 +89,6 @@ public class ListUserAction extends ContactAction {
         final TimeZone timeZone = req.getTimeZone();
 
         final ContactInterface contactInterface = new RdbContactSQLImpl(session, ctx);
-        final Map<String, List<Contact>> contactMap = new HashMap<String, List<Contact>>(1);
         final List<Contact> contacts = new ArrayList<Contact>();
         for (final int uid : uids) {
             final Contact contact = contactInterface.getUserById(uid);
@@ -107,8 +104,7 @@ public class ListUserAction extends ContactAction {
             }
         }
 
-        contactMap.put("contacts", contacts);
-        return new AJAXRequestResult(contactMap, timestamp, "contacts");
+        return new AJAXRequestResult(contacts, timestamp, "contact");
     }
 
 }

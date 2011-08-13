@@ -53,7 +53,6 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.contact.json.ContactActionFactory;
-import com.openexchange.contact.json.converters.ContactListResultConverter;
 import com.openexchange.contact.json.converters.ContactResultConverter;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.image.ImageService;
@@ -78,7 +77,6 @@ public class ContactJSONActivator extends AJAXModuleActivator {
     protected void startBundle() throws Exception {
         registerModule(new ContactActionFactory(new ExceptionOnAbsenceServiceLookup(this)), AJAXServlet.MODULE_CONTACT);
         registerService(ResultConverter.class, new ContactResultConverter(getService(ImageService.class)));
-        registerService(ResultConverter.class, new ContactListResultConverter(getService(ImageService.class)));
     }
 
 }

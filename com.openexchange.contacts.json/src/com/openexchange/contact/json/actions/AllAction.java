@@ -51,9 +51,7 @@ package com.openexchange.contact.json.actions;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.TimeZone;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contact.json.ContactRequest;
@@ -99,7 +97,6 @@ public class AllAction extends ContactAction {
         Date timestamp = new Date(0);
         final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
         SearchIterator<Contact> it = null;
-        final Map<String, List<Contact>> contactMap = new HashMap<String, List<Contact>>(1);
         final List<Contact> contacts = new ArrayList<Contact>();
         try {
             it = contactInterface.getContactsInFolder(folder, leftHandLimit, rightHandLimit, sort, order, collation, columns);
@@ -117,15 +114,13 @@ public class AllAction extends ContactAction {
                     timestamp = lastModified;
                 }
             }
-
-            contactMap.put("contacts", contacts);
         } finally {
             if (it != null) {
                 it.close();
             }
         }
 
-        return new AJAXRequestResult(contactMap, timestamp, "contacts");
+        return new AJAXRequestResult(contacts, timestamp, "contact");
     }
 
 }

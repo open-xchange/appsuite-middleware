@@ -51,9 +51,7 @@ package com.openexchange.contact.json.actions;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -102,7 +100,6 @@ public class AdvancedSearchAction extends ContactAction {
         JSONArray filterContent;
         SearchIterator<Contact> it = null;
         final List<Contact> contacts = new ArrayList<Contact>();
-        final Map<String, List<Contact>> contactMap = new HashMap<String, List<Contact>>(1);
         try {
             filterContent = json.getJSONArray("filter");
             final SearchTerm<?> searchTerm = SearchTermParser.parse(filterContent);
@@ -130,8 +127,7 @@ public class AdvancedSearchAction extends ContactAction {
             }
         }
 
-        contactMap.put("contacts", contacts);
-        return new AJAXRequestResult(contactMap, lastModified, "contacts");
+        return new AJAXRequestResult(contacts, lastModified, "contact");
     }
 
 }

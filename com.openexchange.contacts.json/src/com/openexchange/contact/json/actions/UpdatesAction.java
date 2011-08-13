@@ -51,14 +51,13 @@ package com.openexchange.contact.json.actions;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.TimeZone;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contact.json.ContactRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.container.CommonObject.Marker;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -91,9 +90,7 @@ public class UpdatesAction extends ContactAction {
         final TimeZone timeZone = req.getTimeZone();
 
         final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
-        final List<Contact> modifiedList = new ArrayList<Contact>();
-        final List<Contact> deletedList = new ArrayList<Contact>();
-        final Map<String, List<Contact>> responseMap = new HashMap<String, List<Contact>>(2);
+        final List<Contact> list = new ArrayList<Contact>();
         SearchIterator<Contact> it = null;
         try {
             it = contactInterface.getModifiedContactsInFolder(folder, columns, timestamp);
@@ -104,7 +101,7 @@ public class UpdatesAction extends ContactAction {
                 // Correct last modified and creation date with users timezone
                 contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
                 contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
-                modifiedList.add(contact);
+                list.add(contact);
 
                 if ((lastModified != null) && (timestamp.getTime() < lastModified.getTime())) {
                     timestamp = lastModified;
@@ -119,22 +116,20 @@ public class UpdatesAction extends ContactAction {
                 // Correct last modified and creation date with users timezone
                 contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
                 contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
-                deletedList.add(contact);
+                contact.setMarker(Marker.ID_ONLY);
+                list.add(contact);
 
                 if ((lastModified != null) && (timestamp.getTime() < lastModified.getTime())) {
                     timestamp = lastModified;
                 }
             }
-
-            responseMap.put("modified", modifiedList);
-            responseMap.put("deleted", deletedList);
         } finally {
             if (it != null) {
                 it.close();
             }
         }
 
-        return new AJAXRequestResult(responseMap, timestamp, "contacts");
+        return new AJAXRequestResult(list, timestamp, "contact");
     }
 
 
