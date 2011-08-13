@@ -84,9 +84,9 @@ import com.openexchange.subscribe.microformats.transformers.MapToDocumentMetadat
  */
 public class SubcriptionServicesActivator implements BundleActivator {
 
-    private List<ServiceRegistration> registrations;
+    private List<ServiceRegistration<?>> registrations;
 
-    private List<ServiceTracker> trackers;
+    private List<ServiceTracker<?,?>> trackers;
 
     /**
      * Initializes a new {@link SubcriptionServicesActivator}.
@@ -142,26 +142,26 @@ public class SubcriptionServicesActivator implements BundleActivator {
         /*
          * Add and register services
          */
-        registrations = new ArrayList<ServiceRegistration>(4);
+        registrations = new ArrayList<ServiceRegistration<?>>(4);
 
-        registrations.add(context.registerService(SubscribeService.class.getName(), subscribeService, null));
-        registrations.add(context.registerService(SubscribeService.class.getName(), infostoreService, null));
+        registrations.add(context.registerService(SubscribeService.class, subscribeService, null));
+        registrations.add(context.registerService(SubscribeService.class, infostoreService, null));
 
-        registrations.add(context.registerService(OXMFParserFactoryService.class.getName(), parserFactory, null));
-        registrations.add(context.registerService(OXMFFormParser.class.getName(), new CybernekoOXMFFormParser(), null));
+        registrations.add(context.registerService(OXMFParserFactoryService.class, parserFactory, null));
+        registrations.add(context.registerService(OXMFFormParser.class, new CybernekoOXMFFormParser(), null));
         /*
          * Add and open service trackers
          */
-        trackers = new ArrayList<ServiceTracker>(1);
-        trackers.add(new ServiceTracker(
+        trackers = new ArrayList<ServiceTracker<?,?>>(1);
+        trackers.add(new ServiceTracker<ConfigurationService,ConfigurationService>(
             context,
-            ConfigurationService.class.getName(),
+            ConfigurationService.class,
             new RegistryServiceTrackerCustomizer<ConfigurationService>(
                 context,
                 OXMFServiceRegistry.getInstance(),
                 ConfigurationService.class)));
 
-        for (final ServiceTracker tracker : trackers) {
+        for (final ServiceTracker<?,?> tracker : trackers) {
             tracker.open();
         }
     }
@@ -169,14 +169,14 @@ public class SubcriptionServicesActivator implements BundleActivator {
     @Override
     public void stop(final BundleContext context) throws Exception {
         if (null != registrations) {
-            for (final ServiceRegistration registration : registrations) {
+            for (final ServiceRegistration<?> registration : registrations) {
                 registration.unregister();
             }
             registrations.clear();
             registrations = null;
         }
         if (null != trackers) {
-            for (final ServiceTracker tracker : trackers) {
+            for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.close();
             }
             trackers.clear();
