@@ -67,7 +67,7 @@ import com.openexchange.management.ManagementService;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class MBeanRegisterer implements ServiceTrackerCustomizer {
+public final class MBeanRegisterer implements ServiceTrackerCustomizer<ManagementService,ManagementService> {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MBeanRegisterer.class));
 
@@ -75,44 +75,44 @@ public final class MBeanRegisterer implements ServiceTrackerCustomizer {
 
     private ObjectName name;
 
-    public MBeanRegisterer(BundleContext context) {
+    public MBeanRegisterer(final BundleContext context) {
         super();
         this.context = context;
     }
 
     @Override
-    public Object addingService(ServiceReference reference) {
-        ManagementService managementService = (ManagementService) context.getService(reference);
+    public ManagementService addingService(final ServiceReference<ManagementService> reference) {
+        final ManagementService managementService = context.getService(reference);
         try {
             name = MBeanNamer.getName();
             LOG.info("Registering consistency MBean under name: " + name);
             managementService.registerMBean(name, new OsgiOXConsistency());
-        } catch (OXException e) {
-            OXException e1 = ConsistencyExceptionCodes.REGISTRATION_FAILED.create(e);
+        } catch (final OXException e) {
+            final OXException e1 = ConsistencyExceptionCodes.REGISTRATION_FAILED.create(e);
             LOG.error(e1.getMessage(), e1);
-        } catch (MalformedObjectNameException e) {
-            OXException e1 = ConsistencyExceptionCodes.REGISTRATION_FAILED.create(e);
+        } catch (final MalformedObjectNameException e) {
+            final OXException e1 = ConsistencyExceptionCodes.REGISTRATION_FAILED.create(e);
             LOG.error(e1.getMessage(), e1);
-        } catch (NullPointerException e) {
-            OXException e1 = ConsistencyExceptionCodes.REGISTRATION_FAILED.create(e);
+        } catch (final NullPointerException e) {
+            final OXException e1 = ConsistencyExceptionCodes.REGISTRATION_FAILED.create(e);
             LOG.error(e1.getMessage(), e1);
         }
         return managementService;
     }
 
     @Override
-    public void modifiedService(ServiceReference reference, Object service) {
+    public void modifiedService(final ServiceReference<ManagementService> reference, final ManagementService service) {
         // Nothing to do.
     }
 
     @Override
-    public void removedService(ServiceReference reference, Object service) {
-        ManagementService managementService = (ManagementService) service;
+    public void removedService(final ServiceReference<ManagementService> reference, final ManagementService service) {
+        final ManagementService managementService = service;
         LOG.info("Unregistering consistency MBean with name " + name);
         try {
             managementService.unregisterMBean(name);
-        } catch (OXException e) {
-            OXException e1 = ConsistencyExceptionCodes.UNREGISTRATION_FAILED.create(e);
+        } catch (final OXException e) {
+            final OXException e1 = ConsistencyExceptionCodes.UNREGISTRATION_FAILED.create(e);
             LOG.error(e1.getMessage(), e1);
         }
         name = null;

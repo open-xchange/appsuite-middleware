@@ -61,7 +61,7 @@ import com.openexchange.management.ManagementService;
  */
 public final class ConsistencyActivator implements BundleActivator {
 
-    private ServiceTracker tracker;
+    private ServiceTracker<ManagementService,ManagementService> tracker;
 
     public ConsistencyActivator() {
         super();
@@ -69,7 +69,7 @@ public final class ConsistencyActivator implements BundleActivator {
 
     @Override
     public void start(final BundleContext context) throws Exception {
-        tracker = new ServiceTracker(context, ManagementService.class.getName(), new MBeanRegisterer(context));
+        tracker = new ServiceTracker<ManagementService,ManagementService>(context, ManagementService.class, new MBeanRegisterer(context));
         tracker.open();
     }
 
