@@ -66,13 +66,13 @@ import com.openexchange.login.LoginHandlerService;
 import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
 
 /**
- * {@link Activator} - Activator for JSON folder interface.
+ * {@link FolderJSONActivator} - Activator for JSON folder interface.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Activator extends AJAXModuleActivator {
+public class FolderJSONActivator extends AJAXModuleActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FolderJSONActivator.class));
 
     private String module;
 
@@ -137,7 +137,7 @@ public class Activator extends AJAXModuleActivator {
              */
             restore();
         } catch (final Exception e) {
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Activator.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FolderJSONActivator.class)).error(e.getMessage(), e);
             throw e;
         }
     }
