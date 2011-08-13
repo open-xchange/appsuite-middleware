@@ -66,18 +66,13 @@ import com.openexchange.server.osgiservice.HousekeepingActivator;
  */
 public class ContextActivator extends HousekeepingActivator {
 
-    /**
-     *
-     */
-    private static final Class[] NEEDED = new Class[]{DatabaseService.class};
-
     public ContextActivator() {
         super();
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED;
+        return new Class[]{DatabaseService.class};
     }
 
     @Override
