@@ -378,6 +378,12 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     }
 
+    /**
+     * Initializes a new {@link AjpProcessor}.
+     * 
+     * @param packetSize The packet size
+     * @param listenerMonitor The listener monitor
+     */
     public AjpProcessor(final int packetSize, final AJPv13TaskMonitor listenerMonitor) {
         super();
         bodyBytes = MessageBytes.newInstance();
