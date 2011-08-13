@@ -59,16 +59,16 @@ import com.openexchange.user.json.actions.UserActionFactory;
 import com.openexchange.user.json.services.ServiceRegistry;
 
 /**
- * {@link Activator} - Activator for user component.
+ * {@link UserJSONActivator} - Activator for JSON user interface.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Activator extends AJAXModuleActivator {
+public class UserJSONActivator extends AJAXModuleActivator {
 
     /**
-     * Initializes a new {@link Activator}.
+     * Initializes a new {@link UserJSONActivator}.
      */
-    public Activator() {
+    public UserJSONActivator() {
         super();
     }
 
@@ -104,7 +104,7 @@ public class Activator extends AJAXModuleActivator {
                 ContactInterfaceDiscoveryService.class));
             openTrackers();
         } catch (final Exception e) {
-            final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Activator.class));
+            final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UserJSONActivator.class));
             LOG.error(e.getMessage(), e);
             throw e;
         }
