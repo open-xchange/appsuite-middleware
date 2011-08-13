@@ -362,6 +362,9 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
             clearBuffers();
             throw new AJPv13Exception(AJPCode.IO_ERROR, false, e, e.getMessage());
         } catch (final RuntimeException e) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(e.getMessage(), e);
+            }
             clearBuffers();
             throw new AJPv13Exception(AJPCode.IO_ERROR, false, e, e.getMessage());
         } finally {
