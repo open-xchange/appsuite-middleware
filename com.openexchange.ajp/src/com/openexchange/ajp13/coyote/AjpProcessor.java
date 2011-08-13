@@ -357,11 +357,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         endMessageArray = new byte[endMessage.getLen()];
         System.arraycopy(endMessage.getBuffer(), 0, endMessageArray, 0, endMessage.getLen());
 
-        // Allocate the end message array
+        // Allocate the end message array with reuse flag not set
         final AjpMessage endMessageNoReuse = new AjpMessage(16);
         endMessageNoReuse.reset();
         endMessageNoReuse.appendByte(Constants.JK_AJP13_END_RESPONSE);
-        endMessageNoReuse.appendByte(1);
+        endMessageNoReuse.appendByte(0); // No "reuse" flag
         endMessageNoReuse.end();
         endMessageArrayNoReuse = new byte[endMessageNoReuse.getLen()];
         System.arraycopy(endMessageNoReuse.getBuffer(), 0, endMessageArrayNoReuse, 0, endMessageNoReuse.getLen());
