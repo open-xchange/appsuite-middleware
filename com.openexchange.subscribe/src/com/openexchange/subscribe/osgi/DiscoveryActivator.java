@@ -97,9 +97,9 @@ public class DiscoveryActivator implements BundleActivator {
 
     private OSGiSubscriptionSourceCollector collector;
 
-    private ServiceRegistration discoveryRegistration;
+    private ServiceRegistration<SubscriptionSourceDiscoveryService> discoveryRegistration;
 
-    private ServiceRegistration executionRegistration;
+    private ServiceRegistration<SubscriptionExecutionService> executionRegistration;
 
     private WhiteboardContextService contextService;
 
@@ -107,7 +107,7 @@ public class DiscoveryActivator implements BundleActivator {
 
     private Whiteboard whiteboard;
 
-    private ServiceRegistration folderUpdaterRegistryRegistration;
+    private ServiceRegistration<FolderUpdaterRegistry> folderUpdaterRegistryRegistration;
 
     @Override
     public void start(final BundleContext context) throws Exception {
@@ -126,11 +126,11 @@ public class DiscoveryActivator implements BundleActivator {
         discoveryCollector.addSubscriptionSourceDiscoveryService(collector);
 
         discoveryRegistration =
-            context.registerService(SubscriptionSourceDiscoveryService.class.getName(), discoveryCollector, discoveryDict);
+            context.registerService(SubscriptionSourceDiscoveryService.class, discoveryCollector, discoveryDict);
 
         FolderFieldActivator.DISCOVERY = discoveryCollector;
 
-        final List<FolderUpdaterService> folderUpdaters = new ArrayList<FolderUpdaterService>(5);
+        final List<FolderUpdaterService<?>> folderUpdaters = new ArrayList<FolderUpdaterService<?>>(5);
         folderUpdaters.add(new StrategyFolderUpdaterService<Contact>(new ContactFolderUpdaterStrategy()));
         folderUpdaters.add(new StrategyFolderUpdaterService<Contact>(new ContactFolderMultipleUpdaterStrategy(), true));
         folderUpdaters.add(new StrategyFolderUpdaterService<CalendarDataObject>(new CalendarFolderUpdaterStrategy()));
@@ -141,9 +141,9 @@ public class DiscoveryActivator implements BundleActivator {
             infostore)));
 
         final SubscriptionExecutionServiceImpl executor = new SubscriptionExecutionServiceImpl(collector, folderUpdaters, contextService);
-        executionRegistration = context.registerService(SubscriptionExecutionService.class.getName(), executor, null);
+        executionRegistration = context.registerService(SubscriptionExecutionService.class, executor, null);
 
-        folderUpdaterRegistryRegistration = context.registerService(FolderUpdaterRegistry.class.getName(), executor, null);
+        folderUpdaterRegistryRegistration = context.registerService(FolderUpdaterRegistry.class, executor, null);
 
 
         final DBProvider provider = whiteboard.getService(DBProvider.class);
