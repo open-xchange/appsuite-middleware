@@ -75,11 +75,6 @@ public class ContactListResultConverter extends ContactResultConverter {
         super(imageService);
     }
 
-    @Override
-    public String getInputFormat() {
-        return "contact";
-    }
-
     /**
      * Converts specified contact collection to an appropriate JSON array.
      * 
