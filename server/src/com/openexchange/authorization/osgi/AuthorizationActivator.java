@@ -72,7 +72,7 @@ public class AuthorizationActivator implements BundleActivator {
         /*
          * Start tracker
          */
-        tracker = new ServiceTracker(context, AuthorizationService.class.getName(), new AuthorizationCustomizer(context));
+        tracker = new ServiceTracker<AuthorizationService,AuthorizationService>(context, AuthorizationService.class, new AuthorizationCustomizer(context));
         tracker.open();
     }
 
