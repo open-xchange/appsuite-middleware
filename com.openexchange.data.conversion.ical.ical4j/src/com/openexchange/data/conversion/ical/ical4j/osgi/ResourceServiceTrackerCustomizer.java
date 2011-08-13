@@ -56,11 +56,9 @@ import com.openexchange.data.conversion.ical.ical4j.internal.OXResourceResolver;
 import com.openexchange.resource.ResourceService;
 
 /**
- *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class ResourceServiceTrackerCustomizer implements
-    ServiceTrackerCustomizer {
+public final class ResourceServiceTrackerCustomizer implements ServiceTrackerCustomizer<ResourceService, ResourceService> {
 
     private final BundleContext context;
 
@@ -69,8 +67,7 @@ public final class ResourceServiceTrackerCustomizer implements
     /**
      * Default constructor.
      */
-    public ResourceServiceTrackerCustomizer(final BundleContext context,
-        final OXResourceResolver resourceResolver) {
+    public ResourceServiceTrackerCustomizer(final BundleContext context, final OXResourceResolver resourceResolver) {
         super();
         this.context = context;
         this.resourceResolver = resourceResolver;
@@ -80,9 +77,8 @@ public final class ResourceServiceTrackerCustomizer implements
      * {@inheritDoc}
      */
     @Override
-    public Object addingService(final ServiceReference reference) {
-        final ResourceService resourceService = (ResourceService) context
-            .getService(reference);
+    public ResourceService addingService(final ServiceReference<ResourceService> reference) {
+        final ResourceService resourceService = context.getService(reference);
         resourceResolver.setResourceService(resourceService);
         return resourceService;
     }
@@ -91,8 +87,7 @@ public final class ResourceServiceTrackerCustomizer implements
      * {@inheritDoc}
      */
     @Override
-    public void modifiedService(final ServiceReference reference,
-        final Object service) {
+    public void modifiedService(final ServiceReference<ResourceService> reference, final ResourceService service) {
         // Nothing to do.
     }
 
@@ -100,8 +95,7 @@ public final class ResourceServiceTrackerCustomizer implements
      * {@inheritDoc}
      */
     @Override
-    public void removedService(final ServiceReference reference,
-        final Object service) {
+    public void removedService(final ServiceReference<ResourceService> reference, final ResourceService service) {
         resourceResolver.setResourceService(null);
         context.ungetService(reference);
     }

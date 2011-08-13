@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,57 +47,18 @@
  *
  */
 
-package com.openexchange.data.conversion.ical.ical4j.osgi;
+package com.openexchange.server.osgiservice;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.data.conversion.ical.ical4j.internal.OXUserResolver;
-import com.openexchange.user.UserService;
+
 
 /**
+ * {@link SimpleServiceTrackerCustomizer}
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UserServiceTrackerCustomizer implements ServiceTrackerCustomizer<UserService, UserService> {
+public interface SimpleServiceTrackerCustomizer<S> extends ServiceTrackerCustomizer<S, S> {
 
-    private final BundleContext context;
+    // Nope
 
-    private final OXUserResolver userResolver;
-
-    /**
-     * Default constructor.
-     */
-    public UserServiceTrackerCustomizer(final BundleContext context, final OXUserResolver userResolver) {
-        super();
-        this.context = context;
-        this.userResolver = userResolver;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public UserService addingService(final ServiceReference<UserService> reference) {
-        final UserService userService = context.getService(reference);
-        userResolver.setUserService(userService);
-        return userService;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void modifiedService(final ServiceReference<UserService> reference, final UserService service) {
-        // Nothing to do.
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void removedService(final ServiceReference<UserService> reference, final UserService service) {
-        userResolver.setUserService(null);
-        context.ungetService(reference);
-    }
 }

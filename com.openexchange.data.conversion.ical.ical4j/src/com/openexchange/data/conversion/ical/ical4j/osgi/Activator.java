@@ -68,6 +68,7 @@ import com.openexchange.user.UserService;
 
 /**
  * Publishes the iCal4j parser and emitter services.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class Activator implements BundleActivator {
@@ -75,24 +76,24 @@ public class Activator implements BundleActivator {
     /**
      * Tracker for the user service.
      */
-    private ServiceTracker userTracker;
+    private ServiceTracker<UserService, UserService> userTracker;
 
     /**
      * Tracker for the resource service.
      */
-    private ServiceTracker resourceTracker;
+    private ServiceTracker<ResourceService, ResourceService> resourceTracker;
 
-    private ServiceTracker calendarTracker;
+    private ServiceTracker<CalendarCollectionService, CalendarCollectionService> calendarTracker;
 
     /**
      * Service registration of the parser service.
      */
-    private ServiceRegistration parserRegistration;
+    private ServiceRegistration<ICalParser> parserRegistration;
 
     /**
      * Service registration of the emitter service.
      */
-    private ServiceRegistration emitterRegistration;
+    private ServiceRegistration<ICalEmitter> emitterRegistration;
 
     /**
      * {@inheritDoc}
@@ -100,21 +101,32 @@ public class Activator implements BundleActivator {
     @Override
     public void start(final BundleContext context) throws Exception {
         final OXUserResolver userResolver = new OXUserResolver();
-        userTracker = new ServiceTracker(context, UserService.class.getName(), new UserServiceTrackerCustomizer(context, userResolver));
+        userTracker =
+            new ServiceTracker<UserService, UserService>(context, UserService.class.getName(), new UserServiceTrackerCustomizer(
+                context,
+                userResolver));
         userTracker.open();
         Participants.userResolver = userResolver;
         CreatedBy.userResolver = userResolver;
 
         final OXResourceResolver resourceResolver = new OXResourceResolver();
-        resourceTracker = new ServiceTracker(context, ResourceService.class.getName(), new ResourceServiceTrackerCustomizer(context, resourceResolver));
+        resourceTracker =
+            new ServiceTracker<ResourceService, ResourceService>(
+                context,
+                ResourceService.class.getName(),
+                new ResourceServiceTrackerCustomizer(context, resourceResolver));
         resourceTracker.open();
         Participants.resourceResolver = resourceResolver;
 
-        calendarTracker = new ServiceTracker(context, CalendarCollectionService.class.getName(), new CalendarServiceTracker(context));
+        calendarTracker =
+            new ServiceTracker<CalendarCollectionService, CalendarCollectionService>(
+                context,
+                CalendarCollectionService.class.getName(),
+                new CalendarServiceTracker(context));
         calendarTracker.open();
 
-        parserRegistration = context.registerService(ICalParser.class.getName(), new ICal4JParser(), null);
-        emitterRegistration = context.registerService(ICalEmitter.class.getName(), new ICal4JEmitter(), null);
+        parserRegistration = context.registerService(ICalParser.class, new ICal4JParser(), null);
+        emitterRegistration = context.registerService(ICalEmitter.class, new ICal4JEmitter(), null);
     }
 
     /**
