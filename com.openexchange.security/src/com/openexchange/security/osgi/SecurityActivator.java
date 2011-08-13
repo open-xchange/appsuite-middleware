@@ -66,7 +66,7 @@ public final class SecurityActivator implements BundleActivator {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(SecurityActivator.class);
 
-	private ServiceRegistration serviceRegistration;
+	private ServiceRegistration<BundleAccessSecurityService> serviceRegistration;
 
 	/**
 	 * Initializes a new {@link SecurityActivator}
@@ -78,7 +78,7 @@ public final class SecurityActivator implements BundleActivator {
 	@Override
     public void start(final BundleContext context) throws Exception {
 		try {
-			serviceRegistration = context.registerService(BundleAccessSecurityService.class.getName(),
+			serviceRegistration = context.registerService(BundleAccessSecurityService.class,
 					new BundleAccessSecurityServiceImpl(), null);
 		} catch (final Exception e) {
 			LOG.error(e.getMessage(), e);
