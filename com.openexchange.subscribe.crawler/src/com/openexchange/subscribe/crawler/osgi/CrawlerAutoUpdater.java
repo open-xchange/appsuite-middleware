@@ -68,7 +68,7 @@ import com.openexchange.timer.TimerService;
  * restarted, resulting in multiple Tasks where only one is needed.
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class CrawlerAutoUpdater implements ServiceTrackerCustomizer {
+public class CrawlerAutoUpdater implements ServiceTrackerCustomizer<Object, Object> {
 
     private final BundleContext context;
 
@@ -84,14 +84,14 @@ public class CrawlerAutoUpdater implements ServiceTrackerCustomizer {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CrawlerAutoUpdater.class));
 
-    public CrawlerAutoUpdater(BundleContext context, Activator activator) {
+    public CrawlerAutoUpdater(final BundleContext context, final Activator activator) {
         super();
         this.context = context;
         this.activator = activator;
     }
 
     @Override
-    public Object addingService(ServiceReference reference) {
+    public Object addingService(final ServiceReference<Object> reference) {
         final Object obj = context.getService(reference);
         final boolean taskSchedulingPossible;
         lock.lock();
@@ -108,7 +108,7 @@ public class CrawlerAutoUpdater implements ServiceTrackerCustomizer {
         }
         // only activate the auto-update if both services are available and it is enabled via config-file
         if (taskSchedulingPossible && Boolean.parseBoolean(configurationService.getProperty(activator.ENABLE_AUTO_UPDATE))) {
-            CrawlerUpdateTask crawlerUpdateTask = new CrawlerUpdateTask(configurationService, activator);
+            final CrawlerUpdateTask crawlerUpdateTask = new CrawlerUpdateTask(configurationService, activator);
             // Start the job 30 seconds after this and repeat it as often as configured (default:daily)
             final long updateInterval = Integer.parseInt(configurationService.getProperty(Activator.UPDATE_INTERVAL));
             // Insert daily TimerTask to look for updates
@@ -119,12 +119,12 @@ public class CrawlerAutoUpdater implements ServiceTrackerCustomizer {
     }
 
     @Override
-    public void modifiedService(ServiceReference reference, Object service) {
+    public void modifiedService(final ServiceReference<Object> reference, final Object service) {
         // Nothing to do.
     }
 
     @Override
-    public void removedService(ServiceReference reference, Object service) {
+    public void removedService(final ServiceReference<Object> reference, final Object service) {
         ScheduledTimerTask cancel = null;
         lock.lock();
         try {

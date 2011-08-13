@@ -79,7 +79,7 @@ import com.openexchange.timer.TimerService;
  */
 public class Activator implements BundleActivator {
 
-    private ArrayList<ServiceRegistration> services;
+    private ArrayList<ServiceRegistration<?>> services;
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
 
@@ -93,9 +93,9 @@ public class Activator implements BundleActivator {
 
     private BundleContext bundleContext;
 
-    private final Stack<ServiceTracker> trackers = new Stack<ServiceTracker>();
+    private final Stack<ServiceTracker<?,?>> trackers = new Stack<ServiceTracker<?,?>>();
 
-    private final Map<String, ServiceRegistration> activeServices = new HashMap<String, ServiceRegistration>();
+    private final Map<String, ServiceRegistration<?>> activeServices = new HashMap<String, ServiceRegistration<?>>();
 
     public static final int CRAWLER_API_VERSION = 616;
 
@@ -108,18 +108,18 @@ public class Activator implements BundleActivator {
     public void start(final BundleContext context) throws Exception {
 
         bundleContext = context;
-        services = new ArrayList<ServiceRegistration>();
+        services = new ArrayList<ServiceRegistration<?>>();
 
         // react dynamically to the appearance/disappearance of ConfigurationService, TimerService, ManagementService and iCalParserService
-        trackers.push(new ServiceTracker(context, ConfigurationService.class.getName(), new CrawlerRegisterer(context, this)));
+        trackers.push(new ServiceTracker<ConfigurationService,ConfigurationService>(context, ConfigurationService.class, new CrawlerRegisterer(context, this)));
         final Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + TimerService.class.getName() + "))");
-        ServiceTracker configAndTimerTracker = new ServiceTracker(context, filter, new CrawlerAutoUpdater(context, this));
+        final ServiceTracker<Object,Object> configAndTimerTracker = new ServiceTracker<Object,Object>(context, filter, new CrawlerAutoUpdater(context, this));
         trackers.push(configAndTimerTracker);
         final Filter filter2 = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + ManagementService.class.getName() + "))");
-        ServiceTracker configAndManagementTracker = new ServiceTracker(context, filter2, new CrawlerMBeanRegisterer(context, this));
+        final ServiceTracker<Object,Object> configAndManagementTracker = new ServiceTracker<Object,Object>(context, filter2, new CrawlerMBeanRegisterer(context, this));
         trackers.push(configAndManagementTracker);
-        trackers.push(new ServiceTracker(context, ICalParser.class.getName(), new ICalParserRegisterer(context, this)));
-        for (final ServiceTracker tracker : trackers) {
+        trackers.push(new ServiceTracker<ICalParser,ICalParser>(context, ICalParser.class, new ICalParserRegisterer(context, this)));
+        for (final ServiceTracker<?,?> tracker : trackers) {
             tracker.open();
         }
     }
@@ -144,9 +144,8 @@ public class Activator implements BundleActivator {
         if (files == null) {
             LOG.warn("Could not find crawler descriptions in " + directory + ". Skipping crawler initialisation.");
             return crawlers;
-        } else {
-            LOG.info("Loading crawler descriptions from directory : " + directory);
         }
+        LOG.info("Loading crawler descriptions from directory : " + directory);
         for (final File file : files) {
             try {
                 if (file.isFile() && file.getPath().endsWith(".yml")) {
@@ -159,7 +158,7 @@ public class Activator implements BundleActivator {
         return crawlers;
     }
 
-    public boolean removeCrawlerFromFilesystem(final ConfigurationService config, String crawlerIdToDelete) {
+    public boolean removeCrawlerFromFilesystem(final ConfigurationService config, final String crawlerIdToDelete) {
         final String path = config.getProperty(PATH_PROPERTY);
         if (path != null) {
             final File directory = new File(path);
@@ -168,7 +167,7 @@ public class Activator implements BundleActivator {
                 for (final File file : files) {
                     try {
                         if (file.isFile() && file.getPath().endsWith(".yml")) {
-                            CrawlerDescription crawler = (CrawlerDescription) Yaml.load(file);
+                            final CrawlerDescription crawler = (CrawlerDescription) Yaml.load(file);
                             if (crawler.getId().equals(crawlerIdToDelete)) {
                                 return file.delete();
                             }
@@ -182,7 +181,7 @@ public class Activator implements BundleActivator {
         return false;
     }
 
-    public void registerServices(ConfigurationService config) {
+    public void registerServices(final ConfigurationService config) {
         if (config != null) {
             final ArrayList<CrawlerDescription> crawlers = getCrawlersFromFilesystem(config);
             for (final CrawlerDescription crawler : crawlers) {
@@ -194,8 +193,8 @@ public class Activator implements BundleActivator {
                     crawler.getPriority(),
                     this,
                     crawler.isJavascriptEnabled());
-                final ServiceRegistration serviceRegistration = bundleContext.registerService(
-                    SubscribeService.class.getName(),
+                final ServiceRegistration<SubscribeService> serviceRegistration = bundleContext.registerService(
+                    SubscribeService.class,
                     subscribeService,
                     null);
                 services.add(serviceRegistration);
@@ -206,15 +205,15 @@ public class Activator implements BundleActivator {
     }
 
     public void unregisterServices() {
-        for (final ServiceRegistration serviceRegistration : services) {
+        for (final ServiceRegistration<?> serviceRegistration : services) {
             serviceRegistration.unregister();
         }
     }
 
-    public void restartSingleCrawler(String crawlerIdToUpdate, ConfigurationService config) {
+    public void restartSingleCrawler(final String crawlerIdToUpdate, final ConfigurationService config) {
         // only activate the crawler if it is configured in crawler.properties
         if (Boolean.parseBoolean(config.getProperty(crawlerIdToUpdate))) {
-            ServiceRegistration serviceRegistration = activeServices.get(crawlerIdToUpdate);
+            ServiceRegistration<?> serviceRegistration = activeServices.get(crawlerIdToUpdate);
             if (serviceRegistration != null) {
                 serviceRegistration.unregister();
                 activeServices.remove(crawlerIdToUpdate);
@@ -244,7 +243,7 @@ public class Activator implements BundleActivator {
         return LAST_TIME_CHECKED;
     }
 
-    public void setLAST_TIME_CHECKED(Long last_time_checked) {
+    public void setLAST_TIME_CHECKED(final Long last_time_checked) {
         LAST_TIME_CHECKED = last_time_checked;
     }
 
@@ -252,7 +251,7 @@ public class Activator implements BundleActivator {
         return CRAWLER_API_VERSION;
     }
 
-    public void setICalParser(ICalParser iCalParser) {
+    public void setICalParser(final ICalParser iCalParser) {
         this.iCalParser = iCalParser;
     }
 
@@ -261,15 +260,15 @@ public class Activator implements BundleActivator {
     }
 
     // THESE METHODS SHOULD ONLY BE USED FOR TESTING
-    public ArrayList<ServiceRegistration> getServices() {
+    public ArrayList<ServiceRegistration<?>> getServices() {
         return services;
     }
 
-    public void setServices(ArrayList<ServiceRegistration> services) {
+    public void setServices(final ArrayList<ServiceRegistration<?>> services) {
         this.services = services;
     }
 
-    public void setBundleContext(BundleContext bundleContext) {
+    public void setBundleContext(final BundleContext bundleContext) {
         this.bundleContext = bundleContext;
     }
     // THESE METHODS SHOULD ONLY BE USED FOR TESTING
