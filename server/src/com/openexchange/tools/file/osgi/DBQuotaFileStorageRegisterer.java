@@ -60,9 +60,9 @@ import com.openexchange.tools.file.external.FileStorageFactory;
 import com.openexchange.tools.file.external.QuotaFileStorageFactory;
 import com.openexchange.tools.file.internal.DBQuotaFileStorageFactory;
 
-public class DBQuotaFileStorageRegisterer implements ServiceTrackerCustomizer {
+public class DBQuotaFileStorageRegisterer implements ServiceTrackerCustomizer<Object,Object> {
 
-    private ServiceRegistration registration = null;
+    private ServiceRegistration<QuotaFileStorageFactory> registration = null;
 
     private final BundleContext context;
 
@@ -80,7 +80,7 @@ public class DBQuotaFileStorageRegisterer implements ServiceTrackerCustomizer {
     }
 
     @Override
-    public Object addingService(final ServiceReference reference) {
+    public Object addingService(final ServiceReference<Object> reference) {
         final Object service = context.getService(reference);
         boolean needsRegistration = false;
         lock.lock();
@@ -100,20 +100,20 @@ public class DBQuotaFileStorageRegisterer implements ServiceTrackerCustomizer {
         }
         if (needsRegistration) {
             final QuotaFileStorageFactory qfss = new DBQuotaFileStorageFactory(dbService, fssService);
-            registration = context.registerService(QuotaFileStorageFactory.class.getName(), qfss, null);
+            registration = context.registerService(QuotaFileStorageFactory.class, qfss, null);
         }
         return service;
     }
 
     @Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<Object> reference, final Object service) {
         // Nothing to do.
     }
 
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
+    public void removedService(final ServiceReference<Object> reference, final Object service) {
         boolean needsUnregistration = false;
-        final ServiceRegistration reg = registration;
+        final ServiceRegistration<QuotaFileStorageFactory> reg = registration;
         if (service instanceof DatabaseService) {
             dbService = null;
         }
