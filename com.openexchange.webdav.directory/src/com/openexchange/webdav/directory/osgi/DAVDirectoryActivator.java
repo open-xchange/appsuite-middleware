@@ -12,11 +12,9 @@ import com.openexchange.webdav.directory.servlets.WebdavDirectoryServlet;
 
 public class DAVDirectoryActivator extends HousekeepingActivator {
 
-    private static final Class<?>[] NEEDED = new Class[] { HttpService.class };
-
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED;
+        return new Class[] { HttpService.class };
     }
 
     @Override
