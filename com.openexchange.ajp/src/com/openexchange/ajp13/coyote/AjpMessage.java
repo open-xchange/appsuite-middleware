@@ -424,7 +424,7 @@ public final class AjpMessage {
         if (!log.isDebugEnabled()) {
             return;
         }
-        final StringBuilder temp = new StringBuilder(8192).append(msg + ": " + pos + "/" + (len + 4)).append('\n');
+        final StringBuilder temp = new StringBuilder(8192).append(msg).append('\n');
         int max = pos;
         if (len + 4 > pos) {
             max = len + 4;
