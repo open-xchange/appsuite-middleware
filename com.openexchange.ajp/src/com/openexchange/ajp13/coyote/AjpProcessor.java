@@ -838,8 +838,9 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     error = true;
                 }
             }
-            // If there was an error, make sure the request is counted as
-            // and error, and update the statistics counter
+            /*
+             * If there was an error, make sure the request is counted as an error, and update the statistics counter
+             */
             if (error) {
                 response.setStatus(500);
             }
