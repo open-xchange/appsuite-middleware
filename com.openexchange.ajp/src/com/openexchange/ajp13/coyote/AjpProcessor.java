@@ -808,7 +808,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                         final byte[] bytes = sink.toByteArray();
                         parseQueryString(new String(bytes, charEnc));
                         /*
-                         * Apply already read data to request to make them re-available?
+                         * Apply already read data to request to make them re-available.
                          */
                         request.dumpToBuffer(bytes);
                     }
