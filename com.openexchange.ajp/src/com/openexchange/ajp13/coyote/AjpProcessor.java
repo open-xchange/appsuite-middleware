@@ -695,8 +695,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                         Constants.JK_AJP13_CPING_REQUEST == type ? "CPing" : (Constants.JK_AJP13_FORWARD_REQUEST == type ? "Forward-Request" : "unknown");
                     LOG.debug("First " + ajpReqName + " AJP message successfully read from stream.");
                 }
-                final int dataLength = requestHeaderMessage.getLen();
-                if (type == Constants.JK_AJP13_CPING_REQUEST && 1 == dataLength) {
+                if (type == Constants.JK_AJP13_CPING_REQUEST && 1 == requestHeaderMessage.getLen()) {
                     softLock.lock();
                     try {
                         output.write(pongMessageArray);
@@ -709,7 +708,21 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     }
                     continue;
                 } else if (type != Constants.JK_AJP13_FORWARD_REQUEST) {
-                    /*
+                    /*-
+                     * Invalid/unknown prefix code
+                     * 
+                     * Usually the servlet didn't read the previous request body
+                     */
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Unexpected message: " + type);
+                    }
+                    continue;
+                }
+                final byte methodCode = requestHeaderMessage.peekByte();
+                if (Constants.SC_M_JK_STORED != methodCode && (methodCode < 1 || methodCode > Constants.methodTransArray.length)) {
+                    /*-
+                     * Invalid method code.
+                     * 
                      * Usually the servlet didn't read the previous request body
                      */
                     if (LOG.isDebugEnabled()) {
