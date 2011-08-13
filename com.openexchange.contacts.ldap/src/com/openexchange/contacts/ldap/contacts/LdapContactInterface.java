@@ -257,6 +257,18 @@ public class LdapContactInterface implements ContactInterface {
         final Mappings mappings = folderprop.getMappings();
         final ContactTypes contacttype = folderprop.getContacttypes();
 
+        final boolean specialSort;
+        if (orderBy > 0 && orderBy != Contact.SPECIAL_SORTING && orderBy != Contact.USE_COUNT_GLOBAL_FIRST && !Order.NO_ORDER.equals(order)) {
+            specialSort = false;
+        } else {
+            for (final int field : new int[] {
+                Contact.YOMI_LAST_NAME, Contact.SUR_NAME, Contact.YOMI_FIRST_NAME, Contact.GIVEN_NAME, Contact.DISPLAY_NAME,
+                Contact.YOMI_COMPANY, Contact.COMPANY, Contact.EMAIL1, Contact.EMAIL2, Contact.USE_COUNT }) {
+                columns.add(Integer.valueOf(field));
+            }
+            specialSort = true;
+        }
+
         final boolean both = ContactTypes.both.equals(contacttype);
         if (searchobject.isStartLetter()) {
             String userfilter = null;
@@ -291,7 +303,7 @@ public class LdapContactInterface implements ContactInterface {
             arrayList = getLDAPContacts(folderId, columns, getStringFromStringBuilder(user), getStringFromStringBuilder(distri), null, false);
         }
 
-        sorting(orderBy, order, arrayList);
+        sorting(orderBy, order, arrayList, specialSort);
         return new ArrayIterator<Contact>(arrayList.toArray(new Contact[arrayList.size()]));
     }
 
@@ -310,6 +322,18 @@ public class LdapContactInterface implements ContactInterface {
         }
         if (0 != orderBy) {
             columns.addAll(getColumnSet(new int[]{orderBy}));
+        }
+
+        final boolean specialSort;
+        if (orderBy > 0 && orderBy != Contact.SPECIAL_SORTING && orderBy != Contact.USE_COUNT_GLOBAL_FIRST && !Order.NO_ORDER.equals(order)) {
+            specialSort = false;
+        } else {
+            for (final int field : new int[] {
+                Contact.YOMI_LAST_NAME, Contact.SUR_NAME, Contact.YOMI_FIRST_NAME, Contact.GIVEN_NAME, Contact.DISPLAY_NAME,
+                Contact.YOMI_COMPANY, Contact.COMPANY, Contact.EMAIL1, Contact.EMAIL2, Contact.USE_COUNT }) {
+                columns.add(Integer.valueOf(field));
+            }
+            specialSort = true;
         }
 
         final List<Contact> arrayList;
@@ -347,7 +371,7 @@ public class LdapContactInterface implements ContactInterface {
         // Get only the needed parts...
         final List<Contact> subList = getSubList(from, to, arrayList);
 
-        sorting(orderBy, order, subList);
+        sorting(orderBy, order, subList, specialSort);
         final SearchIterator<Contact> searchIterator = new ArrayIterator<Contact>(subList.toArray(new Contact[subList.size()]));
         return searchIterator;
     }
@@ -760,9 +784,8 @@ public class LdapContactInterface implements ContactInterface {
 
     }
 
-    private void sorting(final int orderBy, final Order order, final List<Contact> subList) {
+    private void sorting(final int orderBy, final Order order, final List<Contact> subList, final boolean specialSort) {
         if (Order.NO_ORDER != order && folderprop.getSorting().equals(Sorting.groupware)) {
-            final boolean specialSort = !(orderBy > 0 && orderBy != Contact.SPECIAL_SORTING && orderBy != Contact.USE_COUNT_GLOBAL_FIRST && !Order.NO_ORDER.equals(order));
             if (orderBy == Contact.USE_COUNT_GLOBAL_FIRST) {
                 java.util.Collections.sort(subList, new UseCountComparator(specialSort));
                 if (Order.DESCENDING.equals(order)) {
