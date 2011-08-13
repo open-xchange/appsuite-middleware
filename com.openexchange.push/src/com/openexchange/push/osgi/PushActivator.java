@@ -79,7 +79,7 @@ public final class PushActivator implements BundleActivator {
 
     private ServiceRegistration eventHandlerRegistration;
 
-    private List<ServiceTracker> trackers;
+    private List<ServiceTracker<?,?>> trackers;
 
     /**
      * Initializes a new {@link PushActivator}.
@@ -98,26 +98,26 @@ public final class PushActivator implements BundleActivator {
             /*
              * Initialize and open service tracker for push manager services
              */
-            trackers = new ArrayList<ServiceTracker>(4);
+            trackers = new ArrayList<ServiceTracker<?,?>>(8);
             PushManagerRegistry.init();
-            trackers.add(new ServiceTracker(context, PushManagerService.class.getName(), new PushManagerServiceTracker(context)));
-            trackers.add(new ServiceTracker(context, ConfigurationService.class.getName(), new WhitelistServiceTracker(context)));
+            trackers.add(new ServiceTracker(context, PushManagerService.class, new PushManagerServiceTracker(context)));
+            trackers.add(new ServiceTracker(context, ConfigurationService.class, new WhitelistServiceTracker(context)));
             /*
              * Thread pool service tracker
              */
-            trackers.add(new ServiceTracker(context, ConfigurationService.class.getName(), new RegistryServiceTrackerCustomizer<ConfigurationService>(
+            trackers.add(new ServiceTracker(context, ConfigurationService.class, new RegistryServiceTrackerCustomizer<ConfigurationService>(
                 context,
                 ServiceRegistry.getInstance(),
                 ConfigurationService.class)));
-            trackers.add(new ServiceTracker(context, EventFactoryService.class.getName(), new RegistryServiceTrackerCustomizer<EventFactoryService>(
+            trackers.add(new ServiceTracker(context, EventFactoryService.class, new RegistryServiceTrackerCustomizer<EventFactoryService>(
                 context,
                 ServiceRegistry.getInstance(),
                 EventFactoryService.class)));
-            trackers.add(new ServiceTracker(context, ThreadPoolService.class.getName(), new RegistryServiceTrackerCustomizer<ThreadPoolService>(
+            trackers.add(new ServiceTracker(context, ThreadPoolService.class, new RegistryServiceTrackerCustomizer<ThreadPoolService>(
                     context,
                     ServiceRegistry.getInstance(),
                     ThreadPoolService.class)));
-            trackers.add(new ServiceTracker(context, EventAdmin.class.getName(), new RegistryServiceTrackerCustomizer<EventAdmin>(
+            trackers.add(new ServiceTracker(context, EventAdmin.class, new RegistryServiceTrackerCustomizer<EventAdmin>(
                 context,
                 ServiceRegistry.getInstance(),
                 EventAdmin.class)));
