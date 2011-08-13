@@ -69,9 +69,14 @@ import com.openexchange.messaging.json.actions.messages.MessagingActionFactory;
 import com.openexchange.messaging.json.actions.services.ServicesActionFactory;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 
-public class Activator extends AJAXModuleActivator {
+/**
+ * {@link MessagingJSONActivator} - The messaging JSON activator.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public class MessagingJSONActivator extends AJAXModuleActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MessagingJSONActivator.class));
 
     private static final Class<?>[] NEEDED_SERVICES = new Class[] { MessagingServiceRegistry.class, HttpService.class, CacheService.class, ConfigViewFactory.class };
 
