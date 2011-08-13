@@ -401,7 +401,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         response = new HttpServletResponseImpl(this);
         request = new HttpServletRequestImpl(response);
         /*
-         * Apply input/outout
+         * Apply input/output
          */
         request.setInputBuffer(new SocketInputBuffer());
         response.setOutputBuffer(new SocketOutputBuffer());
