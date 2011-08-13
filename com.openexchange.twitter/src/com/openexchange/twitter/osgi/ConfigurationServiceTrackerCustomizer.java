@@ -62,7 +62,7 @@ import com.openexchange.twitter.internal.TwitterConfiguration;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ConfigurationServiceTrackerCustomizer implements ServiceTrackerCustomizer {
+public final class ConfigurationServiceTrackerCustomizer implements ServiceTrackerCustomizer<ConfigurationService,ConfigurationService> {
 
     private final BundleContext context;
 
@@ -77,12 +77,8 @@ public final class ConfigurationServiceTrackerCustomizer implements ServiceTrack
     }
 
     @Override
-    public Object addingService(final ServiceReference reference) {
-        final Object service = context.getService(reference);
-        if (!ConfigurationService.class.isInstance(service)) {
-            context.ungetService(reference);
-            return null;
-        }
+    public ConfigurationService addingService(final ServiceReference<ConfigurationService> reference) {
+        final ConfigurationService service = context.getService(reference);
         /*
          * Add to registry
          */
@@ -90,19 +86,19 @@ public final class ConfigurationServiceTrackerCustomizer implements ServiceTrack
         /*
          * ... and configure
          */
-        final ConfigurationService configurationService = (ConfigurationService) service;
+        final ConfigurationService configurationService = service;
         TwitterConfiguration.configure(configurationService);
         OXConfigurationBase.getInstance().parseFrom(configurationService);
         return service;
     }
 
     @Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<ConfigurationService> reference, final ConfigurationService service) {
         // Nothing to do
     }
 
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
+    public void removedService(final ServiceReference<ConfigurationService> reference, final ConfigurationService service) {
         if (null != service && ConfigurationService.class.isInstance(service)) {
             try {
                 /*
