@@ -73,7 +73,7 @@ import com.openexchange.server.osgiservice.Whiteboard;
  */
 public class CleanUpActivator implements BundleActivator {
 
-    private List<ServiceRegistration> registrations;
+    private List<ServiceRegistration<?>> registrations;
 
     private Whiteboard whiteboard;
 
@@ -84,7 +84,7 @@ public class CleanUpActivator implements BundleActivator {
 
         final EntityCleanUp entityCleanUp = new EntityCleanUp(AbstractPublicationService.getDefaultStorage());
 
-        registrations = new LinkedList<ServiceRegistration>();
+        registrations = new LinkedList<ServiceRegistration<?>>();
 
         registerHandler(
             context,
@@ -108,7 +108,7 @@ public class CleanUpActivator implements BundleActivator {
 
     @Override
     public void stop(final BundleContext context) throws Exception {
-        for (final ServiceRegistration registration : registrations) {
+        for (final ServiceRegistration<?> registration : registrations) {
             registration.unregister();
         }
         registrations = null;
