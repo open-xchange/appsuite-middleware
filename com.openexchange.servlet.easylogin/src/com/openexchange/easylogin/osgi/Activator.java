@@ -65,23 +65,23 @@ import com.openexchange.server.osgiservice.Tools;
  */
 public class Activator implements BundleActivator {
 
-    private final Stack<ServiceTracker> trackers = new Stack<ServiceTracker>();
+    private final Stack<ServiceTracker<?,?>> trackers = new Stack<ServiceTracker<?,?>>();
 
     public Activator() {
         super();
     }
 
     @Override
-    public void start(BundleContext context) throws Exception {
-        Filter filter = Tools.generateServiceFilter(context, HttpService.class, ConfigurationService.class);
-        trackers.push(new ServiceTracker(context, filter, new ServletRegisterer(context)));
-        for (final ServiceTracker tracker : trackers) {
+    public void start(final BundleContext context) throws Exception {
+        final Filter filter = Tools.generateServiceFilter(context, HttpService.class, ConfigurationService.class);
+        trackers.push(new ServiceTracker<Object, Object>(context, filter, new ServletRegisterer(context)));
+        for (final ServiceTracker<?,?> tracker : trackers) {
             tracker.open();
         }
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    public void stop(final BundleContext context) throws Exception {
         while (!trackers.isEmpty()) {
             trackers.pop().close();
         }
