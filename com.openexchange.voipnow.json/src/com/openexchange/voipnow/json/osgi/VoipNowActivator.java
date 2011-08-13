@@ -63,16 +63,16 @@ import com.openexchange.voipnow.json.preferences.VoipNowFaxAddress;
 import com.openexchange.voipnow.json.services.ServiceRegistry;
 
 /**
- * {@link Activator} - Activator for VoipNow component.
+ * {@link VoipNowActivator} - Activator for VoipNow component.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Activator extends AJAXModuleActivator {
+public class VoipNowActivator extends AJAXModuleActivator {
 
     /**
-     * Initializes a new {@link Activator}.
+     * Initializes a new {@link VoipNowActivator}.
      */
-    public Activator() {
+    public VoipNowActivator() {
         super();
     }
 
@@ -117,7 +117,7 @@ public class Activator extends AJAXModuleActivator {
             openTrackers();
         } catch (final Throwable e) {
             final org.apache.commons.logging.Log LOG =
-                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Activator.class));
+                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(VoipNowActivator.class));
             LOG.error(e.getMessage(), e);
             // throw e;
         }
@@ -129,7 +129,7 @@ public class Activator extends AJAXModuleActivator {
             cleanUp();
         } catch (final Exception e) {
             final org.apache.commons.logging.Log LOG =
-                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Activator.class));
+                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(VoipNowActivator.class));
             LOG.error(e.getMessage(), e);
             throw e;
         }
