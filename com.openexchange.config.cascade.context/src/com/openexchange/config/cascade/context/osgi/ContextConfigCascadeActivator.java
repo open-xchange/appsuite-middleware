@@ -62,11 +62,9 @@ import com.openexchange.userconf.UserConfigurationService;
 
 public class ContextConfigCascadeActivator extends HousekeepingActivator {
 
-    private static final Class<?>[] NEEDED = new Class[]{ ContextService.class, ConfigurationService.class, UserConfigurationService.class};
-
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED;
+        return new Class[]{ ContextService.class, ConfigurationService.class, UserConfigurationService.class};
     }
 
     @Override
