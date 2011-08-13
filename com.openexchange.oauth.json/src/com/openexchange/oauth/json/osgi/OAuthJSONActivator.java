@@ -62,13 +62,13 @@ import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
 
 /**
- * {@link Activator} - Activator for JSON folder interface.
+ * {@link OAuthJSONActivator} - Activator for JSON OAuth interface.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Activator extends AJAXModuleActivator {
+public class OAuthJSONActivator extends AJAXModuleActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OAuthJSONActivator.class));
 
     private OSGiOAuthService oAuthService;
 
@@ -158,7 +158,7 @@ public class Activator extends AJAXModuleActivator {
             AbstractOAuthAJAXActionService.setOAuthService(null);
             ServiceRegistry.getInstance().clearRegistry();
         } catch (final Exception e) {
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Activator.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(OAuthJSONActivator.class)).error(e.getMessage(), e);
             throw e;
         }
     }
