@@ -71,7 +71,7 @@ public final class FileStorageActivator implements BundleActivator {
 
     private OSGIEventAdminLookup eventAdminLookup;
 
-    private List<ServiceRegistration> registrations;
+    private List<ServiceRegistration<?>> registrations;
 
     /**
      * Initializes a new {@link FileStorageActivator}.
@@ -102,9 +102,9 @@ public final class FileStorageActivator implements BundleActivator {
             /*
              * Register services
              */
-            registrations = new ArrayList<ServiceRegistration>(4);
-            registrations.add(context.registerService(FileStorageServiceRegistry.class.getName(), registry, null));
-            registrations.add(context.registerService(FileStorageAccountManagerLookupService.class.getName(), lookupService, null));
+            registrations = new ArrayList<ServiceRegistration<?>>(4);
+            registrations.add(context.registerService(FileStorageServiceRegistry.class, registry, null));
+            registrations.add(context.registerService(FileStorageAccountManagerLookupService.class, lookupService, null));
         } catch (final Exception e) {
             log.error("Starting bundle \"com.openexchange.file.storage\" failed.", e);
             throw e;
