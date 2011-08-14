@@ -77,12 +77,12 @@ public class FileStorageCompositionActivator extends DeferredActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-
+        // Nothing to do
     }
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-
+        // Nothing to do
     }
 
     @Override
