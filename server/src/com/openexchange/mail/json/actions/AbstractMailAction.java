@@ -54,6 +54,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -153,7 +154,10 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             if (LogProperties.isEnabled()) {
-                
+                final Map<String, Object> logProperties = LogProperties.getLogProperties();
+                for (final String name : ALL_LOG_PROPERTIES) {
+                    logProperties.remove(name);
+                }
             }
         }
     }
