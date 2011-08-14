@@ -63,15 +63,15 @@ import com.openexchange.subscribe.microformats.parser.OXMFParserFactoryServiceIm
  */
 public class OXMFParserActivator implements BundleActivator {
 
-    private ServiceRegistration parserRegistration;
+    private ServiceRegistration<OXMFParserFactoryService> parserRegistration;
 
     @Override
-    public void start(BundleContext context) throws Exception {
-        parserRegistration = context.registerService(OXMFParserFactoryService.class.getName(), new OXMFParserFactoryServiceImpl(), null);
+    public void start(final BundleContext context) throws Exception {
+        parserRegistration = context.registerService(OXMFParserFactoryService.class, new OXMFParserFactoryServiceImpl(), null);
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    public void stop(final BundleContext context) throws Exception {
         parserRegistration.unregister();
     }
 
