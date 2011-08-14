@@ -82,13 +82,13 @@ public final class ImapIdleActivator extends DeferredActivator {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImapIdleActivator.class));
 
-    private List<ServiceRegistration> serviceRegistrations;
+    private List<ServiceRegistration<?>> serviceRegistrations;
 
     private String folder;
 
     private int errordelay;
 
-    private List<ServiceTracker> serviceTrackers;
+    private List<ServiceTracker<?,?>> serviceTrackers;
 
     /**
      * Initializes a new {@link ImapIdleActivator}.
@@ -145,14 +145,14 @@ public final class ImapIdleActivator extends DeferredActivator {
             /*
              * Initialize & open tracker for SessionD service
              */
-            serviceTrackers = new ArrayList<ServiceTracker>(2);
+            serviceTrackers = new ArrayList<ServiceTracker<?,?>>(2);
             {
-                final ServiceTrackerCustomizer trackerCustomizer =
+                final ServiceTrackerCustomizer<SessiondService,SessiondService> trackerCustomizer =
                     new RegistryServiceTrackerCustomizer<SessiondService>(context, getServiceRegistry(), SessiondService.class);
-                serviceTrackers.add(new ServiceTracker(context, SessiondService.class.getName(), trackerCustomizer));
+                serviceTrackers.add(new ServiceTracker<SessiondService,SessiondService>(context, SessiondService.class.getName(), trackerCustomizer));
             }
-            serviceTrackers.add(new ServiceTracker(context, IMAPNotifierRegistryService.class.getName(), new IMAPNotifierTracker(context)));
-            for (final ServiceTracker tracker : serviceTrackers) {
+            serviceTrackers.add(new ServiceTracker<IMAPNotifierRegistryService,IMAPNotifierRegistryService>(context, IMAPNotifierRegistryService.class, new IMAPNotifierTracker(context)));
+            for (final ServiceTracker<?,?> tracker : serviceTrackers) {
                 tracker.open();
             }
             /*
@@ -187,13 +187,13 @@ public final class ImapIdleActivator extends DeferredActivator {
             /*
              * Register push manager
              */
-            serviceRegistrations = new ArrayList<ServiceRegistration>(4);
-            serviceRegistrations.add(context.registerService(PushManagerService.class.getName(), new ImapIdlePushManagerService(), null));
+            serviceRegistrations = new ArrayList<ServiceRegistration<?>>(4);
+            serviceRegistrations.add(context.registerService(PushManagerService.class, new ImapIdlePushManagerService(), null));
             serviceRegistrations.add(context.registerService(
-                MailAccountDeleteListener.class.getName(),
+                MailAccountDeleteListener.class,
                 new ImapIdleMailAccountDeleteListener(),
                 null));
-            serviceRegistrations.add(context.registerService(DeleteListener.class.getName(), new ImapIdleDeleteListener(), null));
+            serviceRegistrations.add(context.registerService(DeleteListener.class, new ImapIdleDeleteListener(), null));
 
             LOG.info("com.openexchange.push.imapidle bundle started");
             LOG.info(debug ? " debugging enabled" : "debugging disabled");
