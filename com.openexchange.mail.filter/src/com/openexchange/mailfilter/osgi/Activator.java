@@ -67,7 +67,7 @@ public class Activator extends DeferredActivator {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Activator.class));
 
-    private final AtomicBoolean started;
+    private final AtomicBoolean mstarted;
 
     private ServiceRegistration<PreferencesItemService> serviceRegistration;
 
@@ -76,7 +76,7 @@ public class Activator extends DeferredActivator {
      */
     public Activator() {
         super();
-        started = new AtomicBoolean();
+        mstarted = new AtomicBoolean();
     }
 
     @Override
@@ -121,7 +121,7 @@ public class Activator extends DeferredActivator {
                     }
                 }
             }
-            if (!started.compareAndSet(false, true)) {
+            if (!mstarted.compareAndSet(false, true)) {
                 /*
                  * Don't start the server again. A duplicate call to
                  * startBundle() is probably caused by temporary absent
@@ -160,7 +160,7 @@ public class Activator extends DeferredActivator {
             LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         } finally {
-            started.set(false);
+            mstarted.set(false);
         }
     }
 
