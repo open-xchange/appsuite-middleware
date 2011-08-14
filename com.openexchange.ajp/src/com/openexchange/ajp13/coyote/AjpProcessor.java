@@ -1187,91 +1187,115 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
          * Decode extra attributes
          */
         boolean secret = false;
-        byte attributeCode;
-        while ((attributeCode = requestHeaderMessage.getByte()) != Constants.SC_A_ARE_DONE) {
-
-            if (attributeCode == Constants.SC_A_REQ_ATTRIBUTE) {
-                final String n = requestHeaderMessage.getString(temp);
-                final String v = requestHeaderMessage.getString(temp);
-                /*
-                 * AJP13 misses to forward the remotePort. Allow the AJP connector to add this info via a private request attribute. We will
-                 * accept the forwarded data as the remote port, and remove it from the public list of request attributes.
-                 */
-                if (n.equals(Constants.SC_A_REQ_REMOTE_PORT)) {
-                    try {
-                        request.setRemotePort(Integer.parseInt(v));
-                    } catch (final NumberFormatException nfe) {
-                        // Ignore
+        for (byte attributeCode = requestHeaderMessage.getByte(); attributeCode != Constants.SC_A_ARE_DONE; attributeCode = requestHeaderMessage.getByte()) {
+            switch (attributeCode) {
+            case Constants.SC_A_REQ_ATTRIBUTE:
+                {
+                    final String n = requestHeaderMessage.getString(temp);
+                    final String v = requestHeaderMessage.getString(temp);
+                    /*
+                     * AJP13 misses to forward the remotePort. Allow the AJP connector to add this info via a private request attribute. We will
+                     * accept the forwarded data as the remote port, and remove it from the public list of request attributes.
+                     */
+                    if (n.equals(Constants.SC_A_REQ_REMOTE_PORT)) {
+                        try {
+                            request.setRemotePort(Integer.parseInt(v));
+                        } catch (final NumberFormatException nfe) {
+                            // Ignore
+                        }
+                    } else {
+                        request.setAttribute(n, v);
                     }
-                } else {
-                    request.setAttribute(n, v);
                 }
-            } else if (attributeCode == Constants.SC_A_CONTEXT) {
-                final String context = requestHeaderMessage.getString(temp);
-                request.setAttribute(Constants.attributeNameArray[attributeCode - 1], context);
-                request.setContextPath(context);
-            } else if (attributeCode == Constants.SC_A_SERVLET_PATH) {
-                final String servletPath = requestHeaderMessage.getString(temp);
-                request.setAttribute(Constants.attributeNameArray[attributeCode - 1], servletPath);
-                request.setServletPath(servletPath);
-            } else if (attributeCode == Constants.SC_A_REMOTE_USER) {
+                break;
+            case Constants.SC_A_CONTEXT:
+                {
+                    final String context = requestHeaderMessage.getString(temp);
+                    request.setAttribute(Constants.attributeNameArray[attributeCode - 1], context);
+                    request.setContextPath(context);
+                }
+                break;
+            case Constants.SC_A_SERVLET_PATH:
+                {
+                    final String servletPath = requestHeaderMessage.getString(temp);
+                    request.setAttribute(Constants.attributeNameArray[attributeCode - 1], servletPath);
+                    request.setServletPath(servletPath);
+                }
+                break;
+            case Constants.SC_A_REMOTE_USER:
                 if (tomcatAuthentication) {
                     // ignore server
                     requestHeaderMessage.getString(temp);
                 } else {
                     request.setRemoteUser(requestHeaderMessage.getString(temp));
                 }
-            } else if (attributeCode == Constants.SC_A_AUTH_TYPE) {
+                break;
+            case Constants.SC_A_AUTH_TYPE:
                 if (tomcatAuthentication) {
                     // ignore server
                     requestHeaderMessage.getString(temp);
                 } else {
                     request.setAuthType(requestHeaderMessage.getString(temp));
                 }
-            } else if (attributeCode == Constants.SC_A_QUERY_STRING) {
-                final String queryString = requestHeaderMessage.getString(temp);
-                request.setQueryString(queryString);
-                try {
-                    parseQueryString(queryString);
-                    if (DEBUG && isEASPingCommand()) {
-                        LOG.debug("Incoming long-running EAS ping request.");
+                break;
+            case Constants.SC_A_QUERY_STRING:
+                {
+                    final String queryString = requestHeaderMessage.getString(temp);
+                    request.setQueryString(queryString);
+                    try {
+                        parseQueryString(queryString);
+                        if (DEBUG && isEASPingCommand()) {
+                            LOG.debug("Incoming long-running EAS ping request.");
+                        }
+                    } catch (final UnsupportedEncodingException e) {
+                        throw new IllegalStateException(e.getMessage(), e);
                     }
-                } catch (final UnsupportedEncodingException e) {
-                    throw new IllegalStateException(e.getMessage(), e);
                 }
-            } else if (attributeCode == Constants.SC_A_JVM_ROUTE) {
-                final String jvmRoute = requestHeaderMessage.getString(temp);
-                if (DEBUG && !AJPv13Config.getJvmRoute().equals(jvmRoute)) {
-                    LOG.debug("JVM route mismatch. Expected \"" + AJPv13Config.getJvmRoute() + "\", but is \"" + jvmRoute + "\".");
+                break;
+            case Constants.SC_A_JVM_ROUTE:
+                {
+                    final String jvmRoute = requestHeaderMessage.getString(temp);
+                    if (DEBUG && !AJPv13Config.getJvmRoute().equals(jvmRoute)) {
+                        LOG.debug("JVM route mismatch. Expected \"" + AJPv13Config.getJvmRoute() + "\", but is \"" + jvmRoute + "\".");
+                    }
+                    request.setInstanceId(jvmRoute);
                 }
-                request.setInstanceId(jvmRoute);
-            } else if (attributeCode == Constants.SC_A_SSL_CERT) {
+                break;
+            case Constants.SC_A_SSL_CERT:
                 request.setScheme(HTTPS);
                 // SSL certificate extraction is lazy, moved to JkCoyoteHandler
                 requestHeaderMessage.getBytes(certificates);
-            } else if (attributeCode == Constants.SC_A_SSL_CIPHER) {
+                break;
+            case Constants.SC_A_SSL_CIPHER:
                 request.setScheme(HTTPS);
                 request.setAttribute("javax.servlet.request.cipher_suite", requestHeaderMessage.getString(temp));
-            } else if (attributeCode == Constants.SC_A_SSL_SESSION) {
+                break;
+            case Constants.SC_A_SSL_SESSION:
                 request.setScheme(HTTPS);
                 request.setAttribute("javax.servlet.request.ssl_session", requestHeaderMessage.getString(temp));
-            } else if (attributeCode == Constants.SC_A_SSL_KEY_SIZE) {
+                break;
+            case Constants.SC_A_SSL_KEY_SIZE:
                 request.setAttribute("javax.servlet.request.key_size", new Integer(requestHeaderMessage.getInt()));
-            } else if (attributeCode == Constants.SC_A_STORED_METHOD) {
+                break;
+            case Constants.SC_A_STORED_METHOD:
                 request.setMethod(requestHeaderMessage.getString(temp));
-            } else if (attributeCode == Constants.SC_A_SECRET) {
-                final String value = requestHeaderMessage.getString(temp);
-                if (requiredSecret != null) {
-                    secret = true;
-                    if (!value.equals(requiredSecret)) {
-                        response.setStatus(403);
-                        error = true;
+                break;
+            case Constants.SC_A_SECRET:
+                {
+                    final String value = requestHeaderMessage.getString(temp);
+                    if (requiredSecret != null) {
+                        secret = true;
+                        if (!value.equals(requiredSecret)) {
+                            response.setStatus(403);
+                            error = true;
+                        }
                     }
                 }
-            } else {
+                break;
+            default:
                 // Nothing to do
+                break;
             }
-
         }
         /*
          * Check if secret was submitted if required
