@@ -78,9 +78,9 @@ public final class HeaderCacheActivator extends DeferredActivator {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(HeaderCacheActivator.class));
 
-    private List<ServiceRegistration> registrations;
+    private List<ServiceRegistration<?>> registrations;
 
-    private List<ServiceTracker> trackers;
+    private List<ServiceTracker<?,?>> trackers;
 
     /**
      * Initializes a new {@link HeaderCacheActivator}
@@ -131,15 +131,15 @@ public final class HeaderCacheActivator extends DeferredActivator {
             /*
              * Service trackers
              */
-            trackers = new ArrayList<ServiceTracker>(4);
-            trackers.add(new ServiceTracker(context, MailProvider.class.getName(), new HeaderCacheMailProviderServiceTracker(context)));
+            trackers = new ArrayList<ServiceTracker<?,?>>(4);
+            trackers.add(new ServiceTracker<MailProvider,MailProvider>(context, MailProvider.class, new HeaderCacheMailProviderServiceTracker(context)));
             for (final ServiceTracker tracker : trackers) {
                 tracker.open();
             }
             /*
              * Service registrations
              */
-            registrations = new ArrayList<ServiceRegistration>(4);
+            registrations = new ArrayList<ServiceRegistration<?>>(4);
 
             final Dictionary<String, String> dictionary = new Hashtable<String, String>();
             dictionary.put("protocol", HeaderCacheProvider.PROTOCOL_HEADER_CACHE.toString());
