@@ -70,15 +70,15 @@ public class Activator implements BundleActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
 
-    private List<ServiceTracker> trackers;
+    private List<ServiceTracker<?,?>> trackers;
 
 	@Override
     public void start(final BundleContext context) throws Exception {
 	    try {
-	        trackers = new ArrayList<ServiceTracker>(1);
-	        trackers.add(new ServiceTracker(context, HTMLService.class.getName(), new HTMLRegistryCustomizer(context)));
-	        trackers.add(new ServiceTracker(context, ProxyRegistry.class.getName(), new ProxyRegistryCustomizer(context)));
-	        for (final ServiceTracker tracker : trackers) {
+	        trackers = new ArrayList<ServiceTracker<?,?>>(2);
+	        trackers.add(new ServiceTracker<HTMLService,HTMLService>(context, HTMLService.class, new HTMLRegistryCustomizer(context)));
+	        trackers.add(new ServiceTracker<ProxyRegistry,ProxyRegistry>(context, ProxyRegistry.class, new ProxyRegistryCustomizer(context)));
+	        for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.open();
             }
 
@@ -92,7 +92,7 @@ public class Activator implements BundleActivator {
 	@Override
     public void stop(final BundleContext context) throws Exception {
 	    if (null != trackers) {
-	        for (final ServiceTracker tracker : trackers) {
+	        for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.close();
             }
 	        trackers = null;
