@@ -79,9 +79,9 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public final class MessagingServiceActivator extends DeferredActivator {
 
-    private List<ServiceRegistration> registrations;
+    private List<ServiceRegistration<?>> registrations;
 
-    private List<ServiceTracker> trackers;
+    private List<ServiceTracker<?,?>> trackers;
 
     private MessagingServer server;
 
@@ -147,31 +147,31 @@ public final class MessagingServiceActivator extends DeferredActivator {
             /*
              * Start other trackers
              */
-            trackers = new ArrayList<ServiceTracker>(4);
+            trackers = new ArrayList<ServiceTracker<?,?>>(4);
             trackers.add(handlers);
             trackers.add(MessagingRemoteServerProvider.getInstance());
             trackers.add(dmh);
-            for (final ServiceTracker tracker : trackers) {
+            for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.open();
             }
             /*
              * Register
              */
-            registrations = new ArrayList<ServiceRegistration>(3);
+            registrations = new ArrayList<ServiceRegistration<?>>(3);
             server = new MessagingServer(handlers);
             server.startServer(config);
             {
                 final Dictionary<String, String> serviceProperties = new Hashtable<String, String>(1);
                 serviceProperties.put(MessagingServiceConstants.MESSAGE_TOPIC, "*");
-                registrations.add(context.registerService(MessageHandler.class.getName(), dmh, serviceProperties));
+                registrations.add(context.registerService(MessageHandler.class, dmh, serviceProperties));
             }
             final MessagingServiceImpl serviceImpl = new MessagingServiceImpl(server.getServerSocket());
-            registrations.add(context.registerService(MessagingService.class.getName(), serviceImpl, null));
+            registrations.add(context.registerService(MessagingService.class, serviceImpl, null));
             {
                 final Dictionary<String, String> serviceProperties = new Hashtable<String, String>(1);
                 serviceProperties.put(EventConstants.EVENT_TOPIC, "remote/*");
                 registrations.add(context.registerService(
-                    EventHandler.class.getName(),
+                    EventHandler.class,
                     new DelegateEventHandler(serviceImpl),
                     serviceProperties));
             }
