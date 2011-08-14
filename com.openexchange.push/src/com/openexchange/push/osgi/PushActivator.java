@@ -77,7 +77,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public final class PushActivator implements BundleActivator {
 
-    private ServiceRegistration eventHandlerRegistration;
+    private ServiceRegistration<EventHandler> eventHandlerRegistration;
 
     private List<ServiceTracker<?, ?>> trackers;
 
@@ -139,7 +139,7 @@ public final class PushActivator implements BundleActivator {
              */
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-            eventHandlerRegistration = context.registerService(EventHandler.class.getName(), new PushEventHandler(), serviceProperties);
+            eventHandlerRegistration = context.registerService(EventHandler.class, new PushEventHandler(), serviceProperties);
         } catch (final Exception e) {
             log.error("Failed start-up of bundle com.openexchange.push: " + e.getMessage(), e);
             throw e;
