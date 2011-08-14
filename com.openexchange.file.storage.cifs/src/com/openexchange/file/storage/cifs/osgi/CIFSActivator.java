@@ -71,9 +71,9 @@ import com.openexchange.sessiond.SessiondService;
  */
 public final class CIFSActivator extends DeferredActivator {
 
-    private List<ServiceTracker> trackers;
+    private List<ServiceTracker<?,?>> trackers;
 
-    private List<ServiceRegistration> registrations;
+    private List<ServiceRegistration<?>> registrations;
 
     private Registerer registerer;
 
@@ -128,15 +128,15 @@ public final class CIFSActivator extends DeferredActivator {
              * Some init stuff
              */
 
-            trackers = new ArrayList<ServiceTracker>(1);
+            trackers = new ArrayList<ServiceTracker<?,?>>(1);
             // trackers.add(new ServiceTracker(context, I18nService.class.getName(), new I18nCustomizer(context)));
-            for (final ServiceTracker tracker : trackers) {
+            for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.open();
             }
             /*
              * Register services
              */
-            registrations = new ArrayList<ServiceRegistration>(2);
+            registrations = new ArrayList<ServiceRegistration<?>>(2);
             // registrations.add(context.registerService(FileStorageService.class.getName(), CIFSService.newInstance(), null));
             /*
              * Register event handler to detect removed sessions
@@ -148,7 +148,7 @@ public final class CIFSActivator extends DeferredActivator {
                 final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
                 dict.put(EventConstants.EVENT_TOPIC, FileStorageAccountManagerProvider.TOPIC);
                 registerer = new Registerer(context);
-                registrations.add(context.registerService(EventHandler.class.getName(), registerer, dict));
+                registrations.add(context.registerService(EventHandler.class, registerer, dict));
             }
         } catch (final Exception e) {
             com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CIFSActivator.class)).error(e.getMessage(), e);
