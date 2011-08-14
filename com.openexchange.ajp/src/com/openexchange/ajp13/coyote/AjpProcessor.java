@@ -1455,16 +1455,12 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 // Look-up character '='
                 final int pos = paramsNVP.indexOf('=');
                 if (pos >= 0) {
-                    request.setParameter(paramsNVP.substring(0, pos), decodeQueryStringValue(charEnc, paramsNVP.substring(pos + 1)));
+                    request.setParameter(paramsNVP.substring(0, pos), URLDecoder.decode(paramsNVP.substring(pos + 1), charEnc));
                 } else {
                     request.setParameter(paramsNVP, "");
                 }
             }
         }
-    }
-
-    private static String decodeQueryStringValue(final String charEnc, final String queryStringValue) throws UnsupportedEncodingException {
-        return URLDecoder.decode(queryStringValue, charEnc);
     }
 
     /**
