@@ -81,9 +81,9 @@ import com.openexchange.twitter.TwitterService;
  */
 public final class TwitterMessagingActivator extends DeferredActivator {
 
-    private List<ServiceTracker> trackers;
+    private List<ServiceTracker<?,?>> trackers;
 
-    private List<ServiceRegistration> registrations;
+    private List<ServiceRegistration<?>> registrations;
 
     private WhiteboardSecretService secretService;
 
@@ -140,21 +140,21 @@ public final class TwitterMessagingActivator extends DeferredActivator {
             /*
              * Trackers
              */
-            trackers = new ArrayList<ServiceTracker>();
-            for (final ServiceTracker tracker : trackers) {
+            trackers = new ArrayList<ServiceTracker<?,?>>();
+            for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.open();
             }
 
-            registrations = new ArrayList<ServiceRegistration>(2);
-            registrations.add(context.registerService(MessagingService.class.getName(), new TwitterMessagingService(), null));
+            registrations = new ArrayList<ServiceRegistration<?>>(2);
+            registrations.add(context.registerService(MessagingService.class, new TwitterMessagingService(), null));
             /*
              * Register event handler to detect removed sessions
              */
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-            registrations.add(context.registerService(EventHandler.class.getName(), new TwitterEventHandler(), serviceProperties));
+            registrations.add(context.registerService(EventHandler.class, new TwitterEventHandler(), serviceProperties));
 
-            registrations.add(context.registerService(OAuthAccountDeleteListener.class.getName(), new TwitterOAuthAccountDeleteListener(), null));
+            registrations.add(context.registerService(OAuthAccountDeleteListener.class, new TwitterOAuthAccountDeleteListener(), null));
         } catch (final Exception e) {
             com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TwitterMessagingActivator.class)).error(e.getMessage(), e);
             throw e;
