@@ -60,7 +60,6 @@ import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.mail.MailMessageService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
-import com.openexchange.timer.ScheduledTimerTask;
 
 /**
  * {@link MailMessagingActivator}
@@ -70,11 +69,11 @@ import com.openexchange.timer.ScheduledTimerTask;
  */
 public final class MailMessagingActivator extends DeferredActivator {
 
-    private List<ServiceTracker> trackers;
+    private List<ServiceTracker<?,?>> trackers;
 
-    private List<ServiceRegistration> registrations;
+    private List<ServiceRegistration<?>> registrations;
 
-    private ScheduledTimerTask scheduledTimerTask;
+    // private ScheduledTimerTask scheduledTimerTask;
 
     /**
      * Initializes a new {@link MailMessagingActivator}.
@@ -125,15 +124,15 @@ public final class MailMessagingActivator extends DeferredActivator {
                 }
             }
 
-            trackers = new ArrayList<ServiceTracker>();
-            for (final ServiceTracker tracker : trackers) {
+            trackers = new ArrayList<ServiceTracker<?,?>>();
+            for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.open();
             }
             /*
              * Register services
              */
-            registrations = new ArrayList<ServiceRegistration>(2);
-            registrations.add(context.registerService(MessagingService.class.getName(), MailMessageService.newInstance(), null));
+            registrations = new ArrayList<ServiceRegistration<?>>(2);
+            registrations.add(context.registerService(MessagingService.class, MailMessageService.newInstance(), null));
         } catch (final Exception e) {
             com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailMessagingActivator.class)).error(e.getMessage(), e);
             throw e;
