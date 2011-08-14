@@ -23,12 +23,12 @@ public class DAVDirectoryActivator extends HousekeepingActivator {
         track(PathRegistration.class, new SimpleRegistryListener<PathRegistration>() {
 
             @Override
-            public void added(ServiceReference ref, PathRegistration thing) {
+            public void added(final ServiceReference<PathRegistration> ref, final PathRegistration thing) {
                 WebdavDirectoryPerformer.getInstance().getFactory().mkdirs(thing.getPaths());
             }
 
             @Override
-            public void removed(ServiceReference ref, PathRegistration thing) {
+            public void removed(final ServiceReference<PathRegistration> ref, final PathRegistration thing) {
                 // TODO Auto-generated method stub
 
             }
