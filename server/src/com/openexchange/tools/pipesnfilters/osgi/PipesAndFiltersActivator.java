@@ -61,20 +61,20 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public class PipesAndFiltersActivator implements BundleActivator {
 
-    private ServiceTracker tracker;
+    private ServiceTracker<ThreadPoolService,ThreadPoolService> tracker;
 
     public PipesAndFiltersActivator() {
         super();
     }
 
     @Override
-    public void start(BundleContext context) throws Exception {
-        tracker = new ServiceTracker(context, ThreadPoolService.class.getName(), new PipesAndFiltersRegisterer(context));
+    public void start(final BundleContext context) throws Exception {
+        tracker = new ServiceTracker<ThreadPoolService,ThreadPoolService>(context, ThreadPoolService.class, new PipesAndFiltersRegisterer(context));
         tracker.open();
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    public void stop(final BundleContext context) throws Exception {
         tracker.close();
     }
 }
