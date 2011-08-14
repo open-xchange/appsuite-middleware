@@ -80,8 +80,7 @@ public class CXFActivator extends DeferredActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        // TODO Auto-generated method stub
-
+        // Nope
     }
 
     @Override
