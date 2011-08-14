@@ -88,9 +88,9 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
  */
 public class MessagingGenericActivator extends DeferredActivator {
 
-    private List<ServiceTracker> trackers;
+    private List<ServiceTracker<?,?>> trackers;
 
-    private List<ServiceRegistration> registrations;
+    private List<ServiceRegistration<?>> registrations;
 
     private WhiteboardSecretService secretService;
 
@@ -165,16 +165,16 @@ public class MessagingGenericActivator extends DeferredActivator {
                 getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf));
             }
 
-            trackers = new ArrayList<ServiceTracker>();
+            trackers = new ArrayList<ServiceTracker<?,?>>();
 
-            final ServiceTracker messagingServiceTracker = new ServiceTracker(context, MessagingService.class.getName(), null);
+            final ServiceTracker<MessagingService,MessagingService> messagingServiceTracker = new ServiceTracker<MessagingService,MessagingService>(context, MessagingService.class, null);
             trackers.add(messagingServiceTracker);
 
-            for (final ServiceTracker tracker : trackers) {
+            for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.open();
             }
 
-            registrations = new ArrayList<ServiceRegistration>();
+            registrations = new ArrayList<ServiceRegistration<?>>();
             final MessagingGenericCreateTableTask createTableTask = new MessagingGenericCreateTableTask();
             registrations.add(context.registerService(UpdateTaskProviderService.class.getName(), new UpdateTaskProviderService() {
                 @Override
@@ -182,8 +182,8 @@ public class MessagingGenericActivator extends DeferredActivator {
                     return Arrays.asList(((UpdateTask) createTableTask));
                 }
             }, null));
-            registrations.add(context.registerService(CreateTableService.class.getName(), createTableTask, null));
-            registrations.add(context.registerService(DeleteListener.class.getName(), new MessagingGenericDeleteListener(), null));
+            registrations.add(context.registerService(CreateTableService.class, createTableTask, null));
+            registrations.add(context.registerService(DeleteListener.class, new MessagingGenericDeleteListener(), null));
 
 
             // Secret Handling
