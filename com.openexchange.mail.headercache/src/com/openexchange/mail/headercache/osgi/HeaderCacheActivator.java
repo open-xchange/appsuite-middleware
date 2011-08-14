@@ -133,7 +133,7 @@ public final class HeaderCacheActivator extends DeferredActivator {
              */
             trackers = new ArrayList<ServiceTracker<?,?>>(4);
             trackers.add(new ServiceTracker<MailProvider,MailProvider>(context, MailProvider.class, new HeaderCacheMailProviderServiceTracker(context)));
-            for (final ServiceTracker tracker : trackers) {
+            for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.open();
             }
             /*
