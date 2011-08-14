@@ -67,8 +67,6 @@ import com.openexchange.server.osgiservice.HousekeepingActivator;
  */
 public class YahooOAuthActivator extends HousekeepingActivator {
 
-    private static final Class[] NEEDED = new Class[] { ConfigurationService.class, OAuthService.class, DeferringURLService.class };
-
     private static final String API_KEY = "com.openexchange.oauth.yahoo.apiKey";
 
     private static final String API_SECRET = "com.openexchange.oauth.yahoo.apiSecret";
@@ -84,7 +82,7 @@ public class YahooOAuthActivator extends HousekeepingActivator {
     }
 
 
-    public void setOauthService(OAuthService oauthService) {
+    public void setOauthService(final OAuthService oauthService) {
         this.oauthService = oauthService;
     }
 
@@ -94,26 +92,18 @@ public class YahooOAuthActivator extends HousekeepingActivator {
     }
 
 
-    public void setOAuthMetaData(OAuthServiceMetaDataYahooImpl oauthMetaData) {
+    public void setOAuthMetaData(final OAuthServiceMetaDataYahooImpl oauthMetaData) {
         this.oAuthMetaData = oauthMetaData;
     }
 
-
-    /* (non-Javadoc)
-     * @see com.openexchange.server.osgiservice.DeferredActivator#getNeededServices()
-     */
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED;
+        return new Class<?>[] { ConfigurationService.class, OAuthService.class, DeferringURLService.class };
     }
 
-
-    /* (non-Javadoc)
-     * @see com.openexchange.server.osgiservice.DeferredActivator#startBundle()
-     */
     @Override
     protected void startBundle() throws Exception {
-        ConfigurationService config = getService(ConfigurationService.class);
+        final ConfigurationService config = getService(ConfigurationService.class);
         oauthService = getService(OAuthService.class);
 
         oAuthMetaData = new OAuthServiceMetaDataYahooImpl(config.getProperty(API_KEY), config.getProperty(API_SECRET), getService(DeferringURLService.class));
