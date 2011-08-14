@@ -71,27 +71,27 @@ import com.openexchange.oauth.facebook.OAuthServiceMetaDataFacebookImpl;
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class FacebookRegisterer implements ServiceTrackerCustomizer {
+public class FacebookRegisterer implements ServiceTrackerCustomizer<Object,Object> {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FacebookRegisterer.class));
 
     private final BundleContext context;
     private final Lock lock = new ReentrantLock();
 
-    private ServiceRegistration registration;
-    private ServiceRegistration registration2;
+    private ServiceRegistration<OAuthServiceMetaData> registration;
+    private ServiceRegistration<FacebookService> registration2;
     private ConfigurationService configurationService;
     private OAuthService oAuthService;
 
     private DeferringURLService deferrer;
 
-    public FacebookRegisterer(BundleContext context) {
+    public FacebookRegisterer(final BundleContext context) {
         super();
         this.context = context;
     }
 
     @Override
-    public Object addingService(ServiceReference reference) {
+    public Object addingService(final ServiceReference<Object> reference) {
         final Object obj = context.getService(reference);
         final boolean needsRegistration;
         lock.lock();
@@ -113,24 +113,24 @@ public class FacebookRegisterer implements ServiceTrackerCustomizer {
             LOG.info("Registering Facebook MetaData service.");
             LOG.info("Parameter com.openexchange.facebook.apiKey : " + configurationService.getProperty("com.openexchange.facebook.apiKey"));
             LOG.info("Parameter com.openexchange.facebook.secretKey :" + configurationService.getProperty("com.openexchange.facebook.secretKey"));
-            OAuthServiceMetaDataFacebookImpl facebookMetaDataService = new OAuthServiceMetaDataFacebookImpl(configurationService, deferrer);
-            registration = context.registerService(OAuthServiceMetaData.class.getName(),
+            final OAuthServiceMetaDataFacebookImpl facebookMetaDataService = new OAuthServiceMetaDataFacebookImpl(configurationService, deferrer);
+            registration = context.registerService(OAuthServiceMetaData.class,
                 facebookMetaDataService, null);
             LOG.info("Registering Facebook service.");
-            registration2 = context.registerService(FacebookService.class.getName(),
+            registration2 = context.registerService(FacebookService.class,
                 new FacebookServiceImpl(oAuthService, facebookMetaDataService), null);
         }
         return obj;
     }
 
     @Override
-    public void modifiedService(ServiceReference reference, Object service) {
+    public void modifiedService(final ServiceReference<Object> reference, final Object service) {
         // Nothing to do.
     }
 
     @Override
-    public void removedService(ServiceReference reference, Object service) {
-        ServiceRegistration unregister = null;
+    public void removedService(final ServiceReference<Object> reference, final Object service) {
+        ServiceRegistration<?> unregister = null;
         lock.lock();
         try {
             if (service instanceof ConfigurationService) {
