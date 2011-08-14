@@ -76,11 +76,9 @@ public final class CSVDataRetentionActivator extends DeferredActivator {
         super();
     }
 
-    private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class };
-
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
+        return new Class<?>[] { ConfigurationService.class };
     }
 
     @Override
