@@ -80,11 +80,11 @@ public final class GlobalActivator implements BundleActivator {
 
     private Initialization initialization;
 
-    private ServiceTracker parserTracker = null;
+    protected ServiceTracker<StringParser,StringParser> parserTracker = null;
 
-    private ServiceRegistration parserRegistration;
+    private ServiceRegistration<StringParser> parserRegistration;
 
-    private List<ServiceTracker> trackers;
+    private List<ServiceTracker<?,?>> trackers;
 
     /**
      * Initializes a new {@link GlobalActivator}
@@ -104,9 +104,9 @@ public final class GlobalActivator implements BundleActivator {
             ServiceHolderInit.getInstance().start();
             initStringParsers(context);
 
-            trackers = new ArrayList<ServiceTracker>(2);
-            trackers.add(new ServiceTracker(context, I18nService.class.getName(), new I18nCustomizer(context)));
-            for (final ServiceTracker tracker : trackers) {
+            trackers = new ArrayList<ServiceTracker<?,?>>(2);
+            trackers.add(new ServiceTracker<I18nService, I18nService>(context, I18nService.class, new I18nCustomizer(context)));
+            for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.open();
             }
 
@@ -118,7 +118,7 @@ public final class GlobalActivator implements BundleActivator {
     }
 
     private void initStringParsers(final BundleContext context) {
-        parserTracker = new ServiceTracker(context, StringParser.class.getName(), null);
+        parserTracker = new ServiceTracker<StringParser,StringParser>(context, StringParser.class, null);
         final List<StringParser> standardParsers = new ArrayList<StringParser>(3);
         final StringParser standardParsersComposite = new CompositeParser() {
 
@@ -155,11 +155,11 @@ public final class GlobalActivator implements BundleActivator {
         standardParsers.add(new TimeSpanParser());
 
         final Hashtable<String, Object> properties = new Hashtable<String, Object>();
-        properties.put(Constants.SERVICE_RANKING, 100);
+        properties.put(Constants.SERVICE_RANKING, Integer.valueOf(100));
 
         parserTracker.open();
 
-        parserRegistration = context.registerService(StringParser.class.getName(), allParsers, properties);
+        parserRegistration = context.registerService(StringParser.class, allParsers, properties);
 
     }
 
