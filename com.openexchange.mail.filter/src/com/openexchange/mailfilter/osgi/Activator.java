@@ -69,7 +69,7 @@ public class Activator extends DeferredActivator {
 
     private final AtomicBoolean started;
 
-    private ServiceRegistration serviceRegistration;
+    private ServiceRegistration<PreferencesItemService> serviceRegistration;
 
     /**
      * Initializes a new {@link MailFilterServletActivator}
@@ -79,11 +79,9 @@ public class Activator extends DeferredActivator {
         started = new AtomicBoolean();
     }
 
-    private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class, HttpService.class, SessiondService.class };
-
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
+        return new Class<?>[] { ConfigurationService.class, HttpService.class, SessiondService.class };
     }
 
 
@@ -138,7 +136,7 @@ public class Activator extends DeferredActivator {
 
             checkConfigfile();
 
-            serviceRegistration = context.registerService(PreferencesItemService.class.getName(), new MailFilterPreferencesItem(), null);
+            serviceRegistration = context.registerService(PreferencesItemService.class, new MailFilterPreferencesItem(), null);
         } catch (final Throwable t) {
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
