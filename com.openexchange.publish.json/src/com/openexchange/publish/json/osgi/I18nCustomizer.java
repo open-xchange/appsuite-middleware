@@ -60,30 +60,30 @@ import com.openexchange.publish.json.I18n;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class I18nCustomizer implements ServiceTrackerCustomizer {
+public class I18nCustomizer implements ServiceTrackerCustomizer<I18nService,I18nService> {
 
     private final BundleContext context;
 
-    public I18nCustomizer(BundleContext context) {
+    public I18nCustomizer(final BundleContext context) {
         super();
         this.context = context;
     }
 
     @Override
-    public Object addingService(ServiceReference reference) {
-        I18nService service = (I18nService) context.getService(reference);
+    public I18nService addingService(final ServiceReference<I18nService> reference) {
+        final I18nService service = context.getService(reference);
         I18n.getInstance().addI18nService(service);
         return service;
     }
 
     @Override
-    public void modifiedService(ServiceReference reference, Object service) {
+    public void modifiedService(final ServiceReference<I18nService> reference, final I18nService service) {
         // Nothing to do.
     }
 
     @Override
-    public void removedService(ServiceReference reference, Object service) {
-        I18nService i18nService = (I18nService) service;
+    public void removedService(final ServiceReference<I18nService> reference, final I18nService service) {
+        final I18nService i18nService = service;
         I18n.getInstance().removeI18nService(i18nService);
         context.ungetService(reference);
     }

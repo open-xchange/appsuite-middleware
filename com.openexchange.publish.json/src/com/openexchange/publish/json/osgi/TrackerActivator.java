@@ -63,7 +63,7 @@ import com.openexchange.publish.json.Hostname;
  */
 public class TrackerActivator implements BundleActivator {
 
-    private Stack<ServiceTracker> trackers;
+    private Stack<ServiceTracker<?,?>> trackers;
 
     public TrackerActivator() {
         super();
@@ -71,10 +71,10 @@ public class TrackerActivator implements BundleActivator {
 
     @Override
     public void start(final BundleContext context) throws Exception {
-        trackers = new Stack<ServiceTracker>();
-        trackers.add(new ServiceTracker(context, I18nService.class.getName(), new I18nCustomizer(context)));
+        trackers = new Stack<ServiceTracker<?,?>>();
+        trackers.add(new ServiceTracker<I18nService,I18nService>(context, I18nService.class, new I18nCustomizer(context)));
         trackers.add(new HostnameServiceTracker(context, Hostname.getInstance()));
-        for (final ServiceTracker tracker : trackers) {
+        for (final ServiceTracker<?,?> tracker : trackers) {
             tracker.open();
         }
     }
