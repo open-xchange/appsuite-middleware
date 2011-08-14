@@ -96,7 +96,7 @@ public final class PushActivator extends DeferredActivator {
 
     private static final String PROP_USE_EMAIL_ADDRESS = "com.openexchange.push.mail.notify.use_full_email_address";
 
-    private List<ServiceRegistration> serviceRegistrations;
+    private List<ServiceRegistration<?>> serviceRegistrations;
 
     private boolean multicast;
 
@@ -161,13 +161,13 @@ public final class PushActivator extends DeferredActivator {
             /*
              * Register push manager
              */
-            serviceRegistrations = new ArrayList<ServiceRegistration>(3);
-            serviceRegistrations.add(context.registerService(PushManagerService.class.getName(), new MailNotifyPushManagerService(useOXLogin, useEmailAddress), null));
+            serviceRegistrations = new ArrayList<ServiceRegistration<?>>(3);
+            serviceRegistrations.add(context.registerService(PushManagerService.class, new MailNotifyPushManagerService(useOXLogin, useEmailAddress), null));
             serviceRegistrations.add(context.registerService(
-                MailAccountDeleteListener.class.getName(),
+                MailAccountDeleteListener.class,
                 new MailNotifyPushMailAccountDeleteListener(),
                 null));
-            serviceRegistrations.add(context.registerService(DeleteListener.class.getName(), new MailNotifyPushDeleteListener(), null));
+            serviceRegistrations.add(context.registerService(DeleteListener.class, new MailNotifyPushDeleteListener(), null));
             startUdpListener();
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
