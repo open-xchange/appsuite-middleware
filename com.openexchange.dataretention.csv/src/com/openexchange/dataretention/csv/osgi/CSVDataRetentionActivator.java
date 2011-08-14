@@ -51,11 +51,11 @@ package com.openexchange.dataretention.csv.osgi;
 
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.exception.OXException;
 import com.openexchange.dataretention.DataRetentionService;
 import com.openexchange.dataretention.csv.CSVDataRetentionConfig;
 import com.openexchange.dataretention.csv.CSVDataRetentionService;
 import com.openexchange.dataretention.csv.CSVWriter;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.osgiservice.DeferredActivator;
 
 /**
@@ -67,7 +67,7 @@ public final class CSVDataRetentionActivator extends DeferredActivator {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CSVDataRetentionActivator.class));
 
-    private ServiceRegistration registration;
+    private ServiceRegistration<DataRetentionService> registration;
 
     /**
      * Initializes a new {@link CSVDataRetentionActivator}.
@@ -101,7 +101,7 @@ public final class CSVDataRetentionActivator extends DeferredActivator {
     protected void startBundle() throws Exception {
         try {
             CSVDataRetentionConfig.getInstance().init(getService(ConfigurationService.class));
-            registration = context.registerService(DataRetentionService.class.getName(), new CSVDataRetentionService(), null);
+            registration = context.registerService(DataRetentionService.class, new CSVDataRetentionService(), null);
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
