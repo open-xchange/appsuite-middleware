@@ -60,7 +60,7 @@ import com.openexchange.folderstorage.internal.FolderStorageRegistry;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FolderStorageTracker implements ServiceTrackerCustomizer {
+public final class FolderStorageTracker implements ServiceTrackerCustomizer<FolderStorage,FolderStorage> {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FolderStorageTracker.class));
 
@@ -75,8 +75,8 @@ public final class FolderStorageTracker implements ServiceTrackerCustomizer {
     }
 
     @Override
-    public Object addingService(final ServiceReference reference) {
-        final Object addedService = context.getService(reference);
+    public FolderStorage addingService(final ServiceReference<FolderStorage> reference) {
+        final FolderStorage addedService = context.getService(reference);
         // Get tree identifier
         final String treeId;
         {
@@ -91,7 +91,7 @@ public final class FolderStorageTracker implements ServiceTrackerCustomizer {
             treeId = obj.toString();
         }
         // Add to registry
-        if (FolderStorageRegistry.getInstance().addFolderStorage(treeId, (FolderStorage) addedService)) {
+        if (FolderStorageRegistry.getInstance().addFolderStorage(treeId, addedService)) {
             return addedService;
         }
         LOG.error(new StringBuilder(32).append("Failed registration to tree identifier \"").append(treeId).append("\" for ").append(
@@ -102,12 +102,12 @@ public final class FolderStorageTracker implements ServiceTrackerCustomizer {
     }
 
     @Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<FolderStorage> reference, final FolderStorage service) {
         // Nothing to do
     }
 
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
+    public void removedService(final ServiceReference<FolderStorage> reference, final FolderStorage service) {
         if (null != service) {
             try {
                 // Get tree identifier
@@ -121,7 +121,7 @@ public final class FolderStorageTracker implements ServiceTrackerCustomizer {
                     }
                     treeId = obj.toString();
                 }
-                FolderStorageRegistry.getInstance().removeFolderStorage(treeId, (FolderStorage) service);
+                FolderStorageRegistry.getInstance().removeFolderStorage(treeId, service);
             } finally {
                 context.ungetService(reference);
             }
