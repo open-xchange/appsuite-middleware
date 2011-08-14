@@ -1102,9 +1102,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             request.setServerPort(serverPort);
         }
 
-        final boolean isSSL = requestHeaderMessage.getByte() != 0;
-        if (isSSL) {
-            request.setSecure(isSSL);
+        if (requestHeaderMessage.getByte() != 0) {
+            request.setSecure(true);
             request.setScheme(HTTPS);
         }
 
