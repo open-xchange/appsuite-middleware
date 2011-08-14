@@ -93,7 +93,7 @@ public class AutoUpdateTest extends GenericSubscribeServiceTestHelpers {
         configurationService.stringProperties.put("com.openexchange.subscribe.crawler.onlyupdatealreadyinstalled", "false");
         activator = new Activator();
         //set an empty ServiceRegistration as this is not the subject of this test
-        activator.setServices(new ArrayList<ServiceRegistration>());
+        activator.setServices(new ArrayList<ServiceRegistration<?>>());
         //set a simulated BundleContext as this is not the subject of this test
         activator.setBundleContext(new SimBundleContext());
         installedDirectoryPath = configurationService.getProperty("com.openexchange.subscribe.crawler.path");
@@ -108,7 +108,7 @@ public class AutoUpdateTest extends GenericSubscribeServiceTestHelpers {
     }
 
     public void testCrawlersWithAppropriateApiAndHigherPriorityWillBeDownloaded(){
-        CrawlerUpdateTask update = new CrawlerUpdateTask(configurationService, activator);
+        final CrawlerUpdateTask update = new CrawlerUpdateTask(configurationService, activator);
         copyFileFromRepository("Facebook_higherPriority_sameApi.yml", availableUpdatesPath);
         update.run();
         assertTrue("The new file should be present.", thisFileIsPresent("Facebook_higherPriority_sameApi.yml"));
@@ -116,7 +116,7 @@ public class AutoUpdateTest extends GenericSubscribeServiceTestHelpers {
     }
 
     public void testCrawlersWithHigherPriorityAndLowerApiWillBeDownloaded(){
-        CrawlerUpdateTask update = new CrawlerUpdateTask(configurationService, activator);
+        final CrawlerUpdateTask update = new CrawlerUpdateTask(configurationService, activator);
         copyFileFromRepository("Facebook_higherPriority_lowerApi.yml", availableUpdatesPath);
         update.run();
         assertTrue("The new file should be present.", thisFileIsPresent("Facebook_higherPriority_lowerApi.yml"));
@@ -124,7 +124,7 @@ public class AutoUpdateTest extends GenericSubscribeServiceTestHelpers {
     }
 
     public void testCrawlersWithLowerPriorityWillNotBeDownloaded(){
-        CrawlerUpdateTask update = new CrawlerUpdateTask(configurationService, activator);
+        final CrawlerUpdateTask update = new CrawlerUpdateTask(configurationService, activator);
         copyFileFromRepository("Facebook_lowerPriority.yml", availableUpdatesPath);
         update.run();
         assertFalse("The new file should not be present.", thisFileIsPresent("Facebook_lowerPriority.yml"));
@@ -132,7 +132,7 @@ public class AutoUpdateTest extends GenericSubscribeServiceTestHelpers {
     }
 
     public void testCrawlersWithHigherApiWillNotBeDownloaded(){
-        CrawlerUpdateTask update = new CrawlerUpdateTask(configurationService, activator);
+        final CrawlerUpdateTask update = new CrawlerUpdateTask(configurationService, activator);
         copyFileFromRepository("Facebook_higherPriority_higherApi.yml", availableUpdatesPath);
         update.run();
         assertFalse("The new file should not be present.", thisFileIsPresent("Facebook_higherPriority_higherApi.yml"));
@@ -141,7 +141,7 @@ public class AutoUpdateTest extends GenericSubscribeServiceTestHelpers {
 
     public void testOnlyUpdateIfThereAreNewerUpdates(){
         activator.setLAST_TIME_CHECKED(Calendar.getInstance().getTimeInMillis());
-        CrawlerUpdateTask update = new CrawlerUpdateTask(configurationService, activator);
+        final CrawlerUpdateTask update = new CrawlerUpdateTask(configurationService, activator);
         copyFileFromRepository("Facebook_higherPriority_sameApi.yml", availableUpdatesPath);
         update.run();
         assertFalse("The new file should not be present.", thisFileIsPresent("Facebook_higherPriority_sameApi.yml"));
@@ -149,7 +149,7 @@ public class AutoUpdateTest extends GenericSubscribeServiceTestHelpers {
     }
 
     public void testNewCrawlersWithRightApiWillBeDownloaded(){
-        CrawlerUpdateTask update = new CrawlerUpdateTask(configurationService, activator);
+        final CrawlerUpdateTask update = new CrawlerUpdateTask(configurationService, activator);
         copyFileFromRepository("new_service.yml", availableUpdatesPath);
         update.run();
         assertTrue("The new file should be present.", thisFileIsPresent("new_service.yml"));
@@ -157,7 +157,7 @@ public class AutoUpdateTest extends GenericSubscribeServiceTestHelpers {
 
     public void testNewCrawlersWithRightApiWillNotBeDownloadedIfNotEnabled(){
         configurationService.stringProperties.put("com.openexchange.subscribe.crawler.onlyupdatealreadyinstalled", "true");
-        CrawlerUpdateTask update = new CrawlerUpdateTask(configurationService, activator);
+        final CrawlerUpdateTask update = new CrawlerUpdateTask(configurationService, activator);
         copyFileFromRepository("new_service.yml", availableUpdatesPath);
         update.run();
         // reset to default
@@ -169,9 +169,9 @@ public class AutoUpdateTest extends GenericSubscribeServiceTestHelpers {
 
     }
 
-    private boolean thisFileIsPresent(String filename) {
-        File[] files = installedDirectory.listFiles();
-        for (File file : files){
+    private boolean thisFileIsPresent(final String filename) {
+        final File[] files = installedDirectory.listFiles();
+        for (final File file : files){
             if (file.getName().equals(filename)){
                 return true;
             }
@@ -179,30 +179,30 @@ public class AutoUpdateTest extends GenericSubscribeServiceTestHelpers {
         return false;
     }
 
-    private void clearWorkingDirectory(File directory){
-        File[] files = directory.listFiles();
-        for (File file : files){
+    private void clearWorkingDirectory(final File directory){
+        final File[] files = directory.listFiles();
+        for (final File file : files){
             file.delete();
         }
     }
 
-    private void copyFileFromRepository(String filename, String destinationDirectoryPath){
-        File source = new File(allCrawlersRepositoryPath + filename);
-        File target = new File(destinationDirectoryPath + filename);
+    private void copyFileFromRepository(final String filename, final String destinationDirectoryPath){
+        final File source = new File(allCrawlersRepositoryPath + filename);
+        final File target = new File(destinationDirectoryPath + filename);
         try {
-            InputStream in = new FileInputStream(source);
-            OutputStream out = new FileOutputStream(target);
+            final InputStream in = new FileInputStream(source);
+            final OutputStream out = new FileOutputStream(target);
 
-            byte[] buf = new byte[1024];
+            final byte[] buf = new byte[1024];
             int len;
             while ((len = in.read(buf)) > 0){
               out.write(buf, 0, len);
             }
             in.close();
             out.close();
-        } catch (FileNotFoundException e) {
+        } catch (final FileNotFoundException e) {
             e.printStackTrace();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
     }
