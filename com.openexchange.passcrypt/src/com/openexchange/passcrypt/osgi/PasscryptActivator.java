@@ -70,9 +70,9 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
  */
 public final class PasscryptActivator extends DeferredActivator {
 
-    private List<ServiceTracker> trackers;
+    private List<ServiceTracker<?,?>> trackers;
 
-    private List<ServiceRegistration> registrations;
+    private List<ServiceRegistration<?>> registrations;
 
     /**
      * Initializes a new {@link PasscryptActivator}.
@@ -124,19 +124,19 @@ public final class PasscryptActivator extends DeferredActivator {
             /*
              * Some init stuff
              */
-            trackers = new ArrayList<ServiceTracker>(1);
+            trackers = new ArrayList<ServiceTracker<?,?>>(1);
             // trackers.add(new ServiceTracker(context, I18nService.class.getName(), new I18nCustomizer(context)));
-            for (final ServiceTracker tracker : trackers) {
+            for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.open();
             }
             /*
              * Register services
              */
-            registrations = new ArrayList<ServiceRegistration>(2);
+            registrations = new ArrayList<ServiceRegistration<?>>(4);
             final PasswordCrypter passwordCrypter = new PasswordCrypter(getService(ConfigurationService.class));
-            registrations.add(context.registerService(LoginHandlerService.class.getName(), passwordCrypter, null));
-            registrations.add(context.registerService(SecretConsistencyCheck.class.getName(), passwordCrypter, null));
-            registrations.add(context.registerService(SecretMigrator.class.getName(), passwordCrypter, null));
+            registrations.add(context.registerService(LoginHandlerService.class, passwordCrypter, null));
+            registrations.add(context.registerService(SecretConsistencyCheck.class, passwordCrypter, null));
+            registrations.add(context.registerService(SecretMigrator.class, passwordCrypter, null));
         } catch (final Exception e) {
             com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(PasscryptActivator.class)).error(e.getMessage(), e);
             throw e;
