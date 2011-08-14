@@ -69,7 +69,7 @@ public final class URLMailAttachmentActivator implements BundleActivator {
 
     private final String name;
 
-    private ServiceRegistration registration;
+    private ServiceRegistration<DataSource> registration;
 
     /**
      * Initializes a new {@link URLMailAttachmentActivator}.
@@ -88,7 +88,7 @@ public final class URLMailAttachmentActivator implements BundleActivator {
              */
             final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put("identifier", name);
-            registration = context.registerService(DataSource.class.getName(), new URLMailAttachmentDataSource(), props);
+            registration = context.registerService(DataSource.class, new URLMailAttachmentDataSource(), props);
         } catch (final Exception e) {
             LOG.error("starting bundle failed: " + name, e);
             throw e;
