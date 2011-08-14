@@ -88,9 +88,9 @@ public class OutlookFolderStorageActivator extends DeferredActivator {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(OutlookFolderStorageActivator.class));
 
-    private List<ServiceRegistration> serviceRegistrations;
+    private List<ServiceRegistration<?>> serviceRegistrations;
 
-    private List<ServiceTracker> serviceTrackers;
+    private List<ServiceTracker<?,?>> serviceTrackers;
 
     /**
      * Initializes a new {@link OutlookFolderStorageActivator}.
@@ -141,20 +141,20 @@ public class OutlookFolderStorageActivator extends DeferredActivator {
                 }
             }
             // Trackers
-            serviceTrackers = new ArrayList<ServiceTracker>(1);
-            serviceTrackers.add(new ServiceTracker(context, FolderStorage.class.getName(), new OutlookFolderStorageServiceTracker(context)));
-            for (final ServiceTracker serviceTracker : serviceTrackers) {
+            serviceTrackers = new ArrayList<ServiceTracker<?,?>>(1);
+            serviceTrackers.add(new ServiceTracker<FolderStorage,FolderStorage>(context, FolderStorage.class, new OutlookFolderStorageServiceTracker(context)));
+            for (final ServiceTracker<?,?> serviceTracker : serviceTrackers) {
                 serviceTracker.open();
             }
 
             // Register services
-            serviceRegistrations = new ArrayList<ServiceRegistration>(2);
+            serviceRegistrations = new ArrayList<ServiceRegistration<?>>(2);
             // DeleteListener was added statically
             // serviceRegistrations.add(context.registerService(DeleteListener.class.getName(), new OutlookFolderDeleteListener(), null));
 
             final Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
             dictionary.put("tree", OutlookFolderStorage.OUTLOOK_TREE_ID);
-            serviceRegistrations.add(context.registerService(FolderStorage.class.getName(), new OutlookFolderStorage(), dictionary));
+            serviceRegistrations.add(context.registerService(FolderStorage.class, new OutlookFolderStorage(), dictionary));
             {
                 final EventHandler pushMailEventHandler = new EventHandler() {
 
@@ -168,7 +168,7 @@ public class OutlookFolderStorageActivator extends DeferredActivator {
                 };
                 final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
                 dict.put(EventConstants.EVENT_TOPIC, PushEventConstants.getAllTopics());
-                serviceRegistrations.add(context.registerService(EventHandler.class.getName(), pushMailEventHandler, dict));
+                serviceRegistrations.add(context.registerService(EventHandler.class, pushMailEventHandler, dict));
             }
             {
                 final EventHandler folderEventHandler = new EventHandler() {
@@ -228,7 +228,7 @@ public class OutlookFolderStorageActivator extends DeferredActivator {
              * Drop service registrations
              */
             if (null != serviceRegistrations) {
-                for (final ServiceRegistration serviceRegistration : serviceRegistrations) {
+                for (final ServiceRegistration<?> serviceRegistration : serviceRegistrations) {
                     serviceRegistration.unregister();
                 }
                 serviceRegistrations.clear();
@@ -238,7 +238,7 @@ public class OutlookFolderStorageActivator extends DeferredActivator {
              * Drop/close service trackers
              */
             if (null != serviceTrackers) {
-                for (final ServiceTracker serviceTracker : serviceTrackers) {
+                for (final ServiceTracker<?,?> serviceTracker : serviceTrackers) {
                     serviceTracker.close();
                 }
                 serviceTrackers.clear();
