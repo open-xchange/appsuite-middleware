@@ -67,6 +67,7 @@ import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailServletInterface;
@@ -150,6 +151,10 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
                 throw (OXException) cause;
             }
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (LogProperties.isEnabled()) {
+                
+            }
         }
     }
 

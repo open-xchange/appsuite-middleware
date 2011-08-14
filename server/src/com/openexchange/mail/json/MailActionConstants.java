@@ -51,10 +51,9 @@ package com.openexchange.mail.json;
 
 import com.openexchange.mail.MailServletInterface;
 
-
 /**
  * {@link MailActionConstants}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MailActionConstants {
@@ -63,4 +62,15 @@ public interface MailActionConstants {
      * The property name for {@link MailServletInterface} instance.
      */
     public static final String PROPERTY_MAIL_IFACE = "com.openexchange.mail.json.mailInterface";
+
+    // ---------------------- Log properties constants -------------------------------
+
+    public static final String LOG_PROPERTY_LOGIN = "com.openexchange.mail.login";
+
+    public static final String LOG_PROPERTY_HOST = "com.openexchange.mail.host";
+
+    public static final String LOG_PROPERTY_FULL_NAME = "com.openexchange.mail.fullName";
+
+    public static final String LOG_PROPERTY_MAIL_ID = "com.openexchange.mail.mailId";
+
 }
