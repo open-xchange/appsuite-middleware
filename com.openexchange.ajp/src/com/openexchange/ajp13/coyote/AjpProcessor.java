@@ -1439,13 +1439,16 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * Parses a query string and puts resulting parameters into given servlet request.
-     *
+     * 
      * @param queryStr The query string to be parsed
      * @throws UnsupportedEncodingException If charset provided by servlet request is not supported
      */
     private void parseQueryString(final String queryStr) throws UnsupportedEncodingException {
         final String[] paramsNVPs = PATTERN_SPLIT.split(queryStr, 0);
-        final String charEnc = request.getCharacterEncoding();
+        String charEnc = request.getCharacterEncoding();
+        if (null == charEnc) {
+            charEnc = AJPv13Config.getServerProperty(Property.DefaultEncoding);
+        }
         for (final String paramsNVP2 : paramsNVPs) {
             final String paramsNVP = paramsNVP2.trim();
             if (paramsNVP.length() > 0) {
@@ -1461,7 +1464,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     }
 
     private static String decodeQueryStringValue(final String charEnc, final String queryStringValue) throws UnsupportedEncodingException {
-        return URLDecoder.decode(queryStringValue, charEnc == null ? AJPv13Config.getServerProperty(Property.DefaultEncoding) : charEnc);
+        return URLDecoder.decode(queryStringValue, charEnc);
     }
 
     /**
