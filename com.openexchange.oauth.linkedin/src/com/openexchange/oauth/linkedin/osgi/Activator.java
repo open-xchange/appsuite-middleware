@@ -70,9 +70,9 @@ public class Activator implements BundleActivator {
 
     private BundleContext bundleContext;
 
-    private final Stack<ServiceTracker> trackers = new Stack<ServiceTracker>();
+    private final Stack<ServiceTracker<?,?>> trackers = new Stack<ServiceTracker<?,?>>();
 
-    private ArrayList<ServiceRegistration> services;
+    private ArrayList<ServiceRegistration<?>> services;
 
     private OAuthService oauthService;
 
@@ -82,22 +82,18 @@ public class Activator implements BundleActivator {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
-     */
     @Override
-    public void start(BundleContext context) throws Exception {
+    public void start(final BundleContext context) throws Exception {
         bundleContext = context;
-        services = new ArrayList<ServiceRegistration>();
+        services = new ArrayList<ServiceRegistration<?>>(2);
 
         // react dynamically to the appearance/disappearance of ConfigurationService
-        trackers.push(new ServiceTracker(context, ConfigurationService.class.getName(), new ConfigurationServiceRegisterer(context, this)));
+        trackers.push(new ServiceTracker<ConfigurationService,ConfigurationService>(context, ConfigurationService.class, new ConfigurationServiceRegisterer(context, this)));
 
         // react dynamically to the appearance/disappearance of OauthService
-        trackers.push(new ServiceTracker(context, OAuthService.class.getName(), new OAuthServiceRegisterer(context, this)));
+        trackers.push(new ServiceTracker<OAuthService,OAuthService>(context, OAuthService.class, new OAuthServiceRegisterer(context, this)));
 
-        for (final ServiceTracker tracker : trackers) {
+        for (final ServiceTracker<?,?> tracker : trackers) {
             tracker.open();
         }
     }
@@ -107,7 +103,7 @@ public class Activator implements BundleActivator {
      * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
      */
     @Override
-    public void stop(BundleContext context) throws Exception {
+    public void stop(final BundleContext context) throws Exception {
         while (!trackers.isEmpty()) {
             trackers.pop().close();
         }
@@ -116,16 +112,16 @@ public class Activator implements BundleActivator {
     public void registerServices() {
         if (null != oauthService && null != configurationService) {
             final OAuthServiceMetaDataLinkedInImpl linkedInMetaDataService = new OAuthServiceMetaDataLinkedInImpl(this);
-            final ServiceRegistration serviceRegistration = bundleContext.registerService(
-                OAuthServiceMetaData.class.getName(),
+            final ServiceRegistration<OAuthServiceMetaData> serviceRegistration = bundleContext.registerService(
+                OAuthServiceMetaData.class,
                 linkedInMetaDataService,
                 null);
             services.add(serviceRegistration);
             LOG.info("OAuthServiceMetaData for LinkedIn was started");
 
             final LinkedInService linkedInService = new LinkedInServiceImpl(this);
-            final ServiceRegistration serviceRegistration2 = bundleContext.registerService(
-                LinkedInService.class.getName(),
+            final ServiceRegistration<LinkedInService> serviceRegistration2 = bundleContext.registerService(
+                LinkedInService.class,
                 linkedInService,
                 null);
             services.add(serviceRegistration2);
@@ -135,7 +131,7 @@ public class Activator implements BundleActivator {
     }
 
     public void unregisterServices() {
-        for (final ServiceRegistration serviceRegistration : services) {
+        for (final ServiceRegistration<?> serviceRegistration : services) {
             serviceRegistration.unregister();
         }
     }
@@ -144,14 +140,14 @@ public class Activator implements BundleActivator {
         return oauthService;
     }
 
-    public void setOauthService(OAuthService oauthService) {
+    public void setOauthService(final OAuthService oauthService) {
         this.oauthService = oauthService;
     }
 
     /**
      * @param configurationService
      */
-    public void setConfigurationService(ConfigurationService configurationService) {
+    public void setConfigurationService(final ConfigurationService configurationService) {
         this.configurationService = configurationService;
     }
 
