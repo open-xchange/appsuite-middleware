@@ -93,7 +93,7 @@ public final class MALPollActivator extends DeferredActivator {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MALPollActivator.class));
 
-    private List<ServiceRegistration> serviceRegistrations;
+    private List<ServiceRegistration<?>> serviceRegistrations;
 
     private ScheduledTimerTask scheduledTimerTask;
 
@@ -105,7 +105,7 @@ public final class MALPollActivator extends DeferredActivator {
 
     private boolean concurrentGlobal;
 
-    private ServiceTracker sessiondTracker;
+    private ServiceTracker<SessiondService, SessiondService> sessiondTracker;
 
     /**
      * Initializes a new {@link MALPollActivator}.
@@ -169,9 +169,9 @@ public final class MALPollActivator extends DeferredActivator {
              * Initialize & open tracker for SessionD service
              */
             {
-                final ServiceTrackerCustomizer trackerCustomizer =
+                final ServiceTrackerCustomizer<SessiondService,SessiondService> trackerCustomizer =
                     new RegistryServiceTrackerCustomizer<SessiondService>(context, getServiceRegistry(), SessiondService.class);
-                sessiondTracker = new ServiceTracker(context, SessiondService.class.getName(), trackerCustomizer);
+                sessiondTracker = new ServiceTracker<SessiondService,SessiondService>(context, SessiondService.class, trackerCustomizer);
                 sessiondTracker.open();
             }
             /*
@@ -225,15 +225,15 @@ public final class MALPollActivator extends DeferredActivator {
             /*
              * Register push manager
              */
-            serviceRegistrations = new ArrayList<ServiceRegistration>(4);
-            serviceRegistrations.add(context.registerService(CreateTableService.class.getName(), new MALPollCreateTableTask(), null));
-            serviceRegistrations.add(context.registerService(UpdateTaskProviderService.class.getName(), new UpdateTaskPublisher(), null));
-            serviceRegistrations.add(context.registerService(PushManagerService.class.getName(), new MALPollPushManagerService(), null));
+            serviceRegistrations = new ArrayList<ServiceRegistration<?>>(6);
+            serviceRegistrations.add(context.registerService(CreateTableService.class, new MALPollCreateTableTask(), null));
+            serviceRegistrations.add(context.registerService(UpdateTaskProviderService.class, new UpdateTaskPublisher(), null));
+            serviceRegistrations.add(context.registerService(PushManagerService.class, new MALPollPushManagerService(), null));
             serviceRegistrations.add(context.registerService(
-                MailAccountDeleteListener.class.getName(),
+                MailAccountDeleteListener.class,
                 new MALPollMailAccountDeleteListener(),
                 null));
-            serviceRegistrations.add(context.registerService(DeleteListener.class.getName(), new MALPollDeleteListener(), null));
+            serviceRegistrations.add(context.registerService(DeleteListener.class, new MALPollDeleteListener(), null));
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
