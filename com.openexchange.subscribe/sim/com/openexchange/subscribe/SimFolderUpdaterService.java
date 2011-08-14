@@ -62,7 +62,7 @@ import com.openexchange.groupware.generic.TargetFolderDefinition;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class SimFolderUpdaterService implements FolderUpdaterService {
+public class SimFolderUpdaterService implements FolderUpdaterService<Object> {
 
     private TargetFolderDefinition target;
     private Collection data;
@@ -71,18 +71,18 @@ public class SimFolderUpdaterService implements FolderUpdaterService {
     private boolean usesMultipleStrategy = false;
 
     @Override
-    public boolean handles(FolderObject folder) {
+    public boolean handles(final FolderObject folder) {
         this.folder = folder;
         return handles;
     }
 
     @Override
-    public void save(Collection data, TargetFolderDefinition target) throws OXException {
+    public void save(final Collection data, final TargetFolderDefinition target) throws OXException {
         this.data = data;
         this.target = target;
     }
 
-    public void setTarget(TargetFolderDefinition target) {
+    public void setTarget(final TargetFolderDefinition target) {
         this.target = target;
     }
 
@@ -95,7 +95,7 @@ public class SimFolderUpdaterService implements FolderUpdaterService {
     }
 
 
-    public void setData(Collection data) {
+    public void setData(final Collection data) {
         this.data = data;
     }
 
@@ -105,7 +105,7 @@ public class SimFolderUpdaterService implements FolderUpdaterService {
     }
 
 
-    public void setFolder(FolderObject folder) {
+    public void setFolder(final FolderObject folder) {
         this.folder = folder;
     }
 
@@ -115,7 +115,7 @@ public class SimFolderUpdaterService implements FolderUpdaterService {
     }
 
 
-    public void setHandles(boolean handles) {
+    public void setHandles(final boolean handles) {
         this.handles = handles;
     }
 
@@ -127,7 +127,7 @@ public class SimFolderUpdaterService implements FolderUpdaterService {
         return usesMultipleStrategy;
     }
 
-    public void setUsesMultipleStrategy(boolean bool){
+    public void setUsesMultipleStrategy(final boolean bool){
         this.usesMultipleStrategy = bool;
     }
 
