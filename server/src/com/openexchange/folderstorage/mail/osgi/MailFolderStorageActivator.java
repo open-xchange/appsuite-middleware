@@ -71,7 +71,7 @@ public final class MailFolderStorageActivator extends DeferredActivator {
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailFolderStorageActivator.class));
 
-    private ServiceRegistration folderStorageRegistration;
+    private ServiceRegistration<FolderStorage> folderStorageRegistration;
 
     /**
      * Initializes a new {@link MailFolderStorageActivator}.
@@ -121,7 +121,7 @@ public final class MailFolderStorageActivator extends DeferredActivator {
             // Register folder storage
             final Dictionary<String, String> dictionary = new Hashtable<String, String>();
             dictionary.put("tree", FolderStorage.REAL_TREE_ID);
-            folderStorageRegistration = context.registerService(FolderStorage.class.getName(), new MailFolderStorage(), dictionary);
+            folderStorageRegistration = context.registerService(FolderStorage.class, new MailFolderStorage(), dictionary);
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
