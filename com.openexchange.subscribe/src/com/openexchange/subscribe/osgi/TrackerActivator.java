@@ -61,12 +61,13 @@ import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
 
 /**
  * {@link TrackerActivator} - The activator for starting/stopping needed service trackers.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TrackerActivator implements BundleActivator {
 
-    private List<ServiceTracker> trackers;
+    private List<ServiceTracker<?, ?>> trackers;
+
     private WhiteboardSecretService secretService;
 
     /**
@@ -88,15 +89,15 @@ public final class TrackerActivator implements BundleActivator {
     }
 
     private void openTrackers(final BundleContext context) {
-        trackers = new ArrayList<ServiceTracker>();
-        trackers.add(new ServiceTracker(
+        trackers = new ArrayList<ServiceTracker<?, ?>>();
+        trackers.add(new ServiceTracker<ConfigurationService,ConfigurationService>(
             context,
-            ConfigurationService.class.getName(),
+            ConfigurationService.class,
             new RegistryServiceTrackerCustomizer<ConfigurationService>(
                 context,
                 SubscriptionServiceRegistry.getInstance(),
                 ConfigurationService.class)));
-        for (final ServiceTracker tracker : trackers) {
+        for (final ServiceTracker<?,?> tracker : trackers) {
             tracker.open();
         }
 
@@ -106,12 +107,12 @@ public final class TrackerActivator implements BundleActivator {
 
     private void closeTrackers() {
         if (null != trackers) {
-            for (final ServiceTracker tracker : trackers) {
+            for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.close();
             }
             trackers = null;
         }
-        if(secretService != null) {
+        if (secretService != null) {
             secretService.close();
         }
     }
