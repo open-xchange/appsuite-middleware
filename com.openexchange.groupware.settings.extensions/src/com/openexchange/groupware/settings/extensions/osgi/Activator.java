@@ -313,7 +313,7 @@ public class Activator implements BundleActivator {
 
                     @Override
                     public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
-                        setting.setSingleValue(writable);
+                        setting.setSingleValue(Boolean.valueOf(writable));
                     }
 
                     @Override
