@@ -61,7 +61,7 @@ import com.openexchange.push.internal.PushClientWhitelist;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class WhitelistServiceTracker implements ServiceTrackerCustomizer {
+public final class WhitelistServiceTracker implements ServiceTrackerCustomizer<ConfigurationService,ConfigurationService> {
 
     private final BundleContext context;
 
@@ -76,41 +76,34 @@ public final class WhitelistServiceTracker implements ServiceTrackerCustomizer {
     }
 
     @Override
-    public Object addingService(final ServiceReference reference) {
-        final Object service = context.getService(reference);
-        if (service instanceof ConfigurationService) {
-            final String property = ((ConfigurationService) service).getProperty("com.openexchange.push.allowedClients");
-            final PushClientWhitelist clientWhitelist = PushClientWhitelist.getInstance();
-            clientWhitelist.clear();
-            if (null == property) {
-                final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(WhitelistServiceTracker.class))));
-                log.info("Cleared push client white-list from.");
-            } else {
-                final String[] wildcardPatterns = property.split(" *, *", 0);
-                for (final String wildcardPattern : wildcardPatterns) {
-                    if (!isEmpty(wildcardPattern)) {
-                        clientWhitelist.add(Pattern.compile(wildcardToRegex(removeQuotes(wildcardPattern.trim())), Pattern.CASE_INSENSITIVE));
-                    }
+    public ConfigurationService addingService(final ServiceReference<ConfigurationService> reference) {
+        final ConfigurationService service = context.getService(reference);
+        final String property = service.getProperty("com.openexchange.push.allowedClients");
+        final PushClientWhitelist clientWhitelist = PushClientWhitelist.getInstance();
+        clientWhitelist.clear();
+        if (null == property) {
+            final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(WhitelistServiceTracker.class))));
+            log.info("Cleared push client white-list from.");
+        } else {
+            final String[] wildcardPatterns = property.split(" *, *", 0);
+            for (final String wildcardPattern : wildcardPatterns) {
+                if (!isEmpty(wildcardPattern)) {
+                    clientWhitelist.add(Pattern.compile(wildcardToRegex(removeQuotes(wildcardPattern.trim())), Pattern.CASE_INSENSITIVE));
                 }
-                final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(WhitelistServiceTracker.class))));
-                log.info("Built push client white-list from: " + property);
             }
-            return service;
+            final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(WhitelistServiceTracker.class))));
+            log.info("Built push client white-list from: " + property);
         }
-        /*
-         * Nothing to track
-         */
-        context.ungetService(reference);
-        return null;
+        return service;
     }
 
     @Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<ConfigurationService> reference, final ConfigurationService service) {
         // NOP
     }
 
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
+    public void removedService(final ServiceReference<ConfigurationService> reference, final ConfigurationService service) {
         // no-op
     }
 
