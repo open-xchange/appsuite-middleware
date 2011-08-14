@@ -51,7 +51,6 @@ package com.openexchange.contacts.ldap.osgi;
 
 import java.util.Hashtable;
 import java.util.Map.Entry;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.contacts.ldap.contacts.LdapContactInterfaceProvider;
@@ -77,24 +76,19 @@ public final class LdapActivator extends DeferredActivator {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(LdapActivator.class));
 
-    private final AtomicBoolean started;
-
-    private ServiceRegistration registryFolderCreator;
+    private ServiceRegistration<?> registryFolderCreator;
 
     /**
      * Initializes a new {@link LdapActivator}
      */
     public LdapActivator() {
         super();
-        started = new AtomicBoolean();
     }
-
-    private static final Class<?>[] NEEDED_SERVICES = {
-            ConfigurationService.class, ContextService.class, TimerService.class };
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
+        return new Class<?>[] {
+                ConfigurationService.class, ContextService.class, TimerService.class };
     }
 
     @Override
@@ -159,7 +153,7 @@ public final class LdapActivator extends DeferredActivator {
                     /*
                      * Register LDAP contact interface provider for current context-ID/folder-ID pair
                      */
-                    context.registerService(ContactInterfaceProvider.class.getName(), new LdapContactInterfaceProvider(
+                    context.registerService(ContactInterfaceProvider.class, new LdapContactInterfaceProvider(
                         folderprop,
                         createGlobalFolder.getAdminid(),
                         folderid,
