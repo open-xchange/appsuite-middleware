@@ -85,9 +85,9 @@ import com.openexchange.user.UserService;
  */
 public final class FacebookMessagingActivator extends DeferredActivator {
 
-    private List<ServiceTracker> trackers;
+    private List<ServiceTracker<?,?>> trackers;
 
-    private List<ServiceRegistration> registrations;
+    private List<ServiceRegistration<?>> registrations;
 
     private WhiteboardSecretService secretService;
 
@@ -152,16 +152,16 @@ public final class FacebookMessagingActivator extends DeferredActivator {
             FacebookConstants.init();
             FacebookConfiguration.getInstance().configure(getService(ConfigurationService.class));
 
-            trackers = new ArrayList<ServiceTracker>(1);
-            trackers.add(new ServiceTracker(context, I18nService.class.getName(), new I18nCustomizer(context)));
-            for (final ServiceTracker tracker : trackers) {
+            trackers = new ArrayList<ServiceTracker<?,?>>(1);
+            trackers.add(new ServiceTracker<I18nService,I18nService>(context, I18nService.class, new I18nCustomizer(context)));
+            for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.open();
             }
             /*
              * Register services
              */
-            registrations = new ArrayList<ServiceRegistration>(2);
-            registrations.add(context.registerService(MessagingService.class.getName(), new FacebookMessagingService(), null));
+            registrations = new ArrayList<ServiceRegistration<?>>(3);
+            registrations.add(context.registerService(MessagingService.class, new FacebookMessagingService(), null));
             /*
              * Register event handler to detect removed sessions
              */
