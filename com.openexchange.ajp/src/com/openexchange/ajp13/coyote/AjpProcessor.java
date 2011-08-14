@@ -1067,7 +1067,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     /**
      * After reading the request headers, we have to setup the request filters.
      * 
-     * @throws ArrayIndexOutOfBoundsException If parsing of forward-request fails; usually because servlet missed to read request-body chunk(s)
+     * @throws IndexOutOfBoundsException If parsing of forward-request fails; usually because servlet missed to read request-body chunk(s)
      */
     protected void prepareRequest() {
         // Translate the HTTP method code to a String.
