@@ -85,13 +85,13 @@ public final class POP3Activator extends DeferredActivator {
 
     private final Dictionary<String, String> dictionary;
 
-    private List<ServiceTracker> trackers;
+    private List<ServiceTracker<?,?>> trackers;
 
     private POP3StorageProviderServiceTrackerCustomizer customizer;
 
     private MailAccountPOP3StorageProvider builtInProvider;
 
-    private List<ServiceRegistration> registrations;
+    private List<ServiceRegistration<?>> registrations;
 
     /**
      * Initializes a new {@link POP3Activator}
@@ -144,16 +144,16 @@ public final class POP3Activator extends DeferredActivator {
                     }
                 }
             }
-            registrations = new ArrayList<ServiceRegistration>(2);
-            registrations.add(context.registerService(MailProvider.class.getName(), POP3Provider.getInstance(), dictionary));
+            registrations = new ArrayList<ServiceRegistration<?>>(2);
+            registrations.add(context.registerService(MailProvider.class, POP3Provider.getInstance(), dictionary));
             /*
              * Service tracker for possible POP3 storage provider
              */
-            trackers = new ArrayList<ServiceTracker>(2);
+            trackers = new ArrayList<ServiceTracker<?,?>>(2);
             customizer = new POP3StorageProviderServiceTrackerCustomizer(context);
-            trackers.add(new ServiceTracker(context, POP3StorageProvider.class.getName(), customizer));
-            trackers.add(new ServiceTracker(context, SessiondService.class.getName(), new SessiondServiceServiceTrackerCustomizer(context)));
-            for (final ServiceTracker tracker : trackers) {
+            trackers.add(new ServiceTracker(context, POP3StorageProvider.class, customizer));
+            trackers.add(new ServiceTracker(context, SessiondService.class, new SessiondServiceServiceTrackerCustomizer(context)));
+            for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.open();
             }
             /*
