@@ -162,6 +162,7 @@ import com.openexchange.mail.osgi.TransportProviderServiceTracker;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.service.impl.MailServiceImpl;
 import com.openexchange.mail.transport.TransportProvider;
+import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.mailaccount.internal.CreateMailAccountTables;
@@ -205,7 +206,7 @@ import com.openexchange.xml.spring.SpringParser;
  */
 public final class ServerActivator extends DeferredActivator {
 
-	private static final class ServiceAdderTrackerCustomizer implements ServiceTrackerCustomizer {
+	private static final class ServiceAdderTrackerCustomizer implements ServiceTrackerCustomizer<FileMetadataParserService,FileMetadataParserService> {
 
         private final BundleContext context;
 
@@ -215,19 +216,19 @@ public final class ServerActivator extends DeferredActivator {
         }
 
         @Override
-        public void removedService(final ServiceReference reference, final Object service) {
+        public void removedService(final ServiceReference<FileMetadataParserService> reference, final FileMetadataParserService service) {
             ServerServiceRegistry.getInstance().removeService(FileMetadataParserService.class);
             context.ungetService(reference);
         }
 
         @Override
-        public void modifiedService(final ServiceReference reference, final Object service) {
+        public void modifiedService(final ServiceReference<FileMetadataParserService> reference, final FileMetadataParserService service) {
             // Nope
         }
 
         @Override
-        public Object addingService(final ServiceReference reference) {
-            final Object service = context.getService(reference);
+        public FileMetadataParserService addingService(final ServiceReference<FileMetadataParserService> reference) {
+            final FileMetadataParserService service = context.getService(reference);
             ServerServiceRegistry.getInstance().addService(FileMetadataParserService.class, service);
             return service;
         }
@@ -261,9 +262,9 @@ public final class ServerActivator extends DeferredActivator {
             FileStorageServiceRegistry.class, CryptoService.class, HttpService.class, SystemNameService.class, FolderUpdaterRegistry.class, ConfigViewFactory.class, StringParser.class
         };
 
-    private final List<ServiceRegistration> registrationList;
+    private final List<ServiceRegistration<?>> registrationList;
 
-    private final List<ServiceTracker> serviceTrackerList;
+    private final List<ServiceTracker<?,?>> serviceTrackerList;
 
     private final List<EventHandlerRegistration> eventHandlerList;
 
@@ -284,8 +285,8 @@ public final class ServerActivator extends DeferredActivator {
         super();
         this.started = new AtomicBoolean();
         this.starter = new Starter();
-        registrationList = new ArrayList<ServiceRegistration>();
-        serviceTrackerList = new ArrayList<ServiceTracker>();
+        registrationList = new ArrayList<ServiceRegistration<?>>();
+        serviceTrackerList = new ArrayList<ServiceTracker<?,?>>();
         eventHandlerList = new ArrayList<EventHandlerRegistration>();
         activators = new ArrayList<BundleActivator>(8);
     }
@@ -371,25 +372,25 @@ public final class ServerActivator extends DeferredActivator {
          * Add service trackers
          */
         // Configuration service load
-        final ServiceTracker confTracker = new ServiceTracker(context, ConfigurationService.class.getName(), new ConfigurationCustomizer(context));
+        final ServiceTracker<ConfigurationService,ConfigurationService> confTracker = new ServiceTracker<ConfigurationService,ConfigurationService>(context, ConfigurationService.class, new ConfigurationCustomizer(context));
         confTracker.open(); // We need this for {@link Starter#start()}
         serviceTrackerList.add(confTracker);
         // move this to the required services once the database component gets into its own bundle.
-        serviceTrackerList.add(new ServiceTracker(context, DatabaseService.class.getName(), new DatabaseCustomizer(context)));
+        serviceTrackerList.add(new ServiceTracker<DatabaseService,DatabaseService>(context, DatabaseService.class, new DatabaseCustomizer(context)));
         // I18n service load
-        serviceTrackerList.add(new ServiceTracker(context, I18nService.class.getName(), new I18nServiceListener(context)));
+        serviceTrackerList.add(new ServiceTracker<I18nService,I18nService>(context, I18nService.class, new I18nServiceListener(context)));
 
         // Mail account delete listener
-        serviceTrackerList.add(new ServiceTracker(
+        serviceTrackerList.add(new ServiceTracker<MailAccountDeleteListener,MailAccountDeleteListener>(
             context,
-            com.openexchange.mailaccount.MailAccountDeleteListener.class.getName(),
+            MailAccountDeleteListener.class,
             new com.openexchange.mailaccount.internal.DeleteListenerServiceTracker(context)));
 
         // Mail provider service tracker
-        serviceTrackerList.add(new ServiceTracker(context, MailProvider.class.getName(), new MailProviderServiceTracker(context)));
+        serviceTrackerList.add(new ServiceTracker<MailProvider,MailProvider>(context, MailProvider.class, new MailProviderServiceTracker(context)));
 
         // Transport provider service tracker
-        serviceTrackerList.add(new ServiceTracker(context, TransportProvider.class.getName(), new TransportProviderServiceTracker(context)));
+        serviceTrackerList.add(new ServiceTracker<TransportProvider,TransportProvider>(context, TransportProvider.class, new TransportProviderServiceTracker(context)));
 
         // Spam handler provider service tracker
         serviceTrackerList.add(new ServiceTracker(context, SpamHandler.class.getName(), new SpamHandlerServiceTracker(context)));

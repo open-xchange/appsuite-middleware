@@ -55,32 +55,32 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.server.services.I18nServices;
 
-public class I18nServiceListener implements ServiceTrackerCustomizer{
+public class I18nServiceListener implements ServiceTrackerCustomizer<I18nService,I18nService>{
 
     private final BundleContext context;
     private final I18nServices services = I18nServices.getInstance();
 
-    public I18nServiceListener(BundleContext context) {
+    public I18nServiceListener(final BundleContext context) {
         super();
         this.context = context;
     }
 
     @Override
-    public Object addingService(ServiceReference reference) {
-        I18nService i18n = (I18nService) context.getService(reference);
+    public I18nService addingService(final ServiceReference<I18nService> reference) {
+        final I18nService i18n = context.getService(reference);
         services.addService(i18n);
         return i18n;
     }
 
     @Override
-    public void modifiedService(ServiceReference reference, Object service) {
+    public void modifiedService(final ServiceReference<I18nService> reference, final I18nService service) {
         // Nothing to do.
     }
 
     @Override
-    public void removedService(ServiceReference reference, Object service) {
+    public void removedService(final ServiceReference<I18nService> reference, final I18nService service) {
         try {
-            services.removeService((I18nService) service);
+            services.removeService(service);
         } finally {
             context.ungetService(reference);
         }
