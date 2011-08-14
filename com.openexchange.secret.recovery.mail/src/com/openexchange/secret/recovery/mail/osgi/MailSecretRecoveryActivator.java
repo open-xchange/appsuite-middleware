@@ -64,8 +64,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class MailSecretRecoveryActivator extends DeferredActivator {
 
-    private ServiceRegistration consistencyReg;
-    private ServiceRegistration migratorReg;
+    private ServiceRegistration<SecretConsistencyCheck> consistencyReg;
+    private ServiceRegistration<SecretMigrator> migratorReg;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -86,7 +86,7 @@ public class MailSecretRecoveryActivator extends DeferredActivator {
     protected void startBundle() throws Exception {
         final MailAccountStorageService mailAccountStorage = getService(MailAccountStorageService.class);
 
-        consistencyReg = context.registerService(SecretConsistencyCheck.class.getName(), new SecretConsistencyCheck() {
+        consistencyReg = context.registerService(SecretConsistencyCheck.class, new SecretConsistencyCheck() {
 
             @Override
             public String checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws OXException {
@@ -95,7 +95,7 @@ public class MailSecretRecoveryActivator extends DeferredActivator {
 
         }, null);
 
-        migratorReg = context.registerService(SecretMigrator.class.getName(), new SecretMigrator() {
+        migratorReg = context.registerService(SecretMigrator.class, new SecretMigrator() {
 
             @Override
             public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws OXException {
