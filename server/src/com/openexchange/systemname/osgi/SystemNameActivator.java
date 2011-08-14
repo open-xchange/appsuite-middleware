@@ -61,7 +61,7 @@ import com.openexchange.config.ConfigurationService;
  */
 public final class SystemNameActivator implements BundleActivator {
 
-    private ServiceTracker tracker;
+    private ServiceTracker<ConfigurationService,ConfigurationService> tracker;
 
     public SystemNameActivator() {
         super();
@@ -69,7 +69,7 @@ public final class SystemNameActivator implements BundleActivator {
 
     @Override
     public void start(final BundleContext context) throws Exception {
-        tracker = new ServiceTracker(context, ConfigurationService.class, new SystemNameServiceRegisterer(context));
+        tracker = new ServiceTracker<ConfigurationService,ConfigurationService>(context, ConfigurationService.class, new SystemNameServiceRegisterer(context));
         tracker.open();
     }
 
