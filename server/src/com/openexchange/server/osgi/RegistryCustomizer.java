@@ -59,7 +59,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  *
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class RegistryCustomizer<T> implements ServiceTrackerCustomizer {
+public class RegistryCustomizer<T> implements ServiceTrackerCustomizer<T,T> {
 
     private final BundleContext context;
 
@@ -77,23 +77,23 @@ public class RegistryCustomizer<T> implements ServiceTrackerCustomizer {
     }
 
     @Override
-    public Object addingService(final ServiceReference serviceReference) {
-        final Object service = context.getService(serviceReference);
-        ServerServiceRegistry.getInstance().addService(clazz, customize((T)service));
+    public T addingService(final ServiceReference<T> serviceReference) {
+        final T service = context.getService(serviceReference);
+        ServerServiceRegistry.getInstance().addService(clazz, customize(service));
         return service;
     }
 
-    protected T customize(T service) {
+    protected T customize(final T service) {
         return service;
     }
 
     @Override
-    public void modifiedService(final ServiceReference serviceReference, final Object o) {
+    public void modifiedService(final ServiceReference<T> serviceReference, final T o) {
         // Nothing to do
     }
 
     @Override
-    public void removedService(final ServiceReference serviceReference, final Object o) {
+    public void removedService(final ServiceReference<T> serviceReference, final T o) {
         ServerServiceRegistry.getInstance().removeService(clazz);
         context.ungetService(serviceReference);
     }

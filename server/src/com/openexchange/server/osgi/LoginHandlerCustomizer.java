@@ -60,7 +60,7 @@ import com.openexchange.login.internal.LoginHandlerRegistry;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class LoginHandlerCustomizer implements ServiceTrackerCustomizer {
+public class LoginHandlerCustomizer implements ServiceTrackerCustomizer<LoginHandlerService,LoginHandlerService> {
 
     private final BundleContext context;
 
@@ -74,9 +74,9 @@ public class LoginHandlerCustomizer implements ServiceTrackerCustomizer {
     }
 
     @Override
-    public Object addingService(final ServiceReference serviceReference) {
-        final Object service = context.getService(serviceReference);
-        if ((service instanceof LoginHandlerService) && LoginHandlerRegistry.getInstance().addLoginHandler((LoginHandlerService) service)) {
+    public LoginHandlerService addingService(final ServiceReference<LoginHandlerService> serviceReference) {
+        final LoginHandlerService service = context.getService(serviceReference);
+        if (LoginHandlerRegistry.getInstance().addLoginHandler(service)) {
             return service;
         }
         // Nothing to track
@@ -85,16 +85,14 @@ public class LoginHandlerCustomizer implements ServiceTrackerCustomizer {
     }
 
     @Override
-    public void modifiedService(final ServiceReference serviceReference, final Object service) {
+    public void modifiedService(final ServiceReference<LoginHandlerService> serviceReference, final LoginHandlerService service) {
         // Nothing to do
     }
 
     @Override
-    public void removedService(final ServiceReference serviceReference, final Object service) {
+    public void removedService(final ServiceReference<LoginHandlerService> serviceReference, final LoginHandlerService service) {
         if (null != service) {
-            if (service instanceof LoginHandlerService) {
-                LoginHandlerRegistry.getInstance().removeLoginHandler((LoginHandlerService) service);
-            }
+            LoginHandlerRegistry.getInstance().removeLoginHandler(service);
             context.ungetService(serviceReference);
         }
     }

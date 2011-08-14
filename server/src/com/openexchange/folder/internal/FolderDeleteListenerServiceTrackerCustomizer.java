@@ -59,7 +59,7 @@ import com.openexchange.folder.FolderDeleteListenerService;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FolderDeleteListenerServiceTrackerCustomizer implements ServiceTrackerCustomizer {
+public final class FolderDeleteListenerServiceTrackerCustomizer implements ServiceTrackerCustomizer<FolderDeleteListenerService,FolderDeleteListenerService> {
 
     private final BundleContext context;
 
@@ -72,7 +72,7 @@ public final class FolderDeleteListenerServiceTrackerCustomizer implements Servi
     }
 
     @Override
-    public Object addingService(final ServiceReference reference) {
+    public FolderDeleteListenerService addingService(final ServiceReference<FolderDeleteListenerService> reference) {
         /*
          * Optionally expect class name with org.osgi.framework.Constants.SERVICE_DESCRIPTION property
          */
@@ -82,7 +82,7 @@ public final class FolderDeleteListenerServiceTrackerCustomizer implements Servi
             // Nothing to track
             return null;
         }
-        final FolderDeleteListenerService deleteListenerService = (FolderDeleteListenerService) context.getService(reference);
+        final FolderDeleteListenerService deleteListenerService = context.getService(reference);
         if (registry.addDeleteListenerService(deleteListenerService)) {
             return deleteListenerService;
         }
@@ -92,15 +92,15 @@ public final class FolderDeleteListenerServiceTrackerCustomizer implements Servi
     }
 
     @Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<FolderDeleteListenerService> reference, final FolderDeleteListenerService service) {
         // Nothing to do
     }
 
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
+    public void removedService(final ServiceReference<FolderDeleteListenerService> reference, final FolderDeleteListenerService service) {
         if (null != service) {
             try {
-                FolderDeleteListenerRegistry.getInstance().removeDeleteListenerService((FolderDeleteListenerService) service);
+                FolderDeleteListenerRegistry.getInstance().removeDeleteListenerService(service);
             } finally {
                 context.ungetService(reference);
             }

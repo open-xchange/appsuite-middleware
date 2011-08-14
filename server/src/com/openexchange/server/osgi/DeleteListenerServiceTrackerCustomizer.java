@@ -60,7 +60,7 @@ import com.openexchange.groupware.delete.DeleteRegistry;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DeleteListenerServiceTrackerCustomizer implements ServiceTrackerCustomizer {
+public final class DeleteListenerServiceTrackerCustomizer implements ServiceTrackerCustomizer<DeleteListener,DeleteListener> {
 
     private final BundleContext context;
 
@@ -75,9 +75,9 @@ public final class DeleteListenerServiceTrackerCustomizer implements ServiceTrac
     }
 
     @Override
-    public Object addingService(final ServiceReference reference) {
-        final Object addedService = context.getService(reference);
-        if (DeleteRegistry.getInstance().registerDeleteListener((DeleteListener) addedService)) {
+    public DeleteListener addingService(final ServiceReference<DeleteListener> reference) {
+        final DeleteListener addedService = context.getService(reference);
+        if (DeleteRegistry.getInstance().registerDeleteListener(addedService)) {
             return addedService;
         }
         // Nothing to track since adding to registry failed
@@ -86,15 +86,15 @@ public final class DeleteListenerServiceTrackerCustomizer implements ServiceTrac
     }
 
     @Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<DeleteListener> reference, final DeleteListener service) {
         // Nothing to do
     }
 
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
+    public void removedService(final ServiceReference<DeleteListener> reference, final DeleteListener service) {
         if (null != service) {
             try {
-                DeleteRegistry.getInstance().unregisterDeleteListener((DeleteListener) service);
+                DeleteRegistry.getInstance().unregisterDeleteListener(service);
             } finally {
                 context.ungetService(reference);
             }

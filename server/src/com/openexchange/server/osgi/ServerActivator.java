@@ -393,15 +393,15 @@ public final class ServerActivator extends DeferredActivator {
         serviceTrackerList.add(new ServiceTracker<TransportProvider,TransportProvider>(context, TransportProvider.class, new TransportProviderServiceTracker(context)));
 
         // Spam handler provider service tracker
-        serviceTrackerList.add(new ServiceTracker(context, SpamHandler.class.getName(), new SpamHandlerServiceTracker(context)));
+        serviceTrackerList.add(new ServiceTracker<SpamHandler,SpamHandler>(context, SpamHandler.class, new SpamHandlerServiceTracker(context)));
 
         // AJAX request handler
-        serviceTrackerList.add(new ServiceTracker(context, AJAXRequestHandler.class.getName(), new AJAXRequestHandlerCustomizer(context)));
+        serviceTrackerList.add(new ServiceTracker<AJAXRequestHandler,AJAXRequestHandler>(context, AJAXRequestHandler.class, new AJAXRequestHandlerCustomizer(context)));
 
         // contacts
-        serviceTrackerList.add(new ServiceTracker(context, ContactInterfaceProvider.class.getName(), new ContactServiceListener(context)));
+        serviceTrackerList.add(new ServiceTracker<ContactInterfaceProvider,ContactInterfaceProvider>(context, ContactInterfaceProvider.class, new ContactServiceListener(context)));
         // ICal Parser
-        serviceTrackerList.add(new ServiceTracker(context, ICalParser.class.getName(), new RegistryCustomizer<ICalParser>(
+        serviceTrackerList.add(new ServiceTracker<ICalParser,ICalParser>(context, ICalParser.class, new RegistryCustomizer<ICalParser>(
             context,
             ICalParser.class){
 
@@ -413,24 +413,24 @@ public final class ServerActivator extends DeferredActivator {
         }));
 
         // ICal Emitter
-        serviceTrackerList.add(new ServiceTracker(context, ICalEmitter.class.getName(), new RegistryCustomizer<ICalEmitter>(
+        serviceTrackerList.add(new ServiceTracker<ICalEmitter,ICalEmitter>(context, ICalEmitter.class, new RegistryCustomizer<ICalEmitter>(
             context,
             ICalEmitter.class)));
 
         // Data Retention Service
-        serviceTrackerList.add(new ServiceTracker(
+        serviceTrackerList.add(new ServiceTracker<DataRetentionService,DataRetentionService>(
             context,
-            DataRetentionService.class.getName(),
+            DataRetentionService.class,
             new RegistryCustomizer<DataRetentionService>(context, DataRetentionService.class)));
 
         // Delete Listener Service Tracker
-        serviceTrackerList.add(new ServiceTracker(context, DeleteListener.class.getName(), new DeleteListenerServiceTrackerCustomizer(
+        serviceTrackerList.add(new ServiceTracker<DeleteListener,DeleteListener>(context, DeleteListener.class, new DeleteListenerServiceTrackerCustomizer(
             context)));
 
         // Folder Delete Listener Service Tracker
-        serviceTrackerList.add(new ServiceTracker(
+        serviceTrackerList.add(new ServiceTracker<FolderDeleteListenerService,FolderDeleteListenerService>(
             context,
-            FolderDeleteListenerService.class.getName(),
+            FolderDeleteListenerService.class,
             new FolderDeleteListenerServiceTrackerCustomizer(context)));
 
         /*
@@ -452,7 +452,7 @@ public final class ServerActivator extends DeferredActivator {
             starter.adminStart();
         } else {
             // Management is only needed for groupware.
-            serviceTrackerList.add(new ServiceTracker(context, ManagementService.class.getName(), new ManagementServiceTracker(context)));
+            serviceTrackerList.add(new ServiceTracker<ManagementService,ManagementService>(context, ManagementService.class, new ManagementServiceTracker(context)));
             // TODO:
             /*-
              * serviceTrackerList.add(new ServiceTracker(context, MonitorService.class.getName(),
@@ -460,38 +460,38 @@ public final class ServerActivator extends DeferredActivator {
              */
 
             // Search for AuthenticationService
-            serviceTrackerList.add(new ServiceTracker(context, AuthenticationService.class.getName(), new AuthenticationCustomizer(context)));
+            serviceTrackerList.add(new ServiceTracker<AuthenticationService,AuthenticationService>(context, AuthenticationService.class, new AuthenticationCustomizer(context)));
             // Search for ConfigJumpService
-            serviceTrackerList.add(new ServiceTracker(
+            serviceTrackerList.add(new ServiceTracker<ConfigJumpService,ConfigJumpService>(
                 context,
-                ConfigJumpService.class.getName(),
+                ConfigJumpService.class,
                 new BundleServiceTracker<ConfigJumpService>(context, ConfigJump.getHolder(), ConfigJumpService.class)));
             // Search for extensions of the preferences tree interface
-            serviceTrackerList.add(new ServiceTracker(context, PreferencesItemService.class.getName(), new PreferencesCustomizer(context)));
+            serviceTrackerList.add(new ServiceTracker<PreferencesItemService,PreferencesItemService>(context, PreferencesItemService.class, new PreferencesCustomizer(context)));
             // Search for UserPasswordChange service
-            serviceTrackerList.add(new ServiceTracker(context, PasswordChangeService.class.getName(), new PasswordChangeCustomizer(context)));
+            serviceTrackerList.add(new ServiceTracker<PasswordChangeService,PasswordChangeService>(context, PasswordChangeService.class, new PasswordChangeCustomizer(context)));
             // Search for host name service
-            serviceTrackerList.add(new ServiceTracker(context, HostnameService.class.getName(), new HostnameServiceCustomizer(context)));
+            serviceTrackerList.add(new ServiceTracker<HostnameService,HostnameService>(context, HostnameService.class, new HostnameServiceCustomizer(context)));
             // Conversion service
-            serviceTrackerList.add(new ServiceTracker(
+            serviceTrackerList.add(new ServiceTracker<ConversionService,ConversionService>(
                 context,
-                ConversionService.class.getName(),
+                ConversionService.class,
                 new RegistryCustomizer<ConversionService>(context, ConversionService.class)));
             // Contact collector
-            serviceTrackerList.add(new ServiceTracker(
+            serviceTrackerList.add(new ServiceTracker<ContactCollectorService,ContactCollectorService>(
                 context,
-                ContactCollectorService.class.getName(),
+                ContactCollectorService.class,
                 new RegistryCustomizer<ContactCollectorService>(context, ContactCollectorService.class)));
             // Search Service
-            serviceTrackerList.add(new ServiceTracker(context, SearchService.class.getName(), new RegistryCustomizer<SearchService>(
+            serviceTrackerList.add(new ServiceTracker<SearchService,SearchService>(context, SearchService.class, new RegistryCustomizer<SearchService>(
                 context,
                 SearchService.class)));
             // Login handler
-            serviceTrackerList.add(new ServiceTracker(context, LoginHandlerService.class.getName(), new LoginHandlerCustomizer(context)));
+            serviceTrackerList.add(new ServiceTracker<LoginHandlerService,LoginHandlerService>(context, LoginHandlerService.class, new LoginHandlerCustomizer(context)));
             // Multiple handler factory services
-            serviceTrackerList.add(new ServiceTracker(
+            serviceTrackerList.add(new ServiceTracker<MultipleHandlerFactoryService,MultipleHandlerFactoryService>(
                 context,
-                MultipleHandlerFactoryService.class.getName(),
+                MultipleHandlerFactoryService.class,
                 new MultipleHandlerServiceTracker(context)));
 
             // Attachment Plugins
@@ -499,29 +499,29 @@ public final class ServerActivator extends DeferredActivator {
             serviceTrackerList.add(new AttachmentListenerTracker(context));
 
            // PublicationTargetDiscoveryService
-            serviceTrackerList.add(new ServiceTracker(
+            serviceTrackerList.add(new ServiceTracker<PublicationTargetDiscoveryService,PublicationTargetDiscoveryService>(
                 context,
-                PublicationTargetDiscoveryService.class.getName(),
+                PublicationTargetDiscoveryService.class,
                 new PublicationTargetDiscoveryServiceTrackerCustomizer(context)));
 
             // Folder Fields
 
-            serviceTrackerList.add(new ServiceTracker(context, AdditionalFolderField.class.getName(), new FolderFieldCollector(context, Folder.getAdditionalFields())));
+            serviceTrackerList.add(new ServiceTracker<AdditionalFolderField,AdditionalFolderField>(context, AdditionalFolderField.class, new FolderFieldCollector(context, Folder.getAdditionalFields())));
 
             /*
              * The FileMetadataParserService needs to be tracked by a separate service tracker instead of just adding the service to
              * getNeededServices(), because publishing bundle needs the HttpService which is in turn provided by server
              */
-            serviceTrackerList.add(new ServiceTracker(
+            serviceTrackerList.add(new ServiceTracker<FileMetadataParserService,FileMetadataParserService>(
                 context,
-                FileMetadataParserService.class.getName(),
+                FileMetadataParserService.class,
                 new ServiceAdderTrackerCustomizer(context)));
 
             // Start up server the usual way
             starter.start();
         }
         // Open service trackers
-        for (final ServiceTracker tracker : serviceTrackerList) {
+        for (final ServiceTracker<?,?> tracker : serviceTrackerList) {
             tracker.open();
         }
         // Register server's services
@@ -710,14 +710,14 @@ public final class ServerActivator extends DeferredActivator {
             /*
              * Unregister server's services
              */
-            for (final ServiceRegistration registration : registrationList) {
+            for (final ServiceRegistration<?> registration : registrationList) {
                 registration.unregister();
             }
             registrationList.clear();
             /*
              * Close service trackers
              */
-            for (final ServiceTracker tracker : serviceTrackerList) {
+            for (final ServiceTracker<?,?> tracker : serviceTrackerList) {
                 tracker.close();
             }
             serviceTrackerList.clear();

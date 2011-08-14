@@ -62,7 +62,7 @@ import com.openexchange.groupware.settings.impl.ConfigTree;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class PreferencesCustomizer implements ServiceTrackerCustomizer {
+public class PreferencesCustomizer implements ServiceTrackerCustomizer<PreferencesItemService,PreferencesItemService> {
 
     /**
      * Logger.
@@ -84,8 +84,8 @@ public class PreferencesCustomizer implements ServiceTrackerCustomizer {
      * {@inheritDoc}
      */
     @Override
-    public Object addingService(final ServiceReference reference) {
-        final PreferencesItemService item = (PreferencesItemService) context
+    public PreferencesItemService addingService(final ServiceReference<PreferencesItemService> reference) {
+        final PreferencesItemService item = context
             .getService(reference);
         try {
             ConfigTree.addPreferencesItem(item);
@@ -107,7 +107,7 @@ public class PreferencesCustomizer implements ServiceTrackerCustomizer {
      * {@inheritDoc}
      */
     @Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<PreferencesItemService> reference, final PreferencesItemService service) {
         // Nothing to do.
     }
 
@@ -115,8 +115,8 @@ public class PreferencesCustomizer implements ServiceTrackerCustomizer {
      * {@inheritDoc}
      */
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
-        final PreferencesItemService item = (PreferencesItemService) service;
+    public void removedService(final ServiceReference<PreferencesItemService> reference, final PreferencesItemService service) {
+        final PreferencesItemService item = service;
         ConfigTree.removePreferencesItem(item);
         context.ungetService(reference);
     }

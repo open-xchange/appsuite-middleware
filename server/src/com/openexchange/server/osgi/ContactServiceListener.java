@@ -62,7 +62,7 @@ import com.openexchange.groupware.contact.ContactInterfaceProviderRegistry;
  * @author <a href="mailto:ben.pahne@open-xchange.com">Ben Pahne</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ContactServiceListener implements ServiceTrackerCustomizer {
+public class ContactServiceListener implements ServiceTrackerCustomizer<ContactInterfaceProvider,ContactInterfaceProvider> {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ContactServiceListener.class));
 
@@ -79,7 +79,7 @@ public class ContactServiceListener implements ServiceTrackerCustomizer {
     }
 
     @Override
-    public Object addingService(final ServiceReference reference) {
+    public ContactInterfaceProvider addingService(final ServiceReference<ContactInterfaceProvider> reference) {
         final Object id = reference.getProperty(ContactInterface.OVERRIDE_FOLDER_ATTRIBUTE);
         final Object ctx = reference.getProperty(ContactInterface.OVERRIDE_CONTEXT_ATTRIBUTE);
         if (id != null && ctx != null) {
@@ -87,7 +87,7 @@ public class ContactServiceListener implements ServiceTrackerCustomizer {
             final int contextId = Integer.parseInt(ctx.toString());
             final ContactInterfaceProviderRegistry contactServices = ContactInterfaceProviderRegistry.getInstance();
             if (!contactServices.containsService(folderId, contextId)) {
-                final ContactInterfaceProvider provider = (ContactInterfaceProvider) context.getService(reference);
+                final ContactInterfaceProvider provider = context.getService(reference);
                 if (contactServices.addService(folderId, contextId, provider)) {
                     return provider;
                 }
@@ -101,12 +101,12 @@ public class ContactServiceListener implements ServiceTrackerCustomizer {
     }
 
     @Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<ContactInterfaceProvider> reference, final ContactInterfaceProvider service) {
         // Nothing to do
     }
 
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
+    public void removedService(final ServiceReference<ContactInterfaceProvider> reference, final ContactInterfaceProvider service) {
         if (null != service) {
             try {
                 final Object overRiding = reference.getProperty(ContactInterface.OVERRIDE_FOLDER_ATTRIBUTE);
@@ -120,7 +120,7 @@ public class ContactServiceListener implements ServiceTrackerCustomizer {
                     ContactInterfaceProviderRegistry.getInstance().removeService(
                         folderId,
                         contextId,
-                        (ContactInterfaceProvider) context.getService(reference));
+                        context.getService(reference));
                 }
             } finally {
                 context.ungetService(reference);
