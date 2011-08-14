@@ -154,7 +154,7 @@ public final class SessiondActivator extends DeferredActivator {
             trackers.add(new ServiceTracker<ManagementService,ManagementService>(context, ManagementService.class, new ManagementRegisterer(context)));
             trackers.add(new ServiceTracker<ThreadPoolService,ThreadPoolService>(context, ThreadPoolService.class, new ThreadPoolTracker(context)));
             trackers.add(new ServiceTracker<TimerService,TimerService>(context, TimerService.class, new TimerServiceTracker(context)));
-            for (final ServiceTracker tracker : trackers) {
+            for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.open();
             }
 
@@ -194,7 +194,7 @@ public final class SessiondActivator extends DeferredActivator {
                 retrievalServiceRegistration = null;
             }
 
-            for (final ServiceTracker tracker : trackers) {
+            for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.close();
             }
             trackers.clear();
