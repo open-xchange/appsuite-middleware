@@ -151,7 +151,7 @@ public final class POP3Activator extends DeferredActivator {
              */
             trackers = new ArrayList<ServiceTracker<?,?>>(2);
             customizer = new POP3StorageProviderServiceTrackerCustomizer(context);
-            trackers.add(new ServiceTracker(context, POP3StorageProvider.class, customizer));
+            trackers.add(new ServiceTracker<POP3StorageProvider,POP3StorageProvider>(context, POP3StorageProvider.class, customizer));
             trackers.add(new ServiceTracker(context, SessiondService.class, new SessiondServiceServiceTrackerCustomizer(context)));
             for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.open();
