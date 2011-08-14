@@ -69,7 +69,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
  */
 public final class ConfigFileStorageActivator extends DeferredActivator {
 
-    private List<ServiceRegistration> registrations;
+    private List<ServiceRegistration<?>> registrations;
 
     /**
      * Initializes a new {@link ConfigFileStorageActivator}.
@@ -133,9 +133,9 @@ public final class ConfigFileStorageActivator extends DeferredActivator {
             /*
              * Register services
              */
-            registrations = new ArrayList<ServiceRegistration>(4);
+            registrations = new ArrayList<ServiceRegistration<?>>(4);
             registrations.add(context.registerService(
-                FileStorageAccountManagerProvider.class.getName(),
+                FileStorageAccountManagerProvider.class,
                 new ConfigFileStorageAccountManagerProvider(),
                 null));
         } catch (final Exception e) {
