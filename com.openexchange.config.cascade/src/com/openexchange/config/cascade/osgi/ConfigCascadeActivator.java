@@ -78,7 +78,7 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
 
     private boolean configured = false;
 
-    private ConfigCascade configCascade;
+    //private ConfigCascade configCascade;
 
     // private final int INFINITY = 10;
 
@@ -89,7 +89,7 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
 
     @Override
     protected void startBundle() throws Exception {
-        final ConfigCascade configCascade = this.configCascade = new ConfigCascade();
+        final ConfigCascade configCascade = new ConfigCascade();
 
         final ServiceTracker<StringParser, StringParser> stringParsers = track(StringParser.class);
 
@@ -140,6 +140,7 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
 
     @Override
     protected void stopBundle() throws Exception {
+        // Merely calls super?
         super.stopBundle();
     }
 
