@@ -71,7 +71,7 @@ import com.openexchange.login.ConfigurationProperty;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class LoginServletRegisterer implements ServiceTrackerCustomizer {
+public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, Object> {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LoginServletRegisterer.class));
     private static final String SERVLET_PATH = "/ajax/login";
@@ -89,7 +89,7 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer {
     }
 
     @Override
-    public Object addingService(final ServiceReference reference) {
+    public Object addingService(final ServiceReference<Object> reference) {
         final Object obj = context.getService(reference);
         final boolean needsRegistration;
         lock.lock();
@@ -152,12 +152,12 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer {
     }
 
     @Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<Object> reference, final Object service) {
         // Nothing to do.
     }
 
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
+    public void removedService(final ServiceReference<Object> reference, final Object service) {
         HttpService unregister = null;
         lock.lock();
         try {
