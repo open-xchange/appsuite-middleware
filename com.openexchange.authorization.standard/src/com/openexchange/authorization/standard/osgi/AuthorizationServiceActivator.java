@@ -64,7 +64,7 @@ public class AuthorizationServiceActivator extends DeferredActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AuthorizationServiceActivator.class));
 
-    private ServiceRegistration registration;
+    private ServiceRegistration<AuthorizationService> registration;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -98,7 +98,7 @@ public class AuthorizationServiceActivator extends DeferredActivator {
                 if (LOG.isInfoEnabled()) {
                     LOG.info("starting bundle: com.openexchange.authorization.standard");
                 }
-                registration = context.registerService(AuthorizationService.class.getName(), DefaultAuthorizationImpl.getInstance(), null);
+                registration = context.registerService(AuthorizationService.class, DefaultAuthorizationImpl.getInstance(), null);
             }
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
