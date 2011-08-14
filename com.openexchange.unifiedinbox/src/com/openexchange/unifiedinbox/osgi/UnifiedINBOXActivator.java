@@ -79,9 +79,9 @@ public final class UnifiedINBOXActivator extends DeferredActivator {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UnifiedINBOXActivator.class));
 
-    private List<ServiceTracker> trackers;
+    private List<ServiceTracker<?,?>> trackers;
 
-    private ServiceRegistration providerRegistration;
+    private ServiceRegistration<MailProvider> providerRegistration;
 
     /**
      * Initializes a new {@link UnifiedINBOXActivator}
@@ -133,9 +133,9 @@ public final class UnifiedINBOXActivator extends DeferredActivator {
             /*
              * Create & open trackers
              */
-            trackers = new ArrayList<ServiceTracker>(1);
-            trackers.add(new ServiceTracker(context, I18nService.class.getName(), new I18nCustomizer(context)));
-            for (final ServiceTracker tracker : trackers) {
+            trackers = new ArrayList<ServiceTracker<?,?>>(1);
+            trackers.add(new ServiceTracker<I18nService,I18nService>(context, I18nService.class, new I18nCustomizer(context)));
+            for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.open();
             }
             /*
@@ -143,7 +143,7 @@ public final class UnifiedINBOXActivator extends DeferredActivator {
              */
             final Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
             dictionary.put("protocol", UnifiedINBOXProvider.PROTOCOL_UNIFIED_INBOX.toString());
-            providerRegistration = context.registerService(MailProvider.class.getName(), UnifiedINBOXProvider.getInstance(), dictionary);
+            providerRegistration = context.registerService(MailProvider.class, UnifiedINBOXProvider.getInstance(), dictionary);
             /*
              * Detect what SynchronousQueue to use
              */
