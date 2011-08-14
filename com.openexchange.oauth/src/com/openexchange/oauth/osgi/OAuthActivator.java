@@ -77,9 +77,9 @@ import com.openexchange.sessiond.SessiondService;
  */
 public final class OAuthActivator extends DeferredActivator {
 
-    private List<ServiceRegistration> registrations;
+    private List<ServiceRegistration<?>> registrations;
 
-    private List<ServiceTracker> trackers;
+    private List<ServiceTracker<?,?>> trackers;
 
     private OSGiDelegateServiceMap delegateServices;
 
@@ -143,15 +143,15 @@ public final class OAuthActivator extends DeferredActivator {
             /*
              * Start other trackers
              */
-            trackers = new ArrayList<ServiceTracker>(4);
-            trackers.add(new ServiceTracker(context, OAuthAccountDeleteListener.class.getName(), new DeleteListenerServiceTracker(context)));
-            for (final ServiceTracker tracker : trackers) {
+            trackers = new ArrayList<ServiceTracker<?,?>>(4);
+            trackers.add(new ServiceTracker<OAuthAccountDeleteListener,OAuthAccountDeleteListener>(context, OAuthAccountDeleteListener.class, new DeleteListenerServiceTracker(context)));
+            for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.open();
             }
             /*
              * Register
              */
-            registrations = new ArrayList<ServiceRegistration>(2);
+            registrations = new ArrayList<ServiceRegistration<?>>(2);
 
             delegateServices = new OSGiDelegateServiceMap();
             delegateServices.put(DBProvider.class, new OSGiDatabaseServiceDBProvider().start(context));
