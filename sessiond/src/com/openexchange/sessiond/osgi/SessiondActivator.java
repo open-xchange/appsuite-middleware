@@ -56,6 +56,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventAdmin;
+import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
@@ -86,16 +87,16 @@ public final class SessiondActivator extends DeferredActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessiondActivator.class));
 
-    private ServiceRegistration sessiondServiceRegistration;
-    private final List<ServiceTracker> trackers;
+    private ServiceRegistration<SessiondService> sessiondServiceRegistration;
+    private final List<ServiceTracker<?,?>> trackers;
 
-    private ServiceRegistration eventHandlerRegistration;
+    private ServiceRegistration<EventHandler> eventHandlerRegistration;
 
-    private ServiceRegistration retrievalServiceRegistration;
+    private ServiceRegistration<SessionSpecificContainerRetrievalService> retrievalServiceRegistration;
 
     public SessiondActivator() {
         super();
-        trackers = new ArrayList<ServiceTracker>(2);
+        trackers = new ArrayList<ServiceTracker<?,?>>(2);
     }
 
     @Override
@@ -149,10 +150,10 @@ public final class SessiondActivator extends DeferredActivator {
                 LOG.info("starting bundle: com.openexchange.sessiond");
             }
             SessiondInit.getInstance().start();
-            sessiondServiceRegistration = context.registerService(SessiondService.class.getName(), new SessiondServiceImpl(), null);
-            trackers.add(new ServiceTracker(context, ManagementService.class.getName(), new ManagementRegisterer(context)));
-            trackers.add(new ServiceTracker(context, ThreadPoolService.class.getName(), new ThreadPoolTracker(context)));
-            trackers.add(new ServiceTracker(context, TimerService.class.getName(), new TimerServiceTracker(context)));
+            sessiondServiceRegistration = context.registerService(SessiondService.class, new SessiondServiceImpl(), null);
+            trackers.add(new ServiceTracker<ManagementService,ManagementService>(context, ManagementService.class, new ManagementRegisterer(context)));
+            trackers.add(new ServiceTracker<ThreadPoolService,ThreadPoolService>(context, ThreadPoolService.class, new ThreadPoolTracker(context)));
+            trackers.add(new ServiceTracker<TimerService,TimerService>(context, TimerService.class, new TimerServiceTracker(context)));
             for (final ServiceTracker tracker : trackers) {
                 tracker.open();
             }
@@ -164,7 +165,7 @@ public final class SessiondActivator extends DeferredActivator {
 
             eventHandlerRegistration = eventHandler.registerSessiondEventHandler(context);
 
-            retrievalServiceRegistration = context.registerService(SessionSpecificContainerRetrievalService.class.getName(), retrievalService, null);
+            retrievalServiceRegistration = context.registerService(SessionSpecificContainerRetrievalService.class, retrievalService, null);
 
         } catch (final Exception e) {
             LOG.error("SessiondActivator: start: ", e);

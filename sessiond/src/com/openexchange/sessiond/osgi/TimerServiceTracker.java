@@ -61,7 +61,7 @@ import com.openexchange.timer.TimerService;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class TimerServiceTracker implements ServiceTrackerCustomizer {
+public class TimerServiceTracker implements ServiceTrackerCustomizer<TimerService,TimerService> {
 
     private final BundleContext context;
 
@@ -71,20 +71,20 @@ public class TimerServiceTracker implements ServiceTrackerCustomizer {
     }
 
     @Override
-    public Object addingService(final ServiceReference reference) {
-        final TimerService service = (TimerService) context.getService(reference);
+    public TimerService addingService(final ServiceReference<TimerService> reference) {
+        final TimerService service = context.getService(reference);
         SessionHandler.addTimerService(service);
         SessionCacheTimer.addTimerService(service);
         return service;
     }
 
     @Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<TimerService> reference, final TimerService service) {
         // Nothing to do.
     }
 
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
+    public void removedService(final ServiceReference<TimerService> reference, final TimerService service) {
         SessionCacheTimer.removeTimerService();
         SessionHandler.removeTimerService();
         context.ungetService(reference);

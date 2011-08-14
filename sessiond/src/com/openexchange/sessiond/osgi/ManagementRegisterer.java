@@ -67,33 +67,33 @@ import com.openexchange.sessiond.impl.SessiondMBeanImpl;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-final class ManagementRegisterer implements ServiceTrackerCustomizer {
+final class ManagementRegisterer implements ServiceTrackerCustomizer<ManagementService,ManagementService> {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ManagementRegisterer.class));
 
     private final BundleContext context;
     private ObjectName objectName;
 
-    ManagementRegisterer(BundleContext context) {
+    ManagementRegisterer(final BundleContext context) {
         super();
         this.context = context;
     }
 
     @Override
-    public Object addingService(final ServiceReference reference) {
-        final ManagementService management = (ManagementService) context.getService(reference);
+    public ManagementService addingService(final ServiceReference<ManagementService> reference) {
+        final ManagementService management = context.getService(reference);
         registerSessiondMBean(management);
         return management;
     }
 
     @Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<ManagementService> reference, final ManagementService service) {
         // Nothing to do.
     }
 
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
-        final ManagementService management = (ManagementService) service;
+    public void removedService(final ServiceReference<ManagementService> reference, final ManagementService service) {
+        final ManagementService management = service;
         unregisterSessiondMBean(management);
         context.ungetService(reference);
     }
