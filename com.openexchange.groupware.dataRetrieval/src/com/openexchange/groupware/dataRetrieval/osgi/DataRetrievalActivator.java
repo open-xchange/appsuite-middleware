@@ -73,8 +73,6 @@ import com.openexchange.tools.service.SessionServletRegistration;
  */
 public class DataRetrievalActivator extends DeferredActivator {
 
-    private static final Class<?>[] NEEDED_SERVICES = new Class<?>[] { HttpService.class, SessionSpecificContainerRetrievalService.class, ConfigurationService.class };
-
     private static final String NAMESPACE = "com.openexchange.groupware.dataRetrieval.tokens";
 
     private OSGIDataProviderRegistry dataProviderRegistry;
@@ -87,7 +85,7 @@ public class DataRetrievalActivator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
+        return new Class<?>[] { HttpService.class, SessionSpecificContainerRetrievalService.class, ConfigurationService.class };
     }
 
     @Override
