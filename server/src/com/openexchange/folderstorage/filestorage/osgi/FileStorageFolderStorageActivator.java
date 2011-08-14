@@ -73,9 +73,9 @@ public final class FileStorageFolderStorageActivator extends DeferredActivator {
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FileStorageFolderStorageActivator.class));
 
-    private ServiceRegistration folderStorageRegistration;
+    private ServiceRegistration<FolderStorage> folderStorageRegistration;
 
-    private List<ServiceTracker> trackers;
+    private List<ServiceTracker<?,?>> trackers;
 
     /**
      * Initializes a new {@link FileStorageFolderStorageActivator}.
@@ -123,14 +123,14 @@ public final class FileStorageFolderStorageActivator extends DeferredActivator {
                 }
             }
             // Trackers
-            trackers = new ArrayList<ServiceTracker>(4);
-            for (final ServiceTracker tracker : trackers) {
+            trackers = new ArrayList<ServiceTracker<?,?>>(4);
+            for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.open();
             }
             // Register folder storage
             final Dictionary<String, String> dictionary = new Hashtable<String, String>();
             dictionary.put("tree", FolderStorage.REAL_TREE_ID);
-            folderStorageRegistration = context.registerService(FolderStorage.class.getName(), new FileStorageFolderStorage(), dictionary);
+            folderStorageRegistration = context.registerService(FolderStorage.class, new FileStorageFolderStorage(), dictionary);
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
