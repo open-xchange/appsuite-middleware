@@ -52,7 +52,6 @@ package com.openexchange.spamhandler.cloudmark.osgi;
 import static com.openexchange.spamhandler.cloudmark.osgi.CloudmarkSpamHandlerServiceRegistry.getServiceRegistry;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.server.osgiservice.DeferredActivator;
@@ -71,32 +70,18 @@ public final class CloudmarkSpamHandlerActivator extends DeferredActivator {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(CloudmarkSpamHandlerActivator.class);
 
-	private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class };
-
-	private final AtomicBoolean started;
-
-	private final Dictionary<String, String> dictionary;
-
-	private ServiceRegistration serviceRegistration;
+	private ServiceRegistration<SpamHandler> serviceRegistration;
 
 	/**
 	 * Initializes a new {@link CloudmarkSpamHandlerActivator}
 	 */
 	public CloudmarkSpamHandlerActivator() {
 		super();
-		started = new AtomicBoolean();
-		dictionary = new Hashtable<String, String>();
-		dictionary.put("name", CloudmarkSpamHandler.getInstance().getSpamHandlerName());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.server.osgiservice.DeferredActivator#getNeededServices()
-	 */
 	@Override
 	protected Class<?>[] getNeededServices() {
-		return NEEDED_SERVICES;
+		return new Class<?>[] { ConfigurationService.class };
 	}
 
 	@Override
@@ -115,11 +100,6 @@ public final class CloudmarkSpamHandlerActivator extends DeferredActivator {
 		getServiceRegistry().addService(clazz, getService(clazz));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.server.osgiservice.DeferredActivator#startBundle()
-	 */
 	@Override
 	protected void startBundle() throws Exception {
 		try {
@@ -145,7 +125,9 @@ public final class CloudmarkSpamHandlerActivator extends DeferredActivator {
 				return;
 			}
 
-			serviceRegistration = context.registerService(SpamHandler.class.getName(), CloudmarkSpamHandler.getInstance(), dictionary);
+			final Dictionary<String, String> dictionary = new Hashtable<String, String>();
+	        dictionary.put("name", CloudmarkSpamHandler.getInstance().getSpamHandlerName());
+			serviceRegistration = context.registerService(SpamHandler.class, CloudmarkSpamHandler.getInstance(), dictionary);
 		} catch (final Throwable t) {
 			LOG.error(t.getMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
