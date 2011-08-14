@@ -143,7 +143,7 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
         super.stopBundle();
     }
 
-    boolean isServerProvider(final ServiceReference reference) {
+    boolean isServerProvider(final ServiceReference<?> reference) {
         final Object scope = reference.getProperty("scope");
         return scope != null && scope.equals("server");
     }
@@ -174,7 +174,7 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
                 continue;
             }
 
-            final ServiceTracker tracker = track(createFilter(scope));
+            final ServiceTracker<Object,Object> tracker = track(createFilter(scope));
             cascade.setProvider(scope, new TrackingProvider(tracker));
             tracker.open();
         }
