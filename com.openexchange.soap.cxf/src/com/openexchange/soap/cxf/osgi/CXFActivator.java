@@ -56,29 +56,30 @@ import org.apache.cxf.BusFactory;
 import org.apache.cxf.transport.servlet.CXFNonSpringServlet;
 import org.osgi.service.http.HttpService;
 import com.openexchange.server.osgiservice.DeferredActivator;
+
 /**
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CXFActivator extends DeferredActivator {
+
     private static final String PATH = "/webservices";
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CXFActivator.class));
 
-
-    private static final Class<?>[] CLASSES = new Class[]{HttpService.class};
     private WebserviceCollector collector;
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return CLASSES;
+        return new Class[] { HttpService.class };
     }
 
     @Override
-    protected void handleAvailability(Class<?> clazz) {
-
+    protected void handleAvailability(final Class<?> clazz) {
+        // Nope
     }
 
     @Override
-    protected void handleUnavailability(Class<?> clazz) {
+    protected void handleUnavailability(final Class<?> clazz) {
         // TODO Auto-generated method stub
 
     }
@@ -87,19 +88,19 @@ public class CXFActivator extends DeferredActivator {
     protected void startBundle() throws Exception {
         try {
             LOG.info("Starting Bundle :com.openexchange.soap.cxf");
-            HttpService httpService = getService(HttpService.class);
+            final HttpService httpService = getService(HttpService.class);
             final CXFNonSpringServlet cxf = new CXFNonSpringServlet();
             final Bus bus = cxf.getBus();
             BusFactory.setDefaultBus(bus);
 
-            LOG.info("Registering CXF servlet under "+PATH);
+            LOG.info("Registering CXF servlet under " + PATH);
             httpService.registerServlet(PATH, cxf, null, null);
 
             collector = new WebserviceCollector(context);
             context.addServiceListener(collector);
             collector.open();
             LOG.info("com.openexchange.soap.cxf is up and running");
-        } catch (Throwable t) {
+        } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
         }
 
@@ -107,7 +108,7 @@ public class CXFActivator extends DeferredActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        HttpService httpService = getService(HttpService.class);
+        final HttpService httpService = getService(HttpService.class);
         if (httpService != null) {
             httpService.unregister(PATH);
         }
@@ -116,6 +117,5 @@ public class CXFActivator extends DeferredActivator {
             collector = null;
         }
     }
-
 
 }
