@@ -137,6 +137,10 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
         openTrackers();
     }
 
+    @Override
+    public <S> void registerService(final java.lang.Class<S> clazz, final S service) {
+        super.registerService(clazz, service);
+    }
 
     @Override
     protected void stopBundle() throws Exception {
