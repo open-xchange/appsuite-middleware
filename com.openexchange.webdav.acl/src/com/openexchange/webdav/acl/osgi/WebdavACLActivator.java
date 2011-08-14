@@ -67,13 +67,11 @@ public class WebdavACLActivator extends HousekeepingActivator {
 
     private static final Log LOG = LogFactory.getLog(WebdavACLActivator.class);
 
-    private static final Class[] NEEDED = new Class[] { UserService.class };
-
     private OSGiPropertyMixin mixin;
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED;
+        return new Class<?>[] { UserService.class };
     }
 
     @Override
@@ -83,11 +81,11 @@ public class WebdavACLActivator extends HousekeepingActivator {
 
             rememberTracker(new ServletRegistration(context, new WebdavPrincipalServlet(), "/servlet/dav/principals/users"));
 
-            WebdavPrincipalPerformer performer = WebdavPrincipalPerformer.getInstance();
+            final WebdavPrincipalPerformer performer = WebdavPrincipalPerformer.getInstance();
             mixin = new OSGiPropertyMixin(context, performer);
             performer.setGlobalMixins(mixin);
             openTrackers();
-        } catch (Throwable t) {
+        } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
         }
     }
