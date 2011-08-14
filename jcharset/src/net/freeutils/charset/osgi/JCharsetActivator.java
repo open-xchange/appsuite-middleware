@@ -57,12 +57,12 @@ import org.osgi.framework.ServiceRegistration;
 
 /**
  * {@link JCharsetActivator} - Activator for <a href="http://www.freeutils.net/source/jcharset/">JCharset</a>'s charset provider
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JCharsetActivator implements BundleActivator {
 
-    private ServiceRegistration serviceRegistration;
+    private ServiceRegistration<CharsetProvider> serviceRegistration;
 
     private final CharsetProvider charsetProvider;
 
@@ -74,10 +74,6 @@ public final class JCharsetActivator implements BundleActivator {
         charsetProvider = new net.freeutils.charset.CharsetProvider();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
-     */
     @Override
     public void start(final BundleContext context) throws Exception {
         LogFactory.getLog(JCharsetActivator.class).info("starting bundle: net.freeutils.jcharset");
@@ -86,7 +82,7 @@ public final class JCharsetActivator implements BundleActivator {
             /*
              * Register jcharset's charset provider
              */
-            serviceRegistration = context.registerService(CharsetProvider.class.getName(), charsetProvider, null);
+            serviceRegistration = context.registerService(CharsetProvider.class, charsetProvider, null);
             if (LogFactory.getLog(JCharsetActivator.class).isInfoEnabled()) {
                 LogFactory.getLog(JCharsetActivator.class).info("JCharset charset providers registered");
             }
@@ -96,10 +92,6 @@ public final class JCharsetActivator implements BundleActivator {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-     */
     @Override
     public void stop(final BundleContext context) throws Exception {
         LogFactory.getLog(JCharsetActivator.class).info("stopping bundle: net.freeutils.jcharset");
