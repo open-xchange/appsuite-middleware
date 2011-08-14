@@ -68,10 +68,7 @@ public class Activator extends DeferredActivator {
 
     private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
 
-    // add services which we need in our plugins later
-    private static final Class<?>[] NEEDED_SERVICES = { CacheService.class, ConfigurationService.class };
-
-    private ServiceRegistration hostname_registration;
+    private ServiceRegistration<HostnameService> hostnameRegistration;
 
     private LDAPHostnameService hostnameservice;
 
@@ -81,7 +78,7 @@ public class Activator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
+        return new Class<?>[] { CacheService.class, ConfigurationService.class };
     }
 
     @Override
@@ -126,7 +123,7 @@ public class Activator extends DeferredActivator {
 
             LDAPHostnameCache.getInstance().outputSettings();
 
-            hostname_registration = context.registerService(HostnameService.class.getName(), hostnameservice, null);
+            hostnameRegistration = context.registerService(HostnameService.class, hostnameservice, null);
 
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
@@ -139,8 +136,8 @@ public class Activator extends DeferredActivator {
     protected void stopBundle() throws Exception {
         try {
             // stop hostname service
-            if (hostname_registration != null) {
-                hostname_registration.unregister();
+            if (hostnameRegistration != null) {
+                hostnameRegistration.unregister();
                 hostnameservice = null;
             }
 
