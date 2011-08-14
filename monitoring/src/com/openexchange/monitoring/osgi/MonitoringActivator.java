@@ -73,9 +73,9 @@ public final class MonitoringActivator extends DeferredActivator {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MonitoringActivator.class));
 
-    private ServiceRegistration serviceRegistration;
+    private ServiceRegistration<MonitorService> serviceRegistration;
 
-    private List<ServiceTracker> trackers;
+    private List<ServiceTracker<?,?>> trackers;
 
     /**
      * Initializes a new {@link MonitoringActivator}
@@ -123,17 +123,17 @@ public final class MonitoringActivator extends DeferredActivator {
 
             MonitoringInit.getInstance().start();
 
-            trackers = new ArrayList<ServiceTracker>(2);
+            trackers = new ArrayList<ServiceTracker<?,?>>(2);
             trackers.add(new MailCounterServiceTracker(context));
             trackers.add(new MailIdleCounterServiceTracker(context));
-            for (final ServiceTracker tracker : trackers) {
+            for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.open();
             }
 
             /*
              * Register monitor service
              */
-            serviceRegistration = context.registerService(MonitorService.class.getCanonicalName(), new MonitorImpl(), null);
+            serviceRegistration = context.registerService(MonitorService.class, new MonitorImpl(), null);
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
