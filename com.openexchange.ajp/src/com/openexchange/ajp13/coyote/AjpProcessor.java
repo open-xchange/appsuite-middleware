@@ -104,6 +104,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     protected static final org.apache.commons.logging.Log LOG = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AjpProcessor.class));
 
+    private static final boolean TRACE = LOG.isTraceEnabled();
+
     protected static final boolean DEBUG = LOG.isDebugEnabled();
 
     private static final AtomicLong NUMBER = new AtomicLong();
@@ -429,6 +431,9 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
          * Cause loading of HexUtils
          */
         final int foo = HexUtils.DEC[0];
+        if (TRACE) {
+            LOG.trace(Integer.valueOf(foo));
+        }
     }
 
     public void startKeepAlivePing() {
