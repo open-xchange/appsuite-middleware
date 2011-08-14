@@ -59,7 +59,7 @@ import com.openexchange.user.UserService;
 
 public class Activator implements BundleActivator {
 
-    private ServiceTracker tracker;
+    private ServiceTracker<Object,Object> tracker;
 
     public Activator() {
         super();
@@ -71,7 +71,7 @@ public class Activator implements BundleActivator {
     @Override
     public void start(final BundleContext context) throws Exception {
         final Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ContextService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + UserService.class.getName() + "))");
-        tracker = new ServiceTracker(context, filter, new AuthenticationRegisterer(context));
+        tracker = new ServiceTracker<Object,Object>(context, filter, new AuthenticationRegisterer(context));
         tracker.open();
     }
 
