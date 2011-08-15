@@ -50,18 +50,23 @@
 package com.openexchange.contact.json.converters;
 
 import java.util.Collection;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
+import com.openexchange.contact.json.RequestTools;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactGetter;
+import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.DataObject;
 import com.openexchange.image.ImageService;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+
 
 /**
  * {@link ContactResultConverter}
@@ -70,13 +75,69 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class ContactResultConverter extends JSONResultConverter {
 
-    private final ContactListResultConverter listConverter;
-
     public ContactResultConverter(final ImageService imageService) {
         super(imageService);
-        listConverter = new ContactListResultConverter(imageService);
     }
 
+    /**
+     * Converts specified contact collection to an appropriate JSON array.
+     * 
+     * @param contacts The contact collection
+     * @param request The request data
+     * @param result The result
+     * @throws OXException If conversion fails
+     */
+    public void convertResult(final Collection<Contact> contacts, final AJAXRequestData request, final AJAXRequestResult result) throws OXException {
+        final int[] columns = RequestTools.getColumnsAsIntArray(request, "columns");
+
+        final JSONArray resultArray = new JSONArray();
+        for (final Contact contact : contacts) {
+            if (hasOnlyId(contact, columns)) {
+                resultArray.put(contact.getObjectID());
+            } else {
+                final JSONArray contactArray = new JSONArray();
+    
+                final ContactGetter cg = new ContactGetter();
+                for (final int column : columns) {
+                    final ContactField field = ContactField.getByValue(column);
+                    if (field != null && !field.getAjaxName().isEmpty()) {
+                        final Object value = field.doSwitch(cg, contact);
+                        if (value == null) {
+                            contactArray.put(JSONObject.NULL);
+                        } else if (isSpecial(column)) {
+                            final Object special = convertSpecial(field, contact, cg);
+                            if (special == null) {
+                                contactArray.put(JSONObject.NULL);
+                            } else {
+                                contactArray.put(special);
+                            }
+                        } else {
+                            contactArray.put(value);
+                        }
+                    }
+                }
+                resultArray.put(contactArray);
+            }
+        }
+
+        result.setResultObject(resultArray, "json");
+    }
+
+    private static boolean hasOnlyId(final Contact contact, final int[] columns) {
+        if (!contact.containsObjectID()) {
+            return false;
+        }
+        if (CommonObject.Marker.ID_ONLY.equals(contact.getMarker())) {
+            return true;
+        }
+        for (final int column : columns) {
+            if (DataObject.OBJECT_ID != column && contact.contains(column)) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
     @Override
     public String getInputFormat() {
         return "contact";
@@ -91,7 +152,7 @@ public class ContactResultConverter extends JSONResultConverter {
         } else {
             @SuppressWarnings("unchecked")
             final Collection<Contact> contacts = (Collection<Contact>) resultObject;
-            listConverter.convertResult(contacts, request, result);
+            convertResult(contacts, request, result);
         }
     }
 
@@ -125,5 +186,4 @@ public class ContactResultConverter extends JSONResultConverter {
 
         return json;
     }
-
 }
