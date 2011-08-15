@@ -17,13 +17,13 @@ public class FireDetachedEventActionTest extends AbstractAttachmentEventActionTe
 
 	private final MockAttachmentListener listener = new MockAttachmentListener();
 	private MockDBProvider provider = null;
-	
+
 	@Override
     public void setUp() throws Exception {
 	    super.setUp();
 	    provider = new MockDBProvider(new DBPoolProvider());
 	}
-	
+
 	@Override
 	protected UndoableAction getAction() throws Exception {
 		final FireDetachedEventAction fireDetached = new FireDetachedEventAction();
@@ -56,26 +56,26 @@ public class FireDetachedEventActionTest extends AbstractAttachmentEventActionTe
 
 	@Override
 	protected void verifyUndone() throws Exception {
-		
+
 		final List<AttachmentMetadata> m = listener.getAttached();
 		final Map<Integer, AttachmentMetadata> attachmentMap = new HashMap<Integer, AttachmentMetadata>();
 		final Set<AttachmentMetadata> attachmentSet = new HashSet<AttachmentMetadata>();
-		
+
 		for(final AttachmentMetadata att : getAttachments()) {
 			attachmentMap.put(att.getId(),att);
 			attachmentSet.add(att);
 		}
-		
+
 		for(final AttachmentMetadata attached : m) {
 			final AttachmentMetadata orig = attachmentMap.get(attached.getId());
 			assertEquals(orig, attached);
 			assertTrue(attachmentSet.remove(attached));
 		}
 		assertTrue(attachmentSet.isEmpty());
-		
+
 		listener.clear();
 		assertTrue(provider.allOK());
 		assertTrue(provider.called());
-	}	
+	}
 
 }

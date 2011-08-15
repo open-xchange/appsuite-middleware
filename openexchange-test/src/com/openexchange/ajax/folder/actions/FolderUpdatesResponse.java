@@ -58,7 +58,7 @@ import com.openexchange.groupware.container.FolderObject;
 
 /**
  * {@link FolderUpdatesResponse}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class FolderUpdatesResponse extends CommonUpdatesResponse {

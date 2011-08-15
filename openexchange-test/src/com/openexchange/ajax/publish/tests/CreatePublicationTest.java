@@ -78,7 +78,7 @@ public class CreatePublicationTest extends AbstractPublicationTest {
         //create contact folder
         FolderObject folder = fMgr.generateFolder("publishedContacts"+new Date().getTime(), FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
         fMgr.insertFolderOnServer( folder );
-        
+
         //fill contact folder
         Contact contact = generateContact("Herbert", "Meier");
         contact.setParentFolderID(folder.getObjectID());
@@ -92,40 +92,40 @@ public class CreatePublicationTest extends AbstractPublicationTest {
         AJAXClient myClient = getClient();
         NewPublicationResponse newResp = myClient.execute(newReq);
         expected.setId( newResp.getId() );
-        
+
         //verify
         GetPublicationRequest getReq = new GetPublicationRequest( expected.getId() );
         GetPublicationResponse getResp = myClient.execute(getReq);
         Publication actual = getResp.getPublication(discovery);
-        
+
         assertEquals("Should return the same folder as sent to the server", expected.getEntityId(), actual.getEntityId());
         assertEquals("Should return the same module as sent to the server", expected.getModule(), actual.getModule());
         assertEquals("Should return the same user as sent to the server", expected.getUserId(), actual.getUserId());
         assertEquals("Should return the same target id as sent to the server", expected.getTarget().getId(), actual.getTarget().getId());
         assertEquals("Should be enabled by default", true, actual.isEnabled());
-        
+
     }
 
     public void testOnePublicationOfOneContactFolderWithoutAContactShouldNotBeAHassle() throws OXException, IOException, SAXException, JSONException, OXException, OXException{
         //create contact folder
         FolderObject folder = fMgr.generateFolder("publishedContacts"+new Date().getTime(), FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
         fMgr.insertFolderOnServer( folder );
-        
+
         //fill contact folder
         Contact contact = generateContact("Herbert", "Meier");
         contact.setParentFolderID(folder.getObjectID());
         cMgr.newAction(contact);
-        
+
         //publish
         SimPublicationTargetDiscoveryService discovery = new SimPublicationTargetDiscoveryService();
 
         Publication expected = generatePublication("contacts", String.valueOf(folder.getObjectID() ), discovery );
         pubMgr.setPublicationTargetDiscoveryService(discovery);
         pubMgr.newAction(expected);
-        
+
         //verify
         Publication actual = pubMgr.getAction(expected.getId());
-        
+
         assertEquals("Should return the same folder as sent to the server", expected.getEntityId(), actual.getEntityId());
         assertEquals("Should return the same module as sent to the server", expected.getModule(), actual.getModule());
         assertEquals("Should return the same user as sent to the server", expected.getUserId(), actual.getUserId());

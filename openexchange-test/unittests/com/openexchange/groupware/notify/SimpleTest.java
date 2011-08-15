@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.notify;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.tasks.Task;
 
@@ -59,28 +58,28 @@ public class SimpleTest extends ParticipantNotifyTest {
     public void testSimple() throws Exception{
         Participant[] participants = getParticipants(U(2),G(),S(), R());
         Task t = getTask(participants);
-        
+
         notify.taskCreated(t,session);
-        
+
         Message msg = notify.getMessages().get(0);
-        
+
         String[] participantNames = parseParticipants( msg );
-        
+
         assertNames( msg.addresses, "user1@test.invalid" );
         assertLanguage( EN , msg );
         assertNames( participantNames,"User 1 (waiting)" );
         assertEquals(200, msg.folderId);
-        
+
         notify.clearMessages();
-        
+
         participants = getParticipants(U(4), G(),S(), R());
         t = getTask(participants);
-        
+
         notify.taskCreated(t,session);
-        
+
         msg = notify.getMessages().get(0);
         participantNames = parseParticipants( msg );
-        
+
         assertNames( msg.addresses, "user3@test.invalid" );
         assertLanguage( EN , msg );
         assertNames( participantNames,"User 3 (waiting)" );

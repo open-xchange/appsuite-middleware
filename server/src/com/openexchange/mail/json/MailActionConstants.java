@@ -49,12 +49,15 @@
 
 package com.openexchange.mail.json;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import com.openexchange.mail.MailServletInterface;
-
 
 /**
  * {@link MailActionConstants}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MailActionConstants {
@@ -63,4 +66,36 @@ public interface MailActionConstants {
      * The property name for {@link MailServletInterface} instance.
      */
     public static final String PROPERTY_MAIL_IFACE = "com.openexchange.mail.json.mailInterface";
+
+    // ---------------------- Log properties constants -------------------------------
+
+    /**
+     * The log property name for login.
+     */
+    public static final String LOG_PROPERTY_LOGIN = "com.openexchange.mail.login";
+
+    /**
+     * The log property name for host name.
+     */
+    public static final String LOG_PROPERTY_HOST = "com.openexchange.mail.host";
+
+    /**
+     * The log property name for folder full name.
+     */
+    public static final String LOG_PROPERTY_FULL_NAME = "com.openexchange.mail.fullName";
+
+    /**
+     * The log property name for mail identifier.
+     */
+    public static final String LOG_PROPERTY_MAIL_ID = "com.openexchange.mail.mailId";
+
+    /**
+     * A set containing all log property names.
+     */
+    public static final Set<String> ALL_LOG_PROPERTIES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
+        LOG_PROPERTY_FULL_NAME,
+        LOG_PROPERTY_HOST,
+        LOG_PROPERTY_LOGIN,
+        LOG_PROPERTY_MAIL_ID)));
+
 }

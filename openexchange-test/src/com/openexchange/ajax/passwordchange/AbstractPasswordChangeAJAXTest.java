@@ -60,15 +60,15 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 
 /**
  * {@link AbstractPasswordChangeAJAXTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public abstract class AbstractPasswordChangeAJAXTest extends AbstractAJAXSession {
 
 	/**
 	 * Default constructor.
-	 * 
+	 *
 	 * @param name
 	 *            name of the test.
 	 */
@@ -78,7 +78,7 @@ public abstract class AbstractPasswordChangeAJAXTest extends AbstractAJAXSession
 
 	/**
 	 * Gets the client time zone
-	 * 
+	 *
 	 * @return The client time zone
 	 * @throws OXException
 	 *             If an AJAX error occurs

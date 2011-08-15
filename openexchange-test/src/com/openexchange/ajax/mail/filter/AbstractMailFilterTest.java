@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.filter;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Date;
 import com.openexchange.ajax.framework.AJAXSession;
@@ -60,11 +59,9 @@ import com.openexchange.ajax.mail.filter.actions.AbstractMailFilterRequest;
 import com.openexchange.ajax.mail.filter.actions.AllRequest;
 import com.openexchange.ajax.mail.filter.actions.AllResponse;
 import com.openexchange.ajax.mail.filter.actions.DeleteRequest;
-import com.openexchange.ajax.mail.filter.actions.DeleteResponse;
 import com.openexchange.ajax.mail.filter.actions.InsertRequest;
 import com.openexchange.ajax.mail.filter.actions.InsertResponse;
 import com.openexchange.ajax.mail.filter.actions.UpdateRequest;
-import com.openexchange.ajax.mail.filter.actions.UpdateResponse;
 import com.openexchange.ajax.mail.filter.parser.action.ActionParserFactory;
 import com.openexchange.ajax.mail.filter.parser.action.AddFlagsParserImpl;
 import com.openexchange.ajax.mail.filter.parser.action.MoveParserImpl;
@@ -249,11 +246,11 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
 
         return allResponse.getRules();
     }
-    
+
     public static Rule[] listRulesForUser(final AJAXSession ajaxSession, final String userName) throws Exception {
         final AllRequest allRequest = new AllRequest(AbstractMailFilterRequest.URL, userName);
-        final AllResponse allResponse = (AllResponse) Executor.execute(ajaxSession, allRequest);        
-        
+        final AllResponse allResponse = (AllResponse) Executor.execute(ajaxSession, allRequest);
+
         return allResponse.getRules();
     }
 

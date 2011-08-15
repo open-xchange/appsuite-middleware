@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -63,13 +62,13 @@ import com.openexchange.groupware.container.Appointment;
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public class Bug11210Test extends CalendarSqlTest {
-    
+
     private CalendarDataObject single, single2, single3;
-    
+
     private CalendarDataObject sequenceMonthly;
-    
+
     private List<CalendarDataObject> allAppointments = new ArrayList<CalendarDataObject>();
-    
+
     private int THIS_YEAR, THIS_MONTH;
 
     @Override
@@ -77,7 +76,7 @@ public class Bug11210Test extends CalendarSqlTest {
         super.setUp();
         THIS_YEAR = Calendar.getInstance().get(Calendar.YEAR);
         THIS_MONTH = Calendar.getInstance().get(Calendar.MONTH);
-        
+
         sequenceMonthly = appointments.buildBasicAppointment(createDate(THIS_YEAR, THIS_MONTH + 1, 1, 12), createDate(THIS_YEAR, THIS_MONTH + 1, 1, 13));
         sequenceMonthly.setRecurrenceType(Appointment.MONTHLY);
         sequenceMonthly.setInterval(1);
@@ -89,9 +88,9 @@ public class Bug11210Test extends CalendarSqlTest {
         allAppointments.add(single);
         allAppointments.add(single2);
         allAppointments.add(sequenceMonthly);
-        
+
         clean.addAll(allAppointments);
-        
+
         setIgnoreConflicts(false);
     }
 
@@ -99,7 +98,7 @@ public class Bug11210Test extends CalendarSqlTest {
     public void tearDown() throws Exception {
         super.tearDown();
     }
-    
+
     public void testConflict() throws Exception {
         appointments.save(single);
         CalendarDataObject[] conflicts = appointments.save(sequenceMonthly);
@@ -107,13 +106,13 @@ public class Bug11210Test extends CalendarSqlTest {
         assertEquals("Number of conflicts not correct", 1, conflicts.length);
         assertEquals("Wrong conflict", single.getObjectID(), conflicts[0].getObjectID());
     }
-    
+
     public void testNoConflictAfterOneYear() throws Exception {
         appointments.save(single3);
         CalendarDataObject[] conflicts = appointments.save(sequenceMonthly);
         assertTrue("Conflict occurred", conflicts == null);
     }
-    
+
     public void testOnlyOneConflict() throws Exception {
         appointments.save(single);
         appointments.save(single2);
@@ -122,10 +121,10 @@ public class Bug11210Test extends CalendarSqlTest {
         assertEquals("Number of conflicts not correct", 1, conflicts.length);
         assertEquals("Wrong conflict", single.getObjectID(), conflicts[0].getObjectID());
     }
-    
+
     protected Date createDate(int year, int month, int day, int hour) {
         Calendar calendar = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
-        
+
         calendar.set(Calendar.YEAR, year);
         calendar.set(Calendar.MONTH, month);
         calendar.set(Calendar.DAY_OF_MONTH, day);
@@ -133,10 +132,10 @@ public class Bug11210Test extends CalendarSqlTest {
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
-        
+
         return calendar.getTime();
     }
-    
+
     private void setIgnoreConflicts(boolean ignoreConflicts) {
         for (CalendarDataObject app : allAppointments) {
             if (app != null) {

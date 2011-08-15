@@ -12,11 +12,11 @@ import com.openexchange.webdav.xml.ContactTest;
 import com.openexchange.webdav.xml.FolderTest;
 
 public class NewTest extends AttachmentTest {
-	
+
 	public NewTest(final String name) {
 		super(name);
 	}
-	
+
 	public void testInsertAttachment() throws Exception {
 		final FolderObject folderObj = FolderTest.getContactDefaultFolder(webCon, PROTOCOL + hostName, login, password, context);
 		final int contactFolderId = folderObj.getObjectID();
@@ -24,7 +24,7 @@ public class NewTest extends AttachmentTest {
 		contactObj.setSurName("testInsertAttachment");
 		contactObj.setParentFolderID(contactFolderId);
 		final int objectId = ContactTest.insertContact(webCon, contactObj, PROTOCOL + hostName, login, password, context);
-		
+
 		final AttachmentMetadata attachmentObj = new AttachmentImpl();
 		attachmentObj.setFilename(System.currentTimeMillis() + "test.txt");
 		attachmentObj.setModuleId(Types.CONTACT);
@@ -32,11 +32,11 @@ public class NewTest extends AttachmentTest {
 		attachmentObj.setFolderId(contactFolderId);
 		attachmentObj.setRtfFlag(false);
 		attachmentObj.setFileMIMEType(CONTENT_TYPE);
-		
+
 		final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(data);
-		
+
 		final int attachmentId = insertAttachment(webCon, attachmentObj, byteArrayInputStream, getHostName(), getLogin(), getPassword(), context);
 		assertTrue("attachment is 0", attachmentId > 0);
-	}	
+	}
 }
 

@@ -56,7 +56,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
  * {@link ByteArrayServletInputStream} - The {@link ServletInputStream} backed by a byte array.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ByteArrayServletInputStream extends ServletInputStream {

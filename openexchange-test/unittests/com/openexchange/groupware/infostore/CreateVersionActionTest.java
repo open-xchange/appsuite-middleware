@@ -9,7 +9,7 @@ import com.openexchange.tx.UndoableAction;
 public class CreateVersionActionTest extends AbstractInfostoreActionTest {
 
     CreateDocumentAction create = new CreateDocumentAction();
-    
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
@@ -19,13 +19,13 @@ public class CreateVersionActionTest extends AbstractInfostoreActionTest {
         create.setQueryCatalog(getQueryCatalog());
         create.perform();
     }
-    
+
     @Override
     public void tearDown() throws Exception {
         create.undo();
         super.tearDown();
     }
-    
+
     @Override
     protected UndoableAction getAction() throws Exception {
         final CreateVersionAction createAction = new CreateVersionAction();
@@ -56,7 +56,7 @@ public class CreateVersionActionTest extends AbstractInfostoreActionTest {
     }
 
     private void checkNotInVersionTable(final DocumentMetadata doc) throws OXException, SQLException {
-        assertNoResult("SELECT 1 FROM infostore_document WHERE infostore_id = ? and cid = ?", doc.getId(), getContext().getContextId());    
+        assertNoResult("SELECT 1 FROM infostore_document WHERE infostore_id = ? and cid = ?", doc.getId(), getContext().getContextId());
     }
 
 }

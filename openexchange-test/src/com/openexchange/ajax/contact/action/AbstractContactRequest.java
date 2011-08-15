@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.contact.action;
 
-import com.openexchange.exception.OXException;
 import java.util.TimeZone;
 
 import org.json.JSONException;
@@ -62,7 +61,7 @@ import com.openexchange.ajax.writer.ContactWriter;
 import com.openexchange.groupware.container.Contact;
 
 /**
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public abstract class AbstractContactRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {

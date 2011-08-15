@@ -61,7 +61,7 @@ public class NewPublicationResponse extends AbstractPublicationResponse {
     public NewPublicationResponse(Response response) {
         super(response);
     }
-    
+
     public int getId() {
         return ((Integer) getData()).intValue();
     }

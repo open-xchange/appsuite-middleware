@@ -87,13 +87,13 @@ public class SubscriptionFixtureFactory implements FixtureFactory<Subscription> 
             if (null == values) {
                 throw new FixtureException("Entry with name " + entryName + " not found");
             }
-            
+
             defaults(values);
-            
+
             final Subscription subscription = new Subscription();
-            
+
             Map<String, Object> config = new HashMap<String, Object>();
-            
+
             if (values.containsKey("source")) {
                 config.put("source", values.get("source"));
                 values.remove("source");
@@ -110,9 +110,9 @@ public class SubscriptionFixtureFactory implements FixtureFactory<Subscription> 
                 config.put("password", values.get("password"));
                 values.remove("password");
             }
-            
+
             subscription.setConfiguration(config);
-                        
+
             apply(subscription,values);
 
             final Fixture<Subscription> fixture = new Fixture<Subscription>(subscription, values.keySet().toArray(new String[values.size()]), values);
@@ -125,7 +125,7 @@ public class SubscriptionFixtureFactory implements FixtureFactory<Subscription> 
         	if (false == values.containsKey("displayName")) {
         	    values.put("displayName", values.get("login"));
         	}
-        	
+
         	if (false == values.containsKey("secret")) {
         	    values.put("secret", values.get("false"));
         	}

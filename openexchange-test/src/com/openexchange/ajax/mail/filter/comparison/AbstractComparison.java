@@ -55,7 +55,7 @@ package com.openexchange.ajax.mail.filter.comparison;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public abstract class AbstractComparison {
-	
+
 	protected String name;
 
 	public String getName() {

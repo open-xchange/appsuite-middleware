@@ -61,7 +61,7 @@ import com.openexchange.mailaccount.MailAccountDescription;
 
 /**
  * {@link MailAccountValidateTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MailAccountValidateTest extends AbstractMailAccountTest {

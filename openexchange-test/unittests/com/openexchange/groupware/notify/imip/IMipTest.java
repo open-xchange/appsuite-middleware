@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.notify.imip;
 
-import com.openexchange.exception.OXException;
 import javax.mail.BodyPart;
 import javax.mail.internet.MimeMultipart;
 import com.openexchange.data.conversion.ical.ITipMethod;
@@ -64,7 +63,7 @@ import com.openexchange.setuptools.TestFolderToolkit;
 
 /**
  * {@link IMipTest}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public abstract class IMipTest extends ParticipantNotifyTest {
@@ -76,19 +75,19 @@ public abstract class IMipTest extends ParticipantNotifyTest {
     protected String user;
 
     protected String secondUser;
-    
+
     protected String thirdUser;
-    
+
     protected int userId;
 
     protected int secondUserId;
-    
+
     protected int thirdUserId;
 
     protected String userMail;
 
     protected String secondUserMail;
-    
+
     protected String thirdUserMail;
 
     protected Session so;
@@ -106,7 +105,7 @@ public abstract class IMipTest extends ParticipantNotifyTest {
         folders = new TestFolderToolkit();
         final TestConfig config = new TestConfig();
         contextTools = new TestContextToolkit();
-        
+
         ctx = contextTools.getContextByName(config.getContextName());
         user = config.getUser();
         secondUser = config.getSecondUser();
@@ -124,13 +123,13 @@ public abstract class IMipTest extends ParticipantNotifyTest {
 
         notify.realUsers = true;
     }
-    
+
     protected void checkState(Object message, ITipMethod method) throws Exception {
-        
+
         assertTrue("message should be a multipart", MimeMultipart.class.isInstance(message));
         MimeMultipart msg = (MimeMultipart) message;
         assertTrue("wrong content type", msg.getContentType().startsWith("multipart/alternative"));
-        
+
         BodyPart calendarPart = null;
         for (int i = 0; i < msg.getCount(); i++) {
             if (msg.getBodyPart(i).getContentType().startsWith("text/calendar")) {
@@ -138,7 +137,7 @@ public abstract class IMipTest extends ParticipantNotifyTest {
                 break;
             }
         }
-        
+
         if (method == ITipMethod.NO_METHOD) {
             assertFalse("method in content type", calendarPart.getContentType().contains("method"));
         } else {

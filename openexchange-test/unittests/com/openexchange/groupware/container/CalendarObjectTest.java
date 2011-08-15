@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.container;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.container.CalendarObject.*;
 
 import java.util.Date;
@@ -518,12 +517,12 @@ public class CalendarObjectTest extends CommonObjectTest {
         co.setUsers(new UserParticipant[0]);
 
     }
-    
+
     @Override
     public void testAttrAccessors() {
-        
+
         CalendarObject object = new TestCalendarObject();
-        
+
         // RECURRENCE_COUNT
         assertFalse(object.contains(RECURRENCE_COUNT));
         assertFalse(object.containsOccurrence());
@@ -558,14 +557,14 @@ public class CalendarObjectTest extends CommonObjectTest {
         assertFalse(object.contains(UNTIL));
         assertFalse(object.containsUntil());
 
-        
+
         // USERS
         assertFalse(object.contains(USERS));
         assertFalse(object.containsUserParticipants());
 
         UserParticipant[] users = new UserParticipant[]{new UserParticipant(1)};
         UserParticipant[] otherUsers = new UserParticipant[]{new UserParticipant(2)};
-        
+
         object.setUsers(users);
         assertTrue(object.contains(USERS));
         assertTrue(object.containsUserParticipants());
@@ -660,8 +659,8 @@ public class CalendarObjectTest extends CommonObjectTest {
         assertEquals(12, object.getRecurrenceCalculator());
 
 
-        
-        
+
+
         // DAYS
         assertFalse(object.contains(DAYS));
         assertFalse(object.containsDays());
@@ -732,7 +731,7 @@ public class CalendarObjectTest extends CommonObjectTest {
         assertFalse(object.contains(RECURRENCE_COUNT));
         assertFalse(object.containsRecurrenceCount());
 
-        
+
         // DAY_IN_MONTH
         assertFalse(object.contains(DAY_IN_MONTH));
         assertFalse(object.containsDayInMonth());
@@ -845,7 +844,7 @@ public class CalendarObjectTest extends CommonObjectTest {
         assertFalse(object.contains(PARTICIPANTS));
         assertFalse(object.containsParticipants());
 
-        
+
         object.setParticipants(users);
         assertTrue(object.contains(PARTICIPANTS));
         assertTrue(object.containsParticipants());

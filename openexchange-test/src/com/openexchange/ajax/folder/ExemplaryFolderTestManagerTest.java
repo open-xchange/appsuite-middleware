@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.folder;
 
-import com.openexchange.exception.OXException;
 import java.util.Date;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -59,7 +58,7 @@ import com.openexchange.test.FolderTestManager;
 
 /**
  * This class contains some examples of tests created for FolderTestManager
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.org">Karsten Will</a>
  */
 public class ExemplaryFolderTestManagerTest extends AbstractAJAXSession {

@@ -32,16 +32,16 @@ public class FolderObjectTest extends FolderChildObjectTest {
         // PERMISSIONS_BITS
         assertFalse(object.contains(PERMISSIONS_BITS));
         assertFalse(object.containsPermissions());
-        
+
         List<OCLPermission> permissions = Arrays.asList( new OCLPermission[]{} );
-        
+
         object.setPermissions( permissions );
         assertTrue(object.contains( PERMISSIONS_BITS ) );
         assertTrue(object.containsPermissions());
         assertEquals(permissions, object.get(PERMISSIONS_BITS));
 
         List<OCLPermission> permissions2 = Arrays.asList( new OCLPermission[]{ new OCLPermission() } );
-        
+
         object.set(PERMISSIONS_BITS, permissions2);
         assertEquals(permissions2, object.getPermissions());
 
@@ -127,17 +127,17 @@ public class FolderObjectTest extends FolderChildObjectTest {
         assertFalse(object.containsModule());
     }
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
+
     public FolderObject getFolderObject() {
         FolderObject folderObject = new FolderObject();
 

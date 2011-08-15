@@ -1133,7 +1133,7 @@ public final class QuotedInternetAddress extends InternetAddress {
         if (length <= 0) {
             return false;
         }
-        return ('"' == s.charAt(0) && '"' == s.charAt(length - 1));
+        return ('"' == s.charAt(0) && length > 1 && '"' == s.charAt(length - 1));
     }
 
     private static boolean checkQuotedPersonal(final String p) {

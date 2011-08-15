@@ -77,7 +77,7 @@ import com.openexchange.test.JMXInit;
 
 /**
  * {@link AbstractBundleTest} - Abstract super class for a test class that stops/starts a specific bundle to check behavior on absence.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractBundleTest extends TestCase {
@@ -94,7 +94,7 @@ public abstract class AbstractBundleTest extends TestCase {
 
     /**
      * Initializes a new {@link AbstractBundleTest}
-     * 
+     *
      * @param name The test case name
      */
     protected AbstractBundleTest(final String name) {
@@ -126,7 +126,7 @@ public abstract class AbstractBundleTest extends TestCase {
 
     /**
      * Setup the web conversation here so tests are able to create additional if several users are needed for tests.
-     * 
+     *
      * @return a new web conversation.
      */
     protected WebConversation newWebConversation() {

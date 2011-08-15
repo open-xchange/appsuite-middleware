@@ -63,7 +63,7 @@ import com.openexchange.ajax.mail.filter.action.Stop;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class SimpleActionParserImpl implements ActionParser {
-	
+
 	public AbstractAction parseAction(final String name, final JSONObject jsonObject) {
 		if (name.equalsIgnoreCase(Discard.DISCARD)) {
 			return new Discard();

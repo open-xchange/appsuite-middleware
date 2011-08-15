@@ -7,14 +7,14 @@ import com.openexchange.groupware.tasks.Task;
 
 
 public class Bug15300Test extends ParticipantNotifyTest {
-    
+
     public void testSendMessage() throws Exception {
         Participant[] participants = getParticipants(U(2, 4, 6),G(),S(), R());
         Task t = getTask(participants);
-        notify.taskCreated(t, session);        
-        
+        notify.taskCreated(t, session);
+
         List<Message> msgs = notify.getMessages();
-        
+
         String senderSource = NotificationConfig.getProperty(NotificationProperty.FROM_SOURCE, "primaryMail");
         if (senderSource.equals("defaultSenderAddress")) {
             for (Message msg : msgs) {
@@ -25,7 +25,7 @@ public class Bug15300Test extends ParticipantNotifyTest {
                 assertTrue(msg.getFromAddr().equals("primary@test"));
             }
         }
-        
+
     }
 
 }

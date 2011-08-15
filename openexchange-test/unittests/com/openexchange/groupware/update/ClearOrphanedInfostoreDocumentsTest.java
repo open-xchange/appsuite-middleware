@@ -96,7 +96,7 @@ public class ClearOrphanedInfostoreDocumentsTest extends UpdateTest {
         FileStorage fs  = QuotaFileStorage.getInstance(
                 FilestoreStorage.createURI(ctx), ctx);
         for (String path : paths) {
-            fs.deleteFile(path);        
+            fs.deleteFile(path);
         }
         Connection con = getProvider().getWriteConnection(ctx);
         List<ForeignKeyOld> foreignKeys = ForeignKeyOld.getForeignKeys(con, "infostore_document");
@@ -125,7 +125,7 @@ public class ClearOrphanedInfostoreDocumentsTest extends UpdateTest {
         assertNoResults("SELECT * FROM infostore_document WHERE infostore_id = 100000");
         assertNotInFilestorage(paths);
     }
-  
+
     public void testShouldBeRunnableTwice() throws OXException {
         new ClearOrphanedInfostoreDocuments().perform(schema, existing_ctx_id);
         new ClearOrphanedInfostoreDocuments().perform(schema, existing_ctx_id);
@@ -144,7 +144,7 @@ public class ClearOrphanedInfostoreDocumentsTest extends UpdateTest {
 
         String path = fs.saveNewFile(new ByteArrayInputStream("Hallo Welt".getBytes("UTF-8")));
         paths.add(path);
-            
+
         exec("INSERT INTO infostore_document (cid, infostore_id, version_number, file_store_location, creating_date, last_modified, created_by) VALUES (?,?,?,?, 0,0, ?)", ctx.getContextId(), id, version, path, user_id);
     }
 

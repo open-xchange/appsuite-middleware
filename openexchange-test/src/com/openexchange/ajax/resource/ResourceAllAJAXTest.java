@@ -60,15 +60,15 @@ import org.xml.sax.SAXException;
 
 /**
  * {@link ResourceAllAJAXTest} - Tests the ALL request on resource servlet
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class ResourceAllAJAXTest extends AbstractResourceTest {
 
 	/**
 	 * Initializes a new {@link ResourceAllAJAXTest}
-	 * 
+	 *
 	 * @param name
 	 *            The test name
 	 */

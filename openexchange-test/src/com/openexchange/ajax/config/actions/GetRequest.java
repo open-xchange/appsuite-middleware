@@ -50,13 +50,13 @@
 package com.openexchange.ajax.config.actions;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class GetRequest extends AbstractConfigRequest<GetResponse> {
 
     private final String path;
-    
+
     private final boolean failOnError;
 
     public GetRequest(final Tree param) {
@@ -64,7 +64,7 @@ public class GetRequest extends AbstractConfigRequest<GetResponse> {
         this.path = param.getPath();
         this.failOnError = true;
     }
-    
+
     public GetRequest(final Tree param, final boolean failOnError) {
         super();
         this.path = param.getPath();
@@ -76,7 +76,7 @@ public class GetRequest extends AbstractConfigRequest<GetResponse> {
         this.path = path;
         this.failOnError = true;
     }
-    
+
     public GetRequest(final String path, final boolean failOnError) {
         super();
         this.path = path;

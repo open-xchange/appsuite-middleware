@@ -65,7 +65,7 @@ import com.openexchange.webdav.protocol.Protocol.WEBDAV_METHOD;
 
 /**
  * {@link StandardIfHeaderApplyTest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class StandardIfHeaderApplyTest extends TestCase {
@@ -75,7 +75,7 @@ public class StandardIfHeaderApplyTest extends TestCase {
 
         IfHeaderEntity entity = new IfHeaderEntity.ETag("1234567");
         entity.setMatches(true);
-        
+
         WebdavResource resource = resourceWithETag("1234567");
 
         assertTrue(apply.matches(entity, resource));
@@ -95,7 +95,7 @@ public class StandardIfHeaderApplyTest extends TestCase {
 
         IfHeaderEntity entity = new IfHeaderEntity.ETag("1234567");
         entity.setMatches(false);
-        
+
         WebdavResource resource = resourceWithETag("1234567");
 
         assertFalse(apply.matches(entity, resource));
@@ -110,7 +110,7 @@ public class StandardIfHeaderApplyTest extends TestCase {
 
         IfHeaderEntity entity = new IfHeaderEntity.LockToken("1234567");
         entity.setMatches(true);
-        
+
         WebdavResource resource = resourceWithLock("1234567");
 
         assertTrue(apply.matches(entity, resource));
@@ -125,7 +125,7 @@ public class StandardIfHeaderApplyTest extends TestCase {
 
         IfHeaderEntity entity = new IfHeaderEntity.LockToken("1234567");
         entity.setMatches(false);
-        
+
         WebdavResource resource = resourceWithLock("1234567");
 
         assertFalse(apply.matches(entity, resource));
@@ -137,9 +137,9 @@ public class StandardIfHeaderApplyTest extends TestCase {
 
     protected WebdavResource resourceWithETag(final String eTag) {
         return new WebdavResource() {
-            
-            
-            
+
+
+
             public String getETag() throws OXException {
                 return eTag;
             }
@@ -297,10 +297,10 @@ public class StandardIfHeaderApplyTest extends TestCase {
 
         };
     }
-    
+
     protected WebdavResource resourceWithLock(final String lock) {
         return new WebdavResource() {
-            
+
             public WebdavLock getLock(String token) throws OXException {
                 if(!lock.equals(token)) {
                     return null;
@@ -314,7 +314,7 @@ public class StandardIfHeaderApplyTest extends TestCase {
                 return Arrays.asList(getLock(lock));
             }
 
-            
+
             public String getETag() throws OXException {
                 return null;
             }

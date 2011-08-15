@@ -66,7 +66,7 @@ public final class MessagingActivator implements BundleActivator {
 
     private OSGIMessagingServiceRegistry registry;
 
-    private List<ServiceRegistration> registrations;
+    private List<ServiceRegistration<?>> registrations;
 
     /**
      * Initializes a new {@link MessagingActivator}.
@@ -90,7 +90,7 @@ public final class MessagingActivator implements BundleActivator {
             /*
              * Register services
              */
-            registrations = new ArrayList<ServiceRegistration>(4);
+            registrations = new ArrayList<ServiceRegistration<?>>(1);
             registrations.add(context.registerService(MessagingServiceRegistry.class.getName(), registry, null));
         } catch (final Exception e) {
             log.error(e.getMessage(), e);

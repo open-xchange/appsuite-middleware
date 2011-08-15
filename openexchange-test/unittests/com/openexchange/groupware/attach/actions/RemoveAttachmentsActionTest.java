@@ -14,30 +14,30 @@ public class RemoveAttachmentsActionTest extends AbstractAttachmentActionTest {
 
     private final CreateAttachmentAction createAction = new CreateAttachmentAction();
     private int delCountStart;
-    
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        
+
         createAction.setAttachments(getAttachments());
         createAction.setQueryCatalog(getQueryCatalog());
         createAction.setProvider(getProvider());
         createAction.setContext(getContext());
-        
+
         createAction.perform();
-        
+
         delCountStart = countDel();
-        
+
     }
-    
+
     @Override
     public void tearDown() throws Exception {
         createAction.undo();
         super.tearDown();
     }
-    
 
-    
+
+
     @Override
     protected UndoableAction getAction() throws Exception {
         final DeleteAttachmentAction deleteAction = new DeleteAttachmentAction();
@@ -53,7 +53,7 @@ public class RemoveAttachmentsActionTest extends AbstractAttachmentActionTest {
         checkDelTable();
         checkRemovedFromNormalTable();
     }
-    
+
     @Override
     protected void verifyUndone() throws Exception {
         for(final AttachmentMetadata attachment : getAttachments()) {
@@ -62,7 +62,7 @@ public class RemoveAttachmentsActionTest extends AbstractAttachmentActionTest {
         }
         checkRemovedFromDel();
     }
-    
+
     private void checkRemovedFromNormalTable() {
         for(final AttachmentMetadata attachment : getAttachments()) {
             try {
@@ -73,14 +73,14 @@ public class RemoveAttachmentsActionTest extends AbstractAttachmentActionTest {
             }
         }
     }
-    
+
     private int countDel() throws OXException, SQLException{
         final StringBuilder in = new StringBuilder();
         for(final AttachmentMetadata m : getAttachments()) {
             in.append(m.getId()).append(",");
         }
         in.setLength(in.length()-1);
-        
+
         Connection readCon = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -109,7 +109,7 @@ public class RemoveAttachmentsActionTest extends AbstractAttachmentActionTest {
     private void checkDelTable() throws OXException, SQLException {
         assertEquals(getAttachments().size(), countDel()-delCountStart);
     }
-    
+
     private void checkRemovedFromDel() throws OXException, SQLException {
         assertEquals(delCountStart, countDel());
     }

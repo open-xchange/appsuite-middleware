@@ -49,7 +49,6 @@
 
 package com.openexchange.webdav.xml.appointment;
 
-import com.openexchange.exception.OXException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -73,11 +72,11 @@ public class Bug13260Test extends AppointmentTest {
     public void testBugWithEnd() throws Exception {
         test(false, false);
     }
-    
+
     public void testBugAsWrittenInComment6() throws Exception {
         test(true, true);
     }
-    
+
     public void testBugWithEndAndFullTime() throws Exception {
         test(false, true);
     }

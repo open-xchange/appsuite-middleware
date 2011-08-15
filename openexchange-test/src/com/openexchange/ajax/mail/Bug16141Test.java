@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail;
 
-import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -69,28 +68,28 @@ import com.openexchange.ajax.mail.actions.ImportMailResponse;
 import com.openexchange.configuration.MailConfig;
 
 /**
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  *
  */
 public class Bug16141Test extends AbstractAJAXSession {
-    
+
     private AJAXClient client;
 
     private String folder;
 
     private UserValues values;
-    
+
     private String[][] ids = null;
-    
+
     private String testMailDir;
 
     private String address;
-    
+
     public Bug16141Test(String name) {
         super(name);
     }
-    
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
@@ -100,14 +99,14 @@ public class Bug16141Test extends AbstractAJAXSession {
         address = client.getValues().getSendAddress();
         testMailDir = MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR);
     }
-    
+
     public void testMailImport() throws Exception {
         InputStream[] is = createABunchOfMails();
-        
+
         final ImportMailRequest importReq = new ImportMailRequest(folder, MailFlag.SEEN.getValue(), is);
         final ImportMailResponse importResp = client.execute(importReq);
         JSONArray json = (JSONArray) importResp.getData();
-        
+
         int err = 0;
         for (int i = 0; i < json.length(); i++) {
             JSONObject jo = json.getJSONObject(i);
@@ -115,16 +114,16 @@ public class Bug16141Test extends AbstractAJAXSession {
                 err++;
             }
         }
-        
+
         if (err != 1) {
             fail("Number of corrupt mails is wrong");
         }
-        
+
         if (json.length() - err != 3) {
             fail("Import did not run til end.");
         }
     }
-    
+
     private InputStream[] createABunchOfMails() {
         List<InputStream> retval = new ArrayList<InputStream>(4);
         for (String fileName : new String[] { "bug16141_1.eml", "bug16141_2.eml", "bug16141_3.eml", "bug16141_4.eml" }) {

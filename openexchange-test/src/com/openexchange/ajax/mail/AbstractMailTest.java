@@ -76,15 +76,15 @@ import com.openexchange.mail.MailListField;
 
 /**
  * {@link AbstractMailTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public abstract class AbstractMailTest extends AbstractAJAXSession {
 
     /**
      * Default constructor.
-     * 
+     *
      * @param name
      *            name of the test.
      */
@@ -94,7 +94,7 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
 
     /**
      * Gets the message count of specified mail folder.
-     * 
+     *
      * @param folder The mail folder identifier
      * @return The message count
      * @throws OXException If an AJAX error occurs
@@ -110,7 +110,7 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
 
     /**
      * Converts specified object array into a corresponding <i>folder-and-ID</i>-array
-     * 
+     *
      * @param array
      * @return
      */
@@ -145,10 +145,10 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
             + "ransport when sending MimeMessages<br />        with no encoding<br />6456444 MimeMessages created from stream are not correctly handle"
             + "d<br />        with allow8bitmime<br />&lt;no id&gt; fix performance bug in base64 encoder; now even faster!";
 
-    protected static final String LARGE_MAIL_TEXT_BODY              = MAIL_TEXT_BODY + "<br />" 
-            + MAIL_TEXT_BODY + "<br />" + MAIL_TEXT_BODY + "<br />" + MAIL_TEXT_BODY + "<br />" 
+    protected static final String LARGE_MAIL_TEXT_BODY              = MAIL_TEXT_BODY + "<br />"
+            + MAIL_TEXT_BODY + "<br />" + MAIL_TEXT_BODY + "<br />" + MAIL_TEXT_BODY + "<br />"
             + MAIL_TEXT_BODY + "<br />" + MAIL_TEXT_BODY + "<br />" + MAIL_TEXT_BODY + "<br />";
-    
+
     public static final String MAIL_SUBJECT = "The mail subject";
 
     protected final JSONObject createSelfAddressed25KBMailObject(final String subject) throws OXException, JSONException, IOException, SAXException {
@@ -176,7 +176,7 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
         attachments.put(mailBody);
         myMail.put(MailJSONField.ATTACHMENTS.getKey(), attachments);
         return myMail;
-        
+
     }
 
     protected final JSONObject createSelfAddressed25KBMailObject() throws OXException, JSONException, IOException,
@@ -200,7 +200,7 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
 
     /**
      * Performs a hard delete on specified folder
-     * 
+     *
      * @param folder
      *            The folder
      */
@@ -211,7 +211,7 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
 
     /**
      * Gets all folder and IDs from specified folder
-     * 
+     *
      * @param folder
      *            The folder
      * @return All folder and IDs as a two-dimensional array whereby the second
@@ -240,7 +240,7 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
     protected String getTrashFolder() throws OXException, IOException, SAXException, JSONException {
         return getClient().getValues().getTrashFolder();
     }
-    
+
     protected String getDraftsFolder() throws OXException, IOException, SAXException, JSONException {
         return getClient().getValues().getDraftsFolder();
     }
@@ -280,12 +280,12 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
         final JSONObject mailObject = createSelfAddressed25KBMailObject();
        return mailObject.toString();
     }
-    
+
     protected String generateMail(final String subject) throws Exception {
         final JSONObject mailObject = createSelfAddressed25KBMailObject(subject);
        return mailObject.toString();
     }
-    
+
 
     protected JSONObject getFirstMailInFolder(final String inboxFolder) throws OXException, IOException, SAXException, JSONException {
         final CommonAllResponse response = getClient().execute(new AllRequest(inboxFolder, new int[] { 600 }, -1, null, true));
@@ -302,5 +302,5 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
         final JSONObject jsonMail = (JSONObject) getResponse.getData();
         return new TestMail( jsonMail );
     }
-    
+
 }

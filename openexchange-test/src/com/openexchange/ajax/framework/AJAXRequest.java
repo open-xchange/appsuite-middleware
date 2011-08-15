@@ -56,7 +56,7 @@ import java.util.TimeZone;
 import org.json.JSONException;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public interface AJAXRequest<T extends AbstractAJAXResponse> {

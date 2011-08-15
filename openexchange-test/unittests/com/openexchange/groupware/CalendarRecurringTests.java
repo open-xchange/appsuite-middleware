@@ -1185,9 +1185,9 @@ public class CalendarRecurringTests extends TestCase {
         }
 
         assertEquals("Check correct until for !yearly " , check_until , cdao.getUntil().getTime());
-        
+
         final int MONTH = Calendar.AUGUST;
-        final int DAY = 20;        
+        final int DAY = 20;
         final Calendar cdao2Cal = TimeTools.createCalendar(TimeZone.getTimeZone(TIMEZONE));
         cdao2Cal.set(Calendar.MONTH, MONTH);
         cdao2Cal.set(Calendar.DAY_OF_MONTH, DAY);

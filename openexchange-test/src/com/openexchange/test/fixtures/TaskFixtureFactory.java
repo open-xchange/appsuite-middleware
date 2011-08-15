@@ -72,7 +72,7 @@ import com.openexchange.test.fixtures.transformators.StatusTransformator;
 public class TaskFixtureFactory implements FixtureFactory<Task> {
     private FixtureLoader fixtureLoader;
 	private GroupResolver groupResolver;
-    
+
 	public TaskFixtureFactory(GroupResolver groupResolver , FixtureLoader fixtureLoader) {
 		super();
 		this.fixtureLoader = fixtureLoader;
@@ -94,7 +94,7 @@ public class TaskFixtureFactory implements FixtureFactory<Task> {
             super(Task.class, entries, fixtureLoader);
             this.entries = entries;
             this.groupResolver = groupResolver;
-            
+
             addTransformator(new PriorityTransformator(), "priority");
             addTransformator(new StatusTransformator(), "status");
             addTransformator(new BooleanTransformator(), "private_flag");
@@ -118,7 +118,7 @@ public class TaskFixtureFactory implements FixtureFactory<Task> {
             tasks.put(entryName, fixture);
             return fixture;
         }
-        
+
         private void applyUsers(final Task task, GroupResolver groupResolver) {
         	if (null != task) {
         		final Participant[] participants = task.getParticipants();

@@ -168,14 +168,14 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
             if (firstPackage) {
                 /*-
                  * AJP cycle still intact?
-                 * 
+                 *
                 if (endResponseSent) {
                     // Caught in another cycle! Abort immediately
                     ajpCon.dropOutstandingData();
                     final AJPv13Exception e = new AJPv13Exception(AJPCode.IO_ERROR, false, "Broken AJP cyle. Detected outgoing data available with first AJP package.");
                     LOG.error(e.getMessage(), e);
                 }
-                 * 
+                 *
                  */
                 /*
                  * Read Prefix Code from Input Stream
@@ -362,6 +362,9 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
             clearBuffers();
             throw new AJPv13Exception(AJPCode.IO_ERROR, false, e, e.getMessage());
         } catch (final RuntimeException e) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error(e.getMessage(), e);
+            }
             clearBuffers();
             throw new AJPv13Exception(AJPCode.IO_ERROR, false, e, e.getMessage());
         } finally {

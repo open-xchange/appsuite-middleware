@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.openexchange.webdav.protocol;
 
@@ -16,12 +16,12 @@ public class DummySessionHolder implements SessionHolder{
 	private SessionObject session = null;
 
 	private final Context ctx;
-	
+
 	public DummySessionHolder(final String username, final Context ctx) throws OXException {
 		session =  SessionObjectWrapper.createSessionObject(UserStorage.getInstance().getUserId(username, ctx)  , ctx,"12345");
 		this.ctx = ctx;
 	}
-	
+
 	public SessionObject getSessionObject() {
 		return session;
 	}
@@ -37,5 +37,5 @@ public class DummySessionHolder implements SessionHolder{
         // TODO Auto-generated method stub
         return null;
     }
-	
+
 }

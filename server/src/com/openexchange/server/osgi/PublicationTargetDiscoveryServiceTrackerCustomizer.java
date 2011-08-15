@@ -61,7 +61,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PublicationTargetDiscoveryServiceTrackerCustomizer implements ServiceTrackerCustomizer {
+public final class PublicationTargetDiscoveryServiceTrackerCustomizer implements ServiceTrackerCustomizer<PublicationTargetDiscoveryService,PublicationTargetDiscoveryService> {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(PublicationTargetDiscoveryServiceTrackerCustomizer.class));
 
@@ -81,24 +81,24 @@ public final class PublicationTargetDiscoveryServiceTrackerCustomizer implements
     }
 
     @Override
-    public Object addingService(final ServiceReference reference) {
+    public PublicationTargetDiscoveryService addingService(final ServiceReference<PublicationTargetDiscoveryService> reference) {
         final int refRanking = getServiceReferenceRanking(reference);
         if (refRanking <= ranking) {
             // Nothing to track if ranking is less than or equal to current ranking
             return null;
         }
-        final PublicationTargetDiscoveryService addedService = (PublicationTargetDiscoveryService) context.getService(reference);
+        final PublicationTargetDiscoveryService addedService = context.getService(reference);
         ServerServiceRegistry.getInstance().addService(PublicationTargetDiscoveryService.class, addedService);
         return addedService;
     }
 
     @Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<PublicationTargetDiscoveryService> reference, final PublicationTargetDiscoveryService service) {
         // Nothing to do
     }
 
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
+    public void removedService(final ServiceReference<PublicationTargetDiscoveryService> reference, final PublicationTargetDiscoveryService service) {
         if (null != service) {
             try {
                 ServerServiceRegistry.getInstance().removeService(PublicationTargetDiscoveryService.class);
@@ -108,7 +108,7 @@ public final class PublicationTargetDiscoveryServiceTrackerCustomizer implements
         }
     }
 
-    private static int getServiceReferenceRanking(final ServiceReference reference) {
+    private static int getServiceReferenceRanking(final ServiceReference<PublicationTargetDiscoveryService> reference) {
         final Object property = reference.getProperty(org.osgi.framework.Constants.SERVICE_RANKING);
         if (property == null) {
             return 0;

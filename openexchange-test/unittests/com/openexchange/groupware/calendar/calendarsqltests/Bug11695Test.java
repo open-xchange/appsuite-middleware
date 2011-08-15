@@ -60,7 +60,7 @@ import com.openexchange.groupware.calendar.RecurringResultsInterface;
 public class Bug11695Test extends CalendarSqlTest {
     /**
      * Test for <a href= "http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=11695">bug #11695</a>
-     * 
+     *
      * @throws OXException If an OX error occurs
      */
     public void testShouldCalculateProperWeeklyRecurrence() throws OXException {
@@ -83,10 +83,10 @@ public class Bug11695Test extends CalendarSqlTest {
         final RecurringResultInterface secondResult = results.getRecurringResult(1);
         assertEquals("Unexpected second occurrence", D("08/09/2008 22:00"), new Date(secondResult.getStart()));
     }
-    
+
     /**
      * Another test for <a href= "http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=11695">bug #11695</a>
-     * 
+     *
      * @throws OXException If an OX error occurs
      */
     public void testShouldCalculateProperWeeklyRecurrence2() throws OXException {

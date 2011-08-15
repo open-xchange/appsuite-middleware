@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.reminder;
 
-import com.openexchange.exception.OXException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -108,15 +107,15 @@ public class RemindAgainTest extends AbstractAJAXSession {
         c.add(Calendar.DAY_OF_YEAR, 2);
 
         Task reload = null;
-        
+
         int targetId = -1;
-        
+
         final com.openexchange.ajax.task.actions.InsertResponse insertR = client.execute(new com.openexchange.ajax.task.actions.InsertRequest(task, timeZone));
         try {
             targetId = insertR.getId();
             final com.openexchange.ajax.task.actions.GetResponse getR = com.openexchange.ajax.task.TaskTools.get(client, new com.openexchange.ajax.task.actions.GetRequest(folderId, targetId));
             reload = getR.getTask(timeZone);
-            
+
             /*
              * Get reminder
              */
@@ -127,7 +126,7 @@ public class RemindAgainTest extends AbstractAJAXSession {
                     pos = a;
                 }
             }
-            
+
             assertTrue("reminder not found in response", (pos > -1));
             ReminderObject reminderObject = reminderObjs[pos];
             assertTrue("object id not found", reminderObject.getObjectId() > 0);
@@ -135,7 +134,7 @@ public class RemindAgainTest extends AbstractAJAXSession {
             assertEquals("target id is not equal", targetId, reminderObject.getTargetId());
             assertEquals("folder id is not equal", folderId, reminderObject.getFolder());
             assertEquals("user id is not equal", userId, reminderObject.getUser());
-            
+
             /*
              * Remind again
              */
@@ -143,7 +142,7 @@ public class RemindAgainTest extends AbstractAJAXSession {
             final Date newAlarm = c.getTime();
             reminderObject.setDate(newAlarm);
             Executor.execute(client, new RemindAgainRequest(reminderObject));
-            
+
             c.add(Calendar.DAY_OF_YEAR, 2);
             reminderObjs = Executor.execute(client, new RangeRequest(c.getTime())).getReminder(timeZone);
             pos = -1;
@@ -152,7 +151,7 @@ public class RemindAgainTest extends AbstractAJAXSession {
                     pos = a;
                 }
             }
-            
+
             assertTrue("reminder not found in response", (pos > -1));
             reminderObject = reminderObjs[pos];
             assertTrue("object id not found", reminderObject.getObjectId() > 0);

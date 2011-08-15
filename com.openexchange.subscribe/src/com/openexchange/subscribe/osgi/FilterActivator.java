@@ -61,11 +61,9 @@ import com.openexchange.subscribe.helpers.FilteredSubscriptionSourceDiscoverySer
  */
 public class FilterActivator extends HousekeepingActivator {
 
-    private static final Class[] NEEDED_SERVICES = new Class[]{ConfigViewFactory.class};
-
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
+        return new Class<?>[]{ConfigViewFactory.class};
     }
 
     @Override

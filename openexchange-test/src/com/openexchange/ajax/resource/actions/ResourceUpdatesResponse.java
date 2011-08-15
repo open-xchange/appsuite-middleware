@@ -86,7 +86,7 @@ public class ResourceUpdatesResponse extends AbstractAJAXResponse {
         JSONObject data = (JSONObject) getData();
         if(data.isNull(field))
             return new LinkedList<Group>();
-        
+
         JSONArray grp = data.getJSONArray(field);
 
         GroupParser parser = new GroupParser();

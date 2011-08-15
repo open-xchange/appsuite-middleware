@@ -116,7 +116,7 @@ public abstract class AbstractAJAXResponse extends Assert {
 
     /**
      * Gets the formatted error message.
-     * 
+     *
      * @return The formatted error message or <code>null</code> if no error present
      */
     public String getErrorMessage() {

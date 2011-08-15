@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.ajax.folder.Create.ocl;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.Date;
@@ -91,7 +90,7 @@ public class Bug13090Test extends AbstractAJAXSession {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        
+
         folder = Create.folder(
             FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
             "Bug 13090 Folder " + System.currentTimeMillis(),
@@ -132,17 +131,17 @@ public class Bug13090Test extends AbstractAJAXSession {
         exception.setIgnoreConflicts(true);
         exception.setLastModified(new Date(Long.MAX_VALUE));
         exception.setRecurrencePosition(2);
-        
+
         UpdateRequest updateRequest = new UpdateRequest(exception, getClient().getValues().getTimeZone());
         getClient().execute(updateRequest);
-        
+
         updateAppointment = new Appointment();
         updateAppointment.setObjectID(appointment.getObjectID());
         updateAppointment.setParentFolderID(folder.getObjectID());
         updateAppointment.setIgnoreConflicts(true);
         updateAppointment.setLastModified(new Date(Long.MAX_VALUE));
     }
-    
+
     public void testErrorMessag() throws Exception {
         UpdateRequest updateRequest = new UpdateRequest(getClient().getValues().getPrivateAppointmentFolder(), updateAppointment, getClient().getValues().getTimeZone(), false);
         UpdateResponse updateResponse = getClient().execute(updateRequest);
@@ -158,7 +157,7 @@ public class Bug13090Test extends AbstractAJAXSession {
         getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(API.OX_OLD, folder));
         appointment.setLastModified(new Date(Long.MAX_VALUE));
         getClient().execute(new DeleteRequest(appointment));
-        
+
         super.tearDown();
     }
 

@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.notify;
 
-import com.openexchange.exception.OXException;
 import java.util.Calendar;
 import java.util.Date;
 import com.openexchange.groupware.container.Appointment;
@@ -87,7 +86,7 @@ public class AttachedIcalFileTests extends ParticipantNotifyTest {
         app.setOccurrence(4);
         app.setInterval(1);
         app.setDays(127);
-        
+
 
         state.modifyExternal(mailObject, app, session);
 

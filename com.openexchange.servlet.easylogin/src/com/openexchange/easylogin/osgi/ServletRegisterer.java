@@ -67,7 +67,7 @@ import com.openexchange.easylogin.EasyLogin;
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class ServletRegisterer implements ServiceTrackerCustomizer {
+public class ServletRegisterer implements ServiceTrackerCustomizer<Object, Object> {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ServletRegisterer.class));
 
@@ -83,13 +83,13 @@ public class ServletRegisterer implements ServiceTrackerCustomizer {
 
     private boolean isRegistered;
 
-    public ServletRegisterer(BundleContext context){
+    public ServletRegisterer(final BundleContext context){
         super();
         this.context = context;
     }
 
     @Override
-    public Object addingService(ServiceReference reference) {
+    public Object addingService(final ServiceReference<Object> reference) {
         final Object service = context.getService(reference);
         boolean needsRegistration = false;
         lock.lock();
@@ -111,9 +111,9 @@ public class ServletRegisterer implements ServiceTrackerCustomizer {
             try {
                 httpService.registerServlet(ALIAS, new EasyLogin(), configService.getFile("easylogin.properties"), null);
                 LOG.info(EasyLogin.class.getName() + " successfully registered");
-            } catch (ServletException e) {
+            } catch (final ServletException e) {
                 LOG.error("EasyLogin servlet can not be registered.", e);
-            } catch (NamespaceException e) {
+            } catch (final NamespaceException e) {
                 LOG.error("EasyLogin servlet can not be registered.", e);
             }
         }
@@ -121,12 +121,12 @@ public class ServletRegisterer implements ServiceTrackerCustomizer {
     }
 
     @Override
-    public void modifiedService(ServiceReference reference, Object service) {
+    public void modifiedService(final ServiceReference<Object> reference, final Object service) {
         // nothing to do here
     }
 
     @Override
-    public void removedService(ServiceReference reference, Object service) {
+    public void removedService(final ServiceReference<Object> reference, final Object service) {
         HttpService leavingService = null;
         boolean needsUnregistration = false;
         if (service instanceof ConfigurationService) {

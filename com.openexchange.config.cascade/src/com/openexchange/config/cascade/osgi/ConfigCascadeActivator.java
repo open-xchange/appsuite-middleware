@@ -51,6 +51,7 @@ package com.openexchange.config.cascade.osgi;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -77,7 +78,7 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
 
     private boolean configured = false;
 
-    private ConfigCascade configCascade;
+    //private ConfigCascade configCascade;
 
     // private final int INFINITY = 10;
 
@@ -88,30 +89,30 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
 
     @Override
     protected void startBundle() throws Exception {
-        configCascade = new ConfigCascade();
+        final ConfigCascade configCascade = new ConfigCascade();
 
-        final ServiceTracker stringParsers = track(StringParser.class);
+        final ServiceTracker<StringParser, StringParser> stringParsers = track(StringParser.class);
 
         configCascade.setStringParser(new StringParser() {
 
             @Override
             public <T> T parse(final String s, final Class<T> t) {
-                final Object service = stringParsers.getService();
-                if(service == null) {
+                final StringParser parser = stringParsers.getService();
+                if(parser == null) {
                     LOG.fatal("Could not find suitable string parser in OSGi system");
                     return null;
                 }
-                final StringParser parser = (StringParser) service;
                 return parser.parse(s, t);
             }
 
         });
 
-        final ServiceTracker serverProviders = track(createFilter("server"), new ServiceTrackerCustomizer() {
+        final BundleContext context = this.context;
+        track(createFilter("server"), new ServiceTrackerCustomizer<ConfigProviderService, ConfigProviderService>() {
 
             @Override
-            public Object addingService(final ServiceReference reference) {
-                final ConfigProviderService provider = (ConfigProviderService) context.getService(reference);
+            public ConfigProviderService addingService(final ServiceReference<ConfigProviderService> reference) {
+                final ConfigProviderService provider = context.getService(reference);
                 if (isServerProvider(reference)) {
                     final String scopes = getScopes(provider);
                     configure(scopes, configCascade);
@@ -122,31 +123,32 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
             }
 
             @Override
-            public void modifiedService(final ServiceReference reference, final Object service) {
+            public void modifiedService(final ServiceReference<ConfigProviderService> reference, final ConfigProviderService service) {
                 // IGNORE
             }
 
             @Override
-            public void removedService(final ServiceReference reference, final Object service) {
-
+            public void removedService(final ServiceReference<ConfigProviderService> reference, final ConfigProviderService service) {
+                context.ungetService(reference);
             }
 
         });
 
-
         openTrackers();
-
-
-
     }
 
+    @Override
+    public <S> void registerService(final java.lang.Class<S> clazz, final S service) {
+        super.registerService(clazz, service);
+    }
 
     @Override
     protected void stopBundle() throws Exception {
+        // Merely calls super?
         super.stopBundle();
     }
 
-    boolean isServerProvider(final ServiceReference reference) {
+    boolean isServerProvider(final ServiceReference<?> reference) {
         final Object scope = reference.getProperty("scope");
         return scope != null && scope.equals("server");
     }
@@ -177,7 +179,7 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
                 continue;
             }
 
-            final ServiceTracker tracker = track(createFilter(scope));
+            final ServiceTracker<Object,Object> tracker = track(createFilter(scope));
             cascade.setProvider(scope, new TrackingProvider(tracker));
             tracker.open();
         }

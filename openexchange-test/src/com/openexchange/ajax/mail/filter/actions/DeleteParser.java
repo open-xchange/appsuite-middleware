@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.filter.actions;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 
 import com.openexchange.ajax.container.Response;
@@ -66,7 +65,7 @@ public class DeleteParser extends AbstractAJAXParser<DeleteResponse> {
     DeleteParser() {
         super(true);
     }
-	
+
     /**
      * Default constructor with parameter failOnError
      */

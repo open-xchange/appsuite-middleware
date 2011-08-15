@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.subscribe.actions;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.ajax.container.Response;
 
 
@@ -62,7 +61,7 @@ public class UpdateSubscriptionResponse extends AbstractSubscriptionResponse {
     public UpdateSubscriptionResponse(Response response) {
         super(response);
     }
-    
+
     public boolean wasSuccessful(){
         try {
             return (((Integer)getData()).intValue() == 1);

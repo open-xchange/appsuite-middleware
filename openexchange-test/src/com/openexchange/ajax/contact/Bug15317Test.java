@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.contact;
 
-import com.openexchange.exception.OXException;
 import java.util.TimeZone;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.contact.action.DeleteRequest;

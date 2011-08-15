@@ -82,27 +82,27 @@ public class CopyMailTest extends AbstractMailTest {
         clearFolder( values.getDraftsFolder() );
         super.tearDown();
     }
-    
+
     public void testShouldCopyFromSentToDrafts() throws OXException, IOException, SAXException, JSONException{
         MailTestManager manager = new MailTestManager(client, false);
-        
+
         String mail = values.getSendAddress();
         sendMail( createEMail(mail, "Copy a mail", "ALTERNATE", "Copy from sent to drafts").toString() );
-        
+
         String origin = values.getInboxFolder();
         String destination = values.getDraftsFolder();
-        
+
         TestMail myMail = new TestMail( getFirstMailInFolder( origin) );
         myMail.getId();
-        
+
         TestMail copiedMail = manager.copy(myMail, destination);
         String newID = copiedMail.getId();
         System.out.println("***** newID : "+newID);
-        
+
         manager.get(destination, newID);
         assertTrue("Should produce no errors when getting copied e-mail", !manager.getLastResponse().hasError() );
         assertTrue("Should produce no conflicts when getting copied e-mail", !manager.getLastResponse().hasConflicts() );
-                
+
     }
 
 }

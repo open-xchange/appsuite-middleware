@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.task.actions;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.l;
 import java.util.ArrayList;
 import java.util.Date;
@@ -68,7 +67,7 @@ import com.openexchange.groupware.tasks.Task;
 
 /**
  * {@link TaskUpdatesParser}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class TaskUpdatesParser extends AbstractColumnsParser<TaskUpdatesResponse> {

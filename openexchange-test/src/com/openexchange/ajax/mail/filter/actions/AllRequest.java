@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.filter.actions;
 
-import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,7 +59,7 @@ import com.openexchange.groupware.tasks.Task;
 
 /**
  * Contains the data for a mail filter all request.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public class AllRequest extends AbstractMailFilterRequest {
@@ -70,7 +69,7 @@ public class AllRequest extends AbstractMailFilterRequest {
 	private final String servletPath;
 
 	private final boolean failOnError;
-	
+
 	private String userName = null;
 
 	/**
@@ -88,14 +87,14 @@ public class AllRequest extends AbstractMailFilterRequest {
 		this.servletPath = servletPath;
 		this.failOnError = failOnError;
 	}
-	
+
 	public AllRequest(final String servletPath, final String userName, final boolean failOnError) {
         super();
         this.servletPath = servletPath;
         this.userName = userName;
         this.failOnError = failOnError;
     }
-	
+
 	public AllRequest(final String servletPath, final String userName) {
 	    this(servletPath, userName, true);
     }

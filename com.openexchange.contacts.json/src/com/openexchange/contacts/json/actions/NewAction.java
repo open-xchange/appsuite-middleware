@@ -89,37 +89,37 @@ public class NewAction extends ContactAction {
         if (!json.has("folder_id")) {
             throw OXException.mandatoryField("missing folder");
         }
-                
+
         try {
             final int folder = json.getInt("folder_id");
             final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
             final ContactParser parser = new ContactParser();
             final Contact contact = parser.parse(json);
-            if (containsImage) {              
-                UploadEvent uploadEvent = null;               
+            if (containsImage) {
+                UploadEvent uploadEvent = null;
                 try {
                     uploadEvent = req.getUploadEvent();
                     final UploadFile file = uploadEvent.getUploadFileByFieldName("file");
                     if (file == null) {
                         throw AjaxExceptionCodes.NO_UPLOAD_IMAGE.create();
                     }
-                    
+
                     RequestTools.setImageData(contact, file);
                 } finally {
                     if (uploadEvent != null) {
                         uploadEvent.cleanUp();
                     }
                 }
-                
+
             }
-            
+
             contactInterface.insertContactObject(contact);
             final JSONObject object = new JSONObject("{\"id\":" + contact.getObjectID() + "}");
             return new AJAXRequestResult(object, contact.getLastModified(), "json");
         } catch (final JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-        }        
+        }
     }
-    
+
 
 }

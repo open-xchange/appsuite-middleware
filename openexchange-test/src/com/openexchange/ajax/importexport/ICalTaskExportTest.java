@@ -15,20 +15,20 @@ public class ICalTaskExportTest extends ManagedTaskTest {
 
 	public void testExportICalTask() throws Exception {
 		final String title = "testExportICalTask" + System.currentTimeMillis();
-		
-	
+
+
 		final Task taskObj = new Task();
 		taskObj.setTitle(title);
 		taskObj.setStartDate(new Date());
 		taskObj.setEndDate(new Date());
 		taskObj.setParentFolderID(folderID);
-		
+
 		manager.insertTaskOnServer(taskObj);
-		
+
 		ICalExportResponse response = client.execute( new ICalExportRequest(folderID) );
-		
+
 		String iCal = response.getICal();
-		
+
 		assertTrue(iCal.contains(title));
 	}
 }

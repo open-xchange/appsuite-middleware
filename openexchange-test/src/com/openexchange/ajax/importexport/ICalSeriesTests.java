@@ -63,7 +63,6 @@ import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
-import com.openexchange.ajax.importexport.actions.ICalImportResponse;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Appointment;
 
@@ -77,7 +76,7 @@ public class ICalSeriesTests extends ManagedAppointmentTest {
 	}
 
 	public void testDeleteException() throws OXException, IOException, JSONException{
-		String ical = 
+		String ical =
 		"BEGIN:VCALENDAR\n"+
 		"VERSION:2.0\n"+
 		"BEGIN:VEVENT\n"+
@@ -88,17 +87,17 @@ public class ICalSeriesTests extends ManagedAppointmentTest {
 		"DTSTAMP:20110105T174810Z\n"+
 		"SUMMARY:Exceptional Meeting #1\n"+
 		"END:VEVENT\n";
-		
+
 		AJAXClient client = getClient();
 		int fid = folder.getObjectID();
 		TimeZone tz = client.getValues().getTimeZone();
-		
+
 		ICalImportRequest request = new ICalImportRequest(fid, ical);
 		client.execute(request);
-		
+
 		AllRequest allRequest = new AllRequest(fid, Appointment.ALL_COLUMNS, D("2010-02-03 00:00", tz), D("2010-02-04 00:00", tz), tz, false);
 		CommonAllResponse response2 = client.execute(allRequest);
-		
+
 		Object[][] data = response2.getArray();
 		assertEquals(0,data.length);
 	}
@@ -106,10 +105,10 @@ public class ICalSeriesTests extends ManagedAppointmentTest {
 	public void testChangeExceptionWithExceptionFirst() throws Exception{
 		String uid = "change-exception-"+new Date().getTime();
 		String title = "Change to exceptional meeting #3: One hour later";
-		String ical = 
+		String ical =
 		"BEGIN:VCALENDAR\n"+
 		"VERSION:2.0\n"+
-		
+
 		"BEGIN:VEVENT\n"+
 		"DTSTART;TZID=Europe/Rome:20100204T113000\n"+
 		"DTEND;TZID=Europe/Rome:20100204T130000\n"+
@@ -117,7 +116,7 @@ public class ICalSeriesTests extends ManagedAppointmentTest {
 		"SUMMARY:"+title+"\n"+
 		"UID:"+uid+"\n"+
 		"END:VEVENT\n"+
-		
+
 		"BEGIN:VEVENT\n"+
 		"DTSTART;TZID=Europe/Rome:20100202T103000\n"+
 		"DTEND;TZID=Europe/Rome:20100202T120000\n"+
@@ -131,18 +130,18 @@ public class ICalSeriesTests extends ManagedAppointmentTest {
 
 		Date start = D("2010-02-04 00:00", tz);
 		Date end = D("2010-02-05 00:00", tz);
-		
+
 		testChangeException(ical, title, start, end);
 	}
 
 	public void testChangeExceptionWithMasterFirst() throws Exception{
 		String uid = "change-exception-"+new Date().getTime();
-		
+
 		String title = "Change to exceptional meeting #2: Five hours later";
-		String ical = 
+		String ical =
 		"BEGIN:VCALENDAR\n"+
 		"VERSION:2.0\n"+
-		
+
 		"BEGIN:VEVENT\n"+
 		"DTSTART;TZID=Europe/Rome:20100202T110000\n"+
 		"DTEND;TZID=Europe/Rome:20100202T120000\n"+
@@ -151,7 +150,7 @@ public class ICalSeriesTests extends ManagedAppointmentTest {
 		"SUMMARY:Exceptional meeting #2\n"+
 		"UID:"+uid+"\n"+
 		"END:VEVENT\n" +
-		
+
 		"BEGIN:VEVENT\n"+
 		"DTSTART;TZID=Europe/Rome:20100204T160000\n"+
 		"DTEND;TZID=Europe/Rome:20100204T170000\n"+
@@ -159,34 +158,34 @@ public class ICalSeriesTests extends ManagedAppointmentTest {
 		"SUMMARY:"+title+"\n"+
 		"UID:"+uid+"\n"+
 		"END:VEVENT\n";
-		
+
 		TimeZone tz = TimeZone.getTimeZone("GMT");
 		Date start = D("2010-02-04 00:00", tz);
 		Date end = D("2010-02-05 00:00", tz);
 
 		testChangeException(ical, title, start, end);
 	}
-	
-	protected void testChangeException(String ical, String expectedTitle, Date start, Date end) throws Exception{	
+
+	protected void testChangeException(String ical, String expectedTitle, Date start, Date end) throws Exception{
 		AJAXClient client = getClient();
 		int fid = folder.getObjectID();
 		TimeZone tz = client.getValues().getTimeZone();
-		
+
 		ICalImportRequest request = new ICalImportRequest(fid, ical);
 		client.execute(request);
-		
+
 		AllRequest allRequest = new AllRequest(fid, Appointment.ALL_COLUMNS, start, end, tz, false);
 		CommonAllResponse response2 = client.execute(allRequest);
-		
+
 		Object[][] data = response2.getArray();
 		assertEquals(1,data.length);
-		
+
 		int oid = (Integer) data[0][response2.getColumnPos(ContactField.OBJECT_ID.getNumber())];
 		GetRequest getRequest = new GetRequest(fid, oid);
 		GetResponse getResponse = client.execute(getRequest);
-		
+
 		Appointment actual = getResponse.getAppointment(tz);
 		assertEquals(expectedTitle, actual.getTitle());
 	}
-	
+
 }

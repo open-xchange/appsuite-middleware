@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.spellcheck.actions.add;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 
 import com.openexchange.ajax.container.Response;
@@ -57,15 +56,15 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
  * {@link UserWordParser}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class UserWordParser extends AbstractAJAXParser<UserWordResponse> {
 
 	/**
 	 * Initializes a new {@link UserWordParser}
-	 * 
+	 *
 	 * @param failOnError
 	 */
 	public UserWordParser(final boolean failOnError) {
@@ -74,7 +73,7 @@ public final class UserWordParser extends AbstractAJAXParser<UserWordResponse> {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
 	 */
 	@Override

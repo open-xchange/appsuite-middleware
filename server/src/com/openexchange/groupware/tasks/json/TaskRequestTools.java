@@ -61,7 +61,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class TaskRequestTools {
-    
+
     /**
      * Split pattern for CSV.
      */
@@ -90,7 +90,7 @@ public class TaskRequestTools {
         }
         return ret;
     }
-    
+
     /**
      * Checks for presence of comma-separated <code>String</code> list.
      *

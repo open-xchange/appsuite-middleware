@@ -230,13 +230,12 @@ public class RdbGroupStorage extends GroupStorage {
                 group.setDisplayName(result.getString(pos++));
                 group.setLastModified(new Date(result.getLong(pos++)));
             } else {
-                throw LdapExceptionCode.GROUP_NOT_FOUND.create("GRP",
-                    Integer.valueOf(gid), Integer.valueOf(context.getContextId()));
+                throw LdapExceptionCode.GROUP_NOT_FOUND.create(Integer.valueOf(gid), Integer.valueOf(context.getContextId())).setPrefix("GRP");
             }
             group.setMember(selectMember(con, context, group.getIdentifier()));
         } catch (final SQLException e) {
-            throw LdapExceptionCode.SQL_ERROR.create("GRP", e,
-                e.getMessage());
+            throw LdapExceptionCode.SQL_ERROR.create(e,
+                e.getMessage()).setPrefix("GRP");
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);
@@ -259,7 +258,7 @@ public class RdbGroupStorage extends GroupStorage {
         try {
             con = DBPool.pickup(context);
         } catch (final Exception e) {
-            throw LdapExceptionCode.NO_CONNECTION.create("GRP", e);
+            throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("GRP");
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -283,8 +282,8 @@ public class RdbGroupStorage extends GroupStorage {
             }
             groups = tmp.toArray(new Group[tmp.size()]);
         } catch (final SQLException e) {
-            throw LdapExceptionCode.SQL_ERROR.create("GRP", e,
-                e.getMessage());
+            throw LdapExceptionCode.SQL_ERROR.create(e,
+                e.getMessage()).setPrefix("GRP");
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);
@@ -346,7 +345,7 @@ public class RdbGroupStorage extends GroupStorage {
         try {
             con = DBPool.pickup(context);
         } catch (final Exception e) {
-            throw LdapExceptionCode.NO_CONNECTION.create("GRP", e);
+            throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("GRP");
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -370,8 +369,8 @@ public class RdbGroupStorage extends GroupStorage {
             }
             groups = tmp.toArray(new Group[tmp.size()]);
         } catch (final SQLException e) {
-            throw LdapExceptionCode.SQL_ERROR.create("GRP", e,
-                e.getMessage());
+            throw LdapExceptionCode.SQL_ERROR.create(e,
+                e.getMessage()).setPrefix("GRP");
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);

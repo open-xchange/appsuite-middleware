@@ -58,17 +58,17 @@ import java.util.HashMap;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class ComparisonWriterFactory {
-	
-	final static HashMap<String, ComparisonWriter> writerMap = new HashMap<String, ComparisonWriter>(); 
-	
+
+	final static HashMap<String, ComparisonWriter> writerMap = new HashMap<String, ComparisonWriter>();
+
 	public ComparisonWriterFactory() {
 
 	}
-	
+
 	public static void addWriter(final String name, final ComparisonWriter actionWriter) {
 		writerMap.put(name, actionWriter);
 	}
-	
+
 	public static ComparisonWriter getWriter(String name) {
 		return writerMap.get(name);
 	}

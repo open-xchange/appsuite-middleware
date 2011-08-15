@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.folder.api2;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Iterator;
 import com.openexchange.ajax.folder.actions.API;
@@ -66,7 +65,7 @@ import com.openexchange.test.PermissionTools;
 
 /**
  * {@link VisibleFoldersTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class VisibleFoldersTest extends AbstractAJAXSession {

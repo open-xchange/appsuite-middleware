@@ -51,6 +51,7 @@ package com.openexchange.subscribe.internal;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import junit.framework.TestCase;
 import com.openexchange.context.SimContextService;
 import com.openexchange.exception.OXException;
@@ -107,7 +108,9 @@ public class SubscriptionExecutionServiceImplTest extends TestCase {
         discovery.setLookupIdentifier( source.getId() );
         simFolderUpdaterService = new SimFolderUpdaterService();
         simFolderUpdaterService.setHandles(true);
-        executionService = new SubscriptionExecutionServiceImpl(discovery, Arrays.asList((FolderUpdaterService)simFolderUpdaterService), new SimContextService()) {
+        final List<FolderUpdaterService<?>> list = new ArrayList<FolderUpdaterService<?>>(1);
+        list.add(simFolderUpdaterService);
+        executionService = new SubscriptionExecutionServiceImpl(discovery, list, new SimContextService()) {
             @Override
             protected FolderObject getFolder(final TargetFolderSession subscriptionSession, final int contextId, final int folderId) throws OXException {
                 return null;
@@ -131,7 +134,7 @@ public class SubscriptionExecutionServiceImplTest extends TestCase {
      * @param simContext
      * @return
      */
-    private ServerSession sessionForContext(SimContext simContext) {
+    private ServerSession sessionForContext(final SimContext simContext) {
         return new SimServerSession(simContext, null, null);
     }
 
@@ -165,7 +168,10 @@ public class SubscriptionExecutionServiceImplTest extends TestCase {
         final SimFolderUpdaterService simFolderUpdaterService2 = new SimFolderUpdaterService();
         simFolderUpdaterService2.setHandles(true);
         simFolderUpdaterService2.setUsesMultipleStrategy(false);
-        executionService = new SubscriptionExecutionServiceImpl(discovery, Arrays.asList((FolderUpdaterService)simFolderUpdaterService, (FolderUpdaterService)simFolderUpdaterService2), new SimContextService()) {
+        final List<FolderUpdaterService<?>> list = new ArrayList<FolderUpdaterService<?>>(2);
+        list.add(simFolderUpdaterService);
+        list.add(simFolderUpdaterService2);
+        executionService = new SubscriptionExecutionServiceImpl(discovery, list, new SimContextService()) {
             @Override
             protected FolderObject getFolder(final TargetFolderSession subscriptionSession, final int contextId, final int folderId) throws OXException {
                 return null;
@@ -186,7 +192,10 @@ public class SubscriptionExecutionServiceImplTest extends TestCase {
         final SimFolderUpdaterService simFolderUpdaterService2 = new SimFolderUpdaterService();
         simFolderUpdaterService2.setHandles(true);
         simFolderUpdaterService2.setUsesMultipleStrategy(true);
-        executionService = new SubscriptionExecutionServiceImpl(discovery, Arrays.asList((FolderUpdaterService)simFolderUpdaterService, (FolderUpdaterService)simFolderUpdaterService2), new SimContextService()) {
+        final List<FolderUpdaterService<?>> list = new ArrayList<FolderUpdaterService<?>>(2);
+        list.add(simFolderUpdaterService);
+        list.add(simFolderUpdaterService2);
+        executionService = new SubscriptionExecutionServiceImpl(discovery, list, new SimContextService()) {
             @Override
             protected FolderObject getFolder(final TargetFolderSession subscriptionSession, final int contextId, final int folderId) throws OXException {
                 return null;
@@ -204,7 +213,9 @@ public class SubscriptionExecutionServiceImplTest extends TestCase {
         subscriptions.add(subscription);
         subscriptions.add(subscription2);
         subscribeService.setSubscriptions(subscriptions);
-        executionService = new SubscriptionExecutionServiceImpl(discovery, Arrays.asList((FolderUpdaterService)simFolderUpdaterService), new SimContextService()) {
+        final List<FolderUpdaterService<?>> list = new ArrayList<FolderUpdaterService<?>>(1);
+        list.add(simFolderUpdaterService);
+        executionService = new SubscriptionExecutionServiceImpl(discovery, list, new SimContextService()) {
             @Override
             protected FolderObject getFolder(final TargetFolderSession subscriptionSession, final int contextId, final int folderId) throws OXException {
                 return null;

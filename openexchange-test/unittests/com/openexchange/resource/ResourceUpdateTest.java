@@ -68,9 +68,9 @@ import com.openexchange.test.AjaxInit;
 
 /**
  * {@link ResourceUpdateTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class ResourceUpdateTest extends TestCase {
 
@@ -89,7 +89,7 @@ public final class ResourceUpdateTest extends TestCase {
 
 	/**
 	 * Initializes a new {@link ResourceUpdateTest}
-	 * 
+	 *
 	 * @param name
 	 *            The test's name
 	 */

@@ -78,14 +78,14 @@ import com.openexchange.groupware.container.Contact;
 public class AggregatingContactTestManager extends ContactTestManager {
 
     private Set<UUID> createdAssociations = new HashSet<UUID>();
-    
+
     public AggregatingContactTestManager(AJAXClient client) throws OXException, IOException, SAXException, JSONException {
         super(client);
     }
 
     public ContactUnificationState getAssociationBetween(Contact contributor, Contact aggregator) throws IOException, SAXException, JSONException, OXException {
         GetAssociationResponse response = getClient().execute(new GetAssociationRequest(contributor, aggregator));
-        
+
         doJanitorialTasks(response);
         return response.getState();
     }
@@ -93,13 +93,13 @@ public class AggregatingContactTestManager extends ContactTestManager {
     public void associateTwoContacts(Contact aggregator, Contact contributor) {
         try {
             DoAssociationResponse doAssociationResponse = getClient().execute(new DoAssociationRequest(contributor, aggregator));
-            
+
             Contact temp;
             temp = getAction(aggregator);
             aggregator.setUserField20(temp.getUserField20());
             temp = getAction(contributor);
             contributor.setUserField20(temp.getUserField20());
-            
+
             doJanitorialTasks(doAssociationResponse);
         } catch(Exception e){
             doExceptionHandling(e, "DoAssociationRequest");
@@ -112,12 +112,12 @@ public class AggregatingContactTestManager extends ContactTestManager {
             aggregator = getAction(aggregator);
             contributor = getAction(contributor);
             doJanitorialTasks(doSeparationResponse);
-            
+
         } catch(Exception e){
             doExceptionHandling(e, "DoSeparationRequest");
         }
     }
-    
+
     public Contact getContactByUID(UUID uid){
         try {
             GetResponse response = getClient().execute(new GetContactByUIDRequest(uid, timeZone));
@@ -139,7 +139,7 @@ public class AggregatingContactTestManager extends ContactTestManager {
         }
         return null;
     }
-    
+
     public List<UUID> getAssociatedContacts(Contact c){
         try {
             GetAssociatedContactsResponse response = getClient().execute(new GetAssociatedContactsRequest(c, timeZone));

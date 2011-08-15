@@ -431,7 +431,7 @@ public class RdbUserStorage extends UserStorage {
         try {
             con = DBPool.pickupWriteable(context);
         } catch (final OXException e) {
-            throw LdapExceptionCode.NO_CONNECTION.create("USR", e);
+            throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("USR");
         }
         try {
             con.setAutoCommit(false);
@@ -496,7 +496,7 @@ public class RdbUserStorage extends UserStorage {
     @Override
     public void setAttribute(final String name, final String value, final int userId, final Context context) throws OXException {
         if (null == name) {
-            throw LdapExceptionCode.UNEXPECTED_ERROR.create("USR", "Attribute name is null.");
+            throw LdapExceptionCode.UNEXPECTED_ERROR.create("Attribute name is null.").setPrefix("USR");
         }
         final Connection con;
         try {

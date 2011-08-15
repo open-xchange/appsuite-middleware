@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.ajax.appointment.recurrence.TestsForCreatingChangeExceptions;
 import com.openexchange.ajax.appointment.recurrence.TestsForChangingAmongMonthlyRecurrences;
 import com.openexchange.ajax.appointment.recurrence.TestsForChangingAmongYearlyRecurrences;
@@ -63,9 +62,9 @@ import junit.framework.TestSuite;
 
 
 /**
- * Suite for systematic tests to check the expected behaviour 
+ * Suite for systematic tests to check the expected behaviour
  * of the HTTP API for the calendar.
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class NewAppointmentHttpApiTestSuite extends TestSuite{

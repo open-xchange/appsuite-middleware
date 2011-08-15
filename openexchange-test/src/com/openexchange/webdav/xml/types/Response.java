@@ -45,9 +45,9 @@ package com.openexchange.webdav.xml.types;
 public class Response {
 
     private Object object = null;
-	
+
 	private int status = 0;
-	
+
 	private String errorMessage = null;
 
 	public Response() {

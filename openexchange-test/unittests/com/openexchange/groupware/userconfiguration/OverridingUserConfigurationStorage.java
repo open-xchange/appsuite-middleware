@@ -51,7 +51,7 @@ public class OverridingUserConfigurationStorage extends UserConfigurationStorage
     @Override
     public void removeUserConfiguration(final int userId, final Context ctx) throws OXException {
         delegate.removeUserConfiguration(userId,ctx);
-    } 
+    }
 
     public UserConfiguration getOverride(final int userId, final int[] groups, final Context ctx) throws OXException {
         return null;

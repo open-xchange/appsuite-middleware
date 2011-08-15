@@ -11,14 +11,14 @@ import com.openexchange.test.OXTestToolkit;
 import com.openexchange.test.TestInit;
 
 public class DocumentTest extends InfostoreAJAXTest {
-	
+
 	protected File upload;
 	protected int id;
-	
+
 	public DocumentTest(final String name){
 		super(name);
 	}
-	
+
 	@Override
 	public void setUp() throws Exception{
 		super.setUp();
@@ -35,14 +35,14 @@ public class DocumentTest extends InfostoreAJAXTest {
 		);
 		clean.add(id);
 	}
-	
+
 	public void testCurrentVersion() throws Exception{
 		InputStream is = null;
 		InputStream is2 = null;
 		try {
 			is = new FileInputStream(upload);
 			is2 = document(getWebConversation(),getHostName(),sessionId, id, -1);
-			
+
 			OXTestToolkit.assertSameContent(is,is2);
 		} finally {
 			if(is!=null) {
@@ -53,15 +53,15 @@ public class DocumentTest extends InfostoreAJAXTest {
 			}
 		}
 	}
-	
+
 	public void testContentType() throws Exception {
 		GetMethodWebRequest req = documentRequest(sessionId, getHostName(), id, -1, "application/octet-stream");
 		WebResponse resp = getWebConversation().getResource(req);
 		assertEquals("application/octet-stream", resp.getContentType());
-		
+
 		req = documentRequest(sessionId, getHostName(), id, -1, null);
 		resp = getWebConversation().getResource(req);
 		assertEquals("text/plain", resp.getContentType());
-		
+
 	}
 }

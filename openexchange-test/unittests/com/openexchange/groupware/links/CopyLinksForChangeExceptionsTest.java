@@ -89,7 +89,7 @@ public class CopyLinksForChangeExceptionsTest extends TestCase {
     private UserConfiguration userConfig;
 
     private LinkSQLInterface links;
-    
+
     @Override
     public void setUp() throws Exception {
         Init.startServer();
@@ -171,6 +171,6 @@ public class CopyLinksForChangeExceptionsTest extends TestCase {
         assertEquals(appointmentToLinkTo.getObjectID(), loadedLink.getSecondId());
         assertEquals(Types.APPOINTMENT, loadedLink.getSecondType());
         assertEquals(appointmentToLinkTo.getParentFolderID(), loadedLink.getSecondFolder());
-        
+
     }
 }

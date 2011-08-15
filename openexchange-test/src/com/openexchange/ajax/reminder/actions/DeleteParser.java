@@ -7,7 +7,7 @@ import com.openexchange.ajax.framework.CommonDeleteResponse;
 
 
 public class DeleteParser extends AbstractAJAXParser<CommonDeleteResponse> {
-    
+
     public DeleteParser() {
         super(true);
     }

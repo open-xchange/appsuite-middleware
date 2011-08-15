@@ -78,7 +78,7 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.server.impl.OCLPermission;
 
 /**
- * Tests if bug 12595 appears again. 
+ * Tests if bug 12595 appears again.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Bug12595Test extends AbstractAJAXSession {

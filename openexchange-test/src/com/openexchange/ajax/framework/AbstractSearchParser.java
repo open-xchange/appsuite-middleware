@@ -49,14 +49,13 @@
 
 package com.openexchange.ajax.framework;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONArray;
 import org.json.JSONException;
 
 import com.openexchange.ajax.container.Response;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class AbstractSearchParser<T extends CommonSearchResponse> extends AbstractAJAXParser<T> {

@@ -85,11 +85,11 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
     static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CacheFolderStorageActivator.class));
 
-    private List<ServiceRegistration> registrations;
+    private List<ServiceRegistration<?>> registrations;
 
     private CacheFolderStorage cacheFolderStorage;
 
-    private List<ServiceTracker> serviceTrackers;
+    private List<ServiceTracker<?,?>> serviceTrackers;
 
     /**
      * Initializes a new {@link CacheFolderStorageActivator}.
@@ -154,9 +154,9 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
             }
             initCacheFolderStorage();
             // Register service trackers
-            serviceTrackers = new ArrayList<ServiceTracker>(4);
-            serviceTrackers.add(new ServiceTracker(context, FolderStorage.class.getName(), new CacheFolderStorageServiceTracker(context)));
-            for (final ServiceTracker serviceTracker : serviceTrackers) {
+            serviceTrackers = new ArrayList<ServiceTracker<?,?>>(4);
+            serviceTrackers.add(new ServiceTracker<FolderStorage,FolderStorage>(context, FolderStorage.class, new CacheFolderStorageServiceTracker(context)));
+            for (final ServiceTracker<?,?> serviceTracker : serviceTrackers) {
                 serviceTracker.open();
             }
         } catch (final Exception e) {
@@ -170,7 +170,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
         try {
             // Drop service trackers
             if (null != serviceTrackers) {
-                for (final ServiceTracker serviceTracker : serviceTrackers) {
+                for (final ServiceTracker<?,?> serviceTracker : serviceTrackers) {
                     serviceTracker.close();
                 }
                 serviceTrackers.clear();
@@ -204,8 +204,8 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
         // Register folder storage
         final Dictionary<String, String> dictionary = new Hashtable<String, String>();
         dictionary.put("tree", FolderStorage.ALL_TREE_ID);
-        registrations = new ArrayList<ServiceRegistration>(4);
-        registrations.add(context.registerService(FolderStorage.class.getName(), cacheFolderStorage, dictionary));
+        registrations = new ArrayList<ServiceRegistration<?>>(4);
+        registrations.add(context.registerService(FolderStorage.class, cacheFolderStorage, dictionary));
         // Register event handler for content-related changes on a mail folder
         final CacheFolderStorage tmp = cacheFolderStorage;
         {
@@ -225,7 +225,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
             };
             final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
             dict.put(EventConstants.EVENT_TOPIC, PushEventConstants.getAllTopics());
-            registrations.add(context.registerService(EventHandler.class.getName(), eventHandler, dict));
+            registrations.add(context.registerService(EventHandler.class, eventHandler, dict));
         }
         {
             final EventHandler eventHandler = new EventHandler() {
@@ -250,7 +250,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
             };
             final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
             dict.put(EventConstants.EVENT_TOPIC, FolderEventConstants.getAllTopics());
-            registrations.add(context.registerService(EventHandler.class.getName(), eventHandler, dict));
+            registrations.add(context.registerService(EventHandler.class, eventHandler, dict));
         }
         {
             final EventHandler eventHandler = new EventHandler() {
@@ -275,7 +275,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
             };
             final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
             dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-            registrations.add(context.registerService(EventHandler.class.getName(), eventHandler, dict));
+            registrations.add(context.registerService(EventHandler.class, eventHandler, dict));
         }
     }
 

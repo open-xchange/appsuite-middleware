@@ -61,7 +61,7 @@ import com.openexchange.mail.transport.TransportProviderRegistry;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class TransportProviderServiceTracker implements ServiceTrackerCustomizer {
+public final class TransportProviderServiceTracker implements ServiceTrackerCustomizer<TransportProvider,TransportProvider> {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TransportProviderServiceTracker.class));
 
@@ -76,58 +76,54 @@ public final class TransportProviderServiceTracker implements ServiceTrackerCust
     }
 
     @Override
-    public Object addingService(final ServiceReference reference) {
-        final Object addedService = context.getService(reference);
+    public TransportProvider addingService(final ServiceReference<TransportProvider> reference) {
+        final TransportProvider addedService = context.getService(reference);
         if (null == addedService) {
             LOG.warn("Added service is null!", new Throwable());
         }
-        if (addedService instanceof TransportProvider) {
-            final Object protocol = reference.getProperty("protocol");
-            if (null == protocol) {
-                LOG.error("Missing protocol in mail provider service: " + addedService.getClass().getName());
+        final Object protocol = reference.getProperty("protocol");
+        if (null == protocol) {
+            LOG.error("Missing protocol in mail provider service: " + addedService.getClass().getName());
+            context.ungetService(reference);
+            return null;
+        }
+        try {
+            /*
+             * TODO: Clarify if proxy object is reasonable or if service itself should be registered
+             */
+            if (TransportProviderRegistry.registerTransportProvider(protocol.toString(), addedService)) {
+                LOG.info(new StringBuilder(64).append("Transport provider for protocol '").append(protocol.toString()).append(
+                    "' successfully registered"));
+            } else {
+                LOG.warn(new StringBuilder(64).append("Transport provider for protocol '").append(protocol.toString()).append(
+                    "' could not be added.").append("Another provider which supports the protocol has already been registered."));
                 context.ungetService(reference);
                 return null;
             }
-            try {
-                /*
-                 * TODO: Clarify if proxy object is reasonable or if service itself should be registered
-                 */
-                if (TransportProviderRegistry.registerTransportProvider(protocol.toString(), (TransportProvider) addedService)) {
-                    LOG.info(new StringBuilder(64).append("Transport provider for protocol '").append(protocol.toString()).append(
-                        "' successfully registered"));
-                } else {
-                    LOG.warn(new StringBuilder(64).append("Transport provider for protocol '").append(protocol.toString()).append(
-                        "' could not be added.").append("Another provider which supports the protocol has already been registered."));
-                    context.ungetService(reference);
-                    return null;
-                }
-            } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
-                context.ungetService(reference);
-                return null;
-            }
+        } catch (final OXException e) {
+            LOG.error(e.getMessage(), e);
+            context.ungetService(reference);
+            return null;
         }
         return addedService;
     }
 
     @Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<TransportProvider> reference, final TransportProvider service) {
         // Nothing to do
     }
 
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
+    public void removedService(final ServiceReference<TransportProvider> reference, final TransportProvider service) {
         if (null != service) {
             try {
-                if (service instanceof TransportProvider) {
-                    try {
-                        final TransportProvider provider = (TransportProvider) service;
-                        TransportProviderRegistry.unregisterTransportProvider(provider);
-                        LOG.info(new StringBuilder(64).append("Transport provider for protocol '").append(provider.getProtocol().toString()).append(
-                            "' successfully unregistered"));
-                    } catch (final OXException e) {
-                        LOG.error(e.getMessage(), e);
-                    }
+                try {
+                    final TransportProvider provider = service;
+                    TransportProviderRegistry.unregisterTransportProvider(provider);
+                    LOG.info(new StringBuilder(64).append("Transport provider for protocol '").append(provider.getProtocol().toString()).append(
+                        "' successfully unregistered"));
+                } catch (final OXException e) {
+                    LOG.error(e.getMessage(), e);
                 }
             } finally {
                 /*

@@ -86,7 +86,7 @@ import com.openexchange.groupware.tasks.TestTask;
 
 /**
  * {@link TaskTestManager}
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class TaskTestManager implements TestManager{
@@ -248,7 +248,7 @@ public class TaskTestManager implements TestManager{
 
     /**
      * Performs an AllRequest for all columns on the server and returns the tasks in a requested folder.
-     * 
+     *
      * @param folderID
      * @return
      */
@@ -267,7 +267,7 @@ public class TaskTestManager implements TestManager{
         } catch (Exception e) {
             doHandleExeption(e, "ListRequest");
         }
-        return (tasks == null) ? null : tasks.toArray(new Task[]{});        
+        return (tasks == null) ? null : tasks.toArray(new Task[]{});
     }
 
     public Task searchForTasksOnServer() {
@@ -276,7 +276,7 @@ public class TaskTestManager implements TestManager{
 
     /**
      * Transforms a value object into whatever is required for that column, e.g. a date object for the column start_date.
-     * 
+     *
      * @param column
      * @param value
      * @return
@@ -322,7 +322,7 @@ public class TaskTestManager implements TestManager{
     /**
      * An AllRequest answers with a JSONArray of JSONArrays, each of which contains a field belonging to a task. This method assembles a
      * task from this array.
-     * 
+     *
      * @return
      * @throws JSONException
      */
@@ -353,7 +353,7 @@ public class TaskTestManager implements TestManager{
 
     /**
      * Finds a task within a list of tasks. Fails if not found and returns null;
-     * 
+     *
      * @param tasks
      * @return
      */
@@ -368,7 +368,7 @@ public class TaskTestManager implements TestManager{
 
     /**
      * Finds a task within an array of tasks. Fails if not found and returns null;
-     * 
+     *
      * @param tasks
      * @return
      */

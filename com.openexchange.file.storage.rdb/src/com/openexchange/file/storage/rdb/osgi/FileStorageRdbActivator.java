@@ -89,9 +89,9 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
  */
 public class FileStorageRdbActivator extends DeferredActivator {
 
-    private List<ServiceTracker> trackers;
+    private List<ServiceTracker<?,?>> trackers;
 
-    private List<ServiceRegistration> registrations;
+    private List<ServiceRegistration<?>> registrations;
 
     private WhiteboardSecretService secretService;
 
@@ -170,36 +170,36 @@ public class FileStorageRdbActivator extends DeferredActivator {
             /*
              * Initialize and start service trackers
              */
-            trackers = new ArrayList<ServiceTracker>(2);
-            final ServiceTracker fileStorageServiceTracker = new ServiceTracker(context, FileStorageService.class.getName(), null);
+            trackers = new ArrayList<ServiceTracker<?,?>>(2);
+            final ServiceTracker<FileStorageService,FileStorageService> fileStorageServiceTracker = new ServiceTracker<FileStorageService,FileStorageService>(context, FileStorageService.class, null);
             trackers.add(fileStorageServiceTracker);
-            for (final ServiceTracker tracker : trackers) {
+            for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.open();
             }
             /*
              * Initialize and register services
              */
-            registrations = new ArrayList<ServiceRegistration>();
+            registrations = new ArrayList<ServiceRegistration<?>>(6);
             /*
              * The account manager provider which supports all file storages (but with low ranking)
              */
-            registrations.add(context.registerService(FileStorageAccountManagerProvider.class.getName(), new RdbFileStorageAccountManagerProvider(), null));
+            registrations.add(context.registerService(FileStorageAccountManagerProvider.class, new RdbFileStorageAccountManagerProvider(), null));
             /*
              * The update task/create table service
              */
             final FileStorageRdbCreateTableTask createTableTask = new FileStorageRdbCreateTableTask();
-            registrations.add(context.registerService(UpdateTaskProviderService.class.getName(), new UpdateTaskProviderService() {
+            registrations.add(context.registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
 
                 @Override
                 public Collection<UpdateTask> getUpdateTasks() {
                     return Collections.<UpdateTask> singletonList(createTableTask);
                 }
             }, null));
-            registrations.add(context.registerService(CreateTableService.class.getName(), createTableTask, null));
+            registrations.add(context.registerService(CreateTableService.class, createTableTask, null));
             /*
              * The delete listener
              */
-            registrations.add(context.registerService(DeleteListener.class.getName(), new FileStorageRdbDeleteListener(), null));
+            registrations.add(context.registerService(DeleteListener.class, new FileStorageRdbDeleteListener(), null));
             /*
              * Secret Handling
              */
@@ -219,8 +219,8 @@ public class FileStorageRdbActivator extends DeferredActivator {
                         return list;
                     }
                 };
-                registrations.add(context.registerService(SecretConsistencyCheck.class.getName(), secretHandling, null));
-                registrations.add(context.registerService(SecretMigrator.class.getName(), secretHandling, null));
+                registrations.add(context.registerService(SecretConsistencyCheck.class, secretHandling, null));
+                registrations.add(context.registerService(SecretMigrator.class, secretHandling, null));
             }
         } catch (final Exception e) {
             com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FileStorageRdbActivator.class)).error(e.getMessage(), e);

@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests.untiltests;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 
 /**

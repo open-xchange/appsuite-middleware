@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.session;
 
-import com.openexchange.exception.OXException;
 import java.util.Date;
 import org.apache.commons.httpclient.Cookie;
 import com.openexchange.ajax.Login;
@@ -67,32 +66,32 @@ public class StoreTest extends AbstractSimpleClientTest{
     public StoreTest(String name) {
         super(name);
     }
-    
+
     public void testStoreStoresSessionInCookie() throws Exception {
         as(USER1);
         inModule("login");
         call("store");
-        
+
         String sessionID = currentClient.getSessionID();
-        
+
         Cookie[] cookies = currentClient.getClient().getState().getCookies();
-        
+
         boolean found = false;
         for (Cookie cookie : cookies) {
             found = found || ( cookie.getName().startsWith(Login.SESSION_PREFIX) && cookie.getValue().equals(sessionID) );
         }
         assertTrue(found);
     }
-    
+
     public void testCookieLifetimeIsLongerThanADay() throws Exception {
         as(USER1);
         inModule("login");
         call("store");
-        
+
         String sessionID = currentClient.getSessionID();
-        
+
         Cookie[] cookies = currentClient.getClient().getState().getCookies();
-        
+
         Cookie sessionCookie = null;
         for (Cookie cookie : cookies) {
             if ( cookie.getName().startsWith(Login.SESSION_PREFIX) && cookie.getValue().equals(sessionID) ) {
@@ -100,34 +99,34 @@ public class StoreTest extends AbstractSimpleClientTest{
                 break;
             }
         }
-        
+
         assertNotNull(sessionCookie);
-        
+
         assertNotNull(sessionCookie.getExpiryDate());
         Date tomorrow = TimeTools.D("tomorrow");
         assertTrue(sessionCookie.getExpiryDate().after(tomorrow));
     }
-    
+
     // Error Cases
-    
+
     public void testNonExistingSessionID() throws Exception {
         as(USER1);
         inModule("login");
         call("store", "session", "1233456");
-    
+
         assertError();
     }
-    
+
     public void testExistingButDifferentSessionID() throws Exception {
         as(USER1);
         String sessionID = currentClient.getSessionID();
-        
+
         as(USER2);
         inModule("login");
         call("store", "session", sessionID);
-    
+
         assertError();
     }
-    
-    
+
+
 }

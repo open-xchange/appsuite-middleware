@@ -52,7 +52,7 @@ package com.openexchange.ajax.session.actions;
 import com.openexchange.ajax.AJAXServlet;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class LogoutRequest extends AbstractRequest<LogoutResponse> {

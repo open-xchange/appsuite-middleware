@@ -54,9 +54,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.TimeZone;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
@@ -157,9 +155,8 @@ public final class AllAction extends AbstractAppointmentAction {
                 it = appointmentsql.getAppointmentsBetweenInFolder(folderId, _appointmentFields, start, end, orderBy, orderDir);
                 appointmentsql.setIncludePrivateAppointments(old);
             }
-            
+
             Date lastModified = new Date(0);
-            final Map<String, List<Appointment>> appointmentMap = new HashMap<String, List<Appointment>>(1);
             final List<Appointment> appointmentList = new ArrayList<Appointment>();
             while (it.hasNext()) {
                 final Appointment appointment = it.next();
@@ -289,8 +286,7 @@ public final class AllAction extends AbstractAppointmentAction {
                 }
             }
 
-            appointmentMap.put("appointments", appointmentList);
-            return new AJAXRequestResult(appointmentMap, timestamp, "appointments");
+            return new AJAXRequestResult(appointmentList, timestamp, "appointment");
         } catch (final SQLException e) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, new Object[0]);
         } finally {

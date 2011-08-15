@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.updater.actions;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -67,7 +66,7 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class DownloadParser extends AbstractAJAXParser<DownloadResponse> {
-    
+
     private byte[] downloaderBytes;
 
     /**
@@ -77,15 +76,15 @@ public class DownloadParser extends AbstractAJAXParser<DownloadResponse> {
     protected DownloadParser(boolean failOnError) {
         super(failOnError);
     }
-    
+
     @Override
     public String checkResponse(HttpResponse resp) throws ParseException ,IOException {
         assertEquals("Response code is not okay.", HttpStatus.SC_OK, resp.getStatusLine().getStatusCode());
         HttpEntity entity = resp.getEntity();
         assertEquals("Response contained wrong mime type.", "application/octet-stream", EntityUtils.getContentMimeType(entity));
         downloaderBytes = EntityUtils.toByteArray(entity);
-        
-        return null;        
+
+        return null;
     }
 
     /**
@@ -95,15 +94,15 @@ public class DownloadParser extends AbstractAJAXParser<DownloadResponse> {
     protected DownloadResponse createResponse(Response response) throws JSONException {
         return null;
     }
-    
+
     /**
-     * @return 
+     * @return
      * @see com.openexchange.ajax.framework.AbstractAJAXParser#parse(java.lang.String)
      */
     @Override
     public DownloadResponse parse(String body) throws JSONException {
         DownloadResponse downloadResponse = new DownloadResponse(downloaderBytes);
-        
+
         return downloadResponse;
     }
 

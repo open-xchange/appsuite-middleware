@@ -48,8 +48,6 @@
  */
 
 package com.openexchange.groupware.calendar.calendarsqltests.untiltests;
-
-import com.openexchange.exception.OXException;
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */

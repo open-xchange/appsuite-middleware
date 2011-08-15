@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.task;
 
-import com.openexchange.exception.OXException;
 import java.util.Calendar;
 import java.util.TimeZone;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -65,12 +64,12 @@ import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.tasks.Task;
 
 /**
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  *
  */
 public class Bug18204Test extends AbstractAJAXSession {
-    
+
     AJAXClient client;
     TimeZone tz;
     Calendar start;
@@ -78,47 +77,47 @@ public class Bug18204Test extends AbstractAJAXSession {
     Task task;
 
     public Bug18204Test(String name) throws Exception {
-        super(name);        
+        super(name);
     }
-    
+
     @Override
     public void setUp() throws Exception {
-        super.setUp(); 
+        super.setUp();
         client = getClient();
         tz = client.getValues().getTimeZone();
         start = TimeTools.createCalendar(tz);
         due = (Calendar) start.clone();
         due.add(Calendar.HOUR_OF_DAY, 2);
-        task = createTask();        
+        task = createTask();
     }
-    
+
     public void testBug18204() throws Exception {
-        // Insert new recurring task with end of series set to _after_        
+        // Insert new recurring task with end of series set to _after_
         InsertResponse insertResponse = client.execute(new InsertRequest(task, tz, true));
         insertResponse.fillTask(task);
-        
+
         // Modify task to end of series set to _on_
         task.removeOccurrence();
         due.add(Calendar.DAY_OF_MONTH, 4);
         task.setUntil(due.getTime());
         UpdateResponse updateResponse = client.execute(new UpdateRequest(task, tz, true));
-        task.setLastModified(updateResponse.getTimestamp()); 
-        
+        task.setLastModified(updateResponse.getTimestamp());
+
         // Get Task to compare
         GetResponse getResponse = client.execute(new GetRequest(task));
         Task toCompare = getResponse.getTask(tz);
-        
-        assertFalse("Task contains Occurrences although it should not.", toCompare.containsOccurrence()); 
+
+        assertFalse("Task contains Occurrences although it should not.", toCompare.containsOccurrence());
     }
-    
+
     @Override
     public void tearDown() throws Exception {
         client.execute(new DeleteRequest(task, true));
-        
+
         super.tearDown();
     }
-    
-    private Task createTask() throws Exception {        
+
+    private Task createTask() throws Exception {
         Task task = new Task();
         task.setTitle("Bug18204 Task");
         task.setParentFolderID(client.getValues().getPrivateTaskFolder());
@@ -127,8 +126,8 @@ public class Bug18204Test extends AbstractAJAXSession {
         task.setOccurrence(2);
         task.setStartDate(start.getTime());
         task.setEndDate(due.getTime());
-        
-        return task;        
+
+        return task;
     }
 
 }

@@ -55,22 +55,21 @@ import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateRequest;
-import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateResponse;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 
 /**
  * {@link PasswordChangeUpdateAJAXTest} - Tests the UPDATE request on password
  * change servlet
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class PasswordChangeUpdateAJAXTest extends AbstractPasswordChangeAJAXTest {
 
 	/**
 	 * Initializes a new {@link PasswordChangeUpdateAJAXTest}
-	 * 
+	 *
 	 * @param name
 	 *            The test name
 	 */
@@ -80,10 +79,10 @@ public final class PasswordChangeUpdateAJAXTest extends AbstractPasswordChangeAJ
 
 	/**
 	 * Tests the <code>action=update</code> request
-	 * @throws JSONException 
-	 * @throws SAXException 
-	 * @throws IOException 
-	 * @throws OXException 
+	 * @throws JSONException
+	 * @throws SAXException
+	 * @throws IOException
+	 * @throws OXException
 	 */
 	public void testUpdate() throws OXException, IOException, SAXException, JSONException {
 		/*

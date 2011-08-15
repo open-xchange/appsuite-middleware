@@ -76,26 +76,26 @@ import com.openexchange.groupware.container.Appointment;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class FreeBusyTest extends ManagedAppointmentTest {
-    
+
     private Appointment appointment;
     private Date now;
     private Date inAnHour;
     private UserValues values;
     private int contextId;
     private DateFormat formatter = new SimpleDateFormat("yyyyMMdd"); //used by freebusy.java
-    
+
     public FreeBusyTest(String name) {
         super(name);
     }
 
-    
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
         values = getClient().getValues();
 
         contextId = getContextID(getClient());
-        
+
         appointment = new Appointment();
         now = new Date();
         inAnHour = new Date( now.getTime() + 1000 * 60 * 60);
@@ -103,9 +103,9 @@ public class FreeBusyTest extends ManagedAppointmentTest {
         appointment.setEndDate( inAnHour );
         appointment.setParentFolderID(folder.getObjectID());
     }
-    
-    
-    
+
+
+
     @Override
     protected void tearDown() throws Exception {
         super.tearDown();
@@ -113,17 +113,17 @@ public class FreeBusyTest extends ManagedAppointmentTest {
 
 
     public void testReserved() throws Exception{
-        checkFreeBusy(appointment, Appointment.RESERVED);        
+        checkFreeBusy(appointment, Appointment.RESERVED);
     }
 
     public void testTemporary() throws Exception{
-        checkFreeBusy(appointment, Appointment.TEMPORARY);   
+        checkFreeBusy(appointment, Appointment.TEMPORARY);
     }
 
     public void testAbsentOnBusiness() throws Exception{
         checkFreeBusy(appointment, Appointment.ABSENT);
     }
-    
+
     public void testFree() throws Exception{
         checkFreeBusy(appointment, Appointment.FREE);
     }
@@ -136,30 +136,30 @@ public class FreeBusyTest extends ManagedAppointmentTest {
         assertEquals("Wrong free/busy state", expectedState, actualState);
     }
 
-    
+
     private int getFreeBusyState(Appointment app) throws IOException, SAXException, OXException, JSONException, ParseException {
         String[] address = values.getDefaultAddress().split("@");
         assertEquals("Default address ("+values.getDefaultAddress()+") should contain one @", 2, address.length);
-        
+
         List<FreeBusyInformation> freeBusyStates = getFreeBusyState(getSecondWebConversation(), address[0], address[1], app.getStartDate());
         for(FreeBusyInformation info : freeBusyStates){
-            if(Math.abs(info.start.getTime() - now.getTime()) < 2000 
+            if(Math.abs(info.start.getTime() - now.getTime()) < 2000
             && Math.abs(info.end.getTime() - inAnHour.getTime()) < 2000)
                 return info.type;
         }
         return -1;
     }
-    
+
     protected List<FreeBusyInformation> getFreeBusyState(final WebConversation webCon, String username, String mailserver, Date start) throws IOException, SAXException, ParseException {
         String startFreebusy = formatter .format(start);
-        String endFreebusy = formatter.format( new Date( start.getTime() + 24*60*60*1000)); //todo: May fail if appointment is > 1day 
+        String endFreebusy = formatter.format( new Date( start.getTime() + 24*60*60*1000)); //todo: May fail if appointment is > 1day
         String url = "http://"+getHostName()+"/servlet/webdav.freebusy?contextid="+contextId+"&username="+username+"&server="+mailserver+"&start="+startFreebusy+"&end="+endFreebusy;
         WebRequest request = new GetMethodWebRequest(url);
         WebResponse response = webCon.getResponse(request);
         List<FreeBusyInformation> states = parseFreeBusyResponse(response);
         return states;
     }
-    
+
 
     private List<FreeBusyInformation> parseFreeBusyResponse(WebResponse response) throws IOException, ParseException {
         List<FreeBusyInformation> result = new LinkedList<FreeBusyInformation>();

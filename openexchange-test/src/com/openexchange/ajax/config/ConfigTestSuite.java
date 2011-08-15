@@ -64,7 +64,7 @@ public class ConfigTestSuite {
     private ConfigTestSuite() {
         super();
     }
-    
+
     /**
      * Generates the task test suite.
      * @return the task tests suite.
@@ -80,7 +80,7 @@ public class ConfigTestSuite {
         tests.addTestSuite(BugTests.class);
         tests.addTestSuite(Bug15354Test.class);
         tests.addTestSuite(Bug19226Test.class);
-        
+
         return tests;
     }
 }

@@ -93,34 +93,33 @@ public class AllAction extends ContactAction {
         if (rightHandLimit == 0) {
             rightHandLimit = 50000;
         }
-        
+
         Date timestamp = new Date(0);
         final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
         SearchIterator<Contact> it = null;
         final List<Contact> contacts = new ArrayList<Contact>();
         try {
             it = contactInterface.getContactsInFolder(folder, leftHandLimit, rightHandLimit, sort, order, collation, columns);
-            
+
             while (it.hasNext()) {
                 final Contact contact = it.next();
                 final Date lastModified = contact.getLastModified();
-                
+
                 // Correct last modified and creation date with users timezone
                 contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
-                contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));                
+                contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
                 contacts.add(contact);
-                
+
                 if (lastModified != null && timestamp.before(lastModified)) {
                     timestamp = lastModified;
                 }
             }
-            
         } finally {
             if (it != null) {
                 it.close();
             }
         }
-        
+
         return new AJAXRequestResult(contacts, timestamp, "contact");
     }
 

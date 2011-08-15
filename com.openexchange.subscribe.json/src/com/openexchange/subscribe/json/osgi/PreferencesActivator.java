@@ -60,15 +60,15 @@ import com.openexchange.subscribe.json.preferences.Enabled;
  */
 public class PreferencesActivator implements BundleActivator {
 
-    private ServiceRegistration userConfigFlagRegistration;
+    private ServiceRegistration<PreferencesItemService> userConfigFlagRegistration;
 
     @Override
-    public void start(BundleContext context) throws Exception {
-        userConfigFlagRegistration = context.registerService(PreferencesItemService.class.getName(), new Enabled(), null);
+    public void start(final BundleContext context) throws Exception {
+        userConfigFlagRegistration = context.registerService(PreferencesItemService.class, new Enabled(), null);
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    public void stop(final BundleContext context) throws Exception {
         userConfigFlagRegistration.unregister();
     }
 

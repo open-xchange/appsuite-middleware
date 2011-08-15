@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.action;
 
-import com.openexchange.exception.OXException;
 import java.util.TimeZone;
 
 import org.json.JSONException;
@@ -62,7 +61,7 @@ import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.groupware.container.Appointment;
 
 /**
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public abstract class AbstractAppointmentRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {

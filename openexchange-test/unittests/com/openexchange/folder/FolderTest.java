@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.openexchange.folder;
 
@@ -41,7 +41,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public class FolderTest extends TestCase {
 
@@ -73,7 +73,7 @@ public class FolderTest extends TestCase {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see junit.framework.TestCase#setUp()
      */
     @Override
@@ -93,7 +93,7 @@ public class FolderTest extends TestCase {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see junit.framework.TestCase#tearDown()
      */
     @Override
@@ -104,7 +104,7 @@ public class FolderTest extends TestCase {
         }
         super.tearDown();
     }
-    
+
     public AppointmentSQLInterface getAppointmentHandler(){
         return ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
     }

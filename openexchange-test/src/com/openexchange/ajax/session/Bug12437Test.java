@@ -56,8 +56,6 @@ import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.session.actions.LoginRequest;
 import com.openexchange.ajax.session.actions.LoginResponse;
 import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.groupware.EnumComponent;
-
 import junit.framework.TestCase;
 
 /**

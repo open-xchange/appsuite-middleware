@@ -86,7 +86,7 @@ public final class MixTest {
 
     /**
      * @param args
-     * @throws InterruptedException 
+     * @throws InterruptedException
      */
     public static void main(final String[] args) throws InterruptedException {
         final int count = 3;
@@ -136,7 +136,7 @@ public final class MixTest {
                     Executor.execute(session, new LogoutRequest());
                     session.setId(null);
                 } catch (final AssertionFailedError e) {
-                    
+
                     System.out.println("Login failed! " + e.getMessage());
                 } catch (final Throwable t) {
                     t.printStackTrace();

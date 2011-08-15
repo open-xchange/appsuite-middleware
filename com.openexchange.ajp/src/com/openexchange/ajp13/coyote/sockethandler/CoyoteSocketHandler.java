@@ -66,7 +66,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 /**
  * {@link CoyoteSocketHandler} - Handles accepted client sockets by {@link #handleSocket(Socket)} which hands-off to a dedicated AJP
  * processor.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CoyoteSocketHandler implements IAJPv13SocketHandler {
@@ -209,7 +209,7 @@ public final class CoyoteSocketHandler implements IAJPv13SocketHandler {
 
     /**
      * Checks if this socket handler has been shut down or has not been started.
-     * 
+     *
      * @return <code>true</code> if this socket handler has been shut down or has not been started; otherwise <code>false</code>
      */
     @Override
@@ -222,7 +222,7 @@ public final class CoyoteSocketHandler implements IAJPv13SocketHandler {
 
     /**
      * Handles given client socket.
-     * 
+     *
      * @param client The client socket to handle
      */
     @Override

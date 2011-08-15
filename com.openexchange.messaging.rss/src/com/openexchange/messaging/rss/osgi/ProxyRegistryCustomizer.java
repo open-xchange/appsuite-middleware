@@ -60,7 +60,7 @@ import com.openexchange.proxy.ProxyRegistry;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ProxyRegistryCustomizer implements ServiceTrackerCustomizer {
+public final class ProxyRegistryCustomizer implements ServiceTrackerCustomizer<ProxyRegistry,ProxyRegistry> {
 
     private final BundleContext context;
 
@@ -73,19 +73,19 @@ public final class ProxyRegistryCustomizer implements ServiceTrackerCustomizer {
     }
 
     @Override
-    public Object addingService(final ServiceReference reference) {
-        final Object service = context.getService(reference);
-        ProxyRegistryProvider.getInstance().setProxyRegistry((ProxyRegistry) service);
+    public ProxyRegistry addingService(final ServiceReference<ProxyRegistry> reference) {
+        final ProxyRegistry service = context.getService(reference);
+        ProxyRegistryProvider.getInstance().setProxyRegistry(service);
         return service;
     }
 
     @Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<ProxyRegistry> reference, final ProxyRegistry service) {
         // Nope
     }
 
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
+    public void removedService(final ServiceReference<ProxyRegistry> reference, final ProxyRegistry service) {
         ProxyRegistryProvider.getInstance().setProxyRegistry(null);
         context.ungetService(reference);
     }

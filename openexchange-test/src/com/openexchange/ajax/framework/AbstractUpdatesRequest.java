@@ -57,7 +57,7 @@ import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.groupware.search.Order;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class AbstractUpdatesRequest<T extends AbstractColumnsResponse> implements AJAXRequest<T> {
@@ -86,7 +86,7 @@ public abstract class AbstractUpdatesRequest<T extends AbstractColumnsResponse> 
         this.ignore = ignore;
         this.failOnError = failOnError;
     }
-    
+
     public String getServletPath() {
         return servletPath;
     }

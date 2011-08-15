@@ -55,9 +55,9 @@ import com.openexchange.ajax.mail.netsol.FolderAndID;
 
 /**
  * {@link NetsolListRequest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public class NetsolListRequest<CommonListResponse> extends CommonListRequest {
 

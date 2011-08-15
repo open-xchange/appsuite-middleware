@@ -77,62 +77,62 @@ import com.openexchange.webdav.protocol.WebdavLock.Type;
  * {@link LockExpiryTest}
  * http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=13238
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * 
+ *
  */
 public class LockExpiryTest extends AbstractInfostoreTest {
 
     protected WebdavPath testCollection = new WebdavPath("public_infostore","testCollection"+Math.random());
 
     private InfostoreWebdavFactory factory = null;
-    
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
         factory = (InfostoreWebdavFactory) TestWebdavFactoryBuilder.buildFactory();
         factory.beginRequest();
     }
-    
+
     @Override
     public void tearDown() throws OXException {
         resolveFolder(testCollection).delete();
         factory.endRequest(200);
     }
-    
+
     public void testExpiredLocksOnInfoitemsHaveThemShowUpInUpdatesResponse() throws OXException, UnsupportedEncodingException, InterruptedException, OXException {
         FolderCollection folderCollection = resolveFolder(testCollection);
         folderCollection.create();
-        
+
         InfostoreFacade infostoreFacade = factory.getDatabase();
-        
+
         Context ctx = factory.getSession().getContext();
         User user = factory.getSession().getUser();
         UserConfiguration userConfig = factory.getSession().getUserConfiguration();
-        
+
         DocumentMetadataResource resource = createResource();
         final WebdavLock lock = new WebdavLock();
-    
+
         lock.setDepth(0);
         lock.setOwner("me");
         lock.setScope(Scope.EXCLUSIVE_LITERAL);
         lock.setType(Type.WRITE_LITERAL);
-        
+
         lock.setTimeout(2000);
-        
+
         resource.lock(lock);
         newRequest();
-        
+
         Date lastModified = infostoreFacade.getDocumentMetadata(resource.getId(), InfostoreFacade.CURRENT_VERSION, ctx, user, userConfig).getLastModified();
-        
-        
+
+
         Thread.sleep(2001);
-        
+
         // The lock has expired by now, so an updates request on the testCollection folder must include the resource
         newRequest();
-        
+
         Delta delta = infostoreFacade.getDelta(folderCollection.getId(), lastModified.getTime()+10, new Metadata[]{Metadata.ID_LITERAL}, true, ctx, user, userConfig);
-        
+
         boolean found = false;
-        
+
         SearchIterator modified = delta.getModified();
         while(modified.hasNext()) {
             DocumentMetadata document = (DocumentMetadata) modified.next();
@@ -140,11 +140,11 @@ public class LockExpiryTest extends AbstractInfostoreTest {
                 found = true;
             }
         }
-        
+
         assertTrue("Did not find document with autoexpired lock in delta", found);
-    }   
-    
-    
+    }
+
+
     private FolderCollection resolveFolder(WebdavPath url) throws OXException {
         return (FolderCollection) factory.resolveCollection(url);
     }
@@ -153,19 +153,19 @@ public class LockExpiryTest extends AbstractInfostoreTest {
         String name = "/testResource"+Math.random();
         WebdavResource resource = factory.resolveResource(testCollection + name);
         assertFalse(resource.exists());
-        
+
         resource.create();
         resource.putBodyAndGuessLength(new ByteArrayInputStream("Hallo Welt".getBytes("UTF-8")));
         newRequest();
         resource = factory.resolveResource(testCollection + name);
         assertTrue(resource.exists());
-        
+
         return (DocumentMetadataResource) resource;
     }
-    
+
     private void newRequest() {
         factory.endRequest(200);
         factory.beginRequest();
     }
-    
+
 }

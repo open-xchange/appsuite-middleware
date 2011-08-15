@@ -44,16 +44,16 @@ public class RequestSpecificBehaviourRegistryTest extends TestCase {
 
 	public void testBasic() {
 		final RequestSpecificBehaviourRegistry registry = new RequestSpecificBehaviourRegistry();
-		
+
 		final TestImplementation orig = new TestImplementation();
-		
+
 		final Behaviour behaviour = new TestBehaviour(orig);
-		
+
 		registry.add(behaviour);
-		
+
 		final TestInterface t = registry.get(new MockWebdavRequest(null, ""), TestInterface.class);
-		
+
 		assertTrue(t == orig);
 	}
-	
+
 }

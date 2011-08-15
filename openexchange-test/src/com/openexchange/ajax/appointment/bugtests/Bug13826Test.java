@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.ajax.folder.Create.ocl;
 import java.util.Date;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
@@ -76,11 +75,11 @@ import com.openexchange.server.impl.OCLPermission;
 public class Bug13826Test extends AbstractAJAXSession {
 
     private int userId, sourceFolderId, targetFolderId, currentFolder;
-    
+
     private FolderObject folder;
-    
+
     private Appointment appointment, updateAppointment;
-    
+
     private Date lastModified;
 
     public Bug13826Test(String name) {
@@ -90,7 +89,7 @@ public class Bug13826Test extends AbstractAJAXSession {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        
+
         userId = getClient().getValues().getUserId();
         sourceFolderId = getClient().getValues().getPrivateAppointmentFolder();
         OCLPermission ocl = ocl(userId, false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -98,7 +97,7 @@ public class Bug13826Test extends AbstractAJAXSession {
         CommonInsertResponse response = getClient().execute(new com.openexchange.ajax.folder.actions.InsertRequest(API.OX_OLD, folder));
         response.fillObject(folder);
         targetFolderId = folder.getObjectID();
-        
+
         appointment = new Appointment();
         appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         appointment.setTitle("Test Bug 13826");
@@ -113,7 +112,7 @@ public class Bug13826Test extends AbstractAJAXSession {
         AppointmentInsertResponse insertResponse = getClient().execute(request);
         insertResponse.fillObject(appointment);
         setCurrentValues(appointment);
-        
+
         updateAppointment = new Appointment();
         updateAppointment.setObjectID(appointment.getObjectID());
         updateAppointment.setLastModified(appointment.getLastModified());
@@ -122,7 +121,7 @@ public class Bug13826Test extends AbstractAJAXSession {
         updateAppointment.setInterval(1);
         updateAppointment.setOccurrence(5);
     }
-    
+
     public void testBug13826() throws Exception {
         UpdateRequest update = new UpdateRequest(sourceFolderId, updateAppointment, getClient().getValues().getTimeZone(), false);
         UpdateResponse updateResponse = getClient().execute(update);
@@ -150,15 +149,15 @@ public class Bug13826Test extends AbstractAJAXSession {
             getClient().execute(new DeleteRequest(appointment.getObjectID(), currentFolder, lastModified));
         }
         getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(API.OX_OLD, folder.getObjectID(), folder.getLastModified()));
-        
+
         super.tearDown();
     }
-    
+
     private void setCurrentValues(Appointment appointment) {
         if (appointment != null && appointment.getParentFolderID() != 0) {
             currentFolder = appointment.getParentFolderID();
         }
-        
+
         if (appointment != null && appointment.getLastModified() != null) {
             lastModified = appointment.getLastModified();
         }

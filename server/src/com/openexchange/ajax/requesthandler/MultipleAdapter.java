@@ -105,7 +105,7 @@ public class MultipleAdapter implements MultipleHandler {
             }
         }
         String path = "";
-        
+
         if (module.contains("/")) {
         	int slash = module.indexOf('/');
 			path = module.substring(slash);
@@ -115,9 +115,9 @@ public class MultipleAdapter implements MultipleHandler {
         request.setFormat("json");
         request.setAction(action);
         request.setServletRequestURI(path);
-        
-        
-        
+
+
+
         return request;
     }
 

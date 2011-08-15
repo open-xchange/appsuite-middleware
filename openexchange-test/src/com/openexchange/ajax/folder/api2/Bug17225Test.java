@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.folder.api2;
 
-import com.openexchange.exception.OXException;
 import java.util.Iterator;
 
 import com.openexchange.ajax.folder.Create;
@@ -119,7 +118,7 @@ public final class Bug17225Test extends AbstractAJAXSession {
 		client.execute(new UpdateRequest(API.OUTLOOK, folder));
 		super.tearDown();
 	}
-	 
+
 	public void testSharedType() throws Throwable {
 		ListResponse response = client2.execute(new ListRequest(API.OUTLOOK, FolderObject.SHARED_PREFIX + userId1, new int[] { 1, 20, 2, 3, 300, 301, 302, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 316 }, false));
 		Iterator<FolderObject> iter = response.getFolder();

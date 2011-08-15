@@ -59,30 +59,30 @@ import com.openexchange.webdav.xml.fields.CommonFields;
  */
 
 public abstract class CommonParser extends FolderChildParser {
-		
+
 	protected void parseElementCommon(final CommonObject commonobject, final Element eProp) {
 		if (hasElement(eProp.getChild(CommonFields.CATEGORIES, XmlServlet.NS))) {
 			commonobject.setCategories(getValue(eProp.getChild(CommonFields.CATEGORIES, XmlServlet.NS)));
-		} 
-		
+		}
+
 		if (hasElement(eProp.getChild(CommonFields.PRIVATE_FLAG, XmlServlet.NS))) {
 			commonobject.setPrivateFlag(getValueAsBoolean(eProp.getChild(CommonFields.PRIVATE_FLAG, XmlServlet.NS)));
-		} 
+		}
 
 		if (hasElement(eProp.getChild(CommonFields.COLORLABEL, XmlServlet.NS))) {
 			commonobject.setLabel(getValueAsInt(eProp.getChild(CommonFields.COLORLABEL, XmlServlet.NS)));
-		} 
-		
+		}
+
 		if (hasElement(eProp.getChild("attachments", XmlServlet.NS))) {
 			parseElementAttachments(commonobject, eProp.getChild("attachments", XmlServlet.NS));
 		}
 
 		parseElementFolderChildObject(commonobject, eProp);
 	}
-	
+
 	protected void parseElementAttachments(final CommonObject commonobject, final Element eAttachments) {
 		final List elementEntries = eAttachments.getChildren("attachment", XmlServlet.NS);
-		
+
 		if (elementEntries == null) {
 			commonobject.setNumberOfAttachments(0);
 		} else {

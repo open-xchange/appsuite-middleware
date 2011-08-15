@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.ajax.mail.actions.DeleteRequest;
 import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.ImportMailRequest;
@@ -58,7 +57,7 @@ import com.openexchange.tools.encoding.Charsets;
 
 /**
  * {@link Bug19696Test}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Bug19696Test extends AbstractMailTest {
@@ -69,7 +68,7 @@ public final class Bug19696Test extends AbstractMailTest {
 
     /**
      * Default constructor.
-     * 
+     *
      * @param name Name of this test.
      */
     public Bug19696Test(final String name) {
@@ -96,7 +95,7 @@ public final class Bug19696Test extends AbstractMailTest {
 
     /**
      * Tests the <code>action=get</code> request on INBOX folder
-     * 
+     *
      * @throws Throwable
      */
     public void testGet() throws Throwable {

@@ -63,15 +63,15 @@ import com.openexchange.mail.MailListField;
 
 /**
  * {@link NetsolTestMailInboxSort}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class NetsolTestMailInboxSort extends AbstractNetsolTest {
 
 	/**
 	 * Initializes a new {@link NetsolTestMailInboxSort}
-	 * 
+	 *
 	 * @param name
 	 */
 	public NetsolTestMailInboxSort(final String name) {

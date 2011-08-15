@@ -60,7 +60,7 @@ import com.openexchange.oauth.internal.DeleteListenerRegistry;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DeleteListenerServiceTracker implements ServiceTrackerCustomizer {
+public final class DeleteListenerServiceTracker implements ServiceTrackerCustomizer<OAuthAccountDeleteListener,OAuthAccountDeleteListener> {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DeleteListenerServiceTracker.class));
 
@@ -75,9 +75,9 @@ public final class DeleteListenerServiceTracker implements ServiceTrackerCustomi
     }
 
     @Override
-    public Object addingService(final ServiceReference reference) {
-        final Object addedService = context.getService(reference);
-        if (DeleteListenerRegistry.getInstance().addDeleteListener((OAuthAccountDeleteListener) addedService)) {
+    public OAuthAccountDeleteListener addingService(final ServiceReference<OAuthAccountDeleteListener> reference) {
+        final OAuthAccountDeleteListener addedService = context.getService(reference);
+        if (DeleteListenerRegistry.getInstance().addDeleteListener(addedService)) {
             return addedService;
         }
         LOG.warn(new StringBuilder(64).append("Duplicate delete listener \"").append(addedService.getClass().getName()).append(
@@ -88,15 +88,15 @@ public final class DeleteListenerServiceTracker implements ServiceTrackerCustomi
     }
 
     @Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<OAuthAccountDeleteListener> reference, final OAuthAccountDeleteListener service) {
         // Nothing to do
     }
 
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
+    public void removedService(final ServiceReference<OAuthAccountDeleteListener> reference, final OAuthAccountDeleteListener service) {
         if (null != service) {
             try {
-                DeleteListenerRegistry.getInstance().removeDeleteListener((OAuthAccountDeleteListener) service);
+                DeleteListenerRegistry.getInstance().removeDeleteListener(service);
             } finally {
                 context.ungetService(reference);
             }

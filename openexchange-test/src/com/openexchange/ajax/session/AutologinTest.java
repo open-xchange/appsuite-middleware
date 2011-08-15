@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.session;
 
-import com.openexchange.exception.OXException;
 import java.util.Arrays;
 import org.apache.commons.httpclient.Cookie;
 import org.apache.commons.httpclient.HttpState;
@@ -57,7 +56,7 @@ import com.openexchange.ajax.Login;
 
 /**
  * {@link AutologinTest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class AutologinTest extends AbstractLoginTest {
@@ -82,9 +81,9 @@ public class AutologinTest extends AbstractLoginTest {
         }
 
         assertEquals(sessionID, rawResponse.getString("session"));
-        
+
         inModule("quota"); call("filestore", "session", sessionID); // Send some request.
-        
+
         assertNoError();
     }
 

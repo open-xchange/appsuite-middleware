@@ -93,7 +93,7 @@ public abstract class ManagedAppointmentTest extends AppointmentTest {
     protected NegativeAssertionOnCreate negativeAssertionOnCreate;
 
     protected NegativeAssertionOnChangeException negativeAssertionOnChangeException;
-    
+
     protected NegativeAssertionOnDeleteException negativeAssertionOnDeleteException;
 
     protected AbstractPositiveAssertion positiveAssertionOnCreate;
@@ -152,7 +152,7 @@ public abstract class ManagedAppointmentTest extends AppointmentTest {
                 }
             }
         }
-        
+
     }
 
     protected Appointment generateDailyAppointment() {
@@ -178,11 +178,11 @@ public abstract class ManagedAppointmentTest extends AppointmentTest {
         app.set(Appointment.MONTH, Calendar.JANUARY);
         return app;
     }
-    
+
     protected Date D(String dateString){
     	return TimeTools.D(dateString);
     }
-    
+
     protected Date D(String dateString, TimeZone tz){
     	return TimeTools.D(dateString,tz);
     }

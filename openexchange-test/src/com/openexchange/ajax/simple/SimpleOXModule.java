@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.simple;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -70,7 +69,7 @@ public class SimpleOXModule {
         this.client = client;
         this.moduleName = moduleName;
     }
-    
+
     public SimpleResponse call(String action, Object...parameters) throws JSONException, IOException {
         return client.call(moduleName, action, parameters);
     }
@@ -78,6 +77,6 @@ public class SimpleOXModule {
     public JSONObject raw(String action, Object...parameters) throws JSONException, IOException {
         return client.raw(moduleName, action, parameters);
     }
-    
-    
+
+
 }

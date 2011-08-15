@@ -48,8 +48,6 @@
  */
 
 package com.openexchange.ajax.attach;
-
-import com.openexchange.exception.OXException;
 public class SimpleAttachmentTest extends AbstractAttachmentTest {
 
 	public SimpleAttachmentTest(final String name) {
@@ -68,43 +66,43 @@ public class SimpleAttachmentTest extends AbstractAttachmentTest {
 
 	@Override
 	public void removeAttachable(final int folder, final int id, final String sessionId) throws Exception {
-		
+
 	}
 
 	@Override
 	public int getModule() throws Exception {
 		return 22;
 	}
-	
+
 	public void testMultiple() throws Exception {
 		doMultiple();
 	}
-	
+
 	public void testDetach() throws Exception {
 		doDetach();
 	}
-	
-	
+
+
 	public void testUpdates() throws Exception {
 		doUpdates();
 	}
-	
+
 	public void testAll() throws Exception {
 		doAll();
 	}
-	
+
 	public void testGet() throws Exception {
 		doGet();
 	}
-	
+
 	public void testDocument() throws Exception{
 		doDocument();
 	}
-	
+
 	public void testList() throws Exception {
 		doList();
 	}
-	
+
 	public void testQuota() throws Exception {
 		doQuota();
 	}
@@ -113,7 +111,7 @@ public class SimpleAttachmentTest extends AbstractAttachmentTest {
 			upload();
 		}
 	}*/
-	
+
 	public void testDatasource() throws Exception {
 	    doDatasource();
 	}

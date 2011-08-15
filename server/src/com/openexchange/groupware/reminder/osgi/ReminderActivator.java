@@ -47,49 +47,34 @@
  *
  */
 
-package com.openexchange.calendar.osgi;
+package com.openexchange.groupware.reminder.osgi;
 
-import static com.openexchange.java.Autoboxing.I;
-import java.util.Dictionary;
-import java.util.Hashtable;
-import com.openexchange.calendar.CalendarAdministration;
-import com.openexchange.calendar.CalendarReminderDelete;
-import com.openexchange.calendar.api.AppointmentSqlFactory;
-import com.openexchange.calendar.api.CalendarCollection;
-import com.openexchange.groupware.Types;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarAdministrationService;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.groupware.reminder.TargetService;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.groupware.reminder.json.ReminderActionFactory;
+import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 
 /**
- * {@link Activator}
+ * {@link ReminderActivator}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator extends HousekeepingActivator {
+public class ReminderActivator extends AJAXModuleActivator {
 
-    /**
-     * Initializes a new {@link Activator}.
-     */
-    public Activator() {
+    public ReminderActivator() {
         super();
     }
 
     @Override
-    protected java.lang.Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
-    };
-
-    @Override
     protected void startBundle() throws Exception {
-        registerService(AppointmentSqlFactoryService.class, new AppointmentSqlFactory());
-        registerService(CalendarCollectionService.class, new CalendarCollection());
-        registerService(CalendarAdministrationService.class, new CalendarAdministration());
-        final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
-        props.put(TargetService.MODULE_PROPERTY, I(Types.APPOINTMENT));
-        registerService(TargetService.class, new CalendarReminderDelete(), props);
+        rememberTracker(new ServiceTracker<TargetService, TargetService>(context, TargetService.class.getName(), new TargetRegistryCustomizer(context)));
+        openTrackers();
+        registerModule(new ReminderActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "reminder");
     }
 
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[0];
+    }
 }

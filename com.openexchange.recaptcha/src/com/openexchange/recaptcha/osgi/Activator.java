@@ -20,7 +20,7 @@ public class Activator extends DeferredActivator {
 
     private ReCaptchaServlet servlet;
 
-    private ServiceRegistration serviceRegistration;
+    private ServiceRegistration<ReCaptchaService> serviceRegistration;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -53,7 +53,7 @@ public class Activator extends DeferredActivator {
         final Properties props = config.getFile("recaptcha.properties");
         final Properties options = config.getFile("recaptcha_options.properties");
         final ReCaptchaServiceImpl reCaptchaService = new ReCaptchaServiceImpl(props, options);
-        serviceRegistration = context.registerService(ReCaptchaService.class.getName(), reCaptchaService, null);
+        serviceRegistration = context.registerService(ReCaptchaService.class, reCaptchaService, null);
         registry.addService(ReCaptchaService.class, reCaptchaService);
 
         registerServlet();

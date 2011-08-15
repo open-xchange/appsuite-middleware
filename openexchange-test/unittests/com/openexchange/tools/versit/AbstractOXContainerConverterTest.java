@@ -21,7 +21,7 @@ import junit.framework.TestCase;
 public abstract class AbstractOXContainerConverterTest extends TestCase {
 
 	public static SessionObject getSession() throws Exception {
-	
+
 		final UserStorage uStorage = UserStorage.getInstance();
 		final int userId = uStorage.getUserId(AjaxInit.getAJAXProperty("login"), new ContextImpl(1));
 		final SessionObject sessObj = SessionObjectWrapper.createSessionObject(userId, 1, "csv-tests");
@@ -29,7 +29,7 @@ public abstract class AbstractOXContainerConverterTest extends TestCase {
 	}
 
 	public static User getUserParticipant() throws OXException {
-	
+
 		final UserStorage uStorage = UserStorage.getInstance();
 		final Context ctx = new ContextImpl(1);
 		final int uid = uStorage.getUserId(AjaxInit.getAJAXProperty("user_participant1"), ctx);
@@ -52,42 +52,42 @@ public abstract class AbstractOXContainerConverterTest extends TestCase {
 
 	public Task convertTask(final String versitData) throws Exception {
 		final VersitDefinition def = ICalendar.definition;
-		
+
 		final VersitDefinition.Reader versitReader = def.getReader(
 				new ByteArrayInputStream(versitData.getBytes("UTF-8")), "UTF-8");
-		
+
 		final VersitObject rootVersitObject = def.parseBegin(versitReader);
 		final VersitObject versitObject = def.parseChild(versitReader, rootVersitObject);
-		
+
 		final OXContainerConverter oxContainerConverter = new OXContainerConverter(getSession());
 		return oxContainerConverter.convertTask(versitObject);
 	}
 
 	public CalendarDataObject convertAppointment(final String versitData) throws Exception {
 		final VersitDefinition def = ICalendar.definition;
-		
+
 		final VersitDefinition.Reader versitReader = def.getReader(
 				new ByteArrayInputStream(versitData.getBytes("UTF-8")), "UTF-8");
-		
+
 		final VersitObject rootVersitObject = def.parseBegin(versitReader);
 		final VersitObject versitObject = def.parseChild(versitReader, rootVersitObject);
-		
+
 		final OXContainerConverter oxContainerConverter = new OXContainerConverter(getSession());
 		return oxContainerConverter.convertAppointment(versitObject);
 	}
 
 	public boolean isFlaggedAsPrivate(final String versitData) throws Exception {
 		final VersitDefinition def = ICalendar.definition;
-		
+
 		final VersitDefinition.Reader versitReader = def.getReader(
 				new ByteArrayInputStream(versitData.getBytes("UTF-8")), "UTF-8");
-		
+
 		final VersitObject rootVersitObject = def.parseBegin(versitReader);
 		final VersitObject versitObject = def.parseChild(versitReader, rootVersitObject);
-		
+
 		final OXContainerConverter oxContainerConverter = new OXContainerConverter(getSession());
-		
-		final Appointment appointmentObj = oxContainerConverter.convertAppointment(versitObject);; 
+
+		final Appointment appointmentObj = oxContainerConverter.convertAppointment(versitObject);;
 		return appointmentObj.getPrivateFlag();
 	}
 

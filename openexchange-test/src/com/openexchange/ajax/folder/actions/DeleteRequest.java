@@ -59,7 +59,7 @@ import com.openexchange.groupware.container.FolderObject;
 
 /**
  * Stores the parameters to delete a folder.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - working with mail folders
  */

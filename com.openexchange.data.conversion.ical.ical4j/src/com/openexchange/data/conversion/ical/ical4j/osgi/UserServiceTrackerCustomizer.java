@@ -59,7 +59,7 @@ import com.openexchange.user.UserService;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class UserServiceTrackerCustomizer implements ServiceTrackerCustomizer {
+public final class UserServiceTrackerCustomizer implements ServiceTrackerCustomizer<UserService, UserService> {
 
     private final BundleContext context;
 
@@ -78,8 +78,8 @@ public final class UserServiceTrackerCustomizer implements ServiceTrackerCustomi
      * {@inheritDoc}
      */
     @Override
-    public Object addingService(final ServiceReference reference) {
-        final UserService userService = (UserService) context.getService(reference);
+    public UserService addingService(final ServiceReference<UserService> reference) {
+        final UserService userService = context.getService(reference);
         userResolver.setUserService(userService);
         return userService;
     }
@@ -88,7 +88,7 @@ public final class UserServiceTrackerCustomizer implements ServiceTrackerCustomi
      * {@inheritDoc}
      */
     @Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<UserService> reference, final UserService service) {
         // Nothing to do.
     }
 
@@ -96,7 +96,7 @@ public final class UserServiceTrackerCustomizer implements ServiceTrackerCustomi
      * {@inheritDoc}
      */
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
+    public void removedService(final ServiceReference<UserService> reference, final UserService service) {
         userResolver.setUserService(null);
         context.ungetService(reference);
     }

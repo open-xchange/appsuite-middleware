@@ -81,6 +81,7 @@ public class ImageParser extends AbstractAJAXParser<ImageResponse> {
      * @see com.openexchange.ajax.framework.AbstractAJAXParser#checkResponse(org.apache.http.HttpResponse)
      */
     @Override
+<<<<<<< HEAD:openexchange-test/src/com/openexchange/ajax/image/ImageParser.java
     public String checkResponse(HttpResponse resp) throws ParseException, IOException {
         assertEquals("Response code is not okay.", HttpStatus.SC_OK, resp.getStatusLine().getStatusCode());
         HttpEntity entity = resp.getEntity();
@@ -103,6 +104,19 @@ public class ImageParser extends AbstractAJAXParser<ImageResponse> {
     @Override
     public ImageResponse parse(String body) throws JSONException {
         return new ImageResponse(fileBytes);
+=======
+    protected AJAXRequestResult perform(final ContactRequest req) throws OXException {
+        final ServerSession session = req.getSession();
+        final long timestamp = req.getTimestamp();
+        final int[] deleteRequestData = req.getDeleteRequestData();
+        final Date date = new Date(timestamp);
+
+        final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(deleteRequestData[1], session);
+        contactInterface.deleteContactObject(deleteRequestData[0], deleteRequestData[1], date);
+
+        final JSONObject response = new JSONObject();
+        return new AJAXRequestResult(response, date, "json");
+>>>>>>> 730cd26d1ab3805d7b8b1790f6bcd5e53311c62b:com.openexchange.contacts.json/src/com/openexchange/contact/json/actions/DeleteAction.java
     }
 
 }

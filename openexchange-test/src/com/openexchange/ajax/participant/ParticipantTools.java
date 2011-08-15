@@ -72,7 +72,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.ContactSearchObject;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class ParticipantTools {
@@ -113,7 +113,7 @@ public final class ParticipantTools {
         }
         return participants;
     }
-    
+
     public static List<Participant> createParticipants(final int... userIds) {
         final List<Participant> participants = new ArrayList<Participant>();
         for (final int userId : userIds) {

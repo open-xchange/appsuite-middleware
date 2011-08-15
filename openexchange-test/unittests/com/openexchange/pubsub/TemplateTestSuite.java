@@ -59,7 +59,7 @@ import junit.framework.TestSuite;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class TemplateTestSuite extends TestSuite {
- 
+
         public TemplateTestSuite() {
             super();
         }

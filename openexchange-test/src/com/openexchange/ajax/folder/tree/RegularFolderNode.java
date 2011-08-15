@@ -66,12 +66,12 @@ public class RegularFolderNode extends AbstractFolderNode {
     public RegularFolderNode(FolderObject underlyingObject, AJAXClient client) {
         super(underlyingObject, client);
     }
-    
-    
+
+
     public RegularFolderNode(int folderId, AJAXClient client) {
         super(folderId, client);
     }
-    
+
     @Override
     public FolderNode getParent() {
         if(getFolder().getParentFolderID() == FolderObject.SYSTEM_ROOT_FOLDER_ID) {
@@ -92,7 +92,7 @@ public class RegularFolderNode extends AbstractFolderNode {
         }
         return folders;
     }
-    
+
     public boolean isRoot() {
         return false;
     }

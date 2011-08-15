@@ -60,7 +60,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MultipleHandlerServiceTracker implements ServiceTrackerCustomizer {
+public final class MultipleHandlerServiceTracker implements ServiceTrackerCustomizer<MultipleHandlerFactoryService,MultipleHandlerFactoryService> {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MultipleHandlerServiceTracker.class));
 
@@ -77,16 +77,14 @@ public final class MultipleHandlerServiceTracker implements ServiceTrackerCustom
     }
 
     @Override
-    public Object addingService(final ServiceReference reference) {
-        final Object addedService = context.getService(reference);
+    public MultipleHandlerFactoryService addingService(final ServiceReference<MultipleHandlerFactoryService> reference) {
+        final MultipleHandlerFactoryService addedService = context.getService(reference);
         if (null == addedService) {
             LOG.warn("Added service is null!", new Throwable());
         }
-        if (addedService instanceof MultipleHandlerFactoryService) {
-            final MultipleHandlerRegistry registry = ServerServiceRegistry.getInstance().getService(MultipleHandlerRegistry.class);
-            if (null != registry && registry.addFactoryService((MultipleHandlerFactoryService) addedService)) {
-                return addedService;
-            }
+        final MultipleHandlerRegistry registry = ServerServiceRegistry.getInstance().getService(MultipleHandlerRegistry.class);
+        if (null != registry && registry.addFactoryService(addedService)) {
+            return addedService;
         }
         // Drop reference
         context.ungetService(reference);
@@ -94,21 +92,19 @@ public final class MultipleHandlerServiceTracker implements ServiceTrackerCustom
     }
 
     @Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<MultipleHandlerFactoryService> reference, final MultipleHandlerFactoryService service) {
         // Nothing to do
     }
 
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
+    public void removedService(final ServiceReference<MultipleHandlerFactoryService> reference, final MultipleHandlerFactoryService service) {
         if (null == service) {
             return;
         }
         try {
-            if (service instanceof MultipleHandlerFactoryService) {
-                final MultipleHandlerRegistry registry = ServerServiceRegistry.getInstance().getService(MultipleHandlerRegistry.class);
-                if (null != registry) {
-                    registry.removeFactoryService(((MultipleHandlerFactoryService) service).getSupportedModule());
-                }
+            final MultipleHandlerRegistry registry = ServerServiceRegistry.getInstance().getService(MultipleHandlerRegistry.class);
+            if (null != registry) {
+                registry.removeFactoryService(service.getSupportedModule());
             }
         } finally {
             context.ungetService(reference);

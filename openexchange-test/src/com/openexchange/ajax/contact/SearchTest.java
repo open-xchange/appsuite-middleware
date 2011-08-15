@@ -52,7 +52,7 @@ public class SearchTest extends AbstractContactTest {
             new int[] { Contact.INTERNAL_USERID },
             true);
         assertTrue("contact array size < 2", contactArray.length >= 2);
-        
+
         deleteContacts(objectId1, objectId2);
     }
 
@@ -98,7 +98,7 @@ public class SearchTest extends AbstractContactTest {
             contactFolderId,
             new int[] { Contact.INTERNAL_USERID });
         assertTrue("contact array size >= 3", contactArray2.length >= 3);
-        
+
         deleteContacts(objectId1, objectId2, objectId3);
     }
 
@@ -126,36 +126,36 @@ public class SearchTest extends AbstractContactTest {
             deleteContact(objectId, contactFolderId);
         }
     }
-    
+
     public void testAutoCompleteWithContactCollectFolderAndGlobalAddressbook() throws Exception {
         int[] contactIds = new int[]{};
         try {
             final GetResponse getResponse = client.execute(new GetRequest(Tree.ContactCollectFolder));
             final int collectFolderId = getResponse.getInteger();
-            
+
             if (-1 == collectFolderId) {
                 // Obviously contact collector folder is not present for test user
                 return;
             }
-            
+
             contactIds = insertSearchableContacts(collectFolderId);
-            
+
             final ContactSearchObject searchObject = new ContactSearchObject();
             searchObject.setEmail1("*e*");
             searchObject.setEmailAutoComplete(true);
             searchObject.addFolder(6);
             searchObject.addFolder(collectFolderId);
-            
+
             final int[] columns = new int[] {Contact.FOLDER_ID, Contact.OBJECT_ID, Contact.USE_COUNT};
-            
+
             final List<Parameter> parameters = new ArrayList<Parameter>();
             parameters.add(new Parameter(AJAXServlet.PARAMETER_SORT, Contact.USE_COUNT_GLOBAL_FIRST));
             parameters.add(new Parameter(AJAXServlet.PARAMETER_ORDER, "ASC"));
             final com.openexchange.ajax.user.actions.SearchRequest request = new com.openexchange.ajax.user.actions.SearchRequest(searchObject, columns, true, parameters);
             final com.openexchange.ajax.user.actions.SearchResponse response = Executor.execute(client, request);
-            
+
             final Contact[] result = jsonArray2ContactArray((JSONArray) response.getData(), columns);
-            
+
             boolean stillGlobal = true;
             int previousCount = Integer.MAX_VALUE;
             for (final Contact contactObject : result) {
@@ -173,7 +173,7 @@ public class SearchTest extends AbstractContactTest {
         } finally {
             deleteContacts(contactIds);
         }
-        
+
     }
 
     // Node 3087
@@ -205,7 +205,7 @@ public class SearchTest extends AbstractContactTest {
 
         return new int[] { objectId1, objectId2, objectId3 };
     }
-    
+
     private int[] insertSearchableContacts() throws IOException, SAXException, JSONException, Exception {
         return insertSearchableContacts(contactFolderId);
     }
@@ -218,7 +218,7 @@ public class SearchTest extends AbstractContactTest {
 
     public void testSearchByFirstAndLastName() throws Exception {
         final int[] objectIds = insertSearchableContacts();
-        
+
         try {
             final ContactSearchObject cso = new ContactSearchObject();
             cso.setSurname("Must*");
@@ -238,7 +238,7 @@ public class SearchTest extends AbstractContactTest {
                 assertTrue(((String) row[1]).startsWith("Must"));
                 assertTrue(((String) row[2]).startsWith("U"));
             }
-            
+
         } finally {
             deleteContacts(objectIds);
         }
@@ -249,13 +249,13 @@ public class SearchTest extends AbstractContactTest {
 
     public void testOrSearchHabit() throws Exception {
         final int[] objectIds = insertSearchableContacts();
-        
+
         try {
             final ContactSearchObject cso = new ContactSearchObject();
             cso.setSurname("Must*");
             cso.setGivenName("Gue*");
             cso.setOrSearch(true);
-            
+
             final SearchRequest search = new SearchRequest(
                 cso,
                 new int[] { Contact.OBJECT_ID, Contact.SUR_NAME, Contact.GIVEN_NAME },
@@ -265,9 +265,9 @@ public class SearchTest extends AbstractContactTest {
             final Object[][] rows = result.getArray();
 
             assertTrue("contact array size > 0. Expected at least 1 result.", rows.length > 0);
-            
+
             boolean foundTom = false, foundUte = false, foundGuenter = false;
-            
+
             for (final Object[] row : rows) {
                 if(row[2].equals("Ute")) {
                     foundUte = true;
@@ -282,7 +282,7 @@ public class SearchTest extends AbstractContactTest {
             assertTrue("Expected Ute Mustermann, but didn't find her", foundUte);
             assertTrue("Expected Tom Mustermann, but didn't find him", foundTom);
             assertTrue("Expected Guenter Glorreich, but didn't find her", foundGuenter);
-            
+
         } finally {
             deleteContacts(objectIds);
         }

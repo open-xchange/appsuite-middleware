@@ -56,7 +56,7 @@ import com.openexchange.groupware.search.Order;
 
 /**
  * {@link AllInfostoreRequest}
- * 
+ *
  * @author <a href="mailto:markus.wagner@open-xchange.com">Markus Wagner</a>
  */
 public class AllInfostoreRequest extends AbstractAllRequest<AbstractColumnsResponse> {

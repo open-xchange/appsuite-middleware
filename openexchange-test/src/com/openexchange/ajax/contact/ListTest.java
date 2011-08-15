@@ -10,11 +10,11 @@ import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.groupware.container.Contact;
 
 public class ListTest extends AbstractContactTest {
-	
+
 	public ListTest(final String name) {
 		super(name);
 	}
-	
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -34,7 +34,6 @@ public class ListTest extends AbstractContactTest {
 		final int cols[] = new int[]{ Contact.OBJECT_ID, Contact.SUR_NAME, Contact.DISPLAY_NAME, Contact.FOLDER_ID } ;
 		
 		final Contact[] contactArray = listContact(objectIdAndFolderId, cols);
-		
 		assertEquals("check response array", 3, contactArray.length);
 		
 		// Check order of returned contacts
@@ -78,7 +77,7 @@ public class ListTest extends AbstractContactTest {
 	    
 	    System.out.println("Duration: " + diff);
 	}
-	
+
 	public void testListWithAllFields() throws Exception {
 		final Contact contactObject = createCompleteContactObject();
 
@@ -87,23 +86,21 @@ public class ListTest extends AbstractContactTest {
 		final int[][] objectIdAndFolderId = { { objectId, contactFolderId } };
 		
 		final Contact[] contactArray = listContact(objectIdAndFolderId, CONTACT_FIELDS);
-		
+
 		assertEquals("check response array", 1, contactArray.length);
-		
+
 		final Contact loadContact = contactArray[0];
-		
+
 		contactObject.setObjectID(objectId);
 		compareObject(contactObject, loadContact);
 	}
 
 	public void testListWithNotExistingEntries() throws Exception {
-		final Contact contactObject = createCompleteContactObject();
-		
+		final Contact contactObject = createCompleteContactObject();		
 		final int objectId = insertContact(contactObject);
 		final int objectId2 = insertContact(contactObject);
-		
 		final int cols[] = new int[]{ Contact.OBJECT_ID, Contact.SUR_NAME, Contact.DISPLAY_NAME } ;
-		
+
 		// not existing object last
 		final int[][] objectIdAndFolderId1 = { { objectId, contactFolderId }, { objectId+100, contactFolderId } };
 		Contact[] contactArray = listContact(objectIdAndFolderId1, cols);		
@@ -113,7 +110,7 @@ public class ListTest extends AbstractContactTest {
 		final int[][] objectIdAndFolderId2 = { { objectId+100, contactFolderId }, { objectId, contactFolderId } };
 		contactArray = listContact(objectIdAndFolderId2, cols);		
 		assertEquals("check response array", 1, contactArray.length);
-		
+
 		// not existing object first
 		final int[][] objectIdAndFolderId3 = { { objectId+100, contactFolderId }, { objectId, contactFolderId }, { objectId2, contactFolderId } };
 		contactArray = listContact(objectIdAndFolderId3, cols);		

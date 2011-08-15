@@ -64,13 +64,13 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link MailParserWriterTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailParserWriterTest extends AbstractMailTest {
 
     /**
-	 * 
+	 *
 	 */
     public MailParserWriterTest() {
         super();

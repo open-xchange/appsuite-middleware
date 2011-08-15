@@ -32,13 +32,13 @@ import com.openexchange.webdav.xml.request.PropFindMethod;
 import com.openexchange.webdav.xml.types.Response;
 
 public class ContactTest extends AbstractWebdavXMLTest {
-	
+
 	protected int contactFolderId = -1;
-	
+
 	private static final String CONTACT_URL = "/servlet/webdav.contacts";
-	
+
 	private long dateTime = 0;
-	
+
 	public ContactTest(final String name) {
 		super(name);
 	}
@@ -46,25 +46,25 @@ public class ContactTest extends AbstractWebdavXMLTest {
 	protected static Date decrementDate(final Date date) {
 	    return new Date(date.getTime() - 1);
 	}
-	
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		
+
 		final FolderObject folderObj = FolderTest.getContactDefaultFolder(webCon, PROTOCOL + hostName, login, password, context);
 		contactFolderId = folderObj.getObjectID();
 		userId = folderObj.getCreatedBy();
-		
+
 		final Calendar c = Calendar.getInstance();
 		c.setTimeZone(TimeZone.getTimeZone("UTC"));
 		c.set(Calendar.HOUR_OF_DAY, 0);
 		c.set(Calendar.MINUTE, 0);
 		c.set(Calendar.SECOND, 0);
 		c.set(Calendar.MILLISECOND, 0);
-		
+
 		dateTime = c.getTimeInMillis();
 	}
-	
+
 	public static void compareObject(final Contact contactObj1, final Contact contactObj2) throws Exception {
 		assertEquals("id is not equals", contactObj1.getObjectID(), contactObj2.getObjectID());
 		assertEquals("folder id is not equals", contactObj1.getParentFolderID(), contactObj2.getParentFolderID());
@@ -164,11 +164,11 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		assertEqualsAndNotNull("userfield20 is not equals", contactObj1.getUserField20(), contactObj2.getUserField20());
 		assertEqualsAndNotNull("number of attachments is not equals", contactObj1.getNumberOfAttachments(), contactObj2.getNumberOfAttachments());
 		assertEqualsAndNotNull("default address is not equals", contactObj1.getDefaultAddress(), contactObj2.getDefaultAddress());
-		
+
 		assertEqualsAndNotNull("links are not equals", links2String(contactObj1.getLinks()), links2String(contactObj2.getLinks()));
 		assertEqualsAndNotNull("distribution list is not equals", distributionlist2String(contactObj1.getDistributionList()), distributionlist2String(contactObj2.getDistributionList()));
 	}
-	
+
 	protected Contact createContactObject(final String displayname) {
 		final Contact contactObj = new Contact();
 		contactObj.setSurName("Meier");
@@ -184,7 +184,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		contactObj.setParentFolderID(contactFolderId);
 		return contactObj;
 	}
-	
+
 	protected Contact createCompleteContactObject() throws Exception {
 		final Contact contactObj = new Contact();
 		contactObj.setPrivateFlag(true);
@@ -281,16 +281,16 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		contactObj.setUserField18("userfield18");
 		contactObj.setUserField19("userfield19");
 		contactObj.setUserField20("userfield20");
-		
+
 		contactObj.setParentFolderID(contactFolderId);
-		
+
 		final Contact link1 = createContactObject("link1");
 		final Contact link2 = createContactObject("link2");
 		final int linkId1 = insertContact(webCon, link1, PROTOCOL + hostName, login, password, context);
 		link1.setObjectID(linkId1);
 		final int linkId2 = insertContact(webCon, link2, PROTOCOL + hostName, login, password, context);
 		link2.setObjectID(linkId2);
-		
+
 		final LinkEntryObject[] links = new LinkEntryObject[2];
 		links[0] = new LinkEntryObject();
 		links[0].setLinkID(link1.getObjectID());
@@ -298,19 +298,19 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		links[1] = new LinkEntryObject();
 		links[1].setLinkID(link2.getObjectID());
 		links[1].setLinkDisplayname(link2.getDisplayName());
-		
+
 		contactObj.setLinks(links);
-		
+
 		final DistributionListEntryObject[] entry = new DistributionListEntryObject[2];
 		entry[0] = new DistributionListEntryObject("displayname a", "a@a.de", DistributionListEntryObject.INDEPENDENT);
 		entry[1] = new DistributionListEntryObject(link1.getDisplayName(), link1.getEmail1(), DistributionListEntryObject.EMAILFIELD1);
 		entry[1].setEntryID(link1.getObjectID());
-		
+
 		contactObj.setDistributionList(entry);
-		
+
 		return contactObj;
 	}
-	
+
 	public static int insertContact(final WebConversation webCon, final Contact contactObj, String host, final String login, final String password, String context) throws OXException, Exception {
 		host = AbstractWebdavXMLTest.appendPrefix(host);
 		contactObj.removeObjectID();
@@ -340,68 +340,68 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		assertTrue("check objectId", objectId > 0);
 		return objectId;
 	}
-	
+
 	public static void updateContact(final WebConversation webCon, final Contact contactObj, final int objectId, final int inFolder, final String host, final String login, final String password, String context) throws OXException, Exception {
 		updateContact(webCon, contactObj, objectId, inFolder, new Date(System.currentTimeMillis() + APPEND_MODIFIED), host, login, password, context);
 	}
-	
+
 	public static void updateContact(final WebConversation webCon, Contact contactObj, int objectId, final int inFolder, final Date lastModified, String host, final String login, final String password, String context) throws OXException, Exception {
 		host = AbstractWebdavXMLTest.appendPrefix(host);
-		
+
 		contactObj.setObjectID(objectId);
 		contactObj.setLastModified(lastModified);
-		
+
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		
+
 		final Element eProp = new Element("prop", webdav);
-		
+
 		final ContactWriter appointmentWriter = new ContactWriter();
 		appointmentWriter.addContent2PropElement(eProp, contactObj, false, true);
 		final Element eInFolder = new Element("infolder", XmlServlet.NS);
 		eInFolder.addContent(String.valueOf(inFolder));
 		eProp.addContent(eInFolder);
-		
+
 		final Document doc = addProp2Document(eProp);
 		final XMLOutputter xo = new XMLOutputter();
 		xo.output(doc, baos);
-		
+
 		baos.toByteArray();
-		
+
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 		final WebRequest req = new PutMethodWebRequest(host + CONTACT_URL, bais, "text/javascript");
 		req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password, context));
 		final WebResponse resp = webCon.getResponse(req);
-		
+
 		assertEquals(207, resp.getResponseCode());
-		
+
 		bais = new ByteArrayInputStream(resp.getText().getBytes());
 		final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.CONTACT);
-		
+
 		assertEquals("check response", 1, response.length);
-		
+
 		if (response[0].hasError()) {
 			throw new TestException(response[0].getErrorMessage());
 		} else {
 			contactObj = (Contact)response[0].getDataObject();
 			objectId = contactObj.getObjectID();
-			
+
 			assertNotNull("last modified is null", contactObj.getLastModified());
 			assertTrue("last modified is not > 0", contactObj.getLastModified().getTime() > 0);
 		}
-		
+
 		assertEquals("check response status", 200, response[0].getStatus());
 	}
-	
+
 	public static int[] deleteContact(final WebConversation webCon, final int[][] objectIdAndFolderId, final String host, final String login, final String password, String context) throws Exception {
 		new ArrayList();
-		
+
 		for (int a = 0; a < objectIdAndFolderId.length; a++) {
 			deleteContact(webCon, objectIdAndFolderId[a][0], objectIdAndFolderId[a][1], host, login, password, context);
 		}
-		
+
 		return new int[] { };
 	}
-	
+
 	/**
 	 * @deprecated use {@link #deleteContact(WebConversation, int, int, Date, String, String, String)}
 	 */
@@ -409,7 +409,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
     public static void deleteContact(final WebConversation webCon, final int objectId, final int inFolder, final String host, final String login, final String password, String context) throws OXException, Exception {
 		deleteContact(webCon, objectId, inFolder, new Date(System.currentTimeMillis() + APPEND_MODIFIED), host, login, password, context);
 	}
-	
+
 	public static void deleteContact(final WebConversation webCon, final int objectId, final int inFolder, final Date lastModified, String host, final String login, final String password, String context) throws OXException, Exception {
 		host = AbstractWebdavXMLTest.appendPrefix(host);
 		final Element rootElement = new Element("multistatus", webdav);
@@ -438,58 +438,58 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.CONTACT);
 		assertEquals("Response of delete strangely contains more than 1 response entities.", 1, response.length);
 		if (response[0].hasError()) {
-			throw new TestException(response[0].getErrorMessage());		
+			throw new TestException(response[0].getErrorMessage());
 		}
 		assertEquals("check response status", 200, response[0].getStatus());
 	}
-	
+
 	public static int[] listContact(final WebConversation webCon, final int inFolder, String host, final String login, final String password) throws Exception {
 		host = AbstractWebdavXMLTest.appendPrefix(host);
-		
+
 		final Element ePropfind = new Element("propfind", webdav);
 		final Element eProp = new Element("prop", webdav);
-		
+
 		final Element eFolderId = new Element("folder_id", XmlServlet.NS);
 		final Element eObjectmode = new Element("objectmode", XmlServlet.NS);
-		
+
 		eFolderId.addContent(String.valueOf(inFolder));
 		eObjectmode.addContent("LIST");
-		
+
 		eProp.addContent(eFolderId);
 		eProp.addContent(eObjectmode);
-		
+
 		ePropfind.addContent(eProp);
-		
+
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		
+
 		final Document doc = new Document(ePropfind);
-		
+
 		final XMLOutputter xo = new XMLOutputter();
 		xo.output(doc, baos);
-		
+
 		baos.flush();
-		
+
 		final HttpClient httpclient = new HttpClient();
-		
+
 		httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
 		final PropFindMethod propFindMethod = new PropFindMethod(host + CONTACT_URL);
 		propFindMethod.setDoAuthentication( true );
-		
+
 		final ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 		propFindMethod.setRequestBody(bais);
-		
+
 		final int status = httpclient.executeMethod(propFindMethod);
-		
+
 		assertEquals("check propfind response", 207, status);
-		
+
         final InputStream body = propFindMethod.getResponseBodyAsStream();
 		final Response[] response = ResponseParser.parse(new SAXBuilder().build(body), Types.CONTACT, true);
-		
+
 		assertEquals("response length not is 1", 1, response.length);
-		
+
 		return (int[])response[0].getDataObject();
 	}
-	
+
 	public static Contact[] listContact(final WebConversation webCon, final int inFolder, final Date modified, final boolean changed, final boolean deleted, String host, final String login, final String password, String context) throws Exception {
 		host = AbstractWebdavXMLTest.appendPrefix(host);
 		if (!changed && !deleted) {
@@ -541,7 +541,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		}
 		return contactArray;
 	}
-	
+
 	public static Contact loadContact(final WebConversation webCon, final int objectId, final int inFolder, String host, final String login, final String password, String context) throws OXException, Exception {
 		host = AbstractWebdavXMLTest.appendPrefix(host);
 		final Element ePropfind = new Element("propfind", webdav);
@@ -575,50 +575,50 @@ public class ContactTest extends AbstractWebdavXMLTest {
         assertEquals("check response status", 200, response[0].getStatus());
 		return (Contact) response[0].getDataObject();
 	}
-	
+
 	private static HashSet links2String(final LinkEntryObject[] linkEntryObject) throws Exception {
 		if (linkEntryObject == null) {
 			return null;
 		}
-		
+
 		final HashSet hs = new HashSet();
-		
+
 		for (int a = 0; a < linkEntryObject.length; a++) {
 			hs.add(link2String(linkEntryObject[a]));
 		}
-		
+
 		return hs;
 	}
-	
+
 	private static String link2String(final LinkEntryObject linkEntryObject) throws Exception {
 		final StringBuffer sb = new StringBuffer();
 		sb.append("ID" + linkEntryObject.getLinkID());
 		sb.append("DISPLAYNAME" + linkEntryObject.getLinkDisplayname());
-		
+
 		return sb.toString();
 	}
-	
+
 	private static HashSet distributionlist2String(final DistributionListEntryObject[] distributionListEntry) throws Exception {
 		if (distributionListEntry == null) {
 			return null;
 		}
-		
+
 		final HashSet hs = new HashSet();
-		
+
 		for (int a = 0; a < distributionListEntry.length; a++) {
 			hs.add(entry2String(distributionListEntry[a]));
 		}
-		
+
 		return hs;
 	}
-	
+
 	private static String entry2String(final DistributionListEntryObject entry) throws Exception {
 		final StringBuffer sb = new StringBuffer();
 		sb.append("ID" + entry.getEntryID());
 		sb.append("D" + entry.getDisplayname());
 		sb.append("F" + entry.getEmailfield());
 		sb.append("E" + entry.getEmailaddress());
-		
+
 		return sb.toString();
 	}
 }

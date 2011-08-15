@@ -53,7 +53,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 public class UserAJAXSuite extends TestSuite {
-	
+
 	public static Test suite(){
 		final TestSuite tests = new TestSuite();
         tests.addTestSuite(GetTest.class);

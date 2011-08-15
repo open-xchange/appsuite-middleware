@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.publish.actions;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i2I;
 import java.util.Arrays;
@@ -63,7 +62,7 @@ import com.openexchange.java.JSON;
 
 /**
  * {@link DeletePublicationRequest}
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class DeletePublicationRequest extends AbstractPublicationRequest<DeletePublicationResponse> {
@@ -90,7 +89,7 @@ public class DeletePublicationRequest extends AbstractPublicationRequest<DeleteP
         this();
         ids = Arrays.asList(i2I(id));
     }
-    
+
     public DeletePublicationRequest(Collection<Integer> ids) {
         this();
         this.ids = ids;

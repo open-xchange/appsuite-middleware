@@ -62,20 +62,20 @@ public class Bug9204Test extends ParticipantNotifyTest {
     public void testDateFormat(){
         final Locale locale = Locale.GERMANY;
         final Calendar calendar = Calendar.getInstance(locale);
-        
+
         calendar.set(2017, 4, 2, 13, 30,0);
         String expect = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss, z").format(calendar.getTime());
-        
+
         DateFormat df = new AppointmentState(null, null, null).getDateFormat(locale);
-        
+
         assertEquals(expect,df.format(calendar.getTime()));
-        
+
         calendar.set(2017, 4, 2, 0, 0, 0);
         expect = "02.05.2017";
-        
+
         df = new TaskState(null, null, null).getDateFormat(locale);
-        
+
         assertEquals(expect,df.format(new Date(calendar.getTimeInMillis())));
-        
+
     }
 }

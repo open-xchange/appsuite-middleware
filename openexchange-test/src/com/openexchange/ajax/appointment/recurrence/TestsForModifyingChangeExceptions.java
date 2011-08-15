@@ -59,7 +59,7 @@ import com.openexchange.groupware.container.Changes;
 public class TestsForModifyingChangeExceptions extends ManagedAppointmentTest {
 
     private int exceptionPosition = 2;
-    
+
     private Changes changes;
 
     private Appointment update;
@@ -105,7 +105,7 @@ public class TestsForModifyingChangeExceptions extends ManagedAppointmentTest {
         assertTrue("Should get exception when trying to make a change exception a series", calendarManager.hasLastException());
         assertEquals("Should have correct exception", 99, ((OXException) calendarManager.getLastException()).getCode());
     }
-    
+
     public void testDeletingAChangeException(){
         Appointment secondUpdate = new Appointment();
         secondUpdate.setParentFolderID(update.getParentFolderID());

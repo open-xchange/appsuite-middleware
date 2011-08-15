@@ -90,7 +90,7 @@ public class Fixture<T> {
                 }
                 final Comparator<Object> comp = getComparator(field);
                 if(comp != null && comp.compare(v1, v2) != 0) {
-                    return false;	
+                    return false;
                 }
                 if(comp == null && !v1.equals(v2)) {
                     return false;
@@ -119,12 +119,12 @@ public class Fixture<T> {
     public T getEntry() {
         return entry;
     }
-    
+
     // Override me!
     public Comparator<Object> getComparator(final String field) {
     	return null;
     }
-    
+
     public Object getAttribute(String attributeName) {
         return attributes.get(attributeName);
     }

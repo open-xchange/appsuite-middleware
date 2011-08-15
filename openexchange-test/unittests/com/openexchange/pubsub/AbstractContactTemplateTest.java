@@ -49,7 +49,6 @@
 
 package com.openexchange.pubsub;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.subscribe.microformats.FormStrings.FORM_LABEL_URL;
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -83,21 +82,21 @@ import freemarker.template.Configuration;
  * derived from this class usually depend on properly setting the path to the templates to be tested. This is set in
  * <code>pubsub.properties</code>. The tests are in the general test repository, because they depend both on the publish bundle (for the
  * templates), the templating bundle (for templating) and the subscribe bundle (for parsing).
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public abstract class AbstractContactTemplateTest extends TestCase {
-    
+
     /**
      * Initializes a new {@link AbstractContactTemplateTest}.
      */
     public AbstractContactTemplateTest() {
         super();
     }
-    
+
     /**
      * Initializes a new {@link AbstractContactTemplateTest}.
-     * 
+     *
      * @param name
      */
     public AbstractContactTemplateTest(String name) {

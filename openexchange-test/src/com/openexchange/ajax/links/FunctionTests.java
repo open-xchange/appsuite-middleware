@@ -49,12 +49,10 @@
 
 package com.openexchange.ajax.links;
 
-import com.openexchange.exception.OXException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
-import com.openexchange.ajax.contact.action.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
@@ -129,9 +127,9 @@ public final class FunctionTests extends AbstractAJAXSession {
         }
         /*
          *  Now Build The Link Object
-         * 
+         *
          */
-        
+
         final LinkObject lo = new LinkObject();
         lo.setFirstFolder(fid1);
         lo.setFirstId(oid1);

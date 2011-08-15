@@ -137,7 +137,7 @@ public class SearchEngineTest extends TestCase {
     }
 
     // Bug 10968
-    
+
     public void testRequestedFieldOrderMayVary() {
         assertSurvivesOrder(new Metadata[]{Metadata.ID_LITERAL, Metadata.FOLDER_ID_LITERAL, Metadata.TITLE_LITERAL});
         assertSurvivesOrder(new Metadata[]{Metadata.FOLDER_ID_LITERAL, Metadata.ID_LITERAL, Metadata.TITLE_LITERAL});
@@ -150,7 +150,7 @@ public class SearchEngineTest extends TestCase {
     public void testSearchForPercent() throws OXException, OXException {
         final DocumentMetadata doc1 = createWithTitle("100%");
                                 createWithTitle("Hallo");
-        
+
 
         final SearchIterator iter = searchEngine.search("%",new Metadata[]{Metadata.ID_LITERAL, Metadata.TITLE_LITERAL}, folderId, Metadata.TITLE_LITERAL, InfostoreSearchEngine.ASC,0,10,ctx, user, userConfig);
 
@@ -191,12 +191,12 @@ public class SearchEngineTest extends TestCase {
 
     private void assertSurvivesOrder(final Metadata[] metadata) {
         try {
-           searchEngine.search("*",metadata,folderId,metadata[0],InfostoreSearchEngine.ASC, 0, 10, ctx, user, userConfig); 
+           searchEngine.search("*",metadata,folderId,metadata[0],InfostoreSearchEngine.ASC, 0, 10, ctx, user, userConfig);
         } catch (final Exception x) {
             fail(x.getMessage());
             x.printStackTrace();
         }
     }
-    
+
 
 }

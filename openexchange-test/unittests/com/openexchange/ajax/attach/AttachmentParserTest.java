@@ -12,9 +12,9 @@ public class AttachmentParserTest extends TestCase {
 
 	public void testParse() throws JSONException{
 		final AttachmentParser parser = new AttachmentParser();
-		
+
 		final AttachmentMetadata attachment = parser.getAttachmentMetadata("{ \"filename\" : \"test.txt\", \"file_mimetype\" :\"text/plain\", \"file_size\" : 12345 , \"folder\" : 23, \"id\" : 24, \"module\" : 25, \"attached\" : 26, \"created_by\" : 27, \"creation_date\":230023 }");
-		
+
 		assertEquals("test.txt",attachment.getFilename());
 		assertEquals("text/plain", attachment.getFileMIMEType());
 		assertEquals(12345,attachment.getFilesize());
@@ -25,7 +25,7 @@ public class AttachmentParserTest extends TestCase {
 		assertEquals(27, attachment.getCreatedBy());
 		assertEquals(230023, attachment.getCreationDate().getTime());
 	}
-	
+
 	public void testNullColumns() throws OXException {
 		final AttachmentParser parser = new AttachmentParser();
 		assertEquals(null, parser.getColumns(null));

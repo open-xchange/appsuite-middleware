@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.contact;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.test.ContactTestManager;
 
@@ -76,43 +75,43 @@ public class Bug13915FileAsViaJSON extends AbstractManagedContactTest{
 	public void testFileAsViaCreate(){
 		contact.setFileAs("filed as");
 		manager.newAction(contact);
-		
+
 		Contact actual = manager.getAction(contact);
-		
+
 		assertEquals("filed as", actual.getFileAs());
 	}
-	
+
 
 	public void testFileAsViaUpdate(){
 		manager.newAction(contact);
-		
+
 		Contact update = new Contact();
 		update.setParentFolderID(contact.getParentFolderID());
 		update.setObjectID(contact.getObjectID());
 		update.setLastModified(contact.getLastModified());
 		update.setFileAs("filed as");
 		manager.updateAction(update);
-		
+
 		Contact actual = manager.getAction(contact);
-		
+
 		assertEquals("filed as", actual.getFileAs());
 	}
-	
+
 
 	public void testFileAsViaUpdate2(){
 		contact.setFileAs("filed as something else");
 		manager.newAction(contact);
-		
-		
+
+
 		Contact update = new Contact();
 		update.setParentFolderID(contact.getParentFolderID());
 		update.setObjectID(contact.getObjectID());
 		update.setLastModified(contact.getLastModified());
 		update.setFileAs("filed as");
 		manager.updateAction(update);
-		
+
 		Contact actual = manager.getAction(contact);
-		
+
 		assertEquals("filed as", actual.getFileAs());
 	}
 }

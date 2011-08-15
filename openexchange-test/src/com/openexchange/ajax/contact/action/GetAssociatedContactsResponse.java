@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.contact.action;
 
-import com.openexchange.exception.OXException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
@@ -76,7 +75,7 @@ public class GetAssociatedContactsResponse extends AbstractAJAXResponse {
     public List<UUID> getUUIDs() throws JSONException {
         List<UUID> results = new LinkedList<UUID>();
         JSONArray arr = (JSONArray) getData();
-                
+
         for(int i = 0, len = arr.length(); i < len; i++){
             UUID temp = UUID.fromString(arr.getString(i));
             results.add( temp);

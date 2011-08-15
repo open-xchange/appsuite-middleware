@@ -59,10 +59,10 @@ import com.openexchange.mail.dataobjects.MailPart;
 
 /**
  * {@link MailGetTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
- * 
+ *
  */
 public final class MailGetTest extends MessageStorageTest {
 
@@ -72,7 +72,7 @@ public final class MailGetTest extends MessageStorageTest {
          * For serialization
          */
         private static final long serialVersionUID = 4645951099640670488L;
-        
+
 
         @Override
         public String getMailId() {
@@ -89,13 +89,13 @@ public final class MailGetTest extends MessageStorageTest {
         @Override
         public void setMailId(final String id) {
             // TODO Auto-generated method stub
-            
+
         }
 
         @Override
         public void setUnreadMessages(final int unreadMessages) {
             // TODO Auto-generated method stub
-            
+
         }
 
         @Override
@@ -130,28 +130,28 @@ public final class MailGetTest extends MessageStorageTest {
         @Override
         public void loadContent() throws OXException {
             // TODO Auto-generated method stub
-            
+
         }
 
         @Override
         public void prepareForCaching() {
             // TODO Auto-generated method stub
-            
+
         }
-        
+
     }
-    
+
     private static char linebreak = '\n';
     private final String brokenContentTypeMail = "Return-Path: <schweigi@open-xchange.com>" + linebreak +
-        "Date: Thu, 20 Sep 2007 11:01:25 +0200" + linebreak + 
+        "Date: Thu, 20 Sep 2007 11:01:25 +0200" + linebreak +
         "From: Thomas Schweiger <schweigi@open-xchange.com>" + linebreak +
-        "To: Thomas Schweiger <schweigi@open-xchange.com>" + linebreak + 
-        "Subject: test PGP signed mail" + linebreak + 
-        "Message-ID: <20070920090125.GA12567@open-xchange.com>" + linebreak + 
+        "To: Thomas Schweiger <schweigi@open-xchange.com>" + linebreak +
+        "Subject: test PGP signed mail" + linebreak +
+        "Message-ID: <20070920090125.GA12567@open-xchange.com>" + linebreak +
         "Mime-Version: 1.0" + linebreak +
         "Content-Type: multipart/signed; micalg=pgp-sha1; protocol=\"application/pgp-signature\" boundary=\"mP3DRpeJDSE+ciuQ\"" + linebreak +
-        "Content-Disposition: inline" + linebreak + 
-        "X-Operating-System: SUSE LINUX" + linebreak + 
+        "Content-Disposition: inline" + linebreak +
+        "X-Operating-System: SUSE LINUX" + linebreak +
         "X-Mailer: Open-Xchange v6.0 Console Mailer" + linebreak +
         "X-PGP-Key: 1024D/D532F2E8" + linebreak +
         "X-PGP-Fingerprint: 815B 2A54 E23A FEF9 1AED 6CF9 2603 813F D532 F2E8" + linebreak +
@@ -163,10 +163,10 @@ public final class MailGetTest extends MessageStorageTest {
         "--mP3DRpeJDSE+ciuQ" + linebreak +
         "Content-Type: text/plain; charset=us-ascii" + linebreak +
         "Content-Disposition: inline" + linebreak +
-        + linebreak + 
+        + linebreak +
         "This mail contains a PGP signature." + linebreak +
         linebreak +
-        linebreak + 
+        linebreak +
         "--mP3DRpeJDSE+ciuQ" + linebreak +
         "Content-Type: application/pgp-signature" + linebreak +
         "Content-Disposition: inline" + linebreak +
@@ -175,14 +175,14 @@ public final class MailGetTest extends MessageStorageTest {
         "Version: GnuPG v1.4.2 (GNU/Linux)" + linebreak +
         linebreak +
         "iD8DBQFG8jblJgOBP9Uy8ugRAp4+AJ9iAZcBh6ke0zrqkrtLMWH+QKfTGgCffF+5" + linebreak +
-        "F2P9TrHERgiiyRTA6x6BR2U=" + linebreak + 
-        "=Wk8C" + linebreak + 
+        "F2P9TrHERgiiyRTA6x6BR2U=" + linebreak +
+        "=Wk8C" + linebreak +
         "-----END PGP SIGNATURE-----" + linebreak +
-        linebreak + 
-        "--mP3DRpeJDSE+ciuQ--" + linebreak; 
+        linebreak +
+        "--mP3DRpeJDSE+ciuQ--" + linebreak;
 
     /**
-     * 
+     *
      */
     public MailGetTest() {
         super();
@@ -208,7 +208,7 @@ public final class MailGetTest extends MessageStorageTest {
             fail("getMessage throws an exception: " + e.getMessage());
         }
     }
-    
+
     public void testMailGetNotExistingFolder() throws OXException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {
@@ -219,7 +219,7 @@ public final class MailGetTest extends MessageStorageTest {
             mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
         }
     }
-    
+
     public void testMailGet() throws OXException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {

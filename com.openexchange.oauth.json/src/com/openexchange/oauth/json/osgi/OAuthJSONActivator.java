@@ -47,36 +47,32 @@
  *
  */
 
-package com.openexchange.folder.json.osgi;
+package com.openexchange.oauth.json.osgi;
 
-import static com.openexchange.folder.json.services.ServiceRegistry.getInstance;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.folder.json.Constants;
-import com.openexchange.folder.json.actions.FolderActionFactory;
-import com.openexchange.folder.json.preferences.Tree;
-import com.openexchange.folder.json.services.ServiceRegistry;
-import com.openexchange.folderstorage.ContentTypeDiscoveryService;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.login.LoginHandlerService;
+import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
+import com.openexchange.oauth.json.oauthaccount.actions.AccountActionFactory;
+import com.openexchange.oauth.json.oauthmeta.actions.MetaDataActionFactory;
+import com.openexchange.oauth.json.service.ServiceRegistry;
+import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
 
 /**
- * {@link Activator} - Activator for JSON folder interface.
+ * {@link OAuthJSONActivator} - Activator for JSON OAuth interface.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Activator extends AJAXModuleActivator {
+public class OAuthJSONActivator extends AJAXModuleActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OAuthJSONActivator.class));
 
-    private String module;
+    private OSGiOAuthService oAuthService;
 
-    private String servletPath;
+    private WhiteboardSecretService secretService;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -85,43 +81,63 @@ public class Activator extends AJAXModuleActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        apply((ConfigurationService) getService(clazz));
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Re-available service: " + clazz.getName());
+        }
+        ServiceRegistry.getInstance().addService(clazz, getService(clazz));
     }
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        restore();
+        if (LOG.isWarnEnabled()) {
+            LOG.warn("Absent service: " + clazz.getName());
+        }
+        ServiceRegistry.getInstance().removeService(clazz);
     }
 
     @Override
     public void startBundle() throws Exception {
         try {
             /*
-             * Configure
+             * (Re-)Initialize service registry with available services
              */
-            apply(getService(ConfigurationService.class));
+            final ServiceRegistry registry = ServiceRegistry.getInstance();
+            registry.clearRegistry();
+            final Class<?>[] classes = getNeededServices();
+            for (final Class<?> classe : classes) {
+                final Object service = getService(classe);
+                if (null != service) {
+                    registry.addService(classe, service);
+                }
+            }
             /*
              * Service trackers
              */
-            track(FolderService.class, new RegistryServiceTrackerCustomizer<FolderService>(context, getInstance(), FolderService.class));
-            track(ContentTypeDiscoveryService.class, new RegistryServiceTrackerCustomizer<ContentTypeDiscoveryService>(
-                context,
-                getInstance(),
-                ContentTypeDiscoveryService.class));
-            track(AdditionalFolderField.class, new FolderFieldCollector(context, Constants.ADDITIONAL_FOLDER_FIELD_LIST));
+            track(OAuthService.class, new RegistryServiceTrackerCustomizer<OAuthService>(context, registry, OAuthService.class));
+            /*
+             * Tracker for HTTPService to register servlets
+             */
+            // trackers.add(new SessionServletRegistration(context, new AccountServlet(), "/ajax/" + AccountMultipleHandlerFactory.MODULE));
+            // trackers.add(new SessionServletRegistration(context,new MetaDataServlet(), "/ajax/" +
+            // MetaDataMultipleHandlerFactory.MODULE));
             /*
              * Open trackers
              */
             openTrackers();
             /*
-             * Register module
+             * Service registrations
              */
-            registerModule(FolderActionFactory.getInstance(), Constants.getModule());
+            registerModule(AccountActionFactory.getInstance(), "oauth/accounts");
+            registerModule(MetaDataActionFactory.getInstance(), "oauth/services");
             /*
-             * Preference item
+             * Apply OAuth service to actions
              */
-            registerService(PreferencesItemService.class, new Tree());
-            registerService(LoginHandlerService.class, new FolderConsistencyLoginHandler());
+            oAuthService = new OSGiOAuthService().start(context);
+            // registry.addService(OAuthService.class, oAuthService);
+            AbstractOAuthAJAXActionService.setOAuthService(oAuthService);
+            secretService = new WhiteboardSecretService(context);
+            secretService.open();
+            AbstractOAuthAJAXActionService.setSecretService(secretService);
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
@@ -131,53 +147,20 @@ public class Activator extends AJAXModuleActivator {
     @Override
     public void stopBundle() throws Exception {
         try {
+            if (secretService != null) {
+                secretService.close();
+            }
             cleanUp();
-            /*
-             * Restore
-             */
-            restore();
+            if (null != oAuthService) {
+                oAuthService.stop();
+                oAuthService = null;
+            }
+            AbstractOAuthAJAXActionService.setOAuthService(null);
+            ServiceRegistry.getInstance().clearRegistry();
         } catch (final Exception e) {
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Activator.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(OAuthJSONActivator.class)).error(e.getMessage(), e);
             throw e;
         }
-    }
-
-    private void apply(final ConfigurationService configurationService) {
-        ServiceRegistry.getInstance().addService(ConfigurationService.class, configurationService);
-        final String tmpModule = configurationService.getProperty("com.openexchange.folder.json.module");
-        if (null != tmpModule) {
-            final String cmod = Constants.getModule();
-            if (!cmod.equals(tmpModule)) {
-                /*
-                 * Remember old module and apply new one
-                 */
-                module = cmod;
-                Constants.setModule(tmpModule);
-            }
-        }
-        final String tmpServletPath = configurationService.getProperty("com.openexchange.folder.json.servletPath");
-        if (null != tmpServletPath) {
-            final String cpath = Constants.getServletPath();
-            if (!cpath.equals(tmpServletPath)) {
-                /*
-                 * Remember old path and apply new one
-                 */
-                servletPath = cpath;
-                Constants.setServletPath(tmpServletPath);
-            }
-        }
-    }
-
-    private void restore() {
-        if (null != module) {
-            Constants.setModule(module);
-            module = null;
-        }
-        if (null != servletPath) {
-            Constants.setServletPath(servletPath);
-            servletPath = null;
-        }
-        ServiceRegistry.getInstance().removeService(ConfigurationService.class);
     }
 
 }

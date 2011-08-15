@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 
 

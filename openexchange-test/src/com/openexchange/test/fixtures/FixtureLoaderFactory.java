@@ -61,20 +61,20 @@ import com.openexchange.subscribe.Subscription;
 import com.openexchange.resource.Resource;
 
 /**
- * @author Francisco Laguna <francisco.laguna@open-xchange.com> 
+ * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class FixtureLoaderFactory {
 
     public static FixtureLoader getLoader() {//TODO add datapath to method signature
     	File datapath = null;
     	final YAMLFixtureLoader loader = new YAMLFixtureLoader();
-    	
+
     	loader.addFixtureFactory(new TaskFixtureFactory(null, loader), Task.class);
-    	// TODO: create and use groupResolver 
+    	// TODO: create and use groupResolver
         loader.addFixtureFactory(new AppointmentFixtureFactory(null, loader), Appointment.class);
         loader.addFixtureFactory(new ContactFixtureFactory(loader), Contact.class);
         loader.addFixtureFactory(new InfoItemFixtureFactory(loader), InfoItem.class);
-        // TODO: create and use TestUserConfigFactory 
+        // TODO: create and use TestUserConfigFactory
         // TODO: create and use ContactFinder
         loader.addFixtureFactory(new CredentialFixtureFactory(null, null, loader), SimpleCredentials.class);
         loader.addFixtureFactory(new GroupFixtureFactory(loader), Group.class);

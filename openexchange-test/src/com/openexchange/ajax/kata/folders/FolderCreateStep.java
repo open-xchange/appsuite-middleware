@@ -47,7 +47,6 @@
 
 package com.openexchange.ajax.kata.folders;
 
-import com.openexchange.exception.OXException;
 import java.util.Date;
 import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.InsertRequest;
@@ -66,7 +65,7 @@ public class FolderCreateStep extends AbstractStep implements IdentitySource<Fol
     private FolderObject entry;
     private boolean inserted;
     private FolderTestManager manager;
-    
+
     public FolderCreateStep(FolderObject entry, String name, String expectedError) {
         super(name, expectedError);
         this.entry = entry;
@@ -83,12 +82,12 @@ public class FolderCreateStep extends AbstractStep implements IdentitySource<Fol
     public void perform(AJAXClient myClient) throws Exception {
         this.client = myClient;
         this.manager = new FolderTestManager(myClient);
-             
+
         InsertRequest insertRequest = new InsertRequest(API.OX_OLD, entry, false);
         CommonInsertResponse insertResponse = execute(insertRequest);
         insertResponse.fillObject(entry);
         inserted = !insertResponse.hasError();
-        checkError(insertResponse);        
+        checkError(insertResponse);
     }
 
     public void assumeIdentity(FolderObject folder) {
@@ -99,13 +98,13 @@ public class FolderCreateStep extends AbstractStep implements IdentitySource<Fol
     }
 
     public void rememberIdentityValues(FolderObject folder) {
-        folder.setLastModified( entry.getLastModified());        
+        folder.setLastModified( entry.getLastModified());
     }
 
     public void forgetIdentity(FolderObject myEntry) {
         inserted = false;
     }
-    
+
     public Class<FolderObject> getType() {
         return FolderObject.class;
     }

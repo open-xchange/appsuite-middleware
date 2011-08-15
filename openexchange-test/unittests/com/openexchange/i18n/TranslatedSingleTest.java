@@ -49,7 +49,6 @@
 
 package com.openexchange.i18n;
 
-import com.openexchange.exception.OXException;
 import java.util.Locale;
 import com.openexchange.groupware.Init;
 import com.openexchange.server.services.I18nServices;

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,67 +47,18 @@
  *
  */
 
-package com.openexchange.user.json.osgi;
+package com.openexchange.server.osgiservice;
 
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.api2.ContactInterfaceFactory;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
-import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
-import com.openexchange.user.UserService;
-import com.openexchange.user.json.Constants;
-import com.openexchange.user.json.actions.UserActionFactory;
-import com.openexchange.user.json.services.ServiceRegistry;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+
 
 /**
- * {@link Activator} - Activator for user component.
+ * {@link SimpleServiceTrackerCustomizer}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Activator extends AJAXModuleActivator {
+public interface SimpleServiceTrackerCustomizer<S> extends ServiceTrackerCustomizer<S, S> {
 
-    /**
-     * Initializes a new {@link Activator}.
-     */
-    public Activator() {
-        super();
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        try {
-            /*
-             * Register user multiple service
-             */
-            registerModule(UserActionFactory.getInstance(), Constants.MODULE);
-            /*
-             * User service tracker
-             */
-            track(UserService.class, new RegistryServiceTrackerCustomizer<UserService>(
-                context,
-                ServiceRegistry.getInstance(),
-                UserService.class));
-            /*
-             * Contact interface factory tracker
-             */
-            track(ContactInterfaceFactory.class, new RegistryServiceTrackerCustomizer<ContactInterfaceFactory>(
-                context,
-                ServiceRegistry.getInstance(),
-                ContactInterfaceFactory.class));
-            track(ContactInterfaceDiscoveryService.class, new RegistryServiceTrackerCustomizer<ContactInterfaceDiscoveryService>(
-                context,
-                ServiceRegistry.getInstance(),
-                ContactInterfaceDiscoveryService.class));
-            openTrackers();
-        } catch (final Exception e) {
-            final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Activator.class));
-            LOG.error(e.getMessage(), e);
-            throw e;
-        }
-    }
+    // Nope
 
 }

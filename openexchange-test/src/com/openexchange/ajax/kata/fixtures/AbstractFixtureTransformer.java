@@ -108,7 +108,7 @@ public abstract class AbstractFixtureTransformer<T> implements FixtureTransforme
         }
         return postfix(fixtureName).contains("update");
     }
-    
+
     protected boolean isDelete(String fixtureName){
         return( postfix(fixtureName).contains("delete") );
     }
@@ -124,7 +124,7 @@ public abstract class AbstractFixtureTransformer<T> implements FixtureTransforme
         }
         return fixtureName.substring(index);
     }
-    
+
     protected String idSourceName(String fixtureName) {
         int index = fixtureName.lastIndexOf('_');
         if (index == -1) {
@@ -145,5 +145,5 @@ public abstract class AbstractFixtureTransformer<T> implements FixtureTransforme
         }
 
     }
-    
+
 }

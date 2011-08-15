@@ -57,7 +57,7 @@ package com.openexchange.ajax.mail.filter.comparison;
 public class ContainsComparison extends AbstractComparison {
 
 	public static final String CONTAINS = "contains";
-	
+
 	public ContainsComparison() {
 		name = CONTAINS;
 	}
@@ -86,12 +86,12 @@ public class ContainsComparison extends AbstractComparison {
 			return false;
 		return true;
 	}
-	
+
 	@Override
     public String toString() {
 		final StringBuffer stringBuffer = new StringBuffer();
 		stringBuffer.append("name: " + name);
-		
+
 		return stringBuffer.toString();
 	}
 }

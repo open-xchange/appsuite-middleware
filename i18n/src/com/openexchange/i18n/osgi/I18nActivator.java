@@ -80,6 +80,10 @@ import com.openexchange.server.osgiservice.BundleServiceTracker;
 
 public class I18nActivator implements BundleActivator {
 
+    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(I18nActivator.class));
+
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
     /**
      * {@link I18nServiceHolderListener} - Properly registers all I18n services defined through property <code>"i18n.language.path"</code>
      * when configuration service is available
@@ -90,7 +94,7 @@ public class I18nActivator implements BundleActivator {
 
         private final ConfigurationServiceHolder csh;
 
-        private ServiceRegistration[] serviceRegistrations;
+        private ServiceRegistration<?>[] serviceRegistrations;
 
         public I18nServiceHolderListener(final BundleContext context, final ConfigurationServiceHolder csh) {
             super();
@@ -111,6 +115,7 @@ public class I18nActivator implements BundleActivator {
 
         @Override
         public void onServiceRelease() throws Exception {
+            // Nope
         }
 
         /**
@@ -131,10 +136,6 @@ public class I18nActivator implements BundleActivator {
         }
     }
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(I18nActivator.class));
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
     /**
      * Reads in all I18n services configured through property <code>"i18n.language.path"</code>, registers them, and returns corresponding
      * service registrations for future unregistration.
@@ -143,13 +144,13 @@ public class I18nActivator implements BundleActivator {
      * @return The corresponding service registrations of registered I18n services
      * @throws FileNotFoundException If directory referenced by <code>"i18n.language.path"</code> does not exist
      */
-    private static ServiceRegistration[] initI18nServices(final BundleContext context, final ConfigurationService config) throws FileNotFoundException {
+    protected static ServiceRegistration<?>[] initI18nServices(final BundleContext context, final ConfigurationService config) throws FileNotFoundException {
 
         final File dir = new File(config.getProperty("i18n.language.path"));
 
         final List<ResourceBundle> resourceBundles = new ResourceBundleDiscoverer(dir).getResourceBundles();
         final List<Translations> translations = new POTranslationsDiscoverer(dir).getTranslations();
-        final List<ServiceRegistration> serviceRegistrations = new ArrayList<ServiceRegistration>();
+        final List<ServiceRegistration<?>> serviceRegistrations = new ArrayList<ServiceRegistration<?>>();
 
         final Map<Locale, List<I18nService>> locales = new HashMap<Locale, List<I18nService>>();
 
@@ -192,7 +193,7 @@ public class I18nActivator implements BundleActivator {
                 i18n = new CompositeI18nTools(list);
             }
 
-            serviceRegistrations.add(context.registerService(I18nService.class.getName(), i18n, prop));
+            serviceRegistrations.add(context.registerService(I18nService.class, i18n, prop));
 
         }
 
@@ -206,7 +207,7 @@ public class I18nActivator implements BundleActivator {
 
     private I18nServiceHolderListener listener;
 
-    private final List<ServiceTracker> serviceTrackerList = new ArrayList<ServiceTracker>();
+    private final List<ServiceTracker<?,?>> serviceTrackerList = new ArrayList<ServiceTracker<?,?>>();
 
     @Override
     public void start(final BundleContext context) throws Exception {
@@ -217,12 +218,12 @@ public class I18nActivator implements BundleActivator {
         try {
             csh = ConfigurationServiceHolder.newInstance();
 
-            serviceTrackerList.add(new ServiceTracker(
+            serviceTrackerList.add(new ServiceTracker<ConfigurationService,ConfigurationService>(
                 context,
                 ConfigurationService.class.getName(),
                 new BundleServiceTracker<ConfigurationService>(context, csh, ConfigurationService.class)));
 
-            for (final ServiceTracker tracker : serviceTrackerList) {
+            for (final ServiceTracker<?,?> tracker : serviceTrackerList) {
                 tracker.open();
             }
 
@@ -257,7 +258,7 @@ public class I18nActivator implements BundleActivator {
             /*
              * Close service trackers
              */
-            for (final ServiceTracker tracker : serviceTrackerList) {
+            for (final ServiceTracker<?,?> tracker : serviceTrackerList) {
                 tracker.close();
             }
             serviceTrackerList.clear();

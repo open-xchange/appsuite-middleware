@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.resource.actions;
 
-import com.openexchange.exception.OXException;
 import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONArray;
@@ -68,7 +67,7 @@ public class ResourceSearchResponse  extends AbstractAJAXResponse{
     protected ResourceSearchResponse(Response response) {
         super(response);
     }
-    
+
     public List<Resource> getResources() throws JSONException{
         List<Resource> list = new LinkedList<Resource>();
         JSONArray data = (JSONArray) getData();

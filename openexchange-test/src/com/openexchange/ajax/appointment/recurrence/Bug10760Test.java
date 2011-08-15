@@ -7,14 +7,14 @@ import java.util.List;
 import com.openexchange.groupware.container.Appointment;
 
 /**
- * 
+ *
  * {@link Bug10760Test}
  * @author Offspring
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - added clean-up
  *
  */
 public class Bug10760Test extends AbstractRecurrenceTest {
-	
+
 	private int objectId;
 
     public Bug10760Test(final String name) {
@@ -40,7 +40,7 @@ public class Bug10760Test extends AbstractRecurrenceTest {
 		appointmentObj.setIgnoreConflicts(true);
 		objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		appointmentObj.setObjectID(objectId);
-		
+
 		appointmentObj.setRecurrencePosition(2);
 		final int newObjectId = updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, timeZone, getHostName(), getSessionId());
 		final List<Integer> tmp = new ArrayList<Integer>();
@@ -76,6 +76,6 @@ public class Bug10760Test extends AbstractRecurrenceTest {
             deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
         }
     }
-	
-	
+
+
 }

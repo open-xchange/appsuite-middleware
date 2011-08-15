@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.actions;
 
-import com.openexchange.exception.OXException;
 import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONException;
@@ -59,7 +58,7 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
  * {@link ReplyRequest}
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class ReplyRequest extends AbstractMailRequest<ReplyResponse> {
@@ -86,7 +85,7 @@ public class ReplyRequest extends AbstractMailRequest<ReplyResponse> {
             return null;
         }
     }
-    
+
     protected boolean failOnError;
 
     protected ViewOption view;
@@ -96,52 +95,52 @@ public class ReplyRequest extends AbstractMailRequest<ReplyResponse> {
     protected String mailID;
 
     public ReplyRequest(){
-        
+
     }
-    
+
     public ReplyRequest(String[] folderAndID){
         this(folderAndID[0], folderAndID[1]);
     }
-    
+
     public ReplyRequest(String folderID, String mailID){
         this.folderID = folderID;
         this.mailID = mailID;
     }
-    
+
     public ViewOption getView() {
         return view;
     }
 
-    
+
     public void setView(ViewOption view) {
         this.view = view;
     }
 
-    
+
     public String getFolderID() {
         return folderID;
     }
 
-    
+
     public void setFolderID(String folderID) {
         this.folderID = folderID;
     }
 
-    
+
     public String getMailID() {
         return mailID;
     }
 
-    
+
     public void setMailID(String mailID) {
         this.mailID = mailID;
     }
-    
+
     public boolean isFailOnError() {
         return failOnError;
     }
 
-    
+
     public void setFailOnError(boolean failOnError) {
         this.failOnError = failOnError;
     }
@@ -153,7 +152,7 @@ public class ReplyRequest extends AbstractMailRequest<ReplyResponse> {
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
         return Method.GET;
     }
-    
+
     public String getAction(){
         return Mail.ACTION_REPLY;
     }

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.framework;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -58,7 +57,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.DataFields;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class CommonListRequest implements AJAXRequest<CommonListResponse> {

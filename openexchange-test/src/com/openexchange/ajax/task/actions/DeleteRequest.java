@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.task.actions;
 
-import com.openexchange.exception.OXException;
 import java.util.Date;
 
 import org.json.JSONException;
@@ -97,7 +96,7 @@ public class DeleteRequest extends AbstractTaskRequest<CommonDeleteResponse> {
     public DeleteRequest(final InsertResponse insert) {
         this(insert.getFolderId(), insert.getId(), insert.getTimestamp(), true);
     }
-    
+
     /**
      * Default constructor.
      */

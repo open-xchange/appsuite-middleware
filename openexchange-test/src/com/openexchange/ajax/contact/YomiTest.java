@@ -61,7 +61,7 @@ import com.openexchange.groupware.container.Contact;
 
 /**
  * {@link YomiTest}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class YomiTest extends AbstractAJAXSession {

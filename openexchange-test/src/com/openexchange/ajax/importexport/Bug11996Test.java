@@ -90,7 +90,7 @@ public final class Bug11996Test extends AbstractAJAXSession {
         }
     }
 
-    private static final String ICAL = 
+    private static final String ICAL =
         "BEGIN:VCALENDAR\n" +
         "VERSION:2.0\n" +
         "PRODID:-//Minter Software//EdgeDesk 4.03 MIMEDIR//EN\n" +

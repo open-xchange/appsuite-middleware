@@ -41,11 +41,11 @@ public class YomiContactSearchTests extends AbstractManagedContactTest {
 	public void tearDown() throws Exception {
 		super.tearDown();
 	}
-	
+
 //	public void testFindByLastName(){
-//		
+//
 //	}
-	
+
 	/**
 	 * This is how the GUI does a search
 	 */
@@ -64,7 +64,7 @@ public class YomiContactSearchTests extends AbstractManagedContactTest {
 		search.setYomiLastName(b);
 		search.setOrSearch(true);
 		Contact[] results= manager.searchAction(search);
-		
+
 		assertEquals("Should find one contact", 1, results.length);
 		assertEquals("Should find the right contact", YOMI_LAST_NAME, results[0].getYomiLastName());
 

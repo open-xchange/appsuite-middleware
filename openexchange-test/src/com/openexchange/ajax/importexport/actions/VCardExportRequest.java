@@ -63,6 +63,6 @@ public class VCardExportRequest extends AbstractExportRequest<VCardExportRespons
 
 
     public AbstractAJAXParser<VCardExportResponse> getParser() {
-        return new VCardExportParser(failOnError); 
+        return new VCardExportParser(failOnError);
     }
 }

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.importexport;
 
-import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
@@ -73,7 +72,7 @@ import com.openexchange.test.OXTestToolkit;
  */
 public class CSVImportExportServletTest extends AbstractImportExportServletTest {
 
-	
+
 	public CSVImportExportServletTest(final String name) {
 		super(name);
 	}
@@ -84,7 +83,7 @@ public class CSVImportExportServletTest extends AbstractImportExportServletTest 
 		final Format format = Format.CSV;
 		final int folderId = createFolder("csv-contact-roundtrip-" + System.currentTimeMillis(),FolderObject.CONTACT);
 		try {
-		
+
 			//test: import
 			InputStream is = new ByteArrayInputStream(insertedCSV.getBytes());
 			WebConversation webconv = getWebConversation();
@@ -93,9 +92,9 @@ public class CSVImportExportServletTest extends AbstractImportExportServletTest 
 					true);
 			req.selectFile("file", "contacts.csv", is, format.getMimeType());
 			WebResponse webRes = webconv.getResource(req);
-			
+
 			extractFromCallback( webRes.getText() );
-			
+
 			//test: export
 			webconv =  getWebConversation();
 			req = new GetMethodWebRequest( getCSVColumnUrl(EXPORT_SERVLET, folderId, format) );
@@ -134,13 +133,13 @@ public class CSVImportExportServletTest extends AbstractImportExportServletTest 
 			removeFolder(folderId);
 		}
 	}
-	
+
 	public void testUnknownCSVFormat() throws Exception{
 		//preparations
 		final String insertedCSV = "bla\nbla\nbla";
 		final Format format = Format.CSV;
 		final int folderId = createFolder("csv-contact-roundtrip-" + System.currentTimeMillis(),FolderObject.CONTACT);
-		
+
 		try {
 			//test: import
 			final InputStream is = new ByteArrayInputStream(insertedCSV.getBytes());
@@ -156,7 +155,7 @@ public class CSVImportExportServletTest extends AbstractImportExportServletTest 
 			removeFolder(folderId);
 		}
 	}
-	
+
 	public void testEmptyFileUploaded() throws Exception{
 		final InputStream is = new ByteArrayInputStream("".getBytes());
 		final WebConversation webconv = getWebConversation();
@@ -174,34 +173,34 @@ public class CSVImportExportServletTest extends AbstractImportExportServletTest 
 			removeFolder(folderId);
 		}
 	}
-	
+
 	public void testImportTwice() throws Exception {
 	  //preparations
         final String insertedCSV = IMPORTED_CSV;
         final Format format = Format.CSV;
         final int folderId = createFolder("csv-contact-double-import-" + System.currentTimeMillis(),FolderObject.CONTACT);
         try {
-        
+
             //test: import
             InputStream is = new ByteArrayInputStream(insertedCSV.getBytes());
             WebConversation webconv = getWebConversation();
-            
+
             // Import once
             WebRequest req = new PostMethodWebRequest(
                     getCSVColumnUrl(IMPORT_SERVLET, folderId, format),
                     true);
             req.selectFile("file", "contacts.csv", is, format.getMimeType());
             WebResponse webRes = webconv.getResource(req);
-            
+
             // Import twice
             is = new ByteArrayInputStream(insertedCSV.getBytes());
             req = new PostMethodWebRequest(getCSVColumnUrl(IMPORT_SERVLET, folderId, format), true);
             req.selectFile("file", "contacts.csv", is, format.getMimeType());
             webRes = webconv.getResource(req);
-        
-            
+
+
             extractFromCallback( webRes.getText() );
-            
+
             //test: export
             webconv =  getWebConversation();
             req = new GetMethodWebRequest( getCSVColumnUrl(EXPORT_SERVLET, folderId, format) );

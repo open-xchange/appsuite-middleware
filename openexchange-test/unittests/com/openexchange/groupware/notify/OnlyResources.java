@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.notify;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.tasks.Task;
 
@@ -59,11 +58,11 @@ public class OnlyResources extends ParticipantNotifyTest {
     public void testOnlyResources() throws Exception {
         final Participant[] participants = getParticipants(U(),G(),S(), R(1));
         final Task t = getTask(participants);
-        
+
         notify.taskCreated(t,session);
-        
+
         final Message msg = notify.getMessages().get(0);
-        
+
         assertNames( msg.addresses, "resource_admin1@test.invalid" );
         assertTrue(msg.internal);
 

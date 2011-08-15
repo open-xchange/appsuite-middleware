@@ -60,31 +60,32 @@ import com.openexchange.oauth.linkedin.LinkedInService;
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class LinkedInServiceRegisterer implements ServiceTrackerCustomizer {
+public class LinkedInServiceRegisterer implements ServiceTrackerCustomizer<LinkedInService,LinkedInService> {
 
     private final BundleContext context;
     private final Activator activator;
 
-    public LinkedInServiceRegisterer(BundleContext context, Activator activator){
+    public LinkedInServiceRegisterer(final BundleContext context, final Activator activator){
+        super();
         this.context = context;
         this.activator = activator;
     }
 
     @Override
-    public Object addingService(ServiceReference reference) {
-        LinkedInService linkedIn = (LinkedInService) context.getService(reference);
+    public LinkedInService addingService(final ServiceReference<LinkedInService> reference) {
+        final LinkedInService linkedIn = context.getService(reference);
         activator.setLinkedInService(linkedIn);
         activator.registerServices();
         return linkedIn;
     }
 
     @Override
-    public void modifiedService(ServiceReference arg0, Object arg1) {
+    public void modifiedService(final ServiceReference<LinkedInService> arg0, final LinkedInService arg1) {
       //nothing to do here
     }
 
     @Override
-    public void removedService(ServiceReference reference, Object arg1) {
+    public void removedService(final ServiceReference<LinkedInService> reference, final LinkedInService arg1) {
         activator.setLinkedInService(null);
         activator.unregisterServices();
         context.ungetService(reference);

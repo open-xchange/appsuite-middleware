@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.notify;
 
-import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.mail.mime.ContentType;
@@ -153,10 +152,10 @@ public class Bug16110Test extends ParticipantNotifyTest {
         +"TRIGGER;RELATED=START:-PT00H15M00S\n"
         +"END:VALARM\n"
         +"END:VEVENT\n"
-        +"END:VCALENDAR\n"; 
-    
-    
-    
+        +"END:VCALENDAR\n";
+
+
+
     public void testAddICalAttachment() throws Exception{
         final AppointmentState state = new AppointmentState(null, null, null);
         final TestMailObject mailObject = new TestMailObject();

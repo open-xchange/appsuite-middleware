@@ -90,45 +90,45 @@ public abstract class AbstractCalendarTest extends TestCase {
     @Override
     public void setUp() throws Exception {
         Init.startServer();
-    
+
         TestEventAdmin.getInstance().clearEvents();
-    
+
         final TestConfig config = new TestConfig();
-    
+
         user = config.getUser();
         secondUser = config.getSecondUser();
         thirdUser = config.getThirdUser();
         fourthUser = config.getFourthUser();
-    
+
         final TestContextToolkit tools = new TestContextToolkit();
         final String ctxName = config.getContextName();
         ctx = null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
-    
+
         appointments = new CommonAppointments(ctx, user);
-    
+
         participant1 = config.getParticipant1();
         participant2 = config.getParticipant2();
         participant3 = config.getParticipant3();
-    
+
         resource1 = config.getResource1();
         resource2 = config.getResource2();
         resource3 = config.getResource3();
-    
+
         folders = new TestFolderToolkit();
-    
+
         group = config.getGroup();
         groupId = tools.resolveGroup(group, ctx);
         final Group group = tools.loadGroup(groupId, ctx);
         final int memberid = group.getMember()[0];
         member = tools.loadUser(memberid, ctx).getLoginInfo();
-    
+
         userId = tools.resolveUser(user, ctx);
         secondUserId = tools.resolveUser(secondUser, ctx);
         thirdUserId = tools.resolveUser(thirdUser, ctx);
         fourthUserId = tools.resolveUser(fourthUser, ctx);
-    
+
         appointments.deleteAll(ctx);
-    
+
         session = tools.getSessionForUser(user, ctx);
         session2 = tools.getSessionForUser(secondUser, ctx);
         session3 = tools.getSessionForUser(thirdUser, ctx);
@@ -208,7 +208,7 @@ public abstract class AbstractCalendarTest extends TestCase {
             private String called;
             List<Object> args = new ArrayList<Object>();
             private Verifyer verifyer;
-    
+
             public void createdChangeExceptionInRecurringAppointment(final Appointment master, final Appointment changeException,final int inFolder, final ServerSession session) {
                 this.called = "createdChangeExceptionInRecurringAppointment";
                 this.args.add(master);
@@ -216,32 +216,32 @@ public abstract class AbstractCalendarTest extends TestCase {
                 this.args.add(session);
                 verifyer.verify(this);
             }
-    
+
             public void clear() {
                 called = null;
                 args.clear();
             }
-    
+
             public String getCalledMethodName() {
                 return called;
             }
-    
+
             public List<Object> getArgs() {
                 return args;
             }
-    
+
             public boolean wasCalled() {
                 return called != null;
             }
-    
+
             public Object getArg(final int i) {
                 return args.get(i);
             }
-    
+
             public Verifyer getVerifyer() {
                 return verifyer;
             }
-    
+
             public void setVerifyer(final Verifyer verifyer) {
                 this.verifyer = verifyer;
             }
@@ -260,7 +260,7 @@ public abstract class AbstractCalendarTest extends TestCase {
     public AbstractCalendarTest(final String name) {
         super(name);
     }
-    
+
     protected CalendarCollection getTools() {
         return new CalendarCollection();
     }

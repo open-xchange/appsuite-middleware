@@ -73,13 +73,13 @@ public class GroupResolver {
     public GroupResolver(AJAXClient client) {
         this.client = client;
     }
-    
+
     public Group[] resolveGroup(String pattern) throws OXException, IOException, SAXException, JSONException, OXException {
         SearchRequest req = new SearchRequest(pattern, false);
         SearchResponse response = client.execute(req);
         return response.getGroups();
     }
-    
+
     public Group[] loadGroups(int...groupIds) throws OXException, IOException, SAXException, JSONException, OXException {
         if(groupIds == null) {
             return new Group[0];

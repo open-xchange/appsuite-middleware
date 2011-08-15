@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import org.json.JSONArray;
 import com.openexchange.ajax.appointment.action.AllRequest;
@@ -64,7 +63,7 @@ import com.openexchange.groupware.container.Appointment;
 
 /**
  * {@link Bug17175Test}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Bug17175Test extends AbstractAJAXSession {
@@ -74,7 +73,7 @@ public class Bug17175Test extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link Bug17175Test}.
-     * 
+     *
      * @param name
      */
     public Bug17175Test(String name) {
@@ -123,10 +122,10 @@ public class Bug17175Test extends AbstractAJAXSession {
                 count++;
             }
         }
-        
+
         assertEquals("Wrong amount of occurrences", 4, count);
     }
-    
+
     @Override
     protected void tearDown() throws Exception {
         getClient().execute(new DeleteRequest(appointment.getObjectID(), appointment.getParentFolderID(), appointment.getLastModified()));

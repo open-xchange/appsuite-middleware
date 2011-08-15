@@ -58,15 +58,15 @@ import com.openexchange.groupware.attach.impl.AttachmentImpl;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class AttachmentMetadataFactory {
-    
+
     public AttachmentMetadataFactory() {
         super();
     }
-    
+
     public AttachmentMetadata newAttachmentMetadata(AttachmentMetadata orig) {
         return new AttachmentImpl(orig);
     }
-    
+
     public AttachmentMetadata newAttachmentMetadata() {
         return new AttachmentImpl();
     }

@@ -72,24 +72,24 @@ public class MailAccountListRequest implements AJAXRequest<MailAccountListRespon
         this.failOnError = failOnError;
         this.ids = ids;
         this.cols = cols;
-        
+
         StringBuilder bob = new StringBuilder();
         for(int colId : cols) {
             bob.append(colId).append(",");
         }
         bob.setLength(bob.length()-1);
         this.columns = bob.toString();
-        
+
         this.idArray = new JSONArray();
         for(int id : ids) {
             idArray.put(id);
         }
     }
-    
+
     public MailAccountListRequest(int[] ids, int[] cols) {
         this(true, ids, cols);
     }
-    
+
     public Object getBody() {
         return idArray;
     }

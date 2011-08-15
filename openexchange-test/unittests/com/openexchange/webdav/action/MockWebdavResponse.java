@@ -10,11 +10,11 @@ import java.util.Map;
 public class MockWebdavResponse implements WebdavResponse {
 
 	private final ByteArrayOutputStream out = new ByteArrayOutputStream();
-	
+
 	private final Map<String,String> headers = new HashMap<String,String>();
 
 	private int status;
-	
+
 	public String getResponseBodyAsString() {
 		try {
 			return new String(out.toByteArray(),"UTF-8");
@@ -39,7 +39,7 @@ public class MockWebdavResponse implements WebdavResponse {
 	public int getStatus() {
 		return status;
 	}
-	
+
 	public void setStatus(final int status) {
 		this.status = status;
 	}

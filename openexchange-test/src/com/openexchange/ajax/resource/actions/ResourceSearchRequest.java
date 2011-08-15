@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.resource.actions;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -71,7 +70,7 @@ public class ResourceSearchRequest extends AbstractResourceRequest<ResourceSearc
         setSearchPattern(pattern);
         setFailOnError(failOnError);
     }
-    
+
     public void setFailOnError(boolean failOnError) {
         this.failOnError = failOnError;
     }

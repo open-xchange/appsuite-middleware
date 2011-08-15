@@ -67,29 +67,21 @@ import com.openexchange.subscribe.yahoo.YahooSubscribeService;
  */
 public class Activator extends HousekeepingActivator {
 
-    private static final Class[] NEEDED = new Class[] { OAuthService.class, ContextService.class, YahooService.class};
-
     private OAuthServiceMetaData oAuthServiceMetaData;
 
     private YahooService yahooService;
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
 
-    /* (non-Javadoc)
-     * @see com.openexchange.server.osgiservice.DeferredActivator#getNeededServices()
-     */
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED;
+        return new Class[] { OAuthService.class, ContextService.class, YahooService.class};
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.server.osgiservice.DeferredActivator#startBundle()
-     */
     @Override
     protected void startBundle() throws Exception {
      // react dynamically to the appearance/disappearance of OAuthMetaDataService for MSN
-        final ServiceTracker metaDataTracker = new ServiceTracker(context, OAuthServiceMetaData.class.getName(), new OAuthServiceMetaDataRegisterer(context, this));
+        final ServiceTracker<OAuthServiceMetaData,OAuthServiceMetaData> metaDataTracker = new ServiceTracker<OAuthServiceMetaData,OAuthServiceMetaData>(context, OAuthServiceMetaData.class, new OAuthServiceMetaDataRegisterer(context, this));
         rememberTracker(metaDataTracker);
         openTrackers();
         yahooService = getService(YahooService.class);

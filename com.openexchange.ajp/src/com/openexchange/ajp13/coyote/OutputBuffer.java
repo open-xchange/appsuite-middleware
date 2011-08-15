@@ -23,14 +23,14 @@ import com.openexchange.ajp13.coyote.util.ByteChunk;
 /**
  * Output buffer. This class is used internally by the protocol implementation. All writes from higher level code should happen via
  * Resonse.doWrite().
- * 
+ *
  * @author Remy Maucherat
  */
 public interface OutputBuffer {
 
     /**
      * Write the response. The caller (servlet container) owns the chunks.
-     * 
+     *
      * @param The chunk data to write
      * @return The number of written bytes
      * @throws IOException If an I/O error occurs

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
-import com.openexchange.exception.OXException;
 import java.util.Calendar;
 import java.util.TimeZone;
 
@@ -113,7 +112,7 @@ public final class Bug12280Test extends AbstractAJAXSession {
         final GetRequest request = new GetRequest(appointment);
         final GetResponse response = client.execute(request);
         response.getAppointment(tz);
-        
+
     }
 
     private final Appointment createAppointment() {

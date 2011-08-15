@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.resource.actions;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -60,15 +59,15 @@ import com.openexchange.resource.json.ResourceParser;
 
 /**
  * {@link ResourceGetResponse} - The response corresponding to GET request
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class ResourceGetResponse extends AbstractAJAXResponse {
 
 	/**
 	 * Initializes a new {@link ResourceGetResponse}
-	 * 
+	 *
 	 * @param response
 	 *            The JSON response container
 	 */
@@ -78,7 +77,7 @@ public final class ResourceGetResponse extends AbstractAJAXResponse {
 
 	/**
 	 * Gets the resource received through GET request
-	 * 
+	 *
 	 * @return The resource received through GET request
 	 * @throws JSONException
 	 *             If a JSON error occurs

@@ -74,7 +74,7 @@ public final class AllAction extends AbstractMailAction {
 
     /**
      * Initializes a new {@link AllAction}.
-     * 
+     *
      * @param services The service look-up
      */
     public AllAction(final ServiceLookup services) {

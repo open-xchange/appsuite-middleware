@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.actions;
 
-import com.openexchange.exception.OXException;
 import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONException;
@@ -60,7 +59,7 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
  * {@link MoveMailRequest}
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class MoveMailRequest extends AbstractMailRequest<UpdateMailResponse> {

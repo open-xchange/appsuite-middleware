@@ -177,7 +177,7 @@ public class Bug12377Test extends AbstractAJAXSession {
         WebConversation conversation = session.getConversation();
         String sessionId = session.getId();
         File file = getFile();
-        
+
         AttachmentClient.attach(conversation, sessionId, appointment.getParentFolderID(), appointment.getObjectID(), Types.APPOINTMENT, file );
     }
 
@@ -194,7 +194,7 @@ public class Bug12377Test extends AbstractAJAXSession {
         getClient().execute(delete);
     }
 
-    
+
     private void verifyAttachments() throws JSONException, IOException, SAXException {
         AJAXClient client = getClient();
         AJAXSession session = client.getSession();

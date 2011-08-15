@@ -52,14 +52,13 @@ package com.openexchange.configuration;
 import com.openexchange.exception.OXException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.conf.AbstractConfig;
 
 /**
  * {@link MailConfig}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class MailConfig extends AbstractConfig {
 
@@ -107,7 +106,7 @@ public final class MailConfig extends AbstractConfig {
 
 		/**
 		 * Default constructor.
-		 * 
+		 *
 		 * @param propertyName
 		 *            Name of the property in the ajax.properties file.
 		 */
@@ -149,7 +148,7 @@ public final class MailConfig extends AbstractConfig {
 
 	/**
 	 * Reads the mail configuration.
-	 * 
+	 *
 	 * @throws OXException
 	 *             if reading configuration fails.
 	 */

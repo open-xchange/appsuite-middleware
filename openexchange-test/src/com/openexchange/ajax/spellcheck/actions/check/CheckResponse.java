@@ -54,9 +54,9 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
  * {@link CheckResponse}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class CheckResponse extends AbstractAJAXResponse {
 
@@ -64,7 +64,7 @@ public final class CheckResponse extends AbstractAJAXResponse {
 
 	/**
 	 * Initializes a new {@link CheckResponse}
-	 * 
+	 *
 	 * @param response
 	 */
 	public CheckResponse(final Response response) {

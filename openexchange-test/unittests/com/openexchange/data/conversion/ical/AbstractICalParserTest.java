@@ -80,7 +80,7 @@ public abstract class AbstractICalParserTest extends TestCase {
     protected MockUserLookup users;
     protected ResourceResolver oldResourceResolver;
     protected UserResolver oldUserResolver;
-   
+
 
     @Override
     protected void setUp() throws Exception {
@@ -142,7 +142,7 @@ public abstract class AbstractICalParserTest extends TestCase {
             }
         };
     }
-    
+
 
     protected List<User> U(final int...ids) {
         final List<User> found = new LinkedList<User>();
@@ -179,12 +179,12 @@ public abstract class AbstractICalParserTest extends TestCase {
     protected List<CalendarDataObject> parseAppointments(final String icalText) throws ConversionError {
         return parseAppointments(icalText, TimeZone.getDefault());
     }
-    
+
     protected List<CalendarDataObject> parseAppointments(final String icalText, final TimeZone defaultTZ) throws ConversionError {
         return parser.parseAppointments(icalText, defaultTZ, new ContextImpl(23), new ArrayList<ConversionError>() , new ArrayList<ConversionWarning>() );
     }
-    
-    
+
+
     //single task
     protected Task parseTask(final String icalText,  final TimeZone defaultTZ) throws ConversionError {
         return parseTasks(icalText,defaultTZ).get(0);
@@ -203,8 +203,8 @@ public abstract class AbstractICalParserTest extends TestCase {
         return parseTasks(icalText, TimeZone.getDefault());
     }
 
-    
-    
+
+
     protected Appointment appointmentWithRecurrence(final String recurrence, final Date start, final Date end) throws ConversionError {
 
         final TimeZone utc = TimeZone.getTimeZone("UTC");
@@ -221,7 +221,7 @@ public abstract class AbstractICalParserTest extends TestCase {
 
         final String icalText = fixtures.vtodoWithSimpleProperties(start, end, "RRULE", recurrence);
         final Task task = parseTask(icalText, utc);
-        
+
         return task;
     }
 

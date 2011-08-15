@@ -62,7 +62,7 @@ import com.openexchange.mail.MailListField;
 
 /**
  * {@link MailSearchTest}
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class MailSearchTest extends AbstractMailTest {
@@ -89,7 +89,7 @@ public class MailSearchTest extends AbstractMailTest {
     public void testSearch() throws Exception {
         String searchText = MAIL_SUBJECT;
         JSONArray search;
-        
+
         search = searchBySubject(searchText);
         assertEquals("Should not yield results in empty folder.", 0, search.length());
 
@@ -100,7 +100,7 @@ public class MailSearchTest extends AbstractMailTest {
         sendMail(generateMail());
         search = searchBySubject(searchText);
         assertEquals("Should yield two results when facing two identical mails.", 2, search.length());
-        
+
         sendMail(generateMail("Different subject than original one." ));
         search = searchBySubject(searchText);
         assertEquals("Should still yield two results after being sent a different one", 2, search.length());

@@ -1,9 +1,8 @@
 /**
- * 
+ *
  */
 package com.openexchange.ajax.framework;
 
-import com.openexchange.exception.OXException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +13,7 @@ import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class MultipleParser<T extends AbstractAJAXResponse> extends AbstractAJAXParser<MultipleResponse<T>> {
@@ -22,7 +21,7 @@ public class MultipleParser<T extends AbstractAJAXResponse> extends AbstractAJAX
     private final AJAXRequest<T>[] requests;
 
     /**
-     * @param requests 
+     * @param requests
      */
     public MultipleParser(final AJAXRequest<T>[] requests) {
         super(true);

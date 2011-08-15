@@ -61,7 +61,7 @@ import com.openexchange.test.fixtures.SimpleCredentials;
 public class CredentialsTransformator implements Transformator {
 
 	private FixtureLoader fixtureLoader;
-	
+
 	public CredentialsTransformator(FixtureLoader fixtureLoader) {
 		super();
 		this.fixtureLoader = fixtureLoader;
@@ -78,7 +78,7 @@ public class CredentialsTransformator implements Transformator {
 			return getCredentials(splitted[0], splitted[1]);
 		}
     }
-	
+
 	private final SimpleCredentials getCredentials(final String fixtureName, final String fixtureEntry) throws OXException {
 		return fixtureLoader.getFixtures(fixtureName, SimpleCredentials.class).getEntry(fixtureEntry).getEntry();
 	}

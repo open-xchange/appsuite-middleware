@@ -51,14 +51,14 @@ package com.openexchange.server.osgiservice;
 
 import org.osgi.framework.ServiceReference;
 
-
 /**
  * {@link SimpleRegistryListener}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface SimpleRegistryListener<T> {
-    public void added(ServiceReference<T> ref, T thing);
 
-    public void removed(ServiceReference<T> ref, T thing);
+    public void added(ServiceReference<T> ref, T service);
+
+    public void removed(ServiceReference<T> ref, T service);
 }

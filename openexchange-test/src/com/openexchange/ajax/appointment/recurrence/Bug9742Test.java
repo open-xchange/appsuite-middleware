@@ -14,7 +14,6 @@ import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.configuration.AJAXConfig;
@@ -85,15 +84,15 @@ public class Bug9742Test extends AbstractAJAXSession {
 		appointmentObj.setRecurrenceCount(5);
 		appointmentObj.setIgnoreConflicts(true);
 		appointmentObj.setTimezone("Europe/Berlin");
-		
+
 		final Calendar calendarRange = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 		calendarRange.set(Calendar.HOUR_OF_DAY, 0);
 		calendarRange.set(Calendar.MINUTE, 0);
 		calendarRange.set(Calendar.SECOND, 0);
 		calendarRange.set(Calendar.MILLISECOND, 0);
-		
+
 		final Date start = calendarRange.getTime();
-		
+
 		calendarRange.add(Calendar.DAY_OF_MONTH, 5);
 
 		final Date end = calendarRange.getTime();
@@ -106,7 +105,7 @@ public class Bug9742Test extends AbstractAJAXSession {
 
 		final String hostname = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
 		final WebConversation webCon = ajaxSession.getConversation();
-		
+
 		final Appointment loadAppointment = AppointmentTest.loadAppointment(webCon, objectId, appointmentFolderId, timeZone, hostname, ajaxSession.getId());
 		final Date modified = loadAppointment.getLastModified();
 
@@ -114,16 +113,16 @@ public class Bug9742Test extends AbstractAJAXSession {
 		final Appointment[] appointmentArray = AppointmentTest.listAppointment(webCon,
 				appointmentFolderId, APPOINTMENT_FIELDS, start, end, timeZone, false, hostname, ajaxSession
 						.getId());
-		
+
 		int appointmentCounter = 0;
 		for (int a = 0; a < appointmentArray.length; a++) {
 			if (appointmentArray[a].getObjectID() == objectId) {
 				appointmentCounter++;
 			}
 		}
-		
+
 		assertEquals("unexpected appointments size", 4, appointmentCounter);
-		
+
 		final DeleteRequest deleteRequest = new DeleteRequest(objectId, appointmentFolderId, modified);
 		Executor.execute(ajaxSession, deleteRequest);
 	}

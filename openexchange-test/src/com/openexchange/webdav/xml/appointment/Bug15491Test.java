@@ -49,7 +49,6 @@
 
 package com.openexchange.webdav.xml.appointment;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.Date;
 import com.openexchange.groupware.container.Appointment;
@@ -57,7 +56,7 @@ import com.openexchange.webdav.xml.AppointmentTest;
 
 /**
  * {@link Bug15491Test}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Bug15491Test extends AppointmentTest {
@@ -67,7 +66,7 @@ public class Bug15491Test extends AppointmentTest {
 
     /**
      * Initializes a new {@link Bug15491Test}.
-     * 
+     *
      * @param name
      */
     public Bug15491Test(String name) {
@@ -93,7 +92,7 @@ public class Bug15491Test extends AppointmentTest {
         }
         super.tearDown();
     }
-    
+
     public void testRead() throws Exception {
         System.currentTimeMillis();
         objectId = insertAppointment(getWebConversation(), appointment, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
@@ -104,7 +103,7 @@ public class Bug15491Test extends AppointmentTest {
         assertFalse("Uid is empty", loadAppointment.getUid().trim().equals(""));
         Date date = new Date(loadAppointment.getLastModified().getTime() - 1);
         Appointment[] listAppointments = listAppointment(getWebConversation(), appointmentFolderId, date, true, true, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
-        
+
         boolean found = false;
         for (Appointment current : listAppointments) {
             if (current.getObjectID() == objectId) {
@@ -116,7 +115,7 @@ public class Bug15491Test extends AppointmentTest {
         }
         assertTrue("Did not find appointment", found);
     }
-    
+
     public void testWrite() throws Exception {
         System.currentTimeMillis();
         appointment.setUid("ichbineineuid");
@@ -126,11 +125,11 @@ public class Bug15491Test extends AppointmentTest {
         assertNotNull("Loaded Appointment is null", loadAppointment);
         assertNotNull("Uid is null", loadAppointment.getUid());
         assertEquals("Wrong Uid", "ichbineineuid", loadAppointment.getUid());
-        
+
         Date date = new Date(loadAppointment.getLastModified().getTime() - 1);
 
         Appointment[] listAppointments = listAppointment(getWebConversation(), appointmentFolderId, date, true, true, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
-        
+
         boolean found = false;
         for (Appointment current : listAppointments) {
             if (current.getObjectID() == objectId) {

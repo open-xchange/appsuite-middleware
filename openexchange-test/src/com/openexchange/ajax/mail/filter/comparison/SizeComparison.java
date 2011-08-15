@@ -57,25 +57,25 @@ package com.openexchange.ajax.mail.filter.comparison;
 public class SizeComparison extends AbstractComparison {
 
 	public static final String SIZE = "size";
-	
+
 	public static final int HIGHER = 1;
-	
+
 	public static final int LOWER = 2;
-	
+
 	protected int comparator;
-	
+
 	protected int size;
-	
+
 	public SizeComparison(final int comparator, final int size) {
 		name = SIZE;
 		this.comparator = comparator;
 		this.size = size;
 	}
-	
+
 	public int getComparator() {
 		return comparator;
 	}
-	
+
 	public int getSize() {
 		return size;
 	}
@@ -108,17 +108,17 @@ public class SizeComparison extends AbstractComparison {
 				return false;
 		} else if (!name.equals(other.name))
 			return false;
-		
+
 		return true;
 	}
-	
+
 	@Override
     public String toString() {
 		final StringBuffer stringBuffer = new StringBuffer();
 		stringBuffer.append("name: " + name + ", ");
 		stringBuffer.append("comperator: " + comparator + ", ");
 		stringBuffer.append("size: " + size);
-		
+
 		return stringBuffer.toString();
 	}
 }

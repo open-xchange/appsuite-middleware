@@ -55,7 +55,7 @@ import com.openexchange.groupware.container.FolderObject;
 
 /**
  * {@link RootRequest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class RootRequest extends AbstractFolderRequest<ListResponse> {

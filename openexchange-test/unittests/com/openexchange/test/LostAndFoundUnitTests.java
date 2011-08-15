@@ -49,7 +49,6 @@
 
 package com.openexchange.test;
 
-import com.openexchange.exception.OXException;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import com.openexchange.config.internal.ConfigurationImplTest;
@@ -87,7 +86,7 @@ import com.openexchange.tools.update.ForeignKeyTest;
 public class LostAndFoundUnitTests {
     public static Test suite() {
         final TestSuite tests = new TestSuite();
-        
+
         tests.addTestSuite(ForeignKeyTest.class);
         tests.addTestSuite(SpecificServiceChooserTest.class);
         tests.addTestSuite(MailPlainTextStructureTest.class);

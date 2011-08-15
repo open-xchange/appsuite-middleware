@@ -77,45 +77,45 @@ public class ConfirmTest extends AbstractTaskTestForAJAXClient {
     public ConfirmTest(String name) {
         super(name);
     }
-    
+
     @Override
     public void setUp() throws Exception{
         super.setUp();
         manager = new TaskTestManager(getClient());
         task = getNewTask(getName());
-        
+
         userId = getClient().getValues().getUserId();
         task.addParticipant(new UserParticipant(userId));
-        
+
         manager.insertTaskOnServer(task);
-        
-       
+
+
     }
-    
+
     @Override
     public void tearDown() throws Exception {
         task.setLastModified(new Date(Long.MAX_VALUE));
         manager.cleanUp();
         super.tearDown();
     }
-    
+
     public void testConfirmWithTaskInParameters() throws OXException, IOException, SAXException, JSONException {
         ConfirmWithTaskInParametersRequest request = new ConfirmWithTaskInParametersRequest(task, Task.ACCEPT, "Confirmanize!");
         getClient().execute(request);
-        
+
         checkTaskOnServer(Task.ACCEPT, "Confirmanize!");
     }
-    
+
     public void testConfirmWithTaskInBody() throws OXException, IOException, SAXException, JSONException {
         ConfirmWithTaskInBodyRequest request = new ConfirmWithTaskInBodyRequest(task, Task.ACCEPT, "Confirmanize!");
         getClient().execute(request);
-        
+
         checkTaskOnServer(Task.ACCEPT, "Confirmanize!");
     }
 
     private void checkTaskOnServer(int confirmmation, String message) {
         Task reloaded = manager.getTaskFromServer(task);
-        
+
         boolean found = false;
         for(UserParticipant user : reloaded.getUsers()) {
             if(user.getIdentifier() == userId) {
@@ -124,9 +124,9 @@ public class ConfirmTest extends AbstractTaskTestForAJAXClient {
                 found = true;
             }
         }
-        
+
         assertTrue(found);
-            
+
     }
 
 }

@@ -60,7 +60,6 @@ import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.AllRequest;
 import com.openexchange.ajax.mail.actions.AllResponse;
 import com.openexchange.ajax.mail.actions.CopyRequest;
-import com.openexchange.ajax.mail.actions.CopyResponse;
 import com.openexchange.ajax.mail.actions.SendRequest;
 import com.openexchange.ajax.mail.actions.SendResponse;
 
@@ -140,8 +139,8 @@ public class CopyTest extends AbstractMailTest {
             fail(allR.getException().toString());
         }
         assertEquals("There should be exactly one message in the destination folder", 1, allR.getMailMessages(COLUMNS_DEFAULT_LIST).length);
-        //        
-        //        
+        //
+        //
         // // Assert the message is in the destination folder
         // GetResponse gr = getClient().execute(new GetRequest(destinationFolderID, newMailID));
         // if (gr.hasError()) {

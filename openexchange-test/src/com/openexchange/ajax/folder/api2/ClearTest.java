@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.folder.api2;
 
-import com.openexchange.exception.OXException;
 import java.util.Date;
 import org.json.JSONArray;
 import com.openexchange.ajax.AppointmentTest;
@@ -72,7 +71,7 @@ import com.openexchange.test.CalendarTestManager;
 
 /**
  * {@link ClearTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ClearTest extends AbstractAJAXSession {
@@ -81,7 +80,7 @@ public class ClearTest extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link ClearTest}.
-     * 
+     *
      * @param name The name of the test.
      */
     public ClearTest(final String name) {

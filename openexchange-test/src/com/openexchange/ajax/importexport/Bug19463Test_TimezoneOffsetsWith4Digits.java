@@ -39,8 +39,8 @@ public class Bug19463Test_TimezoneOffsetsWith4Digits extends
 		+"END:VALARM\n"
 		+"SUMMARY:Neuer Serien-Termin\n"
 		+"LOCATION:\n"
-		+"DESCRIPTION;CHARSET=UTF-8:t\u00e4glich\n" 
-		+" jeden 2. tag\n" 
+		+"DESCRIPTION;CHARSET=UTF-8:t\u00e4glich\n"
+		+" jeden 2. tag\n"
 		+" ab 10.5.\n"
 		+" bis 31.05.\n"
 		+"DTSTART;TZID=W. Europe Standard Time:20110510T170000\n"
@@ -51,11 +51,11 @@ public class Bug19463Test_TimezoneOffsetsWith4Digits extends
 		+"CLASS:PUBLIC\n"
 		+"END:VEVENT\n"
 		+"END:VCALENDAR\n";
-	
+
 	public Bug19463Test_TimezoneOffsetsWith4Digits(String name) {
 		super(name);
 	}
-	
+
 	public void testTimezoneOffsetWith4DigitsIsPassed() throws Exception{
 		ICalImportResponse response = getClient().execute(new ICalImportRequest(folder.getObjectID(), ical, false));
 		assertFalse("Should not fail because of 4-digit timezone code", response.hasError());

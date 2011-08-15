@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
-import com.openexchange.exception.OXException;
 import java.util.Calendar;
 import java.util.TimeZone;
 import com.openexchange.ajax.appointment.action.AllRequest;
@@ -74,12 +73,12 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 
 /**
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  *
  */
 public class Bug17327Test extends AbstractAJAXSession {
-    
+
     AJAXClient client;
     AJAXClient client2;
     FolderObject sharedFolder;
@@ -90,34 +89,34 @@ public class Bug17327Test extends AbstractAJAXSession {
     public Bug17327Test(String name) {
         super(name);
     }
-    
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        
+
         client = getClient();
         tz = client.getValues().getTimeZone();
         client2 = new AJAXClient(User.User2);
-        
+
         // Create shared folder
         sharedFolder = Create.createPrivateFolder("Bug 17327 shared folder", FolderObject.CALENDAR, client.getValues().getUserId());
         sharedFolder.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
         InsertResponse folderInsertResponse = client.execute(new com.openexchange.ajax.folder.actions.InsertRequest(API.OUTLOOK, sharedFolder, true));
         folderInsertResponse.fillObject(sharedFolder);
-        FolderTools.shareFolder(client, API.OUTLOOK, sharedFolder.getObjectID(), client2.getValues().getUserId(), 
+        FolderTools.shareFolder(client, API.OUTLOOK, sharedFolder.getObjectID(), client2.getValues().getUserId(),
             OCLPermission.CREATE_OBJECTS_IN_FOLDER,
             OCLPermission.READ_ALL_OBJECTS,
             OCLPermission.WRITE_ALL_OBJECTS,
             OCLPermission.DELETE_ALL_OBJECTS);
-        
+
         // Create appointment
-        appointment = createAppointment();        
+        appointment = createAppointment();
     }
-    
+
     public void testAlarmInAllRequest() throws Exception {
         AppointmentInsertResponse insertResponse = client.execute(new InsertRequest(appointment, tz, true));
         insertResponse.fillAppointment(appointment);
-        
+
         // Get appointment via AllRequest
         CommonAllResponse allResponseBeforeUpdate = client2.execute(new AllRequest(sharedFolder.getObjectID(), new int[] {Appointment.ALARM}, appointment.getStartDate(), appointment.getEndDate(), tz));
 //        CommonListResponse listResponseBeforeUpdate = client2.execute(new ListRequest(new ListIDs(appointment.getParentFolderID(), appointment.getObjectID()), new int[] {Appointment.ALARM}));
@@ -129,14 +128,14 @@ public class Bug17327Test extends AbstractAJAXSession {
         } else {
             alarmValueInt = (Integer) alarmValue;
         }
-        
+
         assertEquals("Alarm is not equal in All- and GetRequest before update.", getResponseBeforeUpdate.getAppointment(tz).getAlarm(), alarmValueInt);
-        
+
         // Update alarm
         appointment.setAlarm(15);
         UpdateResponse updateResponse = client.execute(new UpdateRequest(appointment, tz));
         appointment.setLastModified(updateResponse.getTimestamp());
-        
+
         // Get appointment via AllRequest
         CommonAllResponse allResponseAfterUpdate = client2.execute(new AllRequest(sharedFolder.getObjectID(), new int[] {Appointment.ALARM}, appointment.getStartDate(), appointment.getEndDate(), tz));
 //        CommonListResponse listResponseAfterUpdate = client2.execute(new ListRequest(new ListIDs(appointment.getParentFolderID(), appointment.getObjectID()), new int[] {Appointment.ALARM}));
@@ -147,19 +146,19 @@ public class Bug17327Test extends AbstractAJAXSession {
         } else {
             alarmValueInt = (Integer) alarmValue;
         }
-        
+
         assertEquals("Alarm is not equal in All- and GetRequest after update.", getResponseAfterUpdate.getAppointment(tz).getAlarm(), alarmValueInt);
     }
-    
+
     @Override
     public void tearDown() throws Exception {
         client.execute(new DeleteRequest(appointment));
-        client.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(API.OUTLOOK, sharedFolder));        
-        client2.logout();        
-        
-        super.tearDown();        
+        client.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(API.OUTLOOK, sharedFolder));
+        client2.logout();
+
+        super.tearDown();
     }
-    
+
     public Appointment createAppointment() throws Exception {
         final Appointment appointment = new Appointment();
         appointment.setTitle("Bug 17327 Testappointment");
@@ -169,8 +168,8 @@ public class Bug17327Test extends AbstractAJAXSession {
         appointment.setStartDate(cal.getTime());
         cal.add(Calendar.HOUR, 2);
         appointment.setEndDate(cal.getTime());
-        
-        return appointment;        
+
+        return appointment;
     }
 
 }

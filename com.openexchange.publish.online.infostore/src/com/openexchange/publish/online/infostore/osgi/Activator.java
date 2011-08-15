@@ -68,31 +68,30 @@ public class Activator extends DeferredActivator {
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
 
     private static final String ALIAS = InfostoreDocumentPublicationService.PREFIX+"*";
-    private static final Class<?>[] NEEDED_SERVICES = {HttpService.class, PublicationDataLoaderService.class, ContextService.class, InfostoreFacade.class, UserService.class, UserConfigurationService.class };
-    private ServiceRegistration serviceRegistration;
+    private ServiceRegistration<PublicationService> serviceRegistration;
     private InfostorePublicationServlet servlet;
 
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
+        return new Class<?>[] {HttpService.class, PublicationDataLoaderService.class, ContextService.class, InfostoreFacade.class, UserService.class, UserConfigurationService.class };
     }
 
     @Override
-    protected void handleAvailability(Class<?> clazz) {
+    protected void handleAvailability(final Class<?> clazz) {
             registerServlet();
     }
 
     @Override
-    protected void handleUnavailability(Class<?> clazz) {
+    protected void handleUnavailability(final Class<?> clazz) {
         unregisterServlet();
     }
 
     @Override
     protected void startBundle() throws Exception {
-        InfostoreDocumentPublicationService infostorePublisher = new InfostoreDocumentPublicationService();
+        final InfostoreDocumentPublicationService infostorePublisher = new InfostoreDocumentPublicationService();
         InfostorePublicationServlet.setInfostoreDocumentPublicationService(infostorePublisher);
-        serviceRegistration = context.registerService(PublicationService.class.getName(), infostorePublisher, null);
+        serviceRegistration = context.registerService(PublicationService.class, infostorePublisher, null);
 
         registerServlet();
 
@@ -109,7 +108,7 @@ public class Activator extends DeferredActivator {
         InfostorePublicationServlet.setContextService(null);
         InfostorePublicationServlet.setPublicationDataLoaderService(null);
 
-        HttpService httpService = getService(HttpService.class);
+        final HttpService httpService = getService(HttpService.class);
         if(httpService != null && servlet != null) {
             httpService.unregister(ALIAS);
             servlet = null;
@@ -118,32 +117,32 @@ public class Activator extends DeferredActivator {
     }
 
     private void registerServlet() {
-        HttpService httpService = getService(HttpService.class);
+        final HttpService httpService = getService(HttpService.class);
         if(httpService == null) {
             return;
         }
 
-        PublicationDataLoaderService dataLoader = getService(PublicationDataLoaderService.class);
+        final PublicationDataLoaderService dataLoader = getService(PublicationDataLoaderService.class);
         if(dataLoader == null) {
             return;
         }
 
-        ContextService contexts = getService(ContextService.class);
+        final ContextService contexts = getService(ContextService.class);
         if(contexts == null) {
             return;
         }
 
-        UserService users = getService(UserService.class);
+        final UserService users = getService(UserService.class);
         if(users == null) {
             return;
         }
 
-        UserConfigurationService userConfigs = getService(UserConfigurationService.class);
+        final UserConfigurationService userConfigs = getService(UserConfigurationService.class);
         if(userConfigs == null) {
             return;
         }
 
-        InfostoreFacade infostore = getService(InfostoreFacade.class);
+        final InfostoreFacade infostore = getService(InfostoreFacade.class);
         if(infostore == null) {
             return;
         }
@@ -158,7 +157,7 @@ public class Activator extends DeferredActivator {
         if(servlet == null) {
             try {
                 httpService.registerServlet(ALIAS, servlet = new InfostorePublicationServlet(), null, null);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 LOG.error(e.getMessage(), e);
             }
         }

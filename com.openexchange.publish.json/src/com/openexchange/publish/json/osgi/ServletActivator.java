@@ -52,8 +52,6 @@ package com.openexchange.publish.json.osgi;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
@@ -69,20 +67,16 @@ import com.openexchange.tools.service.SessionServletRegistration;
 
 public class ServletActivator extends DeferredActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ServletActivator.class));
-
     private static final String TARGET_ALIAS = "ajax/publicationTargets";
     private static final String PUB_ALIAS = "ajax/publications";
 
-    private static final Class<?>[] NEEDED_SERVICES = { HttpService.class, PublicationTargetDiscoveryService.class, ConfigurationService.class };
-
     List<SessionServletRegistration> servletRegistrations = new ArrayList<SessionServletRegistration>(2);
 
-    private final List<ServiceRegistration> serviceRegistrations = new LinkedList<ServiceRegistration>();
+    private final List<ServiceRegistration<?>> serviceRegistrations = new LinkedList<ServiceRegistration<?>>();
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
+        return new Class<?>[] { HttpService.class, PublicationTargetDiscoveryService.class, ConfigurationService.class };
     }
 
     @Override
@@ -105,8 +99,8 @@ public class ServletActivator extends DeferredActivator {
         final PublicationMultipleHandlerFactory publicationHandlerFactory = new PublicationMultipleHandlerFactory(discovery, new EntityMap(), config);
         final PublicationTargetMultipleHandlerFactory publicationTargetHandlerFactory = new PublicationTargetMultipleHandlerFactory(discovery);
 
-        serviceRegistrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), publicationHandlerFactory, null));
-        serviceRegistrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), publicationTargetHandlerFactory, null));
+        serviceRegistrations.add(context.registerService(MultipleHandlerFactoryService.class, publicationHandlerFactory, null));
+        serviceRegistrations.add(context.registerService(MultipleHandlerFactoryService.class, publicationTargetHandlerFactory, null));
 
         PublicationServlet.setFactory(publicationHandlerFactory);
         PublicationTargetServlet.setFactory(publicationTargetHandlerFactory);
@@ -128,7 +122,7 @@ public class ServletActivator extends DeferredActivator {
         PublicationServlet.setFactory(null);
         PublicationTargetServlet.setFactory(null);
 
-        for(final ServiceRegistration registration : serviceRegistrations) {
+        for(final ServiceRegistration<?> registration : serviceRegistrations) {
             registration.unregister();
         }
         serviceRegistrations.clear();

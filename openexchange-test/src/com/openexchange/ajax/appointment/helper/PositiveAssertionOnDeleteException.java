@@ -68,16 +68,16 @@ public class PositiveAssertionOnDeleteException extends AbstractPositiveAssertio
     public void check(Appointment startAppointment, Changes changes, Expectations expectations) {
         int recurrencePosition = (Integer) changes.get(Appointment.RECURRENCE_POSITION);
         Appointment copy = startAppointment.clone();
-        
+
         approachUsedForTest = "Creation, then DeleteException";
-        
-        create(copy);        
+
+        create(copy);
         if(manager.hasLastException())
             fail2("Could not create appointment, error: " + manager.getLastException());
-        
-        
+
+
         manager.createDeleteException(copy, recurrencePosition);
-        
+
         checkViaGet(copy.getParentFolderID(), copy.getObjectID(), expectations);
         checkViaList(copy.getParentFolderID(), copy.getObjectID(), expectations);
     }

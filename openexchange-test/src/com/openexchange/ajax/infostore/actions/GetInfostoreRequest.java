@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.infostore.actions;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
@@ -74,7 +73,7 @@ public class GetInfostoreRequest extends AbstractInfostoreRequest<GetInfostoreRe
     public GetInfostoreRequest() {
         super();
     }
-    
+
     public GetInfostoreRequest(int id) {
         this();
         setId(id);
@@ -90,9 +89,9 @@ public class GetInfostoreRequest extends AbstractInfostoreRequest<GetInfostoreRe
 
     public Parameter[] getParameters() {
         return new Params(
-            AJAXServlet.PARAMETER_ACTION, 
-            AJAXServlet.ACTION_GET, 
-            AJAXServlet.PARAMETER_ID, 
+            AJAXServlet.PARAMETER_ACTION,
+            AJAXServlet.ACTION_GET,
+            AJAXServlet.PARAMETER_ID,
             String.valueOf(getId())).toArray();
     }
 

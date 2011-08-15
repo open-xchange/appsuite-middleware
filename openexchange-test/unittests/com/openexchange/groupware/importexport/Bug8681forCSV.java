@@ -50,14 +50,12 @@
 package com.openexchange.groupware.importexport;
 
 import com.openexchange.exception.OXException;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import junit.framework.JUnit4TestAdapter;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;

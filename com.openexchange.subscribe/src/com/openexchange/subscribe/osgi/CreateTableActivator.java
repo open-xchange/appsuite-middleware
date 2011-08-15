@@ -62,15 +62,15 @@ import com.openexchange.subscribe.database.CreateSubscriptionTables;
  */
 public class CreateTableActivator implements BundleActivator {
 
-    private ServiceRegistration serviceRegistration;
+    private ServiceRegistration<CreateTableService> serviceRegistration;
 
     @Override
-    public void start(BundleContext context) throws Exception {
-        serviceRegistration = context.registerService(CreateTableService.class.getName(), new CreateSubscriptionTables(), null);
+    public void start(final BundleContext context) throws Exception {
+        serviceRegistration = context.registerService(CreateTableService.class, new CreateSubscriptionTables(), null);
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    public void stop(final BundleContext context) throws Exception {
         serviceRegistration.unregister();
     }
 }

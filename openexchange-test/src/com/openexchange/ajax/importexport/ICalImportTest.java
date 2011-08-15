@@ -71,11 +71,11 @@ import com.openexchange.ajax.importexport.actions.ICalImportResponse;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 
 public class ICalImportTest extends AbstractICalTest {
-	
+
 	public ICalImportTest(final String name) {
 		super(name);
 	}
-	
+
 	public void testImportICalWithAppointment() throws Exception {
 		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle("testImportICalWithAppointment" + System.currentTimeMillis());
@@ -83,18 +83,18 @@ public class ICalImportTest extends AbstractICalTest {
 		appointmentObj.setEndDate(endTime);
 		appointmentObj.setShownAs(Appointment.RESERVED);
 		final ImportResult[] importResult = importICal(getWebConversation(), new Appointment[] {appointmentObj}, appointmentFolderId, getHostName(), getSessionId());
-		
+
 		assertEquals("import result size is not 1", 1, importResult.length);
 		assertTrue("server errors of server", importResult[0].isCorrect());
-		
+
 		final int objectId = Integer.parseInt(importResult[0].getObjectId());
-		
+
 		assertTrue("object id is 0", objectId > 0);
-		
+
 		final Appointment[] appointmentArray = exportAppointment(getWebConversation(), appointmentFolderId, timeZone, getHostName(), getSessionId(), null);
-		
+
 		boolean found = false;
-		
+
 		for (int a = 0; a < appointmentArray.length; a++) {
 			if (appointmentArray[a].getTitle().equals(appointmentObj.getTitle())) {
                 appointmentObj.setUntil(appointmentArray[a].getUntil());
@@ -103,41 +103,41 @@ public class ICalImportTest extends AbstractICalTest {
 				found = true;
 			}
 		}
-		
+
 		assertTrue("inserted object not found in response", found);
-		
+
 		AppointmentTest.deleteAppointment(getWebConversation(), Integer.parseInt(importResult[0].getObjectId()), appointmentFolderId, getHostName(), getLogin(), getPassword(), "");
 	}
-	
+
 	public void testImportICalWithTask() throws Exception {
 		final Task taskObj = new Task();
 		taskObj.setTitle("testImportICalWithTask" + System.currentTimeMillis());
 		taskObj.setStartDate(startTime);
 		taskObj.setEndDate(endTime);
 		final ImportResult[] importResult = importICal(getWebConversation(), new Task[] { taskObj }, taskFolderId, getHostName(), getSessionId());
-		
+
 		assertEquals("import result size is not 1", 1, importResult.length);
 		assertTrue("server errors of server", importResult[0].isCorrect());
-		
+
 		final int objectId = Integer.parseInt(importResult[0].getObjectId());
-		
+
 		assertTrue("object id is 0", objectId > 0);
-		
+
 		final Task[] taskArray = exportTask(getWebConversation(), taskFolderId, emailaddress, timeZone, getHostName(), getSessionId(), null);
-		
+
 		boolean found = false;
-		
+
 		for (int a = 0; a < taskArray.length; a++) {
 			if (taskArray[a].getTitle().equals(taskObj.getTitle())) {
 				taskObj.setParentFolderID(0);
 				TaskTest.compareObject(taskObj, taskArray[a]);
-                
+
                 found = true;
 			}
 		}
-		
+
 		assertTrue("inserted object not found in response", found);
-		
+
 		TaskTest.deleteTask(getWebConversation(), Integer.parseInt(importResult[0].getObjectId()), taskFolderId, getHostName(), getLogin(), getPassword(), "");
 	}
     // Bug 12177
@@ -189,12 +189,12 @@ public class ICalImportTest extends AbstractICalTest {
 		final String title1 = "testImportICalWithBrokenAppointment1_" + System.currentTimeMillis();
 		final String title2 = "testImportICalWithBrokenAppointment2_" + System.currentTimeMillis();
 		final String title3 = "testImportICalWithBrokenAppointment3_" + System.currentTimeMillis();
-		
+
 		final StringBuffer stringBuffer = new StringBuffer();
 		stringBuffer.append("BEGIN:VCALENDAR").append('\n');
 		stringBuffer.append("VERSION:2.0").append('\n');
-		stringBuffer.append("PRODID:OPEN-XCHANGE").append('\n');		
-		
+		stringBuffer.append("PRODID:OPEN-XCHANGE").append('\n');
+
 		// app1
 		stringBuffer.append("BEGIN:VEVENT").append('\n');
 		stringBuffer.append("CLASS:PUBLIC").append('\n');
@@ -212,8 +212,8 @@ public class ICalImportTest extends AbstractICalTest {
 		stringBuffer.append("SUMMARY:" + title2).append('\n');
 		stringBuffer.append("TRANSP:OPAQUE").append('\n');
 		stringBuffer.append("END:VEVENT").append('\n');
-		
-		// app3	
+
+		// app3
 		stringBuffer.append("BEGIN:VEVENT").append('\n');
 		stringBuffer.append("CLASS:PUBLIC").append('\n');
 		stringBuffer.append("DTSTART:20070101T080000Z").append('\n');
@@ -223,19 +223,19 @@ public class ICalImportTest extends AbstractICalTest {
 		stringBuffer.append("END:VEVENT").append('\n');
 
 		stringBuffer.append("END:VCALENDAR").append('\n');
-		
+
 		final ImportResult[] importResult = importICal(getWebConversation(), new ByteArrayInputStream(stringBuffer.toString().getBytes()), appointmentFolderId, getHostName(), getSessionId());
-		
+
 		assertEquals("invalid import result array size", 3, importResult.length);
-		
+
 		assertTrue("server errors of server", importResult[0].isCorrect());
 		assertTrue("server errors of server", importResult[1].hasError());
 		assertTrue("server errors of server", importResult[2].isCorrect());
-		
+
 		exportAppointment(getWebConversation(), appointmentFolderId, timeZone, getHostName(), getSessionId(), null);
-		
+
 		AppointmentTest.deleteAppointment(getWebConversation(), Integer.parseInt(importResult[0].getObjectId()), appointmentFolderId, getHostName(), getLogin(), getPassword(), "");
 		AppointmentTest.deleteAppointment(getWebConversation(), Integer.parseInt(importResult[2].getObjectId()), appointmentFolderId, getHostName(), getLogin(), getPassword(), "");
 	}
-	
+
 }

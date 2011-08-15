@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.action;
 
-import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONException;
@@ -75,14 +74,14 @@ public class ConfirmRequest extends AbstractAppointmentRequest<ConfirmResponse> 
     private int user;
 
     private boolean failOnError;
-    
+
     private String mail;
-    
+
     private int type;
 
     /**
      * For external users
-     * 
+     *
      * Initializes a new {@link ConfirmRequest}.
      * @param folderId
      * @param objectId
@@ -104,7 +103,7 @@ public class ConfirmRequest extends AbstractAppointmentRequest<ConfirmResponse> 
 
     /**
      * For internal users
-     * 
+     *
      * Initializes a new {@link ConfirmRequest}.
      * @param folderId
      * @param objectId

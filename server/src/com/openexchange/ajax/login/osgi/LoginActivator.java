@@ -64,21 +64,21 @@ import com.openexchange.config.ConfigurationService;
  */
 public class LoginActivator implements BundleActivator {
 
-    private ServiceTracker tracker;
+    private ServiceTracker<Object, Object> tracker;
 
     public LoginActivator() {
         super();
     }
 
     @Override
-    public void start(BundleContext context) throws Exception {
+    public void start(final BundleContext context) throws Exception {
         final Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + HttpService.class.getName() + "))");
-        tracker = new ServiceTracker(context, filter, new LoginServletRegisterer(context));
+        tracker = new ServiceTracker<Object, Object>(context, filter, new LoginServletRegisterer(context));
         tracker.open();
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    public void stop(final BundleContext context) throws Exception {
         tracker.close();
     }
 }

@@ -61,34 +61,34 @@ import com.openexchange.groupware.tasks.Task;
  *
  */
 public class OverridingTypeTest extends ParticipantNotifyTest {
-    
-    
+
+
     public void testAddingParticipantSetsStateToNew() throws OXException, OXException {
         Participant[] participantsBefore = getParticipants(U(1,2,3), G(), S(), R());
         Participant[] participantsAfter = getParticipants(U(1,2,3,4), G(), S(), R());
-        
+
         Task oldTask = getTask(participantsBefore);
         Task newTask = getTask(participantsAfter);
-        
+
         notify.taskModified(oldTask, newTask, session);
-        
+
         Message message = notify.getMessageForUser(4);
-    
+
         assertEquals(State.Type.NEW, message.overrideType);
     }
-    
+
     public void testRemovingParticipantSetsStateToDeleted() throws OXException, OXException {
         Participant[] participantsBefore = getParticipants(U(1,2,3,4), G(), S(), R());
         Participant[] participantsAfter = getParticipants(U(1,2,3), G(), S(), R());
-        
+
         Task oldTask = getTask(participantsBefore);
         Task newTask = getTask(participantsAfter);
-        
+
         notify.taskModified(oldTask, newTask, session);
-    
+
         Message message = notify.getMessageForUser(4);
-        
+
         assertEquals(State.Type.DELETED, message.overrideType);
-    
+
     }
 }

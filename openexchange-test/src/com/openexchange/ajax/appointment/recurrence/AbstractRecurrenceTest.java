@@ -17,15 +17,15 @@ import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.test.OXTestToolkit;
 
 public class AbstractRecurrenceTest extends AppointmentTest {
-	
+
 	protected static final TimeZone timeZoneUTC = TimeZone.getTimeZone("UTC");
-	
+
 	protected SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-	
+
 	protected SimpleDateFormat simpleDateFormatUTC = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 
 	private static final Log LOG = LogFactory.getLog(AbstractRecurrenceTest.class);
-	
+
 	protected final static int[] _fields = {
 		DataObject.OBJECT_ID,
 		DataObject.CREATED_BY,
@@ -47,18 +47,18 @@ public class AbstractRecurrenceTest extends AppointmentTest {
 		Appointment.RECURRENCE_POSITION,
 		Appointment.TIMEZONE
 	};
-	
+
 	public AbstractRecurrenceTest(final String name) {
 		super(name);
 	}
-	
+
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
 		simpleDateFormatUTC.setTimeZone(timeZoneUTC);
 		simpleDateFormat.setTimeZone(timeZone);
 	}
-	
+
 	protected Occurrence getOccurrenceByPosition(final Occurrence[] occurrenceArray, final int position) {
 		for (int a = 0; a < occurrenceArray.length; a++) {
 			if (occurrenceArray[a].getPosition() == position) {
@@ -67,18 +67,18 @@ public class AbstractRecurrenceTest extends AppointmentTest {
 		}
 		return null;
 	}
-	
+
 	public static void assertOccurrence(final int expectedPosition, final Date expectedStartDate, final Date expectedEndDate, final Occurrence occurrence) throws Exception {
 		assertOccurrence(expectedPosition, expectedStartDate, expectedEndDate, occurrence, timeZoneUTC);
 	}
-	
+
 	public static void assertOccurrence(final int expectedPosition, final Date expectedStartDate, final Date expectedEndDate, final Occurrence occurrence, final TimeZone timeZone) throws Exception {
 		assertNotNull("occurrence is null", occurrence);
 		assertEquals("position is not equals", expectedPosition, occurrence.getPosition());
 		OXTestToolkit.assertEqualsAndNotNull("start date is not equals at position: " + expectedPosition, addOffsetToDate(expectedStartDate, timeZone), addOffsetToDate(occurrence.getStartDate(), timeZone));
 		OXTestToolkit.assertEqualsAndNotNull("end date is not equals at position: " + expectedPosition, addOffsetToDate(expectedEndDate, timeZone), addOffsetToDate(occurrence.getEndDate(), timeZone));
 	}
-	
+
 	public static Date addOffsetToDate(final Date value, final TimeZone timeZone) throws JSONException {
 		final int offset = timeZone.getOffset(value.getTime());
 		return new Date(value.getTime()+offset);

@@ -68,7 +68,7 @@ public class GetRequest extends AbstractContactRequest<GetResponse> {
         this.folderId = folderId;
         this.objectId = objectId;
     }
-    
+
     public RequestEntity getEntity() throws OXException, IOException {
         // TODO Auto-generated method stub
         return null;

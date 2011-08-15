@@ -29,4 +29,4 @@ Import-Package: com.openexchange.ajax,
  org.osgi.framework,
  org.osgi.service.http,
  org.osgi.util.tracker
-Bundle-Activator: com.openexchange.oauth.json.osgi.Activator
+Bundle-Activator: com.openexchange.oauth.json.osgi.OAuthJSONActivator

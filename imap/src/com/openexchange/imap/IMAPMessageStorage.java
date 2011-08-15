@@ -356,6 +356,30 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 } else {
                     throw MIMEMailException.handleMessagingException(e, imapConfig, session);
                 }
+            } catch (final ArrayIndexOutOfBoundsException e) {
+                /*
+                 * May occur while parsing invalid BODYSTRUCTURE response
+                 */
+                if (DEBUG) {
+                    final StringBuilder sb = new StringBuilder(128).append("Fetch with fetch profile failed: ");
+                    for (final Item item : fetchProfile.getItems()) {
+                        sb.append(item.getClass().getSimpleName()).append(',');
+                    }
+                    for (final String name : fetchProfile.getHeaderNames()) {
+                        sb.append(name).append(',');
+                    }
+                    sb.deleteCharAt(sb.length() - 1);
+                    LOG.debug(sb.toString(), e);
+                }
+                if (0 == retry) {
+                    session.setParameter(key, FetchIMAPCommand.NO_BODYSTRUCTURE_PROFILE_MODIFIER);
+                    retry++;
+                } else if (1 == retry) {
+                    session.setParameter(key, FetchIMAPCommand.HEADERLESS_PROFILE_MODIFIER);
+                    retry++;
+                } else {
+                    throw handleRuntimeException(e);
+                }
             } catch (final RuntimeException e) {
                 throw handleRuntimeException(e);
             }

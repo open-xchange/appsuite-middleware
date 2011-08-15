@@ -111,7 +111,7 @@ public class TaskVerificationStep extends NeedExistingStep<Task> {
         super(name, null);
         this.entry = entry;
     }
-    
+
     @Override
     protected void assumeIdentity(Task thing) {
         expectedFolderId = entry.getParentFolderID();
@@ -167,7 +167,7 @@ public class TaskVerificationStep extends NeedExistingStep<Task> {
         checkInList(task, tasks);
 
     }
-    
+
     private void checkViaSearch(Task task) throws OXException, IOException, SAXException, JSONException{
         Object[][] rows = getViaSearch(task);
         checkInList(task, rows, Task.ALL_COLUMNS);
@@ -178,7 +178,7 @@ public class TaskVerificationStep extends NeedExistingStep<Task> {
         CommonAllResponse response = client.execute(all);
         return response.getArray();
     }
-    
+
     private Object[][] getViaSearch(Task task) throws OXException, IOException, SAXException, JSONException{
         TaskSearchObject searchObject = new TaskSearchObject();
         searchObject.addFolder(expectedFolderId);
@@ -332,7 +332,7 @@ public class TaskVerificationStep extends NeedExistingStep<Task> {
                 }
             }
             return participants.toArray(new Participant[participants.size()]);
-            
+
         case Appointment.USERS:
             JSONArray userParticipantArr = (JSONArray) actual;
             List<UserParticipant> userParticipants = new LinkedList<UserParticipant>();
@@ -342,13 +342,13 @@ public class TaskVerificationStep extends NeedExistingStep<Task> {
             }
             return userParticipants.toArray(new UserParticipant[userParticipants.size()]);
         }
-        
+
         return actual;
     }
 
 
     public void cleanUp() throws Exception {
-        
+
     }
 
 

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mailaccount.actions;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
@@ -57,7 +56,7 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
  * {@link MailAccountValidateParser}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MailAccountValidateParser extends AbstractAJAXParser<MailAccountValidateResponse> {

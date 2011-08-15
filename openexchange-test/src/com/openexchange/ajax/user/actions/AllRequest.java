@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.user.actions;
 
-import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONException;
@@ -57,7 +56,7 @@ import com.openexchange.ajax.AJAXServlet;
 
 /**
  * {@link AllRequest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AllRequest extends AbstractUserRequest<AllResponse> {
@@ -85,7 +84,7 @@ public class AllRequest extends AbstractUserRequest<AllResponse> {
 
     /**
      * Gets the sortColumn
-     * 
+     *
      * @return The sortColumn
      */
     public Integer getSortColumn() {
@@ -94,7 +93,7 @@ public class AllRequest extends AbstractUserRequest<AllResponse> {
 
     /**
      * Sets the sortColumn
-     * 
+     *
      * @param sortColumn The sortColumn to set
      */
     public void setSortColumn(final Integer sortColumn) {
@@ -103,7 +102,7 @@ public class AllRequest extends AbstractUserRequest<AllResponse> {
 
     /**
      * Gets the orderDirection
-     * 
+     *
      * @return The orderDirection
      */
     public Boolean getOrderDirection() {
@@ -112,7 +111,7 @@ public class AllRequest extends AbstractUserRequest<AllResponse> {
 
     /**
      * Sets the orderDirection
-     * 
+     *
      * @param orderDirection The orderDirection to set
      */
     public void setOrderDirection(final Boolean orderDirection) {
@@ -121,7 +120,7 @@ public class AllRequest extends AbstractUserRequest<AllResponse> {
 
     /**
      * Gets the leftHandLimit
-     * 
+     *
      * @return The leftHandLimit
      */
     public Integer getLeftHandLimit() {
@@ -130,7 +129,7 @@ public class AllRequest extends AbstractUserRequest<AllResponse> {
 
     /**
      * Sets the leftHandLimit
-     * 
+     *
      * @param leftHandLimit The leftHandLimit to set
      */
     public void setLeftHandLimit(final Integer leftHandLimit) {
@@ -139,7 +138,7 @@ public class AllRequest extends AbstractUserRequest<AllResponse> {
 
     /**
      * Gets the rightHandLimit
-     * 
+     *
      * @return The rightHandLimit
      */
     public Integer getRightHandLimit() {
@@ -148,7 +147,7 @@ public class AllRequest extends AbstractUserRequest<AllResponse> {
 
     /**
      * Sets the rightHandLimit
-     * 
+     *
      * @param rightHandLimit The rightHandLimit to set
      */
     public void setRightHandLimit(final Integer rightHandLimit) {
@@ -157,7 +156,7 @@ public class AllRequest extends AbstractUserRequest<AllResponse> {
 
     /**
      * Gets the cols
-     * 
+     *
      * @return The cols
      */
     public int[] getCols() {

@@ -71,8 +71,8 @@ import com.openexchange.webdav.xml.FolderTest;
 
 /**
  * Test of the ImporterExporter servlet. This class serves as library for all
- * derived tests. 
- * 
+ * derived tests.
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  *
  */
@@ -85,11 +85,11 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
 	public String IMPORT_SERVLET = "import";
 	public String IMPORT_VCARD = "BEGIN:VCARD\nVERSION:3.0\nPRODID:OPEN-XCHANGE\nFN:Prinz\\, Tobias\nN:Prinz;Tobias;;;\nNICKNAME:Tierlieb\nBDAY:19810501\nADR;TYPE=work:;;;Meinerzhagen;NRW;58540;DE\nTEL;TYPE=home,voice:+49 2358 7192\nEMAIL:tobias.prinz@open-xchange.com\nORG:- deactivated -\nREV:20061204T160750.018Z\nURL:www.tobias-prinz.de\nUID:80@ox6.netline.de\nEND:VCARD\n";
 	public String[] IMPORT_VCARD_AWAITED_ELEMENTS = "PRODID:OPEN-XCHANGE\nFN:Prinz\\, Tobias\nN:Prinz;Tobias;;;\nBDAY:19810501\nADR;TYPE=work:;;;Meinerzhagen;NRW;58540;DE\nTEL;TYPE=home,voice:+49 2358 7192\nEMAIL:tobias.prinz@open-xchange.com".split("\n");
-	
+
 	public AbstractImportExportServletTest(final String name){
 		super(name);
 	}
-	
+
 	@Override
 	public void setUp() throws Exception{
 		super.setUp();
@@ -97,12 +97,12 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
 	//  final int userId = uStorage.getUserId( Init.getAJAXProperty("login") );
 	//	sessObj = SessionObjectWrapper.createSessionObject(userId, 1, "csv-roundtrip-test");
 	}
-	
+
 	@Override
 	public void tearDown() throws Exception{
         super.tearDown();
 	}
-	
+
 	protected int getUserId_FIXME() throws MalformedURLException, OXException, IOException, SAXException, JSONException, OXException {
 		final FolderObject folderObj = com.openexchange.ajax.FolderTest
 		.getStandardCalendarFolder(getWebConversation(),
@@ -122,38 +122,38 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
 		addParam(bob, ImportExport.PARAMETER_ACTION, format.getConstantName());
 		return bob.toString();
 	}
-	
+
 	public String getCSVColumnUrl(final String servlet, final int folderId, final Format format) throws IOException, OXException, JSONException{
 		final StringBuilder bob = new StringBuilder(getUrl(servlet, folderId, format));
-		
+
 		addParam(bob, ImportExport.PARAMETER_COLUMNS, ContactField.GIVEN_NAME.getNumber());
 		addParam(bob, ImportExport.PARAMETER_COLUMNS, ContactField.EMAIL1.getNumber());
 		addParam(bob, ImportExport.PARAMETER_COLUMNS, ContactField.DISPLAY_NAME.getNumber());
-		return bob.toString();		
+		return bob.toString();
 	}
-	
+
 	protected void addParam(final StringBuilder bob, final String param, final String value){
 		bob.append("&");
 		bob.append(param);
 		bob.append("=");
 		bob.append(value);
 	}
-	
+
 	protected void addParam(final StringBuilder bob, final String param, final int value){
 		addParam(bob, param, Integer.toString(value));
 	}
-	
+
 	protected int createFolder(final String title, final int folderObjectModuleID) throws Exception{
 		final FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName(title);
 		folderObj.setParentFolderID(FolderObject.PRIVATE);
 		folderObj.setModule(folderObjectModuleID);
 		folderObj.setType(FolderObject.PRIVATE);
-		
+
 		final OCLPermission[] permission = new OCLPermission[] {
 			FolderTest.createPermission( getUserId_FIXME(), false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION),
 		};
-		
+
 		folderObj.setPermissionsAsArray( permission );
 		try{
 			return FolderTest.insertFolder(getWebConversation(), folderObj, getHostName(), getLogin(), getPassword(), "");
@@ -161,16 +161,16 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
 			return -1;
 		}
 	}
-	
+
 	protected void removeFolder( final int folderId) throws OXException, Exception{
 		if(folderId == -1){
 			return;
 		}
 		FolderTest.deleteFolder(getWebConversation(), new int[] { folderId }, getHostName(), getLogin(), getPassword(), "");
 	}
-	
 
-	
+
+
 	public static void assertEquals(final String message, final List l1, final List l2){
 		if(l1.size() != l2.size()) {
 			fail(message);
@@ -180,6 +180,6 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
 			assertTrue(message,s.remove(o));
 		}
 	}
-	
-	
+
+
 }

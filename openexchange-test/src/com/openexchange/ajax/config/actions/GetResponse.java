@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.config.actions;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -57,7 +56,7 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class GetResponse extends AbstractAJAXResponse {
@@ -82,7 +81,7 @@ public class GetResponse extends AbstractAJAXResponse {
 
     /**
      * Checks if obtained value is not <code>null</code>
-     * 
+     *
      * @return <code>true</code> if obtained value is not <code>null</code>; otherwise <code>false</code>
      */
     public boolean hasValue() {
@@ -92,7 +91,7 @@ public class GetResponse extends AbstractAJAXResponse {
 
     /**
      * Gets the <code>int</code> value or <code>-1</code> if not present.
-     * 
+     *
      * @return The <code>int</code> value or <code>-1</code> if not present
      */
     public int getInteger() {
@@ -102,7 +101,7 @@ public class GetResponse extends AbstractAJAXResponse {
 
     /**
      * Gets the <code>java.lang.String</code> value or <code>null</code> if not present.
-     * 
+     *
      * @return The <code>java.lang.String</code> value or <code>null</code> if not present
      */
     public String getString() {
@@ -112,7 +111,7 @@ public class GetResponse extends AbstractAJAXResponse {
 
     /**
      * Gets the <code>long</code> value or <code>-1</code> if not present.
-     * 
+     *
      * @return The <code>long</code> value or <code>-1</code> if not present
      */
     public long getLong() {
@@ -122,7 +121,7 @@ public class GetResponse extends AbstractAJAXResponse {
 
     /**
      * Gets the <code>boolean</code> value or <code>false</code> if not present.
-     * 
+     *
      * @return The <code>boolean</code> value or <code>false</code> if not present
      */
     public boolean getBoolean() {
@@ -132,7 +131,7 @@ public class GetResponse extends AbstractAJAXResponse {
 
     /**
      * Gets the <code>java.lang.Object[]</code> value or <code>null</code> if not present.
-     * 
+     *
      * @return The <code>java.lang.Object[]</code> value or <code>null</code> if not present
      */
     public Object[] getArray() throws JSONException {
@@ -150,7 +149,7 @@ public class GetResponse extends AbstractAJAXResponse {
 
     /**
      * Gets the <code>org.json.JSONObject</code> value or <code>null</code> if not present.
-     * 
+     *
      * @return The <code>org.json.JSONObject</code> value or <code>null</code> if not present
      */
     public JSONObject getJSON() {

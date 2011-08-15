@@ -70,7 +70,7 @@ public final class DatabaseFolderStorageActivator extends DeferredActivator {
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DatabaseFolderStorageActivator.class));
 
-    private ServiceRegistration folderStorageRegistration;
+    private ServiceRegistration<FolderStorage> folderStorageRegistration;
 
     /**
      * Initializes a new {@link DatabaseFolderStorageActivator}.
@@ -120,7 +120,7 @@ public final class DatabaseFolderStorageActivator extends DeferredActivator {
             // Register folder storage
             final Dictionary<String, String> dictionary = new Hashtable<String, String>();
             dictionary.put("tree", FolderStorage.REAL_TREE_ID);
-            folderStorageRegistration = context.registerService(FolderStorage.class.getName(), new DatabaseFolderStorage(), dictionary);
+            folderStorageRegistration = context.registerService(FolderStorage.class, new DatabaseFolderStorage(), dictionary);
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;

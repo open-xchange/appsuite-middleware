@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.group;
 
-import com.openexchange.exception.OXException;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -88,7 +87,7 @@ public final class FunctionTest extends AbstractAJAXSession {
     private static final Log LOG = LogFactory.getLog(FunctionTest.class);
 
     private Set<Integer> groupsToDelete;
-    
+
     /**
      * @param name
      */
@@ -147,19 +146,19 @@ public final class FunctionTest extends AbstractAJAXSession {
         JSONArray arr = (JSONArray) listResponse.getResponse().getData();
         assertContainsLastModifiedUTC(arr);
     }
-    
+
     public void testAllWithMembers() throws Throwable {
     	int groupLengthBySearch = getClient().execute(new SearchRequest("*")).getGroups().length;
-    	
+
         AllRequest allRequest = new AllRequest(Group.ALL_COLUMNS, true);
 		AllResponse allResponse = getClient().execute(allRequest);
         JSONArray data = (JSONArray) allResponse.getData();
-        
+
         int groupLengthByAll = data.length();
-        
+
         assertEquals(groupLengthBySearch, groupLengthByAll);
-        
-        int memberPos = 4; 
+
+        int memberPos = 4;
         int memberCount = 0;
 		for(int i = 0; i < data.length(); i++){
 			JSONArray row = data.getJSONArray(i);
@@ -168,45 +167,45 @@ public final class FunctionTest extends AbstractAJAXSession {
         }
         assertTrue(memberCount > 0);
     }
-    
+
 
     public void testAllWithoutMembers() throws Throwable {
     	int groupLengthBySearch = getClient().execute(new SearchRequest("*")).getGroups().length;
-    	
+
         AllResponse allResponse = getClient().execute(new AllRequest(Group.ALL_COLUMNS_EXCEPT_MEMBERS, true));
         JSONArray data = (JSONArray) allResponse.getData();
-        
+
         int groupLengthByAll = data.length();
-        
+
         assertEquals(groupLengthBySearch, groupLengthByAll);
-        
+
         int arrLen = Group.ALL_COLUMNS_EXCEPT_MEMBERS.length;
 		for(int i = 0; i < data.length(); i++){
 			JSONArray row = data.getJSONArray(i);
 			assertEquals(arrLen, row.length());
         }
     }
-    
+
     public void testUpdatesViaComparingWithSearch() throws Exception {
         Group[] groupsViaSearch = getClient().execute(new SearchRequest("*")).getGroups();
         UpdatesResponse response = getClient().execute(new UpdatesRequest(new Date(0), false));
         List<Group> groupsViaUpdates = response.getModified();
         assertEquals("Should find the same amount of groups via *-search as via updates since day 0", groupsViaSearch.length, groupsViaUpdates.size());
     }
-    
+
     public void testUpdatesViaCreateAndDelete() throws Exception {
         int GROUP0 = 1; // group 0 always has a very high creation date since it is automatically generated, so this will be included most of the time
         Group group = new Group();
         group.setSimpleName("simplename_"+new Date().getTime());
         group.setDisplayName("Group Updates Test"+new Date());
-        
+
         CreateResponse createResponse = getClient().execute(new CreateRequest(group,true));
         int id = createResponse.getId();
         group.setIdentifier(id);
         groupsToDelete.add(id);
         group.setLastModified(createResponse.getTimestamp());
         Date lm = new Date(group.getLastModified().getTime() - 1);
-                
+
         UpdatesResponse updatesResponseAfterCreate = getClient().execute(new UpdatesRequest(lm, true));
         int numberNewAfterCreation = updatesResponseAfterCreate.getNew().size();
         int numberModifiedAfterCreation = updatesResponseAfterCreate.getModified().size();
@@ -214,11 +213,11 @@ public final class FunctionTest extends AbstractAJAXSession {
         assertEquals("Amount of modified elements should have increased after creation", 1+GROUP0, numberModifiedAfterCreation);
         assertEquals("Amount of deleted elements should not change after creation", 0+GROUP0, numberDeletedAfterCreation);
         assertEquals("Amount of new elements should equal modfied elements, since we cannot distinguish between the two", numberNewAfterCreation, numberModifiedAfterCreation);
-        
+
         DeleteResponse deleteResponse = getClient().execute(new DeleteRequest(group, true));
         if(deleteResponse.hasError())
             groupsToDelete.remove(id);
-        
+
         UpdatesResponse updatesResponseAfterDeletion = getClient().execute(new UpdatesRequest(lm, true));
         int numberNewAfterDeletion = updatesResponseAfterDeletion.getNew().size();
         int numberModifiedAfterDeletion = updatesResponseAfterDeletion.getModified().size();
@@ -228,7 +227,7 @@ public final class FunctionTest extends AbstractAJAXSession {
         assertEquals("Amount of new elements should equal modfied elements, since we cannot distinguish between the two", numberNewAfterDeletion, numberModifiedAfterDeletion);
     }
 
-    
+
     public void assertContainsLastModifiedUTC(JSONArray arr) {
         for(int i = 0, size = arr.length(); i < size; i++) {
             JSONObject entry = arr.optJSONObject(i);

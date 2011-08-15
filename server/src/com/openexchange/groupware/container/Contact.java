@@ -341,7 +341,7 @@ public class Contact extends CommonObject implements Serializable {
         FOLDER_ID,
         // From DataObject
         OBJECT_ID, CREATED_BY, MODIFIED_BY, CREATION_DATE, LAST_MODIFIED, LAST_MODIFIED_UTC });
-    
+
     public static final int[] JSON_COLUMNS = com.openexchange.tools.arrays.Arrays.addUniquely(CONTENT_COLUMNS, new int[] {
         OBJECT_ID, CREATED_BY, MODIFIED_BY, CREATION_DATE, LAST_MODIFIED, LAST_MODIFIED_UTC,
         USE_COUNT, FILE_AS, NUMBER_OF_IMAGES, INTERNAL_USERID, CATEGORIES, FOLDER_ID, IMAGE1_URL, LAST_MODIFIED_OF_NEWEST_ATTACHMENT,

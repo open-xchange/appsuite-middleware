@@ -67,15 +67,15 @@ import com.openexchange.resource.Resource;
 
 /**
  * {@link AbstractResourceTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public abstract class AbstractResourceTest extends AbstractAJAXSession {
 
 	/**
 	 * Default constructor.
-	 * 
+	 *
 	 * @param name
 	 *            name of the test.
 	 */
@@ -85,7 +85,7 @@ public abstract class AbstractResourceTest extends AbstractAJAXSession {
 
 	/**
 	 * Gets the client time zone
-	 * 
+	 *
 	 * @return The client time zone
 	 * @throws OXException
 	 *             If an AJAX error occurs
@@ -102,7 +102,7 @@ public abstract class AbstractResourceTest extends AbstractAJAXSession {
 
 	/**
 	 * Gets the resource identified through specified <code>resourceId</code>
-	 * 
+	 *
 	 * @param resourceId
 	 *            The resource ID
 	 * @return The resource identified through specified <code>resourceId</code>
@@ -127,7 +127,7 @@ public abstract class AbstractResourceTest extends AbstractAJAXSession {
 	/**
 	 * Deletes the resource identified through specified <code>resourceId</code>
 	 * .
-	 * 
+	 *
 	 * @param resourceId
 	 *            The resource ID
 	 * @throws OXException
@@ -157,7 +157,7 @@ public abstract class AbstractResourceTest extends AbstractAJAXSession {
 
 	/**
 	 * Creates specified resource
-	 * 
+	 *
 	 * @param toCreate
 	 *            The resource to create
 	 * @return The ID of the newly created resource

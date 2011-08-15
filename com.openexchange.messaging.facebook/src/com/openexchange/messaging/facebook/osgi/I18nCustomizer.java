@@ -60,7 +60,7 @@ import com.openexchange.messaging.facebook.I18n;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class I18nCustomizer implements ServiceTrackerCustomizer {
+public class I18nCustomizer implements ServiceTrackerCustomizer<I18nService,I18nService> {
 
     private final BundleContext context;
 
@@ -75,8 +75,8 @@ public class I18nCustomizer implements ServiceTrackerCustomizer {
     }
 
     @Override
-    public Object addingService(final ServiceReference reference) {
-        final I18nService service = (I18nService) context.getService(reference);
+    public I18nService addingService(final ServiceReference<I18nService> reference) {
+        final I18nService service = context.getService(reference);
         if (I18n.getInstance().addI18nService(service)) {
             return service;
         }
@@ -85,14 +85,14 @@ public class I18nCustomizer implements ServiceTrackerCustomizer {
     }
 
     @Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<I18nService> reference, final I18nService service) {
         // Nothing to do.
     }
 
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
+    public void removedService(final ServiceReference<I18nService> reference, final I18nService service) {
         if (null != service) {
-            final I18nService i18nService = (I18nService) service;
+            final I18nService i18nService = service;
             I18n.getInstance().removeI18nService(i18nService);
             context.ungetService(reference);
         }

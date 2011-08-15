@@ -49,7 +49,6 @@
 
 package com.openexchange.test.osgi;
 
-import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -71,7 +70,7 @@ import com.openexchange.tools.URLParameter;
 
 /**
  * {@link BundleTestCache} - Test absence of cache bundle
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class BundleTestCache extends AbstractBundleTest {

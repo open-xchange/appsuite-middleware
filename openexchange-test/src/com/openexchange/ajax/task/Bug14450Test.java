@@ -131,7 +131,7 @@ public class Bug14450Test extends AbstractTaskTest {
         Object actualCosts = response.getValue(0, Task.ACTUAL_COSTS);
         assertNull("Actual costs should not be set.", actualCosts);
     }
-    
+
     private static final class NullSendingInsertRequest extends InsertRequest {
 
         public NullSendingInsertRequest(Task task, TimeZone timeZone) {

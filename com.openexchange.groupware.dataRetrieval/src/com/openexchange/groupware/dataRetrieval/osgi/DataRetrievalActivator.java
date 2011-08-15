@@ -73,8 +73,6 @@ import com.openexchange.tools.service.SessionServletRegistration;
  */
 public class DataRetrievalActivator extends DeferredActivator {
 
-    private static final Class<?>[] NEEDED_SERVICES = new Class<?>[] { HttpService.class, SessionSpecificContainerRetrievalService.class, ConfigurationService.class };
-
     private static final String NAMESPACE = "com.openexchange.groupware.dataRetrieval.tokens";
 
     private OSGIDataProviderRegistry dataProviderRegistry;
@@ -83,20 +81,20 @@ public class DataRetrievalActivator extends DeferredActivator {
 
     private ServletRegistration servletRegistration2;
 
-    private ServiceRegistration registration1;
+    private ServiceRegistration<MultipleHandlerFactoryService> registration1;
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
+        return new Class<?>[] { HttpService.class, SessionSpecificContainerRetrievalService.class, ConfigurationService.class };
     }
 
     @Override
-    protected void handleAvailability(Class<?> clazz) {
+    protected void handleAvailability(final Class<?> clazz) {
         // IGNORE
     }
 
     @Override
-    protected void handleUnavailability(Class<?> clazz) {
+    protected void handleUnavailability(final Class<?> clazz) {
         // IGNORE
     }
 
@@ -106,24 +104,24 @@ public class DataRetrievalActivator extends DeferredActivator {
         dataProviderRegistry = new OSGIDataProviderRegistry(context);
         dataProviderRegistry.open();
 
-        SessionSpecificContainerRetrievalService containerRetrievalService = getService(SessionSpecificContainerRetrievalService.class);
-        RandomTokenContainer<Map<String, Object>> randomTokenContainer = containerRetrievalService.getRandomTokenContainer(
+        final SessionSpecificContainerRetrievalService containerRetrievalService = getService(SessionSpecificContainerRetrievalService.class);
+        final RandomTokenContainer<Map<String, Object>> randomTokenContainer = containerRetrievalService.getRandomTokenContainer(
             NAMESPACE,
             null,
             null);
 
-        RetrievalActions retrievalActions = new RetrievalActions(dataProviderRegistry, randomTokenContainer);
+        final RetrievalActions retrievalActions = new RetrievalActions(dataProviderRegistry, randomTokenContainer);
         RetrievalServlet.RETRIEVAL_ACTIONS = retrievalActions;
 
         FileDeliveryServlet.DATA_PROVIDERS = dataProviderRegistry;
         FileDeliveryServlet.PARAM_MAP = randomTokenContainer;
 
-        AJAXActionServiceAdapterHandler actionService = new AJAXActionServiceAdapterHandler(retrievalActions, Paths.MODULE);
+        final AJAXActionServiceAdapterHandler actionService = new AJAXActionServiceAdapterHandler(retrievalActions, Paths.MODULE);
 
         servletRegistration1 = new SessionServletRegistration(context, new RetrievalServlet(), "/ajax/" + Paths.MODULE);
         servletRegistration2 = new ServletRegistration(context, new FileDeliveryServlet(), Paths.FILE_DELIVERY_PATH);
 
-        registration1 = context.registerService(MultipleHandlerFactoryService.class.getName(), actionService, null);
+        registration1 = context.registerService(MultipleHandlerFactoryService.class, actionService, null);
 
     }
 
@@ -142,7 +140,7 @@ public class DataRetrievalActivator extends DeferredActivator {
 
         if (dataProviderRegistry != null) {
             dataProviderRegistry.close();
-            SessionSpecificContainerRetrievalService containerRetrievalService = getService(SessionSpecificContainerRetrievalService.class);
+            final SessionSpecificContainerRetrievalService containerRetrievalService = getService(SessionSpecificContainerRetrievalService.class);
             containerRetrievalService.destroyRandomTokenContainer(NAMESPACE, null);
         }
 

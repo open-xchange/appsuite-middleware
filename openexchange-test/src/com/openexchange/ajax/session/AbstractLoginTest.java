@@ -64,7 +64,7 @@ public class AbstractLoginTest extends AbstractSimpleClientTest {
     public AbstractLoginTest(String name) {
         super(name);
     }
-    
+
     protected void assertNoOXCookies() {
         Cookie[] cookies2 = currentClient.getClient().getState().getCookies();
         for (Cookie cookie : cookies2) {

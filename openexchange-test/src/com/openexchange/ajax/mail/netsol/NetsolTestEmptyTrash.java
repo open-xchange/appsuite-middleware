@@ -62,15 +62,15 @@ import com.openexchange.mail.MailJSONField;
 
 /**
  * {@link NetsolTestEmptyTrash}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class NetsolTestEmptyTrash extends AbstractNetsolTest {
 
 	/**
 	 * Initializes a new {@link NetsolTestEmptyTrash}
-	 * 
+	 *
 	 * @param name
 	 */
 	public NetsolTestEmptyTrash(final String name) {

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.folder;
 
-import com.openexchange.exception.OXException;
 import java.util.Iterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -70,7 +69,7 @@ import com.openexchange.server.impl.OCLPermission;
 
 /**
  * {@link ListTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ListTest extends AbstractAJAXSession {
@@ -82,7 +81,7 @@ public class ListTest extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link ListTest}.
-     * 
+     *
      * @param name name of the test.
      */
     public ListTest(final String name) {
@@ -231,7 +230,7 @@ public class ListTest extends AbstractAJAXSession {
             }
         }
         assertNotNull("Shared folder expected below shared parent folder.", foundShared);
-        
+
         FolderTools.unshareFolder(client2, API.OX_NEW, folderId, userId);
     }
 }

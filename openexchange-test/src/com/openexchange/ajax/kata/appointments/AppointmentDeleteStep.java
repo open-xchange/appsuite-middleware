@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.kata.appointments;
 
-import com.openexchange.exception.OXException;
 import org.junit.Assert;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.kata.NeedExistingStep;
@@ -57,7 +56,7 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.test.CalendarTestManager;
 
 /**
- * 
+ *
  * {@link AppointmentDeleteStep}
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -80,7 +79,7 @@ public class AppointmentDeleteStep extends NeedExistingStep<Appointment> {
         assumeIdentity(entry);
         CalendarTestManager manager = new CalendarTestManager(ajaxclient);
         manager.setFailOnError(false);
-        Assert.assertNotNull("Should have found appointment before deletion" , manager.get(this.entry) );        
+        Assert.assertNotNull("Should have found appointment before deletion" , manager.get(this.entry) );
         manager.delete(this.entry, false);
         Assert.assertNull("Should not have found appointment after deletion" , manager.get(this.entry) );
         forgetIdentity(entry);

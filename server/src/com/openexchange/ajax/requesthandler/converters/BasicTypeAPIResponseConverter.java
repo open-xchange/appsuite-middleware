@@ -22,15 +22,15 @@ public class BasicTypeAPIResponseConverter implements ResultConverter {
 		add(new BasicTypeAPIResponseConverter("float"));
 		add(new BasicTypeAPIResponseConverter("boolean"));
 		add(new BasicTypeAPIResponseConverter("json"));
-		
+
 	}});
-	
+
 	private String inputFormat;
 
 	private BasicTypeAPIResponseConverter(String inputFormat) {
 		this.inputFormat = inputFormat;
 	}
-	
+
 	@Override
 	public String getInputFormat() {
 		return inputFormat;

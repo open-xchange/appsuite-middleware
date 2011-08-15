@@ -47,7 +47,6 @@
 
 package com.openexchange.ajax.kata.folders;
 
-import com.openexchange.exception.OXException;
 import org.junit.Assert;
 
 import com.openexchange.ajax.framework.AJAXClient;
@@ -60,7 +59,7 @@ import com.openexchange.test.FolderTestManager;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class FolderDeleteStep extends NeedExistingStep<FolderObject> {
-	
+
 	private FolderObject entry;
 
     public FolderDeleteStep(FolderObject entry, String name, String expectedError) {
@@ -75,7 +74,7 @@ public class FolderDeleteStep extends NeedExistingStep<FolderObject> {
         assumeIdentity(entry);
         FolderTestManager manager = new FolderTestManager(client);
         manager.setFailOnError(false);
-        Assert.assertNotNull("Should have found folder before deletion" , manager.getFolderFromServer(this.entry , false) );        
+        Assert.assertNotNull("Should have found folder before deletion" , manager.getFolderFromServer(this.entry , false) );
         manager.deleteFolderOnServer(this.entry);
         Assert.assertNull("Should not have found folder after deletion" , manager.getFolderFromServer(this.entry , false) );
         forgetIdentity(entry);

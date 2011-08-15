@@ -63,7 +63,7 @@ abstract class AbstractGroupRequest<T extends AbstractAJAXResponse> implements A
      * URL for group servlet.
      */
     public static final String GROUP_URL = "/ajax/group";
-    
+
     protected AbstractGroupRequest() {
         super();
     }

@@ -55,7 +55,7 @@ import junit.framework.TestSuite;
 import com.openexchange.ajax.appointment.bugtests.Bug12377Test;
 
 public class AppointmentBugTestSuite {
-	
+
 	public static Test suite() {
 		final TestSuite tests = new TestSuite();
 		tests.addTestSuite(Bug4395Test.class);

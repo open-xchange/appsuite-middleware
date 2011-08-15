@@ -80,15 +80,15 @@ public class DeleteSubscriptionTest extends AbstractSubscriptionTest {
         //setup
         FolderObject folder = getFolderManager().generateFolder("subscriptionTest", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
         getFolderManager().insertFolderOnServer(folder);
-        
-        DynamicFormDescription form = generateFormDescription();        
+
+        DynamicFormDescription form = generateFormDescription();
         Subscription expected = generateOXMFSubscription(form);
         expected.setFolderId( String.valueOf( folder.getObjectID() ) );
 
        //new request
         NewSubscriptionRequest newReq = new NewSubscriptionRequest(expected, form);
         NewSubscriptionResponse newResp = getClient().execute(newReq);
-        
+
         assertFalse("Should succeed creating the subscription", newResp.hasError());
         expected.setId( newResp.getId() );
 
@@ -96,11 +96,11 @@ public class DeleteSubscriptionTest extends AbstractSubscriptionTest {
         DeleteSubscriptionRequest delReq = new DeleteSubscriptionRequest( expected.getId());
         DeleteSubscriptionResponse delResp = getClient().execute(delReq);
         assertFalse("Should succeed deleting the subscription", delResp.hasError());
-        
+
         //verify absense via get request
         GetSubscriptionRequest getReq = new GetSubscriptionRequest( newResp.getId() );
         GetSubscriptionResponse getResp = getClient().execute(getReq);
-        
+
         assertTrue("Should fail trying to get subcription afte deletion", getResp.hasError());
         assertEquals("Should return 1 in case of success", Autoboxing.I(1), delResp.getData());
     }

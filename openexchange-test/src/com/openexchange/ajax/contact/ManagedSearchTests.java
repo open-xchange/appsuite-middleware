@@ -59,7 +59,7 @@ import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
 
 /**
- * 
+ *
  * @author tobiasp
  *
  */
@@ -70,16 +70,16 @@ public class ManagedSearchTests extends AbstractManagedContactTest {
 	public ManagedSearchTests(String name) {
 		super(name);
 	}
-	
+
 	public void testGuiLikeSearch(){
 		List<ContactSearchObject> searches = new LinkedList<ContactSearchObject>();
-		
+
 		for(String name: sinographs){
 			//create
 			Contact tmp = generateContact();
 			tmp.setSurName(name);
 			manager.newAction(tmp);
-			
+
 			//prepare search
 			ContactSearchObject search = new ContactSearchObject();
 			search.setFolder(folderID);
@@ -97,7 +97,7 @@ public class ManagedSearchTests extends AbstractManagedContactTest {
 		}
 		for(int i = 0; i < sinographs.size(); i++){
 			Contact[] results= manager.searchAction(searches.get(i));
-		
+
 			assertEquals("#"+i+" Should find one contact", 1, results.length);
 			assertEquals("#"+i+" Should find the right contact", sinographs.get(i), results[0].getSurName());
 		}
@@ -110,7 +110,7 @@ public class ManagedSearchTests extends AbstractManagedContactTest {
 			manager.newAction(tmp);
 		}
 		Contact[] contacts= manager.searchAction("*", folderID, ContactField.SUR_NAME.getNumber(), Order.ASCENDING, "gb2312", Contact.ALL_COLUMNS);
-		
+
 		for(int i = 0; i < sinographs.size(); i++){
 			String name = contacts[i].getSurName();
 			assertEquals("#"+i+" Should have the right order", sinographs.get(i), name);

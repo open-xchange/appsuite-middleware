@@ -74,12 +74,12 @@ public class MailAccountInsertRequest implements AJAXRequest<MailAccountInsertRe
     public MailAccountInsertRequest(final MailAccountDescription account) {
         this(account, true);
     }
-    
+
     public MailAccountInsertRequest(final MailAccountDescription account, final boolean failOnError) {
         this.account = account;
         this.failOnError = failOnError;
     }
-    
+
     public Object getBody() throws JSONException {
         final JSONObject json = MailAccountWriter.write(wrap(account));
         json.put("password", account.getPassword());
@@ -107,10 +107,10 @@ public class MailAccountInsertRequest implements AJAXRequest<MailAccountInsertRe
     public String getServletPath() {
         return "/ajax/account";
     }
-    
+
     private MailAccount wrap(final MailAccountDescription acc) {
         return new MailAccount() {
-            
+
             public String getConfirmedHam() {
                 return acc.getConfirmedHam();
             }
@@ -138,7 +138,7 @@ public class MailAccountInsertRequest implements AJAXRequest<MailAccountInsertRe
                     throw new IllegalStateException(e);
                 }
             }
-            
+
             public int getMailPort() {
                 return acc.getMailPort();
             }
@@ -194,7 +194,7 @@ public class MailAccountInsertRequest implements AJAXRequest<MailAccountInsertRe
                     throw new IllegalStateException(e);
                 }
             }
-            
+
             public int getTransportPort() {
                 return acc.getTransportPort();
             }

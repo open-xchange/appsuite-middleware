@@ -49,7 +49,6 @@
 
 package com.openexchange.webdav.xml.appointment;
 
-import com.openexchange.exception.OXException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -61,11 +60,11 @@ import com.openexchange.webdav.xml.FolderTest;
 /**
  * This is a test for bug 13262. Note, that the test passes although the bug isn't fixed. That's because the bug is located in the outlook
  * oxtender. But having additional tests is never a bad idea.
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public class Bug13262Test extends AppointmentTest {
-    
+
     private int objectId = -1;
     private Appointment appointment;
     private Calendar thirdOccurrence;
@@ -73,7 +72,7 @@ public class Bug13262Test extends AppointmentTest {
     public Bug13262Test(final String name) {
         super(name);
     }
-    
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
@@ -86,7 +85,7 @@ public class Bug13262Test extends AppointmentTest {
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
-        
+
         appointment = new Appointment();
         appointment.setTitle("testBug13262");
         appointment.setStartDate(cal.getTime());
@@ -98,25 +97,25 @@ public class Bug13262Test extends AppointmentTest {
         appointment.setInterval(1);
         appointment.setOccurrence(5);
         appointment.setIgnoreConflicts(true);
-        
+
         cal.add(Calendar.DATE, 2);
         thirdOccurrence = cal;
     }
-    
+
     @Override
     public void tearDown() throws Exception {
         if (objectId != -1) {
             deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
         }
-        
+
         super.tearDown();
     }
-    
+
     public void testBugAsWritten() throws Exception {
         // Create Appointment
         objectId = insertAppointment(getWebConversation(), appointment, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
         assertTrue("No object Id returned after creation", objectId > 0);
-        
+
         // Create Exception with update
         final Appointment exception = createException();
         final int exceptionId = updateAppointment(getWebConversation(), exception, objectId, appointmentFolderId, getHostName(), getLogin(), getPassword(), context);
@@ -128,7 +127,7 @@ public class Bug13262Test extends AppointmentTest {
         // Load exception
         final Appointment loadException = loadAppointment(getWebConversation(), exceptionId, appointmentFolderId, getHostName(), getLogin(), getPassword(), context);
         assertNotNull("Loaded Exception is null", loadException);
-        
+
         // Checks
         assertEquals("Start date of exception is wrong", thirdOccurrence.getTimeInMillis(), loadException.getStartDate().getTime());
     }

@@ -7,14 +7,14 @@ import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
 /**
  * {@link ServerSessionFactory} - A factory for instances of {@link ServerSession}.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ServerSessionFactory {
 
     /**
      * Creates a server session.
-     * 
+     *
      * @param userid The user ID
      * @param ctx The context ID
      * @param sessionid The session ID
@@ -26,7 +26,7 @@ public class ServerSessionFactory {
 
     /**
      * Creates a server session.
-     * 
+     *
      * @param userid The user ID
      * @param contextid The context ID
      * @param sessionid The session ID

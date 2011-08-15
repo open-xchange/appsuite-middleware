@@ -67,15 +67,15 @@ public class FolderFieldActivator implements BundleActivator {
 
     private static PublicationTargetDiscoveryService DISCOVERER;
 
-    public static void setDiscoverer(PublicationTargetDiscoveryService discoverer) {
+    public static void setDiscoverer(final PublicationTargetDiscoveryService discoverer) {
         DISCOVERER = discoverer;
     }
 
-    private ServiceRegistration registerService;
+    private ServiceRegistration<AdditionalFolderField> registerService;
 
     @Override
     public void start(final BundleContext context) throws Exception {
-        registerService = context.registerService(AdditionalFolderField.class.getName(), new IsPublished(DISCOVERER), null);
+        registerService = context.registerService(AdditionalFolderField.class, new IsPublished(DISCOVERER), null);
     }
 
     @Override

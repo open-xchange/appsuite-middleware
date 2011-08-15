@@ -93,13 +93,13 @@ public class ExpressiveErrorMessageWhileParsingVCard extends TestCase {
         +"REV;CHARSET=utf-8:2\n"
         +"X-PRIMARY-PHONE;CHARSET=utf-8:1\n"
         +"END:VCARD\n";
-    
+
 
     public void testBug13557() throws Throwable{
         String charset = "UTF-8";
         ByteArrayInputStream stream = new ByteArrayInputStream(vcard.getBytes(charset));
         VersionedObjectDefinition def = VCard.definition;
-        
+
         //from string to VersitObject
         try {
             Reader reader = def.getReader(stream, charset);

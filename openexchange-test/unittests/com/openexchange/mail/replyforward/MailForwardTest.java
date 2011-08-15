@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.replyforward;
 
-import com.openexchange.exception.OXException;
 import java.io.ByteArrayOutputStream;
 import java.text.DateFormat;
 import java.util.Date;
@@ -76,13 +75,13 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link MailForwardTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailForwardTest extends AbstractMailTest {
 
     /**
-	 * 
+	 *
 	 */
     public MailForwardTest() {
         super();
@@ -185,7 +184,7 @@ public final class MailForwardTest extends AbstractMailTest {
                                     DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.LONG,locale);
                                     dateFormat.setTimeZone(tz);
                                     forwardPrefix = forwardPrefix.replaceFirst("#DATE#", dateFormat.format(date));
-                                    
+
                                     dateFormat = DateFormat.getTimeInstance(DateFormat.SHORT,locale);
                                     dateFormat.setTimeZone(tz);
                                     forwardPrefix = forwardPrefix.replaceFirst("#TIME#", dateFormat.format(date));
@@ -303,7 +302,7 @@ public final class MailForwardTest extends AbstractMailTest {
                             DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.LONG,locale);
                             dateFormat.setTimeZone(tz);
                             forwardPrefix = forwardPrefix.replaceFirst("#DATE#", dateFormat.format(date));
-                            
+
                             dateFormat = DateFormat.getTimeInstance(DateFormat.SHORT,locale);
                             dateFormat.setTimeZone(tz);
                             forwardPrefix = forwardPrefix.replaceFirst("#TIME#", dateFormat.format(date));
@@ -410,7 +409,7 @@ public final class MailForwardTest extends AbstractMailTest {
     /**
      * Creates a {@link String} from given array of {@link InternetAddress} instances through invoking
      * {@link InternetAddress#toUnicodeString()}
-     * 
+     *
      * @param addrs The array of {@link InternetAddress} instances
      * @return A comma-separated list of addresses as a {@link String}
      */

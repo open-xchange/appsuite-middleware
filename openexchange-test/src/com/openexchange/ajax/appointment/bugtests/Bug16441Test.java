@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.Date;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
@@ -60,7 +59,7 @@ import com.openexchange.groupware.container.Appointment;
 
 /**
  * {@link Bug16441Test}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Bug16441Test extends AbstractAJAXSession {
@@ -69,7 +68,7 @@ public class Bug16441Test extends AbstractAJAXSession {
     public Bug16441Test(String name) {
         super(name);
     }
-    
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -85,13 +84,13 @@ public class Bug16441Test extends AbstractAJAXSession {
         appointment.setDays(Appointment.FRIDAY);
         appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
     }
-    
+
     public void testBug16441() throws Exception {
         AppointmentInsertResponse response = getClient().execute(new InsertRequest(appointment, getClient().getValues().getTimeZone()));
         response.fillAppointment(appointment);
         getClient().execute(new DeleteRequest(appointment.getObjectID(), appointment.getParentFolderID(), 5, appointment.getLastModified()));
     }
-    
+
     @Override
     protected void tearDown() throws Exception {
         appointment.setLastModified(new Date(Long.MAX_VALUE));

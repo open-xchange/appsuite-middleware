@@ -49,7 +49,6 @@
 
 package com.openexchange.mail;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -61,9 +60,9 @@ import com.openexchange.sessiond.impl.SessionObject;
 
 /**
  * {@link MailBugfixTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class MailBugfixTest extends AbstractMailTest {
 
@@ -101,7 +100,7 @@ public final class MailBugfixTest extends AbstractMailTest {
 
 	/**
 	 * Initializes a new {@link MailBugfixTest}
-	 * 
+	 *
 	 * @param name
 	 *            The name
 	 */
@@ -113,7 +112,7 @@ public final class MailBugfixTest extends AbstractMailTest {
 	 * Test for <a href=
 	 * "http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=12357">bug
 	 * #12357</a>:<br>
-	 * 
+	 *
 	 * <pre>
 	 * Attachments won't be forwarded when email will be forwarded as inline
 	 * </pre>

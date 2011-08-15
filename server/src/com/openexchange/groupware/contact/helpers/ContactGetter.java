@@ -1043,7 +1043,8 @@ public class ContactGetter implements ContactSwitcher {
         final Contact conObj = (Contact) objects[0];
         return I(conObj.getNumberOfAttachments());
     }
-    
+
+    @Override
     public Object numberofimages(Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("NumberOfImages");
@@ -1052,6 +1053,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getNumberOfImages();
     }
 
+    @Override
     public Object lastmodifiedofnewestattachment(Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("LastModifiedOfNewestAttachment");
@@ -1060,6 +1062,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getLastModifiedOfNewestAttachment();
     }
 
+    @Override
     public Object usecount(Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("UseCount");

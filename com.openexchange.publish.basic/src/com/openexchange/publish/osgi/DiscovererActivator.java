@@ -71,7 +71,7 @@ import com.openexchange.userconf.UserConfigurationService;
  */
 public class DiscovererActivator implements BundleActivator {
 
-    private ServiceRegistration discoveryRegistration;
+    private ServiceRegistration<PublicationTargetDiscoveryService> discoveryRegistration;
 
     private OSGiPublicationTargetCollector pubServiceCollector;
 
@@ -96,7 +96,7 @@ public class DiscovererActivator implements BundleActivator {
         discoveryDict.put(Constants.SERVICE_RANKING, Integer.valueOf(256));
 
         discoveryRegistration =
-            context.registerService(PublicationTargetDiscoveryService.class.getName(), compositeDiscovererCollector, discoveryDict);
+            context.registerService(PublicationTargetDiscoveryService.class, compositeDiscovererCollector, discoveryDict);
 
         FolderFieldActivator.setDiscoverer( compositeDiscovererCollector );
 

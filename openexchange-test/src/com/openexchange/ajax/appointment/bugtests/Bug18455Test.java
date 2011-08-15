@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.ajax.folder.Create.ocl;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import org.json.JSONArray;
@@ -71,7 +70,7 @@ import com.openexchange.server.impl.OCLPermission;
 
 /**
  * {@link Bug18455Test}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Bug18455Test extends AbstractAJAXSession {
@@ -88,7 +87,7 @@ public class Bug18455Test extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link Bug18455Test}.
-     * 
+     *
      * @param name
      */
     public Bug18455Test(String name) {

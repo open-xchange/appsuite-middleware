@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.config;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.B;
 import java.util.Arrays;
 import java.util.Random;

@@ -55,7 +55,7 @@ import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class AbstractColumnsParser<T extends AbstractColumnsResponse> extends AbstractAJAXParser<T> {

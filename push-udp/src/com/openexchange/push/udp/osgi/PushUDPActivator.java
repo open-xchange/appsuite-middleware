@@ -78,16 +78,16 @@ public class PushUDPActivator extends DeferredActivator {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(PushUDPActivator.class));
 
-    private ServiceRegistration registration;
+    private ServiceRegistration<EventHandler> registration;
 
-    private final List<ServiceTracker> serviceTrackers;
+    private final List<ServiceTracker<?,?>> serviceTrackers;
 
     /**
      * Initializes a new {@link PushUDPActivator}.
      */
     public PushUDPActivator() {
         super();
-        serviceTrackers = new ArrayList<ServiceTracker>(4);
+        serviceTrackers = new ArrayList<ServiceTracker<?,?>>(4);
     }
 
     @Override
@@ -139,13 +139,13 @@ public class PushUDPActivator extends DeferredActivator {
             /*
              * Service trackers
              */
-            serviceTrackers.add(new ServiceTracker(
+            serviceTrackers.add(new ServiceTracker<EventFactoryService,EventFactoryService>(
                 context,
-                EventFactoryService.class.getName(),
+                EventFactoryService.class,
                 new RegistryCustomizer<EventFactoryService>(context, EventFactoryService.class)));
-            serviceTrackers.add(new ServiceTracker(context, TimerService.class.getName(), new TimerCustomizer(context)));
+            serviceTrackers.add(new ServiceTracker<TimerService,TimerService>(context, TimerService.class, new TimerCustomizer(context)));
             // Open service trackers
-            for (final ServiceTracker tracker : serviceTrackers) {
+            for (final ServiceTracker<?,?> tracker : serviceTrackers) {
                 tracker.open();
             }
         } catch (final Exception e) {
@@ -160,7 +160,7 @@ public class PushUDPActivator extends DeferredActivator {
             /*
              * Close service trackers
              */
-            for (final ServiceTracker tracker : serviceTrackers) {
+            for (final ServiceTracker<?,?> tracker : serviceTrackers) {
                 tracker.close();
             }
             serviceTrackers.clear();
@@ -183,7 +183,7 @@ public class PushUDPActivator extends DeferredActivator {
         final String[] topics = new String[] { EventConstants.EVENT_TOPIC, "com/openexchange/*" };
         final Hashtable<String, Object> ht = new Hashtable<String, Object>(1);
         ht.put(EventConstants.EVENT_TOPIC, topics);
-        registration = context.registerService(EventHandler.class.getName(), new PushHandler(), ht);
+        registration = context.registerService(EventHandler.class, new PushHandler(), ht);
     }
 
     protected void dropRegisterService() {

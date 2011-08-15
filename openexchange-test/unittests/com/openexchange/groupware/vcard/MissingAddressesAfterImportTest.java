@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.vcard;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.List;
 import com.openexchange.groupware.container.Contact;
@@ -57,24 +56,24 @@ import com.openexchange.tools.versit.converter.ConverterException;
 
 /**
  * Bug 14350
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class MissingAddressesAfterImportTest extends AbstractVCardUnitTest {
 
-    public String vcard = 
-        "BEGIN:VCARD\n" + 
-        "VERSION:3.0\n" + 
-        "PRODID:OPEN-XCHANGE\n" + 
-        "FN:Prinz\\, Tobias\n" + 
-        "N:Prinz;Tobias;;;\n" + 
-        "NICKNAME:Tierlieb\n" + 
-        "BDAY:19810501\n" + 
-        "ADR;TYPE=work:;;Broadway 3131 / 5th Ave;T\u00fcbingen;Baden-W\u00fcrttemberg;57621;Germany\n" + 
-        "ADR;TYPE=home:;;Testroad 4711;Port de la V\u00e9rde;Skol-upon-sea;37542;France\n" + 
-        "ORG:- deactivated -\n" + 
-        "REV:20061204T160750.018Z\n" + 
-        "UID:80@ox6.netline.de\n" + 
+    public String vcard =
+        "BEGIN:VCARD\n" +
+        "VERSION:3.0\n" +
+        "PRODID:OPEN-XCHANGE\n" +
+        "FN:Prinz\\, Tobias\n" +
+        "N:Prinz;Tobias;;;\n" +
+        "NICKNAME:Tierlieb\n" +
+        "BDAY:19810501\n" +
+        "ADR;TYPE=work:;;Broadway 3131 / 5th Ave;T\u00fcbingen;Baden-W\u00fcrttemberg;57621;Germany\n" +
+        "ADR;TYPE=home:;;Testroad 4711;Port de la V\u00e9rde;Skol-upon-sea;37542;France\n" +
+        "ORG:- deactivated -\n" +
+        "REV:20061204T160750.018Z\n" +
+        "UID:80@ox6.netline.de\n" +
         "END:VCARD\n";
 
     public void testBug14350() throws ConverterException, IOException {

@@ -71,9 +71,9 @@ public class Activator implements BundleActivator {
 
     private BundleContext bundleContext;
 
-    private final Stack<ServiceTracker> trackers = new Stack<ServiceTracker>();
+    private final Stack<ServiceTracker<?,?>> trackers = new Stack<ServiceTracker<?,?>>();
 
-    private ArrayList<ServiceRegistration> services;
+    private ArrayList<ServiceRegistration<?>> services;
 
     private OAuthServiceMetaData oAuthServiceMetadata;
 
@@ -82,25 +82,25 @@ public class Activator implements BundleActivator {
     private ContextService contextService;
 
     @Override
-    public void start(BundleContext context) throws Exception {
+    public void start(final BundleContext context) throws Exception {
         bundleContext = context;
-        services = new ArrayList<ServiceRegistration>();
+        services = new ArrayList<ServiceRegistration<?>>();
         // react dynamically to the appearance/disappearance of LinkedinService
-        trackers.push(new ServiceTracker(context, LinkedInService.class.getName(), new LinkedInServiceRegisterer(context, this)));
+        trackers.push(new ServiceTracker<LinkedInService,LinkedInService>(context, LinkedInService.class, new LinkedInServiceRegisterer(context, this)));
 
         // react dynamically to the appearance/disappearance of OAuthServiceMetadata
-        trackers.push(new ServiceTracker(context, OAuthServiceMetaData.class.getName(), new OAuthServiceMetaDataRegisterer(context, this)));
+        trackers.push(new ServiceTracker<OAuthServiceMetaData,OAuthServiceMetaData>(context, OAuthServiceMetaData.class, new OAuthServiceMetaDataRegisterer(context, this)));
 
         // react dynamically to the appearance/disappearance of ContextService
-        trackers.push(new ServiceTracker(context, ContextService.class.getName(), new ContextServiceRegisterer(context, this)));
+        trackers.push(new ServiceTracker<ContextService,ContextService>(context, ContextService.class, new ContextServiceRegisterer(context, this)));
 
-        for (final ServiceTracker tracker : trackers) {
+        for (final ServiceTracker<?,?> tracker : trackers) {
             tracker.open();
         }
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    public void stop(final BundleContext context) throws Exception {
         while (!trackers.isEmpty()) {
             trackers.pop().close();
         }
@@ -109,15 +109,15 @@ public class Activator implements BundleActivator {
     public void registerServices() {
         if (null != oAuthServiceMetadata && null != linkedInService && null != contextService){
             final LinkedInSubscribeService linkedInSubscribeService = new LinkedInSubscribeService(this);
-            final ServiceRegistration serviceRegistration = bundleContext.registerService(
-                SubscribeService.class.getName(),
+            final ServiceRegistration<SubscribeService> serviceRegistration = bundleContext.registerService(
+                SubscribeService.class,
                 linkedInSubscribeService,
                 null);
             services.add(serviceRegistration);
 
             try {
                 services.add(bundleContext.registerService(OAuthAccountDeleteListener.class.getName(), new LinkedInSubscriptionsOAuthAccountDeleteListener(linkedInSubscribeService, contextService), null));
-            } catch (Throwable t) {
+            } catch (final Throwable t) {
                 t.printStackTrace();
             }
 
@@ -126,9 +126,9 @@ public class Activator implements BundleActivator {
     }
 
     public void unregisterServices() {
-        ArrayList<ServiceRegistration> registrations = new ArrayList<ServiceRegistration>(services);
+        final ArrayList<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>(services);
         services.clear();
-        for (final ServiceRegistration serviceRegistration : registrations) {
+        for (final ServiceRegistration<?> serviceRegistration : registrations) {
             serviceRegistration.unregister();
         }
     }
@@ -137,7 +137,7 @@ public class Activator implements BundleActivator {
         return oAuthServiceMetadata;
     }
 
-    public void setOAuthServiceMetadata(OAuthServiceMetaData authServiceMetadata) {
+    public void setOAuthServiceMetadata(final OAuthServiceMetaData authServiceMetadata) {
         oAuthServiceMetadata = authServiceMetadata;
     }
 
@@ -145,11 +145,11 @@ public class Activator implements BundleActivator {
         return linkedInService;
     }
 
-    public void setLinkedInService(LinkedInService linkedInService) {
+    public void setLinkedInService(final LinkedInService linkedInService) {
         this.linkedInService = linkedInService;
     }
 
-    public void setContextService(ContextService contexts) {
+    public void setContextService(final ContextService contexts) {
         this.contextService = contexts;
     }
 

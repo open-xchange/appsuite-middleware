@@ -16,7 +16,7 @@ import com.openexchange.test.fixtures.transformators.FolderModuleTransformator;
 /**
  * {@link FolderUpdatesParser} - parses an updates-response, which does use a different format than other responses, so FolderParser cannot
  * be used directly.
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class FolderUpdatesParser extends CommonUpdatesParser<FolderUpdatesResponse> {

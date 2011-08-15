@@ -61,7 +61,7 @@ import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 
 /**
  * {@link AbstractDocumentListActionTest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class AbstractDocumentListActionTest extends AbstractInfostoreTest {
@@ -113,7 +113,7 @@ public class AbstractDocumentListActionTest extends AbstractInfostoreTest {
         getInfostore().saveDocumentMetadata(document, InfostoreFacade.NEW, getSession());
         clean.add(document);
         existingId = document.getId();
-        
+
         notExistingId = IDGenerator.getId(getCtx(), Types.INFOSTORE);
     }
 

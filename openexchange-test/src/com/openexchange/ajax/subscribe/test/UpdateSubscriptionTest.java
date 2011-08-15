@@ -69,10 +69,10 @@ public class UpdateSubscriptionTest extends AbstractSubscriptionTest {
     public UpdateSubscriptionTest(String name) {
         super(name);
     }
-    
+
     public void testUpdatingAnExistingValueWithinAnOMXFSubscription() throws OXException, IOException, SAXException, JSONException{
         FolderObject folder = createDefaultContactFolder();
-        
+
         DynamicFormDescription formDescription = generateFormDescription();
         Subscription expected = generateOXMFSubscription(formDescription);
         expected.setFolderId(folder.getObjectID());
@@ -80,28 +80,28 @@ public class UpdateSubscriptionTest extends AbstractSubscriptionTest {
         SimSubscriptionSourceDiscoveryService discovery = new SimSubscriptionSourceDiscoveryService();
         discovery.addSource(expected.getSource());
         subMgr.setSubscriptionSourceDiscoveryService(discovery);
-        
+
         //create as pre-requisite
         subMgr.newAction(expected);
         assertFalse("Precondition: Creation of subscription should work", subMgr.getLastResponse().hasError());
-        
+
         //update
         expected.getConfiguration().put("url", "http://ox.open-exchange.com/2");
         subMgr.updateAction(expected);
         assertTrue("Should return 1 if update worked", ((UpdateSubscriptionResponse)subMgr.getLastResponse()).wasSuccessful());
-        
+
         //verify via get
 
         Subscription actual = subMgr.getAction(expected.getId());
-        
+
         assertEquals("Should contain the same url in the configuration", expected.getConfiguration().get("url"), actual.getConfiguration().get("url"));
     }
 
-    
+
 
     public void testUpdatingAnOMXFSubscriptionWithANewValue() throws OXException, IOException, SAXException, JSONException{
         FolderObject folder = createDefaultContactFolder();
-        
+
         DynamicFormDescription formDescription = generateFormDescription();
         Subscription expected = generateOXMFSubscription(formDescription);
         expected.setFolderId(folder.getObjectID());
@@ -109,20 +109,20 @@ public class UpdateSubscriptionTest extends AbstractSubscriptionTest {
         SimSubscriptionSourceDiscoveryService discovery = new SimSubscriptionSourceDiscoveryService();
         discovery.addSource(expected.getSource());
         subMgr.setSubscriptionSourceDiscoveryService(discovery);
-        
+
         //create as pre-requisite
         subMgr.newAction(expected);
         assertFalse("Precondition: Creation of subscription should work", subMgr.getLastResponse().hasError());
-        
+
         //update
         expected.getConfiguration().put("username", "Elvis Aaron Presley");
         subMgr.updateAction(expected);
         assertTrue("Should return 1 if update worked", ((UpdateSubscriptionResponse)subMgr.getLastResponse()).wasSuccessful());
-        
+
         //verify via get
 
         Subscription actual = subMgr.getAction(expected.getId());
-        
+
         assertEquals("Should not take a value that was not defined in the form description", null, actual.getConfiguration().get("username"));
     }
 

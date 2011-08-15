@@ -68,9 +68,10 @@ import com.openexchange.tools.session.ServerSession;
  * {@link ContactAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class ContactAction implements AJAXActionService {
-    
+
     private final ServiceLookup serviceLookup;
 
     public ContactAction(final ServiceLookup serviceLookup) {
@@ -81,31 +82,30 @@ public abstract class ContactAction implements AJAXActionService {
     @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         final ContactRequest contactRequest = new ContactRequest(request, session);
-        
+
         return perform(contactRequest);
     }
-    
+
     protected abstract AJAXRequestResult perform(ContactRequest req) throws OXException;
-    
+
     protected ContactInterfaceDiscoveryService getContactInterfaceDiscoveryService() throws OXException {
-        final ContactInterfaceDiscoveryService service = serviceLookup.getService(ContactInterfaceDiscoveryService.class);
-        if (service != null) {
-            return service;
-        } else {
-            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create("ContactInterfaceDiscoveryService");
+        try {
+            return serviceLookup.getService(ContactInterfaceDiscoveryService.class);
+        } catch (final IllegalStateException e) {
+            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(ContactInterfaceDiscoveryService.class.getName());
         }
     }
-    
+
     protected Date getCorrectedTime(final Date date, final TimeZone timeZone) {
         if (date == null) {
             return null;
         }
-        
+
         final int offset = timeZone.getOffset(date.getTime());
         final Calendar calendar = new GregorianCalendar();
         calendar.setTime(date);
         calendar.add(Calendar.MILLISECOND, offset);
-        
+
         return calendar.getTime();
     }
 }

@@ -78,9 +78,9 @@ import com.openexchange.tools.service.SessionServletRegistration;
  */
 public class ProxyServletActivator implements BundleActivator {
 
-    private List<ServiceTracker> trackers;
+    private List<ServiceTracker<?,?>> trackers;
 
-    private List<ServiceRegistration> registrations;
+    private List<ServiceRegistration<?>> registrations;
 
     @Override
     public void start(final BundleContext context) throws Exception {
@@ -89,25 +89,25 @@ public class ProxyServletActivator implements BundleActivator {
             if (log.isInfoEnabled()) {
                 log.info("starting bundle: com.openexchange.proxy.servlet");
             }
-            trackers = new ArrayList<ServiceTracker>(1);
+            trackers = new ArrayList<ServiceTracker<?,?>>(4);
             trackers.add(new SessionServletRegistration(context, new ProxyServlet(), Constants.PATH));
-            trackers.add(new ServiceTracker(context, TimerService.class.getName(), new TimerServiceCustomizer(context)));
-            trackers.add(new ServiceTracker(context, SessiondService.class.getName(), new RegistryServiceTrackerCustomizer<SessiondService>(context, ServiceRegistry.getInstance(), SessiondService.class)));
-            for (final ServiceTracker serviceTracker : trackers) {
+            trackers.add(new ServiceTracker<TimerService,TimerService>(context, TimerService.class, new TimerServiceCustomizer(context)));
+            trackers.add(new ServiceTracker<SessiondService,SessiondService>(context, SessiondService.class, new RegistryServiceTrackerCustomizer<SessiondService>(context, ServiceRegistry.getInstance(), SessiondService.class)));
+            for (final ServiceTracker<?,?> serviceTracker : trackers) {
                 serviceTracker.open();
             }
 
-            registrations = new ArrayList<ServiceRegistration>(2);
+            registrations = new ArrayList<ServiceRegistration<?>>(2);
             /*
              * Register proxy registry
              */
-            registrations.add(context.registerService(ProxyRegistry.class.getName(), ProxyRegistryImpl.getInstance(), null));
+            registrations.add(context.registerService(ProxyRegistry.class, ProxyRegistryImpl.getInstance(), null));
             /*
              * Register event handler to detect removed sessions
              */
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-            registrations.add(context.registerService(EventHandler.class.getName(), new ProxyEventHandler(), serviceProperties));
+            registrations.add(context.registerService(EventHandler.class, new ProxyEventHandler(), serviceProperties));
         } catch (final Exception e) {
             log.error("Failed start-up of bundle com.openexchange.proxy.servlet: " + e.getMessage(), e);
             throw e;
@@ -122,7 +122,7 @@ public class ProxyServletActivator implements BundleActivator {
                 log.info("stopping bundle: com.openexchange.proxy.servlet");
             }
             if (null != trackers) {
-                for (final ServiceTracker serviceTracker : trackers) {
+                for (final ServiceTracker<?,?> serviceTracker : trackers) {
                     serviceTracker.close();
                 }
                 trackers = null;

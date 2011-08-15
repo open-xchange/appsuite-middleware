@@ -78,7 +78,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link MailConverter}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailConverter implements ResultConverter, MailActionConstants {
@@ -135,6 +135,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                     convertMultiple4List(mails, request, result, session);
                 }
             }
+            throw AjaxExceptionCodes.UNKNOWN_ACTION.create(action);
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
@@ -283,7 +284,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         if (doUnseen) {
             /*-
              * Leave mail as unseen
-             * 
+             *
              * Determine mail identifier
              */
             final String uid;

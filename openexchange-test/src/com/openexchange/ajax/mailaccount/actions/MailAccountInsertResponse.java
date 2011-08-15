@@ -73,10 +73,10 @@ public class MailAccountInsertResponse extends AbstractAJAXResponse {
     }
 
     public void fillObject(MailAccountDescription mailAccountDescription) {
- 
+
         mailAccountDescription.setId(id);
     }
-    
+
     public void setId(int id) {
         this.id = id;
     }

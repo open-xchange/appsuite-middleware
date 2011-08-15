@@ -79,6 +79,8 @@ public final class MessageUtility {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MessageUtility.class));
 
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
     /**
      * No instantiation.
      */
@@ -307,9 +309,12 @@ public final class MessageUtility {
                 throw error;
             }
         }
+        /*
+         * TODO: Re-think to make this the default case...
+         */
         if (isGB2312(charset)) {
             /*
-             * Special treatment for possible BIG5 encoded stream
+             * Special treatment for possible GB2312 encoded stream
              */
             final byte[] bytes = getBytesFrom(inStream);
             if (bytes.length == 0) {
@@ -322,7 +327,12 @@ public final class MessageUtility {
             /*
              * Detect the charset
              */
-            return new String(bytes, CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(bytes)));
+            if (!DEBUG) {
+                return new String(bytes, CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(bytes)));
+            }
+            final String detectedCharset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(bytes));
+            LOG.debug("Mapped \"GB2312\" charset to \"" + detectedCharset + "\".");
+            return new String(bytes, detectedCharset);
         }
         return readStream0(inStream, charset);
     }

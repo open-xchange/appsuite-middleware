@@ -281,11 +281,11 @@ public interface ContactSwitcher {
     public Object defaultaddress(Object... objects) throws OXException;
 
     public Object numberofattachments(Object... objects) throws OXException;
-    
+
     public Object numberofimages(Object... objects) throws OXException;
-    
+
     public Object lastmodifiedofnewestattachment(Object... objects) throws OXException;
-    
+
     public Object usecount(Object... objects) throws OXException;
     
     public Object markasdistributionlist(Object[] objects) throws OXException;

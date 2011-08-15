@@ -55,7 +55,7 @@ import com.openexchange.ajp13.coyote.util.ByteChunk;
 
 /**
  * {@link ActionAwareServletOutputStream}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ActionAwareServletOutputStream extends ServletOutputStream {
@@ -81,11 +81,18 @@ public final class ActionAwareServletOutputStream extends ServletOutputStream {
 
     /**
      * Checks if there is buffered data.
-     * 
+     *
      * @return <code>true</code> if there is buffered data; otherwise <code>false</code>
      */
     public boolean hasBufferedData() {
         return byteChunk.getLength() > 0;
+    }
+
+    /**
+     * Recycles this stream.
+     */
+    public void recycle() {
+        byteChunk.recycle();
     }
 
     /**

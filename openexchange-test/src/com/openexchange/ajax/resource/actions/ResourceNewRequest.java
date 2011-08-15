@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.resource.actions;
 
-import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,9 +63,9 @@ import com.openexchange.resource.json.ResourceWriter;
 
 /**
  * {@link ResourceNewRequest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class ResourceNewRequest extends AbstractResourceRequest<ResourceNewResponse> {
 
@@ -76,7 +75,7 @@ public final class ResourceNewRequest extends AbstractResourceRequest<ResourceNe
 
 	/**
 	 * Initializes a new {@link ResourceNewRequest}
-	 * 
+	 *
 	 * @param createMe
 	 *            The resource to create
 	 * @param failOnError
@@ -98,7 +97,7 @@ public final class ResourceNewRequest extends AbstractResourceRequest<ResourceNe
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
 	 */
 	public Object getBody() throws JSONException {
@@ -107,7 +106,7 @@ public final class ResourceNewRequest extends AbstractResourceRequest<ResourceNe
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
 	 */
 	public Method getMethod() {
@@ -116,7 +115,7 @@ public final class ResourceNewRequest extends AbstractResourceRequest<ResourceNe
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
 	 */
 	public Parameter[] getParameters() {
@@ -127,7 +126,7 @@ public final class ResourceNewRequest extends AbstractResourceRequest<ResourceNe
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
 	 */
 	public ResourceNewParser getParser() {

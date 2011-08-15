@@ -60,31 +60,31 @@ import com.openexchange.config.ConfigurationService;
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class CrawlerRegisterer implements ServiceTrackerCustomizer {
+public class CrawlerRegisterer implements ServiceTrackerCustomizer<ConfigurationService,ConfigurationService> {
 
     private final BundleContext context;
     private final Activator activator;
 
-    public CrawlerRegisterer(BundleContext context, Activator activator) {
+    public CrawlerRegisterer(final BundleContext context, final Activator activator) {
         super();
         this.context = context;
         this.activator = activator;
     }
 
     @Override
-    public Object addingService(ServiceReference reference) {
-        ConfigurationService configurationService = (ConfigurationService) context.getService(reference);
+    public ConfigurationService addingService(final ServiceReference<ConfigurationService> reference) {
+        final ConfigurationService configurationService = context.getService(reference);
         activator.registerServices(configurationService);
         return configurationService;
     }
 
     @Override
-    public void modifiedService(ServiceReference reference, Object service) {
+    public void modifiedService(final ServiceReference<ConfigurationService> reference, final ConfigurationService service) {
         //nothing to do here
     }
 
     @Override
-    public void removedService(ServiceReference reference, Object service) {
+    public void removedService(final ServiceReference<ConfigurationService> reference, final ConfigurationService service) {
         activator.unregisterServices();
         context.ungetService(reference);
     }

@@ -63,7 +63,7 @@ import com.openexchange.ajax.reminder.actions.RangeResponse;
 import com.openexchange.groupware.reminder.ReminderObject;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class ReminderTools extends Assert {

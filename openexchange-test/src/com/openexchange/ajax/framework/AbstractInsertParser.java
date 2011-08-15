@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.framework;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -57,7 +56,7 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.DataFields;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class AbstractInsertParser<T extends CommonInsertResponse> extends AbstractAJAXParser<T> {

@@ -1,7 +1,6 @@
 
 package com.openexchange.test;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -44,7 +43,7 @@ public class OXTestToolkit {
     public static void assertSameContent(final InputStream is1, final InputStream is2) throws IOException {
         assertSameContent("", is1, is2);
     }
-    
+
     public static void assertSameContent(String message, final InputStream is1, final InputStream is2) throws IOException {
         int i = 0;
         while ((i = is1.read()) != -1) {
@@ -63,19 +62,19 @@ public class OXTestToolkit {
         c1.setTimeZone(TimeZone.getTimeZone("UTC"));
         c2.setTimeZone(TimeZone.getTimeZone("UTC"));
         assertEquals(
-            message + " (Day of the year)", 
-            I(c1.get(Calendar.DAY_OF_YEAR)), 
+            message + " (Day of the year)",
+            I(c1.get(Calendar.DAY_OF_YEAR)),
             I(c2.get(Calendar.DAY_OF_YEAR)));
         assertEquals(
-            message + " (Year)", 
-            I(c1.get(Calendar.YEAR)), 
+            message + " (Year)",
+            I(c1.get(Calendar.YEAR)),
             I(c2.get(Calendar.YEAR)));
     }
-    
+
     public static void assertSameStream(InputStream expected, InputStream actual){
         assertSameStream("", expected, actual);
     }
-    
+
     public static void assertSameStream(String message, InputStream expected, InputStream actual){
         if(message == null || message.equals(""))
             message = "Comparing InputStreams";

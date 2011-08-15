@@ -54,15 +54,15 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.mail.filter.ConfigTestHolder;
 
 /**
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public class ConfigResponse extends AbstractAJAXResponse {
 
 	protected ConfigTestHolder[] configTests;
-	
+
 	protected String[] actions;
-	
+
     /**
 	 * @param response
 	 */
@@ -75,7 +75,7 @@ public class ConfigResponse extends AbstractAJAXResponse {
     public ConfigTestHolder[] getConfigTests() {
     	return configTests;
     }
-    
+
     public String[] getActionCommands() {
     	return actions;
     }

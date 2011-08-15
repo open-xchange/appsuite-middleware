@@ -49,7 +49,6 @@
 
 package com.openexchange.test.osgi;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -65,7 +64,7 @@ import com.openexchange.ajax.Mail;
 
 /**
  * {@link BundleTestIMAP} - Test absence of IMAP bundle
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class BundleTestIMAP extends AbstractBundleTest {

@@ -52,7 +52,7 @@ package com.openexchange.ajax.importexport.actions;
 import java.io.InputStream;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class CSVImportRequest extends AbstractImportRequest<CSVImportResponse> {

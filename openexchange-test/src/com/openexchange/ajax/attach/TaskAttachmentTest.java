@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.attach;
 
-import com.openexchange.exception.OXException;
 import java.util.Date;
 
 import com.openexchange.ajax.container.Response;
@@ -120,7 +119,7 @@ public class TaskAttachmentTest extends AbstractAttachmentTest {
     public void testAll() throws Throwable {
         doAll();
     }
-    
+
     /**
      * Tests uploading of multiple Attachments in one request.
      * @throws Throwable if an error occurs.

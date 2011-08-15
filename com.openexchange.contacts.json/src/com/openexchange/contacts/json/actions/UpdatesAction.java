@@ -99,8 +99,9 @@ public class UpdatesAction extends ContactAction {
         if (ignore.indexOf("deleted") != -1) {
             bIgnoreDelete = true;
         }
-        
+
         final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
+        final List<Contact> list = new ArrayList<Contact>();
         final List<Contact> modifiedList = new ArrayList<Contact>();
         final List<Contact> deletedList = new ArrayList<Contact>();
         final Map<String, List<Contact>> responseMap = new HashMap<String, List<Contact>>(2);
@@ -110,12 +111,12 @@ public class UpdatesAction extends ContactAction {
             while (it.hasNext()) {
                 final Contact contact = it.next();
                 lastModified = contact.getLastModified();
-                
+
                 // Correct last modified and creation date with users timezone
                 contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
                 contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
-                modifiedList.add(contact);                
-                
+                list.add(contact);
+
                 if ((lastModified != null) && (timestamp.getTime() < lastModified.getTime())) {
                     timestamp = lastModified;
                 }
@@ -139,15 +140,13 @@ public class UpdatesAction extends ContactAction {
             }
             responseMap.put("modified", modifiedList);
             responseMap.put("deleted", deletedList);
+
         } finally {
             if (it != null) {
                 it.close();
             }
         }
 
-        return new AJAXRequestResult(responseMap, timestamp, "contact");
+        return new AJAXRequestResult(list, timestamp, "contact");
     }
-    
-    
-
 }

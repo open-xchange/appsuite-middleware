@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.openexchange.configuration;
 
@@ -7,7 +7,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.tools.conf.AbstractConfig;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class TestConfig extends AbstractConfig {
@@ -16,7 +16,7 @@ public class TestConfig extends AbstractConfig {
      * Singleton.
      */
     private static TestConfig singleton;
-    
+
     /**
      * Prevent instantiation
      */
@@ -56,7 +56,7 @@ public class TestConfig extends AbstractConfig {
     public static String getProperty(final Property key) {
         return singleton.getPropertyInternal(key.getPropertyName());
     }
-    
+
     /**
      * Enumeration of all properties in the test.properties file.
      */

@@ -54,7 +54,7 @@ import com.openexchange.tools.conf.AbstractConfig;
 
 /**
  * Tests need to be able to find the templates, so this one uses
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class PublishConfig extends AbstractConfig {

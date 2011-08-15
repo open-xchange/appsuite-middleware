@@ -73,7 +73,7 @@ public class ReplyAllTest extends AbstractReplyTest {
     public ReplyAllTest(String name) {
         super(name);
     }
-    
+
     public List<Contact> extract(int amount, Contact[] source, List<String> excludedEmail){
         List<Contact> returnees = new LinkedList<Contact>();
         int used = 0;
@@ -84,22 +84,22 @@ public class ReplyAllTest extends AbstractReplyTest {
             }
         return returnees;
     }
-    
+
     public void testShouldReplyToSenderAndAllRecipients() throws OXException, IOException, SAXException, JSONException, OXException {
         AJAXClient client1 = new AJAXClient(User.User1);
         AJAXClient client2 = new AJAXClient(User.User2);
-        
-        
+
+
         String mail1 = client1.getValues().getSendAddress(); // note: doesn't work the other way around on the dev system, because only the
         String mail2 = client2.getValues().getSendAddress(); // first account is set up correctly.
 
         List<Contact> otherContacts = extract(2, contactManager.searchAction("*", 6), Arrays.asList(mail1,mail2));
         assertTrue("Precondition: This test needs at least to other contacts in the global address book to work", otherContacts.size() > 1);
-        
+
         this.client = client2;
         String anotherMail = otherContacts.get(0).getEmail1();
         String yetAnotherMail = otherContacts.get(1).getEmail1();
-        
+
         JSONObject mySentMail = createEMail(adresses(mail1, anotherMail, yetAnotherMail), "ReplyAll test", MailContentType.ALTERNATIVE.toString(), MAIL_TEXT_BODY);
         sendMail(mySentMail.toString());
 
@@ -111,13 +111,13 @@ public class ReplyAllTest extends AbstractReplyTest {
 
         List<String> toAndCC = myReplyMail.getTo();
         toAndCC.addAll(myReplyMail.getCc()); //need to do both because depending on user settings, it might be one of these
-        
+
         assertTrue("Sender of original message should become recipient in reply", contains(toAndCC, mail2));
         assertTrue("1st recipient ("+anotherMail+") of original message should still be recipient in reply, but TO/CC field only has these: " + toAndCC, contains(toAndCC, anotherMail));
         assertTrue("2nd recipient ("+yetAnotherMail+") of original message should still be recipient in reply, but TO/CC field only has these: " + toAndCC, contains(toAndCC, yetAnotherMail));
     }
-    
-    
+
+
     protected String adresses(String... mails){
         StringBuilder builder = new StringBuilder();
         builder.append("[");

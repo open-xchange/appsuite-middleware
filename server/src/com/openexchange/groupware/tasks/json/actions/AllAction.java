@@ -51,9 +51,7 @@ package com.openexchange.groupware.tasks.json.actions;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.OrderFields;
@@ -102,7 +100,6 @@ public final class AllAction extends AbstractTaskAction {
 
         Date lastModified = null;
 
-        final Map<String, List<Task>> taskMap = new HashMap<String, List<Task>>(1);
         final List<Task> taskList = new ArrayList<Task>();
         SearchIterator<Task> it = null;
         try {
@@ -123,9 +120,8 @@ public final class AllAction extends AbstractTaskAction {
                     timestamp = lastModified;
                 }
             }
-            
-            taskMap.put("tasks", taskList);
-            return new AJAXRequestResult(taskMap, timestamp, "tasks");
+
+            return new AJAXRequestResult(taskList, timestamp, "task");
         } finally {
             if(it!=null) {
                 it.close();

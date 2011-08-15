@@ -65,7 +65,7 @@ import com.openexchange.sessiond.impl.SessionObject;
 
 /**
  * {@link MailIDTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailIDTest extends AbstractMailTest {

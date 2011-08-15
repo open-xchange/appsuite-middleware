@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.notify;
 
-import com.openexchange.exception.OXException;
 import java.util.List;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.tools.CommonAppointments;
@@ -82,7 +81,7 @@ public class Bug14309Test extends ParticipantNotifyTest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        
+
         final TestContextToolkit contextTools = new TestContextToolkit();
         ctx = contextTools.getDefaultContext();
         final TestConfig config = new TestConfig();

@@ -49,8 +49,14 @@
 
 package com.openexchange.groupware.calendar.json.converters;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.TimeZone;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -66,29 +72,164 @@ import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.CommonObject;
+import com.openexchange.groupware.container.DataObject;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link AppointmentResultConverter}
- * 
+ * {@link AppointmentListResultConverter}
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AppointmentResultConverter extends AbstractCalendarJSONResultConverter {
+	private static final org.apache.commons.logging.Log LOG =
+		        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AppointmentResultConverter.class));
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AppointmentResultConverter.class));
+	private static final String INPUT_FORMAT = "appointment";
+    /**
+     * Initializes a new {@link AppointmentListResultConverter}.
+     */
+    public AppointmentResultConverter() {
+        super();
+    }
 
-    private static final String INPUT_FORMAT = "appointment";
+    protected void convertCalendar(final String action, final Collection<Appointment> appointmentList, final AppointmentAJAXRequest req, final AJAXRequestResult result, final TimeZone userTimeZone) throws OXException {
+        if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATES)) {
+            convert4Updates(appointmentList, req, result, userTimeZone);
+        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_FREEBUSY)) {
+            convert4FreeBusy(appointmentList, req, result, userTimeZone);
+        } else {
+            convert(appointmentList, req, result, userTimeZone);
+        }
+    }
 
+    protected void convert(final Collection<Appointment> appointmentList, final AppointmentAJAXRequest req, final AJAXRequestResult result, final TimeZone userTimeZone) throws OXException {
+        final Date startUTC = req.optDate(AJAXServlet.PARAMETER_START);
+        final Date endUTC = req.optDate(AJAXServlet.PARAMETER_END);
+        final int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
+
+        final TimeZone timeZone;
+        {
+            final String timeZoneId = req.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
+            timeZone = null == timeZoneId ? userTimeZone : getTimeZone(timeZoneId);
+        }
+        final JSONArray jsonResponseArray = new JSONArray();
+        final AppointmentWriter writer = new AppointmentWriter(timeZone);
+
+        for (final Appointment appointment : appointmentList) {
+            try {
+                writer.writeArray(appointment, columns, startUTC, endUTC, jsonResponseArray);
+            } catch (final JSONException e) {
+                throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+            }
+        }
+
+        result.setResultObject(jsonResponseArray, OUTPUT_FORMAT);
+    }
+
+    protected void convert4FreeBusy(final Collection<Appointment> appointmentList, final AppointmentAJAXRequest req, final AJAXRequestResult result, final TimeZone userTimeZone) throws OXException {
+        final TimeZone timeZone;
+        {
+            final String timeZoneId = req.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
+            timeZone = null == timeZoneId ? userTimeZone : getTimeZone(timeZoneId);
+        }
+
+        final JSONArray jsonResponseArray = new JSONArray();
+        final AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone);
+        for (final Appointment appointment : appointmentList) {
+            final JSONObject jsonAppointmentObj = new JSONObject();
+            try {
+                appointmentWriter.writeAppointment(appointment, jsonAppointmentObj);
+                jsonResponseArray.put(jsonAppointmentObj);
+            } catch (final JSONException e) {
+                throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+            }
+        }
+
+        result.setResultObject(jsonResponseArray, OUTPUT_FORMAT);
+    }
+
+    protected void convert4Updates(final Collection<Appointment> appointments, final AppointmentAJAXRequest req, final AJAXRequestResult result, final TimeZone userTimeZone) throws OXException {
+        final Date startUTC = req.optDate(AJAXServlet.PARAMETER_START);
+        final Date endUTC = req.optDate(AJAXServlet.PARAMETER_END);
+        final int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
+        /*
+         * Create list with support for Iterator.remove()
+         */
+        final List<Appointment> appointmentList = new ArrayList<Appointment>(appointments);
+        /*
+         * Any deleted appointments?
+         */
+        final List<Appointment> deletedAppointments = new LinkedList<Appointment>();
+        for (final Iterator<Appointment> iter = appointmentList.iterator(); iter.hasNext();) {
+            final Appointment appointment = iter.next();
+            if (hasOnlyId(appointment, columns)) {
+                deletedAppointments.add(appointment);
+                iter.remove();
+            }
+        }
+
+        final TimeZone timeZone;
+        {
+            final String timeZoneId = req.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
+            timeZone = null == timeZoneId ? userTimeZone : getTimeZone(timeZoneId);
+        }
+        final JSONArray jsonResponseArray = new JSONArray();
+        final AppointmentWriter writer = new AppointmentWriter(timeZone);
+
+        for (final Appointment appointment : appointmentList) {
+            try {
+                writer.writeArray(appointment, columns, startUTC, endUTC, jsonResponseArray);
+            } catch (final JSONException e) {
+                throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+            }
+        }
+
+        if (!deletedAppointments.isEmpty()) {
+            for (final Appointment appointment : deletedAppointments) {
+                jsonResponseArray.put(appointment.getObjectID());
+            }
+        }
+
+        result.setResultObject(jsonResponseArray, OUTPUT_FORMAT);
+    }
+
+    private static boolean hasOnlyId(final Appointment appointment, final int[] columns) {
+        if (!appointment.containsObjectID()) {
+            return false;
+        }
+        if (CommonObject.Marker.ID_ONLY.equals(appointment.getMarker())) {
+            return true;
+        }
+        for (final int column : columns) {
+            if (DataObject.OBJECT_ID != column && appointment.contains(column)) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
     @Override
     public String getInputFormat() {
         return INPUT_FORMAT;
     }
 
     @Override
-    protected void convertCalendar(final AppointmentAJAXRequest request, final AJAXRequestResult result, final ServerSession session, final Converter converter, TimeZone userTimeZone) throws OXException {
-        final Appointment appointmentobject = (Appointment) result.getResultObject();
+    protected void convertCalendar(final AppointmentAJAXRequest request, final AJAXRequestResult result, final ServerSession session, final Converter converter, final TimeZone userTimeZone) throws OXException {
+        final Object resultObject = result.getResultObject();
+        final String action = request.getParameter(AJAXServlet.PARAMETER_ACTION);
+        if (resultObject instanceof Appointment) {
+            convertCalendar((Appointment) resultObject, request, result, session, userTimeZone);
+        } else {
+            @SuppressWarnings("unchecked") final Collection<Appointment> appointments = (Collection<Appointment>) resultObject;
+            convertCalendar(action, appointments, request, result, userTimeZone);
+        }
+    }
+
+    private void convertCalendar(final Appointment appointmentobject, final AppointmentAJAXRequest request, final AJAXRequestResult result, final ServerSession session, final TimeZone userTimeZone) throws OXException {
         final JSONObject jsonResponseObj = new JSONObject();
         final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
         final int recurrencePosition = request.optInt(CalendarFields.RECURRENCE_POSITION);
@@ -104,13 +245,8 @@ public class AppointmentResultConverter extends AbstractCalendarJSONResultConver
         if (appointmentobject.getRecurrenceType() != CalendarObject.NONE && recurrencePosition > 0) {
             // Commented this because this is done in CalendarOperation.loadAppointment():207 that calls extractRecurringInformation()
             // appointmentobject.calculateRecurrence();
-            final RecurringResultsInterface recuResults = recColl.calculateRecurring(
-                appointmentobject,
-                0,
-                0,
-                recurrencePosition,
-                CalendarCollectionService.MAX_OCCURRENCESE,
-                true);
+            final RecurringResultsInterface recuResults =
+                recColl.calculateRecurring(appointmentobject, 0, 0, recurrencePosition, CalendarCollectionService.MAX_OCCURRENCESE, true);
             if (recuResults.size() == 0) {
                 if (LOG.isWarnEnabled()) {
                     LOG.warn(new StringBuilder(32).append("No occurrence at position ").append(recurrencePosition));
@@ -134,7 +270,8 @@ public class AppointmentResultConverter extends AbstractCalendarJSONResultConver
                 throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             }
         }
-        
+
         result.setResultObject(jsonResponseObj, OUTPUT_FORMAT);
     }
+
 }

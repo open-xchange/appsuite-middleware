@@ -56,7 +56,6 @@ import java.util.TimeZone;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.ExternalUserParticipant;

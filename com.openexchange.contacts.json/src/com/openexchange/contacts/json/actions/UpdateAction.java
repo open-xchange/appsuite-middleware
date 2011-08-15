@@ -89,20 +89,20 @@ public class UpdateAction extends ContactAction {
         final Date date = new Date(timestamp);
         final boolean containsImage = req.containsImage();
         final JSONObject json = req.getContactJSON(containsImage);
-        
+
         final ContactParser parser = new ContactParser();
         final Contact contact = parser.parse(json);
         contact.setObjectID(id);
-        
+
         if (containsImage) {
-            UploadEvent uploadEvent = null;               
+            UploadEvent uploadEvent = null;
             try {
                 uploadEvent = req.getUploadEvent();
                 final UploadFile file = uploadEvent.getUploadFileByFieldName("file");
                 if (file == null) {
                     throw AjaxExceptionCodes.NO_UPLOAD_IMAGE.create();
                 }
-                
+
                 RequestTools.setImageData(contact, file);
             } finally {
                 if (uploadEvent != null) {
@@ -110,10 +110,10 @@ public class UpdateAction extends ContactAction {
                 }
             }
         }
-        
+
         final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
         contactInterface.updateContactObject(contact, folder, date);
-        
+
         final JSONObject response = new JSONObject();
         return new AJAXRequestResult(response, contact.getLastModified(), "json");
     }

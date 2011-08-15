@@ -66,7 +66,7 @@ import com.openexchange.resource.Resource;
 
 /**
  * This was just a quick&dirty implementation to get other tests running that use resources.
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class ResourceTestManager implements TestManager {

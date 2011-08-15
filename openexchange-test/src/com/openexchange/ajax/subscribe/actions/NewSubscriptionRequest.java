@@ -82,12 +82,12 @@ public class NewSubscriptionRequest extends AbstractSubscriptionRequest<NewSubsc
     public DynamicFormDescription getFormDescription() {
         return formDescription;
     }
-    
-    
+
+
     public NewSubscriptionRequest() {
         super();
     }
-    
+
     public NewSubscriptionRequest(Subscription subscription, DynamicFormDescription formDescription){
         this();
         setSubscription(subscription);

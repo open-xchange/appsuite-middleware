@@ -94,7 +94,7 @@ public class InfostoreDowngradeTest extends TestCase {
 	public void setUp() throws Exception {
         Init.startServer();
         AJAXConfig.init();
-        
+
         ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
         userId = UserStorage.getInstance().getUserId(AJAXConfig.getProperty(AJAXConfig.Property.LOGIN), ctx);
         user = UserStorage.getInstance().getUser(userId, ctx);
@@ -166,7 +166,7 @@ public class InfostoreDowngradeTest extends TestCase {
             database.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, ctx, user, userConfig);
             fail("The document still exists!");
         } catch (final OXException e) {
-            assertEquals(e.getMessage(), 300, e.getCode());    
+            assertEquals(e.getMessage(), 300, e.getCode());
         }
     }
 

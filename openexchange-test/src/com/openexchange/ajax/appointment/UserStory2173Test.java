@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.ajax.folder.Create.ocl;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Date;
@@ -151,16 +150,16 @@ public class UserStory2173Test extends AbstractAJAXSession {
         if (appointmentPrivate.getObjectID() > 0) {
             clientA.execute(new DeleteRequest(appointmentPrivate));
         }
-        
+
         if (appointmentPublic.getObjectID() > 0) {
             clientA.execute(new DeleteRequest(appointmentPublic));
         }
-        
+
         clientA.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(API.OX_OLD, publicFolder.getObjectID(), publicFolder.getLastModified()));
-        
+
         SetRequest setRequest = new SetRequest(Tree.CalendarDefaultStatusPrivate, I(Appointment.NONE));
         clientB.execute(setRequest);
-        
+
         setRequest = new SetRequest(Tree.CalendarDefaultStatusPublic, I(Appointment.NONE));
         clientB.execute(setRequest);
 
@@ -170,10 +169,10 @@ public class UserStory2173Test extends AbstractAJAXSession {
     public void testPrivate() throws Exception {
         AppointmentInsertResponse insertResponse = clientA.execute(new InsertRequest(appointmentPrivate, clientA.getValues().getTimeZone()));
         insertResponse.fillAppointment(appointmentPrivate);
-        
+
         GetRequest getRequest = new GetRequest(clientA.getValues().getPrivateAppointmentFolder(), appointmentPrivate.getObjectID());
         Appointment loadedAppointment = clientA.execute(getRequest).getAppointment(clientA.getValues().getTimeZone());
-        
+
         for (UserParticipant user : loadedAppointment.getUsers()) {
             if (user.getIdentifier() == clientB.getValues().getUserId()) {
                 assertEquals("Wrong confirmation status", Appointment.ACCEPT, user.getConfirm());
@@ -184,10 +183,10 @@ public class UserStory2173Test extends AbstractAJAXSession {
     public void testPublic() throws Exception {
         AppointmentInsertResponse insertResponse = clientA.execute(new InsertRequest(appointmentPublic, clientA.getValues().getTimeZone()));
         insertResponse.fillAppointment(appointmentPublic);
-        
+
         GetRequest getRequest = new GetRequest(publicFolder.getObjectID(), appointmentPublic.getObjectID());
         Appointment loadedAppointment = clientA.execute(getRequest).getAppointment(clientA.getValues().getTimeZone());
-        
+
         for (UserParticipant user : loadedAppointment.getUsers()) {
             if (user.getIdentifier() == clientB.getValues().getUserId()) {
                 assertEquals("Wrong confirmation status", Appointment.ACCEPT, user.getConfirm());

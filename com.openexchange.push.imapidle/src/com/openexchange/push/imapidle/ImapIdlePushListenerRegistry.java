@@ -176,7 +176,7 @@ public final class ImapIdlePushListenerRegistry {
      * @param contextId The context identifier
      * @param userId The user identifier
      * @return <code>true</code> if a push listener for given user-context-pair was found and removed; otherwise <code>false</code>
-     * @throws PushException 
+     * @throws PushException
      */
     public boolean removePushListener(final int contextId, final int userId) throws OXException {
         final SessiondService sessiondService = ImapIdleServiceRegistry.getServiceRegistry().getService(SessiondService.class);

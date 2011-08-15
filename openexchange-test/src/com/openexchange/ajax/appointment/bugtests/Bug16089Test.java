@@ -29,16 +29,16 @@ public class Bug16089Test extends AbstractAJAXSession {
     private AJAXClient client;
 
     FolderObject folderObject1;
-    
+
     Appointment appointment;
-    
+
     TimeZone timezone;
-    
+
     Calendar cal;
-    
+
     public Bug16089Test(String name) {
         super(name);
-        
+
     }
 
     @Override
@@ -48,7 +48,7 @@ public class Bug16089Test extends AbstractAJAXSession {
         manager = new FolderTestManager(getClient());
         timezone = client.getValues().getTimeZone();
         cal = Calendar.getInstance(timezone);
-        
+
         // create a folder
         folderObject1 = new FolderObject();
         folderObject1.setFolderName("Bug16089Testfolder");
@@ -66,15 +66,15 @@ public class Bug16089Test extends AbstractAJAXSession {
             OCLPermission.ADMIN_PERMISSION,
             OCLPermission.ADMIN_PERMISSION);
         folderObject1.setPermissionsAsArray(new OCLPermission[] { perm1 });
-        manager.insertFolderOnServer(folderObject1);      
-        
+        manager.insertFolderOnServer(folderObject1);
+
         appointment = createAppointment();
     }
-    
+
     public void testConfirmation() throws Exception {
         GetResponse getAppointmentResp = client.execute(new GetRequest(appointment));
         Appointment testApp = getAppointmentResp.getAppointment(timezone);
-        
+
         Participant[] participants = testApp.getParticipants();
         boolean found = false;
         for (Participant p : participants) {
@@ -83,14 +83,14 @@ public class Bug16089Test extends AbstractAJAXSession {
                 ConfirmableParticipant[] confirmations = testApp.getConfirmations();
                 for (ConfirmableParticipant c : confirmations) {
                     if (c.getIdentifier() == client.getValues().getUserId()) {
-                        int ctx = getContextID(client);                        
+                        int ctx = getContextID(client);
                         int publicConfig = ServerUserSetting.getInstance().getDefaultStatusPublic(ctx, client.getValues().getUserId());
                         assertEquals("Confirm status isn't equal with user setting.", c.getConfirm(),publicConfig);
                     }
                 }
             }
         }
-        
+
         if (!found) {
             fail("User not found as Participant");
         }
@@ -104,18 +104,18 @@ public class Bug16089Test extends AbstractAJAXSession {
         String sub = text.substring(8, text.length()-1); //TODO: exchange ugly hack for JSON parser
         return Integer.parseInt(sub);
     }
-    
+
     @Override
     public void tearDown() throws Exception {
         client.execute(new DeleteRequest(appointment, false));
         manager.cleanUp();
         super.tearDown();
     }
-    
+
     private Appointment createAppointment() throws Exception {
         Calendar cal = (Calendar) this.cal.clone();
         cal.add(Calendar.HOUR_OF_DAY, 1);
-        
+
         Appointment app = new Appointment();
         app.setTitle("Bug16089Appointment");
         app.setIgnoreConflicts(true);
@@ -124,12 +124,12 @@ public class Bug16089Test extends AbstractAJAXSession {
         app.setEndDate(cal.getTime());
         app.setParentFolderID(folderObject1.getObjectID());
         app.setRecurrenceType(Appointment.NO_RECURRENCE);
-        
-        InsertRequest insApp = new InsertRequest(app, timezone, false);    
+
+        InsertRequest insApp = new InsertRequest(app, timezone, false);
         AppointmentInsertResponse execute = client.execute(insApp);
 
         execute.fillAppointment(app);
-        
+
         return app;
     }
 

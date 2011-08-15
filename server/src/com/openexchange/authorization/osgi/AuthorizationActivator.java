@@ -61,7 +61,7 @@ import com.openexchange.server.osgi.AuthorizationCustomizer;
  */
 public class AuthorizationActivator implements BundleActivator {
 
-    private ServiceTracker tracker;
+    private ServiceTracker<AuthorizationService,AuthorizationService> tracker;
 
     public AuthorizationActivator() {
         super();
@@ -72,7 +72,7 @@ public class AuthorizationActivator implements BundleActivator {
         /*
          * Start tracker
          */
-        tracker = new ServiceTracker(context, AuthorizationService.class.getName(), new AuthorizationCustomizer(context));
+        tracker = new ServiceTracker<AuthorizationService,AuthorizationService>(context, AuthorizationService.class, new AuthorizationCustomizer(context));
         tracker.open();
     }
 

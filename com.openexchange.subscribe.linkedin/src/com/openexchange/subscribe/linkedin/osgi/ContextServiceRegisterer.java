@@ -60,31 +60,31 @@ import com.openexchange.context.ContextService;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class ContextServiceRegisterer implements ServiceTrackerCustomizer {
+public class ContextServiceRegisterer implements ServiceTrackerCustomizer<ContextService,ContextService> {
 
     private final BundleContext context;
     private final Activator activator;
 
-    public ContextServiceRegisterer(BundleContext context, Activator activator){
+    public ContextServiceRegisterer(final BundleContext context, final Activator activator){
         this.context = context;
         this.activator = activator;
     }
 
     @Override
-    public Object addingService(ServiceReference reference) {
-        ContextService contexts = (ContextService) context.getService(reference);
+    public ContextService addingService(final ServiceReference<ContextService> reference) {
+        final ContextService contexts = context.getService(reference);
         activator.setContextService(contexts);
         activator.registerServices();
         return contexts;
     }
 
     @Override
-    public void modifiedService(ServiceReference arg0, Object arg1) {
+    public void modifiedService(final ServiceReference<ContextService> arg0, final ContextService arg1) {
       //nothing to do here
     }
 
     @Override
-    public void removedService(ServiceReference reference, Object arg1) {
+    public void removedService(final ServiceReference<ContextService> reference, final ContextService arg1) {
         activator.setContextService(null);
         activator.unregisterServices();
         context.ungetService(reference);

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.importexport.actions;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONArray;
@@ -90,7 +89,7 @@ public final class ImportExportParser {
 
         JSONArray warnings = json.optJSONArray("warnings");
         List<ConversionWarning> conversionWarnings = new ArrayList<ConversionWarning>();
-        
+
         if (warnings != null) {
             for (int i = 0, size = warnings.length(); i < size; i++) {
                 String message = warnings.getJSONObject(i).getString("error");

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.folder;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.GetResponse;
@@ -60,7 +59,7 @@ import com.openexchange.server.impl.OCLPermission;
 
 /**
  * {@link GetVirtualTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class GetVirtualTest extends AbstractAJAXSession {
@@ -69,7 +68,7 @@ public class GetVirtualTest extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link GetVirtualTest}.
-     * 
+     *
      * @param name name of the test.
      */
     public GetVirtualTest(final String name) {

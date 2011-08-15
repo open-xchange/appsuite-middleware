@@ -65,20 +65,20 @@ import com.openexchange.messaging.facebook.groupware.FacebookDropObsoleteAccount
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class UpdateTaskRegisterer implements ServiceTrackerCustomizer {
+public final class UpdateTaskRegisterer implements ServiceTrackerCustomizer<DatabaseService,DatabaseService> {
 
     private final BundleContext context;
-    private ServiceRegistration registration;
+    private ServiceRegistration<UpdateTaskProviderService> registration;
 
-    public UpdateTaskRegisterer(BundleContext context) {
+    public UpdateTaskRegisterer(final BundleContext context) {
         super();
         this.context = context;
     }
 
     @Override
-    public Object addingService(ServiceReference reference) {
-        final DatabaseService dbService = (DatabaseService) context.getService(reference);
-        registration = context.registerService(UpdateTaskProviderService.class.getName(), new UpdateTaskProviderService() {
+    public DatabaseService addingService(final ServiceReference<DatabaseService> reference) {
+        final DatabaseService dbService = context.getService(reference);
+        registration = context.registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
             @Override
             public Collection<UpdateTaskV2> getUpdateTasks() {
                 return Arrays.asList(((UpdateTaskV2) new FacebookDropObsoleteAccountsTask(dbService)));
@@ -88,12 +88,12 @@ public final class UpdateTaskRegisterer implements ServiceTrackerCustomizer {
     }
 
     @Override
-    public void modifiedService(ServiceReference reference, Object service) {
+    public void modifiedService(final ServiceReference<DatabaseService> reference, final DatabaseService service) {
         // Nothing to do.
     }
 
     @Override
-    public void removedService(ServiceReference reference, Object service) {
+    public void removedService(final ServiceReference<DatabaseService> reference, final DatabaseService service) {
         registration.unregister();
         context.ungetService(reference);
     }

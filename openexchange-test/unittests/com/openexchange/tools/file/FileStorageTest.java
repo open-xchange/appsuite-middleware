@@ -67,8 +67,8 @@ public class FileStorageTest extends TestCase {
 
     private static final Log LOG = LogFactory.getLog(FileStorageTest.class);
 
-    
-    
+
+
     @Override
 	protected void setUp() throws Exception {
 		// TODO Auto-generated method stub
@@ -154,7 +154,7 @@ public class FileStorageTest extends TestCase {
         }
         rmdir(tempFile);
     }
-    
+
     /**
      * Test for changes related to bug 19600, which was caused by creating directories
      * when checking for their existence (using the root user, not the open-xchange user).
@@ -162,7 +162,7 @@ public class FileStorageTest extends TestCase {
     public final void testDeleteFile() throws Throwable {
         final ByteArrayInputStream baos = new ByteArrayInputStream(
         		RandomString.generateLetter(100).getBytes("UTF-8"));
-        
+
         final File tempFile = File.createTempFile("filestorage", ".tmp");
         tempFile.delete();
         final FileStorage storage = new LocalFileStorage(tempFile.toURI());
@@ -172,8 +172,8 @@ public class FileStorageTest extends TestCase {
         assertFalse(storage.deleteFile(identifier));
     }
 
-    
-    
+
+
     private static void rmdir(final File tempFile) {
         if (tempFile.isDirectory()) {
             for (final File f : tempFile.listFiles()) {

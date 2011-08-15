@@ -62,7 +62,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link ImageData} - The image data.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ImageData {
@@ -89,7 +89,7 @@ public final class ImageData {
 
     /**
      * Initializes a new {@link ImageData} with its unique ID set to {@link DataArguments#getID()}.
-     * 
+     *
      * @param imageSource The image data source
      * @param imageArguments The image arguments
      * @param timeToLive The time-to-live in milliseconds; a value less than or equal to zero is an infinite time-to-live
@@ -155,7 +155,7 @@ public final class ImageData {
     /**
      * Translates specified string into application/x-www-form-urlencoded format using a specific encoding scheme. This method uses the
      * supplied encoding scheme to obtain the bytes for unsafe characters.
-     * 
+     *
      * @param text The string to be translated.
      * @param charset The character encoding to use; should be <code>UTF-8</code> according to W3C
      * @return The translated string or the string itself if any error occurred
@@ -172,7 +172,7 @@ public final class ImageData {
 
     /**
      * Checks if specified unique ID matches this image data's unique ID.
-     * 
+     *
      * @param otherUniqueId The other unique ID to check against
      * @return <code>true</code> if specified unique ID matches this image data's unique ID; otherwise <code>false</code>
      */
@@ -182,7 +182,7 @@ public final class ImageData {
 
     /**
      * Gets the unique ID (actually {@link DataArguments#getID()} from formerly passed data arguments).
-     * 
+     *
      * @return The unique ID
      */
     public String getUniqueId() {
@@ -191,7 +191,7 @@ public final class ImageData {
 
     /**
      * Gets the image data.
-     * 
+     *
      * @param session The session needed to obtain image's data
      * @return The image data
      * @throws OXException
@@ -202,11 +202,11 @@ public final class ImageData {
 
     /**
      * Gets the URL to this image; something like:
-     * 
+     *
      * <pre>
      * &quot;/ajax/image?uid=1578300019-288076184-517459785&quot;
      * </pre>
-     * 
+     *
      * @return The URL to this image
      */
     public String getImageURL() {
@@ -215,7 +215,7 @@ public final class ImageData {
 
     /**
      * Gets this image data's time-to-live in milliseconds.
-     * 
+     *
      * @return This image data's time-to-live in milliseconds
      */
     public int getTimeToLive() {
@@ -258,7 +258,7 @@ public final class ImageData {
 
     /**
      * Touches the last-accessed time stamp.
-     * 
+     *
      * @return This image data with its last-accessed time stamp touched
      */
     public ImageData touch() {
@@ -268,7 +268,7 @@ public final class ImageData {
 
     /**
      * Gets the last-accessed time stamp.
-     * 
+     *
      * @return The last-accessed time stamp
      */
     public long getLastAccessed() {

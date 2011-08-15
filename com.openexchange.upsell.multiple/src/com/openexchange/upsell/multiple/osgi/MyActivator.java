@@ -70,22 +70,19 @@ public class MyActivator extends DeferredActivator {
 
     private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MyActivator.class));
 
-    // add services which we need in our plugins later
-    private static final Class<?>[] NEEDED_SERVICES = {
-        UserService.class, DatabaseService.class, ContextService.class, ConfigurationService.class };
-
-    private final List<ServiceTracker> serviceTrackerList;
+    private final List<ServiceTracker<?,?>> serviceTrackerList;
 
     private SessionServletRegistration servletRegistration;
 
     public MyActivator() {
         super();
-        serviceTrackerList = new ArrayList<ServiceTracker>();
+        serviceTrackerList = new ArrayList<ServiceTracker<?,?>>();
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
+        return new Class<?>[] {
+            UserService.class, DatabaseService.class, ContextService.class, ConfigurationService.class };
     }
 
     @Override
@@ -127,10 +124,10 @@ public class MyActivator extends DeferredActivator {
 			// register the http info/sso servlet
 			servletRegistration = new SessionServletRegistration(context, new MyServlet(), getFromConfig("com.openexchange.upsell.multiple.servlet"));
 			servletRegistration.open();
-            serviceTrackerList.add(new ServiceTracker(context, UpsellURLService.class.getName(), new UrlServiceInstallationServiceListener(context)));
+            serviceTrackerList.add(new ServiceTracker<UpsellURLService,UpsellURLService>(context, UpsellURLService.class, new UrlServiceInstallationServiceListener(context)));
 
             // Open service trackers
-            for (final ServiceTracker tracker : serviceTrackerList) {
+            for (final ServiceTracker<?,?> tracker : serviceTrackerList) {
                 tracker.open();
             }
 
@@ -154,7 +151,7 @@ public class MyActivator extends DeferredActivator {
             /*
              * Close service trackers
              */
-            for (final ServiceTracker tracker : serviceTrackerList) {
+            for (final ServiceTracker<?,?> tracker : serviceTrackerList) {
                 tracker.close();
             }
             serviceTrackerList.clear();

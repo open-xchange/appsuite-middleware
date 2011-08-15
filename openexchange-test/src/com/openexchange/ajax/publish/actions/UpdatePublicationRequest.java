@@ -63,7 +63,7 @@ import com.openexchange.publish.json.PublicationWriter;
  */
 public class UpdatePublicationRequest extends AbstractPublicationRequest<UpdatePublicationResponse> {
     private Publication publication;
-    
+
     public void setPublication(Publication publication) {
         this.publication = publication;
     }
@@ -75,12 +75,12 @@ public class UpdatePublicationRequest extends AbstractPublicationRequest<UpdateP
     public UpdatePublicationRequest(){
         super();
     }
-    
+
     public UpdatePublicationRequest(Publication pub){
         this();
         setPublication(pub);
     }
-    
+
     public Object getBody() throws JSONException {
         try {
             return new PublicationWriter().write(getPublication(), null);

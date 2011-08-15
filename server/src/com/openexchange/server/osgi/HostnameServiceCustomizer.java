@@ -62,7 +62,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
-public final class HostnameServiceCustomizer implements ServiceTrackerCustomizer {
+public final class HostnameServiceCustomizer implements ServiceTrackerCustomizer<HostnameService,HostnameService> {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(HostnameServiceCustomizer.class);
@@ -78,31 +78,29 @@ public final class HostnameServiceCustomizer implements ServiceTrackerCustomizer
 	}
 
 	@Override
-    public Object addingService(final ServiceReference reference) {
-		final Object addedService = context.getService(reference);
+    public HostnameService addingService(final ServiceReference<HostnameService> reference) {
+		final HostnameService addedService = context.getService(reference);
 		if (null == addedService) {
 			LOG.warn("Added service is null!", new Throwable());
 			return addedService;
 		}
-		if (addedService instanceof HostnameService) {
-			if (ServerServiceRegistry.getInstance().getService(HostnameService.class) == null) {
-				ServerServiceRegistry.getInstance().addService(HostnameService.class, addedService);
-			} else {
-				LOG.error("Several hostname services found. Remove all except one!");
-			}
+		if (ServerServiceRegistry.getInstance().getService(HostnameService.class) == null) {
+			ServerServiceRegistry.getInstance().addService(HostnameService.class, addedService);
+		} else {
+			LOG.error("Several hostname services found. Remove all except one!");
 		}
 		return addedService;
 	}
 
 	@Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<HostnameService> reference, final HostnameService service) {
 		if (LOG.isTraceEnabled()) {
 			LOG.trace("HostnameURLCustomizer.modifiedService()");
 		}
 	}
 
 	@Override
-    public void removedService(final ServiceReference reference, final Object service) {
+    public void removedService(final ServiceReference<HostnameService> reference, final HostnameService service) {
 		try {
 			ServerServiceRegistry.getInstance().removeService(HostnameService.class);
 		} finally {

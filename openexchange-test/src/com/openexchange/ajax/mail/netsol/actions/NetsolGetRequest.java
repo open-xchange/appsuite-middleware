@@ -57,9 +57,9 @@ import com.openexchange.ajax.mail.netsol.FolderAndID;
 
 /**
  * {@link NetsolGetRequest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class NetsolGetRequest extends AbstractMailRequest<NetsolGetResponse> {
 
@@ -90,7 +90,7 @@ public final class NetsolGetRequest extends AbstractMailRequest<NetsolGetRespons
 
     /**
      * Initializes a new {@link NetsolGetRequest}
-     * 
+     *
      * @param mailPath
      */
     public NetsolGetRequest(final FolderAndID mailPath) {
@@ -99,7 +99,7 @@ public final class NetsolGetRequest extends AbstractMailRequest<NetsolGetRespons
 
     /**
      * Initializes a new {@link NetsolGetRequest}
-     * 
+     *
      * @param mailPath
      * @param failOnError
      */
@@ -111,7 +111,7 @@ public final class NetsolGetRequest extends AbstractMailRequest<NetsolGetRespons
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
      */
     public Object getBody() {
@@ -120,7 +120,7 @@ public final class NetsolGetRequest extends AbstractMailRequest<NetsolGetRespons
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
      */
     public Method getMethod() {
@@ -129,7 +129,7 @@ public final class NetsolGetRequest extends AbstractMailRequest<NetsolGetRespons
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
      */
     public Parameter[] getParameters() {
@@ -140,7 +140,7 @@ public final class NetsolGetRequest extends AbstractMailRequest<NetsolGetRespons
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
      */
     public AbstractAJAXParser<NetsolGetResponse> getParser() {

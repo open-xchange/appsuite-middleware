@@ -58,14 +58,13 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.ContactSQLInterface;
-import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLImpl;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionHolder;
@@ -80,7 +79,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractWebdavFactory;
 
 /**
  * {@link GroupwareCarddavFactory}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class GroupwareCarddavFactory extends AbstractWebdavFactory {
@@ -119,7 +118,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 
     public WebdavCollection resolveCollection(WebdavPath url) throws WebdavProtocolException {
         if (url.size() > 1) {
-            throw new WebdavProtocolException(url, 404);
+            throw WebdavProtocolException.Code.GENERAL_ERROR.create(url, 404);
         }
         if (isRoot(url)) {
             return mixin(new RootCollection(this));
@@ -133,7 +132,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
                 return mixin((AbstractCollection) resource);
             }
         }
-        throw new WebdavProtocolException(url, 404);
+        throw WebdavProtocolException.Code.GENERAL_ERROR.create(url, 404);
     }
 
     // TODO: i18n
@@ -165,14 +164,14 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
         return sessionHolder.getUser();
     }
 
-    public ContactSQLInterface getContactInterface() throws ContextException {
+    public ContactSQLInterface getContactInterface() throws OXException {
         return new RdbContactSQLImpl(getSession());
     }
 
     public State getState() {
         return stateHolder.get();
     }
-    
+
     public OXFolderAccess getOXFolderAccess() {
         return new OXFolderAccess(getContext());
     }
@@ -182,7 +181,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 
         private final static int[] FIELDS_FOR_ALL_REQUEST = { DataObject.OBJECT_ID };
 
-        
+
 
         private GroupwareCarddavFactory factory;
 
@@ -194,11 +193,11 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 
         private Map<Integer, List<Contact>> folderCache = new HashMap<Integer, List<Contact>>();
 
-        public void cacheFolder(int folderId) throws ContextException {
+        public void cacheFolder(int folderId) throws OXException {
             cacheFolderSlow(folderId);
         }
 
-        public void cacheFolderSlow(int folderId) throws ContextException {
+        public void cacheFolderSlow(int folderId) throws OXException {
             if (folderCache.containsKey(folderId)) {
                 return;
             }
@@ -220,13 +219,13 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
             }
         }
 
-        public Contact get(int id, int folderId) throws ContextException {
+        public Contact get(int id, int folderId) throws OXException {
             cacheFolder(folderId);
             Contact contact = contactCache.get(id);
             return contact;
         }
 
-        public List<Contact> getFolder(int id) throws ContextException {
+        public List<Contact> getFolder(int id) throws OXException {
             cacheFolder(id);
             List<Contact> contacts = folderCache.get(id);
             if (contacts == null) {
@@ -235,16 +234,16 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
             return contacts;
         }
 
-        public List<Contact> getAggregatedContacts() throws ContextException, OXException {
+        public List<Contact> getAggregatedContacts() throws OXException {
 
             List<Contact> contacts = new ArrayList<Contact>();
 
             //TODO: Karsten: Merge all of these
             // ContactSimilarity.areSimilar(original, candidate);
-            
+
             contacts.addAll(getFolder(getStandardContactFolderId()));
             contacts.addAll(getFolder(6));
-            
+
             return contacts;
         }
 

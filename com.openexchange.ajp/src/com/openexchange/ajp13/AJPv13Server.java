@@ -94,6 +94,15 @@ public abstract class AJPv13Server {
     }
 
     /**
+     * Gets the instance.
+     *
+     * @return The instance
+     */
+    public static AJPv13Server getInstance() {
+        return AJPv13Server.instance;
+    }
+
+    /**
      * Releases the singleton instance of AJP server.
      */
     public static void releaseInstrance() {

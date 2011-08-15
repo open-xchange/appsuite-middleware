@@ -61,7 +61,7 @@ import com.openexchange.groupware.calendar.Constants;
 public class Bug12072Test extends CalendarSqlTest {
     /**
      * Test for <a href= "http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=12072">bug #12072</a>
-     * 
+     *
      * @throws OXException If an OX error occurs
      */
     public void testShouldNotIndicateConflictingResources() throws OXException {

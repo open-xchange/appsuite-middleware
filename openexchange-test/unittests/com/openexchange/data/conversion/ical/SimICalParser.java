@@ -67,8 +67,8 @@ public class SimICalParser implements ICalParser{
 
     private List<CalendarDataObject> appointments;
     private List<Task> tasks;
-    
-    
+
+
     public List<CalendarDataObject> parseAppointments(final String icalText, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
         return appointments;
     }
@@ -84,11 +84,11 @@ public class SimICalParser implements ICalParser{
     public List<Task> parseTasks(final InputStream ical, final TimeZone defaultTZ, final Context context, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
         return tasks;
     }
-    
+
     public void setAppointments(final List<CalendarDataObject> appointments) {
         this.appointments = appointments;
     }
-    
+
     public void setTasks(final List<Task> tasks) {
         this.tasks = tasks;
     }

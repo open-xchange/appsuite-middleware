@@ -56,7 +56,7 @@ import junit.framework.TestCase;
 
 /**
  * {@link FilenamesMayNotContainSlashesValidatorTest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FilenamesMayNotContainSlashesValidatorTest extends TestCase {

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.framework;
 
-import com.openexchange.exception.OXException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

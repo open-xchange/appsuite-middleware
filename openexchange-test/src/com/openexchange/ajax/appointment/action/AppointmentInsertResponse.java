@@ -16,7 +16,7 @@ public class AppointmentInsertResponse extends CommonInsertResponse {
 
     /**
      * Puts the data of this insert response into a task object. This are
-     * especially the task identifier and the modified time stamp. 
+     * especially the task identifier and the modified time stamp.
      */
     public void fillAppointment(final Appointment appointment) {
         fillObject(appointment);

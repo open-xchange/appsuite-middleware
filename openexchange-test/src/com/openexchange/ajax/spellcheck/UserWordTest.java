@@ -61,15 +61,15 @@ import com.openexchange.ajax.spellcheck.actions.check.CheckResponse;
 
 /**
  * {@link UserWordTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class UserWordTest extends AbstractSpellCheckTest {
 
 	/**
 	 * Initializes a new {@link UserWordTest}
-	 * 
+	 *
 	 * @param name
 	 */
 	public UserWordTest(final String name) {
@@ -78,7 +78,7 @@ public final class UserWordTest extends AbstractSpellCheckTest {
 
 	/**
 	 * Tests the <code>action=add</code> request
-	 * 
+	 *
 	 * @throws Throwable
 	 */
 	public void testCheck() throws Throwable {
@@ -96,15 +96,15 @@ public final class UserWordTest extends AbstractSpellCheckTest {
 
 		String[] mw = checkResponse.getMisspeltWords();
 		assertTrue("Misspelt words: " + Arrays.toString(mw), mw.length == 0);
-		
+
 		userWordResponse = (UserWordResponse) Executor.execute(getSession(), new UserWordRequest(userWord, false, true));
 		assertTrue("non NULL JSON object: ", JSONObject.NULL.equals(userWordResponse.getNullObject()));
-		
+
 		checkResponse = (CheckResponse) Executor.execute(getSession(), new CheckRequest(
 				htmlContent, "en", true));
 		mw = checkResponse.getMisspeltWords();
 		assertTrue("No misspelt words: " + Arrays.toString(mw), mw.length == 1);
-		
+
 
 	}
 

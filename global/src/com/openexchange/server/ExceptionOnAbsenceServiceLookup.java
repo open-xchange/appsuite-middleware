@@ -53,7 +53,7 @@ package com.openexchange.server;
 
 /**
  * {@link ExceptionOnAbsenceServiceLookup}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ExceptionOnAbsenceServiceLookup implements ServiceLookup {
@@ -62,7 +62,7 @@ public final class ExceptionOnAbsenceServiceLookup implements ServiceLookup {
 
     /**
      * Initializes a new {@link ExceptionOnAbsenceServiceLookup}.
-     * 
+     *
      * @param serviceLookup The service look-up
      */
     public ExceptionOnAbsenceServiceLookup(final ServiceLookup serviceLookup) {

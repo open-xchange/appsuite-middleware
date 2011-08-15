@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.updater;
 
-import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -86,7 +85,7 @@ import com.openexchange.configuration.AJAXConfig.Property;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class UpdaterXMLTest extends AbstractAJAXSession {
-    
+
     private AJAXClient client;
 
     /**
@@ -96,7 +95,7 @@ public class UpdaterXMLTest extends AbstractAJAXSession {
     public UpdaterXMLTest(String name) {
         super(name);
     }
-    
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
@@ -108,39 +107,39 @@ public class UpdaterXMLTest extends AbstractAJAXSession {
         DefaultHttpClient httpClient = client.getSession().getHttpClient();
         httpClient.getCredentialsProvider().setCredentials(new AuthScope(hostname, 80), new UsernamePasswordCredentials(login, password));
     }
-    
+
     public void testUpdateXML() throws Exception {
         UpdateXMLRequest request = new UpdateXMLRequest();
         UpdateXMLResponse response = client.execute(request);
-        
+
         SAXBuilder builder = new SAXBuilder();
         String xml = response.getXML();
-        
+
         Document doc = null;
         try {
             doc = builder.build(new StringReader(xml));
             Element products = doc.getRootElement();
             List<Element> children = products.getChildren("Product");
-            
+
             Map<String, String> filesToGet = new HashMap<String, String>();
             for (Element child : children) {
                 filesToGet.put(child.getChildText("URL"), child.getChildText("MD5"));
             }
-            
+
             for (String url : filesToGet.keySet()) {
                 FileRequest fileRequest = new FileRequest(extractFileName(url));
                 FileResponse fileResponse = client.execute(fileRequest);
                 byte[] fileBytes = fileResponse.getFileBytes();
                 String md5 = calculateMD5(new ByteArrayInputStream(fileBytes));
-                
+
                 assertEquals("MD5 Hash was not correct for Download from " + url, md5, filesToGet.get(url));
             }
         } catch (JDOMException e) {
             System.out.println(xml);
             throw e;
-        }        
+        }
     }
-    
+
     public void testAgainWithChangedLocale() throws Exception {
         SetRequest setRequest = new SetRequest(Tree.Language, "wx_YZ");
         client.execute(setRequest);
@@ -152,12 +151,12 @@ public class UpdaterXMLTest extends AbstractAJAXSession {
             client.execute(setBackRequest);
         }
     }
-    
-    private String extractFileName(String url) {    
+
+    private String extractFileName(String url) {
         String searchStr = "/ajax/updater/files/";
         return url.substring(url.indexOf(searchStr) + searchStr.length());
     }
-    
+
     private String calculateMD5(InputStream inputStream) throws IOException {
         if (inputStream == null) {
             return null;
@@ -177,7 +176,7 @@ public class UpdaterXMLTest extends AbstractAJAXSession {
         }
         return new String(Hex.encodeHex(digest.digest()));
     }
-    
+
     @Override
     public void tearDown() throws Exception {
         super.tearDown();

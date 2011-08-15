@@ -57,20 +57,19 @@ import com.openexchange.ajax.mail.contenttypes.MailContentType;
 import com.openexchange.ajax.mail.netsol.actions.NetsolDeleteRequest;
 import com.openexchange.ajax.mail.netsol.actions.NetsolSendRequest;
 import com.openexchange.ajax.mail.netsol.actions.NetsolSendResponse;
-import com.openexchange.ajax.mail.netsol.actions.NetsolDeleteRequest.NetsolDeleteResponse;
 import com.openexchange.mail.MailJSONField;
 
 /**
  * {@link NetsolTestMailMessageDelete}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class NetsolTestMailMessageDelete extends AbstractNetsolTest {
 
 	/**
 	 * Initializes a new {@link NetsolTestMailMessageDelete}
-	 * 
+	 *
 	 * @param name
 	 */
 	public NetsolTestMailMessageDelete(final String name) {

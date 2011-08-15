@@ -61,10 +61,10 @@ import com.openexchange.test.fixtures.FixtureLoader;
 import com.openexchange.test.fixtures.SimpleCredentials;
 
 /**
- * Transforms strings of the kind "users:user_a",contacts:my_contact,custom:john doe 
+ * Transforms strings of the kind "users:user_a",contacts:my_contact,custom:john doe
  * <john.doe@example.invalid>" into a distributionlist contact. Note that referenced
  * contacts should have an e-mail address defined.
- * 
+ *
  * @author tfriedrich
  */
 public class DistributionListTransformator implements Transformator {
@@ -75,7 +75,7 @@ public class DistributionListTransformator implements Transformator {
 	}
 
 	private FixtureLoader fixtureLoader;
-	
+
 	public Object transform(final String value) throws OXException {
 		if (null == value || 1 > value.length()) { return null; }
 		String fixtureName = "users";
@@ -94,7 +94,7 @@ public class DistributionListTransformator implements Transformator {
 		}
 		return distributionListEntries.toArray(new DistributionListEntryObject[distributionListEntries.size()]);
     }
-	
+
 	private DistributionListEntryObject getDistributionListEntry(final String fixtureName, final String fixtureEntry) throws OXException {
 		if ("users".equals(fixtureName)) {
 			return getUserDistributionListEntry(fixtureName, fixtureEntry);
@@ -130,7 +130,7 @@ public class DistributionListTransformator implements Transformator {
 		return entry;
 //		return new DistributionListEntryObject(user.getDisplayName(), user.getEmail1(), DistributionListEntryObject.INDEPENDENT);
 	}
-	
+
 	private DistributionListEntryObject getCustomDistributionListEntry(final String fixtureName, final String fixtureEntry) throws OXException {
 		InternetAddress address = null;
 		try {

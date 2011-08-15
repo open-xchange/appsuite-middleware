@@ -59,12 +59,12 @@ import com.openexchange.tools.file.external.FileStorageFactory;
 
 public class DBQuotaFileStorageActivator implements BundleActivator {
 
-    private ServiceTracker track;
+    private ServiceTracker<Object,Object> track;
 
     @Override
     public void start(final BundleContext context) throws Exception {
         final Filter filter = Tools.generateServiceFilter(context, FileStorageFactory.class, DatabaseService.class);
-        track = new ServiceTracker(context, filter, new DBQuotaFileStorageRegisterer(context));
+        track = new ServiceTracker<Object,Object>(context, filter, new DBQuotaFileStorageRegisterer(context));
         track.open();
     }
 

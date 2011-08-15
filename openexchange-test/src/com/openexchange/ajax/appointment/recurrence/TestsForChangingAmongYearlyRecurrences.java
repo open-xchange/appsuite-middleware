@@ -136,7 +136,7 @@ public class TestsForChangingAmongYearlyRecurrences extends ManagedAppointmentTe
 
         negativeAssertionOnUpdate.check(app, changes, OXCalendarExceptionCodes.RECURRING_MISSING_YEARLY_MONTH.create());
     }
-    
+
     public void testShouldFailChangingFromYearly2ToYearly1UsingOnlyAdditionalData() throws Exception {
         Appointment app = generateYearlyAppointment();
 

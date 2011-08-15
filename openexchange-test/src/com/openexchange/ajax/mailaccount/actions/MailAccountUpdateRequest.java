@@ -79,19 +79,19 @@ public class MailAccountUpdateRequest implements AJAXRequest<MailAccountUpdateRe
         this.attributes = attributes;
         this.failOnError = failOnError;
     }
-    
+
     public MailAccountUpdateRequest(final MailAccountDescription account, final boolean failOnError) {
         this(account, EnumSet.allOf(Attribute.class), failOnError);
     }
-    
+
     public MailAccountUpdateRequest(final MailAccountDescription account, final Set<Attribute> attributes) {
         this(account, attributes, true);
     }
-    
+
     public MailAccountUpdateRequest(final MailAccountDescription account) {
         this(account, true);
     }
-    
+
     public Object getBody() throws JSONException {
         try {
             final JSONObject incrementalUpdate = new JSONObject();
@@ -102,7 +102,7 @@ public class MailAccountUpdateRequest implements AJAXRequest<MailAccountUpdateRe
             if(! attributes.contains(Attribute.ID_LITERAL)) {
                 incrementalUpdate.put(Attribute.ID_LITERAL.getName(), account.getId());
             }
-            
+
             return incrementalUpdate;
         } catch (final OXException e) {
             throw new JSONException(e);

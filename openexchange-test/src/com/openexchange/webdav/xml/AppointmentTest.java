@@ -127,7 +127,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
     /**
      * Gets a newly created {@link Date date} with its time set to {@link Date#getTime()} - <code>1</code> of specified {@link Date date}
      * instance.
-     * 
+     *
      * @param date The date to decrement
      * @return A newly created {@link Date date} with decremented time
      */
@@ -658,10 +658,10 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 
         return (Appointment) response[0].getDataObject();
     }
-    
-    
+
+
     protected int getFreeBusyState(final WebConversation webCon, String contextid, String username, String context, Date start, Date end) throws IOException, SAXException {
-        
+
         String url = "http://"+getHostName()+"/servlet/webdav.freebusy?contextid="+contextid+"&username="+username+"&server="+context+"&start="+start.getTime()+"&end="+end.getTime();
         WebRequest request = new GetMethodWebRequest(url);
         WebResponse response = webCon.getResponse(request);

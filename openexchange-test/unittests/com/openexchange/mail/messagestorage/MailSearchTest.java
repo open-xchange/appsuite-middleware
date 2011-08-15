@@ -84,14 +84,14 @@ import com.openexchange.sessiond.impl.SessionObject;
 
 /**
  * {@link MailSearchTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class MailSearchTest extends AbstractMailTest {
 
 	/**
-	 * 
+	 *
 	 */
 	public MailSearchTest() {
 		super();

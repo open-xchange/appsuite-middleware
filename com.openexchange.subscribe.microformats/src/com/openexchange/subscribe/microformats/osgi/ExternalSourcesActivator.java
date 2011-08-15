@@ -64,16 +64,14 @@ import com.openexchange.subscribe.microformats.parser.HTMLMicroformatParserFacto
 import com.openexchange.subscribe.microformats.parser.OXMFFormParser;
 import com.openexchange.timer.TimerService;
 
-
 /**
  * {@link ExternalSourcesActivator}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class ExternalSourcesActivator extends DeferredActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ExternalSourcesActivator.class));
+    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ExternalSourcesActivator.class));
 
     private static final String SOURCES_LIST = "com.openexchange.subscribe.external.sources";
 
@@ -81,74 +79,66 @@ public class ExternalSourcesActivator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[]{ConfigurationService.class, TimerService.class};
+        return new Class[] { ConfigurationService.class, TimerService.class };
     }
 
-
     @Override
-    protected void handleAvailability(Class<?> clazz) {
+    protected void handleAvailability(final Class<?> clazz) {
         tryConfig();
     }
 
-
     @Override
-    protected void handleUnavailability(Class<?> clazz) {
-
+    protected void handleUnavailability(final Class<?> clazz) {
+        // Nope
     }
-
 
     @Override
     protected void startBundle() throws Exception {
         tryConfig();
     }
 
-
     @Override
     protected void stopBundle() throws Exception {
-
+        // Nope
     }
 
     private void tryConfig() {
-        ConfigurationService config = getService(ConfigurationService.class);
-        TimerService timer = getService(TimerService.class);
-        if(config == null || timer == null) {
+        final ConfigurationService config = getService(ConfigurationService.class);
+        final TimerService timer = getService(TimerService.class);
+        if (config == null || timer == null) {
             return;
         }
-        String sourcesList = config.getProperty(SOURCES_LIST);
+        final String sourcesList = config.getProperty(SOURCES_LIST);
 
-        OXMFParserFactoryService oxmfParserFactory = new HTMLMicroformatParserFactory();
-        OXMFFormParser formParser = new CybernekoOXMFFormParser();
+        final OXMFParserFactoryService oxmfParserFactory = new HTMLMicroformatParserFactory();
+        final OXMFFormParser formParser = new CybernekoOXMFFormParser();
 
-        if(sourcesList != null) {
+        if (sourcesList != null) {
             final List<ExternalSubscriptionSourceDiscoveryService> services = new ArrayList<ExternalSubscriptionSourceDiscoveryService>();
-            for(String source : sourcesList.split("\\s*,\\s*")) {
-                ExternalSubscriptionSourceDiscoveryService discoveryService = new ExternalSubscriptionSourceDiscoveryService(source, oxmfParserFactory, formParser);
+            for (final String source : sourcesList.split("\\s*,\\s*")) {
+                final ExternalSubscriptionSourceDiscoveryService discoveryService =
+                    new ExternalSubscriptionSourceDiscoveryService(source, oxmfParserFactory, formParser);
                 services.add(discoveryService);
-                context.registerService(SubscriptionSourceDiscoveryService.class.getName(), discoveryService, null);
+                context.registerService(SubscriptionSourceDiscoveryService.class, discoveryService, null);
             }
 
             timer.scheduleAtFixedRate(new Runnable() {
 
                 @Override
                 public void run() {
-                    for (ExternalSubscriptionSourceDiscoveryService service : services) {
+                    for (final ExternalSubscriptionSourceDiscoveryService service : services) {
                         try {
                             service.refresh();
-                        } catch (OXException x) {
-                            LOG.error(x.getMessage(),x);
+                        } catch (final OXException x) {
+                            LOG.error(x.getMessage(), x);
                         }
                     }
                 }
 
-            }, 0, 30 *MINUTES);
+            }, 0, 30 * MINUTES);
 
         }
 
-
-
     }
-
-
-
 
 }

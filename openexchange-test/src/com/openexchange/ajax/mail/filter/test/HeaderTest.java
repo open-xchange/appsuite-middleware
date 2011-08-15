@@ -59,30 +59,30 @@ import com.openexchange.ajax.mail.filter.comparison.AbstractComparison;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class HeaderTest extends AbstractTest {
-	
+
 	public static final String HEADER = "header";
-	
+
 	protected AbstractComparison comparision;
-	
+
 	protected String[] headers;
-	
+
 	protected String[] values;
-	
+
 	public HeaderTest(final AbstractComparison comparision, final String[] headers, final String[] values) {
 		name = HEADER;
 		this.comparision = comparision;
 		this.headers = headers;
 		this.values = values;
 	}
-	
+
 	public AbstractComparison getComparison() {
 		return comparision;
 	}
-	
+
 	public String[] getHeaders() {
 		return headers;
 	}
-	
+
 	public String[] getValues() {
 		return values;
 	}
@@ -117,7 +117,7 @@ public class HeaderTest extends AbstractTest {
 			return false;
 		return true;
 	}
-	
+
 	@Override
 	public String toString() {
 		final StringBuffer stringBuffer = new StringBuffer();
@@ -125,7 +125,7 @@ public class HeaderTest extends AbstractTest {
 		stringBuffer.append("headers: " + Arrays.toString(headers) + ", ");
 		stringBuffer.append("values: " + Arrays.toString(headers) + ", ");
 		stringBuffer.append("comp: " + comparision);
-		
+
 		return stringBuffer.toString();
 	}
 }

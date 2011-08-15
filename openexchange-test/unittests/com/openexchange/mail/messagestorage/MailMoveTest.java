@@ -58,13 +58,13 @@ import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
  * {@link MailMoveTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailMoveTest extends MessageStorageTest {
 
     /**
-     * 
+     *
      */
     public MailMoveTest() {
         super();
@@ -120,7 +120,7 @@ public final class MailMoveTest extends MessageStorageTest {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {
             final String fullname = createTemporaryFolder(getSession(), mailAccess);
-            
+
             try {
                 /*
                  * Move not existing message to valid folder
@@ -137,7 +137,7 @@ public final class MailMoveTest extends MessageStorageTest {
             } finally {
                 mailAccess.getFolderStorage().deleteFolder(fullname, true);
             }
-            
+
         } finally {
             mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
         }

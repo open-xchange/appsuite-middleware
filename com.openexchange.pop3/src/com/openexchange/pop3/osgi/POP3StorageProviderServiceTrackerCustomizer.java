@@ -66,13 +66,13 @@ import com.openexchange.pop3.storage.POP3StorageProviderRegistry;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class POP3StorageProviderServiceTrackerCustomizer implements ServiceTrackerCustomizer {
+public class POP3StorageProviderServiceTrackerCustomizer implements ServiceTrackerCustomizer<POP3StorageProvider,POP3StorageProvider> {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(POP3StorageProviderServiceTrackerCustomizer.class));
 
     private final BundleContext context;
 
-    private final Map<String, List<ServiceRegistration>> registrationMap;
+    private final Map<String, List<ServiceRegistration<?>>> registrationMap;
 
     /**
      * Initializes a new {@link POP3StorageProviderServiceTrackerCustomizer}.
@@ -80,16 +80,16 @@ public class POP3StorageProviderServiceTrackerCustomizer implements ServiceTrack
     public POP3StorageProviderServiceTrackerCustomizer(final BundleContext context) {
         super();
         this.context = context;
-        registrationMap = new ConcurrentHashMap<String, List<ServiceRegistration>>();
+        registrationMap = new ConcurrentHashMap<String, List<ServiceRegistration<?>>>();
     }
 
     @Override
-    public Object addingService(final ServiceReference reference) {
-        final Object addedService = context.getService(reference);
+    public POP3StorageProvider addingService(final ServiceReference<POP3StorageProvider> reference) {
+        final POP3StorageProvider addedService = context.getService(reference);
         if (null == addedService) {
             LOG.warn("Added service is null!", new Throwable());
         }
-        if ((addedService instanceof POP3StorageProvider) && addPOP3StorageProvider((POP3StorageProvider) addedService)) {
+        if (addPOP3StorageProvider(addedService)) {
             return addedService;
         }
         // Service needs not to be tracked
@@ -112,9 +112,9 @@ public class POP3StorageProviderServiceTrackerCustomizer implements ServiceTrack
         if (POP3StorageProviderRegistry.getInstance().addPOP3StorageProvider(providerName, provider)) {
             // Register provider's delete listeners
             final List<MailAccountDeleteListener> listeners = provider.getDeleteListeners();
-            final List<ServiceRegistration> registrations = new ArrayList<ServiceRegistration>(listeners.size());
+            final List<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>(listeners.size());
             for (final MailAccountDeleteListener mailAccountDeleteListener : listeners) {
-                registrations.add(context.registerService(MailAccountDeleteListener.class.getName(), mailAccountDeleteListener, null));
+                registrations.add(context.registerService(MailAccountDeleteListener.class, mailAccountDeleteListener, null));
             }
             registrationMap.put(provider.getPOP3StorageName(), registrations);
             LOG.info(new StringBuilder(64).append("POP3 storage provider for name '").append(providerName).append(
@@ -127,17 +127,15 @@ public class POP3StorageProviderServiceTrackerCustomizer implements ServiceTrack
     }
 
     @Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<POP3StorageProvider> reference, final POP3StorageProvider service) {
         // Nothing to do
     }
 
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
+    public void removedService(final ServiceReference<POP3StorageProvider> reference, final POP3StorageProvider service) {
         if (null != service) {
             try {
-                if (service instanceof POP3StorageProvider) {
-                    removePOP3StorageProvider((POP3StorageProvider) service);
-                }
+                removePOP3StorageProvider(service);
             } finally {
                 context.ungetService(reference);
             }
@@ -153,9 +151,9 @@ public class POP3StorageProviderServiceTrackerCustomizer implements ServiceTrack
     public void removePOP3StorageProvider(final POP3StorageProvider provider) {
         // Unregister provider's delete listeners
         if (provider.unregisterDeleteListenersOnAbsence()) {
-            final List<ServiceRegistration> registrations = registrationMap.remove(provider.getPOP3StorageName());
+            final List<ServiceRegistration<?>> registrations = registrationMap.remove(provider.getPOP3StorageName());
             if (null != registrations) {
-                for (final ServiceRegistration serviceRegistration : registrations) {
+                for (final ServiceRegistration<?> serviceRegistration : registrations) {
                     serviceRegistration.unregister();
                 }
             }
@@ -168,8 +166,8 @@ public class POP3StorageProviderServiceTrackerCustomizer implements ServiceTrack
      * Drops all tracked {@link ServiceRegistration registrations} for {@link MailAccountDeleteListener delete listeners}.
      */
     public void dropAllRegistrations() {
-        for (final List<ServiceRegistration> registrations : registrationMap.values()) {
-            for (final ServiceRegistration serviceRegistration : registrations) {
+        for (final List<ServiceRegistration<?>> registrations : registrationMap.values()) {
+            for (final ServiceRegistration<?> serviceRegistration : registrations) {
                 serviceRegistration.unregister();
             }
         }

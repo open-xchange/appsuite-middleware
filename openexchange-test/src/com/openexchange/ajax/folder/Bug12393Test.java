@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.folder;
 
-import com.openexchange.exception.OXException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -67,7 +66,7 @@ import com.openexchange.server.impl.OCLPermission;
 
 /**
  * Title of Bug: Lost permission on infostore folder
- * 
+ *
  * Description of Bug: If you remove group 0 as view permission from your infostore folder all
  * subfolders of it lose all their permission in database.
  * ...
@@ -75,31 +74,31 @@ import com.openexchange.server.impl.OCLPermission;
  * 1. Create some folder below your private infostore folder.
  * 2. Give the group 0 view permission on your private infostore folder.
  * 3. Remove that view permission again.
- * 
+ *
  * Actual Results:
  * All permissions for the subfolders have been deleted.
- * 
+ *
  * Expected Results:
  * Not deleted permissions on subfolders.
- * 
+ *
  * This test creates two infostore folders and sets permissions as follows:
  * One user is given permission to see the subfolder, all users are given permission to see the parent
  * folder. Then the latter permission is removed. The first permission is asserted to be still there.
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.org">Karsten Will</a>
  */
 public class Bug12393Test extends AbstractAJAXSession {
-    
+
     FolderObject subFolderObject;
     FolderObject parentFolderObject;
     int subFolderId;
     int parentFolderId;
     List<OCLPermission> originalSubFolderPermissions;
-    
+
     public Bug12393Test (final String name) {
         super(name);
     }
-    
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
@@ -146,7 +145,7 @@ public class Bug12393Test extends AbstractAJAXSession {
         response.fillObject(subFolderObject);
         subFolderId = subFolderObject.getObjectID();
     }
-    
+
     @Override
     public void tearDown() throws Exception {
         final AJAXClient myClient = getClient();
@@ -159,10 +158,10 @@ public class Bug12393Test extends AbstractAJAXSession {
         //delete the parent folder and with it the subfolder
         final com.openexchange.ajax.folder.actions.DeleteRequest folderDeleteRequest  = new com.openexchange.ajax.folder.actions.DeleteRequest(API.OX_OLD, parentFolderObject);
         myClient.execute(folderDeleteRequest);
-        
+
         super.tearDown();
     }
-    
+
     public void testPermissionsOfSubfoldersRemainIntactAfterRemovalOfFolderGroupPermission() throws Exception{
         final AJAXClient myClient = getClient();
         // reload the parent folder (it has been changed since its creation by the addition of the subfolder)
@@ -200,7 +199,7 @@ public class Bug12393Test extends AbstractAJAXSession {
         }
 
         assertEquals("The permissions of the subfolder have changed. Differing size. ", expectedSet.size(), isSet.size());
-        
+
         expectedSet.removeAll(isSet);
         assertTrue("The permissions of the subfolder have changed: " + expectedSet.toString(), expectedSet.isEmpty());
     }

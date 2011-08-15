@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.actions;
 
-import com.openexchange.exception.OXException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.json.JSONArray;
@@ -61,7 +60,7 @@ import com.openexchange.mail.mime.dataobjects.MIMEMailMessage;
 
 /**
  * {@link SearchResponse}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SearchResponse extends CommonAllResponse {

@@ -53,7 +53,7 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractInsertParser;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class InsertParser extends AbstractInsertParser<InsertResponse> {

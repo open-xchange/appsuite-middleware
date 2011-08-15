@@ -86,13 +86,13 @@ public class MessagingFixtureFactory implements FixtureFactory<Messaging> {
             if (null == values) {
                 throw new FixtureException("Entry with name " + entryName + " not found");
             }
-            
+
             defaults(values);
-            
+
             final Messaging messaging = new Messaging();
-            
+
             Map<String, Object> config = new HashMap<String, Object>();
-            
+
             if (values.containsKey("type")) {
                 config.put("type", values.get("type"));
                 values.remove("type");
@@ -117,9 +117,9 @@ public class MessagingFixtureFactory implements FixtureFactory<Messaging> {
                 config.put("message", values.get("message")+ " - " + UUID.randomUUID().toString());
                 values.remove("message");
             }
-            
+
             messaging.setConfiguration(config);
-                        
+
             apply(messaging,values);
 
             final Fixture<Messaging> fixture = new Fixture<Messaging>(messaging, values.keySet().toArray(new String[values.size()]), values);

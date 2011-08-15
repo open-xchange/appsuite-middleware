@@ -62,11 +62,9 @@ import com.openexchange.server.osgiservice.HousekeepingActivator;
  */
 public class ConfigObjectsActivator extends HousekeepingActivator {
 
-    private static final Class[] CLASSES = new Class[] { ConfigurationService.class, ConfigViewFactory.class };
-
     @Override
     protected Class<?>[] getNeededServices() {
-        return CLASSES;
+        return new Class<?>[] { ConfigurationService.class, ConfigViewFactory.class };
     }
 
     @Override

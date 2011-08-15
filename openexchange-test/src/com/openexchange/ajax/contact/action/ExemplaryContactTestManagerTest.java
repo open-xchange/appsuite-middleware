@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.contact.action;
 
-import com.openexchange.exception.OXException;
 import java.util.Date;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -66,27 +65,27 @@ import com.openexchange.test.FolderTestManager;
 public class ExemplaryContactTestManagerTest extends AbstractAJAXSession {
 
 	private ContactTestManager contactManager;
-	private AJAXClient client; 
+	private AJAXClient client;
 	Contact contactObject1;
 	Contact contactObject2;
     private FolderTestManager folderManager;
     private FolderObject folder;
-	
+
 	public ExemplaryContactTestManagerTest(final String name) {
 		super(name);
 	}
-	
+
 	@Override
     public void setUp() throws Exception {
 		super.setUp();
 		client = getClient();
 		contactManager = new ContactTestManager(client);
 		folderManager = new FolderTestManager(client);
-		
+
 		//create a folder for testing
 		folder = folderManager.generateFolder("contacts manager tests ("+new Date().getTime()+")", FolderObject.CONTACT, client.getValues().getPrivateContactFolder(), client.getValues().getUserId());
 		folderManager.insertFolderOnServer(folder);
-		
+
         //create a contact in the private folder
         contactObject1 = new Contact();
         contactObject1.setDisplayName("Herbert Meier");
@@ -94,7 +93,7 @@ public class ExemplaryContactTestManagerTest extends AbstractAJAXSession {
         contactObject1.setNote("created by ExemplaryContactTestManagerTest");
         contactObject1.setParentFolderID(folder.getObjectID());
         contactManager.newAction(contactObject1);
-        
+
         //create a second contact in the private folder
         contactObject2 = new Contact();
         contactObject2.setDisplayName("Herbert M\u00fcller");
@@ -103,18 +102,18 @@ public class ExemplaryContactTestManagerTest extends AbstractAJAXSession {
         contactObject2.setNote("created by ExemplaryContactTestManagerTest");
         contactManager.newAction(contactObject2);
 	}
-	
+
 	@Override
     public void tearDown() throws Exception {
 		contactManager.cleanUp();
 		folderManager.cleanUp();
 	}
-	
+
 	public void testCreatedContactsAreReturnedByGetRequest () throws Exception {
 		Contact co = contactManager.getAction(contactObject1.getParentFolderID(), contactObject1.getObjectID());
 		assertEquals("The contact was not returned.", co.getDisplayName(), contactObject1.getDisplayName());
 	}
-	
+
 	public void testCreatedContactsAppearInAllRequestForSameFolder () throws Exception {
 		boolean found1 = false;
 		boolean found2 = false;
@@ -127,7 +126,7 @@ public class ExemplaryContactTestManagerTest extends AbstractAJAXSession {
 		assertTrue("First contact was not found.", found1);
 		assertTrue("Second contact was not found.", found2);
 	}
-	
+
 	public void testCreatedContactsAppearInListRequest () throws Exception {
 		boolean found1 = false;
 		boolean found2 = false;
@@ -142,30 +141,30 @@ public class ExemplaryContactTestManagerTest extends AbstractAJAXSession {
 		assertTrue("First contact was not found.", found1);
 		assertTrue("Second contact was not found.", found2);
 	}
-	
+
 	public void testCreatedContactsAppearInSearchRequestOverAllFolders () throws Exception {
 		boolean found1 = false;
 		boolean found2 = false;
 		// folderId "-1" means searching in all folders
 		Contact[] contacts_1 = contactManager.searchAction(contactObject1.getDisplayName(), -1);
 		Contact[] contacts_2 = contactManager.searchAction(contactObject2.getDisplayName(), -1);
-		
+
 		for (int i = 0; i < contacts_1.length; i++) {
 		    if (contacts_1[i].getObjectID() == contactObject1.getObjectID()) {
 		        found1 = true;
 		    }
 		}
-		
+
 		for (int i = 0; i < contacts_1.length; i++) {
             if (contacts_2[i].getObjectID() == contactObject2.getObjectID()) {
                 found2 = true;
             }
         }
-		
+
 		assertTrue("First contact was not found.", found1);
 		assertTrue("Second contact was not found.", found2);
 	}
-	
+
 	public void testCreatedContactsAppearAsUpdatedSinceYesterday () throws Exception {
 		boolean found1 = false;
 		boolean found2 = false;

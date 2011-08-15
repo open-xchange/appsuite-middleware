@@ -47,60 +47,49 @@
  *
  */
 
-package com.openexchange.groupware.calendar.json.converters;
+package com.openexchange.calendar.osgi;
 
-import java.util.List;
-import java.util.TimeZone;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.Converter;
-import com.openexchange.ajax.writer.AppointmentWriter;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.json.AppointmentAJAXRequest;
-import com.openexchange.groupware.container.Appointment;
-import com.openexchange.tools.servlet.OXJSONExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
-
+import static com.openexchange.java.Autoboxing.I;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import com.openexchange.calendar.CalendarAdministration;
+import com.openexchange.calendar.CalendarReminderDelete;
+import com.openexchange.calendar.api.AppointmentSqlFactory;
+import com.openexchange.calendar.api.CalendarCollection;
+import com.openexchange.groupware.Types;
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
+import com.openexchange.groupware.calendar.CalendarAdministrationService;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
+import com.openexchange.groupware.reminder.TargetService;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 
 /**
- * {@link FreeBusyResultConverter}
+ * {@link CalendarActivator}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class FreeBusyResultConverter extends AbstractCalendarJSONResultConverter {
+public class CalendarActivator extends HousekeepingActivator {
 
-    private static final String INPUT_FORMAT = "freebusy_appointments";
-    
-    @Override
-    public String getInputFormat() {
-        return INPUT_FORMAT;
+    /**
+     * Initializes a new {@link CalendarActivator}.
+     */
+    public CalendarActivator() {
+        super();
     }
 
     @Override
-    protected void convertCalendar(final AppointmentAJAXRequest req, final AJAXRequestResult result, final ServerSession session, final Converter converter, TimeZone userTimeZone) throws OXException {
-        final List<Appointment> appointmentList = (List<Appointment>) result.getResultObject();
-        final TimeZone timeZone;
-        {
-            final String timeZoneId = req.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-            timeZone = null == timeZoneId ? req.getTimeZone() : getTimeZone(timeZoneId);
-        }
-        
-        final JSONArray jsonResponseArray = new JSONArray();
-        final AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone);
-        for (final Appointment appointment : appointmentList) {
-            final JSONObject jsonAppointmentObj = new JSONObject();
-            try {
-                appointmentWriter.writeAppointment(appointment, jsonAppointmentObj);
-                jsonResponseArray.put(jsonAppointmentObj);
-            } catch (final JSONException e) {
-                throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-            }            
-        }
-        
-        result.setResultObject(jsonResponseArray, OUTPUT_FORMAT);
+    protected java.lang.Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
+    };
+
+    @Override
+    protected void startBundle() throws Exception {
+        registerService(AppointmentSqlFactoryService.class, new AppointmentSqlFactory());
+        registerService(CalendarCollectionService.class, new CalendarCollection());
+        registerService(CalendarAdministrationService.class, new CalendarAdministration());
+        final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
+        props.put(TargetService.MODULE_PROPERTY, I(Types.APPOINTMENT));
+        registerService(TargetService.class, new CalendarReminderDelete(), props);
     }
 
 }

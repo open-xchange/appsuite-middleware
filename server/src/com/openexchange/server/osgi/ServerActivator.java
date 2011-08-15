@@ -162,6 +162,7 @@ import com.openexchange.mail.osgi.TransportProviderServiceTracker;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.service.impl.MailServiceImpl;
 import com.openexchange.mail.transport.TransportProvider;
+import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.mailaccount.internal.CreateMailAccountTables;
@@ -205,7 +206,7 @@ import com.openexchange.xml.spring.SpringParser;
  */
 public final class ServerActivator extends DeferredActivator {
 
-	private static final class ServiceAdderTrackerCustomizer implements ServiceTrackerCustomizer {
+	private static final class ServiceAdderTrackerCustomizer implements ServiceTrackerCustomizer<FileMetadataParserService,FileMetadataParserService> {
 
         private final BundleContext context;
 
@@ -215,19 +216,19 @@ public final class ServerActivator extends DeferredActivator {
         }
 
         @Override
-        public void removedService(final ServiceReference reference, final Object service) {
+        public void removedService(final ServiceReference<FileMetadataParserService> reference, final FileMetadataParserService service) {
             ServerServiceRegistry.getInstance().removeService(FileMetadataParserService.class);
             context.ungetService(reference);
         }
 
         @Override
-        public void modifiedService(final ServiceReference reference, final Object service) {
+        public void modifiedService(final ServiceReference<FileMetadataParserService> reference, final FileMetadataParserService service) {
             // Nope
         }
 
         @Override
-        public Object addingService(final ServiceReference reference) {
-            final Object service = context.getService(reference);
+        public FileMetadataParserService addingService(final ServiceReference<FileMetadataParserService> reference) {
+            final FileMetadataParserService service = context.getService(reference);
             ServerServiceRegistry.getInstance().addService(FileMetadataParserService.class, service);
             return service;
         }
@@ -261,9 +262,9 @@ public final class ServerActivator extends DeferredActivator {
             FileStorageServiceRegistry.class, CryptoService.class, HttpService.class, SystemNameService.class, FolderUpdaterRegistry.class, ConfigViewFactory.class, StringParser.class
         };
 
-    private final List<ServiceRegistration> registrationList;
+    private final List<ServiceRegistration<?>> registrationList;
 
-    private final List<ServiceTracker> serviceTrackerList;
+    private final List<ServiceTracker<?,?>> serviceTrackerList;
 
     private final List<EventHandlerRegistration> eventHandlerList;
 
@@ -284,8 +285,8 @@ public final class ServerActivator extends DeferredActivator {
         super();
         this.started = new AtomicBoolean();
         this.starter = new Starter();
-        registrationList = new ArrayList<ServiceRegistration>();
-        serviceTrackerList = new ArrayList<ServiceTracker>();
+        registrationList = new ArrayList<ServiceRegistration<?>>();
+        serviceTrackerList = new ArrayList<ServiceTracker<?,?>>();
         eventHandlerList = new ArrayList<EventHandlerRegistration>();
         activators = new ArrayList<BundleActivator>(8);
     }
@@ -371,36 +372,36 @@ public final class ServerActivator extends DeferredActivator {
          * Add service trackers
          */
         // Configuration service load
-        final ServiceTracker confTracker = new ServiceTracker(context, ConfigurationService.class.getName(), new ConfigurationCustomizer(context));
+        final ServiceTracker<ConfigurationService,ConfigurationService> confTracker = new ServiceTracker<ConfigurationService,ConfigurationService>(context, ConfigurationService.class, new ConfigurationCustomizer(context));
         confTracker.open(); // We need this for {@link Starter#start()}
         serviceTrackerList.add(confTracker);
         // move this to the required services once the database component gets into its own bundle.
-        serviceTrackerList.add(new ServiceTracker(context, DatabaseService.class.getName(), new DatabaseCustomizer(context)));
+        serviceTrackerList.add(new ServiceTracker<DatabaseService,DatabaseService>(context, DatabaseService.class, new DatabaseCustomizer(context)));
         // I18n service load
-        serviceTrackerList.add(new ServiceTracker(context, I18nService.class.getName(), new I18nServiceListener(context)));
+        serviceTrackerList.add(new ServiceTracker<I18nService,I18nService>(context, I18nService.class, new I18nServiceListener(context)));
 
         // Mail account delete listener
-        serviceTrackerList.add(new ServiceTracker(
+        serviceTrackerList.add(new ServiceTracker<MailAccountDeleteListener,MailAccountDeleteListener>(
             context,
-            com.openexchange.mailaccount.MailAccountDeleteListener.class.getName(),
+            MailAccountDeleteListener.class,
             new com.openexchange.mailaccount.internal.DeleteListenerServiceTracker(context)));
 
         // Mail provider service tracker
-        serviceTrackerList.add(new ServiceTracker(context, MailProvider.class.getName(), new MailProviderServiceTracker(context)));
+        serviceTrackerList.add(new ServiceTracker<MailProvider,MailProvider>(context, MailProvider.class, new MailProviderServiceTracker(context)));
 
         // Transport provider service tracker
-        serviceTrackerList.add(new ServiceTracker(context, TransportProvider.class.getName(), new TransportProviderServiceTracker(context)));
+        serviceTrackerList.add(new ServiceTracker<TransportProvider,TransportProvider>(context, TransportProvider.class, new TransportProviderServiceTracker(context)));
 
         // Spam handler provider service tracker
-        serviceTrackerList.add(new ServiceTracker(context, SpamHandler.class.getName(), new SpamHandlerServiceTracker(context)));
+        serviceTrackerList.add(new ServiceTracker<SpamHandler,SpamHandler>(context, SpamHandler.class, new SpamHandlerServiceTracker(context)));
 
         // AJAX request handler
-        serviceTrackerList.add(new ServiceTracker(context, AJAXRequestHandler.class.getName(), new AJAXRequestHandlerCustomizer(context)));
+        serviceTrackerList.add(new ServiceTracker<AJAXRequestHandler,AJAXRequestHandler>(context, AJAXRequestHandler.class, new AJAXRequestHandlerCustomizer(context)));
 
         // contacts
-        serviceTrackerList.add(new ServiceTracker(context, ContactInterfaceProvider.class.getName(), new ContactServiceListener(context)));
+        serviceTrackerList.add(new ServiceTracker<ContactInterfaceProvider,ContactInterfaceProvider>(context, ContactInterfaceProvider.class, new ContactServiceListener(context)));
         // ICal Parser
-        serviceTrackerList.add(new ServiceTracker(context, ICalParser.class.getName(), new RegistryCustomizer<ICalParser>(
+        serviceTrackerList.add(new ServiceTracker<ICalParser,ICalParser>(context, ICalParser.class, new RegistryCustomizer<ICalParser>(
             context,
             ICalParser.class){
 
@@ -412,24 +413,24 @@ public final class ServerActivator extends DeferredActivator {
         }));
 
         // ICal Emitter
-        serviceTrackerList.add(new ServiceTracker(context, ICalEmitter.class.getName(), new RegistryCustomizer<ICalEmitter>(
+        serviceTrackerList.add(new ServiceTracker<ICalEmitter,ICalEmitter>(context, ICalEmitter.class, new RegistryCustomizer<ICalEmitter>(
             context,
             ICalEmitter.class)));
 
         // Data Retention Service
-        serviceTrackerList.add(new ServiceTracker(
+        serviceTrackerList.add(new ServiceTracker<DataRetentionService,DataRetentionService>(
             context,
-            DataRetentionService.class.getName(),
+            DataRetentionService.class,
             new RegistryCustomizer<DataRetentionService>(context, DataRetentionService.class)));
 
         // Delete Listener Service Tracker
-        serviceTrackerList.add(new ServiceTracker(context, DeleteListener.class.getName(), new DeleteListenerServiceTrackerCustomizer(
+        serviceTrackerList.add(new ServiceTracker<DeleteListener,DeleteListener>(context, DeleteListener.class, new DeleteListenerServiceTrackerCustomizer(
             context)));
 
         // Folder Delete Listener Service Tracker
-        serviceTrackerList.add(new ServiceTracker(
+        serviceTrackerList.add(new ServiceTracker<FolderDeleteListenerService,FolderDeleteListenerService>(
             context,
-            FolderDeleteListenerService.class.getName(),
+            FolderDeleteListenerService.class,
             new FolderDeleteListenerServiceTrackerCustomizer(context)));
 
         /*
@@ -451,7 +452,7 @@ public final class ServerActivator extends DeferredActivator {
             starter.adminStart();
         } else {
             // Management is only needed for groupware.
-            serviceTrackerList.add(new ServiceTracker(context, ManagementService.class.getName(), new ManagementServiceTracker(context)));
+            serviceTrackerList.add(new ServiceTracker<ManagementService,ManagementService>(context, ManagementService.class, new ManagementServiceTracker(context)));
             // TODO:
             /*-
              * serviceTrackerList.add(new ServiceTracker(context, MonitorService.class.getName(),
@@ -459,38 +460,38 @@ public final class ServerActivator extends DeferredActivator {
              */
 
             // Search for AuthenticationService
-            serviceTrackerList.add(new ServiceTracker(context, AuthenticationService.class.getName(), new AuthenticationCustomizer(context)));
+            serviceTrackerList.add(new ServiceTracker<AuthenticationService,AuthenticationService>(context, AuthenticationService.class, new AuthenticationCustomizer(context)));
             // Search for ConfigJumpService
-            serviceTrackerList.add(new ServiceTracker(
+            serviceTrackerList.add(new ServiceTracker<ConfigJumpService,ConfigJumpService>(
                 context,
-                ConfigJumpService.class.getName(),
+                ConfigJumpService.class,
                 new BundleServiceTracker<ConfigJumpService>(context, ConfigJump.getHolder(), ConfigJumpService.class)));
             // Search for extensions of the preferences tree interface
-            serviceTrackerList.add(new ServiceTracker(context, PreferencesItemService.class.getName(), new PreferencesCustomizer(context)));
+            serviceTrackerList.add(new ServiceTracker<PreferencesItemService,PreferencesItemService>(context, PreferencesItemService.class, new PreferencesCustomizer(context)));
             // Search for UserPasswordChange service
-            serviceTrackerList.add(new ServiceTracker(context, PasswordChangeService.class.getName(), new PasswordChangeCustomizer(context)));
+            serviceTrackerList.add(new ServiceTracker<PasswordChangeService,PasswordChangeService>(context, PasswordChangeService.class, new PasswordChangeCustomizer(context)));
             // Search for host name service
-            serviceTrackerList.add(new ServiceTracker(context, HostnameService.class.getName(), new HostnameServiceCustomizer(context)));
+            serviceTrackerList.add(new ServiceTracker<HostnameService,HostnameService>(context, HostnameService.class, new HostnameServiceCustomizer(context)));
             // Conversion service
-            serviceTrackerList.add(new ServiceTracker(
+            serviceTrackerList.add(new ServiceTracker<ConversionService,ConversionService>(
                 context,
-                ConversionService.class.getName(),
+                ConversionService.class,
                 new RegistryCustomizer<ConversionService>(context, ConversionService.class)));
             // Contact collector
-            serviceTrackerList.add(new ServiceTracker(
+            serviceTrackerList.add(new ServiceTracker<ContactCollectorService,ContactCollectorService>(
                 context,
-                ContactCollectorService.class.getName(),
+                ContactCollectorService.class,
                 new RegistryCustomizer<ContactCollectorService>(context, ContactCollectorService.class)));
             // Search Service
-            serviceTrackerList.add(new ServiceTracker(context, SearchService.class.getName(), new RegistryCustomizer<SearchService>(
+            serviceTrackerList.add(new ServiceTracker<SearchService,SearchService>(context, SearchService.class, new RegistryCustomizer<SearchService>(
                 context,
                 SearchService.class)));
             // Login handler
-            serviceTrackerList.add(new ServiceTracker(context, LoginHandlerService.class.getName(), new LoginHandlerCustomizer(context)));
+            serviceTrackerList.add(new ServiceTracker<LoginHandlerService,LoginHandlerService>(context, LoginHandlerService.class, new LoginHandlerCustomizer(context)));
             // Multiple handler factory services
-            serviceTrackerList.add(new ServiceTracker(
+            serviceTrackerList.add(new ServiceTracker<MultipleHandlerFactoryService,MultipleHandlerFactoryService>(
                 context,
-                MultipleHandlerFactoryService.class.getName(),
+                MultipleHandlerFactoryService.class,
                 new MultipleHandlerServiceTracker(context)));
 
             // Attachment Plugins
@@ -498,29 +499,29 @@ public final class ServerActivator extends DeferredActivator {
             serviceTrackerList.add(new AttachmentListenerTracker(context));
 
            // PublicationTargetDiscoveryService
-            serviceTrackerList.add(new ServiceTracker(
+            serviceTrackerList.add(new ServiceTracker<PublicationTargetDiscoveryService,PublicationTargetDiscoveryService>(
                 context,
-                PublicationTargetDiscoveryService.class.getName(),
+                PublicationTargetDiscoveryService.class,
                 new PublicationTargetDiscoveryServiceTrackerCustomizer(context)));
 
             // Folder Fields
 
-            serviceTrackerList.add(new ServiceTracker(context, AdditionalFolderField.class.getName(), new FolderFieldCollector(context, Folder.getAdditionalFields())));
+            serviceTrackerList.add(new ServiceTracker<AdditionalFolderField,AdditionalFolderField>(context, AdditionalFolderField.class, new FolderFieldCollector(context, Folder.getAdditionalFields())));
 
             /*
              * The FileMetadataParserService needs to be tracked by a separate service tracker instead of just adding the service to
              * getNeededServices(), because publishing bundle needs the HttpService which is in turn provided by server
              */
-            serviceTrackerList.add(new ServiceTracker(
+            serviceTrackerList.add(new ServiceTracker<FileMetadataParserService,FileMetadataParserService>(
                 context,
-                FileMetadataParserService.class.getName(),
+                FileMetadataParserService.class,
                 new ServiceAdderTrackerCustomizer(context)));
 
             // Start up server the usual way
             starter.start();
         }
         // Open service trackers
-        for (final ServiceTracker tracker : serviceTrackerList) {
+        for (final ServiceTracker<?,?> tracker : serviceTrackerList) {
             tracker.open();
         }
         // Register server's services
@@ -709,14 +710,14 @@ public final class ServerActivator extends DeferredActivator {
             /*
              * Unregister server's services
              */
-            for (final ServiceRegistration registration : registrationList) {
+            for (final ServiceRegistration<?> registration : registrationList) {
                 registration.unregister();
             }
             registrationList.clear();
             /*
              * Close service trackers
              */
-            for (final ServiceTracker tracker : serviceTrackerList) {
+            for (final ServiceTracker<?,?> tracker : serviceTrackerList) {
                 tracker.close();
             }
             serviceTrackerList.clear();

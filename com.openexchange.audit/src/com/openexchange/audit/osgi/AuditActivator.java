@@ -73,7 +73,7 @@ public class AuditActivator extends DeferredActivator {
 
 	final Dictionary<String,Object> serviceProperties;
 
-	private ServiceRegistration auditServiceRegistration;
+	private ServiceRegistration<EventHandler> auditServiceRegistration;
 
 	public AuditActivator() {
 		super();
@@ -120,7 +120,7 @@ public class AuditActivator extends DeferredActivator {
 					}
 				}
 			}
-			auditServiceRegistration = context.registerService(EventHandler.class.getName(), AuditEventHandler.getInstance(), serviceProperties);
+			auditServiceRegistration = context.registerService(EventHandler.class, AuditEventHandler.getInstance(), serviceProperties);
 		} catch (final Throwable t) {
 			LOG.error(t.getMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);

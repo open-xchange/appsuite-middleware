@@ -56,7 +56,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public class UpdatesRequest extends AbstractAppointmentRequest<UpdatesResponse> {
@@ -77,7 +77,7 @@ public class UpdatesRequest extends AbstractAppointmentRequest<UpdatesResponse> 
         this.recurrenceMaster = recurrenceMaster;
         this.showPrivates = showPrivates;
     }
-    
+
     public Object getBody() {
         return null;
     }

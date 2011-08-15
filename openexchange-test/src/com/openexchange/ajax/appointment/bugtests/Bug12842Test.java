@@ -72,7 +72,7 @@ public class Bug12842Test extends AbstractAJAXSession {
 
     /**
      * Tests if an appointment conflicts, if the new appointment is between the start and end date of an occurrence.
-     * 
+     *
      * @throws Throwable
      */
     public void testConflictBetween() throws Throwable {
@@ -88,7 +88,7 @@ public class Bug12842Test extends AbstractAJAXSession {
 
     /**
      * Tests, if an appointment conflicts, if the new appointment overlaps the start date of an occurrence, but not the end date.
-     * 
+     *
      * @throws Throwable
      */
     public void testConflictOverlappingStartDate() throws Throwable {
@@ -104,7 +104,7 @@ public class Bug12842Test extends AbstractAJAXSession {
 
     /**
      * Tests, if an appointment conflicts, if the new appointment overlaps the end date of an occurrence, but not the start date.
-     * 
+     *
      * @throws Throwable
      */
     public void testConflictOverlappingEndDate() throws Throwable {
@@ -120,7 +120,7 @@ public class Bug12842Test extends AbstractAJAXSession {
 
     /**
      * Tests, if an appointment conflicts, if the the new appointment overlaps the start and end date of an occurrence.
-     * 
+     *
      * @throws Throwable
      */
     public void testConflictOverlapping() throws Throwable {
@@ -136,7 +136,7 @@ public class Bug12842Test extends AbstractAJAXSession {
 
     /**
      * Tests, if an appointment conflicts, if the the new appointment touches the start date of an occurrence.
-     * 
+     *
      * @throws Throwable
      */
     public void testBoundaryStart() throws Throwable {
@@ -152,7 +152,7 @@ public class Bug12842Test extends AbstractAJAXSession {
 
     /**
      * Tests, if an appointment conflicts, if the the new appointment touches the end date of an occurrence.
-     * 
+     *
      * @throws Throwable
      */
     public void testBoundaryEnd() throws Throwable {
@@ -168,11 +168,11 @@ public class Bug12842Test extends AbstractAJAXSession {
 
     /**
      * - Tests, if an appointment conflicts, if the the new appointment is before an occurrence.
-     * 
+     *
      * @throws Throwable
      */
     public void testBeforeStart() throws Throwable {
-        /*- 
+        /*-
          * Occurrence:      [--------]
          * Appointment:[--]
          */
@@ -184,7 +184,7 @@ public class Bug12842Test extends AbstractAJAXSession {
 
     /**
      * Tests, if an appointment conflicts, if the the new appointment is after an occurrence.
-     * 
+     *
      * @throws Throwable
      */
     public void testAfterEnd() throws Throwable {
@@ -201,7 +201,7 @@ public class Bug12842Test extends AbstractAJAXSession {
     /**
      * Each test-method does nearly the same, there is only a small variance in the timeframe of the conflicting appointment. This Method
      * does the main work.
-     * 
+     *
      * @param start start hour of the sequence
      * @param end end hour of the sequence
      * @param conflictStart start hour of the conflicting appointment

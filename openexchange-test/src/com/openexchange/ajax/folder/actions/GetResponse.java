@@ -61,7 +61,7 @@ import com.openexchange.webdav.xml.fields.FolderFields;
 
 /**
  * {@link GetResponse}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
@@ -71,7 +71,7 @@ public final class GetResponse extends AbstractAJAXResponse {
 
     /**
      * Initializes a new {@link GetResponse}
-     * 
+     *
      * @param response The response
      */
     public GetResponse(final Response response) {

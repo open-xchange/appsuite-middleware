@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.messagestorage;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.mail.AbstractMailTest;
@@ -65,9 +64,9 @@ import com.openexchange.sessiond.impl.SessionObject;
 
 /**
  * {@link MailRFC2231Test}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class MailRFC2231Test extends AbstractMailTest {
 
@@ -282,7 +281,7 @@ public final class MailRFC2231Test extends AbstractMailTest {
 			+ "--------------090609000008050700040700--";
 
 	/**
-	 * 
+	 *
 	 */
 	public MailRFC2231Test() {
 		super();

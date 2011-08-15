@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.filter;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AJAXClient.User;
@@ -93,9 +92,9 @@ public class AdminListTest extends AbstractMailFilterTest {
         rule.setTest(new HeaderTest(isComp, new String[] { "testheader" }, new String[] { "testvalue" }));
 
         final String rid = insertRule(rule, null, userSession);
-        
+
         // Get rules of user
-        final Rule[] userRules = listRules(userSession);        
+        final Rule[] userRules = listRules(userSession);
 
         // Get rules of user as admin
         MailAccountGetRequest getMailAcc = new MailAccountGetRequest(0, false);
@@ -105,10 +104,10 @@ public class AdminListTest extends AbstractMailFilterTest {
 
         final Rule[] adminRules = listRulesForUser(adminSession, userImapLogin);
 
-        
+
         for (final Rule ur : userRules) {
             boolean foundRule = false;
-            inner: for (final Rule ar : adminRules) {                
+            inner: for (final Rule ar : adminRules) {
                 if (ar.getId().equals(ur.getId())) {
                     foundRule = true;
                     break inner;

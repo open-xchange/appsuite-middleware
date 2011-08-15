@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.calendar;
 
-import com.openexchange.exception.OXException;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.logging.Log;
@@ -78,7 +77,7 @@ public class CalendarMoveTest extends AbstractCalendarTest {
 
     /**
      * Tests a move of an appointment from a private to another private folder.
-     * 
+     *
      * @throws Throwable
      */
     public void testMoveFromPrivateToPrivate() throws Throwable {
@@ -139,7 +138,7 @@ public class CalendarMoveTest extends AbstractCalendarTest {
 
     /**
      * Tests a move of an appointment from a private to a shared folder.
-     * 
+     *
      * @throws Throwable
      */
     public void testMoveFromPrivateToShared() throws Throwable {
@@ -214,7 +213,7 @@ public class CalendarMoveTest extends AbstractCalendarTest {
 
     /**
      * Tests a move of an appointment from a private to a public folder.
-     * 
+     *
      * @throws Throwable
      */
     public void testMoveFromPrivateToPublic() throws Throwable {
@@ -284,7 +283,7 @@ public class CalendarMoveTest extends AbstractCalendarTest {
 
     /**
      * Tests a move of an appointment from a shared to a public folder.
-     * 
+     *
      * @throws Throwable
      */
     public void testMoveFromSharedToPrivate() throws Throwable {
@@ -359,7 +358,7 @@ public class CalendarMoveTest extends AbstractCalendarTest {
 
     /**
      * Tests a move of an appointment from one shared folder to another of the same user.
-     * 
+     *
      * @throws Throwable
      */
     public void testMoveFromSharedToSharedSameUser() throws Throwable {
@@ -433,7 +432,7 @@ public class CalendarMoveTest extends AbstractCalendarTest {
 
     /**
      * Tests a move of an appointment from a shared to a public folder.
-     * 
+     *
      * @throws Throwable
      */
     public void testMoveFromSharedToPublic() throws Throwable {
@@ -513,7 +512,7 @@ public class CalendarMoveTest extends AbstractCalendarTest {
     /**
      * Tests a move of an appointment from a public to a private folder.
      * The appointment was created by the mover.
-     * 
+     *
      * @throws Throwable
      */
     public void testMoveFromPublicToPrivate1() throws Throwable {
@@ -586,7 +585,7 @@ public class CalendarMoveTest extends AbstractCalendarTest {
     /**
      * Tests a move of an appointment from a public to a private folder.
      * The appointment was NOT created by the mover.
-     * 
+     *
      * @throws Throwable
      */
     public void testMoveFromPublicToPrivate2() throws Throwable {
@@ -614,7 +613,7 @@ public class CalendarMoveTest extends AbstractCalendarTest {
 
             // Change user
             appointments.switchUser(secondUser);
-            
+
             // Move appointment
             final CalendarDataObject appointmentMove = appointments.createIdentifyingCopy(appointment);
             appointmentMove.setParentFolderID(appointments.getPrivateFolder());
@@ -657,10 +656,10 @@ public class CalendarMoveTest extends AbstractCalendarTest {
         } finally {
         }
     }
-    
+
     /**
      * Tests a move of an appointment from a public to a shared folder.
-     * 
+     *
      * @throws Throwable
      */
     public void testMoveFromPublicToShared() throws Throwable {
@@ -741,7 +740,7 @@ public class CalendarMoveTest extends AbstractCalendarTest {
 
     /**
      * Tests a move of an appointment from a Public to another public folder.
-     * 
+     *
      * @throws Throwable
      */
     public void testMoveFromPublicToPublic() throws Throwable {
@@ -817,7 +816,7 @@ public class CalendarMoveTest extends AbstractCalendarTest {
 
     /**
      * Tests a move of an appointment from a shared to another shared folder of a different user.
-     * 
+     *
      * @throws Throwable
      */
     public void testMoveFromSharedToSharedDifferentUser() throws Throwable {

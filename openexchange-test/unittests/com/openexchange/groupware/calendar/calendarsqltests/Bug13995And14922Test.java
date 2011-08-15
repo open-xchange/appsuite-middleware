@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -79,7 +78,7 @@ public class Bug13995And14922Test extends CalendarSqlTest {
         assertEquals("Wrong participant", userId, loadedAppointment.getUsers()[0].getIdentifier());
         assertEquals("Wrong status", CalendarObject.ACCEPT, loadedAppointment.getUsers()[0].getConfirm());
     }
-    
+
     public void testBugWithoutUsers() throws Exception {
         appointment.removeUsers();
         appointments.save(appointment);

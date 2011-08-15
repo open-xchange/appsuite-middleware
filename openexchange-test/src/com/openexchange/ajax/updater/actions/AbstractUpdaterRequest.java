@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.updater.actions;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.json.JSONException;
 import com.openexchange.ajax.framework.AJAXRequest;
@@ -63,9 +62,9 @@ import com.openexchange.ajax.framework.Header;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public abstract class AbstractUpdaterRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
-    
+
     private final String servletPath;
-    
+
     public AbstractUpdaterRequest(final String servletPath) {
         super();
         this.servletPath = servletPath;

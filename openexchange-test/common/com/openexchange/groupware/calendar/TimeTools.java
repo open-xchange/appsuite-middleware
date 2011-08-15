@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.calendar;
 
-import com.openexchange.exception.OXException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
@@ -90,7 +89,7 @@ public final class TimeTools {
 
     /**
      * Creates a new calendar and sets it to the last current full hour.
-     * 
+     *
      * @param tz TimeZone.
      * @return a calendar set to last full hour.
      */
@@ -147,7 +146,7 @@ public final class TimeTools {
     public static Date D(final String date) {
         return D(date, TimeZone.getTimeZone("UTC"));
     }
-    
+
 
     public static Date applyTimeZone(final TimeZone timeZone, final Date date) {
         final SimpleDateFormat sdf = new SimpleDateFormat();

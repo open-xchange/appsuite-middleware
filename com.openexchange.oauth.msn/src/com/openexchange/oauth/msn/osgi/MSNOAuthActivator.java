@@ -68,8 +68,6 @@ import com.openexchange.server.osgiservice.HousekeepingActivator;
  */
 public class MSNOAuthActivator extends HousekeepingActivator {
 
-    private static final Class[] NEEDED = new Class[] { ConfigurationService.class, OAuthService.class, DeferringURLService.class };
-
     private static final String API_KEY = "com.openexchange.oauth.msn.apiKey";
 
     private static final String API_SECRET = "com.openexchange.oauth.msn.apiSecret";
@@ -82,12 +80,12 @@ public class MSNOAuthActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED;
+        return new Class<?>[] { ConfigurationService.class, OAuthService.class, DeferringURLService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        ConfigurationService config = getService(ConfigurationService.class);
+        final ConfigurationService config = getService(ConfigurationService.class);
         oauthService = getService(OAuthService.class);
 
         oAuthMetadata = new OAuthServiceMetaDataMSNImpl(config.getProperty(API_KEY), config.getProperty(API_SECRET), getService(DeferringURLService.class));
@@ -107,7 +105,7 @@ public class MSNOAuthActivator extends HousekeepingActivator {
         return oauthService;
     }
 
-    public void setOauthService(OAuthService oauthService) {
+    public void setOauthService(final OAuthService oauthService) {
         this.oauthService = oauthService;
     }
 
@@ -115,7 +113,7 @@ public class MSNOAuthActivator extends HousekeepingActivator {
         return oAuthMetadata;
     }
 
-    public void setOAuthMetadata(OAuthServiceMetaDataMSNImpl authMetadata) {
+    public void setOAuthMetadata(final OAuthServiceMetaDataMSNImpl authMetadata) {
         oAuthMetadata = authMetadata;
     }
 

@@ -65,7 +65,7 @@ import com.openexchange.test.CalendarTestManager;
  * {@link Bug15903Test} This tests if a participant is correctly missing, as both participant and user, from the result of the next get when
  * removing him as participant. Also a get for the specific appointment is done twice as the second user. Once when he is in, and therefore
  * may see it. Once when he is out and an error is expected when trying to read it.
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class Bug15903Test extends CalendarTestManagerTest {

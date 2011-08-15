@@ -56,28 +56,28 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  * @author <a href="mailto:steffen.templin@open-xchange.com>Steffen Templin</a>
  */
 public class StoreRequest extends AbstractRequest<StoreResponse> {
-    
+
     private static final String PARAM_SESSION = "session";
-    
+
     private final boolean failOnError;
 
     public StoreRequest(final String session) {
         this(session, true);
     }
-    
+
     public StoreRequest(final String session, final boolean failOnError) {
         super(new Parameter[] {
             new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_STORE),
             new URLParameter(PARAM_SESSION, session)
         });
-        
+
         this.failOnError = failOnError;
     }
 
     public AbstractAJAXParser<? extends StoreResponse> getParser() {
         return new StoreResponseParser(failOnError);
     }
-    
+
     /**
      * {@inheritDoc}
      */

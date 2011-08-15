@@ -56,7 +56,7 @@ public class AttachmentClient {
 	public static Response get(final WebConversation webConv, final String sessionId, final int folderId, final int attachedId, final int moduleId, final int id) throws MalformedURLException, JSONException, IOException, SAXException {
 		return delegate.get(webConv, sessionId, folderId, attachedId, moduleId, id);
 	}
-	
+
 	public Response list(final WebConversation webConv, final String sessionId, final int folderId, final int attachedId, final int moduleId, final int[] ids, final int[] columns) throws JSONException, MalformedURLException, IOException, SAXException {
 		return delegate.list(webConv, sessionId, folderId, attachedId, moduleId, ids, columns);
 	}

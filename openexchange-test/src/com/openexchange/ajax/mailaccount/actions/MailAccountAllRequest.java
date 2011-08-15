@@ -64,7 +64,7 @@ public class MailAccountAllRequest implements AJAXRequest<MailAccountAllResponse
     private String columns;
     private boolean failOnError;
     private int[] cols;
-    
+
     public MailAccountAllRequest(boolean failOnError, int...cols) {
         StringBuilder bob = new StringBuilder();
         for(int colId : cols) {
@@ -75,7 +75,7 @@ public class MailAccountAllRequest implements AJAXRequest<MailAccountAllResponse
         this.failOnError = failOnError;
         this.cols = cols;
     }
-    
+
     public MailAccountAllRequest(int...cols) {
         this(true, cols);
     }

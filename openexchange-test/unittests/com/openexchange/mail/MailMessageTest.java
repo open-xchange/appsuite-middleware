@@ -61,14 +61,14 @@ import com.openexchange.sessiond.impl.SessionObject;
 
 /**
  * MailMessageTest
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class MailMessageTest extends AbstractMailTest {
 
 	/**
-	 * 
+	 *
 	 */
 	public MailMessageTest() {
 		super();

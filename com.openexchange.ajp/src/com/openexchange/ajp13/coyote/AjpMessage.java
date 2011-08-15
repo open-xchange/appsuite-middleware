@@ -61,7 +61,7 @@ import com.openexchange.tools.codec.QuotedPrintable;
 
 /**
  * {@link AjpMessage}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AjpMessage {
@@ -254,7 +254,7 @@ public final class AjpMessage {
     /**
      * Copy a chunk of bytes into the packet, starting at the current write position. The chunk of bytes is encoded with the length in two
      * bytes first, then the data itself, and finally a terminating \0 (which is <B>not</B> included in the encoded length).
-     * 
+     *
      * @param b The array from which to copy bytes.
      * @param off The offset into the array at which to start copying
      * @param numBytes The number of bytes to copy.
@@ -279,10 +279,10 @@ public final class AjpMessage {
 
     /**
      * Reads a string from packet and advance the read position past it.
-     * 
+     *
      * @return The read string
      */
-    public String getString() {
+    public String getString(final StringBuilder builder) {
         final int strLength = getInt();
         if ((strLength == 0xFFFF) || (strLength == -1)) {
             /*
@@ -291,7 +291,13 @@ public final class AjpMessage {
             return "";
         }
         boolean encoded = false;
-        final StringBuilder sb = new StringBuilder(strLength);
+        final StringBuilder sb;
+        if (null == builder) {
+            sb = new StringBuilder(strLength);
+        } else {
+            sb = builder;
+            sb.setLength(0);
+        }
         for (int strIndex = 0; strIndex < strLength; strIndex++) {
             final int b = buf[pos++] & 0xFF;
             if (b > ASCII_LIMIT) { // non-ascii character
@@ -314,7 +320,6 @@ public final class AjpMessage {
             }
         }
         return sb.toString();
-        
     }
 
     /**
@@ -322,25 +327,19 @@ public final class AjpMessage {
      * byte first, and, as far as I can tell, in little-endian order within each byte.
      */
     public int getInt() {
-        final int b1 = buf[pos++] & 0xFF;
-        final int b2 = buf[pos++] & 0xFF;
-        return (b1 << 8) + b2;
+        return ((buf[pos++] & 0xFF) << 8) + (buf[pos++] & 0xFF);
     }
 
     public int peekInt() {
-        final int b1 = buf[pos] & 0xFF;
-        final int b2 = buf[pos + 1] & 0xFF;
-        return (b1 << 8) + b2;
+        return ((buf[pos] & 0xFF) << 8) + (buf[pos + 1] & 0xFF);
     }
 
     public byte getByte() {
-        final byte res = buf[pos++];
-        return res;
+        return buf[pos++];
     }
 
     public byte peekByte() {
-        final byte res = buf[pos];
-        return res;
+        return buf[pos];
     }
 
     public void getBytes(final MessageBytes mb) {
@@ -357,7 +356,7 @@ public final class AjpMessage {
     /**
      * Copy a chunk of bytes from the packet into an array and advance the read position past the chunk. See appendBytes() for details on
      * the encoding.
-     * 
+     *
      * @return The number of bytes copied.
      */
     public int getBytes(final byte[] dest) {
@@ -413,7 +412,7 @@ public final class AjpMessage {
             return -1;
         }
         if (log.isDebugEnabled()) {
-            log.debug("Received " + len + " " + buf[0]);
+            log.debug("Received AJP message of length " + len + ". First payload byte is: " + buf[0]);
         }
         return len;
     }
@@ -422,9 +421,10 @@ public final class AjpMessage {
      * Dump the contents of the message, prefixed with the given String.
      */
     public void dump(final String msg) {
-        if (log.isDebugEnabled()) {
-            log.debug(msg + ": " + buf + " " + pos + "/" + (len + 4));
+        if (!log.isDebugEnabled()) {
+            return;
         }
+        final StringBuilder temp = new StringBuilder(8192).append(msg).append('\n');
         int max = pos;
         if (len + 4 > pos) {
             max = len + 4;
@@ -432,17 +432,17 @@ public final class AjpMessage {
         if (max > 1000) {
             max = 1000;
         }
-        if (log.isDebugEnabled()) {
-            for (int j = 0; j < max; j += 16) {
-                log.debug(hexLine(buf, j, len));
-            }
+
+        for (int j = 0; j < max; j += 16) {
+            hexLine(buf, j, len, temp);
+            temp.append('\n');
         }
+        log.debug(temp.toString());
     }
 
     // ------------------------------------------------------ Protected Methods
 
-    protected static String hexLine(final byte buf[], final int start, final int len) {
-        final StringBuffer sb = new StringBuffer();
+    protected static void hexLine(final byte buf[], final int start, final int len, final StringBuilder sb) {
         for (int i = start; i < start + 16; i++) {
             if (i < len + 4) {
                 sb.append(hex(buf[i]) + " ");
@@ -458,7 +458,6 @@ public final class AjpMessage {
                 sb.append(".");
             }
         }
-        return sb.toString();
     }
 
     protected static String hex(final int x) {

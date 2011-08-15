@@ -59,6 +59,7 @@ import org.jdom.JDOMException;
 import org.jdom.Namespace;
 import com.openexchange.carddav.CarddavProtocol;
 import com.openexchange.carddav.GroupwareCarddavFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.action.WebdavPropfindAction;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
@@ -69,7 +70,7 @@ import com.openexchange.webdav.xml.resources.ResourceMarshaller;
 
 /**
  * A {@link CaldavMultigetReport} allows clients to retrieve properties of certain named resources. It is conceptually similar to a propfind.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class AddressbookMultigetReport extends WebdavPropfindAction {
@@ -81,7 +82,7 @@ public class AddressbookMultigetReport extends WebdavPropfindAction {
     public AddressbookMultigetReport(Protocol protocol) {
         super(protocol);
     }
-    
+
     @Override
     public void perform(WebdavRequest req, WebdavResponse res) throws WebdavProtocolException {
         final Element response = new Element("multistatus", DAV_NS);
@@ -110,7 +111,12 @@ public class AddressbookMultigetReport extends WebdavPropfindAction {
         List<Element> all = new ArrayList<Element>();
 
         for (WebdavPath webdavPath : paths) {
-            List<Element> marshalled = marshaller.marshal(req.getFactory().resolveResource(webdavPath));
+            List<Element> marshalled;
+            try {
+                marshalled = marshaller.marshal(req.getFactory().resolveResource(webdavPath));
+            } catch (OXException e) {
+                throw WebdavProtocolException.Code.GENERAL_ERROR.create(webdavPath, 404, e);
+            }
             all.addAll(marshalled);
         }
 
@@ -142,7 +148,12 @@ public class AddressbookMultigetReport extends WebdavPropfindAction {
             Element href = (Element) object;
             String url = href.getText();
             url = url.substring(length);
-            paths.add(((GroupwareCarddavFactory) req.getFactory()).decode(new WebdavPath(url)));
+            WebdavPath webdavPath = new WebdavPath(url);
+            try {
+                paths.add(((GroupwareCarddavFactory) req.getFactory()).decode(webdavPath));
+            } catch (OXException e) {
+                throw WebdavProtocolException.Code.GENERAL_ERROR.create(webdavPath, 500, e);
+            }
         }
 
         return paths;

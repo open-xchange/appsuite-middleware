@@ -64,7 +64,7 @@ import com.openexchange.subscribe.Subscription;
 /**
  * This is rather boring. Refresh needs a lot a pre-requisites, so expect
  * it to be tested in roundtrip tests.
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class RefreshSubscriptionTest extends AbstractSubscriptionTest {
@@ -75,28 +75,28 @@ public class RefreshSubscriptionTest extends AbstractSubscriptionTest {
 
     public void testShouldFailOnNonExistingSubscription() throws OXException, IOException, SAXException, JSONException{
     }
-    
+
     public void testShouldNotFailOnExistingSubscription() throws OXException, IOException, SAXException, JSONException{
         FolderObject folder = createDefaultContactFolder();
-    
-        
+
+
         DynamicFormDescription formDescription = generateFormDescription();
         Subscription subscription = generateOXMFSubscription(formDescription, String.valueOf(folder.getObjectID() ));
-        
+
         SimSubscriptionSourceDiscoveryService discovery = new SimSubscriptionSourceDiscoveryService();
         discovery.addSource(subscription.getSource());
 
         subMgr.setFormDescription(formDescription);
-        
+
         subMgr.setSubscriptionSourceDiscoveryService(discovery);
-        
+
         subMgr.newAction(subscription );
-        
+
         assertFalse("Insert failed!", ((NewSubscriptionResponse) subMgr.getLastResponse()).hasError());
-        
+
         subMgr.refreshAction( subscription.getId() );
-        
+
         assertTrue("Should have been successful", ((RefreshSubscriptionResponse) subMgr.getLastResponse()).wasSuccessful() );
- 
+
     }
 }

@@ -59,10 +59,10 @@ import com.openexchange.ajax.publish.actions.GetPublicationResponse;
 
 /**
  * {@link GetPublicationTest}
- * action=get is used in nearly all tests for verification purposes, 
- * therefore you won't find many positive tests here, 
+ * action=get is used in nearly all tests for verification purposes,
+ * therefore you won't find many positive tests here,
  * because that would be redundant.
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class GetPublicationTest extends AbstractPublicationTest {
@@ -70,10 +70,10 @@ public class GetPublicationTest extends AbstractPublicationTest {
     public GetPublicationTest(String name) {
         super(name);
     }
-    
+
     public void testShouldNotFindNonExistingPublication() throws OXException, IOException, SAXException, JSONException{
         GetPublicationRequest req = new GetPublicationRequest(Integer.MAX_VALUE);
-        
+
         GetPublicationResponse res = getClient().execute(req);
         OXException exception = res.getException();
         assertNotNull("Should contain an exception" , exception);

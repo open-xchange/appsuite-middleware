@@ -16,21 +16,21 @@ public class TaskAsserts extends TestCase{
 	public static void assertTaskFieldMatches(int field, Task expectedTask, Task comparedTask){
 		Mapper<?> mapping = Mapping.getMapping(field);
 		if(mapping == null) { return; }
-	
+
 		Object expectedValue = mapping.get(expectedTask);
 		Object comparedValue = mapping.get(comparedTask);
-	
+
 		if(expectedValue instanceof Date){
 			assertTrue(
-				"The following field should be equal in both Tasks: " 
+				"The following field should be equal in both Tasks: "
 				+ "[" + getReadableName(mapping) + "], expected: "
 				+ expectedValue + ", but was: " + comparedValue,
 				TaskAsserts.checkOXDatesAreEqual((Date)expectedValue, (Date)comparedValue));
-		} else 
+		} else
 			assertEquals(
-				"The following field should be equal in both Tasks: " 
+				"The following field should be equal in both Tasks: "
 				+ "[" + getReadableName(mapping) + "]",
-				expectedValue, 
+				expectedValue,
 				comparedValue );
 	}
 
@@ -50,23 +50,23 @@ public class TaskAsserts extends TestCase{
 		Mapper<?> mapping = Mapping.getMapping(field);
 		Object expectedValue = mapping.get(expectedTask);
 		Object comparedValue = mapping.get(comparedTask);
-		
+
 		assertFalse(
 			"The following field should differ in both Tasks: "
 			+ "[" + mapping.getDBColumnName() + "]"
-			+ ", value: " + expectedValue , 
+			+ ", value: " + expectedValue ,
 			expectedValue.equals(comparedValue) );
 	}
 
 	/**
-	 * Compares two Tasks and asserts that all of their fields 
-	 * excepts the listed ones are the same. 
-	 * 
+	 * Compares two Tasks and asserts that all of their fields
+	 * excepts the listed ones are the same.
+	 *
 	 * @param expectedTask
 	 * @param comparedTask
 	 * @param excluded
 	 */
-	public static void assertAllTaskFieldsMatchExcept(Task expectedTask, Task comparedTask, Set<Integer> excluded){		
+	public static void assertAllTaskFieldsMatchExcept(Task expectedTask, Task comparedTask, Set<Integer> excluded){
 		for(int column: Task.ALL_COLUMNS){
 			if(! excluded.contains(Integer.valueOf( column ))){
 				assertTaskFieldMatches(column, expectedTask, comparedTask);
@@ -77,7 +77,7 @@ public class TaskAsserts extends TestCase{
 	/**
 	 * Compares two Tasks and asserts that all listed fields
 	 * are different.
-	 * 
+	 *
 	 * @param expectedTask
 	 * @param comparedTask
 	 * @param included
@@ -129,9 +129,9 @@ public class TaskAsserts extends TestCase{
 	}
 
 	/**
-	 * Compares two dates, but only down to the second. Due to some database 
+	 * Compares two dates, but only down to the second. Due to some database
 	 * optimizations, the OX is not precise below that.
-	 * 
+	 *
 	 * @param message
 	 * @param date1
 	 * @param date2

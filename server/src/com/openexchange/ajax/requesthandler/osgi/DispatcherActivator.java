@@ -53,10 +53,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.ajax.Multiple;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.ajax.requesthandler.DefaultConverter;
@@ -94,8 +94,8 @@ public class DispatcherActivator extends HousekeepingActivator {
 
         final DefaultConverter defaultConverter = new DefaultConverter();
         defaultConverter.addConverter(new DebugConverter());
-        
-        for(ResultConverter converter : BasicTypeAPIResponseConverter.CONVERTERS) {
+
+        for(final ResultConverter converter : BasicTypeAPIResponseConverter.CONVERTERS) {
         	defaultConverter.addConverter(converter);
         }
 
@@ -163,8 +163,8 @@ public class DispatcherActivator extends HousekeepingActivator {
         private final DefaultDispatcher dispatcher;
         private final DispatcherServlet servlet;
 
-        private Set<String> registrationGuardian = new HashSet<String>();
-        
+        private final Set<String> registrationGuardian = new HashSet<String>();
+
         private final Map<String, SessionServletRegistration> registrations = new HashMap<String, SessionServletRegistration>();
         private final Map<String, ServiceRegistration<AJAXActionServiceFactory>> serviceRegistrations = new HashMap<String, ServiceRegistration<AJAXActionServiceFactory>>();
 
@@ -179,12 +179,12 @@ public class DispatcherActivator extends HousekeepingActivator {
         public void added(final ServiceReference<AJAXActionServiceFactory> ref, final AJAXActionServiceFactory thing) {
             final String module = (String) ref.getProperty("module");
             dispatcher.register(module, thing);
-            
+
             if (registrationGuardian.contains(module)) {
             	return;
             }
             registrationGuardian.add(module);
-            
+
             final SessionServletRegistration registration = new SessionServletRegistration(rcontext, servlet, "/ajax/"+module);
             registrations.put(module, registration);
             rememberTracker(registration);
@@ -201,7 +201,16 @@ public class DispatcherActivator extends HousekeepingActivator {
             serviceRegistrations.remove(module).unregister();
         }
 
+    }
 
+    @Override
+    public void forgetTracker(final ServiceTracker<?, ?> tracker) {
+        super.forgetTracker(tracker);
+    }
+
+    @Override
+    public void rememberTracker(final ServiceTracker<?, ?> tracker) {
+        super.rememberTracker(tracker);
     }
 
 }

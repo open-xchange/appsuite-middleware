@@ -71,7 +71,7 @@ import com.openexchange.subscribe.crawler.commandline.CrawlerUpdateMBeanImpl;
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class CrawlerMBeanRegisterer implements ServiceTrackerCustomizer{
+public class CrawlerMBeanRegisterer implements ServiceTrackerCustomizer<Object,Object>{
 
     private final BundleContext context;
 
@@ -85,13 +85,13 @@ public class CrawlerMBeanRegisterer implements ServiceTrackerCustomizer{
 
     private final Lock lock = new ReentrantLock();
 
-    public CrawlerMBeanRegisterer (BundleContext context, Activator activator){
+    public CrawlerMBeanRegisterer (final BundleContext context, final Activator activator){
         this.context = context;
         this.activator = activator;
     }
 
     @Override
-    public Object addingService(ServiceReference reference) {
+    public Object addingService(final ServiceReference<Object> reference) {
         final Object obj = context.getService(reference);
         lock.lock();
         boolean registeringMBeanPossible = false;
@@ -108,15 +108,15 @@ public class CrawlerMBeanRegisterer implements ServiceTrackerCustomizer{
         }
         if (registeringMBeanPossible){
             try {
-                ObjectName objectName = new ObjectName(CrawlerUpdateMBean.DOMAIN_NAME , "name", "CrawlerUpdateMBeanImpl");
+                final ObjectName objectName = new ObjectName(CrawlerUpdateMBean.DOMAIN_NAME , "name", "CrawlerUpdateMBeanImpl");
                 managementService.registerMBean(objectName, new CrawlerUpdateMBeanImpl(configurationService, activator));
-            } catch (MalformedObjectNameException e) {
+            } catch (final MalformedObjectNameException e) {
                 LOG.error(e);
-            } catch (NotCompliantMBeanException e) {
+            } catch (final NotCompliantMBeanException e) {
                 LOG.error(e);
-            } catch (OXException e) {
+            } catch (final OXException e) {
                 LOG.error(e);
-            } catch (NullPointerException e) {
+            } catch (final NullPointerException e) {
                 LOG.error(e);
             }
         }
@@ -125,19 +125,19 @@ public class CrawlerMBeanRegisterer implements ServiceTrackerCustomizer{
 
 
     @Override
-    public void modifiedService(ServiceReference reference, Object service) {
+    public void modifiedService(final ServiceReference<Object> reference, final Object service) {
         // nothing to do here
     }
 
 
     @Override
-    public void removedService(ServiceReference reference, Object service) {
+    public void removedService(final ServiceReference<Object> reference, final Object service) {
         lock.lock();
         try {
             if (service instanceof ManagementService) {
                 try {
                     managementService.unregisterMBean("CrawlerUpdateMBeanImpl");
-                } catch (OXException e) {
+                } catch (final OXException e) {
                     LOG.error(e);
                 }
                 managementService = null;

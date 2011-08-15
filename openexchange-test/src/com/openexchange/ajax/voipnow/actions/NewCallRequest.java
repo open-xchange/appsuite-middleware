@@ -49,13 +49,12 @@
 
 package com.openexchange.ajax.voipnow.actions;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 
 /**
  * {@link NewCallRequest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class NewCallRequest extends AbstractVoipNowRequest<NewCallResponse> {
@@ -68,7 +67,7 @@ public class NewCallRequest extends AbstractVoipNowRequest<NewCallResponse> {
 
     /**
      * Default constructor.
-     * 
+     *
      * @param phone The phone number
      * @param timeout The call's timeout
      * @param callerId The caller ID

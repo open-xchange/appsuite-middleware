@@ -57,11 +57,11 @@ package com.openexchange.ajax.mail.filter.comparison;
 public class RegexComparison extends AbstractComparison {
 
 	public static final String REGEX = "regex";
-	
+
 	public RegexComparison() {
 		name = REGEX;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -86,12 +86,12 @@ public class RegexComparison extends AbstractComparison {
 			return false;
 		return true;
 	}
-	
+
 	@Override
     public String toString() {
 		final StringBuffer stringBuffer = new StringBuffer();
 		stringBuffer.append("name: " + name);
-		
+
 		return stringBuffer.toString();
 	}
 }

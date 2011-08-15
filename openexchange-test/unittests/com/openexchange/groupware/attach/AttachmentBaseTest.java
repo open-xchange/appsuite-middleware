@@ -64,7 +64,6 @@ import java.util.List;
 import java.util.Set;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.DBProvider;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.attach.impl.AttachmentBaseImpl;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
 import com.openexchange.groupware.attach.util.GetSwitch;
@@ -631,7 +630,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
         public DBProvider getProvider();
 
         public Context getContext();
-        
+
         public Session getSession();
 
         public User getUser();
@@ -654,7 +653,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
             // TODO Auto-generated method stub
             return null;
         }
-        
+
         public Session getSession() {
             // TODO Auto-generated method stub
             return null;

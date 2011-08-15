@@ -52,7 +52,7 @@ package com.openexchange.ajax.framework;
 import com.openexchange.ajax.container.Response;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class CommonAllResponse extends AbstractColumnsResponse {
@@ -65,7 +65,7 @@ public class CommonAllResponse extends AbstractColumnsResponse {
     public CommonAllResponse(final Response response) {
         super(response);
     }
-    
+
     public void setListIDs(final ListIDs list) {
         this.list = list;
     }

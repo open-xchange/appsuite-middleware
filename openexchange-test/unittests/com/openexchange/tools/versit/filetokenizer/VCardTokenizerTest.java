@@ -49,7 +49,6 @@
 
 package com.openexchange.tools.versit.filetokenizer;
 
-import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
@@ -63,7 +62,7 @@ import com.openexchange.tools.versit.old.VCalendar10;
 import com.openexchange.tools.versit.old.VCard21;
 
 /**
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  *
  */
@@ -79,11 +78,11 @@ public class VCardTokenizerTest extends TestCase {
 	public static final String BUG_7250 = "BEGIN:VCARD\nVERSION:2.1\nN:C\u00f6l\u00f6mb\u00e4r\u00e4;R\u00f6b\u00f6rt\nEND:VCARD";
 	public static final String UTF8 = "UTF-8";
 	public static final String WIN = "Cp1252";
-	
+
 	public void testVCardRecognition() throws IOException{
 		prepareTest(VCARD21,1,1, new VersitDefinition[]{VCard21.definition}, new String[]{VCARD21}, UTF8);
 		prepareTest(VCARD30,1,1, new VersitDefinition[]{VCard.definition}, new String[]{VCARD30}, UTF8);
-		
+
 		prepareTest(VCARD21+VCARD30,2,2, new VersitDefinition[]{VCard21.definition,VCard.definition}, new String[]{VCARD21, VCARD30}, UTF8);
 	}
 	public void testVCalendarRecognition() throws IOException{
@@ -101,7 +100,7 @@ public class VCardTokenizerTest extends TestCase {
 			VCARD21,
 			VCALENDAR10,
 			VCARD30,
-			ICALENDAR}, 
+			ICALENDAR},
 		UTF8);
 		//with newline on end
 		prepareTest(MULTI_MONDO_TEST2,4,4, new VersitDefinition[]{
@@ -113,19 +112,19 @@ public class VCardTokenizerTest extends TestCase {
 				VCARD21,
 				VCALENDAR10,
 				VCARD30,
-				ICALENDAR}, 
+				ICALENDAR},
 			UTF8);
 	}
-	
+
 	public void test7248() throws IOException{
 		prepareTest(BUG_7248, 1, 1, new VersitDefinition[]{VCard21.definition}, new String[]{BUG_7248}, UTF8);
 	}
-	
+
 	public void test7250() throws IOException{
 		prepareTest(BUG_7250, 1, 1, new VersitDefinition[]{VCard21.definition}, new String[]{BUG_7250}, WIN);
 	}
 
-	
+
 	private void prepareTest(final String content, final int entriesFound, final int entriesRecognized, final VersitDefinition[] compDefs, final String[] expectedContent, final String encoding) throws IOException{
 		final VCardTokenizer chunky = new VCardTokenizer(new ByteArrayInputStream( content.getBytes(encoding) ));
 		final List<VCardFileToken> l = chunky.split();

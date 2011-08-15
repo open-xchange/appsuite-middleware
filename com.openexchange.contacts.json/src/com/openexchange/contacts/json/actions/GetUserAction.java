@@ -81,17 +81,17 @@ public class GetUserAction extends ContactAction {
     protected AJAXRequestResult perform(final ContactRequest req) throws OXException {
         final ServerSession session = req.getSession();
         final TimeZone timeZone = req.getTimeZone();
-        final int uid = req.getId();        
+        final int uid = req.getId();
         final Context ctx = session.getContext();
 
         final ContactInterface contactInterface = new RdbContactSQLImpl(session, ctx);
-        final Contact contact = contactInterface.getUserById(uid);        
+        final Contact contact = contactInterface.getUserById(uid);
         final Date lastModified = contact.getLastModified();
-        
+
         // Correct last modified and creation date with users timezone
         contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
         contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
-        
+
         return new AJAXRequestResult(contact, lastModified, "contact");
     }
 

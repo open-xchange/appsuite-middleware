@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.simple;
 
-import com.openexchange.exception.OXException;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONException;
@@ -65,9 +64,9 @@ import com.openexchange.ajax.tools.JSONCoercion;
 public class SimpleResponse {
     private Object data;
     private JSONObject response;
-    
+
     private String error;
-    
+
     public SimpleResponse(JSONObject response) throws JSONException {
         this.response = response;
         if(response.has("error")) {
@@ -76,23 +75,23 @@ public class SimpleResponse {
             this.data = JSONCoercion.coerceToNative(response.get("data"));
         }
     }
-    
+
     public boolean hasError() {
         return error != null;
     }
-    
+
     public String getError() {
         return error;
     }
-    
+
     public Object getData() {
         return data;
     }
-    
+
     public Map<String, Object> getObjectData() {
         return (Map<String, Object>) data;
     }
-    
+
     public List<List<Object>> getListData() {
         return (List<List<Object>>) data;
     }

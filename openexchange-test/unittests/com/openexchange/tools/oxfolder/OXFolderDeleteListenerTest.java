@@ -22,16 +22,16 @@ import com.openexchange.sessiond.impl.SessionObjectWrapper;
 public class OXFolderDeleteListenerTest extends TestCase {
 	SessionObject session = null;
 	int myInfostoreFolder = 0;
-	
+
 	int userWhichWillBeDeletedId = 0;
 	int userWhichWillRemainId = 0;
 	int contextAdminId = 0;
-	
+
 	OXFolderAccess oxfa = null;
 	OXFolderManager oxma = null;
-	
+
 	List<FolderObject> clean = new LinkedList<FolderObject>();
-	
+
 	@Override
 	public void setUp() throws Exception {
 		Init.startServer();
@@ -39,15 +39,15 @@ public class OXFolderDeleteListenerTest extends TestCase {
 		userWhichWillBeDeletedId = UserStorage.getInstance().getUserId("francisco", ctx);
 		userWhichWillRemainId = UserStorage.getInstance().getUserId("thorben", ctx);
 		contextAdminId = ctx.getMailadmin(); // TODO
-		
+
 		session = SessionObjectWrapper.createSessionObject(userWhichWillBeDeletedId, ctx, "Blubb");
-		
+
 		oxfa = new OXFolderAccess(ctx);
 		oxma = OXFolderManager.getInstance(session);
-		
+
 		myInfostoreFolder = oxfa.getDefaultFolder(session.getUserId(), FolderObject.INFOSTORE).getObjectID();
 	}
-	
+
 	@Override
 	public void tearDown() throws Exception {
 		for(final FolderObject fo : clean) {
@@ -55,20 +55,20 @@ public class OXFolderDeleteListenerTest extends TestCase {
 		}
 		Init.stopServer();
 	}
-	
+
 	// Bug 7503
 	public void testPublicFolderTransferPermissionsToAdmin() throws OXException, OXException, OXException, OXException, SQLException, OXException{
-		
+
 		FolderObject testFolder = createPublicInfostoreSubfolderWithAdmin(myInfostoreFolder, userWhichWillBeDeletedId);
 		clean.add(testFolder);
-		
+
 		testFolder = assignAdminPermissions(testFolder, userWhichWillRemainId);
-		
+
 		simulateUserDelete(userWhichWillBeDeletedId);
-		
+
 		checkUserInPermissionsOfFolder(testFolder.getObjectID(), userWhichWillRemainId);
 		checkUserInPermissionsOfFolder(testFolder.getObjectID(), contextAdminId);
-		
+
 	}
 
 	public void checkUserInPermissionsOfFolder(final int folderId, final int user) throws OXException {
@@ -83,7 +83,7 @@ public class OXFolderDeleteListenerTest extends TestCase {
 
 	public void simulateUserDelete(final int deleteMe) throws OXException, OXException, OXException, SQLException, OXException {
 		final DeleteEvent delEvent = new DeleteEvent(this, deleteMe, DeleteEvent.TYPE_USER, ContextStorage.getInstance().getContext(session.getContextId()));
-		
+
 		Connection con = null;
 		try {
 			con = DBPool.pickupWriteable(ContextStorage.getInstance().getContext(session.getContextId()));
@@ -91,7 +91,7 @@ public class OXFolderDeleteListenerTest extends TestCase {
 		} finally {
 			DBPool.closeWriterSilent(ContextStorage.getInstance().getContext(session.getContextId()), con);
 		}
-		
+
 	}
 
 	public FolderObject assignAdminPermissions(final FolderObject folder, final int user) throws OXException {
@@ -100,14 +100,14 @@ public class OXFolderDeleteListenerTest extends TestCase {
 		ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
 		ocl.setGroupPermission(false);
 		ocl.setFolderAdmin(true);
-		
+
 		final OCLPermission[] oldPerms = folder.getPermissionsAsArray();
 		final OCLPermission[] newPerms = new OCLPermission[oldPerms.length+1];
 		System.arraycopy(oldPerms, 0, newPerms, 0, oldPerms.length);
 		newPerms[oldPerms.length] = ocl;
-		
+
 		folder.setPermissionsAsArray(newPerms);
-		
+
 		return oxma.updateFolder(folder, true, System.currentTimeMillis());
 	}
 
@@ -123,7 +123,7 @@ public class OXFolderDeleteListenerTest extends TestCase {
 		ocl.setGroupPermission(false);
 		ocl.setFolderAdmin(true);
 		fo.setPermissionsAsArray(new OCLPermission[] { ocl });
-		
+
 		final FolderObject created = oxma.createFolder(fo, true, System.currentTimeMillis());
 		return created;
 	}

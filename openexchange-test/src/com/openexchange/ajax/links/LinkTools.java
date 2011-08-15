@@ -83,7 +83,7 @@ import com.openexchange.groupware.container.LinkObject;
 import com.openexchange.tools.URLParameter;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class LinkTools extends Assert {
@@ -102,7 +102,7 @@ public final class LinkTools extends Assert {
      * URL to AJAX link interface.
      */
     private static final String LINK_URL = "/ajax/link";
-    
+
     /**
      * Prevent instantiation
      */
@@ -115,11 +115,11 @@ public final class LinkTools extends Assert {
         throws JSONException, IOException, SAXException {
         LOG.trace("Inserting link.");
         final JSONObject json = AbstractLinkRequest.convert(link);
-        
+
         final URLParameter parameter = new URLParameter();
         parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
         parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW);
-        
+
         final ByteArrayInputStream bais = new ByteArrayInputStream(json
             .toString().getBytes(ENCODING));
         final WebRequest req = new PutMethodWebRequest(AbstractAJAXTest.PROTOCOL

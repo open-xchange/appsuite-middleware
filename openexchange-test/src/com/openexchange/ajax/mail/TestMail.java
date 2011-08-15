@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import java.util.Arrays;
@@ -73,7 +72,7 @@ import com.openexchange.mail.MailListField;
 
 /**
  * {@link TestMail} - simulates a mail object, but without the necessary session and whatnot needed that makes for a complicated setup.
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class TestMail implements IdentitySource<TestMail> {
@@ -97,7 +96,7 @@ public class TestMail implements IdentitySource<TestMail> {
 
     /**
      * Gets specified header
-     * 
+     *
      * @param name The header name
      * @return Either a <code>String</code> or a <code>JSONArray</code> instance if header has multiple values in mail headers
      */
@@ -253,7 +252,7 @@ public class TestMail implements IdentitySource<TestMail> {
 
     /**
      * Used for reading from FitNesse tables
-     * 
+     *
      * @param map A map, where the keys are taken from MailListField or TestMailField
      * @throws JSONException
      */
@@ -273,7 +272,7 @@ public class TestMail implements IdentitySource<TestMail> {
 
     /**
      * Used for reading from a JSONObject like it is returned from a GET request
-     * 
+     *
      * @param json
      * @throws JSONException
      */
@@ -321,7 +320,7 @@ public class TestMail implements IdentitySource<TestMail> {
 
     /**
      * Used for reading in fields returned by requests such as SEARCH
-     * 
+     *
      * @param columns Columns (as in #MailListField) that were requested
      * @param values A JSONArray carrying values for a TestMail
      * @throws JSONException
@@ -375,7 +374,7 @@ public class TestMail implements IdentitySource<TestMail> {
                     }
                     setFlags(bitmask);
                 }
-                
+
             }
             if (field == MailListField.PRIORITY) {
                 setPriority(values.getInt(index));
@@ -484,7 +483,7 @@ public class TestMail implements IdentitySource<TestMail> {
                 }
                 setFlags(bitmask);
             }
-            
+
         }
         if (field == MailListField.PRIORITY) {
             setPriority(Integer.valueOf((String) value).intValue());
@@ -509,7 +508,7 @@ public class TestMail implements IdentitySource<TestMail> {
 
     /**
      * Makes this mail look properly (e.g. attaching the content as attachment if it is of content_type &quot;alternative&quot;
-     * 
+     *
      * @return
      * @throws JSONException
      */
@@ -523,7 +522,7 @@ public class TestMail implements IdentitySource<TestMail> {
 
     /**
      * Transforms this mail into a JSONObject like used by the HTTP API.
-     * 
+     *
      * @return
      * @throws JSONException
      */

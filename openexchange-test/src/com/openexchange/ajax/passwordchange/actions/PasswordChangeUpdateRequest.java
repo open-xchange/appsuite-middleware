@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.passwordchange.actions;
 
-import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,9 +61,9 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
  * {@link PasswordChangeUpdateRequest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class PasswordChangeUpdateRequest extends AbstractPasswordChangeResourceRequest {
 
@@ -76,7 +75,7 @@ public final class PasswordChangeUpdateRequest extends AbstractPasswordChangeRes
 
 	/**
 	 * Initializes a new {@link PasswordChangeUpdateRequest}
-	 * 
+	 *
 	 * @param newPassword
 	 *            The new password
 	 * @param oldPassword
@@ -94,7 +93,7 @@ public final class PasswordChangeUpdateRequest extends AbstractPasswordChangeRes
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
 	 */
 	public Object getBody() throws JSONException {
@@ -106,7 +105,7 @@ public final class PasswordChangeUpdateRequest extends AbstractPasswordChangeRes
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
 	 */
 	public Method getMethod() {
@@ -115,7 +114,7 @@ public final class PasswordChangeUpdateRequest extends AbstractPasswordChangeRes
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
 	 */
 	public Parameter[] getParameters() {
@@ -126,7 +125,7 @@ public final class PasswordChangeUpdateRequest extends AbstractPasswordChangeRes
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
 	 */
 	public ResourceUpdateParser getParser() {

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.folder.api2;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.ajax.folder.actions.API;
@@ -60,7 +59,7 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 
 /**
  * {@link MoveTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MoveTest extends AbstractAJAXSession {
@@ -69,7 +68,7 @@ public class MoveTest extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link MoveTest}.
-     * 
+     *
      * @param name The name of the test.
      */
     public MoveTest(final String name) {

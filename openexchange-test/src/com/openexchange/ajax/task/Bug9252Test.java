@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.task;
 
-import com.openexchange.exception.OXException;
 import java.util.Date;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.API;

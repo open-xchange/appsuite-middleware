@@ -14,22 +14,22 @@ import com.openexchange.ajax.framework.Executor;
 import com.openexchange.groupware.container.Appointment;
 
 public class Bug10733Test extends AppointmentTest {
-	
+
 	private static final Log LOG = LogFactory.getLog(Bug10733Test.class);
-	
+
 	public Bug10733Test(final String name) {
 		super(name);
 	}
-	
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
-	
+
 	public void testDummy() {
-		
+
 	}
-	
+
 	public void testBug10733() throws Exception {
 		final StringBuffer stringBuffer = new StringBuffer();
 		stringBuffer.append("testBug10733");
@@ -39,7 +39,7 @@ public class Bug10733Test extends AppointmentTest {
 		stringBuffer.append("012345678901234567890123456789012345678901234567890123456789"); // 60 chars
 		stringBuffer.append("012345678901234567890123456789012345678901234567890123456789"); // 60 chars
 		stringBuffer.append("012345678901234567890123456789012345678901234567890123456789"); // 60 chars
-	
+
 		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle(stringBuffer.toString());
 		appointmentObj.setStartDate(new Date(startTime));
@@ -54,11 +54,11 @@ public class Bug10733Test extends AppointmentTest {
 		final CommonInsertResponse insertResponse = Executor.execute(ajaxSession, insertRequest);
 		final boolean hasError = insertResponse.hasError();
 		assertTrue("error message expected", hasError);
-		
+
 		final JSONObject jsonObj = insertResponse.getResponse().getJSON();
-		
+
 		final String errorCode = jsonObj.getString("code");
-		
+
 		assertEquals("unexpected error message", "APP-0072", errorCode);
 	}
 }

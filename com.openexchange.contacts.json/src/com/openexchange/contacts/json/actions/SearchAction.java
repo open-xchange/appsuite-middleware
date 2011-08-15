@@ -97,7 +97,7 @@ public class SearchAction extends ContactAction {
         Date lastModified = null;
         Date timestamp = new Date(0);
         final TimeZone timeZone = req.getTimeZone();
-        
+
         final ContactSearchObject searchObject = createContactSearchObject((JSONObject) req.getData());
         final ContactSearchMultiplexer multiplexer = new ContactSearchMultiplexer(getContactInterfaceDiscoveryService());
         SearchIterator<Contact> it = null;
@@ -107,13 +107,13 @@ public class SearchAction extends ContactAction {
             while (it.hasNext()) {
                 final Contact contact = it.next();
                 lastModified = contact.getLastModified();
-                
+
                 // Correct last modified and creation date with users timezone
                 contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
                 contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
                 contacts.add(contact);
-                
-                
+
+
                 if (lastModified != null && timestamp.before(lastModified)) {
                     timestamp = lastModified;
                 }
@@ -126,7 +126,7 @@ public class SearchAction extends ContactAction {
         
         return new AJAXRequestResult(contacts, lastModified, "contact");
     }
-    
+
     private ContactSearchObject createContactSearchObject(final JSONObject json) throws OXException {
         ContactSearchObject searchObject = null;
         try {
@@ -152,7 +152,7 @@ public class SearchAction extends ContactAction {
             if (json.has("orSearch") && json.getBoolean("orSearch")) {
                 searchObject.setOrSearch(true);
             }
-            
+
             searchObject.setSurname(DataParser.parseString(json, ContactFields.LAST_NAME));
             searchObject.setDisplayName(DataParser.parseString(json, ContactFields.DISPLAY_NAME));
             searchObject.setGivenName(DataParser.parseString(json, ContactFields.FIRST_NAME));
@@ -183,7 +183,7 @@ public class SearchAction extends ContactAction {
         } catch (final JSONException e) {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e);
         }
-        
+
         return searchObject;
     }
 

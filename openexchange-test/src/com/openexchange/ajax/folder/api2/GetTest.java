@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.folder.api2;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONObject;
 import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.GetRequest;
@@ -60,7 +59,7 @@ import com.openexchange.groupware.container.FolderObject;
 
 /**
  * {@link GetTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class GetTest extends AbstractAJAXSession {
@@ -69,7 +68,7 @@ public class GetTest extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link GetTest}.
-     * 
+     *
      * @param name name of the test.
      */
     public GetTest(final String name) {

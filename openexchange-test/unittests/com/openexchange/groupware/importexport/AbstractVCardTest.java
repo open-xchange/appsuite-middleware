@@ -79,15 +79,15 @@ public class AbstractVCardTest extends AbstractContactTest {
 	public static void initialize() throws Exception {
 		Init.startServer();
 		final UserStorage uStorage = UserStorage.getInstance();
-		
+
 		String[] loginParts = AjaxInit.getAJAXProperty("login").split("@");;
 		String name = loginParts[0];
 		String context = null;
 		if(loginParts.length == 2)
 		    context = loginParts[1];
-		else 
+		else
 		    context = "defaultcontext";
-		
+
         ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId(context));
         userId = uStorage.getUserId(name, ctx);
 	    sessObj = ServerSessionFactory.createServerSession(userId, 1, "vcard-tests");

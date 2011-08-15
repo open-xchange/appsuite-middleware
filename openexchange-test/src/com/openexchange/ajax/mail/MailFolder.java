@@ -68,13 +68,13 @@ public enum MailFolder {
     DRAFTS("drafts"),
     SENT("sent"),
     TRASH("trash");
-    
+
     private final String name;
 
     private MailFolder(String name){
         this.name = name;
     }
-    
+
     public static MailFolder getByName(String name){
         MailFolder[] folders = values();
         for(MailFolder folder: folders){
@@ -84,7 +84,7 @@ public enum MailFolder {
         }
         return null;
     }
-    
+
     public String getFolder(AJAXClient client) throws OXException, IOException, SAXException, JSONException{
         UserValues values = client.getValues();
         switch (this) {

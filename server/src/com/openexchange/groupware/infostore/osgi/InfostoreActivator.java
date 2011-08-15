@@ -67,7 +67,7 @@ import com.openexchange.groupware.update.UpdateTaskV2;
  */
 public class InfostoreActivator implements BundleActivator {
 
-    private final Stack<ServiceRegistration> registrations = new Stack<ServiceRegistration>();
+    private final Stack<ServiceRegistration<?>> registrations = new Stack<ServiceRegistration<?>>();
 
     @Override
     public void start(final BundleContext context) throws Exception {

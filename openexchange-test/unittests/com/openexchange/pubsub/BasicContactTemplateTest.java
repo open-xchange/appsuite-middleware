@@ -49,7 +49,6 @@
 
 package com.openexchange.pubsub;
 
-import com.openexchange.exception.OXException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Arrays;
@@ -88,63 +87,63 @@ public abstract class BasicContactTemplateTest extends AbstractContactTemplateTe
     /**
      * Tests a single export. Compares every single field.
      * Is rather helpful telling you which field failed.
-     * 
+     *
      * @throws Exception
      */
     public void testSingle() throws Exception {
         SubscriptionSource source = getSubscriptionSource();
         MicroformatSubscribeService service = getSubscribeService();
         introduceToEachOther(service, source);
-    
+
         StringWriter writer = new StringWriter();
-    
+
         Contact expected = generateContact("");
         List<Contact> expecteds = Arrays.asList(expected);
-    
+
         OXTemplate templ = getTemplate();
         Map<String, Object> variables = getVariables();
         variables.put("contacts", expecteds);
         templ.process(variables, writer);
-    
+
         String htmlData = writer.toString();
-        
+
         Collection<Contact> actuals = service.getContent(new StringReader(htmlData));
-    
+
         assertEquals("Should return one contact", 1, actuals.size());
-    
+
         Contact actual = actuals.iterator().next();
-    
+
         for (int field : Contact.ALL_COLUMNS) {
             assertEquals("Comparing field #" + field, expected.get(field), actual.get(field));
         }
     }
 
     /**
-     * Tests several exports. Tries to find them in the result set using 
+     * Tests several exports. Tries to find them in the result set using
      * {@link #equals(Object)}. If that does not match, have a look at {@link #testSingle()},
      * which will tell you which fields did not match.
-     *  
+     *
      * @throws Exception
      */
     public void testSeveral() throws Exception {
         SubscriptionSource source = getSubscriptionSource();
         MicroformatSubscribeService service = getSubscribeService();
         introduceToEachOther(service, source);
-    
+
         StringWriter writer = new StringWriter();
-    
+
         List<Contact> expecteds = getContacts();
         OXTemplate templ = getTemplate();
         Map<String, Object> variables = getVariables();
         variables.put("contacts", expecteds);
         templ.process(variables, writer);
-    
+
         String htmlData = writer.toString();
-    
+
         Collection<Contact> actuals = service.getContent(new StringReader(htmlData));
-    
+
         assertEquals("Should return the same amount of contacts as were inserted", expecteds.size(), actuals.size());
-    
+
         for (Contact expected : expecteds) {
             assertTrue("Should contain the following contact: " + expected, actuals.contains(expected));
         }

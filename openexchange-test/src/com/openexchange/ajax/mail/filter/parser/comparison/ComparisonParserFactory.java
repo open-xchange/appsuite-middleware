@@ -58,17 +58,17 @@ import java.util.HashMap;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class ComparisonParserFactory {
-	
-	final static HashMap<String, ComparisonParser> parseMap = new HashMap<String, ComparisonParser>(); 
-	
+
+	final static HashMap<String, ComparisonParser> parseMap = new HashMap<String, ComparisonParser>();
+
 	public ComparisonParserFactory() {
 
 	}
-	
+
 	public static void addParser(final String name, final ComparisonParser comparisonParser) {
 		parseMap.put(name, comparisonParser);
 	}
-	
+
 	public static ComparisonParser getParser(String name) {
 		return parseMap.get(name);
 	}

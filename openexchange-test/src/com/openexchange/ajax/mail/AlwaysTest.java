@@ -99,7 +99,7 @@ public class AlwaysTest extends AbstractAJAXTest {
      * </ul>
      */
     private final static int MAX = -1;
-    
+
     /**
      * This attributes of mails are requested when a mail folder is listed.
      */

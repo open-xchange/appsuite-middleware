@@ -37,7 +37,6 @@
 
 package com.openexchange.ajax;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.net.URL;
 
@@ -88,7 +87,7 @@ public class ConfigJumpTest extends AbstractAJAXTest {
         assertTrue("Got no value from server.", control.toString().length()
             > 0);
     }
-    
+
     /**
      * Reads a configuration setting. A tree of configuration settings can also
      * be read. This tree will be returned as a string in JSON.

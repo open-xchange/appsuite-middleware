@@ -54,7 +54,7 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
  * {@link NewMailResponse} - Response received by <code>/ajax/mail?action=new</code>.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class NewMailResponse extends AbstractAJAXResponse {

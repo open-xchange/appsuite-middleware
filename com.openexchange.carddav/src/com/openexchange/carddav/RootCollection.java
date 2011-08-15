@@ -49,30 +49,17 @@
 
 package com.openexchange.carddav;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.openexchange.folderstorage.ContentType;
-import com.openexchange.folderstorage.FolderException;
-import com.openexchange.folderstorage.FolderResponse;
-import com.openexchange.folderstorage.FolderStorage;
-import com.openexchange.folderstorage.Permission;
-import com.openexchange.folderstorage.Type;
-import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.ContactContentType;
-import com.openexchange.folderstorage.type.PrivateType;
-import com.openexchange.folderstorage.type.PublicType;
-import com.openexchange.folderstorage.type.SharedType;
-import com.openexchange.groupware.settings.SettingException;
-import com.openexchange.preferences.ServerUserSetting;
-import com.openexchange.session.Session;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 /**
  * {@link RootCollection}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class RootCollection extends AbstractCarddavCollection {

@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.contact.helpers;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import junit.framework.TestCase;
 
@@ -58,20 +57,20 @@ import junit.framework.TestCase;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class ContactMergerTest extends TestCase {
-    
-    
+
+
     private Contact c1, c2;
-    
-    
-    
+
+
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        
+
         c1 = new Contact();
         c1.setGivenName("Given Name 1");
         c1.setCompany("Company 1");
-        
+
         c2 = new Contact();
         c2.setSurName("Surname 2");
         c2.setCompany("Company 2");
@@ -85,7 +84,7 @@ public class ContactMergerTest extends TestCase {
         assertEquals("Given name should be retained", "Given Name 1" , merged.getGivenName());
         assertEquals("Surname should be transferred", "Surname 2" , merged.getSurName());
     }
-    
+
     public void testSecondElementShouldPrecedeWithOverwrite(){
         ContactMerger merger = new ContactMerger(true);
         Contact merged = merger.merge(c1, c2);
@@ -97,7 +96,7 @@ public class ContactMergerTest extends TestCase {
         Contact merged = merger.merge(c1, c2);
         assertEquals("Given name should be retained if second one's is null", "Given Name 1" , merged.getGivenName());
     }
-    
+
     public void testFirstElementShouldPrecedeWithoutOverwrite(){
         ContactMerger merger = new ContactMerger(false);
         Contact merged = merger.merge(c1, c2);

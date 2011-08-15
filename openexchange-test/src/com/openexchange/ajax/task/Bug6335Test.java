@@ -50,11 +50,9 @@
 package com.openexchange.ajax.task;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.tasks.Create;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TaskExceptionCode;
@@ -85,6 +83,6 @@ public class Bug6335Test extends AbstractTaskTest {
         assertTrue("Invalid character was not detected.", iResponse.hasError());
         OXException expected = TaskExceptionCode.INVALID_DATA.create();
         final OXException actual = iResponse.getException();
-        assertTrue("Wrong exception", actual.similarTo(expected)); 
+        assertTrue("Wrong exception", actual.similarTo(expected));
     }
 }

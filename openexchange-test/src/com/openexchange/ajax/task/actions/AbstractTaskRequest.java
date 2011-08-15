@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.task.actions;
 
-import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
@@ -64,7 +63,7 @@ import com.openexchange.groupware.tasks.Task;
 
 /**
  * Shared information for all task requests.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class AbstractTaskRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {

@@ -72,20 +72,17 @@ public class MobilityProvisioningActivator extends DeferredActivator {
     private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MobilityProvisioningActivator.class));
     private final static String SERVLET_PATH = "/ajax/mobilityprovisioning";
 
-	private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class,HttpService.class };
-
 	private SessionServletRegistration servletRegistration;
 
-	private final List<ServiceTracker> serviceTrackerList;
+	private List<ServiceTracker<?,?>> serviceTrackerList;
 
 	public MobilityProvisioningActivator() {
 		super();
-		serviceTrackerList = new ArrayList<ServiceTracker>();
 	}
 
 	@Override
 	protected Class<?>[] getNeededServices() {
-		return NEEDED_SERVICES;
+		return new Class<?>[] { ConfigurationService.class,HttpService.class };
 	}
 
 	@Override
@@ -124,10 +121,12 @@ public class MobilityProvisioningActivator extends DeferredActivator {
 
 			this.servletRegistration = new SessionServletRegistration(context, new MobilityProvisioningServlet(), SERVLET_PATH);
 			this.servletRegistration.open();
-            serviceTrackerList.add(new ServiceTracker(context, ActionService.class.getName(), new ActionServiceListener(context)));
+
+			serviceTrackerList = new ArrayList<ServiceTracker<?,?>>(1);
+            serviceTrackerList.add(new ServiceTracker<ActionService,ActionService>(context, ActionService.class, new ActionServiceListener(context)));
 
             // Open service trackers
-            for (final ServiceTracker tracker : serviceTrackerList) {
+            for (final ServiceTracker<?,?> tracker : serviceTrackerList) {
                 tracker.open();
             }
 		} catch (final Throwable t) {

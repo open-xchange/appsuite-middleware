@@ -49,14 +49,13 @@
 
 package com.openexchange.groupware.vcard;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import junit.framework.AssertionFailedError;
 import com.openexchange.tools.versit.converter.ConverterException;
 
 /**
  * Testing bug 6962, in which different MIME types ruin parsing.
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class VCardMimeTypeTest extends AbstractVCardUnitTest {
@@ -89,7 +88,7 @@ public class VCardMimeTypeTest extends AbstractVCardUnitTest {
     public void test6962variant1() throws IOException, ConverterException {
         performTest("vCard 1 as " + mime1, vcard1, mime1);
     }
-    
+
     public void test6962variant2() throws IOException, ConverterException {
         try {
             performTest("vCard 2 as " + mime1, vcard2, mime1);
@@ -98,11 +97,11 @@ public class VCardMimeTypeTest extends AbstractVCardUnitTest {
             assertTrue(true);
         }
     }
-    
+
     public void test6962variant3() throws IOException, ConverterException {
         performTest("vCard 1 as " + mime2, vcard1, mime2);
     }
-    
+
     public void test6962variant4() throws IOException, ConverterException {
         performTest("vCard 2 as " + mime2, vcard2, mime2);
     }

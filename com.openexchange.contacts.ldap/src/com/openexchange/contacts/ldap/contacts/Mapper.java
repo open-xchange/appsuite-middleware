@@ -671,7 +671,7 @@ public class Mapper {
         return retval;
     }
 
-    public static class ParameterObject {
+    public static final class ParameterObject {
 
         private final LdapGetter m_getter;
 
@@ -689,10 +689,14 @@ public class Mapper {
         public Set<Integer> getCols() {
             return m_cols;
         }
+
+        public boolean contains(final int field) {
+            return m_cols.contains(Integer.valueOf(field));
+        }
     }
 
     private static void stringSetter(final ParameterObject parameterObject, final String attributename, final int field, final SetterClosure closure) throws OXException {
-        if (parameterObject.getCols().contains(field)) {
+        if (parameterObject.contains(field)) {
             if (null != attributename && 0 != attributename.length()) {
                 final String attribute = parameterObject.getGetter().getAttribute(attributename);
                 if (null != attribute) {
@@ -703,7 +707,7 @@ public class Mapper {
     }
 
     private static void intSetter(final ParameterObject parameterObject, final String attributename, final int field, final SetterIntClosure closure) throws OXException {
-        if (parameterObject.getCols().contains(field)) {
+        if (parameterObject.contains(field)) {
             if (null != attributename && 0 != attributename.length()) {
                 final int attribute = parameterObject.getGetter().getIntAttribute(attributename);
                 if (-1 != attribute) {
@@ -714,7 +718,7 @@ public class Mapper {
     }
 
     private static void dateSetter(final ParameterObject parameterObject, final String attributename, final int field, final SetterDateClosure closure) throws OXException {
-        if (parameterObject.getCols().contains(field)) {
+        if (parameterObject.contains(field)) {
             if (null != attributename && 0 != attributename.length()) {
                 final Date attribute = parameterObject.getGetter().getDateAttribute(attributename);
                 if (null != attribute) {

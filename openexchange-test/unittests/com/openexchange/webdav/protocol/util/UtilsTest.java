@@ -61,7 +61,7 @@ import static com.openexchange.groupware.calendar.TimeTools.D;
  *
  */
 public class UtilsTest extends TestCase {
-    
+
     // Bug 13465
     public void testConvertToStringInUTCTimeZone() {
         Date d = D("24/03/2009 10:00");

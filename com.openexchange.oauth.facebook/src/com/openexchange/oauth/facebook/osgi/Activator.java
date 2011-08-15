@@ -49,8 +49,6 @@
 
 package com.openexchange.oauth.facebook.osgi;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -69,9 +67,7 @@ import com.openexchange.oauth.OAuthService;
  */
 public final class Activator implements BundleActivator{
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
-
-    private ServiceTracker tracker;
+    private ServiceTracker<Object,Object> tracker;
 
     public Activator() {
         super();
@@ -80,7 +76,7 @@ public final class Activator implements BundleActivator{
     @Override
     public void start(final BundleContext context) throws Exception {
         final Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + OAuthService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + DeferringURLService.class.getName() + "))");
-        tracker = new ServiceTracker(context, filter, new FacebookRegisterer(context));
+        tracker = new ServiceTracker<Object,Object>(context, filter, new FacebookRegisterer(context));
         tracker.open();
     }
 

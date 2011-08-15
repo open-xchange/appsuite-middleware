@@ -15,6 +15,7 @@ import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 
+
 public class CopyTest extends AbstractContactTest {
 	
 	private int objectId1;
@@ -24,14 +25,15 @@ public class CopyTest extends AbstractContactTest {
 
 
     public CopyTest(final String name) {
+
 		super(name);
 	}
-	
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
-	
+
 	public void testCopy() throws Exception {
 		final Contact contactObj = new Contact();
 		contactObj.setSurName("testCopy");
@@ -47,6 +49,7 @@ public class CopyTest extends AbstractContactTest {
 		
 		CopyRequest request = new CopyRequest(objectId1, contactFolderId, targetFolder, true);
 		CopyResponse response = client.execute(request);
+
 
 		if (response.hasError()) {
 			fail("json error: " + response.getErrorMessage());

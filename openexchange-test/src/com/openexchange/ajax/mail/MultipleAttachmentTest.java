@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import com.meterware.httpunit.WebResponse;
@@ -65,15 +64,15 @@ import com.openexchange.mail.MailListField;
 
 /**
  * {@link MultipleAttachmentTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class MultipleAttachmentTest extends AbstractMailTest {
 
 	/**
 	 * Default constructor.
-	 * 
+	 *
 	 * @param name
 	 *            Name of this test.
 	 */
@@ -83,7 +82,7 @@ public final class MultipleAttachmentTest extends AbstractMailTest {
 
 	/**
 	 * Tests the <code>action=zip_attachments</code> request on INBOX folder
-	 * 
+	 *
 	 * @throws Throwable
 	 */
 	public void testGet() throws Throwable {
@@ -144,7 +143,7 @@ public final class MultipleAttachmentTest extends AbstractMailTest {
 			assertNotNull("No Content-disposition header", disp);
 			assertTrue("Disposition is not set to 'attachment'", disp.startsWith("attachment"));
 			assertTrue("'filename' parameter not found in Content-disposition", disp.indexOf("filename=") >= 0);
-			
+
 		} catch (final Exception e) {
 			e.printStackTrace();
 			fail(e.getMessage());

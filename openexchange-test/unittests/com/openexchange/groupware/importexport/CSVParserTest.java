@@ -63,7 +63,7 @@ import org.junit.Test;
 import com.openexchange.groupware.importexport.csv.CSVParser;
 
 /**
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  *
  */
@@ -71,39 +71,39 @@ public class CSVParserTest {
 	public static junit.framework.Test suite() {
 		return new JUnit4TestAdapter(CSVParserTest.class);
 	}
-	
+
 	private static final String UNESCAPED_TEST = "title 1, title 2, title3\ncontent 1, content2, content3";
 	private static final String ESCAPED_TEST = "\"title 1\", \"title 2\", \"title3\"\r\n\"content \"\"1\"\"\", \"content,2\", \"content\n3\"";
 	private static final String UNEVEN_TEST = "title1, title 2\ncontent 11\ncontent21, content22,content23";
 	private List< List<String> > result;
 	private CSVParser parser;
-	
+
 	@Test public void getLines(){
 		parser = new CSVParser(UNESCAPED_TEST );
 		assertEquals("title 1, title 2, title3",parser.getLine(0));
 		assertEquals("content 1, content2, content3",parser.getLine(1));
-		
+
 		parser = new CSVParser(UNEVEN_TEST );
 		assertEquals("title1, title 2",parser.getLine(0));
 		assertEquals("content 11",parser.getLine(1));
 		assertEquals("content21, content22,content23",parser.getLine(2));
 	}
-	
+
 	 @Test public void parseUnescaped() throws OXException{
 		doAsserts(UNESCAPED_TEST + '\n' , "Un-escaped with final linebreak",2,3, false);
 		doAsserts(UNESCAPED_TEST, "Un-escaped without final linebreak",2,3, false);
 	}
-	
+
 	 @Test public void parseEscaped() throws OXException{
 		doAsserts(ESCAPED_TEST + '\n' , "Escaped with final linebreak",2,3, false);
 		doAsserts(ESCAPED_TEST, "Escaped without final linebreak",2,3, false);
 	}
-	
+
 	 @Test public void parseMixed() throws OXException{
 		doAsserts(UNESCAPED_TEST + '\n' + ESCAPED_TEST , "Un-escaped with final linebreak",4,3, false);
 		doAsserts(UNESCAPED_TEST + '\n' + ESCAPED_TEST + '\n', "Un-escaped without final linebreak",4,3, false);
 	}
-	
+
 	 @Test public void parseBuggedIntolerant() {
 		parser = new CSVParser(UNEVEN_TEST );
 		parser.setTolerant(false);
@@ -118,7 +118,7 @@ public class CSVParserTest {
 	}
 
 	 @Test public void parseBuggedIntolerant2() {
-		final String bla = "1\n2,3"; 
+		final String bla = "1\n2,3";
 		parser = new CSVParser(bla );
 		parser.setTolerant(false);
 		try {
@@ -130,19 +130,19 @@ public class CSVParserTest {
 		}
 		fail("Unparsable CSV given, but no exception thrown!");
 	}
-	 
+
 	@Test public void parseBuggedTolerant() throws OXException {
 		final List<List<String>> result = doAsserts(UNEVEN_TEST , "Bugged lines with tolerant parser", 3, 2, true);
 		assertEquals("checking last element" , "content22" , result.get(2).get(1));
 	}
-	
+
 	@Test public void umlauts() throws OXException {
 		final String umlaut = "\u00dcmlaut title\nSonder\u00dfeichen cell";
 		final List<List<String>> result = doAsserts(umlaut, "Checking umlauts", 2, 1, false);
 		assertEquals("\u00dc in title", "\u00dcmlaut title" , result.get(0).get(0));
 		assertEquals("\u00df in cell", "Sonder\u00dfeichen cell" , result.get(1).get(0));
 	}
-	
+
 	protected List<List<String>> doAsserts(final String line, final String comment, final int lines, final int cells, final boolean isTolerant) throws OXException{
 		parser = new CSVParser(line);
 		parser.setTolerant(isTolerant);

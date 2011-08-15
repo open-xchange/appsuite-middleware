@@ -58,14 +58,14 @@ import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
 /**
  * {@link MailAccessTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class MailAccessTest extends AbstractMailTest {
 
 	/**
-	 * 
+	 *
 	 */
 	public MailAccessTest() {
 		super();
@@ -108,8 +108,8 @@ public final class MailAccessTest extends AbstractMailTest {
 				} catch (final Exception e2) {
 				}
 			}
-			
-			
+
+
 			mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();
 			/*
@@ -128,8 +128,8 @@ public final class MailAccessTest extends AbstractMailTest {
 			} catch (final Exception e) {
 				assertTrue(true);
 			}
-			
-			
+
+
 			session.setPassword(getPassword());
 			mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();
@@ -145,18 +145,18 @@ public final class MailAccessTest extends AbstractMailTest {
 			 */
 			Thread.sleep(10000);
 	}
-	
+
 	public void testSimultaneousConnections() throws InterruptedException {
 			final MyRunnable runnable = new MyRunnable(this);
 			final Thread[] threads = new Thread[50];
 			for (int i = 0; i < threads.length; i++) {
 				threads[i] = new Thread(runnable);
 			}
-			
+
 			for (final Thread thread : threads) {
 				thread.start();
 			}
-			
+
 			/*
 			 * Test if cache closes connection(s)
 			 */
@@ -173,11 +173,11 @@ public final class MailAccessTest extends AbstractMailTest {
 			Thread.sleep(10000);
 			assertTrue("Zero connections should be open", 0 == MailAccess.getCounter());
 	}
-	
+
 	private static final class MyRunnable implements Runnable {
-		
+
 		private final AbstractMailTest testRef;
-		
+
 		public MyRunnable(final AbstractMailTest testRef) {
 			this.testRef = testRef;
 		}
@@ -193,14 +193,14 @@ public final class MailAccessTest extends AbstractMailTest {
 				 * close
 				 */
 				mailAccess.close(false);
-	
+
 				mailAccess = MailAccess.getInstance(session);
 				mailAccess.connect();
 				/*
 				 * close
 				 */
 				mailAccess.close(false);
-	
+
 				session.setPassword(null);
 				mailAccess = MailAccess.getInstance(session);
 				/*
@@ -212,7 +212,7 @@ public final class MailAccessTest extends AbstractMailTest {
 				} catch (final Exception e) {
 					assertTrue(true);
 				}
-				
+
 				session.setPassword(testRef.getPassword());
 				mailAccess = MailAccess.getInstance(session);
 				mailAccess.connect();
@@ -222,11 +222,11 @@ public final class MailAccessTest extends AbstractMailTest {
 				 * close
 				 */
 				mailAccess.close(false);
-	
+
 			} catch (final Exception e) {
 				e.printStackTrace();
 			}
 		}
-		
+
 	}
 }

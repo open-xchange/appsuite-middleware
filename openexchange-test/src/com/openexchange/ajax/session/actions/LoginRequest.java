@@ -53,7 +53,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.LoginFields;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class LoginRequest extends AbstractRequest<LoginResponse> {

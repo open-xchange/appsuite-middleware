@@ -73,58 +73,58 @@ import com.openexchange.tools.session.SimServerSession;
  *
  */
 public class ContactSearchMuliplexerTest extends TestCase {
-    
+
     private ContactSearchMultiplexer searchMultiplexer;
     private SimServerSession session;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        
+
         final ContactSQLInterface iface1 = contactsWithSearchResult(11,12,13);
         final ContactSQLInterface iface2 = contactsWithSearchResult(21,22,23);
         final ContactSQLInterface iface3 = contactsWithSearchResult(31,32,33);
-        
+
         final ContactSQLInterface standard = contactsWithSearchResult(1,2,3);
-    
+
         final SimContactInterfaceDiscoveryService discoveryService = new SimContactInterfaceDiscoveryService();
         discoveryService.register(iface1, 1);
         discoveryService.register(iface2, 2);
         discoveryService.register(iface3, 3);
         discoveryService.setDefaultContactInterface(standard);
-        
+
         searchMultiplexer = new ContactSearchMultiplexer(discoveryService);
-           
+
         session = new SimServerSession(new SimContext(1), null, null);
     }
-    
+
 
     public void testSearchInSpecificFolders() throws Exception {
-        
+
         final ContactSearchObject contactSearchObject = new ContactSearchObject();
         contactSearchObject.addFolder(1);
         contactSearchObject.addFolder(3);
         contactSearchObject.addFolder(1337);
-        
-        
+
+
         final SearchIterator<Contact> contacts = searchMultiplexer.extendedSearch(session, contactSearchObject, Contact.OBJECT_ID, Order.ASCENDING, null, new int[]{Contact.OBJECT_ID});
-        
+
         assertNotNull(contacts);
         // Folder 2 is not searched, so 21,22 and 23 will be missing
         assertIDs(contacts, 1,2,3,11,12,13,31,32,33);
-        
+
     }
-    
+
     public void testSearchEverywhere() throws Exception {
         final ContactSearchObject contactSearchObject = new ContactSearchObject();
-        
-        
+
+
         final SearchIterator<Contact> contacts = searchMultiplexer.extendedSearch(session, contactSearchObject, Contact.OBJECT_ID, Order.ASCENDING, null, new int[]{Contact.OBJECT_ID});
-        
+
         assertNotNull(contacts);
         assertIDs(contacts, 1,2,3,11,12,13,21,22,23,31,32,33);
     }
-    
+
     private void assertIDs(final SearchIterator<Contact> results, final int...ids) throws Exception {
         int index = 0;
         while(results.hasNext()) {
@@ -142,22 +142,22 @@ public class ContactSearchMuliplexerTest extends TestCase {
             contact.setObjectID(id);
             contacts.add(contact);
         }
-        
+
         return new ContactSQLInterface() {
 
             public void deleteContactObject(final int objectId, final int inFolder, final Date clientLastModified) throws OXException, OXException, OXException {
                 // TODO Auto-generated method stub
-                
+
             }
 
             public void insertContactObject(final Contact contactObj) throws OXException {
                 // TODO Auto-generated method stub
-                
+
             }
 
             public void updateContactObject(final Contact contactObj, final int inFolder, final Date clientLastModified) throws OXException, OXException {
                 // TODO Auto-generated method stub
-                
+
             }
 
             public void updateUserContact(Contact contact, Date lastmodified) throws OXException {
@@ -230,7 +230,7 @@ public class ContactSearchMuliplexerTest extends TestCase {
 
             public void associateTwoContacts(Contact master, Contact slave) throws OXException {
                 // TODO Auto-generated method stub
-                
+
             }
 
             public List<Contact> getAssociatedContacts(Contact contact) throws OXException {
@@ -250,7 +250,7 @@ public class ContactSearchMuliplexerTest extends TestCase {
 
             public void separateTwoContacts(Contact master, Contact slave) throws OXException {
                 // TODO Auto-generated method stub
-                
+
             }
 
 			public <T> SearchIterator<Contact> getContactsByExtendedSearch(
@@ -258,8 +258,8 @@ public class ContactSearchMuliplexerTest extends TestCase {
 					String collation, int[] cols) throws OXException {
                 return new SearchIteratorAdapter<Contact>(contacts.iterator());
 			}
-            
+
         };
     }
-    
+
 }

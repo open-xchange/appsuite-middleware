@@ -47,34 +47,67 @@
  *
  */
 
-package com.openexchange.groupware.reminder.osgi;
+package com.openexchange.user.json.osgi;
 
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.groupware.reminder.TargetService;
-import com.openexchange.groupware.reminder.json.ReminderActionFactory;
-import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
+import com.openexchange.api2.ContactInterfaceFactory;
+import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
+import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
+import com.openexchange.user.UserService;
+import com.openexchange.user.json.Constants;
+import com.openexchange.user.json.actions.UserActionFactory;
+import com.openexchange.user.json.services.ServiceRegistry;
 
 /**
- * {@link Activator}
+ * {@link UserJSONActivator} - Activator for JSON user interface.
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Activator extends AJAXModuleActivator {
+public class UserJSONActivator extends AJAXModuleActivator {
 
-    public Activator() {
+    /**
+     * Initializes a new {@link UserJSONActivator}.
+     */
+    public UserJSONActivator() {
         super();
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        rememberTracker(new ServiceTracker<TargetService, TargetService>(context, TargetService.class.getName(), new TargetRegistryCustomizer(context)));
-        openTrackers();
-        registerModule(new ReminderActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "reminder");
+    protected Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[0];
+    protected void startBundle() throws Exception {
+        try {
+            /*
+             * Register user multiple service
+             */
+            registerModule(UserActionFactory.getInstance(), Constants.MODULE);
+            /*
+             * User service tracker
+             */
+            track(UserService.class, new RegistryServiceTrackerCustomizer<UserService>(
+                context,
+                ServiceRegistry.getInstance(),
+                UserService.class));
+            /*
+             * Contact interface factory tracker
+             */
+            track(ContactInterfaceFactory.class, new RegistryServiceTrackerCustomizer<ContactInterfaceFactory>(
+                context,
+                ServiceRegistry.getInstance(),
+                ContactInterfaceFactory.class));
+            track(ContactInterfaceDiscoveryService.class, new RegistryServiceTrackerCustomizer<ContactInterfaceDiscoveryService>(
+                context,
+                ServiceRegistry.getInstance(),
+                ContactInterfaceDiscoveryService.class));
+            openTrackers();
+        } catch (final Exception e) {
+            final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UserJSONActivator.class));
+            LOG.error(e.getMessage(), e);
+            throw e;
+        }
     }
+
 }

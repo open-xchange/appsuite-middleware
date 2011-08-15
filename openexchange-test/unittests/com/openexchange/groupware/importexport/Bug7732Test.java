@@ -70,11 +70,11 @@ public class Bug7732Test extends AbstractICalImportTest {
 	public static junit.framework.Test suite() {
 		return new JUnit4TestAdapter(Bug7732Test.class);
 	}
-	
-	
+
+
 	@Test public void test7732() throws OXException, SQLException, UnsupportedEncodingException, OXException, NumberFormatException, OXException, OXException {
 		final int count = 10;
-		final String ical = 
+		final String ical =
 			"BEGIN:VCALENDAR\n" +
 			"PRODID:-//Microsoft Corporation//Outlook 12.0 MIMEDIR//EN\n" +
 			"VERSION:2.0\n" +
@@ -102,9 +102,9 @@ public class Bug7732Test extends AbstractICalImportTest {
 		final Appointment appointmentObj = appointmentSql.getObjectById(Integer.parseInt( res.getObjectId() ), folderId);
 		assertEquals(count + " occurences found?" , count , appointmentObj.getOccurrence());
 	}
-	
+
 	@Test public void testMeaningfulParserMessage() throws Exception {
-		final String ical = 
+		final String ical =
 			"BEGIN:VCALENDAR\n"+
 			"PRODID:-//Microsoft Corporation//Outlook 12.0 MIMEDIR//EN\n"+
 			"VERSION:2.0\n"+
@@ -121,9 +121,9 @@ public class Bug7732Test extends AbstractICalImportTest {
 		assertTrue(res.hasError());
 		final OXException x = res.getException();
 		x.printStackTrace();
-		
+
 		assertTrue(x.getMessage(), x.getMessage().contains("Missing DTSTART"));
-		
+
 	}
 
 }

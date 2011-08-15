@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
-import com.openexchange.exception.OXException;
 import java.util.Date;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.groupware.container.Appointment;
@@ -57,7 +56,7 @@ import com.openexchange.groupware.container.Appointment;
 /**
  * Displaying an appointment that spanned more than one month and was changed from fulltime to a small time period breaks in several GUI
  * views. This is due to some requests working differently than others. This test documents that.
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class Bug16107Test extends ManagedAppointmentTest {
@@ -83,7 +82,7 @@ public class Bug16107Test extends ManagedAppointmentTest {
         startAppointment.setFullTime(true);
         startAppointment.setInterval(1);
 
-        
+
         updateAppointment = new Appointment();
         updateAppointment.setTitle("Bug 16107 (updated)");
         updateAppointment.setStartDate(D("24.05.2010 07:00"));
@@ -94,7 +93,7 @@ public class Bug16107Test extends ManagedAppointmentTest {
         updateAppointment.setInterval(1);
         updateAppointment.setRecurringStart(D("24.05.2010 00:00").getTime());
         updateAppointment.setUntil(D("11.06.2010 07:30"));
-        
+
         calendarManager.insert(startAppointment);
         link(startAppointment, updateAppointment);
         updateAppointment.setRecurrenceID(startAppointment.getObjectID());
@@ -105,15 +104,15 @@ public class Bug16107Test extends ManagedAppointmentTest {
         super.tearDown();
     }
 
-    
-    
+
+
     public void testFirstMonthView(){
         Date start = D("26.04.2010 00:00");
         Date end = D("07.06.2010 00:00");
         int occurences = 14;
         check("month view", start, end, occurences);
     }
-    
+
     public void testLastMonthView(){
         Date start = D("31.05.2010 00:00");
         Date end = D("05.07.2010 00:00");
@@ -127,41 +126,41 @@ public class Bug16107Test extends ManagedAppointmentTest {
         int occurences = 5;
         check("work week view (next-to-last week)", start, end, occurences);
     }
-    
-    
+
+
     public void testLastWorkWeekView() {
         Date start = D("07.06.2010 00:00");
         Date end = D("12.06.2010 00:00");
         int occurences = 5;
         check("work week view (last week)", start, end, occurences);
     }
-    
+
     private void check(String name, Date start, Date end, int occurences) {
         boolean[] has;
         Appointment[] all;
         int count = 0;
-        
+
 //        all = calendarManager.all(folder.getObjectID(), start, end, new int[]{1,20,207,206,2});
 //        assertEquals("AllRequest should find starting appointment in "+name, 1, all.length);
-//        
+//
 //        has = calendarManager.has(start, end);
 //        count = 0;
 //        for(boolean b : has)
 //            if(b) count++;
-//        
+//
 //        assertEquals("HasRequest should find the right amount of occurences "+name, occurences, count);
-//        
-        
+//
+
         calendarManager.update(updateAppointment);
 
         all = calendarManager.all(folder.getObjectID(), start, end, new int[]{1,20,207,206,2});
         assertEquals("AllRequest should find updated appointment in "+name, 1, all.length);
-        
+
         has = calendarManager.has(start, end);
         count = 0;
         for(boolean b: has)
             if(b) count++;
-        
+
         assertEquals("HasRequest should find the right amount of occurences in updated "+ name, occurences, count);
     }
 }

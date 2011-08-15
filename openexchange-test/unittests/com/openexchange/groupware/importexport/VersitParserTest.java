@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.importexport;
 
-import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -236,21 +235,21 @@ public class VersitParserTest extends TestCase {
 
         final List<VersitObject> list = parseVCard3(vcard);
         final VersitObject obj = list.get(0);
-        
+
         Property property = obj.getProperty("TEL");
         Parameter parameter = property.getParameter(0);
-        
+
         assertEquals(2, parameter.getValueCount());
-        
+
         Set<String> expected = new HashSet<String>();
         expected.add("home");
         expected.add("cell");
-        
+
         for(int i = 0; i < 2; i++) {
             String value = parameter.getValue(i).getText();
             assertTrue( value.toString(), expected.remove( value ));
         }
-        
+
         assertTrue(expected.isEmpty());
     }
 }

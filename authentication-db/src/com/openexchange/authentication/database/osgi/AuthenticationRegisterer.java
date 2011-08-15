@@ -66,24 +66,24 @@ import com.openexchange.user.UserService;
  * Dependently registers the AuthenticationService.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class AuthenticationRegisterer implements ServiceTrackerCustomizer {
+public final class AuthenticationRegisterer implements ServiceTrackerCustomizer<Object,Object> {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AuthenticationRegisterer.class));
 
     private final BundleContext context;
     private final Lock lock = new ReentrantLock();
 
-    private ServiceRegistration registration;
+    private ServiceRegistration<AuthenticationService> registration;
     private ContextService contextService;
     private UserService userService;
 
-    public AuthenticationRegisterer(BundleContext context) {
+    public AuthenticationRegisterer(final BundleContext context) {
         super();
         this.context = context;
     }
 
     @Override
-    public Object addingService(ServiceReference reference) {
+    public Object addingService(final ServiceReference<Object> reference) {
         final Object obj = context.getService(reference);
         final boolean needsRegistration;
         lock.lock();
@@ -100,20 +100,20 @@ public final class AuthenticationRegisterer implements ServiceTrackerCustomizer 
         }
         if (needsRegistration) {
             LOG.info("Registering database authentication service.");
-            registration = context.registerService(AuthenticationService.class.getName(),
+            registration = context.registerService(AuthenticationService.class,
                 new DatabaseAuthentication(contextService, userService), null);
         }
         return obj;
     }
 
     @Override
-    public void modifiedService(ServiceReference reference, Object service) {
+    public void modifiedService(final ServiceReference<Object> reference, final Object service) {
         // Nothing to do.
     }
 
     @Override
-    public void removedService(ServiceReference reference, Object service) {
-        ServiceRegistration unregister = null;
+    public void removedService(final ServiceReference<Object> reference, final Object service) {
+        ServiceRegistration<?> unregister = null;
         lock.lock();
         try {
             if (service instanceof ContextService) {

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.importexport;
 
-import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
@@ -64,7 +63,7 @@ import com.openexchange.groupware.importexport.Format;
 
 /**
  * Tests the ICAL imports and exports by using the servlets.
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  *
  */

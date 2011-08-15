@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.kata.appointments;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -66,7 +65,7 @@ import com.openexchange.groupware.container.Appointment;
 public class AppointmentUpdateStep extends NeedExistingStep<Appointment> {
 
     private Appointment entry;
-    
+
     /**
      * Initializes a new {@link AppointmentUpdateStep}.
      * @param entry
@@ -84,7 +83,7 @@ public class AppointmentUpdateStep extends NeedExistingStep<Appointment> {
         assumeIdentity(entry);
         UpdateRequest updateRequest = new UpdateRequest(entry, getTimeZone(), false);
         UpdateResponse updateResponse = execute(updateRequest);
-        
+
         if(!updateResponse.hasError()) {
             entry.setLastModified(updateResponse.getTimestamp());
             rememberIdentityValues(entry);

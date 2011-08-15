@@ -62,7 +62,7 @@ public class Activator implements BundleActivator {
 
     private Services services;
 
-    private ServiceTracker tracker;
+    private ServiceTracker<ConfigurationService, ConfigurationService> tracker;
 
 	/**
 	 * {@inheritDoc}
@@ -70,7 +70,7 @@ public class Activator implements BundleActivator {
 	@Override
     public void start(final BundleContext context) throws Exception {
         services = new Services(context);
-        tracker = new ServiceTracker(context, ConfigurationService.class
+        tracker = new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class
             .getName(), new ConfigurationTracker(context, services));
         tracker.open();
 	}

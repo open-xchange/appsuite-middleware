@@ -86,7 +86,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class CopyAction extends ContactAction {
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CopyAction.class));
 
     /**
@@ -133,16 +133,17 @@ public class CopyAction extends ContactAction {
         copyLinks(folderId, session, ctx, contact, origObjectId, origFolderId, user);
 
         timestamp = contact.getLastModified();
+        
         final JSONObject response = new JSONObject();
         try {
             response.put("id", contact.getObjectID());
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }
-        
+
         return new AJAXRequestResult(response, timestamp, "json");
     }
-    
+
     private static void copyLinks(final int folderId, final Session session, final Context ctx, final Contact contactObj, final int origObjectId, final int origFolderId, final User user) throws OXException {
         /*
          * Get all

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.filter.actions;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -59,7 +58,7 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.mail.filter.ConfigTestHolder;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class ConfigParser extends AbstractAJAXParser<ConfigResponse> {
@@ -79,7 +78,7 @@ public class ConfigParser extends AbstractAJAXParser<ConfigResponse> {
     	final JSONObject jsonObj = (JSONObject)response.getData();
     	final JSONArray jsonTestArray = jsonObj.getJSONArray("tests");
     	final JSONArray jsonActionArray = jsonObj.getJSONArray("actioncommands");
-    	
+
     	final ConfigTestHolder[] configTests = new ConfigTestHolder[jsonTestArray.length()];
     	for (int a = 0; a < configTests.length; a++) {
     		final JSONObject jsonTestObj = jsonTestArray.getJSONObject(a);
@@ -89,15 +88,15 @@ public class ConfigParser extends AbstractAJAXParser<ConfigResponse> {
     		for (int b = 0; b < comparisons.length; b++) {
     			comparisons[b] = jsonComparisonArray.getString(b);
     		}
-    		
+
     		configTests[a] = new ConfigTestHolder(testString, comparisons);
     	}
-    	
+
     	final String[] actions = new String[jsonActionArray.length()];
     	for (int a = 0; a < actions.length; a++) {
     		actions[a] = jsonActionArray.getString(a);
     	}
-    	
+
     	return new ConfigResponse(response, configTests, actions);
     }
 }

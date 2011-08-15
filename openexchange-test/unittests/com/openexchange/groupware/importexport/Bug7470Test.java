@@ -86,7 +86,7 @@ public class Bug7470Test extends AbstractContactTest {
 	public static junit.framework.Test suite() {
 		return new JUnit4TestAdapter(Bug7470Test.class);
 	}
-	
+
 	@BeforeClass
 	public static void initialize() throws Exception {
 		Init.startServer();
@@ -116,7 +116,7 @@ public class Bug7470Test extends AbstractContactTest {
 		folderId = createTestFolder(FolderObject.CALENDAR, sessObj, ctx, "ical7470Folder");
 		final String email = "cbartkowiak@oxhemail.open-xchange.com";
 		final String cn = "Camil Bartkowiak (cbartkowiak@oxhemail.open-xchange.com)";
-		final String ical = 
+		final String ical =
 			"BEGIN:VCALENDAR\n" +
 			"PRODID:-//Microsoft Corporation//Outlook 12.0 MIMEDIR//EN\n" +
 			"VERSION:2.0\n" +
@@ -155,19 +155,19 @@ public class Bug7470Test extends AbstractContactTest {
 			"END:VALARM\n" +
 			"END:VEVENT\n" +
 			"END:VCALENDAR";
-		
+
 		assertTrue("Can import?" ,  imp.canImport(sessObj, format, _folders(), null));
 		final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes("UTF-8")), _folders(), null);
 		assertEquals("One import?" , 1 , results.size());
 		final ImportResult res = results.get(0);
 		assertEquals("Shouldn't have error" , null, res.getException());
-		
+
 		final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
 		final Appointment appointmentObj = appointmentSql.getObjectById(Integer.parseInt( res.getObjectId() ), folderId);
 		assertTrue("Exists" , appointmentObj != null);
 		final Participant[] participants = appointmentObj.getParticipants();
 		assertEquals("Number of attendees?" , 2, participants.length);
-		
+
 		boolean containsAttendee = false;
 		for(final Participant p : participants){
 			if(cn.equals( p.getDisplayName() ) && email.equals( p.getEmailAddress())){
@@ -175,6 +175,6 @@ public class Bug7470Test extends AbstractContactTest {
 			}
 		}
 		assertTrue("Found attendee?" , containsAttendee);
-		
+
 	}
 }

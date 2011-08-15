@@ -55,17 +55,17 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.webdav.protocol.Protocol;
+import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
-import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.helpers.AbstractCollection;
 
 /**
  * {@link AbstractCarddavResource}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class AbstractCarddavCollection extends AbstractCollection {
@@ -84,7 +84,7 @@ public abstract class AbstractCarddavCollection extends AbstractCollection {
 
     @Override
     protected void internalDelete() throws WebdavProtocolException {
-
+        // Nope
     }
 
     @Override
@@ -127,7 +127,7 @@ public abstract class AbstractCarddavCollection extends AbstractCollection {
 
     public WebdavProtocolException internalError(Throwable t) {
         LOG.error(t.getMessage(), t);
-        return new WebdavProtocolException(getUrl(), 500);
+        return WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), 500);
     }
 
     public void create() throws WebdavProtocolException {

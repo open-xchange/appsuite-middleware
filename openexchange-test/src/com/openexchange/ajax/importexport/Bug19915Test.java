@@ -5,7 +5,7 @@ import com.openexchange.ajax.importexport.actions.ICalImportRequest;
 import com.openexchange.ajax.importexport.actions.ICalImportResponse;
 
 public class Bug19915Test extends ManagedAppointmentTest {
-	
+
 	public Bug19915Test(String name) {
 		super(name);
 	}
@@ -16,11 +16,11 @@ public class Bug19915Test extends ManagedAppointmentTest {
 		assertFalse(response.hasError());
 		assertFalse(response.hasConflicts());
 	}
-	
+
 	public String getIcal(){
 		return getIcal1().append(getIcal2()).append(getIcal3()).append(getIcal4()).toString();
 	}
-	
+
 	/* 10k lines of ICAL. Don't bother scrolling */
 	public StringBuffer getIcal1(){
 		StringBuffer bob = new StringBuffer();
@@ -3009,7 +3009,7 @@ public class Bug19915Test extends ManagedAppointmentTest {
 		bob.append("TZOFFSETFROM:+0100\n");
 		return bob;
 	}
-	
+
 	public StringBuffer getIcal2(){
 		StringBuffer bob = new StringBuffer();
 		bob.append("TZOFFSETTO:+0200\n");
@@ -6110,7 +6110,7 @@ public class Bug19915Test extends ManagedAppointmentTest {
 		bob.append("DTEND;TZID=Europe/London:20101013T173000\n");
 		return bob;
 	}
-	
+
 	public StringBuffer getIcal3(){
 		StringBuffer bob = new StringBuffer();
 		bob.append("CLASS:PUBLIC\n");
@@ -9019,7 +9019,7 @@ public class Bug19915Test extends ManagedAppointmentTest {
 		bob.append("RDATE:19480314T020000\n");
 		return bob;
 	}
-	
+
 	public StringBuffer getIcal4(){
 		StringBuffer bob = new StringBuffer();
 		bob.append("RDATE:19490403T020000\n");
@@ -10673,10 +10673,10 @@ public class Bug19915Test extends ManagedAppointmentTest {
 		bob.append("DESCRIPTION:Open-XChange\n");
 		bob.append("END:VALARM\n");
 		bob.append("END:VEVENT\n");
-		bob.append("END:VCALENDAR");		
+		bob.append("END:VCALENDAR");
 		return bob;
 	}
-	
-	
-	
+
+
+
 }

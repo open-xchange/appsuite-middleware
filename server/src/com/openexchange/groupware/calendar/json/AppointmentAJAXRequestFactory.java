@@ -61,14 +61,14 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class AppointmentAJAXRequestFactory {
-    
+
     public static AppointmentAJAXRequest createAppointmentAJAXRequest(final AJAXRequestData request, final ServerSession session) {
         final AppointmentAJAXRequest ar = new AppointmentAJAXRequest(request, session);
         final String sTimeZone = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
         if (null != sTimeZone) {
             ar.setTimeZone(getTimeZone(sTimeZone));
         }
-        
+
         return ar;
     }
 

@@ -55,16 +55,16 @@ package com.openexchange.ajax.mail.filter.action;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class Redirect extends AbstractAction {
-	
+
 	public static final String REDIRECT = "redirect";
-	
+
 	public String mail;
-	
+
 	public Redirect(final String mail) {
 		name = REDIRECT;
 		this.mail = mail;
 	}
-	
+
 	public String getMail() {
 		return mail;
 	}

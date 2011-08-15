@@ -62,7 +62,7 @@ import com.openexchange.mailaccount.MailAccountDescription;
 
 /**
  * {@link MailAccountAllTest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class MailAccountAllTest extends AbstractMailAccountTest {
@@ -84,14 +84,14 @@ public class MailAccountAllTest extends AbstractMailAccountTest {
         }
         super.tearDown();
     }
-    
+
     public void testAllShouldNotIncludePassword() throws OXException, IOException, SAXException, JSONException {
         int[] fields = new int[]{Attribute.ID_LITERAL.getId(), Attribute.PASSWORD_LITERAL.getId()};
         MailAccountAllResponse response = getClient().execute(new MailAccountAllRequest(fields));
-        
+
         List<MailAccountDescription> descriptions = response.getDescriptions();
         assertFalse(descriptions.isEmpty());
-        
+
         boolean found = false;
         for(MailAccountDescription description : descriptions) {
             if(description.getId() == mailAccountDescription.getId()) {

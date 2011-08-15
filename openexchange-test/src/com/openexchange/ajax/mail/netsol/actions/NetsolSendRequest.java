@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.netsol.actions;
 
-import com.openexchange.exception.OXException;
 import java.io.InputStream;
 
 import org.json.JSONException;
@@ -62,9 +61,9 @@ import com.openexchange.ajax.framework.Header;
 
 /**
  * {@link NetsolSendRequest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public class NetsolSendRequest implements AJAXRequest<NetsolSendResponse> {
 
@@ -88,7 +87,7 @@ public class NetsolSendRequest implements AJAXRequest<NetsolSendResponse> {
 
 	/**
 	 * Initializes a new {@link NetsolSendRequest}
-	 * 
+	 *
 	 * @param mailStr
 	 *            The mail string (JSON)
 	 */
@@ -98,7 +97,7 @@ public class NetsolSendRequest implements AJAXRequest<NetsolSendResponse> {
 
 	/**
 	 * Initializes a new {@link NetsolSendRequest}
-	 * 
+	 *
 	 * @param mailStr
 	 *            The mail string (JSON)
 	 * @param upload
@@ -110,7 +109,7 @@ public class NetsolSendRequest implements AJAXRequest<NetsolSendResponse> {
 
 	/**
 	 * Initializes a new {@link NetsolSendRequest}
-	 * 
+	 *
 	 * @param mailStr
 	 *            The mail string (JSON)
 	 * @param upload

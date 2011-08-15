@@ -64,7 +64,7 @@ public final class UpdatesRequest extends AbstractUpdatesRequest<TaskUpdatesResp
     private int[] columns;
 
     private TimeZone timeZone = TimeZone.getTimeZone("UTC");
-    
+
     public UpdatesRequest(int folderId, int[] columns, int sort, Order order, Date lastModified) {
         this(folderId, columns, sort, order, lastModified, Ignore.DELETED);
     }
@@ -76,7 +76,7 @@ public final class UpdatesRequest extends AbstractUpdatesRequest<TaskUpdatesResp
     public UpdatesRequest(int folderId, int[] columns, int sort, Order order, Date lastModified, Ignore ignore) {
         this(folderId, columns, sort, order, lastModified, ignore, true, null);
     }
-    
+
     public UpdatesRequest(int folderId, int[] columns, int sort, Order order, Date lastModified, TimeZone timeZone) {
         this(folderId, columns, sort, order, lastModified, Ignore.DELETED, true, timeZone);
     }

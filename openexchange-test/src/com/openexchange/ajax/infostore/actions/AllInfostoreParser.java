@@ -56,7 +56,7 @@ import com.openexchange.ajax.framework.CommonAllResponse;
 
 /**
  * {@link AllInfostoreParser}
- * 
+ *
  * @author <a href="mailto:markus.wagner@open-xchange.com">Markus Wagner</a>
  */
 public class AllInfostoreParser extends AbstractColumnsParser<AbstractColumnsResponse> {

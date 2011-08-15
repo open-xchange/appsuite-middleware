@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.spellcheck.actions.add;
 
-import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,9 +59,9 @@ import com.openexchange.ajax.spellcheck.actions.AbstractSpellCheckRequest;
 
 /**
  * {@link UserWordRequest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class UserWordRequest extends AbstractSpellCheckRequest {
 
@@ -84,7 +83,7 @@ public final class UserWordRequest extends AbstractSpellCheckRequest {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
 	 */
 	public Object getBody() throws JSONException {
@@ -93,7 +92,7 @@ public final class UserWordRequest extends AbstractSpellCheckRequest {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
 	 */
 	public Method getMethod() {
@@ -102,7 +101,7 @@ public final class UserWordRequest extends AbstractSpellCheckRequest {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
 	 */
 	public Parameter[] getParameters() {
@@ -113,7 +112,7 @@ public final class UserWordRequest extends AbstractSpellCheckRequest {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
 	 */
 	public UserWordParser getParser() {

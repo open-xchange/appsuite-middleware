@@ -61,9 +61,9 @@ public class CharChunk implements CharSequence {
 
  // Input interface, used when the buffer is emptied.
     public static interface CharInputChannel {
-        /** 
+        /**
          * Read new bytes ( usually the internal conversion buffer ).
-         * The implementation is allowed to ignore the parameters, 
+         * The implementation is allowed to ignore the parameters,
          * and mutate the chunk if it wishes to implement its own buffering.
          */
         public int realReadChars(char cbuf[], int off, int len)
@@ -80,15 +80,15 @@ public class CharChunk implements CharSequence {
         public void realWriteChars(char cbuf[], int off, int len)
             throws IOException;
     }
-    
-    // -------------------- 
+
+    // --------------------
     // char[]
     private char buff[];
 
     private int start;
     private int end;
 
-    private boolean isSet=false;  // XXX 
+    private boolean isSet=false;  // XXX
 
     private boolean isOutput=false;
 
@@ -98,7 +98,7 @@ public class CharChunk implements CharSequence {
 
     private CharInputChannel in = null;
     private CharOutputChannel out = null;
-    
+
     private boolean optimizedWrite=true;
 
     /**
@@ -112,7 +112,7 @@ public class CharChunk implements CharSequence {
     }
 
     // --------------------
-    
+
     public CharChunk getClone() {
     try {
         return (CharChunk)this.clone();
@@ -125,9 +125,9 @@ public class CharChunk implements CharSequence {
     if( end > 0 ) {
         return false;
     }
-    return !isSet; //XXX 
+    return !isSet; //XXX
     }
-    
+
     /**
      * Resets the message bytes to an uninitialized state.
      */
@@ -178,7 +178,7 @@ public class CharChunk implements CharSequence {
     public void setLimit(final int limit) {
     this.limit=limit;
     }
-    
+
     public int getLimit() {
     return limit;
     }
@@ -199,17 +199,17 @@ public class CharChunk implements CharSequence {
     this.out=out;
     }
 
-    // compat 
+    // compat
     public char[] getChars()
     {
     return getBuffer();
     }
-    
+
     public char[] getBuffer()
     {
     return buff;
     }
-    
+
     /**
      * Returns the start offset of the bytes.
      * For output this is the end of the buffer.
@@ -217,7 +217,7 @@ public class CharChunk implements CharSequence {
     public int getStart() {
     return start;
     }
-    
+
     public int getOffset() {
     return start;
     }
@@ -246,7 +246,7 @@ public class CharChunk implements CharSequence {
     }
 
     // -------------------- Adding data --------------------
-    
+
     public void append( final char b )
     throws IOException
     {
@@ -258,7 +258,7 @@ public class CharChunk implements CharSequence {
     }
     buff[end++]=b;
     }
-    
+
     public void append( final CharChunk src )
     throws IOException
     {
@@ -288,13 +288,13 @@ public class CharChunk implements CharSequence {
             out.realWriteChars( src, off, len );
             return;
         }
-    
+
     // if we have limit and we're below
     if( len <= limit - end ) {
         // makeSpace will grow the buffer to the limit,
         // so we have space
         System.arraycopy( src, off, buff, end, len );
-            
+
         end+=len;
         return;
     }
@@ -303,7 +303,7 @@ public class CharChunk implements CharSequence {
     // buffer
 
     // the buffer is already at ( or bigger than ) limit
-    
+
     // Optimization:
     // If len-avail < length ( i.e. after we fill the buffer with
     // what we can, the remaining will fit in the buffer ) we'll just
@@ -319,17 +319,17 @@ public class CharChunk implements CharSequence {
         final int avail=limit-end;
         System.arraycopy(src, off, buff, end, avail);
         end += avail;
-        
+
         flushBuffer();
-        
+
         System.arraycopy(src, off+avail, buff, end, len - avail);
         end+= len - avail;
-        
+
     } else {    // len > buf.length + avail
         // long write - flush the buffer and write the rest
         // directly from source
         flushBuffer();
-        
+
         out.realWriteChars( src, off, len );
     }
     }
@@ -372,14 +372,14 @@ public class CharChunk implements CharSequence {
     public void append(final String s) throws IOException {
         append(s, 0, s.length());
     }
-    
+
     /** Append a string to the buffer
      */
     public void append(final String s, final int off, final int len) throws IOException {
     if (s==null) {
         return;
     }
-    
+
     // will grow, up to limit
     makeSpace( len );
 
@@ -403,7 +403,7 @@ public class CharChunk implements CharSequence {
         }
     }
     }
-    
+
     // -------------------- Removing data from the buffer --------------------
 
     public int substract()
@@ -524,12 +524,12 @@ public class CharChunk implements CharSequence {
         }
         tmp=new char[newSize];
     }
-    
+
     System.arraycopy(buff, 0, tmp, 0, end);
     buff = tmp;
     tmp = null;
     }
-    
+
     // -------------------- Conversion and getters --------------------
 
     @Override
@@ -541,7 +541,7 @@ public class CharChunk implements CharSequence {
         }
         return StringCache.toString(this);
     }
-    
+
     public String toStringInternal() {
         return new String(buff, start, end-start);
     }
@@ -551,7 +551,7 @@ public class CharChunk implements CharSequence {
     return Ascii.parseInt(buff, start,
                 end-start);
     }
-    
+
     // -------------------- equals --------------------
 
     /**
@@ -603,7 +603,7 @@ public class CharChunk implements CharSequence {
     if( b1==null && b2==null ) {
         return true;
     }
-    
+
     if (b1== null || b2==null || end-start != len2) {
         return false;
     }
@@ -628,7 +628,7 @@ public class CharChunk implements CharSequence {
     }
     int off1 = start;
     int len=end-start;
-    
+
     while ( len-- > 0) {
         if ( b1[off1++] != (char)b2[off2++]) {
         return false;
@@ -636,7 +636,7 @@ public class CharChunk implements CharSequence {
     }
     return true;
     }
-    
+
     /**
      * Returns true if the message bytes starts with the specified string.
      * @param s the string
@@ -655,7 +655,7 @@ public class CharChunk implements CharSequence {
     }
     return true;
     }
-    
+
     /**
      * Returns true if the message bytes starts with the specified string.
      * @param s the string
@@ -674,11 +674,11 @@ public class CharChunk implements CharSequence {
     }
     return true;
     }
-    
+
 
     // -------------------- Hash code  --------------------
 
-    // normal hash. 
+    // normal hash.
     public int hash() {
     int code=0;
     for (int i = start; i < start + end-start; i++) {
@@ -699,7 +699,7 @@ public class CharChunk implements CharSequence {
     public int indexOf(final char c) {
     return indexOf( c, start);
     }
-    
+
     /**
      * Returns true if the message bytes starts with the specified string.
      * @param c the character
@@ -720,14 +720,14 @@ public class CharChunk implements CharSequence {
     }
     return -1;
     }
-    
+
 
     public int indexOf( final String src, final int srcOff, final int srcLen, final int myOff ) {
     final char first=src.charAt( srcOff );
 
-    // Look for first char 
+    // Look for first char
     final int srcEnd = srcOff + srcLen;
-        
+
     for( int i=myOff+start; i <= (end - srcLen); i++ ) {
         if( buff[i] != first ) {
             continue;
@@ -756,12 +756,12 @@ public class CharChunk implements CharSequence {
     }
 
     // Char sequence impl
-    
+
     @Override
     public char charAt(final int index) {
         return buff[index + start];
     }
-    
+
     @Override
     public CharSequence subSequence(final int start, final int end) {
         try {
@@ -774,7 +774,7 @@ public class CharChunk implements CharSequence {
             return null;
         }
     }
-    
+
     @Override
     public int length() {
         return end - start;

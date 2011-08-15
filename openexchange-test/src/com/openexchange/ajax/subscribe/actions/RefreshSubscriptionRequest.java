@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.subscribe.actions;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
@@ -62,7 +61,7 @@ import com.openexchange.ajax.framework.Params;
 public class RefreshSubscriptionRequest extends AbstractSubscriptionRequest<RefreshSubscriptionResponse> {
 
     private int subscriptionID = -1;
-    
+
     private String folderID = null;
 
     public void setSubscriptionID(int subscriptionID) {
@@ -87,7 +86,7 @@ public class RefreshSubscriptionRequest extends AbstractSubscriptionRequest<Refr
 
     /**
      * Sets up a refresh request for either a folder or a subscription.
-     * 
+     *
      * @param subscriptionID ID of a subscription. Set to -1 if not wanted.
      * @param folderID ID of a folder. Set to null if not wanted.
      */

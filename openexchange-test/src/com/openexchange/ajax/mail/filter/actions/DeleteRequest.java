@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.filter.actions;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -59,7 +58,7 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
  * Stores parameters for the delete request.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public class DeleteRequest extends AbstractMailFilterRequest {

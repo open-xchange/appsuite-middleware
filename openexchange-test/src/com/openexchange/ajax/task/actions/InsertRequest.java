@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.task.actions;
 
-import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
@@ -86,7 +85,7 @@ public class InsertRequest extends AbstractTaskRequest<InsertResponse> {
     public InsertRequest(Task task, TimeZone timeZone) {
         this(task, timeZone, false, true);
     }
-    
+
     public JSONObject getBody() throws JSONException {
         return convert(task, timeZone);
     }

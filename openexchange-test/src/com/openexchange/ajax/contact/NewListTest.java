@@ -81,7 +81,7 @@ public class NewListTest extends AbstractAJAXSession {
     public NewListTest(final String name) {
         super(name);
     }
-    
+
     /**
      * This method tests the new handling of not more available objects for LIST
      * requests.
@@ -96,19 +96,19 @@ public class NewListTest extends AbstractAJAXSession {
             final Contact contactObj = new Contact();
             contactObj.setSurName("NewTestList"+i);
             contactObj.setParentFolderID(folderA);
-            
+
             inserts[i] = new InsertRequest(contactObj, true);
         }
-        
+
         final MultipleRequest<InsertResponse> mRequest = MultipleRequest.create(inserts);
         final MultipleResponse<InsertResponse> mInsert = Executor.execute(getClient(), mRequest);
 
         // A now gets all of the folder.
         final int[] columns = new int[] { Contact.SUR_NAME, Contact.OBJECT_ID, Contact.FOLDER_ID };
-        
-        
+
+
         final CommonAllResponse allR = Executor.execute(clientA, new AllRequest(folderA, columns));
-        
+
         // Now B deletes some of them.
         final DeleteRequest[] deletes1 = new DeleteRequest[DELETES];
         for (int i = 0; i < deletes1.length; i++) {
@@ -123,23 +123,23 @@ public class NewListTest extends AbstractAJAXSession {
         // no error.
         final CommonListResponse listR = Executor.execute(
             clientA, new ListRequest(allR.getListIDs(), columns, true));
-        
+
         final Iterator<Object[]> it = listR.iterator();
         while (it.hasNext()) {
             final Object[] ar = it.next();
-            
-            
+
+
             final InsertResponse irr = mInsert.getResponse(DELETES);
-            final InsertResponse irr2 = mInsert.getResponse(DELETES+1);           
-            
+            final InsertResponse irr2 = mInsert.getResponse(DELETES+1);
+
             if ( ((Integer)ar[1]).intValue() == irr.getId() || ((Integer)ar[1]).intValue() == irr2.getId()){
                 assertFalse("Error: Object was found in list", true);
             }
-            
+
         }
-        
+
         final DeleteRequest[] deletes2 = new DeleteRequest[NUMBER - DELETES];
-        
+
         int cnt = 0;
         for (int i = 0; i < NUMBER; i++) {
             if ( (i != DELETES) && (i != (DELETES +1)) ){
@@ -148,7 +148,7 @@ public class NewListTest extends AbstractAJAXSession {
                 cnt++;
             }
         }
-        
-        Executor.execute(getClient(), MultipleRequest.create(deletes2)); 
+
+        Executor.execute(getClient(), MultipleRequest.create(deletes2));
     }
 }

@@ -49,14 +49,13 @@
 
 package com.openexchange.ajax.infostore.actions;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractUploadParser;
 
 /**
  * {@link UpdateInfostoreParser}
- * 
+ *
  * @author <a href="mailto:markus.wagner@open-xchange.com">Markus Wagner</a>
  */
 public class UpdateInfostoreParser extends AbstractUploadParser<UpdateInfostoreResponse> {

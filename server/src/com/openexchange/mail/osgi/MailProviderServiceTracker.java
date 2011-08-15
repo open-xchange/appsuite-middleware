@@ -61,7 +61,7 @@ import com.openexchange.mail.api.MailProvider;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailProviderServiceTracker implements ServiceTrackerCustomizer {
+public final class MailProviderServiceTracker implements ServiceTrackerCustomizer<MailProvider,MailProvider> {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailProviderServiceTracker.class));
 
@@ -76,60 +76,51 @@ public final class MailProviderServiceTracker implements ServiceTrackerCustomize
     }
 
     @Override
-    public Object addingService(final ServiceReference reference) {
-        final Object addedService = context.getService(reference);
-        if (addedService instanceof MailProvider) {
-            final Object protocol = reference.getProperty("protocol");
-            if (null == protocol) {
-                LOG.error("Missing protocol in mail provider service: " + addedService.getClass().getName());
+    public MailProvider addingService(final ServiceReference<MailProvider> reference) {
+        final MailProvider addedService = context.getService(reference);
+        final Object protocol = reference.getProperty("protocol");
+        if (null == protocol) {
+            LOG.error("Missing protocol in mail provider service: " + addedService.getClass().getName());
+            context.ungetService(reference);
+            return null;
+        }
+        try {
+            /*
+             * TODO: Clarify if proxy object is reasonable or if service itself should be registered
+             */
+            if (MailProviderRegistry.registerMailProvider(protocol.toString(), addedService)) {
+                LOG.info(new StringBuilder(64).append("Mail provider for protocol '").append(protocol.toString()).append(
+                    "' successfully registered"));
+            } else {
+                LOG.warn(new StringBuilder(64).append("Mail provider for protocol '").append(protocol.toString()).append(
+                    "' could not be added.").append(" Another provider which supports the protocol has already been registered."));
                 context.ungetService(reference);
                 return null;
             }
-            try {
-                /*
-                 * TODO: Clarify if proxy object is reasonable or if service itself should be registered
-                 */
-                if (MailProviderRegistry.registerMailProvider(protocol.toString(), (MailProvider) addedService)) {
-                    LOG.info(new StringBuilder(64).append("Mail provider for protocol '").append(protocol.toString()).append(
-                        "' successfully registered"));
-                } else {
-                    LOG.warn(new StringBuilder(64).append("Mail provider for protocol '").append(protocol.toString()).append(
-                        "' could not be added.").append(" Another provider which supports the protocol has already been registered."));
-                    context.ungetService(reference);
-                    return null;
-                }
-            } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
-                context.ungetService(reference);
-                return null;
-            }
-            return addedService;
+        } catch (final OXException e) {
+            LOG.error(e.getMessage(), e);
+            context.ungetService(reference);
+            return null;
         }
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Added service is null!", new Throwable());
-        }
-        context.ungetService(reference);
-        return null;
+        return addedService;
     }
 
     @Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<MailProvider> reference, final MailProvider service) {
         // Nothing to do
     }
 
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
+    public void removedService(final ServiceReference<MailProvider> reference, final MailProvider service) {
         if (null != service) {
             try {
-                if (service instanceof MailProvider) {
-                    try {
-                        final MailProvider provider = (MailProvider) service;
-                        MailProviderRegistry.unregisterMailProvider(provider);
-                        LOG.info(new StringBuilder(64).append("Mail provider for protocol '").append(provider.getProtocol().toString()).append(
-                            "' successfully unregistered"));
-                    } catch (final OXException e) {
-                        LOG.error(e.getMessage(), e);
-                    }
+                try {
+                    final MailProvider provider = service;
+                    MailProviderRegistry.unregisterMailProvider(provider);
+                    LOG.info(new StringBuilder(64).append("Mail provider for protocol '").append(provider.getProtocol().toString()).append(
+                        "' successfully unregistered"));
+                } catch (final OXException e) {
+                    LOG.error(e.getMessage(), e);
                 }
             } finally {
                 context.ungetService(reference);

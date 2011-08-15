@@ -64,7 +64,7 @@ import com.openexchange.groupware.update.internal.DynamicList;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UpdateTaskCustomizer implements ServiceTrackerCustomizer {
+public final class UpdateTaskCustomizer implements ServiceTrackerCustomizer<UpdateTaskProviderService, UpdateTaskProviderService> {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(UpdateTaskCustomizer.class));
 
@@ -76,13 +76,13 @@ public final class UpdateTaskCustomizer implements ServiceTrackerCustomizer {
     }
 
     @Override
-    public Object addingService(final ServiceReference reference) {
-        UpdateTaskProviderService providerService = (UpdateTaskProviderService) context.getService(reference);
-        DynamicList registry = DynamicList.getInstance();
+    public UpdateTaskProviderService addingService(final ServiceReference<UpdateTaskProviderService> reference) {
+        final UpdateTaskProviderService providerService = context.getService(reference);
+        final DynamicList registry = DynamicList.getInstance();
         // Get provider's collection
         final Collection<UpdateTask> collection = (Collection<UpdateTask>) providerService.getUpdateTasks();
         boolean error = false;
-        for (UpdateTask task : collection) {
+        for (final UpdateTask task : collection) {
             if (!registry.addUpdateTask(task)) {
                 LOG.error("Update task \"" + task.getClass().getName() + "\" could not be registered.", new Exception());
                 error = true;
@@ -103,16 +103,16 @@ public final class UpdateTaskCustomizer implements ServiceTrackerCustomizer {
     }
 
     @Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<UpdateTaskProviderService> reference, final UpdateTaskProviderService service) {
         // Nothing to do
     }
 
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
+    public void removedService(final ServiceReference<UpdateTaskProviderService> reference, final UpdateTaskProviderService service) {
         if (null != service) {
             try {
                 final DynamicList registry = DynamicList.getInstance();
-                final UpdateTaskProviderService providerService = (UpdateTaskProviderService) service;
+                final UpdateTaskProviderService providerService = service;
                 final Collection<UpdateTask> collection = (Collection<UpdateTask>) providerService.getUpdateTasks();
                 for (final UpdateTask task : collection) {
                     registry.removeUpdateTask(task);

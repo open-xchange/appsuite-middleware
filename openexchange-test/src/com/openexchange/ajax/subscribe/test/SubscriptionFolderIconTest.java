@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.subscribe.test;
 
-import com.openexchange.exception.OXException;
 import java.util.Date;
 
 import org.json.JSONArray;
@@ -70,15 +69,15 @@ import com.openexchange.test.FolderTestManager;
 
 /**
  * {@link SubscriptionFolderIconTest}
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class SubscriptionFolderIconTest extends AbstractSubscriptionTest {
 
     private static final int FLAG_SUBSCRIBED = 3020;
-    
+
     private static final String KEY_SUBSCRIBED = "com.openexchange.subscribe.subscriptionFlag";
-    
+
     private FolderTestManager fMgr;
 
     public SubscriptionFolderIconTest(String name) {
@@ -91,7 +90,7 @@ public class SubscriptionFolderIconTest extends AbstractSubscriptionTest {
     protected void setUp() throws Exception {
         super.setUp();
         fMgr = getFolderManager();
-        
+
         // create contact folder
         folder = fMgr.generateFolder(
             "publishedContacts",

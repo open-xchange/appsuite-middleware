@@ -62,6 +62,21 @@ import java.util.Set;
 
 public abstract class CommonObject extends FolderChildObject implements Cloneable{
 
+    /**
+     * The available markers for a {@link CommonObject}.
+     */
+    public static enum Marker {
+        /**
+         * A common object.
+         */
+        COMMON,
+        /**
+         * A id-only object.
+         */
+        ID_ONLY,
+        ;
+    }
+
     public static final int LABEL_NONE = 0;
 
     public static final int LABEL_1 = 1;
@@ -96,6 +111,8 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
 
     public static final int LAST_MODIFIED_OF_NEWEST_ATTACHMENT = 105;
 
+    protected Marker marker;
+
     protected int personal_folder_id;
 
     protected int number_of_attachments;
@@ -124,9 +141,26 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
 
     protected boolean bLabel;
 
+    /**
+     * Initializes a new {@link CommonObject}.
+     */
+    protected CommonObject() {
+        super();
+        marker = Marker.COMMON;
+    }
+
     // GET METHODS
     public String getCategories() {
         return categories;
+    }
+
+    /**
+     * Gets the marker
+     *
+     * @return The marker
+     */
+    public Marker getMarker() {
+        return marker;
     }
 
     public int getPersonalFolderID() {
@@ -159,6 +193,15 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
         b_categories = true;
     }
 
+    /**
+     * Sets the marker
+     *
+     * @param marker The marker to set
+     */
+    public void setMarker(final Marker marker) {
+        this.marker = marker;
+    }
+
     public void setPersonalFolderID(final int personal_folder_id) {
         this.personal_folder_id = personal_folder_id;
         b_personal_folder_id = true;
@@ -169,7 +212,7 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
         b_number_of_attachments = true;
     }
 
-    public void setLastModifiedOfNewestAttachment(Date lastModifiedOfNewestAttachment) {
+    public void setLastModifiedOfNewestAttachment(final Date lastModifiedOfNewestAttachment) {
         this.lastModifiedOfNewestAttachment = lastModifiedOfNewestAttachment;
         containsLastModifiedOfNewestAttachment = true;
     }
@@ -274,15 +317,15 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
     }
 
     @Override
-    public Set<Integer> findDifferingFields(DataObject dataObject) {
+    public Set<Integer> findDifferingFields(final DataObject dataObject) {
 
-        Set<Integer> differingFields = super.findDifferingFields(dataObject);
+        final Set<Integer> differingFields = super.findDifferingFields(dataObject);
 
         if (!getClass().isAssignableFrom(dataObject.getClass())) {
             return differingFields;
         }
 
-        CommonObject other = (CommonObject) dataObject;
+        final CommonObject other = (CommonObject) dataObject;
 
         if ((!containsCategories() && other.containsCategories()) || (containsCategories() && other.containsCategories() && getCategories() != other.getCategories() && (getCategories() == null || !getCategories().equals(
             other.getCategories())))) {
@@ -313,7 +356,7 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
     }
 
     @Override
-    public void set(int field, Object value) {
+    public void set(final int field, final Object value) {
         switch (field) {
         case COLOR_LABEL:
             setLabel(((Integer) value).intValue());
@@ -340,7 +383,7 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
     }
 
     @Override
-    public Object get(int field) {
+    public Object get(final int field) {
         switch (field) {
         case COLOR_LABEL:
             return I(getLabel());
@@ -361,7 +404,7 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
     }
 
     @Override
-    public boolean contains(int field) {
+    public boolean contains(final int field) {
         switch (field) {
         case COLOR_LABEL:
             return containsLabel();
@@ -382,7 +425,7 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
     }
 
     @Override
-    public void remove(int field) {
+    public void remove(final int field) {
         switch (field) {
         case COLOR_LABEL:
             removeLabel();

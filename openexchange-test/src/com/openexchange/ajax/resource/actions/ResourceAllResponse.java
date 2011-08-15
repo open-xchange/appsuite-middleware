@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.resource.actions;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -58,15 +57,15 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
  * {@link ResourceAllResponse} - The response corresponding to ALL request
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class ResourceAllResponse extends AbstractAJAXResponse {
 
 	/**
 	 * Initializes a new {@link ResourceAllResponse}
-	 * 
+	 *
 	 * @param response
 	 *            The JSON response container
 	 */
@@ -76,7 +75,7 @@ public final class ResourceAllResponse extends AbstractAJAXResponse {
 
 	/**
 	 * Parses the IDs out of this ALL response
-	 * 
+	 *
 	 * @return The IDs as an array of <code>int</code>
 	 * @throws JSONException
 	 *             If a JSON error occurs

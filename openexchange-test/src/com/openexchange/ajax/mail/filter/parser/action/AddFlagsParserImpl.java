@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.filter.parser.action;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -65,14 +64,14 @@ import com.openexchange.ajax.mail.filter.fields.RuleFields;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class AddFlagsParserImpl implements ActionParser {
-	
+
 	public AbstractAction parseAction(final String name, final JSONObject jsonObject) throws JSONException {
 		final JSONArray jsonArray = jsonObject.getJSONArray(RuleFields.FLAGS);
 		final String[] flags = new String[jsonArray.length()];
 		for (int a = 0; a < flags.length; a++) {
 			flags[a] = jsonArray.getString(a);
 		}
-		
+
 		return new AddFlags(flags);
 	}
 }

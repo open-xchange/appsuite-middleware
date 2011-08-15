@@ -49,14 +49,13 @@
 
 package com.openexchange.ajax.session.actions;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class LogoutParser extends AbstractAJAXParser<LogoutResponse> {
@@ -71,7 +70,7 @@ public class LogoutParser extends AbstractAJAXParser<LogoutResponse> {
     /**
      * {@inheritDoc}
      */
-    
+
     @Override
     public LogoutResponse parse(final String body) throws JSONException {
         return createResponse(null);

@@ -49,14 +49,13 @@
 
 package com.openexchange.test.osgi;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.ajax.LoginTest;
 
 /**
  * {@link BundleTestAuthentication} - Test absence of authentication bundle
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class BundleTestAuthentication extends AbstractBundleTest {

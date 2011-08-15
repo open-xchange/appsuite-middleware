@@ -145,7 +145,7 @@ public abstract class AbstractMailTest extends TestCase {
 
     /**
      * Gets the denoted folder's message count using folder API.
-     * 
+     *
      * @param mailAccess The mail access
      * @param fullName The full name
      * @return The message count
@@ -157,7 +157,7 @@ public abstract class AbstractMailTest extends TestCase {
 
     /**
      * Gets the denoted folder's message count using folder API.
-     * 
+     *
      * @param accountId The account identifier
      * @param fullName The full name
      * @return The message count

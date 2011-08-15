@@ -59,17 +59,17 @@ import java.util.Date;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class Asserts {
-    
+
     public static void assertEquals(String message, Date date1, Date date2, int precision){
         Calendar cal1 = Calendar.getInstance();
         Calendar cal2 = Calendar.getInstance();
         cal1.setTime(date1);
         cal2.setTime(date2);
-        
+
         if(precision <= Calendar.SECOND)
             equalize(cal1, cal2, Calendar.MILLISECOND);
         if(precision <= Calendar.MINUTE)
-            equalize(cal1, cal2, Calendar.SECOND);        
+            equalize(cal1, cal2, Calendar.SECOND);
         if(precision <= Calendar.HOUR_OF_DAY)
             equalize(cal1, cal2, Calendar.MINUTE);
         if(precision <= Calendar.DAY_OF_MONTH)
@@ -78,10 +78,10 @@ public class Asserts {
             equalize(cal1, cal2, Calendar.DAY_OF_MONTH);
         if(precision <= Calendar.YEAR)
             equalize(cal1, cal2, Calendar.MONTH);
-        
+
         junit.framework.Assert.assertEquals(message, cal1.getTime(), cal2.getTime());
     }
-    
+
     private static void equalize(Calendar c1, Calendar c2, int field){
         c1.set(field, 0);
         c2.set(field, 0);

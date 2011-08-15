@@ -1,7 +1,6 @@
 
 package com.openexchange.ajax.infostore;
 
-import com.openexchange.exception.OXException;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -235,7 +234,7 @@ public class NewTest extends InfostoreAJAXTest {
             "text/plain");
         clean.add(id);
 
-        
+
         final int id2 = createNew(
             getWebConversation(),
             getHostName(),
@@ -244,10 +243,10 @@ public class NewTest extends InfostoreAJAXTest {
             upload,
             "text/plain");
         clean.add(id2);
-        
+
         Response res = get(getWebConversation(), getHostName(), sessionId, id2);
         JSONObject obj = (JSONObject) res.getData();
-        
+
         assertEquals(obj.getString("filename"), obj.getString("title"));
     }
 

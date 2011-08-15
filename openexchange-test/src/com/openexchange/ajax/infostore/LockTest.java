@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.infostore;
 
-import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -79,13 +78,13 @@ import com.openexchange.test.TestInit;
 import com.openexchange.tools.URLParameter;
 
 public class LockTest extends InfostoreAJAXTest {
-	
+
 	protected File testFile;
-	
+
 	public LockTest(final String name){
 		super(name);
 	}
-	
+
 	@Override
 	public void setUp() throws Exception{
 		testFile = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
@@ -98,171 +97,171 @@ public class LockTest extends InfostoreAJAXTest {
 		folderId = FolderTest.insertFolder(getWebConversation(), getHostName(), getSessionId(), userId, false,
 		    myInfostore.getObjectID(), "NewInfostoreFolder"+System.currentTimeMillis(), "infostore", FolderObject.PUBLIC, -1, true);
 		updateFolder(getWebConversation(),getHostName(),sessionId,userId,secondUserId,folderId,Long.MAX_VALUE);
-		
+
 		//folderId=228;
 		final Map<String,String> create = m(
 				"folder_id" 		,	((Integer)folderId).toString(),
 				"title"  		,  	"test knowledge",
 				"description" 	, 	"test knowledge description"
 		);
-		
+
 		final int c = this.createNew(getWebConversation(),getHostName(),sessionId,create, testFile, "text/plain");
-		
+
 		clean.add(c);
-		
+
 		Response res = this.update(getWebConversation(),getHostName(),sessionId,c,Long.MAX_VALUE,m(), testFile, "text/plain");
 		assertNoError(res);
-        
+
         res = this.update(getWebConversation(),getHostName(),sessionId,c,Long.MAX_VALUE,m(), testFile, "text/plain");
 		assertNoError(res);
-		
+
 		res = this.update(getWebConversation(),getHostName(),sessionId,c,Long.MAX_VALUE,m(), testFile, "text/plain");
 		assertNoError(res);
-		
+
 		res = this.update(getWebConversation(),getHostName(),sessionId,c,Long.MAX_VALUE,m(), testFile, "text/plain");
 		assertNoError(res);
-		
+
 	}
-	
+
 	@Override
 	public void tearDown() throws Exception{
 
 		FolderTest.deleteFolders(getWebConversation(),getHostName(),sessionId,new int[]{folderId},Long.MAX_VALUE,false);
         super.tearDown();
-			    
+
     }
-	
+
 	public void testLock() throws Exception{
-		
+
 		Response res = get(getWebConversation(), getHostName(), sessionId, clean.get(0));
 		final Date ts = res.getTimestamp();
-		
+
 		res = lock(getWebConversation(),getHostName(), sessionId, clean.get(0));
 		assertNoError(res);
         assertNotNull(res.getTimestamp());
-		
+
 		res = get(getWebConversation(),getHostName(), sessionId, clean.get(0));
 		assertNoError(res);
 		assertLocked((JSONObject)res.getData());
-		
+
 		// BUG 4232
-		
+
 		res = updates(getWebConversation(), getHostName(), sessionId, folderId, new int[]{Metadata.ID}, ts.getTime());
-		
+
 		final JSONArray modAndDel = (JSONArray) res.getData();
 		final JSONArray mod = modAndDel.getJSONArray(0);
-		
+
 		assertEquals(1, mod.length());
 		assertEquals(clean.get(0), (Integer) mod.getInt(0));
-		
-		
+
+
 		final String sessionId2 = this.getSecondSessionId();
-		
+
 		// Object may not be modified
 		res = update(getSecondWebConversation(),getHostName(),sessionId2, clean.get(0), Long.MAX_VALUE, m("title" , "Hallo"));
 		assertTrue(res.hasError());
-		
+
 		// Bug #????
 		// Object may not be moved
-		
+
 		final int userId2 = FolderTest.getUserId(getSecondWebConversation(), getHostName(), getSeconduser(), getPassword());
 		final int folderId2 = FolderTest.getMyInfostoreFolder(getSecondWebConversation(),getHostName(),sessionId2,userId2).getObjectID();
-		
+
 		res = update(getSecondWebConversation(),getHostName(),sessionId2, clean.get(0), Long.MAX_VALUE, m("folder_id" , ""+folderId2));
 		assertTrue(res.hasError());
-		
+
 		// Object may not be removed
         JSONObject response = deleteGetResponse(getSecondWebConversation(),null, getHostName(),sessionId2, Long.MAX_VALUE, new int[][]{{folderId, clean.get(0)}});
 		assertTrue(response.has("error"));
 
-		
+
 		// Versions may not be removed
 		int[] notDetached = detach(getSecondWebConversation(),getHostName(),sessionId2,Long.MAX_VALUE, clean.get(0), new int[]{4});
 		assertEquals(1,notDetached.length);
 		assertEquals(4,notDetached[0]);
-		
+
 		// Object may not be locked
 		res = lock(getSecondWebConversation(),getHostName(), sessionId2, clean.get(0));
 		assertTrue(res.hasError());
-		
-		
+
+
 		// Object may not be unlocked
-		
+
 		res = unlock(getSecondWebConversation(),getHostName(), sessionId2, clean.get(0));
 		assertTrue(res.hasError());
-		
+
 		// Lock owner may update
 		res = update(getWebConversation(),getHostName(),sessionId, clean.get(0), Long.MAX_VALUE, m("title" , "Hallo"));
 		assertNoError(res);
-		
+
 		res = get(getWebConversation(), getHostName(), sessionId, clean.get(0));
 		final JSONObject o = (JSONObject) res.getData();
-		
+
 		assertEquals("Hallo",o.get("title"));
-		
+
 		//Lock owner may detach
 		notDetached = detach(getWebConversation(),getHostName(),sessionId,Long.MAX_VALUE, clean.get(0), new int[]{4});
 		assertEquals(0,notDetached.length);
-		
+
 		//Lock owner may remove
 		int[] notDeleted = delete(getWebConversation(),getHostName(),sessionId, Long.MAX_VALUE, new int[][]{{folderId, clean.get(0)}});
 		assertEquals(0, notDeleted.length);
 		clean.remove(0);
-		
+
 	}
-	
+
 	public void testUnlock() throws Exception{
 		Response res = lock(getWebConversation(),getHostName(), sessionId, clean.get(0));
 		assertNoError(res);
-		
+
 		res = get(getWebConversation(),getHostName(), sessionId, clean.get(0));
 		assertNoError(res);
 		assertLocked((JSONObject)res.getData());
-		
+
 		// Lock owner may relock
 		res = lock(getWebConversation(),getHostName(), sessionId, clean.get(0));
 		assertNoError(res);
-		
+
 		// Lock owner may unlock (duh!)
 		res = unlock(getWebConversation(),getHostName(), sessionId, clean.get(0));
 		assertNoError(res);
         assertNotNull(res.getTimestamp());
-				
+
 		res = get(getWebConversation(),getHostName(), sessionId, clean.get(0));
 		assertNoError(res);
 		assertUnlocked((JSONObject)res.getData());
-		
+
 		final String sessionId2 = getSecondSessionId();
-		
+
 		res = lock(getSecondWebConversation(),getHostName(), sessionId2, clean.get(0));
 		assertNoError(res);
-		
+
 		// Owner may not edit
 		res = update(getWebConversation(),getHostName(),sessionId, clean.get(0), Long.MAX_VALUE, m("title" , "Hallo"));
 		assertTrue(res.hasError());
-		
+
 		// Owner may unlock
 		res = unlock(getWebConversation(),getHostName(), sessionId, clean.get(0));
 		assertNoError(res);
-		
+
 		res = get(getWebConversation(),getHostName(), sessionId, clean.get(0));
 		assertNoError(res);
 		assertUnlocked((JSONObject)res.getData());
-		
+
 	}
-	
+
 	public static void assertLocked(final JSONObject o) throws JSONException{
 		final long locked = o.getInt(Metadata.LOCKED_UNTIL_LITERAL.getName());
 		assertFalse("This must be != 0: "+locked, 0 == locked);
 	}
-	
+
 	public static void assertUnlocked(final JSONObject o) throws JSONException{
 		assertEquals(0, o.getInt(Metadata.LOCKED_UNTIL_LITERAL.getName()));
 	}
-	
+
 	// Copied from FolderTest
-	
-	
+
+
 	public static boolean updateFolder(final WebConversation conversation, final String hostname, final String sessionId,
 			final int entity, final int secondEntity, final int folderId, final long timestamp) throws JSONException, MalformedURLException, IOException, SAXException {
 			final JSONObject jsonFolder = new JSONObject();
@@ -295,7 +294,7 @@ public class LockTest extends InfostoreAJAXTest {
 			}
 			return true;
 		}
-	
+
 	private static int createPermissionBits(final int fp, final int orp, final int owp, final int odp, final boolean adminFlag) {
 		final int[] perms = new int[5];
 		perms[0] = fp;
@@ -305,7 +304,7 @@ public class LockTest extends InfostoreAJAXTest {
 		perms[4] = adminFlag ? 1 : 0;
 		return createPermissionBits(perms);
 	}
-	
+
 	private static int createPermissionBits(final int[] permission) {
 		int retval = 0;
 		boolean first = true;
@@ -325,7 +324,7 @@ public class LockTest extends InfostoreAJAXTest {
 		return retval;
 	}
 	private static final int[] mapping = { 0, -1, 1, -1, 2, -1, -1, -1, 4 };
-	
+
 	private static final String FOLDER_URL = "/ajax/folders";
 
 }

@@ -59,7 +59,7 @@ import com.openexchange.test.fixtures.transformators.UserIdTransformator;
  * @author Tobias Friedrich <tobias.friedrich@open-xchange.com>
  */
 public class InfoItemFixtureFactory implements FixtureFactory<InfoItem> {
-    
+
 	private FixtureLoader fixtureLoader;
 
 	public InfoItemFixtureFactory(FixtureLoader fixtureLoader) {
@@ -92,14 +92,14 @@ public class InfoItemFixtureFactory implements FixtureFactory<InfoItem> {
             }
             final InfoItem item = new InfoItem();
             apply(item, values);
-            
+
             if (item.containsVersions()) {
             	for (final Document version : item.getVersions()) {
             		version.setParent(item);
             	}
             }
-            
-            final Fixture<InfoItem> fixture = new Fixture<InfoItem>(item, 
+
+            final Fixture<InfoItem> fixture = new Fixture<InfoItem>(item,
             		values.keySet().toArray(new String[values.size()]), values);
             knownInfoitems.put(entryName, fixture);
             return fixture;

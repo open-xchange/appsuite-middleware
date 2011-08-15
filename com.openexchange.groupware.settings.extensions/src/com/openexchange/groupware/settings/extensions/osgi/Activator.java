@@ -62,9 +62,9 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.cascade.ComposedConfigProperty;
-import com.openexchange.exception.OXException;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
@@ -80,10 +80,14 @@ import com.openexchange.session.Session;
 public class Activator implements BundleActivator {
 
     private static final String PREFERENCE_PATH = "preferencePath";
+
     private static final String METADATA_PREFIX = "meta";
+
     private ServicePublisher services;
+
     private BundleContext context;
-    private ServiceTracker serviceTracker;
+
+    private ServiceTracker<ConfigViewFactory, ConfigViewFactory> serviceTracker;
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
 
@@ -103,33 +107,32 @@ public class Activator implements BundleActivator {
     public void handleConfigurationUpdate(final ConfigViewFactory viewFactory) {
         LOG.info("Updating configtree");
         try {
-            ConfigView view = viewFactory.getView();
-            Map<String, ComposedConfigProperty<String>> all = view.all();
-            for(Map.Entry<String,ComposedConfigProperty<String>> entry : all.entrySet()) {
-                String propertyName = entry.getKey();
-                ComposedConfigProperty<String> property = entry.getValue();
+            final ConfigView view = viewFactory.getView();
+            final Map<String, ComposedConfigProperty<String>> all = view.all();
+            for (final Map.Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
+                final String propertyName = entry.getKey();
+                final ComposedConfigProperty<String> property = entry.getValue();
                 if (isPreferenceItem(property)) {
                     export(viewFactory, property, propertyName);
                 }
             }
-        } catch (Throwable x) {
+        } catch (final Throwable x) {
             LOG.error(x.getMessage(), x);
         }
-
 
     }
 
     // Maybe that is an overuse of anonymous inner classes. Better get around to refactoring this at some point.
 
-    private void export(final ConfigViewFactory viewFactory, ComposedConfigProperty<String> property, final String propertyName) throws OXException {
+    private void export(final ConfigViewFactory viewFactory, final ComposedConfigProperty<String> property, final String propertyName) throws OXException {
 
         final String[] path = property.get(PREFERENCE_PATH).split("/");
-        String finalScope = property.get("final");
-        String isProtected = property.get("protected");
-        final boolean writable = (finalScope == null || finalScope.equals("user")) && (isProtected == null || ! property.get("protected", boolean.class));
+        final String finalScope = property.get("final");
+        final String isProtected = property.get("protected");
+        final boolean writable =
+            (finalScope == null || finalScope.equals("user")) && (isProtected == null || !property.get("protected", boolean.class).booleanValue());
 
-
-        PreferencesItemService prefItem = new PreferencesItemService() {
+        final PreferencesItemService prefItem = new PreferencesItemService() {
 
             private static final String UNDEFINED_STRING = "undefined";
 
@@ -148,7 +151,7 @@ public class Activator implements BundleActivator {
                     }
 
                     @Override
-                    public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
+                    public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
                         try {
                             Object value = viewFactory.getView(user.getId(), ctx.getContextId()).get(propertyName, String.class);
                             if (UNDEFINED_STRING.equals(value)) {
@@ -157,20 +160,20 @@ public class Activator implements BundleActivator {
                             }
                             try {
                                 // Let's turn this into a nice object, if it conforms to JSON
-                                value = new JSONObject("{value: "+value+"}").get("value");
+                                value = new JSONObject("{value: " + value + "}").get("value");
 
-                            } catch (JSONException x) {
+                            } catch (final JSONException x) {
                                 // Ah well, let's pretend it's a string.
                             }
 
                             setting.setSingleValue(value);
-                        } catch (OXException e) {
+                        } catch (final OXException e) {
                             throw new OXException(e);
                         }
                     }
 
                     @Override
-                    public boolean isAvailable(UserConfiguration userConfig) {
+                    public boolean isAvailable(final UserConfiguration userConfig) {
                         return true;
                     }
 
@@ -180,14 +183,14 @@ public class Activator implements BundleActivator {
                     }
 
                     @Override
-                    public void writeValue(Session session, Context ctx, User user, Setting setting) throws OXException {
+                    public void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws OXException {
                         Object value = setting.getSingleValue();
-                        if(value == null) {
-                            Object[] multiValue = setting.getMultiValue();
-                            if(multiValue != null) {
+                        if (value == null) {
+                            final Object[] multiValue = setting.getMultiValue();
+                            if (multiValue != null) {
 
-                                JSONArray arr = new JSONArray();
-                                for (Object o : multiValue) {
+                                final JSONArray arr = new JSONArray();
+                                for (final Object o : multiValue) {
                                     arr.put(o);
                                 }
                                 value = arr.toString();
@@ -196,16 +199,17 @@ public class Activator implements BundleActivator {
                             }
                         }
                         try {
-                            String oldValue = viewFactory.getView(user.getId(), ctx.getContextId()).get(propertyName, String.class);
-                        if(value != null) {
+                            final String oldValue = viewFactory.getView(user.getId(), ctx.getContextId()).get(propertyName, String.class);
+                            if (value != null) {
                                 // Clients have a habit of dumping the config back at us, so we only save differing values.
-                                if(!value.equals(oldValue)) {
+                                if (!value.equals(oldValue)) {
                                     viewFactory.getView(user.getId(), ctx.getContextId()).set("user", propertyName, value);
                                 }
 
-                        } else {
-
-                        }} catch (OXException e) {
+                            } else {
+                                // Eh...
+                            }
+                        } catch (final OXException e) {
                             throw new OXException(e);
                         }
 
@@ -219,14 +223,14 @@ public class Activator implements BundleActivator {
         services.publishService(PreferencesItemService.class, prefItem);
 
         // And let's publish the metadata as well
-        List<String> metadataNames = property.getMetadataNames();
+        final List<String> metadataNames = property.getMetadataNames();
         for (final String metadataName : metadataNames) {
-            final String[] metadataPath = new String[path.length+2];
+            final String[] metadataPath = new String[path.length + 2];
             System.arraycopy(path, 0, metadataPath, 1, path.length);
-            metadataPath[metadataPath.length-1] = metadataName;
+            metadataPath[metadataPath.length - 1] = metadataName;
             metadataPath[0] = METADATA_PREFIX;
 
-            PreferencesItemService metadataItem = new PreferencesItemService() {
+            final PreferencesItemService metadataItem = new PreferencesItemService() {
 
                 @Override
                 public String[] getPath() {
@@ -243,26 +247,27 @@ public class Activator implements BundleActivator {
                         }
 
                         @Override
-                        public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
+                        public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
                             try {
-                                ComposedConfigProperty<String> prop = viewFactory.getView(user.getId(), ctx.getContextId()).property(propertyName, String.class);
+                                final ComposedConfigProperty<String> prop =
+                                    viewFactory.getView(user.getId(), ctx.getContextId()).property(propertyName, String.class);
                                 Object value = prop.get(metadataName);
                                 try {
                                     // Let's turn this into a nice object, if it conforms to JSON
-                                    value = new JSONObject("{value: "+value+"}").get("value");
+                                    value = new JSONObject("{value: " + value + "}").get("value");
 
-                                } catch (JSONException x) {
+                                } catch (final JSONException x) {
                                     // Ah well, let's pretend it's a string.
                                 }
 
                                 setting.setSingleValue(value);
-                            } catch (OXException e) {
+                            } catch (final OXException e) {
                                 throw new OXException(e);
                             }
                         }
 
                         @Override
-                        public boolean isAvailable(UserConfiguration userConfig) {
+                        public boolean isAvailable(final UserConfiguration userConfig) {
                             return true;
                         }
 
@@ -272,7 +277,7 @@ public class Activator implements BundleActivator {
                         }
 
                         @Override
-                        public void writeValue(Session session, Context ctx, User user, Setting setting) throws OXException {
+                        public void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws OXException {
                             // IGNORE
                         }
 
@@ -285,13 +290,12 @@ public class Activator implements BundleActivator {
         }
 
         // Lastly, let's publish configurability.
-        final String[] configurablePath = new String[path.length+2];
+        final String[] configurablePath = new String[path.length + 2];
         System.arraycopy(path, 0, configurablePath, 1, path.length);
-        configurablePath[configurablePath.length-1] = "configurable";
+        configurablePath[configurablePath.length - 1] = "configurable";
         configurablePath[0] = METADATA_PREFIX;
 
-
-        PreferencesItemService configurableItem = new PreferencesItemService(){
+        final PreferencesItemService configurableItem = new PreferencesItemService() {
 
             @Override
             public String[] getPath() {
@@ -308,12 +312,12 @@ public class Activator implements BundleActivator {
                     }
 
                     @Override
-                    public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
-                        setting.setSingleValue(writable);
+                    public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
+                        setting.setSingleValue(Boolean.valueOf(writable));
                     }
 
                     @Override
-                    public boolean isAvailable(UserConfiguration userConfig) {
+                    public boolean isAvailable(final UserConfiguration userConfig) {
                         return true;
                     }
 
@@ -323,7 +327,7 @@ public class Activator implements BundleActivator {
                     }
 
                     @Override
-                    public void writeValue(Session session, Context ctx, User user, Setting setting) throws OXException {
+                    public void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws OXException {
                         // IGNORE
                     }
 
@@ -335,12 +339,15 @@ public class Activator implements BundleActivator {
         services.publishService(PreferencesItemService.class, configurableItem);
     }
 
-    private boolean isPreferenceItem(ComposedConfigProperty<String> property) throws OXException {
+    private boolean isPreferenceItem(final ComposedConfigProperty<String> property) throws OXException {
         return property.get(PREFERENCE_PATH) != null;
     }
 
     private void registerListenerForConfigurationService() {
-        serviceTracker = new ServiceTracker(context, ConfigViewFactory.class.getName(), new ConfigurationTracker(context, this));
+        serviceTracker =
+            new ServiceTracker<ConfigViewFactory, ConfigViewFactory>(context, ConfigViewFactory.class, new ConfigurationTracker(
+                context,
+                this));
         serviceTracker.open();
     }
 
@@ -348,9 +355,10 @@ public class Activator implements BundleActivator {
         serviceTracker.close();
     }
 
+    private static final class ConfigurationTracker implements ServiceTrackerCustomizer<ConfigViewFactory, ConfigViewFactory> {
 
-    private static final class ConfigurationTracker implements ServiceTrackerCustomizer {
         private final BundleContext context;
+
         private final Activator activator;
 
         public ConfigurationTracker(final BundleContext context, final Activator activator) {
@@ -360,21 +368,19 @@ public class Activator implements BundleActivator {
         }
 
         @Override
-        public Object addingService(final ServiceReference serviceReference) {
-            final Object addedService = context.getService(serviceReference);
-            if(ConfigViewFactory.class.isAssignableFrom(addedService.getClass())) {
-                activator.handleConfigurationUpdate((ConfigViewFactory) addedService);
-            }
+        public ConfigViewFactory addingService(final ServiceReference<ConfigViewFactory> serviceReference) {
+            final ConfigViewFactory addedService = context.getService(serviceReference);
+            activator.handleConfigurationUpdate(addedService);
             return addedService;
         }
 
         @Override
-        public void modifiedService(final ServiceReference serviceReference, final Object o) {
+        public void modifiedService(final ServiceReference<ConfigViewFactory> serviceReference, final ConfigViewFactory o) {
             // IGNORE
         }
 
         @Override
-        public void removedService(final ServiceReference serviceReference, final Object o) {
+        public void removedService(final ServiceReference<ConfigViewFactory> serviceReference, final ConfigViewFactory o) {
             context.ungetService(serviceReference);
         }
     }

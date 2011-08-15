@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail;
 
-import com.openexchange.exception.OXException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
@@ -63,7 +62,7 @@ import com.openexchange.mail.MailSortField;
 
 /**
  * {@link SearchTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="karsten.will@open-xchange.com">Karsten Will</a>
  */
@@ -75,7 +74,7 @@ public final class SearchTest extends AbstractMailTest {
 
     /**
      * Default constructor.
-     * 
+     *
      * @param name Name of this test.
      */
     public SearchTest(final String name) {
@@ -111,7 +110,7 @@ public final class SearchTest extends AbstractMailTest {
 
     /**
      * Tests the <code>action=search</code> request on INBOX folder
-     * 
+     *
      * @throws Throwable
      */
     public void testSimpleSearch() throws Throwable {
@@ -154,7 +153,7 @@ public final class SearchTest extends AbstractMailTest {
 
     /**
      * Tests the <code>action=search</code> request on INBOX folder
-     * 
+     *
      * @throws Throwable
      */
     public void testComplexSearch() throws Throwable {

@@ -60,7 +60,7 @@ import com.openexchange.ajax.framework.Header;
 
 /**
  * {@link SendRequest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SendRequest implements AJAXRequest<SendResponse> {
@@ -82,7 +82,7 @@ public class SendRequest implements AJAXRequest<SendResponse> {
 
     /**
      * Initializes a new {@link SendRequest}
-     * 
+     *
      * @param mailStr The mail string (JSON)
      */
     public SendRequest(final String mailStr) {
@@ -91,7 +91,7 @@ public class SendRequest implements AJAXRequest<SendResponse> {
 
     /**
      * Initializes a new {@link SendRequest}
-     * 
+     *
      * @param mailStr The mail string (JSON)
      * @param upload The upload input stream
      */

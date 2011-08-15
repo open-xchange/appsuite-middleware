@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
@@ -63,9 +62,9 @@ import com.openexchange.groupware.container.Appointment;
 
 /**
  * {@link CreatedByTest}
- * 
+ *
  * Tests if it is possible to inject a value for the created_by field.
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class CreatedByTest extends AbstractAJAXSession {
@@ -76,7 +75,7 @@ public class CreatedByTest extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link CreatedByTest}.
-     * 
+     *
      * @param name
      */
     public CreatedByTest(String name) {

@@ -7,7 +7,7 @@ import com.openexchange.ajax.ContactTest;
 import com.openexchange.groupware.container.Contact;
 
 /**
- * 
+ *
  * {@link Bug4409Test}
  *
  * @author Offspring
@@ -18,23 +18,23 @@ public class Bug4409Test extends ContactTest {
 
 	private static final Log LOG = LogFactory.getLog(Bug4409Test.class);
     private int objectId = -1;
-	
+
 	public Bug4409Test(final String name) {
 		super(name);
 	}
-	
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
-	
+
 	public void testBug4409() throws Exception {
 		final Contact contactObj = new Contact();
 		contactObj.setSurName("testBug4409");
 		contactObj.setParentFolderID(contactFolderId);
-		
+
 		objectId  = insertContact(getWebConversation(), contactObj, getHostName(), getSessionId());
-		
+
 		loadImage(getWebConversation(),objectId, contactFolderId, getHostName(), getSessionId());
 	}
 
@@ -45,5 +45,5 @@ public class Bug4409Test extends ContactTest {
             deleteContact(getWebConversation(), objectId, contactFolderId, getHostName(), getSessionId());
         }
     }
-	
+
 }

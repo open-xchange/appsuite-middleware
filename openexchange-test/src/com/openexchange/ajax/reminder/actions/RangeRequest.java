@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.reminder.actions;
 
-import com.openexchange.exception.OXException;
 import java.util.Date;
 
 import org.json.JSONException;
@@ -57,7 +56,7 @@ import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class RangeRequest extends AbstractReminderRequest<RangeResponse> {

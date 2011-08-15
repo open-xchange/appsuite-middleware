@@ -61,14 +61,14 @@ import com.openexchange.tools.file.external.QuotaFileStorageFactory;
 
 public class FileStorageWrapperActivator implements BundleActivator {
 
-    private ServiceTracker FSTracker;
+    private ServiceTracker<FileStorageFactory,FileStorageFactory> FSTracker;
 
-    private ServiceTracker QFSTracker;
+    private ServiceTracker<QuotaFileStorageFactory,QuotaFileStorageFactory> QFSTracker;
 
     @Override
     public void start(final BundleContext context) throws Exception {
-        FSTracker = new ServiceTracker(context, FileStorageFactory.class.getName(), new FSTrackerCustomizer(context));
-        QFSTracker = new ServiceTracker(context, QuotaFileStorageFactory.class.getName(), new QFSTrackerCustomizer(context));
+        FSTracker = new ServiceTracker<FileStorageFactory,FileStorageFactory>(context, FileStorageFactory.class, new FSTrackerCustomizer(context));
+        QFSTracker = new ServiceTracker<QuotaFileStorageFactory,QuotaFileStorageFactory>(context, QuotaFileStorageFactory.class, new QFSTrackerCustomizer(context));
         FSTracker.open();
         QFSTracker.open();
     }
@@ -79,7 +79,7 @@ public class FileStorageWrapperActivator implements BundleActivator {
         QFSTracker.close();
     }
 
-    private static class FSTrackerCustomizer implements ServiceTrackerCustomizer {
+    private static class FSTrackerCustomizer implements ServiceTrackerCustomizer<FileStorageFactory,FileStorageFactory> {
 
         private final BundleContext context;
 
@@ -88,27 +88,27 @@ public class FileStorageWrapperActivator implements BundleActivator {
         }
 
         @Override
-        public Object addingService(final ServiceReference reference) {
-            final FileStorageFactory service = (FileStorageFactory) context.getService(reference);
+        public FileStorageFactory addingService(final ServiceReference<FileStorageFactory> reference) {
+            final FileStorageFactory service = context.getService(reference);
             FileStorage.setFileStorageStarter(service);
             return service;
         }
 
         @Override
-        public void modifiedService(final ServiceReference reference, final Object service) {
+        public void modifiedService(final ServiceReference<FileStorageFactory> reference, final FileStorageFactory service) {
             // Nothing to do here
 
         }
 
         @Override
-        public void removedService(final ServiceReference reference, final Object service) {
+        public void removedService(final ServiceReference<FileStorageFactory> reference, final FileStorageFactory service) {
             FileStorage.setFileStorageStarter(null);
             context.ungetService(reference);
         }
 
     }
 
-    private static class QFSTrackerCustomizer implements ServiceTrackerCustomizer {
+    private static class QFSTrackerCustomizer implements ServiceTrackerCustomizer<QuotaFileStorageFactory,QuotaFileStorageFactory> {
 
         private final BundleContext context;
 
@@ -117,20 +117,20 @@ public class FileStorageWrapperActivator implements BundleActivator {
         }
 
         @Override
-        public Object addingService(final ServiceReference reference) {
-            final QuotaFileStorageFactory service = (QuotaFileStorageFactory) context.getService(reference);
+        public QuotaFileStorageFactory addingService(final ServiceReference<QuotaFileStorageFactory> reference) {
+            final QuotaFileStorageFactory service = context.getService(reference);
             QuotaFileStorage.setQuotaFileStorageStarter(service);
             return service;
         }
 
         @Override
-        public void modifiedService(final ServiceReference reference, final Object service) {
+        public void modifiedService(final ServiceReference<QuotaFileStorageFactory> reference, final QuotaFileStorageFactory service) {
             // Nothing to do here
 
         }
 
         @Override
-        public void removedService(final ServiceReference reference, final Object service) {
+        public void removedService(final ServiceReference<QuotaFileStorageFactory> reference, final QuotaFileStorageFactory service) {
             QuotaFileStorage.setQuotaFileStorageStarter(null);
             context.ungetService(reference);
         }

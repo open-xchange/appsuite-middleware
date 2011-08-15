@@ -62,30 +62,31 @@ import com.openexchange.systemname.internal.JVMRouteSystemNameImpl;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class SystemNameServiceRegisterer implements ServiceTrackerCustomizer {
+public final class SystemNameServiceRegisterer implements ServiceTrackerCustomizer<ConfigurationService,ConfigurationService> {
 
     private final BundleContext context;
-    private ServiceRegistration registration;
+    private ServiceRegistration<SystemNameService> registration;
 
-    public SystemNameServiceRegisterer(BundleContext context) {
+    public SystemNameServiceRegisterer(final BundleContext context) {
         super();
         this.context = context;
     }
 
     @Override
-    public Object addingService(ServiceReference reference) {
-        ConfigurationService configService = (ConfigurationService) context.getService(reference);
-        registration = context.registerService(SystemNameService.class.getName(), new JVMRouteSystemNameImpl(configService), null);
+    public ConfigurationService addingService(final ServiceReference<ConfigurationService> reference) {
+        final ConfigurationService configService = context.getService(reference);
+        registration = context.registerService(SystemNameService.class, new JVMRouteSystemNameImpl(configService), null);
         return configService;
     }
 
     @Override
-    public void modifiedService(ServiceReference reference, Object service) {
+    public void modifiedService(final ServiceReference<ConfigurationService> reference, final ConfigurationService service) {
         // Nothing to do.
     }
 
     @Override
-    public void removedService(ServiceReference reference, Object service) {
+    public void removedService(final ServiceReference<ConfigurationService> reference, final ConfigurationService service) {
         registration.unregister();
+        context.ungetService(reference);
     }
 }

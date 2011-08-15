@@ -57,9 +57,9 @@ package com.openexchange.ajax.mail.filter;
 public class ConfigTestHolder {
 
 	protected String test;
-	
+
 	protected String[] comparisons;
-	
+
 	public ConfigTestHolder(String test, String comparisons[]) {
 		this.test = test;
 		this.comparisons = comparisons;

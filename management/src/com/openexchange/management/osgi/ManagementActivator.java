@@ -70,9 +70,7 @@ public final class ManagementActivator extends DeferredActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ManagementActivator.class));
 
-    private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class };
-
-    private ServiceRegistration serviceRegistration;
+    private ServiceRegistration<ManagementService> serviceRegistration;
 
     /**
      * Initializes a new {@link ManagementActivator}
@@ -83,7 +81,7 @@ public final class ManagementActivator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
+        return new Class<?>[] { ConfigurationService.class };
     }
 
     @Override
@@ -149,7 +147,7 @@ public final class ManagementActivator extends DeferredActivator {
         /*
          * Register management service
          */
-        serviceRegistration = context.registerService(ManagementService.class.getCanonicalName(), ManagementAgentImpl.getInstance(), null);
+        serviceRegistration = context.registerService(ManagementService.class, ManagementAgentImpl.getInstance(), null);
     }
 
     private void stopInternal() throws OXException {

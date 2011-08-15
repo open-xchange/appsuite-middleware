@@ -74,7 +74,7 @@ public final class ImageRegistry {
     private static final int DELAY = 30000;
 
     private static final int INITIAL_DELAY = 1000;
-    
+
     static final int DEFAULT_TTL = 300000;
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageRegistry.class));

@@ -251,7 +251,7 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
     protected FolderObject createDefaultInfostoreFolder() throws OXException, IOException, SAXException, JSONException {
         return createDefaultInfostoreFolder(null);
     }
-    
+
     protected FolderObject createDefaultInfostoreFolder(String folderName) throws OXException, IOException, SAXException, JSONException {
     	if (folderName == null) {
     		folderName = "pubsub default infostore folder "+getName()+"-"+System.currentTimeMillis();
@@ -284,7 +284,7 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
     }
 
     public String getWebsite(String url) throws IOException {
-       
+
         WebResponse resp = getResponse(url);
         assertEquals("Should respond with status 200", 200 , resp.getResponseCode());
         return resp .getText();

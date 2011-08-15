@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax;
 
-import com.openexchange.exception.OXException;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -72,9 +71,9 @@ import com.openexchange.tools.URLParameter;
 
 /**
  * AJAXFileUploadTest
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class AJAXFileUploadTest extends AbstractAJAXTest {
 
@@ -102,7 +101,7 @@ public final class AJAXFileUploadTest extends AbstractAJAXTest {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see junit.framework.TestCase#setUp()
 	 */
 	@Override
@@ -112,22 +111,22 @@ public final class AJAXFileUploadTest extends AbstractAJAXTest {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see junit.framework.TestCase#tearDown()
 	 */
 	@Override
 	public void tearDown() throws Exception {
 		logout();
 	}
-	
+
 	private static final String getUploadedFile(final WebConversation conversation, final String hostname,
 			final String sessionId, final String id) throws IOException, SAXException {
-		
+
 		final GetMethodWebRequest getRequest = new GetMethodWebRequest(hostname + URL);
 		getRequest.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
 		getRequest.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET);
 		getRequest.setParameter(AJAXServlet.PARAMETER_ID, id);
-		
+
 		final WebResponse resp = conversation.getResponse(getRequest);
 		return resp.getText();
 	}
@@ -209,7 +208,7 @@ public final class AJAXFileUploadTest extends AbstractAJAXTest {
 			fail(e.getMessage());
 		}
 	}
-	
+
 	public void testGetUploadedFile() {
 		try {
 			final File[] fa = { createTempFile() };
@@ -220,13 +219,13 @@ public final class AJAXFileUploadTest extends AbstractAJAXTest {
 			assertTrue("JSON response has no key \"data\"", jResp.has("data"));
 			final JSONArray jArray = jResp.getJSONArray("data");
 			assertTrue("Number of received IDs is " + jArray.length() + " but should be 1", jArray.length() == 1);
-			
+
 			final String id = jArray.getString(0);
 			final String content = getUploadedFile(getWebConversation(), PROTOCOL + getHostName(), sessionId, id);
-			
+
 			assertTrue("File content was not present!", content != null && content.length() > 0);
 			assertTrue("File content is not equal to expected one", FILE_CONTENT.replaceAll("\r?\n", "").equalsIgnoreCase(content.replaceAll("\r?\n", "")));
-			
+
 		} catch (final IOException e) {
 			e.printStackTrace();
 			fail(e.getMessage());

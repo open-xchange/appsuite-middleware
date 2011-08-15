@@ -64,7 +64,7 @@ import com.openexchange.timer.TimerService;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class TimerCustomizer implements ServiceTrackerCustomizer {
+public final class TimerCustomizer implements ServiceTrackerCustomizer<TimerService,TimerService> {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TimerCustomizer.class));
 
@@ -81,8 +81,8 @@ public final class TimerCustomizer implements ServiceTrackerCustomizer {
     }
 
     @Override
-    public Object addingService(final ServiceReference reference) {
-        final TimerService timer = (TimerService) context.getService(reference);
+    public TimerService addingService(final ServiceReference<TimerService> reference) {
+        final TimerService timer = context.getService(reference);
         final PushConfiguration config = PushInit.getInstance().getConfig();
         if (config.isMultiCastEnabled()) {
             LOG.info("Starting push multicast discovery sender.");
@@ -95,12 +95,12 @@ public final class TimerCustomizer implements ServiceTrackerCustomizer {
     }
 
     @Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<TimerService> reference, final TimerService service) {
         // Nothing to do.
     }
 
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
+    public void removedService(final ServiceReference<TimerService> reference, final TimerService service) {
         if (null != sender) {
             LOG.info("Stopping push multicast discovery sender.");
             sender.stopSender();

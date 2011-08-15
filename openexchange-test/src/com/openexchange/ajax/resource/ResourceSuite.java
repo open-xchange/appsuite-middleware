@@ -59,7 +59,7 @@ import junit.framework.TestSuite;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class ResourceSuite extends TestSuite {
-    
+
     /**
      * TODO add this tests to the AJAX interface test suite.
      */

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.filter.parser.comparison;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -63,7 +62,7 @@ import com.openexchange.ajax.mail.filter.comparison.IsComparison;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class MatchesParserImpl implements ComparisonParser {
-	
+
 	public AbstractComparison parseComparison(final String name, final JSONObject jsonObject) throws JSONException {
 		return new IsComparison();
 	}

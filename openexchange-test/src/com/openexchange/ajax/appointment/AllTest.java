@@ -33,7 +33,7 @@ public class AllTest extends AppointmentTest {
     public AllTest(final String name) {
 		super(name);
 	}
-	
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -82,21 +82,21 @@ public class AllTest extends AppointmentTest {
             final long endDate = row.getLong(4);
 
             final JSONArray row2 = data2.getJSONArray(i);
-            
+
             final int id2 = row2.getInt(0);
             final int folderId2 = row2.getInt(1);
             final String title2 = row2.getString(2);
             final long startDate2 = row2.getLong(3);
             final long endDate2 = row2.getLong(4);
-            
+
             assertEquals("Unexpected ID.", id, id2);
             assertEquals("Unexpected folder ID.", folderId, folderId2);
             assertEquals("Unexpected title.", title, title2);
-            
+
             final long userTZStartOffset = timeZone.getOffset(startDate);
             final long respTZStartOffset = respTimeZone.getOffset(startDate);
             assertEquals("Unexpected time zone is response", ((startDate2 - startDate)), (respTZStartOffset - userTZStartOffset));
-            
+
             final long userTZEndOffset = timeZone.getOffset(endDate);
             final long respTZEndOffset = respTimeZone.getOffset(endDate2);
             assertEquals("Unexpected time zone is response", ((endDate2 - endDate)), (respTZEndOffset - userTZEndOffset));
@@ -126,7 +126,7 @@ public class AllTest extends AppointmentTest {
 
         assertNotInResponse(data, appointment);
         assertInResponse(data, anotherAppointment);
-                
+
     }
 
     private void assertInResponse(final JSONArray data, final Appointment...appointments) throws JSONException {
@@ -176,53 +176,53 @@ public class AllTest extends AppointmentTest {
     public void testShowAppointmentsBetween() throws Exception {
 		final Date start = new Date(System.currentTimeMillis()-(dayInMillis*7));
 		final Date end = new Date(System.currentTimeMillis()+(dayInMillis*7));
-		
+
 		final int cols[] = new int[]{ Appointment.OBJECT_ID };
-		
+
 		listAppointment(getWebConversation(), appointmentFolderId, cols, start, end, timeZone, false, PROTOCOL + getHostName(), getSessionId());
 	}
-	
+
 	public void testShowAllAppointmentWhereIAmParticipant() throws Exception {
 		final Date start = new Date(System.currentTimeMillis()-(dayInMillis*7));
 		final Date end = new Date(System.currentTimeMillis()+(dayInMillis*7));
-		
+
 		final int cols[] = new int[]{ Appointment.OBJECT_ID };
-		
+
 		listAppointment(getWebConversation(), appointmentFolderId, cols, start, end, timeZone, true, PROTOCOL + getHostName(), getSessionId());
 	}
-	
+
 	public void testShowFullTimeAppointments() throws Exception {
 		final int cols[] = new int[]{ Appointment.OBJECT_ID };
-		
+
 		Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 		calendar.setTimeInMillis(startTime);
 		calendar.set(Calendar.HOUR_OF_DAY, 0);
 		calendar.set(Calendar.MINUTE, 0);
 		calendar.set(Calendar.SECOND, 0);
 		calendar.set(Calendar.MILLISECOND, 0);
-		
+
 		final Date startDate = calendar.getTime();
-		
+
 		calendar.add(Calendar.DAY_OF_MONTH, 1);
-		
+
 		final Date endDate = calendar.getTime();
-		
+
 		final Appointment appointmentObj = createAppointmentObject("testShowFullTimeAppointments");
 		appointmentObj.setStartDate(startDate);
 		appointmentObj.setEndDate(endDate);
 		appointmentObj.setFullTime(true);
 		appointmentObj.setIgnoreConflicts(true);
 		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
-		
+
 		calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 		calendar.set(Calendar.HOUR_OF_DAY, 0);
 		calendar.set(Calendar.MINUTE, 0);
 		calendar.set(Calendar.SECOND, 0);
 		calendar.set(Calendar.MILLISECOND, 0);
-		
+
 		Date start = calendar.getTime();
 		Date end = new Date(start.getTime()+dayInMillis);
-		
+
 		Appointment[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, cols, start, end, timeZone, false, getHostName(), getSessionId());
 		boolean found = false;
 		for (int a = 0; a < appointmentArray.length; a++) {
@@ -231,7 +231,7 @@ public class AllTest extends AppointmentTest {
 			}
 		}
 		assertTrue("appointment not found in day view", found);
-		
+
         // one day less
 		start = new Date(calendar.getTimeInMillis()-dayInMillis);
 		end = new Date(start.getTime()+dayInMillis);
@@ -243,7 +243,7 @@ public class AllTest extends AppointmentTest {
 			}
 		}
 		assertFalse("appointment found one day before start date in day view", found);
-		
+
 		// one day more
 		start = new Date(calendar.getTimeInMillis()+dayInMillis);
 		end = new Date(start.getTime()+dayInMillis);
@@ -314,7 +314,7 @@ public class AllTest extends AppointmentTest {
                 assertNotNull(objectData.opt(2));
             }
         } finally {
-            deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());    
+            deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());
         }
     }
 }

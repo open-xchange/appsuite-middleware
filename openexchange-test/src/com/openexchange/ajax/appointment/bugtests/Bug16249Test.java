@@ -83,7 +83,7 @@ import com.openexchange.tools.URLParameter;
 
 /**
  * {@link Bug16249Test}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Bug16249Test extends AttachmentTest {
@@ -118,16 +118,16 @@ public class Bug16249Test extends AttachmentTest {
 
         appointmentId = insertAppointment(getWebConversation(), a, timeZone, getHostName(), getSessionId());
         Date beforeAttach = loadAppointment(getWebConversation(), appointmentId, folderId, timeZone, getHostName(), getSessionId()).getLastModified();
-        
+
         Response res = attach(getWebConversation(), getSessionId(), folderId, appointmentId, Types.APPOINTMENT, testFile);
         int attachmentId = ((JSONArray)res.getData()).getInt(0);
 
         Date afterAttach = loadAppointment(getWebConversation(), appointmentId, folderId, timeZone, getHostName(), getSessionId()).getLastModified();
-        
+
         detach(getWebConversation(), getSessionId(), folderId, appointmentId, Types.APPOINTMENT, new int[]{attachmentId});
-        
+
         Date afterDetach = loadAppointment(getWebConversation(), appointmentId, folderId, timeZone, getHostName(), getSessionId()).getLastModified();
-        
+
         assertTrue("Wrong last modified after attach", beforeAttach.compareTo(afterAttach) < 0);
         assertTrue("Wrong last modified after detach", beforeAttach.compareTo(afterDetach) < 0);
         assertTrue("Wrong last modified after detach", afterAttach.compareTo(afterDetach) < 0);

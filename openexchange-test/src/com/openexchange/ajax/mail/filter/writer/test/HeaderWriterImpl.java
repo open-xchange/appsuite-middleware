@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.filter.writer.test;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -67,34 +66,34 @@ import com.openexchange.ajax.mail.filter.writer.comparison.ComparisonWriterFacto
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class HeaderWriterImpl implements TestWriter {
-	
+
 	public JSONObject writeTest(final String name, final AbstractTest abstractTest) throws JSONException {
 		final JSONObject jsonObj = new JSONObject();
 		final HeaderTest headerTest = (HeaderTest)abstractTest;
-		
+
 		jsonObj.put("id", name);
-		
+
 		final AbstractComparison abstractComp = headerTest.getComparison();
 		final String comparisonName = abstractComp.getName();
 		final ComparisonWriter compWriter = ComparisonWriterFactory.getWriter(comparisonName);
 		compWriter.writeComparison(comparisonName, abstractComp, jsonObj);
-		
+
 		final JSONArray jsonHeaderArray = new JSONArray();
 		final JSONArray jsonValueArray = new JSONArray();
-		
+
 		final String[] headers = headerTest.getHeaders();
 		final String[] values = headerTest.getValues();
-		
+
 		for (int a = 0; a < headers.length; a++) {
 			jsonHeaderArray.put(headers[a]);
-		}	
+		}
 		jsonObj.put("headers", jsonHeaderArray);
 
 		for (int a = 0; a < values.length; a++) {
 			jsonValueArray.put(values[a]);
-		}		
+		}
 		jsonObj.put("values", jsonValueArray);
-		
+
 		return jsonObj;
 	}
 }

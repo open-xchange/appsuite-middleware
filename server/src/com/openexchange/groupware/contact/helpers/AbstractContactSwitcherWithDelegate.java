@@ -625,15 +625,18 @@ public class AbstractContactSwitcherWithDelegate implements ContactSwitcher {
     public Object userfield20(final Object... objects) throws OXException {
 		return delegate.userfield20(objects);
 	}
-	
+
+    @Override
     public Object numberofimages(Object... objects) throws OXException {
         return delegate.numberofimages(objects);
     }
 
+    @Override
     public Object lastmodifiedofnewestattachment(Object... objects) throws OXException {
         return delegate.lastmodifiedofnewestattachment(objects);
     }
 
+    @Override
     public Object usecount(Object... objects) throws OXException {
         return delegate.usecount(objects);
     }

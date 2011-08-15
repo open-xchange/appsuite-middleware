@@ -65,7 +65,7 @@ import com.openexchange.user.UserService;
  */
 public final class ScriptPasswordChangeActivator extends DeferredActivator {
 
-    private ServiceRegistration serviceRegistration;
+    private ServiceRegistration<PasswordChangeService> serviceRegistration;
 
     /**
      * Initializes a new {@link ScriptPasswordChangeActivator}
@@ -108,7 +108,7 @@ public final class ScriptPasswordChangeActivator extends DeferredActivator {
             }
         }
         if (serviceRegistration == null) {
-            serviceRegistration = context.registerService(PasswordChangeService.class.getName(), new ScriptPasswordChange(), null);
+            serviceRegistration = context.registerService(PasswordChangeService.class, new ScriptPasswordChange(), null);
         }
     }
 

@@ -146,7 +146,7 @@ public class StateTest extends TestCase {
 
     public void testAppAcceptRespectsOwnerFlagForOwner() {
         assertRespectsOwnerFlag(
-            new AppointmentState(null, null, State.Type.ACCEPTED)        
+            new AppointmentState(null, null, State.Type.ACCEPTED)
         );
     }
 
@@ -158,7 +158,7 @@ public class StateTest extends TestCase {
 
     public void testAppTentativeRespectsOwnerFlagForOwner() {
         assertRespectsOwnerFlag(
-            new AppointmentState(null, null, State.Type.TENTATIVELY_ACCEPTED)        
+            new AppointmentState(null, null, State.Type.TENTATIVELY_ACCEPTED)
         );
     }
 
@@ -176,7 +176,7 @@ public class StateTest extends TestCase {
 
     public void testTaskTentativeRespectsOwnerFlagForOwner() {
         assertRespectsOwnerFlag(
-            new TaskState(null, null, State.Type.TENTATIVELY_ACCEPTED)        
+            new TaskState(null, null, State.Type.TENTATIVELY_ACCEPTED)
         );
     }
 

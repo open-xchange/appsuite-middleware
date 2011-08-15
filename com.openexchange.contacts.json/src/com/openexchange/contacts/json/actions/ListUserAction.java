@@ -87,23 +87,23 @@ public class ListUserAction extends ContactAction {
         Date timestamp = new Date(0);
         Date lastModified = null;
         final TimeZone timeZone = req.getTimeZone();
-        
+
         final ContactInterface contactInterface = new RdbContactSQLImpl(session, ctx);
         final List<Contact> contacts = new ArrayList<Contact>();
         for (final int uid : uids) {
-            final Contact contact = contactInterface.getUserById(uid);                 
+            final Contact contact = contactInterface.getUserById(uid);
             lastModified = contact.getLastModified();
-            
+
             // Correct last modified and creation date with users timezone
             contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
             contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
-            contacts.add(contact);       
-            
+            contacts.add(contact);
+
             if (lastModified != null && timestamp.before(lastModified)) {
                 timestamp = lastModified;
             }
         }
-     
+        
         return new AJAXRequestResult(contacts, timestamp, "contact");
     }
 

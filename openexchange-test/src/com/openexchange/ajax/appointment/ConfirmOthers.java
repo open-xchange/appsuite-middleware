@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.ajax.folder.Create.ocl;
 import java.util.Calendar;
 import java.util.Date;
@@ -126,7 +125,7 @@ public class ConfirmOthers extends AbstractAJAXSession {
                 OCLPermission.ADMIN_PERMISSION) });
 
         Participant external = new ExternalUserParticipant("test@example.invalid");
-        
+
         CommonInsertResponse response = clientA.execute(new com.openexchange.ajax.folder.actions.UpdateRequest(API.OX_OLD, folder));
         response.fillObject(folder);
 
@@ -162,7 +161,7 @@ public class ConfirmOthers extends AbstractAJAXSession {
             }
         }
     }
-    
+
     public void testConfirmOthersNotAllowed() throws Exception {
         clientC.execute(new ConfirmRequest(folder.getObjectID(), appointment.getObjectID(), Appointment.ACCEPT, "yap!", userIdA, false));
         GetResponse getResponse = clientA.execute(new GetRequest(folder.getObjectID(), appointment.getObjectID()));
@@ -175,7 +174,7 @@ public class ConfirmOthers extends AbstractAJAXSession {
             }
         }
     }
-    
+
     public void testConfirmExternal() throws Exception {
         clientC.execute(new ConfirmRequest(clientC.getValues().getPrivateAppointmentFolder(), appointment.getObjectID(), Appointment.TENTATIVE, "maybe", "test@example.invalid", false));
         GetResponse getResponse = clientC.execute(new GetRequest(clientC.getValues().getPrivateAppointmentFolder(), appointment.getObjectID()));

@@ -61,7 +61,7 @@ import com.openexchange.passwordchange.service.PasswordChange;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
-public final class PasswordChangeCustomizer implements ServiceTrackerCustomizer {
+public final class PasswordChangeCustomizer implements ServiceTrackerCustomizer<PasswordChangeService,PasswordChangeService> {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(PasswordChangeCustomizer.class);
@@ -77,30 +77,28 @@ public final class PasswordChangeCustomizer implements ServiceTrackerCustomizer 
 	}
 
 	@Override
-    public Object addingService(final ServiceReference reference) {
-		final Object addedService = context.getService(reference);
+    public PasswordChangeService addingService(final ServiceReference<PasswordChangeService> reference) {
+		final PasswordChangeService addedService = context.getService(reference);
 		if (null == addedService) {
 			LOG.warn("Added service is null!", new Throwable());
 		}
-		if (addedService instanceof PasswordChangeService) {
-			if (PasswordChange.getService() == null) {
-				PasswordChange.setService((PasswordChangeService) addedService);
-			} else {
-				LOG.error("Several password change services found. Remove all except one!", new Throwable());
-			}
+		if (PasswordChange.getService() == null) {
+			PasswordChange.setService(addedService);
+		} else {
+			LOG.error("Several password change services found. Remove all except one!", new Throwable());
 		}
 		return addedService;
 	}
 
 	@Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<PasswordChangeService> reference, final PasswordChangeService service) {
 		if (LOG.isTraceEnabled()) {
 			LOG.trace("UserPasswordChangeCustomizer.modifiedService()");
 		}
 	}
 
 	@Override
-    public void removedService(final ServiceReference reference, final Object service) {
+    public void removedService(final ServiceReference<PasswordChangeService> reference, final PasswordChangeService service) {
 		try {
 			if (PasswordChange.getService() == service) {
 				PasswordChange.setService(null);

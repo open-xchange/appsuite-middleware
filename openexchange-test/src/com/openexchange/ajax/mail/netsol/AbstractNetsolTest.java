@@ -64,15 +64,15 @@ import com.openexchange.mail.MailListField;
 
 /**
  * {@link AbstractNetsolTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public abstract class AbstractNetsolTest extends AbstractMailTest {
 
 	/**
 	 * Initializes a new {@link AbstractNetsolTest}
-	 * 
+	 *
 	 * @param name
 	 */
 	protected AbstractNetsolTest(final String name) {

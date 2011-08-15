@@ -7,10 +7,10 @@ public class TermSearchTest extends AbstractManagedContactTest {
 	public TermSearchTest(String name) {
 		super(name);
 	}
-	
+
 	public void testSearchForFirstLetter() throws Exception{
 		new JSONObject("{ \"AND\" : [\"yomiLastName >= A\", \"yomiLastName < B\"] }");
-		
+
 	}
 
 	public void testSearchForAll() throws Exception{
@@ -21,7 +21,7 @@ public class TermSearchTest extends AbstractManagedContactTest {
 				"\"yomiCompany = Peter\"," +
 				"]" +
 			"}");
-		
+
 	}
 
 }

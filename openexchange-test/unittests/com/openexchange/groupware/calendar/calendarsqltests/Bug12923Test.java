@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 
 
@@ -87,7 +86,7 @@ public class Bug12923Test extends CalendarSqlTest {
             }
 
             CalendarDataObject appointmentInTargetFolder = appointments.load(objectId, sharedFolderId);
-            
+
             assertNotNull("Appointment should not be null", appointmentInTargetFolder);
             assertEquals("Unexpected number of users.", 1, appointmentInTargetFolder.getUsers().length);
             assertEquals("Unexpected number of participants.", 1, appointmentInTargetFolder.getParticipants().length);

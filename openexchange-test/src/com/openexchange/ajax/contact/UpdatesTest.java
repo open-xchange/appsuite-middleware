@@ -7,16 +7,16 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.groupware.container.Contact;
 
 public class UpdatesTest extends AbstractContactTest {
-	
+
 	public UpdatesTest(final String name) {
 		super(name);
 	}
-	
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
-	
+
 	public void testUpdates() throws Exception {
 		listModifiedAppointment(contactFolderId, new Date(0));
 	}

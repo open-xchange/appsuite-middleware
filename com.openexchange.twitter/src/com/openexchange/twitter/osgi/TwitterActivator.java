@@ -66,9 +66,9 @@ import com.openexchange.twitter.internal.TwitterServiceImpl;
  */
 public final class TwitterActivator implements BundleActivator {
 
-    private List<ServiceTracker> trackers;
+    private List<ServiceTracker<?,?>> trackers;
 
-    private List<ServiceRegistration> registrations;
+    private List<ServiceRegistration<?>> registrations;
 
     /**
      * Initializes a new {@link TwitterActivator}.
@@ -87,17 +87,17 @@ public final class TwitterActivator implements BundleActivator {
             /*
              * Service trackers
              */
-            trackers = new ArrayList<ServiceTracker>(1);
-            trackers.add(new ServiceTracker(context, ConfigurationService.class.getName(), new ConfigurationServiceTrackerCustomizer(
+            trackers = new ArrayList<ServiceTracker<?,?>>(1);
+            trackers.add(new ServiceTracker<ConfigurationService,ConfigurationService>(context, ConfigurationService.class, new ConfigurationServiceTrackerCustomizer(
                 context)));
-            for (final ServiceTracker tracker : trackers) {
+            for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.open();
             }
             /*
              * Register
              */
-            registrations = new ArrayList<ServiceRegistration>(1);
-            registrations.add(context.registerService(TwitterService.class.getName(), new TwitterServiceImpl(), null));
+            registrations = new ArrayList<ServiceRegistration<?>>(1);
+            registrations.add(context.registerService(TwitterService.class, new TwitterServiceImpl(), null));
         } catch (final Exception e) {
             log.error("Failed start-up of bundle com.openexchange.twitter: " + e.getMessage(), e);
             throw e;
@@ -115,7 +115,7 @@ public final class TwitterActivator implements BundleActivator {
              * Unregister
              */
             if (null != registrations) {
-                for (final ServiceRegistration registration : registrations) {
+                for (final ServiceRegistration<?> registration : registrations) {
                     registration.unregister();
                 }
                 registrations = null;
@@ -124,7 +124,7 @@ public final class TwitterActivator implements BundleActivator {
              * Close trackers
              */
             if (null != trackers) {
-                for (final ServiceTracker tracker : trackers) {
+                for (final ServiceTracker<?,?> tracker : trackers) {
                     tracker.close();
                 }
                 trackers = null;

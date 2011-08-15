@@ -18,14 +18,14 @@ public class GetContactForUserRequest extends AbstractContactRequest<GetResponse
 		this.failOnError = failOnError;
 		this.timezone = tz;
 	}
-	
+
 	public Method getMethod() {
 		return Method.GET;
 	}
 
 	public Parameter[] getParameters() throws IOException, JSONException {
 		return new Params(
-			"action", "getuser", 
+			"action", "getuser",
 			"id",this.id)
 		.toArray();
 	}

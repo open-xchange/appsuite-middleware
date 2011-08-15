@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.infostore;
 
-import com.openexchange.exception.OXException;
 import junit.framework.TestCase;
 
 import com.openexchange.ajax.parser.InfostoreParser;

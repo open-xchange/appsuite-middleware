@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.actions;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -58,17 +57,17 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
  * {@link ClearRequest}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
- * 
+ *
  */
 public class CopyResponse extends AbstractAJAXResponse {
 
 	protected CopyResponse(Response response) {
 		super(response);
-		
+
 	}
-	
+
 	public String getFolder() throws JSONException{
         JSONObject data = (JSONObject) getData();
         return data.getString("folder_id");

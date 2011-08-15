@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.actions;
 
-import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONException;
@@ -60,7 +59,7 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
  * {@link GetRequest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class GetRequest extends AbstractMailRequest<GetResponse> {

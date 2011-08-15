@@ -7240,7 +7240,7 @@ public class ContactObjectTest extends CommonObjectTest {
         assertTrue(object.contains(IMAGE1));
         assertTrue(object.containsImage1());
         assertTrue(Arrays.equals(new byte[]{1,2,3}, (byte[]) object.get(IMAGE1)));
-        
+
         object.set(IMAGE1,new byte[]{3,2,1});
         assertTrue(Arrays.equals(new byte[]{3,2,1}, object.getImage1()));
 
@@ -7265,7 +7265,7 @@ public class ContactObjectTest extends CommonObjectTest {
         object.remove(TELEPHONE_BUSINESS1);
         assertFalse(object.contains(TELEPHONE_BUSINESS1));
         assertFalse(object.containsTelephoneBusiness1());
-        
+
         // MARK_AS_DISTRIBUTIONLIST
         assertFalse(object.contains(MARK_AS_DISTRIBUTIONLIST));
         assertFalse(object.containsMarkAsDistributionlist());

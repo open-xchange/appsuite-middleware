@@ -58,7 +58,7 @@ import com.openexchange.test.fixtures.transformators.FolderTypeTransformator;
 
 /**
  * {@link FolderFixtureFactory}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FolderFixtureFactory implements FixtureFactory<FolderObject> {
@@ -68,7 +68,7 @@ public class FolderFixtureFactory implements FixtureFactory<FolderObject> {
     public FolderFixtureFactory(FixtureLoader fixtureLoader) {
         this.fixtureLoader = fixtureLoader;
     }
-    
+
     public Fixtures<FolderObject> createFixture(String fixtureName, Map<String, Map<String, String>> entries) {
         return new FolderFixtures(entries, fixtureLoader );
     }

@@ -79,7 +79,7 @@ public class MultiMailFixtureFactory implements FixtureFactory<CustomMailAccount
         public MultiMailFixtures(final String fixtureName, final Map<String, Map<String, String>> entries, FixtureLoader fixtureLoader) {
             super(CustomMailAccount.class, entries, fixtureLoader);
             this.entries = entries;
-            
+
             addTransformator(new BooleanTransformator(), "unified_inbox_enabled");
             addTransformator(new BooleanTransformator(), "mail_secure");
             addTransformator(new BooleanTransformator(), "transport_secure");
@@ -93,11 +93,11 @@ public class MultiMailFixtureFactory implements FixtureFactory<CustomMailAccount
             if (null == values) {
                 throw new FixtureException("Entry with name " + entryName + " not found");
             }
-            
+
             defaults(values);
-            
+
             final CustomMailAccount customMailAccount = new CustomMailAccount();
-                        
+
             apply(customMailAccount, values);
 
             final Fixture<CustomMailAccount> fixture = new Fixture<CustomMailAccount>(customMailAccount, values.keySet().toArray(new String[values.size()]), values);
@@ -107,7 +107,7 @@ public class MultiMailFixtureFactory implements FixtureFactory<CustomMailAccount
         }
 
         private void defaults(final Map<String, String> values) {
-        
+
         }
     }
 }

@@ -96,7 +96,7 @@ public class AdvancedSearchAction extends ContactAction {
         Date timestamp = new Date(0);
         final JSONObject json = (JSONObject) req.getData();
         final TimeZone timeZone = req.getTimeZone();
-        
+
         JSONArray filterContent;
         SearchIterator<Contact> it = null;
         final List<Contact> contacts = new ArrayList<Contact>();
@@ -109,12 +109,12 @@ public class AdvancedSearchAction extends ContactAction {
             while (it.hasNext()) {
                 final Contact contact = it.next();
                 lastModified = contact.getLastModified();
-                
+
                 // Correct last modified and creation date with users timezone
                 contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
                 contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
-                contacts.add(contact);                
-                
+                contacts.add(contact);
+
                 if (lastModified != null && timestamp.before(lastModified)) {
                     timestamp = lastModified;
                 }
@@ -126,7 +126,7 @@ public class AdvancedSearchAction extends ContactAction {
                 it.close();
             }
         }
-        
+
         return new AJAXRequestResult(contacts, lastModified, "contact");
     }
 

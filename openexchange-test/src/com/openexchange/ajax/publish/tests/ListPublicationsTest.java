@@ -81,24 +81,24 @@ public class ListPublicationsTest extends AbstractPublicationTest {
         final Contact contact = createDefaultContactFolderWithOneContact();
         String folderID = String.valueOf(contact.getParentFolderID() );
         String module = "contacts";
-        
+
         SimPublicationTargetDiscoveryService discovery = new SimPublicationTargetDiscoveryService();
         pubMgr.setPublicationTargetDiscoveryService(discovery);
-        
+
         Publication expected = generatePublication(module, folderID, discovery );
         expected.setDisplayName("This will be changed");
         NewPublicationRequest newReq = new NewPublicationRequest(expected);
         NewPublicationResponse newResp = getClient().execute(newReq);
         assertFalse("Precondition: Should be able to create a publication", newResp.hasError());
         expected.setId(newResp.getId());
-        
+
         ListPublicationsRequest listReq = new ListPublicationsRequest(
-            Arrays.asList(I(expected.getId())), 
+            Arrays.asList(I(expected.getId())),
             Arrays.asList("id","entity", "entityModule", "displayName", "target"));
         ListPublicationsResponse listResp = getClient().execute(listReq);
-        
+
         assertEquals("Should only find one element", 1, listResp.getList().size());
-        
+
         JSONArray actual = listResp.getList().get(0);
         assertEquals("Should have same publication ID", expected.getId(), actual.getInt(0));
         assertEquals(expected.getEntityId(), actual.getJSONObject(1).get("folder"));
@@ -106,15 +106,15 @@ public class ListPublicationsTest extends AbstractPublicationTest {
         assertFalse("Should change display name", expected.getDisplayName().equals(actual.getString(3)));
         assertEquals("Should have same target ID", expected.getTarget().getId(), actual.getString(4));
     }
-    
+
     public void testListExistingPublicationOfEmptyFolder() throws OXException, IOException, SAXException, JSONException, OXException, OXException{
         final FolderObject contact = createDefaultContactFolder();
         String folderID = String.valueOf(contact.getObjectID() );
         String module = "contacts";
-        
+
         SimPublicationTargetDiscoveryService discovery = new SimPublicationTargetDiscoveryService();
         pubMgr.setPublicationTargetDiscoveryService(discovery);
-        
+
         Publication expected = generatePublication(module, folderID , discovery);
         expected.setDisplayName("This will be changed");
 
@@ -122,14 +122,14 @@ public class ListPublicationsTest extends AbstractPublicationTest {
         NewPublicationResponse newResp = (NewPublicationResponse) pubMgr.getLastResponse();
         assertFalse("Precondition: Should be able to create a publication", newResp.hasError());
         expected.setId(newResp.getId());
-        
+
         pubMgr.listAction(
-            Arrays.asList(I(expected.getId())), 
+            Arrays.asList(I(expected.getId())),
             Arrays.asList("id","entity", "entityModule", "displayName", "target"));
         ListPublicationsResponse listResp = (ListPublicationsResponse) pubMgr.getLastResponse();
-        
+
         assertEquals("Should only find one element", 1, listResp.getList().size());
-        
+
         JSONArray actual = listResp.getList().get(0);
         assertEquals("Should have same publication ID", expected.getId(), actual.getInt(0));
         assertEquals(expected.getEntityId(), actual.getJSONObject(1).get("folder"));

@@ -22,7 +22,7 @@ import com.openexchange.sessiond.impl.SessionObject;
 
 /**
  * An abstract class which contains methods used for alle MessageStorage based tests
- * 
+ *
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  *
  */
@@ -36,28 +36,28 @@ public abstract class MessageStorageTest extends AbstractMailTest {
 
     protected static final MailField[] FIELDS_ID = { MailField.ID };
 
-//    private static final MailField[] RELEVANT_FIELD = { MailField.ID, MailField.FOLDER_ID, MailField.CONTENT_TYPE, MailField.FROM, MailField.TO, MailField.CC, 
+//    private static final MailField[] RELEVANT_FIELD = { MailField.ID, MailField.FOLDER_ID, MailField.CONTENT_TYPE, MailField.FROM, MailField.TO, MailField.CC,
 //        MailField.BCC, MailField.SUBJECT, MailField.SIZE, MailField.SENT_DATE, MailField.RECEIVED_DATE, MailField.FLAGS, MailField.THREAD_LEVEL,
 //        MailField.DISPOSITION_NOTIFICATION_TO, MailField.PRIORITY, MailField.COLOR_LABEL, MailField.HEADERS, MailField.BODY };
-    
+
     protected static final MailField[] FIELDS_MORE = { MailField.ID, MailField.CONTENT_TYPE, MailField.FLAGS, MailField.BODY };
-    
+
     protected MailAccess<?, ?> mailAccess = null;
-    
+
     protected MailMessage[] testmessages = null;
 
     /**
-     * 
+     *
      */
     protected MessageStorageTest() {
         super();
     }
-    
+
     protected MessageStorageTest(final String name) {
         super(name);
     }
 
-    
+
     protected static MailField[][] generateVariations() {
         final MailField[] values = MailField.values();
         final int number = 1 << values.length ;
@@ -104,7 +104,7 @@ public abstract class MessageStorageTest extends AbstractMailTest {
     /**
      * Compares if two MailMessage object are equal. Only the fields specified
      * are checked
-     * 
+     *
      * @param mail1
      * @param mail2
      * @param fields1
@@ -125,19 +125,19 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         checkFieldsSet(mail2, set2, mail2name, false);
 
         final Set<MailField> comparefields;
-        
+
         if (set1.contains(MailField.FULL) && !set2.contains(MailField.FULL)) {
             comparefields = set2;
         } else if (set2.contains(MailField.FULL) && !set1.contains(MailField.FULL)) {
             comparefields = set1;
         } else if (set1.size() > set2.size()){
-            comparefields = EnumSet.copyOf(set1); 
+            comparefields = EnumSet.copyOf(set1);
             comparefields.retainAll(set2);
         } else {
             comparefields = EnumSet.copyOf(set2);
             set2.retainAll(set1);
         }
-        
+
         if (comparefields.contains(MailField.ID) || comparefields.contains(MailField.FULL)) {
             check("Mail ID", mail1.getMailId(), mail2.getMailId(), mail1name, mail2name);
         }
@@ -207,9 +207,9 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         if (comparefields.contains(MailField.FOLDER_ID) || comparefields.contains(MailField.FULL)) {
             check("Folder id", mail1.getFolder(), mail2.getFolder(), mail1name, mail2name);
         }
-        
+
     }
-    
+
     /**
      * @param session
      * @param mailAccess
@@ -219,10 +219,10 @@ public abstract class MessageStorageTest extends AbstractMailTest {
     protected String createTemporaryFolder(final SessionObject session, final MailAccess<?, ?> mailAccess) throws OXException {
         return createTemporaryFolderAndGetFullname(session, mailAccess, "TemporaryFolder");
     }
-    
+
     /**
      * Creates a folder with tempFolderName under the inbox
-     * 
+     *
      * @param session
      * @param mailAccess
      * @param tempFolderName
@@ -288,7 +288,7 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         assertTrue(sb.toString(), equalsCheckWithNull(value1, value2));
     }
 
-    
+
     private void check(final String string, final int value1, final int value2, final String mail1name, final String mail2name) {
         final StringBuilder sb = new StringBuilder();
         sb.append(string);
@@ -317,7 +317,7 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         sb.append("''");
         assertTrue(sb.toString(), Arrays.equals(address1, address2));
     }
-    
+
     private void check(final String string, final long value1, final long value2, final String mail1name, final String mail2name) {
         final StringBuilder sb = new StringBuilder();
         sb.append(string);
@@ -332,7 +332,7 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         sb.append("''");
         assertTrue(sb.toString(), value1 == value2);
     }
-    
+
     private void check(final String string, final Object value1, final Object value2, final String mail1name, final String mail2name) {
         final StringBuilder sb = new StringBuilder();
         sb.append(string);
@@ -501,7 +501,7 @@ public abstract class MessageStorageTest extends AbstractMailTest {
             return headerCollectiona.equals(headerCollectionb);
         }
     }
-    
+
     private boolean equalsCheckWithNull(final Object a, final Object b) {
         if (null == a) {
             if (null == b) {

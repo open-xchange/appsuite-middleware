@@ -136,7 +136,7 @@ public class CopyAttachmentsForChangeExceptionsTest extends TestCase {
         exception.setRecurrencePosition(3);
         exception.setStartDate(D("13/02/2008 13:00"));
         exception.setEndDate(D("13/02/2008 15:00"));
-        
+
         appointments.save(exception);
 
         AttachmentMetadata attachment = new AttachmentImpl();
@@ -165,7 +165,7 @@ public class CopyAttachmentsForChangeExceptionsTest extends TestCase {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         int i = 0;
         while((i = is.read()) != -1) {
-            out.write(i);    
+            out.write(i);
         }
         String data = out.toString("UTF-8");
         assertEquals("Hallo", data);

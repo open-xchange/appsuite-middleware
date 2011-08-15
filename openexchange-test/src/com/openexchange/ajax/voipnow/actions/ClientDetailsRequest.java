@@ -49,13 +49,12 @@
 
 package com.openexchange.ajax.voipnow.actions;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 
 /**
  * {@link ClientDetailsRequest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ClientDetailsRequest extends AbstractVoipNowRequest<ClientDetailsResponse> {

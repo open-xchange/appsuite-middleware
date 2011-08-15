@@ -57,16 +57,16 @@ import java.util.Arrays;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class AddFlags extends AbstractAction {
-	
+
 	public static final String ADD_FLAGS = "addflags";
-	
+
 	protected String[] flags;
-	
+
 	public AddFlags(final String[] flags) {
 		name = ADD_FLAGS;
 		this.flags = flags;
 	}
-	
+
 	public String[] getFlags() {
 		return flags;
 	}
@@ -95,7 +95,7 @@ public class AddFlags extends AbstractAction {
 				return false;
 		} else if (!name.equals(other.getName()))
 				return false;
-		
+
 		return true;
 	}
 }

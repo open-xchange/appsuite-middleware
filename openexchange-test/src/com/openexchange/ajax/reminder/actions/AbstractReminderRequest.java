@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.reminder.actions;
 
-import com.openexchange.exception.OXException;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;

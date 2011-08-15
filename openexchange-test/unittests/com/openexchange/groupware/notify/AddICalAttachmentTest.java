@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.notify;
 
-import com.openexchange.exception.OXException;
 import java.util.Date;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.mail.mime.ContentType;

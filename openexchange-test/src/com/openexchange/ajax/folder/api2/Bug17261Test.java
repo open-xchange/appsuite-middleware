@@ -34,38 +34,38 @@ public class Bug17261Test extends AbstractAJAXSession {
         folder = ftm1.generateFolder(folderName, FolderObject.CONTACT, 1, new int[] {client.getValues().getUserId()});
         final InsertRequest insertFolderReq = new InsertRequest(API.OUTLOOK, folder, false);
         final InsertResponse insertFolderResp = client.execute(insertFolderReq);
-        
+
         assertNull("Inserting folder caused exception.", insertFolderResp.getException());
-        insertFolderResp.fillObject(folder);   
+        insertFolderResp.fillObject(folder);
     }
-    
+
     public void testInsertingFolderWithSameNameFromSecondUser() throws Exception {
         ftm2 = new FolderTestManager(client2);
         secondFolder = ftm2.generateFolder(folderName, FolderObject.CONTACT, 1, new int[] {client2.getValues().getUserId()});
         final InsertRequest insertSecondFolderReq = new InsertRequest(API.OUTLOOK, secondFolder, false);
         final InsertResponse insertSecondFolderResp = client2.execute(insertSecondFolderReq);
-        
+
         assertNull("Inserting second folder caused exception.", insertSecondFolderResp.getException());
         insertSecondFolderResp.fillObject(secondFolder);
-        
+
         ftm2.deleteFolderOnServer(secondFolder);
     }
-    
+
     public void testMakeFirstFolderVisibleAndTryAgain() throws Exception {
-        FolderTools.shareFolder(client, API.OUTLOOK, folder.getObjectID(), client2.getValues().getUserId(), 
+        FolderTools.shareFolder(client, API.OUTLOOK, folder.getObjectID(), client2.getValues().getUserId(),
             OCLPermission.READ_FOLDER,
             OCLPermission.READ_ALL_OBJECTS,
             OCLPermission.NO_PERMISSIONS,
             OCLPermission.NO_PERMISSIONS);
-        
+
         ftm2 = new FolderTestManager(client2);
         secondFolder = ftm2.generateFolder(folderName, FolderObject.CONTACT, 1, new int[] {client2.getValues().getUserId()});
         final InsertRequest insertSecondFolderReq = new InsertRequest(API.OUTLOOK, secondFolder, false);
         final InsertResponse insertSecondFolderResp = client2.execute(insertSecondFolderReq);
-        
+
         assertNull("Inserting second folder should not cause an exception.", insertSecondFolderResp.getException());
         insertSecondFolderResp.fillObject(secondFolder);
-        
+
         ftm2.deleteFolderOnServer(secondFolder);
     }
 
@@ -73,10 +73,10 @@ public class Bug17261Test extends AbstractAJAXSession {
         secondFolder = ftm1.generateFolder(folderName, FolderObject.CONTACT, 1, new int[] {client.getValues().getUserId()});
         final InsertRequest insertSecondFolderReq = new InsertRequest(API.OUTLOOK, secondFolder, false);
         final InsertResponse insertSecondFolderResp = client2.execute(insertSecondFolderReq);
-        
+
         assertNotNull("Inserting second folder should cause an exception.", insertSecondFolderResp.getException());
         insertSecondFolderResp.fillObject(secondFolder);
-        
+
         if (secondFolder.getObjectID() > 0) {
             ftm1.deleteFolderOnServer(secondFolder);
         }
@@ -86,10 +86,10 @@ public class Bug17261Test extends AbstractAJAXSession {
     protected void tearDown() throws Exception {
         ftm1.deleteFolderOnServer(folder);
         client2.logout();
-        
+
         super.tearDown();
     }
-    
-    
+
+
 
 }

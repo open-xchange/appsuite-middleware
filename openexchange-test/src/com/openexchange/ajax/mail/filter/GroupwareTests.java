@@ -32,7 +32,7 @@ public class GroupwareTests extends AJAXTest {
     private static final String AUTHNAME = "sieve@777";
 
     private final static String HOSTNAME = "localhost";
-    
+
     private static final String LOGIN_URL = "/ajax/login";
 
     @Override
@@ -41,7 +41,7 @@ public class GroupwareTests extends AJAXTest {
         HttpUnitOptions.setScriptingEnabled(false);
         CookieProperties.setPathMatchingStrict(false);
         CookieProperties.addCookieListener(new CookieListener() {
-            
+
             public void cookieRejected(String cookieName, int reason, String attribute) {
                 System.out.println("Cookie: " + cookieName + " was rejected due to " + reason + " ; attribute " + attribute);
             }
@@ -78,7 +78,7 @@ public class GroupwareTests extends AJAXTest {
         System.out.println(json);
         return new WebconversationAndSessionID(conversation, (String)json.get(Login.PARAMETER_SESSION));
     }
-    
+
     @Override
     protected String getHostname() {
         return HOSTNAME;

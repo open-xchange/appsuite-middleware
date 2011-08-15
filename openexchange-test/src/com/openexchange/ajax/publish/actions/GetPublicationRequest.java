@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.publish.actions;
 
-import com.openexchange.exception.OXException;
 import java.util.LinkedList;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
@@ -58,13 +57,13 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
  * {@link GetPublicationRequest}
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class GetPublicationRequest extends AbstractPublicationRequest<GetPublicationResponse> {
 
     private int id;
-    
+
     public GetPublicationRequest() {
         super();
     }
@@ -73,7 +72,7 @@ public class GetPublicationRequest extends AbstractPublicationRequest<GetPublica
         this();
         setId(id);
     }
-    
+
     public void setId(int id) {
         this.id = id;
     }

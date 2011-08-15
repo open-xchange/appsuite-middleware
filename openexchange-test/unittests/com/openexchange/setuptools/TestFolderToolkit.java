@@ -167,7 +167,7 @@ public class TestFolderToolkit {
 
     /**
      * Shares the standard private Calendar Folder to a given userId with admin permission.
-     * 
+     *
      * @param session
      * @param ctx
      * @param otherUserId
@@ -193,10 +193,10 @@ public class TestFolderToolkit {
             OCLPermission.ADMIN_PERMISSION);
         sharePrivateFolder(session, ctx, otherUserId, folder, oclp);
     }
-    
+
     /**
      * Shares a given Calendar Folder to a given userId with the given permission.
-     * 
+     *
      * @param session
      * @param ctx
      * @param otherUserId
@@ -244,7 +244,7 @@ public class TestFolderToolkit {
 
     /**
      * Unshares the standard private Calendar Folder.
-     * 
+     *
      * @param session
      * @param ctx
      */
@@ -255,7 +255,7 @@ public class TestFolderToolkit {
 
     /**
      * Unshares a given Calendar Folder.
-     * 
+     *
      * @param session
      * @param ctx
      * @param folder

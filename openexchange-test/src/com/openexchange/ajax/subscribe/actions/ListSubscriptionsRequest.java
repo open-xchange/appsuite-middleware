@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.subscribe.actions;
 
-import com.openexchange.exception.OXException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -73,7 +72,7 @@ public class ListSubscriptionsRequest extends AbstractSubscriptionRequest<ListSu
     private List<String> columns; // a list of column names to load (id, entityId, entityModule, url, target)
 
     private Map<String, List<String>> dynamicColumns;
-    
+
     public void setIDs(List<Integer> iDs) {
         IDs = iDs;
     }
@@ -97,23 +96,23 @@ public class ListSubscriptionsRequest extends AbstractSubscriptionRequest<ListSu
     public Map<String, List<String>> getDynamicColumns() {
         return dynamicColumns;
     }
-    
+
     public ListSubscriptionsRequest(List<Integer> ids, List<String> columns){
         super();
         setIDs(ids);
         setColumns(columns);
     }
-    
+
     public ListSubscriptionsRequest(List<Integer> ids, List<String> columns, Map<String,List<String>> dynamicColumns){
         this(ids, columns);
         setDynamicColumns(dynamicColumns);
     }
-    
+
     public Object getBody() throws JSONException {
         return JSON.collection2jsonArray(getIDs());
     }
 
-    
+
     public Method getMethod() {
         return Method.PUT;
     }

@@ -60,20 +60,20 @@ import com.openexchange.oauth.OAuthService;
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class OAuthServiceRegisterer implements ServiceTrackerCustomizer {
+public class OAuthServiceRegisterer implements ServiceTrackerCustomizer<OAuthService,OAuthService> {
 
     private final BundleContext context;
     private final Activator activator;
 
-    public OAuthServiceRegisterer(BundleContext context, Activator activator) {
+    public OAuthServiceRegisterer(final BundleContext context, final Activator activator) {
         super();
         this.context = context;
         this.activator = activator;
     }
 
     @Override
-    public Object addingService(ServiceReference reference) {
-        OAuthService oauth = (OAuthService) context.getService(reference);
+    public OAuthService addingService(final ServiceReference<OAuthService> reference) {
+        final OAuthService oauth = context.getService(reference);
         activator.setOauthService(oauth);
         activator.registerServices();
         return oauth;
@@ -82,12 +82,12 @@ public class OAuthServiceRegisterer implements ServiceTrackerCustomizer {
     }
 
     @Override
-    public void modifiedService(ServiceReference reference, Object service) {
+    public void modifiedService(final ServiceReference<OAuthService> reference, final OAuthService service) {
         //nothing to do here
     }
 
     @Override
-    public void removedService(ServiceReference reference, Object service) {
+    public void removedService(final ServiceReference<OAuthService> reference, final OAuthService service) {
         activator.setOauthService(null);
         context.ungetService(reference);
     }

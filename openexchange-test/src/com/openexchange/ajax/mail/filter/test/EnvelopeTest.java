@@ -57,30 +57,30 @@ import com.openexchange.ajax.mail.filter.comparison.AbstractComparison;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class EnvelopeTest extends AbstractTest {
-	
+
 	public static final String ENVELOPE = "envelope";
-	
+
 	protected AbstractComparison comp;
-	
+
 	protected String[] headers;
-	
+
 	protected String[] values;
-	
+
 	public EnvelopeTest(final AbstractComparison comp, final String[] headers, final String[] values) {
 		name = ENVELOPE;
 		this.comp = comp;
 		this.headers = headers;
 		this.values = values;
 	}
-	
+
 	public AbstractComparison getComparison() {
 		return comp;
 	}
-	
+
 	public String[] getHeaders() {
 		return headers;
 	}
-	
+
 	public String[] getValues() {
 		return values;
 	}

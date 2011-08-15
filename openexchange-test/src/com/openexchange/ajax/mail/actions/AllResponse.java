@@ -67,8 +67,8 @@ public class AllResponse extends CommonAllResponse {
 	protected AllResponse(final Response response) {
         super(response);
     }
-	
-	public MailMessage[] getMailMessages(int[] columns) throws JSONException, AddressException, OXException{		
+
+	public MailMessage[] getMailMessages(int[] columns) throws JSONException, AddressException, OXException{
 		final JSONArray objectsArray = (JSONArray) getData();
 		MailMessage[] messages = new MailMessage[objectsArray.length()];
 		for (int i=0; i<objectsArray.length(); i++){
@@ -76,13 +76,13 @@ public class AllResponse extends CommonAllResponse {
 			MailMessage message = parse(oneMailAsArray, columns);
 			messages[i] = message;
 		}
-		
+
 		return messages;
 	}
-	
-	private MailMessage parse(JSONArray mailAsArray, int[] columns) throws JSONException, AddressException{		
+
+	private MailMessage parse(JSONArray mailAsArray, int[] columns) throws JSONException, AddressException{
 		MIMEMailMessage message = new MIMEMailMessage();
-		
+
 		for (int i=0; i<mailAsArray.length() && i<columns.length; i++){
 			// MailID
 			if (columns[i] == 600) message.setMailId((String)mailAsArray.get(i));
@@ -91,7 +91,7 @@ public class AllResponse extends CommonAllResponse {
 			// hasAttachments
 			else if (columns[i] == 602) message.setHasAttachment((Boolean)mailAsArray.get(i));
 			// From
-			else if (columns[i] == 603) handleInnerArrays(mailAsArray, message, i, "from");				
+			else if (columns[i] == 603) handleInnerArrays(mailAsArray, message, i, "from");
 			// Recipient_TO
 			else if (columns[i] == 604) handleInnerArrays(mailAsArray, message, i, "to");
 			// Recipient_CC
@@ -107,7 +107,7 @@ public class AllResponse extends CommonAllResponse {
 			// Received date
 			//else if (columns[i] == 610) message.setReceivedDate(new Date((Long)mailAsArray.get(i)));
 		}
-		
+
 		return message;
 	}
 
@@ -117,7 +117,7 @@ public class AllResponse extends CommonAllResponse {
 			JSONArray secondInnerArray = (JSONArray) innerArray.get(a);
 			for (int x=0; x<secondInnerArray.length(); x++){
 				String string ="";
-				if (null!= secondInnerArray.getString(x) && !"null".equals(secondInnerArray.getString(x))){ 
+				if (null!= secondInnerArray.getString(x) && !"null".equals(secondInnerArray.getString(x))){
 					string = secondInnerArray.getString(x);
 					if (string.contains("@")) {
 						if (type.equals("from")){

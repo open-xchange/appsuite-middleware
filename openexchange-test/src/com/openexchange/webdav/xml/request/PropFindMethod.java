@@ -45,15 +45,15 @@ import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public class PropFindMethod extends EntityEnclosingMethod {
-	
+
 	public PropFindMethod() {
 		super();
 	}
-	
+
 	public PropFindMethod(final String url) {
 		super(url);
 	}
-	
+
 	@Override
 	public String getName() {
 		return "PROPFIND";

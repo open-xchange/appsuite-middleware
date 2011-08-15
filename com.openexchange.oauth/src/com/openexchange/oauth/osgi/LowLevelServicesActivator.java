@@ -67,23 +67,23 @@ import com.openexchange.oauth.internal.groupware.OAuthDeleteListener;
  */
 public class LowLevelServicesActivator implements BundleActivator {
 
-    private final Stack<ServiceRegistration> registrations = new Stack<ServiceRegistration>();
-    private ServiceTracker tracker;
+    private final Stack<ServiceRegistration<?>> registrations = new Stack<ServiceRegistration<?>>();
+    private ServiceTracker<DatabaseService,DatabaseService> tracker;
 
     public LowLevelServicesActivator() {
         super();
     }
 
     @Override
-    public void start(BundleContext context) throws Exception {
+    public void start(final BundleContext context) throws Exception {
         registrations.push(context.registerService(CreateTableService.class.getName(), new CreateOAuthAccountTable(), null));
         registrations.push(context.registerService(DeleteListener.class.getName(), new OAuthDeleteListener(), null));
-        tracker = new ServiceTracker(context, DatabaseService.class.getName(), new UpdateTaskRegisterer(context));
+        tracker = new ServiceTracker<DatabaseService,DatabaseService>(context, DatabaseService.class, new UpdateTaskRegisterer(context));
         tracker.open();
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    public void stop(final BundleContext context) throws Exception {
         if (null != tracker) {
             tracker.close();
         }

@@ -60,7 +60,7 @@ import com.openexchange.push.internal.PushManagerRegistry;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PushManagerServiceTracker implements ServiceTrackerCustomizer {
+public final class PushManagerServiceTracker implements ServiceTrackerCustomizer<PushManagerService,PushManagerService> {
 
     private final BundleContext context;
 
@@ -75,9 +75,9 @@ public final class PushManagerServiceTracker implements ServiceTrackerCustomizer
     }
 
     @Override
-    public Object addingService(final ServiceReference reference) {
-        final Object service = context.getService(reference);
-        if (service instanceof PushManagerService && PushManagerRegistry.getInstance().addPushManager((PushManagerService) service)) {
+    public PushManagerService addingService(final ServiceReference<PushManagerService> reference) {
+        final PushManagerService service = context.getService(reference);
+        if (PushManagerRegistry.getInstance().addPushManager(service)) {
             final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(PushManagerServiceTracker.class))));
             log.info("Registered push manager: " + service.getClass().getName());
             return service;
@@ -90,15 +90,15 @@ public final class PushManagerServiceTracker implements ServiceTrackerCustomizer
     }
 
     @Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<PushManagerService> reference, final PushManagerService service) {
         // NOP
     }
 
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
+    public void removedService(final ServiceReference<PushManagerService> reference, final PushManagerService service) {
         if (null != service) {
             try {
-                PushManagerRegistry.getInstance().removePushManager((PushManagerService) service);
+                PushManagerRegistry.getInstance().removePushManager(service);
             } finally {
                 context.ungetService(reference);
             }

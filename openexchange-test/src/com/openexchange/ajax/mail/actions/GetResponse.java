@@ -72,9 +72,9 @@ import com.openexchange.messaging.MessagingExceptionCodes;
 
 /**
  * {@link GetResponse}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public class GetResponse extends AbstractAJAXResponse {
 
@@ -88,7 +88,7 @@ public class GetResponse extends AbstractAJAXResponse {
 
     /**
      * Parses an instance of {@link MailMessage} from response's data
-     * 
+     *
      * @param timeZone
      *            The user time zone
      * @return The parsed instance of {@link MailMessage}
@@ -109,7 +109,7 @@ public class GetResponse extends AbstractAJAXResponse {
         }
         return mail;
     }
-    
+
     public JSONArray getAttachments() throws JSONException {
         if (null == attachments) {
             final JSONObject jsonObj;

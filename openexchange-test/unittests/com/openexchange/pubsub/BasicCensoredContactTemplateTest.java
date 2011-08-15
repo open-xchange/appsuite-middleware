@@ -49,7 +49,6 @@
 
 package com.openexchange.pubsub;
 
-import com.openexchange.exception.OXException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Arrays;
@@ -110,45 +109,45 @@ public abstract class BasicCensoredContactTemplateTest extends BasicContactTempl
         SubscriptionSource source = getSubscriptionSource();
         MicroformatSubscribeService service = getSubscribeService();
         introduceToEachOther(service, source);
-    
+
         StringWriter writer = new StringWriter();
-    
+
         Contact expected = generateContact("");
         expected.setEmail1("this-will-need-to-be-censored-1@open-xchange.invalid");
         expected.setEmail2("this-will-need-to-be-censored-2@open-xchange.invalid");
         expected.setEmail3("this-will-need-to-be-censored-3@open-xchange.invalid");
         expected.setBirthday(new Date());
-    
+
         expected.setStreetBusiness("street_business");
         expected.setPostalCodeBusiness("postal_code_business");
         expected.setCityBusiness("city_business");
         expected.setCountryBusiness("country_business");
-    
+
         expected.setStreetHome("street_home");
         expected.setPostalCodeHome("postal_code_home");
         expected.setCityHome("city_home");
         expected.setCountryHome("country_home");
-    
+
         expected.setStreetOther("street_other");
         expected.setPostalCodeOther("postal_code_other");
         expected.setCityOther("city_other");
         expected.setCountryOther("country_other");
-    
+
         List<Contact> expecteds = Arrays.asList(expected);
-    
+
         OXTemplate templ = getTemplate();
         Map<String, Object> variables = getVariables();
         variables.put("contacts", expecteds);
         templ.process(variables, writer);
-    
+
         String htmlData = writer.toString();
-        
+
         Collection<Contact> actuals = service.getContent(new StringReader(htmlData));
-    
+
         assertEquals("Should return one contact", 1, actuals.size());
-    
+
         Contact actual = actuals.iterator().next();
-    
+
         for (int field : CENSORED_COLUMNS) {
             assertNull("This field needs to be censored: #" + field, actual.get(field));
         }

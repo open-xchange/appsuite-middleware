@@ -51,7 +51,7 @@ package com.openexchange.ajp13.coyote;
 
 /**
  * {@link ActionCode}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum ActionCode {
@@ -137,7 +137,7 @@ public enum ActionCode {
      */
     CLIENT_PING(21),
     ;
-    
+
 
 //    /**
 //     * Callback for begin Comet processing

@@ -56,6 +56,7 @@ import javax.mail.FolderClosedException;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.StoreClosedException;
+import javax.mail.search.SearchException;
 import javax.mail.search.SearchTerm;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCapabilities;
@@ -65,19 +66,21 @@ import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.config.MailProperties;
-import com.openexchange.tools.Collections.SmartIntArray;
+import com.openexchange.mail.mime.MIMEMailException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.imap.protocol.IMAPProtocol;
 
 /**
  * {@link IMAPSearch}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IMAPSearch {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IMAPSearch.class));
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IMAPSearch.class));
 
     /**
      * No instantiation
@@ -88,7 +91,7 @@ public final class IMAPSearch {
 
     /**
      * Searches messages in given IMAP folder
-     *
+     * 
      * @param imapFolder The IMAP folder
      * @param searchTerm The search term
      * @return Filtered messages' sequence numbers according to search term
@@ -114,8 +117,8 @@ public final class IMAPSearch {
                 }
             }
             /*
-             * Manual search needed in case of body search since IMAP's SEARCH command does not perform type-sensitive search; e.g.
-             * extract plain-text out of HTML content.
+             * Manual search needed in case of body search since IMAP's SEARCH command does not perform type-sensitive search; e.g. extract
+             * plain-text out of HTML content.
              */
             final Message[] allMsgs = imapFolder.getMessages();
             final TIntArrayList list = new TIntArrayList(msgCount);
@@ -141,9 +144,10 @@ public final class IMAPSearch {
         } else {
             mailFields.add(MailField.CONTENT_TYPE); // Possibly checked by search term
             final long start = System.currentTimeMillis();
-            allMsgs = new FetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), getFetchProfile(
-                mailFields.toArray(),
-                imapConfig.getIMAPProperties().isFastFetch()), msgCount).doCommand();
+            allMsgs =
+                new FetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), getFetchProfile(
+                    mailFields.toArray(),
+                    imapConfig.getIMAPProperties().isFastFetch()), msgCount).doCommand();
             mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
         }
         final TIntArrayList list = new TIntArrayList(msgCount);
@@ -157,33 +161,20 @@ public final class IMAPSearch {
 
     private static int[] issueIMAPSearch(final IMAPFolder imapFolder, final com.openexchange.mail.search.SearchTerm<?> searchTerm) throws OXException, FolderClosedException, StoreClosedException {
         try {
-            final int[] matchSeqNums;
             if (searchTerm.containsWildcard()) {
                 /*
                  * Try to pre-select with non-wildcard part
                  */
-                final Message[] msgs = issueNonWildcardSearch(searchTerm.getNonWildcardJavaMailSearchTerm(), imapFolder);
-                final SmartIntArray sia = new SmartIntArray(msgs.length);
-                for (int i = 0; i < msgs.length; i++) {
-                    if (searchTerm.matches(msgs[i])) {
-                        sia.append(msgs[i].getMessageNumber());
-                    }
-                }
-                matchSeqNums = sia.toArray();
-            } else {
-                final Message[] msgs = issueNonWildcardSearch(searchTerm.getJavaMailSearchTerm(), imapFolder);
-                if ((msgs.length < 50) && !searchTerm.isAscii()) {
-                    /*
-                     * Search with respect to umlauts in pre-selected messages
-                     */
-                    return searchWithUmlautSupport(searchTerm, msgs);
-                }
-                matchSeqNums = new int[msgs.length];
-                for (int i = 0; i < msgs.length; i++) {
-                    matchSeqNums[i] = msgs[i].getMessageNumber();
-                }
+                return issueNonWildcardSearch(searchTerm.getNonWildcardJavaMailSearchTerm(), imapFolder);
             }
-            return matchSeqNums;
+            final int[] seqNums = issueNonWildcardSearch(searchTerm.getJavaMailSearchTerm(), imapFolder);
+            if ((seqNums.length <= 50) && !searchTerm.isAscii()) {
+                /*
+                 * Search with respect to umlauts in pre-selected messages
+                 */
+                return searchWithUmlautSupport(searchTerm, seqNums, imapFolder);
+            }
+            return seqNums;
         } catch (final FolderClosedException e) {
             /*
              * Caused by a protocol error such as a socket error. No retry in this case.
@@ -195,8 +186,9 @@ public final class IMAPSearch {
              */
             throw e;
         } catch (final MessagingException e) {
-            if (e.getNextException() instanceof ProtocolException) {
-                final ProtocolException protocolException = (ProtocolException) e.getNextException();
+            final Exception nextException = e.getNextException();
+            if (nextException instanceof ProtocolException) {
+                final ProtocolException protocolException = (ProtocolException) nextException;
                 final Response response = protocolException.getResponse();
                 if (response != null && response.isBYE()) {
                     /*
@@ -230,44 +222,74 @@ public final class IMAPSearch {
      * <p>
      * The search term is considered to not contain any wildcard characters, but may contain non-ascii characters since IMAP search is
      * capable to deal with non-ascii characters through specifying a proper charset like UTF-8.
-     *
+     * 
      * @param term The search term to pass
      * @param imapFolder The IMAP folder to search in
      * @return The matching messages as an array
      * @throws MessagingException If a messaging error occurs
      */
-    private static Message[] issueNonWildcardSearch(final SearchTerm term, final IMAPFolder imapFolder) throws MessagingException {
+    private static int[] issueNonWildcardSearch(final SearchTerm term, final IMAPFolder imapFolder) throws MessagingException {
+        /*-
+         * JavaMail already searches dependent on whether pattern contains non-ascii characters. If yes a charset is used:
+         * SEARCH CHARSET UTF-8 <one or more search criteria>
+         */
+        if (!LOG.isDebugEnabled()) {
+            return search(term, imapFolder);
+        }
         final long start = System.currentTimeMillis();
         /*-
          * JavaMail already searches dependent on whether pattern contains non-ascii characters. If yes a charset is used:
          * SEARCH CHARSET UTF-8 <one or more search criteria>
          */
-        final Message[] msgs = imapFolder.search(term);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(new StringBuilder(128).append("IMAP search took ").append((System.currentTimeMillis() - start)).append("msec").toString());
-        }
-        return msgs;
+        final int[] seqNums = search(term, imapFolder);
+        LOG.debug(new StringBuilder(128).append("IMAP search took ").append((System.currentTimeMillis() - start)).append("msec").toString());
+        return seqNums;
     }
 
     /**
      * Searches with respect to umlauts
-     *
-     * @param searchTerm
-     *            The search term
-     * @param msgs
-     *            The messages
-     * @return Matching messages
-     * @throws OXException
-     *             If searching fails
      */
-    private static int[] searchWithUmlautSupport(final com.openexchange.mail.search.SearchTerm<?> searchTerm,
-            final Message[] msgs) throws OXException {
-        final SmartIntArray sia = new SmartIntArray(msgs.length);
-        for (int i = 0; i < msgs.length; i++) {
-            if (searchTerm.matches(msgs[i])) {
-                sia.append(msgs[i].getMessageNumber());
+    private static int[] searchWithUmlautSupport(final com.openexchange.mail.search.SearchTerm<?> searchTerm, final int[] seqNums, final IMAPFolder imapFolder) throws OXException {
+        try {
+            final TIntArrayList results = new TIntArrayList(seqNums.length);
+            for (int i = 0; i < seqNums.length; i++) {
+                final int msgnum = seqNums[i];
+                if (searchTerm.matches(imapFolder.getMessage(msgnum))) {
+                    results.add(msgnum);
+                }
+            }
+            return results.toNativeArray();
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e);
+        }
+    }
+
+    // --------------------------- IMAP commands ------------------------------
+
+    private static int[] search(final SearchTerm term, final IMAPFolder imapFolder) throws MessagingException {
+        final int messageCount = imapFolder.getMessageCount();
+        if (0 == messageCount) {
+            return new int[0];
+        }
+        final int[] seqNums = (int[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+            @Override
+            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+                try {
+                    return protocol.search(term);
+                } catch (final SearchException e) {
+                    throw new ProtocolException(e.getMessage(), e);
+                }
+            }
+        });
+        final TIntArrayList validSeqNums = new TIntArrayList(seqNums.length);
+        for (int i = 0; i < seqNums.length; i++) {
+            final int seqNum = seqNums[i];
+            if (seqNum >= 1 && seqNum <= messageCount) {
+                validSeqNums.add(seqNum);
             }
         }
-        return sia.toArray();
+        return validSeqNums.toNativeArray();
     }
+
 }

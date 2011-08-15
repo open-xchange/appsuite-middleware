@@ -23,9 +23,9 @@ public class CreateAttachmentsActionTest extends AbstractAttachmentActionTest{
 			final AttachmentMetadata loaded = getAttachmentBase().getAttachment(attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(),  attachment.getId(), getContext(), getUser(), null);
 			assertEquals(attachment, loaded);
 		}
-		
+
 	}
-	
+
 	@Override
 	protected void verifyUndone() throws Exception {
 		for(final AttachmentMetadata attachment : getAttachments()) {
@@ -37,6 +37,6 @@ public class CreateAttachmentsActionTest extends AbstractAttachmentActionTest{
 			}
 		}
 	}
-	
+
 
 }

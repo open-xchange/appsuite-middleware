@@ -65,16 +65,16 @@ public class CreateGenconfTablesTaskTest extends UpdateTest {
     public void setUp() throws Exception {
         super.setUp();
     }
-    
+
     @Override
     public void tearDown() throws Exception {
         execSafe("DROP TABLE genconf_attributes_strings");
         execSafe("DROP TABLE genconf_attributes_bools");
         execSafe("DROP TABLE sequence_genconf");
-        
+
         super.tearDown();
     }
-    
+
     public void testShouldCreateStringAttributeTable() throws OXException {
         executeTask();
         try {
@@ -92,12 +92,12 @@ public class CreateGenconfTablesTaskTest extends UpdateTest {
             fail("Expected table genconf_attributes_bools, but doesn't seem to exist: "+x.toString());
         }
     }
-    
+
     public void testShouldBeRunnableTwice() throws OXException {
         executeTask();
         executeTask();
     }
-    
+
     public void testShouldCreateSequenceTable() throws OXException {
         executeTask();
         try {
@@ -106,13 +106,13 @@ public class CreateGenconfTablesTaskTest extends UpdateTest {
             fail("Expected table sequence_genconf, but doesn't seem to exist: "+x.toString());
         }
     }
-    
+
     public void testShouldCreateEntryInSequenceTableForEveryContext() throws OXException, SQLException {
         executeTask();
         assertResult("SELECT 1 FROM sequence_genconf WHERE cid = "+existing_ctx_id);
     }
 
-    
+
     private void executeTask() throws OXException {
         new CreateGenconfTablesTask().perform(schema, existing_ctx_id);
     }

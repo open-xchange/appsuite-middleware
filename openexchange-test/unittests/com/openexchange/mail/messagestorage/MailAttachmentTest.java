@@ -73,9 +73,9 @@ import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
 /**
  * {@link MailAttachmentTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class MailAttachmentTest extends MessageStorageTest {
 
@@ -253,7 +253,7 @@ public final class MailAttachmentTest extends MessageStorageTest {
 			+ "--Boundary-00=_mtJhHd7H54sG6XG--\n";
 
 	/**
-	 * 
+	 *
 	 */
 	public MailAttachmentTest() {
 		super();
@@ -262,7 +262,7 @@ public final class MailAttachmentTest extends MessageStorageTest {
 	public void testMailAttachment() {
 		try {
 			final MailAccess<?, ?> mailAccess = getMailAccess();
-			
+
 			final MailMessage[] mails = getMessages(getTestMailDir(), -1);
 			final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", mails);
 			try {

@@ -68,31 +68,29 @@ import com.openexchange.session.Session;
  */
 public class FileStorageCompositionActivator extends DeferredActivator {
 
-    private static final Class<?>[] NEEDED_SERVICES = new Class<?>[]{FileStorageServiceRegistry.class};
-
-    private ServiceRegistration registration;
+    private ServiceRegistration<IDBasedFileAccessFactory> registration;
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
+        return new Class<?>[]{FileStorageServiceRegistry.class};
     }
 
     @Override
-    protected void handleAvailability(Class<?> clazz) {
-
+    protected void handleAvailability(final Class<?> clazz) {
+        // Nothing to do
     }
 
     @Override
-    protected void handleUnavailability(Class<?> clazz) {
-
+    protected void handleUnavailability(final Class<?> clazz) {
+        // Nothing to do
     }
 
     @Override
     protected void startBundle() throws Exception {
-        registration = context.registerService(IDBasedFileAccessFactory.class.getName(), new IDBasedFileAccessFactory() {
+        registration = context.registerService(IDBasedFileAccessFactory.class, new IDBasedFileAccessFactory() {
 
             @Override
-            public IDBasedFileAccess createAccess(Session session) {
+            public IDBasedFileAccess createAccess(final Session session) {
                 return new CompositingIDBasedFileAccess(session) {
 
                     @Override
@@ -101,7 +99,7 @@ public class FileStorageCompositionActivator extends DeferredActivator {
                     }
 
                     @Override
-                    protected FileStorageService getFileStorageService(String serviceId) throws OXException {
+                    protected FileStorageService getFileStorageService(final String serviceId) throws OXException {
                         return getService(FileStorageServiceRegistry.class).getFileStorageService(serviceId);
                     }
 

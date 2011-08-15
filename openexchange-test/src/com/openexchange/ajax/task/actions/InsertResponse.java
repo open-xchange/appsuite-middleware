@@ -79,7 +79,7 @@ public class InsertResponse extends CommonInsertResponse {
 
     /**
      * Puts the data of this insert response into a task object. This are
-     * especially the task identifier and the modified time stamp. 
+     * especially the task identifier and the modified time stamp.
      */
     public void fillTask(final Task task) {
         fillObject(task);

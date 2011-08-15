@@ -58,7 +58,7 @@ import com.openexchange.ajax.container.Response;
 
 /**
  * {@link AllPublicationsResponse}
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class AllPublicationsResponse extends AbstractPublicationResponse {

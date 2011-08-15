@@ -82,26 +82,26 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
 
     private final SubscriptionSourceDiscoveryService discoverer;
 
-    private final Collection<FolderUpdaterService> folderUpdaters;
+    private final Collection<FolderUpdaterService<?>> folderUpdaters;
 
     private final ContextService contextService;
 
-    public SubscriptionExecutionServiceImpl(final SubscriptionSourceDiscoveryService discoverer, final Collection<FolderUpdaterService> folderUpdaters, final ContextService contexts) {
+    public SubscriptionExecutionServiceImpl(final SubscriptionSourceDiscoveryService discoverer, final Collection<FolderUpdaterService<?>> folderUpdaters, final ContextService contexts) {
         this.discoverer = discoverer;
         this.folderUpdaters = folderUpdaters;
         this.contextService = contexts;
     }
 
     @Override
-    public int executeSubscription(String sourceId, ServerSession session, int subscriptionId) throws OXException {
-        SubscribeService subscribeService = discoverer.getSource(sourceId).getSubscribeService();
-        Subscription subscription = subscribeService.loadSubscription(session.getContext(), subscriptionId, null);
+    public int executeSubscription(final String sourceId, final ServerSession session, final int subscriptionId) throws OXException {
+        final SubscribeService subscribeService = discoverer.getSource(sourceId).getSubscribeService();
+        final Subscription subscription = subscribeService.loadSubscription(session.getContext(), subscriptionId, null);
         subscription.setSession(session);
-        boolean knowsSource = discoverer.filter(subscription.getUserId(), session.getContextId()).knowsSource(subscribeService.getSubscriptionSource().getId());
+        final boolean knowsSource = discoverer.filter(subscription.getUserId(), session.getContextId()).knowsSource(subscribeService.getSubscriptionSource().getId());
         if(!knowsSource) {
             throw INACTIVE_SOURCE.create();
         }
-        final Collection data = subscribeService.getContent(subscription);
+        final Collection<?> data = subscribeService.getContent(subscription);
 
         storeData(data, subscription);
         return data.size();
@@ -112,7 +112,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
      * @param subscription
      * @throws OXException
      */
-    protected void storeData(final Collection data, final Subscription subscription) throws OXException {
+    protected void storeData(final Collection<?> data, final Subscription subscription) throws OXException {
         getFolderUpdater(subscription).save(data, subscription);
     }
 
@@ -147,16 +147,16 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
     }
 
     @Override
-    public int executeSubscription(ServerSession session, int subscriptionId) throws OXException {
-        Context context = session.getContext();
-        SubscriptionSource source = discoverer.getSource(context, subscriptionId);
+    public int executeSubscription(final ServerSession session, final int subscriptionId) throws OXException {
+        final Context context = session.getContext();
+        final SubscriptionSource source = discoverer.getSource(context, subscriptionId);
         if(source == null) {
             throw INACTIVE_SOURCE.create();
         }
-        SubscribeService subscribeService = source.getSubscribeService();
-        Subscription subscription = subscribeService.loadSubscription(context, subscriptionId, null);
+        final SubscribeService subscribeService = source.getSubscribeService();
+        final Subscription subscription = subscribeService.loadSubscription(context, subscriptionId, null);
         subscription.setSession(session);
-        boolean knowsSource = discoverer.filter(subscription.getUserId(), context.getContextId()).knowsSource(subscribeService.getSubscriptionSource().getId());
+        final boolean knowsSource = discoverer.filter(subscription.getUserId(), context.getContextId()).knowsSource(subscribeService.getSubscriptionSource().getId());
         if(!knowsSource) {
             throw INACTIVE_SOURCE.create();
         }        final Collection data = subscribeService.getContent(subscription);
@@ -165,9 +165,9 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
     }
 
     @Override
-    public int executeSubscriptions(List<Subscription> subscriptionsToRefresh, ServerSession session) throws OXException {
+    public int executeSubscriptions(final List<Subscription> subscriptionsToRefresh, final ServerSession session) throws OXException {
         int sum = 0;
-        for (Subscription subscription : subscriptionsToRefresh) {
+        for (final Subscription subscription : subscriptionsToRefresh) {
             subscription.setSession(session);
             if(!subscription.isEnabled()) {
                 LOG.debug("Skipping subscription "+subscription.getDisplayName()+" because it is disabled");

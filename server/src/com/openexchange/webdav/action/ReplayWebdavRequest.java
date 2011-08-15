@@ -61,7 +61,6 @@ import org.jdom.input.SAXBuilder;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.webdav.action.ifheader.IfHeader;
-import com.openexchange.webdav.action.ifheader.IfHeaderParseException;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavPath;

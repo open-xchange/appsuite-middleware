@@ -57,7 +57,7 @@ import com.openexchange.ajax.framework.AbstractUploadParser;
 import com.openexchange.ajax.parser.ResponseParser;
 
 /**
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public class InsertParser extends AbstractInsertParser<InsertResponse> {

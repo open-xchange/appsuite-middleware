@@ -59,7 +59,7 @@ import java.util.TimeZone;
 
 /**
  * {@link DateTool}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DateTool {
@@ -121,7 +121,7 @@ public final class DateTool {
     }
 
     // Called from MessageBytes.setTime
-    /** 
+    /**
      */
     public static String format1123(final Date d) {
         String dstr = null;
@@ -142,7 +142,7 @@ public final class DateTool {
     }
 
     // Called from ServerCookie
-    /** 
+    /**
      */
     public static void formatOldCookie(final Date d, final StringBuffer sb, final FieldPosition fp) {
         synchronized (oldCookieFormat) {

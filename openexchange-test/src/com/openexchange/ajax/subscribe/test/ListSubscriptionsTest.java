@@ -74,21 +74,21 @@ public class ListSubscriptionsTest extends AbstractSubscriptionTest {
 
     public void testShouldSurviveBasicOXMFSubscription() throws OXException, IOException, SAXException, JSONException{
         FolderObject folder = createDefaultContactFolder();
-        
+
         DynamicFormDescription formDescription = generateFormDescription();
         Subscription subscription = generateOXMFSubscription(formDescription);
         subscription.setFolderId(String.valueOf(folder.getObjectID()));
-        
+
         subMgr.newAction(subscription);
         assertFalse("Precondition: Creation of subscription should work",subMgr.getLastResponse().hasError());
-        
+
         List<String> columns = Arrays.asList("id","folder", "source");
         List<Integer> ids = Arrays.asList(Integer.valueOf( subscription.getId() ) );
         JSONArray list = subMgr.listAction(ids, columns);
-        
+
         ListSubscriptionsResponse listResp = (ListSubscriptionsResponse) subMgr.getLastResponse();
         assertFalse("List request should have worked flawlessly", listResp.hasError());
-        
+
         assertEquals("Should only have one result", 1, list.length());
         JSONArray elements = list.getJSONArray(0);
         assertEquals("Should have three elements", 3, elements.length());

@@ -55,7 +55,7 @@ import com.openexchange.ajax.framework.Header;
 
 /**
  * {@link AbstractVoipNowRequest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractVoipNowRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {

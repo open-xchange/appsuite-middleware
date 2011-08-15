@@ -58,20 +58,20 @@ import com.openexchange.webdav.xml.fields.AppointmentFields;
  */
 
 public class AppointmentParser extends CalendarParser {
-	
+
 	protected void parse(final Appointment appointmentObj, final Element eProp) throws OXException {
 		if (hasElement(eProp.getChild(AppointmentFields.SHOW_AS, XmlServlet.NS))) {
 			appointmentObj.setShownAs(getValueAsInt(eProp.getChild(AppointmentFields.SHOW_AS, XmlServlet.NS)));
 		}
-		
+
 		if (hasElement(eProp.getChild(AppointmentFields.FULL_TIME, XmlServlet.NS))) {
 			appointmentObj.setFullTime(getValueAsBoolean(eProp.getChild(AppointmentFields.FULL_TIME, XmlServlet.NS)));
 		}
-		
+
 		if (hasElement(eProp.getChild(AppointmentFields.LOCATION, XmlServlet.NS))) {
 			appointmentObj.setLocation(getValue(eProp.getChild(AppointmentFields.LOCATION, XmlServlet.NS)));
 		}
-		
+
 		if (hasElement(eProp.getChild(AppointmentFields.ALARM, XmlServlet.NS))) {
 			appointmentObj.setAlarm(getValueAsInt(eProp.getChild(AppointmentFields.ALARM, XmlServlet.NS)));
 		}
@@ -79,23 +79,23 @@ public class AppointmentParser extends CalendarParser {
 		if (hasElement(eProp.getChild(AppointmentFields.ALARM_FLAG, XmlServlet.NS))) {
 			appointmentObj.setAlarmFlag(getValueAsBoolean(eProp.getChild(AppointmentFields.ALARM_FLAG, XmlServlet.NS)));
 		}
-		
+
 		if (hasElement(eProp.getChild(AppointmentFields.IGNORE_CONFLICTS, XmlServlet.NS))) {
 			appointmentObj.setIgnoreConflicts(getValueAsBoolean(eProp.getChild(AppointmentFields.IGNORE_CONFLICTS, XmlServlet.NS)));
 		}
-		
+
 		if (hasElement(eProp.getChild(AppointmentFields.UID, XmlServlet.NS))) {
 		    appointmentObj.setUid(getValue(eProp.getChild(AppointmentFields.UID, XmlServlet.NS)));
 		}
-		
+
 		if (hasElement(eProp.getChild(AppointmentFields.DELETE_EXCEPTIONS, XmlServlet.NS))) {
 			final String[] tmp = getValue(eProp.getChild(AppointmentFields.DELETE_EXCEPTIONS, XmlServlet.NS)).split(",");
 			final java.util.Date[] delete_exceptions = new java.util.Date[tmp.length];
-			
+
 			for (int a = 0; a < delete_exceptions.length; a++) {
 				delete_exceptions[a] = new java.util.Date(Long.valueOf(tmp[a]));
 			}
-			
+
 			appointmentObj.setDeleteExceptions(delete_exceptions);
 		}
 
@@ -103,15 +103,15 @@ public class AppointmentParser extends CalendarParser {
 			final String[] tmp = getValue(eProp.getChild(AppointmentFields.CHANGE_EXCEPTIONS, XmlServlet.NS)).split(",");
 			final java.util.Date[] change_exceptions = new java.util.Date[tmp.length];
 
-			
+
 			for (int a = 0; a < change_exceptions.length; a++) {
 				change_exceptions[a] = new java.util.Date(Long.valueOf(tmp[a]));
 			}
-			
+
 			appointmentObj.setChangeExceptions(change_exceptions);
 		}
 
-		
+
 		parseElementCalendar(appointmentObj, eProp);
 	}
 }

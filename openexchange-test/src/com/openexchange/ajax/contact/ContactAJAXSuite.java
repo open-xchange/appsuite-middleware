@@ -54,7 +54,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 public class ContactAJAXSuite extends TestSuite {
-    
+
     public static Test suite() {
         final TestSuite tests = new TestSuite();
         tests.addTestSuite(AllTest.class);
@@ -72,12 +72,12 @@ public class ContactAJAXSuite extends TestSuite {
         tests.addTestSuite(BasicManagedContactTests.class);
         tests.addTestSuite(ExemplaryContactTestManagerTest.class);
         tests.addTestSuite(ContactAttachmentTests.class);
-        
+
         tests.addTestSuite(YomiTest.class);
         tests.addTestSuite(YomiContactSearchTests.class);
         tests.addTestSuite(ContactSearchTests.class);
         tests.addTestSuite(Bug18608Test_SpecialCharsInEmailTest.class);
-        
+
         tests.addTest(ContactBugTestSuite.suite());
         return tests;
     }

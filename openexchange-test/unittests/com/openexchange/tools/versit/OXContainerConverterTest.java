@@ -56,27 +56,27 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.Task;
 
 /**
- * This test was only written to test additions that I made to 
+ * This test was only written to test additions that I made to
  * OXContainerConverter, but I was too lazy to implement tests
  * for all cases.
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  *
  */
 public class OXContainerConverterTest extends AbstractOXContainerConverterTest {
 
-    /** 
+    /**
 	 * Test of the private flag.
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public void test7472_forPrivate() throws Exception{
 		final String versitData = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Apple Computer\\, Inc//iCal 2.0//EN\nBEGIN:VEVENT\nCLASS:PRIVATE\nDTSTART:20070514T150000Z\nDTEND:20070514T163000Z\nLOCATION:Olpe\nSUMMARY:Simple iCal Appointment\nDESCRIPTION:Notes here...\nEND:VEVENT\nEND:VCALENDAR\n";
 		isFlaggedAsPrivate(versitData);
 	}
-	
-	/** 
+
+	/**
 	 * Test of the confidential flag.
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 
 	public void test7472_forConfidential() {
@@ -92,15 +92,15 @@ public class OXContainerConverterTest extends AbstractOXContainerConverterTest {
 		}
 	}
 
-	/** 
+	/**
 	 * Test of the public flag.
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public void test7472_forPublic() throws Exception{
 		final String versitData = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Apple Computer\\, Inc//iCal 2.0//EN\nBEGIN:VEVENT\nCLASS:PUBLIC\nDTSTART:20070514T150000Z\nDTEND:20070514T163000Z\nLOCATION:Olpe\nSUMMARY:Simple iCal Appointment\nDESCRIPTION:Notes here...\nEND:VEVENT\nEND:VCALENDAR\n";
 		assertFalse(isFlaggedAsPrivate(versitData));
 	}
-	
+
 	public void test8475() throws Exception{
 		final User testUser = getUserParticipant();
 		final String participantEmail = testUser.getMail();
@@ -121,7 +121,7 @@ public class OXContainerConverterTest extends AbstractOXContainerConverterTest {
 		final Task task = convertTask(versitData);
 		final Participant[] participants = task.getParticipants();
 		assertEquals(1,participants.length);
-		
+
 		try {
 			final UserParticipant p = (UserParticipant) participants[0];
 			assertEquals(testUser.getId() ,p.getIdentifier());

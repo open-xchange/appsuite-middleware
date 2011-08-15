@@ -55,7 +55,7 @@ package com.openexchange.ajax.mail.filter.test;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class TrueTest extends AbstractTest {
-	
+
 	public static final String TRUE = "true";
 
 	protected AbstractTest test;
@@ -63,12 +63,12 @@ public class TrueTest extends AbstractTest {
 	public TrueTest() {
 		name = TRUE;
 	}
-	
+
 	public TrueTest(final AbstractTest test) {
 		name = TRUE;
 		this.test = test;
 	}
-	
+
 	public AbstractTest getTest() {
 		return test;
 	}

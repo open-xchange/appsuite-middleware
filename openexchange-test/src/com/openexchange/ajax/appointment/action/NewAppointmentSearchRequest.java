@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.action;
 
-import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -65,7 +64,7 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 
 /**
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public class NewAppointmentSearchRequest extends AbstractAppointmentRequest<NewAppointmentSearchResponse> {
@@ -79,15 +78,15 @@ public class NewAppointmentSearchRequest extends AbstractAppointmentRequest<NewA
      * The end range
      */
     private final Date end;
-	
-	
+
+
 	/**
 	 * The max count of returned appointments
 	 */
 	private final int limit;
-	
+
 	private final TimeZone timeZone;
-	
+
 	private int[] columns = {
 		DataObject.OBJECT_ID,
 		FolderChildObject.FOLDER_ID,
@@ -103,7 +102,7 @@ public class NewAppointmentSearchRequest extends AbstractAppointmentRequest<NewA
 		Appointment.FULL_TIME,
 		Appointment.COLOR_LABEL
 	};
-	
+
 	/**
      * Default constructor.
      */
@@ -114,7 +113,7 @@ public class NewAppointmentSearchRequest extends AbstractAppointmentRequest<NewA
 		this.limit = limit;
 		this.timeZone = timeZone;
     }
-	
+
     public NewAppointmentSearchRequest(final Date start, final Date end, final int limit, final TimeZone timeZone, final int[] columns) {
         super();
         this.start = start;

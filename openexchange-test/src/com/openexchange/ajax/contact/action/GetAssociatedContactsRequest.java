@@ -73,7 +73,7 @@ public class GetAssociatedContactsRequest extends AbstractContactRequest<GetAsso
         this.uuid = uid;
         this.tz = tz;
     }
-    
+
     public GetAssociatedContactsRequest(Contact c, TimeZone tz) {
         super();
         this.contact = c;
@@ -96,7 +96,7 @@ public class GetAssociatedContactsRequest extends AbstractContactRequest<GetAsso
                 FinalContactConstants.PARAMETER_UUID.getName(),
                 String.valueOf(uuid)
             ).toArray();
-        
+
         Params params = new Params(
             AJAXServlet.PARAMETER_ACTION,
             FinalContactConstants.ACTION_GET_ASSOCIATED.getName());
@@ -104,12 +104,12 @@ public class GetAssociatedContactsRequest extends AbstractContactRequest<GetAsso
             params.add(FinalContactConstants.PARAMETER_UUID.getName(), contact.getUserField20());
         } else {
             params.add(
-                AJAXServlet.PARAMETER_FOLDERID, 
-                String.valueOf(contact.getParentFolderID()), 
-                AJAXServlet.PARAMETER_ID, 
+                AJAXServlet.PARAMETER_FOLDERID,
+                String.valueOf(contact.getParentFolderID()),
+                AJAXServlet.PARAMETER_ID,
                 String.valueOf(contact.getObjectID()));
         }
-        
+
         return params.toArray();
     }
 

@@ -63,13 +63,13 @@ import com.openexchange.smtp.dataobjects.SMTPMailMessage;
 
 /**
  * {@link MailSaveDraftTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailSaveDraftTest extends AbstractMailTest {
 
     /**
-	 * 
+	 *
 	 */
     public MailSaveDraftTest() {
         super();

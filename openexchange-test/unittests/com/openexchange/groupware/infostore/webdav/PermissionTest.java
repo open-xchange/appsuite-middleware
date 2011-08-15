@@ -73,12 +73,12 @@ public class PermissionTest extends TestCase implements SessionHolder {
         final int pos = un.indexOf('@');
         return pos == -1 ? un : un.substring(0, pos);
     }
-    
+
     @Override
 	public void setUp() throws Exception {
         Init.startServer();
         AJAXConfig.init();
-        
+
         final TestConfig config = new TestConfig();
         final TestContextToolkit tools = new TestContextToolkit();
         final String ctxName = config.getContextName();
@@ -122,7 +122,7 @@ public class PermissionTest extends TestCase implements SessionHolder {
 
     // Bug 10395
     public void testListSubfolders() throws Exception{
-        
+
         final FolderObject parentFolder =  createFolder(root, "parent",
                 adminPermission(user1),
                 permission(user2, false, OCLPermission.READ_FOLDER, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS));
@@ -231,7 +231,7 @@ public class PermissionTest extends TestCase implements SessionHolder {
         }
     }
 
-    //Bug 10706 
+    //Bug 10706
     public void testDontDulicateDocumentsWithCreateAndWritePermissions() throws Exception {
         final FolderObject testFolder = createFolder(root, "test"+ System.currentTimeMillis(),
                 adminPermission(user1),

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.action;
 
-import com.openexchange.exception.OXException;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -59,7 +58,7 @@ import com.openexchange.groupware.container.Appointment;
 /**
  * Implements creating the necessary values for a appointment update request. All necessary values are read from the appointment object. The
  * appointment must contain the folder and object identifier and the last modification timestamp.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public class UpdateRequest extends AbstractAppointmentRequest<UpdateResponse> {
@@ -74,7 +73,7 @@ public class UpdateRequest extends AbstractAppointmentRequest<UpdateResponse> {
 
     /**
      * Default constructor.
-     * 
+     *
      * @param appointment Appointment object with updated attributes. This appointment must contain the attributes parent folder
      *            identifier, object identifier and last modification timestamp.
      */

@@ -75,7 +75,7 @@ public final class TwitterMailActivator extends DeferredActivator {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TwitterMailActivator.class));
 
-    private ServiceRegistration twitterServiceRegistration;
+    private ServiceRegistration<MailProvider> twitterServiceRegistration;
 
     /**
      * Initializes a new {@link TwitterMailActivator}
@@ -129,7 +129,7 @@ public final class TwitterMailActivator extends DeferredActivator {
             }
             final Dictionary<String, String> dictionary = new Hashtable<String, String>();
             dictionary.put("protocol", TwitterProvider.PROTOCOL_TWITTER.toString());
-            twitterServiceRegistration = context.registerService(MailProvider.class.getName(), new TwitterProvider(), dictionary);
+            twitterServiceRegistration = context.registerService(MailProvider.class, new TwitterProvider(), dictionary);
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;

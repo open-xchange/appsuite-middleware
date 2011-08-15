@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.kata.tasks;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.kata.NeedExistingStep;
 import com.openexchange.ajax.task.actions.UpdateRequest;
@@ -67,7 +66,7 @@ import com.openexchange.groupware.tasks.Task;
 public class TaskUpdateStep extends NeedExistingStep<Task> {
 
     private Task entry;
-    
+
     /**
      * Initializes a new {@link TaskUpdateStep}.
      * @param name
@@ -92,7 +91,7 @@ public class TaskUpdateStep extends NeedExistingStep<Task> {
         assumeIdentity(entry);
         UpdateRequest updateRequest = new UpdateRequest(entry, getTimeZone(), false);
         UpdateResponse updateResponse = execute(updateRequest);
-        
+
         if(!updateResponse.hasError()) {
             entry.setLastModified(updateResponse.getTimestamp());
             rememberIdentityValues(entry);

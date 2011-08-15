@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.ajax.folder.Create.ocl;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.Calendar;
@@ -74,7 +73,7 @@ import com.openexchange.server.impl.OCLPermission;
 
 /**
  * {@link Bug17264Test}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Bug17264Test extends AbstractAJAXSession {
@@ -89,7 +88,7 @@ public class Bug17264Test extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link Bug17264Test}.
-     * 
+     *
      * @param name
      */
     public Bug17264Test(String name) {
@@ -176,7 +175,7 @@ public class Bug17264Test extends AbstractAJAXSession {
         updateResponse.fillObject(appointment);
         checkAlarm(120, 5);
     }
-    
+
     public void testShareCreate() throws Exception {
         appointment.removeObjectID();
         appointment.setParentFolderID(folder.getObjectID());

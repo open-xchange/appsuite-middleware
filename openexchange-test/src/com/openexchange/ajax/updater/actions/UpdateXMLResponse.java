@@ -62,7 +62,7 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class UpdateXMLResponse extends AbstractAJAXResponse {
-    
+
     private final String xml;
 
     /**
@@ -73,7 +73,7 @@ public class UpdateXMLResponse extends AbstractAJAXResponse {
         super(null);
         this.xml = xml;
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -105,7 +105,7 @@ public class UpdateXMLResponse extends AbstractAJAXResponse {
     public boolean hasError() {
         throw new UnsupportedOperationException();
     }
-    
+
     /**
      * @see com.openexchange.ajax.framework.AbstractAJAXResponse#getData()
      */
@@ -113,7 +113,7 @@ public class UpdateXMLResponse extends AbstractAJAXResponse {
     public Object getData() {
         return getXML();
     }
-    
+
     public String getXML() {
         return xml;
     }

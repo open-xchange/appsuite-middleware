@@ -59,7 +59,7 @@ import com.openexchange.test.fixtures.Fixture;
 
 /**
  * {@link TaskFixtureTransformer}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class TaskFixtureTransformer extends AbstractFixtureTransformer<Task> implements FixtureTransformer {

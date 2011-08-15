@@ -110,21 +110,21 @@ public class UserValues {
         }
         return trashFolder;
     }
-    
+
     public String getDraftsFolder() throws OXException, IOException, JSONException {
         if (null == draftsFolder) {
             draftsFolder = client.execute(new GetRequest(Tree.DraftsFolder)).getString();
         }
         return draftsFolder;
     }
-    
+
     public int getPrivateInfostoreFolder() throws OXException, IOException, JSONException {
         if (null == privateInfostoreFolder) {
             privateInfostoreFolder = I(client.execute(new GetRequest(Tree.PrivateInfostoreFolder)).getInteger());
         }
         return privateInfostoreFolder.intValue();
     }
-    
+
     public String getSendAddress() throws OXException, IOException, JSONException {
         if (null == sendAddress) {
             sendAddress = client.execute(new GetRequest(Tree.SendAddress)).getString();
@@ -174,7 +174,7 @@ public class UserValues {
         }
         return timeZone;
     }
-    
+
     public void setTimeZone(final TimeZone timeZone) throws OXException, IOException, JSONException {
         client.execute(new SetRequest(Tree.TimeZone, timeZone.getID()));
     }

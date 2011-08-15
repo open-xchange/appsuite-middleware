@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.action;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -59,7 +58,7 @@ import com.openexchange.ajax.framework.AbstractInsertParser;
 import static com.openexchange.ajax.appointment.action.AppointmentParserTools.parseConflicts;
 
 /**
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public class InsertParser extends AbstractInsertParser<AppointmentInsertResponse> {
@@ -75,7 +74,7 @@ public class InsertParser extends AbstractInsertParser<AppointmentInsertResponse
     protected AppointmentInsertResponse instantiateResponse(final Response response) {
         return new AppointmentInsertResponse(response);
     }
-    
+
     @Override
     protected AppointmentInsertResponse createResponse(final Response response) throws JSONException {
         final AppointmentInsertResponse retval = instantiateResponse(response);

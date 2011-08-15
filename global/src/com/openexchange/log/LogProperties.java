@@ -100,7 +100,7 @@ public final class LogProperties {
 
     /**
      * Checks if thread-local log properties are enabled.
-     * 
+     *
      * @return <code>true</code> if thread-local log properties are enabled; otherwise <code>false</code>
      */
     public static boolean isEnabled() {

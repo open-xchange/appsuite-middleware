@@ -53,7 +53,7 @@ import java.io.IOException;
 
 /**
  * {@link ByteChunk}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ByteChunk {
@@ -166,7 +166,7 @@ public final class ByteChunk {
 
     /**
      * Sets the message bytes to the specified subarray of bytes.
-     * 
+     *
      * @param b the ascii bytes
      * @param off the start offset of the bytes
      * @param len the length of the bytes
@@ -270,7 +270,7 @@ public final class ByteChunk {
     // -------------------- Adding data to the buffer --------------------
     /**
      * Append a char, by casting it to byte. This IS NOT intended for unicode.
-     * 
+     *
      * @param c
      * @throws IOException
      */
@@ -412,7 +412,7 @@ public final class ByteChunk {
     /**
      * Send the buffer to the sink. Called by append() when the limit is reached. You can also call it explicitely to force the data to be
      * written.
-     * 
+     *
      * @throws IOException
      */
     public void flushBuffer() throws IOException {
@@ -517,7 +517,7 @@ public final class ByteChunk {
 
     /**
      * Compares the message bytes to the specified String object.
-     * 
+     *
      * @param s the String to compare
      * @return true if the comparison succeeded, false otherwise
      */
@@ -541,7 +541,7 @@ public final class ByteChunk {
 
     /**
      * Compares the message bytes to the specified String object.
-     * 
+     *
      * @param s the String to compare
      * @return true if the comparison succeeded, false otherwise
      */
@@ -608,7 +608,7 @@ public final class ByteChunk {
 
     /**
      * Returns true if the message bytes starts with the specified string.
-     * 
+     *
      * @param s the string
      */
     public boolean startsWith(final String s) {
@@ -648,7 +648,7 @@ public final class ByteChunk {
 
     /**
      * Returns true if the message bytes starts with the specified string.
-     * 
+     *
      * @param s the string
      * @param pos The position
      */
@@ -725,7 +725,7 @@ public final class ByteChunk {
 
     /**
      * Returns true if the message bytes starts with the specified string.
-     * 
+     *
      * @param c the character
      * @param starting The start position
      */
@@ -748,7 +748,7 @@ public final class ByteChunk {
 
     /**
      * Find a character, no side effects.
-     * 
+     *
      * @return index of char if found, -1 if not
      */
     public static int findChar(final byte buf[], final int start, final int end, final char c) {
@@ -765,7 +765,7 @@ public final class ByteChunk {
 
     /**
      * Find a character, no side effects.
-     * 
+     *
      * @return index of char if found, -1 if not
      */
     public static int findChars(final byte buf[], final int start, final int end, final byte c[]) {
@@ -784,7 +784,7 @@ public final class ByteChunk {
 
     /**
      * Find the first character != c
-     * 
+     *
      * @return index of char if found, -1 if not
      */
     public static int findNotChars(final byte buf[], final int start, final int end, final byte c[]) {
@@ -810,7 +810,7 @@ public final class ByteChunk {
 
     /**
      * Convert specified String to a byte array. This ONLY WORKS for ascii, UTF chars will be truncated.
-     * 
+     *
      * @param value to convert to byte array
      * @return the byte array value
      */
@@ -824,7 +824,7 @@ public final class ByteChunk {
 
     /**
      * Gets a {@link ByteChunk} carrying specified single byte.
-     * 
+     *
      * @param b The byte
      * @return The {@link ByteChunk} instance
      */

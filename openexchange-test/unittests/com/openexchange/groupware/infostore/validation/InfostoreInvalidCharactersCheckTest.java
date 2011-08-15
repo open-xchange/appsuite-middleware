@@ -11,20 +11,20 @@ import com.openexchange.groupware.infostore.database.impl.GetSwitch;
 import com.openexchange.groupware.infostore.utils.Metadata;
 
 public class InfostoreInvalidCharactersCheckTest extends TestCase {
-	
+
 	public static class TestValidator extends InvalidCharactersValidator {
-	
+
 		List<String> strings = new ArrayList<String>();
-		
+
 		@Override
 		public String check(final String s) {
 			strings.add(s);
 			return s;
 		}
 
-	
+
 	}
-	
+
 	public void testSwitcher(){
 		final DocumentMetadata metadata = new DocumentMetadataImpl();
 		metadata.setCategories("categories");
@@ -35,11 +35,11 @@ public class InfostoreInvalidCharactersCheckTest extends TestCase {
 		metadata.setTitle("title");
 		metadata.setURL("url");
 		metadata.setVersionComment("comment");
-		
+
 		final DocumentMetadataValidation validation = new TestValidator().validate(metadata);
-		
+
 		assertFalse(validation.isValid());
-		
+
 		final Metadata[] fields = new Metadata[]{Metadata.CATEGORIES_LITERAL, Metadata.DESCRIPTION_LITERAL, Metadata.FILE_MD5SUM_LITERAL, Metadata.FILE_MIMETYPE_LITERAL, Metadata.FILENAME_LITERAL, Metadata.TITLE_LITERAL, Metadata.URL_LITERAL, Metadata.VERSION_COMMENT_LITERAL};
 
 		final GetSwitch get = new GetSwitch(metadata);
@@ -47,7 +47,7 @@ public class InfostoreInvalidCharactersCheckTest extends TestCase {
 			assertTrue(validation.hasErrors(m));
 			assertEquals(m.doSwitch(get), validation.getError(m));
 		}
-		
-		
+
+
 	}
 }

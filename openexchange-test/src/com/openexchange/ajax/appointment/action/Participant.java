@@ -4,7 +4,7 @@ public class Participant {
     private int confirmation;
     private int type;
     private int id;
-    
+
     public int getConfirmation() {
         return confirmation;
     }

@@ -48,7 +48,6 @@
  */
 package com.openexchange.config.internal;
 
-import com.openexchange.exception.OXException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;

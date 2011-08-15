@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.kata.appointments;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -66,17 +65,17 @@ import com.openexchange.groupware.container.Appointment;
 public class AppointmentMoveStep extends NeedExistingStep<Appointment> {
 
     private int destination;
-    
-    
+
+
     public AppointmentMoveStep(int destination, String fixtureName, String expectedError) {
         super(fixtureName, expectedError);
         this.destination = destination;
     }
-    
+
     public void cleanUp() throws Exception {
-        
+
     }
-    
+
     public void perform(AJAXClient client) throws Exception {
         this.client = client;
         Appointment appointment = new Appointment();
@@ -88,7 +87,7 @@ public class AppointmentMoveStep extends NeedExistingStep<Appointment> {
         checkError(response);
         appointment.setLastModified( response.getTimestamp() );
         rememberIdentityValues(appointment);
-        
+
     }
 
 }

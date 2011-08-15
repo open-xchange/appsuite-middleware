@@ -115,7 +115,7 @@ public class InfostoreTestManager {
         }
         createdEntities = new HashSet<DocumentMetadata>();
     }
-    
+
     private void removeFromCreatedEntities(Collection<Integer> ids) {
         for (int id : ids) {
             for (DocumentMetadata data : new HashSet<DocumentMetadata>(createdEntities)) {
@@ -136,7 +136,7 @@ public class InfostoreTestManager {
     }
 
     /*
-     * The following is not beautiful, but the request/response framework 
+     * The following is not beautiful, but the request/response framework
      * doesn't seem to offer a solution to do POST requests containing files.
      */
     public void newAction(DocumentMetadata data, File upload) throws OXException, IOException, SAXException, JSONException {

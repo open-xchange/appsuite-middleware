@@ -85,9 +85,9 @@ public class HTMLServiceActivator extends DeferredActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(HTMLServiceActivator.class));
 
-    private List<ServiceTracker> trackers;
+    private List<ServiceTracker<?,?>> trackers;
 
-    private ServiceRegistration registration;
+    private ServiceRegistration<HTMLService> registration;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -114,12 +114,12 @@ public class HTMLServiceActivator extends DeferredActivator {
             /*
              * Service trackers
              */
-            trackers = new ArrayList<ServiceTracker>(2);
-            trackers.add(new ServiceTracker(context, ProxyRegistry.class.getName(), new ProxyRegistryCustomizer(context)));
+            trackers = new ArrayList<ServiceTracker<?,?>>(2);
+            trackers.add(new ServiceTracker<ProxyRegistry,ProxyRegistry>(context, ProxyRegistry.class, new ProxyRegistryCustomizer(context)));
             /*
              * Open trackers
              */
-            for (final ServiceTracker tracker : trackers) {
+            for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.open();
             }
             /*
@@ -191,7 +191,7 @@ public class HTMLServiceActivator extends DeferredActivator {
          * Register HTML service
          */
         registration =
-            context.registerService(HTMLService.class.getName(), new HTMLServiceImpl(properties, htmlCharMap, htmlEntityMap), null);
+            context.registerService(HTMLService.class, new HTMLServiceImpl(properties, htmlCharMap, htmlEntityMap), null);
     }
 
     public static Object[] getHTMLEntityMaps(final String htmlEntityFilename) {

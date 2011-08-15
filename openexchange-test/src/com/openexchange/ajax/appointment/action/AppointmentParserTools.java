@@ -20,7 +20,7 @@ public class AppointmentParserTools{
         if (!data.has("conflicts")) {
             return;
         }
-        
+
         JSONArray conflicts = (JSONArray) data.get("conflicts");
         List<ConflictObject> conflictObjects = new ArrayList<ConflictObject>();
         for (int i = 0; i < conflicts.length(); i++) {
@@ -51,7 +51,7 @@ public class AppointmentParserTools{
         }
         response.setConflicts(conflictObjects);
     }
-    
+
     private static void parseConflictParticipants(JSONArray participants, ConflictObject conflictObject) throws JSONException {
         List<Participant> participantObjects = new ArrayList<Participant>();
         for (int i = 0; i < participants.length(); i++) {

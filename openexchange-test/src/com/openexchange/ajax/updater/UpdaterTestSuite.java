@@ -66,12 +66,12 @@ public class UpdaterTestSuite {
     public UpdaterTestSuite() {
         super();
     }
-    
+
     public static Test suite() {
         final TestSuite tests = new TestSuite();
         tests.addTestSuite(UpdaterDownloadTest.class);
         tests.addTestSuite(UpdaterXMLTest.class);
-        
+
         return tests;
     }
 

@@ -70,7 +70,7 @@ Import-Package: com.openexchange.ajax,
  org.osgi.util.tracker,
  org.xml.sax,
  org.xml.sax.helpers
-Bundle-Activator: com.openexchange.voipnow.json.osgi.Activator
+Bundle-Activator: com.openexchange.voipnow.json.osgi.VoipNowActivator
 Bundle-ClassPath: .,
  lib/jacksum.jar
 OX-Bundle-Information: Integrates 4PSA's VoipNow server with Open-Xchange server and enables you to make VoIP calls to contacts.

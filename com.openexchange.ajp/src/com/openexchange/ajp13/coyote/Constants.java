@@ -58,7 +58,7 @@ import com.openexchange.ajp13.coyote.util.ByteChunk;
 
 /**
  * {@link Constants}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Constants {
@@ -71,11 +71,6 @@ public final class Constants {
     }
 
     // -------------------------------------------------------------- Constants
-
-    /**
-     * Package name.
-     */
-    public static final String Package = "org.apache.coyote.ajp";
 
     public static final int DEFAULT_CONNECTION_LINGER = -1;
 

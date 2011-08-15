@@ -69,9 +69,9 @@ import com.openexchange.test.AjaxInit;
 
 /**
  * {@link ResourceDeleteTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class ResourceDeleteTest extends TestCase {
 
@@ -90,7 +90,7 @@ public final class ResourceDeleteTest extends TestCase {
 
 	/**
 	 * Initializes a new {@link ResourceDeleteTest}
-	 * 
+	 *
 	 * @param name
 	 *            The test's name
 	 */

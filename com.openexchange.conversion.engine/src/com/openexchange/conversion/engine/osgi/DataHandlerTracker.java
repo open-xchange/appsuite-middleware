@@ -58,7 +58,7 @@ import com.openexchange.conversion.engine.internal.ConversionEngineRegistry;
 
 /**
  * {@link DataHandlerTracker} - The service tracker customizer for {@link DataHandler}s.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DataHandlerTracker implements ServiceTrackerCustomizer<DataHandler, DataHandler> {
@@ -72,7 +72,7 @@ public final class DataHandlerTracker implements ServiceTrackerCustomizer<DataHa
 
     /**
      * Initializes a new {@link DataHandlerTracker}
-     * 
+     *
      * @param context The bundle context
      */
     public DataHandlerTracker(final BundleContext context) {

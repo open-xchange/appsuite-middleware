@@ -66,7 +66,7 @@ public class IgnoreLocksIfHeaderApplyTest extends StandardIfHeaderApplyTest {
 
         IfHeaderEntity entity = new IfHeaderEntity.LockToken("1234567");
         entity.setMatches(true);
-        
+
         WebdavResource resource = resourceWithLock("1234567");
 
         assertTrue(apply.matches(entity, resource));
@@ -75,14 +75,14 @@ public class IgnoreLocksIfHeaderApplyTest extends StandardIfHeaderApplyTest {
 
         assertTrue(apply.matches(entity, resource));
     }
-    
+
     @Override
     public void testLockMustNotMatch() throws OXException {
         IfHeaderApply apply = getApply();
 
         IfHeaderEntity entity = new IfHeaderEntity.LockToken("1234567");
         entity.setMatches(false);
-        
+
         WebdavResource resource = resourceWithLock("1234567");
 
         assertTrue(apply.matches(entity, resource));
@@ -91,7 +91,7 @@ public class IgnoreLocksIfHeaderApplyTest extends StandardIfHeaderApplyTest {
 
         assertTrue(apply.matches(entity, resource));
     }
-    
+
     @Override
     protected StandardIfHeaderApply getApply() {
         return new IgnoreLocksIfHeaderApply();

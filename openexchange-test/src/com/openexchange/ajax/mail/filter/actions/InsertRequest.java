@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.filter.actions;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 
 import com.openexchange.ajax.AJAXServlet;
@@ -58,7 +57,7 @@ import com.openexchange.ajax.mail.filter.Rule;
 
 /**
  * Stores the parameters for inserting the appointment.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public class InsertRequest extends AbstractMailFilterRequest {
@@ -80,7 +79,7 @@ public class InsertRequest extends AbstractMailFilterRequest {
 
 	/**
 	 * default constructor.
-	 * 
+	 *
 	 * @param rule
 	 *            Rule to insert.
 	 * @param failOnError
@@ -92,7 +91,7 @@ public class InsertRequest extends AbstractMailFilterRequest {
 
 	/**
 	 * More detailed constructor.
-	 * 
+	 *
 	 * @param rule
 	 *            Rule to insert.
 	 * @param failOnError

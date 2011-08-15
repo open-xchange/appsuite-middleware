@@ -73,27 +73,27 @@ public class UpdatePublicationTest extends AbstractPublicationTest {
     public UpdatePublicationTest(String name) {
         super(name);
     }
-    
+
     public void testShouldUpdateExistingPublication() throws OXException, IOException, SAXException, JSONException, OXException, OXException{
         final Contact contact = createDefaultContactFolderWithOneContact();
         String folderID = String.valueOf(contact.getParentFolderID() );
         String module = "contacts";
-        
+
         SimPublicationTargetDiscoveryService discovery = new SimPublicationTargetDiscoveryService();
         pubMgr.setPublicationTargetDiscoveryService(discovery);
-        
+
         Publication orignal = generatePublication(module, folderID, discovery );
         NewPublicationRequest newReq = new NewPublicationRequest(orignal);
         NewPublicationResponse newResp = getClient().execute(newReq);
         assertFalse("Should contain no error after creating", newResp.hasError());
         orignal.setId(newResp.getId());
-        
+
         Publication update = generatePublication(module, folderID, discovery);
-        
+
         update.setId(newResp.getId());
         UpdatePublicationRequest updReq = new UpdatePublicationRequest(update);
         UpdatePublicationResponse updResp = getClient().execute(updReq);
-        
+
         assertFalse("Should contain no error after updating", updResp.hasError());
         assertEquals("Should return 1 in case of success", I(1), updResp.getData());
     }
@@ -103,52 +103,52 @@ public class UpdatePublicationTest extends AbstractPublicationTest {
 
         final Contact contact = createDefaultContactFolderWithOneContact();
         String folderID = String.valueOf(contact.getParentFolderID() );
-        
+
         Publication pub1 = generatePublication("contacts", folderID, discovery );
         pub1.getConfiguration().put("siteName","oldName");
         pubMgr.setPublicationTargetDiscoveryService( discovery );
-        
+
         pubMgr.newAction(pub1);
         assertFalse("Should contain no error after creating", pubMgr.getLastResponse().hasError());
-        
+
         Publication pub2 = pubMgr.getAction(pub1.getId());
         assertEquals("Should have set the siteName", "oldName", pub2.getConfiguration().get("siteName"));
-        
+
         Publication pub3 = generatePublication("contacts", folderID, discovery);
         pub3.setId(pub1.getId());
         pub3.getConfiguration().put("siteName", "newName");
         pubMgr.updateAction(pub3);
-        
+
         UpdatePublicationResponse updResp = (UpdatePublicationResponse) pubMgr.getLastResponse();
         assertFalse("Should contain no error after updating", updResp.hasError());
         assertTrue("Should return 1 in case of success", updResp.wasSuccessful());
-        
+
         Publication pub4 = pubMgr.getAction(pub3.getId());
         assertEquals("Should have updated the siteName", "newName", pub4.getConfiguration().get("siteName"));
     }
 
-    
+
     /*
     public void testUpdatingTargetShouldCallForNewConfiguration(){
         fail("Implement me!");
     }
-    
+
     public void testUpdatingWithActualChange(){
         fail("Implement me!");
     }
     */
-    
+
     /*
     public void testUpdatingNonExistentPublicationShouldFail() throws OXException, IOException, SAXException, JSONException{
         final Contact contact = createDefaultContactFolderWithOneContact();
         String folderID = String.valueOf(contact.getParentFolderID() );
         String module = "contacts";
-                
+
         Publication update = generatePublication(module, folderID);
         update.setId(Integer.MAX_VALUE);
         UpdatePublicationRequest updReq = new UpdatePublicationRequest(update);
         UpdatePublicationResponse updResp = getClient().execute(updReq);
-        
+
         assertTrue("Should contain error when updating non-existent publication ", updResp.hasError());
         assertFalse("Should not contain the error code for 'unknown error'" , "PUBH-0001".equals(updResp.getException().getErrorCode()));
     }

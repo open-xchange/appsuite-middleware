@@ -69,14 +69,14 @@ import com.openexchange.templating.TemplateService;
 
 public class PublicationServicesActivator implements BundleActivator {
 
-    private final List<ServiceRegistration> serviceRegistrations = new ArrayList<ServiceRegistration>();
+    private final List<ServiceRegistration<?>> serviceRegistrations = new ArrayList<ServiceRegistration<?>>(2);
 
     private OXMFPublicationService contactPublisher;
 
     private OXMFPublicationService infostorePublisher;
 
     @Override
-    public void start(BundleContext context) throws Exception {
+    public void start(final BundleContext context) throws Exception {
         contactPublisher = new OXMFPublicationService();
         contactPublisher.setFolderType("contacts");
         contactPublisher.setRootURL("/publications/contacts");
@@ -84,13 +84,13 @@ public class PublicationServicesActivator implements BundleActivator {
         contactPublisher.setTargetId("com.openexchange.publish.microformats.contacts.online");
         contactPublisher.setDefaultTemplateName("contacts.tmpl");
 
-        Map<String, Object> additionalVars = new HashMap<String, Object>();
+        final Map<String, Object> additionalVars = new HashMap<String, Object>();
         additionalVars.put("utils", new ContactTemplateUtils());
 
         MicroformatServlet.registerType("contacts", contactPublisher,additionalVars);
         ContactPictureServlet.setContactPublisher(contactPublisher);
 
-        serviceRegistrations.add(context.registerService(PublicationService.class.getName(), contactPublisher, null));
+        serviceRegistrations.add(context.registerService(PublicationService.class, contactPublisher, null));
 
         infostorePublisher = new OXMFPublicationService();
         infostorePublisher.setFolderType("infostore");
@@ -100,23 +100,23 @@ public class PublicationServicesActivator implements BundleActivator {
         infostorePublisher.setDefaultTemplateName("infostore.tmpl");
         InfostoreFileServlet.setInfostorePublisher(infostorePublisher);
 
-        HashMap<String, Object> infoAdditionalVars = new HashMap<String, Object>();
+        final HashMap<String, Object> infoAdditionalVars = new HashMap<String, Object>();
         infoAdditionalVars.put("utils", new InfostoreTemplateUtils());
 
         MicroformatServlet.registerType("infostore", infostorePublisher, infoAdditionalVars);
 
-        serviceRegistrations.add(context.registerService(PublicationService.class.getName(), infostorePublisher, null));
+        serviceRegistrations.add(context.registerService(PublicationService.class, infostorePublisher, null));
 
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
-        for (ServiceRegistration registration : serviceRegistrations) {
+    public void stop(final BundleContext context) throws Exception {
+        for (final ServiceRegistration<?> registration : serviceRegistrations) {
             registration.unregister();
         }
     }
 
-    public void setTemplateService(TemplateService templateService) {
+    public void setTemplateService(final TemplateService templateService) {
         infostorePublisher.setTemplateService(templateService);
         contactPublisher.setTemplateService(templateService);
     }

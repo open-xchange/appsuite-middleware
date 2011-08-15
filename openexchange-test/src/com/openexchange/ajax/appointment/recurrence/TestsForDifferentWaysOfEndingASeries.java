@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Changes;
 import com.openexchange.groupware.container.Expectations;
@@ -59,7 +58,7 @@ import com.openexchange.groupware.container.Expectations;
  * information needs to be kept (you cannot just convert one into the other), because changing this series might have different
  * implications, eg.: If you move a daily series two days closer to the end date, you might lose two occurrences - if you move a series with
  * 7 occurrences, moving does not matter.
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class TestsForDifferentWaysOfEndingASeries extends ManagedAppointmentTest {

@@ -60,7 +60,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ThreadPoolTracker implements ServiceTrackerCustomizer {
+public class ThreadPoolTracker implements ServiceTrackerCustomizer<ThreadPoolService,ThreadPoolService> {
 
     private final BundleContext context;
 
@@ -70,19 +70,19 @@ public class ThreadPoolTracker implements ServiceTrackerCustomizer {
     }
 
     @Override
-    public Object addingService(final ServiceReference reference) {
-        final ThreadPoolService service = (ThreadPoolService) context.getService(reference);
+    public ThreadPoolService addingService(final ServiceReference<ThreadPoolService> reference) {
+        final ThreadPoolService service = context.getService(reference);
         SessionHandler.addThreadPoolService(service);
         return service;
     }
 
     @Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<ThreadPoolService> reference, final ThreadPoolService service) {
         // Nothing to do.
     }
 
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
+    public void removedService(final ServiceReference<ThreadPoolService> reference, final ThreadPoolService service) {
         SessionHandler.removeThreadPoolService();
         context.ungetService(reference);
     }

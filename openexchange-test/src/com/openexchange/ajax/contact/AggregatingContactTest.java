@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.contact;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
@@ -68,8 +67,8 @@ public class AggregatingContactTest extends AbstractAJAXSession{
     private Contact contributor;
     private FolderObject folder;
 
-    // FIXME: Reactivate me, when the update task is ready. 
-    
+    // FIXME: Reactivate me, when the update task is ready.
+
     public AggregatingContactTest(String name) throws Exception{
         super(name);
     }
@@ -78,7 +77,7 @@ public class AggregatingContactTest extends AbstractAJAXSession{
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        
+
         folderMgr = new FolderTestManager(client);
         contactMgr = new AggregatingContactTestManager(client);
         contactMgr.setFailOnError(true);
@@ -86,11 +85,11 @@ public class AggregatingContactTest extends AbstractAJAXSession{
         UserValues values = client.getValues();
         folder = folderMgr.generateFolder("aggregatedContactTest"+(new Date().getTime()), Module.CONTACTS.getFolderConstant(), values.getPrivateContactFolder(), values.getUserId());
         folderMgr.insertFolderOnServer(folder);
-        
+
         aggregator = new Contact();
         contributor = new Contact();
 
-        
+
         for(Contact c: new Contact[]{aggregator,contributor}){
             c.setParentFolderID(folder.getObjectID());
             c.setSurName("Mueller");
@@ -101,8 +100,8 @@ public class AggregatingContactTest extends AbstractAJAXSession{
         contributor.setEmail2("m@mueller.invalid");
         contactMgr.newAction(aggregator, contributor);
     }
-    
-    
+
+
 
 
     @Override
@@ -115,25 +114,25 @@ public class AggregatingContactTest extends AbstractAJAXSession{
 
     public void testPerformTheUnknownGreenRedCycle() throws Exception{
         ContactUnificationState state;
-        
+
         state = contactMgr.getAssociationBetween(contributor,aggregator);
         assertEquals(ContactUnificationState.UNDEFINED, state);
-        
+
         contactMgr.associateTwoContacts(aggregator, contributor);
         state = contactMgr.getAssociationBetween(contributor,aggregator);
         assertEquals(ContactUnificationState.GREEN, state);
-        
+
         contactMgr.separateTwoContacts(aggregator, contributor);
         state = contactMgr.getAssociationBetween(contributor,aggregator);
         assertEquals(ContactUnificationState.RED, state);
     }
-    
+
     public void testFindAssociatedContacts() throws Exception, IOException, SAXException, JSONException{
         ContactUnificationState state = contactMgr.getAssociationBetween(contributor,aggregator);
         assertEquals(ContactUnificationState.UNDEFINED, state);
         List<UUID> associatedContacts = contactMgr.getAssociatedContacts(contributor);
         assertEquals("Should have no associated contacts", 0, associatedContacts.size());
-        
+
         contactMgr.associateTwoContacts(aggregator, contributor);
         state = contactMgr.getAssociationBetween(contributor,aggregator);
         assertEquals(ContactUnificationState.GREEN, state);
@@ -141,7 +140,7 @@ public class AggregatingContactTest extends AbstractAJAXSession{
         associatedContacts = contactMgr.getAssociatedContacts(contributor);
         assertEquals("Should have one associated contact", 1, associatedContacts.size());
         assertEquals("Should have the same UUID", aggregator.getUserField20(), associatedContacts.get(0).toString());
-        
+
         contactMgr.separateTwoContacts(aggregator, contributor);
         state = contactMgr.getAssociationBetween(contributor,aggregator);
         assertEquals(ContactUnificationState.RED, state);
@@ -149,35 +148,35 @@ public class AggregatingContactTest extends AbstractAJAXSession{
         associatedContacts = contactMgr.getAssociatedContacts(contributor);
         assertEquals("Should have no associated contacts", 0, associatedContacts.size());
     }
-    
+
     public void testWorksWithUUIDsNotGivenByFinalContactModule() throws Exception {
     	//Karsten's case
     }
-    
+
     public void testWorksWithMoreThanOneAssociatedPair() throws Exception {
-    	
+
     }
-    
+
     public void testSecurity() throws Exception {
         contactMgr.associateTwoContacts(aggregator, contributor);
         UUID aggregatorUUID = UUID.fromString( contactMgr.getAction(aggregator).getUserField20());
         UUID contributorUUID = UUID.fromString( contactMgr.getAction(contributor).getUserField20());
-        
+
         TimeZone tz = TimeZone.getDefault();
-        
+
         AJAXClient client2 = new AJAXClient(User.User2);
         GetResponse getResponse = client2.execute(new GetContactByUIDRequest(aggregatorUUID, tz));
         OXException exception = getResponse.getException();
         assertNotNull("Should not be able to retrieve contact", exception);
         assertEquals("Should prohibit access", "CON-0104", exception.getErrorCode());
-        
+
         getResponse = client2.execute(new GetContactByUIDRequest(contributorUUID, tz));
         exception = getResponse.getException();
         assertNotNull("Should not be able to retrieve other contact", getResponse.getException());
         assertEquals("Should prohibit access", "CON-0104", exception.getErrorCode());
     } */
-    
+
     public void testDummy() {
-        
+
     }
 }

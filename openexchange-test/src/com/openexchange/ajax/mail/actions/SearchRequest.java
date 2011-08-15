@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.actions;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,7 +61,7 @@ import com.openexchange.groupware.search.Order;
 
 /**
  * {@link SearchRequest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SearchRequest extends AbstractMailRequest<SearchResponse> {
@@ -74,18 +73,18 @@ public class SearchRequest extends AbstractMailRequest<SearchResponse> {
     private final JSONObject searchObject;
 
     private final String[] patterns;
-    
+
     private final int[] searchColumns;
- 
+
     private final int sort;
 
     private final Order order;
-    
+
     private final int[] columns;
 
     /**
      * Initializes a new {@link SearchRequest}.
-     * 
+     *
      * @param searchObject The search object: <tt>{"filter":{...}}</tt>
      * @param folder The mail folder fullname
      * @param columns The columns to output

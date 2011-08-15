@@ -49,14 +49,13 @@
 
 package com.openexchange.test.osgi;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.ajax.LoginTest;
 
 /**
  * {@link BundleTestSessionD} - Test absence of SessionD bundle
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class BundleTestSessionD extends AbstractBundleTest {
@@ -65,7 +64,7 @@ public final class BundleTestSessionD extends AbstractBundleTest {
 
     /**
      * Initializes a new {@link BundleTestSessionD}
-     * 
+     *
      * @param name
      */
     public BundleTestSessionD(final String name) {

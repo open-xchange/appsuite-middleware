@@ -366,7 +366,7 @@ public class ConsistencyTest extends TestCase {
 
         createFilestoreEntry(context, version1, "wholeInfoitemVersion1");
         createFilestoreEntry(context, version2, "wholeInfoitemVersion2");
-        
+
     }
 
     private void simulateBrokenCurrentVersionInInfostore(final Context context) {
@@ -377,7 +377,7 @@ public class ConsistencyTest extends TestCase {
         createVersion(context, dmId, version2);
 
         createFilestoreEntry(context, version1, "brokenCurrentVersionV1");
-                
+
     }
 
     private void simulateBrokenOlderVersionInInfostore(final Context context) {
@@ -428,7 +428,7 @@ public class ConsistencyTest extends TestCase {
         dm.setFilestoreLocation(filestoreLocation);
         dm.setVersion(database.getNextVersionNumber(context, dmId));
 
-        database.put(context,dm);        
+        database.put(context,dm);
     }
 
     private static final class TestConsistency extends Consistency {

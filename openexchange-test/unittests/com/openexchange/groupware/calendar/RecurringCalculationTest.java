@@ -48,7 +48,6 @@
  */
 package com.openexchange.groupware.calendar;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.dateString;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.recalculate;
@@ -114,7 +113,7 @@ public class RecurringCalculationTest extends TestCase {
                 D("05/03/2008 10:00"),
                 D("03/04/2008 10:00")
         };
-        
+
         for(int i = 0; i < 5; i++) {
             final long expected = days[i].getTime();
             final long actual = results.getRecurringResult(i).getStart();
@@ -170,5 +169,5 @@ public class RecurringCalculationTest extends TestCase {
         fail("Couldn't find future recurrence for unlimited series");
 
     }
-    
+
 }

@@ -7,7 +7,7 @@ public class CommonObjectTest extends FolderChildObjectTest {
     public void testFindDifferingFields() {
         CommonObject dataObject = getCommonObject();
         CommonObject otherDataObject = getCommonObject();
-        
+
         otherDataObject.setCategories("blupp");
         assertDifferences(dataObject, otherDataObject , CommonObject.CATEGORIES);
 
@@ -25,12 +25,12 @@ public class CommonObjectTest extends FolderChildObjectTest {
         assertDifferences(dataObject, otherDataObject , CommonObject.CATEGORIES, CommonObject.COLOR_LABEL, CommonObject.NUMBER_OF_ATTACHMENTS, CommonObject.NUMBER_OF_LINKS, CommonObject.PRIVATE_FLAG);
 
     }
-    
+
     @Override
     public void testAttrAccessors() {
-        
+
         CommonObject object = new CommonObject() {};
-        
+
         // COLOR_LABEL
         assertFalse(object.contains(COLOR_LABEL));
         assertFalse(object.containsLabel());
@@ -117,7 +117,7 @@ public class CommonObjectTest extends FolderChildObjectTest {
         assertFalse(object.contains(PRIVATE_FLAG));
         assertFalse(object.containsPrivateFlag());
     }
-    
+
     private CommonObject getCommonObject() {
         CommonObject co = new CommonObject(){};
         fillCommonObject(co);
@@ -126,7 +126,7 @@ public class CommonObjectTest extends FolderChildObjectTest {
 
     public void fillCommonObject(CommonObject co) {
         super.fillFolderChildObject(co);
-        
+
         co.setCategories("c1, c2, c3");
         co.setLabel(1);
         co.setNumberOfAttachments(2);

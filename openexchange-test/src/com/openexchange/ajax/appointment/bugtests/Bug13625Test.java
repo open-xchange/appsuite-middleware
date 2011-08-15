@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
-import com.openexchange.exception.OXException;
 import java.util.Date;
 import org.json.JSONArray;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;

@@ -64,11 +64,9 @@ import com.openexchange.tools.service.ServletRegistration;
  */
 public class HTTPDeferrerActivator extends HousekeepingActivator {
 
-    private static final Class[] CLASSES = new Class[]{ConfigurationService.class};
-
     @Override
     protected Class<?>[] getNeededServices() {
-        return CLASSES;
+        return new Class<?>[]{ConfigurationService.class};
     }
 
     @Override

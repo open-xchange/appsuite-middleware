@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.folder;
 
-import com.openexchange.exception.OXException;
 import java.util.Iterator;
 import java.util.List;
 import com.openexchange.ajax.folder.actions.API;

@@ -19,19 +19,19 @@ import org.jdom.input.SAXBuilder;
 
 public class XMLCompare {
 
-		
+
 	private static Map<String,Method>  methods = new HashMap<String,Method>();
 	private static boolean inited;
 	private Set<String> checkTextNames = Collections.EMPTY_SET;
-	
+
 	public boolean compare(final String expect, final String got) throws UnsupportedEncodingException, JDOMException, IOException {
 		final SAXBuilder builder = new SAXBuilder();
 		final Document expectedDoc = builder.build(new ByteArrayInputStream(expect.getBytes("UTF-8")));
 		final Document gotDoc = builder.build(new ByteArrayInputStream(got.getBytes("UTF-8")));
-		
+
 		return compareDocuments(expectedDoc.getRootElement(), gotDoc.getRootElement());
 	}
-	
+
 	public boolean compareDocuments(final Element expectedDoc, final Element gotDoc) {
 		if(!expectedDoc.getName().equals(gotDoc.getName()) || !expectedDoc.getNamespace().equals(gotDoc.getNamespace())) {
 			return false;
@@ -54,7 +54,7 @@ public class XMLCompare {
 		}
 		return compareChildElems(expectedDoc, gotDoc);
 	}
-	
+
 	protected boolean checkText(final String nodeName) {
 		return getCheckTextNames().contains(nodeName);
 	}
@@ -62,7 +62,7 @@ public class XMLCompare {
 	protected Set<String> getCheckTextNames() {
 		return checkTextNames;
 	}
-	
+
 	public void setCheckTextNames(final String...names) {
 		checkTextNames = new HashSet<String>(Arrays.asList(names));
 	}

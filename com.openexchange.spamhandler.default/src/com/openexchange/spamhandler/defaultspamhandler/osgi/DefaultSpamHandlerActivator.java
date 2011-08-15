@@ -73,7 +73,7 @@ public final class DefaultSpamHandlerActivator extends DeferredActivator {
 
     private final Dictionary<String, String> dictionary;
 
-    private ServiceRegistration serviceRegistration;
+    private ServiceRegistration<SpamHandler> serviceRegistration;
 
     /**
      * Initializes a new {@link DefaultSpamHandlerActivator}
@@ -108,7 +108,7 @@ public final class DefaultSpamHandlerActivator extends DeferredActivator {
         try {
             MailServiceSupplier.getInstance().setMailService(getService(MailService.class));
             ConfigurationServiceSupplier.getInstance().setConfigurationService(getService(ConfigurationService.class));
-            serviceRegistration = context.registerService(SpamHandler.class.getName(), DefaultSpamHandler.getInstance(), dictionary);
+            serviceRegistration = context.registerService(SpamHandler.class, DefaultSpamHandler.getInstance(), dictionary);
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);

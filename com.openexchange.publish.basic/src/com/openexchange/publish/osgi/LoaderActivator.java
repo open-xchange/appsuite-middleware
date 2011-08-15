@@ -73,7 +73,7 @@ public class LoaderActivator implements BundleActivator {
 
     private Whiteboard whiteboard;
 
-    private ServiceRegistration dataLoaderRegistration;
+    private ServiceRegistration<PublicationDataLoaderService> dataLoaderRegistration;
 
     @Override
     public void start(final BundleContext context) throws Exception {
@@ -91,7 +91,7 @@ public class LoaderActivator implements BundleActivator {
         compositeLoader.registerLoader("contacts", contactLoader);
 
         dataLoaderRegistration =
-            context.registerService(PublicationDataLoaderService.class.getName(), new CachingLoader(whiteboard, compositeLoader), null);
+            context.registerService(PublicationDataLoaderService.class, new CachingLoader(whiteboard, compositeLoader), null);
     }
 
     @Override

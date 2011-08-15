@@ -63,14 +63,15 @@ import com.openexchange.management.ManagementService;
 
 /**
  * {@link ControlActivator}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ControlActivator implements BundleActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ControlActivator.class));
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ControlActivator.class));
 
-    private ServiceTracker managementServiceTracker;
+    private ServiceTracker<ManagementService, ManagementService> managementServiceTracker;
 
     private Thread shutdownHookThread;
 
@@ -88,10 +89,11 @@ public final class ControlActivator implements BundleActivator {
             /*
              * Create & open service tracker
              */
-            managementServiceTracker = new ServiceTracker(
-                context,
-                ManagementService.class.getName(),
-                new ManagementServiceTrackerCustomizer(context, LOG));
+            managementServiceTracker =
+                new ServiceTracker<ManagementService, ManagementService>(
+                    context,
+                    ManagementService.class,
+                    new ManagementServiceTrackerCustomizer(context, LOG));
             managementServiceTracker.open();
             /*
              * Add shutdown hook
@@ -139,7 +141,7 @@ public final class ControlActivator implements BundleActivator {
         }
     }
 
-    private static final class ManagementServiceTrackerCustomizer implements ServiceTrackerCustomizer {
+    private static final class ManagementServiceTrackerCustomizer implements ServiceTrackerCustomizer<ManagementService, ManagementService> {
 
         private final BundleContext bundleContext;
 
@@ -152,16 +154,10 @@ public final class ControlActivator implements BundleActivator {
         }
 
         @Override
-        public Object addingService(final ServiceReference reference) {
-            final Object addedService = bundleContext.getService(reference);
-            if (!(addedService instanceof ManagementService)) {
-                bundleContext.ungetService(reference);
-                return null;
-            }
+        public ManagementService addingService(final ServiceReference<ManagementService> reference) {
+            final ManagementService addedService = bundleContext.getService(reference);
             try {
-                ((ManagementService) addedService).registerMBean(
-                    new ObjectName("com.openexchange.control", "name", "Control"),
-                    new GeneralControl(bundleContext));
+                addedService.registerMBean(new ObjectName("com.openexchange.control", "name", "Control"), new GeneralControl(bundleContext));
                 logger.info("Control MBean successfully registered.");
                 return addedService;
             } catch (final MalformedObjectNameException e) {
@@ -178,15 +174,15 @@ public final class ControlActivator implements BundleActivator {
         }
 
         @Override
-        public void modifiedService(final ServiceReference reference, final Object service) {
+        public void modifiedService(final ServiceReference<ManagementService> reference, final ManagementService service) {
             // Nothing to do
         }
 
         @Override
-        public void removedService(final ServiceReference reference, final Object service) {
+        public void removedService(final ServiceReference<ManagementService> reference, final ManagementService service) {
             if (null != service) {
                 try {
-                    ((ManagementService) service).unregisterMBean(new ObjectName("com.openexchange.control", "name", "Control"));
+                    service.unregisterMBean(new ObjectName("com.openexchange.control", "name", "Control"));
                     logger.info("Control MBean successfully unregistered.");
                 } catch (final MalformedObjectNameException e) {
                     logger.error("Control MBean unregistration failed.", e);
@@ -203,7 +199,7 @@ public final class ControlActivator implements BundleActivator {
 
     /**
      * {@link ControlShutdownHookThread} - The shutdown hook thread of control bundle.
-     *
+     * 
      * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
      */
     private static final class ControlShutdownHookThread extends Thread {
@@ -212,7 +208,7 @@ public final class ControlActivator implements BundleActivator {
 
         /**
          * Initializes a new {@link ControlShutdownHookThread}
-         *
+         * 
          * @param bundleContext The bundle context
          */
         public ControlShutdownHookThread(final BundleContext bundleContext) {

@@ -51,11 +51,11 @@ package com.openexchange.ajax.session.actions;
 
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class RedirectResponseParser extends AbstractRedirectParser<RedirectResponse> {
-    
+
     RedirectResponseParser() {
         super();
     }

@@ -69,7 +69,7 @@ public abstract class AbstractNegativeAssertion extends AbstractAssertion {
     public void check(Changes changes, OXException expectedError){
         check(generateDefaultAppointment(), changes, expectedError);
     }
-    
+
     public abstract void check(Appointment startWith, Changes changes, OXException expectedError);
 
     protected void createAndCheck(Appointment startWith, Changes changes, OXException expectedError) {

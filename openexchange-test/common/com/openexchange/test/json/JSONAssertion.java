@@ -49,7 +49,6 @@
 
 package com.openexchange.test.json;
 
-import com.openexchange.exception.OXException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
@@ -65,23 +64,23 @@ import static org.junit.Assert.fail;
  *
  */
 public class JSONAssertion implements JSONCondition {
-    
+
     public static final void assertValidates(JSONAssertion assertion, Object o) {
         assertNotNull("Object was null", o);
         if(!assertion.validate(o)) {
             fail(assertion.getComplaint());
         }
     }
-    
+
     private Stack<JSONAssertion> stack = new Stack<JSONAssertion>();
-    
+
     private List<JSONCondition> conditions = new LinkedList<JSONCondition>();
     private String key;
 
     private String complaint;
 
     private int lastIndex;
-    
+
     public JSONAssertion isObject() {
         if(!stack.isEmpty()) {
             stack.peek().isObject();
@@ -90,7 +89,7 @@ public class JSONAssertion implements JSONCondition {
         }
         return this;
     }
-    
+
     public JSONAssertion hasKey(String key) {
         if(!stack.isEmpty()) {
             stack.peek().hasKey(key);
@@ -100,7 +99,7 @@ public class JSONAssertion implements JSONCondition {
         }
         return this;
     }
-    
+
     public JSONAssertion withValue(Object value) {
         if(!stack.isEmpty()) {
             stack.peek().withValue(value);
@@ -109,7 +108,7 @@ public class JSONAssertion implements JSONCondition {
         }
         return this;
     }
-    
+
     public JSONAssertion withValueObject() {
         JSONAssertion stackElement = new JSONAssertion();
         conditions.add(new ValueObject(key, stackElement));
@@ -117,7 +116,7 @@ public class JSONAssertion implements JSONCondition {
         stack.push(stackElement);
         return this;
     }
-    
+
     public JSONAssertion withValueArray() {
         JSONAssertion stackElement = new JSONAssertion();
         conditions.add(new ValueArray(key, stackElement));
@@ -136,27 +135,27 @@ public class JSONAssertion implements JSONCondition {
         return null;
     }
 
-    
+
     public JSONAssertion hasNoMoreKeys() {
         if(!stack.isEmpty())
             stack.pop();
         return this;
     }
-    
+
     public JSONAssertion isArray() {
         conditions.add(new IsOfType(JSONArray.class));
         return this;
     }
-    
+
     public JSONAssertion withValues(Object...values) {
         conditions.add(new WithValues(values));
         return this;
     }
-    
+
     public JSONAssertion objectEnds() {
         return hasNoMoreKeys();
     }
-    
+
     public boolean validate(Object o) {
         for(JSONCondition condition : conditions) {
             if(!condition.validate(o)) {
@@ -166,20 +165,20 @@ public class JSONAssertion implements JSONCondition {
         }
         return true;
     }
-    
+
     public String getComplaint() {
         return complaint;
     }
-    
-    
+
+
     private static final class IsOfType implements JSONCondition{
         private String complaint;
         private Class type;
-        
+
         public IsOfType(Class type) {
             this.type = type;
         }
-        
+
         public boolean validate(Object o) {
             boolean isCorrectType = type.isInstance(o);
             if(!isCorrectType) {
@@ -191,41 +190,41 @@ public class JSONAssertion implements JSONCondition {
             return complaint;
         }
     }
-    
+
     private static final class HasKey implements JSONCondition {
         private String key;
 
         public HasKey(String key) {
             this.key = key;
         }
-        
+
         public boolean validate(Object o) {
             return ((JSONObject)o).has(key);
         }
-        
+
         public String getComplaint() {
             return "Missing key: "+key;
         }
-        
+
     }
-    
+
     private static final class HasIndex implements JSONCondition {
         private int index;
 
         public HasIndex(int index) {
             this.index = index;
         }
-        
+
         public boolean validate(Object o) {
             return ((JSONArray)o).length() > index;
         }
-        
+
         public String getComplaint() {
             return "Missing index: "+index;
         }
-        
+
     }
-    
+
     private static final class KeyValuePair implements JSONCondition {
         private String key;
         private Object value;
@@ -248,12 +247,12 @@ public class JSONAssertion implements JSONCondition {
                 return false;
             }
         }
-        
+
         public String getComplaint() {
             return complaint;
         }
     }
-    
+
     private static final class ValueObject implements JSONCondition {
 
         private String key;
@@ -276,9 +275,9 @@ public class JSONAssertion implements JSONCondition {
                 return false;
             }
         }
-        
+
     }
-    
+
     private static final class ValueArray implements JSONCondition {
 
         private String key;
@@ -301,17 +300,17 @@ public class JSONAssertion implements JSONCondition {
                 return false;
             }
         }
-        
+
     }
-    
+
     private static final class WithValues implements JSONCondition {
         private Object[] values;
         private String complaint;
-        
+
         public WithValues(Object[] values) {
             this.values = values;
         }
-        
+
         public boolean validate(Object o) {
             JSONArray arr = (JSONArray) o;
             if(arr.length() != values.length) {
@@ -334,12 +333,12 @@ public class JSONAssertion implements JSONCondition {
             }
             return true;
         }
-        
+
         public String getComplaint() {
             return complaint;
         }
     }
 
- 
+
 
 }

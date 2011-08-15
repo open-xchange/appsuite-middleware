@@ -77,7 +77,7 @@ public class ResourceTools {
     private static int[] getAllResourceIds(AJAXClient client) throws OXException, IOException, SAXException, JSONException {
         ResourceAllRequest request = new ResourceAllRequest();
         ResourceAllResponse response = client.execute(request);
-        return response.getIDs();        
+        return response.getIDs();
     }
 
     private static List<Resource> getResources(AJAXClient client) throws OXException, IOException, SAXException, JSONException {

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.filter.parser.test;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -63,14 +62,14 @@ import com.openexchange.ajax.mail.filter.test.NotTest;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class NotParserImpl implements TestParser {
-	
+
 	public AbstractTest parseTest(String name, JSONObject jsonObject) throws JSONException {
 		final JSONObject jsonTestObject = jsonObject.getJSONObject("test");
 		final String testname = jsonTestObject.getString("test");
-		
+
 		final TestParser testParser = TestParserFactory.getParser(testname);
 		final AbstractTest test = testParser.parseTest(testname, jsonTestObject);
-		
+
 		return new NotTest(test);
 	}
 }

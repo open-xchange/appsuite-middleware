@@ -67,7 +67,7 @@ public class ListIDs implements Iterable<ListID> {
     public ListIDs() {
         super();
     }
-    
+
     /**
      * Convenience constructor for one ListID
      */
@@ -75,7 +75,7 @@ public class ListIDs implements Iterable<ListID> {
         this();
         add(listID);
     }
-    
+
     /**
      * Convenience constructor for folder and id as ints
      */

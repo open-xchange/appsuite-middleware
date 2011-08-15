@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware;
 
-import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -64,6 +63,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.service.event.EventAdmin;
 import org.w3c.tidy.Report;
 import com.openexchange.ajp13.AJPv13Config;
+import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.servlet.ServletConfigLoader;
 import com.openexchange.ajp13.servlet.http.HttpManagersInit;
@@ -180,7 +180,7 @@ import com.openexchange.xml.spring.impl.DefaultSpringParser;
 
 /**
  * This class contains methods for initialising tests.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Init {
@@ -214,11 +214,15 @@ public final class Init {
             public void start() throws OXException {
                 AJPv13Config.getInstance().start();
                 ServletConfigLoader.initDefaultInstance(AJPv13Config.getServletConfigs());
+                AJPv13Server.setInstance(new com.openexchange.ajp13.najp.AJPv13ServerImpl());
+                AJPv13Server.startAJPServer();
                 HttpManagersInit.getInstance().start();
             }
 
             public void stop() throws OXException {
                 HttpManagersInit.getInstance().stop();
+                AJPv13Server.stopAJPServer();
+                AJPv13Server.releaseInstrance();
                 ServletConfigLoader.resetDefaultInstance();
                 AJPv13Config.getInstance().stop();
             }
@@ -406,7 +410,7 @@ public final class Init {
             services.put(UserConfigurationService.class, new UserConfigurationServiceImpl());
             new ContactInterfaceDiscoveryInitialization().start();
             services.put(ContactInterfaceDiscoveryService.class, ContactInterfaceDiscoveryServiceImpl.getInstance());
-    
+
             ServerServiceRegistry.getInstance().addService(UserConfigurationService.class, services.get(UserConfigurationService.class));
             ServerServiceRegistry.getInstance().addService(
                 ContactInterfaceDiscoveryService.class,
@@ -442,7 +446,7 @@ public final class Init {
             }
         };
         return new OXException(
-        		9999, 
+        		9999,
         		null == message ? "[Not available]" : message,
         		cause);
     }
@@ -460,7 +464,7 @@ public final class Init {
             final SpringParser springParser = new DefaultSpringParser();
             ServerServiceRegistry.getInstance().addService(SpringParser.class, springParser);
         }
-    
+
         if (null == ServerServiceRegistry.getInstance().getService(JDOMParser.class)) {
             final JDOMParser jdomParser = new JDOMParserImpl();
             ServerServiceRegistry.getInstance().addService(JDOMParser.class, jdomParser);
@@ -471,7 +475,7 @@ public final class Init {
     }
 
     private static void startAndInjectSubscribeServices() {
-        final List<FolderUpdaterService> folderUpdaters = new ArrayList<FolderUpdaterService>(2);
+        final List<FolderUpdaterService<?>> folderUpdaters = new ArrayList<FolderUpdaterService<?>>(2);
         folderUpdaters.add(new StrategyFolderUpdaterService<Contact>(new ContactFolderUpdaterStrategy()));
         folderUpdaters.add(new StrategyFolderUpdaterService<Contact>(new ContactFolderMultipleUpdaterStrategy(), true));
         final ContextService contextService = (ContextService) services.get(ContextService.class);
@@ -533,14 +537,15 @@ public final class Init {
          * May be invoked multiple times
          */
         final FileStorageFactory fileStorageStarter = new LocalFileStorageFactory();
-        FileStorage.setFileStorageStarter(fileStorageStarter); 
+        FileStorage.setFileStorageStarter(fileStorageStarter);
         final DatabaseService dbService = (DatabaseService) services.get(DatabaseService.class);
         QuotaFileStorage.setQuotaFileStorageStarter(new DBQuotaFileStorageFactory(dbService, fileStorageStarter));
     }
 
     public static void startAndInjectDatabaseUpdate() throws OXException {
-    	if(databaseUpdateinitialized )
-    		return;
+    	if(databaseUpdateinitialized ) {
+            return;
+        }
     	InternalList.getInstance().start();
     	databaseUpdateinitialized = true;
     }
@@ -565,7 +570,7 @@ public final class Init {
             imapServiceRegistry.addService(UnifiedINBOXManagement.class, services.get(UnifiedINBOXManagement.class));
             imapServiceRegistry.addService(ThreadPoolService.class, services.get(ThreadPoolService.class));
             imapServiceRegistry.addService(TimerService.class, services.get(TimerService.class));
-    
+
             /*
              * Register IMAP bundle
              */
@@ -593,7 +598,7 @@ public final class Init {
             services.put(MailAccountStorageService.class, storageService);
             ServerServiceRegistry.getInstance().addService(MailAccountStorageService.class, storageService);
             MailServiceRegistry.getServiceRegistry().addService(MailAccountStorageService.class, storageService);
-    
+
             final UnifiedINBOXManagement unifiedINBOXManagement = MailAccountStorageInit.newUnifiedINBOXManagement();
             services.put(UnifiedINBOXManagement.class, unifiedINBOXManagement);
             ServerServiceRegistry.getInstance().addService(UnifiedINBOXManagement.class, unifiedINBOXManagement);
@@ -662,11 +667,11 @@ public final class Init {
     private static void startAndInjectEventBundle() throws Exception {
         if (null == ServerServiceRegistry.getInstance().getService(EventAdmin.class)) {
             EventQueue.setNewEventDispatcher(new EventDispatcher() {
-    
+
                 public void addListener(final AppointmentEventInterface listener) {
                     // Do nothing.
                 }
-    
+
                 public void addListener(final TaskEventInterface listener) {
                     // Do nothing.
                 }
@@ -690,19 +695,19 @@ public final class Init {
         if (null == ServerServiceRegistry.getInstance().getService(ICalParser.class)) {
             final ICal4JParser parser = new ICal4JParser();
             final ICal4JEmitter emitter = new ICal4JEmitter();
-    
+
             final OXUserResolver userResolver = new OXUserResolver();
             userResolver.setUserService((UserService) services.get(UserService.class));
             Participants.userResolver = userResolver;
             CreatedBy.userResolver = userResolver;
-    
+
             final OXResourceResolver resourceResolver = new OXResourceResolver();
             resourceResolver.setResourceService((ResourceService) services.get(ResourceService.class));
             Participants.resourceResolver = resourceResolver;
-    
+
             services.put(ICalParser.class, parser);
             services.put(ICalEmitter.class, emitter);
-    
+
             ServerServiceRegistry.getInstance().addService(ICalParser.class, parser);
             ServerServiceRegistry.getInstance().addService(ICalEmitter.class, emitter);
         }
@@ -712,7 +717,7 @@ public final class Init {
         if (null == ServerServiceRegistry.getInstance().getService(ConversionService.class)) {
             ConversionEngineRegistry.getInstance().putDataHandler("com.openexchange.contact", new ContactInsertDataHandler());
             ConversionEngineRegistry.getInstance().putDataSource("com.openexchange.mail.vcard", new VCardMailPartDataSource());
-    
+
             final ConversionService conversionService = new ConversionServiceImpl();
             services.put(ConversionService.class, conversionService);
             ServerServiceRegistry.getInstance().addService(ConversionService.class, conversionService);

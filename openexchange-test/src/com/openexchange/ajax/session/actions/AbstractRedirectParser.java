@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.session.actions;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.Header;
@@ -66,7 +65,7 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class AbstractRedirectParser<T extends AbstractAJAXResponse> extends AbstractAJAXParser<T> {

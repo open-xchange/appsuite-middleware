@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
-import com.openexchange.exception.OXException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -102,13 +101,13 @@ public class Bug13501Test extends AbstractAJAXSession {
                 count++;
             }
         }
-        
+
         assertEquals("Wrong number of occurrences in this view.", 3, count);
 
         GetRequest getRequest = new GetRequest(client.getValues().getPrivateAppointmentFolder(), appointment.getObjectID());
         GetResponse getResponse = client.execute(getRequest);
         Appointment sequenceApp = getResponse.getAppointment(client.getValues().getTimeZone());
-        
+
         assertEquals("Wrong occurrences value", 5, sequenceApp.getOccurrence());
     }
 

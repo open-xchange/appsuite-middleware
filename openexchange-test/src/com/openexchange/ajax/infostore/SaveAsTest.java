@@ -14,13 +14,13 @@ import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.test.OXTestToolkit;
 
 public class SaveAsTest extends InfostoreAJAXTest {
-	
+
 	private final SimpleAttachmentTest attachmentTest = new SimpleAttachmentTest("TaskAttachmentTest");
-	
+
 	public SaveAsTest(final String name) {
 		super(name);
 	}
-	
+
 	public void testBasic() throws Exception {
 		final AttachmentMetadata attachment = attachmentTest.getAttachment(0);
 		final int id = saveAs(getWebConversation(), getHostName(), sessionId,attachment.getFolderId(), attachment.getAttachedId(),attachment.getModuleId(), attachment.getId(), m(
@@ -28,21 +28,21 @@ public class SaveAsTest extends InfostoreAJAXTest {
 				"title"				,		"My Attachment",
 				"description"		,		"An attachment cum InfoItem"
 		));
-		
+
 		clean.add(id);
-		
+
 		final Response res = get(getWebConversation(),getHostName(), sessionId, id);
 		assertNotNull(res.getTimestamp());
         final JSONObject obj = (JSONObject) res.getData();
-		
+
 		final File upload = attachmentTest.getTestFile();
-		
+
 		assertEquals("My Attachment",obj.getString("title"));
 		assertEquals("An attachment cum InfoItem",obj.getString("description"));
 		assertEquals(1,obj.getInt("version"));
 		assertEquals(upload.getName(),obj.getString("filename"));
 
-		
+
 		InputStream is = null;
 		InputStream is2 = null;
 		try {
@@ -75,22 +75,22 @@ public class SaveAsTest extends InfostoreAJAXTest {
 					"title"				,		"My Attachment",
 					"description"		,		"An attachment cum InfoItem"
 			));
-			
+
 			clean.add(id);
 			fail("Expected IOException when trying to save attachment in virtual infostore folder");
 		} catch (final JSONException x) {
 			assertTrue(x.getMessage(), x.getMessage().contains("virt"));
 		}
-		
+
 	}
-	
+
 	@Override
 	public void setUp() throws Exception{
 		attachmentTest.setUp();
 		attachmentTest.upload();
 		super.setUp();
 	}
-	
+
 	@Override
 	public void tearDown() throws Exception {
 		attachmentTest.tearDown();

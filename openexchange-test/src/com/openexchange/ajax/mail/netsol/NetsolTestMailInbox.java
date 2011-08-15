@@ -61,15 +61,15 @@ import com.openexchange.mail.MailJSONField;
 
 /**
  * {@link NetsolTestMailInbox}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class NetsolTestMailInbox extends AbstractNetsolTest {
 
 	/**
 	 * Initializes a new {@link NetsolTestMailInbox}
-	 * 
+	 *
 	 * @param name
 	 */
 	public NetsolTestMailInbox(final String name) {

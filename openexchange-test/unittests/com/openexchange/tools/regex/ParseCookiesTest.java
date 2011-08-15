@@ -70,7 +70,7 @@ public final class ParseCookiesTest extends TestCase {
     }
 
     public void testCookie() throws Throwable {
-        
+
         LOG.info("Version: " + RFC2616Regex.COOKIE_VERSION);
         final String version = "$Version=0";
         assertTrue(RFC2616Regex.COOKIE_VERSION.matcher(version).matches());
@@ -78,7 +78,7 @@ public final class ParseCookiesTest extends TestCase {
         LOG.info(RFC2616Regex.COOKIE_VALUE);
         final String simple = "sessionid=aaa713ea6275b42205f040c6614701b7";
         assertTrue(RFC2616Regex.COOKIE_VALUE.matcher(simple).matches());
-        
+
         LOG.info(RFC2616Regex.COOKIES);
         final String firstCookie = "$Version=0; sessionid=aaa713ea6275b42205f040c6614701b7";
         assertTrue(RFC2616Regex.COOKIES.matcher(firstCookie).matches());
@@ -94,7 +94,7 @@ public final class ParseCookiesTest extends TestCase {
 
         final String valueWithPath = "JSESSIONID=1fed47c83eb3d3d5178c510bbde887499591f014.OX1; $Path=/";
         assertTrue(RFC2616Regex.COOKIES.matcher(valueWithPath).matches());
-        
+
         final String headerValue = "$Version=0; sessionid=aaa713ea6275b42205f040c6614701b7, $Version=0; JSESSIONID=1fed47c83eb3d3d5178c510bbde887499591f014.OX1; $Path=/";
         assertTrue(RFC2616Regex.COOKIES.matcher(headerValue).matches());
     }

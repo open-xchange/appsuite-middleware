@@ -51,14 +51,13 @@ package com.openexchange.groupware.tasks.json.actions;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.CommonObject.Marker;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
@@ -103,9 +102,7 @@ public final class UpdatesAction extends AbstractTaskAction {
 
         Date lastModified = null;
 
-        final Map<String, List<Task>> taskMap = new HashMap<String, List<Task>>(2);
-        final List<Task> modified = new ArrayList<Task>();
-        final List<Task> deleted = new ArrayList<Task>();
+        final List<Task> taskList = new ArrayList<Task>();
         SearchIterator<Task> it = null;
         try {
             final int[] internalColumns = new int[columnsToLoad.length+1];
@@ -117,7 +114,7 @@ public final class UpdatesAction extends AbstractTaskAction {
             it = taskssql.getModifiedTasksInFolder(folderId, internalColumns, requestedTimestamp);
             while (it.hasNext()) {
                 final Task taskObj = it.next();
-                modified.add(taskObj);
+                taskList.add(taskObj);
 
                 lastModified = taskObj.getLastModified();
 
@@ -125,14 +122,14 @@ public final class UpdatesAction extends AbstractTaskAction {
                     timestamp = lastModified;
                 }
             }
-            taskMap.put("modified", modified);
 
             if (!bIgnoreDelete) {
                 it.close();
                 it = taskssql.getDeletedTasksInFolder(folderId, internalColumns, requestedTimestamp);
                 while (it.hasNext()) {
                     final Task taskObj = it.next();
-                    deleted.add(taskObj);
+                    taskObj.setMarker(Marker.ID_ONLY);
+                    taskList.add(taskObj);
 
                     lastModified = taskObj.getLastModified();
 
@@ -141,9 +138,8 @@ public final class UpdatesAction extends AbstractTaskAction {
                     }
                 }
             }
-            taskMap.put("deleted", deleted);
 
-            return new AJAXRequestResult(taskMap, timestamp, "tasks");
+            return new AJAXRequestResult(taskList, timestamp, "task");
         } finally {
             if(it!=null) {
                 it.close();

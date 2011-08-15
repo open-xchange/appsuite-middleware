@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.contact;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONObject;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.contact.action.GetRequest;

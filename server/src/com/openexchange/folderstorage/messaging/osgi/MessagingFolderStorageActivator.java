@@ -78,9 +78,9 @@ public final class MessagingFolderStorageActivator extends DeferredActivator {
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MessagingFolderStorageActivator.class));
 
-    private ServiceRegistration folderStorageRegistration;
+    private ServiceRegistration<FolderStorage> folderStorageRegistration;
 
-    private List<ServiceTracker> trackers;
+    private List<ServiceTracker<?,?>> trackers;
 
     /**
      * Initializes a new {@link MessagingFolderStorageActivator}.
@@ -128,15 +128,15 @@ public final class MessagingFolderStorageActivator extends DeferredActivator {
                 }
             }
             // Trackers
-            trackers = new ArrayList<ServiceTracker>(4);
-            trackers.add(new ServiceTracker(context, FolderStorage.class.getName(), new Switcher(context)));
-            for (final ServiceTracker tracker : trackers) {
+            trackers = new ArrayList<ServiceTracker<?,?>>(4);
+            trackers.add(new ServiceTracker<FolderStorage,FolderStorage>(context, FolderStorage.class, new Switcher(context)));
+            for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.open();
             }
             // Register folder storage
             final Dictionary<String, String> dictionary = new Hashtable<String, String>();
             dictionary.put("tree", FolderStorage.REAL_TREE_ID);
-            folderStorageRegistration = context.registerService(FolderStorage.class.getName(), new MessagingFolderStorage(), dictionary);
+            folderStorageRegistration = context.registerService(FolderStorage.class, new MessagingFolderStorage(), dictionary);
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
@@ -167,7 +167,7 @@ public final class MessagingFolderStorageActivator extends DeferredActivator {
         }
     }
 
-    private static final class Switcher implements ServiceTrackerCustomizer {
+    private static final class Switcher implements ServiceTrackerCustomizer<FolderStorage,FolderStorage> {
 
         private final BundleContext context;
 
@@ -177,8 +177,8 @@ public final class MessagingFolderStorageActivator extends DeferredActivator {
         }
 
         @Override
-        public Object addingService(final ServiceReference reference) {
-            final FolderStorage folderStorage = (FolderStorage) context.getService(reference);
+        public FolderStorage addingService(final ServiceReference<FolderStorage> reference) {
+            final FolderStorage folderStorage = context.getService(reference);
             if (Arrays.asList(folderStorage.getSupportedContentTypes()).contains(MailContentType.getInstance())) {
                 MessagingFolderStorage.setMailFolderStorageAvailable(true);
                 return folderStorage;
@@ -188,14 +188,14 @@ public final class MessagingFolderStorageActivator extends DeferredActivator {
         }
 
         @Override
-        public void modifiedService(final ServiceReference reference, final Object service) {
+        public void modifiedService(final ServiceReference<FolderStorage> reference, final FolderStorage service) {
             // Nothing to do
         }
 
         @Override
-        public void removedService(final ServiceReference reference, final Object service) {
+        public void removedService(final ServiceReference<FolderStorage> reference, final FolderStorage service) {
             if (null != service) {
-                final FolderStorage folderStorage = (FolderStorage) service;
+                final FolderStorage folderStorage = service;
                 if (Arrays.asList(folderStorage.getSupportedContentTypes()).contains(MailContentType.getInstance())) {
                     MessagingFolderStorage.setMailFolderStorageAvailable(false);
                 }

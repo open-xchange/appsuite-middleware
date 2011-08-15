@@ -93,7 +93,7 @@ public abstract class AbstractICalImportTest extends AbstractContactTest {
 	}
 
 	public String generateRecurringICAL(final int interval, final String frequency) {
-		return 
+		return
 		"BEGIN:VCALENDAR\n" +
 		"VERSION:2.0\n" +
 		"PRODID:-//The Horde Project//Horde_iCalendar Library//EN\n" +

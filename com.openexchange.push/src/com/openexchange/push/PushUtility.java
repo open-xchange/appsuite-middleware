@@ -144,7 +144,7 @@ public final class PushUtility {
 
     /**
      * Checks if specified client identifier is allowed according to white-list filter.
-     * 
+     *
      * @param client The client identifier
      * @return <code>true</code> if client identifier is allowed; otherwise <code>false</code>
      */

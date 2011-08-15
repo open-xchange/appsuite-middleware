@@ -227,7 +227,7 @@ public class CachingUserStorage extends UserStorage {
                 try {
                     cache.put(key, Integer.valueOf(identifier));
                 } catch (final OXException e) {
-                    throw LdapExceptionCode.CACHE_PROBLEM.create("USR", e);
+                    throw LdapExceptionCode.CACHE_PROBLEM.create(e).setPrefix("USR");
                 }
             } else {
                 if (LOG.isTraceEnabled()) {
@@ -237,7 +237,7 @@ public class CachingUserStorage extends UserStorage {
             }
             return identifier;
         } catch (final OXException e) {
-            throw LdapExceptionCode.CACHE_PROBLEM.create("USR", e);
+            throw LdapExceptionCode.CACHE_PROBLEM.create(e).setPrefix("USR");
         }
     }
 

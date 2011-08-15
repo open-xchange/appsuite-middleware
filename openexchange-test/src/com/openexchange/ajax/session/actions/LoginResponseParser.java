@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.session.actions;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -67,7 +66,7 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class LoginResponseParser extends AbstractAJAXParser<LoginResponse> {
@@ -75,7 +74,7 @@ public class LoginResponseParser extends AbstractAJAXParser<LoginResponse> {
     private static final Log LOG = LogFactory.getLog(LoginResponseParser.class);
 
     private String jvmRoute;
-    
+
     LoginResponseParser(final boolean failOnError) {
         super(failOnError);
     }

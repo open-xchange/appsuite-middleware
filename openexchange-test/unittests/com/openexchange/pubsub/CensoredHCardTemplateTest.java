@@ -49,12 +49,11 @@
 
 package com.openexchange.pubsub;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.templating.OXTemplate;
 
 /**
  * {@link CensoredHCardTemplateTest}
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class CensoredHCardTemplateTest extends BasicCensoredContactTemplateTest {

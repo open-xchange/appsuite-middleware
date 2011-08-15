@@ -47,7 +47,6 @@
 
 package com.openexchange.ajax.kata.contacts;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.ajax.contact.action.UpdateRequest;
 import com.openexchange.ajax.contact.action.UpdateResponse;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -55,7 +54,7 @@ import com.openexchange.ajax.kata.NeedExistingStep;
 import com.openexchange.groupware.container.Contact;
 
 /**
- * 
+ *
  * {@link ContactUpdateStep}
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -78,7 +77,7 @@ public class ContactUpdateStep extends NeedExistingStep<Contact>{
         assumeIdentity(entry);
         UpdateRequest updateRequest = new UpdateRequest(entry, false);
         UpdateResponse updateResponse = execute(updateRequest);
-        
+
         if(!updateResponse.hasError()) {
             entry.setLastModified(updateResponse.getTimestamp());
             rememberIdentityValues(entry);

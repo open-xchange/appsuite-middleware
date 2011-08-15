@@ -188,53 +188,53 @@ public enum Tree {
 
     /** [inside GUI] "1" - "7" */
     CalendarCustomCountDays("/gui/calendar/custom/countdays"),
-    
+
     /** [inside GUI] "1" - "8" */
     CalendarCustomNumberOfAppointments("/gui/calendar/custom/numberofappointments"),
-    
+
     /** [inside GUI] Effects: Fading. If you set this, please also set EffectsGlobal to the same value. */
     EffectsFading("/gui/effects/fading"),
 
     /** [inside GUI] Effects: Global. If you set this, please also set EffectsFading to the same value. */
     EffectsGlobal("/gui/effects/global"),
-    
+
     /** [inside GUI] "true" or "false" */
     HoverCalendarEnabled("/gui/effects/hover/calendar"),
-    
+
     /** [inside GUI] "true" or "false" */
     HoverContactsEnabled("/gui/effects/hover/contacts"),
-    
+
     /** [inside GUI] "true" or "false" */
     HoverInfostoreEnabled("/gui/effects/hover/infostore"),
-    
+
     /** [inside GUI] "true" or "false" */
     HoverMailEnabled("/gui/effects/hover/mail"),
-    
+
     /** [inside GUI] "true" or "false" */
     HoverPortalEnabled("/gui/effects/hover/portal"),
-    
+
     /** [inside GUI] "true" or "false" */
     HoverTaskEnabled("/gui/effects/hover/tasks"),
-    
-    /** [inside GUI] 1 = short  =  500 milliseconds 
+
+    /** [inside GUI] 1 = short  =  500 milliseconds
      *               2 = middle = 1000 milliseconds
      *               3 = long   = 2000 milliseconds */
     HoverSpeed("/gui/effects/hover/speed"),
-    
+
     /** [inside GUI] "true" or "false" */
     ShowMiniCalendarOnStartUp("/gui/portal/minicalendar"),
-    
+
     /** [inside GUI] "true" or "false" */
     ShowInfoBoxOnStartUp("/gui/portal/tooltip"),
-    
+
     /** [inside GUI] "true" or "false" */
     LaunchWizardOnStart("/gui/wizard/launchOnStart"),
-    
+
     /** [inside GUI] */
     Categories("/gui/categories"),
-    
+
     CategoriesLocal("/gui/categories/local"),
-    
+
 
     //TODO: more gui settings
 
@@ -302,7 +302,7 @@ public enum Tree {
 
     /** Defines the maximum number of participants for appointments and tasks. (read-only, added 2008-10-20/SP5) */
     MAXIMUM_NUMBER_PARTICIPANTS("/participants/maximumNumberParticipants"),
-    
+
     /** If external participants without email should be shown. */
     ShowWithoutEmail("/participants/showWithoutEmail"),
 
@@ -323,7 +323,7 @@ public enum Tree {
 
     /** Alters default setting whether external images contained in HTML content are allowed or not (added 2008-05-27) */
     AllowHtmlImages("/modules/mail/allowhtmlimages"),
-    
+
     /** color quoted lines (added 2008-02-25) */
     ColorQuoted("/modules/mail/colorquoted"),
 
@@ -377,10 +377,10 @@ public enum Tree {
 
     /** header(s) identifying phishing headers (added 2008-05-27) */
     PhishingHeaders("/modules/mail/phishingheaders"),
-    
+
     /** contact folder id to save mail addresses from sent mails (added 2008-10-16) */
     ContactCollectFolder("/modules/mail/contactCollectFolder"),
-    
+
     /** switch contact collection on/off (added 2008-10-16) */
     ContactCollectEnabled("/modules/mail/contactCollectEnabled"),
 
@@ -399,7 +399,7 @@ public enum Tree {
     CalendarNotifyNewModifiedDeleted("/modules/calendar/notifyNewModifiedDeleted"),
     CalendarNotifyNewAcceptedDeclinedAsCreator("/modules/calendar/notifyAcceptedDeclinedAsCreator"),
     CalendarNotifyNewAcceptedDeclinedAsParticipant("/modules/calendar/notifyAcceptedDeclinedAsParticipant"),
-    
+
     /**
      * Default status for new appointments in private/public folders, where the user is participant.
      * This does not affect appointments created by this user, which always have the status "accepted".
@@ -416,7 +416,7 @@ public enum Tree {
 
     /** Defines if the user is allowed to search across all contact folders. */
     SingleFolderSearch("/modules/contacts/singleFolderSearch"),
-    
+
     /** Define if search via Sidebar is available or not .*/
     CharacterSearch("/modules/contacts/characterSearch"),
 
@@ -460,9 +460,9 @@ public enum Tree {
     AvailableModules("/availableModules"),
 
     MailFilter("/modules/mailfilter"),
-    
+
     OXUpdater("/modules/com.openexchange.oxupdater"),
-    
+
     ActiveSync("/modules/com.openexchange.usm.eas/module"),
 
     OLOX20Module("/modules/olox20/module"),

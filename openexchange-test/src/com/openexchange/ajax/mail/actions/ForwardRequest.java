@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.actions;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.Response;
@@ -62,15 +61,15 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class ForwardRequest extends ReplyRequest {
-    
+
     public ForwardRequest(String folderID, String mailID){
         super(folderID, mailID);
     }
-    
+
     public ForwardRequest(String[] folderAndId) {
         this(folderAndId[0], folderAndId[1]);
     }
-    
+
     @Override
     public String getAction(){
         return Mail.ACTION_FORWARD;

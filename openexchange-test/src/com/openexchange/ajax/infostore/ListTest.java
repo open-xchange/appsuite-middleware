@@ -20,19 +20,19 @@ public class ListTest extends InfostoreAJAXTest {
 	public ListTest(final String name) {
 		super(name);
 	}
-	
+
 	public void testBasic() throws Exception {
 		final int[][] bothEntries = new int[2][2];
 		bothEntries[0][1] = clean.get(0);
 		bothEntries[1][1] = clean.get(1);
-		
+
 		bothEntries[0][0] = folderId;
 		bothEntries[1][0] = folderId;
-		
-		
+
+
 		checkEntries(bothEntries);
-		
-		
+
+
 	}
 
 
@@ -49,12 +49,12 @@ public class ListTest extends InfostoreAJAXTest {
         entries[1][0] = folderId;
         entries[2][0] = folderId;
         entries[3][0] = fantasyID;
- 
+
 
         checkEntries(entries);
 
 
-        
+
     }
 
     // Node 2652
@@ -87,7 +87,7 @@ public class ListTest extends InfostoreAJAXTest {
         final int[][] entries = new int[1][2];
         entries[0][0] = folderId;
         entries[0][1] = clean.get(0);
-        
+
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
         Response res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),Long.MAX_VALUE,m("description","New description"), upload, "text/plain");
         assertNoError(res);
@@ -109,7 +109,7 @@ public class ListTest extends InfostoreAJAXTest {
         assertTrue(found);
     }
 
-    // Find a non-existing ID 
+    // Find a non-existing ID
     public int getFantasyID() throws JSONException, IOException, SAXException {
         int id = 20000;
         Response res = this.get(getWebConversation(), getHostName(), sessionId, id);

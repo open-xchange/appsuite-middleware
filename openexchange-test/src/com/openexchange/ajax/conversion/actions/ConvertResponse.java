@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.conversion.actions;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -61,15 +60,15 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
  * {@link ConvertResponse}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class ConvertResponse extends AbstractAJAXResponse {
 
 	/**
 	 * Initializes a new {@link ConvertResponse}
-	 * 
+	 *
 	 * @param response
 	 */
 	public ConvertResponse(final Response response) {
@@ -79,11 +78,11 @@ public final class ConvertResponse extends AbstractAJAXResponse {
 	/**
 	 * Appropriate if conversion response consists of a JSON array of folder and
 	 * object ID:<br>
-	 * 
+	 *
 	 * <pre>
 	 * [{&quot;folder_id&quot;:2567, &quot;id&quot;:7689}, ...]
 	 * </pre>
-	 * 
+	 *
 	 * @return The folders and IDs
 	 * @throws JSONException
 	 *             If a JSON error occurs

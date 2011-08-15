@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime.datasource;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -56,15 +57,60 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import javax.activation.DataSource;
+import com.openexchange.configuration.ServerConfig;
+import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.mail.mime.MIMEType2ExtMap;
 
 /**
  * {@link FileDataSource} - A simple {@link DataSource data source} that encapsulates a file.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FileDataSource implements DataSource {
 
+    /**
+     * Gets a file data source for specified input stream's data.
+     * 
+     * @param inputStream The input stream providing binary data
+     * @return The generated file data source (Content-Type and name still need to be set appropriately)
+     * @throws IOException If an I/O error occurs
+     */
+    public static FileDataSource valueOf(final InputStream inputStream) throws IOException {
+        if (null == inputStream) {
+            return null;
+        }
+        FileOutputStream fos = null;
+        final File tmpFile;
+        try {
+            tmpFile = File.createTempFile("openexchange", null, new File(ServerConfig.getProperty(Property.UploadDirectory)));
+            tmpFile.deleteOnExit();
+            final int bufLen = 8192;
+            final byte[] buf = new byte[bufLen];
+            fos = new FileOutputStream(tmpFile);
+            for (int read = inputStream.read(buf, 0, bufLen); read > 0; read = inputStream.read(buf, 0, bufLen)) {
+                fos.write(buf, 0, read);
+            }
+            fos.flush();
+        } finally {
+            if (null != fos) {
+                closeQuietly(fos);
+            }
+            closeQuietly(inputStream);
+        } 
+        return new FileDataSource(tmpFile);
+    }
+
+    private static void closeQuietly(final Closeable closeable) {
+        try {
+            closeable.close();
+        } catch (final Exception e) {
+            // Ignore
+        }
+    }
+
     private String contentType;
+
+    private String name;
 
     private final File file;
 
@@ -73,17 +119,17 @@ public final class FileDataSource implements DataSource {
      * file to be opened.</i>
      * <p>
      * Content type is initially set to "application/octet-stream".
-     *
+     * 
      * @param file The file
      */
     public FileDataSource(final File file) {
-        this(file, null);
+        this(file, MIMEType2ExtMap.getContentType(file.getName()));
     }
 
     /**
      * Creates a FileDataSource from a File object. <i>Note: The file will not actually be opened until a method is called that requires the
      * file to be opened.</i>
-     *
+     * 
      * @param file The file
      * @param contentType The content type
      */
@@ -91,6 +137,7 @@ public final class FileDataSource implements DataSource {
         super();
         this.file = file; // save the file Object...
         this.contentType = contentType == null ? "application/octet-stream" : contentType;
+        name = file.getName();
     }
 
     /**
@@ -98,7 +145,7 @@ public final class FileDataSource implements DataSource {
      * requires the file to be opened.</i>
      * <p>
      * Content type is initially set to "application/octet-stream".
-     *
+     * 
      * @param name The system-dependent file name.
      */
     public FileDataSource(final String name) {
@@ -110,7 +157,7 @@ public final class FileDataSource implements DataSource {
      * requires the file to be opened.</i>
      * <p>
      * Content type is initially set to "application/octet-stream".
-     *
+     * 
      * @param name The system-dependent file name.
      * @param contentType The content type
      */
@@ -135,12 +182,12 @@ public final class FileDataSource implements DataSource {
 
     @Override
     public String getName() {
-        return file.getName();
+        return name;
     }
 
     /**
      * Return the file that corresponds to this FileDataSource.
-     *
+     * 
      * @return The file.
      */
     public File getFile() {
@@ -149,11 +196,21 @@ public final class FileDataSource implements DataSource {
 
     /**
      * Sets the content type.
-     *
+     * 
      * @param contentType The content type.
      */
     public void setContentType(final String contentType) {
         this.contentType = contentType;
+    }
+
+    /**
+     * Sets the name (and implicitly content type).
+     * 
+     * @param name The name to set
+     */
+    public void setName(final String name) {
+        this.name = name == null ? file.getName() : name;
+        this.contentType = MIMEType2ExtMap.getContentType(this.name);
     }
 
 }

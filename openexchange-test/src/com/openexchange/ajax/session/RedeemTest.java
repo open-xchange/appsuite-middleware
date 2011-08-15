@@ -48,8 +48,6 @@
  */
 
 package com.openexchange.ajax.session;
-
-import com.openexchange.exception.OXException;
 /**
  * {@link RedeemTest}
  *
@@ -60,24 +58,24 @@ public class RedeemTest extends AbstractLoginTest {
     public RedeemTest(String name) {
         super(name);
     }
-    
+
     public void testRedeemRandom() throws Exception {
         createClient();
         String[] credentials = credentials(USER1);
-        
+
         inModule("login");
-        
+
         raw("login", "name", credentials[0], "password", credentials[1]);
-        
+
         String random = rawResponse.getString("random");
         String session = rawResponse.getString("session");
-        
+
         createClient();
-        
+
         raw("redeem", "random", random);
-        
+
         assertFalse(rawResponse.has("error"));
         assertEquals(session, rawResponse.get("session"));
-        
+
     }
 }

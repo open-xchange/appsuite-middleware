@@ -68,7 +68,7 @@ import com.openexchange.mailaccount.json.fields.GetSwitch;
 
 /**
  * {@link MailAccountLifecycleTest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -76,7 +76,7 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
 
     /**
      * Initializes a new {@link MailAccountLifecycleTest}.
-     * 
+     *
      * @param name
      */
     public MailAccountLifecycleTest(final String name) {

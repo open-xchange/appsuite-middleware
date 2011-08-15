@@ -60,19 +60,19 @@ import com.openexchange.oauth.OAuthServiceMetaData;
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer {
+public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<OAuthServiceMetaData,OAuthServiceMetaData> {
 
     private final BundleContext context;
     private final Activator activator;
 
-    public OAuthServiceMetaDataRegisterer(BundleContext context, Activator activator){
+    public OAuthServiceMetaDataRegisterer(final BundleContext context, final Activator activator){
         this.context = context;
         this.activator = activator;
     }
 
     @Override
-    public Object addingService(ServiceReference reference) {
-        OAuthServiceMetaData oAuthServiceMetaData = (OAuthServiceMetaData) context.getService(reference);
+    public OAuthServiceMetaData addingService(final ServiceReference<OAuthServiceMetaData> reference) {
+        final OAuthServiceMetaData oAuthServiceMetaData = context.getService(reference);
         // TODO Please use a service property or the service description to let the ServiceTracker filter the only wanted service.
         if ("com.openexchange.oauth.yahoo".equals(oAuthServiceMetaData.getId())) {
             activator.setOAuthServiceMetaData(oAuthServiceMetaData);
@@ -82,13 +82,13 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer 
     }
 
     @Override
-    public void modifiedService(ServiceReference arg0, Object arg1) {
+    public void modifiedService(final ServiceReference<OAuthServiceMetaData> arg0, final OAuthServiceMetaData arg1) {
       //nothing to do here
     }
 
     @Override
-    public void removedService(ServiceReference reference, Object arg1) {
-        OAuthServiceMetaData oAuthServiceMetaData = (OAuthServiceMetaData) arg1;
+    public void removedService(final ServiceReference<OAuthServiceMetaData> reference, final OAuthServiceMetaData arg1) {
+        final OAuthServiceMetaData oAuthServiceMetaData = arg1;
         if ("com.openexchange.oauth.yahoo".equals(oAuthServiceMetaData.getId())) {
             activator.setOAuthServiceMetaData(null);
             activator.unregisterSubscribeService();

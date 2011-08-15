@@ -58,14 +58,14 @@ import com.openexchange.ajax.mail.actions.SendRequest;
 
 /**
  * {@link GetTest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class GetTest extends AbstractMailTest {
 
     /**
      * Default constructor.
-     * 
+     *
      * @param name Name of this test.
      */
     public GetTest(final String name) {
@@ -74,7 +74,7 @@ public final class GetTest extends AbstractMailTest {
 
     /**
      * Tests the <code>action=get</code> request on INBOX folder
-     * 
+     *
      * @throws Throwable
      */
     public void testGet() throws Throwable {
@@ -107,7 +107,7 @@ public final class GetTest extends AbstractMailTest {
 
     /**
      * Tests the <code>action=get_structure</code> request on INBOX folder
-     * 
+     *
      * @throws Throwable
      */
     public void testGetStructure() throws Throwable {

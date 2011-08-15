@@ -14,7 +14,7 @@ import com.openexchange.webdav.xml.ContactTest;
 import com.openexchange.webdav.xml.FolderTest;
 
 public class ListTest extends AttachmentTest {
-	
+
 	public ListTest(final String name) {
 		super(name);
 	}
@@ -25,9 +25,9 @@ public class ListTest extends AttachmentTest {
 		final Contact contactObj = new Contact();
 		contactObj.setSurName("testLoadAttachment");
 		contactObj.setParentFolderID(contactFolderId);
-		
+
 		final int objectId = ContactTest.insertContact(webCon, contactObj, PROTOCOL + hostName, login, password, context);
-		
+
 		final AttachmentMetadata attachmentObj = new AttachmentImpl();
 		attachmentObj.setFilename(System.currentTimeMillis() + "test.txt");
 		attachmentObj.setModuleId(Types.CONTACT);
@@ -35,12 +35,12 @@ public class ListTest extends AttachmentTest {
 		attachmentObj.setFolderId(contactFolderId);
 		attachmentObj.setRtfFlag(false);
 		attachmentObj.setFileMIMEType(CONTENT_TYPE);
-		
+
 		final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(data);
-		
+
 		final int attachmentId = insertAttachment(webCon, attachmentObj, byteArrayInputStream, getHostName(), getLogin(), getPassword(), context);
 		assertTrue("attachment is 0", attachmentId > 0);
-		
+
 		attachmentObj.setId(attachmentId);
 		final InputStream is = loadAttachment(webCon, attachmentObj, getHostName(), getLogin(), getPassword(), context);
 		final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -51,16 +51,16 @@ public class ListTest extends AttachmentTest {
 		}
 		assertEqualsAndNotNull("byte[] are not equals", data, byteArrayOutputStream.toByteArray());
 	}
-	
+
 	public void testLoadAttachmentWithRtf() throws Exception {
 		final FolderObject folderObj = FolderTest.getContactDefaultFolder(webCon, PROTOCOL + hostName, login, password, context);
 		final int contactFolderId = folderObj.getObjectID();
 		final Contact contactObj = new Contact();
 		contactObj.setSurName("testLoadAttachmentWithRtf");
 		contactObj.setParentFolderID(contactFolderId);
-		
+
 		final int objectId = ContactTest.insertContact(webCon, contactObj, PROTOCOL + hostName, login, password, context);
-		
+
 		final AttachmentMetadata attachmentObj = new AttachmentImpl();
 		attachmentObj.setFilename(System.currentTimeMillis() + "test.txt");
 		attachmentObj.setModuleId(Types.CONTACT);
@@ -68,12 +68,12 @@ public class ListTest extends AttachmentTest {
 		attachmentObj.setFolderId(contactFolderId);
 		attachmentObj.setRtfFlag(true);
 		attachmentObj.setFileMIMEType(CONTENT_TYPE);
-		
+
 		final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(data);
-		
+
 		final int attachmentId = insertAttachment(webCon, attachmentObj, byteArrayInputStream, getHostName(), getLogin(), getPassword(), context);
 		assertTrue("attachment is 0", attachmentId > 0);
-		
+
 		attachmentObj.setId(attachmentId);
 		final InputStream is = loadAttachment(webCon, attachmentObj, getHostName(), getLogin(), getPassword(), context);
 		final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -84,5 +84,5 @@ public class ListTest extends AttachmentTest {
 		}
 		assertEqualsAndNotNull("byte[] are not equals", data, byteArrayOutputStream.toByteArray());
 	}
-	
+
 }

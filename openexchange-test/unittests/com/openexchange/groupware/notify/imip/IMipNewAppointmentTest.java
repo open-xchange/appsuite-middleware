@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.notify.imip;
 
-import com.openexchange.exception.OXException;
 import java.util.List;
 import javax.mail.internet.MimeMultipart;
 import com.openexchange.data.conversion.ical.ITipMethod;
@@ -58,7 +57,7 @@ import com.openexchange.groupware.container.Participant;
 
 /**
  * {@link IMipNewAppointmentTest}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class IMipNewAppointmentTest extends IMipTest {
@@ -91,14 +90,14 @@ public class IMipNewAppointmentTest extends IMipTest {
         super.tearDown();
 
     }
-    
+
     public void testMailForParticipants() throws Exception {
         notify.appointmentCreated(appointment, so);
         List<Message> messages = notify.getMessages();
-        
+
         boolean foundSecond = false;
         boolean foundThird = false;
-        
+
         for (Message message : messages) {
             if (message.addresses.contains(userMail)) {
                 checkState(message.message, ITipMethod.NO_METHOD);
@@ -112,7 +111,7 @@ public class IMipNewAppointmentTest extends IMipTest {
                 checkState(message.message, ITipMethod.REQUEST);
             }
         }
-        
+
         assertTrue("missing user", foundSecond);
         assertTrue("missing user", foundThird);
     }

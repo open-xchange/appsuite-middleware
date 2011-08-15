@@ -47,71 +47,44 @@
  *
  */
 
-package com.openexchange.groupware.tasks.json.converters;
+package com.openexchange.groupware.tasks.osgi;
 
-import java.util.List;
-import java.util.Map;
-import org.json.JSONArray;
-import org.json.JSONException;
+import static com.openexchange.java.Autoboxing.I;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.Converter;
-import com.openexchange.ajax.writer.TaskWriter;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.tasks.json.TaskRequestTools;
-import com.openexchange.tools.servlet.OXJSONExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
-
+import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.groupware.Types;
+import com.openexchange.groupware.reminder.TargetService;
+import com.openexchange.groupware.tasks.ModifyThroughDependant;
+import com.openexchange.groupware.tasks.json.TaskActionFactory;
+import com.openexchange.groupware.tasks.json.converters.TaskResultConverter;
+import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 
 /**
- * {@link TaskListResultConverter}
+ * {@link TaskActivator}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class TaskListResultConverter extends AbstractTaskJSONResultConverter {
+public class TaskActivator extends AJAXModuleActivator {
 
-    private static final String INPUT_FORMAT = "tasks";
-
-    @Override
-    public String getInputFormat() {
-        return INPUT_FORMAT;
-    }
-    
-    @Override
-    public void convertTask(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
-        final Map<String, List<Task>> taskMap = (Map<String, List<Task>>) result.getResultObject();
-        final boolean putDeleted;
-        final List<Task> taskList;
-        if (taskMap.size() > 1) {
-            putDeleted = true;
-            taskList = taskMap.get("modified");
-        } else {
-            putDeleted = false;
-            taskList = taskMap.get("tasks");
-        }
-        
-        final int[] columns = TaskRequestTools.checkIntArray(request, AJAXServlet.PARAMETER_COLUMNS);
-        final JSONArray jsonResponseArray = new JSONArray();
-        
-        final TaskWriter taskwriter = new TaskWriter(getTimeZone());        
-        for (final Task task : taskList) {
-            try {
-                taskwriter.writeArray(task, columns, jsonResponseArray);
-            } catch (JSONException e) {
-                throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-            }
-        }
-        
-        if (putDeleted) {
-            final List<Task> deleted = taskMap.get("deleted");
-            for (final Task task : deleted) {
-                jsonResponseArray.put(task.getObjectID());
-            }
-        }
-
-        result.setResultObject(jsonResponseArray, OUTPUT_FORMAT);
+    public TaskActivator() {
+        super();
     }
 
+    @Override
+    protected void startBundle() throws Exception {
+        final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
+        props.put(TargetService.MODULE_PROPERTY, I(Types.TASK));
+        registerService(TargetService.class, new ModifyThroughDependant(), props);
+
+        registerModule(new TaskActionFactory(new ExceptionOnAbsenceServiceLookup(this)), AJAXServlet.MODULE_TASK);
+        registerService(ResultConverter.class, new TaskResultConverter());
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[0];
+    }
 }

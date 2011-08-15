@@ -53,7 +53,7 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.container.DataObject;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class CommonInsertResponse extends AbstractAJAXResponse {
@@ -85,7 +85,7 @@ public class CommonInsertResponse extends AbstractAJAXResponse {
 
     /**
      * Puts the data of this insert response into the object. This are
-     * especially the identifier and the modified time stamp. 
+     * especially the identifier and the modified time stamp.
      */
     public void fillObject(final DataObject obj) {
         obj.setObjectID(getId());

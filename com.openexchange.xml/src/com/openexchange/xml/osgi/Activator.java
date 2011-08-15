@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.xml.osgi;
 
 import org.osgi.framework.BundleActivator;
@@ -60,13 +61,15 @@ import com.openexchange.xml.spring.impl.DefaultSpringParser;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class Activator implements BundleActivator {
-    private ServiceRegistration jdomRegistration;
-    private ServiceRegistration springParserRegistration;
+
+    private ServiceRegistration<JDOMParser> jdomRegistration;
+
+    private ServiceRegistration<SpringParser> springParserRegistration;
 
     @Override
     public void start(final BundleContext bundleContext) throws Exception {
-        this.jdomRegistration = bundleContext.registerService(JDOMParser.class.getName(), new JDOMParserImpl(), null);
-        this.springParserRegistration = bundleContext.registerService(SpringParser.class.getName(), new DefaultSpringParser(), null);
+        this.jdomRegistration = bundleContext.registerService(JDOMParser.class, new JDOMParserImpl(), null);
+        this.springParserRegistration = bundleContext.registerService(SpringParser.class, new DefaultSpringParser(), null);
         // new javax.xml.stream.internal.Activator().start(bundleContext);
     }
 

@@ -56,7 +56,7 @@ import com.openexchange.groupware.container.DataObject;
 
 /**
  * {@link InsertResponse}
- * 
+ *
  * @author
  */
 public class InsertResponse extends CommonInsertResponse {
@@ -72,7 +72,7 @@ public class InsertResponse extends CommonInsertResponse {
 
     /**
      * Every new object gets a new identifier. With this method this identifier can be read.
-     * 
+     *
      * @return the new identifier of the new object.
      */
     public String getMailFolderID() {

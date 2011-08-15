@@ -61,7 +61,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class DatabaseCustomizer implements ServiceTrackerCustomizer {
+public class DatabaseCustomizer implements ServiceTrackerCustomizer<DatabaseService,DatabaseService> {
 
     private final BundleContext context;
 
@@ -69,26 +69,26 @@ public class DatabaseCustomizer implements ServiceTrackerCustomizer {
      * Default constructor.
      * @param context bundle context
      */
-    public DatabaseCustomizer(BundleContext context) {
+    public DatabaseCustomizer(final BundleContext context) {
         super();
         this.context = context;
     }
 
     @Override
-    public Object addingService(ServiceReference reference) {
-        DatabaseService service = (DatabaseService) context.getService(reference);
+    public DatabaseService addingService(final ServiceReference<DatabaseService> reference) {
+        final DatabaseService service = context.getService(reference);
         ServerServiceRegistry.getInstance().addService(DatabaseService.class, service);
         Database.setDatabaseService(service);
         return service;
     }
 
     @Override
-    public void modifiedService(ServiceReference reference, Object service) {
+    public void modifiedService(final ServiceReference<DatabaseService> reference, final DatabaseService service) {
         // Nothing to do.
     }
 
     @Override
-    public void removedService(ServiceReference reference, Object service) {
+    public void removedService(final ServiceReference<DatabaseService> reference, final DatabaseService service) {
         Database.setDatabaseService(null);
         ServerServiceRegistry.getInstance().removeService(DatabaseService.class);
         context.ungetService(reference);

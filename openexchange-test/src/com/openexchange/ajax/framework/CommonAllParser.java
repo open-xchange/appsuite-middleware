@@ -52,7 +52,7 @@ package com.openexchange.ajax.framework;
 import com.openexchange.ajax.container.Response;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class CommonAllParser extends AbstractColumnsParser<CommonAllResponse> {

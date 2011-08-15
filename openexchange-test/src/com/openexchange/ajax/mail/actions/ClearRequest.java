@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.actions;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
@@ -58,23 +57,23 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
  * {@link ClearRequest}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
- * 
+ *
  */
 public class ClearRequest extends AbstractMailRequest<ClearResponse> {
-	
+
 	private final String[] folderIds;
 	private boolean failOnError = true;
-	
+
 	public ClearRequest(String folderId){
 		this.folderIds = new String [] {folderId};
 	}
-	
+
 	public ClearRequest(String[] folderIds){
 		this.folderIds = folderIds;
 	}
-	
+
 	public ClearRequest(String[] folderIds, boolean failOnError){
 		this.folderIds = folderIds;
 		this.failOnError = failOnError;
@@ -82,7 +81,7 @@ public class ClearRequest extends AbstractMailRequest<ClearResponse> {
 
 	public Object getBody() throws JSONException {
 		final JSONArray array = new JSONArray();
-        for (final String folderId : folderIds) {            
+        for (final String folderId : folderIds) {
             array.put(folderId);
         }
         return array;

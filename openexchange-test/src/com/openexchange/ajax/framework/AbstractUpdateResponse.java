@@ -64,7 +64,7 @@ public abstract class AbstractUpdateResponse extends AbstractAJAXResponse {
     }
 
     /**
-     * Puts the data of this update response into the object. This are especially the modified time stamp. 
+     * Puts the data of this update response into the object. This are especially the modified time stamp.
      */
     public void fillObject(final DataObject obj) {
         obj.setLastModified(getTimestamp());

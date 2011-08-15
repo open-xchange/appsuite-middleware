@@ -64,7 +64,7 @@ import com.openexchange.push.imapidle.ImapIdlePushListenerRegistry;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IMAPNotifierTracker implements ServiceTrackerCustomizer {
+public final class IMAPNotifierTracker implements ServiceTrackerCustomizer<IMAPNotifierRegistryService,IMAPNotifierRegistryService> {
 
     private final AtomicReference<IMAPNotifierRegistryService> reference;
 
@@ -80,10 +80,9 @@ public final class IMAPNotifierTracker implements ServiceTrackerCustomizer {
     }
 
     @Override
-    public Object addingService(final ServiceReference serviceReference) {
-        final Object service = context.getService(serviceReference);
-        final IMAPNotifierRegistryService registryService = (IMAPNotifierRegistryService) service;
-        if (reference.compareAndSet(null, registryService)) {
+    public IMAPNotifierRegistryService addingService(final ServiceReference<IMAPNotifierRegistryService> serviceReference) {
+        final IMAPNotifierRegistryService service = context.getService(serviceReference);
+        if (reference.compareAndSet(null, service)) {
             /*
              * No IDLE-bases push needed anymore. Orderly close existing ones and add an appropriate notifier task instead.
              */
@@ -91,7 +90,7 @@ public final class IMAPNotifierTracker implements ServiceTrackerCustomizer {
             if (listenerRegistry.compareAndSetEnabled(true, false)) {
                 for (final Iterator<ImapIdlePushListener> listeners = listenerRegistry.getPushListeners(); listeners.hasNext();) {
                     final ImapIdlePushListener listener = listeners.next();
-                    registryService.addTaskFor(ImapIdlePushListener.getAccountId(), listener.getSession());
+                    service.addTaskFor(ImapIdlePushListener.getAccountId(), listener.getSession());
                 }
                 listenerRegistry.purgeAllPushListener();
                 com.openexchange.log.Log.valueOf(LogFactory.getLog(IMAPNotifierTracker.class)).warn(
@@ -104,16 +103,16 @@ public final class IMAPNotifierTracker implements ServiceTrackerCustomizer {
     }
 
     @Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<IMAPNotifierRegistryService> reference, final IMAPNotifierRegistryService service) {
         // Nothing to do
     }
 
     @Override
-    public void removedService(final ServiceReference serviceReference, final Object service) {
+    public void removedService(final ServiceReference<IMAPNotifierRegistryService> serviceReference, final IMAPNotifierRegistryService service) {
         if (null == service) {
             return;
         }
-        reference.compareAndSet((IMAPNotifierRegistryService) service, null);
+        reference.compareAndSet(service, null);
         context.ungetService(serviceReference);
     }
 

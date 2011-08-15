@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.session;
 
-import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.http.client.params.ClientPNames;
@@ -71,7 +70,7 @@ import com.openexchange.login.ConfigurationProperty;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class RedirectTest extends AbstractAJAXSession {
@@ -92,7 +91,7 @@ public class RedirectTest extends AbstractAJAXSession {
         Init.injectProperty();
         ConfigurationService configService = new ConfigurationImpl();
         final String value = configService.getProperty(ConfigurationProperty.INSECURE.getPropertyName(), ConfigurationProperty.INSECURE.getDefaultValue());
-        insecure = Boolean.parseBoolean(value); 
+        insecure = Boolean.parseBoolean(value);
     }
 
     @Override
@@ -131,7 +130,7 @@ public class RedirectTest extends AbstractAJAXSession {
             RedirectRequest request = new RedirectRequest(lResponse.getJvmRoute(), lResponse.getRandom(), clientIdentifier);
             final RedirectResponse rResponse = myClient.execute(request);
             assertNotNull("Redirect location is missing.", rResponse.getLocation());
-            
+
             for (Cookie cookie : session.getHttpClient().getCookieStore().getCookies()) {
                 String name = cookie.getName();
                 if (insecure) {

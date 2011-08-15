@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.infostore.actions;
 
-import com.openexchange.exception.OXException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
@@ -70,7 +69,7 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 public abstract class AbstractInfostoreRequest<T extends AbstractInfostoreResponse> implements AJAXRequest<T> {
 
     private boolean failOnError;
-    
+
     public static final String INFOSTORE_URL = "/ajax/infostore";
 
     public void setFailOnError(boolean failOnError) {
@@ -92,7 +91,7 @@ public abstract class AbstractInfostoreRequest<T extends AbstractInfostoreRespon
     public String writeJSON(DocumentMetadata data) throws JSONException {
         return convertToJSON(data);
     }
-    
+
     public static String convertToJSON(DocumentMetadata data) throws JSONException{
         StringWriter results = new StringWriter();
         InfostoreWriter writer = new InfostoreWriter(new JSONWriter(new PrintWriter(results)));

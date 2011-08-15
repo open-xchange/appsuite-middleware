@@ -69,12 +69,12 @@ public class ResourceUpdatesRequest  extends AbstractResourceRequest<ResourceUpd
     public Object getBody(){
         return null;
     }
-    
+
     public ResourceUpdatesRequest(Date since, boolean failOnError){
         this.failOnError = failOnError;
         this.lastModified = since;
     }
-    
+
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
         return Method.GET;
     }
@@ -92,7 +92,7 @@ public class ResourceUpdatesRequest  extends AbstractResourceRequest<ResourceUpd
             protected ResourceUpdatesResponse createResponse(Response response) {
                 return new ResourceUpdatesResponse(response);
             }
-            
+
         };
     }
 

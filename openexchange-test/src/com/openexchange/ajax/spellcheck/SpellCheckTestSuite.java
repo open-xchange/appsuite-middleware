@@ -54,9 +54,9 @@ import junit.framework.TestSuite;
 
 /**
  * {@link SpellCheckTestSuite}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class SpellCheckTestSuite extends TestSuite {
 

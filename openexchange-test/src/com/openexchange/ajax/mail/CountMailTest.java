@@ -48,11 +48,9 @@
  */
 
 package com.openexchange.ajax.mail;
-
-import com.openexchange.exception.OXException;
 /**
- * 
- * {@link CountMailTest} - tests the CountRequest 
+ *
+ * {@link CountMailTest} - tests the CountRequest
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  *
@@ -64,7 +62,7 @@ public class CountMailTest extends AbstractMailTest {
     public CountMailTest(final String name) {
         super(name);
     }
-    
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
@@ -83,7 +81,7 @@ public class CountMailTest extends AbstractMailTest {
 
         for (int number = 1; number < 10; number++) {
             sendMail(generateMail());
-            assertEquals("Does not contain the expected number of elements in folder "+folder, number, count(folder) );    
+            assertEquals("Does not contain the expected number of elements in folder "+folder, number, count(folder) );
         }
 
         clearFolder(folder);

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.importexport.actions;
 
-import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,7 +60,7 @@ import com.openexchange.ajax.framework.AbstractUploadParser;
 import com.openexchange.ajax.parser.ResponseParser;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class VCardImportParser extends AbstractUploadParser<VCardImportResponse> {

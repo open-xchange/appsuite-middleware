@@ -60,7 +60,7 @@ import com.openexchange.messaging.rss.HTMLServiceProvider;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class HTMLRegistryCustomizer implements ServiceTrackerCustomizer {
+public final class HTMLRegistryCustomizer implements ServiceTrackerCustomizer<HTMLService,HTMLService> {
 
     private final BundleContext context;
 
@@ -73,19 +73,19 @@ public final class HTMLRegistryCustomizer implements ServiceTrackerCustomizer {
     }
 
     @Override
-    public Object addingService(final ServiceReference reference) {
-        final Object service = context.getService(reference);
-        HTMLServiceProvider.getInstance().setHTMLService((HTMLService) service);
+    public HTMLService addingService(final ServiceReference<HTMLService> reference) {
+        final HTMLService service = context.getService(reference);
+        HTMLServiceProvider.getInstance().setHTMLService(service);
         return service;
     }
 
     @Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<HTMLService> reference, final HTMLService service) {
         // Nope
     }
 
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
+    public void removedService(final ServiceReference<HTMLService> reference, final HTMLService service) {
         HTMLServiceProvider.getInstance().setHTMLService(null);
         context.ungetService(reference);
     }

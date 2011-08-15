@@ -39,14 +39,14 @@ public abstract class AbstractInfostoreActionTest extends AbstractActionTest {
 		Init.startServer();
 		provider = new DBPoolProvider();
 		queryCatalog = new InfostoreQueryCatalog();
-		
+
 		final TestConfig config = new TestConfig();
         final String userName = config.getUser();
         final TestContextToolkit tools = new TestContextToolkit();
         final String ctxName = config.getContextName();
         ctx = null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
         final int userId = tools.resolveUser(userName, ctx);
-		
+
 		ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
 		user = UserStorage.getInstance().getUser(userId, ctx);
 
@@ -116,7 +116,7 @@ public abstract class AbstractInfostoreActionTest extends AbstractActionTest {
 			getProvider().releaseReadConnection(getContext(), readCon);
 		}
 	}
-	
+
 	private void initDocMeta() {
 		DocumentMetadata m = new DocumentMetadataImpl();
 		m.setCategories("cat1, cat2, cat3");
@@ -136,45 +136,45 @@ public abstract class AbstractInfostoreActionTest extends AbstractActionTest {
 		m.setURL("http://gnirz.com");
 		m.setVersion(2);
 		m.setVersionComment("vc");
-		
+
 		infoitems.add(m);
-		
+
 		m = new DocumentMetadataImpl(m);
 		m.setId(102048);
-		
+
 		infoitems.add(m);
-		
+
 		m = new DocumentMetadataImpl(m);
 		m.setId(104096);
-		
+
 		infoitems.add(m);
-		
+
 		m = new DocumentMetadataImpl(m);
 		m.setId(108192);
-		
+
 		infoitems.add(m);
-		
+
 		m = new DocumentMetadataImpl(m);
 		m.setId(101024);
 		m.setColorLabel(42);
 		m.setFileName("updated.txt");
 		updatedInfoitems.add(m);
-		
+
 		m = new DocumentMetadataImpl(m);
 		m.setId(102048);
-		
+
 		updatedInfoitems.add(m);
-		
+
 		m = new DocumentMetadataImpl(m);
 		m.setId(104096);
-		
+
 		updatedInfoitems.add(m);
-		
+
 		m = new DocumentMetadataImpl(m);
 		m.setId(108192);
-		
+
 		updatedInfoitems.add(m);
-		
+
 	}
 
 }

@@ -72,11 +72,11 @@ import com.openexchange.tools.oxfolder.OXFolderManager;
 public class Bug13184Test extends ParticipantNotifyTest {
 
     private TestFolderToolkit folders;
-    
+
     private Context ctx;
 
     private String user, secondUser;
-    
+
     private int userId, secondUserId;
 
     private FolderObject folder;
@@ -88,11 +88,11 @@ public class Bug13184Test extends ParticipantNotifyTest {
     private String userMail, secondUserMail;
 
     private Session so;
-    
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        
+
         folders = new TestFolderToolkit();
         final TestContextToolkit contextTools = new TestContextToolkit();
         ctx = contextTools.getDefaultContext();
@@ -106,28 +106,28 @@ public class Bug13184Test extends ParticipantNotifyTest {
 
         so = contextTools.getSessionForUser(user, ctx);
         folder = createPublicFolderFor();
-        
+
         appointments = new CommonAppointments(ctx, user);
         appointment = appointments.buildAppointmentWithUserParticipants(user, secondUser);
         appointment.setParentFolderID(folder.getObjectID());
-        
+
         notify.realUsers = true;
     }
-    
+
     @Override
     public void tearDown() throws Exception {
         folders.removeAll(so, new ArrayList<FolderObject>(){{add(folder);}});
-        
+
         super.tearDown();
     }
-    
+
     public void testBug13185() throws Exception {
         notify.appointmentCreated(appointment, so);
         final List<Message> messages = notify.getMessages();
         assertEquals("Wrong amount of notification messages.", 1, messages.size());
         final Message message = messages.get(0);
         assertTrue("Wrong recipient.", message.addresses.contains(secondUserMail));
-        
+
         String msg = "";
         if (MimeMultipart.class.isInstance(message.message)) {
             MimeMultipart mpart = (MimeMultipart) message.message;

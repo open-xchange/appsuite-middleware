@@ -61,6 +61,7 @@ import org.osgi.service.event.EventHandler;
 import com.openexchange.exception.OXException;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushManagerService;
+import com.openexchange.push.PushUtility;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -113,7 +114,18 @@ public final class PushEventHandler implements EventHandler {
             try {
                 if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
                     final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
-                    // Iterate push managers
+                    /*
+                     * Check session's client identifier
+                     */
+                    if (!PushUtility.allowedClient(session.getClient())) {
+                        /*
+                         * No push listener for the client associated with current session.
+                         */
+                        return;
+                    }
+                    /*
+                     * Iterate push managers
+                     */
                     final PushManagerRegistry registry = PushManagerRegistry.getInstance();
                     for (final Iterator<PushManagerService> pushManagersIterator = registry.getPushManagers(); pushManagersIterator.hasNext();) {
                         try {
@@ -142,6 +154,15 @@ public final class PushEventHandler implements EventHandler {
                             // Stop listener for sessions
                             final Collection<Session> sessions = sessionContainer.values();
                             for (final Session session : sessions) {
+                                /*
+                                 * Check session's client identifier
+                                 */
+                                if (!PushUtility.allowedClient(session.getClient())) {
+                                    /*
+                                     * No push listener for the client associated with current session.
+                                     */
+                                    return;
+                                }
                                 final boolean stopped = pushManager.stopListener(session);
                                 if (DEBUG && stopped) {
                                     LOG.debug(new StringBuilder(64).append("Stopped push listener for user ").append(session.getUserId()).append(
@@ -160,8 +181,7 @@ public final class PushEventHandler implements EventHandler {
                     /*
                      * Check session's client identifier
                      */
-                    final PushClientWhitelist clientWhitelist = PushClientWhitelist.getInstance();
-                    if (!clientWhitelist.isEmpty() && !clientWhitelist.isAllowed(session.getClient())) {
+                    if (!PushUtility.allowedClient(session.getClient())) {
                         /*
                          * No push listener for the client associated with current session.
                          */

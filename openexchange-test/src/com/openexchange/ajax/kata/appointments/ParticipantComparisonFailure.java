@@ -72,8 +72,8 @@ public class ParticipantComparisonFailure extends ComparisonFailure {
      */
     public ParticipantComparisonFailure(String message, Participant[] expected, Participant[] actual) {
         super(
-            message, 
-            expected == null ? null : expected.toString(), 
+            message,
+            expected == null ? null : expected.toString(),
             actual == null ? null : expected.toString()
         );
         if(expected != null)
@@ -83,16 +83,16 @@ public class ParticipantComparisonFailure extends ComparisonFailure {
 
     }
 
-    
+
     public Participant[] getActualParticipants() {
         return actualParticipants;
     }
 
-    
+
     public Participant[] getExpectedParticipants() {
         return expectedParticipants;
     }
-    
-    
+
+
 
 }

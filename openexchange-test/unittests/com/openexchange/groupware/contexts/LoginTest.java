@@ -37,7 +37,6 @@
 
 package com.openexchange.groupware.contexts;
 
-import com.openexchange.exception.OXException;
 import junit.framework.TestCase;
 
 import org.apache.commons.logging.Log;

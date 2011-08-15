@@ -97,16 +97,20 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link AjpProcessor} - The AJP processor adapted from Tomcat's Coyote AJP connector.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     protected static final org.apache.commons.logging.Log LOG = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AjpProcessor.class));
 
+    private static final boolean TRACE = LOG.isTraceEnabled();
+
     protected static final boolean DEBUG = LOG.isDebugEnabled();
 
     private static final AtomicLong NUMBER = new AtomicLong();
+
+    private static final String HTTPS = "https";
 
     private static final int STAGE_AWAIT = 1;
 
@@ -310,6 +314,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     private final AJPv13TaskMonitor listenerMonitor;
 
     /**
+     * The ping counter.
+     */
+    private volatile int pingCount;
+
+    /**
      * Direct buffer used for sending right away a pong message.
      */
     private static final byte[] pongMessageArray;
@@ -318,6 +327,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      * End message array.
      */
     private static final byte[] endMessageArray;
+
+    /**
+     * End message array with "reuse" flag set to <code>false</code>.
+     */
+    private static final byte[] endMessageArrayNoReuse;
 
     /**
      * Flush message array.
@@ -345,6 +359,15 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         endMessageArray = new byte[endMessage.getLen()];
         System.arraycopy(endMessage.getBuffer(), 0, endMessageArray, 0, endMessage.getLen());
 
+        // Allocate the end message array with reuse flag not set
+        final AjpMessage endMessageNoReuse = new AjpMessage(16);
+        endMessageNoReuse.reset();
+        endMessageNoReuse.appendByte(Constants.JK_AJP13_END_RESPONSE);
+        endMessageNoReuse.appendByte(0); // No "reuse" flag
+        endMessageNoReuse.end();
+        endMessageArrayNoReuse = new byte[endMessageNoReuse.getLen()];
+        System.arraycopy(endMessageNoReuse.getBuffer(), 0, endMessageArrayNoReuse, 0, endMessageNoReuse.getLen());
+
         // Allocate the flush message array
         final AjpMessage flushMessage = new AjpMessage(16);
         flushMessage.reset();
@@ -357,6 +380,12 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     }
 
+    /**
+     * Initializes a new {@link AjpProcessor}.
+     * 
+     * @param packetSize The packet size
+     * @param listenerMonitor The listener monitor
+     */
     public AjpProcessor(final int packetSize, final AJPv13TaskMonitor listenerMonitor) {
         super();
         bodyBytes = MessageBytes.newInstance();
@@ -374,7 +403,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         response = new HttpServletResponseImpl(this);
         request = new HttpServletRequestImpl(response);
         /*
-         * Apply input/outout
+         * Apply input/output
          */
         request.setInputBuffer(new SocketInputBuffer());
         response.setOutputBuffer(new SocketOutputBuffer());
@@ -402,6 +431,9 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
          * Cause loading of HexUtils
          */
         final int foo = HexUtils.DEC[0];
+        if (TRACE) {
+            LOG.trace(Integer.valueOf(foo));
+        }
     }
 
     public void startKeepAlivePing() {
@@ -475,7 +507,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * Sets the required secret.
-     * 
+     *
      * @param requiredSecret The secret
      */
     public void setRequiredSecret(final String requiredSecret) {
@@ -492,7 +524,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * Sets the control object.
-     * 
+     *
      * @param control The control
      */
     public void setControl(final Future<Object> control) {
@@ -501,7 +533,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * Checks if this AJP processor was canceled before it completed normally.
-     * 
+     *
      * @return <code>true</code> if this AJP processor was canceled before it completed normally; otherwise <code>false</code>
      */
     public boolean isCancelled() {
@@ -511,7 +543,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     /**
      * Checks if this AJP processor completed. Completion may be due to normal termination, an exception, or cancellation -- in all of these
      * cases, this method will return <code>true</code>.
-     * 
+     *
      * @return <code>true</code> if this AJP processor completed; otherwise <code>false</code>
      */
     public boolean isDone() {
@@ -525,7 +557,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     public void cancel() {
         response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
         action(ActionCode.CLIENT_FLUSH, null);
-        action(ActionCode.CLOSE, null);
+        action(ActionCode.CLOSE, Boolean.FALSE);
         /*
          * Drop socket
          */
@@ -542,7 +574,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
          */
         final Future<Object> f = control;
         if (f != null) {
-            f.cancel(false);
+            f.cancel(true);
             control = null;
         }
     }
@@ -561,7 +593,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * Get the request associated with this processor.
-     * 
+     *
      * @return The request
      */
     public HttpServletRequestImpl getRequest() {
@@ -570,7 +602,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * Get the response associated with this processor.
-     * 
+     *
      * @return The response
      */
     public HttpServletResponseImpl getResponse() {
@@ -579,7 +611,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * Gets the HTTP session cookie.
-     * 
+     *
      * @return The HTTP session cookie
      */
     public Cookie getHttpSessionCookie() {
@@ -588,7 +620,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * Checks if the client joined a previously existing HTTP session.
-     * 
+     *
      * @return <code>true</code> if the client joined a previously existing HTTP session; otherwise <code>false</code>
      */
     public boolean isHttpSessionJoined() {
@@ -597,7 +629,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * Process pipelined HTTP requests using the specified input and output streams.
-     * 
+     *
      * @throws IOException If an error occurs during an I/O operation
      */
     public void process(final Socket socket) throws IOException {
@@ -652,12 +684,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     stage = STAGE_ENDED;
                     break;
                 }
-                if (DEBUG) {
-                    final byte prefixCode = requestHeaderMessage.peekByte();
-                    final String ajpReqName =
-                        Constants.JK_AJP13_CPING_REQUEST == prefixCode ? "CPing" : (Constants.JK_AJP13_FORWARD_REQUEST == prefixCode ? "Forward-Request" : "unknown");
-                    LOG.debug("First " + ajpReqName + " AJP message successfully read from stream.");
-                }
                 /*
                  * Set back timeout if keep alive timeout is enabled
                  */
@@ -669,7 +695,12 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                  * not regular request processing
                  */
                 final int type = requestHeaderMessage.getByte();
-                if (type == Constants.JK_AJP13_CPING_REQUEST) {
+                if (DEBUG) {
+                    final String ajpReqName =
+                        Constants.JK_AJP13_CPING_REQUEST == type ? "CPing" : (Constants.JK_AJP13_FORWARD_REQUEST == type ? "Forward-Request" : "unknown");
+                    LOG.debug("First " + ajpReqName + " AJP message successfully read from stream.");
+                }
+                if (type == Constants.JK_AJP13_CPING_REQUEST && 1 == requestHeaderMessage.getLen()) {
                     softLock.lock();
                     try {
                         output.write(pongMessageArray);
@@ -682,7 +713,9 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     }
                     continue;
                 } else if (type != Constants.JK_AJP13_FORWARD_REQUEST) {
-                    /*
+                    /*-
+                     * Invalid/unknown prefix code
+                     * 
                      * Usually the servlet didn't read the previous request body
                      */
                     if (LOG.isDebugEnabled()) {
@@ -690,6 +723,24 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     }
                     continue;
                 }
+//                /*
+//                 * Check HTTP method code
+//                 */
+//                final byte methodCode = requestHeaderMessage.peekByte();
+//                if (Constants.SC_M_JK_STORED != methodCode && (methodCode < 1 || methodCode > Constants.methodTransArray.length)) {
+//                    /*-
+//                     * Invalid method code.
+//                     * 
+//                     * Usually the servlet didn't read the previous request body
+//                     */
+//                    if (LOG.isDebugEnabled()) {
+//                        LOG.debug("Unexpected message: " + type);
+//                    }
+//                    continue;
+//                }
+                /*
+                 * So far a valid forward-request package
+                 */
                 request.setStartTime(System.currentTimeMillis());
             } catch (final IOException e) {
                 LOG.debug("ajpprocessor.io.error", e);
@@ -712,8 +763,22 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                  * Parse AJP FORWARD-REQUEST package
                  */
                 prepareRequest();
+            } catch (final IndexOutOfBoundsException indexException) {
+                /*-
+                 * Parsing of forward-request failed
+                 *
+                 * Usually the servlet didn't read the previous request body
+                 */
+                if (LOG.isDebugEnabled()) {
+                    requestHeaderMessage.dump("Invalid forward-request detected");
+                }
+                continue;
             } catch (final Throwable t) {
-                LOG.debug("ajpprocessor.request.prepare", t);
+                final StringBuilder sb = new StringBuilder(512);
+                sb.append("ajpprocessor.request.prepare: ").append(t.getClass().getName());
+                sb.append(" message=").append(t.getMessage()).append("\n");
+                appendStackTrace(t.getStackTrace(), sb);
+                LOG.debug(sb.toString());
                 /*
                  * 400 - Internal Server Error
                  */
@@ -732,25 +797,25 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                      */
                     if (request.isFormData()) {
                         /*
-                         * Read all data from servlet input stream...
+                         * Read all form data from servlet input stream...
                          */
                         final int buflen = 2048;
                         final byte[] buf = new byte[buflen];
-                        final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(8192);
+                        sink.reset();
                         final ServletInputStream inputStream = request.getInputStream();
                         for (int read = inputStream.read(buf, 0, buflen); read > 0; read = inputStream.read(buf, 0, buflen)) {
-                            baos.write(buf, 0, read);
+                            sink.write(buf, 0, read);
                         }
                         String charEnc = request.getCharacterEncoding();
                         if (charEnc == null) {
                             charEnc = ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding);
                         }
-                        final byte[] bytes = baos.toByteArray();
+                        final byte[] bytes = sink.toByteArray();
                         parseQueryString(new String(bytes, charEnc));
                         /*
-                         * TODO: Apply already read data to request to make them re-available?
+                         * Apply already read data to request to make them re-available.
                          */
-                        // request.dumpToBuffer(bytes);
+                        request.dumpToBuffer(bytes);
                     }
                     servlet.service(request, response);
                     response.flushBuffer();
@@ -778,13 +843,12 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     error = true;
                 }
             }
-            // If there was an error, make sure the request is counted as
-            // and error, and update the statistics counter
+            /*
+             * If there was an error, make sure the request is counted as an error, and update the statistics counter
+             */
             if (error) {
                 response.setStatus(500);
             }
-            // TODO:
-            // request.updateCounters();
             stage = STAGE_KEEPALIVE;
             recycle();
             /*
@@ -815,9 +879,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     // ----------------------------------------------------- ActionHook Methods
 
+    private static final int MAX_PING_COUNT = 3;
+
     /**
      * Send an action to the connector.
-     * 
+     *
      * @param actionCode The action type
      * @param param The action parameter
      */
@@ -863,6 +929,10 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             final Lock hardLock = mainLock.writeLock();
             hardLock.lock();
             try {
+                if (++pingCount > MAX_PING_COUNT) {
+                    cancel();
+                    return;
+                }
                 if (response.isCommitted()) {
                     /*
                      * Write empty SEND-BODY-CHUNK package
@@ -899,7 +969,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 /*
                  * Write END-RESPONSE package
                  */
-                finish();
+                final Boolean reuseFlag = (param instanceof Boolean) ? ((Boolean) param) : Boolean.TRUE;
+                finish(reuseFlag.booleanValue());
             } catch (final IOException e) {
                 // Set error flag
                 error = true;
@@ -910,7 +981,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             started = false;
         }
         /*-
-         * 
+         *
         else if (actionCode == ActionCode.ACTION_REQ_SSL_ATTRIBUTE) {
 
             if (!certificates.isNull()) {
@@ -940,7 +1011,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             }
 
         }
-         * 
+         *
          */
         else if (actionCode == ActionCode.REQ_HOST_ATTRIBUTE) {
             // Get remote host name using a DNS resolution
@@ -968,7 +1039,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * Get the associated servlet.
-     * 
+     *
      * @return the associated servlet
      */
     public HttpServlet getServlet() {
@@ -986,7 +1057,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     /**
      * Checks for long-running EAS ping command, that is URI is equal to <code>"/Microsoft-Server-ActiveSync"</code> and request's
      * <code>"Cmd"</code> parameter equals <code>"Ping"</code>.
-     * 
+     *
      * @return <code>true</code> if EAS ping command is detected; otherwise <code>false</code>
      */
     private boolean isEASPingCommand() {
@@ -995,6 +1066,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * After reading the request headers, we have to setup the request filters.
+     * 
+     * @throws IndexOutOfBoundsException If parsing of forward-request fails; usually because servlet missed to read request-body chunk(s)
      */
     protected void prepareRequest() {
         // Translate the HTTP method code to a String.
@@ -1003,10 +1076,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             final String methodName = Constants.methodTransArray[methodCode - 1];
             request.setMethod(methodName);
         }
-        request.setProtocol(requestHeaderMessage.getString());
+        final StringBuilder temp = new StringBuilder(16);
+        request.setProtocol(requestHeaderMessage.getString(temp));
         String jsessionID = null;
         {
-            final String requestURI = requestHeaderMessage.getString();
+            final String requestURI = requestHeaderMessage.getString(temp);
             final int pos = requestURI.toLowerCase(Locale.ENGLISH).indexOf(JSESSIONID_URI);
             if (pos > -1) {
                 jsessionID = requestURI.substring(pos + JSESSIONID_URI.length());
@@ -1015,10 +1089,10 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             }
             request.setRequestURI(requestURI);
         }
-        request.setRemoteAddr(requestHeaderMessage.getString());
-        request.setRemoteHost(requestHeaderMessage.getString());
+        request.setRemoteAddr(requestHeaderMessage.getString(temp));
+        request.setRemoteHost(requestHeaderMessage.getString(temp));
         {
-            final String serverName = requestHeaderMessage.getString();
+            final String serverName = requestHeaderMessage.getString(temp);
             request.setLocalName(serverName);
             request.setServerName(serverName);
         }
@@ -1028,10 +1102,9 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             request.setServerPort(serverPort);
         }
 
-        final boolean isSSL = requestHeaderMessage.getByte() != 0;
-        if (isSSL) {
-            request.setSecure(isSSL);
-            request.setScheme("https");
+        if (requestHeaderMessage.getByte() != 0) {
+            request.setSecure(true);
+            request.setScheme(HTTPS);
         }
 
         // Decode headers
@@ -1055,9 +1128,9 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 // SC_REQ_CONTENT_LENGTH=8 - leading to unexpected
                 // behaviour. see bug 5861 for more information.
                 hId = -1;
-                hName = requestHeaderMessage.getString();
+                hName = requestHeaderMessage.getString(temp);
             }
-            final String hValue = requestHeaderMessage.getString();
+            final String hValue = requestHeaderMessage.getString(temp);
             /*
              * Check for "Content-Length" and "Content-Type" headers
              */
@@ -1113,91 +1186,115 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
          * Decode extra attributes
          */
         boolean secret = false;
-        byte attributeCode;
-        while ((attributeCode = requestHeaderMessage.getByte()) != Constants.SC_A_ARE_DONE) {
-
-            if (attributeCode == Constants.SC_A_REQ_ATTRIBUTE) {
-                final String n = requestHeaderMessage.getString();
-                final String v = requestHeaderMessage.getString();
-                /*
-                 * AJP13 misses to forward the remotePort. Allow the AJP connector to add this info via a private request attribute. We will
-                 * accept the forwarded data as the remote port, and remove it from the public list of request attributes.
-                 */
-                if (n.equals(Constants.SC_A_REQ_REMOTE_PORT)) {
+        for (byte attributeCode = requestHeaderMessage.getByte(); attributeCode != Constants.SC_A_ARE_DONE; attributeCode = requestHeaderMessage.getByte()) {
+            switch (attributeCode) {
+            case Constants.SC_A_REQ_ATTRIBUTE:
+                {
+                    final String n = requestHeaderMessage.getString(temp);
+                    final String v = requestHeaderMessage.getString(temp);
+                    /*
+                     * AJP13 misses to forward the remotePort. Allow the AJP connector to add this info via a private request attribute. We will
+                     * accept the forwarded data as the remote port, and remove it from the public list of request attributes.
+                     */
+                    if (n.equals(Constants.SC_A_REQ_REMOTE_PORT)) {
+                        try {
+                            request.setRemotePort(Integer.parseInt(v));
+                        } catch (final NumberFormatException nfe) {
+                            // Ignore
+                        }
+                    } else {
+                        request.setAttribute(n, v);
+                    }
+                }
+                break;
+            case Constants.SC_A_CONTEXT:
+                {
+                    final String context = requestHeaderMessage.getString(temp);
+                    request.setAttribute(Constants.attributeNameArray[attributeCode - 1], context);
+                    request.setContextPath(context);
+                }
+                break;
+            case Constants.SC_A_SERVLET_PATH:
+                {
+                    final String servletPath = requestHeaderMessage.getString(temp);
+                    request.setAttribute(Constants.attributeNameArray[attributeCode - 1], servletPath);
+                    request.setServletPath(servletPath);
+                }
+                break;
+            case Constants.SC_A_REMOTE_USER:
+                if (tomcatAuthentication) {
+                    // ignore server
+                    requestHeaderMessage.getString(temp);
+                } else {
+                    request.setRemoteUser(requestHeaderMessage.getString(temp));
+                }
+                break;
+            case Constants.SC_A_AUTH_TYPE:
+                if (tomcatAuthentication) {
+                    // ignore server
+                    requestHeaderMessage.getString(temp);
+                } else {
+                    request.setAuthType(requestHeaderMessage.getString(temp));
+                }
+                break;
+            case Constants.SC_A_QUERY_STRING:
+                {
+                    final String queryString = requestHeaderMessage.getString(temp);
+                    request.setQueryString(queryString);
                     try {
-                        request.setRemotePort(Integer.parseInt(v));
-                    } catch (final NumberFormatException nfe) {
-                        // Ignore
+                        parseQueryString(queryString);
+                        if (DEBUG && isEASPingCommand()) {
+                            LOG.debug("Incoming long-running EAS ping request.");
+                        }
+                    } catch (final UnsupportedEncodingException e) {
+                        throw new IllegalStateException(e.getMessage(), e);
                     }
-                } else {
-                    request.setAttribute(n, v);
                 }
-            } else if (attributeCode == Constants.SC_A_CONTEXT) {
-                final String context = requestHeaderMessage.getString();
-                request.setAttribute(Constants.attributeNameArray[attributeCode - 1], context);
-                request.setContextPath(context);
-            } else if (attributeCode == Constants.SC_A_SERVLET_PATH) {
-                final String servletPath = requestHeaderMessage.getString();
-                request.setAttribute(Constants.attributeNameArray[attributeCode - 1], servletPath);
-                request.setServletPath(servletPath);
-            } else if (attributeCode == Constants.SC_A_REMOTE_USER) {
-                if (tomcatAuthentication) {
-                    // ignore server
-                    requestHeaderMessage.getString();
-                } else {
-                    request.setRemoteUser(requestHeaderMessage.getString());
-                }
-            } else if (attributeCode == Constants.SC_A_AUTH_TYPE) {
-                if (tomcatAuthentication) {
-                    // ignore server
-                    requestHeaderMessage.getString();
-                } else {
-                    request.setAuthType(requestHeaderMessage.getString());
-                }
-            } else if (attributeCode == Constants.SC_A_QUERY_STRING) {
-                final String queryString = requestHeaderMessage.getString();
-                request.setQueryString(queryString);
-                try {
-                    parseQueryString(queryString);
-                    if (DEBUG && isEASPingCommand()) {
-                        LOG.debug("Incoming long-running EAS ping request.");
+                break;
+            case Constants.SC_A_JVM_ROUTE:
+                {
+                    final String jvmRoute = requestHeaderMessage.getString(temp);
+                    if (DEBUG && !AJPv13Config.getJvmRoute().equals(jvmRoute)) {
+                        LOG.debug("JVM route mismatch. Expected \"" + AJPv13Config.getJvmRoute() + "\", but is \"" + jvmRoute + "\".");
                     }
-                } catch (final UnsupportedEncodingException e) {
-                    throw new IllegalStateException(e.getMessage(), e);
+                    request.setInstanceId(jvmRoute);
                 }
-            } else if (attributeCode == Constants.SC_A_JVM_ROUTE) {
-                final String jvmRoute = requestHeaderMessage.getString();
-                if (!AJPv13Config.getJvmRoute().equals(jvmRoute)) {
-                    LOG.error("JVM route mismatch. Expected \"" + AJPv13Config.getJvmRoute() + "\", but is \"" + jvmRoute + "\".");
-                }
-                request.setInstanceId(jvmRoute);
-            } else if (attributeCode == Constants.SC_A_SSL_CERT) {
-                request.setScheme("https");
+                break;
+            case Constants.SC_A_SSL_CERT:
+                request.setScheme(HTTPS);
                 // SSL certificate extraction is lazy, moved to JkCoyoteHandler
                 requestHeaderMessage.getBytes(certificates);
-            } else if (attributeCode == Constants.SC_A_SSL_CIPHER) {
-                request.setScheme("https");
-                request.setAttribute("javax.servlet.request.cipher_suite", requestHeaderMessage.getString());
-            } else if (attributeCode == Constants.SC_A_SSL_SESSION) {
-                request.setScheme("https");
-                request.setAttribute("javax.servlet.request.ssl_session", requestHeaderMessage.getString());
-            } else if (attributeCode == Constants.SC_A_SSL_KEY_SIZE) {
+                break;
+            case Constants.SC_A_SSL_CIPHER:
+                request.setScheme(HTTPS);
+                request.setAttribute("javax.servlet.request.cipher_suite", requestHeaderMessage.getString(temp));
+                break;
+            case Constants.SC_A_SSL_SESSION:
+                request.setScheme(HTTPS);
+                request.setAttribute("javax.servlet.request.ssl_session", requestHeaderMessage.getString(temp));
+                break;
+            case Constants.SC_A_SSL_KEY_SIZE:
                 request.setAttribute("javax.servlet.request.key_size", new Integer(requestHeaderMessage.getInt()));
-            } else if (attributeCode == Constants.SC_A_STORED_METHOD) {
-                request.setMethod(requestHeaderMessage.getString());
-            } else if (attributeCode == Constants.SC_A_SECRET) {
-                final String value = requestHeaderMessage.getString();
-                if (requiredSecret != null) {
-                    secret = true;
-                    if (!value.equals(requiredSecret)) {
-                        response.setStatus(403);
-                        error = true;
+                break;
+            case Constants.SC_A_STORED_METHOD:
+                request.setMethod(requestHeaderMessage.getString(temp));
+                break;
+            case Constants.SC_A_SECRET:
+                {
+                    final String value = requestHeaderMessage.getString(temp);
+                    if (requiredSecret != null) {
+                        secret = true;
+                        if (!value.equals(requiredSecret)) {
+                            response.setStatus(403);
+                            error = true;
+                        }
                     }
                 }
-            } else {
+                break;
+            default:
                 // Nothing to do
+                break;
             }
-
         }
         /*
          * Check if secret was submitted if required
@@ -1243,7 +1340,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         }
         /*-
          * Parsing done
-         * 
+         *
          * Determine addressed servlet instance
          */
         setServletInstance(request.getRequestURI());
@@ -1256,8 +1353,12 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
              */
             checkJSessionIDCookie();
         } else {
-            final int dot = jsessionID.lastIndexOf('.');
-            if ((dot == -1) || (AJPv13Config.getJvmRoute().equals(jsessionID.substring(dot + 1)))) {
+            String thisJVMRoute = request.getInstanceId();
+            if (null == thisJVMRoute) {
+                final int dot = jsessionID.lastIndexOf('.');
+                thisJVMRoute = -1 == dot ? null : jsessionID.substring(dot + 1);
+            }
+            if ((null == thisJVMRoute) || (AJPv13Config.getJvmRoute().equals(thisJVMRoute))) {
                 addJSessionIDCookie(jsessionID);
             } else {
                 /*
@@ -1304,7 +1405,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
          * Colon detected?
          */
         if (colonPos < 0) {
-            if (request.getScheme().equalsIgnoreCase("https")) {
+            if (request.getScheme().equalsIgnoreCase(HTTPS)) {
                 /*
                  * 443 - Default HTTPS port
                  */
@@ -1344,14 +1445,17 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      */
     private void parseQueryString(final String queryStr) throws UnsupportedEncodingException {
         final String[] paramsNVPs = PATTERN_SPLIT.split(queryStr, 0);
-        final String charEnc = request.getCharacterEncoding();
+        String charEnc = request.getCharacterEncoding();
+        if (null == charEnc) {
+            charEnc = AJPv13Config.getServerProperty(Property.DefaultEncoding);
+        }
         for (final String paramsNVP2 : paramsNVPs) {
             final String paramsNVP = paramsNVP2.trim();
             if (paramsNVP.length() > 0) {
                 // Look-up character '='
                 final int pos = paramsNVP.indexOf('=');
                 if (pos >= 0) {
-                    request.setParameter(paramsNVP.substring(0, pos), decodeQueryStringValue(charEnc, paramsNVP.substring(pos + 1)));
+                    request.setParameter(paramsNVP.substring(0, pos), URLDecoder.decode(paramsNVP.substring(pos + 1), charEnc));
                 } else {
                     request.setParameter(paramsNVP, "");
                 }
@@ -1359,13 +1463,9 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         }
     }
 
-    private static String decodeQueryStringValue(final String charEnc, final String queryStringValue) throws UnsupportedEncodingException {
-        return URLDecoder.decode(queryStringValue, charEnc == null ? AJPv13Config.getServerProperty(Property.DefaultEncoding) : charEnc);
-    }
-
     /**
      * Sets this request hander's servlet reference to the one bound to given path argument
-     * 
+     *
      * @param requestURI The request URI
      */
     private void setServletInstance(final String requestURI) {
@@ -1425,7 +1525,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * Removes specified character if given path ends with such a character.
-     * 
+     *
      * @param path The path to prepare
      * @param c The (trailing) character to remove
      * @return The path possibly with ending character removed
@@ -1574,7 +1674,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * Data length of SEND_BODY_CHUNK:
-     * 
+     *
      * <pre>
      * prefix(1) + http_status_code(2) + http_status_msg(3) + num_headers(2)
      * </pre>
@@ -1583,7 +1683,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * Starting first 4 bytes:
-     * 
+     *
      * <pre>
      * 'A' + 'B' + [data length as 2 byte integer]
      * </pre>
@@ -1699,6 +1799,13 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      * Finish AJP response.
      */
     protected void finish() throws IOException {
+        finish(true);
+    }
+
+    /**
+     * Finish AJP response.
+     */
+    protected void finish(final boolean reuse) throws IOException {
 
         if (!response.isCommitted()) {
             // Validate and write response headers
@@ -1719,7 +1826,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         // Add the end message
         softLock.lock();
         try {
-            output.write(endMessageArray);
+            output.write(reuse ? endMessageArray : endMessageArrayNoReuse);
             // output.flush();
         } finally {
             softLock.unlock();
@@ -1767,7 +1874,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * Get more request body data from the web server and store it in the internal buffer.
-     * 
+     *
      * @return true if there is more data, false if not.
      */
     protected boolean refillReadBuffer() throws IOException {
@@ -1800,7 +1907,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * Read an AJP message.
-     * 
+     *
      * @return true if the message has been read, false if the short read didn't return anything
      * @throws IOException any other failure, including incomplete reads
      */
@@ -1825,6 +1932,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         empty = true;
         replay = false;
         finished = false;
+        pingCount = 0;
         httpSessionCookie = null;
         httpSessionJoined = false;
         servlet = null;
@@ -1972,5 +2080,33 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         }
 
     } // End of class
+
+    private static void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb) {
+        if (null == trace) {
+            return;
+        }
+        for (final StackTraceElement ste : trace) {
+            final String className = ste.getClassName();
+            if (null != className) {
+                sb.append("\tat ").append(className).append('.').append(ste.getMethodName());
+                if (ste.isNativeMethod()) {
+                    sb.append("(Native Method)");
+                } else {
+                    final String fileName = ste.getFileName();
+                    if (null == fileName) {
+                        sb.append("(Unknown Source)");
+                    } else {
+                        final int lineNumber = ste.getLineNumber();
+                        sb.append('(').append(fileName);
+                        if (lineNumber >= 0) {
+                            sb.append(':').append(lineNumber);
+                        }
+                        sb.append(')');
+                    }
+                }
+                sb.append("\n");
+            }
+        }
+    }
 
 }

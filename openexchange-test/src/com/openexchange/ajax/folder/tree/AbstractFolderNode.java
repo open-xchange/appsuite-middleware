@@ -73,16 +73,16 @@ public abstract class AbstractFolderNode implements FolderNode {
         this.client = client;
         this.manager = new FolderTestManager(client);
     }
-    
+
     public AbstractFolderNode(int folderId, AJAXClient client) {
         this(null, client);
         setFolder(getManager().getFolderFromServer(folderId));
     }
-    
+
     public FolderObject getFolder() {
         return folder;
     }
-    
+
     public FolderNode resolve(String... path) {
         return resolveRecursively(0, path);
     }
@@ -97,14 +97,14 @@ public abstract class AbstractFolderNode implements FolderNode {
                 return ((AbstractFolderNode) node).resolveRecursively(i+1, path);
             }
         }
-        
+
         return null;
     }
 
     public FolderNode resolve(Collection<String> path) {
         return resolveRecursively(0, path.toArray(new String[path.size()]));
     }
-    
+
     public FolderNode getParent() {
         if(parent != null) {
             return parent;
@@ -115,31 +115,31 @@ public abstract class AbstractFolderNode implements FolderNode {
     protected FolderNode load(FolderObject folder) {
         FolderObject folderObject = manager.getFolderFromServer(folder, false);
         if(folderObject == null) {
-            // Best effort 
+            // Best effort
             return node(folder, client);
         }
         return node(folderObject, client);
     }
-    
+
     protected FolderNode load(int folderId) {
         FolderObject folderObject = manager.getFolderFromServer(folderId);
         return node(folderObject, client);
     }
-    
+
     protected FolderTestManager getManager() {
         return manager;
     }
-    
-    
+
+
     protected AJAXClient getClient() {
         return client;
     }
-    
-    
+
+
     protected void setFolder(FolderObject folder) {
         this.folder = folder;
     }
-    
+
     protected abstract FolderNode node(FolderObject folderObject, AJAXClient client);
 
     public void recurse(FolderNodeVisitor visitor) {

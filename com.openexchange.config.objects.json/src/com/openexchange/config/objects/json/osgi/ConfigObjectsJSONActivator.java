@@ -66,17 +66,16 @@ import com.openexchange.tools.service.SessionServletRegistration;
  */
 public class ConfigObjectsJSONActivator extends HousekeepingActivator {
 
-    private static final Class[] CLASSES = new Class[]{HttpService.class, ConfigObjectRegistryFactory.class};
     private SessionServletRegistration servletRegistration;
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return CLASSES;
+        return new Class<?>[]{HttpService.class, ConfigObjectRegistryFactory.class};
     }
 
     @Override
     protected void startBundle() throws Exception {
-        ConfigObjectActionFactory factory = new ConfigObjectActionFactory(getService(ConfigObjectRegistryFactory.class));
+        final ConfigObjectActionFactory factory = new ConfigObjectActionFactory(getService(ConfigObjectRegistryFactory.class));
         ConfigObjectServlet.ACTIONS = factory;
 
         registerService(MultipleHandlerFactoryService.class, new AJAXActionServiceAdapterHandler(factory, "cobjects"));

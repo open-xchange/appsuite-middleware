@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.action;
 
-import com.openexchange.exception.OXException;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -101,7 +100,7 @@ public class InsertRequest extends AbstractAppointmentRequest<AppointmentInsertR
     public InsertRequest(final Appointment appointment, final TimeZone timeZone) {
         this(appointment, timeZone, true);
     }
-    
+
     /**
      * {@inheritDoc}
      */

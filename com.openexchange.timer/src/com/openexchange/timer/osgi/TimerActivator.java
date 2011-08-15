@@ -64,7 +64,7 @@ public final class TimerActivator implements BundleActivator {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(TimerActivator.class);
 
-    private ServiceRegistration timerRegistration;
+    private ServiceRegistration<TimerService> timerRegistration;
 
     private TimerImpl timer;
 
@@ -86,7 +86,7 @@ public final class TimerActivator implements BundleActivator {
             }
             timer = new TimerImpl();
             timer.start();
-            timerRegistration = context.registerService(TimerService.class.getName(), timer, null);
+            timerRegistration = context.registerService(TimerService.class, timer, null);
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;

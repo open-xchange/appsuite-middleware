@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.framework;
 
-import com.openexchange.exception.OXException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
@@ -57,7 +56,7 @@ import java.util.Iterator;
 import com.openexchange.ajax.container.Response;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class AbstractColumnsResponse extends AbstractAJAXResponse implements Iterable<Object[]> {

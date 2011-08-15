@@ -87,13 +87,13 @@ import com.openexchange.tools.session.ServerSessionFactory;
 
 /**
  * Basis for folder tests: Creates a folder and deletes it after testing.
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  */
 public class AbstractContactTest {
-    
+
     public static class TestSession extends SessionObject {
-        
+
         /**
          * This class is needed to fake permissions for different modules.
          * @param sessionid
@@ -101,7 +101,7 @@ public class AbstractContactTest {
         public TestSession(final String sessionid) {
             super(sessionid);
         }
-        
+
         public SessionObject delegateSessionObject;
         public UserConfiguration delegateUserConfiguration;
         @Override
@@ -228,7 +228,7 @@ public class AbstractContactTest {
             return delegateSessionObject.toString();
         }
     }
-    
+
     protected static final int[] POSSIBLE_FIELDS = {
             DataObject.OBJECT_ID,
             DataObject.CREATED_BY,
@@ -373,7 +373,7 @@ public class AbstractContactTest {
         }
         //creating new folder
         tempFolderId = oxfa.createFolder(fo, true, System.currentTimeMillis()).getObjectID();
-        return tempFolderId; 
+        return tempFolderId;
     }
 
     public static void deleteTestFolder(final int fuid) throws OXException {
@@ -398,7 +398,7 @@ public class AbstractContactTest {
         sessObj = ServerSessionFactory.createServerSession(userId, ctx, "csv-tests");
         folderId = createTestFolder(FolderObject.CONTACT, sessObj, ctx, "csvContactTestFolder");
     }
-    
+
     @AfterClass
     public static void debrief() throws Exception {
         deleteTestFolder(folderId);
@@ -427,20 +427,20 @@ public class AbstractContactTest {
             return false;
         }
     }
-    
+
     protected Contact getEntry(final int entryNumber) throws OXException, OXException {
         final ContactSQLInterface contactSql = new RdbContactSQLImpl(sessObj);
         return contactSql.getObjectById(entryNumber, folderId);
     }
-    
+
     protected List<String> _folders(){
         return Arrays.asList( Integer.toString(folderId) );
     }
-    
+
     /**
      * This method perform the import of a file with one one result.
      * Kept for backward compatibility, calls <code>performMultipleEntryImport</code>
-     * 
+     *
      * @param file Content of file as string
      * @param format Format of the file
      * @param folderObjectType Type of this folder, usually taken from FolderObject.
@@ -451,11 +451,11 @@ public class AbstractContactTest {
     protected ImportResult performOneEntryCheck(final String file, final Format format, final int folderObjectType, final String foldername,final Context ctx, final boolean errorExpected) throws UnsupportedEncodingException, OXException, OXException {
         return performMultipleEntryImport(file, format, folderObjectType, foldername, ctx, B(errorExpected)).get(0);
     }
-    
+
     /**
      * This method performs an import of several entries
-     * 
-     * @param file The content of a file as string 
+     *
+     * @param file The content of a file as string
      * @param format Format of the file given
      * @param folderObjectType Type of this folder, usually taken from FolderObject.
      * @param foldername Name of the folder to be used for this tests
@@ -469,17 +469,17 @@ public class AbstractContactTest {
 
         final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(file.getBytes("UTF-8")), _folders(), null);
         assertEquals("Correct number of results?", Integer.valueOf(expectedErrors.length), Integer.valueOf(results.size())); //ugly, but necessary to bridge JUnit 3 and 4
-        
+
         for(int i = 0; i < expectedErrors.length; i++){
             assertEquals("Entry " +i+ " is as expected? "+results.get(i).getException() , expectedErrors[i], B(results.get(i).hasError()));
         }
         return results;
     }
-    
+
     /**
      * Loads a user that is different from the usual user for testing
-     * 
-     * @return the user information of user_participant1 as defined in ajax.properties 
+     *
+     * @return the user information of user_participant1 as defined in ajax.properties
      * @throws Exception
      */
     public static User getUserParticipant() throws Exception{

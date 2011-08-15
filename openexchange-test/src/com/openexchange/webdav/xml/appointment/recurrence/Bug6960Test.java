@@ -10,17 +10,17 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.container.Appointment;
 
 public class Bug6960Test extends AbstractRecurrenceTest {
-	
+
 	private static final Log LOG = LogFactory.getLog(Bug6960Test.class);
-	
+
 	public Bug6960Test(final String name) {
 		super(name);
 	}
-	
+
 	public void testDummy() {
-		
+
 	}
-	
+
 	public void testBug6960() throws Exception {
 		final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 		calendar.setTime(startTime);
@@ -28,15 +28,15 @@ public class Bug6960Test extends AbstractRecurrenceTest {
 		calendar.set(Calendar.MINUTE, 0);
 		calendar.set(Calendar.SECOND, 0);
 		calendar.set(Calendar.MILLISECOND, 0);
-		
+
 		calendar.add(Calendar.DAY_OF_MONTH, 3);
-		
+
 		final Date recurrenceDatePosition = calendar.getTime();
-		
+
 		calendar.add(Calendar.DAY_OF_MONTH, 3);
-		
+
 		final Date until = calendar.getTime();
-		
+
 		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle("testBug6960");
 		appointmentObj.setStartDate(startTime);
@@ -47,19 +47,19 @@ public class Bug6960Test extends AbstractRecurrenceTest {
 		appointmentObj.setInterval(1);
 		appointmentObj.setUntil(until);
 		appointmentObj.setIgnoreConflicts(true);
-		
+
 		final int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
-		
+
 		final Calendar calendarException = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 		calendarException.setTime(recurrenceDatePosition);
 		calendarException.set(Calendar.HOUR_OF_DAY, 10);
-		
+
 		final Date exceptionStartDate = calendarException.getTime();
-		
+
 		calendarException.set(Calendar.HOUR_OF_DAY, 12);
-		
+
 		final Date exceptionEndDate = calendarException.getTime();
-		
+
 		final Appointment exceptionAppointmentObject = new Appointment();
 		exceptionAppointmentObject.setTitle("testBug6960 - change exception");
 		exceptionAppointmentObject.setStartDate(exceptionStartDate);
@@ -70,24 +70,24 @@ public class Bug6960Test extends AbstractRecurrenceTest {
 		exceptionAppointmentObject.setIgnoreConflicts(true);
 
 		final int exceptionObjectId = updateAppointment(getWebConversation(), exceptionAppointmentObject, objectId, appointmentFolderId, getHostName(), getLogin(), getPassword(), context);
-		
+
 		final Appointment loadAppointment = loadAppointment(getWebConversation(), exceptionObjectId, appointmentFolderId, getHostName(), getLogin(), getPassword(), context);
 		final Date modified = loadAppointment.getLastModified();
-		
+
 		deleteAppointment(getWebConversation(), exceptionObjectId, appointmentFolderId, recurrenceDatePosition, getHostName(), getLogin(), getPassword(), context);
-		
+
 		final Appointment[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, modified, true, true, getHostName(), getLogin(), getPassword(), context);
 		boolean found = false;
-		
+
 		for (int a = 0; a < appointmentArray.length; a++) {
 			if (appointmentArray[a].getObjectID() == exceptionObjectId) {
 				found = true;
-				
-				assertEquals("recurrence id not equals expected", objectId, appointmentArray[a].getRecurrenceID());				
+
+				assertEquals("recurrence id not equals expected", objectId, appointmentArray[a].getRecurrenceID());
 				break;
 			}
 		}
-		
+
 		assertTrue("object id " + exceptionObjectId + " not found in response", found);
 
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);

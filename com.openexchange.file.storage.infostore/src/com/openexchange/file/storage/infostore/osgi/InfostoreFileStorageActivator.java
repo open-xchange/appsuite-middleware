@@ -64,27 +64,26 @@ import com.openexchange.server.osgiservice.DeferredActivator;
  */
 public class InfostoreFileStorageActivator extends DeferredActivator {
 
-    private final Class<?>[] NEEDED_CLASSES = new Class[]{InfostoreFacade.class, InfostoreSearchEngine.class};
-    private ServiceRegistration registration;
+    private ServiceRegistration<FileStorageService> registration;
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_CLASSES;
+        return new Class<?>[]{InfostoreFacade.class, InfostoreSearchEngine.class};
     }
 
     @Override
-    protected void handleAvailability(Class<?> clazz) {
+    protected void handleAvailability(final Class<?> clazz) {
         // Don't care
     }
 
     @Override
-    protected void handleUnavailability(Class<?> clazz) {
+    protected void handleUnavailability(final Class<?> clazz) {
         // Don't care
     }
 
     @Override
     protected void startBundle() throws Exception {
-        registration = context.registerService(FileStorageService.class.getName(), new InfostoreFileStorageService() {
+        registration = context.registerService(FileStorageService.class, new InfostoreFileStorageService() {
             @Override
             public InfostoreFacade getInfostore() {
                 return getService(InfostoreFacade.class);

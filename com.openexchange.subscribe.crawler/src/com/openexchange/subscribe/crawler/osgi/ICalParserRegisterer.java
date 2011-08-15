@@ -60,31 +60,31 @@ import com.openexchange.data.conversion.ical.ICalParser;
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class ICalParserRegisterer implements ServiceTrackerCustomizer {
+public class ICalParserRegisterer implements ServiceTrackerCustomizer<ICalParser,ICalParser> {
 
     private final BundleContext context;
     private final Activator activator;
 
-    public ICalParserRegisterer(BundleContext context, Activator activator) {
+    public ICalParserRegisterer(final BundleContext context, final Activator activator) {
         super();
         this.context = context;
         this.activator = activator;
     }
 
     @Override
-    public Object addingService(ServiceReference reference) {
-        ICalParser iCalParser = (ICalParser) context.getService(reference);
+    public ICalParser addingService(final ServiceReference<ICalParser> reference) {
+        final ICalParser iCalParser = context.getService(reference);
         activator.setICalParser(iCalParser);
         return iCalParser;
     }
 
     @Override
-    public void modifiedService(ServiceReference reference, Object service) {
+    public void modifiedService(final ServiceReference<ICalParser> reference, final ICalParser service) {
         //nothing to do here
     }
 
     @Override
-    public void removedService(ServiceReference reference, Object service) {
+    public void removedService(final ServiceReference<ICalParser> reference, final ICalParser service) {
         activator.setICalParser(null);
         context.ungetService(reference);
     }

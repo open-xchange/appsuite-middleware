@@ -51,7 +51,6 @@ package com.openexchange.ajax.image;
 
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
-
 /**
  * {@link ImageResponse}
  *

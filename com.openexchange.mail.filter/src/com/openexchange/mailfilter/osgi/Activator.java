@@ -67,23 +67,21 @@ public class Activator extends DeferredActivator {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Activator.class));
 
-    private final AtomicBoolean started;
+    private final AtomicBoolean mstarted;
 
-    private ServiceRegistration serviceRegistration;
+    private ServiceRegistration<PreferencesItemService> serviceRegistration;
 
     /**
      * Initializes a new {@link MailFilterServletActivator}
      */
     public Activator() {
         super();
-        started = new AtomicBoolean();
+        mstarted = new AtomicBoolean();
     }
-
-    private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class, HttpService.class, SessiondService.class };
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
+        return new Class<?>[] { ConfigurationService.class, HttpService.class, SessiondService.class };
     }
 
 
@@ -123,7 +121,7 @@ public class Activator extends DeferredActivator {
                     }
                 }
             }
-            if (!started.compareAndSet(false, true)) {
+            if (!mstarted.compareAndSet(false, true)) {
                 /*
                  * Don't start the server again. A duplicate call to
                  * startBundle() is probably caused by temporary absent
@@ -138,7 +136,7 @@ public class Activator extends DeferredActivator {
 
             checkConfigfile();
 
-            serviceRegistration = context.registerService(PreferencesItemService.class.getName(), new MailFilterPreferencesItem(), null);
+            serviceRegistration = context.registerService(PreferencesItemService.class, new MailFilterPreferencesItem(), null);
         } catch (final Throwable t) {
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
@@ -162,7 +160,7 @@ public class Activator extends DeferredActivator {
             LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         } finally {
-            started.set(false);
+            mstarted.set(false);
         }
     }
 

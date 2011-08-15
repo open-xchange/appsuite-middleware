@@ -19,7 +19,7 @@ public class CreateDocumentActionTest extends AbstractInfostoreActionTest {
 	}
 
 	@Override
-	protected void verifyPerformed() throws Exception {	
+	protected void verifyPerformed() throws Exception {
 		for(final DocumentMetadata doc : getDocuments()) {
 			checkInDocTable(doc);
 		}
@@ -33,9 +33,9 @@ public class CreateDocumentActionTest extends AbstractInfostoreActionTest {
 	}
 
 	private void checkNotInDocTable(final DocumentMetadata doc) throws OXException, SQLException {
-		assertNoResult("SELECT 1 FROM infostore WHERE id = ? and cid = ?", doc.getId(), getContext().getContextId());	
+		assertNoResult("SELECT 1 FROM infostore WHERE id = ? and cid = ?", doc.getId(), getContext().getContextId());
 	}
-	
+
 	private void checkInDocTable(final DocumentMetadata doc) throws OXException, SQLException {
 		assertResult("SELECT 1 FROM infostore WHERE id = ? and cid = ?", doc.getId(), getContext().getContextId());
 	}

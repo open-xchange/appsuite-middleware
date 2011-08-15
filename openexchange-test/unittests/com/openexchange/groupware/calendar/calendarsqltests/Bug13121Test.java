@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 
 
@@ -93,7 +92,7 @@ public class Bug13121Test extends CalendarSqlTest {
             } catch (Exception e) {
                 // Expected!
             }
-            
+
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {

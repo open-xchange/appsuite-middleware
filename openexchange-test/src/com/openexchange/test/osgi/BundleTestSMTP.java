@@ -49,7 +49,6 @@
 
 package com.openexchange.test.osgi;
 
-import com.openexchange.exception.OXException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -71,7 +70,7 @@ import com.openexchange.tools.URLParameter;
 
 /**
  * {@link BundleTestSMTP} - Test absence of SMTP bundle
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class BundleTestSMTP extends AbstractBundleTest {

@@ -136,7 +136,7 @@ public class InMemoryFileStorage extends LocalFileStorage {
     protected void lock(final long timeout) {
         // Nothing to lock.
     }
-    
+
     @Override
     protected void unlock() {
         // Nothing to lock.

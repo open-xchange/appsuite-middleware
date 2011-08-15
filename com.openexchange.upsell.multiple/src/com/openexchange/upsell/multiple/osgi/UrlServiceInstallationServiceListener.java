@@ -61,39 +61,35 @@ import com.openexchange.upsell.multiple.api.UpsellURLService;
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  *
  */
-public class UrlServiceInstallationServiceListener implements ServiceTrackerCustomizer {
+public class UrlServiceInstallationServiceListener implements ServiceTrackerCustomizer<UpsellURLService,UpsellURLService> {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UrlServiceInstallationServiceListener.class));
 
     private final BundleContext context;
 
-    public UrlServiceInstallationServiceListener(BundleContext context) {
+    public UrlServiceInstallationServiceListener(final BundleContext context) {
         this.context = context;
     }
 
     @Override
-    public Object addingService(ServiceReference serviceReference) {
-        final Object service = context.getService(serviceReference);
-        if (service instanceof UpsellURLService) {
-            if (null == MyServiceRegistry.getServiceRegistry().getService(UpsellURLService.class)) {
-                MyServiceRegistry.getServiceRegistry().addService(UpsellURLService.class, (UpsellURLService) service);
-            } else {
-                LOG.error("Duplicate URL GENERATOR Service detected: " + serviceReference.getClass().getName());
-            }
+    public UpsellURLService addingService(final ServiceReference<UpsellURLService> serviceReference) {
+        final UpsellURLService service = context.getService(serviceReference);
+        if (null == MyServiceRegistry.getServiceRegistry().getService(UpsellURLService.class)) {
+            MyServiceRegistry.getServiceRegistry().addService(UpsellURLService.class, service);
+        } else {
+            LOG.error("Duplicate URL GENERATOR Service detected: " + serviceReference.getClass().getName());
         }
         return service;
     }
 
     @Override
-    public void modifiedService(ServiceReference arg0, Object arg1) {
+    public void modifiedService(final ServiceReference<UpsellURLService> arg0, final UpsellURLService arg1) {
         // Nothing to do
     }
 
     @Override
-    public void removedService(ServiceReference arg0, Object o) {
-        if (o instanceof UpsellURLService) {
-            MyServiceRegistry.getServiceRegistry().removeService(UpsellURLService.class);
-        }
+    public void removedService(final ServiceReference<UpsellURLService> arg0, final UpsellURLService o) {
+        MyServiceRegistry.getServiceRegistry().removeService(UpsellURLService.class);
         context.ungetService(arg0);
     }
 

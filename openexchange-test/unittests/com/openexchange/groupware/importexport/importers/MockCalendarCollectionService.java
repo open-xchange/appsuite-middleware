@@ -148,7 +148,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     public void checkAndConfirmIfUserUserIsParticipantInPublicFolder(CalendarDataObject cdao, UserParticipant up) {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -156,7 +156,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     public void checkAndFillIfUserIsParticipant(CalendarDataObject cdao, UserParticipant up) {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -164,7 +164,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     public void checkAndFillIfUserIsUser(CalendarDataObject cdao, Participant p) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -180,7 +180,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     public void checkAndRemovePastReminders(CalendarDataObject cdao, CalendarDataObject edao) {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -188,7 +188,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     public void checkForInvalidCharacters(CalendarDataObject cdao) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -260,7 +260,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     public void checkRecurring(CalendarObject cdao) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -268,7 +268,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     public void checkRecurringCompleteness(CalendarObject cdao, boolean ignoreUntilAndOccurrence) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -276,7 +276,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     public void checkUserParticipantObject(UserParticipant up, int folder_type) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -292,7 +292,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     public void closePreparedStatement(PreparedStatement prep) {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -300,7 +300,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     public void closeResultSet(ResultSet rs) {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -308,7 +308,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     public void closeStatement(Statement stmt) {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -340,7 +340,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     public void debugActiveDates(long start, long end, boolean[] activeDates) {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -348,7 +348,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     public void debugRecurringResult(RecurringResultInterface rr) {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -356,7 +356,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     public void detectFolderMoveAction(CalendarDataObject cdao, CalendarDataObject edao) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -412,7 +412,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     public void fillEventInformation(CalendarDataObject cdao, CalendarDataObject edao, UserParticipant[] up_event, UserParticipant[] new_userparticipants, UserParticipant[] deleted_userparticipants, Participant[] p_event, Participant[] new_participants, Participant[] deleted_participants) {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -420,7 +420,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     public void fillMap(RecurringResultsInterface rss, long s, long diff, int d, int counter) {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -708,7 +708,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     public void getVisibleFolderSQLInString(StringBuilder sb, int uid, int[] groups, Context c, UserConfiguration uc, Connection readcon) throws SQLException, OXException, OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -788,7 +788,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     public void purgeExceptionFieldsFromObject(CalendarDataObject cdao) {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -796,7 +796,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     public void recoverForInvalidPattern(CalendarDataObject cdao) {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -820,7 +820,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     public void removeFieldsFromObject(CalendarDataObject cdao) {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -828,7 +828,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     public void removeParticipant(CalendarDataObject cdao, int uid) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -836,7 +836,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     public void removeRecurringType(CalendarDataObject cdao) {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -844,7 +844,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     public void removeUserParticipant(CalendarDataObject cdao, int uid) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -852,7 +852,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     public void replaceDatesWithFirstOccurence(Appointment appointment) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -868,7 +868,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     public void safelySetStartAndEndDateForRecurringAppointment(CalendarDataObject cdao) {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -876,7 +876,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     public void setMAX_END_YEARS(int MAX_END_YEARS) {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -884,7 +884,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     public void setRecurrencePositionOrDateInDAO(CalendarDataObject cdao) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -892,33 +892,33 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     public void simpleParticipantCheck(CalendarDataObject cdao) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     public void triggerEvent(Session session, int action, Appointment appointmentobject) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     public void triggerModificationEvent(Session session, CalendarDataObject oldAppointment, CalendarDataObject newAppointment) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     public void updateDefaultStatus(CalendarDataObject cdao, Context ctx, int uid, int inFolder) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
     /* (non-Javadoc)
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#fillEventInformation(com.openexchange.groupware.calendar.CalendarDataObject, com.openexchange.groupware.calendar.CalendarDataObject, com.openexchange.groupware.container.UserParticipant[], com.openexchange.groupware.container.UserParticipant[], com.openexchange.groupware.container.UserParticipant[], com.openexchange.groupware.container.UserParticipant[], com.openexchange.groupware.container.Participant[], com.openexchange.groupware.container.Participant[], com.openexchange.groupware.container.Participant[], com.openexchange.groupware.container.Participant[])
      */
     public void fillEventInformation(CalendarDataObject cdao, CalendarDataObject edao, UserParticipant[] up_event, UserParticipant[] new_userparticipants, UserParticipant[] deleted_userparticipants, UserParticipant[] modified_userparticipants, Participant[] p_event, Participant[] new_participants, Participant[] deleted_participants, Participant[] modified_participants) {
         // TODO Auto-generated method stub
-        
+
     }
     public CalendarFolderObject getAllVisibleAndReadableFolderObject(int uid, int[] groups, Context c, UserConfiguration uc, Connection con) throws SQLException, OXException, OXException, OXException {
         // TODO Auto-generated method stub
         return null;
     }
-    
+
 }

@@ -72,7 +72,7 @@ public class Assert extends junit.framework.Assert {
 
     public static void assertStandardAppFields(final ICalFile ical, final Date start, final Date end) {
         assertProperty(ical, "DTSTART", Tools.formatForICal(start));
-        assertProperty(ical, "DTEND", Tools.formatForICal(end));               
+        assertProperty(ical, "DTEND", Tools.formatForICal(end));
     }
 
     public static void assertProperty(final ICalFile ical, final String name, final String value) {

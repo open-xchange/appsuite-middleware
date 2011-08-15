@@ -60,23 +60,19 @@ import com.openexchange.groupware.calendar.json.AppointmentAJAXRequestFactory;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link AbstractCalendarJSONResultConverter}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public abstract class AbstractCalendarJSONResultConverter implements ResultConverter {
-    
-    protected static final String OUTPUT_FORMAT = "json";
-    
 
+    protected static final String OUTPUT_FORMAT = "json";
 
     @Override
     public String getOutputFormat() {
         return OUTPUT_FORMAT;
     }
-
 
     @Override
     public Quality getQuality() {
@@ -85,13 +81,12 @@ public abstract class AbstractCalendarJSONResultConverter implements ResultConve
 
     @Override
     public void convert(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
-        TimeZone timeZone = TimeZoneUtils.getTimeZone(session.getUser().getTimeZone());
+        final TimeZone timeZone = TimeZoneUtils.getTimeZone(session.getUser().getTimeZone());
         convertCalendar(AppointmentAJAXRequestFactory.createAppointmentAJAXRequest(request, session), result, session, converter, timeZone);
     }
-    
+
     protected abstract void convertCalendar(AppointmentAJAXRequest request, AJAXRequestResult result, ServerSession session, Converter converter, TimeZone userTimeZone) throws OXException;
 
-    
     protected TimeZone getTimeZone(final String timeZoneId) {
         return TimeZoneUtils.getTimeZone(timeZoneId);
     }

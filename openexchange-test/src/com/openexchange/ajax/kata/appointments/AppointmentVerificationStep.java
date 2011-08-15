@@ -88,7 +88,7 @@ import com.openexchange.test.CalendarTestManager;
 
 /**
  * {@link AppointmentVerificationStep}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
@@ -102,7 +102,7 @@ public class AppointmentVerificationStep extends NeedExistingStep<Appointment> {
 
     /**
      * Initializes a new {@link AppointmentVerificationStep}.
-     * 
+     *
      * @param entry
      */
     public AppointmentVerificationStep(Appointment entry, String name) {
@@ -321,7 +321,7 @@ public class AppointmentVerificationStep extends NeedExistingStep<Appointment> {
         fail("No ID column requested. This won't work. " + name);
         return -1;
     }
-    
+
     protected <T> boolean compareArrays(T[] expected, T[] actual) {
         if (expected == null && actual == null){
             return true;
@@ -345,12 +345,12 @@ public class AppointmentVerificationStep extends NeedExistingStep<Appointment> {
 
     protected Object transform(int column, Object actual) throws OXException, IOException, SAXException, JSONException {
         switch (column) {
-    
+
         case Appointment.START_DATE:
         case Appointment.END_DATE:
             int offset = getTimeZone().getOffset(((Long) actual).longValue());
             return new Date(((Long) actual).longValue() - offset);
-    
+
         case Appointment.PARTICIPANTS:
             JSONArray participantArr = (JSONArray) actual;
             List<Participant> participants = new LinkedList<Participant>();
@@ -370,7 +370,7 @@ public class AppointmentVerificationStep extends NeedExistingStep<Appointment> {
                 }
             }
             return participants.toArray(new Participant[participants.size()]);
-    
+
         case Appointment.USERS:
             JSONArray userParticipantArr = (JSONArray) actual;
             List<UserParticipant> userParticipants = new LinkedList<UserParticipant>();
@@ -380,7 +380,7 @@ public class AppointmentVerificationStep extends NeedExistingStep<Appointment> {
             }
             return userParticipants.toArray(new UserParticipant[userParticipants.size()]);
         }
-    
+
         return actual;
     }
 

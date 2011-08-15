@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.config;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Date;
 import java.util.Random;
@@ -67,7 +66,7 @@ import com.openexchange.ajax.framework.Executor;
 import com.openexchange.tools.RandomString;
 
 /**
- * This class contains tests for added funtionalities of the configuration tree. 
+ * This class contains tests for added funtionalities of the configuration tree.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class FunctionTests extends AbstractAJAXSession {
@@ -225,7 +224,7 @@ public class FunctionTests extends AbstractAJAXSession {
             testBoolean(param, true);
         }
     }
-    
+
     public void testCharacterSearch() throws Throwable {
         final GetResponse response = client.execute(new GetRequest(Tree.CharacterSearch));
         LOG.info("User is only allowed to search via character side bar in contacts: " + response.getBoolean());

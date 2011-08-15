@@ -67,7 +67,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ContactRequest}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class ContactRequest {

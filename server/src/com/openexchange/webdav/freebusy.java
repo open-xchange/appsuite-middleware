@@ -154,10 +154,12 @@ public class freebusy extends HttpServlet {
     }
 
     private String getMailAddress(final HttpServletRequest request) {
-        if (null == request.getParameter("username") || null == request.getParameter("server")) {
+        final String userName = request.getParameter("username");
+        final String serverName = request.getParameter("server");
+        if (null == userName || null == serverName) {
             return null;
         }
-        return request.getParameter("username") + '@' + request.getParameter("server");
+        return userName + '@' + serverName;
     }
 
     private Date getStart(final HttpServletRequest request) {
@@ -245,6 +247,9 @@ public class freebusy extends HttpServlet {
         try {
             final Session sessionObj = SessionObjectWrapper.createSessionObject(context.getMailadmin(), context, "freebusysessionobject");
             final AppointmentSQLInterface appointmentInterface = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class, true).createAppointmentSql(sessionObj);
+            /*
+             * Write free-busy elements
+             */
             final SearchIterator<Appointment> it = appointmentInterface.getFreeBusyInformation(principalId, type, start, end);
             try {
                 synchronized (outputFormat) {

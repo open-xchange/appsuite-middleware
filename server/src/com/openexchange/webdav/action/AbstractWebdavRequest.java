@@ -115,7 +115,7 @@ public abstract class AbstractWebdavRequest implements WebdavRequest {
         final String ifHeader = getHeader("If");
         if(ifHeader == null) {
             return null;
-        } 
+        }
         try {
         	return new IfHeaderParser().parse(getHeader("If"));
         } catch (IfHeaderParseException e) {

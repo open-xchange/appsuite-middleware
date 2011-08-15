@@ -1,7 +1,6 @@
 
 package com.openexchange.groupware.attach.actions;
 
-import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;

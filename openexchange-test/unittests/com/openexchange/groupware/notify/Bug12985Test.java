@@ -63,15 +63,15 @@ public class Bug12985Test extends ParticipantNotifyTest {
         final Participant[] participants = getParticipants(U(2,4,10),G(),S(), R());
         final Task oldTask = getTask(participants);
         final Task newTask = getTask(participants);
-        
+
         newTask.setAlarm(new Date());
         newTask.setAlarmFlag(true);
-        
+
         notify.taskModified(oldTask, newTask, session);
 
         final List<Message> messages = notify.getMessages();
         assertTrue("The system has generated notifications. Didn't expect any.", messages.isEmpty());
-        
+
         final List<PooledNotification> pooledNotifications = NotificationPool.getInstance().getNotifications();
         assertTrue("The system has generated notifications. Didn't expect any.", pooledNotifications.isEmpty());
     }

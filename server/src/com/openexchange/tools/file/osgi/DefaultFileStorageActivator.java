@@ -57,11 +57,11 @@ import com.openexchange.tools.file.internal.CompositeFileStorageFactory;
 
 public class DefaultFileStorageActivator implements BundleActivator {
 
-    private ServiceRegistration reg;
+    private ServiceRegistration<FileStorageFactory> reg;
 
     @Override
     public void start(final BundleContext context) throws Exception {
-        reg = context.registerService(FileStorageFactory.class.getName(), new CompositeFileStorageFactory(), null);
+        reg = context.registerService(FileStorageFactory.class, new CompositeFileStorageFactory(), null);
     }
 
     @Override

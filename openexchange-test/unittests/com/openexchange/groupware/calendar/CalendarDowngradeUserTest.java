@@ -103,7 +103,7 @@ public class CalendarDowngradeUserTest extends TestCase {
 	public void setUp() throws Exception {
         Init.startServer();
         AJAXConfig.init();
-        
+
         TestEventAdmin.getInstance().clearEvents();
 
         ctx = tools.getDefaultContext();
@@ -159,7 +159,7 @@ public class CalendarDowngradeUserTest extends TestCase {
 
         assertAppointmentNotFound(cdao.getParentFolderID(), cdao.getObjectID());
         assertDeleteEvent(Appointment.class, cdao.getParentFolderID(), cdao.getObjectID());
-        
+
     }
 
 
@@ -170,7 +170,7 @@ public class CalendarDowngradeUserTest extends TestCase {
 
     private void deleteAll() {
         final CalendarSql calendars = new CalendarSql(session);
-        
+
         for(final CalendarDataObject cdao : clean) {
             try {
                 calendars.deleteAppointmentObject(cdao, cdao.getParentFolderID(), new Date(Long.MAX_VALUE));
@@ -214,11 +214,11 @@ public class CalendarDowngradeUserTest extends TestCase {
 
     private CalendarDataObject createPrivateAppointment(final int userId) throws OXException {
         final CalendarDataObject cdao = newAppointment("Private appointment", folders.getStandardFolder(userId, ctx), ctx);
-        final CalendarSql csql = new CalendarSql(session);        
+        final CalendarSql csql = new CalendarSql(session);
         csql.insertAppointmentObject(cdao);
 
         clean.add(cdao);
-        
+
         return cdao;
     }
 
@@ -253,7 +253,7 @@ public class CalendarDowngradeUserTest extends TestCase {
 
     private int createPublicFolder() throws OXException {
         if(publicFolderId != -1) {
-            return publicFolderId;    
+            return publicFolderId;
         }
         Connection writecon = null;
         try {
@@ -286,7 +286,7 @@ public class CalendarDowngradeUserTest extends TestCase {
         final Participants participants = new Participants();
 
         for(final int uid : users) {
-            participants.add(new UserParticipant(uid));            
+            participants.add(new UserParticipant(uid));
         }
 
         cdao.setParticipants(participants.getList());
@@ -323,6 +323,6 @@ public class CalendarDowngradeUserTest extends TestCase {
             fail(x.toString());
         }
     }
-    
+
 
 }

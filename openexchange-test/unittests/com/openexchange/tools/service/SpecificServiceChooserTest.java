@@ -49,7 +49,6 @@
 
 package com.openexchange.tools.service;
 
-import com.openexchange.exception.OXException;
 import junit.framework.TestCase;
 
 
@@ -60,48 +59,48 @@ import junit.framework.TestCase;
  *
  */
 public class SpecificServiceChooserTest extends TestCase {
-    
+
     private SpecificServiceChooser<TestService> specificServiceChooser;
 
     @Override
     public void setUp() {
         specificServiceChooser = new SpecificServiceChooser<TestService>();
     }
-    
+
     public void testChooseMostSpecificService() throws ServicePriorityConflictException {
         specificServiceChooser.registerForEverything(new TestServiceImpl(1), 1);
-        
+
         specificServiceChooser.registerForEverything(new TestServiceImpl(80), 0);
-        
+
         specificServiceChooser.registerForContext(new TestServiceImpl(2), 0, 1337);
         specificServiceChooser.registerForContextAndFolder(new TestServiceImpl(3), 0, 1337, 12);
         specificServiceChooser.registerForFolder(new TestServiceImpl(4), 2, 13);
-        
+
         assertChooses(1, 1338, 2);
         assertChooses(2, 1337, 2);
         assertChooses(3, 1337, 12);
         assertChooses(4, 1338, 13);
         assertChooses(4, 1337, 13);
-        
+
     }
 
     public void testChooseMostSpecificServiceWithStringIDs() throws ServicePriorityConflictException {
         specificServiceChooser.registerForEverything(new TestServiceImpl(1), 1);
         specificServiceChooser.registerForEverything(new TestServiceImpl(80), 0);
-        
+
         specificServiceChooser.registerForContext(new TestServiceImpl(2), 0, 1337);
         specificServiceChooser.registerForContextAndFolder(new TestServiceImpl(3), 0, 1337, "gnitz");
         specificServiceChooser.registerForFolder(new TestServiceImpl(4), 2, "batz");
-        
+
         assertChooses(1, 1338, "2");
         assertChooses(2, 1337, "2");
         assertChooses(3, 1337, "gnitz");
         assertChooses(4, 1338, "batz");
         assertChooses(4, 1337, "batz");
-        
+
     }
 
-    
+
     // Test removing services
 
     public void testRemovingServices() throws ServicePriorityConflictException {
@@ -109,77 +108,77 @@ public class SpecificServiceChooserTest extends TestCase {
         specificServiceChooser.registerForEverything(serviceInstance, 1);
         specificServiceChooser.registerForEverything(new TestServiceImpl(80), 0);
         specificServiceChooser.removeForEverything(serviceInstance);
-        
+
         assertChooses(80, 1338, "2");
 
         specificServiceChooser = new SpecificServiceChooser<TestService>();
         specificServiceChooser.registerForContext(new TestServiceImpl(2), 2, 1337);
         specificServiceChooser.registerForContext(new TestServiceImpl(82), 0, 1337);
         specificServiceChooser.removeForContext(new TestServiceImpl(2), 1337);
-        
+
         assertChooses(82, 1337, "bla");
-        
+
         specificServiceChooser = new SpecificServiceChooser<TestService>();
         specificServiceChooser.registerForContextAndFolder(new TestServiceImpl(2), 2, 1337, 12);
         specificServiceChooser.registerForContextAndFolder(new TestServiceImpl(84), 0, 1337, 12);
         specificServiceChooser.removeForContextAndFolder(new TestServiceImpl(2), 1337, 12);
-        
+
         assertChooses(84, 1337, 12);
-        
+
         specificServiceChooser = new SpecificServiceChooser<TestService>();
         specificServiceChooser.registerForFolder(new TestServiceImpl(2), 2, 12);
         specificServiceChooser.registerForFolder(new TestServiceImpl(84), 0, 12);
         specificServiceChooser.removeForFolder(new TestServiceImpl(2), 12);
-        
+
         assertChooses(84, 1337, 12);
-        
+
     }
-    
+
     public void testConflictingServices() throws ServicePriorityConflictException {
         specificServiceChooser.registerForContext(new TestServiceImpl(2), 0, 1337);
         specificServiceChooser.registerForFolder(new TestServiceImpl(4), 0, 13);
-        
+
         try {
             specificServiceChooser.choose(1337, 13);
             fail("Should have thrown Exception");
         } catch (ServicePriorityConflictException x) {
             // Hooray!
         }
-        
+
         try {
             specificServiceChooser.registerForFolder(new TestServiceImpl(5), 0, 13);
             fail("Should have thrown Exception");
         } catch (ServicePriorityConflictException x) {
             // Hooray!
         }
-        
-        
+
+
     }
-    
+
     private void assertChooses(int expected, int cid, int folderId) throws ServicePriorityConflictException {
         TestService chosen = specificServiceChooser.choose(cid, folderId);
         assertEquals("Wrong service chosen for "+cid+" : "+folderId, expected, chosen.getId());
-        
+
     }
-    
+
     private void assertChooses(int expected, int cid, String folderId) throws ServicePriorityConflictException {
         TestService chosen = specificServiceChooser.choose(cid, folderId);
         assertEquals("Wrong service chosen for "+cid+" : "+folderId, expected, chosen.getId());
-        
+
     }
 
     private static interface TestService {
         public int getId();
     }
-    
+
     private static final class TestServiceImpl implements TestService {
-        
+
         private int id;
 
         public TestServiceImpl(int id) {
             this.id = id;
         }
-        
+
         public int getId() {
             return id;
         }
@@ -188,13 +187,13 @@ public class SpecificServiceChooserTest extends TestCase {
         public int hashCode() {
             return id;
         }
-        
+
         @Override
         public boolean equals(Object obj) {
             return id == ((TestServiceImpl)obj).id;
         }
-        
+
     }
-    
+
 }
-    
+

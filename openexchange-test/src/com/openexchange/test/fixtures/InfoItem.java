@@ -9,19 +9,19 @@ public class InfoItem extends DocumentMetadataImpl {
 	private static final long serialVersionUID = 1L;
 	private int numberOfLinks;
 	private Document[] versions;
-	
+
 	public InfoItem() {
 		super();
 	}
-	
+
 	public int getLabel() {
 		return super.getColorLabel();
 	}
-	
+
 	public void setLabel(final int label) {
 		super.setColorLabel(label);
 	}
-	
+
 	/**
 	 * @param numberOfLinks the numberOfLinks to set
 	 */
@@ -56,18 +56,18 @@ public class InfoItem extends DocumentMetadataImpl {
 	public void setVersions(final Document[] versions) {
 		this.versions = versions;
 	}
-	
+
 	/**
 	 * @return the versions
 	 */
 	public Document[] getVersions() {
 		return versions;
 	}
-	
+
 	public boolean containsVersions() {
 		return null != this.versions && 0 < this.versions.length;
 	}
-	
+
 	public Document getCurrentVersion() {
 		if (this.containsVersions()) {
 			if (super.getVersion() < this.versions.length) {
@@ -79,7 +79,7 @@ public class InfoItem extends DocumentMetadataImpl {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Gets the remote path associated with the current document version of this
 	 * infoitem, pointing to a file on the remote filesystem.
@@ -89,7 +89,7 @@ public class InfoItem extends DocumentMetadataImpl {
 		final Document currentVersion = getCurrentVersion();
 		return null == currentVersion ? null : currentVersion.getRemotePath();
 	}
-	
+
 	/*
 	 * overrides
 	 */
@@ -99,18 +99,18 @@ public class InfoItem extends DocumentMetadataImpl {
 		final Document currentVersion = getCurrentVersion();
 		return null == currentVersion ? null : currentVersion.getFile().getName();
 	}
-	
+
 	@Override
     public long getFileSize() {
 		final Document currentVersion = getCurrentVersion();
 		return null == currentVersion ? 0 : currentVersion.getSize();
 	}
-	
+
 	@Override
     public int getVersion() {
 		return containsVersions() ? 1 + super.getVersion() : 0;
 	}
-	
+
 	@Override
     public void setVersion(int version) {
 		super.setVersion(version - 1);
@@ -120,5 +120,5 @@ public class InfoItem extends DocumentMetadataImpl {
     public String getFileMIMEType() {
 		final Document currentVersion = getCurrentVersion();
 		return null == currentVersion ? null : currentVersion.getMimeType();
-	}	
+	}
 }

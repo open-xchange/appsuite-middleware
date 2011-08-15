@@ -22,12 +22,12 @@ public class Bug12610Test extends AbstractAJAXSession {
     public void testBugAsWritten() throws Throwable{
         AJAXClient client = null;
         Appointment appointment = new Appointment();
-        
+
         try {
             client = getClient();
             int folderId = client.getValues().getPrivateAppointmentFolder();
             TimeZone tz = client.getValues().getTimeZone();
-            
+
             appointment.setTitle("Bug12610Test");
             appointment.setParentFolderID(folderId);
             appointment.setIgnoreConflicts(true);
@@ -52,17 +52,17 @@ public class Bug12610Test extends AbstractAJAXSession {
             until.set(Calendar.SECOND, 0);
             until.set(Calendar.MILLISECOND, 0);
             appointment.setUntil(until.getTime());
-            
+
             final InsertRequest request = new InsertRequest(appointment, tz);
             final CommonInsertResponse response = client.execute(request);
             appointment.setObjectID(response.getId());
             appointment.setLastModified(response.getTimestamp());
-            
+
             until.set(Calendar.DAY_OF_MONTH, 18);
             until.set(Calendar.MONTH, Calendar.JULY);
             until.set(Calendar.YEAR, 2014);
             appointment.setUntil(until.getTime());
-            
+
             final UpdateRequest updateRequest = new UpdateRequest(appointment, tz);
             final UpdateResponse updateResponse = client.execute(updateRequest);
             appointment.setLastModified(updateResponse.getTimestamp());

@@ -65,7 +65,7 @@ import com.openexchange.groupware.container.Contact;
 public final class SearchResponse extends CommonSearchResponse {
 
     private final int[] userImplAttributes;
-    
+
     /**
      * @param response
      */

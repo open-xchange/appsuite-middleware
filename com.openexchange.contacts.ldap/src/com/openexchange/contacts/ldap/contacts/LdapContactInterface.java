@@ -72,6 +72,8 @@ import com.openexchange.contacts.ldap.property.Mappings;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactUnificationState;
+import com.openexchange.groupware.contact.helpers.SpecialAlphanumSortContactComparator;
+import com.openexchange.groupware.contact.helpers.UseCountComparator;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
@@ -85,8 +87,15 @@ import com.openexchange.timer.TimerService;
 import com.openexchange.tools.iterator.ArrayIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 
-
+/**
+ * {@link LdapContactInterface}
+ *
+ * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 public class LdapContactInterface implements ContactInterface {
+
+    protected static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(LdapContactInterface.class));
 
     private class ContactLoaderTask implements Runnable {
 
@@ -134,7 +143,7 @@ public class LdapContactInterface implements ContactInterface {
          * @param field
          * @param sort
          */
-        private SortInfo(final int field, final Order sort) {
+        protected SortInfo(final int field, final Order sort) {
             this.field = field;
             this.sort = sort;
         }
@@ -150,8 +159,6 @@ public class LdapContactInterface implements ContactInterface {
         }
 
     }
-
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(LdapContactInterface.class));
 
     private static final String MAPPING_TABLE_KEYS = "CONTACT_LDAP_MAPPING_TABLE_KEYS";
 
@@ -255,6 +262,18 @@ public class LdapContactInterface implements ContactInterface {
         final Mappings mappings = folderprop.getMappings();
         final ContactTypes contacttype = folderprop.getContacttypes();
 
+        final boolean specialSort;
+        if (orderBy > 0 && orderBy != Contact.SPECIAL_SORTING && orderBy != Contact.USE_COUNT_GLOBAL_FIRST && !Order.NO_ORDER.equals(order)) {
+            specialSort = false;
+        } else {
+            for (final int field : new int[] {
+                Contact.YOMI_LAST_NAME, Contact.SUR_NAME, Contact.YOMI_FIRST_NAME, Contact.GIVEN_NAME, Contact.DISPLAY_NAME,
+                Contact.YOMI_COMPANY, Contact.COMPANY, Contact.EMAIL1, Contact.EMAIL2, Contact.USE_COUNT }) {
+                columns.add(Integer.valueOf(field));
+            }
+            specialSort = true;
+        }
+
         final boolean both = ContactTypes.both.equals(contacttype);
         if (searchobject.isStartLetter()) {
             String userfilter = null;
@@ -289,7 +308,7 @@ public class LdapContactInterface implements ContactInterface {
             arrayList = getLDAPContacts(folderId, columns, getStringFromStringBuilder(user), getStringFromStringBuilder(distri), null, false);
         }
 
-        sorting(orderBy, order, arrayList);
+        sorting(orderBy, order, arrayList, specialSort);
         return new ArrayIterator<Contact>(arrayList.toArray(new Contact[arrayList.size()]));
     }
 
@@ -308,6 +327,18 @@ public class LdapContactInterface implements ContactInterface {
         }
         if (0 != orderBy) {
             columns.addAll(getColumnSet(new int[]{orderBy}));
+        }
+
+        final boolean specialSort;
+        if (orderBy > 0 && orderBy != Contact.SPECIAL_SORTING && orderBy != Contact.USE_COUNT_GLOBAL_FIRST && !Order.NO_ORDER.equals(order)) {
+            specialSort = false;
+        } else {
+            for (final int field : new int[] {
+                Contact.YOMI_LAST_NAME, Contact.SUR_NAME, Contact.YOMI_FIRST_NAME, Contact.GIVEN_NAME, Contact.DISPLAY_NAME,
+                Contact.YOMI_COMPANY, Contact.COMPANY, Contact.EMAIL1, Contact.EMAIL2, Contact.USE_COUNT }) {
+                columns.add(Integer.valueOf(field));
+            }
+            specialSort = true;
         }
 
         final List<Contact> arrayList;
@@ -345,7 +376,7 @@ public class LdapContactInterface implements ContactInterface {
         // Get only the needed parts...
         final List<Contact> subList = getSubList(from, to, arrayList);
 
-        sorting(orderBy, order, subList);
+        sorting(orderBy, order, subList, specialSort);
         final SearchIterator<Contact> searchIterator = new ArrayIterator<Contact>(subList.toArray(new Contact[subList.size()]));
         return searchIterator;
     }
@@ -758,9 +789,21 @@ public class LdapContactInterface implements ContactInterface {
 
     }
 
-    private void sorting(final int orderBy, final Order order, final List<Contact> subList) {
+    private void sorting(final int orderBy, final Order order, final List<Contact> subList, final boolean specialSort) {
         if (Order.NO_ORDER != order && folderprop.getSorting().equals(Sorting.groupware)) {
-            Collections.sort(subList, new ContactComparator(orderBy, order));
+            if (orderBy == Contact.USE_COUNT_GLOBAL_FIRST) {
+                java.util.Collections.sort(subList, new UseCountComparator(specialSort));
+                if (Order.DESCENDING.equals(order)) {
+                    java.util.Collections.reverse(subList);
+                }
+            } else if (specialSort) {
+                java.util.Collections.sort(subList, new SpecialAlphanumSortContactComparator());
+                if (Order.DESCENDING.equals(order)) {
+                    java.util.Collections.reverse(subList);
+                }
+            } else {
+                Collections.sort(subList, new ContactComparator(orderBy, order));
+            }
         } else {
             // Default sorting
             Collections.sort(subList, new ContactComparator(-1, order));

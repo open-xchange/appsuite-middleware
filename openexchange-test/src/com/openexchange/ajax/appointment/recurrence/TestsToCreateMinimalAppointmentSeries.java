@@ -59,7 +59,7 @@ import com.openexchange.groupware.container.Expectations;
 
 /**
  * Find out which parameters are needed to create an appointment and which are not enough.
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class TestsToCreateMinimalAppointmentSeries extends ManagedAppointmentTest {
@@ -72,7 +72,7 @@ public class TestsToCreateMinimalAppointmentSeries extends ManagedAppointmentTes
         /*
          * TODO: Fix!
          * This test fails as long as the Server side JSON-Writer/Parser is used.
-         * 
+         *
          * Details:
          * This does not send an exception, because the current JSON-writer does not set the days-value as it is not necessary for daily recurrence.
          */

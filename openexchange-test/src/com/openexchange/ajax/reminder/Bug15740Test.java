@@ -106,7 +106,7 @@ public class Bug15740Test extends AbstractAJAXSession {
         calendar.add(Calendar.DATE, 1);
         final RangeRequest request = new RangeRequest(calendar.getTime());
         final RangeResponse response = client.execute(request);
-        
+
         ReminderObject actual = null;
         for (ReminderObject reminder : response.getReminder(tz)) {
             if (appointment.getObjectID() == reminder.getTargetId()) {
@@ -132,7 +132,7 @@ public class Bug15740Test extends AbstractAJAXSession {
     private Appointment createAppointment() throws OXException, IOException, SAXException, JSONException {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testBug15740");
-        
+
         //long startDate = System.currentTimeMillis()-86400000;
         calendar.add(Calendar.DAY_OF_MONTH, -1);
         // Second occurrence must be in the future.

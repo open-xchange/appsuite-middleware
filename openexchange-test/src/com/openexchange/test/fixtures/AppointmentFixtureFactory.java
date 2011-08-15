@@ -118,7 +118,7 @@ public class AppointmentFixtureFactory implements FixtureFactory<Appointment>{
             appointments.put(entryName, fixture);
             return fixture;
         }
-        
+
         private void applyUsers(final Appointment appointment, GroupResolver groupResolver) {
         	if (null != appointment) {
         		final Participant[] participants = appointment.getParticipants();

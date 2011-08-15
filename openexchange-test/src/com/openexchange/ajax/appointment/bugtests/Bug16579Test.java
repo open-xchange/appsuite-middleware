@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import org.json.JSONArray;
 import com.openexchange.ajax.appointment.action.AllRequest;
@@ -64,7 +63,7 @@ import com.openexchange.groupware.container.Appointment;
 
 /**
  * {@link Bug16579Test}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Bug16579Test extends AbstractAJAXSession {
@@ -75,7 +74,7 @@ public class Bug16579Test extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link Bug16579Test}.
-     * 
+     *
      * @param name
      */
     public Bug16579Test(String name) {
@@ -125,7 +124,7 @@ public class Bug16579Test extends AbstractAJAXSession {
                 count++;
             }
         }
-        
+
         assertEquals("Wrong amount of occurrences", 3, count);
     }
 

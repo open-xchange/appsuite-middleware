@@ -147,7 +147,7 @@ public final class BrowserDetector {
 
     /**
      * Checks if specified instance is equal by: browser name, browser platform and version.
-     * 
+     *
      * @param other The instance to compare with
      * @return <code>true</code> if specified instance is equal by: browser name, browser platform and version; otherwise <code>false</code>
      */

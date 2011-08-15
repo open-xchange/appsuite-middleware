@@ -58,12 +58,12 @@ import com.openexchange.ajax.mail.filter.test.AbstractTest;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class Rule {
-	
+
 	public static final int ID = 1200;
-	
+
     public static final int RULENAME = 1201;
 
-    public static final int ACTIVE = 1202;  
+    public static final int ACTIVE = 1202;
 
     public static final int FLAGS = 1203;
 
@@ -74,33 +74,33 @@ public class Rule {
     public static final int ACTIONCMDS = 1206;
 
     public static final int TEXT = 1207;
-	
+
 	protected int position = 0;
-	
+
 	protected String id = null;
-	
+
 	protected String name = null;
-	
+
 	protected boolean active = false;
-	
+
 	protected String[] flags = null;
-	
+
 	protected AbstractTest test = null;
-	
+
 	protected AbstractAction[] actioncmds = null;
-	
+
 	protected String rawData = null;
-	
+
 	protected String errormsg = null;
-	
+
 	public Rule() {
-		
+
 	}
-	
+
 	public int getPosition() {
 		return position;
 	}
-	
+
 	public void setPosition(int position) {
 		this.position = position;
 	}

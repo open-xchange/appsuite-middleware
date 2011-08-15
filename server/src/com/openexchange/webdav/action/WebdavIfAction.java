@@ -62,7 +62,6 @@ import com.openexchange.webdav.action.ifheader.IfHeader;
 import com.openexchange.webdav.action.ifheader.IfHeaderApply;
 import com.openexchange.webdav.action.ifheader.IfHeaderEntity;
 import com.openexchange.webdav.action.ifheader.IfHeaderList;
-import com.openexchange.webdav.action.ifheader.IfHeaderParseException;
 import com.openexchange.webdav.action.ifheader.StandardIfHeaderApply;
 import com.openexchange.webdav.loader.LoadingHints;
 import com.openexchange.webdav.protocol.Protocol;

@@ -49,7 +49,6 @@
 
 package com.openexchange.webdav.xml.contact;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;

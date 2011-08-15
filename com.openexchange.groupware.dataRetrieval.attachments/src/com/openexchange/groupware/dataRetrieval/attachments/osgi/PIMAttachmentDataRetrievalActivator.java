@@ -63,27 +63,26 @@ import com.openexchange.server.osgiservice.DeferredActivator;
  */
 public class PIMAttachmentDataRetrievalActivator extends DeferredActivator {
 
-    private static final Class<?>[] NEEDED_CLASSES = new Class<?>[]{AttachmentBase.class};
-    private ServiceRegistration registration;
+    private ServiceRegistration<DataProvider> registration;
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_CLASSES;
+        return new Class<?>[]{AttachmentBase.class};
     }
 
     @Override
-    protected void handleAvailability(Class<?> clazz) {
-
+    protected void handleAvailability(final Class<?> clazz) {
+        // Nope
     }
 
     @Override
-    protected void handleUnavailability(Class<?> clazz) {
-
+    protected void handleUnavailability(final Class<?> clazz) {
+        // Nope
     }
 
     @Override
     protected void startBundle() throws Exception {
-        registration = context.registerService(DataProvider.class.getName(), new PIMAttachmentDataProvider(getService(AttachmentBase.class)), null);
+        registration = context.registerService(DataProvider.class, new PIMAttachmentDataProvider(getService(AttachmentBase.class)), null);
     }
 
     @Override

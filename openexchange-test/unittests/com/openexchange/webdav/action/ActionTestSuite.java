@@ -26,10 +26,10 @@ public class ActionTestSuite {
 		tests.addTestSuite(DefaultHeaderTest.class);
 		tests.addTestSuite(NotExistTest.class);
 		tests.addTestSuite(MaxUploadSizeActionTest.class);
-		
+
         tests.addTestSuite(StandardIfHeaderApplyTest.class);
 		tests.addTestSuite(IgnoreLocksIfHeaderApplyTest.class);
-		
+
 		return tests;
 	}
 }

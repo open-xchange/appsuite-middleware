@@ -75,7 +75,7 @@ public class DeleteExceptionTimestampTest extends AbstractAJAXSession {
     public DeleteExceptionTimestampTest(String name) {
         super(name);
     }
-    
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -91,21 +91,21 @@ public class DeleteExceptionTimestampTest extends AbstractAJAXSession {
         appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         manager.insert(appointment);
     }
-    
+
     @Override
     protected void tearDown() throws Exception {
         manager.cleanUp();
         super.tearDown();
     }
-    
+
     public void testTimestampShouldBeDifferentAfterCreatingDeleteException() throws OXException, IOException, SAXException, JSONException {
         Date oldTimestamp = appointment.getLastModified();
-        
+
         DeleteRequest deleteRequest = new DeleteRequest(appointment.getObjectID(), appointment.getParentFolderID(), 3, oldTimestamp, true);
         CommonDeleteResponse response = getClient().execute(deleteRequest);
-        
+
         assertTrue("Timestamp should be later", oldTimestamp.before(response.getTimestamp()));
-        
+
     }
 
 }

@@ -90,7 +90,7 @@ public class OrderByTest extends TestCase {
         Init.startServer();
         final TestConfig config = new TestConfig();
         user = config.getUser();
-        
+
         final int pos = user.indexOf('@');
         final String contextName;
         if (pos == -1) {

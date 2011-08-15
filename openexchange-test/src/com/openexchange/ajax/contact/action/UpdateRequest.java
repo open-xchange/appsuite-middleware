@@ -49,7 +49,10 @@
 
 package com.openexchange.ajax.contact.action;
 
+<<<<<<< HEAD
 import java.io.ByteArrayInputStream;
+=======
+>>>>>>> 730cd26d1ab3805d7b8b1790f6bcd5e53311c62b
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.groupware.container.Contact;
@@ -77,7 +80,7 @@ public class UpdateRequest extends AbstractContactRequest<UpdateResponse> {
     public UpdateRequest(final Contact contactObj) {
         this(contactObj, true);
     }
-    
+
     public UpdateRequest(final Contact contactObj, boolean failOnError) {
         this(contactObj.getParentFolderID(), contactObj, failOnError);
     }
@@ -87,6 +90,7 @@ public class UpdateRequest extends AbstractContactRequest<UpdateResponse> {
         this.contactObj = entry;
         this.failOnError = failOnError;
         this.originFolder = inFolder;
+<<<<<<< HEAD
         
         this.withImage = contactObj.containsImage1() && (null != contactObj.getImage1());
         
@@ -98,6 +102,9 @@ public class UpdateRequest extends AbstractContactRequest<UpdateResponse> {
             }
         }
         
+=======
+
+>>>>>>> 730cd26d1ab3805d7b8b1790f6bcd5e53311c62b
     }
 
     /**

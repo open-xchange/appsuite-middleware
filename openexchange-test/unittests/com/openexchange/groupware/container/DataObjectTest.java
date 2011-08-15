@@ -41,10 +41,10 @@ public class DataObjectTest extends TestCase {
             DataObject.MODIFIED_BY,
             DataObject.OBJECT_ID);
     }
-    
+
     public void testAttrAccessors() {
         DataObject object = new DataObject(){};
-        
+
         // LAST_MODIFIED
         assertFalse(object.contains(LAST_MODIFIED));
         assertFalse(object.containsLastModified());
@@ -151,7 +151,7 @@ public class DataObjectTest extends TestCase {
         };
 
         fillDataObject(dataObject);
-        
+
         return dataObject;
     }
 

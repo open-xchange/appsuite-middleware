@@ -54,15 +54,15 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
  * {@link ResourceDeleteResponse} - The response corresponding to DELETE request
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class ResourceDeleteResponse extends AbstractAJAXResponse {
 
 	/**
 	 * Initializes a new {@link ResourceDeleteResponse}
-	 * 
+	 *
 	 * @param response
 	 *            The JSON response container
 	 */

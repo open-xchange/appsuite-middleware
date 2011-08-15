@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Participant;
 
@@ -68,7 +67,7 @@ public class Bug13226Test extends CalendarSqlTest {
         appointment.setTitle("Bug 13226 Test");
         appointments.save(appointment);
         clean.add(appointment);
-        
+
         changeAppointment = appointments.createIdentifyingCopy(appointment);
         changeAppointment.setLastModified(appointment.getLastModified());
         changeAppointment.setTitle("Bug 13226 Test - CHANGED");
@@ -76,12 +75,12 @@ public class Bug13226Test extends CalendarSqlTest {
         appointments.switchUser(secondUser);
         changeAppointment.setParentFolderID(appointments.getPrivateFolder());
     }
-    
+
     public void testBug13226() throws Exception {
         appointments.save(changeAppointment);
         appointments.switchUser(user);
         CalendarDataObject loadedAppointment = appointments.load(appointment.getObjectID(), appointment.getParentFolderID());
-        
+
         boolean found = false;
         for (Participant participant : loadedAppointment.getParticipants()) {
             if (participant.getIdentifier() == secondUserId) {
@@ -89,7 +88,7 @@ public class Bug13226Test extends CalendarSqlTest {
                 break;
             }
         }
-        
+
         assertFalse("Did not expect the change user as participant.", found);
     }
 

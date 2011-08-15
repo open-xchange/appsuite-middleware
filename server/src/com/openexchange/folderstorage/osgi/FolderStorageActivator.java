@@ -173,9 +173,9 @@ public final class FolderStorageActivator implements BundleActivator {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FolderStorageActivator.class));
 
-    private List<ServiceRegistration> serviceRegistrations;
+    private List<ServiceRegistration<?>> serviceRegistrations;
 
-    private List<ServiceTracker> serviceTrackers;
+    private List<ServiceTracker<?,?>> serviceTrackers;
 
     private List<BundleActivator> activators;
 
@@ -190,18 +190,18 @@ public final class FolderStorageActivator implements BundleActivator {
     public void start(final BundleContext context) throws Exception {
         try {
             // Register services
-            serviceRegistrations = new ArrayList<ServiceRegistration>(4);
+            serviceRegistrations = new ArrayList<ServiceRegistration<?>>(4);
             // Register folder service
-            serviceRegistrations.add(context.registerService(FolderService.class.getName(), new FolderServiceImpl(), null));
+            serviceRegistrations.add(context.registerService(FolderService.class, new FolderServiceImpl(), null));
             serviceRegistrations.add(context.registerService(
-                ContentTypeDiscoveryService.class.getName(),
+                ContentTypeDiscoveryService.class,
                 ContentTypeRegistry.getInstance(),
                 null));
-            serviceRegistrations.add(context.registerService(AdditionalFolderField.class.getName(), new DisplayNameFolderField(), null));
+            serviceRegistrations.add(context.registerService(AdditionalFolderField.class, new DisplayNameFolderField(), null));
             // Register service trackers
-            serviceTrackers = new ArrayList<ServiceTracker>(4);
-            serviceTrackers.add(new ServiceTracker(context, FolderStorage.class.getName(), new FolderStorageTracker(context)));
-            for (final ServiceTracker serviceTracker : serviceTrackers) {
+            serviceTrackers = new ArrayList<ServiceTracker<?,?>>(4);
+            serviceTrackers.add(new ServiceTracker<FolderStorage,FolderStorage>(context, FolderStorage.class, new FolderStorageTracker(context)));
+            for (final ServiceTracker<?,?> serviceTracker : serviceTrackers) {
                 serviceTracker.open();
             }
 
@@ -271,7 +271,7 @@ public final class FolderStorageActivator implements BundleActivator {
             }
             // Drop service trackers
             if (null != serviceTrackers) {
-                for (final ServiceTracker serviceTracker : serviceTrackers) {
+                for (final ServiceTracker<?,?> serviceTracker : serviceTrackers) {
                     serviceTracker.close();
                 }
                 serviceTrackers.clear();
@@ -279,7 +279,7 @@ public final class FolderStorageActivator implements BundleActivator {
             }
             // Unregister previously registered services
             if (null != serviceRegistrations) {
-                for (final ServiceRegistration serviceRegistration : serviceRegistrations) {
+                for (final ServiceRegistration<?> serviceRegistration : serviceRegistrations) {
                     serviceRegistration.unregister();
                 }
                 serviceRegistrations.clear();

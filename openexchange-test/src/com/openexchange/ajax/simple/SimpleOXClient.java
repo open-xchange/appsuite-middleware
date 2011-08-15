@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.simple;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
@@ -74,14 +73,14 @@ import com.openexchange.subscribe.helpers.TrustAllAdapter;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SimpleOXClient {
-    
+
     private static final String BASE = "/ajax";
 
     private boolean debug = System.getProperty("ebug") != null && System.getProperty("ebug").equals("true");
-    
+
     private HttpClient client = new HttpClient();
     private String sessionID;
-    
+
     public SimpleOXClient(String host, boolean secure) {
         if(secure) {
             final Protocol https = new Protocol("https", new TrustAllAdapter(), 443);
@@ -90,11 +89,11 @@ public class SimpleOXClient {
             client.getHostConfiguration().setHost(host);
         }
     }
-    
+
     public SimpleOXClient(String host) {
         this(host, false);
     }
-    
+
     public String login(String login, String password) throws JSONException, IOException {
         JSONObject obj = raw("login", "login", "name", login, "password", password);
         if(obj.has("error")) {
@@ -102,19 +101,19 @@ public class SimpleOXClient {
         }
         return sessionID = obj.getString("session");
     }
-    
+
     public boolean isLoggedIn() {
         return sessionID != null;
     }
-    
+
     public SimpleOXModule getModule(String moduleName) {
         return new SimpleOXModule(this, moduleName);
     }
-    
+
     public SimpleResponse call(String module, String action, Object...parameters) throws JSONException, IOException {
         return new SimpleResponse(raw(module, action, parameters));
     }
-    
+
     public JSONObject raw(String module, String action, Object...parameters) throws JSONException, IOException {
         Map<String, Object> params = M(parameters);
         params.put("action", action);
@@ -122,9 +121,9 @@ public class SimpleOXClient {
             params.put("session", sessionID);
         }
         HttpMethod method;
-        
+
         String url = BASE+"/"+module;
-        
+
         if(params.containsKey("body")) {
             String body = JSONCoercion.coerceToJSON(params.remove("body")).toString();
             PutMethod putMethod = new PutMethod(url);
@@ -138,52 +137,52 @@ public class SimpleOXClient {
         } else {
             method = new GetMethod(url);
         }
-        
+
         NameValuePair[] pairs = new NameValuePair[params.size()];
         int i = 0;
         for (Entry<String, Object> entry : params.entrySet()) {
             pairs[i++] = new NameValuePair(entry.getKey(), entry.getValue().toString());
         }
-        
+
         method.setQueryString(pairs);
-        
+
         int rc = client.executeMethod(method);
-        
+
         if(rc != 200) {
             throw new IllegalStateException("Expected a return code of 200 but was "+rc);
         }
-        
+
         String response = method.getResponseBodyAsString();
         if(debug) {
             System.out.println("Response: "+response);
         }
         return new JSONObject(response);
     }
-    
+
     private Map<String, Object> M(Object...parameters) {
         HashMap<String,Object> map = new HashMap<String, Object>();
-        
+
         for(int i = 0; i < parameters.length; i++) {
             map.put(parameters[i++].toString(), parameters[i]);
         }
-        
+
         return map;
     }
 
     public HttpClient getClient() {
         return client;
     }
-    
+
     public String getSessionID() {
         return sessionID;
     }
-    
+
     public void setSessionID(String sessionID) {
         this.sessionID = sessionID;
     }
-    
+
     public void setDebug(boolean debug) {
         this.debug = debug;
     }
-   
+
 }
