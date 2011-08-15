@@ -60,7 +60,6 @@ import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.mail.Part;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
@@ -94,9 +93,9 @@ public abstract class UploadFileMailPart extends MailPart {
      * @param uploadFile The upload file
      * @throws OXException If upload file's content type cannot be parsed
      */
-    protected UploadFileMailPart(final UploadFile uploadFile) throws OXException {
+    protected UploadFileMailPart(final com.openexchange.mail.mime.datasource.FileDataSource file) throws OXException {
         super();
-        this.file = uploadFile.getTmpFile();
+        this.file = file.getFile();
         final String preparedFileName = uploadFile.getPreparedFileName();
         setContentType(prepareContentType(uploadFile.getContentType(), preparedFileName));
         setFileName(preparedFileName);
