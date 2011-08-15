@@ -47,75 +47,87 @@
  *
  */
 
-package com.openexchange.contact.json.actions;
+package com.openexchange.contacts.json.actions;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.parser.SearchTermParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.contact.json.ContactRequest;
-import com.openexchange.contact.json.RequestTools;
-import com.openexchange.contact.json.converters.ContactParser;
+import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.ContactSearchMultiplexer;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.upload.UploadFile;
-import com.openexchange.groupware.upload.impl.UploadEvent;
+import com.openexchange.groupware.search.Order;
+import com.openexchange.search.SearchTerm;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link UpdateAction}
+ * {@link AdvancedSearchAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class UpdateAction extends ContactAction {
+public class AdvancedSearchAction extends ContactAction {
 
     /**
-     * Initializes a new {@link UpdateAction}.
+     * Initializes a new {@link AdvancedSearchAction}.
      * @param serviceLookup
      */
-    public UpdateAction(final ServiceLookup serviceLookup) {
+    public AdvancedSearchAction(final ServiceLookup serviceLookup) {
         super(serviceLookup);
     }
 
     @Override
     protected AJAXRequestResult perform(final ContactRequest req) throws OXException {
         final ServerSession session = req.getSession();
-        final int folder = req.getFolder();
-        final int id = req.getId();
-        final long timestamp = req.getTimestamp();
-        final Date date = new Date(timestamp);
-        final boolean containsImage = req.containsImage();
-        final JSONObject json = req.getContactJSON(containsImage);
+        final int[] columns = req.getColumns();
+        final int sort = req.getSort();
+        final Order order = req.getOrder();
+        final String collation = req.getCollation();
+        Date lastModified = null;
+        Date timestamp = new Date(0);
+        final JSONObject json = (JSONObject) req.getData();
+        final TimeZone timeZone = req.getTimeZone();
         
-        final ContactParser parser = new ContactParser();
-        final Contact contact = parser.parse(json);
-        contact.setObjectID(id);
-        
-        if (containsImage) {
-            UploadEvent uploadEvent = null;               
-            try {
-                uploadEvent = req.getUploadEvent();
-                final UploadFile file = uploadEvent.getUploadFileByFieldName("file");
-                if (file == null) {
-                    throw AjaxExceptionCodes.NO_UPLOAD_IMAGE.create();
-                }
+        JSONArray filterContent;
+        SearchIterator<Contact> it = null;
+        final List<Contact> contacts = new ArrayList<Contact>();
+        try {
+            filterContent = json.getJSONArray("filter");
+            final SearchTerm<?> searchTerm = SearchTermParser.parse(filterContent);
+
+            final ContactSearchMultiplexer multiplexer = new ContactSearchMultiplexer(getContactInterfaceDiscoveryService());
+            it = multiplexer.extendedSearch(session, searchTerm, sort, order, collation, columns);
+            while (it.hasNext()) {
+                final Contact contact = it.next();
+                lastModified = contact.getLastModified();
                 
-                RequestTools.setImageData(contact, file);
-            } finally {
-                if (uploadEvent != null) {
-                    uploadEvent.cleanUp();
+                // Correct last modified and creation date with users timezone
+                contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
+                contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
+                contacts.add(contact);                
+                
+                if (lastModified != null && timestamp.before(lastModified)) {
+                    timestamp = lastModified;
                 }
+            }
+        } catch (final JSONException e) {
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e);
+        } finally {
+            if (it != null) {
+                it.close();
             }
         }
         
-        final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
-        contactInterface.updateContactObject(contact, folder, date);
-        
-        final JSONObject response = new JSONObject();
-        return new AJAXRequestResult(response, contact.getLastModified(), "json");
+        return new AJAXRequestResult(contacts, lastModified, "contact");
     }
 
 }

@@ -47,13 +47,11 @@
  *
  */
 
-package com.openexchange.contact.json.actions;
+package com.openexchange.contacts.json.actions;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -62,7 +60,7 @@ import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.contact.json.ContactRequest;
+import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactSearchMultiplexer;
 import com.openexchange.groupware.container.Contact;
@@ -104,7 +102,6 @@ public class SearchAction extends ContactAction {
         final ContactSearchMultiplexer multiplexer = new ContactSearchMultiplexer(getContactInterfaceDiscoveryService());
         SearchIterator<Contact> it = null;
         final List<Contact> contacts = new ArrayList<Contact>();
-        final Map<String, List<Contact>> contactMap = new HashMap<String, List<Contact>>(1);
         try {
             it = multiplexer.extendedSearch(session, searchObject, sort, order, collation, columns);
             while (it.hasNext()) {
@@ -127,8 +124,7 @@ public class SearchAction extends ContactAction {
             }
         }
         
-        contactMap.put("contacts", contacts);
-        return new AJAXRequestResult(contactMap, lastModified, "contacts");
+        return new AJAXRequestResult(contacts, lastModified, "contact");
     }
     
     private ContactSearchObject createContactSearchObject(final JSONObject json) throws OXException {

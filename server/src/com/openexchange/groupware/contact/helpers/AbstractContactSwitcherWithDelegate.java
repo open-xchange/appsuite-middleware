@@ -637,10 +637,29 @@ public class AbstractContactSwitcherWithDelegate implements ContactSwitcher {
     public Object usecount(Object... objects) throws OXException {
         return delegate.usecount(objects);
     }
+    
+    @Override
+    public Object markasdistributionlist(Object[] objects) throws OXException {
+        return delegate.markasdistributionlist(objects);
+    }
+    
+    @Override
+    public Object yomifirstname(Object[] objects) throws OXException {
+        return delegate.yomifirstname(objects);
+    }
+
+    @Override
+    public Object yomilastname(Object[] objects) throws OXException {
+        return delegate.yomilastname(objects);
+    }
+
+    @Override
+    public Object yomicompanyname(Object[] objects) throws OXException {
+        return delegate.yomicompanyname(objects);
+    }
 
     @Override
     public boolean _unknownfield(final Contact contact, final String fieldname, final Object value, final Object... additionalObjects) throws OXException {
         return delegate._unknownfield(contact, fieldname, value, additionalObjects);
     }
-
 }

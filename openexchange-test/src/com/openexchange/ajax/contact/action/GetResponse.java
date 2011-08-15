@@ -51,12 +51,14 @@ package com.openexchange.ajax.contact.action;
 
 import com.openexchange.exception.OXException;
 import java.util.TimeZone;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.parser.ContactParser;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
  * 
@@ -66,6 +68,7 @@ public class GetResponse extends AbstractAJAXResponse {
 
     private Contact contactObj;
     private TimeZone timeZone;
+    private String imageUrl;
 
     /**
      * @param response
@@ -82,8 +85,10 @@ public class GetResponse extends AbstractAJAXResponse {
     public Contact getContact() throws OXException, OXException {
         if (null == contactObj) {
             this.contactObj = new Contact();
-            new ContactParser(true, timeZone).parse(contactObj, (JSONObject) getResponse().getData());
+            JSONObject json = (JSONObject) getResponse().getData();
+            new ContactParser(true, timeZone).parse(contactObj, json);
         }
+        
         return contactObj;
     }
 
@@ -92,5 +97,40 @@ public class GetResponse extends AbstractAJAXResponse {
      */
     public void setContact(final Contact contactObj) {
         this.contactObj = contactObj;
+    }
+
+    
+    /**
+     * Gets the imageUrl
+     *
+     * @return The imageUrl
+     * @throws OXException 
+     */
+    public String getImageUrl() throws OXException {
+        extractImageUrl();
+        return imageUrl;
+    }
+    
+    public String getImageUid() throws OXException {
+        final String imageUrl = getImageUrl();
+        if (imageUrl == null) {
+            return null;
+        } else {
+            final String path = "/ajax/image?uid=";
+            int index = imageUrl.indexOf(path);
+            
+            return imageUrl.substring(index + path.length(), imageUrl.length());
+        }
+    }
+    
+    private void extractImageUrl() throws OXException {
+        JSONObject json = (JSONObject) getResponse().getData();
+        if (imageUrl == null && json.hasAndNotNull("image1_url")) {
+            try {
+                this.imageUrl = json.getString("image1_url");
+            } catch (JSONException e) {
+                throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, json);
+            }
+        }
     }
 }

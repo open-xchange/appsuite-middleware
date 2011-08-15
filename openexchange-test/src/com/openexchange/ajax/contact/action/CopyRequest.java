@@ -47,46 +47,55 @@
  *
  */
 
-package com.openexchange.ajax.updater.actions;
+package com.openexchange.ajax.contact.action;
 
-import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 
 /**
- * {@link FileRequest}
+ * {@link CopyRequest}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class FileRequest extends AbstractUpdaterRequest<FileResponse> {
+public class CopyRequest extends AbstractContactRequest<CopyResponse> {
 
-    /**
-     * Initializes a new {@link FileRequest}.
-     * @param servletPath
-     */
-    public FileRequest(String fileName) {
-        super("/ajax/updater/files/" + fileName);
+    private int sourceFolderID;
+    private int destinationFolderID;
+    private int contactID;
+    private boolean failOnError;
+    
+    public CopyRequest(int contactID, int sourceFolderID, int destinationFolderID, boolean failOnError) {
+        super();
+        this.contactID = contactID;
+        this.sourceFolderID = sourceFolderID;
+        this.destinationFolderID = destinationFolderID;
+        this.failOnError = failOnError;
     }
 
-    /**
-     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-     */
+    public Object getBody() throws JSONException {
+        JSONObject jso = new JSONObject();
+        jso.put("folder_id", destinationFolderID);
+        return jso;        
+    }
+
     public Method getMethod() {
-        return Method.GET;
+        return Method.PUT;
     }
 
-    /**
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-     */
-    public FileParser getParser() {
-        return new FileParser(true);
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
+        List<Parameter> list = new LinkedList<Parameter>();
+
+        list.add(new Parameter("action", "copy"));
+        list.add(new Parameter("folder", sourceFolderID));
+        list.add(new Parameter("id", contactID));
+        
+        return list.toArray(new Parameter[list.size()]);
     }
 
-    /**
-     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-     */
-    public Object getBody() throws IOException, JSONException {
-        return null;
+    public CopyParser getParser() {
+        return new CopyParser(failOnError);
     }
-
 }

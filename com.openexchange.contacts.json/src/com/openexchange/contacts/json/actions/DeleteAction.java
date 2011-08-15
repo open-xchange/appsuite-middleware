@@ -47,79 +47,45 @@
  *
  */
 
-package com.openexchange.contact.json.actions;
+package com.openexchange.contacts.json.actions;
 
-import org.json.JSONException;
+import java.util.Date;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.contact.json.ContactRequest;
-import com.openexchange.contact.json.RequestTools;
-import com.openexchange.contact.json.converters.ContactParser;
+import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.upload.UploadFile;
-import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link NewAction}
+ * {@link DeleteAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class NewAction extends ContactAction {
+public class DeleteAction extends ContactAction {
 
     /**
-     * Initializes a new {@link NewAction}.
+     * Initializes a new {@link DeleteAction}.
      * @param serviceLookup
      */
-    public NewAction(final ServiceLookup serviceLookup) {
+    public DeleteAction(final ServiceLookup serviceLookup) {
         super(serviceLookup);
     }
 
     @Override
     protected AJAXRequestResult perform(final ContactRequest req) throws OXException {
         final ServerSession session = req.getSession();
-        final boolean containsImage = req.containsImage();
-        final JSONObject json = req.getContactJSON(containsImage);
-        if (!json.has("folder_id")) {
-            throw OXException.mandatoryField("missing folder");
-        }
-                
-        try {
-            final int folder = json.getInt("folder_id");
-            final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
-            final ContactParser parser = new ContactParser();
-            final Contact contact = parser.parse(json);
-            if (containsImage) {              
-                UploadEvent uploadEvent = null;               
-                try {
-                    uploadEvent = req.getUploadEvent();
-                    final UploadFile file = uploadEvent.getUploadFileByFieldName("file");
-                    if (file == null) {
-                        throw AjaxExceptionCodes.NO_UPLOAD_IMAGE.create();
-                    }
-                    
-                    RequestTools.setImageData(contact, file);
-                } finally {
-                    if (uploadEvent != null) {
-                        uploadEvent.cleanUp();
-                    }
-                }
-                
-            }
-            
-            contactInterface.insertContactObject(contact);
-            final JSONObject object = new JSONObject("{\"id\":" + contact.getObjectID() + "}");
-            return new AJAXRequestResult(object, contact.getLastModified(), "json");
-        } catch (final JSONException e) {
-            throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-        }        
+        final long timestamp = req.getTimestamp();
+        final int[] deleteRequestData = req.getDeleteRequestData();
+        final Date date = new Date(timestamp);
+        
+        final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(deleteRequestData[1], session);
+        contactInterface.deleteContactObject(deleteRequestData[0], deleteRequestData[1], date);
+        
+        final JSONObject response = new JSONObject();
+        return new AJAXRequestResult(response, date, "json");
     }
-    
 
 }

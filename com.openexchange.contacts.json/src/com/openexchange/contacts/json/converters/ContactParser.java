@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.contact.json.converters;
+package com.openexchange.contacts.json.converters;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -149,21 +149,29 @@ public class ContactParser {
             try {
                 entry = jsonDistributionList.getJSONObject(i);
                 distributionList[i] = new DistributionListEntryObject();
-                if (entry.has(DistributionListFields.ID)) {
+                if (hasAndNotEmptyOrNull(entry, DistributionListFields.ID)) {
                     distributionList[i].setEntryID(entry.getInt(DistributionListFields.ID));
                 }
 
-                if (entry.has(DistributionListFields.FIRST_NAME)) {
+                if (hasAndNotEmptyOrNull(entry, DistributionListFields.FIRST_NAME)) {
                     distributionList[i].setFirstname(entry.getString(DistributionListFields.FIRST_NAME));
                 }
 
-                if (entry.has(DistributionListFields.LAST_NAME)) {
+                if (hasAndNotEmptyOrNull(entry, DistributionListFields.LAST_NAME)) {
                     distributionList[i].setFirstname(entry.getString(DistributionListFields.LAST_NAME));
                 }
 
-                distributionList[i].setDisplayname(entry.getString(DistributionListFields.DISPLAY_NAME));
-                distributionList[i].setEmailaddress(entry.getString(DistributionListFields.MAIL));
-                distributionList[i].setEmailfield(entry.getInt(DistributionListFields.MAIL_FIELD));
+                if (hasAndNotEmptyOrNull(entry, DistributionListFields.DISPLAY_NAME)) {
+                    distributionList[i].setDisplayname(entry.getString(DistributionListFields.DISPLAY_NAME));
+                }
+                
+                if (hasAndNotEmptyOrNull(entry, DistributionListFields.MAIL)) {
+                    distributionList[i].setEmailaddress(entry.getString(DistributionListFields.MAIL));
+                }                
+                
+                if (hasAndNotEmptyOrNull(entry, DistributionListFields.MAIL_FIELD)) {
+                    distributionList[i].setEmailfield(entry.getInt(DistributionListFields.MAIL_FIELD));
+                }
             } catch (final JSONException e) {
                 throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, entry);
             }            
@@ -171,17 +179,30 @@ public class ContactParser {
         
         return distributionList;
     }
+    
+    private boolean hasAndNotEmptyOrNull(JSONObject json, String key) throws JSONException {
+        if (json.hasAndNotNull(key)) {
+            String str = json.getString(key);   
+            if (!str.isEmpty()) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
 
     private LinkEntryObject[] parseLinks(final JSONArray jsonLinks) throws JSONException, OXException {
         final LinkEntryObject[] links = new LinkEntryObject[jsonLinks.length()];
         for (int i = 0; i < links.length; i++) {
             links[i] = new LinkEntryObject();
             final JSONObject entry = jsonLinks.getJSONObject(i);
-            if (entry.has(ContactFields.ID)) {
+            if (hasAndNotEmptyOrNull(entry, ContactFields.ID)) {
                 links[i].setLinkID(entry.getInt(ContactFields.ID));
             }
-
-            links[i].setLinkDisplayname(entry.getString(DistributionListFields.DISPLAY_NAME));
+            
+            if (hasAndNotEmptyOrNull(entry, DistributionListFields.DISPLAY_NAME)) {
+                links[i].setLinkDisplayname(entry.getString(DistributionListFields.DISPLAY_NAME));
+            }
         }
 
         return links;

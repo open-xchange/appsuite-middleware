@@ -47,72 +47,81 @@
  *
  */
 
-package com.openexchange.contact.json.converters;
+package com.openexchange.contacts.json.actions;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.Converter;
+import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.helpers.ContactField;
-import com.openexchange.groupware.contact.helpers.ContactGetter;
+import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.image.ImageService;
-import com.openexchange.tools.servlet.OXJSONExceptionCodes;
+import com.openexchange.groupware.search.Order;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 
+
 /**
- * {@link ContactResultConverter}
- * 
+ * {@link AllAction}
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ContactResultConverter extends JSONResultConverter {
+public class AllAction extends ContactAction {
 
-    public ContactResultConverter(final ImageService imageService) {
-        super(imageService);
+    /**
+     * Initializes a new {@link AllAction}.
+     * @param serviceLookup
+     */
+    public AllAction(final ServiceLookup serviceLookup) {
+        super(serviceLookup);
     }
 
     @Override
-    public String getInputFormat() {
-        return "contact";
-    }
-
-    @Override
-    public void convertResult(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
-        final Contact contact = (Contact) result.getResultObject();
-        result.setResultObject(convert(contact, session), "json");
-    }
-
-    private Object convert(final Contact contact, final ServerSession session) throws OXException {
-        final JSONObject json = new JSONObject();
-
-        final ContactGetter cg = new ContactGetter();
-        for (final int column : Contact.JSON_COLUMNS) {
-            final ContactField field = ContactField.getByValue(column);
-            if (field != null && !field.getAjaxName().isEmpty()) {
-                try {
-                    final Object value = field.doSwitch(cg, contact);
-                    
-                    if (isSpecial(column)) {
-                        final Object special = convertSpecial(field, contact, cg);
-                        if (special != null && !String.valueOf(special).isEmpty()) {
-                            final String jsonKey = field.getAjaxName();
-                            json.put(jsonKey, special);
-                        }                            
-                    } else {
-                        if (value != null && !String.valueOf(value).isEmpty()) {
-                            final String jsonKey = field.getAjaxName();
-                            json.put(jsonKey, value);
-                        }
-                    }
-                } catch (final JSONException e) {
-                    OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+    protected AJAXRequestResult perform(final ContactRequest req) throws OXException {
+        final ServerSession session = req.getSession();
+        final TimeZone timeZone = req.getTimeZone();
+        final int folder = req.getFolder();
+        final int[] columns = req.getColumns();
+        final int sort = req.getSort();
+        final Order order = req.getOrder();
+        final String collation = req.getCollation();
+        final int leftHandLimit = req.getLeftHandLimit();
+        int rightHandLimit = req.getRightHandLimit();
+        if (rightHandLimit == 0) {
+            rightHandLimit = 50000;
+        }
+        
+        Date timestamp = new Date(0);
+        final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
+        SearchIterator<Contact> it = null;
+        final List<Contact> contacts = new ArrayList<Contact>();
+        try {
+            it = contactInterface.getContactsInFolder(folder, leftHandLimit, rightHandLimit, sort, order, collation, columns);
+            
+            while (it.hasNext()) {
+                final Contact contact = it.next();
+                final Date lastModified = contact.getLastModified();
+                
+                // Correct last modified and creation date with users timezone
+                contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
+                contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));                
+                contacts.add(contact);
+                
+                if (lastModified != null && timestamp.before(lastModified)) {
+                    timestamp = lastModified;
                 }
+            }
+            
+        } finally {
+            if (it != null) {
+                it.close();
             }
         }
         
-        return json;
+        return new AJAXRequestResult(contacts, timestamp, "contact");
     }
 
 }

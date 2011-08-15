@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.contact.json;
+package com.openexchange.contacts.json;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;

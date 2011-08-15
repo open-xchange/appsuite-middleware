@@ -446,6 +446,10 @@ public enum ContactField{
 		case NUMBER_OF_IMAGES: return switcher.numberofimages(objects);
 		case LAST_MODIFIED_OF_NEWEST_ATTACHMENT: return switcher.lastmodifiedofnewestattachment(objects);
 		case USE_COUNT: return switcher.usecount(objects);
+		case MARK_AS_DISTRIBUTIONLIST: return switcher.markasdistributionlist(objects);
+		case YOMI_FIRST_NAME: return switcher.yomifirstname(objects);
+		case YOMI_LAST_NAME: return switcher.yomilastname(objects);
+		case YOMI_COMPANY: return switcher.yomicompanyname(objects);
 		default: return null;
 		}
 	}

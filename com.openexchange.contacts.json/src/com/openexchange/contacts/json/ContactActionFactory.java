@@ -47,52 +47,57 @@
  *
  */
 
-package com.openexchange.contact.json.actions;
+package com.openexchange.contacts.json;
 
-import java.util.Date;
-import java.util.TimeZone;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.api2.RdbContactSQLImpl;
-import com.openexchange.contact.json.ContactRequest;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.contacts.json.actions.AdvancedSearchAction;
+import com.openexchange.contacts.json.actions.AllAction;
+import com.openexchange.contacts.json.actions.ContactAction;
+import com.openexchange.contacts.json.actions.CopyAction;
+import com.openexchange.contacts.json.actions.DeleteAction;
+import com.openexchange.contacts.json.actions.GetAction;
+import com.openexchange.contacts.json.actions.GetUserAction;
+import com.openexchange.contacts.json.actions.ListAction;
+import com.openexchange.contacts.json.actions.ListUserAction;
+import com.openexchange.contacts.json.actions.NewAction;
+import com.openexchange.contacts.json.actions.SearchAction;
+import com.openexchange.contacts.json.actions.UpdateAction;
+import com.openexchange.contacts.json.actions.UpdatesAction;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link GetUserAction}
+ * {@link ContactActionFactory}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class GetUserAction extends ContactAction {
-
-    /**
-     * Initializes a new {@link GetUserAction}.
-     * @param serviceLookup
-     */
-    public GetUserAction(final ServiceLookup serviceLookup) {
-        super(serviceLookup);
+public class ContactActionFactory implements AJAXActionServiceFactory {
+    
+    private static final Map<String, ContactAction> ACTIONS = new ConcurrentHashMap<String, ContactAction>();
+    
+    public ContactActionFactory(final ServiceLookup serviceLookup) {
+        super();
+        ACTIONS.put("get", new GetAction(serviceLookup));
+        ACTIONS.put("all", new AllAction(serviceLookup));
+        ACTIONS.put("list", new ListAction(serviceLookup));
+        ACTIONS.put("new", new NewAction(serviceLookup));
+        ACTIONS.put("delete", new DeleteAction(serviceLookup));
+        ACTIONS.put("update", new UpdateAction(serviceLookup));
+        ACTIONS.put("updates", new UpdatesAction(serviceLookup));
+        ACTIONS.put("listuser", new ListUserAction(serviceLookup));
+        ACTIONS.put("getuser", new GetUserAction(serviceLookup));
+        ACTIONS.put("copy", new CopyAction(serviceLookup));
+        ACTIONS.put("search", new SearchAction(serviceLookup));
+        ACTIONS.put("advancedSearch", new AdvancedSearchAction(serviceLookup));        
     }
 
     @Override
-    protected AJAXRequestResult perform(final ContactRequest req) throws OXException {
-        final ServerSession session = req.getSession();
-        final TimeZone timeZone = req.getTimeZone();
-        final int uid = req.getId();        
-        final Context ctx = session.getContext();
-
-        final ContactInterface contactInterface = new RdbContactSQLImpl(session, ctx);
-        final Contact contact = contactInterface.getUserById(uid);        
-        final Date lastModified = contact.getLastModified();
-        
-        // Correct last modified and creation date with users timezone
-        contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
-        contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
-        
-        return new AJAXRequestResult(contact, lastModified, "contact");
+    public AJAXActionService createActionService(final String action) throws OXException {
+        return ACTIONS.get(action);
     }
 
 }

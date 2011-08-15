@@ -47,12 +47,13 @@
  *
  */
 
-package com.openexchange.contact.json.converters;
+package com.openexchange.contacts.json.converters;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.json.JSONArray;
@@ -64,6 +65,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.contacts.json.RequestTools;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.datasource.ContactImageDataSource;
@@ -76,16 +78,16 @@ import com.openexchange.image.ImageService;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
+
 /**
- * {@link JSONResultConverter}
- * 
+ * {@link ContactJSONResultConverter}
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public abstract class JSONResultConverter implements ResultConverter {
-
+public class ContactJSONResultConverter implements ResultConverter {
     private static final Map<Integer, String> specialColumns = new HashMap<Integer, String>();
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(JSONResultConverter.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ContactJSONResultConverter.class));
 
     private final ImageService imageService;
 
@@ -102,6 +104,7 @@ public abstract class JSONResultConverter implements ResultConverter {
         specialColumns.put(Contact.LAST_MODIFIED_UTC, "date_utc");
         specialColumns.put(Contact.DISTRIBUTIONLIST, "distributionlist");
         specialColumns.put(Contact.LINKS, "links");
+        specialColumns.put(Contact.DEFAULT_ADDRESS, "remove_if_zero");
     }
 
     /**
@@ -109,9 +112,14 @@ public abstract class JSONResultConverter implements ResultConverter {
      * 
      * @param imageService
      */
-    public JSONResultConverter(final ImageService imageService) {
+    public ContactJSONResultConverter(final ImageService imageService) {
         super();
         this.imageService = imageService;
+    }
+    
+    @Override
+    public String getInputFormat() {
+        return "contact";
     }
 
     @Override
@@ -127,10 +135,110 @@ public abstract class JSONResultConverter implements ResultConverter {
     @Override
     public void convert(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
         this.session = session;
-        convertResult(request, result, session, converter);
+        final Object resultObject = result.getResultObject();
+        final Object newResultObject;
+        if(resultObject instanceof Contact) {
+            
+            // Only one contact to convert
+            final Contact contact = (Contact) resultObject;
+            newResultObject = convertSingleContact(contact);
+        } else {            
+            final int[] columns = RequestTools.getColumnsAsIntArray(request, "columns"); 
+            
+            if (request.getAction().equals("updates")) {
+                
+                // result contains a Map<String, List<Contact>> to decide between deleted and modified contacts
+                @SuppressWarnings("unchecked")
+                final Map<String, List<Contact>> contactMap = (Map<String, List<Contact>>) resultObject;
+                final List<Contact> modified = contactMap.get("modified");
+                final List<Contact> deleted = contactMap.get("deleted");
+                
+                newResultObject = convertListOfContacts(modified, columns);
+                if (!deleted.isEmpty()) {
+                    addObjectIdsToResultArray(newResultObject, deleted);
+                }                
+            } else {
+                
+                // A list of contacts to convert
+                @SuppressWarnings("unchecked")
+                final List<Contact> contacts = (List<Contact>) resultObject;
+                newResultObject = convertListOfContacts(contacts, columns);
+            }
+        }
+        
+        result.setResultObject(newResultObject, "json");
     }
 
-    public abstract void convertResult(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException;
+    private Object convertSingleContact(final Contact contact) throws OXException {
+        final JSONObject json = new JSONObject();
+        final ContactGetter cg = new ContactGetter();
+        for (final int column : Contact.JSON_COLUMNS) {
+            final ContactField field = ContactField.getByValue(column);
+            if (field != null && !field.getAjaxName().isEmpty()) {
+                try {
+                    final Object value = field.doSwitch(cg, contact);
+                    
+                    if (isSpecial(column)) {
+                        final Object special = convertSpecial(field, contact, cg);
+                        if (special != null && !String.valueOf(special).isEmpty()) {
+                            final String jsonKey = field.getAjaxName();
+                            json.put(jsonKey, special);
+                        }                            
+                    } else {
+                        if (value != null && !String.valueOf(value).isEmpty()) {
+                            final String jsonKey = field.getAjaxName();
+                            json.put(jsonKey, value);
+                        }
+                    }
+                } catch (final JSONException e) {
+                    OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+                }
+            }
+        }
+        
+        return json;
+    }
+    
+    private Object convertListOfContacts(final List<Contact> contacts, int[] columns) throws OXException {       
+        final JSONArray resultArray = new JSONArray();
+        for (final Contact contact : contacts) {
+            final JSONArray contactArray = new JSONArray();
+            
+            final ContactGetter cg = new ContactGetter();
+            for (final int column : columns) {
+                final ContactField field = ContactField.getByValue(column);
+                if (field != null && !field.getAjaxName().isEmpty()) {                
+                    final Object value = field.doSwitch(cg, contact);
+                    if (isSpecial(column)) {
+                        final Object special = convertSpecial(field, contact, cg);
+                        if (special == null) {
+                            contactArray.put(JSONObject.NULL);                            
+                        } else {
+                            contactArray.put(special);
+                        }                        
+                    } else if (value == null) {
+                        contactArray.put(JSONObject.NULL);
+                    } else {
+                        contactArray.put(value);
+                    }
+                } else {
+                    LOG.warn("Did not find field or json name for column: " + column);
+                    contactArray.put(JSONObject.NULL);
+                }
+            }
+            
+            resultArray.put(contactArray);
+        }
+        
+        return resultArray;
+    }
+    
+    private void addObjectIdsToResultArray(final Object object, final List<Contact> contacts) {
+        final JSONArray resultArray = (JSONArray) object;
+        for (final Contact contact : contacts) {
+            resultArray.put(contact.getObjectID());
+        }
+    }
 
     protected boolean isSpecial(final int column) {
         return specialColumns.containsKey(column);
@@ -191,6 +299,16 @@ public abstract class JSONResultConverter implements ResultConverter {
             }
             
             return links;
+        } else if (type.equals("remove_if_zero")) {
+            Integer value = (Integer) field.doSwitch(cg, contact);
+            if (value != null) {
+                int intValue = value.intValue();
+                if (intValue != 0) {
+                    return intValue;
+                }
+            }
+            
+            return null;
         } else {
             return null;
         }
@@ -246,5 +364,4 @@ public abstract class JSONResultConverter implements ResultConverter {
     protected ImageService getImageService() {
         return imageService;
     }
-
 }

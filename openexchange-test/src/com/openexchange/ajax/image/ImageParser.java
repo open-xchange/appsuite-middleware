@@ -47,68 +47,62 @@
  *
  */
 
-package com.openexchange.contact.json.actions;
+package com.openexchange.ajax.image;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.api2.RdbContactSQLImpl;
-import com.openexchange.contact.json.ContactRequest;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
+import java.io.IOException;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.ParseException;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 
 /**
- * {@link ListUserAction}
+ * {@link ImageParser}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ListUserAction extends ContactAction {
+public class ImageParser extends AbstractAJAXParser<ImageResponse> {
+    
+    private byte[] fileBytes;
 
     /**
-     * Initializes a new {@link ListUserAction}.
-     * @param serviceLookup
+     * Initializes a new {@link ImageParser}.
+     * @param failOnError
      */
-    public ListUserAction(final ServiceLookup serviceLookup) {
-        super(serviceLookup);
+    protected ImageParser(boolean failOnError) {
+        super(failOnError);
+    }
+    
+    /**
+     * @see com.openexchange.ajax.framework.AbstractAJAXParser#checkResponse(org.apache.http.HttpResponse)
+     */
+    @Override
+    public String checkResponse(HttpResponse resp) throws ParseException, IOException {
+        assertEquals("Response code is not okay.", HttpStatus.SC_OK, resp.getStatusLine().getStatusCode());
+        HttpEntity entity = resp.getEntity();
+        fileBytes = EntityUtils.toByteArray(entity);
+        
+        return null;
     }
 
+    /**
+     * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
+     */
     @Override
-    protected AJAXRequestResult perform(final ContactRequest req) throws OXException {
-        final ServerSession session = req.getSession();
-        final int[] uids = req.getUserIds();
-        final Context ctx = session.getContext();
-        Date timestamp = new Date(0);
-        Date lastModified = null;
-        final TimeZone timeZone = req.getTimeZone();
-        
-        final ContactInterface contactInterface = new RdbContactSQLImpl(session, ctx);
-        final Map<String, List<Contact>> contactMap = new HashMap<String, List<Contact>>(1);
-        final List<Contact> contacts = new ArrayList<Contact>();
-        for (final int uid : uids) {
-            final Contact contact = contactInterface.getUserById(uid);                 
-            lastModified = contact.getLastModified();
-            
-            // Correct last modified and creation date with users timezone
-            contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
-            contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
-            contacts.add(contact);       
-            
-            if (lastModified != null && timestamp.before(lastModified)) {
-                timestamp = lastModified;
-            }
-        }
-
-        contactMap.put("contacts", contacts);        
-        return new AJAXRequestResult(contactMap, timestamp, "contacts");
+    protected ImageResponse createResponse(Response response) throws JSONException {
+        return null;
+    }
+    
+    /**
+     * @see com.openexchange.ajax.framework.AbstractAJAXParser#parse(java.lang.String)
+     */
+    @Override
+    public ImageResponse parse(String body) throws JSONException {
+        return new ImageResponse(fileBytes);
     }
 
 }

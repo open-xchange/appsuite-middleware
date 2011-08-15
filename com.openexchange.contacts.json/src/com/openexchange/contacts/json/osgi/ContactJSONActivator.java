@@ -47,13 +47,12 @@
  *
  */
 
-package com.openexchange.contact.json.osgi;
+package com.openexchange.contacts.json.osgi;
 
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.contact.json.ContactActionFactory;
-import com.openexchange.contact.json.converters.ContactListResultConverter;
-import com.openexchange.contact.json.converters.ContactResultConverter;
+import com.openexchange.contacts.json.ContactActionFactory;
+import com.openexchange.contacts.json.converters.ContactJSONResultConverter;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.image.ImageService;
 
@@ -64,8 +63,10 @@ import com.openexchange.image.ImageService;
  */
 public class ContactJSONActivator extends AJAXModuleActivator {
     
-    private static final Class<?>[] NEEDED = new Class[] { ContactInterfaceDiscoveryService.class,
-                                                        ImageService.class };
+    private static final Class<?>[] NEEDED = new Class[] { 
+                                                ContactInterfaceDiscoveryService.class,
+                                                ImageService.class 
+                                                };
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -75,8 +76,7 @@ public class ContactJSONActivator extends AJAXModuleActivator {
     @Override
     protected void startBundle() throws Exception {
         registerModule(new ContactActionFactory(this), "contacts");
-        registerService(ResultConverter.class, new ContactResultConverter(getService(ImageService.class)));
-        registerService(ResultConverter.class, new ContactListResultConverter(getService(ImageService.class)));
+        registerService(ResultConverter.class, new ContactJSONResultConverter(getService(ImageService.class)));
     }
 
 }

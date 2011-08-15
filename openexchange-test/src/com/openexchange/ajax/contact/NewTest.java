@@ -49,15 +49,15 @@
 
 package com.openexchange.ajax.contact;
 
-import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
-import com.openexchange.ajax.ContactTest;
+import java.io.InputStream;
+import com.openexchange.ajax.attach.actions.AttachRequest;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
 import com.openexchange.groupware.container.Contact;
 
-public class NewTest extends ContactTest {
+public class NewTest extends AbstractContactTest {
 
     public NewTest(final String name) {
         super(name);
@@ -70,13 +70,13 @@ public class NewTest extends ContactTest {
 
     public void testNew() throws Exception {
         final Contact contactObj = createContactObject("testNew");
-        insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
+        insertContact(contactObj);
     }
 
     public void testNewWithDistributionList() throws Exception {
         final Contact contactEntry = createContactObject("internal contact");
         contactEntry.setEmail1("internalcontact@x.de");
-        final int contactId = insertContact(getWebConversation(), contactEntry, PROTOCOL + getHostName(), getSessionId());
+        final int contactId = insertContact(contactEntry);
         contactEntry.setObjectID(contactId);
 
         createContactWithDistributionList("testNewWithDistributionList", contactEntry);
@@ -85,9 +85,9 @@ public class NewTest extends ContactTest {
     public void testNewWithLinks() throws Exception {
         final Contact link1 = createContactObject("link1");
         final Contact link2 = createContactObject("link2");
-        final int linkId1 = insertContact(getWebConversation(), link1, PROTOCOL + getHostName(), getSessionId());
+        final int linkId1 = insertContact(link1);
         link1.setObjectID(linkId1);
-        final int linkId2 = insertContact(getWebConversation(), link2, PROTOCOL + getHostName(), getSessionId());
+        final int linkId2 = insertContact(link2);
         link2.setObjectID(linkId2);
 
         createContactWithLinks("testNewWithLinks", link1, link2);
@@ -95,7 +95,7 @@ public class NewTest extends ContactTest {
 
     public void testNewContactWithAttachment() throws Exception {
         final Contact contactObj = createContactObject("testNewContactWithAttachment");
-        final int objectId = insertContact(getWebConversation(), contactObj, getHostName(), getSessionId());
+        final int objectId = insertContact(contactObj);
         contactObj.setObjectID(objectId);
 
         final AttachmentMetadata attachmentObj = new AttachmentImpl();
@@ -105,16 +105,18 @@ public class NewTest extends ContactTest {
         attachmentObj.setFolderId(contactFolderId);
         attachmentObj.setRtfFlag(false);
         attachmentObj.setFileMIMEType("plain/text");
-
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream("t1".getBytes());
-        com.openexchange.webdav.xml.AttachmentTest.insertAttachment(getWebConversation(), attachmentObj, byteArrayInputStream, getHostName(), getLogin(), getPassword(), "");
+        
+        InputStream byteArrayInputStream = new ByteArrayInputStream("t1".getBytes());
+        AttachRequest request1 = new AttachRequest(contactObj, System.currentTimeMillis() + "test1.txt", byteArrayInputStream, "plain/text");
+        client.execute(request1);
         contactObj.setNumberOfAttachments(1);
-
+        
         byteArrayInputStream = new ByteArrayInputStream("t2".getBytes());
-        com.openexchange.webdav.xml.AttachmentTest.insertAttachment(getWebConversation(), attachmentObj, byteArrayInputStream, getHostName(), getLogin(), getPassword(), "");
+        AttachRequest request2 = new AttachRequest(contactObj, System.currentTimeMillis() + "test1.txt", byteArrayInputStream, "plain/text");
+        client.execute(request2);
         contactObj.setNumberOfAttachments(2);
 
-        final Contact loadContact = ContactTest.loadContact(getWebConversation(), objectId, contactFolderId, PROTOCOL, getHostName(), getSessionId());
+        final Contact loadContact = loadContact(objectId, contactFolderId);
         compareObject(contactObj, loadContact);
     }
 }

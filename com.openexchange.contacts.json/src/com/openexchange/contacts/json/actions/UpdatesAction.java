@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.contact.json.actions;
+package com.openexchange.contacts.json.actions;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -56,7 +56,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.contact.json.ContactRequest;
+import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.container.Contact;
@@ -90,6 +90,16 @@ public class UpdatesAction extends ContactAction {
         Date lastModified = null;
         final TimeZone timeZone = req.getTimeZone();
         
+        String ignore = req.getIgnore();
+        if (ignore == null) {
+            ignore = "deleted";
+        }
+        
+        boolean bIgnoreDelete = false;
+        if (ignore.indexOf("deleted") != -1) {
+            bIgnoreDelete = true;
+        }
+        
         final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
         final List<Contact> modifiedList = new ArrayList<Contact>();
         final List<Contact> deletedList = new ArrayList<Contact>();
@@ -111,21 +121,22 @@ public class UpdatesAction extends ContactAction {
                 }
             }
             
-            it = contactInterface.getDeletedContactsInFolder(folder, columns, timestamp);
-            while (it.hasNext()) {
-                final Contact contact = it.next();
-                lastModified = contact.getLastModified();
-                
-                // Correct last modified and creation date with users timezone
-                contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
-                contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
-                deletedList.add(contact);                
-                
-                if ((lastModified != null) && (timestamp.getTime() < lastModified.getTime())) {
-                    timestamp = lastModified;
+            if (!bIgnoreDelete) {
+                it = contactInterface.getDeletedContactsInFolder(folder, columns, timestamp);
+                while (it.hasNext()) {
+                    final Contact contact = it.next();
+                    lastModified = contact.getLastModified();
+
+                    // Correct last modified and creation date with users timezone
+                    contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
+                    contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
+                    deletedList.add(contact);
+
+                    if ((lastModified != null) && (timestamp.getTime() < lastModified.getTime())) {
+                        timestamp = lastModified;
+                    }
                 }
             }
-            
             responseMap.put("modified", modifiedList);
             responseMap.put("deleted", deletedList);
         } finally {
@@ -134,7 +145,7 @@ public class UpdatesAction extends ContactAction {
             }
         }
 
-        return new AJAXRequestResult(responseMap, timestamp, "contacts");
+        return new AJAXRequestResult(responseMap, timestamp, "contact");
     }
     
     

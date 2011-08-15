@@ -47,45 +47,65 @@
  *
  */
 
-package com.openexchange.contact.json.actions;
+package com.openexchange.contacts.json.actions;
 
+import java.util.Calendar;
 import java.util.Date;
-import org.json.JSONObject;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.contact.json.ContactRequest;
+import com.openexchange.contacts.json.ContactRequest;
+import com.openexchange.contacts.json.ServiceExceptionCodes;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link DeleteAction}
+ * {@link ContactAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class DeleteAction extends ContactAction {
+public abstract class ContactAction implements AJAXActionService {
+    
+    private final ServiceLookup serviceLookup;
 
-    /**
-     * Initializes a new {@link DeleteAction}.
-     * @param serviceLookup
-     */
-    public DeleteAction(final ServiceLookup serviceLookup) {
-        super(serviceLookup);
+    public ContactAction(final ServiceLookup serviceLookup) {
+        super();
+        this.serviceLookup = serviceLookup;
     }
 
     @Override
-    protected AJAXRequestResult perform(final ContactRequest req) throws OXException {
-        final ServerSession session = req.getSession();
-        final long timestamp = req.getTimestamp();
-        final int[] deleteRequestData = req.getDeleteRequestData();
-        final Date date = new Date(timestamp);
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+        final ContactRequest contactRequest = new ContactRequest(request, session);
         
-        final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(deleteRequestData[1], session);
-        contactInterface.deleteContactObject(deleteRequestData[0], deleteRequestData[1], date);
-        
-        final JSONObject response = new JSONObject();
-        return new AJAXRequestResult(response, date, "json");
+        return perform(contactRequest);
     }
-
+    
+    protected abstract AJAXRequestResult perform(ContactRequest req) throws OXException;
+    
+    protected ContactInterfaceDiscoveryService getContactInterfaceDiscoveryService() throws OXException {
+        final ContactInterfaceDiscoveryService service = serviceLookup.getService(ContactInterfaceDiscoveryService.class);
+        if (service != null) {
+            return service;
+        } else {
+            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create("ContactInterfaceDiscoveryService");
+        }
+    }
+    
+    protected Date getCorrectedTime(final Date date, final TimeZone timeZone) {
+        if (date == null) {
+            return null;
+        }
+        
+        final int offset = timeZone.getOffset(date.getTime());
+        final Calendar calendar = new GregorianCalendar();
+        calendar.setTime(date);
+        calendar.add(Calendar.MILLISECOND, offset);
+        
+        return calendar.getTime();
+    }
 }

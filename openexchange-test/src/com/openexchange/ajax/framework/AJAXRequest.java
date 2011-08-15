@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.framework;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.updater.actions;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -74,7 +73,7 @@ public class FileParser extends AbstractAJAXParser<FileResponse> {
      * Initializes a new {@link FileParser}.
      * @param failOnError
      */
-    protected FileParser(boolean failOnError) {
+    public FileParser(boolean failOnError) {
         super(failOnError);
     }
     

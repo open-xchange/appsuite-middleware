@@ -1390,7 +1390,8 @@ public final class Contacts {
                 } else if ((dleo.containsLastname() && (dleo.getLastname() != null)) && !dleo.containsFistname()) {
                     ps.setString(4, dleo.getLastname());
                 } else {
-                    ps.setString(4, "unknown");
+                    ps.setNull(4, java.sql.Types.VARCHAR);
+//                    ps.setString(4, "unknown");
                 }
                 if (dleo.containsLastname() && (dleo.getLastname() != null)) {
                     ps.setString(5, dleo.getLastname());

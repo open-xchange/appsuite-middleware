@@ -47,57 +47,31 @@
  *
  */
 
-package com.openexchange.contact.json;
+package com.openexchange.ajax.contact.action;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.contact.json.actions.AdvancedSearchAction;
-import com.openexchange.contact.json.actions.AllAction;
-import com.openexchange.contact.json.actions.ContactAction;
-import com.openexchange.contact.json.actions.CopyAction;
-import com.openexchange.contact.json.actions.DeleteAction;
-import com.openexchange.contact.json.actions.GetAction;
-import com.openexchange.contact.json.actions.GetUserAction;
-import com.openexchange.contact.json.actions.ListAction;
-import com.openexchange.contact.json.actions.ListUserAction;
-import com.openexchange.contact.json.actions.NewAction;
-import com.openexchange.contact.json.actions.SearchAction;
-import com.openexchange.contact.json.actions.UpdateAction;
-import com.openexchange.contact.json.actions.UpdatesAction;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
+import org.json.JSONException;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 
 /**
- * {@link ContactActionFactory}
+ * {@link CopyParser}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ContactActionFactory implements AJAXActionServiceFactory {
-    
-    private static final Map<String, ContactAction> ACTIONS = new ConcurrentHashMap<String, ContactAction>();
-    
-    public ContactActionFactory(final ServiceLookup serviceLookup) {
-        super();
-        ACTIONS.put("get", new GetAction(serviceLookup));
-        ACTIONS.put("all", new AllAction(serviceLookup));
-        ACTIONS.put("list", new ListAction(serviceLookup));
-        ACTIONS.put("new", new NewAction(serviceLookup));
-        ACTIONS.put("delete", new DeleteAction(serviceLookup));
-        ACTIONS.put("update", new UpdateAction(serviceLookup));
-        ACTIONS.put("updates", new UpdatesAction(serviceLookup));
-        ACTIONS.put("listuser", new ListUserAction(serviceLookup));
-        ACTIONS.put("getuser", new GetUserAction(serviceLookup));
-        ACTIONS.put("copy", new CopyAction(serviceLookup));
-        ACTIONS.put("search", new SearchAction(serviceLookup));
-        ACTIONS.put("advancedSearch", new AdvancedSearchAction(serviceLookup));        
+public class CopyParser extends AbstractAJAXParser<CopyResponse> {
+
+    /**
+     * Initializes a new {@link CopyParser}.
+     * @param failOnError
+     */
+    protected CopyParser(boolean failOnError) {
+        super(failOnError);
     }
 
     @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return ACTIONS.get(action);
+    protected CopyResponse createResponse(Response response) throws JSONException {
+        return new CopyResponse(response);
     }
 
 }

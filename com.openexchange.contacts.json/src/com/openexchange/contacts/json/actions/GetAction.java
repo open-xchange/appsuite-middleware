@@ -47,46 +47,45 @@
  *
  */
 
-package com.openexchange.ajax.updater.actions;
+package com.openexchange.contacts.json.actions;
 
-import java.io.IOException;
-import org.json.JSONException;
+import java.util.Date;
+import java.util.TimeZone;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.contacts.json.ContactRequest;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link FileRequest}
+ * {@link GetAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class FileRequest extends AbstractUpdaterRequest<FileResponse> {
+public class GetAction extends ContactAction {
 
-    /**
-     * Initializes a new {@link FileRequest}.
-     * @param servletPath
-     */
-    public FileRequest(String fileName) {
-        super("/ajax/updater/files/" + fileName);
+    public GetAction(final ServiceLookup serviceLookup) {
+        super(serviceLookup);
     }
 
-    /**
-     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-     */
-    public Method getMethod() {
-        return Method.GET;
+    @Override
+    protected AJAXRequestResult perform(final ContactRequest req) throws OXException {
+        final int id = req.getId();
+        final int folder = req.getFolder();
+        final TimeZone timeZone = req.getTimeZone();
+        final ServerSession session = req.getSession();
+        
+        final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
+        final Contact contact = contactInterface.getObjectById(id, folder);     
+        final Date lastModified = contact.getLastModified();
+        
+        // Correct last modified and creation date with users timezone
+        contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
+        contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
+        
+        return new AJAXRequestResult(contact, lastModified, "contact");
     }
-
-    /**
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-     */
-    public FileParser getParser() {
-        return new FileParser(true);
-    }
-
-    /**
-     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-     */
-    public Object getBody() throws IOException, JSONException {
-        return null;
-    }
-
 }

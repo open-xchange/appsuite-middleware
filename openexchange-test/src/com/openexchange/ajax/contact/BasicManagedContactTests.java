@@ -49,11 +49,9 @@
 
 package com.openexchange.ajax.contact;
 
-import com.openexchange.exception.OXException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
@@ -188,7 +186,7 @@ public class BasicManagedContactTests extends AbstractManagedContactTest {
 		}
 
 		int fieldNum = ContactField.SUR_NAME.getNumber();
-        Contact[] allContacts = manager.allAction(folderID, new int[] { 1, 4, 5, 20, fieldNum }, -1, Order.ASCENDING, "gb2312" );
+        Contact[] allContacts = manager.allAction(folderID, new int[] { 1, 4, 5, 20, fieldNum, ContactField.INFO.getNumber() }, -1, Order.ASCENDING, "gb2312" );
 
         for(int i = 0, len = sinograph.size(); i < len; i++){
         	String expected = sinograph.get(i);

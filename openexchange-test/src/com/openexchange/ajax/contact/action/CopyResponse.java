@@ -47,46 +47,25 @@
  *
  */
 
-package com.openexchange.ajax.updater.actions;
+package com.openexchange.ajax.contact.action;
 
-import java.io.IOException;
-import org.json.JSONException;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 
 /**
- * {@link FileRequest}
+ * {@link CopyResponse}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class FileRequest extends AbstractUpdaterRequest<FileResponse> {
+public class CopyResponse extends AbstractAJAXResponse {
 
     /**
-     * Initializes a new {@link FileRequest}.
-     * @param servletPath
+     * Initializes a new {@link CopyResponse}.
+     * @param response
      */
-    public FileRequest(String fileName) {
-        super("/ajax/updater/files/" + fileName);
-    }
-
-    /**
-     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-     */
-    public Method getMethod() {
-        return Method.GET;
-    }
-
-    /**
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-     */
-    public FileParser getParser() {
-        return new FileParser(true);
-    }
-
-    /**
-     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-     */
-    public Object getBody() throws IOException, JSONException {
-        return null;
+    protected CopyResponse(Response response) {
+        super(response);
     }
 
 }

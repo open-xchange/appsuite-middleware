@@ -47,46 +47,52 @@
  *
  */
 
-package com.openexchange.ajax.updater.actions;
+package com.openexchange.contacts.json.actions;
 
-import java.io.IOException;
-import org.json.JSONException;
+import java.util.Date;
+import java.util.TimeZone;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.api2.RdbContactSQLImpl;
+import com.openexchange.contacts.json.ContactRequest;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link FileRequest}
+ * {@link GetUserAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class FileRequest extends AbstractUpdaterRequest<FileResponse> {
+public class GetUserAction extends ContactAction {
 
     /**
-     * Initializes a new {@link FileRequest}.
-     * @param servletPath
+     * Initializes a new {@link GetUserAction}.
+     * @param serviceLookup
      */
-    public FileRequest(String fileName) {
-        super("/ajax/updater/files/" + fileName);
+    public GetUserAction(final ServiceLookup serviceLookup) {
+        super(serviceLookup);
     }
 
-    /**
-     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-     */
-    public Method getMethod() {
-        return Method.GET;
-    }
+    @Override
+    protected AJAXRequestResult perform(final ContactRequest req) throws OXException {
+        final ServerSession session = req.getSession();
+        final TimeZone timeZone = req.getTimeZone();
+        final int uid = req.getId();        
+        final Context ctx = session.getContext();
 
-    /**
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-     */
-    public FileParser getParser() {
-        return new FileParser(true);
-    }
-
-    /**
-     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-     */
-    public Object getBody() throws IOException, JSONException {
-        return null;
+        final ContactInterface contactInterface = new RdbContactSQLImpl(session, ctx);
+        final Contact contact = contactInterface.getUserById(uid);        
+        final Date lastModified = contact.getLastModified();
+        
+        // Correct last modified and creation date with users timezone
+        contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
+        contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
+        
+        return new AJAXRequestResult(contact, lastModified, "contact");
     }
 
 }
