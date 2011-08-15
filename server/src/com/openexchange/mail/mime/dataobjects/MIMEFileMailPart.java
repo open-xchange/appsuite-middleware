@@ -69,17 +69,17 @@ import com.openexchange.mail.mime.datasource.FileDataSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 
 /**
- * {@link UploadFileMailPart} - A {@link MailPart} implementation that keeps a reference to a temporary uploaded file that shall be added as
+ * {@link MIMEFileMailPart} - A {@link MailPart} implementation that keeps a reference to a temporary uploaded file that shall be added as
  * an attachment later
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class UploadFileMailPart extends MailPart {
+public abstract class MIMEFileMailPart extends MailPart {
 
     private static final long serialVersionUID = 257902073011243269L;
 
     private static final transient org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UploadFileMailPart.class));
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MIMEFileMailPart.class));
 
     private final File file;
 
@@ -88,22 +88,35 @@ public abstract class UploadFileMailPart extends MailPart {
     private transient Object cachedContent;
 
     /**
-     * Initializes a new {@link UploadFileMailPart}
-     *
-     * @param uploadFile The upload file
+     * Initializes a new {@link MIMEFileMailPart}
+     * 
+     * @param fileDataSource The file data source
      * @throws OXException If upload file's content type cannot be parsed
      */
-    protected UploadFileMailPart(final com.openexchange.mail.mime.datasource.FileDataSource file) throws OXException {
+    protected MIMEFileMailPart(final com.openexchange.mail.mime.datasource.FileDataSource fileDataSource) throws OXException {
         super();
-        this.file = file.getFile();
-        final String preparedFileName = uploadFile.getPreparedFileName();
-        setContentType(prepareContentType(uploadFile.getContentType(), preparedFileName));
+        this.file = fileDataSource.getFile();
+        final String preparedFileName = fileDataSource.getName();
+        setContentType(prepareContentType(fileDataSource.getContentType(), preparedFileName));
         setFileName(preparedFileName);
-        setSize(uploadFile.getSize());
+        setSize(fileDataSource.getFile().length());
         final ContentDisposition cd = new ContentDisposition();
         cd.setDisposition(Part.ATTACHMENT);
         cd.setFilenameParameter(getFileName());
         setContentDisposition(cd);
+        try {
+            if (getContentType().getCharsetParameter() == null && getContentType().startsWith(TEXT)) {
+                /*
+                 * Guess charset for textual attachment
+                 */
+                final String cs = detectCharset(new FileInputStream(file));
+                getContentType().setCharsetParameter(cs);
+            }
+            this.dataSource = fileDataSource;
+        } catch (final IOException e) {
+            LOG.error(e.getMessage(), e);
+            dataSource = new MessageDataSource(new byte[0], MIMETypes.MIME_APPL_OCTET);
+        }
     }
 
     private static String prepareContentType(final String contentType, final String preparedFileName) {
@@ -140,10 +153,6 @@ public abstract class UploadFileMailPart extends MailPart {
                      */
                     final String cs = detectCharset(new FileInputStream(file));
                     getContentType().setCharsetParameter(cs);
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn(new StringBuilder("Uploaded file contains textual content but").append(
-                            " does not specify a charset. Assumed charset is: ").append(cs).toString());
-                    }
                 }
                 dataSource = new FileDataSource(file, getContentType().toString());
             } catch (final IOException e) {
@@ -156,7 +165,7 @@ public abstract class UploadFileMailPart extends MailPart {
 
     /**
      * Gets the upload file associated with this mail part
-     *
+     * 
      * @return The upload file associated with this mail part
      */
     public File getFile() {
