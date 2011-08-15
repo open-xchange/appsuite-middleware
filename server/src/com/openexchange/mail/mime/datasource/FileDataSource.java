@@ -56,6 +56,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import javax.activation.DataSource;
+import com.openexchange.mail.mime.MIMEType2ExtMap;
 
 /**
  * {@link FileDataSource} - A simple {@link DataSource data source} that encapsulates a file.
@@ -77,7 +78,7 @@ public final class FileDataSource implements DataSource {
      * @param file The file
      */
     public FileDataSource(final File file) {
-        this(file, null);
+        this(file, MIMEType2ExtMap.getContentType(file.getName()));
     }
 
     /**
