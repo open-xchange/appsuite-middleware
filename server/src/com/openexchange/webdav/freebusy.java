@@ -245,6 +245,9 @@ public class freebusy extends HttpServlet {
         try {
             final Session sessionObj = SessionObjectWrapper.createSessionObject(context.getMailadmin(), context, "freebusysessionobject");
             final AppointmentSQLInterface appointmentInterface = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class, true).createAppointmentSql(sessionObj);
+            /*
+             * Write free-busy elements
+             */
             final SearchIterator<Appointment> it = appointmentInterface.getFreeBusyInformation(principalId, type, start, end);
             try {
                 synchronized (outputFormat) {
