@@ -63,7 +63,7 @@ import com.openexchange.groupware.update.internal.InternalList;
 /**
  * This {@link Activator} currently is only used to initialize some structures within the database update component. Lateron this may used
  * to start up the bundle.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class Activator implements BundleActivator {

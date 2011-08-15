@@ -64,7 +64,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link MessageDataSource} - Allows creation of a data source by either an input stream, a string or a byte array.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MessageDataSource implements DataSource {
@@ -157,7 +157,7 @@ public final class MessageDataSource implements DataSource {
 
     /**
      * Gets the {@link ByteArrayInputStream}.
-     * 
+     *
      * @return The {@link ByteArrayInputStream}.
      * @throws IOException If an I/O error occurs
      */
@@ -170,7 +170,7 @@ public final class MessageDataSource implements DataSource {
 
     /**
      * Gets the data
-     * 
+     *
      * @return The data
      */
     public byte[] getData() {
@@ -187,7 +187,7 @@ public final class MessageDataSource implements DataSource {
 
     /**
      * Sets the contentType
-     * 
+     *
      * @param contentType The contentType to set
      */
     public void setContentType(final String contentType) {

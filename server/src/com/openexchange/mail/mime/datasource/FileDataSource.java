@@ -63,14 +63,14 @@ import com.openexchange.mail.mime.MIMEType2ExtMap;
 
 /**
  * {@link FileDataSource} - A simple {@link DataSource data source} that encapsulates a file.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FileDataSource implements DataSource {
 
     /**
      * Gets a file data source for specified input stream's data.
-     * 
+     *
      * @param inputStream The input stream providing binary data
      * @return The generated file data source (Content-Type and name still need to be set appropriately)
      * @throws IOException If an I/O error occurs
@@ -96,7 +96,7 @@ public final class FileDataSource implements DataSource {
                 closeQuietly(fos);
             }
             closeQuietly(inputStream);
-        } 
+        }
         return new FileDataSource(tmpFile);
     }
 
@@ -119,7 +119,7 @@ public final class FileDataSource implements DataSource {
      * file to be opened.</i>
      * <p>
      * Content type is initially set to "application/octet-stream".
-     * 
+     *
      * @param file The file
      */
     public FileDataSource(final File file) {
@@ -129,7 +129,7 @@ public final class FileDataSource implements DataSource {
     /**
      * Creates a FileDataSource from a File object. <i>Note: The file will not actually be opened until a method is called that requires the
      * file to be opened.</i>
-     * 
+     *
      * @param file The file
      * @param contentType The content type
      */
@@ -145,7 +145,7 @@ public final class FileDataSource implements DataSource {
      * requires the file to be opened.</i>
      * <p>
      * Content type is initially set to "application/octet-stream".
-     * 
+     *
      * @param name The system-dependent file name.
      */
     public FileDataSource(final String name) {
@@ -157,7 +157,7 @@ public final class FileDataSource implements DataSource {
      * requires the file to be opened.</i>
      * <p>
      * Content type is initially set to "application/octet-stream".
-     * 
+     *
      * @param name The system-dependent file name.
      * @param contentType The content type
      */
@@ -187,7 +187,7 @@ public final class FileDataSource implements DataSource {
 
     /**
      * Return the file that corresponds to this FileDataSource.
-     * 
+     *
      * @return The file.
      */
     public File getFile() {
@@ -196,7 +196,7 @@ public final class FileDataSource implements DataSource {
 
     /**
      * Sets the content type.
-     * 
+     *
      * @param contentType The content type.
      */
     public void setContentType(final String contentType) {
@@ -205,7 +205,7 @@ public final class FileDataSource implements DataSource {
 
     /**
      * Sets the name (and implicitly content type).
-     * 
+     *
      * @param name The name to set
      */
     public void setName(final String name) {

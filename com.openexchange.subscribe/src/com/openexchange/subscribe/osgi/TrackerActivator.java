@@ -61,7 +61,7 @@ import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
 
 /**
  * {@link TrackerActivator} - The activator for starting/stopping needed service trackers.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TrackerActivator implements BundleActivator {

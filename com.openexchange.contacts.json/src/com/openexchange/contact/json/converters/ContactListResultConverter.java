@@ -77,7 +77,7 @@ public class ContactListResultConverter extends ContactResultConverter {
 
     /**
      * Converts specified contact collection to an appropriate JSON array.
-     * 
+     *
      * @param contacts The contact collection
      * @param request The request data
      * @param result The result
@@ -92,7 +92,7 @@ public class ContactListResultConverter extends ContactResultConverter {
                 resultArray.put(contact.getObjectID());
             } else {
                 final JSONArray contactArray = new JSONArray();
-    
+
                 final ContactGetter cg = new ContactGetter();
                 for (final int column : columns) {
                     final ContactField field = ContactField.getByValue(column);

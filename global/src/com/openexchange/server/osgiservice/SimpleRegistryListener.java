@@ -53,7 +53,7 @@ import org.osgi.framework.ServiceReference;
 
 /**
  * {@link SimpleRegistryListener}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface SimpleRegistryListener<T> {

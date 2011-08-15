@@ -57,7 +57,7 @@ import com.openexchange.config.ConfigurationService;
 
 /**
  * This customizer handles an appearing Configuration service and activates then this bundles service.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class ConfigurationTracker implements ServiceTrackerCustomizer<ConfigurationService, ConfigurationService> {
@@ -68,7 +68,7 @@ public class ConfigurationTracker implements ServiceTrackerCustomizer<Configurat
 
     /**
      * Default constructor.
-     * 
+     *
      * @param services
      */
     public ConfigurationTracker(final BundleContext context, final Services services) {

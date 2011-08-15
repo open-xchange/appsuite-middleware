@@ -71,7 +71,7 @@ import com.openexchange.mail.mime.datasource.MessageDataSource;
 /**
  * {@link MIMEFileMailPart} - A {@link MailPart} implementation that keeps a reference to a temporary created file that shall be added as an
  * attachment later.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class MIMEFileMailPart extends MailPart {
@@ -89,7 +89,7 @@ public abstract class MIMEFileMailPart extends MailPart {
 
     /**
      * Initializes a new {@link MIMEFileMailPart}
-     * 
+     *
      * @param fileDataSource The file data source
      * @throws OXException If upload file's content type cannot be parsed
      */
@@ -165,7 +165,7 @@ public abstract class MIMEFileMailPart extends MailPart {
 
     /**
      * Gets the upload file associated with this mail part
-     * 
+     *
      * @return The upload file associated with this mail part
      */
     public File getFile() {

@@ -382,7 +382,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * Initializes a new {@link AjpProcessor}.
-     * 
+     *
      * @param packetSize The packet size
      * @param listenerMonitor The listener monitor
      */
@@ -715,7 +715,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 } else if (type != Constants.JK_AJP13_FORWARD_REQUEST) {
                     /*-
                      * Invalid/unknown prefix code
-                     * 
+                     *
                      * Usually the servlet didn't read the previous request body
                      */
                     if (LOG.isDebugEnabled()) {
@@ -730,7 +730,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 //                if (Constants.SC_M_JK_STORED != methodCode && (methodCode < 1 || methodCode > Constants.methodTransArray.length)) {
 //                    /*-
 //                     * Invalid method code.
-//                     * 
+//                     *
 //                     * Usually the servlet didn't read the previous request body
 //                     */
 //                    if (LOG.isDebugEnabled()) {
@@ -1066,7 +1066,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * After reading the request headers, we have to setup the request filters.
-     * 
+     *
      * @throws IndexOutOfBoundsException If parsing of forward-request fails; usually because servlet missed to read request-body chunk(s)
      */
     protected void prepareRequest() {
@@ -1439,7 +1439,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * Parses a query string and puts resulting parameters into given servlet request.
-     * 
+     *
      * @param queryStr The query string to be parsed
      * @throws UnsupportedEncodingException If charset provided by servlet request is not supported
      */
