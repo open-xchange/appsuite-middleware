@@ -74,6 +74,7 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.DataObject;
+import com.openexchange.groupware.results.CollectionDelta;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -97,9 +98,7 @@ public class AppointmentResultConverter extends AbstractCalendarJSONResultConver
     }
 
     protected void convertCalendar(final String action, final Collection<Appointment> appointmentList, final AppointmentAJAXRequest req, final AJAXRequestResult result, final TimeZone userTimeZone) throws OXException {
-        if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATES)) {
-            convert4Updates(appointmentList, req, result, userTimeZone);
-        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_FREEBUSY)) {
+        if (action.equalsIgnoreCase(AJAXServlet.ACTION_FREEBUSY)) {
             convert4FreeBusy(appointmentList, req, result, userTimeZone);
         } else {
             convert(appointmentList, req, result, userTimeZone);
@@ -152,26 +151,14 @@ public class AppointmentResultConverter extends AbstractCalendarJSONResultConver
         result.setResultObject(jsonResponseArray, OUTPUT_FORMAT);
     }
 
-    protected void convert4Updates(final Collection<Appointment> appointments, final AppointmentAJAXRequest req, final AJAXRequestResult result, final TimeZone userTimeZone) throws OXException {
+    protected void convert4Updates(final CollectionDelta<Appointment> appointments, final AppointmentAJAXRequest req, final AJAXRequestResult result, final TimeZone userTimeZone) throws OXException {
         final Date startUTC = req.optDate(AJAXServlet.PARAMETER_START);
         final Date endUTC = req.optDate(AJAXServlet.PARAMETER_END);
         final int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
-        /*
-         * Create list with support for Iterator.remove()
-         */
-        final List<Appointment> appointmentList = new ArrayList<Appointment>(appointments);
-        /*
-         * Any deleted appointments?
-         */
-        final List<Appointment> deletedAppointments = new LinkedList<Appointment>();
-        for (final Iterator<Appointment> iter = appointmentList.iterator(); iter.hasNext();) {
-            final Appointment appointment = iter.next();
-            if (hasOnlyId(appointment, columns)) {
-                deletedAppointments.add(appointment);
-                iter.remove();
-            }
-        }
 
+        final List<Appointment> deletedAppointments = appointments.getDeleted();
+        final List<Appointment> appointmentList = appointments.getNewAndModified();
+        
         final TimeZone timeZone;
         {
             final String timeZoneId = req.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
@@ -197,34 +184,22 @@ public class AppointmentResultConverter extends AbstractCalendarJSONResultConver
         result.setResultObject(jsonResponseArray, OUTPUT_FORMAT);
     }
 
-    private static boolean hasOnlyId(final Appointment appointment, final int[] columns) {
-        if (!appointment.containsObjectID()) {
-            return false;
-        }
-        if (CommonObject.Marker.ID_ONLY.equals(appointment.getMarker())) {
-            return true;
-        }
-        for (final int column : columns) {
-            if (DataObject.OBJECT_ID != column && appointment.contains(column)) {
-                return false;
-            }
-        }
-        return true;
-    }
-    
     @Override
     public String getInputFormat() {
         return INPUT_FORMAT;
     }
 
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     protected void convertCalendar(final AppointmentAJAXRequest request, final AJAXRequestResult result, final ServerSession session, final Converter converter, final TimeZone userTimeZone) throws OXException {
         final Object resultObject = result.getResultObject();
         final String action = request.getParameter(AJAXServlet.PARAMETER_ACTION);
         if (resultObject instanceof Appointment) {
             convertCalendar((Appointment) resultObject, request, result, session, userTimeZone);
+        } else if (resultObject instanceof CollectionDelta) {
+        	convert4Updates((CollectionDelta<Appointment>) resultObject, request, result, userTimeZone);
         } else {
-            @SuppressWarnings("unchecked") final Collection<Appointment> appointments = (Collection<Appointment>) resultObject;
+            final Collection<Appointment> appointments = (Collection<Appointment>) resultObject;
             convertCalendar(action, appointments, request, result, userTimeZone);
         }
     }

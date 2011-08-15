@@ -121,7 +121,7 @@ public class Bug13214Test extends AbstractAJAXSession {
                 assertTrue("No Exception occurred.", updateResponse.hasError());
                 OXException e = updateResponse.getException();
                 assertTrue("Wrong Exception", e instanceof OXException);
-                assertEquals(
+                assertTrue(
                     "Wrong Exception", e.similarTo(OXCalendarExceptionCodes.END_DATE_BEFORE_START_DATE.create()));
             } finally {
                 if (!updateResponse.hasError()) {

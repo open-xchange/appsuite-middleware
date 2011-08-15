@@ -110,6 +110,7 @@ abstract class AbstractFolderRequest<T extends AbstractAJAXResponse> implements 
         if (folder.containsType()) {
             jsonFolder.put(FolderFields.TYPE, folder.getType());
         }
+        
         return jsonFolder;
     }
 
@@ -154,6 +155,7 @@ abstract class AbstractFolderRequest<T extends AbstractAJAXResponse> implements 
             }
             params.add(new Parameter("allowed_modules", Strings.join(tmp, ",")));
         }
+        
         return params.toArray(new Parameter[params.size()]);
     }
 
