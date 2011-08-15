@@ -69,17 +69,17 @@ import com.openexchange.mail.mime.datasource.FileDataSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 
 /**
- * {@link MIMEFileMailPart} - A {@link MailPart} implementation that keeps a reference to a temporary created file that shall be added as an
- * attachment later.
+ * {@link MIMEFileStoreMailPart} - A {@link MailPart} implementation that keeps a reference to a temporary uploaded file that shall be added as
+ * an attachment later
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class MIMEFileMailPart extends MailPart {
+public abstract class MIMEFileStoreMailPart extends MailPart {
 
     private static final long serialVersionUID = 257902073011243269L;
 
     private static final transient org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MIMEFileMailPart.class));
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MIMEFileStoreMailPart.class));
 
     private final File file;
 
@@ -88,12 +88,12 @@ public abstract class MIMEFileMailPart extends MailPart {
     private transient Object cachedContent;
 
     /**
-     * Initializes a new {@link MIMEFileMailPart}
+     * Initializes a new {@link MIMEFileStoreMailPart}
      * 
      * @param fileDataSource The file data source
      * @throws OXException If upload file's content type cannot be parsed
      */
-    protected MIMEFileMailPart(final com.openexchange.mail.mime.datasource.FileDataSource fileDataSource) throws OXException {
+    protected MIMEFileStoreMailPart(final com.openexchange.mail.mime.datasource.FileDataSource fileDataSource) throws OXException {
         super();
         this.file = fileDataSource.getFile();
         final String preparedFileName = fileDataSource.getName();
