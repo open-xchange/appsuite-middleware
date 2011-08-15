@@ -475,7 +475,7 @@ public final class Init {
     }
 
     private static void startAndInjectSubscribeServices() {
-        final List<FolderUpdaterService> folderUpdaters = new ArrayList<FolderUpdaterService>(2);
+        final List<FolderUpdaterService<?>> folderUpdaters = new ArrayList<FolderUpdaterService<?>>(2);
         folderUpdaters.add(new StrategyFolderUpdaterService<Contact>(new ContactFolderUpdaterStrategy()));
         folderUpdaters.add(new StrategyFolderUpdaterService<Contact>(new ContactFolderMultipleUpdaterStrategy(), true));
         final ContextService contextService = (ContextService) services.get(ContextService.class);
