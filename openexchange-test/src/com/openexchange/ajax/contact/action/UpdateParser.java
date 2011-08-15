@@ -50,9 +50,11 @@
 package com.openexchange.ajax.contact.action;
 
 import org.json.JSONException;
-
+import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.AbstractUploadParser;
+import com.openexchange.ajax.parser.ResponseParser;
 
 /**
  *
@@ -60,17 +62,28 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  */
 public class UpdateParser extends AbstractAJAXParser<UpdateResponse> {
 
+    private boolean withImage;
+	
     /**
-     * Remembers if this parser fails out with an error.
+     * Initializes a new {@link UpdateParser}.
+     * @param failOnError2
+     * @param withImage
      */
-    private final boolean failOnError;
-
-    /**
-     * Default constructor.
-     */
-    UpdateParser(final boolean failOnError) {
+    public UpdateParser(boolean failOnError, boolean withImage) {
         super(failOnError);
-        this.failOnError = failOnError;
+        this.withImage = withImage;        
+    }
+    
+    @Override
+    public UpdateResponse parse(String body) throws JSONException {
+        final Response response;
+        if (withImage) {
+            JSONObject tmp = new JSONObject(AbstractUploadParser.extractFromCallback(body));
+            response = ResponseParser.parse(tmp);
+        } else {
+            response = getResponse(body);
+        }
+        return createResponse(response);
     }
 
 
@@ -78,8 +91,7 @@ public class UpdateParser extends AbstractAJAXParser<UpdateResponse> {
      * {@inheritDoc}
      */
     @Override
-    protected UpdateResponse createResponse(final Response response)
-        throws JSONException {
+    protected UpdateResponse createResponse(final Response response) throws JSONException {
         return new UpdateResponse(response);
     }
 }

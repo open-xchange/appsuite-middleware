@@ -370,6 +370,10 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } catch (final OXException e) {
+            if (e.getCode() == OXFolderExceptionCode.NO_DUPLICATE_FOLDER.getNumber()) {
+                throw e;
+            }
+            
             throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         }
         /*

@@ -73,7 +73,7 @@ public class FileParser extends AbstractAJAXParser<FileResponse> {
      * Initializes a new {@link FileParser}.
      * @param failOnError
      */
-    protected FileParser(boolean failOnError) {
+    public FileParser(boolean failOnError) {
         super(failOnError);
     }
 

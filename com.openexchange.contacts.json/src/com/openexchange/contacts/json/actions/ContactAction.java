@@ -47,64 +47,65 @@
  *
  */
 
-package com.openexchange.ajax.contact;
+package com.openexchange.contacts.json.actions;
 
+import java.util.Calendar;
 import java.util.Date;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.framework.UserValues;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.modules.Module;
-import com.openexchange.test.ContactTestManager;
-import com.openexchange.test.FolderTestManager;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.contacts.json.ContactRequest;
+import com.openexchange.contacts.json.ServiceExceptionCodes;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
-public abstract class AbstractManagedContactTest extends AbstractAJAXSession {
 
-	protected ContactTestManager manager;
-	protected FolderTestManager folderManager;
-	protected int folderID;
+/**
+ * {@link ContactAction}
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public abstract class ContactAction implements AJAXActionService {
 
-	public AbstractManagedContactTest(String name) {
-		super(name);
-	}
+    private final ServiceLookup serviceLookup;
 
-	@Override
-	public void setUp() throws Exception {
-	    super.setUp();
+    public ContactAction(final ServiceLookup serviceLookup) {
+        super();
+        this.serviceLookup = serviceLookup;
+    }
 
-	    manager = new ContactTestManager(getClient());
-	    manager.setFailOnError(false);
+    @Override
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+        final ContactRequest contactRequest = new ContactRequest(request, session);
 
-	    folderManager = new FolderTestManager(getClient());
-	    folderManager.setFailOnError(false);
+        return perform(contactRequest);
+    }
 
-	    UserValues values = getClient().getValues();
-	    FolderObject folder = folderManager.generateFolder(
-	    		"ManagedContactTest_"+(new Date().getTime()),
-	    		Module.CONTACTS.getFolderConstant(),
-	    		values.getPrivateContactFolder(),
-	    		values.getUserId());
-	    folder = folderManager.insertFolderOnServer(folder);
-	    folderID = folder.getObjectID();
-	}
+    protected abstract AJAXRequestResult perform(ContactRequest req) throws OXException;
 
-	@Override
-	public void tearDown() throws Exception {
-        manager.cleanUp();
-    	folderManager.cleanUp();
-	    super.tearDown();
-	}
+    protected ContactInterfaceDiscoveryService getContactInterfaceDiscoveryService() throws OXException {
+        try {
+            return serviceLookup.getService(ContactInterfaceDiscoveryService.class);
+        } catch (final IllegalStateException e) {
+            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(ContactInterfaceDiscoveryService.class.getName());
+        }
+    }
 
-	protected Contact generateContact(String lastname) {
-	    Contact contact = new Contact();
-	    contact.setSurName(lastname);
-	    contact.setGivenName("Given name");
-	    contact.setDisplayName(contact.getSurName() +", "+contact.getGivenName());
-	    contact.setParentFolderID(folderID);
-	    return contact;
-	}
+    protected Date getCorrectedTime(final Date date, final TimeZone timeZone) {
+        if (date == null) {
+            return null;
+        }
 
-	protected Contact generateContact() {
-	    return generateContact("Surname");
-	}
+        final int offset = timeZone.getOffset(date.getTime());
+        final Calendar calendar = new GregorianCalendar();
+        calendar.setTime(date);
+        calendar.add(Calendar.MILLISECOND, offset);
+
+        return calendar.getTime();
+    }
 }

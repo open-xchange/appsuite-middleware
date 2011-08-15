@@ -325,7 +325,8 @@ public class Contact extends CommonObject implements Serializable {
         // From ContactObject itself
         INTERNAL_USERID,
         // Produces error: missing field in mapping: 593 (ContactWriter.java:603)// CONTEXTID,
-        NUMBER_OF_DISTRIBUTIONLIST, CONTACT_NUMBER_OF_LINKS, // NUMBER_OF_IMAGES,
+        NUMBER_OF_DISTRIBUTIONLIST, 
+        // CONTACT_NUMBER_OF_LINKS, // NUMBER_OF_IMAGES,
         // IMAGE_LAST_MODIFIED, FILE_AS,
         // Produces a MySQLDataException// ATTACHMENT,
         // IMAGE1_CONTENT_TYPE, MARK_AS_DISTRIBUTIONLIST,
@@ -344,7 +345,7 @@ public class Contact extends CommonObject implements Serializable {
     public static final int[] JSON_COLUMNS = com.openexchange.tools.arrays.Arrays.addUniquely(CONTENT_COLUMNS, new int[] {
         OBJECT_ID, CREATED_BY, MODIFIED_BY, CREATION_DATE, LAST_MODIFIED, LAST_MODIFIED_UTC,
         USE_COUNT, FILE_AS, NUMBER_OF_IMAGES, INTERNAL_USERID, CATEGORIES, FOLDER_ID, IMAGE1_URL, LAST_MODIFIED_OF_NEWEST_ATTACHMENT,
-        NUMBER_OF_ATTACHMENTS, PRIVATE_FLAG, USE_COUNT
+        NUMBER_OF_ATTACHMENTS, PRIVATE_FLAG, USE_COUNT, DEFAULT_ADDRESS
     });
 
     protected String display_name;

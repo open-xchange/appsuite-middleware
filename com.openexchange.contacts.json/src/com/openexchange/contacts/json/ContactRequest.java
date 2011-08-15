@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.contact.json;
+package com.openexchange.contacts.json;
 
 import gnu.trove.TIntArrayList;
 import java.util.TimeZone;
@@ -128,8 +128,11 @@ public class ContactRequest {
     }
 
     public int[][] getListRequestData() throws OXException {
-        final JSONArray data = request.getParameter("data", JSONArray.class);
-
+        final JSONArray data = (JSONArray) request.getData();
+        if (data == null) {
+            throw OXJSONExceptionCodes.MISSING_FIELD.create("data");
+        }
+        
         return RequestTools.buildObjectIdAndFolderId(data);
     }
 
@@ -224,6 +227,10 @@ public class ContactRequest {
         } else {
             return columns;
         }
+    }
+
+    public String getIgnore() {
+        return request.getParameter("ignore");
     }
 
 }

@@ -47,91 +47,45 @@
  *
  */
 
-package com.openexchange.contact.json.actions;
+package com.openexchange.contacts.json.actions;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import java.util.TimeZone;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.contact.json.ContactRequest;
+import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.container.CommonObject.Marker;
-import com.openexchange.groupware.container.Contact;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link UpdatesAction}
+ * {@link DeleteAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class UpdatesAction extends ContactAction {
+public class DeleteAction extends ContactAction {
 
     /**
-     * Initializes a new {@link UpdatesAction}.
+     * Initializes a new {@link DeleteAction}.
      * @param serviceLookup
      */
-    public UpdatesAction(final ServiceLookup serviceLookup) {
+    public DeleteAction(final ServiceLookup serviceLookup) {
         super(serviceLookup);
     }
 
     @Override
     protected AJAXRequestResult perform(final ContactRequest req) throws OXException {
         final ServerSession session = req.getSession();
-        final int folder = req.getFolder();
-        final int[] columns = req.getColumns();
-        final long timestampLong = req.getTimestamp();
-        Date timestamp = new Date(timestampLong);
-        Date lastModified = null;
-        final TimeZone timeZone = req.getTimeZone();
-
-        final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
-        final List<Contact> list = new ArrayList<Contact>();
-        SearchIterator<Contact> it = null;
-        try {
-            it = contactInterface.getModifiedContactsInFolder(folder, columns, timestamp);
-            while (it.hasNext()) {
-                final Contact contact = it.next();
-                lastModified = contact.getLastModified();
-
-                // Correct last modified and creation date with users timezone
-                contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
-                contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
-                list.add(contact);
-
-                if ((lastModified != null) && (timestamp.getTime() < lastModified.getTime())) {
-                    timestamp = lastModified;
-                }
-            }
-
-            it = contactInterface.getDeletedContactsInFolder(folder, columns, timestamp);
-            while (it.hasNext()) {
-                final Contact contact = it.next();
-                lastModified = contact.getLastModified();
-
-                // Correct last modified and creation date with users timezone
-                contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
-                contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
-                contact.setMarker(Marker.ID_ONLY);
-                list.add(contact);
-
-                if ((lastModified != null) && (timestamp.getTime() < lastModified.getTime())) {
-                    timestamp = lastModified;
-                }
-            }
-        } finally {
-            if (it != null) {
-                it.close();
-            }
-        }
-
-        return new AJAXRequestResult(list, timestamp, "contact");
+        final long timestamp = req.getTimestamp();
+        final int[] deleteRequestData = req.getDeleteRequestData();
+        final Date date = new Date(timestamp);
+        
+        final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(deleteRequestData[1], session);
+        contactInterface.deleteContactObject(deleteRequestData[0], deleteRequestData[1], date);
+        
+        final JSONObject response = new JSONObject();
+        return new AJAXRequestResult(response, date, "json");
     }
-
-
 
 }

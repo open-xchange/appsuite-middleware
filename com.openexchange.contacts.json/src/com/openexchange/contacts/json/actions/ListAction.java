@@ -47,14 +47,14 @@
  *
  */
 
-package com.openexchange.contact.json.actions;
+package com.openexchange.contacts.json.actions;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.contact.json.ContactRequest;
+import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.container.Contact;
@@ -98,8 +98,10 @@ public class ListAction extends ContactAction {
         Date timestamp = new Date(0);
         Date lastModified = null;
         SearchIterator<Contact> it = null;
-        final List<Contact> contacts = new ArrayList<Contact>();
+
+        final List<Contact> sortedContacts;
         try {
+            final List<Contact> contacts = new ArrayList<Contact>();
             if (allInSameFolder) {
                 final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(lastFolder, session);
                 it = contactInterface.getObjectsById(objectIdsAndFolderIds, columns);
@@ -138,12 +140,27 @@ public class ListAction extends ContactAction {
                     }
                 }
             }
+
+            // Sort loaded contacts in the order they were requested
+            sortedContacts = new ArrayList<Contact>(contacts.size());
+            for (int i = 0; i < objectIdsAndFolderIds.length; i++) {
+                final int[] objectIdsAndFolderId = objectIdsAndFolderIds[i];
+                final int objectId = objectIdsAndFolderId[0];
+                final int folderId = objectIdsAndFolderId[1];
+                
+                for (final Contact contact : contacts) {
+                    if (contact.getObjectID() == objectId && contact.getParentFolderID() == folderId) {
+                        sortedContacts.add(contact);
+                        break;
+                    }
+                }
+            }   
         } finally {
             if (it != null) {
                 it.close();
             }
         }
-
-        return new AJAXRequestResult(contacts, timestamp, "contact");
+        
+        return new AJAXRequestResult(sortedContacts, timestamp, "contact");
     }
 }

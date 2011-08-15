@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.contact.json.actions;
+package com.openexchange.contacts.json.actions;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -60,7 +60,7 @@ import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.contact.json.ContactRequest;
+import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactSearchMultiplexer;
 import com.openexchange.groupware.container.Contact;
@@ -123,7 +123,7 @@ public class SearchAction extends ContactAction {
                 it.close();
             }
         }
-
+        
         return new AJAXRequestResult(contacts, lastModified, "contact");
     }
 

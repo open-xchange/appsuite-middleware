@@ -1047,7 +1047,7 @@ public class ContactGetter implements ContactSwitcher {
     @Override
     public Object numberofimages(Object... objects) throws OXException {
         if (objects.length < 1) {
-            throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("NumberOfAttachments");
+            throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("NumberOfImages");
         }
         final Contact conObj = (Contact) objects[0];
         return conObj.getNumberOfImages();
@@ -1056,7 +1056,7 @@ public class ContactGetter implements ContactSwitcher {
     @Override
     public Object lastmodifiedofnewestattachment(Object... objects) throws OXException {
         if (objects.length < 1) {
-            throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("NumberOfAttachments");
+            throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("LastModifiedOfNewestAttachment");
         }
         final Contact conObj = (Contact) objects[0];
         return conObj.getLastModifiedOfNewestAttachment();
@@ -1065,15 +1065,50 @@ public class ContactGetter implements ContactSwitcher {
     @Override
     public Object usecount(Object... objects) throws OXException {
         if (objects.length < 1) {
-            throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("NumberOfAttachments");
+            throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("UseCount");
         }
         final Contact conObj = (Contact) objects[0];
         return conObj.getUseCount();
+    }
+    
+    @Override
+    public Object markasdistributionlist(Object[] objects) throws OXException {
+        if (objects.length < 1) {
+            throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("MarkAsDistributionList");
+        }
+        final Contact conObj = (Contact) objects[0];
+        return conObj.getMarkAsDistribtuionlist();
+    }
+    
+    @Override
+    public Object yomifirstname(Object[] objects) throws OXException {
+        if (objects.length < 1) {
+            throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("yomiFirstName");
+        }
+        final Contact conObj = (Contact) objects[0];
+        return conObj.getYomiFirstName();
+    }
+
+    @Override
+    public Object yomilastname(Object[] objects) throws OXException {
+        if (objects.length < 1) {
+            throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("yomiLastName");
+        }
+        final Contact conObj = (Contact) objects[0];
+        return conObj.getYomiLastName();
+    }
+
+    @Override
+    public Object yomicompanyname(Object[] objects) throws OXException {
+        if (objects.length < 1) {
+            throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("yomiCompanyName");
+        }
+        final Contact conObj = (Contact) objects[0];
+        return conObj.getYomiCompany();
     }
 
     @Override
     public boolean _unknownfield(final Contact contact, final String fieldname, final Object value, final Object... additionalObjects){
         return false;
     }
-
 }

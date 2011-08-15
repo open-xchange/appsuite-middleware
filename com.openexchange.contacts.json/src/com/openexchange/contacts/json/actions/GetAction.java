@@ -47,45 +47,45 @@
  *
  */
 
-package com.openexchange.contact.json.actions;
+package com.openexchange.contacts.json.actions;
 
 import java.util.Date;
-import org.json.JSONObject;
+import java.util.TimeZone;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.contact.json.ContactRequest;
+import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link DeleteAction}
+ * {@link GetAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class DeleteAction extends ContactAction {
+public class GetAction extends ContactAction {
 
-    /**
-     * Initializes a new {@link DeleteAction}.
-     * @param serviceLookup
-     */
-    public DeleteAction(final ServiceLookup serviceLookup) {
+    public GetAction(final ServiceLookup serviceLookup) {
         super(serviceLookup);
     }
 
     @Override
     protected AJAXRequestResult perform(final ContactRequest req) throws OXException {
+        final int id = req.getId();
+        final int folder = req.getFolder();
+        final TimeZone timeZone = req.getTimeZone();
         final ServerSession session = req.getSession();
-        final long timestamp = req.getTimestamp();
-        final int[] deleteRequestData = req.getDeleteRequestData();
-        final Date date = new Date(timestamp);
 
-        final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(deleteRequestData[1], session);
-        contactInterface.deleteContactObject(deleteRequestData[0], deleteRequestData[1], date);
+        final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
+        final Contact contact = contactInterface.getObjectById(id, folder);
+        final Date lastModified = contact.getLastModified();
 
-        final JSONObject response = new JSONObject();
-        return new AJAXRequestResult(response, date, "json");
+        // Correct last modified and creation date with users timezone
+        contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
+        contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
+
+        return new AJAXRequestResult(contact, lastModified, "contact");
     }
-
 }

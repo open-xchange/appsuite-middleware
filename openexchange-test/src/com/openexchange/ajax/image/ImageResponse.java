@@ -47,35 +47,37 @@
  *
  */
 
-package com.openexchange.contact.json.osgi;
+package com.openexchange.ajax.image;
 
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.contact.json.ContactActionFactory;
-import com.openexchange.contact.json.converters.ContactResultConverter;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
-import com.openexchange.image.ImageService;
-import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * {@link ContactJSONActivator} - OSGi Activator for the Contact JSON interface.
+ * {@link ImageResponse}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ContactJSONActivator extends AJAXModuleActivator {
+public class ImageResponse extends AbstractAJAXResponse {
 
-    private static final Class<?>[] NEEDED = new Class[] { ContactInterfaceDiscoveryService.class, ImageService.class };
+    private byte[] image = null;
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return NEEDED;
+    /**
+     * Initializes a new {@link ImageResponse}.
+     * @param fileBytes
+     */
+    public ImageResponse(final byte[] image) {
+        super(null);
+        this.image = image;        
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        registerModule(new ContactActionFactory(new ExceptionOnAbsenceServiceLookup(this)), AJAXServlet.MODULE_CONTACT);
-        registerService(ResultConverter.class, new ContactResultConverter(getService(ImageService.class)));
+    /**
+     * @param image
+     */
+    public void setImage(final byte[] image) {
+        this.image  = image;        
+    }
+    
+    public byte[] getImage() {
+        return image;
     }
 
 }

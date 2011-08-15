@@ -47,65 +47,62 @@
  *
  */
 
-package com.openexchange.contact.json.actions;
+package com.openexchange.ajax.image;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.contact.json.ContactRequest;
-import com.openexchange.contact.json.ServiceExceptionCodes;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
+import java.io.IOException;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.ParseException;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 
 /**
- * {@link ContactAction}
+ * {@link ImageParser}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class ContactAction implements AJAXActionService {
+public class ImageParser extends AbstractAJAXParser<ImageResponse> {
+    
+    private byte[] fileBytes;
 
-    private final ServiceLookup serviceLookup;
-
-    public ContactAction(final ServiceLookup serviceLookup) {
-        super();
-        this.serviceLookup = serviceLookup;
+    /**
+     * Initializes a new {@link ImageParser}.
+     * @param failOnError
+     */
+    protected ImageParser(boolean failOnError) {
+        super(failOnError);
     }
-
+    
+    /**
+     * @see com.openexchange.ajax.framework.AbstractAJAXParser#checkResponse(org.apache.http.HttpResponse)
+     */
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
-        final ContactRequest contactRequest = new ContactRequest(request, session);
-
-        return perform(contactRequest);
+    public String checkResponse(HttpResponse resp) throws ParseException, IOException {
+        assertEquals("Response code is not okay.", HttpStatus.SC_OK, resp.getStatusLine().getStatusCode());
+        HttpEntity entity = resp.getEntity();
+        fileBytes = EntityUtils.toByteArray(entity);
+        
+        return null;
     }
 
-    protected abstract AJAXRequestResult perform(ContactRequest req) throws OXException;
-
-    protected ContactInterfaceDiscoveryService getContactInterfaceDiscoveryService() throws OXException {
-        try {
-            return serviceLookup.getService(ContactInterfaceDiscoveryService.class);
-        } catch (final IllegalStateException e) {
-            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(ContactInterfaceDiscoveryService.class.getName());
-        }
+    /**
+     * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
+     */
+    @Override
+    protected ImageResponse createResponse(Response response) throws JSONException {
+        return null;
+    }
+    
+    /**
+     * @see com.openexchange.ajax.framework.AbstractAJAXParser#parse(java.lang.String)
+     */
+    @Override
+    public ImageResponse parse(String body) throws JSONException {
+        return new ImageResponse(fileBytes);
     }
 
-    protected Date getCorrectedTime(final Date date, final TimeZone timeZone) {
-        if (date == null) {
-            return null;
-        }
-
-        final int offset = timeZone.getOffset(date.getTime());
-        final Calendar calendar = new GregorianCalendar();
-        calendar.setTime(date);
-        calendar.add(Calendar.MILLISECOND, offset);
-
-        return calendar.getTime();
-    }
 }

@@ -49,8 +49,8 @@
 
 package com.openexchange.ajax.contact.action;
 
+import java.io.ByteArrayInputStream;
 import org.json.JSONException;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.groupware.container.Contact;
 
@@ -65,6 +65,8 @@ public class UpdateRequest extends AbstractContactRequest<UpdateResponse> {
     private final Contact contactObj;
     private boolean failOnError;
     private int originFolder;
+    private boolean withImage;
+    private String fieldContent;
 
     /**
      * Default constructor.
@@ -84,8 +86,16 @@ public class UpdateRequest extends AbstractContactRequest<UpdateResponse> {
         super();
         this.contactObj = entry;
         this.failOnError = failOnError;
-        this.originFolder = inFolder;
-
+        this.originFolder = inFolder;        
+        this.withImage = contactObj.containsImage1() && (null != contactObj.getImage1());
+        
+        if (withImage) {
+            try {
+                fieldContent = convert(contactObj).toString();
+            } catch (final JSONException e) {
+                throw new IllegalArgumentException(e);
+            }
+        }
     }
 
     /**
@@ -99,21 +109,29 @@ public class UpdateRequest extends AbstractContactRequest<UpdateResponse> {
      * {@inheritDoc}
      */
     public Method getMethod() {
-        return Method.PUT;
+        return withImage ? Method.UPLOAD : Method.PUT;
     }
 
     /**
      * {@inheritDoc}
      */
-    public Parameter[] getParameters() {
+    public Parameter[] getParameters() {        
+        if (withImage) {
+            return new Parameter[] {
+                new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE),
+                new Parameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(this.originFolder)),
+                new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(contactObj.getObjectID())),
+                new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(contactObj.getLastModified().getTime())),
+                new FieldParameter("json", fieldContent),
+                new FileParameter("file", "open-xchange_image.jpg", new ByteArrayInputStream(contactObj.getImage1()), "image/jpg")
+            };
+        }
+        
         return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
-                .ACTION_UPDATE),
+            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE),
             new Parameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(this.originFolder)),
-            new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(contactObj
-                .getObjectID())),
-            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(contactObj
-                .getLastModified().getTime()))
+            new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(contactObj.getObjectID())),
+            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(contactObj.getLastModified().getTime()))
         };
     }
 
@@ -121,7 +139,7 @@ public class UpdateRequest extends AbstractContactRequest<UpdateResponse> {
      * {@inheritDoc}
      */
     public UpdateParser getParser() {
-        return new UpdateParser(failOnError);
+        return new UpdateParser(failOnError, withImage);
     }
 
     /**

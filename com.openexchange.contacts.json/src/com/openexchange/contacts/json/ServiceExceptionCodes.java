@@ -1,4 +1,4 @@
-package com.openexchange.contact.json;
+package com.openexchange.contacts.json;
 
 import com.openexchange.exception.Category;
 import com.openexchange.exception.LogLevel;

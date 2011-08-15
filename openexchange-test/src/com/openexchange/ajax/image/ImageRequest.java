@@ -47,45 +47,55 @@
  *
  */
 
-package com.openexchange.contact.json.actions;
+package com.openexchange.ajax.image;
 
-import java.util.Date;
-import java.util.TimeZone;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.contact.json.ContactRequest;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
+import java.io.IOException;
+import org.json.JSONException;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.Header;
 
 
 /**
- * {@link GetAction}
+ * {@link ImageRequest}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class GetAction extends ContactAction {
+public class ImageRequest implements AJAXRequest<ImageResponse> {
 
-    public GetAction(final ServiceLookup serviceLookup) {
-        super(serviceLookup);
+    private String uid;
+    
+    
+    public ImageRequest(final String uid) {
+        super();
+        this.uid = uid;
     }
 
-    @Override
-    protected AJAXRequestResult perform(final ContactRequest req) throws OXException {
-        final int id = req.getId();
-        final int folder = req.getFolder();
-        final TimeZone timeZone = req.getTimeZone();
-        final ServerSession session = req.getSession();
-
-        final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
-        final Contact contact = contactInterface.getObjectById(id, folder);
-        final Date lastModified = contact.getLastModified();
-
-        // Correct last modified and creation date with users timezone
-        contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
-        contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
-
-        return new AJAXRequestResult(contact, lastModified, "contact");
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return Method.GET;
     }
+
+    public String getServletPath() {
+        return "/ajax/image";
+    }
+
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+        Parameter[] parameters = new Parameter[] {
+            new Parameter("uid", uid)
+        };
+        
+        return parameters;
+    }
+
+    public ImageParser getParser() {
+        return new ImageParser(true);
+    }
+
+    public Object getBody() throws IOException, JSONException {
+        return null;
+    }
+
+    public Header[] getHeaders() {
+        return NO_HEADER;
+    }
+
 }

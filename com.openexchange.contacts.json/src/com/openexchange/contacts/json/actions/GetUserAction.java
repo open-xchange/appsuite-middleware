@@ -47,64 +47,52 @@
  *
  */
 
-package com.openexchange.ajax.contact;
+package com.openexchange.contacts.json.actions;
 
 import java.util.Date;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.framework.UserValues;
+import java.util.TimeZone;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.api2.RdbContactSQLImpl;
+import com.openexchange.contacts.json.ContactRequest;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.modules.Module;
-import com.openexchange.test.ContactTestManager;
-import com.openexchange.test.FolderTestManager;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
-public abstract class AbstractManagedContactTest extends AbstractAJAXSession {
 
-	protected ContactTestManager manager;
-	protected FolderTestManager folderManager;
-	protected int folderID;
+/**
+ * {@link GetUserAction}
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ */
+public class GetUserAction extends ContactAction {
 
-	public AbstractManagedContactTest(String name) {
-		super(name);
-	}
+    /**
+     * Initializes a new {@link GetUserAction}.
+     * @param serviceLookup
+     */
+    public GetUserAction(final ServiceLookup serviceLookup) {
+        super(serviceLookup);
+    }
 
-	@Override
-	public void setUp() throws Exception {
-	    super.setUp();
+    @Override
+    protected AJAXRequestResult perform(final ContactRequest req) throws OXException {
+        final ServerSession session = req.getSession();
+        final TimeZone timeZone = req.getTimeZone();
+        final int uid = req.getId();
+        final Context ctx = session.getContext();
 
-	    manager = new ContactTestManager(getClient());
-	    manager.setFailOnError(false);
+        final ContactInterface contactInterface = new RdbContactSQLImpl(session, ctx);
+        final Contact contact = contactInterface.getUserById(uid);
+        final Date lastModified = contact.getLastModified();
 
-	    folderManager = new FolderTestManager(getClient());
-	    folderManager.setFailOnError(false);
+        // Correct last modified and creation date with users timezone
+        contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
+        contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
 
-	    UserValues values = getClient().getValues();
-	    FolderObject folder = folderManager.generateFolder(
-	    		"ManagedContactTest_"+(new Date().getTime()),
-	    		Module.CONTACTS.getFolderConstant(),
-	    		values.getPrivateContactFolder(),
-	    		values.getUserId());
-	    folder = folderManager.insertFolderOnServer(folder);
-	    folderID = folder.getObjectID();
-	}
+        return new AJAXRequestResult(contact, lastModified, "contact");
+    }
 
-	@Override
-	public void tearDown() throws Exception {
-        manager.cleanUp();
-    	folderManager.cleanUp();
-	    super.tearDown();
-	}
-
-	protected Contact generateContact(String lastname) {
-	    Contact contact = new Contact();
-	    contact.setSurName(lastname);
-	    contact.setGivenName("Given name");
-	    contact.setDisplayName(contact.getSurName() +", "+contact.getGivenName());
-	    contact.setParentFolderID(folderID);
-	    return contact;
-	}
-
-	protected Contact generateContact() {
-	    return generateContact("Surname");
-	}
 }

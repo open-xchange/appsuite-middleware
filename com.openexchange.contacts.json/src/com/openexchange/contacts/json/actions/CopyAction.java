@@ -47,15 +47,16 @@
  *
  */
 
-package com.openexchange.contact.json.actions;
+package com.openexchange.contacts.json.actions;
 
 import java.sql.Connection;
 import java.util.Date;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.contact.json.ContactRequest;
+import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -75,6 +76,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -130,8 +132,14 @@ public class CopyAction extends ContactAction {
          */
         copyLinks(folderId, session, ctx, contact, origObjectId, origFolderId, user);
 
-        final JSONObject response = new JSONObject();
         timestamp = contact.getLastModified();
+        
+        final JSONObject response = new JSONObject();
+        try {
+            response.put("id", contact.getObjectID());
+        } catch (JSONException e) {
+            throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+        }
 
         return new AJAXRequestResult(response, timestamp, "json");
     }

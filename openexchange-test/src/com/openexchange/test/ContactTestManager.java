@@ -162,7 +162,7 @@ public class ContactTestManager implements TestManager {
         this.setClient(client);
         this.setTimeZone(client.getValues().getTimeZone());
         setCreatedEntities(new LinkedList<Contact>());
-        setContactParser(new ContactParser());
+        setContactParser(new ContactParser(true, timeZone));
     }
 
     public static Contact generateContact() {
@@ -333,7 +333,7 @@ public class ContactTestManager implements TestManager {
             CommonAllResponse response = getClient().execute(request, getSleep());
             lastResponse = response;
             final JSONArray data = (JSONArray) response.getResponse().getData();
-            allContacts = transform(data);
+            allContacts = transform(data, columns);
         } catch (Exception e) {
             doExceptionHandling(e, "AllRequest for folder " + folderId);
         }
@@ -347,7 +347,7 @@ public class ContactTestManager implements TestManager {
             CommonAllResponse response = getClient().execute(request, getSleep());
             lastResponse = response;
             final JSONArray data = (JSONArray) response.getResponse().getData();
-            allContacts = transform(data);
+            allContacts = transform(data, columns);
         } catch (Exception e) {
             doExceptionHandling(e, "AllRequest for folder " + folderId);
         }
@@ -398,7 +398,7 @@ public class ContactTestManager implements TestManager {
             SearchResponse response = getClient().execute(request, getSleep());
             lastResponse = response;
             final JSONArray data = (JSONArray) response.getResponse().getData();
-            allContacts = transform(data);
+            allContacts = transform(data, columns);
         } catch (Exception e) {
             doExceptionHandling(
                 e,
@@ -439,7 +439,7 @@ public class ContactTestManager implements TestManager {
             SearchResponse response = getClient().execute(request, getSleep());
             lastResponse = response;
             final JSONArray data = (JSONArray) response.getResponse().getData();
-            allContacts = transform(data);
+            allContacts = transform(data, columns);
         } catch (Exception e) {
             doExceptionHandling(
                 e,
@@ -474,7 +474,7 @@ public class ContactTestManager implements TestManager {
 			CommonSearchResponse response = getClient().execute(request, getSleep());
 			lastResponse = response;
             JSONArray data = (JSONArray) response.getResponse().getData();
-            contacts = transform(data);
+            contacts = transform(data, columns);
 		} catch (Exception e) {
             doExceptionHandling(e,"searching for contacts with term: \n" + filter.toString() );
         }
@@ -547,15 +547,20 @@ public class ContactTestManager implements TestManager {
     }
 
     private List<Contact> transform(JSONArray data) throws JSONException, OXException, OXException {
-    	List<Contact> contacts = new LinkedList<Contact>();
+    	return transform(data, Contact.ALL_COLUMNS);
+    }
+    
+    private List<Contact> transform(JSONArray data, int[] columns) throws JSONException, OXException, OXException {
+        List<Contact> contacts = new LinkedList<Contact>();
         for (int i = 0; i < data.length(); i++) {
-            final JSONArray jsonArray = data.getJSONArray(i);
+            final JSONArray jsonArray = data.getJSONArray(i);            
             JSONObject jsonObject = new JSONObject();
             for (int a = 0; a < jsonArray.length(); a++) {
                 if (!"null".equals(jsonArray.getString(a))) {
-                    String fieldname = ContactMapping.columnToFieldName(Contact.ALL_COLUMNS[a]);
-                    if (fieldname != null)
+                    String fieldname = ContactMapping.columnToFieldName(columns[a]);
+                    if (fieldname != null) {
                         jsonObject.put(fieldname, jsonArray.get(a));
+                    }
                 }
             }
             Contact contactObject = new Contact();

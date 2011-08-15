@@ -47,65 +47,67 @@
  *
  */
 
-package com.openexchange.contact.json.actions;
+package com.openexchange.contacts.json.actions;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.parser.SearchTermParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.contact.json.ContactRequest;
+import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactSearchMultiplexer;
+import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.search.Order;
-import com.openexchange.search.SearchTerm;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link AdvancedSearchAction}
+ * {@link UpdatesAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class AdvancedSearchAction extends ContactAction {
+public class UpdatesAction extends ContactAction {
 
     /**
-     * Initializes a new {@link AdvancedSearchAction}.
+     * Initializes a new {@link UpdatesAction}.
      * @param serviceLookup
      */
-    public AdvancedSearchAction(final ServiceLookup serviceLookup) {
+    public UpdatesAction(final ServiceLookup serviceLookup) {
         super(serviceLookup);
     }
 
     @Override
     protected AJAXRequestResult perform(final ContactRequest req) throws OXException {
         final ServerSession session = req.getSession();
+        final int folder = req.getFolder();
         final int[] columns = req.getColumns();
-        final int sort = req.getSort();
-        final Order order = req.getOrder();
-        final String collation = req.getCollation();
+        final long timestampLong = req.getTimestamp();
+        Date timestamp = new Date(timestampLong);
         Date lastModified = null;
-        Date timestamp = new Date(0);
-        final JSONObject json = (JSONObject) req.getData();
         final TimeZone timeZone = req.getTimeZone();
+        
+        String ignore = req.getIgnore();
+        if (ignore == null) {
+            ignore = "deleted";
+        }
+        
+        boolean bIgnoreDelete = false;
+        if (ignore.indexOf("deleted") != -1) {
+            bIgnoreDelete = true;
+        }
 
-        JSONArray filterContent;
+        final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
+        final List<Contact> list = new ArrayList<Contact>();
+        final List<Contact> modifiedList = new ArrayList<Contact>();
+        final List<Contact> deletedList = new ArrayList<Contact>();
+        final Map<String, List<Contact>> responseMap = new HashMap<String, List<Contact>>(2);
         SearchIterator<Contact> it = null;
-        final List<Contact> contacts = new ArrayList<Contact>();
         try {
-            filterContent = json.getJSONArray("filter");
-            final SearchTerm<?> searchTerm = SearchTermParser.parse(filterContent);
-
-            final ContactSearchMultiplexer multiplexer = new ContactSearchMultiplexer(getContactInterfaceDiscoveryService());
-            it = multiplexer.extendedSearch(session, searchTerm, sort, order, collation, columns);
+            it = contactInterface.getModifiedContactsInFolder(folder, columns, timestamp);
             while (it.hasNext()) {
                 final Contact contact = it.next();
                 lastModified = contact.getLastModified();
@@ -113,21 +115,38 @@ public class AdvancedSearchAction extends ContactAction {
                 // Correct last modified and creation date with users timezone
                 contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
                 contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
-                contacts.add(contact);
+                list.add(contact);
 
-                if (lastModified != null && timestamp.before(lastModified)) {
+                if ((lastModified != null) && (timestamp.getTime() < lastModified.getTime())) {
                     timestamp = lastModified;
                 }
             }
-        } catch (final JSONException e) {
-            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e);
+            
+            if (!bIgnoreDelete) {
+                it = contactInterface.getDeletedContactsInFolder(folder, columns, timestamp);
+                while (it.hasNext()) {
+                    final Contact contact = it.next();
+                    lastModified = contact.getLastModified();
+
+                    // Correct last modified and creation date with users timezone
+                    contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
+                    contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
+                    deletedList.add(contact);
+
+                    if ((lastModified != null) && (timestamp.getTime() < lastModified.getTime())) {
+                        timestamp = lastModified;
+                    }
+                }
+            }
+            responseMap.put("modified", modifiedList);
+            responseMap.put("deleted", deletedList);
+
         } finally {
             if (it != null) {
                 it.close();
             }
         }
 
-        return new AJAXRequestResult(contacts, lastModified, "contact");
+        return new AJAXRequestResult(list, timestamp, "contact");
     }
-
 }

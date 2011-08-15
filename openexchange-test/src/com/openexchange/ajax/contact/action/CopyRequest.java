@@ -47,52 +47,55 @@
  *
  */
 
-package com.openexchange.contact.json.actions;
+package com.openexchange.ajax.contact.action;
 
-import java.util.Date;
-import java.util.TimeZone;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.api2.RdbContactSQLImpl;
-import com.openexchange.contact.json.ContactRequest;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
+import java.util.LinkedList;
+import java.util.List;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 
 /**
- * {@link GetUserAction}
+ * {@link CopyRequest}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class GetUserAction extends ContactAction {
+public class CopyRequest extends AbstractContactRequest<CopyResponse> {
 
-    /**
-     * Initializes a new {@link GetUserAction}.
-     * @param serviceLookup
-     */
-    public GetUserAction(final ServiceLookup serviceLookup) {
-        super(serviceLookup);
+    private int sourceFolderID;
+    private int destinationFolderID;
+    private int contactID;
+    private boolean failOnError;
+    
+    public CopyRequest(int contactID, int sourceFolderID, int destinationFolderID, boolean failOnError) {
+        super();
+        this.contactID = contactID;
+        this.sourceFolderID = sourceFolderID;
+        this.destinationFolderID = destinationFolderID;
+        this.failOnError = failOnError;
     }
 
-    @Override
-    protected AJAXRequestResult perform(final ContactRequest req) throws OXException {
-        final ServerSession session = req.getSession();
-        final TimeZone timeZone = req.getTimeZone();
-        final int uid = req.getId();
-        final Context ctx = session.getContext();
-
-        final ContactInterface contactInterface = new RdbContactSQLImpl(session, ctx);
-        final Contact contact = contactInterface.getUserById(uid);
-        final Date lastModified = contact.getLastModified();
-
-        // Correct last modified and creation date with users timezone
-        contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
-        contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
-
-        return new AJAXRequestResult(contact, lastModified, "contact");
+    public Object getBody() throws JSONException {
+        JSONObject jso = new JSONObject();
+        jso.put("folder_id", destinationFolderID);
+        return jso;        
     }
 
+    public Method getMethod() {
+        return Method.PUT;
+    }
+
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
+        List<Parameter> list = new LinkedList<Parameter>();
+
+        list.add(new Parameter("action", "copy"));
+        list.add(new Parameter("folder", sourceFolderID));
+        list.add(new Parameter("id", contactID));
+        
+        return list.toArray(new Parameter[list.size()]);
+    }
+
+    public CopyParser getParser() {
+        return new CopyParser(failOnError);
+    }
 }

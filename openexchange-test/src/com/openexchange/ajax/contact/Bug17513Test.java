@@ -1,7 +1,6 @@
 package com.openexchange.ajax.contact;
 
-import org.json.JSONException;
-
+import junit.framework.AssertionFailedError;
 import com.openexchange.ajax.contact.action.InsertRequest;
 
 public class Bug17513Test extends AbstractManagedContactTest {
@@ -17,7 +16,7 @@ public class Bug17513Test extends AbstractManagedContactTest {
 		try {
 			getClient().execute(new InsertRequest(json));
 			fail("Should fail, because the date is not in a format the OX can parse");
-		} catch(JSONException e){
+		} catch(AssertionFailedError e){
 			assertTrue("Should fail, because the date is not in a format the OX can parse", true);
 		}
 

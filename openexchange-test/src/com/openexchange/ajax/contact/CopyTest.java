@@ -1,30 +1,31 @@
 package com.openexchange.ajax.contact;
 
-import java.io.ByteArrayInputStream;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.Date;
 import org.json.JSONObject;
-
-import com.meterware.httpunit.PutMethodWebRequest;
-import com.meterware.httpunit.WebRequest;
-import com.meterware.httpunit.WebResponse;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.ContactTest;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.fields.AppointmentFields;
+import com.openexchange.ajax.contact.action.CopyRequest;
+import com.openexchange.ajax.contact.action.CopyResponse;
+import com.openexchange.ajax.contact.action.DeleteRequest;
+import com.openexchange.ajax.contact.action.GetRequest;
+import com.openexchange.ajax.contact.action.GetResponse;
 import com.openexchange.ajax.fields.DataFields;
-import com.openexchange.ajax.fields.FolderChildFields;
-import com.openexchange.groupware.configuration.AbstractConfigWrapper;
+import com.openexchange.ajax.folder.Create;
+import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.InsertRequest;
+import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.tools.URLParameter;
 
-public class CopyTest extends ContactTest {
 
-	private static final Log LOG = LogFactory.getLog(CopyTest.class);
+public class CopyTest extends AbstractContactTest {
+	
+	private int objectId1;
+    private int objectId2;
+    private int targetFolder;
+    private FolderObject folder;
 
-	public CopyTest(final String name) {
+
+    public CopyTest(final String name) {
+
 		super(name);
 	}
 
@@ -37,45 +38,54 @@ public class CopyTest extends ContactTest {
 		final Contact contactObj = new Contact();
 		contactObj.setSurName("testCopy");
 		contactObj.setParentFolderID(contactFolderId);
-		final int objectId1 = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
+		objectId1 = insertContact(contactObj);
+		
+		folder = Create.createPrivateFolder("testCopy", FolderObject.CONTACT, userId);
+		folder.setParentFolderID(client.getValues().getPrivateContactFolder());
+		InsertResponse folderCreateResponse = client.execute(new InsertRequest(API.OUTLOOK, folder));
+		folderCreateResponse.fillObject(folder);
+		
+		targetFolder = folder.getObjectID();
+		
+		CopyRequest request = new CopyRequest(objectId1, contactFolderId, targetFolder, true);
+		CopyResponse response = client.execute(request);
 
-		final String login = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "login", "");
-		final String password = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "password", "");
-
-		final FolderObject folderObj = com.openexchange.webdav.xml.FolderTest.createFolderObject(userId, "testCopy" + System.currentTimeMillis(), FolderObject.CONTACT, false);
-		final int targetFolder = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), login, password, "");
-
-		final URLParameter parameter = new URLParameter();
-		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, getSessionId());
-		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_COPY);
-		parameter.setParameter(AJAXServlet.PARAMETER_ID, objectId1);
-		parameter.setParameter(AJAXServlet.PARAMETER_FOLDERID, contactFolderId);
-		parameter.setParameter(AppointmentFields.IGNORE_CONFLICTS, true);
-
-		final JSONObject jsonObj = new JSONObject();
-		jsonObj.put(FolderChildFields.FOLDER_ID, targetFolder);
-		final ByteArrayInputStream bais = new ByteArrayInputStream(jsonObj.toString().getBytes("UTF-8"));
-		final WebRequest req = new PutMethodWebRequest(PROTOCOL + getHostName() + CONTACT_URL + parameter.getURLParameters(), bais, "text/javascript");
-		final WebResponse resp = getWebConversation().getResponse(req);
-
-		assertEquals(200, resp.getResponseCode());
-
-		final Response response = Response.parse(resp.getText());
 
 		if (response.hasError()) {
 			fail("json error: " + response.getErrorMessage());
 		}
-
-		int objectId2 = 0;
-
+		
+		objectId2 = 0;
+		
 		final JSONObject data = (JSONObject)response.getData();
 		if (data.has(DataFields.ID)) {
 			objectId2 = data.getInt(DataFields.ID);
-		}
-
-		deleteContact(getWebConversation(), objectId1, contactFolderId, PROTOCOL + getHostName(), getSessionId());
-		if (objectId2 > 0) {
-			deleteContact(getWebConversation(), objectId2, targetFolder, PROTOCOL + getHostName(), getSessionId());
-		}
+		} else {
+		    fail("Could not find copied contact.");
+		}		
+		
+		GetRequest getFirstContactRequest = new GetRequest(contactFolderId, objectId1, tz);
+		GetResponse firstContactResponse = client.execute(getFirstContactRequest);
+		Contact firstContact = firstContactResponse.getContact();
+		
+		GetRequest getSecondContactRequest = new GetRequest(targetFolder, objectId2, tz);
+		GetResponse seconContactResponse = client.execute(getSecondContactRequest);
+		Contact secondContact = seconContactResponse.getContact();
+		secondContact.setObjectID(objectId1);
+		secondContact.setParentFolderID(contactFolderId);
+		
+		compareObject(firstContact, secondContact);		
 	}
+	
+
+    @Override
+    protected void tearDown() throws Exception {
+        client.execute(new DeleteRequest(contactFolderId, objectId1, new Date()));
+        if (objectId2 > 0) {
+            client.execute(new DeleteRequest(targetFolder, objectId2, new Date()));
+        }        
+        client.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(API.OUTLOOK, folder));
+        
+        super.tearDown();
+    }
 }
