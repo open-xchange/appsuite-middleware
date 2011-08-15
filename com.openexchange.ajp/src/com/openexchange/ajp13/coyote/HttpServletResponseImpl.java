@@ -431,9 +431,9 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
             outputSelection = OUTPUT_WRITER;
         }
         if (bufferSize > 0) {
-            writer = new PrintWriter(new OutputStreamWriter(servletOutputStream, characterEncoding), true);
+            writer = new PrintWriter(new OutputStreamWriter(servletOutputStream, characterEncoding), false);
         } else {
-            writer = new PrintWriter(new OutputStreamWriter(servletOutputStream, characterEncoding), true);
+            writer = new PrintWriter(new OutputStreamWriter(servletOutputStream, characterEncoding), false);
         }
         return writer;
     }

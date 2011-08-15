@@ -96,7 +96,7 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
         running = new AtomicBoolean();
 
         final ConfigurationService service = AJPv13ServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
-        boolean coyote = null == service ? false : service.getBoolProperty("AJP_COYOTE_SOCKET_HANDLER", false);
+        boolean coyote = null == service ? false : service.getBoolProperty("AJP_COYOTE_SOCKET_HANDLER", true);
         coyote = true;
         if (coyote) {
             socketHandler = new CoyoteSocketHandler();
