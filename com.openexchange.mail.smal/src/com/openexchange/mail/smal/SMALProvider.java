@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,43 +47,78 @@
  *
  */
 
-package com.openexchange.mail.smal.osgi;
+package com.openexchange.mail.smal;
 
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.Protocol;
+import com.openexchange.mail.api.AbstractProtocolProperties;
+import com.openexchange.mail.api.AllMailProvider;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailProvider;
-import com.openexchange.mail.smal.SMALServiceLookup;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.session.Session;
 
 /**
- * {@link SMALActivator} - The activator for Super-MAL bundle.
+ * {@link SMALProvider}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SMALActivator extends HousekeepingActivator {
+public final class SMALProvider extends AllMailProvider {
 
     /**
-     * Initializes a new {@link SMALActivator}.
+     * SMAL protocol.
      */
-    public SMALActivator() {
+    public static final Protocol PROTOCOL_SMAL = Protocol.PROTOCOL_ALL;
+
+    private static final SMALProvider instance = new SMALProvider();
+
+    /**
+     * Gets the singleton instance of SMAL provider.
+     * 
+     * @return The singleton instance of SMAL provider
+     */
+    public static SMALProvider getInstance() {
+        return instance;
+    }
+
+    /**
+     * Initializes a new {@link SMALProvider}.
+     */
+    private SMALProvider() {
         super();
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        SMALServiceLookup.getInstance().setServiceLookup(this);
-        track(MailProvider.class, new MailProviderServiceTracker(context));
-        openTrackers();
+    public MailProvider getDelegatingProvider(final MailProvider realProvider) {
+        return this;
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
-        SMALServiceLookup.getInstance().setServiceLookup(null);
+    public Protocol getProtocol() {
+        return PROTOCOL_SMAL;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+    public MailAccess<?, ?> createNewMailAccess(final Session session) throws OXException {
+        return createNewMailAccess(session, MailAccount.DEFAULT_ID);
+    }
+
+    @Override
+    public MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> createNewMailAccess(final Session session, final int accountId) throws OXException {
+        if (null == session) {
+            /*
+             * For initialization purpose
+             */
+            
+        }
+        return null;
+    }
+
+    @Override
+    protected AbstractProtocolProperties getProtocolProperties() {
+        return SMALStaticProperties.getInstance();
     }
 
 }

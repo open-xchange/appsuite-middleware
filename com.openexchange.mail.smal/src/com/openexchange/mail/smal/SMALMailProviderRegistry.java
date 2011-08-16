@@ -57,7 +57,6 @@ import java.util.concurrent.ConcurrentMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailSessionCache;
-import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
@@ -66,14 +65,19 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.session.Session;
 
 /**
- * {@link MailProviderRegistry}
+ * {@link SMALMailProviderRegistry}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailProviderRegistry {
+public final class SMALMailProviderRegistry {
+
+    /**
+     * The parameter name for SMAL provider.
+     */
+    private static final String SMAL_PROVIDER = "smal.provider";
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailProviderRegistry.class));
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SMALMailProviderRegistry.class));
 
     /**
      * Concurrent map used as set for mail providers
@@ -81,9 +85,9 @@ public final class MailProviderRegistry {
     private static final ConcurrentMap<Protocol, MailProvider> PROVIDERS = new ConcurrentHashMap<Protocol, MailProvider>();
 
     /**
-     * Initializes a new {@link MailProviderRegistry}
+     * Initializes a new {@link SMALMailProviderRegistry}
      */
-    private MailProviderRegistry() {
+    private SMALMailProviderRegistry() {
         super();
     }
 
@@ -97,10 +101,9 @@ public final class MailProviderRegistry {
      */
     public static MailProvider getMailProviderBySession(final Session session, final int accountId) throws OXException {
         final MailSessionCache mailSessionCache = MailSessionCache.getInstance(session);
-        final String key = MailSessionParameterNames.getParamMailProvider();
         MailProvider provider;
         try {
-            provider = mailSessionCache.getParameter(accountId, key);
+            provider = mailSessionCache.getParameter(accountId, SMAL_PROVIDER);
         } catch (final ClassCastException e) {
             /*
              * Probably caused by bundle update(s)
@@ -126,7 +129,7 @@ public final class MailProviderRegistry {
         if (null == provider || !provider.supportsProtocol(protocol)) {
             throw MailExceptionCode.UNKNOWN_PROTOCOL.create(mailServerURL);
         }
-        mailSessionCache.putParameter(accountId, key, provider);
+        mailSessionCache.putParameter(accountId, SMAL_PROVIDER, provider);
         return provider;
     }
 

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,43 +47,71 @@
  *
  */
 
-package com.openexchange.mail.smal.osgi;
+package com.openexchange.mail.smal;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.mail.api.MailProvider;
-import com.openexchange.mail.smal.SMALServiceLookup;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link SMALActivator} - The activator for Super-MAL bundle.
+ * {@link SMALServiceLookup}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SMALActivator extends HousekeepingActivator {
+public final class SMALServiceLookup implements ServiceLookup {
+
+    private static final SMALServiceLookup INSTANCE = new SMALServiceLookup();
 
     /**
-     * Initializes a new {@link SMALActivator}.
+     * Gets the instance
+     * 
+     * @return The instance
      */
-    public SMALActivator() {
+    public static SMALServiceLookup getInstance() {
+        return INSTANCE;
+    }
+
+    private final AtomicReference<ServiceLookup> serviceLookupReference;
+
+    /**
+     * Initializes a new {@link SMALServiceLookup}.
+     */
+    private SMALServiceLookup() {
         super();
+        serviceLookupReference = new AtomicReference<ServiceLookup>();
     }
 
+    /**
+     * Gets the service of specified type
+     * 
+     * @param clazz The service's class
+     * @return The service or <code>null</code> is absent
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
     @Override
-    protected void startBundle() throws Exception {
-        SMALServiceLookup.getInstance().setServiceLookup(this);
-        track(MailProvider.class, new MailProviderServiceTracker(context));
-        openTrackers();
+    public <S> S getService(final Class<? extends S> clazz) {
+        final ServiceLookup serviceLookup = serviceLookupReference.get();
+        if (null == serviceLookup) {
+            return null;
+        }
+        return serviceLookup.getService(clazz);
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
-        SMALServiceLookup.getInstance().setServiceLookup(null);
+    /**
+     * Sets the service look-up
+     * 
+     * @param serviceLookup The service look-up to set
+     */
+    public void setServiceLookup(final ServiceLookup serviceLookup) {
+        serviceLookupReference.set(serviceLookup);
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+    /**
+     * Gets the service look-up
+     * 
+     * @return The service look-up
+     */
+    public ServiceLookup getServiceLookup() {
+        return serviceLookupReference.get();
     }
 
 }
