@@ -1033,6 +1033,13 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     protected abstract void releaseResources();
 
     /**
+     * Releases all used resources prior to caching or closing a connection.
+     */
+    public void invokeReleaseResources() {
+        releaseResources();
+    }
+
+    /**
      * Internal close method to drop a mail connection.
      */
     protected abstract void closeInternal();
