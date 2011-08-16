@@ -612,7 +612,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
          */
         if (mailConfig.getServer() == null) {
             throw MailExceptionCode.MISSING_CONNECT_PARAM.create("mail server");
-        } else if (delegateCheckMailServerPort() && (mailConfig.getPort() <= 0)) {
+        } else if (checkMailServerPort() && (mailConfig.getPort() <= 0)) {
             throw MailExceptionCode.MISSING_CONNECT_PARAM.create("mail server port");
         } else if (mailConfig.getLogin() == null) {
             throw MailExceptionCode.MISSING_CONNECT_PARAM.create("login");
@@ -731,7 +731,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             }
         } else {
             checkFieldsBeforeConnect(getMailConfig());
-            delegateConnectInternal();
+            connectInternal();
             if (checkDefaultFolder) {
                 checkDefaultFolderOnConnect();
             }
@@ -755,7 +755,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                     Integer.valueOf(session.getContextId()),
                     e.getMessage());
             LOG.error(mailExc.getMessage(), mailExc);
-            delegateCloseInternal();
+            closeInternal();
             throw mailExc;
         }
     }
@@ -767,13 +767,6 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @throws OXException If connection could not be established
      */
     protected abstract void connectInternal() throws OXException;
-
-    /**
-     * For delegating purpose. Don't invoke.
-     */
-    public void delegateConnectInternal() throws OXException {
-        connectInternal();
-    }
 
     /**
      * Closes this access.
@@ -793,7 +786,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                 /*
                  * Release all used, non-cachable resources
                  */
-                delegateReleaseResources();
+                releaseResources();
             } catch (final Throwable t) {
                 /*
                  * Dropping
@@ -819,7 +812,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             /*
              * Close mail connection
              */
-            delegateCloseInternal();
+            closeInternal();
             if (!cached) {
                 /*
                  * Not closed by MailAccessCache
@@ -908,8 +901,8 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @throws OXException If creating a new mail configuration fails
      */
     private final MailConfig createMailConfig() throws OXException {
-        final MailConfig instance = delegateCreateNewMailConfig();
-        instance.setMailProperties(delegateCreateNewMailProperties());
+        final MailConfig instance = createNewMailConfig();
+        instance.setMailProperties(createNewMailProperties());
         return MailConfig.getConfig(instance, session, accountId);
     }
 
@@ -1020,26 +1013,12 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     protected abstract MailConfig createNewMailConfig();
 
     /**
-     * For delegating purpose. Don't invoke.
-     */
-    public MailConfig delegateCreateNewMailConfig() {
-        return createNewMailConfig();
-    }
-
-    /**
      * Gets an implementation-specific new instance of {@link IMailProperties}.
      *
      * @return An implementation-specific new instance of {@link IMailProperties}
      * @throws OXException If creating a new instance of {@link IMailProperties} fails
      */
     protected abstract IMailProperties createNewMailProperties() throws OXException;
-
-    /**
-     * For delegating purpose. Don't invoke.
-     */
-    public IMailProperties delegateCreateNewMailProperties() throws OXException {
-        return createNewMailProperties();
-    }
 
     /**
      * Defines if mail server port has to be present in provided mail configuration before establishing any connection.
@@ -1049,35 +1028,14 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     protected abstract boolean checkMailServerPort();
 
     /**
-     * For delegating purpose. Don't invoke.
-     */
-    public boolean delegateCheckMailServerPort() {
-        return checkMailServerPort();
-    }
-
-    /**
      * Releases all used resources prior to caching or closing a connection.
      */
-    protected abstract void releaseResources();
-
-    /**
-     * For delegating purpose. Don't invoke.
-     */
-    public void delegateReleaseResources() {
-        releaseResources();
-    }
+    public abstract void releaseResources();
 
     /**
      * Internal close method to drop a mail connection.
      */
     protected abstract void closeInternal();
-
-    /**
-     * For delegating purpose. Don't invoke.
-     */
-    public void delegateCloseInternal() {
-        closeInternal();
-    }
 
     /**
      * Gets the appropriate {@link IMailFolderStorage} implementation that is considered as the main entry point to a user's mailbox.

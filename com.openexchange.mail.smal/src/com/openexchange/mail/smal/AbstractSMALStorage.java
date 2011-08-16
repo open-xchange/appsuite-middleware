@@ -109,7 +109,7 @@ public abstract class AbstractSMALStorage {
      * @throws OXException If resources cannot be released
      */
     public void releaseResources() throws OXException {
-        realMailAccess.delegateReleaseResources();
+        realMailAccess.releaseResources();
     }
 
 }

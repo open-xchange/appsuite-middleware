@@ -142,7 +142,7 @@ public final class FolderParser {
                                 throw new OXException(e1);
                             }
                         }
-                        final MailPermission mailPerm = provider.createNewMailPermission();
+                        final MailPermission mailPerm = provider.createNewMailPermission(session, accountId);
                         mailPerm.setEntity(entity);
                         if (!elem.has(FolderFields.BITS)) {
                             throw MailExceptionCode.MISSING_PARAMETER.create(FolderFields.BITS);

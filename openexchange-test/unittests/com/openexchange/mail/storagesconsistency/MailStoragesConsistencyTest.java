@@ -49,9 +49,9 @@
 
 package com.openexchange.mail.storagesconsistency;
 
-import com.openexchange.exception.OXException;
 import java.util.HashSet;
 import java.util.Set;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailField;
@@ -122,7 +122,7 @@ public final class MailStoragesConsistencyTest extends AbstractMailTest {
                     mfd.setSubscribed(false);
                     mfd.setName(TEMPORARY_FOLDER);
 
-                    final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID).createNewMailPermission();
+                    final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID).createNewMailPermission(session, MailAccount.DEFAULT_ID);
                     p.setEntity(getUser());
                     p.setAllPermission(
                         OCLPermission.ADMIN_PERMISSION,
@@ -204,7 +204,7 @@ public final class MailStoragesConsistencyTest extends AbstractMailTest {
                     mfd.setSubscribed(false);
                     mfd.setName(TEMPORARY_FOLDER);
 
-                    final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID).createNewMailPermission();
+                    final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID).createNewMailPermission(session, MailAccount.DEFAULT_ID);
                     p.setEntity(getUser());
                     p.setAllPermission(
                         OCLPermission.ADMIN_PERMISSION,
@@ -316,7 +316,7 @@ public final class MailStoragesConsistencyTest extends AbstractMailTest {
                     mfd.setSubscribed(false);
                     mfd.setName(TEMPORARY_FOLDER);
 
-                    final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID).createNewMailPermission();
+                    final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID).createNewMailPermission(session, MailAccount.DEFAULT_ID);
                     p.setEntity(getUser());
                     p.setAllPermission(
                         OCLPermission.ADMIN_PERMISSION,

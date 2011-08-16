@@ -1,10 +1,10 @@
 package com.openexchange.mail.messagestorage;
 
-import com.openexchange.exception.OXException;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Set;
 import javax.mail.internet.InternetAddress;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailProviderRegistry;
@@ -533,7 +533,7 @@ public abstract class MessageStorageTest extends AbstractMailTest {
 
     private MailPermission getPermission(final SessionObject session) throws OXException {
         final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID)
-        		.createNewMailPermission();
+        		.createNewMailPermission(session, MailAccount.DEFAULT_ID);
         p.setEntity(getUser());
         p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
         		OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);

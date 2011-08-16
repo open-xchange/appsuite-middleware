@@ -113,7 +113,7 @@ public final class MailFolderSpecialCharsTest extends AbstractMailTest {
 				mfd.setName(invalidName);
 
 				final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID)
-						.createNewMailPermission();
+						.createNewMailPermission(session, MailAccount.DEFAULT_ID);
 				p.setEntity(getUser());
 				p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
 						OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -226,7 +226,7 @@ public final class MailFolderSpecialCharsTest extends AbstractMailTest {
 				mfd.setName(invalidName);
 
 				final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID)
-						.createNewMailPermission();
+						.createNewMailPermission(session, MailAccount.DEFAULT_ID);
 				p.setEntity(getUser());
 				p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
 						OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);

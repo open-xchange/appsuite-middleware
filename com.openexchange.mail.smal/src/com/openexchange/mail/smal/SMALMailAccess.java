@@ -100,12 +100,18 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
 
     @Override
     protected MailConfig createNewMailConfig() {
-        return realMailAccess.delegateCreateNewMailConfig();
+        /*
+         * Invoked in getMailConfig(), but overridden here
+         */
+        return null;
     }
 
     @Override
     protected IMailProperties createNewMailProperties() throws OXException {
-        return realMailAccess.delegateCreateNewMailProperties();
+        /*
+         * Invoked in getMailConfig(), but overridden here
+         */
+        return null;
     }
 
     @Override
@@ -131,11 +137,6 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
     @Override
     protected void checkFieldsBeforeConnect(final MailConfig mailConfig) throws OXException {
         // Nothing to do
-    }
-
-    @Override
-    public void delegateConnectInternal() throws OXException {
-        connected = true;
     }
 
     @Override
