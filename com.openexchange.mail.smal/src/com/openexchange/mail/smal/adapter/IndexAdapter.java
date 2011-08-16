@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.smal.adapter;
 
+import org.json.JSONObject;
+
 /**
  * {@link IndexAdapter}
  * 
@@ -65,4 +67,12 @@ public interface IndexAdapter {
      * Stops the index adapter.
      */
     public void stop();
+
+    /**
+     * Performs specified query.
+     * 
+     * @param jsonQuery The query
+     * @return The search result
+     */
+    public JSONObject search(JSONObject jsonQuery);
 }

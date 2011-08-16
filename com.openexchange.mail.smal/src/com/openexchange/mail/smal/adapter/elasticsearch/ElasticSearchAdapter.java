@@ -51,6 +51,7 @@ package com.openexchange.mail.smal.adapter.elasticsearch;
 
 import java.io.IOException;
 import java.util.Collection;
+import org.elasticsearch.ElasticSearchException;
 import org.elasticsearch.action.WriteConsistencyLevel;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthRequest;
 import org.elasticsearch.action.admin.cluster.node.info.NodesInfoRequest;
@@ -62,6 +63,7 @@ import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
 import org.elasticsearch.action.count.CountResponse;
 import org.elasticsearch.action.delete.DeleteResponse;
+import org.elasticsearch.client.action.admin.indices.mapping.put.PutMappingRequestBuilder;
 import org.elasticsearch.client.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.cluster.metadata.IndexMetaData;
@@ -71,6 +73,7 @@ import org.elasticsearch.common.settings.ImmutableSettings.Builder;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.json.JsonXContent;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.smal.adapter.IndexAdapter;
@@ -87,6 +90,8 @@ public final class ElasticSearchAdapter implements IndexAdapter {
 
     private TransportClient client;
 
+    private final String clusterName;
+
     private final String indexName;
 
     private final String indexType;
@@ -96,6 +101,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
      */
     public ElasticSearchAdapter() {
         super();
+        clusterName = "ox_cluster";
         indexName = "mail_index";
         indexType = "mail";
     }
@@ -110,7 +116,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         /*
          * Specify cluster name
          */
-        settingsBuilder.put("cluster.name", "ox_cluster");
+        settingsBuilder.put("cluster.name", clusterName);
         /*
          * We act as client only
          */
@@ -128,14 +134,33 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         } catch (final Exception ex) {
             LOG.info("Index \"" + indexName + "\" already exists.");
         }
+        /*
+         * Create the mapping definition for a mail
+         */
+        createMailMapping();
     }
 
-    private void createMailTemplate() {
-        final JSONObject mailTemplate = new JSONObject();
-        
-        
-        
-        client.admin().indices().preparePutMapping(indexName).setSource(mailTemplate.toString());
+    private void createMailMapping() {
+        try {
+            final JSONObject properties = new JSONObject();
+            properties.put("mailId", new JSONObject("{ \"type\": \"string\", \"index\": \"not_analyzed\" }"));
+            properties.put("subject", new JSONObject("{ \"type\": \"string\", \"store\": \"yes\" }"));
+            /*
+             * TODO: Further properties
+             */
+            final JSONObject container = new JSONObject();
+            container.put("properties", properties);
+            final JSONObject mapping = new JSONObject();
+            mapping.put(indexType, container);
+            final PutMappingRequestBuilder pmrb = client.admin().indices().preparePutMapping(indexName).setSource(mapping.toString());
+            pmrb.execute().actionGet();
+        } catch (final JSONException e) {
+            // Cannot occur
+            LOG.error(e.getMessage(), e);
+        } catch (final ElasticSearchException e) {
+            // Mapping could not be put; probably it already exists
+            LOG.debug(e.getMessage(), e);
+        }
     }
 
     @Override
@@ -144,6 +169,15 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             client.close();
             client = null;
         }
+    }
+
+    @Override
+    public JSONObject search(final JSONObject jsonQuery) {
+        
+        
+        
+        // TODO Auto-generated method stub
+        return null;
     }
 
     public XContentBuilder createDoc(final MailMessage mail) {
@@ -159,6 +193,9 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         }
     }
 
+    /**
+     * Logs some cluster information.
+     */
     public void clusterInfo() {
         final NodesInfoResponse rsp = client.admin().cluster().nodesInfo(new NodesInfoRequest()).actionGet();
         final StringBuilder sb =
@@ -167,14 +204,15 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         LOG.info(sb.toString());
     }
 
+    /**
+     * Checks if specified index exists.
+     * 
+     * @param indexName The index name
+     * @return <code>true</code> if index exists; otherwise <code>false</code>
+     */
     public boolean indexExists(final String indexName) {
-        // make sure node is up to create the index otherwise we get: blocked by: [1/not recovered from gateway];
-        // waitForYellow();
-
-        // Map map = client.admin().cluster().health(new ClusterHealthRequest(indexName)).actionGet().getIndices();
         final ImmutableMap<String, IndexMetaData> map =
             client.admin().cluster().prepareState().execute().actionGet().getState().getMetaData().getIndices();
-        // System.out.println("Index info:" + map);
         return map.containsKey(indexName);
     }
 
@@ -232,9 +270,13 @@ public final class ElasticSearchAdapter implements IndexAdapter {
 
     public void refresh(final String... indices) {
         final RefreshResponse rsp = client.admin().indices().refresh(new RefreshRequest(indices)).actionGet();
-        // assertEquals(1, rsp.getFailedShards());
     }
 
+    /**
+     * Gets the number of mails held in index.
+     * 
+     * @return The number of mails
+     */
     public long countAll() {
         final CountResponse response = client.prepareCount(indexName).setQuery(QueryBuilders.matchAllQuery()).execute().actionGet();
         return response.getCount();
