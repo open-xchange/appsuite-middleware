@@ -120,7 +120,7 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
     }
 
     @Override
-    protected void releaseResources() {
+    public void releaseResources() {
         // Nothing to do
     }
 
