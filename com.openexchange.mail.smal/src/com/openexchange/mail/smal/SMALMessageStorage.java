@@ -111,6 +111,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
     public MailMessage[] getMessages(final String folder, final String[] mailIds, final MailField[] fields) throws OXException {
         connect();
         try {
+            System.out.println("SMALMessageStorage.getMessages()");
             return delegateMailAccess.getMessageStorage().getMessages(folder, mailIds, fields);
         } finally {
             close();
@@ -121,6 +122,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
     public MailMessage[] searchMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
         connect();
         try {
+            System.out.println("SMALMessageStorage.searchMessages()");
             return delegateMailAccess.getMessageStorage().searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
         } finally {
             close();

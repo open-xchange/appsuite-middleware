@@ -100,6 +100,7 @@ public final class SMALFolderStorage extends AbstractSMALStorage implements IMai
     public MailFolder[] getSubfolders(final String parentFullName, final boolean all) throws OXException {
         connect();
         try {
+            System.out.println("SMALFolderStorage.getSubfolders()");
             return delegateMailAccess.getFolderStorage().getSubfolders(parentFullName, all);
         } finally {
             close();

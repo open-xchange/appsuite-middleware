@@ -98,7 +98,7 @@ public final class IMAPProvider extends MailProvider {
     }
 
     @Override
-    public MailPermission createNewMailPermission() {
+    public MailPermission createNewMailPermission(final Session session, final int accountId) {
         return new ACLPermission();
     }
 
