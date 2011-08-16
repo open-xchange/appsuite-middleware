@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry exported="true" kind="lib" path="lib/jacksum.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/elasticsearch-0.17.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/elasticsearch-0.17.6.jar" sourcepath="sources/elasticsearch-0.17.6-src.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jline-0.9.94.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jna-3.2.7.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/log4j-1.2.16.jar"/>
