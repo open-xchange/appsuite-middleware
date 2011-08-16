@@ -101,7 +101,7 @@ public final class SMALFolderStorage extends MailFolderStorage {
     public MailFolder getFolder(final String fullname) throws OXException {
         realMailAccess.connect(false);
         try {
-            return realMailAccess.getFolderStorage().getFolder(fullname);
+            return realMailAccess.getFolderStorage().getFolder(fullname);s
         } finally {
             realMailAccess.close(true);
         }
