@@ -50,75 +50,84 @@
 package com.openexchange.mail.smal;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.Protocol;
-import com.openexchange.mail.api.AbstractProtocolProperties;
-import com.openexchange.mail.api.AllMailProvider;
-import com.openexchange.mail.api.IMailFolderStorage;
-import com.openexchange.mail.api.IMailMessageStorage;
-import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.api.MailProvider;
-import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.session.Session;
+import com.openexchange.mail.api.IMailProperties;
+import com.openexchange.mail.api.MailCapabilities;
+import com.openexchange.mail.api.MailConfig;
+
 
 /**
- * {@link SMALProvider}
- * 
+ * {@link SMALConfig}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SMALProvider extends AllMailProvider {
+public final class SMALConfig extends MailConfig {
 
     /**
-     * SMAL protocol.
+     * Initializes a new {@link SMALConfig}.
      */
-    public static final Protocol PROTOCOL_SMAL = Protocol.PROTOCOL_ALL;
-
-    private static final SMALProvider instance = new SMALProvider();
-
-    /**
-     * Gets the singleton instance of SMAL provider.
-     * 
-     * @return The singleton instance of SMAL provider
-     */
-    public static SMALProvider getInstance() {
-        return instance;
-    }
-
-    /**
-     * Initializes a new {@link SMALProvider}.
-     */
-    private SMALProvider() {
+    public SMALConfig(final int accountId) {
         super();
+        this.accountId = accountId;
     }
 
     @Override
-    public MailProvider getDelegatingProvider(final MailProvider realProvider) {
-        return this;
+    public MailCapabilities getCapabilities() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     @Override
-    public Protocol getProtocol() {
-        return PROTOCOL_SMAL;
+    public int getPort() {
+        // TODO Auto-generated method stub
+        return 0;
     }
 
     @Override
-    public MailAccess<?, ?> createNewMailAccess(final Session session) throws OXException {
-        return createNewMailAccess(session, MailAccount.DEFAULT_ID);
+    public String getServer() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     @Override
-    public MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> createNewMailAccess(final Session session, final int accountId) throws OXException {
-        if (null == session) {
-            /*
-             * For initialization purpose
-             */
-            return new SMALMailAccess(null, accountId);
-        }
-        return new SMALMailAccess(session, accountId);
+    public boolean isSecure() {
+        // TODO Auto-generated method stub
+        return false;
     }
 
     @Override
-    protected AbstractProtocolProperties getProtocolProperties() {
-        return SMALStaticProperties.getInstance();
+    public void setPort(final int port) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void setSecure(final boolean secure) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void setServer(final String server) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public IMailProperties getMailProperties() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void setMailProperties(final IMailProperties mailProperties) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    protected void parseServerURL(final String serverURL) throws OXException {
+        // TODO Auto-generated method stub
+
     }
 
 }

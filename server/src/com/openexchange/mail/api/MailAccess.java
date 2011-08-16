@@ -62,7 +62,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -911,7 +910,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     private final MailConfig createMailConfig() throws OXException {
         final MailConfig instance = delegateCreateNewMailConfig();
         instance.setMailProperties(delegateCreateNewMailProperties());
-        return MailConfig.getConfig(instance.getClass(), instance, session, accountId);
+        return MailConfig.getConfig(instance, session, accountId);
     }
 
     /**
