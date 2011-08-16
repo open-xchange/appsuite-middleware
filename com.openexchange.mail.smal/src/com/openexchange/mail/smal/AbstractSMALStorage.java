@@ -105,11 +105,11 @@ public abstract class AbstractSMALStorage {
 
     /**
      * Releases all used resources when closing parental {@link MailAccess}
-     *
+     * 
      * @throws OXException If resources cannot be released
      */
     public void releaseResources() throws OXException {
-        realMailAccess.releaseResources();
+        realMailAccess.invokeReleaseResources();
     }
 
 }
