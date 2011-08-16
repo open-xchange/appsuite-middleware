@@ -72,6 +72,8 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
 
     private final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> realMailAccess;
 
+    private boolean connected;
+
     /**
      * Initializes a new {@link SMALMailAccess}.
      * 
@@ -86,128 +88,90 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
 
     @Override
     protected void connectInternal() throws OXException {
-        realMailAccess.delegateConnectInternal();
+        connected = true;
     }
 
     @Override
     protected MailConfig createNewMailConfig() {
-        
-        
-        
-        final MailConfig realMailConfig = realMailAccess.delegateCreateNewMailConfig();
-        
-        // TODO Auto-generated method stub
-        return null;
+        return realMailAccess.delegateCreateNewMailConfig();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.api.MailAccess#createNewMailProperties()
-     */
     @Override
     protected IMailProperties createNewMailProperties() throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return realMailAccess.delegateCreateNewMailProperties();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.api.MailAccess#checkMailServerPort()
-     */
     @Override
     protected boolean checkMailServerPort() {
-        // TODO Auto-generated method stub
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.api.MailAccess#releaseResources()
-     */
     @Override
     protected void releaseResources() {
-        // TODO Auto-generated method stub
-
+        // Nothing to do
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.api.MailAccess#closeInternal()
-     */
     @Override
     protected void closeInternal() {
-        // TODO Auto-generated method stub
-
+        connected = false;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.api.MailAccess#getFolderStorage()
-     */
+    @Override
+    public MailConfig getMailConfig() throws OXException {
+        return realMailAccess.getMailConfig();
+    }
+
+    @Override
+    protected void checkFieldsBeforeConnect(final MailConfig mailConfig) throws OXException {
+        // Nothing to do
+    }
+
+    @Override
+    public void delegateConnectInternal() throws OXException {
+        connected = true;
+    }
+
+    @Override
+    public boolean ping() throws OXException {
+        return true;
+    }
+
     @Override
     public SMALFolderStorage getFolderStorage() throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.api.MailAccess#getMessageStorage()
-     */
     @Override
     public SMALMessageStorage getMessageStorage() throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.api.MailAccess#getLogicTools()
-     */
     @Override
     public MailLogicTools getLogicTools() throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.api.MailAccess#isConnected()
-     */
     @Override
     public boolean isConnected() {
-        // TODO Auto-generated method stub
-        return false;
+        return connected;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.api.MailAccess#isConnectedUnsafe()
-     */
     @Override
     public boolean isConnectedUnsafe() {
-        // TODO Auto-generated method stub
-        return false;
+        return connected;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.api.MailAccess#startup()
-     */
     @Override
     protected void startup() throws OXException {
-        // TODO Auto-generated method stub
-
+        // Start-up operations
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.api.MailAccess#shutdown()
-     */
     @Override
     protected void shutdown() throws OXException {
-        // TODO Auto-generated method stub
-
+        // Shut-down operations
     }
 
 }

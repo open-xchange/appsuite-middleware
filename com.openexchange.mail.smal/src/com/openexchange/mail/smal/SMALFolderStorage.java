@@ -52,9 +52,13 @@ package com.openexchange.mail.smal;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.Quota;
 import com.openexchange.mail.Quota.Type;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailFolderStorage;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
+import com.openexchange.session.Session;
 
 
 /**
@@ -64,38 +68,50 @@ import com.openexchange.mail.dataobjects.MailFolderDescription;
  */
 public final class SMALFolderStorage extends MailFolderStorage {
 
+    private final Session session;
+
+    private final int accountId;
+
+    private final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> realMailAccess;
+
     /**
      * Initializes a new {@link SMALFolderStorage}.
      */
-    public SMALFolderStorage() {
+    public SMALFolderStorage(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> realMailAccess) {
         super();
-        // TODO Auto-generated constructor stub
-
+        this.accountId = accountId;
+        this.realMailAccess = realMailAccess;
+        this.session = session;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailFolderStorage#exists(java.lang.String)
-     */
     @Override
-    public boolean exists(String fullname) throws OXException {
-        // TODO Auto-generated method stub
-        return false;
+    public boolean exists(final String fullname) throws OXException {
+        if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname)) {
+            return true;
+        }
+        realMailAccess.connect(false);
+        try {
+            return realMailAccess.getFolderStorage().exists(fullname);
+        } finally {
+            realMailAccess.close(true);
+        }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailFolderStorage#getFolder(java.lang.String)
-     */
     @Override
-    public MailFolder getFolder(String fullname) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+    public MailFolder getFolder(final String fullname) throws OXException {
+        realMailAccess.connect(false);
+        try {
+            return realMailAccess.getFolderStorage().getFolder(fullname);
+        } finally {
+            realMailAccess.close(true);
+        }
     }
 
     /* (non-Javadoc)
      * @see com.openexchange.mail.api.MailFolderStorage#getSubfolders(java.lang.String, boolean)
      */
     @Override
-    public MailFolder[] getSubfolders(String parentFullname, boolean all) throws OXException {
+    public MailFolder[] getSubfolders(final String parentFullname, final boolean all) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -113,7 +129,7 @@ public final class SMALFolderStorage extends MailFolderStorage {
      * @see com.openexchange.mail.api.MailFolderStorage#createFolder(com.openexchange.mail.dataobjects.MailFolderDescription)
      */
     @Override
-    public String createFolder(MailFolderDescription toCreate) throws OXException {
+    public String createFolder(final MailFolderDescription toCreate) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -122,7 +138,7 @@ public final class SMALFolderStorage extends MailFolderStorage {
      * @see com.openexchange.mail.api.MailFolderStorage#updateFolder(java.lang.String, com.openexchange.mail.dataobjects.MailFolderDescription)
      */
     @Override
-    public String updateFolder(String fullname, MailFolderDescription toUpdate) throws OXException {
+    public String updateFolder(final String fullname, final MailFolderDescription toUpdate) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -131,7 +147,7 @@ public final class SMALFolderStorage extends MailFolderStorage {
      * @see com.openexchange.mail.api.MailFolderStorage#moveFolder(java.lang.String, java.lang.String)
      */
     @Override
-    public String moveFolder(String fullname, String newFullname) throws OXException {
+    public String moveFolder(final String fullname, final String newFullname) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -140,7 +156,7 @@ public final class SMALFolderStorage extends MailFolderStorage {
      * @see com.openexchange.mail.api.MailFolderStorage#deleteFolder(java.lang.String, boolean)
      */
     @Override
-    public String deleteFolder(String fullname, boolean hardDelete) throws OXException {
+    public String deleteFolder(final String fullname, final boolean hardDelete) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -149,7 +165,7 @@ public final class SMALFolderStorage extends MailFolderStorage {
      * @see com.openexchange.mail.api.MailFolderStorage#clearFolder(java.lang.String, boolean)
      */
     @Override
-    public void clearFolder(String fullname, boolean hardDelete) throws OXException {
+    public void clearFolder(final String fullname, final boolean hardDelete) throws OXException {
         // TODO Auto-generated method stub
 
     }
@@ -158,7 +174,7 @@ public final class SMALFolderStorage extends MailFolderStorage {
      * @see com.openexchange.mail.api.MailFolderStorage#getQuotas(java.lang.String, com.openexchange.mail.Quota.Type[])
      */
     @Override
-    public Quota[] getQuotas(String folder, Type[] types) throws OXException {
+    public Quota[] getQuotas(final String folder, final Type[] types) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
