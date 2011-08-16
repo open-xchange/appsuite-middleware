@@ -25,6 +25,8 @@ runcmd createresource
 runcmd changeresource
 runcmd changeuser
 runcmd listcontext
+runcmd listcontextbydatabase
+runcmd listcontextbyfilestore $FNR
 runcmd listdatabase
 runcmd listfilestore
 runcmd listgroup
