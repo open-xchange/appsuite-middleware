@@ -74,7 +74,7 @@ public class SMALActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         SMALServiceLookup.getInstance().setServiceLookup(this);
-        track(MailProvider.class, new MailProviderServiceTracker(context));
+        track(MailProvider.class, new SMALProviderServiceTracker(context));
         openTrackers();
 
         final Dictionary<String, String> dictionary = new Hashtable<String, String>(1);

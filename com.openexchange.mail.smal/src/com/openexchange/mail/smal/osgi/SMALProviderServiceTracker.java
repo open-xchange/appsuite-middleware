@@ -53,26 +53,26 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.api.MailProvider;
+import com.openexchange.mail.smal.SMALMailProviderRegistry;
 
 /**
  * Service tracker for mail providers
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailProviderServiceTracker implements ServiceTrackerCustomizer<MailProvider, MailProvider> {
+public final class SMALProviderServiceTracker implements ServiceTrackerCustomizer<MailProvider, MailProvider> {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailProviderServiceTracker.class));
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SMALProviderServiceTracker.class));
 
     private final BundleContext context;
 
     /**
-     * Initializes a new {@link MailProviderServiceTracker}
+     * Initializes a new {@link SMALProviderServiceTracker}
      */
-    public MailProviderServiceTracker(final BundleContext context) {
+    public SMALProviderServiceTracker(final BundleContext context) {
         super();
         this.context = context;
     }
@@ -87,7 +87,7 @@ public final class MailProviderServiceTracker implements ServiceTrackerCustomize
             return null;
         }
         try {
-            if (MailProviderRegistry.registerMailProvider(protocol.toString(), addedService)) {
+            if (SMALMailProviderRegistry.registerMailProvider(protocol.toString(), addedService)) {
                 LOG.info(new StringBuilder(64).append("Mail provider for protocol '").append(protocol.toString()).append(
                     "' successfully registered"));
             } else {
@@ -96,6 +96,7 @@ public final class MailProviderServiceTracker implements ServiceTrackerCustomize
                         "' could not be added.").append(" Another provider which supports the protocol has already been registered."));
                     context.ungetService(reference);
                 }
+                context.ungetService(reference);
                 return null;
             }
         } catch (final OXException e) {
@@ -117,7 +118,7 @@ public final class MailProviderServiceTracker implements ServiceTrackerCustomize
             try {
                 try {
                     final MailProvider provider = service;
-                    MailProviderRegistry.unregisterMailProvider(provider);
+                    SMALMailProviderRegistry.unregisterMailProvider(provider);
                     LOG.info(new StringBuilder(64).append("Mail provider for protocol '").append(provider.getProtocol().toString()).append(
                         "' successfully unregistered"));
                 } catch (final OXException e) {

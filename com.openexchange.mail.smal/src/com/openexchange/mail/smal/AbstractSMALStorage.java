@@ -93,14 +93,14 @@ public abstract class AbstractSMALStorage {
      * @throws OXException If connect attempt fails
      */
     protected void connect() throws OXException {
-        connect();
+        delegateMailAccess.connect();
     }
 
     /**
      * Closes real mail access.
      */
     protected void close() {
-        close();
+        delegateMailAccess.close(true);
     }
 
     /**
