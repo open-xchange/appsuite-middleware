@@ -57,6 +57,8 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailProvider;
+import com.openexchange.mail.permission.DefaultMailPermission;
+import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.session.Session;
 
@@ -66,6 +68,9 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SMALProvider extends AllMailProvider {
+
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SMALProvider.class));
 
     /**
      * SMAL protocol.
@@ -119,6 +124,16 @@ public final class SMALProvider extends AllMailProvider {
     @Override
     protected AbstractProtocolProperties getProtocolProperties() {
         return SMALStaticProperties.getInstance();
+    }
+
+    @Override
+    public MailPermission createNewMailPermission(final Session session, final int accountId) {
+        try {
+            return SMALMailProviderRegistry.getMailProviderBySession(session, accountId).createNewMailPermission(session, accountId);
+        } catch (final OXException e) {
+            LOG.error(e.getMessage(), e);
+            return new DefaultMailPermission();
+        }
     }
 
 }
