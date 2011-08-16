@@ -90,7 +90,7 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
      */
     public SMALMailAccess(final Session session, final int accountId) throws OXException {
         super(session, accountId);
-        this.delegateMailAccess = SMALMailProviderRegistry.getMailProviderBySession(session, accountId).createNewMailAccess(session, accountId);
+        this.delegateMailAccess = null == session ? null : SMALMailProviderRegistry.getMailProviderBySession(session, accountId).createNewMailAccess(session, accountId);
     }
 
     @Override
