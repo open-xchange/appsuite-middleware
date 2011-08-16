@@ -140,7 +140,7 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
 
     @Override
     public boolean ping() throws OXException {
-        return true;
+        return realMailAccess.ping();
     }
 
     @Override
