@@ -231,7 +231,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     }
 
     @Override
-    protected void releaseResources() {
+    public void releaseResources() {
         /*-
          *
          * Don't need to close when cached!
