@@ -66,9 +66,6 @@ import com.openexchange.session.Session;
  */
 public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMessageStorage> {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SMALMailAccess.class));
-
     private static final long serialVersionUID = 3887048765113161340L;
 
     private final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess;
