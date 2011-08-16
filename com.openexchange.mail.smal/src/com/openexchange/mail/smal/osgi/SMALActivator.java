@@ -49,8 +49,11 @@
 
 package com.openexchange.mail.smal.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.mail.api.MailProvider;
+import com.openexchange.mail.smal.SMALProvider;
 import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 
@@ -73,11 +76,15 @@ public class SMALActivator extends HousekeepingActivator {
         SMALServiceLookup.getInstance().setServiceLookup(this);
         track(MailProvider.class, new MailProviderServiceTracker(context));
         openTrackers();
+
+        final Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
+        dictionary.put("protocol", SMALProvider.PROTOCOL_SMAL.toString());
+        registerService(MailProvider.class, SMALProvider.getInstance(), dictionary);
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        super.stopBundle();
+        cleanUp();
         SMALServiceLookup.getInstance().setServiceLookup(null);
     }
 
