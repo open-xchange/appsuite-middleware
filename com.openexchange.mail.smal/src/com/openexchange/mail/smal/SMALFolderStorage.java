@@ -55,33 +55,22 @@ import com.openexchange.mail.Quota.Type;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.api.MailFolderStorage;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.session.Session;
 
-
 /**
- * {@link SMALFolderStorage}
- *
+ * {@link SMALFolderStorage} - The SMAL folder storage.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SMALFolderStorage extends MailFolderStorage {
-
-    private final Session session;
-
-    private final int accountId;
-
-    private final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> realMailAccess;
+public final class SMALFolderStorage extends AbstractSMALStorage implements IMailFolderStorage {
 
     /**
      * Initializes a new {@link SMALFolderStorage}.
      */
     public SMALFolderStorage(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> realMailAccess) {
-        super();
-        this.accountId = accountId;
-        this.realMailAccess = realMailAccess;
-        this.session = session;
+        super(session, accountId, realMailAccess);
     }
 
     @Override
@@ -89,161 +78,242 @@ public final class SMALFolderStorage extends MailFolderStorage {
         if (MailFolder.DEFAULT_FOLDER_ID.equals(fullName)) {
             return true;
         }
-        realMailAccess.connect(false);
+        connect();
         try {
             return realMailAccess.getFolderStorage().exists(fullName);
         } finally {
-            realMailAccess.close(true);
+            close();
         }
     }
 
     @Override
     public MailFolder getFolder(final String fullName) throws OXException {
-        realMailAccess.connect(false);
+        connect();
         try {
             return realMailAccess.getFolderStorage().getFolder(fullName);
         } finally {
-            realMailAccess.close(true);
+            close();
         }
     }
 
     @Override
     public MailFolder[] getSubfolders(final String parentFullName, final boolean all) throws OXException {
-        realMailAccess.connect(false);
+        connect();
         try {
             return realMailAccess.getFolderStorage().getSubfolders(parentFullName, all);
         } finally {
-            realMailAccess.close(true);
+            close();
         }
     }
 
     @Override
     public void checkDefaultFolders() throws OXException {
-        realMailAccess.connect(false);
+        connect();
         try {
             realMailAccess.getFolderStorage().checkDefaultFolders();
         } finally {
-            realMailAccess.close(true);
+            close();
         }
     }
 
     @Override
     public String createFolder(final MailFolderDescription toCreate) throws OXException {
-        realMailAccess.connect(false);
+        connect();
         try {
             return realMailAccess.getFolderStorage().createFolder(toCreate);
         } finally {
-            realMailAccess.close(true);
+            close();
         }
     }
 
     @Override
     public String updateFolder(final String fullName, final MailFolderDescription toUpdate) throws OXException {
-        realMailAccess.connect(false);
+        connect();
         try {
             return realMailAccess.getFolderStorage().updateFolder(fullName, toUpdate);
         } finally {
-            realMailAccess.close(true);
+            close();
         }
     }
 
     @Override
     public String moveFolder(final String fullName, final String newFullName) throws OXException {
-        realMailAccess.connect(false);
+        connect();
         try {
             return realMailAccess.getFolderStorage().moveFolder(fullName, newFullName);
         } finally {
-            realMailAccess.close(true);
+            close();
         }
     }
 
     @Override
     public String deleteFolder(final String fullName, final boolean hardDelete) throws OXException {
-        realMailAccess.connect(false);
+        connect();
         try {
             return realMailAccess.getFolderStorage().deleteFolder(fullName, hardDelete);
         } finally {
-            realMailAccess.close(true);
+            close();
         }
     }
 
     @Override
     public void clearFolder(final String fullName, final boolean hardDelete) throws OXException {
-        realMailAccess.connect(false);
+        connect();
         try {
             realMailAccess.getFolderStorage().clearFolder(fullName, hardDelete);
         } finally {
-            realMailAccess.close(true);
+            close();
         }
     }
 
     @Override
     public Quota[] getQuotas(final String fullName, final Type[] types) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        connect();
+        try {
+            return realMailAccess.getFolderStorage().getQuotas(fullName, types);
+        } finally {
+            close();
+        }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailFolderStorage#getConfirmedHamFolder()
-     */
     @Override
     public String getConfirmedHamFolder() throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        connect();
+        try {
+            return realMailAccess.getFolderStorage().getConfirmedHamFolder();
+        } finally {
+            close();
+        }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailFolderStorage#getConfirmedSpamFolder()
-     */
     @Override
     public String getConfirmedSpamFolder() throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        connect();
+        try {
+            return realMailAccess.getFolderStorage().getConfirmedSpamFolder();
+        } finally {
+            close();
+        }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailFolderStorage#getDraftsFolder()
-     */
     @Override
     public String getDraftsFolder() throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        connect();
+        try {
+            return realMailAccess.getFolderStorage().getDraftsFolder();
+        } finally {
+            close();
+        }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailFolderStorage#getSpamFolder()
-     */
     @Override
     public String getSpamFolder() throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        connect();
+        try {
+            return realMailAccess.getFolderStorage().getSpamFolder();
+        } finally {
+            close();
+        }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailFolderStorage#getSentFolder()
-     */
     @Override
     public String getSentFolder() throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        connect();
+        try {
+            return realMailAccess.getFolderStorage().getSentFolder();
+        } finally {
+            close();
+        }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailFolderStorage#getTrashFolder()
-     */
     @Override
     public String getTrashFolder() throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        connect();
+        try {
+            return realMailAccess.getFolderStorage().getTrashFolder();
+        } finally {
+            close();
+        }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailFolderStorage#releaseResources()
-     */
     @Override
-    public void releaseResources() throws OXException {
-        // TODO Auto-generated method stub
+    public MailFolder getRootFolder() throws OXException {
+        connect();
+        try {
+            return realMailAccess.getFolderStorage().getFolder(MailFolder.DEFAULT_FOLDER_ID);
+        } finally {
+            close();
+        }
+    }
 
+    @Override
+    public String getDefaultFolderPrefix() throws OXException {
+        connect();
+        try {
+            return realMailAccess.getFolderStorage().getDefaultFolderPrefix();
+        } finally {
+            close();
+        }
+    }
+
+    @Override
+    public String renameFolder(final String fullName, final String newName) throws OXException {
+        connect();
+        try {
+            return realMailAccess.getFolderStorage().renameFolder(fullName, newName);
+        } finally {
+            close();
+        }
+    }
+
+    @Override
+    public String deleteFolder(final String fullName) throws OXException {
+        connect();
+        try {
+            return realMailAccess.getFolderStorage().deleteFolder(fullName);
+        } finally {
+            close();
+        }
+    }
+
+    @Override
+    public void clearFolder(final String fullName) throws OXException {
+        connect();
+        try {
+            realMailAccess.getFolderStorage().clearFolder(fullName);
+        } finally {
+            close();
+        }
+    }
+
+    @Override
+    public MailFolder[] getPath2DefaultFolder(final String fullName) throws OXException {
+        connect();
+        try {
+            return realMailAccess.getFolderStorage().getPath2DefaultFolder(fullName);
+        } finally {
+            close();
+        }
+    }
+
+    @Override
+    public Quota getStorageQuota(final String fullName) throws OXException {
+        connect();
+        try {
+            return realMailAccess.getFolderStorage().getStorageQuota(fullName);
+        } finally {
+            close();
+        }
+    }
+
+    @Override
+    public Quota getMessageQuota(final String fullName) throws OXException {
+        connect();
+        try {
+            return realMailAccess.getFolderStorage().getMessageQuota(fullName);
+        } finally {
+            close();
+        }
     }
 
 }

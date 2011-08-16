@@ -54,88 +54,197 @@ import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
-import com.openexchange.mail.api.MailMessageStorage;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.search.SearchTerm;
-
+import com.openexchange.session.Session;
 
 /**
  * {@link SMALMessageStorage}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SMALMessageStorage extends MailMessageStorage {
+public final class SMALMessageStorage extends AbstractSMALStorage implements IMailMessageStorage {
 
     /**
      * Initializes a new {@link SMALMessageStorage}.
      */
-    public SMALMessageStorage() {
-        super();
-        // TODO Auto-generated constructor stub
-
+    public SMALMessageStorage(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> realMailAccess) {
+        super(session, accountId, realMailAccess);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailMessageStorage#appendMessages(java.lang.String, com.openexchange.mail.dataobjects.MailMessage[])
-     */
     @Override
-    public String[] appendMessages(String destFolder, MailMessage[] msgs) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+    public String[] appendMessages(final String destFolder, final MailMessage[] msgs) throws OXException {
+        connect();
+        try {
+            return realMailAccess.getMessageStorage().appendMessages(destFolder, msgs);
+        } finally {
+            close();
+        }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailMessageStorage#copyMessages(java.lang.String, java.lang.String, java.lang.String[], boolean)
-     */
     @Override
-    public String[] copyMessages(String sourceFolder, String destFolder, String[] mailIds, boolean fast) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+    public String[] copyMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws OXException {
+        connect();
+        try {
+            return realMailAccess.getMessageStorage().copyMessages(sourceFolder, destFolder, mailIds, fast);
+        } finally {
+            close();
+        }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailMessageStorage#deleteMessages(java.lang.String, java.lang.String[], boolean)
-     */
     @Override
-    public void deleteMessages(String folder, String[] mailIds, boolean hardDelete) throws OXException {
-        // TODO Auto-generated method stub
-
+    public void deleteMessages(final String folder, final String[] mailIds, final boolean hardDelete) throws OXException {
+        connect();
+        try {
+            realMailAccess.getMessageStorage().deleteMessages(folder, mailIds, hardDelete);
+        } finally {
+            close();
+        }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailMessageStorage#getMessages(java.lang.String, java.lang.String[], com.openexchange.mail.MailField[])
-     */
     @Override
-    public MailMessage[] getMessages(String folder, String[] mailIds, MailField[] fields) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+    public MailMessage[] getMessages(final String folder, final String[] mailIds, final MailField[] fields) throws OXException {
+        connect();
+        try {
+            return realMailAccess.getMessageStorage().getMessages(folder, mailIds, fields);
+        } finally {
+            close();
+        }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailMessageStorage#releaseResources()
-     */
     @Override
-    public void releaseResources() throws OXException {
-        // TODO Auto-generated method stub
-
+    public MailMessage[] searchMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
+        connect();
+        try {
+            return realMailAccess.getMessageStorage().searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
+        } finally {
+            close();
+        }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailMessageStorage#searchMessages(java.lang.String, com.openexchange.mail.IndexRange, com.openexchange.mail.MailSortField, com.openexchange.mail.OrderDirection, com.openexchange.mail.search.SearchTerm, com.openexchange.mail.MailField[])
-     */
     @Override
-    public MailMessage[] searchMessages(String folder, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] fields) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+    public void updateMessageFlags(final String folder, final String[] mailIds, final int flags, final boolean set) throws OXException {
+        connect();
+        try {
+            realMailAccess.getMessageStorage().updateMessageFlags(folder, mailIds, flags, set);
+        } finally {
+            close();
+        }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailMessageStorage#updateMessageFlags(java.lang.String, java.lang.String[], int, boolean)
-     */
     @Override
-    public void updateMessageFlags(String folder, String[] mailIds, int flags, boolean set) throws OXException {
-        // TODO Auto-generated method stub
+    public MailMessage[] getAllMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws OXException {
+        connect();
+        try {
+            return realMailAccess.getMessageStorage().getAllMessages(folder, indexRange, sortField, order, fields);
+        } finally {
+            close();
+        }
+    }
 
+    @Override
+    public MailPart getAttachment(final String folder, final String mailId, final String sequenceId) throws OXException {
+        connect();
+        try {
+            return realMailAccess.getMessageStorage().getAttachment(folder, mailId, sequenceId);
+        } finally {
+            close();
+        }
+    }
+
+    @Override
+    public MailPart getImageAttachment(final String folder, final String mailId, final String contentId) throws OXException {
+        connect();
+        try {
+            return realMailAccess.getMessageStorage().getImageAttachment(folder, mailId, contentId);
+        } finally {
+            close();
+        }
+    }
+
+    @Override
+    public MailMessage getMessage(final String folder, final String mailId, final boolean markSeen) throws OXException {
+        connect();
+        try {
+            return realMailAccess.getMessageStorage().getMessage(folder, mailId, markSeen);
+        } finally {
+            close();
+        }
+    }
+
+    @Override
+    public MailMessage[] getThreadSortedMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
+        connect();
+        try {
+            return realMailAccess.getMessageStorage().getThreadSortedMessages(folder, indexRange, sortField, order, searchTerm, fields);
+        } finally {
+            close();
+        }
+    }
+
+    @Override
+    public MailMessage[] getUnreadMessages(final String folder, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int limit) throws OXException {
+        connect();
+        try {
+            return realMailAccess.getMessageStorage().getUnreadMessages(folder, sortField, order, fields, limit);
+        } finally {
+            close();
+        }
+    }
+
+    @Override
+    public String[] moveMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws OXException {
+        connect();
+        try {
+            return realMailAccess.getMessageStorage().moveMessages(sourceFolder, destFolder, mailIds, fast);
+        } finally {
+            close();
+        }
+    }
+
+    @Override
+    public MailMessage saveDraft(final String draftFullname, final ComposedMailMessage draftMail) throws OXException {
+        connect();
+        try {
+            return realMailAccess.getMessageStorage().saveDraft(draftFullname, draftMail);
+        } finally {
+            close();
+        }
+    }
+
+    @Override
+    public void updateMessageColorLabel(final String folder, final String[] mailIds, final int colorLabel) throws OXException {
+        connect();
+        try {
+            realMailAccess.getMessageStorage().updateMessageColorLabel(folder, mailIds, colorLabel);
+        } finally {
+            close();
+        }
+    }
+
+    @Override
+    public MailMessage[] getNewAndModifiedMessages(final String folder, final MailField[] fields) throws OXException {
+        connect();
+        try {
+            return realMailAccess.getMessageStorage().getNewAndModifiedMessages(folder, fields);
+        } finally {
+            close();
+        }
+    }
+
+    @Override
+    public MailMessage[] getDeletedMessages(final String folder, final MailField[] fields) throws OXException {
+        connect();
+        try {
+            return realMailAccess.getMessageStorage().getDeletedMessages(folder, fields);
+        } finally {
+            close();
+        }
     }
 
 }

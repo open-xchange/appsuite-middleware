@@ -50,6 +50,7 @@
 package com.openexchange.mail.smal;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailProperties;
@@ -73,6 +74,12 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
     private final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> realMailAccess;
 
     private boolean connected;
+
+    private MailLogicTools logicTools;
+
+    private SMALMessageStorage messageStorage;
+
+    private SMALFolderStorage folderStorage;
 
     /**
      * Initializes a new {@link SMALMailAccess}.
@@ -138,20 +145,35 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
 
     @Override
     public SMALFolderStorage getFolderStorage() throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        if (!connected) {
+            throw MailExceptionCode.NOT_CONNECTED.create();
+        }
+        if (null == folderStorage) {
+            folderStorage = new SMALFolderStorage(session, accountId, realMailAccess);
+        }
+        return folderStorage;
     }
 
     @Override
     public SMALMessageStorage getMessageStorage() throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        if (!connected) {
+            throw MailExceptionCode.NOT_CONNECTED.create();
+        }
+        if (null == messageStorage) {
+            messageStorage = new SMALMessageStorage(session, accountId, realMailAccess);
+        }
+        return messageStorage;
     }
 
     @Override
     public MailLogicTools getLogicTools() throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        if (!connected) {
+            throw MailExceptionCode.NOT_CONNECTED.create();
+        }
+        if (null == logicTools) {
+            logicTools = new MailLogicTools(session, accountId);
+        }
+        return logicTools;
     }
 
     @Override
