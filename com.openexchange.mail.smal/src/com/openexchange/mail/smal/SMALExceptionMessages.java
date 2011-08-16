@@ -70,8 +70,8 @@ public final class SMALExceptionMessages implements LocalizableStrings {
     // Missing main extension attribute for user %1$s in context %2$s.
     public static final String MISSING_MAIN_EXTENSION_MSG = "Missing main extension attribute for user %1$s in context %2$s.";
 
-    // HTTP request to VoipNow server %1$s failed. Status line: %2$s
-    public static final String HTTP_REQUEST_FAILED_MSG = "HTTP request to VoipNow server \"%1$s\" failed. Status line: %2$s";
+    // HTTP request to server %1$s failed. Status line: %2$s
+    public static final String HTTP_REQUEST_FAILED_MSG = "HTTP request to server \"%1$s\" failed. Status line: %2$s";
 
     // JSON request failed. Error code: %1$s. Error message: %2$s
     public static final String JSON_REQUEST_FAILED_MSG = "JSON request failed. Error code: %1$s. Error message: %2$s";

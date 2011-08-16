@@ -78,7 +78,7 @@ public enum SMALExceptionCodes implements OXExceptionCode {
      */
     MISSING_MAIN_EXTENSION(SMALExceptionMessages.MISSING_MAIN_EXTENSION_MSG, CATEGORY_CONFIGURATION, 4),
     /**
-     * HTTP request to VoipNow server %1$s failed. Status line: %2$s
+     * HTTP request to server %1$s failed. Status line: %2$s
      */
     HTTP_REQUEST_FAILED(SMALExceptionMessages.HTTP_REQUEST_FAILED_MSG, CATEGORY_ERROR, 5),
     /**
