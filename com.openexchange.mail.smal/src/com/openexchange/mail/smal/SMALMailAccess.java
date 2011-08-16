@@ -71,7 +71,7 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
 
     private static final long serialVersionUID = 3887048765113161340L;
 
-    private final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> realMailAccess;
+    private final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess;
 
     private boolean connected;
 
@@ -90,7 +90,7 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
      */
     public SMALMailAccess(final Session session, final int accountId) throws OXException {
         super(session, accountId);
-        this.realMailAccess = SMALMailProviderRegistry.getMailProviderBySession(session, accountId).createNewMailAccess(session, accountId);
+        this.delegateMailAccess = SMALMailProviderRegistry.getMailProviderBySession(session, accountId).createNewMailAccess(session, accountId);
     }
 
     @Override
@@ -131,7 +131,7 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
 
     @Override
     public MailConfig getMailConfig() throws OXException {
-        return realMailAccess.getMailConfig();
+        return delegateMailAccess.getMailConfig();
     }
 
     @Override
@@ -141,7 +141,7 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
 
     @Override
     public boolean ping() throws OXException {
-        return realMailAccess.ping();
+        return delegateMailAccess.ping();
     }
 
     @Override
@@ -150,7 +150,7 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
             throw MailExceptionCode.NOT_CONNECTED.create();
         }
         if (null == folderStorage) {
-            folderStorage = new SMALFolderStorage(session, accountId, realMailAccess);
+            folderStorage = new SMALFolderStorage(session, accountId, delegateMailAccess);
         }
         return folderStorage;
     }
@@ -161,7 +161,7 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
             throw MailExceptionCode.NOT_CONNECTED.create();
         }
         if (null == messageStorage) {
-            messageStorage = new SMALMessageStorage(session, accountId, realMailAccess);
+            messageStorage = new SMALMessageStorage(session, accountId, delegateMailAccess);
         }
         return messageStorage;
     }

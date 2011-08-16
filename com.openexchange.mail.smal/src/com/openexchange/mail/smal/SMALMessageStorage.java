@@ -81,7 +81,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
     public String[] appendMessages(final String destFolder, final MailMessage[] msgs) throws OXException {
         connect();
         try {
-            return realMailAccess.getMessageStorage().appendMessages(destFolder, msgs);
+            return delegateMailAccess.getMessageStorage().appendMessages(destFolder, msgs);
         } finally {
             close();
         }
@@ -91,7 +91,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
     public String[] copyMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws OXException {
         connect();
         try {
-            return realMailAccess.getMessageStorage().copyMessages(sourceFolder, destFolder, mailIds, fast);
+            return delegateMailAccess.getMessageStorage().copyMessages(sourceFolder, destFolder, mailIds, fast);
         } finally {
             close();
         }
@@ -101,7 +101,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
     public void deleteMessages(final String folder, final String[] mailIds, final boolean hardDelete) throws OXException {
         connect();
         try {
-            realMailAccess.getMessageStorage().deleteMessages(folder, mailIds, hardDelete);
+            delegateMailAccess.getMessageStorage().deleteMessages(folder, mailIds, hardDelete);
         } finally {
             close();
         }
@@ -111,7 +111,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
     public MailMessage[] getMessages(final String folder, final String[] mailIds, final MailField[] fields) throws OXException {
         connect();
         try {
-            return realMailAccess.getMessageStorage().getMessages(folder, mailIds, fields);
+            return delegateMailAccess.getMessageStorage().getMessages(folder, mailIds, fields);
         } finally {
             close();
         }
@@ -121,7 +121,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
     public MailMessage[] searchMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
         connect();
         try {
-            return realMailAccess.getMessageStorage().searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
+            return delegateMailAccess.getMessageStorage().searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
         } finally {
             close();
         }
@@ -131,7 +131,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
     public void updateMessageFlags(final String folder, final String[] mailIds, final int flags, final boolean set) throws OXException {
         connect();
         try {
-            realMailAccess.getMessageStorage().updateMessageFlags(folder, mailIds, flags, set);
+            delegateMailAccess.getMessageStorage().updateMessageFlags(folder, mailIds, flags, set);
         } finally {
             close();
         }
@@ -141,7 +141,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
     public MailMessage[] getAllMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws OXException {
         connect();
         try {
-            return realMailAccess.getMessageStorage().getAllMessages(folder, indexRange, sortField, order, fields);
+            return delegateMailAccess.getMessageStorage().getAllMessages(folder, indexRange, sortField, order, fields);
         } finally {
             close();
         }
@@ -151,7 +151,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
     public MailPart getAttachment(final String folder, final String mailId, final String sequenceId) throws OXException {
         connect();
         try {
-            return realMailAccess.getMessageStorage().getAttachment(folder, mailId, sequenceId);
+            return delegateMailAccess.getMessageStorage().getAttachment(folder, mailId, sequenceId);
         } finally {
             close();
         }
@@ -161,7 +161,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
     public MailPart getImageAttachment(final String folder, final String mailId, final String contentId) throws OXException {
         connect();
         try {
-            return realMailAccess.getMessageStorage().getImageAttachment(folder, mailId, contentId);
+            return delegateMailAccess.getMessageStorage().getImageAttachment(folder, mailId, contentId);
         } finally {
             close();
         }
@@ -171,7 +171,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
     public MailMessage getMessage(final String folder, final String mailId, final boolean markSeen) throws OXException {
         connect();
         try {
-            return realMailAccess.getMessageStorage().getMessage(folder, mailId, markSeen);
+            return delegateMailAccess.getMessageStorage().getMessage(folder, mailId, markSeen);
         } finally {
             close();
         }
@@ -181,7 +181,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
     public MailMessage[] getThreadSortedMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
         connect();
         try {
-            return realMailAccess.getMessageStorage().getThreadSortedMessages(folder, indexRange, sortField, order, searchTerm, fields);
+            return delegateMailAccess.getMessageStorage().getThreadSortedMessages(folder, indexRange, sortField, order, searchTerm, fields);
         } finally {
             close();
         }
@@ -191,7 +191,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
     public MailMessage[] getUnreadMessages(final String folder, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int limit) throws OXException {
         connect();
         try {
-            return realMailAccess.getMessageStorage().getUnreadMessages(folder, sortField, order, fields, limit);
+            return delegateMailAccess.getMessageStorage().getUnreadMessages(folder, sortField, order, fields, limit);
         } finally {
             close();
         }
@@ -201,7 +201,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
     public String[] moveMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws OXException {
         connect();
         try {
-            return realMailAccess.getMessageStorage().moveMessages(sourceFolder, destFolder, mailIds, fast);
+            return delegateMailAccess.getMessageStorage().moveMessages(sourceFolder, destFolder, mailIds, fast);
         } finally {
             close();
         }
@@ -211,7 +211,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
     public MailMessage saveDraft(final String draftFullname, final ComposedMailMessage draftMail) throws OXException {
         connect();
         try {
-            return realMailAccess.getMessageStorage().saveDraft(draftFullname, draftMail);
+            return delegateMailAccess.getMessageStorage().saveDraft(draftFullname, draftMail);
         } finally {
             close();
         }
@@ -221,7 +221,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
     public void updateMessageColorLabel(final String folder, final String[] mailIds, final int colorLabel) throws OXException {
         connect();
         try {
-            realMailAccess.getMessageStorage().updateMessageColorLabel(folder, mailIds, colorLabel);
+            delegateMailAccess.getMessageStorage().updateMessageColorLabel(folder, mailIds, colorLabel);
         } finally {
             close();
         }
@@ -231,7 +231,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
     public MailMessage[] getNewAndModifiedMessages(final String folder, final MailField[] fields) throws OXException {
         connect();
         try {
-            return realMailAccess.getMessageStorage().getNewAndModifiedMessages(folder, fields);
+            return delegateMailAccess.getMessageStorage().getNewAndModifiedMessages(folder, fields);
         } finally {
             close();
         }
@@ -241,7 +241,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
     public MailMessage[] getDeletedMessages(final String folder, final MailField[] fields) throws OXException {
         connect();
         try {
-            return realMailAccess.getMessageStorage().getDeletedMessages(folder, fields);
+            return delegateMailAccess.getMessageStorage().getDeletedMessages(folder, fields);
         } finally {
             close();
         }

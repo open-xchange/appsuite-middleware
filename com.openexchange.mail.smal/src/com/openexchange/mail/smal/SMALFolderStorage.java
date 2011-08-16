@@ -80,7 +80,7 @@ public final class SMALFolderStorage extends AbstractSMALStorage implements IMai
         }
         connect();
         try {
-            return realMailAccess.getFolderStorage().exists(fullName);
+            return delegateMailAccess.getFolderStorage().exists(fullName);
         } finally {
             close();
         }
@@ -90,7 +90,7 @@ public final class SMALFolderStorage extends AbstractSMALStorage implements IMai
     public MailFolder getFolder(final String fullName) throws OXException {
         connect();
         try {
-            return realMailAccess.getFolderStorage().getFolder(fullName);
+            return delegateMailAccess.getFolderStorage().getFolder(fullName);
         } finally {
             close();
         }
@@ -100,7 +100,7 @@ public final class SMALFolderStorage extends AbstractSMALStorage implements IMai
     public MailFolder[] getSubfolders(final String parentFullName, final boolean all) throws OXException {
         connect();
         try {
-            return realMailAccess.getFolderStorage().getSubfolders(parentFullName, all);
+            return delegateMailAccess.getFolderStorage().getSubfolders(parentFullName, all);
         } finally {
             close();
         }
@@ -110,7 +110,7 @@ public final class SMALFolderStorage extends AbstractSMALStorage implements IMai
     public void checkDefaultFolders() throws OXException {
         connect();
         try {
-            realMailAccess.getFolderStorage().checkDefaultFolders();
+            delegateMailAccess.getFolderStorage().checkDefaultFolders();
         } finally {
             close();
         }
@@ -120,7 +120,7 @@ public final class SMALFolderStorage extends AbstractSMALStorage implements IMai
     public String createFolder(final MailFolderDescription toCreate) throws OXException {
         connect();
         try {
-            return realMailAccess.getFolderStorage().createFolder(toCreate);
+            return delegateMailAccess.getFolderStorage().createFolder(toCreate);
         } finally {
             close();
         }
@@ -130,7 +130,7 @@ public final class SMALFolderStorage extends AbstractSMALStorage implements IMai
     public String updateFolder(final String fullName, final MailFolderDescription toUpdate) throws OXException {
         connect();
         try {
-            return realMailAccess.getFolderStorage().updateFolder(fullName, toUpdate);
+            return delegateMailAccess.getFolderStorage().updateFolder(fullName, toUpdate);
         } finally {
             close();
         }
@@ -140,7 +140,7 @@ public final class SMALFolderStorage extends AbstractSMALStorage implements IMai
     public String moveFolder(final String fullName, final String newFullName) throws OXException {
         connect();
         try {
-            return realMailAccess.getFolderStorage().moveFolder(fullName, newFullName);
+            return delegateMailAccess.getFolderStorage().moveFolder(fullName, newFullName);
         } finally {
             close();
         }
@@ -150,7 +150,7 @@ public final class SMALFolderStorage extends AbstractSMALStorage implements IMai
     public String deleteFolder(final String fullName, final boolean hardDelete) throws OXException {
         connect();
         try {
-            return realMailAccess.getFolderStorage().deleteFolder(fullName, hardDelete);
+            return delegateMailAccess.getFolderStorage().deleteFolder(fullName, hardDelete);
         } finally {
             close();
         }
@@ -160,7 +160,7 @@ public final class SMALFolderStorage extends AbstractSMALStorage implements IMai
     public void clearFolder(final String fullName, final boolean hardDelete) throws OXException {
         connect();
         try {
-            realMailAccess.getFolderStorage().clearFolder(fullName, hardDelete);
+            delegateMailAccess.getFolderStorage().clearFolder(fullName, hardDelete);
         } finally {
             close();
         }
@@ -170,7 +170,7 @@ public final class SMALFolderStorage extends AbstractSMALStorage implements IMai
     public Quota[] getQuotas(final String fullName, final Type[] types) throws OXException {
         connect();
         try {
-            return realMailAccess.getFolderStorage().getQuotas(fullName, types);
+            return delegateMailAccess.getFolderStorage().getQuotas(fullName, types);
         } finally {
             close();
         }
@@ -180,7 +180,7 @@ public final class SMALFolderStorage extends AbstractSMALStorage implements IMai
     public String getConfirmedHamFolder() throws OXException {
         connect();
         try {
-            return realMailAccess.getFolderStorage().getConfirmedHamFolder();
+            return delegateMailAccess.getFolderStorage().getConfirmedHamFolder();
         } finally {
             close();
         }
@@ -190,7 +190,7 @@ public final class SMALFolderStorage extends AbstractSMALStorage implements IMai
     public String getConfirmedSpamFolder() throws OXException {
         connect();
         try {
-            return realMailAccess.getFolderStorage().getConfirmedSpamFolder();
+            return delegateMailAccess.getFolderStorage().getConfirmedSpamFolder();
         } finally {
             close();
         }
@@ -200,7 +200,7 @@ public final class SMALFolderStorage extends AbstractSMALStorage implements IMai
     public String getDraftsFolder() throws OXException {
         connect();
         try {
-            return realMailAccess.getFolderStorage().getDraftsFolder();
+            return delegateMailAccess.getFolderStorage().getDraftsFolder();
         } finally {
             close();
         }
@@ -210,7 +210,7 @@ public final class SMALFolderStorage extends AbstractSMALStorage implements IMai
     public String getSpamFolder() throws OXException {
         connect();
         try {
-            return realMailAccess.getFolderStorage().getSpamFolder();
+            return delegateMailAccess.getFolderStorage().getSpamFolder();
         } finally {
             close();
         }
@@ -220,7 +220,7 @@ public final class SMALFolderStorage extends AbstractSMALStorage implements IMai
     public String getSentFolder() throws OXException {
         connect();
         try {
-            return realMailAccess.getFolderStorage().getSentFolder();
+            return delegateMailAccess.getFolderStorage().getSentFolder();
         } finally {
             close();
         }
@@ -230,7 +230,7 @@ public final class SMALFolderStorage extends AbstractSMALStorage implements IMai
     public String getTrashFolder() throws OXException {
         connect();
         try {
-            return realMailAccess.getFolderStorage().getTrashFolder();
+            return delegateMailAccess.getFolderStorage().getTrashFolder();
         } finally {
             close();
         }
@@ -240,7 +240,7 @@ public final class SMALFolderStorage extends AbstractSMALStorage implements IMai
     public MailFolder getRootFolder() throws OXException {
         connect();
         try {
-            return realMailAccess.getFolderStorage().getFolder(MailFolder.DEFAULT_FOLDER_ID);
+            return delegateMailAccess.getFolderStorage().getFolder(MailFolder.DEFAULT_FOLDER_ID);
         } finally {
             close();
         }
@@ -250,7 +250,7 @@ public final class SMALFolderStorage extends AbstractSMALStorage implements IMai
     public String getDefaultFolderPrefix() throws OXException {
         connect();
         try {
-            return realMailAccess.getFolderStorage().getDefaultFolderPrefix();
+            return delegateMailAccess.getFolderStorage().getDefaultFolderPrefix();
         } finally {
             close();
         }
@@ -260,7 +260,7 @@ public final class SMALFolderStorage extends AbstractSMALStorage implements IMai
     public String renameFolder(final String fullName, final String newName) throws OXException {
         connect();
         try {
-            return realMailAccess.getFolderStorage().renameFolder(fullName, newName);
+            return delegateMailAccess.getFolderStorage().renameFolder(fullName, newName);
         } finally {
             close();
         }
@@ -270,7 +270,7 @@ public final class SMALFolderStorage extends AbstractSMALStorage implements IMai
     public String deleteFolder(final String fullName) throws OXException {
         connect();
         try {
-            return realMailAccess.getFolderStorage().deleteFolder(fullName);
+            return delegateMailAccess.getFolderStorage().deleteFolder(fullName);
         } finally {
             close();
         }
@@ -280,7 +280,7 @@ public final class SMALFolderStorage extends AbstractSMALStorage implements IMai
     public void clearFolder(final String fullName) throws OXException {
         connect();
         try {
-            realMailAccess.getFolderStorage().clearFolder(fullName);
+            delegateMailAccess.getFolderStorage().clearFolder(fullName);
         } finally {
             close();
         }
@@ -290,7 +290,7 @@ public final class SMALFolderStorage extends AbstractSMALStorage implements IMai
     public MailFolder[] getPath2DefaultFolder(final String fullName) throws OXException {
         connect();
         try {
-            return realMailAccess.getFolderStorage().getPath2DefaultFolder(fullName);
+            return delegateMailAccess.getFolderStorage().getPath2DefaultFolder(fullName);
         } finally {
             close();
         }
@@ -300,7 +300,7 @@ public final class SMALFolderStorage extends AbstractSMALStorage implements IMai
     public Quota getStorageQuota(final String fullName) throws OXException {
         connect();
         try {
-            return realMailAccess.getFolderStorage().getStorageQuota(fullName);
+            return delegateMailAccess.getFolderStorage().getStorageQuota(fullName);
         } finally {
             close();
         }
@@ -310,7 +310,7 @@ public final class SMALFolderStorage extends AbstractSMALStorage implements IMai
     public Quota getMessageQuota(final String fullName) throws OXException {
         connect();
         try {
-            return realMailAccess.getFolderStorage().getMessageQuota(fullName);
+            return delegateMailAccess.getFolderStorage().getMessageQuota(fullName);
         } finally {
             close();
         }

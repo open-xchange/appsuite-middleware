@@ -73,18 +73,18 @@ public abstract class AbstractSMALStorage {
     protected final int accountId;
 
     /**
-     * The real mail access.
+     * The delegate mail access.
      */
-    protected final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> realMailAccess;
+    protected final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess;
 
     /**
      * Initializes a new {@link AbstractSMALStorage}.
      */
-    protected AbstractSMALStorage(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> realMailAccess) {
+    protected AbstractSMALStorage(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess) {
         super();
         this.session = session;
         this.accountId = accountId;
-        this.realMailAccess = realMailAccess;
+        this.delegateMailAccess = delegateMailAccess;
     }
 
     /**
@@ -109,7 +109,7 @@ public abstract class AbstractSMALStorage {
      * @throws OXException If resources cannot be released
      */
     public void releaseResources() throws OXException {
-        realMailAccess.invokeReleaseResources();
+        delegateMailAccess.invokeReleaseResources();
     }
 
 }
