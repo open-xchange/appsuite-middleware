@@ -60,7 +60,7 @@ import com.openexchange.mail.api.MailLogicTools;
 import com.openexchange.session.Session;
 
 /**
- * {@link SMALMailAccess}
+ * {@link SMALMailAccess} - The SMAL mail access.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
