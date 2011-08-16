@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.smal.osgi;
 
+import com.openexchange.mail.api.MailProvider;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 
 /**
@@ -67,7 +68,8 @@ public class SMALActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-
+        track(MailProvider.class, new MailProviderServiceTracker(context));
+        openTrackers();
     }
 
     @Override
