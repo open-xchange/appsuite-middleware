@@ -49,14 +49,15 @@
 
 package com.openexchange.ajax.contact.action;
 
-import com.openexchange.exception.OXException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.parser.ContactParser;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
@@ -119,7 +120,13 @@ public class GetResponse extends AbstractAJAXResponse {
             final String path = "/ajax/image?uid=";
             int index = imageUrl.indexOf(path);
             
-            return imageUrl.substring(index + path.length(), imageUrl.length());
+            String uid;
+            try {
+                uid = URLDecoder.decode(imageUrl.substring(index + path.length(), imageUrl.length()), "UTF-8");
+                return uid;
+            } catch (UnsupportedEncodingException e) {
+                throw OXException.general(e.getMessage());
+            }            
         }
     }
     
