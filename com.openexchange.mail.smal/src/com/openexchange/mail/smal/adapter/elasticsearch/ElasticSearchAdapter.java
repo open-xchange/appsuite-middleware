@@ -117,7 +117,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
 
     private final String clusterName;
 
-    private final String indexName;
+    private final String indexNamePrefix;
 
     private final String indexType;
 
@@ -130,7 +130,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         super();
         syncFlag = new AtomicBoolean();
         clusterName = Constants.CLUSTER_NAME;
-        indexName = Constants.INDEX_NAME;
+        indexNamePrefix = Constants.INDEX_NAME_PREFIX;
         indexType = Constants.INDEX_TYPE;
     }
 
@@ -153,19 +153,6 @@ public final class ElasticSearchAdapter implements IndexAdapter {
          * Create the (transport) client
          */
         client = new TransportClient(settingsBuilder.build());
-        /*
-         * Create the index
-         */
-        try {
-            client.admin().indices().create(new CreateIndexRequest(indexName)).actionGet();
-            LOG.info("Index \"" + indexName + "\" successfully created.");
-        } catch (final Exception ex) {
-            LOG.info("Index \"" + indexName + "\" already exists.");
-        }
-        /*
-         * Create the mapping definition for a mail
-         */
-        Mapping.createMailMapping(client);
     }
 
     @Override
@@ -183,7 +170,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             /*
              * Compose search request
              */
-            final SearchRequestBuilder builder = client.prepareSearch(indexName);
+            final SearchRequestBuilder builder = client.prepareSearch(indexNamePrefix + session.getContextId());
             // builder.addSort("createdAt", SortOrder.DESC);
             // builder.setFrom(page * hitsPerPage).setSize(hitsPerPage);
             builder.setQuery(queryBuilder);
@@ -245,15 +232,26 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         return map.containsKey(indexName);
     }
 
+    
+
     public void createIndex(final String indexName) {
-        // no need for the following because of _default mapping under config
-        // String fileAsString = Helper.readInputStream(getClass().getResourceAsStream("tweet.json"));
-        // new CreateIndexRequest(indexName).mapping(indexType, fileAsString)
-        client.admin().indices().create(new CreateIndexRequest(indexName)).actionGet();
-        // waitForYellow();
+        /*
+         * Create the index
+         */
+        try {
+            client.admin().indices().create(new CreateIndexRequest(indexName)).actionGet();
+            LOG.info("Index \"" + indexName + "\" successfully created.");
+            // waitForYellow();
+            /*
+             * Create the mapping definition for a mail
+             */
+            Mapping.createMailMapping(client, indexName);
+        } catch (final Exception ex) {
+            LOG.info("Index \"" + indexName + "\" already exists.");
+        }
     }
 
-    public void saveCreateIndex(final boolean log) {
+    public void saveCreateIndex(final String indexName, final boolean log) {
         // if (!indexExists(name)) {
         try {
             createIndex(indexName);
@@ -271,21 +269,21 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     /**
      * Waits for yellow status.
      */
-    void waitForYellow() {
+    void waitForYellow(final String indexName) {
         client.admin().cluster().health(new ClusterHealthRequest(indexName).waitForYellowStatus()).actionGet();
     }
 
     /**
      * Waits for green status.
      */
-    void waitForGreen() {
+    void waitForGreen(final String indexName) {
         client.admin().cluster().health(new ClusterHealthRequest(indexName).waitForGreenStatus()).actionGet();
     }
 
     /**
      * Explicitly refresh one or more indices (making the content indexed since the last refresh searchable).
      */
-    public void refresh() {
+    public void refresh(final String indexName) {
         final RefreshResponse rsp = client.admin().indices().refresh(new RefreshRequest(indexName)).actionGet();
     }
 
@@ -294,7 +292,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
      * 
      * @return The number of mails
      */
-    public long countAll() {
+    public long countAll(final String indexName) {
         final CountResponse response = client.prepareCount(indexName).setQuery(QueryBuilders.matchAllQuery()).execute().actionGet();
         return response.getCount();
     }
@@ -305,7 +303,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             final String id = new MailPath(mail.getAccountId(), mail.getFolder(), mail.getMailId()).toString();
             final XContentBuilder b = createDoc(id, mail);
             final IndexRequestBuilder irb =
-                client.prepareIndex(indexName, indexType, id).setConsistencyLevel(WriteConsistencyLevel.DEFAULT).setSource(b);
+                client.prepareIndex(indexNamePrefix + session.getContextId(), indexType, id).setConsistencyLevel(WriteConsistencyLevel.DEFAULT).setSource(b);
             irb.execute().actionGet();
         } catch (final ElasticSearchException e) {
             throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
@@ -344,26 +342,20 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         }
     }
 
-    public void feedDoc(final String mailId, final XContentBuilder b) {
-        final IndexRequestBuilder irb =
-            client.prepareIndex(indexName, indexType, mailId).setConsistencyLevel(WriteConsistencyLevel.DEFAULT).setSource(b);
-        irb.execute().actionGet();
-    }
-
-    public void deleteById(final String mailId) {
+    public void deleteById(final String mailId, final String indexName) {
         final DeleteResponse response = client.prepareDelete(indexName, indexType, mailId).execute().actionGet();
     }
 
-    public void deleteAll() {
+    public void deleteAll(final String indexName) {
         // client.prepareIndex().setOpType(OpType.)
         // there is an index delete operation
         // http://www.elasticsearch.com/docs/elasticsearch/rest_api/admin/indices/delete_index/
 
         client.prepareDeleteByQuery(indexName).setQuery(QueryBuilders.matchAllQuery()).execute().actionGet();
-        refresh();
+        refresh(indexName);
     }
 
-    public OptimizeResponse optimize(final int optimizeToSegmentsAfterUpdate) {
+    public OptimizeResponse optimize(final String indexName, final int optimizeToSegmentsAfterUpdate) {
         return client.admin().indices().optimize(new OptimizeRequest(indexName).maxNumSegments(optimizeToSegmentsAfterUpdate)).actionGet();
     }
 

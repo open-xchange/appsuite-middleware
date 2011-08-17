@@ -71,7 +71,7 @@ public final class Constants {
     /**
      * The name for mail index.
      */
-    public static final String INDEX_NAME = "mail_index";
+    public static final String INDEX_NAME_PREFIX = "mail_index_";
 
     /**
      * The type for mail index.
@@ -81,6 +81,8 @@ public final class Constants {
     // ------------------- FIELD NAMES ----------------------
     
     public static final String FIELD_ID = "id";
+
+    public static final String FIELD_FULL_NAME = "full_name";
 
     public static final String FIELD_BODY = "body";
 
