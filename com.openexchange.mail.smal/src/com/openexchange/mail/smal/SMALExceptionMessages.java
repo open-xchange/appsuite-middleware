@@ -67,8 +67,8 @@ public final class SMALExceptionMessages implements LocalizableStrings {
     // Invalid property value in property "%1$s": %2$s
     public static final String INVALID_PROPERTY_MSG = "Invalid property value in property \"%1$s\": %2$s";
 
-    // Missing main extension attribute for user %1$s in context %2$s.
-    public static final String MISSING_MAIN_EXTENSION_MSG = "Missing main extension attribute for user %1$s in context %2$s.";
+    // A JSON error occurred: %1$s
+    public static final String JSON_ERROR_MSG = "A JSON error occurred: %1$s";
 
     // HTTP request to server %1$s failed. Status line: %2$s
     public static final String HTTP_REQUEST_FAILED_MSG = "HTTP request to server \"%1$s\" failed. Status line: %2$s";
@@ -79,8 +79,8 @@ public final class SMALExceptionMessages implements LocalizableStrings {
     // A remote error occurred: %1$s
     public static final String REMOTE_ERROR_MSG = "A remote error occurred: %1$s";
 
-    // A SOAP fault occurred: %1$s
-    public static final String SOAP_FAULT_MSG = "A SOAP fault occurred: %1$s";
+    // An index fault occurred: %1$s
+    public static final String INDEX_FAULT_MSG = "An index fault occurred: %1$s";
 
     // A HTTP error occurred: %1$s
     public static final String HTTP_ERROR_MSG = "A HTTP error occurred: %1$s";

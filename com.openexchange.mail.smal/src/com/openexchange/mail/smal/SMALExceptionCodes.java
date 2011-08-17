@@ -74,9 +74,9 @@ public enum SMALExceptionCodes implements OXExceptionCode {
      */
     INVALID_PROPERTY(SMALExceptionMessages.INVALID_PROPERTY_MSG, CATEGORY_ERROR, 3),
     /**
-     * Missing main extension attribute for user %1$s in context %2$s.
+     * A JSON error occurred: %1$s
      */
-    MISSING_MAIN_EXTENSION(SMALExceptionMessages.MISSING_MAIN_EXTENSION_MSG, CATEGORY_CONFIGURATION, 4),
+    JSON_ERROR(SMALExceptionMessages.JSON_ERROR_MSG, CATEGORY_CONFIGURATION, 4),
     /**
      * HTTP request to server %1$s failed. Status line: %2$s
      */
@@ -90,9 +90,9 @@ public enum SMALExceptionCodes implements OXExceptionCode {
      */
     REMOTE_ERROR(SMALExceptionMessages.REMOTE_ERROR_MSG, CATEGORY_ERROR, 7),
     /**
-     * A SOAP fault occurred: %1$s
+     * An index fault occurred: %1$s
      */
-    SOAP_FAULT(SMALExceptionMessages.SOAP_FAULT_MSG, CATEGORY_ERROR, 8),
+    INDEX_FAULT(SMALExceptionMessages.INDEX_FAULT_MSG, CATEGORY_ERROR, 8),
     /**
      * A HTTP error occurred: %1$s
      */

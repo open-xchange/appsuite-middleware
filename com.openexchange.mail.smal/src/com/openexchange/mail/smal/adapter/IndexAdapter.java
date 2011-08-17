@@ -49,10 +49,13 @@
 
 package com.openexchange.mail.smal.adapter;
 
-import org.json.JSONObject;
+import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.search.SearchTerm;
 
 /**
- * {@link IndexAdapter}
+ * {@link IndexAdapter} - The adapter for a search index.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -60,19 +63,32 @@ public interface IndexAdapter {
 
     /**
      * Starts the index adapter.
+     * 
+     * @throws OXException If start-up fails
      */
-    public void start();
+    public void start() throws OXException;
 
     /**
      * Stops the index adapter.
+     * 
+     * @throws OXException If shut-down fails
      */
-    public void stop();
+    public void stop() throws OXException;
 
     /**
-     * Performs specified query.
+     * Performs the query derived from given search term.
      * 
-     * @param jsonQuery The query
+     * @param searchTerm The search term
      * @return The search result
+     * @throws OXException If search fails
      */
-    public JSONObject search(JSONObject jsonQuery);
+    public List<MailMessage> search(SearchTerm<?> searchTerm) throws OXException;
+
+    /**
+     * Adds specified mail to the index.
+     * 
+     * @param mail The mail to add
+     * @throws OXException If adding mail to index fails
+     */
+    public void addMail(MailMessage mail) throws OXException;
 }
