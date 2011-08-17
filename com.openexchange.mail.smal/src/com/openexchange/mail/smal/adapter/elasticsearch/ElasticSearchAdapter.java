@@ -66,7 +66,6 @@ import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
 import org.elasticsearch.action.count.CountResponse;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.action.admin.indices.mapping.put.PutMappingRequestBuilder;
 import org.elasticsearch.client.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.action.search.SearchRequestBuilder;
 import org.elasticsearch.client.transport.TransportClient;
@@ -79,8 +78,6 @@ import org.elasticsearch.common.xcontent.json.JsonXContent;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.dataobjects.IDMailMessage;
@@ -112,9 +109,9 @@ public final class ElasticSearchAdapter implements IndexAdapter {
      */
     public ElasticSearchAdapter() {
         super();
-        clusterName = "ox_cluster";
-        indexName = "mail_index";
-        indexType = "mail";
+        clusterName = Constants.CLUSTER_NAME;
+        indexName = Constants.INDEX_NAME;
+        indexType = Constants.INDEX_TYPE;
     }
 
     @Override
@@ -148,30 +145,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         /*
          * Create the mapping definition for a mail
          */
-        createMailMapping();
-    }
-
-    private void createMailMapping() throws OXException {
-        try {
-            final JSONObject properties = new JSONObject();
-            properties.put("mailId", new JSONObject("{ \"type\": \"string\", \"index\": \"not_analyzed\" }"));
-            properties.put("subject", new JSONObject("{ \"type\": \"string\", \"store\": \"yes\" }"));
-            /*
-             * TODO: Further properties
-             */
-            final JSONObject container = new JSONObject();
-            container.put("properties", properties);
-            final JSONObject mapping = new JSONObject();
-            mapping.put(indexType, container);
-            final PutMappingRequestBuilder pmrb = client.admin().indices().preparePutMapping(indexName).setSource(mapping.toString());
-            pmrb.execute().actionGet();
-        } catch (final JSONException e) {
-            // Cannot occur
-            throw SMALExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        } catch (final ElasticSearchException e) {
-            // Mapping could not be put; probably it already exists
-            throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
-        }
+        Mapping.createMailMapping(client);
     }
 
     @Override

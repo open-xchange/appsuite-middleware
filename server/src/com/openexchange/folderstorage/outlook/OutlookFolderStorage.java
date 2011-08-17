@@ -1521,7 +1521,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                  */
                 ids = new SortableId[1];
                 boolean b = false;
-                for (int i = 0; b && i < subfolders.length; i++) {
+                for (int i = 0; !b && i < subfolders.length; i++) {
                     final SortableId si = subfolders[i];
                     if (FolderStorage.PRIVATE_ID.equals(si.getId())) {
                         ids[0] = si;

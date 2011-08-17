@@ -62,7 +62,6 @@ import com.openexchange.mail.search.CcTerm;
 import com.openexchange.mail.search.ComparablePattern;
 import com.openexchange.mail.search.FlagTerm;
 import com.openexchange.mail.search.FromTerm;
-import com.openexchange.mail.search.HeaderTerm;
 import com.openexchange.mail.search.NOTTerm;
 import com.openexchange.mail.search.ORTerm;
 import com.openexchange.mail.search.ReceivedDateTerm;
@@ -131,14 +130,14 @@ public final class SearchTerm2Query {
             final ComparablePattern<Integer> comparablePattern = sizeTerm.getPattern();
             switch (comparablePattern.getComparisonType()) {
             case EQUALS:
-                return QueryBuilders.termQuery("size", comparablePattern.getPattern().intValue());
+                return QueryBuilders.termQuery(Constants.FIELD_SIZE, comparablePattern.getPattern().intValue());
             case GREATER_THAN: {
-                final RangeQueryBuilder rangeQuery = QueryBuilders.rangeQuery("size");
+                final RangeQueryBuilder rangeQuery = QueryBuilders.rangeQuery(Constants.FIELD_SIZE);
                 rangeQuery.gt(comparablePattern.getPattern().intValue());
                 return rangeQuery;
             }
             case LESS_THAN: {
-                final RangeQueryBuilder rangeQuery = QueryBuilders.rangeQuery("size");
+                final RangeQueryBuilder rangeQuery = QueryBuilders.rangeQuery(Constants.FIELD_SIZE);
                 rangeQuery.lt(comparablePattern.getPattern().intValue());
                 return rangeQuery;
             }
@@ -158,31 +157,31 @@ public final class SearchTerm2Query {
             }
             final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
             if ((flags & MailMessage.FLAG_ANSWERED) > 0) {
-                boolQuery.must(QueryBuilders.termQuery("answered", set));
+                boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_FLAG_ANSWERED, set));
             }
             if ((flags & MailMessage.FLAG_DELETED) > 0) {
-                boolQuery.must(QueryBuilders.termQuery("deleted", set));
+                boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_FLAG_DELETED, set));
             }
             if ((flags & MailMessage.FLAG_DRAFT) > 0) {
-                boolQuery.must(QueryBuilders.termQuery("draft", set));
+                boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_FLAG_DRAFT, set));
             }
             if ((flags & MailMessage.FLAG_FLAGGED) > 0) {
-                boolQuery.must(QueryBuilders.termQuery("flagged", set));
+                boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_FLAG_FLAGGED, set));
             }
             if ((flags & MailMessage.FLAG_SEEN) > 0) {
-                boolQuery.must(QueryBuilders.termQuery("seen", set));
+                boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_FLAG_SEEN, set));
             }
             if ((flags & MailMessage.FLAG_USER) > 0) {
-                boolQuery.must(QueryBuilders.termQuery("user", set));
+                boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_FLAG_USER, set));
             }
             if ((flags & MailMessage.FLAG_SPAM) > 0) {
-                boolQuery.must(QueryBuilders.termQuery("spam", set));
+                boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_FLAG_SPAM, set));
             }
             if ((flags & MailMessage.FLAG_FORWARDED) > 0) {
-                boolQuery.must(QueryBuilders.termQuery("forwarded", set));
+                boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_FLAG_FORWARDED, set));
             }
             if ((flags & MailMessage.FLAG_READ_ACK) > 0) {
-                boolQuery.must(QueryBuilders.termQuery("read_ack", set));
+                boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_FLAG_READ_ACK, set));
             }
             return boolQuery;
         }
@@ -196,14 +195,14 @@ public final class SearchTerm2Query {
             final ComparablePattern<Date> comparablePattern = dateTerm.getPattern();
             switch (comparablePattern.getComparisonType()) {
             case EQUALS:
-                return QueryBuilders.termQuery(isRecDate ? "received_date" : "sent_date", comparablePattern.getPattern().getTime());
+                return QueryBuilders.termQuery(isRecDate ? Constants.FIELD_RECEIVED_DATE : Constants.FIELD_SENT_DATE, comparablePattern.getPattern().getTime());
             case GREATER_THAN: {
-                final RangeQueryBuilder rangeQuery = QueryBuilders.rangeQuery(isRecDate ? "received_date" : "sent_date");
+                final RangeQueryBuilder rangeQuery = QueryBuilders.rangeQuery(isRecDate ? Constants.FIELD_RECEIVED_DATE : Constants.FIELD_SENT_DATE);
                 rangeQuery.gt(comparablePattern.getPattern().getTime());
                 return rangeQuery;
             }
             case LESS_THAN: {
-                final RangeQueryBuilder rangeQuery = QueryBuilders.rangeQuery(isRecDate ? "received_date" : "sent_date");
+                final RangeQueryBuilder rangeQuery = QueryBuilders.rangeQuery(isRecDate ? Constants.FIELD_RECEIVED_DATE : Constants.FIELD_SENT_DATE);
                 rangeQuery.lt(comparablePattern.getPattern().getTime());
                 return rangeQuery;
             }
@@ -216,39 +215,33 @@ public final class SearchTerm2Query {
 
     private static String getFieldNameFor(final SearchTerm<?> searchTerm) {
         if (searchTerm instanceof BccTerm) {
-            return "bcc";
+            return Constants.FIELD_BCC;
         }
         if (searchTerm instanceof BodyTerm) {
-            return "content";
+            return Constants.FIELD_BODY;
         }
         if (searchTerm instanceof CcTerm) {
-            return "cc";
-        }
-        if (searchTerm instanceof FlagTerm) {
-            return "flags";
+            return Constants.FIELD_CC;
         }
         if (searchTerm instanceof FromTerm) {
-            return "from";
-        }
-        if (searchTerm instanceof HeaderTerm) {
-            return "headers";
+            return Constants.FIELD_FROM;
         }
         if (searchTerm instanceof ReceivedDateTerm) {
-            return "received_date";
+            return Constants.FIELD_RECEIVED_DATE;
         }
         if (searchTerm instanceof SentDateTerm) {
-            return "sent_date";
+            return Constants.FIELD_SENT_DATE;
         }
         if (searchTerm instanceof SizeTerm) {
-            return "size";
+            return Constants.FIELD_SIZE;
         }
         if (searchTerm instanceof SubjectTerm) {
-            return "suject";
+            return Constants.FIELD_SUBJECT;
         }
         if (searchTerm instanceof ToTerm) {
-            return "to";
+            return Constants.FIELD_TO;
         }
-        throw new IllegalStateException("Unknown search term: " + searchTerm.getClass().getName());
+        throw new IllegalStateException("Unsupported search term: " + searchTerm.getClass().getName());
     }
 
 }
