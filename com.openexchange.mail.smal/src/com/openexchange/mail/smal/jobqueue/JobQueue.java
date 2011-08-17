@@ -67,7 +67,7 @@ public final class JobQueue {
 
     private static final int CAPACITY = 1048576;
 
-    private final BlockingQueue<Job<?>> queue;
+    private final BlockingQueue<Job> queue;
 
     private final Future<Object> future;
 
@@ -78,7 +78,7 @@ public final class JobQueue {
      */
     public JobQueue(final ThreadPoolService threadPool) {
         super();
-        queue = new PriorityBlockingQueue<Job<?>>(CAPACITY);
+        queue = new PriorityBlockingQueue<Job>(CAPACITY);
         consumer = new JobConsumer(queue);
         future = threadPool.submit(consumer, AbortBehavior.getInstance());
     }
@@ -109,7 +109,7 @@ public final class JobQueue {
      * @param job The job to add
      * @return <code>true</code> if job could be added; otherwise <code>false</code>
      */
-    public boolean addJob(final Job<?> job) {
+    public boolean addJob(final Job job) {
         if (queue.size() >= CAPACITY) {
             return false;
         }

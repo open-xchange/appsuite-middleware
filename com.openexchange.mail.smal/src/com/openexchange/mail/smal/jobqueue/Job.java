@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.smal.jobqueue;
 
+import com.openexchange.log.Log;
 import com.openexchange.threadpool.Task;
 
 /**
@@ -56,7 +57,7 @@ import com.openexchange.threadpool.Task;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class Job<V> implements Task<V>, Comparable<Job<?>> {
+public abstract class Job implements Task<Object>, Comparable<Job> {
 
     protected volatile boolean canceled;
 
@@ -74,11 +75,26 @@ public abstract class Job<V> implements Task<V>, Comparable<Job<?>> {
      */
     public abstract int getRanking();
 
+    /**
+     * Performs this job.
+     */
+    public abstract void perform();
+
     @Override
-    public final int compareTo(final Job<?> other) {
+    public final int compareTo(final Job other) {
         final int thisVal = this.getRanking();
         final int anotherVal = other.getRanking();
         return (thisVal < anotherVal ? -1 : (thisVal == anotherVal ? 0 : 1));
+    }
+
+    @Override
+    public final Object call() throws Exception {
+        try {
+            perform();
+        } catch (final Exception e) {
+            Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Job.class)).error(e.getMessage(), e);
+        }
+        return null;
     }
 
     /**

@@ -53,8 +53,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadRenamer;
+import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 
 /**
  * {@link JobConsumer}
@@ -66,16 +69,16 @@ public final class JobConsumer extends AbstractTask<Object> {
     /**
      * The poison element.
      */
-    private static final Job<Object> POISON = new Job<Object>() {
+    private static final Job POISON = new Job() {
 
         @Override
-        public void setThreadName(final ThreadRenamer threadRenamer) {
+        public void perform() {
             // Nope
         }
 
         @Override
-        public Object call() throws Exception {
-            return null;
+        public void setThreadName(final ThreadRenamer threadRenamer) {
+            // Nope
         }
 
         @Override
@@ -99,14 +102,14 @@ public final class JobConsumer extends AbstractTask<Object> {
         }
     };
 
-    private final BlockingQueue<Job<?>> queue;
+    private final BlockingQueue<Job> queue;
 
     private final AtomicBoolean keepgoing;
 
     /**
      * Initializes a new {@link JobConsumer}.
      */
-    public JobConsumer(final BlockingQueue<Job<?>> queue) {
+    public JobConsumer(final BlockingQueue<Job> queue) {
         super();
         keepgoing = new AtomicBoolean(true);
         this.queue = queue;
@@ -135,17 +138,19 @@ public final class JobConsumer extends AbstractTask<Object> {
         threadRenamer.rename("Job-Consumer");
     }
 
+    private static final boolean DELEGATE = true;
+
     @Override
     public Object call() throws Exception {
         try {
-            final List<Job<?>> jobs = new ArrayList<Job<?>>(16);
+            final List<Job> jobs = new ArrayList<Job>(16);
             while (keepgoing.get()) {
                 try {
                     if (queue.isEmpty()) {
                         /*
                          * Blocking wait for at least 1 Loggable to arrive.
                          */
-                        final Job<?> job = queue.take();
+                        final Job job = queue.take();
                         if (POISON == job) {
                             return null;
                         }
@@ -153,9 +158,21 @@ public final class JobConsumer extends AbstractTask<Object> {
                     }
                     queue.drainTo(jobs);
                     final boolean quit = jobs.remove(POISON);
-                    for (final Job<?> job : jobs) {
-                        if (!job.isCanceled()) {
-                            // TODO: Perform job
+                    if (DELEGATE) {
+                        final ThreadPoolService threadPool = SMALServiceLookup.getInstance().getService(ThreadPoolService.class);
+                        for (final Job job : jobs) {
+                            if (!job.isCanceled()) {
+                                threadPool.submit(job, CallerRunsBehavior.getInstance());
+                            }
+                        }
+                    } else {
+                        final Thread thisThread = Thread.currentThread();
+                        for (final Job job : jobs) {
+                            if (!job.isCanceled()) {
+                                job.beforeExecute(thisThread);
+                                job.call();
+                                job.afterExecute(null);
+                            }
                         }
                     }
                     jobs.clear();
