@@ -107,12 +107,8 @@ public final class MailAccountJob extends Job {
 
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.smal.jobqueue.Job#getRanking()
-     */
     @Override
     public int getRanking() {
-        // TODO Auto-generated method stub
         return 0;
     }
 
