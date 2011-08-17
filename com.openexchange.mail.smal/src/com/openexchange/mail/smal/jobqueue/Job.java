@@ -67,6 +67,11 @@ public abstract class Job<V> implements Task<V>, Comparable<Job<?>> {
         super();
     }
 
+    /**
+     * Gets this job's ranking.
+     * 
+     * @return The ranking
+     */
     public abstract int getRanking();
 
     @Override
