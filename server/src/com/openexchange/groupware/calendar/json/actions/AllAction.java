@@ -208,6 +208,7 @@ public final class AllAction extends AbstractAppointmentAction {
                             LOG.error("Can not calculate recurrence " + appointment.getObjectID() + ':' + session.getContextId(), e);
                         }
                         if (recuResults != null && recuResults.size() == 1) {
+                        	appointment = appointment.clone();
                             appointment.setStartDate(new Date(recuResults.getRecurringResult(0).getStart()));
                             appointment.setEndDate(new Date(recuResults.getRecurringResult(0).getEnd()));
 
