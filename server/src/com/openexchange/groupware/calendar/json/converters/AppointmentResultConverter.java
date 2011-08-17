@@ -61,6 +61,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.CalendarFields;
+import com.openexchange.ajax.request.AppointmentRequest;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.writer.AppointmentWriter;
@@ -109,6 +110,7 @@ public class AppointmentResultConverter extends AbstractCalendarJSONResultConver
         final Date startUTC = req.optDate(AJAXServlet.PARAMETER_START);
         final Date endUTC = req.optDate(AJAXServlet.PARAMETER_END);
         final int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
+        final boolean bRecurrenceMaster = Boolean.parseBoolean(req.getParameter(AppointmentRequest.RECURRENCE_MASTER));
 
         final TimeZone timeZone;
         {
@@ -120,7 +122,11 @@ public class AppointmentResultConverter extends AbstractCalendarJSONResultConver
 
         for (final Appointment appointment : appointmentList) {
             try {
-                writer.writeArray(appointment, columns, startUTC, endUTC, jsonResponseArray);
+            	if (bRecurrenceMaster) {
+                	writer.writeArray(appointment, columns, jsonResponseArray);
+            	} else {
+                	writer.writeArray(appointment, columns, startUTC, endUTC, jsonResponseArray);
+            	}
             } catch (final JSONException e) {
                 throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             }
