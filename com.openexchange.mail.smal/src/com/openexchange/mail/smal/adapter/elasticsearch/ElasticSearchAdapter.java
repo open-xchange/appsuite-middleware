@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.elasticsearch.ElasticSearchException;
 import org.elasticsearch.action.WriteConsistencyLevel;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthRequest;
@@ -80,13 +81,25 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.IndexRange;
+import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailPath;
+import com.openexchange.mail.MailSortField;
+import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.smal.SMALExceptionCodes;
+import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.mail.smal.adapter.IndexAdapter;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 
 /**
  * {@link ElasticSearchAdapter}
@@ -95,12 +108,12 @@ import com.openexchange.session.Session;
  */
 public final class ElasticSearchAdapter implements IndexAdapter {
 
-    private static final org.apache.commons.logging.Log LOG =
+    protected static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ElasticSearchAdapter.class));
 
     private static final char DELIM = '/';
 
-    private TransportClient client;
+    protected volatile TransportClient client;
 
     private final String clusterName;
 
@@ -108,11 +121,14 @@ public final class ElasticSearchAdapter implements IndexAdapter {
 
     private final String indexType;
 
+    protected final AtomicBoolean syncFlag;
+
     /**
      * Initializes a new {@link ElasticSearchAdapter}.
      */
     public ElasticSearchAdapter() {
         super();
+        syncFlag = new AtomicBoolean();
         clusterName = Constants.CLUSTER_NAME;
         indexName = Constants.INDEX_NAME;
         indexType = Constants.INDEX_TYPE;
@@ -301,18 +317,18 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         final BulkRequestBuilder bulkRequest = client.prepareBulk();
 
         for (final MailMessage mail : mails) {
-//            bulkRequest.add(client.prepareIndex(indexName, indexType, "1")
-//                .setSource(jsonBuilder()
-//                            .startObject()
-//                                .field("user", "kimchy")
-//                                .field("postDate", new Date())
-//                                .field("message", "trying out Elastic Search")
-//                            .endObject()
-//                          )
-//                );
+            // bulkRequest.add(client.prepareIndex(indexName, indexType, "1")
+            // .setSource(jsonBuilder()
+            // .startObject()
+            // .field("user", "kimchy")
+            // .field("postDate", new Date())
+            // .field("message", "trying out Elastic Search")
+            // .endObject()
+            // )
+            // );
 
         }
-        
+
     }
 
     public XContentBuilder createDoc(final String id, final MailMessage mail) {
@@ -350,4 +366,60 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     public OptimizeResponse optimize(final int optimizeToSegmentsAfterUpdate) {
         return client.admin().indices().optimize(new OptimizeRequest(indexName).maxNumSegments(optimizeToSegmentsAfterUpdate)).actionGet();
     }
+
+    @Override
+    public boolean sync(final String fullName, final int accountId, final Session session) throws OXException {
+        if (!syncFlag.compareAndSet(false, true)) {
+            return false;
+        }
+        /*
+         * Start syncer
+         */
+        SMALServiceLookup.getInstance().getService(ThreadPoolService.class).submit(
+            ThreadPools.task(new SyncRunnable(fullName, accountId, session)),
+            CallerRunsBehavior.getInstance());
+        return true;
+    }
+
+    protected static final MailField[] FIELDS = new MailFields(MailField.ID, MailField.FLAGS).toArray();
+
+    private final class SyncRunnable implements Runnable {
+
+        private final String fullName;
+        
+        private final int accountId;
+
+        private final Session session;
+
+        /**
+         * Initializes a new {@link ElasticSearchAdapter.SyncRunnable}.
+         */
+        public SyncRunnable(final String fullName, final int accountId, final Session session) {
+            super();
+            this.fullName = fullName;
+            this.accountId = accountId;
+            this.session = session;
+        }
+
+        @Override
+        public void run() {
+            try {
+                final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = MailAccess.getInstance(session, accountId);
+                mailAccess.connect(false);
+                try {
+                    final MailMessage[] mails = mailAccess.getMessageStorage().getAllMessages(fullName, IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.ASC, FIELDS);
+                    
+                    
+                    
+                } finally {
+                    mailAccess.close(true);
+                }
+            } catch (final Exception e) {
+                LOG.error("Synchronizing \"" + fullName + "\" mails with index failed.", e);
+            } finally {
+                syncFlag.set(false);
+            }
+        }
+
+    } // End of SyncRunnable class
 }

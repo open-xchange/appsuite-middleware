@@ -56,6 +56,7 @@ import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.smal.SMALProvider;
 import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link SMALActivator} - The activator for Super-MAL bundle.
@@ -69,6 +70,11 @@ public class SMALActivator extends HousekeepingActivator {
      */
     public SMALActivator() {
         super();
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigurationService.class, ThreadPoolService.class };
     }
 
     @Override
@@ -86,11 +92,6 @@ public class SMALActivator extends HousekeepingActivator {
     protected void stopBundle() throws Exception {
         cleanUp();
         SMALServiceLookup.getInstance().setServiceLookup(null);
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
     }
 
 }

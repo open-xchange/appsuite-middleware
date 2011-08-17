@@ -103,4 +103,16 @@ public interface IndexAdapter {
      * @throws OXException If adding mails to index fails
      */
     public void add(MailMessage[] mails, Session session) throws OXException;
+
+    /**
+     * Synchronizes mails contained given folder with the index.
+     * 
+     * @param fullName The folder full name
+     * @param The account identifier
+     * @param session The session
+     * @return <code>true</code> if invocation triggered sync; otherwise <code>false</code> 
+     * @throws OXException If synchronizing mails with index fails
+     */
+    public boolean sync(String fullName, int accountId, Session session) throws OXException;
+
 }
