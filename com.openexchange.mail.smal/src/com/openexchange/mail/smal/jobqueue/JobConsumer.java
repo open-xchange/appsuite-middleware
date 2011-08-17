@@ -95,7 +95,7 @@ public final class JobConsumer extends AbstractTask<Object> {
 
         @Override
         public int getRanking() {
-            return -1;
+            return Integer.MAX_VALUE;
         }
     };
 

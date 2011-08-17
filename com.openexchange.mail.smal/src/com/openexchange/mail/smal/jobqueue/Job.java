@@ -70,7 +70,7 @@ public abstract class Job<V> implements Task<V>, Comparable<Job<?>> {
     public abstract int getRanking();
 
     @Override
-    public int compareTo(final Job<?> other) {
+    public final int compareTo(final Job<?> other) {
         final int thisVal = this.getRanking();
         final int anotherVal = other.getRanking();
         return (thisVal < anotherVal ? -1 : (thisVal == anotherVal ? 0 : 1));
