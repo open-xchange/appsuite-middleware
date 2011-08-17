@@ -80,8 +80,14 @@ public final class Mapping {
     public static void createMailMapping(final Client client, final String indexName) throws OXException {
         try {
             final JSONObject properties = new JSONObject();
-            properties.put(Constants.FIELD_ID, new JSONObject("{ \"type\": \"string\", \"index\": \"not_analyzed\" }"));
+            properties.put(Constants.FIELD_UUID, new JSONObject("{ \"type\": \"string\", \"index\": \"not_analyzed\" }"));
+            properties.put(Constants.FIELD_USER, new JSONObject("{ \"type\": \"string\", \"index\": \"not_analyzed\" }"));
+            properties.put(Constants.FIELD_ACCOUNT_ID, new JSONObject("{ \"type\": \"string\", \"index\": \"not_analyzed\" }"));
             properties.put(Constants.FIELD_FULL_NAME, new JSONObject("{ \"type\": \"string\", \"index\": \"not_analyzed\" }"));
+            properties.put(Constants.FIELD_ID, new JSONObject("{ \"type\": \"string\", \"index\": \"not_analyzed\" }"));
+            /*
+             * Body content
+             */
             properties.put(Constants.FIELD_BODY, new JSONObject("{ \"type\": \"string\", \"store\": \"no\" }"));
             /*
              * Subject

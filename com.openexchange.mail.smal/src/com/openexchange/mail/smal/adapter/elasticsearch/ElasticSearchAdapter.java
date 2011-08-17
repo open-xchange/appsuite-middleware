@@ -232,8 +232,6 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         return map.containsKey(indexName);
     }
 
-    
-
     public void createIndex(final String indexName) {
         /*
          * Create the index

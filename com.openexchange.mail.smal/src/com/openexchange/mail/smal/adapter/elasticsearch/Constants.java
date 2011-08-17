@@ -79,6 +79,12 @@ public final class Constants {
     public static final String INDEX_TYPE = "mail";
 
     // ------------------- FIELD NAMES ----------------------
+
+    public static final String FIELD_UUID = "uuid";
+    
+    public static final String FIELD_USER = "user";
+    
+    public static final String FIELD_ACCOUNT_ID = "account_id";
     
     public static final String FIELD_ID = "id";
 
