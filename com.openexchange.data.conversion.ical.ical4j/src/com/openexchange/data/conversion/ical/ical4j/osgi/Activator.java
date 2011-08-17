@@ -68,7 +68,7 @@ import com.openexchange.user.UserService;
 
 /**
  * Publishes the iCal4j parser and emitter services.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class Activator implements BundleActivator {

@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime.datasource;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -68,13 +69,14 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public final class MessageDataSource implements DataSource {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MessageDataSource.class));
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MessageDataSource.class));
 
     private static final int DEFAULT_BUF_SIZE = 0x1000;
 
     private final byte[] data;
 
-    private final String contentType;
+    private String contentType;
 
     private String name;
 
@@ -154,11 +156,42 @@ public final class MessageDataSource implements DataSource {
     }
 
     /**
+     * Gets the {@link ByteArrayInputStream}.
+     *
+     * @return The {@link ByteArrayInputStream}.
+     * @throws IOException If an I/O error occurs
+     */
+    public ByteArrayInputStream getByteArrayInputStream() throws IOException {
+        if (data == null) {
+            throw new IOException("no data");
+        }
+        return new UnsynchronizedByteArrayInputStream(data);
+    }
+
+    /**
+     * Gets the data
+     *
+     * @return The data
+     */
+    public byte[] getData() {
+        return data;
+    }
+
+    /**
      * Not implemented
      */
     @Override
     public OutputStream getOutputStream() throws IOException {
         throw new IOException(this.getClass().getName() + ".getOutputStream() isn't implemented");
+    }
+
+    /**
+     * Sets the contentType
+     *
+     * @param contentType The contentType to set
+     */
+    public void setContentType(final String contentType) {
+        this.contentType = contentType;
     }
 
     @Override

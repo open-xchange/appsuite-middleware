@@ -49,11 +49,11 @@
 
 package com.openexchange.mail.folderstorage;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import javax.mail.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.imap.dataobjects.IMAPMailFolder;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.IndexRange;
@@ -273,7 +273,7 @@ public final class MailFolderTest extends AbstractMailTest {
 					mfd.setName(TEMPORARY_FOLDER);
 
 					final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID)
-							.createNewMailPermission();
+							.createNewMailPermission(session, MailAccount.DEFAULT_ID);
 					p.setEntity(getUser());
 					p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
 							OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -414,7 +414,7 @@ public final class MailFolderTest extends AbstractMailTest {
 					mfd.setName(TEMPORARY_FOLDER);
 
 					final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID)
-							.createNewMailPermission();
+							.createNewMailPermission(session, MailAccount.DEFAULT_ID);
 					p.setEntity(getUser());
 					p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
 							OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -435,7 +435,7 @@ public final class MailFolderTest extends AbstractMailTest {
 
 				final MailFolderDescription mfd = new MailFolderDescription();
 				final MailPermission p1 = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID)
-						.createNewMailPermission();
+						.createNewMailPermission(session, MailAccount.DEFAULT_ID);
 				p1.setEntity(getUser());
 				p1.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
 						OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -443,7 +443,7 @@ public final class MailFolderTest extends AbstractMailTest {
 				p1.setGroupPermission(false);
 				mfd.addPermission(p1);
 				final MailPermission p2 = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID)
-						.createNewMailPermission();
+						.createNewMailPermission(session, MailAccount.DEFAULT_ID);
 				p2.setEntity(getSecondUser());
 				p2.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.ADMIN_PERMISSION,
 						OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
@@ -523,7 +523,7 @@ public final class MailFolderTest extends AbstractMailTest {
 					mfd.setName(TEMPORARY_FOLDER);
 
 					final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID)
-							.createNewMailPermission();
+							.createNewMailPermission(session, MailAccount.DEFAULT_ID);
 					p.setEntity(getUser());
 					p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
 							OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -640,7 +640,7 @@ public final class MailFolderTest extends AbstractMailTest {
 					mfd.setName(TEMPORARY_FOLDER);
 
 					final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID)
-							.createNewMailPermission();
+							.createNewMailPermission(session, MailAccount.DEFAULT_ID);
 					p.setEntity(getUser());
 					p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
 							OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -709,7 +709,7 @@ public final class MailFolderTest extends AbstractMailTest {
 					mfd.setName(name);
 
 					final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID)
-							.createNewMailPermission();
+							.createNewMailPermission(session, MailAccount.DEFAULT_ID);
 					p.setEntity(getUser());
 					p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
 							OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -829,7 +829,7 @@ public final class MailFolderTest extends AbstractMailTest {
 					mfd.setName(name);
 
 					final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID)
-							.createNewMailPermission();
+							.createNewMailPermission(session, MailAccount.DEFAULT_ID);
 					p.setEntity(getUser());
 					p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
 							OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -941,7 +941,7 @@ public final class MailFolderTest extends AbstractMailTest {
 					mfd.setName(name);
 
 					final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID)
-							.createNewMailPermission();
+							.createNewMailPermission(session, MailAccount.DEFAULT_ID);
 					p.setEntity(getUser());
 					p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
 							OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -1005,7 +1005,7 @@ public final class MailFolderTest extends AbstractMailTest {
 					mfd.setName(name);
 
 					final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID)
-							.createNewMailPermission();
+							.createNewMailPermission(session, MailAccount.DEFAULT_ID);
 					p.setEntity(getUser());
 					p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
 							OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -1045,7 +1045,7 @@ public final class MailFolderTest extends AbstractMailTest {
 						mfd.setName(name);
 
 						final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID)
-								.createNewMailPermission();
+								.createNewMailPermission(session, MailAccount.DEFAULT_ID);
 						p.setEntity(getUser());
 						p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
 								OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);

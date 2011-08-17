@@ -147,7 +147,7 @@ public final class IMAPActivator extends HousekeepingActivator {
             /*
              * Register IMAP mail provider
              */
-            final Dictionary<String, String> dictionary = new Hashtable<String, String>();
+            final Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
             dictionary.put("protocol", IMAPProvider.PROTOCOL_IMAP.toString());
             registerService(MailProvider.class, IMAPProvider.getInstance(), dictionary);
             if (IMAPProperties.getInstance().notifyRecent()) {

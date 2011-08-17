@@ -63,7 +63,7 @@ import com.openexchange.oauth.internal.groupware.OAuthCreateTableTask2;
 
 /**
  * Is notified about the {@link DatabaseService} and registers then the {@link OAuthCreateTableTask}.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public final class UpdateTaskRegisterer implements ServiceTrackerCustomizer<DatabaseService, DatabaseService> {

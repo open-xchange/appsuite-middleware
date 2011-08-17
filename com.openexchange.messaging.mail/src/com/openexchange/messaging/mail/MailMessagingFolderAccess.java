@@ -478,7 +478,7 @@ public final class MailMessagingFolderAccess implements MessagingFolderAccess {
     private void addMailPermissions(final MessagingFolder toUpdate, final MailFolderDescription mfd) throws OXException {
         final MailProvider provider = MailProviderRegistry.getMailProviderBySession(session, accountId);
         for (final MessagingPermission permission : toUpdate.getPermissions()) {
-            final MailPermission mailPermission = provider.createNewMailPermission();
+            final MailPermission mailPermission = provider.createNewMailPermission(session, accountId);
             mailPermission.setAllPermission(
                 permission.getFolderPermission(),
                 permission.getReadPermission(),

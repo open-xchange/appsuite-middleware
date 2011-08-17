@@ -66,7 +66,7 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link ExternalSourcesActivator}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ExternalSourcesActivator extends DeferredActivator {

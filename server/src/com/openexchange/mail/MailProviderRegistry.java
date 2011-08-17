@@ -75,9 +75,9 @@ public final class MailProviderRegistry {
     /**
      * Concurrent map used as set for mail providers
      */
-    private static final ConcurrentMap<Protocol, MailProvider> providers = new ConcurrentHashMap<Protocol, MailProvider>();
+    private static final ConcurrentMap<Protocol, MailProvider> PROVIDERS = new ConcurrentHashMap<Protocol, MailProvider>();
 
-    private static final AtomicReference<AllMailProvider> allProvider = new AtomicReference<AllMailProvider>();
+    private static final AtomicReference<AllMailProvider> ALL_PROVIDER = new AtomicReference<AllMailProvider>();
 
     /**
      * Initializes a new {@link MailProviderRegistry}
@@ -160,7 +160,7 @@ public final class MailProviderRegistry {
         if (null == protocolName) {
             return null;
         }
-        final AllMailProvider all = allProvider.get();
+        final AllMailProvider all = ALL_PROVIDER.get();
         if (null != all) {
             final MailProvider realMailProvider = getRealMailProvider(protocolName);
             return (null == realMailProvider) ? null : all.getDelegatingProvider(realMailProvider);
@@ -175,7 +175,7 @@ public final class MailProviderRegistry {
         /*
          * Look-up
          */
-        for (final Iterator<Map.Entry<Protocol, MailProvider>> iter = providers.entrySet().iterator(); iter.hasNext();) {
+        for (final Iterator<Map.Entry<Protocol, MailProvider>> iter = PROVIDERS.entrySet().iterator(); iter.hasNext();) {
             final Map.Entry<Protocol, MailProvider> entry = iter.next();
             if (entry.getKey().isSupported(protocolName)) {
                 return entry.getValue();
@@ -200,7 +200,7 @@ public final class MailProviderRegistry {
                 /*
                  * All provider
                  */
-                if (!allProvider.compareAndSet(null, (AllMailProvider) provider)) {
+                if (!ALL_PROVIDER.compareAndSet(null, (AllMailProvider) provider)) {
                     return false;
                 }
                 /*
@@ -213,7 +213,7 @@ public final class MailProviderRegistry {
             /*
              * Non-all provider
              */
-            if (null != providers.putIfAbsent(p, provider)) {
+            if (null != PROVIDERS.putIfAbsent(p, provider)) {
                 return false;
             }
             /*
@@ -234,7 +234,7 @@ public final class MailProviderRegistry {
      * Unregisters all mail providers
      */
     public static void unregisterAll() {
-        for (final Iterator<MailProvider> iter = providers.values().iterator(); iter.hasNext();) {
+        for (final Iterator<MailProvider> iter = PROVIDERS.values().iterator(); iter.hasNext();) {
             final MailProvider provider = iter.next();
             /*
              * Perform shutdown
@@ -251,8 +251,8 @@ public final class MailProviderRegistry {
         /*
          * Clear registry
          */
-        providers.clear();
-        final MailProvider all = allProvider.get();
+        PROVIDERS.clear();
+        final MailProvider all = ALL_PROVIDER.get();
         if (null != all) {
             /*
              * Perform shutdown
@@ -260,7 +260,7 @@ public final class MailProviderRegistry {
             try {
                 all.setDeprecated(true);
                 all.shutDown();
-                allProvider.set(null);
+                ALL_PROVIDER.set(null);
             } catch (final OXException e) {
                 LOG.error("Mail connection implementation could not be shut down", e);
             } catch (final RuntimeException t) {
@@ -279,7 +279,7 @@ public final class MailProviderRegistry {
     public static MailProvider unregisterMailProvider(final MailProvider provider) throws OXException {
         final Protocol protocol = provider.getProtocol();
         if (Protocol.PROTOCOL_ALL.equals(protocol)) {
-            final MailProvider all = allProvider.get();
+            final MailProvider all = ALL_PROVIDER.get();
             if (null != all) {
                 /*
                  * Perform shutdown
@@ -288,7 +288,7 @@ public final class MailProviderRegistry {
                 try {
                     all.setDeprecated(true);
                     all.shutDown();
-                    allProvider.set(null);
+                    ALL_PROVIDER.set(null);
                 } catch (final OXException e) {
                     throw e;
                 } catch (final RuntimeException t) {
@@ -300,7 +300,7 @@ public final class MailProviderRegistry {
         /*
          * Unregister
          */
-        final MailProvider removed = providers.remove(protocol);
+        final MailProvider removed = PROVIDERS.remove(protocol);
         if (null == removed) {
             return null;
         }
@@ -330,7 +330,7 @@ public final class MailProviderRegistry {
      */
     public static MailProvider unregisterMailProviderByProtocol(final String protocol) throws OXException {
         if (Protocol.ALL.equals(protocol)) {
-            final MailProvider all = allProvider.get();
+            final MailProvider all = ALL_PROVIDER.get();
             if (null != all) {
                 /*
                  * Perform shutdown
@@ -338,13 +338,13 @@ public final class MailProviderRegistry {
                 MailAccess.clearCounterMap();
                 all.setDeprecated(true);
                 all.shutDown();
-                allProvider.set(null);
+                ALL_PROVIDER.set(null);
             }
         }
         /*
          * Non-all
          */
-        for (final Iterator<Map.Entry<Protocol, MailProvider>> iter = providers.entrySet().iterator(); iter.hasNext();) {
+        for (final Iterator<Map.Entry<Protocol, MailProvider>> iter = PROVIDERS.entrySet().iterator(); iter.hasNext();) {
             final Map.Entry<Protocol, MailProvider> entry = iter.next();
             if (entry.getKey().isSupported(protocol)) {
                 iter.remove();

@@ -1248,7 +1248,7 @@ public final class OutlookFolderStorage implements FolderStorage {
          * Root folder
          */
         if (FolderStorage.ROOT_ID.equals(parentId)) {
-            return getRootFolderSubfolders(parentId, storageParameters);
+            return getRootFolderSubfolders(storageParameters);
         }
         final User user = storageParameters.getUser();
         final Locale locale = user.getLocale();
@@ -1499,12 +1499,13 @@ public final class OutlookFolderStorage implements FolderStorage {
         }
     }
 
-    private SortableId[] getRootFolderSubfolders(final String parentId, final StorageParameters storageParameters) throws OXException {
+    private SortableId[] getRootFolderSubfolders(final StorageParameters storageParameters) throws OXException {
         final SortableId[] ids;
         {
             /*
              * Get real folder storage
              */
+            final String parentId = FolderStorage.REAL_TREE_ID;
             final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, parentId);
             if (null == folderStorage) {
                 throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, parentId);
@@ -1519,8 +1520,8 @@ public final class OutlookFolderStorage implements FolderStorage {
                  * Get only private folder
                  */
                 ids = new SortableId[1];
-                boolean b = true;
-                for (int i = 0; b && i < subfolders.length; i++) {
+                boolean b = false;
+                for (int i = 0; !b && i < subfolders.length; i++) {
                     final SortableId si = subfolders[i];
                     if (FolderStorage.PRIVATE_ID.equals(si.getId())) {
                         ids[0] = si;

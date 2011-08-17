@@ -260,14 +260,13 @@ public abstract class MailConfig {
      * Gets the user-specific mail configuration.
      *
      * @param <C> The return value type
-     * @param clazz The mail configuration type
      * @param mailConfig A newly created {@link MailConfig mail configuration}
      * @param session The session providing needed user data
      * @param accountId The mail account ID
      * @return The user-specific mail configuration
      * @throws OXException If user-specific mail configuration cannot be determined
      */
-    public static final <C extends MailConfig> C getConfig(final Class<? extends C> clazz, final C mailConfig, final Session session, final int accountId) throws OXException {
+    public static final <C extends MailConfig> C getConfig(final C mailConfig, final Session session, final int accountId) throws OXException {
         /*
          * Fetch mail account
          */

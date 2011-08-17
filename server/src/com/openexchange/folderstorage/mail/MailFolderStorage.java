@@ -311,7 +311,7 @@ public final class MailFolderStorage implements FolderStorage {
                 final MailProvider provider = MailProviderRegistry.getMailProviderBySession(session, accountId);
                 for (int i = 0; i < permissions.length; i++) {
                     final Permission permission = permissions[i];
-                    final MailPermission mailPerm = provider.createNewMailPermission();
+                    final MailPermission mailPerm = provider.createNewMailPermission(session, accountId);
                     mailPerm.setEntity(permission.getEntity());
                     mailPerm.setAllPermission(
                         permission.getFolderPermission(),
@@ -700,7 +700,7 @@ public final class MailFolderStorage implements FolderStorage {
         mfd.setName(parentAndName[1]);
         mfd.setSeparator(separator);
         {
-            final MailPermission mailPerm = MailProviderRegistry.getMailProviderBySession(session, accountId).createNewMailPermission();
+            final MailPermission mailPerm = MailProviderRegistry.getMailProviderBySession(session, accountId).createNewMailPermission(session, accountId);
             mailPerm.setEntity(session.getUserId());
             mailPerm.setGroupPermission(false);
             mailPerm.setFolderAdmin(true);
@@ -1008,7 +1008,7 @@ public final class MailFolderStorage implements FolderStorage {
                 final MailProvider provider = MailProviderRegistry.getMailProviderBySession(session, accountId);
                 for (int i = 0; i < permissions.length; i++) {
                     final Permission permission = permissions[i];
-                    final MailPermission mailPerm = provider.createNewMailPermission();
+                    final MailPermission mailPerm = provider.createNewMailPermission(session, accountId);
                     mailPerm.setEntity(permission.getEntity());
                     mailPerm.setAllPermission(
                         permission.getFolderPermission(),

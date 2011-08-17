@@ -50,28 +50,38 @@
 package com.openexchange.mail.mime.dataobjects;
 
 import static com.openexchange.mail.utils.CharsetDetector.detectCharset;
-import static com.openexchange.mail.utils.MessageUtility.readStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.Collection;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
-import javax.mail.Part;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.composition.IDBasedFileAccess;
+import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.mime.ContentDisposition;
+import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.MIMETypes;
-import com.openexchange.mail.mime.datasource.FileDataSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
- * {@link MIMEFileStoreMailPart} - A {@link MailPart} implementation that keeps a reference to a temporary uploaded file that shall be added as
- * an attachment later
- * 
+ * {@link MIMEFileStoreMailPart} - A {@link MailPart} implementation that keeps a reference to a temporary uploaded file that shall be added
+ * as an attachment later
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class MIMEFileStoreMailPart extends MailPart {
@@ -81,42 +91,126 @@ public abstract class MIMEFileStoreMailPart extends MailPart {
     private static final transient org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MIMEFileStoreMailPart.class));
 
-    private final File file;
+    private final IDBasedFileAccessFactory fileAccessFactory;
 
-    private transient DataSource dataSource;
+    private final int userId;
+
+    private final int contextId;
+
+    private final String id;
+
+    private transient MessageDataSource dataSource;
 
     private transient Object cachedContent;
 
     /**
      * Initializes a new {@link MIMEFileStoreMailPart}
-     * 
+     *
      * @param fileDataSource The file data source
      * @throws OXException If upload file's content type cannot be parsed
      */
-    protected MIMEFileStoreMailPart(final com.openexchange.mail.mime.datasource.FileDataSource fileDataSource) throws OXException {
+    protected MIMEFileStoreMailPart(final DataSource dataSource, final Session session) throws OXException {
         super();
-        this.file = fileDataSource.getFile();
-        final String preparedFileName = fileDataSource.getName();
-        setContentType(prepareContentType(fileDataSource.getContentType(), preparedFileName));
-        setFileName(preparedFileName);
-        setSize(fileDataSource.getFile().length());
-        final ContentDisposition cd = new ContentDisposition();
-        cd.setDisposition(Part.ATTACHMENT);
-        cd.setFilenameParameter(getFileName());
-        setContentDisposition(cd);
         try {
+            final File file = new DefaultFile();
+            file.setId(FileStorageFileAccess.NEW);
+            file.setFolderId(String.valueOf(new OXFolderAccess(getContextFrom(session)).getDefaultFolder(
+                session.getUserId(),
+                FolderObject.INFOSTORE)));
+            final String name = dataSource.getName();
+            setContentType(prepareContentType(dataSource.getContentType(), name));
+
             if (getContentType().getCharsetParameter() == null && getContentType().startsWith(TEXT)) {
                 /*
                  * Guess charset for textual attachment
                  */
-                final String cs = detectCharset(new FileInputStream(file));
+                final String cs = detectCharset(dataSource.getInputStream());
                 getContentType().setCharsetParameter(cs);
             }
-            this.dataSource = fileDataSource;
+
+            file.setFileName(name);
+            file.setFileMIMEType(getContentType().toString());
+            file.setTitle(name);
+            /*
+             * Put attachment's document to dedicated infostore folder
+             */
+            fileAccessFactory = ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class, true);
+            final IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
+            boolean retry = true;
+            int count = 1;
+            final StringBuilder hlp = new StringBuilder(16);
+            while (retry) {
+                /*
+                 * Get attachment's input stream
+                 */
+                final InputStream in = dataSource.getInputStream();
+                try {
+                    /*
+                     * Start InfoStore transaction
+                     */
+                    fileAccess.startTransaction();
+                    try {
+                        fileAccess.saveDocument(file, in, FileStorageFileAccess.DISTANT_FUTURE);
+                        fileAccess.commit();
+                        retry = false;
+                    } catch (final OXException x) {
+                        fileAccess.rollback();
+                        if (!x.isPrefix("IFO")) {
+                            throw x;
+                        }
+                        if (441 != x.getCode()) {
+                            throw new OXException(x);
+                        }
+                        /*
+                         * Duplicate document name, thus retry with a new name
+                         */
+                        hlp.setLength(0);
+                        final int pos = name.lastIndexOf('.');
+                        final String newName;
+                        if (pos >= 0) {
+                            newName =
+                                hlp.append(name.substring(0, pos)).append("_(").append(++count).append(')').append(name.substring(pos)).toString();
+                        } else {
+                            newName = hlp.append(name).append("_(").append(++count).append(')').toString();
+                        }
+                        file.setFileName(newName);
+                        file.setTitle(newName);
+                    } catch (final RuntimeException e) {
+                        fileAccess.rollback();
+                        throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+                    } finally {
+                        fileAccess.finish();
+                    }
+                } finally {
+                    try {
+                        in.close();
+                    } catch (final IOException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
+                }
+            }
+            id = String.valueOf(file.getId());
+            userId = session.getUserId();
+            contextId = session.getContextId();
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
-            dataSource = new MessageDataSource(new byte[0], MIMETypes.MIME_APPL_OCTET);
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private static Context getContextFrom(final Session session) throws OXException {
+        if (session instanceof ServerSession) {
+            return ((ServerSession) session).getContext();
+        }
+        return ContextStorage.getStorageContext(session.getContextId());
+    }
+
+    private Session getSession() throws OXException {
+        final Collection<Session> sessions =
+            ServerServiceRegistry.getInstance().getService(SessiondService.class, true).getSessions(userId, contextId);
+        if (null == sessions || sessions.isEmpty()) {
+            throw MailExceptionCode.MISSING_FIELD.create("session");
+        }
+        return sessions.iterator().next();
     }
 
     private static String prepareContentType(final String contentType, final String preparedFileName) {
@@ -141,20 +235,26 @@ public abstract class MIMEFileStoreMailPart extends MailPart {
 
     private static final String TEXT = "text/";
 
-    private DataSource getDataSource() {
+    private MessageDataSource getDataSource() throws OXException {
         /*
          * Lazy creation
          */
         if (null == dataSource) {
             try {
-                if (getContentType().getCharsetParameter() == null && getContentType().startsWith(TEXT)) {
+                final ContentType contentType = getContentType();
+                final MessageDataSource mds =
+                    new MessageDataSource(fileAccessFactory.createAccess(getSession()).getDocument(
+                        id,
+                        FileStorageFileAccess.CURRENT_VERSION), contentType);
+                if (contentType.getCharsetParameter() == null && contentType.startsWith(TEXT)) {
                     /*
                      * Guess charset for textual attachment
                      */
-                    final String cs = detectCharset(new FileInputStream(file));
-                    getContentType().setCharsetParameter(cs);
+                    final String cs = detectCharset(new UnsynchronizedByteArrayInputStream(mds.getData()));
+                    contentType.setCharsetParameter(cs);
+                    mds.setContentType(contentType.toString());
                 }
-                dataSource = new FileDataSource(file, getContentType().toString());
+                dataSource = mds;
             } catch (final IOException e) {
                 LOG.error(e.getMessage(), e);
                 dataSource = new MessageDataSource(new byte[0], MIMETypes.MIME_APPL_OCTET);
@@ -164,12 +264,12 @@ public abstract class MIMEFileStoreMailPart extends MailPart {
     }
 
     /**
-     * Gets the upload file associated with this mail part
-     * 
-     * @return The upload file associated with this mail part
+     * Gets the identifier of the file associated with this mail part
+     *
+     * @return The identifier of the file associated with this mail part
      */
-    public File getFile() {
-        return file;
+    public String getFileId() {
+        return id;
     }
 
     @Override
@@ -178,34 +278,15 @@ public abstract class MIMEFileStoreMailPart extends MailPart {
             return cachedContent;
         }
         if (getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL)) {
+            final MessageDataSource mds = getDataSource();
             String charset = getContentType().getCharsetParameter();
             if (charset == null) {
-                try {
-                    charset = detectCharset(new FileInputStream(file));
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn(new StringBuilder("Uploaded file contains textual content but").append(
-                            " does not specify a charset. Assumed charset is: ").append(charset).toString());
-                    }
-                } catch (final FileNotFoundException e) {
-                    throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-                }
+                charset = "UTF-8";
             }
-            FileInputStream fis = null;
             try {
-                fis = new FileInputStream(file);
-                cachedContent = readStream(fis, charset);
-            } catch (final FileNotFoundException e) {
-                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-            } catch (final IOException e) {
-                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-            } finally {
-                if (fis != null) {
-                    try {
-                        fis.close();
-                    } catch (final IOException e) {
-                        LOG.error(e.getMessage(), e);
-                    }
-                }
+                cachedContent = new String(mds.getData(), charset);
+            } catch (final UnsupportedEncodingException e) {
+                throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
             }
             return cachedContent;
         }
@@ -230,8 +311,8 @@ public abstract class MIMEFileStoreMailPart extends MailPart {
     @Override
     public InputStream getInputStream() throws OXException {
         try {
-            return new FileInputStream(file);
-        } catch (final FileNotFoundException e) {
+            return getDataSource().getInputStream();
+        } catch (final IOException e) {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }

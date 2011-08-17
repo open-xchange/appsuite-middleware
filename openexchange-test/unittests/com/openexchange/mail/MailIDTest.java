@@ -49,9 +49,9 @@
 
 package com.openexchange.mail;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import javax.mail.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.imap.dataobjects.IMAPMailFolder;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.config.MailProperties;
@@ -113,7 +113,7 @@ public final class MailIDTest extends AbstractMailTest {
                 mfd.setName(TEMP_FOLDER);
 
                 final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID)
-                        .createNewMailPermission();
+                        .createNewMailPermission(session, MailAccount.DEFAULT_ID);
                 p.setEntity(getUser());
                 p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
                         OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);

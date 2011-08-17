@@ -64,7 +64,7 @@ public class ImageResponse extends AbstractAJAXResponse {
      * Initializes a new {@link ImageResponse}.
      * @param fileBytes
      */
-    public ImageResponse(byte[] image) {
+    public ImageResponse(final byte[] image) {
         super(null);
         this.image = image;        
     }
@@ -72,7 +72,7 @@ public class ImageResponse extends AbstractAJAXResponse {
     /**
      * @param image
      */
-    public void setImage(byte[] image) {
+    public void setImage(final byte[] image) {
         this.image  = image;        
     }
     

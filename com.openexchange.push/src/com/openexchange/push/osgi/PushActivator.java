@@ -72,7 +72,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link PushActivator} - The activator for push bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PushActivator implements BundleActivator {

@@ -49,12 +49,12 @@
 
 package com.openexchange.mail.messagestorage;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import javax.mail.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailField;
@@ -328,7 +328,7 @@ public final class MailSearchTest extends AbstractMailTest {
 				mfd.setName(name);
 
 				final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID)
-						.createNewMailPermission();
+						.createNewMailPermission(session, MailAccount.DEFAULT_ID);
 				p.setEntity(getUser());
 				p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
 						OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -495,7 +495,7 @@ public final class MailSearchTest extends AbstractMailTest {
 				mfd.setName(name);
 
 				final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID)
-						.createNewMailPermission();
+						.createNewMailPermission(session, MailAccount.DEFAULT_ID);
 				p.setEntity(getUser());
 				p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
 						OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);

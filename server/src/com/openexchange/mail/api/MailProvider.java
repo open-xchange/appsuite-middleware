@@ -150,9 +150,11 @@ public abstract class MailProvider {
      * Returns a {@link DefaultMailPermission default permission} instance if mailing system does not support permission(s). Overwrite if
      * needed.
      *
+     * @param session The session
+     * @param accountId The account identifier
      * @return A newly created {@link MailPermission mail permission}.
      */
-    public MailPermission createNewMailPermission() {
+    public MailPermission createNewMailPermission(final Session session, final int accountId) {
         return new DefaultMailPermission();
     }
 

@@ -64,7 +64,7 @@ import com.openexchange.subscribe.database.SubscriptionsCreatedAndLastModifiedCo
 
 /**
  * {@link UpdateTaskRegisterer}
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public final class UpdateTaskRegisterer implements ServiceTrackerCustomizer<DatabaseService, DatabaseService> {
