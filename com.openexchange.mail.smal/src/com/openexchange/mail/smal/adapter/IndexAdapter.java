@@ -53,6 +53,7 @@ import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.search.SearchTerm;
+import com.openexchange.session.Session;
 
 /**
  * {@link IndexAdapter} - The adapter for a search index.
@@ -79,16 +80,27 @@ public interface IndexAdapter {
      * Performs the query derived from given search term.
      * 
      * @param searchTerm The search term
+     * @param session The session
      * @return The search result
      * @throws OXException If search fails
      */
-    public List<MailMessage> search(SearchTerm<?> searchTerm) throws OXException;
+    public List<MailMessage> search(SearchTerm<?> searchTerm, Session session) throws OXException;
 
     /**
      * Adds specified mail to the index.
      * 
      * @param mail The mail to add
+     * @param session The session
      * @throws OXException If adding mail to index fails
      */
-    public void addMail(MailMessage mail) throws OXException;
+    public void add(MailMessage mail, Session session) throws OXException;
+
+    /**
+     * Adds specified mails to the index.
+     * 
+     * @param mails The mails to add
+     * @param session The session
+     * @throws OXException If adding mails to index fails
+     */
+    public void add(MailMessage[] mails, Session session) throws OXException;
 }

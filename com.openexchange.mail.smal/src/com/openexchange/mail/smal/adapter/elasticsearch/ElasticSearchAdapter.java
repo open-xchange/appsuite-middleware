@@ -66,6 +66,7 @@ import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
 import org.elasticsearch.action.count.CountResponse;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.client.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.client.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.action.search.SearchRequestBuilder;
 import org.elasticsearch.client.transport.TransportClient;
@@ -85,6 +86,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.smal.SMALExceptionCodes;
 import com.openexchange.mail.smal.adapter.IndexAdapter;
+import com.openexchange.session.Session;
 
 /**
  * {@link ElasticSearchAdapter}
@@ -95,6 +97,8 @@ public final class ElasticSearchAdapter implements IndexAdapter {
 
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ElasticSearchAdapter.class));
+
+    private static final char DELIM = '/';
 
     private TransportClient client;
 
@@ -157,7 +161,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     }
 
     @Override
-    public List<MailMessage> search(final SearchTerm<?> searchTerm) throws OXException {
+    public List<MailMessage> search(final SearchTerm<?> searchTerm, final Session session) throws OXException {
         try {
             final QueryBuilder queryBuilder = SearchTerm2Query.searchTerm2Query(searchTerm);
             /*
@@ -280,7 +284,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     }
 
     @Override
-    public void addMail(final MailMessage mail) throws OXException {
+    public void add(final MailMessage mail, final Session session) throws OXException {
         try {
             final String id = new MailPath(mail.getAccountId(), mail.getFolder(), mail.getMailId()).toString();
             final XContentBuilder b = createDoc(id, mail);
@@ -290,6 +294,25 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         } catch (final ElasticSearchException e) {
             throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
         }
+    }
+
+    @Override
+    public void add(final MailMessage[] mails, final Session session) throws OXException {
+        final BulkRequestBuilder bulkRequest = client.prepareBulk();
+
+        for (final MailMessage mail : mails) {
+//            bulkRequest.add(client.prepareIndex(indexName, indexType, "1")
+//                .setSource(jsonBuilder()
+//                            .startObject()
+//                                .field("user", "kimchy")
+//                                .field("postDate", new Date())
+//                                .field("message", "trying out Elastic Search")
+//                            .endObject()
+//                          )
+//                );
+
+        }
+        
     }
 
     public XContentBuilder createDoc(final String id, final MailMessage mail) {
