@@ -59,20 +59,32 @@ import com.openexchange.threadpool.ThreadRenamer;
  */
 public final class MailAccountJob extends Job {
 
+    private final int contextId;
+    
+    private final int userId;
+    
+    private final int accountId;
+
+    
+
     /**
      * Initializes a new {@link MailAccountJob}.
+     * @param accountId
+     * @param userId
+     * @param contextId
      */
-    public MailAccountJob() {
+    public MailAccountJob(final int accountId, final int userId, final int contextId) {
         super();
-        // TODO Auto-generated constructor stub
-
+        this.accountId = accountId;
+        this.userId = userId;
+        this.contextId = contextId;
     }
 
     /* (non-Javadoc)
      * @see com.openexchange.threadpool.Task#setThreadName(com.openexchange.threadpool.ThreadRenamer)
      */
     @Override
-    public void setThreadName(ThreadRenamer threadRenamer) {
+    public void setThreadName(final ThreadRenamer threadRenamer) {
         // TODO Auto-generated method stub
 
     }
@@ -81,7 +93,7 @@ public final class MailAccountJob extends Job {
      * @see com.openexchange.threadpool.Task#beforeExecute(java.lang.Thread)
      */
     @Override
-    public void beforeExecute(Thread t) {
+    public void beforeExecute(final Thread t) {
         // TODO Auto-generated method stub
 
     }
@@ -90,7 +102,7 @@ public final class MailAccountJob extends Job {
      * @see com.openexchange.threadpool.Task#afterExecute(java.lang.Throwable)
      */
     @Override
-    public void afterExecute(Throwable t) {
+    public void afterExecute(final Throwable t) {
         // TODO Auto-generated method stub
 
     }
