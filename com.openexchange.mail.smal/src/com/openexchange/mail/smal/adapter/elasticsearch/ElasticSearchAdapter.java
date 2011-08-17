@@ -410,7 +410,6 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                     final MailMessage[] mails = mailAccess.getMessageStorage().getAllMessages(fullName, IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.ASC, FIELDS);
                     
                     
-                    
                 } finally {
                     mailAccess.close(true);
                 }
