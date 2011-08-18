@@ -114,7 +114,7 @@ public final class SessionImpl implements Session {
      * @param randomToken The random token
      * @param localIp The local IP
      */
-    public SessionImpl(final int userId, final String loginName, final String password, final int contextId, final String sessionId, final String secret, final String randomToken, final String localIp, final String login, final String authId, final String hash, final String client, final String remoteIp) {
+    public SessionImpl(final int userId, final String loginName, final String password, final int contextId, final String sessionId, final String secret, final String randomToken, final String localIp, final String login, final String authId, final String hash, final String client) {
         this.userId = userId;
         this.loginName = loginName;
         this.password = password;
