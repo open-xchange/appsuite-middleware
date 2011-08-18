@@ -138,12 +138,13 @@ public final class JobConsumer extends AbstractTask<Object> {
         threadRenamer.rename("Job-Consumer");
     }
 
-    private static final boolean DELEGATE = true;
+    private static final boolean DELEGATE = false;
 
     @Override
     public Object call() throws Exception {
         try {
             final List<Job> jobs = new ArrayList<Job>(16);
+            final Thread thisThread = Thread.currentThread();
             while (keepgoing.get()) {
                 try {
                     if (queue.isEmpty()) {
@@ -158,20 +159,28 @@ public final class JobConsumer extends AbstractTask<Object> {
                     }
                     queue.drainTo(jobs);
                     final boolean quit = jobs.remove(POISON);
-                    if (DELEGATE) {
+                    {
                         final ThreadPoolService threadPool = SMALServiceLookup.getInstance().getService(ThreadPoolService.class);
                         for (final Job job : jobs) {
+                            /*
+                             * Check if canceled in the meantime
+                             */
                             if (!job.isCanceled()) {
-                                threadPool.submit(job, CallerRunsBehavior.getInstance());
-                            }
-                        }
-                    } else {
-                        final Thread thisThread = Thread.currentThread();
-                        for (final Job job : jobs) {
-                            if (!job.isCanceled()) {
-                                job.beforeExecute(thisThread);
-                                job.call();
-                                job.afterExecute(null);
+                                if (job.isPaused()) {
+                                    /*
+                                     * Re-enqueue
+                                     */
+                                    job.proceed();
+                                    queue.offer(job);
+                                } else {
+                                    if (DELEGATE) {
+                                        threadPool.submit(job, CallerRunsBehavior.getInstance());
+                                    } else {
+                                        job.beforeExecute(thisThread);
+                                        job.call();
+                                        job.afterExecute(null);
+                                    }
+                                }
                             }
                         }
                     }

@@ -66,6 +66,11 @@ public abstract class Job implements Task<Object>, Comparable<Job> {
     protected volatile boolean canceled;
 
     /**
+     * The paused flag.
+     */
+    protected volatile boolean paused;
+
+    /**
      * Initializes a new {@link Job}.
      */
     protected Job() {
@@ -119,4 +124,26 @@ public abstract class Job implements Task<Object>, Comparable<Job> {
         return canceled;
     }
 
+    /**
+     * Gets the paused flag
+     * 
+     * @return The paused flag
+     */
+    public boolean isPaused() {
+        return paused;
+    }
+
+    /**
+     * Sets the paused flag
+     */
+    public void pause() {
+        this.paused = true;
+    }
+
+    /**
+     * Un-Sets the paused flag
+     */
+    public void proceed() {
+        this.paused = false;
+    }
 }
