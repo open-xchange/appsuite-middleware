@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.elasticsearch.ElasticSearchException;
 import org.elasticsearch.action.WriteConsistencyLevel;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthRequest;
@@ -80,13 +81,25 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.IndexRange;
+import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailPath;
+import com.openexchange.mail.MailSortField;
+import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.smal.SMALExceptionCodes;
+import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.mail.smal.adapter.IndexAdapter;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 
 /**
  * {@link ElasticSearchAdapter}
@@ -95,26 +108,29 @@ import com.openexchange.session.Session;
  */
 public final class ElasticSearchAdapter implements IndexAdapter {
 
-    private static final org.apache.commons.logging.Log LOG =
+    protected static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ElasticSearchAdapter.class));
 
     private static final char DELIM = '/';
 
-    private TransportClient client;
+    protected volatile TransportClient client;
 
     private final String clusterName;
 
-    private final String indexName;
+    private final String indexNamePrefix;
 
     private final String indexType;
+
+    protected final AtomicBoolean syncFlag;
 
     /**
      * Initializes a new {@link ElasticSearchAdapter}.
      */
     public ElasticSearchAdapter() {
         super();
+        syncFlag = new AtomicBoolean();
         clusterName = Constants.CLUSTER_NAME;
-        indexName = Constants.INDEX_NAME;
+        indexNamePrefix = Constants.INDEX_NAME_PREFIX;
         indexType = Constants.INDEX_TYPE;
     }
 
@@ -137,19 +153,6 @@ public final class ElasticSearchAdapter implements IndexAdapter {
          * Create the (transport) client
          */
         client = new TransportClient(settingsBuilder.build());
-        /*
-         * Create the index
-         */
-        try {
-            client.admin().indices().create(new CreateIndexRequest(indexName)).actionGet();
-            LOG.info("Index \"" + indexName + "\" successfully created.");
-        } catch (final Exception ex) {
-            LOG.info("Index \"" + indexName + "\" already exists.");
-        }
-        /*
-         * Create the mapping definition for a mail
-         */
-        Mapping.createMailMapping(client);
     }
 
     @Override
@@ -167,7 +170,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             /*
              * Compose search request
              */
-            final SearchRequestBuilder builder = client.prepareSearch(indexName);
+            final SearchRequestBuilder builder = client.prepareSearch(indexNamePrefix + session.getContextId());
             // builder.addSort("createdAt", SortOrder.DESC);
             // builder.setFrom(page * hitsPerPage).setSize(hitsPerPage);
             builder.setQuery(queryBuilder);
@@ -230,14 +233,23 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     }
 
     public void createIndex(final String indexName) {
-        // no need for the following because of _default mapping under config
-        // String fileAsString = Helper.readInputStream(getClass().getResourceAsStream("tweet.json"));
-        // new CreateIndexRequest(indexName).mapping(indexType, fileAsString)
-        client.admin().indices().create(new CreateIndexRequest(indexName)).actionGet();
-        // waitForYellow();
+        /*
+         * Create the index
+         */
+        try {
+            client.admin().indices().create(new CreateIndexRequest(indexName)).actionGet();
+            LOG.info("Index \"" + indexName + "\" successfully created.");
+            // waitForYellow();
+            /*
+             * Create the mapping definition for a mail
+             */
+            Mapping.createMailMapping(client, indexName);
+        } catch (final Exception ex) {
+            LOG.info("Index \"" + indexName + "\" already exists.");
+        }
     }
 
-    public void saveCreateIndex(final boolean log) {
+    public void saveCreateIndex(final String indexName, final boolean log) {
         // if (!indexExists(name)) {
         try {
             createIndex(indexName);
@@ -255,21 +267,21 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     /**
      * Waits for yellow status.
      */
-    void waitForYellow() {
+    void waitForYellow(final String indexName) {
         client.admin().cluster().health(new ClusterHealthRequest(indexName).waitForYellowStatus()).actionGet();
     }
 
     /**
      * Waits for green status.
      */
-    void waitForGreen() {
+    void waitForGreen(final String indexName) {
         client.admin().cluster().health(new ClusterHealthRequest(indexName).waitForGreenStatus()).actionGet();
     }
 
     /**
      * Explicitly refresh one or more indices (making the content indexed since the last refresh searchable).
      */
-    public void refresh() {
+    public void refresh(final String indexName) {
         final RefreshResponse rsp = client.admin().indices().refresh(new RefreshRequest(indexName)).actionGet();
     }
 
@@ -278,7 +290,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
      * 
      * @return The number of mails
      */
-    public long countAll() {
+    public long countAll(final String indexName) {
         final CountResponse response = client.prepareCount(indexName).setQuery(QueryBuilders.matchAllQuery()).execute().actionGet();
         return response.getCount();
     }
@@ -289,7 +301,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             final String id = new MailPath(mail.getAccountId(), mail.getFolder(), mail.getMailId()).toString();
             final XContentBuilder b = createDoc(id, mail);
             final IndexRequestBuilder irb =
-                client.prepareIndex(indexName, indexType, id).setConsistencyLevel(WriteConsistencyLevel.DEFAULT).setSource(b);
+                client.prepareIndex(indexNamePrefix + session.getContextId(), indexType, id).setConsistencyLevel(WriteConsistencyLevel.DEFAULT).setSource(b);
             irb.execute().actionGet();
         } catch (final ElasticSearchException e) {
             throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
@@ -301,18 +313,18 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         final BulkRequestBuilder bulkRequest = client.prepareBulk();
 
         for (final MailMessage mail : mails) {
-//            bulkRequest.add(client.prepareIndex(indexName, indexType, "1")
-//                .setSource(jsonBuilder()
-//                            .startObject()
-//                                .field("user", "kimchy")
-//                                .field("postDate", new Date())
-//                                .field("message", "trying out Elastic Search")
-//                            .endObject()
-//                          )
-//                );
+            // bulkRequest.add(client.prepareIndex(indexName, indexType, "1")
+            // .setSource(jsonBuilder()
+            // .startObject()
+            // .field("user", "kimchy")
+            // .field("postDate", new Date())
+            // .field("message", "trying out Elastic Search")
+            // .endObject()
+            // )
+            // );
 
         }
-        
+
     }
 
     public XContentBuilder createDoc(final String id, final MailMessage mail) {
@@ -328,26 +340,75 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         }
     }
 
-    public void feedDoc(final String mailId, final XContentBuilder b) {
-        final IndexRequestBuilder irb =
-            client.prepareIndex(indexName, indexType, mailId).setConsistencyLevel(WriteConsistencyLevel.DEFAULT).setSource(b);
-        irb.execute().actionGet();
-    }
-
-    public void deleteById(final String mailId) {
+    public void deleteById(final String mailId, final String indexName) {
         final DeleteResponse response = client.prepareDelete(indexName, indexType, mailId).execute().actionGet();
     }
 
-    public void deleteAll() {
+    public void deleteAll(final String indexName) {
         // client.prepareIndex().setOpType(OpType.)
         // there is an index delete operation
         // http://www.elasticsearch.com/docs/elasticsearch/rest_api/admin/indices/delete_index/
 
         client.prepareDeleteByQuery(indexName).setQuery(QueryBuilders.matchAllQuery()).execute().actionGet();
-        refresh();
+        refresh(indexName);
     }
 
-    public OptimizeResponse optimize(final int optimizeToSegmentsAfterUpdate) {
+    public OptimizeResponse optimize(final String indexName, final int optimizeToSegmentsAfterUpdate) {
         return client.admin().indices().optimize(new OptimizeRequest(indexName).maxNumSegments(optimizeToSegmentsAfterUpdate)).actionGet();
     }
+
+    @Override
+    public boolean sync(final String fullName, final int accountId, final Session session) throws OXException {
+        if (!syncFlag.compareAndSet(false, true)) {
+            return false;
+        }
+        /*
+         * Start syncer
+         */
+        SMALServiceLookup.getInstance().getService(ThreadPoolService.class).submit(
+            ThreadPools.task(new SyncRunnable(fullName, accountId, session)),
+            CallerRunsBehavior.getInstance());
+        return true;
+    }
+
+    protected static final MailField[] FIELDS = new MailFields(MailField.ID, MailField.FLAGS).toArray();
+
+    private final class SyncRunnable implements Runnable {
+
+        private final String fullName;
+        
+        private final int accountId;
+
+        private final Session session;
+
+        /**
+         * Initializes a new {@link ElasticSearchAdapter.SyncRunnable}.
+         */
+        public SyncRunnable(final String fullName, final int accountId, final Session session) {
+            super();
+            this.fullName = fullName;
+            this.accountId = accountId;
+            this.session = session;
+        }
+
+        @Override
+        public void run() {
+            try {
+                final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = MailAccess.getInstance(session, accountId);
+                mailAccess.connect(false);
+                try {
+                    final MailMessage[] mails = mailAccess.getMessageStorage().getAllMessages(fullName, IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.ASC, FIELDS);
+                    
+                    
+                } finally {
+                    mailAccess.close(true);
+                }
+            } catch (final Exception e) {
+                LOG.error("Synchronizing \"" + fullName + "\" mails with index failed.", e);
+            } finally {
+                syncFlag.set(false);
+            }
+        }
+
+    } // End of SyncRunnable class
 }

@@ -267,6 +267,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
                 }
             }
         }
+        LogProperties.putLogProperty("com.openexchange.ajp13.requestIp", servletRequest.getRemoteAddr());
         /*
          * Determine if content type indicates form data
          */

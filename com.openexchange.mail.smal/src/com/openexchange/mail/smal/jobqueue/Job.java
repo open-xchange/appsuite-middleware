@@ -47,72 +47,123 @@
  *
  */
 
-package com.openexchange.mail.smal.adapter;
+package com.openexchange.mail.smal.jobqueue;
 
-import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.search.SearchTerm;
-import com.openexchange.session.Session;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.Log;
+import com.openexchange.threadpool.Task;
 
 /**
- * {@link IndexAdapter} - The adapter for a search index.
+ * {@link Job} - A job that is placed into {@link JobQueue}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface IndexAdapter {
+public abstract class Job implements Task<Object>, Comparable<Job> {
+
+    private static final AtomicReference<BlockingQueue<Job>> QUEUE_REF = new AtomicReference<BlockingQueue<Job>>();
 
     /**
-     * Starts the index adapter.
-     * 
-     * @throws OXException If start-up fails
+     * Sets the blocking queue.
      */
-    public void start() throws OXException;
+    static final void set(final BlockingQueue<Job> newValue) {
+        QUEUE_REF.set(newValue);
+    }
 
     /**
-     * Stops the index adapter.
-     * 
-     * @throws OXException If shut-down fails
+     * The canceled flag.
      */
-    public void stop() throws OXException;
+    protected volatile boolean canceled;
 
     /**
-     * Performs the query derived from given search term.
-     * 
-     * @param searchTerm The search term
-     * @param session The session
-     * @return The search result
-     * @throws OXException If search fails
+     * The paused flag.
      */
-    public List<MailMessage> search(SearchTerm<?> searchTerm, Session session) throws OXException;
+    protected volatile boolean paused;
 
     /**
-     * Adds specified mail to the index.
-     * 
-     * @param mail The mail to add
-     * @param session The session
-     * @throws OXException If adding mail to index fails
+     * Initializes a new {@link Job}.
      */
-    public void add(MailMessage mail, Session session) throws OXException;
+    protected Job() {
+        super();
+    }
 
     /**
-     * Adds specified mails to the index.
+     * Gets this job's ranking.
      * 
-     * @param mails The mails to add
-     * @param session The session
-     * @throws OXException If adding mails to index fails
+     * @return The ranking
      */
-    public void add(MailMessage[] mails, Session session) throws OXException;
+    public abstract int getRanking();
 
     /**
-     * Synchronizes mails contained given folder with the index.
-     * 
-     * @param fullName The folder full name
-     * @param The account identifier
-     * @param session The session
-     * @return <code>true</code> if invocation triggered sync; otherwise <code>false</code> 
-     * @throws OXException If synchronizing mails with index fails
+     * Performs this job.
      */
-    public boolean sync(String fullName, int accountId, Session session) throws OXException;
+    public abstract void perform();
 
+    /**
+     * Gets the working queue.
+     * 
+     * @return The working queue or <code>null</code>
+     */
+    public final BlockingQueue<Job> getQueue() {
+        return QUEUE_REF.get();
+    }
+
+    @Override
+    public final int compareTo(final Job other) {
+        final int thisVal = this.getRanking();
+        final int anotherVal = other.getRanking();
+        return (thisVal < anotherVal ? -1 : (thisVal == anotherVal ? 0 : 1));
+    }
+
+    @Override
+    public final Object call() throws Exception {
+        try {
+            perform();
+        } catch (final Exception e) {
+            Log.valueOf(LogFactory.getLog(Job.class)).error(e.getMessage(), e);
+        }
+        return null;
+    }
+
+    /**
+     * Sets the canceled flag.
+     * <p>
+     * If set the job is not performed if not already done.
+     */
+    public void cancel() {
+        canceled = true;
+    }
+
+    /**
+     * Checks if the canceled flag is set.
+     * 
+     * @return Whether canceled or not
+     */
+    public boolean isCanceled() {
+        return canceled;
+    }
+
+    /**
+     * Gets the paused flag
+     * 
+     * @return The paused flag
+     */
+    public boolean isPaused() {
+        return paused;
+    }
+
+    /**
+     * Sets the paused flag
+     */
+    public void pause() {
+        this.paused = true;
+    }
+
+    /**
+     * Un-Sets the paused flag
+     */
+    public void proceed() {
+        this.paused = false;
+    }
 }

@@ -158,12 +158,12 @@ public class PublicationSession implements Session {
     }
 
     @Override
-    public void setLocalIp(String ip) {
+    public void setLocalIp(final String ip) {
         // Nothing to do here.
     }
 
     @Override
-    public void setHash(String hash) {
+    public void setHash(final String hash) {
         // TODO Auto-generated method stub
     }
 
@@ -173,7 +173,8 @@ public class PublicationSession implements Session {
     }
 
     @Override
-    public void setClient(String client) {
+    public void setClient(final String client) {
         // Nothing to do.
     }
+
 }

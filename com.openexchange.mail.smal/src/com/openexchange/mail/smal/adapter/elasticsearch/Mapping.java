@@ -77,10 +77,17 @@ public final class Mapping {
      * @param client The client
      * @throws OXException If creating mapping fails (probably because that mapping already exists)
      */
-    public static void createMailMapping(final Client client) throws OXException {
+    public static void createMailMapping(final Client client, final String indexName) throws OXException {
         try {
             final JSONObject properties = new JSONObject();
+            properties.put(Constants.FIELD_UUID, new JSONObject("{ \"type\": \"string\", \"index\": \"not_analyzed\" }"));
+            properties.put(Constants.FIELD_USER, new JSONObject("{ \"type\": \"string\", \"index\": \"not_analyzed\" }"));
+            properties.put(Constants.FIELD_ACCOUNT_ID, new JSONObject("{ \"type\": \"string\", \"index\": \"not_analyzed\" }"));
+            properties.put(Constants.FIELD_FULL_NAME, new JSONObject("{ \"type\": \"string\", \"index\": \"not_analyzed\" }"));
             properties.put(Constants.FIELD_ID, new JSONObject("{ \"type\": \"string\", \"index\": \"not_analyzed\" }"));
+            /*
+             * Body content
+             */
             properties.put(Constants.FIELD_BODY, new JSONObject("{ \"type\": \"string\", \"store\": \"no\" }"));
             /*
              * Subject
@@ -122,7 +129,7 @@ public final class Mapping {
             final JSONObject mapping = new JSONObject();
             mapping.put(Constants.INDEX_TYPE, container);
             final PutMappingRequestBuilder pmrb =
-                client.admin().indices().preparePutMapping(Constants.INDEX_NAME).setSource(mapping.toString());
+                client.admin().indices().preparePutMapping(indexName).setSource(mapping.toString());
             pmrb.execute().actionGet();
         } catch (final JSONException e) {
             // Cannot occur

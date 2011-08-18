@@ -47,83 +47,75 @@
  *
  */
 
-package com.openexchange.mail.smal.adapter.elasticsearch;
+package com.openexchange.mail.smal.jobqueue;
+
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.behavior.AbortBehavior;
 
 /**
- * {@link Constants}
+ * {@link JobQueue} - The job queue.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Constants {
+public final class JobQueue {
+
+    private static final int CAPACITY = 1048576;
+
+    private final BlockingQueue<Job> queue;
+
+    private final Future<Object> future;
+
+    private final JobConsumer consumer;
 
     /**
-     * Initializes a new {@link Constants}.
+     * Initializes a new {@link JobQueue}.
      */
-    private Constants() {
+    public JobQueue(final ThreadPoolService threadPool) {
         super();
+        queue = new PriorityBlockingQueue<Job>(CAPACITY);
+        consumer = new JobConsumer(queue);
+        future = threadPool.submit(consumer, AbortBehavior.getInstance());
+        Job.set(queue);
     }
 
     /**
-     * The name for the cluster.
+     * Stops the job queue orderly.
      */
-    public static final String CLUSTER_NAME = "mail_cluster";
+    public void stop() {
+        Job.set(null);
+        consumer.stop();
+        try {
+            future.get(1, TimeUnit.SECONDS);
+        } catch (final TimeoutException e) {
+            // Wait time elapsed; enforce cancelation
+            future.cancel(true);
+        } catch (final InterruptedException e) {
+            /*
+             * Cannot occur, but keep interrupted state
+             */
+            Thread.currentThread().interrupt();
+        } catch (final ExecutionException e) {
+            // What?!
+        }
+    }
 
     /**
-     * The name for mail index.
+     * Adds specified job to this service's job queue.
+     * 
+     * @param job The job to add
+     * @return <code>true</code> if job could be added; otherwise <code>false</code>
      */
-    public static final String INDEX_NAME_PREFIX = "mail_index_";
-
-    /**
-     * The type for mail index.
-     */
-    public static final String INDEX_TYPE = "mail";
-
-    // ------------------- FIELD NAMES ----------------------
-
-    public static final String FIELD_UUID = "uuid";
-    
-    public static final String FIELD_USER = "user";
-    
-    public static final String FIELD_ACCOUNT_ID = "account_id";
-    
-    public static final String FIELD_ID = "id";
-
-    public static final String FIELD_FULL_NAME = "full_name";
-
-    public static final String FIELD_BODY = "body";
-
-    public static final String FIELD_FROM = "from";
-
-    public static final String FIELD_TO = "to";
-
-    public static final String FIELD_CC = "cc";
-
-    public static final String FIELD_BCC = "bcc";
-
-    public static final String FIELD_SUBJECT = "subject";
-
-    public static final String FIELD_RECEIVED_DATE = "received_date";
-
-    public static final String FIELD_SENT_DATE = "sent_date";
-
-    public static final String FIELD_SIZE = "size";
-
-    public static final String FIELD_FLAG_ANSWERED = "answered";
-    
-    public static final String FIELD_FLAG_DELETED = "deleted";
-
-    public static final String FIELD_FLAG_DRAFT = "draft";
-
-    public static final String FIELD_FLAG_FLAGGED = "flagged";
-
-    public static final String FIELD_FLAG_SEEN = "seen";
-
-    public static final String FIELD_FLAG_USER = "user";
-
-    public static final String FIELD_FLAG_SPAM = "spam";
-    
-    public static final String FIELD_FLAG_FORWARDED = "forwarded";
-    
-    public static final String FIELD_FLAG_READ_ACK = "read_ack";
+    public boolean addJob(final Job job) {
+        if (queue.size() >= CAPACITY) {
+            return false;
+        }
+        return queue.offer(job);
+    }
 
 }

@@ -450,7 +450,7 @@ public final class CacheFolderStorage implements FolderStorage {
         Folder cachedFolder = (Folder) cache.getFromGroup(cacheKey, sContextId);
         if (null != cachedFolder) {
             final String parentID = cachedFolder.getParentID();
-            removeFromSubfolders(treeId, id, parentID, sContextId, session);
+            removeFromSubfolders(treeId, parentID, sContextId, session);
         }
         cache.removeFromGroup(cacheKey, sContextId);
         if (userId > 0) {
@@ -458,7 +458,7 @@ public final class CacheFolderStorage implements FolderStorage {
             if (null != folderMap) {
                 cachedFolder = folderMap.get(id, treeId);
                 if (null != cachedFolder) {
-                    removeFromSubfolders(treeId, id, cachedFolder.getParentID(), sContextId, session);
+                    removeFromSubfolders(treeId, cachedFolder.getParentID(), sContextId, session);
                 }
                 folderMap.remove(id, treeId);
             }
@@ -469,7 +469,7 @@ public final class CacheFolderStorage implements FolderStorage {
             cachedFolder = (Folder) cache.getFromGroup(cacheKey, sContextId);
             if (null != cachedFolder) {
                 final String parentID = cachedFolder.getParentID();
-                removeFromSubfolders(FolderStorage.REAL_TREE_ID, id, parentID, sContextId, session);
+                removeFromSubfolders(FolderStorage.REAL_TREE_ID, parentID, sContextId, session);
             }
             cache.removeFromGroup(cacheKey, sContextId);
             if (userId > 0) {
@@ -477,7 +477,7 @@ public final class CacheFolderStorage implements FolderStorage {
                 if (null != folderMap) {
                     cachedFolder = folderMap.get(id, FolderStorage.REAL_TREE_ID);
                     if (null != cachedFolder) {
-                        removeFromSubfolders(FolderStorage.REAL_TREE_ID, id, cachedFolder.getParentID(), sContextId, session);
+                        removeFromSubfolders(FolderStorage.REAL_TREE_ID, cachedFolder.getParentID(), sContextId, session);
                     }
                     folderMap.remove(id, FolderStorage.REAL_TREE_ID);
                 }
@@ -568,9 +568,9 @@ public final class CacheFolderStorage implements FolderStorage {
             /*
              * ... and from parent folder's sub-folder list
              */
-            removeFromSubfolders(treeId, folderId, parentId, sContextId, session);
+            removeFromSubfolders(treeId, parentId, sContextId, session);
             if (null != realParentId) {
-                removeFromSubfolders(FolderStorage.REAL_TREE_ID, folderId, realParentId, sContextId, session);
+                removeFromSubfolders(FolderStorage.REAL_TREE_ID, realParentId, sContextId, session);
             }
         }
         /*
@@ -606,27 +606,11 @@ public final class CacheFolderStorage implements FolderStorage {
         }
     }
 
-    private void removeFromSubfolders(final String treeId, final String folderId, final String parentId, final String contextId, final Session session) {
-        Folder cachedParent = (Folder) globalCache.getFromGroup(newCacheKey(parentId, treeId), contextId);
-        if (null != cachedParent) {
-            removeFromSubfolderIds(folderId, cachedParent);
-        }
+    private void removeFromSubfolders(final String treeId, final String parentId, final String contextId, final Session session) {
+        globalCache.removeFromGroup(newCacheKey(parentId, treeId), contextId);
         final FolderMap folderMap = optFolderMapFor(session);
         if (null != folderMap) {
-            cachedParent = folderMap.get(parentId, treeId);
-            removeFromSubfolderIds(folderId, cachedParent);
-        }
-    }
-
-    private static void removeFromSubfolderIds(final String subfolderId, final Folder cachedFolder) {
-        if (null != cachedFolder) {
-            final String[] subfolderIDs = cachedFolder.getSubfolderIDs();
-            if (null != subfolderIDs) {
-                final List<String> temp = new ArrayList<String>(Arrays.asList(subfolderIDs));
-                if (temp.remove(subfolderId)) {
-                    cachedFolder.setSubfolderIDs(temp.toArray(new String[temp.size()]));
-                }
-            }
+            folderMap.remove(parentId, treeId);
         }
     }
 

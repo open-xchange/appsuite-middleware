@@ -69,14 +69,14 @@ public class SimServerSession implements ServerSession {
     private UserConfiguration userConfig;
     private String login;
 
-    public SimServerSession(Context context, User user, UserConfiguration userConfig) {
+    public SimServerSession(final Context context, final User user, final UserConfiguration userConfig) {
         super();
         this.context = context;
         this.user = user;
         this.userConfig = userConfig;
     }
 
-    public SimServerSession(int ctxId, int uid) {
+    public SimServerSession(final int ctxId, final int uid) {
         this(new SimContext(ctxId), null, null);
         this.user = new MockUser(uid);
     }
@@ -102,7 +102,7 @@ public class SimServerSession implements ServerSession {
     }
 
     @Override
-    public boolean containsParameter(String name) {
+    public boolean containsParameter(final String name) {
         return false;
     }
 
@@ -127,7 +127,7 @@ public class SimServerSession implements ServerSession {
     }
 
     @Override
-    public Object getParameter(String name) {
+    public Object getParameter(final String name) {
         return null;
     }
 
@@ -167,7 +167,7 @@ public class SimServerSession implements ServerSession {
     }
 
     @Override
-    public void setParameter(String name, Object value) {
+    public void setParameter(final String name, final Object value) {
         throw new UnsupportedOperationException();
     }
 
@@ -183,29 +183,29 @@ public class SimServerSession implements ServerSession {
     }
 
     @Override
-    public void setLocalIp(String ip) {
+    public void setLocalIp(final String ip) {
         // TODO Auto-generated method stub
 
     }
 
     @Override
-    public void setHash(String hash) {
+    public void setHash(final String hash) {
         // TODO Auto-generated method stub
     }
 
-    public void setContext(Context context) {
+    public void setContext(final Context context) {
         this.context = context;
     }
 
-    public void setUser(User user) {
+    public void setUser(final User user) {
         this.user = user;
     }
 
-    public void setUserConfig(UserConfiguration userConfig) {
+    public void setUserConfig(final UserConfiguration userConfig) {
         this.userConfig = userConfig;
     }
 
-    public void setLogin(String login) {
+    public void setLogin(final String login) {
         this.login = login;
     }
 
@@ -216,7 +216,8 @@ public class SimServerSession implements ServerSession {
     }
 
     @Override
-    public void setClient(String client) {
+    public void setClient(final String client) {
         // TODO Auto-generated method stub
     }
+
 }

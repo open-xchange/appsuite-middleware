@@ -58,8 +58,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.caching.objects.CachedSession;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.exception.OXException;
 import com.openexchange.crypto.CryptoService;
+import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.services.SessiondServiceRegistry;
 
@@ -114,7 +114,7 @@ public final class SessionImpl implements Session {
      * @param randomToken The random token
      * @param localIp The local IP
      */
-    public SessionImpl(final int userId, final String loginName, final String password, final int contextId, final String sessionId, final String secret, final String randomToken, final String localIp, final String login, final String authId, final String hash, String client) {
+    public SessionImpl(final int userId, final String loginName, final String password, final int contextId, final String sessionId, final String secret, final String randomToken, final String localIp, final String login, final String authId, final String hash, final String client) {
         this.userId = userId;
         this.loginName = loginName;
         this.password = password;
@@ -149,7 +149,6 @@ public final class SessionImpl implements Session {
         localIp = cachedSession.getLocalIp();
         authId = cachedSession.getAuthId();
         hash = cachedSession.getHash();
-        client = cachedSession.getClient();
         final Map<String, Serializable> params = cachedSession.getParameters();
         parameters = new ConcurrentHashMap<String, Object>(params.size());
         for (final Entry<String, Serializable> entry : params.entrySet()) {
@@ -167,11 +166,11 @@ public final class SessionImpl implements Session {
         return new CachedSession(userId, loginName, obfuscate( password ), contextId, sessionId, secret, randomToken, localIp, login, authId, hash, client, parameters);
     }
 
-    private String obfuscate(String string) {
+    private String obfuscate(final String string) {
         try {
-            String key = getObfuscationKey();
+            final String key = getObfuscationKey();
             return SessiondServiceRegistry.getServiceRegistry().getService(CryptoService.class).encrypt(string, key);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             LOG.error("Could not obfuscate a string before migration", e);
             return string;
         }
@@ -181,11 +180,11 @@ public final class SessionImpl implements Session {
         return SessiondServiceRegistry.getServiceRegistry().getService(ConfigurationService.class).getProperty(OBFUSCATION_KEY_PROPERTY);
     }
 
-    private String unobfuscate(String string) {
+    private String unobfuscate(final String string) {
         try {
-            String key = getObfuscationKey();
+            final String key = getObfuscationKey();
             return SessiondServiceRegistry.getServiceRegistry().getService(CryptoService.class).decrypt(string, key);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             LOG.error("Could not decode string after migration", e);
             return string;
         }
@@ -252,7 +251,7 @@ public final class SessionImpl implements Session {
     public void setLocalIp(final String localIp) {
         this.localIp = localIp;
     }
-
+    
     @Override
     public String getLoginName() {
         return loginName;
@@ -308,7 +307,7 @@ public final class SessionImpl implements Session {
     }
 
     @Override
-    public void setClient(String client) {
+    public void setClient(final String client) {
         this.client = client;
     }
 }

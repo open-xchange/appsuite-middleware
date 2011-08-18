@@ -47,83 +47,78 @@
  *
  */
 
-package com.openexchange.mail.smal.adapter.elasticsearch;
+package com.openexchange.mail.smal.jobqueue;
+
+import com.openexchange.threadpool.ThreadRenamer;
+
 
 /**
- * {@link Constants}
- * 
+ * {@link MailAccountJob}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Constants {
+public final class MailAccountJob extends Job {
+
+    private final int contextId;
+    
+    private final int userId;
+    
+    private final int accountId;
+
+    
 
     /**
-     * Initializes a new {@link Constants}.
+     * Initializes a new {@link MailAccountJob}.
+     * @param accountId
+     * @param userId
+     * @param contextId
      */
-    private Constants() {
+    public MailAccountJob(final int accountId, final int userId, final int contextId) {
         super();
+        this.accountId = accountId;
+        this.userId = userId;
+        this.contextId = contextId;
     }
 
-    /**
-     * The name for the cluster.
+    /* (non-Javadoc)
+     * @see com.openexchange.threadpool.Task#setThreadName(com.openexchange.threadpool.ThreadRenamer)
      */
-    public static final String CLUSTER_NAME = "mail_cluster";
+    @Override
+    public void setThreadName(final ThreadRenamer threadRenamer) {
+        // TODO Auto-generated method stub
 
-    /**
-     * The name for mail index.
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.threadpool.Task#beforeExecute(java.lang.Thread)
      */
-    public static final String INDEX_NAME_PREFIX = "mail_index_";
+    @Override
+    public void beforeExecute(final Thread t) {
+        // TODO Auto-generated method stub
 
-    /**
-     * The type for mail index.
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.threadpool.Task#afterExecute(java.lang.Throwable)
      */
-    public static final String INDEX_TYPE = "mail";
+    @Override
+    public void afterExecute(final Throwable t) {
+        // TODO Auto-generated method stub
 
-    // ------------------- FIELD NAMES ----------------------
+    }
 
-    public static final String FIELD_UUID = "uuid";
-    
-    public static final String FIELD_USER = "user";
-    
-    public static final String FIELD_ACCOUNT_ID = "account_id";
-    
-    public static final String FIELD_ID = "id";
+    @Override
+    public int getRanking() {
+        return 0;
+    }
 
-    public static final String FIELD_FULL_NAME = "full_name";
+    /* (non-Javadoc)
+     * @see com.openexchange.mail.smal.jobqueue.Job#perform()
+     */
+    @Override
+    public void perform() {
+        // TODO Auto-generated method stub
 
-    public static final String FIELD_BODY = "body";
-
-    public static final String FIELD_FROM = "from";
-
-    public static final String FIELD_TO = "to";
-
-    public static final String FIELD_CC = "cc";
-
-    public static final String FIELD_BCC = "bcc";
-
-    public static final String FIELD_SUBJECT = "subject";
-
-    public static final String FIELD_RECEIVED_DATE = "received_date";
-
-    public static final String FIELD_SENT_DATE = "sent_date";
-
-    public static final String FIELD_SIZE = "size";
-
-    public static final String FIELD_FLAG_ANSWERED = "answered";
-    
-    public static final String FIELD_FLAG_DELETED = "deleted";
-
-    public static final String FIELD_FLAG_DRAFT = "draft";
-
-    public static final String FIELD_FLAG_FLAGGED = "flagged";
-
-    public static final String FIELD_FLAG_SEEN = "seen";
-
-    public static final String FIELD_FLAG_USER = "user";
-
-    public static final String FIELD_FLAG_SPAM = "spam";
-    
-    public static final String FIELD_FLAG_FORWARDED = "forwarded";
-    
-    public static final String FIELD_FLAG_READ_ACK = "read_ack";
+    }
 
 }
