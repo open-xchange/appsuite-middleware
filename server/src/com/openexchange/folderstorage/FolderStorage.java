@@ -97,7 +97,10 @@ public interface FolderStorage {
     public static final String GLOBAL_ADDRESS_BOOK_ID = "6";
 
     /**
-     * Clears the cache.
+     * Clears the cache with respect to specified user.
+     * 
+     * @param userId The user identifier
+     * @param contextId The context identifier
      */
     void clearCache(int userId, int contextId);
 
