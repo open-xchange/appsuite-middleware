@@ -159,7 +159,7 @@ public final class AllAction extends AbstractAppointmentAction {
             Date lastModified = new Date(0);
             final List<Appointment> appointmentList = new ArrayList<Appointment>();
             while (it.hasNext()) {
-                final Appointment appointment = it.next();
+                Appointment appointment = it.next();
                 boolean written = false;
 
                 // Workaround to fill appointments with alarm times
@@ -208,6 +208,7 @@ public final class AllAction extends AbstractAppointmentAction {
                             LOG.error("Can not calculate recurrence " + appointment.getObjectID() + ':' + session.getContextId(), e);
                         }
                         if (recuResults != null && recuResults.size() == 1) {
+                        	appointment = appointment.clone();
                             appointment.setStartDate(new Date(recuResults.getRecurringResult(0).getStart()));
                             appointment.setEndDate(new Date(recuResults.getRecurringResult(0).getEnd()));
 
@@ -228,6 +229,7 @@ public final class AllAction extends AbstractAppointmentAction {
                         if (recuResults != null) {
                             for (int a = 0; a < recuResults.size(); a++) {
                                 final RecurringResultInterface result = recuResults.getRecurringResult(a);
+                                appointment = appointment.clone();
                                 appointment.setStartDate(new Date(result.getStart()));
                                 appointment.setEndDate(new Date(result.getEnd()));
                                 appointment.setRecurrencePosition(result.getPosition());

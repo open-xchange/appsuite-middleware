@@ -68,6 +68,7 @@ import com.openexchange.groupware.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject.Marker;
+import com.openexchange.groupware.results.CollectionDelta;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -138,7 +139,7 @@ public final class UpdatesAction extends AbstractAppointmentAction {
         SearchIterator<Appointment> it = null;
         Date lastModified = null;
         appointmentsql.setIncludePrivateAppointments(showPrivates);
-        final List<Appointment> appointments = new ArrayList<Appointment>(16);
+        final CollectionDelta<Appointment> appointments = new CollectionDelta<Appointment>();
         try {
             if (!bIgnoreModified) {
                 if (showAppointmentInAllFolders) {
@@ -160,7 +161,7 @@ public final class UpdatesAction extends AbstractAppointmentAction {
                 }
 
                 while (it.hasNext()) {
-                    final Appointment appointmentObj = it.next();
+                    Appointment appointmentObj = it.next();
                     boolean written = false;
                     if (appointmentObj.getRecurrenceType() != CalendarObject.NONE && appointmentObj.getRecurrencePosition() == 0) {
                         if (bRecurrenceMaster) {
@@ -177,7 +178,7 @@ public final class UpdatesAction extends AbstractAppointmentAction {
                                 appointmentObj.setStartDate(new Date(recuResults.getRecurringResult(0).getStart()));
                                 appointmentObj.setEndDate(new Date(recuResults.getRecurringResult(0).getEnd()));
 
-                                appointments.add(appointmentObj);
+                                appointments.addNewOrModified(appointmentObj);
                             }
                         } else {
                             // Commented this because this is done in CalendarOperation.next():726 that calls extractRecurringInformation()
@@ -198,15 +199,16 @@ public final class UpdatesAction extends AbstractAppointmentAction {
 
                             if (recuResults != null) {
                                 for (int a = 0; a < recuResults.size(); a++) {
+                                	appointmentObj = appointmentObj.clone();
                                     final RecurringResultInterface result = recuResults.getRecurringResult(a);
                                     appointmentObj.setStartDate(new Date(result.getStart()));
                                     appointmentObj.setEndDate(new Date(result.getEnd()));
                                     appointmentObj.setRecurrencePosition(result.getPosition());
 
                                     if (startUTC == null || endUTC == null) {
-                                        appointments.add(appointmentObj);
+                                        appointments.addNewOrModified(appointmentObj);
                                     } else {
-                                        checkAndAddAppointment(appointments, appointmentObj, startUTC, endUTC, recColl);
+                                        checkAndAddAppointmentAsNewOrModified(appointments, appointmentObj, startUTC, endUTC, recColl);
                                     }
                                 }
                             }
@@ -214,9 +216,9 @@ public final class UpdatesAction extends AbstractAppointmentAction {
                     }
                     if (!written) {
                         if (startUTC == null || endUTC == null) {
-                            appointments.add(appointmentObj);
+                            appointments.addNewOrModified(appointmentObj);
                         } else {
-                            checkAndAddAppointment(appointments, appointmentObj, startUTC, endUTC, recColl);
+                            checkAndAddAppointmentAsNewOrModified(appointments, appointmentObj, startUTC, endUTC, recColl);
                         }
                     }
 
@@ -233,7 +235,7 @@ public final class UpdatesAction extends AbstractAppointmentAction {
                 while (it.hasNext()) {
                     final Appointment appointmentObj = it.next();
                     appointmentObj.setMarker(Marker.ID_ONLY);
-                    appointments.add(appointmentObj);
+                    appointments.addDeleted(appointmentObj);
 
                     lastModified = appointmentObj.getLastModified();
 

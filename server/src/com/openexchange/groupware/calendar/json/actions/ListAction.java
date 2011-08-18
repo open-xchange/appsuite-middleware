@@ -162,7 +162,7 @@ public final class ListAction extends AbstractAppointmentAction {
         try {
             int counter = 0;
             while (it.hasNext()) {
-                final Appointment appointment = it.next();
+                Appointment appointment = it.next();
                 if (null == appointment) {
                     continue;
                 }
@@ -196,6 +196,7 @@ public final class ListAction extends AbstractAppointmentAction {
 
                             final int listSize = recurrencePosList.size();
                             for (int a = 0; a < listSize; a++) {
+                            	appointment = appointment.clone();
                                 appointment.setStartDate(startDate);
                                 appointment.setEndDate(endDate);
                                 final RecurringResultsInterface recuResults = recColl.calculateRecurring(

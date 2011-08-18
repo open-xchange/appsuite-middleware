@@ -101,7 +101,6 @@ public class UpdatesAction extends ContactAction {
         }
 
         final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
-        final List<Contact> list = new ArrayList<Contact>();
         final List<Contact> modifiedList = new ArrayList<Contact>();
         final List<Contact> deletedList = new ArrayList<Contact>();
         final Map<String, List<Contact>> responseMap = new HashMap<String, List<Contact>>(2);
@@ -115,7 +114,7 @@ public class UpdatesAction extends ContactAction {
                 // Correct last modified and creation date with users timezone
                 contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
                 contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
-                list.add(contact);
+                modifiedList.add(contact);
 
                 if ((lastModified != null) && (timestamp.getTime() < lastModified.getTime())) {
                     timestamp = lastModified;
@@ -147,6 +146,6 @@ public class UpdatesAction extends ContactAction {
             }
         }
 
-        return new AJAXRequestResult(list, timestamp, "contact");
+        return new AJAXRequestResult(responseMap, timestamp, "contact");
     }
 }

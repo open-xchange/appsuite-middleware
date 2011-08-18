@@ -90,9 +90,12 @@ public final class CreateAction extends AbstractFolderAction {
              */
             treeId = getDefaultTreeIdentifier();
         }
-        final String parentId = request.getParameter("folder_id");
+        String parentId = request.getParameter("folder_id");
         if (null == parentId) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("folder_id");
+        	parentId = request.getParameter("folder");
+        }
+        if (null == parentId) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("folder");
         }
         /*
          * Parse folder object
