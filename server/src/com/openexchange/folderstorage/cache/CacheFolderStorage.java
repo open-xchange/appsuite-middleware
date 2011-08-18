@@ -62,6 +62,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentHashMap;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
@@ -91,6 +92,7 @@ import com.openexchange.folderstorage.internal.performers.StorageParametersProvi
 import com.openexchange.folderstorage.internal.performers.UpdatePerformer;
 import com.openexchange.folderstorage.internal.performers.UpdatesPerformer;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.log.Log;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -133,6 +135,16 @@ public final class CacheFolderStorage implements FolderStorage {
     public CacheFolderStorage() {
         super();
         registry = CacheFolderStorageRegistry.getInstance();
+    }
+
+    @Override
+    public void clearCache() {
+        try {
+            globalCache.clear();
+        } catch (final OXException e) {
+            Log.valueOf(LogFactory.getLog(CacheFolderStorage.class)).warn("Clearing cache failed.", e);
+        }
+        FolderMapManagement.getInstance().clear();
     }
 
     /**

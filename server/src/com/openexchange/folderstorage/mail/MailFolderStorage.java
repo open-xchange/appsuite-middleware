@@ -141,6 +141,13 @@ public final class MailFolderStorage implements FolderStorage {
     }
 
     @Override
+    public void clearCache() {
+        /*
+         * Nothing to do...
+         */
+    }
+
+    @Override
     public void checkConsistency(final String treeId, final StorageParameters storageParameters) throws OXException {
         // Nothing to do
     }

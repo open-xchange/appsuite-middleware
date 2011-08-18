@@ -208,6 +208,13 @@ public final class DatabaseFolderStorage implements FolderStorage {
     }
 
     @Override
+    public void clearCache() {
+        /*
+         * Nothing to do...
+         */
+    }
+
+    @Override
     public void checkConsistency(final String treeId, final StorageParameters storageParameters) throws OXException {
         final ConnectionProvider provider = getConnection(true, storageParameters);
         try {

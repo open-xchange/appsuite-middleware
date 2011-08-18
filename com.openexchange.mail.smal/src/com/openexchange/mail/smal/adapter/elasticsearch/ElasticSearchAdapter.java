@@ -66,7 +66,9 @@ import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
 import org.elasticsearch.action.count.CountResponse;
 import org.elasticsearch.action.delete.DeleteResponse;
+import org.elasticsearch.action.search.SearchOperationThreading;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.client.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.action.search.SearchRequestBuilder;
@@ -77,6 +79,7 @@ import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.ImmutableSettings.Builder;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.json.JsonXContent;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
@@ -164,16 +167,40 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     }
 
     @Override
-    public List<MailMessage> search(final SearchTerm<?> searchTerm, final Session session) throws OXException {
+    public boolean containsFolder(final String fullName, final int accountId, final Session session) throws OXException {
+        final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+        boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_USER, session.getUserId()));
+        boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_ACCOUNT_ID, accountId));
+        boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_FULL_NAME, fullName));
+        /*
+         * Build search request
+         */
+        final SearchRequestBuilder builder = client.prepareSearch(indexNamePrefix + session.getContextId()).setTypes(indexType);
+        builder.setQuery(boolQuery).setSearchType(SearchType.COUNT);
+        builder.setExplain(true);
+        builder.setOperationThreading(SearchOperationThreading.THREAD_PER_SHARD);
+        /*
+         * Perform search
+         */
+        final SearchResponse rsp = builder.execute().actionGet();
+        return (rsp.getHits().hits().length > 0);
+    }
+
+    @Override
+    public List<MailMessage> search(final SearchTerm<?> searchTerm, final MailSortField sortField, final OrderDirection order, final Session session) throws OXException {
         try {
             final QueryBuilder queryBuilder = SearchTerm2Query.searchTerm2Query(searchTerm);
             /*
              * Compose search request
              */
-            final SearchRequestBuilder builder = client.prepareSearch(indexNamePrefix + session.getContextId());
+            final SearchRequestBuilder builder = client.prepareSearch(indexNamePrefix + session.getContextId()).setTypes(indexType);
             // builder.addSort("createdAt", SortOrder.DESC);
             // builder.setFrom(page * hitsPerPage).setSize(hitsPerPage);
+            builder.setSize(Integer.MAX_VALUE);
             builder.setQuery(queryBuilder);
+            builder.setSearchType(SearchType.DFS_QUERY_THEN_FETCH);
+            builder.setExplain(true);
+            builder.setOperationThreading(SearchOperationThreading.THREAD_PER_SHARD);
             /*
              * Perform search
              */
@@ -265,16 +292,24 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     }
 
     /**
+     * Wait for at least one active shard.
+     */
+    public void waitForOneActiveShard(final String indexName) {
+        client.admin().cluster().health(new ClusterHealthRequest(indexName).waitForActiveShards(1)).actionGet();
+        LOG.info("Now node has at least one active shard!");
+    }
+
+    /**
      * Waits for yellow status.
      */
-    void waitForYellow(final String indexName) {
+    public void waitForYellow(final String indexName) {
         client.admin().cluster().health(new ClusterHealthRequest(indexName).waitForYellowStatus()).actionGet();
     }
 
     /**
      * Waits for green status.
      */
-    void waitForGreen(final String indexName) {
+    public void waitForGreen(final String indexName) {
         client.admin().cluster().health(new ClusterHealthRequest(indexName).waitForGreenStatus()).actionGet();
     }
 

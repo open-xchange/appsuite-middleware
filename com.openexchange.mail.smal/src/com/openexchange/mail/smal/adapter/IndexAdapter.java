@@ -51,6 +51,8 @@ package com.openexchange.mail.smal.adapter;
 
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailSortField;
+import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.session.Session;
@@ -80,11 +82,24 @@ public interface IndexAdapter {
      * Performs the query derived from given search term.
      * 
      * @param searchTerm The search term
+     * @param sortField The sort field
+     * @param order The order direction
      * @param session The session
      * @return The search result
      * @throws OXException If search fails
      */
-    public List<MailMessage> search(SearchTerm<?> searchTerm, Session session) throws OXException;
+    public List<MailMessage> search(SearchTerm<?> searchTerm, MailSortField sortField, OrderDirection order, Session session) throws OXException;
+
+    /**
+     * Checks if index contains mail located in specified folder.
+     * 
+     * @param fullName The folder full name
+     * @param accountId The account identifier
+     * @param session The session
+     * @return <code>true</code> if folder is contained; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
+    public boolean containsFolder(String fullName, int accountId, Session session) throws OXException;
 
     /**
      * Adds specified mail to the index.

@@ -320,6 +320,11 @@ public final class OutlookFolderStorage implements FolderStorage {
         }
     }
 
+    @Override
+    public void clearCache() {
+        clearTCM();
+    }
+
     /**
      * Gets the public mail folder path.
      *
