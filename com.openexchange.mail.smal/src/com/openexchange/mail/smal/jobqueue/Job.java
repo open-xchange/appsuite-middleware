@@ -49,16 +49,20 @@
 
 package com.openexchange.mail.smal.jobqueue;
 
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.log.Log;
 import com.openexchange.threadpool.Task;
 
 /**
- * {@link Job}
+ * {@link Job} - A job that is placed into {@link JobQueue}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class Job implements Task<Object>, Comparable<Job> {
 
+    /**
+     * The canceled flag.
+     */
     protected volatile boolean canceled;
 
     /**
@@ -92,7 +96,7 @@ public abstract class Job implements Task<Object>, Comparable<Job> {
         try {
             perform();
         } catch (final Exception e) {
-            Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Job.class)).error(e.getMessage(), e);
+            Log.valueOf(LogFactory.getLog(Job.class)).error(e.getMessage(), e);
         }
         return null;
     }
