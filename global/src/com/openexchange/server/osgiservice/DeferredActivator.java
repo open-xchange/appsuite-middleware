@@ -441,15 +441,16 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      * Adds specified service (if absent).
      * 
      * @param service The service to add
+     * @return <code>true</code> if service is added; otherwsie <code>false</code> if not initialized or such a service already exists
      */
-    protected final <S> void addService(final S service) {
+    protected final <S> boolean addService(final S service) {
         if (null == services) {
             /*
              * Services not initialized
              */
-            return;
+            return false;
         }
-        services.putIfAbsent(service.getClass(), service);
+        return (null == services.putIfAbsent(service.getClass(), service));
     }
 
     /**

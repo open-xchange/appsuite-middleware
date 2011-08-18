@@ -103,19 +103,21 @@ public final class IndexEventHandler implements EventHandler {
 
     private void handleDroppedSession(final Session session) {
         try {
-            SMALServiceLookup.getInstance().getService(IndexService.class).getAdapter().onSessionGone(session);
+            final IndexService indexService = SMALServiceLookup.getServiceStatic(IndexService.class);
+            indexService.getAdapter().onSessionGone(session);
         } catch (final Exception e) {
             // Failed handling session
-            LOG.warn("Failed handling tracked removed session for LIST/LSUB cache.", e);
+            LOG.warn("Failed handling tracked removed session.", e);
         }
     }
 
     private void handleAddedSession(final Session session) {
         try {
-            SMALServiceLookup.getInstance().getService(IndexService.class).getAdapter().onSessionAdd(session);
+            final IndexService serviceStatic = SMALServiceLookup.getServiceStatic(IndexService.class);
+            serviceStatic.getAdapter().onSessionAdd(session);
         } catch (final Exception e) {
             // Failed handling session
-            LOG.warn("Failed handling tracked removed session for LIST/LSUB cache.", e);
+            LOG.warn("Failed handling tracked removed session.", e);
         }
     }
 
