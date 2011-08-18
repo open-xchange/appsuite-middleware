@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,70 +47,32 @@
  *
  */
 
-package com.openexchange.mail.smal.osgi;
+package com.openexchange.mail.smal.adapter.internal;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.mail.api.MailProvider;
-import com.openexchange.mail.smal.SMALProvider;
-import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.mail.smal.adapter.IndexAdapter;
 import com.openexchange.mail.smal.adapter.IndexService;
-import com.openexchange.mail.smal.adapter.elasticsearch.ElasticSearchAdapter;
-import com.openexchange.mail.smal.adapter.internal.IndexServiceImpl;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
-import com.openexchange.threadpool.ThreadPoolService;
+
 
 /**
- * {@link SMALActivator} - The activator for Super-MAL bundle.
- * 
+ * {@link IndexServiceImpl}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SMALActivator extends HousekeepingActivator {
+public final class IndexServiceImpl implements IndexService {
+
+    private final IndexAdapter adapter;
 
     /**
-     * Initializes a new {@link SMALActivator}.
+     * Initializes a new {@link IndexServiceImpl}.
      */
-    public SMALActivator() {
+    public IndexServiceImpl(final IndexAdapter adapter) {
         super();
+        this.adapter = adapter;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ThreadPoolService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        SMALServiceLookup.getInstance().setServiceLookup(this);
-        track(MailProvider.class, new SMALProviderServiceTracker(context));
-        openTrackers();
-        /*
-         * Register SMAL provider
-         */
-        {
-            final Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
-            dictionary.put("protocol", SMALProvider.PROTOCOL_SMAL.toString());
-            registerService(MailProvider.class, SMALProvider.getInstance(), dictionary);
-        }
-        /*
-         * Register index service
-         */
-        {
-            final ConfigurationService cs = getService(ConfigurationService.class);
-            final String className = cs.getProperty("com.openexchange.mail.smal.adapter", ElasticSearchAdapter.class.getName());
-            final Class<? extends IndexAdapter> clazz = Class.forName(className).asSubclass(IndexAdapter.class);
-            final IndexServiceImpl service = new IndexServiceImpl(clazz.newInstance());
-            registerService(IndexService.class, service);
-            addService(service);
-        }
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        cleanUp();
-        SMALServiceLookup.getInstance().setServiceLookup(null);
+    public IndexAdapter getAdapter() {
+        return adapter;
     }
 
 }

@@ -50,10 +50,10 @@
 package com.openexchange.server.osgiservice;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
@@ -174,7 +174,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
     /**
      * The available service instances.
      */
-    private Map<Class<?>, Object> services;
+    private ConcurrentMap<Class<?>, Object> services;
 
     /**
      * Initializes a new {@link DeferredActivator}.
@@ -218,7 +218,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
     private final void init() throws Exception {
         final Class<?>[] classes = getNeededServices();
         if (null == classes) {
-            services = Collections.emptyMap();
+            services = new ConcurrentHashMap<Class<?>, Object>(1);
             serviceTrackers = new ServiceTracker[0];
             availability = allAvailable = 0;
             startBundle();
@@ -435,6 +435,21 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
             return null;
         }
         return clazz.cast(service);
+    }
+
+    /**
+     * Adds specified service.
+     * 
+     * @param service The service to add
+     */
+    protected final <S> void addService(final S service) {
+        if (null == services) {
+            /*
+             * Services not initialized
+             */
+            return;
+        }
+        services.putIfAbsent(service.getClass(), service);
     }
 
     /**

@@ -49,7 +49,20 @@
 
 package com.openexchange.mail.smal.jobqueue;
 
-import com.openexchange.threadpool.ThreadRenamer;
+import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.IndexRange;
+import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailSortField;
+import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.smal.adapter.IndexAdapter;
 
 
 /**
@@ -59,13 +72,20 @@ import com.openexchange.threadpool.ThreadRenamer;
  */
 public final class MailAccountJob extends Job {
 
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailAccountJob.class));
+
     private final int contextId;
     
     private final int userId;
     
     private final int accountId;
 
-    
+    private final Queue<String> folders;
+
+    private volatile boolean initialized;
+
+    private volatile boolean error;
 
     /**
      * Initializes a new {@link MailAccountJob}.
@@ -78,33 +98,27 @@ public final class MailAccountJob extends Job {
         this.accountId = accountId;
         this.userId = userId;
         this.contextId = contextId;
+        folders = new ConcurrentLinkedQueue<String>();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.threadpool.Task#setThreadName(com.openexchange.threadpool.ThreadRenamer)
-     */
-    @Override
-    public void setThreadName(final ThreadRenamer threadRenamer) {
-        // TODO Auto-generated method stub
-
+    private void init() throws OXException {
+        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = MailAccess.getInstance(userId, contextId, accountId);
+        mailAccess.connect(true);
+        try {
+            final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
+            handleSubfolders(MailFolder.DEFAULT_FOLDER_ID, folderStorage);
+        } finally {
+            mailAccess.close(true);
+        }
+        initialized = true;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.threadpool.Task#beforeExecute(java.lang.Thread)
-     */
-    @Override
-    public void beforeExecute(final Thread t) {
-        // TODO Auto-generated method stub
-
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.threadpool.Task#afterExecute(java.lang.Throwable)
-     */
-    @Override
-    public void afterExecute(final Throwable t) {
-        // TODO Auto-generated method stub
-
+    private void handleSubfolders(final String fullName, final IMailFolderStorage folderStorage) throws OXException {
+        for (final MailFolder mailFolder : folderStorage.getSubfolders(fullName, true)) {
+            final String subFullName = mailFolder.getFullname();
+            folders.offer(subFullName);
+            handleSubfolders(subFullName, folderStorage);
+        }
     }
 
     @Override
@@ -112,13 +126,54 @@ public final class MailAccountJob extends Job {
         return 0;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.smal.jobqueue.Job#perform()
-     */
+    private static final MailField[] FIELDS = new MailField[] { MailField.ID };
+
     @Override
     public void perform() {
-        // TODO Auto-generated method stub
-
+        if (error) {
+            cancel();
+            return;
+        }
+        try {
+            if (!initialized) {
+                init();
+            }
+            /*
+             * Process full names in queue
+             */
+            while (!folders.isEmpty()) {
+                final String fullName = folders.poll();
+                if (null != fullName) {
+                    final IndexAdapter indexAdapter = null; // TODO:
+                    final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = MailAccess.getInstance(userId, contextId, accountId);
+                    mailAccess.connect(true);
+                    try {
+                        final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+                        final MailMessage[] mails = messageStorage.searchMessages(fullName, IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, FIELDS);
+                        for (final MailMessage mail : mails) {
+                            final MailMessage fullMail = messageStorage.getMessage(fullName, mail.getMailId(), false);
+                            indexAdapter.add(fullMail, mailAccess.getSession());
+                        }
+                        
+                    } finally {
+                        mailAccess.close(true);
+                    }
+                    /*
+                     * Re-enqueue for next run
+                     */
+                    final BlockingQueue<Job> queue = getQueue();
+                    if (null == queue || !queue.offer(this)) {
+                        LOG.error("Re-enqueueing mail account job failed.");
+                        cancel();
+                    }
+                    return;
+                }
+            }
+        } catch (final Exception e) {
+            error = true;
+            cancel();
+            LOG.error("Mail account job failed.", e);
+        }
     }
 
 }

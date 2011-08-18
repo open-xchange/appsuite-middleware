@@ -54,6 +54,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.log.Log;
 import com.openexchange.threadpool.Task;
+import com.openexchange.threadpool.ThreadRenamer;
 
 /**
  * {@link Job} - A job that is placed into {@link JobQueue}.
@@ -107,6 +108,21 @@ public abstract class Job implements Task<Object>, Comparable<Job> {
      */
     public final BlockingQueue<Job> getQueue() {
         return QUEUE_REF.get();
+    }
+
+    @Override
+    public void setThreadName(final ThreadRenamer threadRenamer) {
+        // Nothing to do
+    }
+
+    @Override
+    public void beforeExecute(final Thread t) {
+        // Nothing to do
+    }
+
+    @Override
+    public void afterExecute(final Throwable t) {
+        // Nothing to do
     }
 
     @Override
