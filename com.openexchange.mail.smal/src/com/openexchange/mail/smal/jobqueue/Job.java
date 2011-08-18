@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.smal.jobqueue;
 
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.log.Log;
 import com.openexchange.threadpool.Task;
@@ -59,6 +61,15 @@ import com.openexchange.threadpool.Task;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class Job implements Task<Object>, Comparable<Job> {
+
+    private static final AtomicReference<BlockingQueue<Job>> QUEUE_REF = new AtomicReference<BlockingQueue<Job>>();
+
+    /**
+     * Sets the blocking queue.
+     */
+    static final void set(final BlockingQueue<Job> newValue) {
+        QUEUE_REF.set(newValue);
+    }
 
     /**
      * The canceled flag.
@@ -88,6 +99,15 @@ public abstract class Job implements Task<Object>, Comparable<Job> {
      * Performs this job.
      */
     public abstract void perform();
+
+    /**
+     * Gets the working queue.
+     * 
+     * @return The working queue or <code>null</code>
+     */
+    public final BlockingQueue<Job> getQueue() {
+        return QUEUE_REF.get();
+    }
 
     @Override
     public final int compareTo(final Job other) {

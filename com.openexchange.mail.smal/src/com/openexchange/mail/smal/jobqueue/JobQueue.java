@@ -81,12 +81,14 @@ public final class JobQueue {
         queue = new PriorityBlockingQueue<Job>(CAPACITY);
         consumer = new JobConsumer(queue);
         future = threadPool.submit(consumer, AbortBehavior.getInstance());
+        Job.set(queue);
     }
 
     /**
      * Stops the job queue orderly.
      */
     public void stop() {
+        Job.set(null);
         consumer.stop();
         try {
             future.get(1, TimeUnit.SECONDS);
