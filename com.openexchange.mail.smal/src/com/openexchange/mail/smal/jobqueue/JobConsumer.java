@@ -64,7 +64,7 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class JobConsumer extends AbstractTask<Object> {
+final class JobConsumer extends AbstractTask<Object> {
 
     /**
      * The poison element.
@@ -109,7 +109,7 @@ public final class JobConsumer extends AbstractTask<Object> {
     /**
      * Initializes a new {@link JobConsumer}.
      */
-    public JobConsumer(final BlockingQueue<Job> queue) {
+    protected JobConsumer(final BlockingQueue<Job> queue) {
         super();
         keepgoing = new AtomicBoolean(true);
         this.queue = queue;
