@@ -113,8 +113,8 @@ public final class IndexEventHandler implements EventHandler {
 
     private void handleAddedSession(final Session session) {
         try {
-            final IndexService serviceStatic = SMALServiceLookup.getServiceStatic(IndexService.class);
-            serviceStatic.getAdapter().onSessionAdd(session);
+            final IndexService indexService = SMALServiceLookup.getServiceStatic(IndexService.class);
+            indexService.getAdapter().onSessionAdd(session);
         } catch (final Exception e) {
             // Failed handling session
             LOG.warn("Failed handling tracked removed session.", e);
