@@ -144,7 +144,7 @@ public final class MailAccountJob extends Job {
             while (!folders.isEmpty()) {
                 final String fullName = folders.poll();
                 if (null != fullName) {
-                    final IndexAdapter indexAdapter = null; // TODO:
+                    final IndexAdapter indexAdapter = getAdapter();
                     final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = MailAccess.getInstance(userId, contextId, accountId);
                     mailAccess.connect(true);
                     try {

@@ -53,6 +53,9 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.log.Log;
+import com.openexchange.mail.smal.SMALServiceLookup;
+import com.openexchange.mail.smal.adapter.IndexAdapter;
+import com.openexchange.mail.smal.adapter.IndexService;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadRenamer;
 
@@ -108,6 +111,15 @@ public abstract class Job implements Task<Object>, Comparable<Job> {
      */
     public final BlockingQueue<Job> getQueue() {
         return QUEUE_REF.get();
+    }
+
+    /**
+     * Gets the index adapter.
+     * 
+     * @return The index adapter
+     */
+    public IndexAdapter getAdapter() {
+        return SMALServiceLookup.getInstance().getService(IndexService.class).getAdapter();
     }
 
     @Override
