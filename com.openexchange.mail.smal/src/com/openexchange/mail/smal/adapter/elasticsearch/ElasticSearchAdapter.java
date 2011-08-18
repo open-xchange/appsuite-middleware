@@ -87,6 +87,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.IndexRange;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailPath;
@@ -101,6 +102,7 @@ import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.smal.SMALExceptionCodes;
 import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.mail.smal.adapter.IndexAdapter;
+import com.openexchange.mail.text.TextProcessing;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -335,10 +337,10 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     @Override
     public void add(final MailMessage mail, final Session session) throws OXException {
         try {
-            final String id = new MailPath(mail.getAccountId(), mail.getFolder(), mail.getMailId()).toString();
-            final XContentBuilder b = createDoc(id, mail);
+            final String id = UUID.randomUUID().toString();
             final IndexRequestBuilder irb =
-                client.prepareIndex(indexNamePrefix + session.getContextId(), indexType, id).setConsistencyLevel(WriteConsistencyLevel.DEFAULT).setSource(b);
+                client.prepareIndex(indexNamePrefix + session.getContextId(), indexType, id).setConsistencyLevel(
+                    WriteConsistencyLevel.DEFAULT).setSource(createDoc(id, mail, mail.getAccountId(), session));
             irb.execute().actionGet();
         } catch (final ElasticSearchException e) {
             throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
@@ -352,37 +354,39 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         for (final MailMessage mail : mails) {
             final String id = UUID.randomUUID().toString();
             final IndexRequestBuilder irb = client.prepareIndex(indexName, indexType, id);
-            irb.setSource(createDoc(id, mail));
-            
-            
-            // bulkRequest.add(client.prepareIndex(indexName, indexType, "1")
-            // .setSource(jsonBuilder()
-            // .startObject()
-            // .field("user", "kimchy")
-            // .field("postDate", new Date())
-            // .field("message", "trying out Elastic Search")
-            // .endObject()
-            // )
-            // );
-
+            irb.setSource(createDoc(id, mail, mail.getAccountId(), session));
+            bulkRequest.add(irb);
         }
-
+        if (bulkRequest.numberOfActions() > 0) {
+            bulkRequest.execute().actionGet();
+        }
     }
 
-    public XContentBuilder createDoc(final String id, final MailMessage mail, final int accountId, final int userId) {
+    private XContentBuilder createDoc(final String id, final MailMessage mail, final int accountId, final Session session) throws OXException {
         try {
-            final StringBuilder sb = new StringBuilder(64);
             final XContentBuilder b = JsonXContent.unCachedContentBuilder().startObject();
+            /*
+             * Body content
+             */
+            {
+                b.field(Constants.FIELD_BODY, TextProcessing.getTextFrom(mail, session));
+            }
+            /*
+             * Identifiers
+             */
             b.field(Constants.FIELD_ID, id);
-            b.field(Constants.FIELD_USER, userId);
+            b.field(Constants.FIELD_USER, session.getUserId());
             b.field(Constants.FIELD_ACCOUNT_ID, accountId);
             /*
              * Write address fields
              */
-            b.field(Constants.FIELD_FROM, appendAddresses(mail.getFrom(), sb));
-            b.field(Constants.FIELD_TO, appendAddresses(mail.getBcc(), sb));
-            b.field(Constants.FIELD_CC, appendAddresses(mail.getBcc(), sb));
-            b.field(Constants.FIELD_BCC, appendAddresses(mail.getBcc(), sb));
+            {
+                final StringBuilder sb = new StringBuilder(64);
+                b.field(Constants.FIELD_FROM, appendAddresses(mail.getFrom(), sb));
+                b.field(Constants.FIELD_TO, appendAddresses(mail.getBcc(), sb));
+                b.field(Constants.FIELD_CC, appendAddresses(mail.getBcc(), sb));
+                b.field(Constants.FIELD_BCC, appendAddresses(mail.getBcc(), sb));
+            }
             /*
              * Write size
              */
@@ -423,12 +427,10 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             b.field(Constants.FIELD_SUBJECT, mail.getSubject());
             b.endObject();
             return b;
-        } catch (final IOException ex) {
-            throw new RuntimeException(ex);
+        } catch (final IOException e) {
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
-
-    
 
     private static String appendAddresses(final InternetAddress[] addrs, final StringBuilder sb) {
         sb.setLength(0);
@@ -477,7 +479,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     private final class SyncRunnable implements Runnable {
 
         private final String fullName;
-        
+
         private final int accountId;
 
         private final Session session;
@@ -495,12 +497,18 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         @Override
         public void run() {
             try {
-                final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = MailAccess.getInstance(session, accountId);
+                final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
+                    MailAccess.getInstance(session, accountId);
                 mailAccess.connect(false);
                 try {
-                    final MailMessage[] mails = mailAccess.getMessageStorage().getAllMessages(fullName, IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.ASC, FIELDS);
-                    
-                    
+                    final MailMessage[] mails =
+                        mailAccess.getMessageStorage().getAllMessages(
+                            fullName,
+                            IndexRange.NULL,
+                            MailSortField.RECEIVED_DATE,
+                            OrderDirection.ASC,
+                            FIELDS);
+
                 } finally {
                     mailAccess.close(true);
                 }
