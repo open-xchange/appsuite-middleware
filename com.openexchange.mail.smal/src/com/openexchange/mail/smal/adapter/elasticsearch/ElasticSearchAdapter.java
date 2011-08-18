@@ -65,7 +65,6 @@ import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.optimize.OptimizeRequest;
 import org.elasticsearch.action.admin.indices.optimize.OptimizeResponse;
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
-import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
 import org.elasticsearch.action.count.CountResponse;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.search.SearchOperationThreading;
@@ -321,7 +320,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
      * Explicitly refresh one or more indices (making the content indexed since the last refresh searchable).
      */
     public void refresh(final String indexName) {
-        final RefreshResponse rsp = client.admin().indices().refresh(new RefreshRequest(indexName)).actionGet();
+        client.admin().indices().refresh(new RefreshRequest(indexName)).actionGet();
     }
 
     /**
@@ -337,11 +336,12 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     @Override
     public void add(final MailMessage mail, final Session session) throws OXException {
         try {
+            final String indexName = indexNamePrefix + session.getContextId();
             final String id = UUID.randomUUID().toString();
-            final IndexRequestBuilder irb =
-                client.prepareIndex(indexNamePrefix + session.getContextId(), indexType, id).setConsistencyLevel(
-                    WriteConsistencyLevel.DEFAULT).setSource(createDoc(id, mail, mail.getAccountId(), session));
+            final IndexRequestBuilder irb = client.prepareIndex(indexName, indexType, id);
+            irb.setConsistencyLevel(WriteConsistencyLevel.DEFAULT).setSource(createDoc(id, mail, mail.getAccountId(), session));
             irb.execute().actionGet();
+            refresh(indexName);
         } catch (final ElasticSearchException e) {
             throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
         }
@@ -359,6 +359,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         }
         if (bulkRequest.numberOfActions() > 0) {
             bulkRequest.execute().actionGet();
+            refresh(indexName);
         }
     }
 
