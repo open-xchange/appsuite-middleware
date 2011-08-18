@@ -131,6 +131,8 @@ public final class MailAccountJob extends Job {
 
     private static final MailField[] FIELDS = new MailField[] { MailField.ID };
 
+    private static final int CHUNK = 250;
+
     @Override
     public void perform() {
         if (error) {
@@ -165,17 +167,20 @@ public final class MailAccountJob extends Job {
                                 OrderDirection.ASC,
                                 null,
                                 FIELDS);
-                        for (int i = 0; i < mails.length; i++) {
-                            mails[i] = messageStorage.getMessage(fullName, mails[i].getMailId(), false);
-                            mails[i].setAccountId(accountId);
+                        final int blockSize;
+                        {
+                            final int configuredBlockSize = CHUNK;
+                            blockSize = configuredBlockSize > mails.length ? mails.length : configuredBlockSize;
                         }
-                        /*
-                         * TODO: Add in chunks...
-                         */
-                        indexAdapter.add(mails, mailAccess.getSession());
+                        int start = 0;
+                        while (start < mails.length) {
+                            final int num = add2Index(mails, start, blockSize, fullName, session, messageStorage, indexAdapter);
+                            start += num;
+                        }
                     } finally {
                         mailAccess.close(true);
                     }
+                    LOG.info("Put mails from folder " + fullName + " from account " + accountId + " into index for login " + mailAccess.getMailConfig().getLogin());
                     /*
                      * Re-enqueue for next run
                      */
@@ -192,6 +197,29 @@ public final class MailAccountJob extends Job {
             cancel();
             LOG.error("Mail account job failed.", e);
         }
+    }
+
+    private int add2Index(final MailMessage[] mails, final int offset, final int len, final String fullName, final Session session, final IMailMessageStorage messageStorage, final IndexAdapter indexAdapter) throws OXException {
+        final int retval; // The number of mails added to index
+        final int end; // The ending sequence number (exclusive)
+        {
+            final int remaining = mails.length - offset;
+            if (remaining >= len) {
+                end = offset + len;
+                retval = len;
+            } else {
+                end = mails.length;
+                retval = remaining;
+            }
+        }
+        final MailMessage[] toAdd = new MailMessage[retval];
+        for (int i = offset, j = 0; i < end; i++) {
+            final MailMessage mail = messageStorage.getMessage(fullName, mails[i].getMailId(), false);
+            mail.setAccountId(accountId);
+            toAdd[j++] = mail;
+        }
+        indexAdapter.add(toAdd, session);
+        return retval;
     }
 
 }
