@@ -86,11 +86,6 @@ public class TargetFolderSession implements Session {
     }
 
     @Override
-    public String getRemoteIp() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public String getLoginName() {
         throw new UnsupportedOperationException();
     }
@@ -154,11 +149,6 @@ public class TargetFolderSession implements Session {
     @Override
     public void setLocalIp(final String ip) {
         // Nothing to do here.
-    }
-
-    @Override
-    public void setRemoteIp(final String remoteIp) {
-        // Nope
     }
 
     @Override

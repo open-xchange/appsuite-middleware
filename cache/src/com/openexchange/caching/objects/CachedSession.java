@@ -89,8 +89,6 @@ public final class CachedSession implements Serializable {
 
     private final String localIp;
 
-    private final String remoteIp;
-
     private final String login;
 
     private final String authId;
@@ -117,7 +115,7 @@ public final class CachedSession implements Serializable {
      * @param login The full login; e.g. <code>test@foo</code>
      * @param parameters The session's parameters
      */
-    public CachedSession(final int userId, final String loginName, final String password, final int contextId, final String sessionId, final String secret, final String randomToken, final String localIp, final String remoteIp, final String login, final String authId, final String hash, final String client, final Map<String, Object> parameters) {
+    public CachedSession(final int userId, final String loginName, final String password, final int contextId, final String sessionId, final String secret, final String randomToken, final String localIp, final String login, final String authId, final String hash, final String client, final Map<String, Object> parameters) {
         super();
         this.userId = userId;
         this.loginName = loginName;
@@ -126,7 +124,6 @@ public final class CachedSession implements Serializable {
         this.secret = secret;
         this.randomToken = randomToken;
         this.localIp = localIp;
-        this.remoteIp = remoteIp;
         this.contextId = contextId;
         this.login = login;
         this.authId = authId;
@@ -230,15 +227,6 @@ public final class CachedSession implements Serializable {
      */
     public String getRandomToken() {
         return randomToken;
-    }
-
-    /**
-     * Gets the optional remote IP address
-     * 
-     * @return The remote IP address or <code>null</code>
-     */
-    public String getRemoteIp() {
-        return remoteIp;
     }
 
     /**

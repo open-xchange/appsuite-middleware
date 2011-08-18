@@ -77,8 +77,6 @@ public class SessionObject implements Session {
 
     private String localip;
 
-    private String remoteIp;
-
     private String host;
 
     private long lifetime;
@@ -135,11 +133,6 @@ public class SessionObject implements Session {
         this.localip = localip;
     }
 
-    @Override
-    public void setRemoteIp(final String remoteIp) {
-        this.remoteIp = remoteIp;
-    }
-
     public void setHost(final String host) {
         this.host = host;
     }
@@ -191,11 +184,6 @@ public class SessionObject implements Session {
     @Override
     public String getLocalIp() {
         return localip;
-    }
-
-    @Override
-    public String getRemoteIp() {
-        return remoteIp;
     }
 
     public String getHost() {

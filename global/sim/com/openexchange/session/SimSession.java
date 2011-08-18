@@ -217,21 +217,4 @@ public class SimSession implements Session {
         // TODO Auto-generated method stub
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.session.Session#getRemoteIp()
-     */
-    @Override
-    public String getRemoteIp() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.session.Session#setRemoteIp(java.lang.String)
-     */
-    @Override
-    public void setRemoteIp(final String remoteIp) {
-        // TODO Auto-generated method stub
-        
-    }
 }

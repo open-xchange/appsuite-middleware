@@ -87,20 +87,6 @@ public interface Session {
     public int getContextId();
 
     /**
-     * Gets the optional remote IP address
-     * 
-     * @return The remote IP address or <code>null</code>
-     */
-    public String getRemoteIp();
-
-    /**
-     * Sets the optional remote IP address
-     * 
-     * @param remoteIp The remote IP address or <code>null</code>
-     */
-    public void setRemoteIp(String remoteIp);
-
-    /**
      * Gets the local IP address
      *
      * @return The local IP address

@@ -177,13 +177,4 @@ public class PublicationSession implements Session {
         // Nothing to do.
     }
 
-    @Override
-    public String getRemoteIp() {
-        return null;
-    }
-
-    @Override
-    public void setRemoteIp(final String remoteIp) {
-        // Nope
-    }
 }

@@ -92,8 +92,6 @@ public final class SessionImpl implements Session {
 
     private String localIp;
 
-    private String remoteIp;
-
     private final String authId;
 
     private String hash;
@@ -124,7 +122,6 @@ public final class SessionImpl implements Session {
         this.secret = secret;
         this.randomToken = randomToken;
         this.localIp = localIp;
-        this.remoteIp = remoteIp;
         this.contextId = contextId;
         this.login = login;
         this.authId = authId;
@@ -150,10 +147,8 @@ public final class SessionImpl implements Session {
         randomToken = cachedSession.getRandomToken();
         login = cachedSession.getLogin();
         localIp = cachedSession.getLocalIp();
-        remoteIp = cachedSession.getRemoteIp();
         authId = cachedSession.getAuthId();
         hash = cachedSession.getHash();
-        client = cachedSession.getClient();
         final Map<String, Serializable> params = cachedSession.getParameters();
         parameters = new ConcurrentHashMap<String, Object>(params.size());
         for (final Entry<String, Serializable> entry : params.entrySet()) {
@@ -168,7 +163,7 @@ public final class SessionImpl implements Session {
      * @return An appropriate instance of {@link CachedSession}
      */
     public CachedSession createCachedSession() {
-        return new CachedSession(userId, loginName, obfuscate( password ), contextId, sessionId, secret, randomToken, localIp, remoteIp, login, authId, hash, client, parameters);
+        return new CachedSession(userId, loginName, obfuscate( password ), contextId, sessionId, secret, randomToken, localIp, login, authId, hash, client, parameters);
     }
 
     private String obfuscate(final String string) {
@@ -255,16 +250,6 @@ public final class SessionImpl implements Session {
     @Override
     public void setLocalIp(final String localIp) {
         this.localIp = localIp;
-    }
-
-    @Override
-    public String getRemoteIp() {
-        return remoteIp;
-    }
-
-    @Override
-    public void setRemoteIp(final String remoteIp) {
-        this.remoteIp = remoteIp;
     }
     
     @Override

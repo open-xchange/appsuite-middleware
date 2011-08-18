@@ -167,16 +167,6 @@ public class ServerSessionAdapter implements ServerSession {
     }
 
     @Override
-    public String getRemoteIp() {
-        return session.getRemoteIp();
-    }
-
-    @Override
-    public void setRemoteIp(final String remoteIp) {
-        session.setRemoteIp(remoteIp);
-    }
-
-    @Override
     public int getContextId() {
         return session().getContextId();
     }
