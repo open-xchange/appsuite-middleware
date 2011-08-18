@@ -71,13 +71,9 @@ public final class Mapping {
         super();
     }
 
-    /**
-     * Creates the default mail mapping.
-     * 
-     * @param client The client
-     * @throws OXException If creating mapping fails (probably because that mapping already exists)
-     */
-    public static void createMailMapping(final Client client, final String indexName) throws OXException {
+    private static final String JSON_MAPPINGS;
+
+    static {
         try {
             final JSONObject properties = new JSONObject();
             properties.put(Constants.FIELD_UUID, new JSONObject("{ \"type\": \"string\", \"index\": \"not_analyzed\" }"));
@@ -128,12 +124,22 @@ public final class Mapping {
             container.put("properties", properties);
             final JSONObject mapping = new JSONObject();
             mapping.put(Constants.INDEX_TYPE, container);
-            final PutMappingRequestBuilder pmrb =
-                client.admin().indices().preparePutMapping(indexName).setSource(mapping.toString());
-            pmrb.execute().actionGet();
+            JSON_MAPPINGS = mapping.toString(2);
         } catch (final JSONException e) {
-            // Cannot occur
-            throw SMALExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+            throw new Error("Initialization failed", e);
+        }
+    }
+
+    /**
+     * Creates the default mail mapping.
+     * 
+     * @param client The client
+     * @throws OXException If creating mapping fails (probably because that mapping already exists)
+     */
+    public static void createMailMapping(final Client client, final String indexName) throws OXException {
+        try {
+            final PutMappingRequestBuilder pmrb = client.admin().indices().preparePutMapping(indexName).setSource(JSON_MAPPINGS);
+            pmrb.execute().actionGet();
         } catch (final ElasticSearchException e) {
             // Mapping could not be put; probably it already exists
             throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());

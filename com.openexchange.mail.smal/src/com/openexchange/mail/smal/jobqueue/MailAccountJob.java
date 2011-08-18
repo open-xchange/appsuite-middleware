@@ -63,11 +63,11 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.smal.adapter.IndexAdapter;
-
+import com.openexchange.session.Session;
 
 /**
  * {@link MailAccountJob}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailAccountJob extends Job {
@@ -76,9 +76,9 @@ public final class MailAccountJob extends Job {
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailAccountJob.class));
 
     private final int contextId;
-    
+
     private final int userId;
-    
+
     private final int accountId;
 
     private final Queue<String> folders;
@@ -89,6 +89,7 @@ public final class MailAccountJob extends Job {
 
     /**
      * Initializes a new {@link MailAccountJob}.
+     * 
      * @param accountId
      * @param userId
      * @param contextId
@@ -102,7 +103,8 @@ public final class MailAccountJob extends Job {
     }
 
     private void init() throws OXException {
-        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = MailAccess.getInstance(userId, contextId, accountId);
+        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
+            MailAccess.getInstance(userId, contextId, accountId);
         mailAccess.connect(true);
         try {
             final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
@@ -145,11 +147,23 @@ public final class MailAccountJob extends Job {
                 final String fullName = folders.poll();
                 if (null != fullName) {
                     final IndexAdapter indexAdapter = getAdapter();
-                    final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = MailAccess.getInstance(userId, contextId, accountId);
+                    final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
+                        MailAccess.getInstance(userId, contextId, accountId);
+                    final Session session = mailAccess.getSession();
+                    if (indexAdapter.containsFolder(fullName, accountId, session)) {
+                        continue;
+                    }
                     mailAccess.connect(true);
                     try {
                         final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-                        final MailMessage[] mails = messageStorage.searchMessages(fullName, IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, FIELDS);
+                        final MailMessage[] mails =
+                            messageStorage.searchMessages(
+                                fullName,
+                                IndexRange.NULL,
+                                MailSortField.RECEIVED_DATE,
+                                OrderDirection.ASC,
+                                null,
+                                FIELDS);
                         for (int i = 0; i < mails.length; i++) {
                             mails[i] = messageStorage.getMessage(fullName, mails[i].getMailId(), false);
                             mails[i].setAccountId(accountId);

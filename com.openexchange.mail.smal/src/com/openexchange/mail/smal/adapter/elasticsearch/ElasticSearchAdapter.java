@@ -102,7 +102,11 @@ import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.smal.SMALExceptionCodes;
 import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.mail.smal.adapter.IndexAdapter;
+import com.openexchange.mail.smal.jobqueue.JobQueue;
+import com.openexchange.mail.smal.jobqueue.MailAccountJob;
 import com.openexchange.mail.text.TextProcessing;
+import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -172,14 +176,41 @@ public final class ElasticSearchAdapter implements IndexAdapter {
 
     @Override
     public void onSessionAdd(final Session session) throws OXException {
-        // TODO Auto-generated method stub
-
+        final int contextId = session.getContextId();
+        createIndex(indexNamePrefix + contextId);
+        /*
+         * Add job
+         */
+        final MailAccountStorageService storageService = SMALServiceLookup.getServiceStatic(MailAccountStorageService.class);
+        final int userId = session.getUserId();
+        for (final MailAccount account : storageService.getUserMailAccounts(userId, contextId)) {
+            final MailAccountJob maj = new MailAccountJob(account.getId(), userId, contextId);
+            JobQueue.getInstance().addJob(maj);
+        }
     }
 
     @Override
     public void onSessionGone(final Session session) throws OXException {
         // TODO Auto-generated method stub
 
+    }
+
+    private void createIndex(final String indexName) {
+        /*
+         * Create the index
+         */
+        try {
+            client.admin().indices().create(new CreateIndexRequest(indexName)).actionGet();
+            LOG.info("Index \"" + indexName + "\" successfully created.");
+            waitForYellow(indexName);
+            /*
+             * Create the mapping definition for a mail
+             */
+            Mapping.createMailMapping(client, indexName);
+            LOG.info("Mappings successfully created for \"" + indexName + "\".");
+        } catch (final Exception ex) {
+            LOG.info("Index \"" + indexName + "\" already exists.");
+        }
     }
 
     @Override
@@ -308,23 +339,6 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         final ImmutableMap<String, IndexMetaData> map =
             client.admin().cluster().prepareState().execute().actionGet().getState().getMetaData().getIndices();
         return map.containsKey(indexName);
-    }
-
-    public void createIndex(final String indexName) {
-        /*
-         * Create the index
-         */
-        try {
-            client.admin().indices().create(new CreateIndexRequest(indexName)).actionGet();
-            LOG.info("Index \"" + indexName + "\" successfully created.");
-            // waitForYellow();
-            /*
-             * Create the mapping definition for a mail
-             */
-            Mapping.createMailMapping(client, indexName);
-        } catch (final Exception ex) {
-            LOG.info("Index \"" + indexName + "\" already exists.");
-        }
     }
 
     public void saveCreateIndex(final String indexName, final boolean log) {

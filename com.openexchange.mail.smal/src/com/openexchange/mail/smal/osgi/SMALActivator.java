@@ -62,6 +62,8 @@ import com.openexchange.mail.smal.adapter.IndexService;
 import com.openexchange.mail.smal.adapter.elasticsearch.ElasticSearchAdapter;
 import com.openexchange.mail.smal.adapter.internal.IndexEventHandler;
 import com.openexchange.mail.smal.adapter.internal.IndexServiceImpl;
+import com.openexchange.mail.smal.jobqueue.JobQueue;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -82,7 +84,7 @@ public class SMALActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ThreadPoolService.class };
+        return new Class<?>[] { ConfigurationService.class, ThreadPoolService.class, MailAccountStorageService.class };
     }
 
     @Override
@@ -90,6 +92,7 @@ public class SMALActivator extends HousekeepingActivator {
         SMALServiceLookup.getInstance().setServiceLookup(this);
         track(MailProvider.class, new SMALProviderServiceTracker(context));
         openTrackers();
+        JobQueue.getInstance();
         /*
          * Register SMAL provider
          */
@@ -121,6 +124,7 @@ public class SMALActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
+        JobQueue.dropInstance();
         cleanUp();
         SMALServiceLookup.getInstance().setServiceLookup(null);
     }

@@ -70,6 +70,17 @@ public final class SMALServiceLookup implements ServiceLookup {
         return INSTANCE;
     }
 
+    /**
+     * Gets the service of specified type
+     * 
+     * @param clazz The service's class
+     * @return The service or <code>null</code> is absent
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S> S getServiceStatic(final Class<? extends S> clazz) {
+        return INSTANCE.getService(clazz);
+    }
+
     private final AtomicReference<ServiceLookup> serviceLookupReference;
 
     /**

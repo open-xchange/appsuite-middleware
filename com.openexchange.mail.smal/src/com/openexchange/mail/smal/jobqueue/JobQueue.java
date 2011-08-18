@@ -55,6 +55,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.behavior.AbortBehavior;
 
@@ -67,6 +68,37 @@ public final class JobQueue {
 
     private static final int CAPACITY = 1048576;
 
+    private static volatile JobQueue instance;
+
+    /**
+     * Gets the {@link JobQueue} instance
+     * 
+     * @return The {@link JobQueue} instance
+     */
+    public static JobQueue getInstance() {
+        JobQueue tmp = instance;
+        if (null == tmp) {
+            synchronized (JobQueue.class) {
+                tmp = instance;
+                if (null == tmp) {
+                    instance = tmp = new JobQueue(SMALServiceLookup.getServiceStatic(ThreadPoolService.class));
+                }
+            }
+        }
+        return tmp;
+    }
+
+    /**
+     * Drops the {@link JobQueue} instance.
+     */
+    public static void dropInstance() {
+        final JobQueue tmp = instance;
+        if (null != tmp) {
+            tmp.stop();
+            instance = null;
+        }
+    }
+
     private final BlockingQueue<Job> queue;
 
     private final Future<Object> future;
@@ -76,7 +108,7 @@ public final class JobQueue {
     /**
      * Initializes a new {@link JobQueue}.
      */
-    public JobQueue(final ThreadPoolService threadPool) {
+    private JobQueue(final ThreadPoolService threadPool) {
         super();
         queue = new PriorityBlockingQueue<Job>(CAPACITY);
         consumer = new JobConsumer(queue);
