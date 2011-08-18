@@ -77,6 +77,8 @@ public class SessionObject implements Session {
 
     private String localip;
 
+    private String remoteIp;
+
     private String host;
 
     private long lifetime;
@@ -133,6 +135,11 @@ public class SessionObject implements Session {
         this.localip = localip;
     }
 
+    @Override
+    public void setRemoteIp(final String remoteIp) {
+        this.remoteIp = remoteIp;
+    }
+
     public void setHost(final String host) {
         this.host = host;
     }
@@ -184,6 +191,11 @@ public class SessionObject implements Session {
     @Override
     public String getLocalIp() {
         return localip;
+    }
+
+    @Override
+    public String getRemoteIp() {
+        return remoteIp;
     }
 
     public String getHost() {
@@ -275,12 +287,12 @@ public class SessionObject implements Session {
         return authId;
     }
 
-    public void setAuthId(String authId) {
+    public void setAuthId(final String authId) {
         this.authId = authId;
     }
 
     @Override
-    public void setHash(String hash) {
+    public void setHash(final String hash) {
         this.hash = hash;
     }
 
@@ -295,7 +307,7 @@ public class SessionObject implements Session {
     }
 
     @Override
-    public void setClient(String client) {
+    public void setClient(final String client) {
         this.client = client;
     }
 }

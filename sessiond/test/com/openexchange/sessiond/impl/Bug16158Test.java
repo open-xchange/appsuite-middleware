@@ -81,7 +81,7 @@ public class Bug16158Test extends TestCase {
         threadPoolService = new SimThreadPoolService();
         sessionData.addThreadPoolService(threadPoolService);
         final SessionIdGenerator idGenerator = new UUIDSessionIdGenerator();
-        session = new SessionImpl(-1, "bug16158", null, 0, idGenerator.createSessionId(null, null), null, idGenerator.createRandomId(), null, null, null, null, null);
+        session = new SessionImpl(-1, "bug16158", null, 0, idGenerator.createSessionId(null, null), null, idGenerator.createRandomId(), null, null, null, null, null, null);
         sessionData.addSession(session, true);
         for (int i = 0; i < finders.length; i++) {
             finders[i] = new SessionFinder();

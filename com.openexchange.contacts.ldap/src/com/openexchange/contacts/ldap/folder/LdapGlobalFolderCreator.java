@@ -296,6 +296,18 @@ public class LdapGlobalFolderCreator {
                 // TODO Auto-generated method stub
 
             }
+
+            @Override
+            public String getRemoteIp() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public void setRemoteIp(final String remoteIp) {
+                // TODO Auto-generated method stub
+                
+            }
         };
     }
 
