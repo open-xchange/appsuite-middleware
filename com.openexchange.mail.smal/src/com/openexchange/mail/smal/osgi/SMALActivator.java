@@ -110,7 +110,7 @@ public class SMALActivator extends HousekeepingActivator {
             final Class<? extends IndexAdapter> clazz = Class.forName(className).asSubclass(IndexAdapter.class);
             final IndexServiceImpl service = new IndexServiceImpl(clazz.newInstance());
             registerService(IndexService.class, service);
-            if (!addService(service)) {
+            if (!addService(IndexService.class, service)) {
                 com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SMALActivator.class)).error(
                     "IndexService could not be added.");
             }
