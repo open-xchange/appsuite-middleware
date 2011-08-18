@@ -99,7 +99,7 @@ public interface FolderStorage {
     /**
      * Clears the cache.
      */
-    void clearCache();
+    void clearCache(int userId, int contextId);
 
     /**
      * Gets the content types supported by this folder storage.

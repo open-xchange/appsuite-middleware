@@ -191,7 +191,7 @@ public final class MessagingFolderStorage implements FolderStorage {
     }
 
     @Override
-    public void clearCache() {
+    public void clearCache(final int userId, final int contextId) {
         /*
          * Nothing to do...
          */

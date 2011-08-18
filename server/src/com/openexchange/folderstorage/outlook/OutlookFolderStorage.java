@@ -321,7 +321,7 @@ public final class OutlookFolderStorage implements FolderStorage {
     }
 
     @Override
-    public void clearCache() {
+    public void clearCache(final int userId, final int contextId) {
         clearTCM();
     }
 

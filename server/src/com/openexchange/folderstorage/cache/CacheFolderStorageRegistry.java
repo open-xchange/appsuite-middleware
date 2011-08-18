@@ -51,7 +51,9 @@ package com.openexchange.folderstorage.cache;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
@@ -95,6 +97,22 @@ public final class CacheFolderStorageRegistry implements FolderStorageDiscoverer
         super();
         registry = new ConcurrentHashMap<String, List<FolderStorage>>();
         genStorages = new ConcurrentLinkedQueue<FolderStorage>();
+    }
+
+    /**
+     * Clears the caches from registered folder storages.
+     */
+    public void clearCaches(final int userId, final int contextId) {
+        for (final FolderStorage fs : genStorages) {
+            fs.clearCache(userId, contextId);
+        }
+        final Set<Entry<String, List<FolderStorage>>> entrySet = registry.entrySet();
+        for (final Entry<String, List<FolderStorage>> entry : entrySet) {
+            final List<FolderStorage> list = entry.getValue();
+            for (final FolderStorage folderStorage : list) {
+                folderStorage.clearCache(userId, contextId);
+            }
+        }
     }
 
     /**
