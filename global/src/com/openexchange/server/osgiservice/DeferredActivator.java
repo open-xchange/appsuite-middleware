@@ -438,7 +438,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
     }
 
     /**
-     * Adds specified service.
+     * Adds specified service (if absent).
      * 
      * @param service The service to add
      */
