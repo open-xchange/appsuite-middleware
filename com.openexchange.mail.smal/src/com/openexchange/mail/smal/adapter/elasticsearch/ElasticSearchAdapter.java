@@ -171,6 +171,18 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     }
 
     @Override
+    public void onSessionAdd(final Session session) throws OXException {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void onSessionGone(final Session session) throws OXException {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
     public boolean containsFolder(final String fullName, final int accountId, final Session session) throws OXException {
         final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
         boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_USER, session.getUserId()));
