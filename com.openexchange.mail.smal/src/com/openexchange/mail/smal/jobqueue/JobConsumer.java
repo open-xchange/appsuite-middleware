@@ -144,7 +144,7 @@ final class JobConsumer extends AbstractTask<Object> {
     public Object call() throws Exception {
         try {
             final List<Job> jobs = new ArrayList<Job>(16);
-            final Thread thisThread = Thread.currentThread();
+            final Thread consumerThread = Thread.currentThread();
             while (keepgoing.get()) {
                 try {
                     if (queue.isEmpty()) {
@@ -176,7 +176,7 @@ final class JobConsumer extends AbstractTask<Object> {
                                     if (DELEGATE) {
                                         threadPool.submit(job, CallerRunsBehavior.getInstance());
                                     } else {
-                                        job.beforeExecute(thisThread);
+                                        job.beforeExecute(consumerThread);
                                         job.call();
                                         job.afterExecute(null);
                                     }
