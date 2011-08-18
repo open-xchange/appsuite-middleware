@@ -49,12 +49,8 @@
 
 package com.openexchange.mail.smal.adapter.elasticsearch;
 
-import org.elasticsearch.ElasticSearchException;
-import org.elasticsearch.client.Client;
-import org.elasticsearch.client.action.admin.indices.mapping.put.PutMappingRequestBuilder;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.mail.smal.SMALExceptionCodes;
 
 /**
  * {@link Mapping} - See <a href="http://www.elasticsearch.org/guide/reference/mapping/core-types.html">ElasticSearch Core Types</a>
@@ -70,7 +66,10 @@ public final class Mapping {
         super();
     }
 
-    private static final String JSON_MAPPINGS;
+    /**
+     * The JSON mail mappings.
+     */
+    public static final String JSON_MAPPINGS;
 
     static {
         try {
@@ -127,17 +126,6 @@ public final class Mapping {
         } catch (final JSONException e) {
             throw new Error("Initialization failed", e);
         }
-    }
-
-    /**
-     * Creates the default mail mapping.
-     * 
-     * @param client The client
-     * @throws ElasticSearchException If creating mapping fails (probably because mapping already exists)
-     */
-    public static void createMailMapping(final Client client, final String indexName) {
-        final PutMappingRequestBuilder pmrb = client.admin().indices().preparePutMapping(indexName).setSource(JSON_MAPPINGS);
-        pmrb.execute().actionGet();
     }
 
 }

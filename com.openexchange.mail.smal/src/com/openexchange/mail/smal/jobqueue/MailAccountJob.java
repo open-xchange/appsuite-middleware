@@ -62,6 +62,7 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.smal.SMALMailAccess;
 import com.openexchange.mail.smal.adapter.IndexAdapter;
 import com.openexchange.session.Session;
 
@@ -104,7 +105,7 @@ public final class MailAccountJob extends Job {
 
     private void init() throws OXException {
         final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
-            MailAccess.getInstance(userId, contextId, accountId);
+            SMALMailAccess.getDelegateInstance(userId, contextId, accountId);
         mailAccess.connect(true);
         try {
             final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
@@ -148,7 +149,7 @@ public final class MailAccountJob extends Job {
                 if (null != fullName) {
                     final IndexAdapter indexAdapter = getAdapter();
                     final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
-                        MailAccess.getInstance(userId, contextId, accountId);
+                        SMALMailAccess.getDelegateInstance(userId, contextId, accountId);
                     final Session session = mailAccess.getSession();
                     if (indexAdapter.containsFolder(fullName, accountId, session)) {
                         continue;

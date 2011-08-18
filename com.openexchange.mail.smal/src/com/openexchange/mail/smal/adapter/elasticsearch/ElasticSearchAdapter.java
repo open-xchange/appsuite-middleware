@@ -70,6 +70,7 @@ import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.search.SearchOperationThreading;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
+import org.elasticsearch.client.action.admin.indices.mapping.put.PutMappingRequestBuilder;
 import org.elasticsearch.client.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.client.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.action.search.SearchRequestBuilder;
@@ -79,13 +80,16 @@ import org.elasticsearch.cluster.metadata.IndexMetaData;
 import org.elasticsearch.common.collect.ImmutableMap;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.ImmutableSettings.Builder;
+import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.json.JsonXContent;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.indices.IndexAlreadyExistsException;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.sort.SortOrder;
+import org.elasticsearch.transport.RemoteTransportException;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
@@ -166,6 +170,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
              * Create the (transport) client
              */
             client = new TransportClient(settingsBuilder.build());
+            client.addTransportAddress(new InetSocketTransportAddress("192.168.32.36", 9300));
             clusterInfo();
         } catch (final NoNodeAvailableException e) {
             throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
@@ -221,20 +226,40 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             client.admin().indices().create(new CreateIndexRequest(indexName)).actionGet();
             LOG.info("Index \"" + indexName + "\" successfully created.");
             waitForYellow(indexName);
+        } catch (final NoNodeAvailableException ex) {
+            /*
+             * No ElasticSearch node found.
+             */
+            throw SMALExceptionCodes.INDEX_FAULT.create(ex, ex.getMessage());
+        } catch (final RemoteTransportException e) {
+            final Throwable cause = e.getMostSpecificCause();
+            if (!(cause instanceof IndexAlreadyExistsException)) {
+                throw SMALExceptionCodes.INDEX_FAULT.create(cause, cause.getMessage());
+            }
+            LOG.info("Index \"" + indexName + "\" already exists.");
+        } catch (final Exception ex) {
+            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(ex, ex.getMessage());
+        }
+        /*
+         * Put mappings
+         */
+        try {
             /*
              * Create the mapping definition for a mail
              */
-            Mapping.createMailMapping(client, indexName);
+            final PutMappingRequestBuilder pmrb = client.admin().indices().preparePutMapping(indexName).setType(indexType).setSource(Mapping.JSON_MAPPINGS);
+            pmrb.execute().actionGet();
             LOG.info("Mappings successfully created for \"" + indexName + "\".");
         } catch (final NoNodeAvailableException ex) {
             /*
              * No ElasticSearch node found.
              */
             throw SMALExceptionCodes.INDEX_FAULT.create(ex, ex.getMessage());
-        } catch (final ElasticSearchException ex) {
-            LOG.info("Index \"" + indexName + "\" already exists.");
+        } catch (final RemoteTransportException e) {
+            final Throwable cause = e.getMostSpecificCause();
+            throw SMALExceptionCodes.INDEX_FAULT.create(cause, cause.getMessage());
         } catch (final Exception ex) {
-            LOG.info("Index \"" + indexName + "\" already exists.");
+            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(ex, ex.getMessage());
         }
     }
 
@@ -354,7 +379,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         final NodesInfoResponse rsp = client.admin().cluster().nodesInfo(new NodesInfoRequest()).actionGet();
         final StringBuilder sb =
             new StringBuilder(32).append("Cluster: ").append(rsp.getClusterName()).append(". Active nodes: ").append(
-                rsp.getNodesMap().keySet());
+                rsp.getNodesMap().keySet().size());
         LOG.info(sb.toString());
     }
 
