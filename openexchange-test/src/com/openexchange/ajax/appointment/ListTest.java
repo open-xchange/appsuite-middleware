@@ -270,7 +270,7 @@ public class ListTest extends AppointmentTest {
             }
         }
 
-        assertTrue("not all objects in response", (found1 && found2 && found3));
+        assertTrue("not all objects in response : "+found1+":"+found2+":"+found3, (found1 && found2 && found3));
 
         deleteAppointment(getWebConversation(), objectId1, publicFolderId, PROTOCOL + getHostName(), getSessionId());
         deleteAppointment(getWebConversation(), objectId2, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());

@@ -124,7 +124,7 @@ public class Bug15074Test extends AbstractAJAXSession {
             D("01.12.2009 00:00", TimeZone.getTimeZone("UTC")),
             D("01.01.2010 00:00", TimeZone.getTimeZone("UTC")),
             TimeZone.getTimeZone("UTC"),
-            true);
+            false);
 
         CommonAllResponse allResponse = client.execute(allRequest);
         Object[][] objects = allResponse.getArray();
