@@ -53,7 +53,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
+import javax.mail.internet.InternetAddress;
 import org.elasticsearch.ElasticSearchException;
 import org.elasticsearch.action.WriteConsistencyLevel;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthRequest;
@@ -345,9 +347,14 @@ public final class ElasticSearchAdapter implements IndexAdapter {
 
     @Override
     public void add(final MailMessage[] mails, final Session session) throws OXException {
+        final String indexName = indexNamePrefix + session.getContextId();
         final BulkRequestBuilder bulkRequest = client.prepareBulk();
-
         for (final MailMessage mail : mails) {
+            final String id = UUID.randomUUID().toString();
+            final IndexRequestBuilder irb = client.prepareIndex(indexName, indexType, id);
+            irb.setSource(createDoc(id, mail));
+            
+            
             // bulkRequest.add(client.prepareIndex(indexName, indexType, "1")
             // .setSource(jsonBuilder()
             // .startObject()
@@ -362,17 +369,76 @@ public final class ElasticSearchAdapter implements IndexAdapter {
 
     }
 
-    public XContentBuilder createDoc(final String id, final MailMessage mail) {
+    public XContentBuilder createDoc(final String id, final MailMessage mail, final int accountId, final int userId) {
         try {
+            final StringBuilder sb = new StringBuilder(64);
             final XContentBuilder b = JsonXContent.unCachedContentBuilder().startObject();
-            b.field("subject", mail.getSubject());
-            b.field("from", mail.getFrom()[0]);
-            b.field("id", id);
+            b.field(Constants.FIELD_ID, id);
+            b.field(Constants.FIELD_USER, userId);
+            b.field(Constants.FIELD_ACCOUNT_ID, accountId);
+            /*
+             * Write address fields
+             */
+            b.field(Constants.FIELD_FROM, appendAddresses(mail.getFrom(), sb));
+            b.field(Constants.FIELD_TO, appendAddresses(mail.getBcc(), sb));
+            b.field(Constants.FIELD_CC, appendAddresses(mail.getBcc(), sb));
+            b.field(Constants.FIELD_BCC, appendAddresses(mail.getBcc(), sb));
+            /*
+             * Write size
+             */
+            if (mail.containsSize()) {
+                b.field(Constants.FIELD_SIZE, mail.getSize());
+            }
+            /*
+             * Write date fields
+             */
+            {
+                java.util.Date d = mail.getReceivedDate();
+                if (null != d) {
+                    b.field(Constants.FIELD_RECEIVED_DATE, d.getTime());
+                }
+                d = mail.getSentDate();
+                if (null != d) {
+                    b.field(Constants.FIELD_SENT_DATE, d.getTime());
+                }
+            }
+            /*
+             * Write flags
+             */
+            {
+                final int flags = mail.getFlags();
+                b.field(Constants.FIELD_FLAG_ANSWERED, (flags & MailMessage.FLAG_ANSWERED) > 0);
+                b.field(Constants.FIELD_FLAG_DELETED, (flags & MailMessage.FLAG_DELETED) > 0);
+                b.field(Constants.FIELD_FLAG_DRAFT, (flags & MailMessage.FLAG_DRAFT) > 0);
+                b.field(Constants.FIELD_FLAG_FLAGGED, (flags & MailMessage.FLAG_FLAGGED) > 0);
+                b.field(Constants.FIELD_FLAG_SEEN, (flags & MailMessage.FLAG_SEEN) > 0);
+                b.field(Constants.FIELD_FLAG_USER, (flags & MailMessage.FLAG_USER) > 0);
+                b.field(Constants.FIELD_FLAG_SPAM, (flags & MailMessage.FLAG_SPAM) > 0);
+                b.field(Constants.FIELD_FLAG_FORWARDED, (flags & MailMessage.FLAG_FORWARDED) > 0);
+                b.field(Constants.FIELD_FLAG_READ_ACK, (flags & MailMessage.FLAG_READ_ACK) > 0);
+            }
+            /*
+             * Subject
+             */
+            b.field(Constants.FIELD_SUBJECT, mail.getSubject());
             b.endObject();
             return b;
         } catch (final IOException ex) {
             throw new RuntimeException(ex);
         }
+    }
+
+    
+
+    private static String appendAddresses(final InternetAddress[] addrs, final StringBuilder sb) {
+        sb.setLength(0);
+        if (addrs != null && addrs.length > 0) {
+            for (final InternetAddress internetAddress : addrs) {
+                sb.append(',').append(internetAddress.toUnicodeString());
+            }
+            sb.deleteCharAt(0);
+        }
+        return sb.toString();
     }
 
     public void deleteById(final String mailId, final String indexName) {

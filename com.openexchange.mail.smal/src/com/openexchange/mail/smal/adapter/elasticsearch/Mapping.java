@@ -115,12 +115,12 @@ public final class Mapping {
             /*
              * Date fields
              */
-            properties.put(Constants.FIELD_RECEIVED_DATE, new JSONObject("{ \"type\": \"long\", \"store\": \"yes\" }"));
-            properties.put(Constants.FIELD_SENT_DATE, new JSONObject("{ \"type\": \"long\", \"store\": \"yes\" }"));
+            properties.put(Constants.FIELD_RECEIVED_DATE, new JSONObject("{ \"type\": \"long\", \"store\": \"yes\", \"null_value\": 0 }"));
+            properties.put(Constants.FIELD_SENT_DATE, new JSONObject("{ \"type\": \"long\", \"store\": \"yes\", \"null_value\": 0 }"));
             /*
              * Size
              */
-            properties.put(Constants.FIELD_SIZE, new JSONObject("{ \"type\": \"long\", \"store\": \"yes\" }"));
+            properties.put(Constants.FIELD_SIZE, new JSONObject("{ \"type\": \"long\", \"store\": \"yes\", \"null_value\": 0 }"));
             /*
              * Put mapping
              */

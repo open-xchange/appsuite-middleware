@@ -150,11 +150,14 @@ public final class MailAccountJob extends Job {
                     try {
                         final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
                         final MailMessage[] mails = messageStorage.searchMessages(fullName, IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, FIELDS);
-                        for (final MailMessage mail : mails) {
-                            final MailMessage fullMail = messageStorage.getMessage(fullName, mail.getMailId(), false);
-                            indexAdapter.add(fullMail, mailAccess.getSession());
+                        for (int i = 0; i < mails.length; i++) {
+                            mails[i] = messageStorage.getMessage(fullName, mails[i].getMailId(), false);
+                            mails[i].setAccountId(accountId);
                         }
-                        
+                        /*
+                         * TODO: Add in chunks...
+                         */
+                        indexAdapter.add(mails, mailAccess.getSession());
                     } finally {
                         mailAccess.close(true);
                     }
