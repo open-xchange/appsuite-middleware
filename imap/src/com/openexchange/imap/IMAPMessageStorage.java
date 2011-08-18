@@ -428,7 +428,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 // .toString());
                 return null;
             }
-            // TODO: Examine behavior when applying: msg.setPeek(!markSeen);
+            msg.setPeek(!markSeen);
             final MailMessage mail;
             try {
                 mail = MIMEMessageConverter.convertMessage(msg, false);
