@@ -75,6 +75,8 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public class SMALActivator extends HousekeepingActivator {
 
+    private IndexService indexService;
+
     /**
      * Initializes a new {@link SMALActivator}.
      */
@@ -108,9 +110,9 @@ public class SMALActivator extends HousekeepingActivator {
             final ConfigurationService cs = getService(ConfigurationService.class);
             final String className = cs.getProperty("com.openexchange.mail.smal.adapter", ElasticSearchAdapter.class.getName());
             final Class<? extends IndexAdapter> clazz = Class.forName(className).asSubclass(IndexAdapter.class);
-            final IndexServiceImpl service = new IndexServiceImpl(clazz.newInstance());
-            registerService(IndexService.class, service);
-            if (!addService(IndexService.class, service)) {
+            indexService = new IndexServiceImpl(clazz.newInstance());
+            registerService(IndexService.class, indexService);
+            if (!addService(IndexService.class, indexService)) {
                 com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SMALActivator.class)).error(
                     "IndexService could not be added.");
             }
@@ -129,6 +131,10 @@ public class SMALActivator extends HousekeepingActivator {
     protected void stopBundle() throws Exception {
         JobQueue.dropInstance();
         cleanUp();
+        if (null != indexService) {
+            indexService.getAdapter().stop();
+            indexService = null;
+        }
         SMALServiceLookup.getInstance().setServiceLookup(null);
     }
 

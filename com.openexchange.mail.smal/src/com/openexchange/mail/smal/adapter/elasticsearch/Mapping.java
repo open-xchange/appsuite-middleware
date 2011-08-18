@@ -54,7 +54,6 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.client.action.admin.indices.mapping.put.PutMappingRequestBuilder;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.smal.SMALExceptionCodes;
 
 /**
@@ -134,16 +133,11 @@ public final class Mapping {
      * Creates the default mail mapping.
      * 
      * @param client The client
-     * @throws OXException If creating mapping fails (probably because that mapping already exists)
+     * @throws ElasticSearchException If creating mapping fails (probably because mapping already exists)
      */
-    public static void createMailMapping(final Client client, final String indexName) throws OXException {
-        try {
-            final PutMappingRequestBuilder pmrb = client.admin().indices().preparePutMapping(indexName).setSource(JSON_MAPPINGS);
-            pmrb.execute().actionGet();
-        } catch (final ElasticSearchException e) {
-            // Mapping could not be put; probably it already exists
-            throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
-        }
+    public static void createMailMapping(final Client client, final String indexName) {
+        final PutMappingRequestBuilder pmrb = client.admin().indices().preparePutMapping(indexName).setSource(JSON_MAPPINGS);
+        pmrb.execute().actionGet();
     }
 
 }

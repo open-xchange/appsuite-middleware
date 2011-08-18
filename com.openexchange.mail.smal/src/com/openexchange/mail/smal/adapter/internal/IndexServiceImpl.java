@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.smal.adapter.internal;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.smal.adapter.IndexAdapter;
 import com.openexchange.mail.smal.adapter.IndexService;
 
@@ -64,10 +65,13 @@ public final class IndexServiceImpl implements IndexService {
 
     /**
      * Initializes a new {@link IndexServiceImpl}.
+     * 
+     * @throws OXException If adapter start-up fails
      */
-    public IndexServiceImpl(final IndexAdapter adapter) {
+    public IndexServiceImpl(final IndexAdapter adapter) throws OXException {
         super();
         this.adapter = adapter;
+        adapter.start();
     }
 
     @Override

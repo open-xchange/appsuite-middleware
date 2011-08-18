@@ -73,6 +73,7 @@ import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.client.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.action.search.SearchRequestBuilder;
+import org.elasticsearch.client.transport.NoNodeAvailableException;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.cluster.metadata.IndexMetaData;
 import org.elasticsearch.common.collect.ImmutableMap;
@@ -147,23 +148,32 @@ public final class ElasticSearchAdapter implements IndexAdapter {
 
     @Override
     public void start() throws OXException {
-        final Builder settingsBuilder = ImmutableSettings.settingsBuilder();
-        /*
-         * Look-up other nodes in cluster
-         */
-        settingsBuilder.put("client.transport.sniff", true);
-        /*
-         * Specify cluster name
-         */
-        settingsBuilder.put("cluster.name", clusterName);
-        /*
-         * We act as client only
-         */
-        settingsBuilder.put("node.data", false);
-        /*
-         * Create the (transport) client
-         */
-        client = new TransportClient(settingsBuilder.build());
+        try {
+            final Builder settingsBuilder = ImmutableSettings.settingsBuilder();
+            /*
+             * Look-up other nodes in cluster
+             */
+            settingsBuilder.put("client.transport.sniff", true);
+            /*
+             * Specify cluster name
+             */
+            settingsBuilder.put("cluster.name", clusterName);
+            /*
+             * We act as client only
+             */
+            settingsBuilder.put("node.data", false);
+            /*
+             * Create the (transport) client
+             */
+            client = new TransportClient(settingsBuilder.build());
+            clusterInfo();
+        } catch (final NoNodeAvailableException e) {
+            throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
+        } catch (final ElasticSearchException e) {
+            throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
+        } catch (final Exception e) {
+            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     @Override
@@ -174,8 +184,15 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         }
     }
 
+    private void ensureStarted() {
+        if (null == client) {
+            throw new IllegalStateException("ElasticSearch adapter not initialized, yet.");
+        }
+    }
+
     @Override
     public void onSessionAdd(final Session session) throws OXException {
+        ensureStarted();
         final int contextId = session.getContextId();
         createIndex(indexNamePrefix + contextId);
         /*
@@ -191,11 +208,12 @@ public final class ElasticSearchAdapter implements IndexAdapter {
 
     @Override
     public void onSessionGone(final Session session) throws OXException {
+        ensureStarted();
         // TODO Auto-generated method stub
 
     }
 
-    private void createIndex(final String indexName) {
+    private void createIndex(final String indexName) throws OXException {
         /*
          * Create the index
          */
@@ -208,6 +226,13 @@ public final class ElasticSearchAdapter implements IndexAdapter {
              */
             Mapping.createMailMapping(client, indexName);
             LOG.info("Mappings successfully created for \"" + indexName + "\".");
+        } catch (final NoNodeAvailableException ex) {
+            /*
+             * No ElasticSearch node found.
+             */
+            throw SMALExceptionCodes.INDEX_FAULT.create(ex, ex.getMessage());
+        } catch (final ElasticSearchException ex) {
+            LOG.info("Index \"" + indexName + "\" already exists.");
         } catch (final Exception ex) {
             LOG.info("Index \"" + indexName + "\" already exists.");
         }
@@ -215,6 +240,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
 
     @Override
     public boolean containsFolder(final String fullName, final int accountId, final Session session) throws OXException {
+        ensureStarted();
         final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
         boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_USER, session.getUserId()));
         boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_ACCOUNT_ID, accountId));
@@ -235,6 +261,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
 
     @Override
     public List<MailMessage> getMessages(final String fullName, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int accountId, final Session session) throws OXException {
+        ensureStarted();
         final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
         boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_USER, session.getUserId()));
         boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_ACCOUNT_ID, accountId));
@@ -270,6 +297,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
 
     @Override
     public List<MailMessage> search(final SearchTerm<?> searchTerm, final MailSortField sortField, final OrderDirection order, final Session session) throws OXException {
+        ensureStarted();
         try {
             final QueryBuilder queryBuilder = SearchTerm2Query.searchTerm2Query(searchTerm);
             /*
@@ -322,6 +350,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
      * Logs some cluster information.
      */
     public void clusterInfo() {
+        ensureStarted();
         final NodesInfoResponse rsp = client.admin().cluster().nodesInfo(new NodesInfoRequest()).actionGet();
         final StringBuilder sb =
             new StringBuilder(32).append("Cluster: ").append(rsp.getClusterName()).append(". Active nodes: ").append(
@@ -336,12 +365,14 @@ public final class ElasticSearchAdapter implements IndexAdapter {
      * @return <code>true</code> if index exists; otherwise <code>false</code>
      */
     public boolean indexExists(final String indexName) {
+        ensureStarted();
         final ImmutableMap<String, IndexMetaData> map =
             client.admin().cluster().prepareState().execute().actionGet().getState().getMetaData().getIndices();
         return map.containsKey(indexName);
     }
 
     public void saveCreateIndex(final String indexName, final boolean log) {
+        ensureStarted();
         // if (!indexExists(name)) {
         try {
             createIndex(indexName);
@@ -360,6 +391,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
      * Wait for at least one active shard.
      */
     public void waitForOneActiveShard(final String indexName) {
+        ensureStarted();
         client.admin().cluster().health(new ClusterHealthRequest(indexName).waitForActiveShards(1)).actionGet();
         LOG.info("Now node has at least one active shard!");
     }
@@ -368,6 +400,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
      * Waits for yellow status.
      */
     public void waitForYellow(final String indexName) {
+        ensureStarted();
         client.admin().cluster().health(new ClusterHealthRequest(indexName).waitForYellowStatus()).actionGet();
     }
 
@@ -375,6 +408,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
      * Waits for green status.
      */
     public void waitForGreen(final String indexName) {
+        ensureStarted();
         client.admin().cluster().health(new ClusterHealthRequest(indexName).waitForGreenStatus()).actionGet();
     }
 
@@ -382,6 +416,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
      * Explicitly refresh one or more indices (making the content indexed since the last refresh searchable).
      */
     public void refresh(final String indexName) {
+        ensureStarted();
         client.admin().indices().refresh(new RefreshRequest(indexName)).actionGet();
     }
 
@@ -391,12 +426,14 @@ public final class ElasticSearchAdapter implements IndexAdapter {
      * @return The number of mails
      */
     public long countAll(final String indexName) {
+        ensureStarted();
         final CountResponse response = client.prepareCount(indexName).setQuery(QueryBuilders.matchAllQuery()).execute().actionGet();
         return response.getCount();
     }
 
     @Override
     public void add(final MailMessage mail, final Session session) throws OXException {
+        ensureStarted();
         try {
             final String indexName = indexNamePrefix + session.getContextId();
             final String id = UUID.randomUUID().toString();
@@ -411,6 +448,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
 
     @Override
     public void add(final MailMessage[] mails, final Session session) throws OXException {
+        ensureStarted();
         final String indexName = indexNamePrefix + session.getContextId();
         final BulkRequestBuilder bulkRequest = client.prepareBulk();
         for (final MailMessage mail : mails) {
@@ -511,6 +549,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     }
 
     public void deleteAll(final String indexName) {
+        ensureStarted();
         // client.prepareIndex().setOpType(OpType.)
         // there is an index delete operation
         // http://www.elasticsearch.com/docs/elasticsearch/rest_api/admin/indices/delete_index/
@@ -520,11 +559,13 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     }
 
     public OptimizeResponse optimize(final String indexName, final int optimizeToSegmentsAfterUpdate) {
+        ensureStarted();
         return client.admin().indices().optimize(new OptimizeRequest(indexName).maxNumSegments(optimizeToSegmentsAfterUpdate)).actionGet();
     }
 
     @Override
     public boolean sync(final String fullName, final int accountId, final Session session) throws OXException {
+        ensureStarted();
         if (!syncFlag.compareAndSet(false, true)) {
             return false;
         }
