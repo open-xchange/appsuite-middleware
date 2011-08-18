@@ -148,7 +148,7 @@ public final class JobConsumer extends AbstractTask<Object> {
                 try {
                     if (queue.isEmpty()) {
                         /*
-                         * Blocking wait for at least 1 Loggable to arrive.
+                         * Blocking wait for at least 1 job to arrive.
                          */
                         final Job job = queue.take();
                         if (POISON == job) {
