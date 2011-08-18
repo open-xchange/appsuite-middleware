@@ -84,6 +84,7 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.sort.SortOrder;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
@@ -187,6 +188,41 @@ public final class ElasticSearchAdapter implements IndexAdapter {
          */
         final SearchResponse rsp = builder.execute().actionGet();
         return (rsp.getHits().hits().length > 0);
+    }
+
+    @Override
+    public List<MailMessage> getMessages(final String fullName, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int accountId, final Session session) throws OXException {
+        final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+        boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_USER, session.getUserId()));
+        boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_ACCOUNT_ID, accountId));
+        boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_FULL_NAME, fullName));
+        /*
+         * Build search request
+         */
+        final SearchRequestBuilder builder = client.prepareSearch(indexNamePrefix + session.getContextId()).setTypes(indexType);
+        builder.setQuery(boolQuery).setSearchType(SearchType.DFS_QUERY_THEN_FETCH);
+        builder.setExplain(true);
+        builder.setOperationThreading(SearchOperationThreading.THREAD_PER_SHARD);
+        builder.addSort(sortField.getKey(), OrderDirection.DESC.equals(order) ? SortOrder.DESC : SortOrder.ASC);
+        builder.setSize(Integer.MAX_VALUE);
+        /*
+         * Perform search
+         */
+        final SearchResponse rsp = builder.execute().actionGet();
+        final SearchHit[] docs = rsp.getHits().getHits();
+        final List<MailMessage> mails = new ArrayList<MailMessage>(docs.length);
+        final MailPath helper = new MailPath();
+        for (final SearchHit sd : docs) {
+            // to get explanation you'll need to enable this when querying:
+            // System.out.println(sd.getExplanation().toString());
+
+            // if we use in mapping: "_source" : {"enabled" : false}
+            // we need to include all necessary fields in query and then to use doc.getFields()
+            // instead of doc.getSource()
+            final MailMessage mail = readDoc(sd.getSource(), sd.getId(), helper);
+            mails.add(mail);
+        }
+        return mails;
     }
 
     @Override

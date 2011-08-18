@@ -51,6 +51,7 @@ package com.openexchange.mail.smal.adapter;
 
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -99,6 +100,17 @@ public interface IndexAdapter {
      * @return <code>true</code> if folder is contained; otherwise <code>false</code>
      * @throws OXException If check fails
      */
+    public List<MailMessage> getMessages(String fullName, MailSortField sortField, OrderDirection order, MailField[] fields, int accountId, Session session) throws OXException;
+
+    /**
+     * Checks if index contains mail located in specified folder.
+     * 
+     * @param fullName The folder full name
+     * @param accountId The account identifier
+     * @param session The session
+     * @return <code>true</code> if folder is contained; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
     public boolean containsFolder(String fullName, int accountId, Session session) throws OXException;
 
     /**
@@ -125,7 +137,7 @@ public interface IndexAdapter {
      * @param fullName The folder full name
      * @param The account identifier
      * @param session The session
-     * @return <code>true</code> if invocation triggered sync; otherwise <code>false</code> 
+     * @return <code>true</code> if invocation triggered sync; otherwise <code>false</code>
      * @throws OXException If synchronizing mails with index fails
      */
     public boolean sync(String fullName, int accountId, Session session) throws OXException;
