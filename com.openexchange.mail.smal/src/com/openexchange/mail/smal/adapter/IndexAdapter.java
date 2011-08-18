@@ -80,6 +80,22 @@ public interface IndexAdapter {
     public void stop() throws OXException;
 
     /**
+     * Invoked if a new session is added or restored from log-term container.
+     * 
+     * @param session The session
+     * @throws OXException If handling new session fails
+     */
+    public void onSessionAdd(Session session) throws OXException;
+
+    /**
+     * Invoked if a session is dropped or moved to long-term container.
+     * 
+     * @param session The session
+     * @throws OXException If handling dropped session fails
+     */
+    public void onSessionGone(Session session) throws OXException;
+
+    /**
      * Performs the query derived from given search term.
      * 
      * @param searchTerm The search term

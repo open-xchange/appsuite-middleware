@@ -51,6 +51,8 @@ package com.openexchange.mail.smal.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.smal.SMALProvider;
@@ -58,8 +60,10 @@ import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.mail.smal.adapter.IndexAdapter;
 import com.openexchange.mail.smal.adapter.IndexService;
 import com.openexchange.mail.smal.adapter.elasticsearch.ElasticSearchAdapter;
+import com.openexchange.mail.smal.adapter.internal.IndexEventHandler;
 import com.openexchange.mail.smal.adapter.internal.IndexServiceImpl;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
@@ -104,6 +108,14 @@ public class SMALActivator extends HousekeepingActivator {
             final IndexServiceImpl service = new IndexServiceImpl(clazz.newInstance());
             registerService(IndexService.class, service);
             addService(service);
+        }
+        /*
+         * Register event handle
+         */
+        {
+            final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+            serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+            registerService(EventHandler.class, new IndexEventHandler(), serviceProperties);
         }
     }
 
