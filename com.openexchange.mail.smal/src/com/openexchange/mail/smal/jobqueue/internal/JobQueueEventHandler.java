@@ -53,7 +53,6 @@ import java.util.Map;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.mail.smal.SMALServiceLookup;
-import com.openexchange.mail.smal.adapter.IndexService;
 import com.openexchange.mail.smal.jobqueue.JobQueue;
 import com.openexchange.mail.smal.jobqueue.MailAccountJob;
 import com.openexchange.mailaccount.MailAccount;
@@ -107,8 +106,7 @@ public final class JobQueueEventHandler implements EventHandler {
 
     private void handleDroppedSession(final Session session) {
         try {
-            final IndexService indexService = SMALServiceLookup.getServiceStatic(IndexService.class);
-            indexService.getAdapter().onSessionGone(session);
+            // Something...
         } catch (final Exception e) {
             // Failed handling session
             LOG.warn("Failed handling tracked removed session.", e);
