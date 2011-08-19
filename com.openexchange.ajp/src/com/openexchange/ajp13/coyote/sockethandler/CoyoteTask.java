@@ -49,7 +49,6 @@
 
 package com.openexchange.ajp13.coyote.sockethandler;
 
-import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.atomic.AtomicInteger;
 import com.openexchange.ajp13.coyote.ActionCode;
@@ -146,7 +145,16 @@ public final class CoyoteTask implements Task<Object> {
         try {
             ajpProcessor.action(ActionCode.START, null);
             ajpProcessor.process(client);
-        } catch (final IOException e) {
+        } catch(final java.net.SocketException e) {
+            // SocketExceptions are normal
+            CoyoteSocketHandler.LOG.debug(e.getMessage(), e);
+        } catch (final java.io.IOException e) {
+            // IOExceptions are normal
+            CoyoteSocketHandler.LOG.debug(e.getMessage(), e);
+        } catch (final Throwable e) {
+            /*
+             * Any other exception or error is odd.
+             */
             CoyoteSocketHandler.LOG.error(e.getMessage(), e);
         } finally {
             ajpProcessor.action(ActionCode.STOP, null);

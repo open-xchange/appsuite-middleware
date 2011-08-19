@@ -561,17 +561,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         action(ActionCode.CLOSE, Boolean.FALSE);
         action(ActionCode.STOP, null);
         /*
-         * Drop socket
-         */
-        final Socket s = socket;
-        if (null != s) {
-            try {
-                closeQuitely(s);
-            } finally {
-                socket = null;
-            }
-        }
-        /*
          * Cancel via control, too
          */
         final Future<Object> f = control;
@@ -982,6 +971,17 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             started = true;
         } else if (actionCode == ActionCode.STOP) {
             started = false;
+            /*
+             * Drop socket
+             */
+            final Socket s = socket;
+            if (null != s) {
+                try {
+                    closeQuitely(s);
+                } finally {
+                    socket = null;
+                }
+            }
         }
         /*-
          *
