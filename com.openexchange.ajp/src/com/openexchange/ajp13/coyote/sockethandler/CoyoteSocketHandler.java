@@ -236,7 +236,10 @@ public final class CoyoteSocketHandler implements IAJPv13SocketHandler {
             if (linger > 0) {
                 client.setSoLinger(true, linger);
             }
-            client.setSoTimeout(Constants.DEFAULT_CONNECTION_TIMEOUT);
+            final int to = Constants.DEFAULT_CONNECTION_TIMEOUT;
+            if (to > 0) {
+                client.setSoTimeout(to);
+            }
             //client.setServerSoTimeout(Constants.DEFAULT_SERVER_SOCKET_TIMEOUT);
             client.setTcpNoDelay(Constants.DEFAULT_TCP_NO_DELAY);
         } catch (final SocketException e) {
