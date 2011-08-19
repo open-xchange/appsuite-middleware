@@ -49,11 +49,16 @@
 
 package com.openexchange.mail.smal.jobqueue;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.IndexRange;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
@@ -63,8 +68,10 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.smal.SMALMailAccess;
+import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.mail.smal.adapter.IndexAdapter;
 import com.openexchange.session.Session;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link MailAccountJob}
@@ -125,6 +132,12 @@ public final class MailAccountJob extends Job {
     }
 
     @Override
+    public String getIdentifier() {
+        return new StringBuilder(MailAccountJob.class.getSimpleName()).append('@').append(contextId).append('@').append(userId).append('@').append(
+            accountId).toString();
+    }
+
+    @Override
     public int getRanking() {
         return 0;
     }
@@ -138,6 +151,13 @@ public final class MailAccountJob extends Job {
         if (error) {
             cancel();
             return;
+        }
+        try {
+            if (wasDone(userId, contextId)) {
+                return;
+            }
+        } catch (final OXException e) {
+            LOG.error("Couldn't look-up database.", e);
         }
         try {
             if (!initialized) {
@@ -220,6 +240,31 @@ public final class MailAccountJob extends Job {
         }
         indexAdapter.add(toAdd, session);
         return retval;
+    }
+
+    private boolean wasDone(final int userId, final int contextId) throws OXException {
+        final DatabaseService databaseService = SMALServiceLookup.getServiceStatic(DatabaseService.class);
+        final Connection con = databaseService.getWritable(contextId);
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("INSERT INTO jobQueue VALUES (?, ?, 'mail-job-done-0', 'true');");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            stmt.setString(3, "MailAccountJob-" + contextId);
+            stmt.setString(4, "true");
+            try {
+                stmt.executeUpdate();
+                return false;
+            } catch (final Exception e) {
+                return true;
+            }
+        } catch (final SQLException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+            databaseService.backWritable(contextId, con);
+        }
+
     }
 
 }
