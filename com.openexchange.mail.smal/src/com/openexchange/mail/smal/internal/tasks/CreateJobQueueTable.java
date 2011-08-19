@@ -65,10 +65,14 @@ public class CreateJobQueueTable extends AbstractCreateTableImpl {
         "CREATE TABLE " + JOBQUEUE_TABLE + " (" +
         "cid int(10) unsigned NOT NULL," +
         "id int(10) unsigned NOT NULL," +
+        "type tinyint(3) unsigned NOT NULL," +
+        "timestamp bigint(64) NOT NULL," + 
         "name varchar(128) collate utf8_unicode_ci NOT NULL," +
         "value varchar(128) collate utf8_unicode_ci NOT NULL," +
-        "PRIMARY KEY (cid, id, name)," +
-        "INDEX userIndex (cid, id)" +
+        "PRIMARY KEY (cid, id, type, name)," +
+        "INDEX userIndex (cid, id)," +
+        "INDEX typeIndex (cid, id, type)," +
+        "INDEX timestampIndex (cid, id, timestamp)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     
     
