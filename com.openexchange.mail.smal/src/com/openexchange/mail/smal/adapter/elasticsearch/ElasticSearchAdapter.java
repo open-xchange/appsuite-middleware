@@ -51,6 +51,8 @@ package com.openexchange.mail.smal.adapter.elasticsearch;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -267,6 +269,31 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         return (rsp.getHits().getTotalHits() > 0);
     }
 
+    public void deleteMessages(final Collection<String> mailIds, final String fullName, final int accountId, final Session session) throws OXException {
+        if (null == mailIds || mailIds.isEmpty()) {
+            return;
+        }
+        ensureStarted();
+        final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+        boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_USER, session.getUserId()));
+        boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_ACCOUNT_ID, accountId));
+        boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_FULL_NAME, fullName));
+        {
+            final String[] sa = new String[mailIds.size()];
+            final Iterator<String> iterator = mailIds.iterator();
+            for (int i = 0; i < sa.length; i++) {
+                sa[i] = iterator.next();
+            }
+            boolQuery.must(QueryBuilders.inQuery(Constants.FIELD_ID, sa));
+        }
+        /*
+         * Build delete request
+         */
+        final String indexName = indexNamePrefix + session.getContextId();
+        client.prepareDeleteByQuery(indexName).setTypes(indexType).setQuery(boolQuery).execute().actionGet();
+        refresh(indexName);
+    }
+
     @Override
     public List<MailMessage> getMessages(final String fullName, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int accountId, final Session session) throws OXException {
         ensureStarted();
@@ -281,7 +308,9 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         builder.setQuery(boolQuery).setSearchType(SearchType.DFS_QUERY_THEN_FETCH);
         builder.setExplain(true);
         builder.setOperationThreading(SearchOperationThreading.THREAD_PER_SHARD);
-        builder.addSort(sortField.getKey(), OrderDirection.DESC.equals(order) ? SortOrder.DESC : SortOrder.ASC);
+        if (null != sortField && null != order) {
+            builder.addSort(sortField.getKey(), OrderDirection.DESC.equals(order) ? SortOrder.DESC : SortOrder.ASC);
+        }
         builder.setSize(Integer.MAX_VALUE);
         /*
          * Perform search

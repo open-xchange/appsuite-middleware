@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.smal.adapter;
 
+import java.util.Collection;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
@@ -117,6 +118,17 @@ public interface IndexAdapter {
      * @throws OXException If check fails
      */
     public List<MailMessage> getMessages(String fullName, MailSortField sortField, OrderDirection order, MailField[] fields, int accountId, Session session) throws OXException;
+
+    /**
+     * Deletes specified mails from index.
+     * 
+     * @param mailIds The mail identifiers
+     * @param fullName The folder full name
+     * @param accountId The account identifier
+     * @param session The session
+     * @throws OXException If deletion fails
+     */
+    public void deleteMessages(Collection<String> mailIds, String fullName, int accountId, Session session) throws OXException;
 
     /**
      * Checks if index contains mail located in specified folder.
