@@ -54,6 +54,7 @@ import java.util.Hashtable;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.smal.SMALProvider;
 import com.openexchange.mail.smal.SMALServiceLookup;
@@ -87,7 +88,9 @@ public class SMALActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ThreadPoolService.class, MailAccountStorageService.class, SessiondService.class };
+        return new Class<?>[] {
+            ConfigurationService.class, ThreadPoolService.class, MailAccountStorageService.class, SessiondService.class,
+            DatabaseService.class };
     }
 
     @Override
