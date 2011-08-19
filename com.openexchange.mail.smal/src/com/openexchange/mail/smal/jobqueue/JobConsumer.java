@@ -168,7 +168,7 @@ final class JobConsumer extends AbstractTask<Object> {
                             if (!job.isCanceled()) {
                                 if (job.isPaused()) {
                                     /*
-                                     * Re-enqueue
+                                     * Unset "pasued" flag & re-enqueue
                                      */
                                     job.proceed();
                                     queue.offer(job);
