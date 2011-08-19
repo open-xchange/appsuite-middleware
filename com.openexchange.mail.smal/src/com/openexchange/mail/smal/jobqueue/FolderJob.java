@@ -83,6 +83,8 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class FolderJob extends AbstractMailSyncJob {
 
+    private static final long serialVersionUID = -7195124742370755327L;
+
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FolderJob.class));
 
