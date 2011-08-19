@@ -123,7 +123,9 @@ public final class JobQueueEventHandler implements EventHandler {
             final int contextId = session.getContextId();
             for (final MailAccount account : storageService.getUserMailAccounts(userId, contextId)) {
                 final MailAccountJob maj = new MailAccountJob(account.getId(), userId, contextId);
-                JobQueue.getInstance().addJob(maj);
+                if (JobQueue.getInstance().addJob(maj)) {
+                    s
+                }
             }
         } catch (final Exception e) {
             // Failed handling session
