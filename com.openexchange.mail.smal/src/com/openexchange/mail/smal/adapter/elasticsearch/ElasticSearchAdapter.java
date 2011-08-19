@@ -201,8 +201,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     @Override
     public void onSessionGone(final Session session) throws OXException {
         ensureStarted();
-        // TODO Auto-generated method stub
-
+        // 
     }
 
     private void createIndex(final String indexName) throws OXException {
