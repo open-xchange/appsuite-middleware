@@ -1046,10 +1046,6 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
                 addQueriedContacts(myCols, retval, block_object_id);
             }
             final int size = retval.size();
-            if (object_id.length == 1 && size < object_id.length) {
-                // Throw error if single contact is requested
-                throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(I(0), I(ctx.getContextId()));
-            }
             return new SearchIteratorDelegator<Contact>(retval.iterator(), size);
         } catch (final OXException e) {
             throw e;
