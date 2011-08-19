@@ -94,7 +94,7 @@ public class SMALCreateTableTask extends UpdateTaskAdapter {
             PreparedStatement stmt = null;
             try {
                 try {
-                    if (tableExists(writeCon, "oauthAccounts")) {
+                    if (tableExists(writeCon, CreateJobQueueTable.JOBQUEUE_TABLE)) {
                         return;
                     }
                     stmt = writeCon.prepareStatement(CreateJobQueueTable.CREATE_JOBQUEUE_TABLE_STATEMENT);
