@@ -97,7 +97,7 @@ public class Activator implements BundleActivator {
 
     private final Map<String, ServiceRegistration<?>> activeServices = new HashMap<String, ServiceRegistration<?>>();
 
-    public static final int CRAWLER_API_VERSION = 616;
+    public static final int CRAWLER_API_VERSION = 620;
 
     // This assures that every time the server/bundle is restarted it will check for updates
     private Long LAST_TIME_CHECKED = new Long("0");
