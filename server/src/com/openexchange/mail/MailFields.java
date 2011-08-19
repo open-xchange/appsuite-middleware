@@ -77,6 +77,15 @@ public final class MailFields {
     }
 
     /**
+     * Initializes an instance of {@link MailFields} with specified flag.
+     */
+    public MailFields(final boolean initValue) {
+        super();
+        arr = new boolean[VALUES.length];
+        Arrays.fill(arr, initValue);
+    }
+
+    /**
      * Initializes a new instance of {@link MailFields} pre-filled with specified array of {@link MailField} constants.
      *
      * @param mailField The mail field to add

@@ -180,6 +180,9 @@ public final class FolderJob extends AbstractMailSyncJob {
                 retval = remaining;
             }
         }
+        indexAdapter.getMessages(fullName, null, null, FIELDS, accountId, session);
+        
+        
         final MailMessage[] toAdd = new MailMessage[retval];
         for (int i = offset, j = 0; i < end; i++) {
             final MailMessage mail = messageStorage.getMessage(fullName, mails[i].getMailId(), false);

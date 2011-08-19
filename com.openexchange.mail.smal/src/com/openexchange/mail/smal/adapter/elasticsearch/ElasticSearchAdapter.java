@@ -343,14 +343,21 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         }
     }
 
-    private static MailMessage readDoc(final Map<String, Object> source, final String idAsStr, final MailPath helper) throws OXException {
-        helper.setMailIdentifierString(idAsStr);
-        final MailMessage mail = new IDMailMessage(helper.getMailID(), helper.getFolder());
-        mail.setAccountId(helper.getAccountId());
+    private static MailMessage readDoc(final Map<String, Object> source, final MailFields fields) throws OXException {
+        final MailMessage mail = new IDMailMessage(null, null);
         if (null != source) {
-            // tweet.setText((String) source.get("tweetText"));
-            // tweet.setCreatedAt(Helper.toDateNoNPE((String) source.get("createdAt")));
-            // tweet.setFromUserId((Integer) source.get("fromUserId"));
+            mail.setMailId((String) source.get(Constants.FIELD_ID));
+            mail.setFolder((String) source.get(Constants.FIELD_FULL_NAME));
+            mail.setAccountId(((Integer) source.get(Constants.FIELD_ACCOUNT_ID)).intValue());
+            if (fields.contains(MailField.SUBJECT)) {
+                mail.setSubject((String) source.get(Constants.FIELD_SUBJECT));
+            }
+            if (fields.contains(MailField.SIZE)) {
+                mail.setSize(((Long) source.get(Constants.FIELD_ACCOUNT_ID)).longValue());
+            }
+            
+            
+            // Continue
         }
         return mail;
     }
