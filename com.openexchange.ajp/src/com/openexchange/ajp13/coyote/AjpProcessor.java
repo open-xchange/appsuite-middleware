@@ -561,6 +561,17 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         action(ActionCode.CLOSE, Boolean.FALSE);
         action(ActionCode.STOP, null);
         /*
+         * Drop socket
+         */
+        final Socket s = socket;
+        if (null != s) {
+            try {
+                closeQuitely(s);
+            } finally {
+                socket = null;
+            }
+        }
+        /*
          * Cancel via control, too
          */
         final Future<Object> f = control;
@@ -940,6 +951,9 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     output.write(flushMessageArray);
                     lastWriteAccess = System.currentTimeMillis();
                     // output.flush();
+                    if (DEBUG) {
+                        LOG.debug("Performed keep-alive through a flush package.");
+                    }
                 } else {
                     /*
                      * Not committed, yet. Write an empty GET-BODY-CHUNK package.
@@ -951,6 +965,9 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                      * Receive empty body chunk
                      */
                     receive();
+                    if (DEBUG) {
+                        LOG.debug("Performed keep-alive through an empty get-body-chunk package (and received that empty chunk).");
+                    }
                 }
             } catch (final IOException e) {
                 // Set error flag
@@ -979,17 +996,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             started = true;
         } else if (actionCode == ActionCode.STOP) {
             started = false;
-            /*
-             * Drop socket
-             */
-            final Socket s = socket;
-            if (null != s) {
-                try {
-                    closeQuitely(s);
-                } finally {
-                    socket = null;
-                }
-            }
         }
         /*-
          *
