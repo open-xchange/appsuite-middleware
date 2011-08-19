@@ -2,6 +2,7 @@
 <project name="Build bundle">
 
     <!-- Constants -->
+	<property name="mainSrcDir" value="src"/>
     <property name="mainBinDir" value="build"/>
     <property name="simSrcDir" value="sim"/>
     <property name="simBinDir" value="sim-build"/>
@@ -78,7 +79,11 @@
     </target>
 
     <target name="buildMain" depends="testForMainBuild" if="buildMain">
-        <fail message="Building the bundle is not implemented."/>
+        <antcall target="compile" inheritrefs="true">
+            <param name="srcDir" value="${mainSrcDir}"/>
+            <param name="binDir" value="${mainBinDir}"/>
+            <param name="compileClasspath" value="mainCompileClasspath"/>
+        </antcall>
     </target>
 
     <target name="testForSimBuild">

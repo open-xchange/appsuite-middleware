@@ -53,6 +53,7 @@
     </target>
 
     <target name="buildProject">
+    	<!-- TODO only copy if build.xml is not there for custom builds -->
         <copy file="build-project.xml" tofile="${checkoutDir}/${projectName}/build.xml" overwrite="true"/>
         <ant dir="${checkoutDir}/${projectName}" antfile="build.xml" target="clean"/>
     	<if>
@@ -79,6 +80,12 @@
         </computeBuildOrder>
         <foreach list="${projectsOrdered}" target="buildProject" param="projectName" inheritAll="true"/>
     </target>
+
+    <target name="setBuild">
+        <property name="buildType" value="bundle"/>
+    </target>
+
+    <target name="build" depends="setBuild,buildProjects"/>
 
 	<target name="distBuild">
         <property name="buildType" value="dist"/>
