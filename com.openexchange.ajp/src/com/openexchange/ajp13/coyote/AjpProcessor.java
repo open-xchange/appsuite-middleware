@@ -646,10 +646,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             soTimeout = socket.getSoTimeout();
         }
         /*
-         * Set keep-alive on socket
-         */
-        socket.setKeepAlive(true);
-        /*
          * Error flag
          */
         error = false;
@@ -744,6 +740,15 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                  * So far a valid forward-request package
                  */
                 request.setStartTime(System.currentTimeMillis());
+            } catch (final InterruptedIOException e) {
+                LOG.debug("ajpprocessor.io.error", e);
+                error = true;
+                try {
+                    closeQuitely(socket);
+                } finally {
+                    this.socket = null;
+                }
+                break;
             } catch (final IOException e) {
                 LOG.debug("ajpprocessor.io.error", e);
                 error = true;

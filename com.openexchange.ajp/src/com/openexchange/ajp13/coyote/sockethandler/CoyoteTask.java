@@ -146,29 +146,26 @@ public final class CoyoteTask implements Task<Object> {
 
     @Override
     public Object call() throws Exception {
-        try {
-            ajpProcessor.action(ActionCode.START, null);
-            ajpProcessor.process(client);
-        } catch(final java.net.SocketException e) {
-            // SocketExceptions are normal
-            CoyoteSocketHandler.LOG.debug(e.getMessage(), e);
-        } catch (final java.io.IOException e) {
-            // IOExceptions are normal
-            CoyoteSocketHandler.LOG.debug(e.getMessage(), e);
-        } catch (final Throwable e) {
-            /*
-             * Any other exception or error is odd.
-             */
-            CoyoteSocketHandler.LOG.error(e.getMessage(), e);
-        } finally {
-            ajpProcessor.action(ActionCode.STOP, null);
-            AJPv13ServerImpl.decrementNumberOfOpenAJPSockets();
-            /*
-             * Drop socket
-             */
-            final Socket s = client;
-            if (null != s) {
-                closeQuitely(s);
+        while (!client.isClosed()) {
+            try {
+                ajpProcessor.action(ActionCode.START, null);
+                ajpProcessor.process(client);
+            } catch (final java.net.SocketException e) {
+                // SocketExceptions are normal
+                CoyoteSocketHandler.LOG.debug(e.getMessage(), e);
+            } catch (final java.io.IOException e) {
+                // IOExceptions are normal
+                CoyoteSocketHandler.LOG.debug(e.getMessage(), e);
+            } catch (final Throwable e) {
+                /*
+                 * Any other exception or error is odd.
+                 */
+                CoyoteSocketHandler.LOG.error(e.getMessage(), e);
+                closeQuitely(client);
+            } finally {
+                ajpProcessor.action(ActionCode.STOP, null);
+                ajpProcessor.recycle();
+                AJPv13ServerImpl.decrementNumberOfOpenAJPSockets();
             }
         }
         return null;

@@ -231,12 +231,16 @@ public final class CoyoteSocketHandler implements IAJPv13SocketHandler {
         if (readTimeout > 0) {
             ajpProcessor.setKeepAliveTimeout(readTimeout);
         }
-        if (linger > 0) {
-            try {
+        try {
+            final int linger = this.linger > 0 ? this.linger : Constants.DEFAULT_CONNECTION_LINGER;
+            if (linger > 0) {
                 client.setSoLinger(true, linger);
-            } catch (final SocketException e) {
-                // Eh...
             }
+            client.setSoTimeout(Constants.DEFAULT_CONNECTION_TIMEOUT);
+            //client.setServerSoTimeout(Constants.DEFAULT_SERVER_SOCKET_TIMEOUT);
+            client.setTcpNoDelay(Constants.DEFAULT_TCP_NO_DELAY);
+        } catch (final SocketException e) {
+            // Eh...
         }
         final Future<Object> future = pool.submit(new CoyoteTask(client, ajpProcessor, listenerMonitor, watcher), behavior);
         ajpProcessor.setControl(future);
