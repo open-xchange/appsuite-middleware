@@ -68,7 +68,7 @@ import com.openexchange.mail.smal.adapter.internal.IndexEventHandler;
 import com.openexchange.mail.smal.adapter.internal.IndexServiceImpl;
 import com.openexchange.mail.smal.internal.SMALDeleteListener;
 import com.openexchange.mail.smal.internal.SMALUpdateTaskProviderService;
-import com.openexchange.mail.smal.internal.tasks.CreateJobQueueTable;
+import com.openexchange.mail.smal.internal.tasks.CreateMailSyncTable;
 import com.openexchange.mail.smal.internal.tasks.SMALCreateTableTask;
 import com.openexchange.mail.smal.jobqueue.JobQueue;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -138,7 +138,7 @@ public class SMALActivator extends HousekeepingActivator {
          * Register update task, create table job and delete listener
          */
         {
-            registerService(CreateTableService.class, new CreateJobQueueTable());
+            registerService(CreateTableService.class, new CreateMailSyncTable());
             registerService(UpdateTaskProviderService.class, new SMALUpdateTaskProviderService(new SMALCreateTableTask()));
             registerService(DeleteListener.class, new SMALDeleteListener());
         }

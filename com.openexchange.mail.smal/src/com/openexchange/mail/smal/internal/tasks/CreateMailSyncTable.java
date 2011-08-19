@@ -53,11 +53,11 @@ import com.openexchange.database.AbstractCreateTableImpl;
 
 
 /**
- * {@link CreateJobQueueTable}
+ * {@link CreateMailSyncTable}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class CreateJobQueueTable extends AbstractCreateTableImpl {
+public class CreateMailSyncTable extends AbstractCreateTableImpl {
 
     public static final String MAIL_SYNC_TABLE = "mailSync";
     
@@ -75,7 +75,7 @@ public class CreateJobQueueTable extends AbstractCreateTableImpl {
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     
     
-    public CreateJobQueueTable() {
+    public CreateMailSyncTable() {
         super();
     }
 

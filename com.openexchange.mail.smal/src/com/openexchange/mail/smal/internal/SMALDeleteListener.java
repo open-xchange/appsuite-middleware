@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.smal.internal;
 
-import static com.openexchange.mail.smal.internal.tasks.CreateJobQueueTable.MAIL_SYNC_TABLE;
+import static com.openexchange.mail.smal.internal.tasks.CreateMailSyncTable.MAIL_SYNC_TABLE;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
