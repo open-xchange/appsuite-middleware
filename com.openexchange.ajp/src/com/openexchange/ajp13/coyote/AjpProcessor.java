@@ -938,6 +938,9 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             hardLock.lock();
             try {
                 if (++pingCount > MAX_PING_COUNT) {
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info("Max. keep-alive count reached. Canceling...");
+                    }
                     cancel();
                     return;
                 }
