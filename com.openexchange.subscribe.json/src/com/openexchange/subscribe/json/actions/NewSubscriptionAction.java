@@ -47,26 +47,51 @@
  *
  */
 
-package com.openexchange.subscribe.json.osgi;
+package com.openexchange.subscribe.json.actions;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.secret.SecretService;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.subscribe.SubscribeService;
+import com.openexchange.subscribe.Subscription;
+import com.openexchange.subscribe.json.SubscriptionJSONWriter;
 
 /**
- * {@link Activator}
+ * 
+ * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class NewSubscriptionAction extends AbstractSubscribeAction {
 
-    private static final BundleActivator[] ACTIVATORS = {/*new SubscribeActivator(), */new ServletActivator(), new PreferencesActivator(), new I18nActivator()};
+	public NewSubscriptionAction(ServiceLookup services) {
+		this.services = services;
+	}
 
-    public Activator() {
-        super();
-    }
+	/* (non-Javadoc)
+	 * @see com.openexchange.subscribe.json.actions.AbstractSubscribeSourcesAction#perform(com.openexchange.subscribe.json.actions.SubscribeRequest)
+	 */
+	@Override
+	public AJAXRequestResult perform(SubscribeRequest subscribeRequest)
+			throws OXException {
+		Subscription subscription;
+		try {
+			subscription = getSubscription(subscribeRequest.getRequestData(), subscribeRequest.getServerSession(), services.getService(SecretService.class).getSecret(subscribeRequest.getServerSession()));
+			subscription.setId(-1);
+	        final SubscribeService subscribeService = subscription.getSource().getSubscribeService();
+	        subscribeService.subscribe(subscription);
+	        String urlPrefix = "";
+			if (subscribeRequest.getRequestData().getParameter("__serverURL") != null){
+				urlPrefix = subscribeRequest.getRequestData().getParameter("__serverURL");
+			}
+	        JSONObject json =  new SubscriptionJSONWriter().write(subscription, subscription.getSource().getFormDescription(), urlPrefix);
+	        return new AJAXRequestResult(json, "subscription");
+		} catch (JSONException e) {
+			throw new OXException(e);
+		}
+                       
+	}
 
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
-    }
 }

@@ -49,24 +49,33 @@
 
 package com.openexchange.subscribe.json.osgi;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import org.osgi.service.http.HttpService;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.i18n.I18nService;
+import com.openexchange.subscribe.SubscriptionExecutionService;
+import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
+import com.openexchange.subscribe.json.actions.SubscriptionActionFactory;
+import com.openexchange.subscribe.json.actions.SubscriptionSourcesActionFactory;
 
 /**
- * {@link Activator}
+ * 
+ * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class SubscribeActivator extends AJAXModuleActivator {
+	
+	private static final Class<?>[] NEEDED = { HttpService.class, SubscriptionExecutionService.class, I18nService.class, PreferencesItemService.class, SubscriptionSourceDiscoveryService.class };
 
-    private static final BundleActivator[] ACTIVATORS = {/*new SubscribeActivator(), */new ServletActivator(), new PreferencesActivator(), new I18nActivator()};
+	@Override
+	protected Class<?>[] getNeededServices() {
+		return NEEDED;
+	}
 
-    public Activator() {
-        super();
-    }
+	@Override
+	protected void startBundle() throws Exception {
+		registerModule(new SubscriptionSourcesActionFactory(this), "subscriptionSources");
+		//registerModule(new SubscriptionActionFactory(this), "subscriptions");
+	}
 
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
-    }
 }
