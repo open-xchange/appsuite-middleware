@@ -50,10 +50,9 @@
 package com.openexchange.mail.smal.jobqueue;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.threadpool.AbstractTask;
@@ -111,15 +110,18 @@ final class JobConsumer extends AbstractTask<Object> {
 
     private final BlockingQueue<Job> queue;
 
+    private final ConcurrentMap<String, Object> identifiers;
+
     private final AtomicBoolean keepgoing;
 
     /**
      * Initializes a new {@link JobConsumer}.
      */
-    protected JobConsumer(final BlockingQueue<Job> queue) {
+    protected JobConsumer(final BlockingQueue<Job> queue, final ConcurrentMap<String, Object> identifiers) {
         super();
         keepgoing = new AtomicBoolean(true);
         this.queue = queue;
+        this.identifiers = identifiers;
     }
 
     /**
@@ -151,7 +153,6 @@ final class JobConsumer extends AbstractTask<Object> {
     public Object call() throws Exception {
         try {
             final List<Job> jobs = new ArrayList<Job>(16);
-            final Set<String> identifiers = new HashSet<String>(16);
             final Thread consumerThread = Thread.currentThread();
             while (keepgoing.get()) {
                 try {
@@ -173,7 +174,9 @@ final class JobConsumer extends AbstractTask<Object> {
                             /*
                              * Check if canceled in the meantime
                              */
-                            if (!job.isCanceled() && identifiers.add(job.getIdentifier())) {
+                            if (job.isCanceled()) {
+                                identifiers.remove(job.getIdentifier());
+                            } else {
                                 if (job.isPaused()) {
                                     /*
                                      * Unset "pasued" flag & re-enqueue
@@ -181,12 +184,17 @@ final class JobConsumer extends AbstractTask<Object> {
                                     job.proceed();
                                     queue.offer(job);
                                 } else {
+                                    identifiers.remove(job.getIdentifier());
                                     if (DELEGATE) {
                                         threadPool.submit(job, CallerRunsBehavior.getInstance());
                                     } else {
                                         job.beforeExecute(consumerThread);
-                                        job.call();
-                                        job.afterExecute(null);
+                                        try {
+                                            job.call();
+                                            job.afterExecute(null);
+                                        } catch (final Throwable t) {
+                                            job.afterExecute(t);
+                                        }
                                     }
                                 }
                             }

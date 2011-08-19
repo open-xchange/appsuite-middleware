@@ -76,6 +76,16 @@ public abstract class Job implements Task<Object>, Comparable<Job> {
     }
 
     /**
+     * The execution failure (<code>null</code> for no error during execution).
+     */
+    protected volatile Throwable executionFailure;
+
+    /**
+     * The done flag.
+     */
+    protected volatile boolean done;
+
+    /**
      * The canceled flag.
      */
     protected volatile boolean canceled;
@@ -168,7 +178,8 @@ public abstract class Job implements Task<Object>, Comparable<Job> {
 
     @Override
     public void afterExecute(final Throwable t) {
-        // Nothing to do
+        done = true;
+        executionFailure = t;
     }
 
     @Override
@@ -191,7 +202,7 @@ public abstract class Job implements Task<Object>, Comparable<Job> {
     /**
      * Sets the canceled flag.
      * <p>
-     * If set the job is not performed if not already done.
+     * If flag is set and job has not been performed, yet, the job is discarded.
      */
     public void cancel() {
         canceled = true;
@@ -199,6 +210,8 @@ public abstract class Job implements Task<Object>, Comparable<Job> {
 
     /**
      * Checks if the canceled flag is set.
+     * <p>
+     * If flag is set and job has not been performed, yet, the job is discarded.
      * 
      * @return Whether canceled or not
      */
@@ -228,4 +241,23 @@ public abstract class Job implements Task<Object>, Comparable<Job> {
     public void proceed() {
         this.paused = false;
     }
+
+    /**
+     * Gets the done flag
+     * 
+     * @return The done flag
+     */
+    public boolean isDone() {
+        return done;
+    }
+
+    /**
+     * Gets the execution failure
+     * 
+     * @return The execution failure
+     */
+    public Throwable getExecutionFailure() {
+        return executionFailure;
+    }
+
 }

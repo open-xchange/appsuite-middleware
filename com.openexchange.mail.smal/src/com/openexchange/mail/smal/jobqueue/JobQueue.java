@@ -50,6 +50,8 @@
 package com.openexchange.mail.smal.jobqueue;
 
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -99,7 +101,11 @@ public final class JobQueue {
         }
     }
 
+    private static final Object PRESENT = new Object();
+
     private final BlockingQueue<Job> queue;
+
+    private final ConcurrentMap<String, Object> identifiers;
 
     private final Future<Object> future;
 
@@ -111,7 +117,8 @@ public final class JobQueue {
     private JobQueue(final ThreadPoolService threadPool) {
         super();
         queue = new PriorityBlockingQueue<Job>(CAPACITY);
-        consumer = new JobConsumer(queue);
+        identifiers = new ConcurrentHashMap<String, Object>(CAPACITY);
+        consumer = new JobConsumer(queue, identifiers);
         future = threadPool.submit(consumer, AbortBehavior.getInstance());
         Job.set(queue);
     }
@@ -144,11 +151,10 @@ public final class JobQueue {
      * @return <code>true</code> if job could be added; otherwise <code>false</code>
      */
     public boolean addJob(final Job job) {
-        if (queue.size() >= CAPACITY) {
+        if (null == job || queue.size() >= CAPACITY) {
             return false;
         }
-        
-        return queue.offer(job);
+        return (null == identifiers.putIfAbsent(job.getIdentifier(), PRESENT)) && queue.offer(job);
     }
 
 }

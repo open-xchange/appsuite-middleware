@@ -106,7 +106,10 @@ public final class JobQueueEventHandler implements EventHandler {
 
     private void handleDroppedSession(final Session session) {
         try {
-            // Something...
+            final MailAccountJob maj = (MailAccountJob) session.getParameter("com.openexchange.mail.smal.jobqueue.MailAccountJob");
+            if (null != maj && !maj.isDone()) {
+                maj.cancel();
+            }
         } catch (final Exception e) {
             // Failed handling session
             LOG.warn("Failed handling tracked removed session.", e);
@@ -124,7 +127,7 @@ public final class JobQueueEventHandler implements EventHandler {
             for (final MailAccount account : storageService.getUserMailAccounts(userId, contextId)) {
                 final MailAccountJob maj = new MailAccountJob(account.getId(), userId, contextId);
                 if (JobQueue.getInstance().addJob(maj)) {
-                    s
+                    session.setParameter("com.openexchange.mail.smal.jobqueue.MailAccountJob", maj);
                 }
             }
         } catch (final Exception e) {

@@ -92,6 +92,8 @@ public final class MailAccountJob extends Job {
 
     private final Queue<String> folders;
 
+    private final String identifier;
+
     private volatile boolean initialized;
 
     private volatile boolean error;
@@ -109,6 +111,9 @@ public final class MailAccountJob extends Job {
         this.userId = userId;
         this.contextId = contextId;
         folders = new ConcurrentLinkedQueue<String>();
+        identifier =
+            new StringBuilder(MailAccountJob.class.getSimpleName()).append('@').append(contextId).append('@').append(userId).append('@').append(
+                accountId).toString();
     }
 
     private void init() throws OXException {
@@ -134,8 +139,7 @@ public final class MailAccountJob extends Job {
 
     @Override
     public String getIdentifier() {
-        return new StringBuilder(MailAccountJob.class.getSimpleName()).append('@').append(contextId).append('@').append(userId).append('@').append(
-            accountId).toString();
+        return identifier;
     }
 
     @Override
@@ -171,10 +175,7 @@ public final class MailAccountJob extends Job {
                     } catch (final OXException e) {
                         LOG.error("Couldn't look-up database.", e);
                     }
-                    
-                    
-                    
-                    
+
                     final IndexAdapter indexAdapter = getAdapter();
                     final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
                         SMALMailAccess.getDelegateInstance(userId, contextId, accountId);
@@ -257,7 +258,8 @@ public final class MailAccountJob extends Job {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT timestamp, sync FROM mailSync WHERE cid = ? AND user = ? AND accountId = ? AND fullName = ?");
+            stmt =
+                con.prepareStatement("SELECT timestamp, sync FROM mailSync WHERE cid = ? AND user = ? AND accountId = ? AND fullName = ?");
             int pos = 1;
             stmt.setLong(pos++, contextId);
             stmt.setLong(pos++, userId);
@@ -291,7 +293,8 @@ public final class MailAccountJob extends Job {
                  */
                 if (rs.getInt(2) > 0) {
                     DBUtils.closeSQLStuff(rs, stmt);
-                    stmt = con.prepareStatement("UPDATE mailSync SET sync = ? WHERE cid = ? AND user = ? AND accountId = ? AND fullName = ?");
+                    stmt =
+                        con.prepareStatement("UPDATE mailSync SET sync = ? WHERE cid = ? AND user = ? AND accountId = ? AND fullName = ?");
                     pos = 1;
                     stmt.setInt(pos++, 0);
                     stmt.setLong(pos++, contextId);
