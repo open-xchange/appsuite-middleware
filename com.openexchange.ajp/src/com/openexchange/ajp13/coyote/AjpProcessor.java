@@ -83,6 +83,7 @@ import com.openexchange.ajp13.coyote.util.HexUtils;
 import com.openexchange.ajp13.coyote.util.MessageBytes;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13MaxPackgeSizeException;
+import com.openexchange.ajp13.najp.AJPv13ServerImpl;
 import com.openexchange.ajp13.najp.AJPv13TaskMonitor;
 import com.openexchange.ajp13.servlet.http.HttpErrorServlet;
 import com.openexchange.ajp13.servlet.http.HttpServletManager;
@@ -869,6 +870,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         this.socket = null;
         final long duration = System.currentTimeMillis() - st;
         listenerMonitor.addUseTime(duration);
+        AJPv13ServerImpl.decrementNumberOfOpenAJPSockets();
         /*
          * Drop logging info
          */
