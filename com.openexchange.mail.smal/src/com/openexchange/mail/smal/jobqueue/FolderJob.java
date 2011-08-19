@@ -99,9 +99,10 @@ public final class FolderJob extends AbstractMailSyncJob {
     /**
      * Initializes a new {@link FolderJob}.
      * 
-     * @param accountId
-     * @param userId
-     * @param contextId
+     * @param accountId The account ID
+     * @param userId The user ID
+     * @param contextId The context ID
+     * @param checkShouldSync <code>true</code> to check if a sync for denoted folder should be performed; otherwise <code>false</code>
      */
     public FolderJob(final String fullName, final int accountId, final int userId, final int contextId, final boolean checkShouldSync) {
         super(accountId, userId, contextId);
