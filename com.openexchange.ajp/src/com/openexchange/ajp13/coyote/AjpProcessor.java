@@ -584,7 +584,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     private static void closeQuitely(final Socket s) {
         try {
             s.close();
-        } catch (final IOException e) {
+        } catch (final Exception e) {
             if (DEBUG) {
                 LOG.debug("Socket could not be closed. Probably due to a broken socket connection (e.g. broken pipe).", e);
             }
