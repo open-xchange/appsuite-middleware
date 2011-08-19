@@ -53,6 +53,7 @@ import java.net.Socket;
 import java.util.concurrent.atomic.AtomicInteger;
 import com.openexchange.ajp13.coyote.ActionCode;
 import com.openexchange.ajp13.coyote.AjpProcessor;
+import com.openexchange.ajp13.najp.AJPv13ServerImpl;
 import com.openexchange.ajp13.najp.AJPv13TaskMonitor;
 import com.openexchange.ajp13.watcher.AJPv13TaskWatcher;
 import com.openexchange.monitoring.MonitoringInfo;
@@ -158,6 +159,7 @@ public final class CoyoteTask implements Task<Object> {
             CoyoteSocketHandler.LOG.error(e.getMessage(), e);
         } finally {
             ajpProcessor.action(ActionCode.STOP, null);
+            AJPv13ServerImpl.decrementNumberOfOpenAJPSockets();
         }
         return null;
     }
