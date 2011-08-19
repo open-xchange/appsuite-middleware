@@ -54,6 +54,10 @@ import java.util.Hashtable;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.database.CreateTableService;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.smal.SMALProvider;
 import com.openexchange.mail.smal.SMALServiceLookup;
@@ -62,6 +66,10 @@ import com.openexchange.mail.smal.adapter.IndexService;
 import com.openexchange.mail.smal.adapter.elasticsearch.ElasticSearchAdapter;
 import com.openexchange.mail.smal.adapter.internal.IndexEventHandler;
 import com.openexchange.mail.smal.adapter.internal.IndexServiceImpl;
+import com.openexchange.mail.smal.internal.SMALDeleteListener;
+import com.openexchange.mail.smal.internal.SMALUpdateTaskProviderService;
+import com.openexchange.mail.smal.internal.tasks.CreateJobQueueTable;
+import com.openexchange.mail.smal.internal.tasks.SMALCreateTableTask;
 import com.openexchange.mail.smal.jobqueue.JobQueue;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
@@ -87,7 +95,7 @@ public class SMALActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ThreadPoolService.class, MailAccountStorageService.class, SessiondService.class };
+        return new Class<?>[] { ConfigurationService.class, ThreadPoolService.class, MailAccountStorageService.class, SessiondService.class, DatabaseService.class };
     }
 
     @Override
@@ -125,6 +133,14 @@ public class SMALActivator extends HousekeepingActivator {
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
             registerService(EventHandler.class, new IndexEventHandler(), serviceProperties);
+        }
+        /*
+         * Register update task, create table job and delete listener
+         */
+        {
+            registerService(CreateTableService.class, new CreateJobQueueTable());
+            registerService(UpdateTaskProviderService.class, new SMALUpdateTaskProviderService(new SMALCreateTableTask()));
+            registerService(DeleteListener.class, new SMALDeleteListener());
         }
     }
 
