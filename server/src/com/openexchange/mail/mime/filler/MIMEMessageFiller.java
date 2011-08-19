@@ -104,6 +104,7 @@ import com.openexchange.html.HTMLService;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.image.ImageData;
 import com.openexchange.image.ImageService;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -275,7 +276,8 @@ public class MIMEMessageFiller {
          * Add header X-Originating-IP containing the IP address of the client
          */
         if (MailProperties.getInstance().isAddClientIPAddress()) {
-            mimeMessage.setHeader("X-Originating-IP", session.getLocalIp());
+            final String clientIp = (String) LogProperties.getLogProperties().get("com.openexchange.ajp13.requestIp");            
+            mimeMessage.setHeader("X-Originating-IP", clientIp == null ? session.getLocalIp() : clientIp);
         }
     }
 

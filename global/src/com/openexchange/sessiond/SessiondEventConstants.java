@@ -97,7 +97,7 @@ public final class SessiondEventConstants {
      * <p>
      * Needed on event handler registration to a bundle context.
      */
-    private static final String[] TOPICS = { TOPIC_REMOVE_SESSION, TOPIC_REMOVE_CONTAINER, TOPIC_REMOVE_DATA, TOPIC_ADD_SESSION };
+    private static final String[] TOPICS = { TOPIC_REMOVE_SESSION, TOPIC_REMOVE_CONTAINER, TOPIC_REMOVE_DATA, TOPIC_ADD_SESSION, TOPIC_REACTIVATE_SESSION };
 
     /**
      * Gets an array of {@link String string} including all known topics.

@@ -135,18 +135,22 @@ public final class CacheFolderStorage implements FolderStorage {
         registry = CacheFolderStorageRegistry.getInstance();
     }
 
+    @Override
+    public void clearCache(final int userId, final int contextId) {
+        final Cache cache = globalCache;
+        if (null != cache) {
+            cache.invalidateGroup(String.valueOf(contextId));
+        }
+        dropUserEntries(userId, contextId);
+    }
+
     /**
      * Clears this cache with respect to specified session.
      *
      * @param session The session
-     * @throws OXException If clear operation fails
      */
-    public void clear(final Session session) throws OXException {
-        final Cache cache = globalCache;
-        if (null != cache) {
-            cache.invalidateGroup(String.valueOf(session.getContextId()));
-        }
-        dropUserEntries(session.getUserId(), session.getContextId());
+    public void clear(final Session session) {
+        clearCache(session.getUserId(), session.getContextId());
     }
 
     /**
@@ -607,6 +611,7 @@ public final class CacheFolderStorage implements FolderStorage {
     }
 
     private void removeFromSubfolders(final String treeId, final String parentId, final String contextId, final Session session) {
+        registry.clearCaches(session.getUserId(), session.getContextId());
         globalCache.removeFromGroup(newCacheKey(parentId, treeId), contextId);
         final FolderMap folderMap = optFolderMapFor(session);
         if (null != folderMap) {

@@ -64,7 +64,7 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class JobConsumer extends AbstractTask<Object> {
+final class JobConsumer extends AbstractTask<Object> {
 
     /**
      * The poison element.
@@ -109,7 +109,7 @@ public final class JobConsumer extends AbstractTask<Object> {
     /**
      * Initializes a new {@link JobConsumer}.
      */
-    public JobConsumer(final BlockingQueue<Job> queue) {
+    protected JobConsumer(final BlockingQueue<Job> queue) {
         super();
         keepgoing = new AtomicBoolean(true);
         this.queue = queue;
@@ -138,17 +138,18 @@ public final class JobConsumer extends AbstractTask<Object> {
         threadRenamer.rename("Job-Consumer");
     }
 
-    private static final boolean DELEGATE = true;
+    private static final boolean DELEGATE = false;
 
     @Override
     public Object call() throws Exception {
         try {
             final List<Job> jobs = new ArrayList<Job>(16);
+            final Thread consumerThread = Thread.currentThread();
             while (keepgoing.get()) {
                 try {
                     if (queue.isEmpty()) {
                         /*
-                         * Blocking wait for at least 1 Loggable to arrive.
+                         * Blocking wait for at least 1 job to arrive.
                          */
                         final Job job = queue.take();
                         if (POISON == job) {
@@ -158,20 +159,28 @@ public final class JobConsumer extends AbstractTask<Object> {
                     }
                     queue.drainTo(jobs);
                     final boolean quit = jobs.remove(POISON);
-                    if (DELEGATE) {
+                    {
                         final ThreadPoolService threadPool = SMALServiceLookup.getInstance().getService(ThreadPoolService.class);
                         for (final Job job : jobs) {
+                            /*
+                             * Check if canceled in the meantime
+                             */
                             if (!job.isCanceled()) {
-                                threadPool.submit(job, CallerRunsBehavior.getInstance());
-                            }
-                        }
-                    } else {
-                        final Thread thisThread = Thread.currentThread();
-                        for (final Job job : jobs) {
-                            if (!job.isCanceled()) {
-                                job.beforeExecute(thisThread);
-                                job.call();
-                                job.afterExecute(null);
+                                if (job.isPaused()) {
+                                    /*
+                                     * Re-enqueue
+                                     */
+                                    job.proceed();
+                                    queue.offer(job);
+                                } else {
+                                    if (DELEGATE) {
+                                        threadPool.submit(job, CallerRunsBehavior.getInstance());
+                                    } else {
+                                        job.beforeExecute(consumerThread);
+                                        job.call();
+                                        job.afterExecute(null);
+                                    }
+                                }
                             }
                         }
                     }

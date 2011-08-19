@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.smal.adapter.elasticsearch;
 
+import com.openexchange.mail.MailJSONField;
+
 /**
  * {@link Constants}
  * 
@@ -81,35 +83,35 @@ public final class Constants {
     // ------------------- FIELD NAMES ----------------------
 
     public static final String FIELD_UUID = "uuid";
-    
+
     public static final String FIELD_USER = "user";
-    
-    public static final String FIELD_ACCOUNT_ID = "account_id";
-    
+
+    public static final String FIELD_ACCOUNT_ID = MailJSONField.ACCOUNT_NAME.getKey();
+
     public static final String FIELD_ID = "id";
 
-    public static final String FIELD_FULL_NAME = "full_name";
+    public static final String FIELD_FULL_NAME = MailJSONField.FOLDER.getKey();
 
-    public static final String FIELD_BODY = "body";
+    public static final String FIELD_BODY = MailJSONField.CONTENT.getKey();
 
-    public static final String FIELD_FROM = "from";
+    public static final String FIELD_FROM = MailJSONField.FROM.getKey();
 
-    public static final String FIELD_TO = "to";
+    public static final String FIELD_TO = MailJSONField.RECIPIENT_TO.getKey();
 
-    public static final String FIELD_CC = "cc";
+    public static final String FIELD_CC = MailJSONField.RECIPIENT_CC.getKey();
 
-    public static final String FIELD_BCC = "bcc";
+    public static final String FIELD_BCC = MailJSONField.RECIPIENT_BCC.getKey();
 
-    public static final String FIELD_SUBJECT = "subject";
+    public static final String FIELD_SUBJECT = MailJSONField.SUBJECT.getKey();
 
-    public static final String FIELD_RECEIVED_DATE = "received_date";
+    public static final String FIELD_RECEIVED_DATE = MailJSONField.RECEIVED_DATE.getKey();
 
-    public static final String FIELD_SENT_DATE = "sent_date";
+    public static final String FIELD_SENT_DATE = MailJSONField.SENT_DATE.getKey();
 
-    public static final String FIELD_SIZE = "size";
+    public static final String FIELD_SIZE = MailJSONField.SIZE.getKey();
 
     public static final String FIELD_FLAG_ANSWERED = "answered";
-    
+
     public static final String FIELD_FLAG_DELETED = "deleted";
 
     public static final String FIELD_FLAG_DRAFT = "draft";
@@ -121,9 +123,9 @@ public final class Constants {
     public static final String FIELD_FLAG_USER = "user";
 
     public static final String FIELD_FLAG_SPAM = "spam";
-    
+
     public static final String FIELD_FLAG_FORWARDED = "forwarded";
-    
+
     public static final String FIELD_FLAG_READ_ACK = "read_ack";
 
 }

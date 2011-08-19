@@ -49,10 +49,24 @@
 
 package com.openexchange.mail.text;
 
+import java.util.LinkedList;
+import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailJSONField;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.json.writer.MessageWriter;
+import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.mail.utils.DisplayMode;
+import com.openexchange.session.Session;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
  * {@link TextProcessing} - Various methods for text processing
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TextProcessing {
@@ -171,7 +185,7 @@ public final class TextProcessing {
      * excluded.
      * <p>
      * If parameter <code>isHtml</code> is set to <code>true</code> the content is returned unchanged.
-     *
+     * 
      * @param content The plain text content to fold
      * @param linewrap The number of characters which may fit into a line
      * @return The line-folded content
@@ -230,6 +244,41 @@ public final class TextProcessing {
         return sb.toString();
         // final Matcher m = PATTERN_QP.matcher(line);
         // return m.matches() ? new StringBuilder(m.group(1)).append(m.group(2)).toString() : null;
+    }
+
+    /**
+     * Gets the text from passed mail.
+     * 
+     * @param mail The mail
+     * @param session The session
+     * @return The extracted text or <code>null</code>
+     * @throws OXException If an error occurs
+     */
+    public static String getTextFrom(final MailMessage mail, final Session session) throws OXException {
+        try {
+            final UserSettingMail usmNoSave = UserSettingMailStorage.getInstance().getUserSettingMail(session);
+            usmNoSave.setNoSave(true);
+            usmNoSave.setDisplayHtmlInlineContent(false);
+            final List<OXException> warnings = new LinkedList<OXException>();
+            final JSONObject jsonObject =
+                MessageWriter.writeMailMessage(mail.getAccountId(), mail, DisplayMode.DISPLAY, session, usmNoSave, warnings, false, -1);
+            final JSONArray jsonArray = jsonObject.getJSONArray(MailJSONField.ATTACHMENTS.getKey());
+            final int len = jsonArray.length();
+            for (int i = 0; i < len; i++) {
+                final JSONObject attachment = jsonArray.getJSONObject(i);
+                if (attachment.hasAndNotNull(MailJSONField.CONTENT.getKey()) && attachment.getString(MailJSONField.CONTENT_TYPE.getKey()).regionMatches(
+                    true,
+                    0,
+                    "text/",
+                    0,
+                    5)) {
+                    return attachment.getString(MailJSONField.CONTENT.getKey());
+                }
+            }
+            return null;
+        } catch (final JSONException e) {
+            throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, e.getMessage());
+        }
     }
 
     /**

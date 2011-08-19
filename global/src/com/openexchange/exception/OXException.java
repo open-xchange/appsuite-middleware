@@ -733,7 +733,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @return The compound error code
      */
     public final String getErrorCode() {
-        return new StringBuilder(getPrefix()).append('-').append(code).toString();
+        return new StringBuilder(getPrefix()).append('-').append(String.format("%04d", code)).toString();
     }
 
     /**

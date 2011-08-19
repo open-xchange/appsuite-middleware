@@ -116,7 +116,7 @@ public enum SMALExceptionCodes implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "VOIPNOW";
+        return "SMAL";
     }
 
     @Override

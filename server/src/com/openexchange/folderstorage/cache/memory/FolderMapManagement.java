@@ -85,6 +85,13 @@ public final class FolderMapManagement {
     }
 
     /**
+     * Clears the folder management.
+     */
+    public void clear() {
+        map.clear();
+    }
+
+    /**
      * Drop caches for given session's user.
      *
      * @param session The session

@@ -50,10 +50,10 @@
 package com.openexchange.server.osgiservice;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
@@ -174,7 +174,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
     /**
      * The available service instances.
      */
-    private Map<Class<?>, Object> services;
+    private ConcurrentMap<Class<?>, Object> services;
 
     /**
      * Initializes a new {@link DeferredActivator}.
@@ -218,7 +218,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
     private final void init() throws Exception {
         final Class<?>[] classes = getNeededServices();
         if (null == classes) {
-            services = Collections.emptyMap();
+            services = new ConcurrentHashMap<Class<?>, Object>(1);
             serviceTrackers = new ServiceTracker[0];
             availability = allAvailable = 0;
             startBundle();
@@ -435,6 +435,22 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
             return null;
         }
         return clazz.cast(service);
+    }
+
+    /**
+     * Adds specified service (if absent).
+     * 
+     * @param service The service to add
+     * @return <code>true</code> if service is added; otherwsie <code>false</code> if not initialized or such a service already exists
+     */
+    protected final <S> boolean addService(final Class<S> clazz, final S service) {
+        if (null == services || !clazz.isInstance(service)) {
+            /*
+             * Services not initialized
+             */
+            return false;
+        }
+        return (null == services.putIfAbsent(clazz, service));
     }
 
     /**

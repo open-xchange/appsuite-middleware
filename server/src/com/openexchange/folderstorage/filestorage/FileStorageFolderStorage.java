@@ -171,6 +171,13 @@ public final class FileStorageFolderStorage implements FolderStorage {
     }
 
     @Override
+    public void clearCache(final int userId, final int contextId) {
+        /*
+         * Nothing to do...
+         */
+    }
+
+    @Override
     public void restore(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         // TODO:
     }

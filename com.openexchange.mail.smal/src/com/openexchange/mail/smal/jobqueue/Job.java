@@ -49,17 +49,41 @@
 
 package com.openexchange.mail.smal.jobqueue;
 
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.log.Log;
+import com.openexchange.mail.smal.SMALServiceLookup;
+import com.openexchange.mail.smal.adapter.IndexAdapter;
+import com.openexchange.mail.smal.adapter.IndexService;
 import com.openexchange.threadpool.Task;
+import com.openexchange.threadpool.ThreadRenamer;
 
 /**
- * {@link Job}
+ * {@link Job} - A job that is placed into {@link JobQueue}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class Job implements Task<Object>, Comparable<Job> {
 
+    private static final AtomicReference<BlockingQueue<Job>> QUEUE_REF = new AtomicReference<BlockingQueue<Job>>();
+
+    /**
+     * Sets the blocking queue.
+     */
+    static final void set(final BlockingQueue<Job> newValue) {
+        QUEUE_REF.set(newValue);
+    }
+
+    /**
+     * The canceled flag.
+     */
     protected volatile boolean canceled;
+
+    /**
+     * The paused flag.
+     */
+    protected volatile boolean paused;
 
     /**
      * Initializes a new {@link Job}.
@@ -80,6 +104,39 @@ public abstract class Job implements Task<Object>, Comparable<Job> {
      */
     public abstract void perform();
 
+    /**
+     * Gets the working queue.
+     * 
+     * @return The working queue or <code>null</code>
+     */
+    public final BlockingQueue<Job> getQueue() {
+        return QUEUE_REF.get();
+    }
+
+    /**
+     * Gets the index adapter.
+     * 
+     * @return The index adapter
+     */
+    public IndexAdapter getAdapter() {
+        return SMALServiceLookup.getInstance().getService(IndexService.class).getAdapter();
+    }
+
+    @Override
+    public void setThreadName(final ThreadRenamer threadRenamer) {
+        // Nothing to do
+    }
+
+    @Override
+    public void beforeExecute(final Thread t) {
+        // Nothing to do
+    }
+
+    @Override
+    public void afterExecute(final Throwable t) {
+        // Nothing to do
+    }
+
     @Override
     public final int compareTo(final Job other) {
         final int thisVal = this.getRanking();
@@ -92,7 +149,7 @@ public abstract class Job implements Task<Object>, Comparable<Job> {
         try {
             perform();
         } catch (final Exception e) {
-            Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Job.class)).error(e.getMessage(), e);
+            Log.valueOf(LogFactory.getLog(Job.class)).error(e.getMessage(), e);
         }
         return null;
     }
@@ -115,4 +172,26 @@ public abstract class Job implements Task<Object>, Comparable<Job> {
         return canceled;
     }
 
+    /**
+     * Gets the paused flag
+     * 
+     * @return The paused flag
+     */
+    public boolean isPaused() {
+        return paused;
+    }
+
+    /**
+     * Sets the paused flag
+     */
+    public void pause() {
+        this.paused = true;
+    }
+
+    /**
+     * Un-Sets the paused flag
+     */
+    public void proceed() {
+        this.paused = false;
+    }
 }

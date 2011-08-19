@@ -47,82 +47,16 @@
  *
  */
 
-package com.openexchange.mail.smal;
+package com.openexchange.mail.smal.adapter;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link SMALServiceLookup}
- * 
+ * {@link IndexService} - The index service.
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SMALServiceLookup implements ServiceLookup {
+public interface IndexService {
 
-    private static final SMALServiceLookup INSTANCE = new SMALServiceLookup();
-
-    /**
-     * Gets the instance
-     * 
-     * @return The instance
-     */
-    public static SMALServiceLookup getInstance() {
-        return INSTANCE;
-    }
-
-    /**
-     * Gets the service of specified type
-     * 
-     * @param clazz The service's class
-     * @return The service or <code>null</code> is absent
-     * @throws IllegalStateException If an error occurs while returning the demanded service
-     */
-    public static <S> S getServiceStatic(final Class<? extends S> clazz) {
-        return INSTANCE.getService(clazz);
-    }
-
-    private final AtomicReference<ServiceLookup> serviceLookupReference;
-
-    /**
-     * Initializes a new {@link SMALServiceLookup}.
-     */
-    private SMALServiceLookup() {
-        super();
-        serviceLookupReference = new AtomicReference<ServiceLookup>();
-    }
-
-    /**
-     * Gets the service of specified type
-     * 
-     * @param clazz The service's class
-     * @return The service or <code>null</code> is absent
-     * @throws IllegalStateException If an error occurs while returning the demanded service
-     */
-    @Override
-    public <S> S getService(final Class<? extends S> clazz) {
-        final ServiceLookup serviceLookup = serviceLookupReference.get();
-        if (null == serviceLookup) {
-            return null;
-        }
-        return serviceLookup.getService(clazz);
-    }
-
-    /**
-     * Sets the service look-up
-     * 
-     * @param serviceLookup The service look-up to set
-     */
-    public void setServiceLookup(final ServiceLookup serviceLookup) {
-        serviceLookupReference.set(serviceLookup);
-    }
-
-    /**
-     * Gets the service look-up
-     * 
-     * @return The service look-up
-     */
-    public ServiceLookup getServiceLookup() {
-        return serviceLookupReference.get();
-    }
-
+    IndexAdapter getAdapter();
+    
 }

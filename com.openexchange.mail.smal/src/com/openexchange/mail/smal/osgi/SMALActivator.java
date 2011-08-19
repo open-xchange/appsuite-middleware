@@ -51,11 +51,22 @@ package com.openexchange.mail.smal.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.smal.SMALProvider;
 import com.openexchange.mail.smal.SMALServiceLookup;
+import com.openexchange.mail.smal.adapter.IndexAdapter;
+import com.openexchange.mail.smal.adapter.IndexService;
+import com.openexchange.mail.smal.adapter.elasticsearch.ElasticSearchAdapter;
+import com.openexchange.mail.smal.adapter.internal.IndexEventHandler;
+import com.openexchange.mail.smal.adapter.internal.IndexServiceImpl;
+import com.openexchange.mail.smal.jobqueue.JobQueue;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
@@ -64,6 +75,8 @@ import com.openexchange.threadpool.ThreadPoolService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SMALActivator extends HousekeepingActivator {
+
+    private IndexService indexService;
 
     /**
      * Initializes a new {@link SMALActivator}.
@@ -74,7 +87,7 @@ public class SMALActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ThreadPoolService.class };
+        return new Class<?>[] { ConfigurationService.class, ThreadPoolService.class, MailAccountStorageService.class, SessiondService.class };
     }
 
     @Override
@@ -82,15 +95,47 @@ public class SMALActivator extends HousekeepingActivator {
         SMALServiceLookup.getInstance().setServiceLookup(this);
         track(MailProvider.class, new SMALProviderServiceTracker(context));
         openTrackers();
-
-        final Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
-        dictionary.put("protocol", SMALProvider.PROTOCOL_SMAL.toString());
-        registerService(MailProvider.class, SMALProvider.getInstance(), dictionary);
+        JobQueue.getInstance();
+        /*
+         * Register SMAL provider
+         */
+        {
+            final Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
+            dictionary.put("protocol", SMALProvider.PROTOCOL_SMAL.toString());
+            registerService(MailProvider.class, SMALProvider.getInstance(), dictionary);
+        }
+        /*
+         * Register index service
+         */
+        {
+            final ConfigurationService cs = getService(ConfigurationService.class);
+            final String className = cs.getProperty("com.openexchange.mail.smal.adapter", ElasticSearchAdapter.class.getName());
+            final Class<? extends IndexAdapter> clazz = Class.forName(className).asSubclass(IndexAdapter.class);
+            indexService = new IndexServiceImpl(clazz.newInstance());
+            registerService(IndexService.class, indexService);
+            if (!addService(IndexService.class, indexService)) {
+                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SMALActivator.class)).error(
+                    "IndexService could not be added.");
+            }
+        }
+        /*
+         * Register event handle
+         */
+        {
+            final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+            serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+            registerService(EventHandler.class, new IndexEventHandler(), serviceProperties);
+        }
     }
 
     @Override
     protected void stopBundle() throws Exception {
+        JobQueue.dropInstance();
         cleanUp();
+        if (null != indexService) {
+            indexService.getAdapter().stop();
+            indexService = null;
+        }
         SMALServiceLookup.getInstance().setServiceLookup(null);
     }
 

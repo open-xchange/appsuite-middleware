@@ -74,6 +74,7 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.results.CollectionDelta;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -273,6 +274,16 @@ public abstract class AbstractAppointmentAction implements AJAXActionService {
             }
         } else {
             appointmentList.add(appointmentObj);
+        }
+    }
+    
+    protected void checkAndAddAppointmentAsNewOrModified(final CollectionDelta<Appointment> appointmentList, final Appointment appointmentObj, final Date betweenStart, final Date betweenEnd, final CalendarCollectionService calColl) {
+        if (appointmentObj.getFullTime() && betweenStart != null && betweenEnd != null) {
+            if (calColl.inBetween(appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime(), betweenStart.getTime(), betweenEnd.getTime())) {
+                appointmentList.addNewOrModified(appointmentObj);
+            }
+        } else {
+            appointmentList.addNewOrModified(appointmentObj);
         }
     }
 

@@ -53,7 +53,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
+import javax.mail.internet.InternetAddress;
 import org.elasticsearch.ElasticSearchException;
 import org.elasticsearch.action.WriteConsistencyLevel;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthRequest;
@@ -63,25 +65,34 @@ import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.optimize.OptimizeRequest;
 import org.elasticsearch.action.admin.indices.optimize.OptimizeResponse;
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
-import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
 import org.elasticsearch.action.count.CountResponse;
 import org.elasticsearch.action.delete.DeleteResponse;
+import org.elasticsearch.action.search.SearchOperationThreading;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchType;
+import org.elasticsearch.client.action.admin.indices.mapping.put.PutMappingRequestBuilder;
 import org.elasticsearch.client.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.client.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.action.search.SearchRequestBuilder;
+import org.elasticsearch.client.transport.NoNodeAvailableException;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.cluster.metadata.IndexMetaData;
 import org.elasticsearch.common.collect.ImmutableMap;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.ImmutableSettings.Builder;
+import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.json.JsonXContent;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.indices.IndexAlreadyExistsException;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.sort.SortOrder;
+import org.elasticsearch.transport.RemoteTransportException;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.IndexRange;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailPath;
@@ -96,6 +107,11 @@ import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.smal.SMALExceptionCodes;
 import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.mail.smal.adapter.IndexAdapter;
+import com.openexchange.mail.smal.jobqueue.JobQueue;
+import com.openexchange.mail.smal.jobqueue.MailAccountJob;
+import com.openexchange.mail.text.TextProcessing;
+import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -136,23 +152,33 @@ public final class ElasticSearchAdapter implements IndexAdapter {
 
     @Override
     public void start() throws OXException {
-        final Builder settingsBuilder = ImmutableSettings.settingsBuilder();
-        /*
-         * Look-up other nodes in cluster
-         */
-        settingsBuilder.put("client.transport.sniff", true);
-        /*
-         * Specify cluster name
-         */
-        settingsBuilder.put("cluster.name", clusterName);
-        /*
-         * We act as client only
-         */
-        settingsBuilder.put("node.data", false);
-        /*
-         * Create the (transport) client
-         */
-        client = new TransportClient(settingsBuilder.build());
+        try {
+            final Builder settingsBuilder = ImmutableSettings.settingsBuilder();
+            /*
+             * Look-up other nodes in cluster
+             */
+            settingsBuilder.put("client.transport.sniff", true);
+            /*
+             * Specify cluster name
+             */
+            settingsBuilder.put("cluster.name", clusterName);
+            /*
+             * We act as client only
+             */
+            settingsBuilder.put("node.data", false);
+            /*
+             * Create the (transport) client
+             */
+            client = new TransportClient(settingsBuilder.build());
+            client.addTransportAddress(new InetSocketTransportAddress("192.168.32.36", 9300));
+            clusterInfo();
+        } catch (final NoNodeAvailableException e) {
+            throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
+        } catch (final ElasticSearchException e) {
+            throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
+        } catch (final Exception e) {
+            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     @Override
@@ -163,17 +189,153 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         }
     }
 
+    private void ensureStarted() {
+        if (null == client) {
+            throw new IllegalStateException("ElasticSearch adapter not initialized, yet.");
+        }
+    }
+
     @Override
-    public List<MailMessage> search(final SearchTerm<?> searchTerm, final Session session) throws OXException {
+    public void onSessionAdd(final Session session) throws OXException {
+        ensureStarted();
+        final int contextId = session.getContextId();
+        createIndex(indexNamePrefix + contextId);
+        /*
+         * Add job
+         */
+        final MailAccountStorageService storageService = SMALServiceLookup.getServiceStatic(MailAccountStorageService.class);
+        final int userId = session.getUserId();
+        for (final MailAccount account : storageService.getUserMailAccounts(userId, contextId)) {
+            final MailAccountJob maj = new MailAccountJob(account.getId(), userId, contextId);
+            JobQueue.getInstance().addJob(maj);
+        }
+    }
+
+    @Override
+    public void onSessionGone(final Session session) throws OXException {
+        ensureStarted();
+        // TODO Auto-generated method stub
+
+    }
+
+    private void createIndex(final String indexName) throws OXException {
+        /*
+         * Create the index
+         */
+        try {
+            client.admin().indices().create(new CreateIndexRequest(indexName)).actionGet();
+            LOG.info("Index \"" + indexName + "\" successfully created.");
+            waitForYellow(indexName);
+        } catch (final NoNodeAvailableException ex) {
+            /*
+             * No ElasticSearch node found.
+             */
+            throw SMALExceptionCodes.INDEX_FAULT.create(ex, ex.getMessage());
+        } catch (final RemoteTransportException e) {
+            final Throwable cause = e.getMostSpecificCause();
+            if (!(cause instanceof IndexAlreadyExistsException)) {
+                throw SMALExceptionCodes.INDEX_FAULT.create(cause, cause.getMessage());
+            }
+            LOG.info("Index \"" + indexName + "\" already exists.");
+        } catch (final Exception ex) {
+            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(ex, ex.getMessage());
+        }
+        /*
+         * Put mappings
+         */
+        try {
+            /*
+             * Create the mapping definition for a mail
+             */
+            final PutMappingRequestBuilder pmrb = client.admin().indices().preparePutMapping(indexName).setType(indexType).setSource(Mapping.JSON_MAPPINGS);
+            pmrb.execute().actionGet();
+            LOG.info("Mappings successfully created for \"" + indexName + "\".");
+        } catch (final NoNodeAvailableException ex) {
+            /*
+             * No ElasticSearch node found.
+             */
+            throw SMALExceptionCodes.INDEX_FAULT.create(ex, ex.getMessage());
+        } catch (final RemoteTransportException e) {
+            final Throwable cause = e.getMostSpecificCause();
+            throw SMALExceptionCodes.INDEX_FAULT.create(cause, cause.getMessage());
+        } catch (final Exception ex) {
+            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(ex, ex.getMessage());
+        }
+    }
+
+    @Override
+    public boolean containsFolder(final String fullName, final int accountId, final Session session) throws OXException {
+        ensureStarted();
+        final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+        boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_USER, session.getUserId()));
+        boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_ACCOUNT_ID, accountId));
+        boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_FULL_NAME, fullName));
+        /*
+         * Build search request
+         */
+        final SearchRequestBuilder builder = client.prepareSearch(indexNamePrefix + session.getContextId()).setTypes(indexType);
+        builder.setQuery(boolQuery).setSearchType(SearchType.COUNT);
+        builder.setExplain(true);
+        builder.setOperationThreading(SearchOperationThreading.THREAD_PER_SHARD);
+        /*
+         * Perform search
+         */
+        final SearchResponse rsp = builder.execute().actionGet();
+        return (rsp.getHits().hits().length > 0);
+    }
+
+    @Override
+    public List<MailMessage> getMessages(final String fullName, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int accountId, final Session session) throws OXException {
+        ensureStarted();
+        final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+        boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_USER, session.getUserId()));
+        boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_ACCOUNT_ID, accountId));
+        boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_FULL_NAME, fullName));
+        /*
+         * Build search request
+         */
+        final SearchRequestBuilder builder = client.prepareSearch(indexNamePrefix + session.getContextId()).setTypes(indexType);
+        builder.setQuery(boolQuery).setSearchType(SearchType.DFS_QUERY_THEN_FETCH);
+        builder.setExplain(true);
+        builder.setOperationThreading(SearchOperationThreading.THREAD_PER_SHARD);
+        builder.addSort(sortField.getKey(), OrderDirection.DESC.equals(order) ? SortOrder.DESC : SortOrder.ASC);
+        builder.setSize(Integer.MAX_VALUE);
+        /*
+         * Perform search
+         */
+        final SearchResponse rsp = builder.execute().actionGet();
+        final SearchHit[] docs = rsp.getHits().getHits();
+        final List<MailMessage> mails = new ArrayList<MailMessage>(docs.length);
+        final MailPath helper = new MailPath();
+        for (final SearchHit sd : docs) {
+            // to get explanation you'll need to enable this when querying:
+            // System.out.println(sd.getExplanation().toString());
+
+            // if we use in mapping: "_source" : {"enabled" : false}
+            // we need to include all necessary fields in query and then to use doc.getFields()
+            // instead of doc.getSource()
+            final MailMessage mail = readDoc(sd.getSource(), sd.getId(), helper);
+            mails.add(mail);
+        }
+        return mails;
+    }
+
+    @Override
+    public List<MailMessage> search(final SearchTerm<?> searchTerm, final MailSortField sortField, final OrderDirection order, final Session session) throws OXException {
+        ensureStarted();
         try {
             final QueryBuilder queryBuilder = SearchTerm2Query.searchTerm2Query(searchTerm);
             /*
              * Compose search request
              */
-            final SearchRequestBuilder builder = client.prepareSearch(indexNamePrefix + session.getContextId());
+            final SearchRequestBuilder builder = client.prepareSearch(indexNamePrefix + session.getContextId()).setTypes(indexType);
             // builder.addSort("createdAt", SortOrder.DESC);
             // builder.setFrom(page * hitsPerPage).setSize(hitsPerPage);
+            builder.setSize(Integer.MAX_VALUE);
             builder.setQuery(queryBuilder);
+            builder.setSearchType(SearchType.DFS_QUERY_THEN_FETCH);
+            builder.setExplain(true);
+            builder.setOperationThreading(SearchOperationThreading.THREAD_PER_SHARD);
             /*
              * Perform search
              */
@@ -213,10 +375,11 @@ public final class ElasticSearchAdapter implements IndexAdapter {
      * Logs some cluster information.
      */
     public void clusterInfo() {
+        ensureStarted();
         final NodesInfoResponse rsp = client.admin().cluster().nodesInfo(new NodesInfoRequest()).actionGet();
         final StringBuilder sb =
             new StringBuilder(32).append("Cluster: ").append(rsp.getClusterName()).append(". Active nodes: ").append(
-                rsp.getNodesMap().keySet());
+                rsp.getNodesMap().keySet().size());
         LOG.info(sb.toString());
     }
 
@@ -227,29 +390,14 @@ public final class ElasticSearchAdapter implements IndexAdapter {
      * @return <code>true</code> if index exists; otherwise <code>false</code>
      */
     public boolean indexExists(final String indexName) {
+        ensureStarted();
         final ImmutableMap<String, IndexMetaData> map =
             client.admin().cluster().prepareState().execute().actionGet().getState().getMetaData().getIndices();
         return map.containsKey(indexName);
     }
 
-    public void createIndex(final String indexName) {
-        /*
-         * Create the index
-         */
-        try {
-            client.admin().indices().create(new CreateIndexRequest(indexName)).actionGet();
-            LOG.info("Index \"" + indexName + "\" successfully created.");
-            // waitForYellow();
-            /*
-             * Create the mapping definition for a mail
-             */
-            Mapping.createMailMapping(client, indexName);
-        } catch (final Exception ex) {
-            LOG.info("Index \"" + indexName + "\" already exists.");
-        }
-    }
-
     public void saveCreateIndex(final String indexName, final boolean log) {
+        ensureStarted();
         // if (!indexExists(name)) {
         try {
             createIndex(indexName);
@@ -265,16 +413,27 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     }
 
     /**
+     * Wait for at least one active shard.
+     */
+    public void waitForOneActiveShard(final String indexName) {
+        ensureStarted();
+        client.admin().cluster().health(new ClusterHealthRequest(indexName).waitForActiveShards(1)).actionGet();
+        LOG.info("Now node has at least one active shard!");
+    }
+
+    /**
      * Waits for yellow status.
      */
-    void waitForYellow(final String indexName) {
+    public void waitForYellow(final String indexName) {
+        ensureStarted();
         client.admin().cluster().health(new ClusterHealthRequest(indexName).waitForYellowStatus()).actionGet();
     }
 
     /**
      * Waits for green status.
      */
-    void waitForGreen(final String indexName) {
+    public void waitForGreen(final String indexName) {
+        ensureStarted();
         client.admin().cluster().health(new ClusterHealthRequest(indexName).waitForGreenStatus()).actionGet();
     }
 
@@ -282,7 +441,8 @@ public final class ElasticSearchAdapter implements IndexAdapter {
      * Explicitly refresh one or more indices (making the content indexed since the last refresh searchable).
      */
     public void refresh(final String indexName) {
-        final RefreshResponse rsp = client.admin().indices().refresh(new RefreshRequest(indexName)).actionGet();
+        ensureStarted();
+        client.admin().indices().refresh(new RefreshRequest(indexName)).actionGet();
     }
 
     /**
@@ -291,18 +451,21 @@ public final class ElasticSearchAdapter implements IndexAdapter {
      * @return The number of mails
      */
     public long countAll(final String indexName) {
+        ensureStarted();
         final CountResponse response = client.prepareCount(indexName).setQuery(QueryBuilders.matchAllQuery()).execute().actionGet();
         return response.getCount();
     }
 
     @Override
     public void add(final MailMessage mail, final Session session) throws OXException {
+        ensureStarted();
         try {
-            final String id = new MailPath(mail.getAccountId(), mail.getFolder(), mail.getMailId()).toString();
-            final XContentBuilder b = createDoc(id, mail);
-            final IndexRequestBuilder irb =
-                client.prepareIndex(indexNamePrefix + session.getContextId(), indexType, id).setConsistencyLevel(WriteConsistencyLevel.DEFAULT).setSource(b);
+            final String indexName = indexNamePrefix + session.getContextId();
+            final String id = UUID.randomUUID().toString();
+            final IndexRequestBuilder irb = client.prepareIndex(indexName, indexType, id);
+            irb.setConsistencyLevel(WriteConsistencyLevel.DEFAULT).setSource(createDoc(id, mail, mail.getAccountId(), session));
             irb.execute().actionGet();
+            refresh(indexName);
         } catch (final ElasticSearchException e) {
             throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
         }
@@ -310,34 +473,100 @@ public final class ElasticSearchAdapter implements IndexAdapter {
 
     @Override
     public void add(final MailMessage[] mails, final Session session) throws OXException {
+        ensureStarted();
+        final String indexName = indexNamePrefix + session.getContextId();
         final BulkRequestBuilder bulkRequest = client.prepareBulk();
-
         for (final MailMessage mail : mails) {
-            // bulkRequest.add(client.prepareIndex(indexName, indexType, "1")
-            // .setSource(jsonBuilder()
-            // .startObject()
-            // .field("user", "kimchy")
-            // .field("postDate", new Date())
-            // .field("message", "trying out Elastic Search")
-            // .endObject()
-            // )
-            // );
-
+            final String id = UUID.randomUUID().toString();
+            final IndexRequestBuilder irb = client.prepareIndex(indexName, indexType, id);
+            irb.setSource(createDoc(id, mail, mail.getAccountId(), session));
+            bulkRequest.add(irb);
         }
-
+        if (bulkRequest.numberOfActions() > 0) {
+            bulkRequest.execute().actionGet();
+            refresh(indexName);
+        }
     }
 
-    public XContentBuilder createDoc(final String id, final MailMessage mail) {
+    private XContentBuilder createDoc(final String id, final MailMessage mail, final int accountId, final Session session) throws OXException {
         try {
             final XContentBuilder b = JsonXContent.unCachedContentBuilder().startObject();
-            b.field("subject", mail.getSubject());
-            b.field("from", mail.getFrom()[0]);
-            b.field("id", id);
+            /*
+             * Body content
+             */
+            {
+                b.field(Constants.FIELD_BODY, TextProcessing.getTextFrom(mail, session));
+            }
+            /*
+             * Identifiers
+             */
+            b.field(Constants.FIELD_ID, id);
+            b.field(Constants.FIELD_USER, session.getUserId());
+            b.field(Constants.FIELD_ACCOUNT_ID, accountId);
+            /*
+             * Write address fields
+             */
+            {
+                final StringBuilder sb = new StringBuilder(64);
+                b.field(Constants.FIELD_FROM, appendAddresses(mail.getFrom(), sb));
+                b.field(Constants.FIELD_TO, appendAddresses(mail.getBcc(), sb));
+                b.field(Constants.FIELD_CC, appendAddresses(mail.getBcc(), sb));
+                b.field(Constants.FIELD_BCC, appendAddresses(mail.getBcc(), sb));
+            }
+            /*
+             * Write size
+             */
+            if (mail.containsSize()) {
+                b.field(Constants.FIELD_SIZE, mail.getSize());
+            }
+            /*
+             * Write date fields
+             */
+            {
+                java.util.Date d = mail.getReceivedDate();
+                if (null != d) {
+                    b.field(Constants.FIELD_RECEIVED_DATE, d.getTime());
+                }
+                d = mail.getSentDate();
+                if (null != d) {
+                    b.field(Constants.FIELD_SENT_DATE, d.getTime());
+                }
+            }
+            /*
+             * Write flags
+             */
+            {
+                final int flags = mail.getFlags();
+                b.field(Constants.FIELD_FLAG_ANSWERED, (flags & MailMessage.FLAG_ANSWERED) > 0);
+                b.field(Constants.FIELD_FLAG_DELETED, (flags & MailMessage.FLAG_DELETED) > 0);
+                b.field(Constants.FIELD_FLAG_DRAFT, (flags & MailMessage.FLAG_DRAFT) > 0);
+                b.field(Constants.FIELD_FLAG_FLAGGED, (flags & MailMessage.FLAG_FLAGGED) > 0);
+                b.field(Constants.FIELD_FLAG_SEEN, (flags & MailMessage.FLAG_SEEN) > 0);
+                b.field(Constants.FIELD_FLAG_USER, (flags & MailMessage.FLAG_USER) > 0);
+                b.field(Constants.FIELD_FLAG_SPAM, (flags & MailMessage.FLAG_SPAM) > 0);
+                b.field(Constants.FIELD_FLAG_FORWARDED, (flags & MailMessage.FLAG_FORWARDED) > 0);
+                b.field(Constants.FIELD_FLAG_READ_ACK, (flags & MailMessage.FLAG_READ_ACK) > 0);
+            }
+            /*
+             * Subject
+             */
+            b.field(Constants.FIELD_SUBJECT, mail.getSubject());
             b.endObject();
             return b;
-        } catch (final IOException ex) {
-            throw new RuntimeException(ex);
+        } catch (final IOException e) {
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private static String appendAddresses(final InternetAddress[] addrs, final StringBuilder sb) {
+        sb.setLength(0);
+        if (addrs != null && addrs.length > 0) {
+            for (final InternetAddress internetAddress : addrs) {
+                sb.append(',').append(internetAddress.toUnicodeString());
+            }
+            sb.deleteCharAt(0);
+        }
+        return sb.toString();
     }
 
     public void deleteById(final String mailId, final String indexName) {
@@ -345,6 +574,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     }
 
     public void deleteAll(final String indexName) {
+        ensureStarted();
         // client.prepareIndex().setOpType(OpType.)
         // there is an index delete operation
         // http://www.elasticsearch.com/docs/elasticsearch/rest_api/admin/indices/delete_index/
@@ -354,11 +584,13 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     }
 
     public OptimizeResponse optimize(final String indexName, final int optimizeToSegmentsAfterUpdate) {
+        ensureStarted();
         return client.admin().indices().optimize(new OptimizeRequest(indexName).maxNumSegments(optimizeToSegmentsAfterUpdate)).actionGet();
     }
 
     @Override
     public boolean sync(final String fullName, final int accountId, final Session session) throws OXException {
+        ensureStarted();
         if (!syncFlag.compareAndSet(false, true)) {
             return false;
         }
@@ -376,7 +608,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     private final class SyncRunnable implements Runnable {
 
         private final String fullName;
-        
+
         private final int accountId;
 
         private final Session session;
@@ -394,12 +626,18 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         @Override
         public void run() {
             try {
-                final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = MailAccess.getInstance(session, accountId);
+                final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
+                    MailAccess.getInstance(session, accountId);
                 mailAccess.connect(false);
                 try {
-                    final MailMessage[] mails = mailAccess.getMessageStorage().getAllMessages(fullName, IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.ASC, FIELDS);
-                    
-                    
+                    final MailMessage[] mails =
+                        mailAccess.getMessageStorage().getAllMessages(
+                            fullName,
+                            IndexRange.NULL,
+                            MailSortField.RECEIVED_DATE,
+                            OrderDirection.ASC,
+                            FIELDS);
+
                 } finally {
                     mailAccess.close(true);
                 }

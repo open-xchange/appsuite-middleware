@@ -47,82 +47,36 @@
  *
  */
 
-package com.openexchange.mail.smal;
+package com.openexchange.mail.smal.adapter.internal;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.smal.adapter.IndexAdapter;
+import com.openexchange.mail.smal.adapter.IndexService;
+
 
 /**
- * {@link SMALServiceLookup}
- * 
+ * {@link IndexServiceImpl}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SMALServiceLookup implements ServiceLookup {
+public final class IndexServiceImpl implements IndexService {
 
-    private static final SMALServiceLookup INSTANCE = new SMALServiceLookup();
+    private final IndexAdapter adapter;
 
     /**
-     * Gets the instance
+     * Initializes a new {@link IndexServiceImpl}.
      * 
-     * @return The instance
+     * @throws OXException If adapter start-up fails
      */
-    public static SMALServiceLookup getInstance() {
-        return INSTANCE;
-    }
-
-    /**
-     * Gets the service of specified type
-     * 
-     * @param clazz The service's class
-     * @return The service or <code>null</code> is absent
-     * @throws IllegalStateException If an error occurs while returning the demanded service
-     */
-    public static <S> S getServiceStatic(final Class<? extends S> clazz) {
-        return INSTANCE.getService(clazz);
-    }
-
-    private final AtomicReference<ServiceLookup> serviceLookupReference;
-
-    /**
-     * Initializes a new {@link SMALServiceLookup}.
-     */
-    private SMALServiceLookup() {
+    public IndexServiceImpl(final IndexAdapter adapter) throws OXException {
         super();
-        serviceLookupReference = new AtomicReference<ServiceLookup>();
+        this.adapter = adapter;
+        adapter.start();
     }
 
-    /**
-     * Gets the service of specified type
-     * 
-     * @param clazz The service's class
-     * @return The service or <code>null</code> is absent
-     * @throws IllegalStateException If an error occurs while returning the demanded service
-     */
     @Override
-    public <S> S getService(final Class<? extends S> clazz) {
-        final ServiceLookup serviceLookup = serviceLookupReference.get();
-        if (null == serviceLookup) {
-            return null;
-        }
-        return serviceLookup.getService(clazz);
-    }
-
-    /**
-     * Sets the service look-up
-     * 
-     * @param serviceLookup The service look-up to set
-     */
-    public void setServiceLookup(final ServiceLookup serviceLookup) {
-        serviceLookupReference.set(serviceLookup);
-    }
-
-    /**
-     * Gets the service look-up
-     * 
-     * @return The service look-up
-     */
-    public ServiceLookup getServiceLookup() {
-        return serviceLookupReference.get();
+    public IndexAdapter getAdapter() {
+        return adapter;
     }
 
 }

@@ -49,13 +49,8 @@
 
 package com.openexchange.mail.smal.adapter.elasticsearch;
 
-import org.elasticsearch.ElasticSearchException;
-import org.elasticsearch.client.Client;
-import org.elasticsearch.client.action.admin.indices.mapping.put.PutMappingRequestBuilder;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.exception.OXException;
-import com.openexchange.mail.smal.SMALExceptionCodes;
 
 /**
  * {@link Mapping} - See <a href="http://www.elasticsearch.org/guide/reference/mapping/core-types.html">ElasticSearch Core Types</a>
@@ -72,12 +67,11 @@ public final class Mapping {
     }
 
     /**
-     * Creates the default mail mapping.
-     * 
-     * @param client The client
-     * @throws OXException If creating mapping fails (probably because that mapping already exists)
+     * The JSON mail mappings.
      */
-    public static void createMailMapping(final Client client, final String indexName) throws OXException {
+    public static final String JSON_MAPPINGS;
+
+    static {
         try {
             final JSONObject properties = new JSONObject();
             properties.put(Constants.FIELD_UUID, new JSONObject("{ \"type\": \"string\", \"index\": \"not_analyzed\" }"));
@@ -115,12 +109,12 @@ public final class Mapping {
             /*
              * Date fields
              */
-            properties.put(Constants.FIELD_RECEIVED_DATE, new JSONObject("{ \"type\": \"long\", \"store\": \"yes\" }"));
-            properties.put(Constants.FIELD_SENT_DATE, new JSONObject("{ \"type\": \"long\", \"store\": \"yes\" }"));
+            properties.put(Constants.FIELD_RECEIVED_DATE, new JSONObject("{ \"type\": \"long\", \"store\": \"yes\", \"null_value\": 0 }"));
+            properties.put(Constants.FIELD_SENT_DATE, new JSONObject("{ \"type\": \"long\", \"store\": \"yes\", \"null_value\": 0 }"));
             /*
              * Size
              */
-            properties.put(Constants.FIELD_SIZE, new JSONObject("{ \"type\": \"long\", \"store\": \"yes\" }"));
+            properties.put(Constants.FIELD_SIZE, new JSONObject("{ \"type\": \"long\", \"store\": \"yes\", \"null_value\": 0 }"));
             /*
              * Put mapping
              */
@@ -128,15 +122,9 @@ public final class Mapping {
             container.put("properties", properties);
             final JSONObject mapping = new JSONObject();
             mapping.put(Constants.INDEX_TYPE, container);
-            final PutMappingRequestBuilder pmrb =
-                client.admin().indices().preparePutMapping(indexName).setSource(mapping.toString());
-            pmrb.execute().actionGet();
+            JSON_MAPPINGS = mapping.toString(2);
         } catch (final JSONException e) {
-            // Cannot occur
-            throw SMALExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        } catch (final ElasticSearchException e) {
-            // Mapping could not be put; probably it already exists
-            throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
+            throw new Error("Initialization failed", e);
         }
     }
 

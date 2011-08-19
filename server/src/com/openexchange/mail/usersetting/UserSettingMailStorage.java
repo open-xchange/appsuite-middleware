@@ -54,6 +54,8 @@ import com.openexchange.cache.registry.CacheAvailabilityListener;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link UserSettingMailStorage} - Access to {@link UserSettingMail}
@@ -109,17 +111,28 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
      * A convenience method that returns {@link #getUserSettingMail(int, Context, Connection)} with the connection parameter set to
      * <code>null</code>.
      *
+     * @param session The session
+     * @return The instance of {@link UserSettingMail} which matches given user ID and context or <code>null</code> on exception
+     * @throws OXException If context cannot be loaded
+     */
+    public final UserSettingMail getUserSettingMail(final Session session) throws OXException {
+        if (session instanceof ServerSession) {
+            return ((ServerSession) session).getUserSettingMail();
+        }
+        return getUserSettingMail(session.getUserId(), session.getContextId());
+    }
+
+    /**
+     * A convenience method that returns {@link #getUserSettingMail(int, Context, Connection)} with the connection parameter set to
+     * <code>null</code>.
+     *
      * @param user The user ID
      * @param cid The context ID
      * @return The instance of {@link UserSettingMail} which matches given user ID and context or <code>null</code> on exception
      * @throws OXException If context cannot be loaded
      */
     public final UserSettingMail getUserSettingMail(final int user, final int cid) throws OXException {
-        try {
-            return getUserSettingMail(user, ContextStorage.getStorageContext(cid), null);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return getUserSettingMail(user, ContextStorage.getStorageContext(cid), null);
     }
 
     /**

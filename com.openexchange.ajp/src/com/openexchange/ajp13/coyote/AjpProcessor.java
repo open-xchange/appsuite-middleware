@@ -1182,6 +1182,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 }
             }
         }
+        LogProperties.putLogProperty("com.openexchange.ajp13.requestIp", request.getRemoteAddr());
         /*
          * Decode extra attributes
          */

@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.smal;
 
+import java.util.Collection;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -57,7 +58,9 @@ import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailLogicTools;
+import com.openexchange.mail.api.MailProvider;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link SMALMailAccess} - The SMAL mail access.
@@ -87,7 +90,42 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
      */
     public SMALMailAccess(final Session session, final int accountId) throws OXException {
         super(session, accountId);
-        this.delegateMailAccess = null == session ? null : SMALMailProviderRegistry.getMailProviderBySession(session, accountId).createNewMailAccess(session, accountId);
+        this.delegateMailAccess =
+            null == session ? null : SMALMailProviderRegistry.getMailProviderBySession(session, accountId).createNewMailAccess(
+                session,
+                accountId);
+    }
+
+    public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getDelegateInstance(final int userId, final int contextId, final int accountId) throws OXException {
+        final SessiondService sessiondService = SMALServiceLookup.getServiceStatic(SessiondService.class);
+        if (null != sessiondService) {
+            final Collection<Session> sessions = sessiondService.getSessions(userId, contextId);
+            if (!sessions.isEmpty()) {
+                return getDelegateInstance(sessions.iterator().next(), accountId);
+            }
+        }
+        /*
+         * No appropriate session found.
+         */
+        throw MailExceptionCode.UNEXPECTED_ERROR.create("No appropriate session found.");
+    }
+
+    public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getDelegateInstance(final Session session, final int accountId) throws OXException {
+        /*
+         * Check MailAccessCache
+         */
+        {
+            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
+                getMailAccessCache().removeMailAccess(session, accountId);
+            if (mailAccess != null) {
+                return mailAccess;
+            }
+        }
+        /*
+         * Return new MailAccess instance
+         */
+        final MailProvider mailProvider = SMALMailProviderRegistry.getMailProviderBySession(session, accountId);
+        return mailProvider.createNewMailAccess(session, accountId);
     }
 
     @Override
