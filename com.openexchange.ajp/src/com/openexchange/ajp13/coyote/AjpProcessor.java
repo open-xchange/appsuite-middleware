@@ -97,12 +97,13 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link AjpProcessor} - The AJP processor adapted from Tomcat's Coyote AJP connector.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
-    protected static final org.apache.commons.logging.Log LOG = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AjpProcessor.class));
+    protected static final org.apache.commons.logging.Log LOG =
+        Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AjpProcessor.class));
 
     private static final boolean TRACE = LOG.isTraceEnabled();
 
@@ -382,7 +383,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * Initializes a new {@link AjpProcessor}.
-     *
+     * 
      * @param packetSize The packet size
      * @param listenerMonitor The listener monitor
      */
@@ -507,7 +508,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * Sets the required secret.
-     *
+     * 
      * @param requiredSecret The secret
      */
     public void setRequiredSecret(final String requiredSecret) {
@@ -524,7 +525,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * Sets the control object.
-     *
+     * 
      * @param control The control
      */
     public void setControl(final Future<Object> control) {
@@ -533,7 +534,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * Checks if this AJP processor was canceled before it completed normally.
-     *
+     * 
      * @return <code>true</code> if this AJP processor was canceled before it completed normally; otherwise <code>false</code>
      */
     public boolean isCancelled() {
@@ -543,7 +544,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     /**
      * Checks if this AJP processor completed. Completion may be due to normal termination, an exception, or cancellation -- in all of these
      * cases, this method will return <code>true</code>.
-     *
+     * 
      * @return <code>true</code> if this AJP processor completed; otherwise <code>false</code>
      */
     public boolean isDone() {
@@ -583,7 +584,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * Get the request associated with this processor.
-     *
+     * 
      * @return The request
      */
     public HttpServletRequestImpl getRequest() {
@@ -592,7 +593,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * Get the response associated with this processor.
-     *
+     * 
      * @return The response
      */
     public HttpServletResponseImpl getResponse() {
@@ -601,7 +602,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * Gets the HTTP session cookie.
-     *
+     * 
      * @return The HTTP session cookie
      */
     public Cookie getHttpSessionCookie() {
@@ -610,7 +611,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * Checks if the client joined a previously existing HTTP session.
-     *
+     * 
      * @return <code>true</code> if the client joined a previously existing HTTP session; otherwise <code>false</code>
      */
     public boolean isHttpSessionJoined() {
@@ -619,7 +620,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * Process pipelined HTTP requests using the specified input and output streams.
-     *
+     * 
      * @throws IOException If an error occurs during an I/O operation
      */
     public void process(final Socket socket) throws IOException {
@@ -713,21 +714,21 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     }
                     continue;
                 }
-//                /*
-//                 * Check HTTP method code
-//                 */
-//                final byte methodCode = requestHeaderMessage.peekByte();
-//                if (Constants.SC_M_JK_STORED != methodCode && (methodCode < 1 || methodCode > Constants.methodTransArray.length)) {
-//                    /*-
-//                     * Invalid method code.
-//                     *
-//                     * Usually the servlet didn't read the previous request body
-//                     */
-//                    if (LOG.isDebugEnabled()) {
-//                        LOG.debug("Unexpected message: " + type);
-//                    }
-//                    continue;
-//                }
+                // /*
+                // * Check HTTP method code
+                // */
+                // final byte methodCode = requestHeaderMessage.peekByte();
+                // if (Constants.SC_M_JK_STORED != methodCode && (methodCode < 1 || methodCode > Constants.methodTransArray.length)) {
+                // /*-
+                // * Invalid method code.
+                // *
+                // * Usually the servlet didn't read the previous request body
+                // */
+                // if (LOG.isDebugEnabled()) {
+                // LOG.debug("Unexpected message: " + type);
+                // }
+                // continue;
+                // }
                 /*
                  * So far a valid forward-request package
                  */
@@ -815,7 +816,14 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 } catch (final InterruptedIOException e) {
                     error = true;
                 } catch (final Throwable t) {
-                    LOG.error("ajpprocessor.request.process", t);
+                    final StringBuilder tmp = new StringBuilder(128);
+                    tmp.append("ajpprocessor.request.process: request-URI=");
+                    tmp.append(request.getRequestURI());
+                    tmp.append(", servlet-path=");
+                    tmp.append(request.getServletPath());
+                    tmp.append(", path-info=");
+                    tmp.append(request.getPathInfo());
+                    LOG.error(tmp.toString(), t);
                     // 500 - Internal Server Error
                     response.setStatus(500);
                     error = true;
@@ -873,7 +881,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * Send an action to the connector.
-     *
+     * 
      * @param actionCode The action type
      * @param param The action parameter
      */
@@ -1040,7 +1048,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * Get the associated servlet.
-     *
+     * 
      * @return the associated servlet
      */
     public HttpServlet getServlet() {
@@ -1058,7 +1066,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     /**
      * Checks for long-running EAS ping command, that is URI is equal to <code>"/Microsoft-Server-ActiveSync"</code> and request's
      * <code>"Cmd"</code> parameter equals <code>"Ping"</code>.
-     *
+     * 
      * @return <code>true</code> if EAS ping command is detected; otherwise <code>false</code>
      */
     private boolean isEASPingCommand() {
@@ -1067,7 +1075,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * After reading the request headers, we have to setup the request filters.
-     *
+     * 
      * @throws IndexOutOfBoundsException If parsing of forward-request fails; usually because servlet missed to read request-body chunk(s)
      */
     protected void prepareRequest() {
@@ -1188,40 +1196,38 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
          * Decode extra attributes
          */
         boolean secret = false;
-        for (byte attributeCode = requestHeaderMessage.getByte(); attributeCode != Constants.SC_A_ARE_DONE; attributeCode = requestHeaderMessage.getByte()) {
+        for (byte attributeCode = requestHeaderMessage.getByte(); attributeCode != Constants.SC_A_ARE_DONE; attributeCode =
+            requestHeaderMessage.getByte()) {
             switch (attributeCode) {
-            case Constants.SC_A_REQ_ATTRIBUTE:
-                {
-                    final String n = requestHeaderMessage.getString(temp);
-                    final String v = requestHeaderMessage.getString(temp);
-                    /*
-                     * AJP13 misses to forward the remotePort. Allow the AJP connector to add this info via a private request attribute. We will
-                     * accept the forwarded data as the remote port, and remove it from the public list of request attributes.
-                     */
-                    if (n.equals(Constants.SC_A_REQ_REMOTE_PORT)) {
-                        try {
-                            request.setRemotePort(Integer.parseInt(v));
-                        } catch (final NumberFormatException nfe) {
-                            // Ignore
-                        }
-                    } else {
-                        request.setAttribute(n, v);
+            case Constants.SC_A_REQ_ATTRIBUTE: {
+                final String n = requestHeaderMessage.getString(temp);
+                final String v = requestHeaderMessage.getString(temp);
+                /*
+                 * AJP13 misses to forward the remotePort. Allow the AJP connector to add this info via a private request attribute. We will
+                 * accept the forwarded data as the remote port, and remove it from the public list of request attributes.
+                 */
+                if (n.equals(Constants.SC_A_REQ_REMOTE_PORT)) {
+                    try {
+                        request.setRemotePort(Integer.parseInt(v));
+                    } catch (final NumberFormatException nfe) {
+                        // Ignore
                     }
+                } else {
+                    request.setAttribute(n, v);
                 }
+            }
                 break;
-            case Constants.SC_A_CONTEXT:
-                {
-                    final String context = requestHeaderMessage.getString(temp);
-                    request.setAttribute(Constants.attributeNameArray[attributeCode - 1], context);
-                    request.setContextPath(context);
-                }
+            case Constants.SC_A_CONTEXT: {
+                final String context = requestHeaderMessage.getString(temp);
+                request.setAttribute(Constants.attributeNameArray[attributeCode - 1], context);
+                request.setContextPath(context);
+            }
                 break;
-            case Constants.SC_A_SERVLET_PATH:
-                {
-                    final String servletPath = requestHeaderMessage.getString(temp);
-                    request.setAttribute(Constants.attributeNameArray[attributeCode - 1], servletPath);
-                    request.setServletPath(servletPath);
-                }
+            case Constants.SC_A_SERVLET_PATH: {
+                final String servletPath = requestHeaderMessage.getString(temp);
+                request.setAttribute(Constants.attributeNameArray[attributeCode - 1], servletPath);
+                request.setServletPath(servletPath);
+            }
                 break;
             case Constants.SC_A_REMOTE_USER:
                 if (tomcatAuthentication) {
@@ -1239,28 +1245,26 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     request.setAuthType(requestHeaderMessage.getString(temp));
                 }
                 break;
-            case Constants.SC_A_QUERY_STRING:
-                {
-                    final String queryString = requestHeaderMessage.getString(temp);
-                    request.setQueryString(queryString);
-                    try {
-                        parseQueryString(queryString);
-                        if (DEBUG && isEASPingCommand()) {
-                            LOG.debug("Incoming long-running EAS ping request.");
-                        }
-                    } catch (final UnsupportedEncodingException e) {
-                        throw new IllegalStateException(e.getMessage(), e);
+            case Constants.SC_A_QUERY_STRING: {
+                final String queryString = requestHeaderMessage.getString(temp);
+                request.setQueryString(queryString);
+                try {
+                    parseQueryString(queryString);
+                    if (DEBUG && isEASPingCommand()) {
+                        LOG.debug("Incoming long-running EAS ping request.");
                     }
+                } catch (final UnsupportedEncodingException e) {
+                    throw new IllegalStateException(e.getMessage(), e);
                 }
+            }
                 break;
-            case Constants.SC_A_JVM_ROUTE:
-                {
-                    final String jvmRoute = requestHeaderMessage.getString(temp);
-                    if (DEBUG && !AJPv13Config.getJvmRoute().equals(jvmRoute)) {
-                        LOG.debug("JVM route mismatch. Expected \"" + AJPv13Config.getJvmRoute() + "\", but is \"" + jvmRoute + "\".");
-                    }
-                    request.setInstanceId(jvmRoute);
+            case Constants.SC_A_JVM_ROUTE: {
+                final String jvmRoute = requestHeaderMessage.getString(temp);
+                if (DEBUG && !AJPv13Config.getJvmRoute().equals(jvmRoute)) {
+                    LOG.debug("JVM route mismatch. Expected \"" + AJPv13Config.getJvmRoute() + "\", but is \"" + jvmRoute + "\".");
                 }
+                request.setInstanceId(jvmRoute);
+            }
                 break;
             case Constants.SC_A_SSL_CERT:
                 request.setScheme(HTTPS);
@@ -1281,17 +1285,16 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             case Constants.SC_A_STORED_METHOD:
                 request.setMethod(requestHeaderMessage.getString(temp));
                 break;
-            case Constants.SC_A_SECRET:
-                {
-                    final String value = requestHeaderMessage.getString(temp);
-                    if (requiredSecret != null) {
-                        secret = true;
-                        if (!value.equals(requiredSecret)) {
-                            response.setStatus(403);
-                            error = true;
-                        }
+            case Constants.SC_A_SECRET: {
+                final String value = requestHeaderMessage.getString(temp);
+                if (requiredSecret != null) {
+                    secret = true;
+                    if (!value.equals(requiredSecret)) {
+                        response.setStatus(403);
+                        error = true;
                     }
                 }
+            }
                 break;
             default:
                 // Nothing to do
@@ -1346,6 +1349,12 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
          * Determine addressed servlet instance
          */
         setServletInstance(request.getRequestURI());
+        if (LogProperties.isEnabled()) {
+            final Map<String, Object> properties = LogProperties.getLogProperties();
+            properties.put("com.openexchange.ajp13.requestURI", request.getRequestURI());
+            properties.put("com.openexchange.ajp13.servletPath", request.getServletPath());
+            properties.put("com.openexchange.ajp13.pathInfo", request.getPathInfo());
+        }
         /*
          * Set proper JSESSIONID cookie and pre-create associated HTTP session
          */
@@ -1441,7 +1450,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * Parses a query string and puts resulting parameters into given servlet request.
-     *
+     * 
      * @param queryStr The query string to be parsed
      * @throws UnsupportedEncodingException If charset provided by servlet request is not supported
      */
@@ -1467,7 +1476,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * Sets this request hander's servlet reference to the one bound to given path argument
-     *
+     * 
      * @param requestURI The request URI
      */
     private void setServletInstance(final String requestURI) {
@@ -1527,7 +1536,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * Removes specified character if given path ends with such a character.
-     *
+     * 
      * @param path The path to prepare
      * @param c The (trailing) character to remove
      * @return The path possibly with ending character removed
@@ -1676,7 +1685,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * Data length of SEND_BODY_CHUNK:
-     *
+     * 
      * <pre>
      * prefix(1) + http_status_code(2) + http_status_msg(3) + num_headers(2)
      * </pre>
@@ -1685,7 +1694,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * Starting first 4 bytes:
-     *
+     * 
      * <pre>
      * 'A' + 'B' + [data length as 2 byte integer]
      * </pre>
@@ -1876,7 +1885,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * Get more request body data from the web server and store it in the internal buffer.
-     *
+     * 
      * @return true if there is more data, false if not.
      */
     protected boolean refillReadBuffer() throws IOException {
@@ -1909,7 +1918,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * Read an AJP message.
-     *
+     * 
      * @return true if the message has been read, false if the short read didn't return anything
      * @throws IOException any other failure, including incomplete reads
      */
@@ -2042,7 +2051,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
         /**
          * Initializes a new {@link KeepAliveRunnable} to only perform keep-alive on given AJP task.
-         *
+         * 
          * @param task The AJP task
          * @param max The max. processing time when a AJP task is considered as exceeded an keep-alive takes place
          */
@@ -2070,7 +2079,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
         /**
          * Performs AJP-style keep-alive poll to web server to avoid connection timeout.
-         *
+         * 
          * @throws IOException If an I/O error occurs
          * @throws AJPv13Exception If an AJP error occurs
          */

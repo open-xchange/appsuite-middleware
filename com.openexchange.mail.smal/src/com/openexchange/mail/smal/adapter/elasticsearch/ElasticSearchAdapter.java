@@ -281,7 +281,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
          * Perform search
          */
         final SearchResponse rsp = builder.execute().actionGet();
-        return (rsp.getHits().hits().length > 0);
+        return (rsp.getHits().getTotalHits() > 0);
     }
 
     @Override
