@@ -52,11 +52,13 @@ package com.openexchange.mail.smal.adapter.elasticsearch;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.elasticsearch.ElasticSearchException;
 import org.elasticsearch.action.WriteConsistencyLevel;
@@ -104,6 +106,8 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.mime.PlainTextAddress;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.smal.SMALExceptionCodes;
 import com.openexchange.mail.smal.SMALServiceLookup;
@@ -200,7 +204,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     @Override
     public void onSessionGone(final Session session) throws OXException {
         ensureStarted();
-        // 
+        //
     }
 
     private void createIndex(final String indexName) throws OXException {
@@ -232,7 +236,8 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             /*
              * Create the mapping definition for a mail
              */
-            final PutMappingRequestBuilder pmrb = client.admin().indices().preparePutMapping(indexName).setType(indexType).setSource(Mapping.JSON_MAPPINGS);
+            final PutMappingRequestBuilder pmrb =
+                client.admin().indices().preparePutMapping(indexName).setType(indexType).setSource(Mapping.JSON_MAPPINGS);
             pmrb.execute().actionGet();
             LOG.info("Mappings successfully created for \"" + indexName + "\".");
         } catch (final NoNodeAvailableException ex) {
@@ -373,22 +378,104 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     }
 
     private static MailMessage readDoc(final Map<String, Object> source, final MailFields fields) throws OXException {
-        final MailMessage mail = new IDMailMessage(null, null);
-        if (null != source) {
-            mail.setMailId((String) source.get(Constants.FIELD_ID));
-            mail.setFolder((String) source.get(Constants.FIELD_FULL_NAME));
-            mail.setAccountId(((Integer) source.get(Constants.FIELD_ACCOUNT_ID)).intValue());
-            if (fields.contains(MailField.SUBJECT)) {
-                mail.setSubject((String) source.get(Constants.FIELD_SUBJECT));
+        try {
+            final MailMessage mail = new IDMailMessage(null, null);
+            if (null != source) {
+                mail.setMailId((String) source.get(Constants.FIELD_ID));
+                mail.setFolder((String) source.get(Constants.FIELD_FULL_NAME));
+                mail.setAccountId(((Integer) source.get(Constants.FIELD_ACCOUNT_ID)).intValue());
+                if (fields.contains(MailField.SUBJECT)) {
+                    mail.setSubject((String) source.get(Constants.FIELD_SUBJECT));
+                }
+                if (fields.contains(MailField.SIZE)) {
+                    mail.setSize(((Long) source.get(Constants.FIELD_ACCOUNT_ID)).longValue());
+                }
+                if (fields.contains(MailField.RECEIVED_DATE)) {
+                    final long value = ((Long) source.get(Constants.FIELD_RECEIVED_DATE)).longValue();
+                    mail.setReceivedDate(new Date(value));
+                }
+                if (fields.contains(MailField.SENT_DATE)) {
+                    final long value = ((Long) source.get(Constants.FIELD_SENT_DATE)).longValue();
+                    mail.setReceivedDate(new Date(value));
+                }
+                if (fields.contains(MailField.FLAGS)) {
+                    int flags = 0;
+                    if (((Boolean) source.get(Constants.FIELD_FLAG_ANSWERED)).booleanValue()) {
+                        flags |= MailMessage.FLAG_ANSWERED;
+                    }
+                    if (((Boolean) source.get(Constants.FIELD_FLAG_DELETED)).booleanValue()) {
+                        flags |= MailMessage.FLAG_DELETED;
+                    }
+                    if (((Boolean) source.get(Constants.FIELD_FLAG_DRAFT)).booleanValue()) {
+                        flags |= MailMessage.FLAG_DRAFT;
+                    }
+                    if (((Boolean) source.get(Constants.FIELD_FLAG_FLAGGED)).booleanValue()) {
+                        flags |= MailMessage.FLAG_FLAGGED;
+                    }
+                    if (((Boolean) source.get(Constants.FIELD_FLAG_FORWARDED)).booleanValue()) {
+                        flags |= MailMessage.FLAG_FORWARDED;
+                    }
+                    if (((Boolean) source.get(Constants.FIELD_FLAG_READ_ACK)).booleanValue()) {
+                        flags |= MailMessage.FLAG_READ_ACK;
+                    }
+                    if (((Boolean) source.get(Constants.FIELD_FLAG_SEEN)).booleanValue()) {
+                        flags |= MailMessage.FLAG_SEEN;
+                    }
+                    if (((Boolean) source.get(Constants.FIELD_FLAG_SPAM)).booleanValue()) {
+                        flags |= MailMessage.FLAG_SPAM;
+                    }
+                    if (((Boolean) source.get(Constants.FIELD_FLAG_USER)).booleanValue()) {
+                        flags |= MailMessage.FLAG_USER;
+                    }
+                    mail.setFlags(flags);
+                }
+                if (fields.contains(MailField.FROM)) {
+                    final String[] sAddrs = (String[]) source.get(Constants.FIELD_FROM);
+                    for (final String sAddr : sAddrs) {
+                        try {
+                            mail.addFrom(new QuotedInternetAddress(sAddr));
+                        } catch (final AddressException e) {
+                            mail.addFrom(new PlainTextAddress(sAddr));
+                        }
+                    }
+                }
+                if (fields.contains(MailField.TO)) {
+                    final String[] sAddrs = (String[]) source.get(Constants.FIELD_TO);
+                    for (final String sAddr : sAddrs) {
+                        try {
+                            mail.addFrom(new QuotedInternetAddress(sAddr));
+                        } catch (final AddressException e) {
+                            mail.addFrom(new PlainTextAddress(sAddr));
+                        }
+                    }
+                }
+                if (fields.contains(MailField.CC)) {
+                    final String[] sAddrs = (String[]) source.get(Constants.FIELD_CC);
+                    for (final String sAddr : sAddrs) {
+                        try {
+                            mail.addFrom(new QuotedInternetAddress(sAddr));
+                        } catch (final AddressException e) {
+                            mail.addFrom(new PlainTextAddress(sAddr));
+                        }
+                    }
+                }
+                if (fields.contains(MailField.BCC)) {
+                    final String[] sAddrs = (String[]) source.get(Constants.FIELD_BCC);
+                    for (final String sAddr : sAddrs) {
+                        try {
+                            mail.addFrom(new QuotedInternetAddress(sAddr));
+                        } catch (final AddressException e) {
+                            mail.addFrom(new PlainTextAddress(sAddr));
+                        }
+                    }
+                }
             }
-            if (fields.contains(MailField.SIZE)) {
-                mail.setSize(((Long) source.get(Constants.FIELD_ACCOUNT_ID)).longValue());
-            }
-            
-            
-            // Continue
+            return mail;
+        } catch (final ElasticSearchException e) {
+            throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-        return mail;
     }
 
     /**
@@ -527,11 +614,22 @@ public final class ElasticSearchAdapter implements IndexAdapter {
              * Write address fields
              */
             {
-                final StringBuilder sb = new StringBuilder(64);
-                b.field(Constants.FIELD_FROM, appendAddresses(mail.getFrom(), sb));
-                b.field(Constants.FIELD_TO, appendAddresses(mail.getBcc(), sb));
-                b.field(Constants.FIELD_CC, appendAddresses(mail.getBcc(), sb));
-                b.field(Constants.FIELD_BCC, appendAddresses(mail.getBcc(), sb));
+                String[] tmp = toStringArray(mail.getFrom());
+                if (null != tmp) {
+                    b.field(Constants.FIELD_FROM, tmp);
+                }
+                tmp = toStringArray(mail.getTo());
+                if (null != tmp) {
+                    b.field(Constants.FIELD_TO, tmp);
+                }
+                tmp = toStringArray(mail.getCc());
+                if (null != tmp) {
+                    b.field(Constants.FIELD_CC, tmp);
+                }
+                tmp = toStringArray(mail.getBcc());
+                if (null != tmp) {
+                    b.field(Constants.FIELD_BCC, tmp);
+                }
             }
             /*
              * Write size
@@ -578,15 +676,15 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         }
     }
 
-    private static String appendAddresses(final InternetAddress[] addrs, final StringBuilder sb) {
-        sb.setLength(0);
-        if (addrs != null && addrs.length > 0) {
-            for (final InternetAddress internetAddress : addrs) {
-                sb.append(',').append(internetAddress.toUnicodeString());
-            }
-            sb.deleteCharAt(0);
+    private static String[] toStringArray(final InternetAddress[] addrs) {
+        if (addrs == null || addrs.length <= 0) {
+            return null;
         }
-        return sb.toString();
+        final String[] ret = new String[addrs.length];
+        for (int i = 0; i < ret.length; i++) {
+            ret[i] = addrs[i].toUnicodeString();
+        }
+        return ret;
     }
 
     public void deleteById(final String mailId, final String indexName) {
