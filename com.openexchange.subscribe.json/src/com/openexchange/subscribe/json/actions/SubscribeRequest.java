@@ -47,26 +47,45 @@
  *
  */
 
-package com.openexchange.subscribe.json.osgi;
+package com.openexchange.subscribe.json.actions;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link Activator}
+ * 
+ * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class SubscribeRequest {
+	
+	private AJAXRequestData requestData;
+	
+	private ServerSession serverSession;
+	
+	public SubscribeRequest(AJAXRequestData requestData, ServerSession serverSession){
+		this.requestData = requestData;
+		this.serverSession = serverSession;
+	}
 
-    private static final BundleActivator[] ACTIVATORS = {/*new SubscribeActivator(), */new ServletActivator(), new PreferencesActivator(), new I18nActivator()};
+	public AJAXRequestData getRequestData() {
+		return requestData;
+	}
 
-    public Activator() {
-        super();
-    }
+	public void setRequestData(AJAXRequestData requestData) {
+		this.requestData = requestData;
+	}
 
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
-    }
+	public ServerSession getServerSession() {
+		return serverSession;
+	}
+
+	public void setServerSession(ServerSession serverSession) {
+		this.serverSession = serverSession;
+	}
+
+	public String getModule() {
+		return requestData.getModule();
+	}
+
 }

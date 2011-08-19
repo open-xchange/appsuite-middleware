@@ -47,26 +47,41 @@
  *
  */
 
-package com.openexchange.subscribe.json.osgi;
+package com.openexchange.subscribe.json.actions;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link Activator}
+ * 
+ * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class SubscriptionSourcesActionFactory implements
+		AJAXActionServiceFactory {
+	
+	private Map<String, AJAXActionService> actions = new ConcurrentHashMap<String, AJAXActionService>();
+	
+	public SubscriptionSourcesActionFactory(ServiceLookup services){
+		//someone decided to describe this one way and implement it another ... This works for both
+		actions.put("listSources", new ListSourcesAction(services));
+		actions.put("all", new ListSourcesAction(services));		
+		actions.put("getSource", new GetSourceAction(services));
+		actions.put("get", new GetSourceAction(services));
+	}
 
-    private static final BundleActivator[] ACTIVATORS = {/*new SubscribeActivator(), */new ServletActivator(), new PreferencesActivator(), new I18nActivator()};
+	public AJAXActionService createActionService(String action)
+			throws OXException {	
+		if (actions.containsKey(action)){
+			return actions.get(action);
+		} else {
+			// TODO: fill this exception
+			throw new OXException(); 
+		}
+	}
 
-    public Activator() {
-        super();
-    }
-
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
-    }
 }
