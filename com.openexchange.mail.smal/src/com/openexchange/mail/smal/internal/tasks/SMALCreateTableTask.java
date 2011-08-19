@@ -94,10 +94,10 @@ public class SMALCreateTableTask extends UpdateTaskAdapter {
         PreparedStatement stmt = null;
         try {
             try {
-                if (tableExists(writeCon, CreateJobQueueTable.JOBQUEUE_TABLE)) {
+                if (tableExists(writeCon, CreateJobQueueTable.MAIL_SYNC_TABLE)) {
                     return;
                 }
-                stmt = writeCon.prepareStatement(CreateJobQueueTable.CREATE_JOBQUEUE_TABLE_STATEMENT);
+                stmt = writeCon.prepareStatement(CreateJobQueueTable.CREATE_MAIL_SYNC_TABLE_STATEMENT);
                 stmt.executeUpdate();
             } catch (final SQLException e) {
                 throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());

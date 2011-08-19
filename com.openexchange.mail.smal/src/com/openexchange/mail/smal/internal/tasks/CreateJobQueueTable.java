@@ -59,20 +59,19 @@ import com.openexchange.database.AbstractCreateTableImpl;
  */
 public class CreateJobQueueTable extends AbstractCreateTableImpl {
 
-    public static final String JOBQUEUE_TABLE = "jobQueue";
+    public static final String MAIL_SYNC_TABLE = "mailSync";
     
-    public static final String CREATE_JOBQUEUE_TABLE_STATEMENT = 
-        "CREATE TABLE " + JOBQUEUE_TABLE + " (" +
+    public static final String CREATE_MAIL_SYNC_TABLE_STATEMENT = 
+        "CREATE TABLE "+ MAIL_SYNC_TABLE + " (" +
         "cid int(10) unsigned NOT NULL," +
-        "id int(10) unsigned NOT NULL," +
-        "type tinyint(3) unsigned NOT NULL," +
+        "user int(10) unsigned NOT NULL," +
+        "accountId int(10) unsigned NOT NULL," +
+        "fullName varchar(128) collate utf8_unicode_ci NOT NULL," +
         "timestamp bigint(64) NOT NULL," + 
-        "name varchar(128) collate utf8_unicode_ci NOT NULL," +
-        "value varchar(128) collate utf8_unicode_ci NOT NULL," +
-        "PRIMARY KEY (cid, id, type, name)," +
-        "INDEX userIndex (cid, id)," +
-        "INDEX typeIndex (cid, id, type)," +
-        "INDEX timestampIndex (cid, id, timestamp)" +
+        "sync tinyint(3) unsigned NOT NULL," +
+        "PRIMARY KEY (cid, user, accountId, fullName)," +
+        "INDEX accountIndex (cid, user, accountId)," +
+        "INDEX timestampIndex (cid, user, accountId, timestamp)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     
     
@@ -82,7 +81,7 @@ public class CreateJobQueueTable extends AbstractCreateTableImpl {
 
     @Override
     public String[] getCreateStatements() {
-        return new String[] { CREATE_JOBQUEUE_TABLE_STATEMENT };
+        return new String[] { CREATE_MAIL_SYNC_TABLE_STATEMENT };
     }
 
     @Override
@@ -92,7 +91,7 @@ public class CreateJobQueueTable extends AbstractCreateTableImpl {
 
     @Override
     public String[] tablesToCreate() {
-        return new String[] { JOBQUEUE_TABLE };
+        return new String[] { MAIL_SYNC_TABLE };
     }
 
 }

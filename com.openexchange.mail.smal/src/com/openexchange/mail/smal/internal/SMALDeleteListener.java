@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.smal.internal;
 
+import static com.openexchange.mail.smal.internal.tasks.CreateJobQueueTable.MAIL_SYNC_TABLE;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -58,8 +59,6 @@ import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.tools.sql.DBUtils;
 
-import static com.openexchange.mail.smal.internal.tasks.CreateJobQueueTable.JOBQUEUE_TABLE;
-
 /**
  * {@link SMALDeleteListener}
  *
@@ -68,7 +67,7 @@ import static com.openexchange.mail.smal.internal.tasks.CreateJobQueueTable.JOBQ
 public class SMALDeleteListener implements DeleteListener {
 
     @Override
-    public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
+    public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
         if (event.getType() == DeleteEvent.TYPE_USER) {
             deleteUserEntriesFromDB(event, writeCon);
         } else if (event.getType() == DeleteEvent.TYPE_CONTEXT) {
@@ -78,12 +77,12 @@ public class SMALDeleteListener implements DeleteListener {
         }        
     }
 
-    private void deleteContextEntriesFromDB(DeleteEvent event, Connection writeCon) throws OXException {
+    private void deleteContextEntriesFromDB(final DeleteEvent event, final Connection writeCon) throws OXException {
         final int contextId = event.getContext().getContextId();
         PreparedStatement stmt = null;
         try {
             final int userId = event.getId();
-            stmt = writeCon.prepareStatement("DELETE FROM " + JOBQUEUE_TABLE + " WHERE cid = ?");
+            stmt = writeCon.prepareStatement("DELETE FROM " + MAIL_SYNC_TABLE + " WHERE cid = ?");
             int pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
@@ -97,12 +96,12 @@ public class SMALDeleteListener implements DeleteListener {
         }        
     }
 
-    private void deleteUserEntriesFromDB(DeleteEvent event, Connection writeCon) throws OXException {
+    private void deleteUserEntriesFromDB(final DeleteEvent event, final Connection writeCon) throws OXException {
         final int contextId = event.getContext().getContextId();
         PreparedStatement stmt = null;
         try {
             final int userId = event.getId();
-            stmt = writeCon.prepareStatement("DELETE FROM " + JOBQUEUE_TABLE + " WHERE cid = ? AND id = ?");
+            stmt = writeCon.prepareStatement("DELETE FROM " + MAIL_SYNC_TABLE + " WHERE cid = ? AND user = ?");
             int pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
