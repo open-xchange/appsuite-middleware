@@ -79,33 +79,32 @@ public class SMALCreateTableTask extends UpdateTaskAdapter {
     }
 
     @Override
-    public void perform(PerformParameters params) throws OXException {
+    public void perform(final PerformParameters params) throws OXException {
         final DatabaseService dbService = SMALServiceLookup.getInstance().getService(DatabaseService.class);
         if (dbService == null) {
             throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
-        } else {
-            final int contextId = params.getContextId();
-            final Connection writeCon;
+        }
+        final int contextId = params.getContextId();
+        final Connection writeCon;
+        try {
+            writeCon = dbService.getForUpdateTask(contextId);
+        } catch (final OXException e) {
+            throw e;
+        }
+        PreparedStatement stmt = null;
+        try {
             try {
-                writeCon = dbService.getForUpdateTask(contextId);
-            } catch (final OXException e) {
-                throw e;
-            }
-            PreparedStatement stmt = null;
-            try {
-                try {
-                    if (tableExists(writeCon, "oauthAccounts")) {
-                        return;
-                    }
-                    stmt = writeCon.prepareStatement(CreateJobQueueTable.CREATE_JOBQUEUE_TABLE_STATEMENT);
-                    stmt.executeUpdate();
-                } catch (final SQLException e) {
-                    throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+                if (tableExists(writeCon, CreateJobQueueTable.JOBQUEUE_TABLE)) {
+                    return;
                 }
-            } finally {
-                closeSQLStuff(null, stmt);
-                dbService.backForUpdateTask(contextId, writeCon);
+                stmt = writeCon.prepareStatement(CreateJobQueueTable.CREATE_JOBQUEUE_TABLE_STATEMENT);
+                stmt.executeUpdate();
+            } catch (final SQLException e) {
+                throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
             }
+        } finally {
+            closeSQLStuff(null, stmt);
+            dbService.backForUpdateTask(contextId, writeCon);
         }
     }
 
