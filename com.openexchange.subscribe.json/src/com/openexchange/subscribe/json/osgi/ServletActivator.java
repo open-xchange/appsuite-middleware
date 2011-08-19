@@ -99,7 +99,7 @@ public class ServletActivator extends DeferredActivator {
 
     private void registerServlets() {
         try {
-            servletRegistrations.add(new SessionServletRegistration(context, new SubscriptionSourcesServlet(), SUBSCRIPTION_SOURCES_ALIAS));
+            //servletRegistrations.add(new SessionServletRegistration(context, new SubscriptionSourcesServlet(), SUBSCRIPTION_SOURCES_ALIAS));
             servletRegistrations.add(new SessionServletRegistration(context, new SubscriptionServlet(), SUBSCRIPTION_ALIAS));
             for (final SessionServletRegistration reg : servletRegistrations) {
                 reg.open();
