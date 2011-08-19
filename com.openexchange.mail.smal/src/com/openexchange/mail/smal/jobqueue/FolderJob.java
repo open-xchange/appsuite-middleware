@@ -52,6 +52,7 @@ package com.openexchange.mail.smal.jobqueue;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.List;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.IndexRange;
@@ -180,7 +181,8 @@ public final class FolderJob extends AbstractMailSyncJob {
                 retval = remaining;
             }
         }
-        indexAdapter.getMessages(fullName, null, null, FIELDS, accountId, session);
+        final List<MailMessage> indexedMails = indexAdapter.getMessages(fullName, null, null, FIELDS, accountId, session);
+        
         
         
         final MailMessage[] toAdd = new MailMessage[retval];
