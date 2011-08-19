@@ -823,6 +823,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     tmp.append(request.getServletPath());
                     tmp.append(", path-info=");
                     tmp.append(request.getPathInfo());
+                    tmp.append(", query-string=");
+                    tmp.append(request.getQueryString());
                     LOG.error(tmp.toString(), t);
                     // 500 - Internal Server Error
                     response.setStatus(500);
