@@ -163,8 +163,12 @@ public abstract class Job implements Task<Object>, Comparable<Job>, Serializable
         if (!(obj instanceof Job)) {
             return false;
         }
+        final Job other = (Job) obj;
+        if (getRanking() != other.getRanking()) {
+            return false;
+        }
         final String thisIdentifier = getIdentifier();
-        final String otherIdentifier = ((Job) obj).getIdentifier();
+        final String otherIdentifier = other.getIdentifier();
         if (null == thisIdentifier) {
             if (null != otherIdentifier) {
                 return false;
