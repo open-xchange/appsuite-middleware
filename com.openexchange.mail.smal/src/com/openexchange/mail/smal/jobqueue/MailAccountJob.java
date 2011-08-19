@@ -53,9 +53,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Queue;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.IndexRange;
@@ -81,6 +81,8 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class MailAccountJob extends Job {
 
+    private static final long serialVersionUID = -854493208476191708L;
+
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailAccountJob.class));
 
@@ -90,13 +92,7 @@ public final class MailAccountJob extends Job {
 
     private final int accountId;
 
-    private final Queue<String> folders;
-
     private final String identifier;
-
-    private volatile boolean initialized;
-
-    private volatile boolean error;
 
     /**
      * Initializes a new {@link MailAccountJob}.
@@ -110,30 +106,29 @@ public final class MailAccountJob extends Job {
         this.accountId = accountId;
         this.userId = userId;
         this.contextId = contextId;
-        folders = new ConcurrentLinkedQueue<String>();
         identifier =
             new StringBuilder(MailAccountJob.class.getSimpleName()).append('@').append(contextId).append('@').append(userId).append('@').append(
                 accountId).toString();
     }
 
-    private void init() throws OXException {
+    private List<String> init() throws OXException {
         final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
             SMALMailAccess.getDelegateInstance(userId, contextId, accountId);
         mailAccess.connect(true);
         try {
-            final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
-            handleSubfolders(MailFolder.DEFAULT_FOLDER_ID, folderStorage);
+            final List<String> fullNames = new LinkedList<String>();
+            handleSubfolders(MailFolder.DEFAULT_FOLDER_ID, mailAccess.getFolderStorage(), fullNames);
+            return fullNames;
         } finally {
             mailAccess.close(true);
         }
-        initialized = true;
     }
 
-    private void handleSubfolders(final String fullName, final IMailFolderStorage folderStorage) throws OXException {
+    private void handleSubfolders(final String fullName, final IMailFolderStorage folderStorage, final List<String> fullNames) throws OXException {
         for (final MailFolder mailFolder : folderStorage.getSubfolders(fullName, true)) {
             final String subFullName = mailFolder.getFullname();
-            folders.offer(subFullName);
-            handleSubfolders(subFullName, folderStorage);
+            fullNames.add(subFullName);
+            handleSubfolders(subFullName, folderStorage, fullNames);
         }
     }
 

@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.smal.jobqueue;
 
+import java.io.Serializable;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.LogFactory;
@@ -64,7 +65,9 @@ import com.openexchange.threadpool.ThreadRenamer;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class Job implements Task<Object>, Comparable<Job> {
+public abstract class Job implements Task<Object>, Comparable<Job>, Serializable {
+
+    private static final long serialVersionUID = 5618306933455163193L;
 
     private static final AtomicReference<BlockingQueue<Job>> QUEUE_REF = new AtomicReference<BlockingQueue<Job>>();
 

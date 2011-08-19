@@ -50,9 +50,13 @@
 package com.openexchange.mail.smal.jobqueue.internal;
 
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.locks.Lock;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.mail.smal.SMALServiceLookup;
+import com.openexchange.mail.smal.jobqueue.Job;
 import com.openexchange.mail.smal.jobqueue.JobQueue;
 import com.openexchange.mail.smal.jobqueue.MailAccountJob;
 import com.openexchange.mailaccount.MailAccount;
@@ -106,36 +110,72 @@ public final class JobQueueEventHandler implements EventHandler {
 
     private void handleDroppedSession(final Session session) {
         try {
-            final MailAccountJob maj = (MailAccountJob) session.getParameter("com.openexchange.mail.smal.jobqueue.MailAccountJob");
-            if (null != maj && !maj.isDone()) {
-                maj.cancel();
+            final Queue<Job> jobs = (Queue<Job>) session.getParameter("com.openexchange.mail.smal.jobqueue.jobs");
+            if (null != jobs) {
+                while (!jobs.isEmpty()) {
+                    final Job job = jobs.poll();
+                    if (!job.isDone()) {
+                        job.cancel();
+                    }
+                }
             }
         } catch (final Exception e) {
             // Failed handling session
             LOG.warn("Failed handling tracked removed session.", e);
         } finally {
-            session.setParameter("com.openexchange.mail.smal.jobqueue.MailAccountJob", null);
+            session.setParameter("com.openexchange.mail.smal.jobqueue.jobs", null);
         }
     }
 
     private void handleAddedSession(final Session session) {
         try {
             /*
-             * Add job
+             * Add jobs
              */
             final MailAccountStorageService storageService = SMALServiceLookup.getServiceStatic(MailAccountStorageService.class);
             final int userId = session.getUserId();
             final int contextId = session.getContextId();
+            final Queue<Job> jobs = getJobsFrom(session);
+            final JobQueue jobQueue = JobQueue.getInstance();
             for (final MailAccount account : storageService.getUserMailAccounts(userId, contextId)) {
                 final MailAccountJob maj = new MailAccountJob(account.getId(), userId, contextId);
-                if (JobQueue.getInstance().addJob(maj)) {
-                    session.setParameter("com.openexchange.mail.smal.jobqueue.MailAccountJob", maj);
+                if (jobQueue.addJob(maj)) {
+                    jobs.offer(maj);
                 }
             }
+            /*
+             * Periodic job
+             */
+            
+            
         } catch (final Exception e) {
             // Failed handling session
             LOG.warn("Failed handling tracked added session.", e);
         }
+    }
+
+    private static Queue<Job> getJobsFrom(final Session session) {
+        final Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
+        if (null == lock) {
+            synchronized (session) {
+                return getJobsFrom0(session);
+            }
+        }
+        lock.lock();
+        try {
+            return getJobsFrom0(session);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    private static Queue<Job> getJobsFrom0(final Session session) {
+        Queue<Job> jobs = (Queue<Job>) session.getParameter("com.openexchange.mail.smal.jobqueue.jobs");
+        if (null == jobs) {
+            jobs = new ConcurrentLinkedQueue<Job>();
+            session.setParameter("com.openexchange.mail.smal.jobqueue.jobs", jobs);
+        }
+        return jobs;
     }
 
 }
