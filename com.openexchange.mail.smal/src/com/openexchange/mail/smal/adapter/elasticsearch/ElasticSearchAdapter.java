@@ -107,11 +107,7 @@ import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.smal.SMALExceptionCodes;
 import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.mail.smal.adapter.IndexAdapter;
-import com.openexchange.mail.smal.jobqueue.JobQueue;
-import com.openexchange.mail.smal.jobqueue.MailAccountJob;
 import com.openexchange.mail.text.TextProcessing;
-import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -200,15 +196,6 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         ensureStarted();
         final int contextId = session.getContextId();
         createIndex(indexNamePrefix + contextId);
-        /*
-         * Add job
-         */
-        final MailAccountStorageService storageService = SMALServiceLookup.getServiceStatic(MailAccountStorageService.class);
-        final int userId = session.getUserId();
-        for (final MailAccount account : storageService.getUserMailAccounts(userId, contextId)) {
-            final MailAccountJob maj = new MailAccountJob(account.getId(), userId, contextId);
-            JobQueue.getInstance().addJob(maj);
-        }
     }
 
     @Override

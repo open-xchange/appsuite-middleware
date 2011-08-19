@@ -113,15 +113,12 @@ final class JobConsumer extends AbstractTask<Object> {
 
     private final AtomicBoolean keepgoing;
 
-    private final Set<String> identifiers;
-
     /**
      * Initializes a new {@link JobConsumer}.
      */
     protected JobConsumer(final BlockingQueue<Job> queue) {
         super();
         keepgoing = new AtomicBoolean(true);
-        identifiers = new HashSet<String>(1024);
         this.queue = queue;
     }
 
@@ -154,6 +151,7 @@ final class JobConsumer extends AbstractTask<Object> {
     public Object call() throws Exception {
         try {
             final List<Job> jobs = new ArrayList<Job>(16);
+            final Set<String> identifiers = new HashSet<String>(16);
             final Thread consumerThread = Thread.currentThread();
             while (keepgoing.get()) {
                 try {
@@ -195,6 +193,7 @@ final class JobConsumer extends AbstractTask<Object> {
                         }
                     }
                     jobs.clear();
+                    identifiers.clear();
                     if (quit) {
                         return null;
                     }

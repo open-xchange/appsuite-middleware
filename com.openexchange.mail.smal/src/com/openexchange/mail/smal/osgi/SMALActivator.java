@@ -71,6 +71,7 @@ import com.openexchange.mail.smal.internal.SMALUpdateTaskProviderService;
 import com.openexchange.mail.smal.internal.tasks.CreateMailSyncTable;
 import com.openexchange.mail.smal.internal.tasks.SMALCreateTableTask;
 import com.openexchange.mail.smal.jobqueue.JobQueue;
+import com.openexchange.mail.smal.jobqueue.internal.JobQueueEventHandler;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondEventConstants;
@@ -127,12 +128,17 @@ public class SMALActivator extends HousekeepingActivator {
             }
         }
         /*
-         * Register event handle
+         * Register event handlers
          */
         {
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
             registerService(EventHandler.class, new IndexEventHandler(), serviceProperties);
+        }
+        {
+            final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+            serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+            registerService(EventHandler.class, new JobQueueEventHandler(), serviceProperties);
         }
         /*
          * Register update task, create table job and delete listener

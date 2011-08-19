@@ -147,6 +147,7 @@ public final class JobQueue {
         if (queue.size() >= CAPACITY) {
             return false;
         }
+        
         return queue.offer(job);
     }
 

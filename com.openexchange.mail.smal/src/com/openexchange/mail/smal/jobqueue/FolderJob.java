@@ -75,14 +75,14 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link MailAccountJob}
+ * {@link FolderJob}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailAccountJob extends Job {
+public final class FolderJob extends Job {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailAccountJob.class));
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FolderJob.class));
 
     private final int contextId;
 
@@ -97,13 +97,13 @@ public final class MailAccountJob extends Job {
     private volatile boolean error;
 
     /**
-     * Initializes a new {@link MailAccountJob}.
+     * Initializes a new {@link FolderJob}.
      * 
      * @param accountId
      * @param userId
      * @param contextId
      */
-    public MailAccountJob(final int accountId, final int userId, final int contextId) {
+    public FolderJob(final int accountId, final int userId, final int contextId) {
         super();
         this.accountId = accountId;
         this.userId = userId;
@@ -134,7 +134,7 @@ public final class MailAccountJob extends Job {
 
     @Override
     public String getIdentifier() {
-        return new StringBuilder(MailAccountJob.class.getSimpleName()).append('@').append(contextId).append('@').append(userId).append('@').append(
+        return new StringBuilder(FolderJob.class.getSimpleName()).append('@').append(contextId).append('@').append(userId).append('@').append(
             accountId).toString();
     }
 
@@ -248,6 +248,8 @@ public final class MailAccountJob extends Job {
         return retval;
     }
 
+    private static final int HOUR_MILLIS = 60 * 60 * 1000;
+
     private boolean shouldSync(final String fullName, final long now) throws OXException {
         final DatabaseService databaseService = SMALServiceLookup.getServiceStatic(DatabaseService.class);
         if (null == databaseService) {
@@ -285,7 +287,7 @@ public final class MailAccountJob extends Job {
                 }
             }
             final long stamp = rs.getLong(1);
-            if ((now - stamp) > Constants.HOUR_MILLIS) {
+            if ((now - stamp) > HOUR_MILLIS) {
                 /*
                  * Ensure sync flag is NOT set
                  */
