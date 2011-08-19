@@ -49,8 +49,11 @@
 
 package com.openexchange.ajp13.coyote.sockethandler;
 
+import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajp13.coyote.ActionCode;
 import com.openexchange.ajp13.coyote.AjpProcessor;
 import com.openexchange.ajp13.najp.AJPv13ServerImpl;
@@ -143,25 +146,40 @@ public final class CoyoteTask implements Task<Object> {
 
     @Override
     public Object call() throws Exception {
-        try {
-            ajpProcessor.action(ActionCode.START, null);
-            ajpProcessor.process(client);
-        } catch(final java.net.SocketException e) {
-            // SocketExceptions are normal
-            CoyoteSocketHandler.LOG.debug(e.getMessage(), e);
-        } catch (final java.io.IOException e) {
-            // IOExceptions are normal
-            CoyoteSocketHandler.LOG.debug(e.getMessage(), e);
-        } catch (final Throwable e) {
-            /*
-             * Any other exception or error is odd.
-             */
-            CoyoteSocketHandler.LOG.error(e.getMessage(), e);
-        } finally {
-            ajpProcessor.action(ActionCode.STOP, null);
-            AJPv13ServerImpl.decrementNumberOfOpenAJPSockets();
+        while (!client.isClosed()) {
+            try {
+                ajpProcessor.action(ActionCode.START, null);
+                ajpProcessor.process(client);
+            } catch (final java.net.SocketException e) {
+                // SocketExceptions are normal
+                CoyoteSocketHandler.LOG.debug(e.getMessage(), e);
+            } catch (final java.io.IOException e) {
+                // IOExceptions are normal
+                CoyoteSocketHandler.LOG.debug(e.getMessage(), e);
+            } catch (final Throwable e) {
+                /*
+                 * Any other exception or error is odd.
+                 */
+                CoyoteSocketHandler.LOG.error(e.getMessage(), e);
+                closeQuitely(client);
+            } finally {
+                ajpProcessor.action(ActionCode.STOP, null);
+                ajpProcessor.recycle();
+                AJPv13ServerImpl.decrementNumberOfOpenAJPSockets();
+            }
         }
         return null;
     }
 
-} // End of AjpProcessorTask class
+    private static void closeQuitely(final Socket s) {
+        try {
+            s.close();
+        } catch (final IOException e) {
+            final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(CoyoteTask.class));
+            if (log.isDebugEnabled()) {
+                log.debug("Socket could not be closed. Probably due to a broken socket connection (e.g. broken pipe).", e);
+            }
+        }
+    }
+
+}
