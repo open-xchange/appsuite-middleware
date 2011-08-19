@@ -51,6 +51,7 @@ package com.openexchange.mail.smal.jobqueue;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -121,11 +122,12 @@ public final class MailAccountJob extends AbstractMailSyncJob {
     public void perform() {
         try {
             final List<String> list = getList();
+            final BlockingQueue<Job> queue = getQueue();
             final long now = System.currentTimeMillis();
             for (final String fullName : list) {
                 try {
                     if (shouldSync(fullName, now)) {
-                        return;
+                        queue.offer(new FolderJob(fullName, accountId, userId, contextId));
                     }
                 } catch (final OXException e) {
                     LOG.error("Couldn't look-up database.", e);
