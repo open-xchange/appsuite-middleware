@@ -51,11 +51,7 @@ package com.openexchange.mail.smal.jobqueue;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Queue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.IndexRange;
@@ -66,7 +62,6 @@ import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.smal.SMALMailAccess;
 import com.openexchange.mail.smal.SMALServiceLookup;
@@ -79,20 +74,14 @@ import com.openexchange.tools.sql.DBUtils;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FolderJob extends Job {
+public final class FolderJob extends AbstractMailSyncJob {
 
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FolderJob.class));
 
-    private final int contextId;
-
-    private final int userId;
-
-    private final int accountId;
-
-    private final Queue<String> folders;
-
-    private volatile boolean initialized;
+    private final String fullName;
+    
+    private final String identifier;
 
     private volatile boolean error;
 
@@ -103,49 +92,25 @@ public final class FolderJob extends Job {
      * @param userId
      * @param contextId
      */
-    public FolderJob(final int accountId, final int userId, final int contextId) {
-        super();
-        this.accountId = accountId;
-        this.userId = userId;
-        this.contextId = contextId;
-        folders = new ConcurrentLinkedQueue<String>();
-    }
-
-    private void init() throws OXException {
-        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
-            SMALMailAccess.getDelegateInstance(userId, contextId, accountId);
-        mailAccess.connect(true);
-        try {
-            final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
-            handleSubfolders(MailFolder.DEFAULT_FOLDER_ID, folderStorage);
-        } finally {
-            mailAccess.close(true);
-        }
-        initialized = true;
-    }
-
-    private void handleSubfolders(final String fullName, final IMailFolderStorage folderStorage) throws OXException {
-        for (final MailFolder mailFolder : folderStorage.getSubfolders(fullName, true)) {
-            final String subFullName = mailFolder.getFullname();
-            folders.offer(subFullName);
-            handleSubfolders(subFullName, folderStorage);
-        }
+    public FolderJob(final String fullName, final int accountId, final int userId, final int contextId) {
+        super(accountId, userId, contextId);
+        this.fullName = fullName;
+        identifier =
+            new StringBuilder(MailAccountJob.class.getSimpleName()).append('@').append(contextId).append('@').append(userId).append('@').append(
+                accountId).append('@').append(fullName).toString();
     }
 
     @Override
     public String getIdentifier() {
-        return new StringBuilder(FolderJob.class.getSimpleName()).append('@').append(contextId).append('@').append(userId).append('@').append(
-            accountId).toString();
+        return identifier;
     }
 
     @Override
     public int getRanking() {
-        return 1;
+        return 0;
     }
 
-    private static final MailField[] FIELDS = new MailField[] { MailField.ID };
-
-    private static final int CHUNK = 250;
+    private static final MailField[] FIELDS = new MailField[] { MailField.ID, MailField.FLAGS };
 
     @Override
     public void perform() {
@@ -154,70 +119,47 @@ public final class FolderJob extends Job {
             return;
         }
         try {
-            if (!initialized) {
-                init();
-            }
-            /*
-             * Process full names in queue
-             */
             final long now = System.currentTimeMillis();
-            while (!folders.isEmpty()) {
-                final String fullName = folders.poll();
-                if (null != fullName) {
-                    try {
-                        if (shouldSync(fullName, now)) {
-                            return;
-                        }
-                    } catch (final OXException e) {
-                        LOG.error("Couldn't look-up database.", e);
-                    }
-                    
-                    
-                    
-                    
-                    final IndexAdapter indexAdapter = getAdapter();
-                    final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
-                        SMALMailAccess.getDelegateInstance(userId, contextId, accountId);
-                    final Session session = mailAccess.getSession();
-                    if (indexAdapter.containsFolder(fullName, accountId, session)) {
-                        continue;
-                    }
-                    mailAccess.connect(true);
-                    try {
-                        final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-                        final MailMessage[] mails =
-                            messageStorage.searchMessages(
-                                fullName,
-                                IndexRange.NULL,
-                                MailSortField.RECEIVED_DATE,
-                                OrderDirection.ASC,
-                                null,
-                                FIELDS);
-                        final int blockSize;
-                        {
-                            final int configuredBlockSize = CHUNK;
-                            blockSize = configuredBlockSize > mails.length ? mails.length : configuredBlockSize;
-                        }
-                        int start = 0;
-                        while (start < mails.length) {
-                            final int num = add2Index(mails, start, blockSize, fullName, session, messageStorage, indexAdapter);
-                            start += num;
-                        }
-                    } finally {
-                        mailAccess.close(true);
-                    }
-                    LOG.info("Put mails from folder " + fullName + " from account " + accountId + " into index for login " + mailAccess.getMailConfig().getLogin());
-                    /*
-                     * Re-enqueue for next run
-                     */
-                    final BlockingQueue<Job> queue = getQueue();
-                    if (null == queue || !queue.offer(this)) {
-                        LOG.error("Re-enqueueing mail account job failed.");
-                        cancel();
-                    }
+            try {
+                if (!shouldSync(fullName, now) || !wasAbleToSetSyncFlag(fullName)) {
                     return;
                 }
+            } catch (final OXException e) {
+                LOG.error("Couldn't look-up database.", e);
             }
+            /*
+             * Sync mails with index...
+             */
+            final IndexAdapter indexAdapter = getAdapter();
+            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
+                SMALMailAccess.getDelegateInstance(userId, contextId, accountId);
+            final Session session = mailAccess.getSession();
+
+            mailAccess.connect(true);
+            try {
+                final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+                final MailMessage[] mails =
+                    messageStorage.searchMessages(
+                        fullName,
+                        IndexRange.NULL,
+                        MailSortField.RECEIVED_DATE,
+                        OrderDirection.ASC,
+                        null,
+                        FIELDS);
+                final int blockSize;
+                {
+                    final int configuredBlockSize = Constants.CHUNK_SIZE;
+                    blockSize = configuredBlockSize > mails.length ? mails.length : configuredBlockSize;
+                }
+                int start = 0;
+                while (start < mails.length) {
+                    final int num = add2Index(mails, start, blockSize, fullName, session, messageStorage, indexAdapter);
+                    start += num;
+                }
+            } finally {
+                mailAccess.close(true);
+            }
+            LOG.info("Put mails from folder " + fullName + " from account " + accountId + " into index for login " + mailAccess.getMailConfig().getLogin());
         } catch (final Exception e) {
             error = true;
             cancel();
@@ -248,70 +190,27 @@ public final class FolderJob extends Job {
         return retval;
     }
 
-    private static final int HOUR_MILLIS = 60 * 60 * 1000;
-
-    private boolean shouldSync(final String fullName, final long now) throws OXException {
+    private boolean wasAbleToSetSyncFlag(final String fullName) throws OXException {
         final DatabaseService databaseService = SMALServiceLookup.getServiceStatic(DatabaseService.class);
         if (null == databaseService) {
             return false;
         }
         final Connection con = databaseService.getWritable(contextId);
         PreparedStatement stmt = null;
-        ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT timestamp, sync FROM mailSync WHERE cid = ? AND user = ? AND accountId = ? AND fullName = ?");
+            stmt = con.prepareStatement("UPDATE mailSync SET sync = 1 WHERE cid = ? AND user = ? AND accountId = ? AND fullName = ? AND sync = 0");
             int pos = 1;
             stmt.setLong(pos++, contextId);
             stmt.setLong(pos++, userId);
             stmt.setLong(pos++, accountId);
             stmt.setString(pos, fullName);
-            rs = stmt.executeQuery();
-            if (!rs.next()) {
-                DBUtils.closeSQLStuff(rs, stmt);
-                stmt = con.prepareStatement("INSERT INTO mailSync (cid, user, accountId, fullName, timestamp, sync) VALUES (?,?,?,?,?,?)");
-                pos = 1;
-                stmt.setLong(pos++, contextId);
-                stmt.setLong(pos++, userId);
-                stmt.setLong(pos++, accountId);
-                stmt.setString(pos++, fullName);
-                stmt.setLong(pos++, now);
-                stmt.setInt(pos, 0);
-                try {
-                    stmt.executeUpdate();
-                    return true;
-                } catch (final Exception e) {
-                    /*
-                     * Another INSERTed in the meantime
-                     */
-                    return false;
-                }
-            }
-            final long stamp = rs.getLong(1);
-            if ((now - stamp) > HOUR_MILLIS) {
-                /*
-                 * Ensure sync flag is NOT set
-                 */
-                if (rs.getInt(2) > 0) {
-                    DBUtils.closeSQLStuff(rs, stmt);
-                    stmt = con.prepareStatement("UPDATE mailSync SET sync = ? WHERE cid = ? AND user = ? AND accountId = ? AND fullName = ?");
-                    pos = 1;
-                    stmt.setInt(pos++, 0);
-                    stmt.setLong(pos++, contextId);
-                    stmt.setLong(pos++, userId);
-                    stmt.setLong(pos++, accountId);
-                    stmt.setString(pos, fullName);
-                    stmt.executeUpdate();
-                }
-                return true;
-            }
-            return false;
+            return stmt.executeUpdate() > 0;
         } catch (final SQLException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            DBUtils.closeSQLStuff(stmt);
             databaseService.backWritable(contextId, con);
         }
-
     }
 
 }
