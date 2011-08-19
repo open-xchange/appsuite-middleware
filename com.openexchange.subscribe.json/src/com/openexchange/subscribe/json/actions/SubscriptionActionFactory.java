@@ -47,26 +47,45 @@
  *
  */
 
-package com.openexchange.subscribe.json.osgi;
+package com.openexchange.subscribe.json.actions;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link Activator}
+ * 
+ * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class SubscriptionActionFactory implements AJAXActionServiceFactory {
 
-    private static final BundleActivator[] ACTIVATORS = {/*new SubscribeActivator(), */new ServletActivator(), new PreferencesActivator(), new I18nActivator()};
+	private Map<String, AJAXActionService> actions = new ConcurrentHashMap<String, AJAXActionService>();
+	
+	
+	public SubscriptionActionFactory(ServiceLookup services) {
+		actions.put("new", new NewSubscriptionAction(services));
+		actions.put("get", new GetSubscriptionAction(services));
+		actions.put("all", new AllSubscriptionAction(services));
+		actions.put("list", new ListSubscriptionAction(services));
+		actions.put("update", new UpdateSubscriptionAction(services));
+		actions.put("refresh", new RefreshSubscriptionAction(services));
+		actions.put("delete", new DeleteSubscriptionAction(services));
+	}
 
-    public Activator() {
-        super();
-    }
 
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
-    }
+	public AJAXActionService createActionService(String action)
+			throws OXException {
+		if (actions.containsKey(action)){
+			return actions.get(action);
+		} else {
+			// TODO: fill this exception
+			throw new OXException(); 
+		}
+	}
+
 }
