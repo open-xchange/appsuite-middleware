@@ -100,7 +100,9 @@ public abstract class Job implements Task<Object>, Comparable<Job> {
     public abstract int getRanking();
 
     /**
-     * Gets an identifier for this job (used to look-up/filter identical jobs).
+     * Gets an identifier for this job.
+     * <p>
+     * The returned identifier is used to look-up/filter identical jobs through {@link #equals(Object)}
      * 
      * @return The identifier.
      */
@@ -127,6 +129,31 @@ public abstract class Job implements Task<Object>, Comparable<Job> {
      */
     public IndexAdapter getAdapter() {
         return SMALServiceLookup.getInstance().getService(IndexService.class).getAdapter();
+    }
+
+    @Override
+    public int hashCode() {
+        return getIdentifier().hashCode();
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof Job)) {
+            return false;
+        }
+        final String thisIdentifier = getIdentifier();
+        final String otherIdentifier = ((Job) obj).getIdentifier();
+        if (null == thisIdentifier) {
+            if (null != otherIdentifier) {
+                return false;
+            }
+        } else if (!thisIdentifier.equalsIgnoreCase(otherIdentifier)) {
+            return false;
+        }
+        return true;
     }
 
     @Override
