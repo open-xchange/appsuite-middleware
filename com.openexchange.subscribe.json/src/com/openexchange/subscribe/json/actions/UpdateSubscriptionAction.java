@@ -47,26 +47,59 @@
  *
  */
 
-package com.openexchange.subscribe.json.osgi;
+package com.openexchange.subscribe.json.actions;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.secret.SecretService;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.subscribe.SubscribeService;
+import com.openexchange.subscribe.Subscription;
+import com.openexchange.subscribe.json.SubscriptionJSONWriter;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link Activator}
+ * {@link UpdateSubscriptionAction}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class UpdateSubscriptionAction extends AbstractSubscribeAction {
 
-    private static final BundleActivator[] ACTIVATORS = {/*new SubscribeActivator(), */new ServletActivator(), new PreferencesActivator(), new I18nActivator()};
+	/**
+	 * Initializes a new {@link UpdateSubscriptionAction}.
+	 * @param services
+	 */
+	public UpdateSubscriptionAction(ServiceLookup services) {
+		super();
+		this.services = services;
+		
+	}
 
-    public Activator() {
-        super();
-    }
+	/* (non-Javadoc)
+	 * @see com.openexchange.subscribe.json.actions.AbstractSubscribeSourcesAction#perform(com.openexchange.subscribe.json.actions.SubscribeRequest)
+	 */
+	@Override
+	public AJAXRequestResult perform(SubscribeRequest subscribeRequest)
+			throws OXException {
+		Subscription subscription;
+		try {
+			subscription = getSubscription(subscribeRequest.getRequestData(), subscribeRequest.getServerSession(), services.getService(SecretService.class).getSecret(subscribeRequest.getServerSession()));
+			final SubscribeService subscribeService = subscription.getSource().getSubscribeService();
+	        subscribeService.update(subscription);
+	        String urlPrefix = "";
+			if (subscribeRequest.getRequestData().getParameter("__serverURL") != null){
+				urlPrefix = subscribeRequest.getRequestData().getParameter("__serverURL");
+			} 
+			return new AJAXRequestResult(1, "subscription");
+		} catch (JSONException e) {
+			throw new OXException(e);
+		}
+        
+	}	
 
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
-    }
 }

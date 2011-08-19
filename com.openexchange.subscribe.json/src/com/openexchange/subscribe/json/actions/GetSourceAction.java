@@ -47,26 +47,42 @@
  *
  */
 
-package com.openexchange.subscribe.json.osgi;
+package com.openexchange.subscribe.json.actions;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import static com.openexchange.subscribe.json.SubscriptionJSONErrorMessages.MISSING_PARAMETER;
+
+import org.json.JSONObject;
+
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.subscribe.SubscriptionSource;
+import com.openexchange.subscribe.json.SubscriptionSourceJSONWriter;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link Activator}
+ * 
+ * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class GetSourceAction  extends AbstractSubscribeSourcesAction {	
 
-    private static final BundleActivator[] ACTIVATORS = {/*new SubscribeActivator(), */new ServletActivator(), new PreferencesActivator(), new I18nActivator()};
+	public GetSourceAction(ServiceLookup services) {
+		this.services = services;
+	}
 
-    public Activator() {
-        super();
-    }
+	@Override
+	public AJAXRequestResult perform(SubscribeRequest subscribeRequest)
+			throws OXException {
+		final String identifier = subscribeRequest.getRequestData().getParameter("id");
+        if(identifier == null) {
+            MISSING_PARAMETER.create("id");
+        }
+        final SubscriptionSource source = getAvailableSources(subscribeRequest.getServerSession()).getSource(identifier);
+        final JSONObject json = new SubscriptionSourceJSONWriter(createTranslator(subscribeRequest.getServerSession())).writeJSON(source);
+        return new AJAXRequestResult(json, "json");
+	}
 
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
-    }
 }

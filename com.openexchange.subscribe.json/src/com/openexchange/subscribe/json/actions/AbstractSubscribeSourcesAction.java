@@ -47,26 +47,44 @@
  *
  */
 
-package com.openexchange.subscribe.json.osgi;
+package com.openexchange.subscribe.json.actions;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.i18n.I18nService;
+import com.openexchange.i18n.I18nTranslator;
+import com.openexchange.i18n.Translator;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
+import com.openexchange.subscribe.json.I18nServices;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link Activator}
+ * 
+ * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class Activator extends CompositeBundleActivator {
+public abstract class AbstractSubscribeSourcesAction  implements AJAXActionService {
+	
+	protected ServiceLookup services;
+	
+	public abstract AJAXRequestResult perform(SubscribeRequest subscribeRequest) throws OXException;
 
-    private static final BundleActivator[] ACTIVATORS = {/*new SubscribeActivator(), */new ServletActivator(), new PreferencesActivator(), new I18nActivator()};
-
-    public Activator() {
-        super();
+	public AJAXRequestResult perform(AJAXRequestData request,
+			ServerSession session) throws OXException {
+		SubscribeRequest subscribeRequest = new SubscribeRequest(request, session);
+		return perform(subscribeRequest);
+	}
+	
+	protected SubscriptionSourceDiscoveryService getAvailableSources(final ServerSession session) throws OXException {
+        return services.getService(SubscriptionSourceDiscoveryService.class).filter(session.getUserId(), session.getContextId());
+    }	
+	
+	protected Translator createTranslator(final ServerSession session) {
+        final I18nService service = I18nServices.getInstance().getService(session.getUser().getLocale());
+        return null == service ? Translator.EMPTY : new I18nTranslator(service);
     }
 
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
-    }
 }

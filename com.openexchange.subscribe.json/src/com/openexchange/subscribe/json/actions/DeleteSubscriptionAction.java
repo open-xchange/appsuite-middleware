@@ -47,26 +47,68 @@
  *
  */
 
-package com.openexchange.subscribe.json.osgi;
+package com.openexchange.subscribe.json.actions;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.openexchange.ajax.fields.ResponseFields;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.subscribe.SubscribeService;
+import com.openexchange.subscribe.Subscription;
+import com.openexchange.subscribe.SubscriptionSource;
+import com.openexchange.subscribe.json.SubscriptionJSONWriter;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link Activator}
+ * {@link DeleteSubscriptionAction}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class DeleteSubscriptionAction  extends AbstractSubscribeAction {
 
-    private static final BundleActivator[] ACTIVATORS = {/*new SubscribeActivator(), */new ServletActivator(), new PreferencesActivator(), new I18nActivator()};
+	/**
+	 * Initializes a new {@link DeleteSubscriptionAction}.
+	 * @param services
+	 */
+	public DeleteSubscriptionAction(ServiceLookup services) {
+		this.services = services;
+		
+	}
+	
+	@Override
+	public AJAXRequestResult perform(SubscribeRequest subscribeRequest)
+			throws OXException {
+		JSONObject request = (JSONObject) subscribeRequest.getRequestData().getData();
+		 JSONArray ids;
+		try {
+			ids = request.getJSONArray(ResponseFields.DATA);
+			final Context context = subscribeRequest.getServerSession().getContext();
+	        for (int i = 0, size = ids.length(); i < size; i++) {
+	            final int id = ids.getInt(i);
+	            final SubscriptionSource s = getDiscovery(subscribeRequest.getServerSession()).getSource(context, id);
+	            if(s == null) {
+	                continue;
+	            }
+	            final SubscribeService subscribeService = s.getSubscribeService();
+	            final Subscription subscription = new Subscription();
+	            subscription.setContext(context);
+	            subscription.setId(id);
+	            subscribeService.unsubscribe(subscription);
+	        }
+		} catch (JSONException e) {
+			throw new OXException(e);
+		}
+	        	        
+		return new AJAXRequestResult(1, "subscription");
+	}
 
-    public Activator() {
-        super();
-    }
+	
 
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
-    }
 }
