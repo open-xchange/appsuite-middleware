@@ -50,7 +50,9 @@
 package com.openexchange.mail.smal.jobqueue;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.mail.smal.SMALServiceLookup;
@@ -149,6 +151,7 @@ final class JobConsumer extends AbstractTask<Object> {
     public Object call() throws Exception {
         try {
             final List<Job> jobs = new ArrayList<Job>(16);
+            final Set<String> identifiers = new HashSet<String>(16);
             final Thread consumerThread = Thread.currentThread();
             while (keepgoing.get()) {
                 try {
@@ -170,7 +173,7 @@ final class JobConsumer extends AbstractTask<Object> {
                             /*
                              * Check if canceled in the meantime
                              */
-                            if (!job.isCanceled()) {
+                            if (!job.isCanceled() && identifiers.add(job.getIdentifier())) {
                                 if (job.isPaused()) {
                                     /*
                                      * Unset "pasued" flag & re-enqueue
@@ -190,6 +193,7 @@ final class JobConsumer extends AbstractTask<Object> {
                         }
                     }
                     jobs.clear();
+                    identifiers.clear();
                     if (quit) {
                         return null;
                     }
