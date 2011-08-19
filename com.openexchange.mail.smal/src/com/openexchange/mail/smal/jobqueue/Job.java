@@ -53,6 +53,7 @@ import java.io.Serializable;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.ServiceReference;
 import com.openexchange.log.Log;
 import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.mail.smal.adapter.IndexAdapter;
@@ -107,6 +108,12 @@ public abstract class Job implements Task<Object>, Comparable<Job>, Serializable
 
     /**
      * Gets this job's ranking.
+     * <p>
+     * The job ranking is used by the {@link JobQueue} to determine the <i>natural order</i> of services, see
+     * {@link ServiceReference#compareTo}.
+     * <p>
+     * The default ranking is zero (0). A job with a ranking of {@code Integer.MAX_VALUE} is very likely to be immediately executed, whereas
+     * a job with a ranking of {@code Integer.MIN_VALUE} is very unlikely to be executed.
      * 
      * @return The ranking
      */
