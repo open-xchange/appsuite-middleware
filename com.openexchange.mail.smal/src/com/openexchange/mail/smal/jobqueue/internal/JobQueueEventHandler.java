@@ -113,6 +113,8 @@ public final class JobQueueEventHandler implements EventHandler {
         } catch (final Exception e) {
             // Failed handling session
             LOG.warn("Failed handling tracked removed session.", e);
+        } finally {
+            session.setParameter("com.openexchange.mail.smal.jobqueue.MailAccountJob", null);
         }
     }
 
