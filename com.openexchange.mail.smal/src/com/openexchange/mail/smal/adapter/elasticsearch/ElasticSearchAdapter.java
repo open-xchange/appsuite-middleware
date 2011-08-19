@@ -123,8 +123,6 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     protected static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ElasticSearchAdapter.class));
 
-    private static final char DELIM = '/';
-
     protected volatile TransportClient client;
 
     private final String clusterName;
