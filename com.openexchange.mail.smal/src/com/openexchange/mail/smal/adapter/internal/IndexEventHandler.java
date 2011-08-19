@@ -117,7 +117,7 @@ public final class IndexEventHandler implements EventHandler {
             indexService.getAdapter().onSessionAdd(session);
         } catch (final Exception e) {
             // Failed handling session
-            LOG.warn("Failed handling tracked removed session.", e);
+            LOG.warn("Failed handling tracked added session.", e);
         }
     }
 
