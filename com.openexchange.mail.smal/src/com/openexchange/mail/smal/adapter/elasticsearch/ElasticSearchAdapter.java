@@ -95,7 +95,6 @@ import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
-import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -290,7 +289,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         final SearchResponse rsp = builder.execute().actionGet();
         final SearchHit[] docs = rsp.getHits().getHits();
         final List<MailMessage> mails = new ArrayList<MailMessage>(docs.length);
-        final MailPath helper = new MailPath();
+        final MailFields mailFields = new MailFields(fields);
         for (final SearchHit sd : docs) {
             // to get explanation you'll need to enable this when querying:
             // System.out.println(sd.getExplanation().toString());
@@ -298,7 +297,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             // if we use in mapping: "_source" : {"enabled" : false}
             // we need to include all necessary fields in query and then to use doc.getFields()
             // instead of doc.getSource()
-            final MailMessage mail = readDoc(sd.getSource(), sd.getId(), helper);
+            final MailMessage mail = readDoc(sd.getSource(), mailFields);
             mails.add(mail);
         }
         return mails;
@@ -326,7 +325,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             final SearchResponse rsp = builder.execute().actionGet();
             final SearchHit[] docs = rsp.getHits().getHits();
             final List<MailMessage> mails = new ArrayList<MailMessage>(docs.length);
-            final MailPath helper = new MailPath();
+            final MailFields mailFields = new MailFields(true);
             for (final SearchHit sd : docs) {
                 // to get explanation you'll need to enable this when querying:
                 // System.out.println(sd.getExplanation().toString());
@@ -334,7 +333,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                 // if we use in mapping: "_source" : {"enabled" : false}
                 // we need to include all necessary fields in query and then to use doc.getFields()
                 // instead of doc.getSource()
-                final MailMessage mail = readDoc(sd.getSource(), sd.getId(), helper);
+                final MailMessage mail = readDoc(sd.getSource(), mailFields);
                 mails.add(mail);
             }
             return mails;
