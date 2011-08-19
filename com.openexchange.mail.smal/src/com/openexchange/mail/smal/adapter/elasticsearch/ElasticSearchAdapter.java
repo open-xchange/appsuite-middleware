@@ -269,6 +269,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         return (rsp.getHits().getTotalHits() > 0);
     }
 
+    @Override
     public void deleteMessages(final Collection<String> mailIds, final String fullName, final int accountId, final Session session) throws OXException {
         if (null == mailIds || mailIds.isEmpty()) {
             return;
