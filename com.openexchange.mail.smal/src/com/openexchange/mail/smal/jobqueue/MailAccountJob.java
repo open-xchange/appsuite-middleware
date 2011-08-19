@@ -132,6 +132,12 @@ public final class MailAccountJob extends Job {
     }
 
     @Override
+    public String getIdentifier() {
+        return new StringBuilder(MailAccountJob.class.getSimpleName()).append('@').append(contextId).append('@').append(userId).append('@').append(
+            accountId).toString();
+    }
+
+    @Override
     public int getRanking() {
         return 0;
     }
@@ -258,7 +264,7 @@ public final class MailAccountJob extends Job {
             DBUtils.closeSQLStuff(stmt);
             databaseService.backWritable(contextId, con);
         }
-        
+
     }
 
 }

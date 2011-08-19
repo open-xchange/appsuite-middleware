@@ -100,6 +100,13 @@ public abstract class Job implements Task<Object>, Comparable<Job> {
     public abstract int getRanking();
 
     /**
+     * Gets an identifier for this job (used to look-up/filter identical jobs).
+     * 
+     * @return The identifier.
+     */
+    public abstract String getIdentifier();
+
+    /**
      * Performs this job.
      */
     public abstract void perform();

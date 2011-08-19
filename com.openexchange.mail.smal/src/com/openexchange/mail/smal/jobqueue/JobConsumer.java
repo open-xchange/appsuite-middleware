@@ -100,6 +100,11 @@ final class JobConsumer extends AbstractTask<Object> {
         public int getRanking() {
             return Integer.MAX_VALUE;
         }
+
+        @Override
+        public String getIdentifier() {
+            return "poison";
+        }
     };
 
     private final BlockingQueue<Job> queue;
