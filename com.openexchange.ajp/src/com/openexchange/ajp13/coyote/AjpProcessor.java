@@ -721,27 +721,12 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     }
                     continue;
                 }
-                // /*
-                // * Check HTTP method code
-                // */
-                // final byte methodCode = requestHeaderMessage.peekByte();
-                // if (Constants.SC_M_JK_STORED != methodCode && (methodCode < 1 || methodCode > Constants.methodTransArray.length)) {
-                // /*-
-                // * Invalid method code.
-                // *
-                // * Usually the servlet didn't read the previous request body
-                // */
-                // if (LOG.isDebugEnabled()) {
-                // LOG.debug("Unexpected message: " + type);
-                // }
-                // continue;
-                // }
                 /*
                  * So far a valid forward-request package
                  */
                 request.setStartTime(System.currentTimeMillis());
             } catch (final InterruptedIOException e) {
-                LOG.debug("ajpprocessor.io.error", e);
+                LOG.debug("ajpprocessor.io.read-timeout", e);
                 error = true;
                 try {
                     closeQuitely(socket);
@@ -831,6 +816,13 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     // response.getServletOutputStream().flush();
                 } catch (final InterruptedIOException e) {
                     error = true;
+                } catch (final java.net.SocketException e) {
+                    /*
+                     * Thrown by either HttpServlet.service() or ServletResponse.flushBuffer() if socket died while processing
+                     */
+                    error = true;
+                    closeQuitely(socket);
+                    throw e;
                 } catch (final Throwable t) {
                     final StringBuilder tmp = new StringBuilder(128);
                     tmp.append("ajpprocessor.request.process: request-URI=");

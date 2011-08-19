@@ -152,15 +152,17 @@ public final class CoyoteTask implements Task<Object> {
                 ajpProcessor.process(client);
             } catch (final java.net.SocketException e) {
                 // SocketExceptions are normal
-                CoyoteSocketHandler.LOG.debug(e.getMessage(), e);
+                com.openexchange.log.Log.valueOf(LogFactory.getLog(CoyoteTask.class)).debug(e.getMessage(), e);
+                closeQuitely(client); // Socket is broken, so close it
+                break;
             } catch (final java.io.IOException e) {
                 // IOExceptions are normal
-                CoyoteSocketHandler.LOG.debug(e.getMessage(), e);
+                com.openexchange.log.Log.valueOf(LogFactory.getLog(CoyoteTask.class)).debug(e.getMessage(), e);
             } catch (final Throwable e) {
                 /*
                  * Any other exception or error is odd.
                  */
-                CoyoteSocketHandler.LOG.error(e.getMessage(), e);
+                com.openexchange.log.Log.valueOf(LogFactory.getLog(CoyoteTask.class)).error(e.getMessage(), e);
                 closeQuitely(client);
             } finally {
                 ajpProcessor.action(ActionCode.STOP, null);
