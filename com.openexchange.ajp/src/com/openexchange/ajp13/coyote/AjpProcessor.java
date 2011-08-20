@@ -2096,9 +2096,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
         /**
          * Performs AJP-style keep-alive poll to web server to avoid connection timeout.
-         * 
-         * @throws IOException If an I/O error occurs
-         * @throws AJPv13Exception If an AJP error occurs
          */
         private void keepAlive() {
             /*
