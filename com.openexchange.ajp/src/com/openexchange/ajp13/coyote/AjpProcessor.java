@@ -820,19 +820,17 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     /*
                      * Thrown by either HttpServlet.service() or ServletResponse.flushBuffer() if socket died while processing
                      */
+                    if (DEBUG) {
+                        final StringBuilder tmp = new StringBuilder(128).append("ajpprocessor.request.socket-error: ");
+                        appendRequestInfo(tmp);
+                        LOG.debug(tmp.toString(), e);
+                    }
                     error = true;
                     closeQuitely(socket);
                     throw e;
                 } catch (final Throwable t) {
-                    final StringBuilder tmp = new StringBuilder(128);
-                    tmp.append("ajpprocessor.request.process: request-URI=");
-                    tmp.append(request.getRequestURI());
-                    tmp.append(", servlet-path=");
-                    tmp.append(request.getServletPath());
-                    tmp.append(", path-info=");
-                    tmp.append(request.getPathInfo());
-                    tmp.append(", query-string=");
-                    tmp.append(request.getQueryString());
+                    final StringBuilder tmp = new StringBuilder(128).append("ajpprocessor.request.process: ");
+                    appendRequestInfo(tmp);
                     LOG.error(tmp.toString(), t);
                     // 500 - Internal Server Error
                     response.setStatus(500);
@@ -883,6 +881,14 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         if (LogProperties.isEnabled()) {
             LogProperties.removeLogProperties();
         }
+    }
+
+    private void appendRequestInfo(final StringBuilder builder) {
+        builder.append("request-URI=``");
+        builder.append(request.getRequestURI());
+        builder.append("лл, query-string=``");
+        builder.append(request.getQueryString());
+        builder.append("лл");
     }
 
     // ----------------------------------------------------- ActionHook Methods
