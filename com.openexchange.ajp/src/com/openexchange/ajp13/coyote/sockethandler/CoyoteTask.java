@@ -146,15 +146,13 @@ public final class CoyoteTask implements Task<Object> {
 
     @Override
     public Object call() throws Exception {
-        while (!client.isClosed()) {
+        //while (!client.isClosed()) {
             try {
                 ajpProcessor.action(ActionCode.START, null);
                 ajpProcessor.process(client);
             } catch (final java.net.SocketException e) {
                 // SocketExceptions are normal
                 com.openexchange.log.Log.valueOf(LogFactory.getLog(CoyoteTask.class)).debug(e.getMessage(), e);
-                closeQuitely(client); // Socket is broken, so close it
-                break;
             } catch (final java.io.IOException e) {
                 // IOExceptions are normal
                 com.openexchange.log.Log.valueOf(LogFactory.getLog(CoyoteTask.class)).debug(e.getMessage(), e);
@@ -163,13 +161,13 @@ public final class CoyoteTask implements Task<Object> {
                  * Any other exception or error is odd.
                  */
                 com.openexchange.log.Log.valueOf(LogFactory.getLog(CoyoteTask.class)).error(e.getMessage(), e);
-                closeQuitely(client);
             } finally {
                 ajpProcessor.action(ActionCode.STOP, null);
                 ajpProcessor.recycle();
+                closeQuitely(client);
                 AJPv13ServerImpl.decrementNumberOfOpenAJPSockets();
             }
-        }
+        //}
         return null;
     }
 
