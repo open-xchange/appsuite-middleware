@@ -163,7 +163,7 @@ public final class CoyoteTask implements Task<Object> {
                 com.openexchange.log.Log.valueOf(LogFactory.getLog(CoyoteTask.class)).error(e.getMessage(), e);
             } finally {
                 ajpProcessor.action(ActionCode.STOP, null);
-                ajpProcessor.recycle();
+                //ajpProcessor.recycle();
                 closeQuitely(client);
                 AJPv13ServerImpl.decrementNumberOfOpenAJPSockets();
             }
