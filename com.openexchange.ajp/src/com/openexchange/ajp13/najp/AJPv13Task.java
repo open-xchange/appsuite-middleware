@@ -558,7 +558,7 @@ public final class AJPv13Task implements Task<Object>, com.openexchange.ajp13.wa
         if (null != timer) {
             final int max = AJPv13Config.getKeepAliveTime();
             scheduledKeepAliveTask =
-                timer.scheduleWithFixedDelay(new KeepAliveRunnable(this, max), max, max >> 1, TimeUnit.MILLISECONDS);
+                timer.scheduleWithFixedDelay(new KeepAliveRunnable(this, max), max, max, TimeUnit.MILLISECONDS);
         }
         changeNumberOfRunningAJPTasks(true);
         listenerMonitor.incrementNumActive();

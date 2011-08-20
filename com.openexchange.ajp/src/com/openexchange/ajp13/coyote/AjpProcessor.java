@@ -442,7 +442,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         if (null != timer) {
             final int max = AJPv13Config.getKeepAliveTime();
             scheduledKeepAliveTask =
-                timer.scheduleWithFixedDelay(new KeepAliveRunnable(this, max), max, max >> 1, TimeUnit.MILLISECONDS);
+                timer.scheduleWithFixedDelay(new KeepAliveRunnable(this, max), max, max, TimeUnit.MILLISECONDS);
         }
     }
 
