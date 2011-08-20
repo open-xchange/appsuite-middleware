@@ -72,6 +72,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import javax.imageio.ImageIO;
@@ -696,7 +697,7 @@ public final class Contacts {
             boolean modifiedDisplayName = false;
             String newDisplayName = null;
             String newFirstName = null;
-            final String newLstName = null;
+            String newLstName = null;
             String newEmail01 = null;
             final int[] modtrim;
             {
