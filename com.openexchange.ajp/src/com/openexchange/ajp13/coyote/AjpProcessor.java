@@ -813,7 +813,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     response.flushBuffer();
                     listenerMonitor.addProcessingTime(System.currentTimeMillis() - request.getStartTime());
                     listenerMonitor.incrementNumRequests();
-                    // response.getServletOutputStream().flush();
                 } catch (final InterruptedIOException e) {
                     error = true;
                 } catch (final java.net.SocketException e) {
