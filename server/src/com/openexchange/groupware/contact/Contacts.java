@@ -695,6 +695,8 @@ public final class Contacts {
         try {
             boolean modifiedDisplayName = false;
             String newDisplayName = null;
+            String newFirstName = null;
+            final String newLstName = null;
             String newEmail01 = null;
             final int[] modtrim;
             {
@@ -711,6 +713,10 @@ public final class Contacts {
                             newDisplayName = co.getDisplayName();
                         } else if (i == Contact.EMAIL1) {
                             newEmail01 = co.getEmail1();
+                        } else if (i == Contact.GIVEN_NAME) {
+                            newFirstName = co.getGivenName();
+                        } else if (i == Contact.SUR_NAME) {
+                            newLstName = co.getSurName();
                         }
                         mod[cnt++] = i;
                     }
@@ -828,32 +834,83 @@ public final class Contacts {
                     ctx.getContextId());
             }
             // Check for modifications
-            if (null != newDisplayName || null != newEmail01) {
+            if (null != newDisplayName || null != newEmail01 || null != newFirstName || null != newLstName) {
+                final boolean isUserContact = (original.getInternalUserId() > 0);
                 PreparedStatement stmt = null;
+                ResultSet rs = null;
                 try {
-                    final StringBuilder sb = new StringBuilder("UPDATE prg_dlist SET");
-                    final List<String> vals = new ArrayList<String>(2);
-                    if (null != newDisplayName) {
-                        sb.append(" field01 = ?,");
-                        vals.add(newDisplayName);
-                    }
-                    if (null != newEmail01) {
-                        sb.append(" field04 = ?,");
-                        vals.add(newEmail01);
-                    }
-                    sb.deleteCharAt(sb.length() - 1);
-                    sb.append(" WHERE cid = ? AND intfield03 IS NOT NULL AND intfield03 <> ").append(DistributionListEntryObject.INDEPENDENT);
-                    sb.append(" AND intfield02 IS NOT NULL AND intfield02 = ?");
-                    stmt = writecon.prepareStatement(sb.toString());
+                    stmt = writecon.prepareStatement("SELECT field01, field02, field03, field04, intfield01 FROM prg_dlist WHERE cid = ? AND intfield03 IS NOT NULL AND intfield03 <> " + 
+                            DistributionListEntryObject.INDEPENDENT + " AND intfield02 IS NOT NULL AND intfield02 = ?");
                     int pos = 1;
-                    for (final String val : vals) {
-                        stmt.setString(pos++, val);
-                    }
                     stmt.setInt(pos++, ctx.getContextId());
                     stmt.setInt(pos, co.getObjectID());
-                    stmt.executeUpdate();
+                    rs = stmt.executeQuery();
+                    if (rs.next()) {
+                        final List<DistributionListEntryObject> entries = new LinkedList<DistributionListEntryObject>();
+                        do {
+                            final DistributionListEntryObject e = new DistributionListEntryObject();
+                            String tmp = rs.getString(1);
+                            if (!rs.wasNull()) {
+                                e.setDisplayname(tmp);
+                            }
+                            tmp = rs.getString(2);
+                            if (!rs.wasNull()) {
+                                e.setFirstname(tmp);
+                            }
+                            tmp = rs.getString(3);
+                            if (!rs.wasNull()) {
+                                e.setLastname(tmp);
+                            }
+                            tmp = rs.getString(4);
+                            if (!rs.wasNull()) {
+                                e.setEmailaddress(tmp);
+                            }
+                            e.setEmailfield(rs.getInt(5)); // Store id in that field...
+                            entries.add(e);
+                        } while (rs.next());
+                        DBUtils.closeSQLStuff(rs, stmt);
+                        /*
+                         * Iterate them
+                         */
+                        final List<String> values = new ArrayList<String>(4);
+                        for (final DistributionListEntryObject dleo : entries) {
+                            values.clear();
+                            final StringBuilder sb = new StringBuilder("UPDATE prg_dlist SET");
+                            if (null != newDisplayName) {
+                                sb.append(" field01 = ?,");
+                                values.add(newDisplayName);
+                            } else if (null != newLstName && null != newFirstName) {
+                                sb.append(" field01 = ?,");
+                                values.add(newLstName + ", " + newFirstName);
+                            } else if (null != newLstName && null == newFirstName) {
+                                sb.append(" field01 = ?,");
+                                values.add(newLstName + ", " + original.getGivenName());
+                            } else if (null == newLstName && null != newFirstName) {
+                                sb.append(" field01 = ?,");
+                                values.add(original.getSurName() + ", " + newFirstName);
+                            }
+                            if (null != newEmail01) {
+                                sb.append(" field04 = ?,");
+                                values.add(newEmail01);
+                            }
+                            if (!values.isEmpty()) {
+                                sb.deleteCharAt(sb.length() - 1);
+                                sb.append(" WHERE cid = ? AND intfield03 IS NOT NULL AND intfield03 <> ").append(DistributionListEntryObject.INDEPENDENT);
+                                sb.append(" AND intfield02 IS NOT NULL AND intfield02 = ? AND intfield01 = ").append(dleo.getEmailfield());
+                                stmt = writecon.prepareStatement(sb.toString());
+                                pos = 1;
+                                for (final String val : values) {
+                                    stmt.setString(pos++, val);
+                                }
+                                stmt.setInt(pos++, ctx.getContextId());
+                                stmt.setInt(pos, co.getObjectID());
+                                stmt.executeUpdate();
+                                DBUtils.closeSQLStuff(stmt);
+                            }
+                        }
+                    }
                 } finally {
-                    DBUtils.closeSQLStuff(stmt);
+                    DBUtils.closeSQLStuff(rs, stmt);
                 }
             }
             writecon.commit();
