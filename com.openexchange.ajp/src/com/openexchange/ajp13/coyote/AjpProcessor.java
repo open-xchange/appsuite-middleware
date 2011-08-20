@@ -825,7 +825,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                         LOG.debug(tmp.toString(), e);
                     }
                     error = true;
-                    closeQuitely(socket);
+                    try {
+                        closeQuitely(socket);
+                    } finally {
+                        this.socket = null;
+                    }
                     throw e;
                 } catch (final Throwable t) {
                     final StringBuilder tmp = new StringBuilder(128).append("ajpprocessor.request.process: ");
