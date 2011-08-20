@@ -556,7 +556,7 @@ public final class AJPv13Task implements Task<Object>, com.openexchange.ajp13.wa
         watcher.addTask(this);
         final TimerService timer = AJPv13ServiceRegistry.getInstance().getService(TimerService.class);
         if (null != timer) {
-            final int max = (int) (AJPv13Config.getAJPWatcherMaxRunningTime() * 0.66f);
+            final int max = AJPv13Config.getKeepAliveTime();
             scheduledKeepAliveTask =
                 timer.scheduleWithFixedDelay(new KeepAliveRunnable(this, max), max, max >> 1, TimeUnit.MILLISECONDS);
         }
