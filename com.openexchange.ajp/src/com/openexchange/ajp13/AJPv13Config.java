@@ -90,6 +90,8 @@ public final class AJPv13Config implements Initialization {
 
     private int listenerReadTimeout = 60000;
 
+    private int keepAliveTime = 20000;
+
     private int maxNumOfSockets = 50;
 
     private boolean modJK;
@@ -146,6 +148,7 @@ public final class AJPv13Config implements Initialization {
         serverThreadSize = 20;
         listenerPoolSize = 20;
         listenerReadTimeout = 60000;
+        keepAliveTime = 20000;
         maxNumOfSockets = 50;
         modJK = false;
         connectionPool = false;
@@ -230,6 +233,13 @@ public final class AJPv13Config implements Initialization {
             listenerReadTimeout = Integer.parseInt(ajpProperties.getProperty("AJP_LISTENER_READ_TIMEOUT", "60000").trim());
             if (listenerReadTimeout < 0) {
                 listenerReadTimeout = 0;
+            }
+            /*
+             * AJP_KEEP_ALIVE_TIME
+             */
+            keepAliveTime = Integer.parseInt(ajpProperties.getProperty("AJP_KEEP_ALIVE_TIME", "20000").trim());
+            if (keepAliveTime < 0) {
+                keepAliveTime = 0;
             }
             /*
              * AJP_CONNECTION_POOL / AJP_CONNECTION_POOL_SIZE
@@ -345,6 +355,7 @@ public final class AJPv13Config implements Initialization {
             logBuilder.append("\tAJP_MOD_JK=").append(instance.modJK).append('\n');
             logBuilder.append("\tAJP_LISTENER_POOL_SIZE=").append(instance.listenerPoolSize).append('\n');
             logBuilder.append("\tAJP_LISTENER_READ_TIMEOUT=").append(instance.listenerReadTimeout).append('\n');
+            logBuilder.append("\tAJP_KEEP_ALIVE_TIME=").append(instance.keepAliveTime).append('\n');
             logBuilder.append("\tAJP_CONNECTION_POOL=").append(instance.connectionPool).append('\n');
             logBuilder.append("\tAJP_CONNECTION_POOL_SIZE=").append(instance.connectionPoolSize).append('\n');
             logBuilder.append("\tAJP_REQUEST_HANDLER_POOL=").append(instance.requestHandlerPool).append('\n');
@@ -395,6 +406,15 @@ public final class AJPv13Config implements Initialization {
 
     public static int getAJPListenerReadTimeout() {
         return instance.listenerReadTimeout;
+    }
+
+    /**
+     * Gets the keep-alive time
+     *
+     * @return The keep-alive time
+     */
+    public static int getKeepAliveTime() {
+        return instance.keepAliveTime;
     }
 
     public static boolean useAJPConnectionPool() {
