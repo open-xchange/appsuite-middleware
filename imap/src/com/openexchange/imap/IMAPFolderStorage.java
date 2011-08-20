@@ -58,6 +58,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -2038,6 +2039,25 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     @Override
     public String getDefaultFolderPrefix() throws OXException {
         try {
+            /*
+             * Special handling for GMail...
+             */
+            {
+                final String server = imapConfig.getServer().toLowerCase(Locale.US);
+                if ("imap.gmail.com".equals(server) || "imap.googlemail.com".equals(server)) {
+                    /*
+                     * Look-up special GMail folder: [GMail], [Google Mail], ...
+                     */
+                    final ListLsubEntry rootEntry = ListLsubCache.getCachedLISTEntry("", accountId, imapStore, session);
+                    final List<ListLsubEntry> children = rootEntry.getChildren();
+                    for (final ListLsubEntry child : children) {
+                        final String fullName = child.getFullName();
+                        if (fullName.startsWith("[G")) {
+                            return fullName + child.getSeparator();
+                        }
+                    }
+                }
+            }
             /*
              * Try NAMESPACE command
              */
