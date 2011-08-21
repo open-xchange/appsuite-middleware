@@ -60,7 +60,7 @@ import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.json.SubscriptionJSONWriter;
 
 /**
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  *
  */
@@ -91,7 +91,7 @@ public class NewSubscriptionAction extends AbstractSubscribeAction {
 		} catch (JSONException e) {
 			throw new OXException(e);
 		}
-                       
+
 	}
 
 }

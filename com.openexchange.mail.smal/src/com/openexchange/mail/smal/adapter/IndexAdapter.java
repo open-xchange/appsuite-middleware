@@ -61,28 +61,28 @@ import com.openexchange.session.Session;
 
 /**
  * {@link IndexAdapter} - The adapter for a search index.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface IndexAdapter {
 
     /**
      * Starts the index adapter.
-     * 
+     *
      * @throws OXException If start-up fails
      */
     public void start() throws OXException;
 
     /**
      * Stops the index adapter.
-     * 
+     *
      * @throws OXException If shut-down fails
      */
     public void stop() throws OXException;
 
     /**
      * Invoked if a new session is added or restored from log-term container.
-     * 
+     *
      * @param session The session
      * @throws OXException If handling new session fails
      */
@@ -90,7 +90,7 @@ public interface IndexAdapter {
 
     /**
      * Invoked if a session is dropped or moved to long-term container.
-     * 
+     *
      * @param session The session
      * @throws OXException If handling dropped session fails
      */
@@ -98,7 +98,7 @@ public interface IndexAdapter {
 
     /**
      * Performs the query derived from given search term.
-     * 
+     *
      * @param searchTerm The search term
      * @param sortField The sort field
      * @param order The order direction
@@ -110,7 +110,7 @@ public interface IndexAdapter {
 
     /**
      * Checks if index contains mail located in specified folder.
-     * 
+     *
      * @param fullName The folder full name
      * @param accountId The account identifier
      * @param session The session
@@ -121,7 +121,7 @@ public interface IndexAdapter {
 
     /**
      * Deletes specified mails from index.
-     * 
+     *
      * @param mailIds The mail identifiers
      * @param fullName The folder full name
      * @param accountId The account identifier
@@ -132,7 +132,7 @@ public interface IndexAdapter {
 
     /**
      * Checks if index contains mail located in specified folder.
-     * 
+     *
      * @param fullName The folder full name
      * @param accountId The account identifier
      * @param session The session
@@ -143,7 +143,7 @@ public interface IndexAdapter {
 
     /**
      * Adds specified mail to the index.
-     * 
+     *
      * @param mail The mail to add
      * @param session The session
      * @throws OXException If adding mail to index fails
@@ -152,7 +152,7 @@ public interface IndexAdapter {
 
     /**
      * Adds specified mails to the index.
-     * 
+     *
      * @param mails The mails to add
      * @param session The session
      * @throws OXException If adding mails to index fails
@@ -161,7 +161,7 @@ public interface IndexAdapter {
 
     /**
      * Synchronizes mails contained given folder with the index.
-     * 
+     *
      * @param fullName The folder full name
      * @param The account identifier
      * @param session The session

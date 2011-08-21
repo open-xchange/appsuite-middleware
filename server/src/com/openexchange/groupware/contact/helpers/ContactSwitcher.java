@@ -287,15 +287,15 @@ public interface ContactSwitcher {
     public Object lastmodifiedofnewestattachment(Object... objects) throws OXException;
 
     public Object usecount(Object... objects) throws OXException;
-    
+
     public Object markasdistributionlist(Object[] objects) throws OXException;
-    
+
     public Object yomifirstname(Object[] objects) throws OXException;
-    
+
     public Object yomilastname(Object[] objects) throws OXException;
-    
+
     public Object yomicompanyname(Object[] objects) throws OXException;
-    
+
     public boolean _unknownfield(Contact contact, String fieldname, Object value, Object... additionalObjects) throws OXException;
-    
+
 }

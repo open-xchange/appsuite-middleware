@@ -63,7 +63,7 @@ import com.openexchange.threadpool.behavior.AbortBehavior;
 
 /**
  * {@link JobQueue} - The job queue.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JobQueue {
@@ -74,7 +74,7 @@ public final class JobQueue {
 
     /**
      * Gets the {@link JobQueue} instance
-     * 
+     *
      * @return The {@link JobQueue} instance
      */
     public static JobQueue getInstance() {
@@ -146,7 +146,7 @@ public final class JobQueue {
 
     /**
      * Adds specified job to this service's job queue.
-     * 
+     *
      * @param job The job to add
      * @return <code>true</code> if job could be added; otherwise <code>false</code>
      */

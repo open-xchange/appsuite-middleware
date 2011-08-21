@@ -54,7 +54,7 @@ import org.json.JSONObject;
 
 /**
  * {@link Mapping} - See <a href="http://www.elasticsearch.org/guide/reference/mapping/core-types.html">ElasticSearch Core Types</a>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Mapping {

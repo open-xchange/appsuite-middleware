@@ -79,16 +79,16 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class TaskResultConverter extends AbstractTaskJSONResultConverter {
-	
+
 	private static final String INPUT_FORMAT = "task";
-	
+
     /**
      * Initializes a new {@link TaskResultConverter}.
      */
     public TaskResultConverter() {
         super();
     }
-    
+
 
     @Override
     public String getInputFormat() {
@@ -176,7 +176,7 @@ public class TaskResultConverter extends AbstractTaskJSONResultConverter {
         }
         return true;
     }
-    
+
     @Override
     public void convertTask(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
         final Object resultObject = result.getResultObject();

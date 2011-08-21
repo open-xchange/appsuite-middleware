@@ -132,7 +132,7 @@ public class ContactRequest {
         if (data == null) {
             throw OXJSONExceptionCodes.MISSING_FIELD.create("data");
         }
-        
+
         return RequestTools.buildObjectIdAndFolderId(data);
     }
 

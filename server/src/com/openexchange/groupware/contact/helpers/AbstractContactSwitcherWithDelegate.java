@@ -640,12 +640,12 @@ public class AbstractContactSwitcherWithDelegate implements ContactSwitcher {
     public Object usecount(Object... objects) throws OXException {
         return delegate.usecount(objects);
     }
-    
+
     @Override
     public Object markasdistributionlist(Object[] objects) throws OXException {
         return delegate.markasdistributionlist(objects);
     }
-    
+
     @Override
     public Object yomifirstname(Object[] objects) throws OXException {
         return delegate.yomifirstname(objects);

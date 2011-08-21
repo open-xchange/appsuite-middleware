@@ -89,12 +89,12 @@ public class UpdatesAction extends ContactAction {
         Date timestamp = new Date(timestampLong);
         Date lastModified = null;
         final TimeZone timeZone = req.getTimeZone();
-        
+
         String ignore = req.getIgnore();
         if (ignore == null) {
             ignore = "deleted";
         }
-        
+
         boolean bIgnoreDelete = false;
         if (ignore.indexOf("deleted") != -1) {
             bIgnoreDelete = true;
@@ -120,7 +120,7 @@ public class UpdatesAction extends ContactAction {
                     timestamp = lastModified;
                 }
             }
-            
+
             if (!bIgnoreDelete) {
                 it = contactInterface.getDeletedContactsInFolder(folder, columns, timestamp);
                 while (it.hasNext()) {

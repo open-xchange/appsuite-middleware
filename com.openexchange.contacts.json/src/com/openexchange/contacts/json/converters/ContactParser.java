@@ -164,11 +164,11 @@ public class ContactParser {
                 if (hasAndNotEmptyOrNull(entry, DistributionListFields.DISPLAY_NAME)) {
                     distributionList[i].setDisplayname(entry.getString(DistributionListFields.DISPLAY_NAME));
                 }
-                
+
                 if (hasAndNotEmptyOrNull(entry, DistributionListFields.MAIL)) {
                     distributionList[i].setEmailaddress(entry.getString(DistributionListFields.MAIL));
-                }                
-                
+                }
+
                 if (hasAndNotEmptyOrNull(entry, DistributionListFields.MAIL_FIELD)) {
                     distributionList[i].setEmailfield(entry.getInt(DistributionListFields.MAIL_FIELD));
                 }
@@ -179,15 +179,15 @@ public class ContactParser {
 
         return distributionList;
     }
-    
+
     private boolean hasAndNotEmptyOrNull(JSONObject json, String key) throws JSONException {
         if (json.hasAndNotNull(key)) {
-            String str = json.getString(key);   
+            String str = json.getString(key);
             if (!str.isEmpty()) {
                 return true;
             }
         }
-        
+
         return false;
     }
 
@@ -199,7 +199,7 @@ public class ContactParser {
             if (hasAndNotEmptyOrNull(entry, ContactFields.ID)) {
                 links[i].setLinkID(entry.getInt(ContactFields.ID));
             }
-            
+
             if (hasAndNotEmptyOrNull(entry, DistributionListFields.DISPLAY_NAME)) {
                 links[i].setLinkDisplayname(entry.getString(DistributionListFields.DISPLAY_NAME));
             }

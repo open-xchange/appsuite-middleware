@@ -59,8 +59,6 @@ import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.secret.SecretService;
@@ -68,7 +66,6 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionExecutionService;
 import com.openexchange.subscribe.json.SubscriptionJSONWriter;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link RefreshSubscriptionAction}
@@ -84,7 +81,7 @@ public class RefreshSubscriptionAction extends AbstractSubscribeAction {
 	public RefreshSubscriptionAction(ServiceLookup services) {
 		super();
 		this.services = services;
-		
+
 	}
 
 	/* (non-Javadoc)
@@ -104,13 +101,14 @@ public class RefreshSubscriptionAction extends AbstractSubscribeAction {
 	            allSubscriptions = getSubscriptionsInFolder(subscribeRequest.getServerSession(), folderId, services.getService(SecretService.class).getSecret(subscribeRequest.getServerSession()));
 	            Collections.sort(allSubscriptions, new Comparator<Subscription>() {
 
-	                public int compare(final Subscription o1, final Subscription o2) {
+	                @Override
+                    public int compare(final Subscription o1, final Subscription o2) {
 	                    if(o1.getLastUpdate() == o2.getLastUpdate()) {
 	                        return o2.getId() - o1.getId();
 	                    }
 	                    return (int) (o2.getLastUpdate() - o1.getLastUpdate());
 	                }
-	                
+
 	            });
 	            for (final Subscription subscription : allSubscriptions) {
 	                ids.add(subscription.getId());
@@ -119,7 +117,7 @@ public class RefreshSubscriptionAction extends AbstractSubscribeAction {
 			} catch (JSONException e) {
 				throw new OXException(e);
 			}
-            
+
         }
         if (request.has("id")) {
             int id;
@@ -135,17 +133,17 @@ public class RefreshSubscriptionAction extends AbstractSubscribeAction {
 				if (subscribeRequest.getRequestData().getParameter("__serverURL") != null){
 					urlPrefix = subscribeRequest.getRequestData().getParameter("__serverURL");
 				}
-	            
+
 	    			JSONObject json = new SubscriptionJSONWriter().write(subscription, subscription.getSource().getFormDescription(), urlPrefix);
 	    			return new AJAXRequestResult(json, "subscription");
-	    		
+
 			} catch (JSONException e) {
 				throw new OXException(e);
 			}
-            
+
         }
-        
+
         return null;
-	}	
+	}
 
 }

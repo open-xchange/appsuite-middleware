@@ -66,7 +66,7 @@ import com.openexchange.sessiond.SessiondEventConstants;
 
 /**
  * {@link JobQueueEventHandler}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JobQueueEventHandler implements EventHandler {
@@ -146,8 +146,8 @@ public final class JobQueueEventHandler implements EventHandler {
             /*
              * Periodic job
              */
-            
-            
+
+
         } catch (final Exception e) {
             // Failed handling session
             LOG.warn("Failed handling tracked added session.", e);

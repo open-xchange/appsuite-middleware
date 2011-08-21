@@ -147,20 +147,20 @@ public class ListAction extends ContactAction {
                 final int[] objectIdsAndFolderId = objectIdsAndFolderIds[i];
                 final int objectId = objectIdsAndFolderId[0];
                 final int folderId = objectIdsAndFolderId[1];
-                
+
                 for (final Contact contact : contacts) {
                     if (contact.getObjectID() == objectId && contact.getParentFolderID() == folderId) {
                         sortedContacts.add(contact);
                         break;
                     }
                 }
-            }   
+            }
         } finally {
             if (it != null) {
                 it.close();
             }
         }
-        
+
         return new AJAXRequestResult(sortedContacts, timestamp, "contact");
     }
 }

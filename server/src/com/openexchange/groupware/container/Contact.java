@@ -325,7 +325,7 @@ public class Contact extends CommonObject implements Serializable {
         // From ContactObject itself
         INTERNAL_USERID,
         // Produces error: missing field in mapping: 593 (ContactWriter.java:603)// CONTEXTID,
-        NUMBER_OF_DISTRIBUTIONLIST, 
+        NUMBER_OF_DISTRIBUTIONLIST,
         CONTACT_NUMBER_OF_LINKS, // NUMBER_OF_IMAGES,
         // IMAGE_LAST_MODIFIED, FILE_AS,
         // Produces a MySQLDataException// ATTACHMENT,

@@ -65,7 +65,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link SMALMessageStorage}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SMALMessageStorage extends AbstractSMALStorage implements IMailMessageStorage {
@@ -111,9 +111,9 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
     public MailMessage[] getMessages(final String folder, final String[] mailIds, final MailField[] fields) throws OXException {
         connect();
         try {
-            
-            
-            
+
+
+
             System.out.println("SMALMessageStorage.getMessages()");
             return delegateMailAccess.getMessageStorage().getMessages(folder, mailIds, fields);
         } finally {

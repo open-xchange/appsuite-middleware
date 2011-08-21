@@ -57,7 +57,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link AbstractSMALStorage}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractSMALStorage {
@@ -89,7 +89,7 @@ public abstract class AbstractSMALStorage {
 
     /**
      * Connects real mail access instance.
-     * 
+     *
      * @throws OXException If connect attempt fails
      */
     protected void connect() throws OXException {
@@ -105,7 +105,7 @@ public abstract class AbstractSMALStorage {
 
     /**
      * Releases all used resources when closing parental {@link MailAccess}
-     * 
+     *
      * @throws OXException If resources cannot be released
      */
     public void releaseResources() throws OXException {

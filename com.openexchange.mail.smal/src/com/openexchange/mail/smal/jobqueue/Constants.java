@@ -51,7 +51,7 @@ package com.openexchange.mail.smal.jobqueue;
 
 /**
  * {@link Constants} - Constants for job queue.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Constants {

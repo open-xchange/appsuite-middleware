@@ -51,15 +51,11 @@ package com.openexchange.subscribe.json.actions;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -84,7 +80,7 @@ public class AllSubscriptionAction extends AbstractSubscribeAction {
 	public AllSubscriptionAction(ServiceLookup services) {
 		super();
 		this.services = services;
-		
+
 	}
 
 	@Override
@@ -96,7 +92,7 @@ public class AllSubscriptionAction extends AbstractSubscribeAction {
             folderId = subscribeRequest.getRequestData().getParameter("folder");
             containsFolder = true;
         }
-        
+
         final Context context = subscribeRequest.getServerSession().getContext();
 
         List<Subscription> allSubscriptions = null;
@@ -104,7 +100,7 @@ public class AllSubscriptionAction extends AbstractSubscribeAction {
             allSubscriptions = getSubscriptionsInFolder(subscribeRequest.getServerSession(), folderId, services.getService(SecretService.class).getSecret(subscribeRequest.getServerSession()));
         } else {
             allSubscriptions = getAllSubscriptions(subscribeRequest.getServerSession(), services.getService(SecretService.class).getSecret(subscribeRequest.getServerSession()));
-        }       
+        }
 
         final String[] basicColumns = getBasicColumns((JSONObject)subscribeRequest.getRequestData().getData());
         Map<String, String[]> dynamicColumns;
@@ -116,11 +112,11 @@ public class AllSubscriptionAction extends AbstractSubscribeAction {
 		} catch (JSONException e) {
 			throw new OXException(e);
 		}
-        
+
 	}
-	
-	
-	
+
+
+
 	private List<Subscription> getAllSubscriptions(final ServerSession session, final String secret) throws OXException {
         final List<SubscriptionSource> sources = getDiscovery(session).getSources();
         final List<Subscription> allSubscriptions = new ArrayList<Subscription>();
@@ -129,7 +125,7 @@ public class AllSubscriptionAction extends AbstractSubscribeAction {
             final Collection<Subscription> subscriptions = subscribeService.loadSubscriptions(session.getContext(), session.getUserId(), secret);
             allSubscriptions.addAll(subscriptions);
         }
-        
+
         return allSubscriptions;
     }
 }

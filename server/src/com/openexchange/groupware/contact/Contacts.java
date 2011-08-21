@@ -840,7 +840,7 @@ public final class Contacts {
                 PreparedStatement stmt = null;
                 ResultSet rs = null;
                 try {
-                    stmt = writecon.prepareStatement("SELECT field01, field02, field03, field04, intfield01 FROM prg_dlist WHERE cid = ? AND intfield03 IS NOT NULL AND intfield03 <> " + 
+                    stmt = writecon.prepareStatement("SELECT field01, field02, field03, field04, intfield01 FROM prg_dlist WHERE cid = ? AND intfield03 IS NOT NULL AND intfield03 <> " +
                             DistributionListEntryObject.INDEPENDENT + " AND intfield02 IS NOT NULL AND intfield02 = ?");
                     int pos = 1;
                     stmt.setInt(pos++, ctx.getContextId());

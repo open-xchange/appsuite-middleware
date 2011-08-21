@@ -61,7 +61,7 @@ import com.openexchange.mail.smal.SMALMailAccess;
 
 /**
  * {@link MailAccountJob}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailAccountJob extends AbstractMailSyncJob {
@@ -75,7 +75,7 @@ public final class MailAccountJob extends AbstractMailSyncJob {
 
     /**
      * Initializes a new {@link MailAccountJob}.
-     * 
+     *
      * @param accountId
      * @param userId
      * @param contextId

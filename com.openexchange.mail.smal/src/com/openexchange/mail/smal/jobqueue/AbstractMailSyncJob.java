@@ -61,7 +61,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link AbstractMailSyncJob}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractMailSyncJob extends Job {
@@ -86,7 +86,7 @@ public abstract class AbstractMailSyncJob extends Job {
 
     /**
      * Checks if a sync shouzld be performed for specified full name.
-     * 
+     *
      * @param fullName The full name
      * @param now The current time milliseconds
      * @return <code>true</code> if a sync should be performed for passed full name; otherwise <code>false</code>

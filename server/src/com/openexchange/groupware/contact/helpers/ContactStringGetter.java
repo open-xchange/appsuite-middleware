@@ -666,12 +666,12 @@ public class ContactStringGetter implements ContactSwitcher {
     public Object usecount(Object... objects) throws OXException {
         return stringify(delegate.usecount(objects));
     }
-    
+
     @Override
     public Object markasdistributionlist(Object[] objects) throws OXException {
         return stringify(delegate.markasdistributionlist(objects));
     }
-    
+
     @Override
     public Object yomifirstname(Object[] objects) throws OXException {
         return stringify(delegate.yomifirstname(objects));

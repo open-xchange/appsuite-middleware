@@ -73,7 +73,7 @@ import com.openexchange.mail.search.ToTerm;
 
 /**
  * {@link SearchTerm2Query} - Transforms a search term to a query.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SearchTerm2Query {
@@ -87,7 +87,7 @@ public final class SearchTerm2Query {
 
     /**
      * Transforms specified search term to a query.
-     * 
+     *
      * @param searchTerm The search term
      * @return The resulting query (builder)
      */

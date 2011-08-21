@@ -58,5 +58,5 @@ package com.openexchange.mail.smal.adapter;
 public interface IndexService {
 
     IndexAdapter getAdapter();
-    
+
 }

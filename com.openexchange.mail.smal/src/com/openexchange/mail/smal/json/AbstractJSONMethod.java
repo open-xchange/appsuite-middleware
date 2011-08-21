@@ -55,7 +55,7 @@ import com.openexchange.mail.smal.SMALServiceLookup;
 
 /**
  * {@link AbstractJSONMethod} - An abstract JSON method.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractJSONMethod {
@@ -74,7 +74,7 @@ public abstract class AbstractJSONMethod {
 
     /**
      * Gets the VoipNow setting for specified session.
-     * 
+     *
      * @param session The session
      * @param httpApi <code>true</code> to authenticate against HTTP-API interface; otherwise <code>false</code>
      * @return The VoipNow setting

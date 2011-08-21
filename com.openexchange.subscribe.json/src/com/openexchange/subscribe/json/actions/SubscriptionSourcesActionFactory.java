@@ -57,30 +57,31 @@ import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
 
 /**
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  *
  */
 public class SubscriptionSourcesActionFactory implements
 		AJAXActionServiceFactory {
-	
+
 	private Map<String, AJAXActionService> actions = new ConcurrentHashMap<String, AJAXActionService>();
-	
+
 	public SubscriptionSourcesActionFactory(ServiceLookup services){
 		//someone decided to describe this one way and implement it another ... This works for both
 		actions.put("listSources", new ListSourcesAction(services));
-		actions.put("all", new ListSourcesAction(services));		
+		actions.put("all", new ListSourcesAction(services));
 		actions.put("getSource", new GetSourceAction(services));
 		actions.put("get", new GetSourceAction(services));
 	}
 
-	public AJAXActionService createActionService(String action)
-			throws OXException {	
+	@Override
+    public AJAXActionService createActionService(String action)
+			throws OXException {
 		if (actions.containsKey(action)){
 			return actions.get(action);
 		} else {
 			// TODO: fill this exception
-			throw new OXException(); 
+			throw new OXException();
 		}
 	}
 

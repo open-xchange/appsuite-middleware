@@ -251,7 +251,7 @@ public final class SessionImpl implements Session {
     public void setLocalIp(final String localIp) {
         this.localIp = localIp;
     }
-    
+
     @Override
     public String getLoginName() {
         return loginName;

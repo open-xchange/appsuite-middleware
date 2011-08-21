@@ -60,22 +60,22 @@ import com.openexchange.subscribe.crawler.internal.Step;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class GenericSubscribeServiceForGMXandWEBdeAPITest extends GenericSubscribeServiceTestHelpers {
-    
+
     public void testGMXdeAddressbook(){
         String username = "";
         String password = "";
         String serviceID = "coms.homenet.gmxde";
         String url = "https://uas2.uilogin.de/login/";
-        
+
         // create a CrawlerDescription
         CrawlerDescription crawler = new CrawlerDescription();
         crawler.setDisplayName("gmx.de");
         crawler.setId("com.openexchange.subscribe.crawler.gmx.de");
-        crawler.setCrawlerApiVersion(620);              
-        crawler.setPriority(20); 
-        
+        crawler.setCrawlerApiVersion(620);
+        crawler.setPriority(20);
+
         ArrayList<Step> listOfSteps = new ArrayList<Step>();
-        
+
         GMXAndWebDeAPIStep postStep = new GMXAndWebDeAPIStep();
         postStep.setUrl(url);
         ArrayList<NameValuePair> parameters = new ArrayList<NameValuePair>();
@@ -85,29 +85,29 @@ public class GenericSubscribeServiceForGMXandWEBdeAPITest extends GenericSubscri
         postStep.setParameters(parameters);
         listOfSteps.add(postStep);
         postStep.setDebuggingEnabled(true);
-        
+
         crawler.finishUp(listOfSteps);
 
         findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
         // uncomment this if the if the crawler description was updated to get the new config-files
         // dumpThis(crawler, crawler.getDisplayName());
     }
-    
+
     public void testWebDeAddressbook(){
         String username = "";
         String password = "";
         String serviceID = "coms.homenet.webde";
         String url = "https://uas2.uilogin.de/login/";
-        
+
         // create a CrawlerDescription
         CrawlerDescription crawler = new CrawlerDescription();
         crawler.setDisplayName("web.de");
         crawler.setId("com.openexchange.subscribe.crawler.web.de");
-        crawler.setCrawlerApiVersion(620);              
-        crawler.setPriority(20); 
-        
+        crawler.setCrawlerApiVersion(620);
+        crawler.setPriority(20);
+
         ArrayList<Step> listOfSteps = new ArrayList<Step>();
-        
+
         GMXAndWebDeAPIStep postStep = new GMXAndWebDeAPIStep();
         postStep.setUrl(url);
         ArrayList<NameValuePair> parameters = new ArrayList<NameValuePair>();
@@ -117,29 +117,29 @@ public class GenericSubscribeServiceForGMXandWEBdeAPITest extends GenericSubscri
         postStep.setParameters(parameters);
         listOfSteps.add(postStep);
         postStep.setDebuggingEnabled(true);
-        
+
         crawler.finishUp(listOfSteps);
 
         findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
         // uncomment this if the if the crawler description was updated to get the new config-files
         // dumpThis(crawler, crawler.getDisplayName());
     }
-    
+
     public void testGMXComAddressbook(){
         String username = "";
         String password = "";
         String serviceID = "coms.homenet.gmxcom";
         String url = "https://uas2.uilogin.de/login/";
-        
+
         // create a CrawlerDescription
         CrawlerDescription crawler = new CrawlerDescription();
         crawler.setDisplayName("gmx.com");
         crawler.setId("com.openexchange.subscribe.crawler.gmx.com");
-        crawler.setCrawlerApiVersion(620);              
-        crawler.setPriority(20); 
-        
+        crawler.setCrawlerApiVersion(620);
+        crawler.setPriority(20);
+
         ArrayList<Step> listOfSteps = new ArrayList<Step>();
-        
+
         GMXAndWebDeAPIStep postStep = new GMXAndWebDeAPIStep();
         postStep.setUrl(url);
         ArrayList<NameValuePair> parameters = new ArrayList<NameValuePair>();
@@ -149,7 +149,7 @@ public class GenericSubscribeServiceForGMXandWEBdeAPITest extends GenericSubscri
         postStep.setParameters(parameters);
         listOfSteps.add(postStep);
         postStep.setDebuggingEnabled(true);
-        
+
         crawler.finishUp(listOfSteps);
 
         findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);

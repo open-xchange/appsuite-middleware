@@ -182,12 +182,26 @@ public final class StructureMailMessageParser {
 
     private InlineDetector inlineDetector;
 
+    private boolean neverTreatMessageAsAttachment;
+
     /**
      * Constructor
      */
     public StructureMailMessageParser() {
         super();
+        neverTreatMessageAsAttachment = true;
         inlineDetector = LENIENT_DETECTOR;
+    }
+
+    /**
+     * Sets the behavior how to handle a message part.
+     * 
+     * @param neverTreatMessageAsAttachment whether to treat a message part as an attachment
+     * @return This parser with new behavior applied
+     */
+    public StructureMailMessageParser setNeverTreatMessageAsAttachment(final boolean neverTreatMessageAsAttachment) {
+        this.neverTreatMessageAsAttachment = neverTreatMessageAsAttachment;
+        return this;
     }
 
     /**
@@ -414,15 +428,22 @@ public final class StructureMailMessageParser {
             if (!mailPart.containsSequenceId()) {
                 mailPart.setSequenceId(getSequenceId(prefix, partCount));
             }
-            if (isInline) {
+            if (neverTreatMessageAsAttachment) {
                 if (!handler.handleNestedMessage(mailPart, getSequenceId(prefix, partCount))) {
                     stop = true;
                     return;
                 }
             } else {
-                if (!handler.handleAttachment(mailPart, mailPart.getSequenceId())) {
-                    stop = true;
-                    return;
+                if (isInline) {
+                    if (!handler.handleNestedMessage(mailPart, getSequenceId(prefix, partCount))) {
+                        stop = true;
+                        return;
+                    }
+                } else {
+                    if (!handler.handleAttachment(mailPart, mailPart.getSequenceId())) {
+                        stop = true;
+                        return;
+                    }
                 }
             }
         } else if (parseTNEFParts && TNEFUtils.isTNEFMimeType(lcct)) {

@@ -1480,7 +1480,7 @@ public class ContactSetter implements ContactSwitcher {
         if(objects[1] == null) {
             return conObj;
         }
-        
+
         final long timestamp = (Long) objects[1];
         final Date value = new Date(timestamp);
         conObj.setLastModified(value);
@@ -1670,7 +1670,7 @@ public class ContactSetter implements ContactSwitcher {
         conObj.setUseCount(value);
         return conObj;
     }
-    
+
     @Override
     public Object markasdistributionlist(Object[] objects) throws OXException {
         if (objects.length < 2) {
@@ -1684,7 +1684,7 @@ public class ContactSetter implements ContactSwitcher {
         conObj.setMarkAsDistributionlist(value);
         return conObj;
     }
-    
+
     @Override
     public Object yomifirstname(Object[] objects) throws OXException {
         if (objects.length < 2) {
@@ -1738,5 +1738,5 @@ public class ContactSetter implements ContactSwitcher {
         }
 
         return false;
-    }    
+    }
 }

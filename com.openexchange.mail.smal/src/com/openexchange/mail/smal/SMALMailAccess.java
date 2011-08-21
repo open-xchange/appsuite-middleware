@@ -64,7 +64,7 @@ import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link SMALMailAccess} - The SMAL mail access.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMessageStorage> {
@@ -83,7 +83,7 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
 
     /**
      * Initializes a new {@link SMALMailAccess}.
-     * 
+     *
      * @param session The session
      * @param accountId The account identifier
      * @throws OXException If initialization fails

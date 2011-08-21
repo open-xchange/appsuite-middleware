@@ -59,7 +59,7 @@ import com.openexchange.mail.smal.SMALMailProviderRegistry;
 
 /**
  * Service tracker for mail providers
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SMALProviderServiceTracker implements ServiceTrackerCustomizer<MailProvider, MailProvider> {

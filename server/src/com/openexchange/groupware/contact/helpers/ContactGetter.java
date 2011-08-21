@@ -1070,7 +1070,7 @@ public class ContactGetter implements ContactSwitcher {
         final Contact conObj = (Contact) objects[0];
         return conObj.getUseCount();
     }
-    
+
     @Override
     public Object markasdistributionlist(Object[] objects) throws OXException {
         if (objects.length < 1) {
@@ -1079,7 +1079,7 @@ public class ContactGetter implements ContactSwitcher {
         final Contact conObj = (Contact) objects[0];
         return conObj.getMarkAsDistribtuionlist();
     }
-    
+
     @Override
     public Object yomifirstname(Object[] objects) throws OXException {
         if (objects.length < 1) {

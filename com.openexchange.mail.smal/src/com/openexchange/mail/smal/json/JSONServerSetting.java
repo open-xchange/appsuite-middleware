@@ -51,7 +51,7 @@ package com.openexchange.mail.smal.json;
 
 /**
  * {@link JSONServerSetting}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JSONServerSetting {
@@ -75,7 +75,7 @@ public final class JSONServerSetting {
 
     /**
      * Sets the host
-     * 
+     *
      * @param host The host to set
      */
     public void setHost(final String host) {
@@ -84,7 +84,7 @@ public final class JSONServerSetting {
 
     /**
      * Gets the host
-     * 
+     *
      * @return The host
      */
     public String getHost() {
@@ -93,7 +93,7 @@ public final class JSONServerSetting {
 
     /**
      * Sets the secure
-     * 
+     *
      * @param secure The secure to set
      */
     public void setSecure(final boolean secure) {
@@ -102,7 +102,7 @@ public final class JSONServerSetting {
 
     /**
      * Gets the secure
-     * 
+     *
      * @return The secure
      */
     public boolean isSecure() {
@@ -111,7 +111,7 @@ public final class JSONServerSetting {
 
     /**
      * Sets the port
-     * 
+     *
      * @param port The port to set
      */
     public void setPort(final int port) {
@@ -120,7 +120,7 @@ public final class JSONServerSetting {
 
     /**
      * Gets the port
-     * 
+     *
      * @return The port
      */
     public int getPort() {
@@ -129,7 +129,7 @@ public final class JSONServerSetting {
 
     /**
      * Sets the login
-     * 
+     *
      * @param login The login to set
      */
     public void setLogin(final String login) {
@@ -138,7 +138,7 @@ public final class JSONServerSetting {
 
     /**
      * Gets the login
-     * 
+     *
      * @return The login
      */
     public String getLogin() {
@@ -147,7 +147,7 @@ public final class JSONServerSetting {
 
     /**
      * Sets the password
-     * 
+     *
      * @param password The password to set
      */
     public void setPassword(final String password) {
@@ -156,7 +156,7 @@ public final class JSONServerSetting {
 
     /**
      * Gets the password
-     * 
+     *
      * @return The password
      */
     public String getPassword() {

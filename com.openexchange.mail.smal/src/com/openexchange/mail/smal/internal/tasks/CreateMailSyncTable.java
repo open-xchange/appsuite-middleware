@@ -61,21 +61,21 @@ import com.openexchange.database.AbstractCreateTableImpl;
 public class CreateMailSyncTable extends AbstractCreateTableImpl {
 
     public static final String MAIL_SYNC_TABLE = "mailSync";
-    
-    public static final String CREATE_MAIL_SYNC_TABLE_STATEMENT = 
+
+    public static final String CREATE_MAIL_SYNC_TABLE_STATEMENT =
         "CREATE TABLE "+ MAIL_SYNC_TABLE + " (" +
         "cid int(10) unsigned NOT NULL," +
         "user int(10) unsigned NOT NULL," +
         "accountId int(10) unsigned NOT NULL," +
         "fullName varchar(128) collate utf8_unicode_ci NOT NULL," +
-        "timestamp bigint(64) NOT NULL," + 
+        "timestamp bigint(64) NOT NULL," +
         "sync tinyint(3) unsigned NOT NULL," +
         "PRIMARY KEY (cid, user, accountId, fullName)," +
         "INDEX accountIndex (cid, user, accountId)," +
         "INDEX timestampIndex (cid, user, accountId, timestamp)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
-    
-    
+
+
     public CreateMailSyncTable() {
         super();
     }

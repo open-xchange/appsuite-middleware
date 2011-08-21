@@ -373,7 +373,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             if (e.getCode() == OXFolderExceptionCode.NO_DUPLICATE_FOLDER.getNumber()) {
                 throw e;
             }
-            
+
             throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         }
         /*

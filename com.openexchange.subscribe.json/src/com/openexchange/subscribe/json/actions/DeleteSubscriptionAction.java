@@ -54,8 +54,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.fields.ResponseFields;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -63,8 +61,6 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
-import com.openexchange.subscribe.json.SubscriptionJSONWriter;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DeleteSubscriptionAction}
@@ -79,9 +75,9 @@ public class DeleteSubscriptionAction  extends AbstractSubscribeAction {
 	 */
 	public DeleteSubscriptionAction(ServiceLookup services) {
 		this.services = services;
-		
+
 	}
-	
+
 	@Override
 	public AJAXRequestResult perform(SubscribeRequest subscribeRequest)
 			throws OXException {
@@ -105,10 +101,10 @@ public class DeleteSubscriptionAction  extends AbstractSubscribeAction {
 		} catch (JSONException e) {
 			throw new OXException(e);
 		}
-	        	        
+
 		return new AJAXRequestResult(1, "subscription");
 	}
 
-	
+
 
 }

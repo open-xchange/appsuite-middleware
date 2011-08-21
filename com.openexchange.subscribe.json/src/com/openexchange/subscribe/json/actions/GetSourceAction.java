@@ -53,21 +53,18 @@ import static com.openexchange.subscribe.json.SubscriptionJSONErrorMessages.MISS
 
 import org.json.JSONObject;
 
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.json.SubscriptionSourceJSONWriter;
-import com.openexchange.tools.session.ServerSession;
 
 /**
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  *
  */
-public class GetSourceAction  extends AbstractSubscribeSourcesAction {	
+public class GetSourceAction  extends AbstractSubscribeSourcesAction {
 
 	public GetSourceAction(ServiceLookup services) {
 		this.services = services;

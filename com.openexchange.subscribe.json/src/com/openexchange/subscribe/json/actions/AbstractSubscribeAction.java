@@ -98,7 +98,7 @@ public abstract class AbstractSubscribeAction extends
             add("action");
         }
     };
-	
+
 	protected Subscription getSubscription(final AJAXRequestData requestData, final ServerSession session, final String secret)
 			throws JSONException, OXException {
 			    final JSONObject object = (JSONObject) requestData.getData();
@@ -140,7 +140,7 @@ public abstract class AbstractSubscribeAction extends
 	    if (request.has("dynamicColumnPlugins")) {
 	        return Arrays.asList(request.getString("dynamicColumnPlugins").split("\\s*,\\s*"));
 	    }
-	
+
 	    final List<String> dynamicColumnIdentifiers = new ArrayList<String>();
 	    for (final String paramName : request.keySet()) {
 	        if (!KNOWN_PARAMS.contains(paramName) && paramName.contains(".")) {
@@ -175,7 +175,7 @@ public abstract class AbstractSubscribeAction extends
 			    }
 			    return rows;
 			}
-	
+
 	protected Subscription loadSubscription(final int id, final ServerSession session, final String source, final String secret) throws OXException {
         SubscribeService service = null;
         if (source != null && !source.equals("")) {

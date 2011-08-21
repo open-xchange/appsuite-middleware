@@ -55,16 +55,15 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.subscribe.SubscriptionExecutionService;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
-import com.openexchange.subscribe.json.actions.SubscriptionActionFactory;
 import com.openexchange.subscribe.json.actions.SubscriptionSourcesActionFactory;
 
 /**
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  *
  */
 public class SubscribeActivator extends AJAXModuleActivator {
-	
+
 	private static final Class<?>[] NEEDED = { HttpService.class, SubscriptionExecutionService.class, I18nService.class, PreferencesItemService.class, SubscriptionSourceDiscoveryService.class };
 
 	@Override

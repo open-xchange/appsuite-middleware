@@ -64,7 +64,7 @@ import com.openexchange.server.ServiceExceptionCodes;
 
 /**
  * {@link SMALCreateTableTask}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -72,7 +72,7 @@ public class SMALCreateTableTask extends UpdateTaskAdapter {
 
     /**
      * Initializes a new {@link SMALCreateTableTask}.
-     * 
+     *
      * @param dbService
      */
     public SMALCreateTableTask() {

@@ -123,7 +123,7 @@ public class SearchAction extends ContactAction {
                 it.close();
             }
         }
-        
+
         return new AJAXRequestResult(contacts, lastModified, "contact");
     }
 

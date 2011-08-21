@@ -116,7 +116,7 @@ public class ContactJSONResultConverter implements ResultConverter {
         super();
         this.imageService = imageService;
     }
-    
+
     @Override
     public String getInputFormat() {
         return "contact";
@@ -138,34 +138,34 @@ public class ContactJSONResultConverter implements ResultConverter {
         final Object resultObject = result.getResultObject();
         final Object newResultObject;
         if(resultObject instanceof Contact) {
-            
+
             // Only one contact to convert
             final Contact contact = (Contact) resultObject;
             newResultObject = convertSingleContact(contact);
-        } else {            
-            final int[] columns = RequestTools.getColumnsAsIntArray(request, "columns"); 
-            
+        } else {
+            final int[] columns = RequestTools.getColumnsAsIntArray(request, "columns");
+
             if (request.getAction().equals("updates")) {
-                
+
                 // result contains a Map<String, List<Contact>> to decide between deleted and modified contacts
                 @SuppressWarnings("unchecked")
                 final Map<String, List<Contact>> contactMap = (Map<String, List<Contact>>) resultObject;
                 final List<Contact> modified = contactMap.get("modified");
                 final List<Contact> deleted = contactMap.get("deleted");
-                
+
                 newResultObject = convertListOfContacts(modified, columns);
                 if (!deleted.isEmpty()) {
                     addObjectIdsToResultArray(newResultObject, deleted);
-                }                
+                }
             } else {
-                
+
                 // A list of contacts to convert
                 @SuppressWarnings("unchecked")
                 final List<Contact> contacts = (List<Contact>) resultObject;
                 newResultObject = convertListOfContacts(contacts, columns);
             }
         }
-        
+
         result.setResultObject(newResultObject, "json");
     }
 
@@ -177,13 +177,13 @@ public class ContactJSONResultConverter implements ResultConverter {
             if (field != null && !field.getAjaxName().isEmpty()) {
                 try {
                     final Object value = field.doSwitch(cg, contact);
-                    
+
                     if (isSpecial(column)) {
                         final Object special = convertSpecial(field, contact, cg);
                         if (special != null && !String.valueOf(special).isEmpty()) {
                             final String jsonKey = field.getAjaxName();
                             json.put(jsonKey, special);
-                        }                            
+                        }
                     } else {
                         if (value != null && !String.valueOf(value).isEmpty()) {
                             final String jsonKey = field.getAjaxName();
@@ -195,27 +195,27 @@ public class ContactJSONResultConverter implements ResultConverter {
                 }
             }
         }
-        
+
         return json;
     }
-    
-    private Object convertListOfContacts(final List<Contact> contacts, int[] columns) throws OXException {       
+
+    private Object convertListOfContacts(final List<Contact> contacts, int[] columns) throws OXException {
         final JSONArray resultArray = new JSONArray();
         for (final Contact contact : contacts) {
             final JSONArray contactArray = new JSONArray();
-            
+
             final ContactGetter cg = new ContactGetter();
             for (final int column : columns) {
                 final ContactField field = ContactField.getByValue(column);
-                if (field != null && !field.getAjaxName().isEmpty()) {                
+                if (field != null && !field.getAjaxName().isEmpty()) {
                     final Object value = field.doSwitch(cg, contact);
                     if (isSpecial(column)) {
                         final Object special = convertSpecial(field, contact, cg);
                         if (special == null) {
-                            contactArray.put(JSONObject.NULL);                            
+                            contactArray.put(JSONObject.NULL);
                         } else {
                             contactArray.put(special);
-                        }                        
+                        }
                     } else if (value == null) {
                         contactArray.put(JSONObject.NULL);
                     } else {
@@ -226,13 +226,13 @@ public class ContactJSONResultConverter implements ResultConverter {
                     contactArray.put(JSONObject.NULL);
                 }
             }
-            
+
             resultArray.put(contactArray);
         }
-        
+
         return resultArray;
     }
-    
+
     private void addObjectIdsToResultArray(final Object object, final List<Contact> contacts) {
         final JSONArray resultArray = (JSONArray) object;
         for (final Contact contact : contacts) {
@@ -307,7 +307,7 @@ public class ContactJSONResultConverter implements ResultConverter {
                     return intValue;
                 }
             }
-            
+
             return null;
         } else {
             return null;

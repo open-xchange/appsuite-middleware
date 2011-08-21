@@ -63,7 +63,7 @@ import java.util.Map.Entry;
  */
 /**
  * {@link CachedSession}
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public final class CachedSession implements Serializable {
@@ -103,7 +103,7 @@ public final class CachedSession implements Serializable {
 
     /**
      * Initializes a new {@link CachedSession}.
-     * 
+     *
      * @param userId The user ID
      * @param loginName The login name
      * @param password The password
@@ -159,7 +159,7 @@ public final class CachedSession implements Serializable {
 
     /**
      * Gets the loginName.
-     * 
+     *
      * @return the loginName
      */
     public String getLoginName() {
@@ -168,7 +168,7 @@ public final class CachedSession implements Serializable {
 
     /**
      * Gets the full login incl. context information; e.g <code>test@foo</code>.
-     * 
+     *
      * @return The full login
      */
     public String getLogin() {
@@ -177,7 +177,7 @@ public final class CachedSession implements Serializable {
 
     /**
      * Gets the password.
-     * 
+     *
      * @return the password
      */
     public String getPassword() {
@@ -186,7 +186,7 @@ public final class CachedSession implements Serializable {
 
     /**
      * Gets the contextId.
-     * 
+     *
      * @return the contextId
      */
     public int getContextId() {
@@ -195,7 +195,7 @@ public final class CachedSession implements Serializable {
 
     /**
      * Gets the userId.
-     * 
+     *
      * @return the userId
      */
     public int getUserId() {
@@ -204,7 +204,7 @@ public final class CachedSession implements Serializable {
 
     /**
      * Gets the sessionId.
-     * 
+     *
      * @return the sessionId
      */
     public String getSessionId() {
@@ -213,7 +213,7 @@ public final class CachedSession implements Serializable {
 
     /**
      * Gets the secret.
-     * 
+     *
      * @return the secret
      */
     public String getSecret() {
@@ -222,7 +222,7 @@ public final class CachedSession implements Serializable {
 
     /**
      * Gets the randomToken.
-     * 
+     *
      * @return the randomToken
      */
     public String getRandomToken() {
@@ -231,7 +231,7 @@ public final class CachedSession implements Serializable {
 
     /**
      * Gets the localIp.
-     * 
+     *
      * @return the localIp
      */
     public String getLocalIp() {
@@ -252,7 +252,7 @@ public final class CachedSession implements Serializable {
 
     /**
      * Gets the parameters.
-     * 
+     *
      * @return the parameters
      */
     public Map<String, Serializable> getParameters() {
@@ -276,7 +276,7 @@ public final class CachedSession implements Serializable {
 
     /**
      * Checks if this cached session has been marked as removed.
-     * 
+     *
      * @return <code>true</code> if this cached session has been marked as removed; otherwise <code>false</code>
      */
     public boolean isMarkedAsRemoved() {
@@ -285,7 +285,7 @@ public final class CachedSession implements Serializable {
 
     /**
      * Sets this cached session's marked-as-removed flag.
-     * 
+     *
      * @param markedAsRemoved <code>true</code> to mark this cached session as removed; otherwise <code>false</code>
      */
     public void setMarkedAsRemoved(final boolean markedAsRemoved) {

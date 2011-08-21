@@ -61,7 +61,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link SMALFolderStorage} - The SMAL folder storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SMALFolderStorage extends AbstractSMALStorage implements IMailFolderStorage {

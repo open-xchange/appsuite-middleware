@@ -238,7 +238,7 @@ public class Multiple extends SessionServlet {
                     if (result.getTimestamp() != null) {
                         jsonWriter.key(ResponseFields.TIMESTAMP);
                         jsonWriter.value(result.getTimestamp().getTime());
-                    }                    
+                    }
                     jsonWriter.key(ResponseFields.DATA);
                     jsonWriter.value(result.getResultObject());
                 } catch (final OXException e) {

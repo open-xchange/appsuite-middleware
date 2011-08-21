@@ -53,16 +53,16 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  *
  */
 public class SubscribeRequest {
-	
+
 	private AJAXRequestData requestData;
-	
+
 	private ServerSession serverSession;
-	
+
 	public SubscribeRequest(AJAXRequestData requestData, ServerSession serverSession){
 		this.requestData = requestData;
 		this.serverSession = serverSession;

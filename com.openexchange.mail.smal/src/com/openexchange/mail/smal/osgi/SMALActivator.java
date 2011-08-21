@@ -80,7 +80,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link SMALActivator} - The activator for Super-MAL bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SMALActivator extends HousekeepingActivator {

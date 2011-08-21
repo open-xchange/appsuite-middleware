@@ -62,7 +62,7 @@ import com.openexchange.threadpool.ThreadRenamer;
 
 /**
  * {@link Job} - A job that is placed into {@link JobQueue}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class Job implements Task<Object>, Comparable<Job>, Serializable {
@@ -113,7 +113,7 @@ public abstract class Job implements Task<Object>, Comparable<Job>, Serializable
      * <p>
      * The default ranking is zero (0). A job with a ranking of {@code Integer.MAX_VALUE} is very likely to be immediately executed, whereas
      * a job with a ranking of {@code Integer.MIN_VALUE} is very unlikely to be executed.
-     * 
+     *
      * @return The ranking
      */
     public abstract int getRanking();
@@ -122,7 +122,7 @@ public abstract class Job implements Task<Object>, Comparable<Job>, Serializable
      * Gets an identifier for this job.
      * <p>
      * The returned identifier is used to look-up/filter identical jobs through {@link #equals(Object)}
-     * 
+     *
      * @return The identifier.
      */
     public abstract String getIdentifier();
@@ -134,7 +134,7 @@ public abstract class Job implements Task<Object>, Comparable<Job>, Serializable
 
     /**
      * Gets the working queue.
-     * 
+     *
      * @return The working queue or <code>null</code>
      */
     public final BlockingQueue<Job> getQueue() {
@@ -143,7 +143,7 @@ public abstract class Job implements Task<Object>, Comparable<Job>, Serializable
 
     /**
      * Gets the index adapter.
-     * 
+     *
      * @return The index adapter
      */
     public IndexAdapter getAdapter() {
@@ -225,7 +225,7 @@ public abstract class Job implements Task<Object>, Comparable<Job>, Serializable
      * Checks if the canceled flag is set.
      * <p>
      * If flag is set and job has not been performed, yet, the job is discarded.
-     * 
+     *
      * @return Whether canceled or not
      */
     public boolean isCanceled() {
@@ -234,7 +234,7 @@ public abstract class Job implements Task<Object>, Comparable<Job>, Serializable
 
     /**
      * Gets the paused flag
-     * 
+     *
      * @return The paused flag
      */
     public boolean isPaused() {
@@ -257,7 +257,7 @@ public abstract class Job implements Task<Object>, Comparable<Job>, Serializable
 
     /**
      * Gets the done flag
-     * 
+     *
      * @return The done flag
      */
     public boolean isDone() {
@@ -266,7 +266,7 @@ public abstract class Job implements Task<Object>, Comparable<Job>, Serializable
 
     /**
      * Gets the execution failure
-     * 
+     *
      * @return The execution failure
      */
     public Throwable getExecutionFailure() {

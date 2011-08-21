@@ -98,7 +98,7 @@ public interface FolderStorage {
 
     /**
      * Clears the cache with respect to specified user.
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      */

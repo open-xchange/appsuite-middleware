@@ -58,15 +58,15 @@ import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  *
  */
 public class SubscriptionActionFactory implements AJAXActionServiceFactory {
 
 	private Map<String, AJAXActionService> actions = new ConcurrentHashMap<String, AJAXActionService>();
-	
-	
+
+
 	public SubscriptionActionFactory(ServiceLookup services) {
 		actions.put("new", new NewSubscriptionAction(services));
 		actions.put("get", new GetSubscriptionAction(services));
@@ -78,13 +78,14 @@ public class SubscriptionActionFactory implements AJAXActionServiceFactory {
 	}
 
 
-	public AJAXActionService createActionService(String action)
+	@Override
+    public AJAXActionService createActionService(String action)
 			throws OXException {
 		if (actions.containsKey(action)){
 			return actions.get(action);
 		} else {
 			// TODO: fill this exception
-			throw new OXException(); 
+			throw new OXException();
 		}
 	}
 

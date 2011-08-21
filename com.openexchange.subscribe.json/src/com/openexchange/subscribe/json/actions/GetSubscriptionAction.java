@@ -52,16 +52,11 @@ package com.openexchange.subscribe.json.actions;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.json.SubscriptionJSONWriter;
-import com.openexchange.tools.session.ServerSession;
 import com.openexchange.secret.SecretService;
 
 /**
@@ -70,11 +65,11 @@ import com.openexchange.secret.SecretService;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class GetSubscriptionAction  extends AbstractSubscribeAction {
-	
+
 	public GetSubscriptionAction(ServiceLookup services) {
 		super();
 		this.services = services;
-		
+
 	}
 
 	@Override
@@ -83,22 +78,22 @@ public class GetSubscriptionAction  extends AbstractSubscribeAction {
 		final int id = Integer.parseInt(subscribeRequest.getRequestData().getParameter("id"));
 		String source = "";
 		if (subscribeRequest.getRequestData().getParameter("source") != null){
-			source = subscribeRequest.getRequestData().getParameter("source"); 
-		}        
+			source = subscribeRequest.getRequestData().getParameter("source");
+		}
         final Subscription subscription = loadSubscription(id, subscribeRequest.getServerSession(), source, services.getService(SecretService.class).getSecret(subscribeRequest.getServerSession()));
         String urlPrefix = "";
 		if (subscribeRequest.getRequestData().getParameter("__serverURL") != null){
 			urlPrefix = subscribeRequest.getRequestData().getParameter("__serverURL");
-		}        
+		}
 		try {
 			JSONObject json = new SubscriptionJSONWriter().write(subscription, subscription.getSource().getFormDescription(), urlPrefix);
 			return new AJAXRequestResult(json, "subscription");
 		} catch (JSONException e) {
 			throw new OXException(e);
 		}
-        
+
 	}
-	
-	
+
+
 
 }

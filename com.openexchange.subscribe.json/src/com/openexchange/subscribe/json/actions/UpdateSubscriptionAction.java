@@ -50,18 +50,12 @@
 package com.openexchange.subscribe.json.actions;
 
 import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.secret.SecretService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.json.SubscriptionJSONWriter;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link UpdateSubscriptionAction}
@@ -77,7 +71,7 @@ public class UpdateSubscriptionAction extends AbstractSubscribeAction {
 	public UpdateSubscriptionAction(ServiceLookup services) {
 		super();
 		this.services = services;
-		
+
 	}
 
 	/* (non-Javadoc)
@@ -94,12 +88,12 @@ public class UpdateSubscriptionAction extends AbstractSubscribeAction {
 	        String urlPrefix = "";
 			if (subscribeRequest.getRequestData().getParameter("__serverURL") != null){
 				urlPrefix = subscribeRequest.getRequestData().getParameter("__serverURL");
-			} 
+			}
 			return new AJAXRequestResult(1, "subscription");
 		} catch (JSONException e) {
 			throw new OXException(e);
 		}
-        
-	}	
+
+	}
 
 }

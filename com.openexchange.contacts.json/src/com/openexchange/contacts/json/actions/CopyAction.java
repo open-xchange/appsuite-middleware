@@ -133,7 +133,7 @@ public class CopyAction extends ContactAction {
         copyLinks(folderId, session, ctx, contact, origObjectId, origFolderId, user);
 
         timestamp = contact.getLastModified();
-        
+
         final JSONObject response = new JSONObject();
         try {
             response.put("id", contact.getObjectID());

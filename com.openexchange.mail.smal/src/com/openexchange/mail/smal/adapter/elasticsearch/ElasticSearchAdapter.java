@@ -120,7 +120,7 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 
 /**
  * {@link ElasticSearchAdapter}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ElasticSearchAdapter implements IndexAdapter {
@@ -492,7 +492,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
 
     /**
      * Checks if specified index exists.
-     * 
+     *
      * @param indexName The index name
      * @return <code>true</code> if index exists; otherwise <code>false</code>
      */
@@ -554,7 +554,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
 
     /**
      * Gets the number of mails held in index.
-     * 
+     *
      * @return The number of mails
      */
     public long countAll(final String indexName) {

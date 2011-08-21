@@ -55,7 +55,6 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -80,7 +79,7 @@ import com.openexchange.subscribe.crawler.internal.LoginStep;
 
 /**
  * {@link GMXAndWebDeAPIStep}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implements LoginStep {
@@ -100,7 +99,7 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
 
     /**
      * Initializes a new {@link GMXAndWebDeAPIStep}.
-     * 
+     *
      * @param url
      * @param parameters
      */
@@ -367,7 +366,7 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
                                 }
                             }
                         }
-                        
+
                         if (contactJSON.has("email")) {
                             JSONArray emailsJSON = contactJSON.getJSONArray("email");
                             for (int a = 0; a < emailsJSON.length(); a++) {
@@ -439,6 +438,7 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
      * (non-Javadoc)
      * @see com.openexchange.subscribe.crawler.internal.LoginStep#setUsername(java.lang.String)
      */
+    @Override
     public void setUsername(String username) {
         parameters.add(new NameValuePair("username", username));
         this.username = username;
@@ -449,6 +449,7 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
      * (non-Javadoc)
      * @see com.openexchange.subscribe.crawler.internal.LoginStep#setPassword(java.lang.String)
      */
+    @Override
     public void setPassword(String password) {
         parameters.add(new NameValuePair("password", password));
         this.password = password;
@@ -458,6 +459,7 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
      * (non-Javadoc)
      * @see com.openexchange.subscribe.crawler.internal.LoginStep#getBaseUrl()
      */
+    @Override
     public String getBaseUrl() {
         // TODO Auto-generated method stub
         return null;

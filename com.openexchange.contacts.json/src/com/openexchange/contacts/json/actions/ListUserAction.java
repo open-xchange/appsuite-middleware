@@ -103,7 +103,7 @@ public class ListUserAction extends ContactAction {
                 timestamp = lastModified;
             }
         }
-        
+
         return new AJAXRequestResult(contacts, timestamp, "contact");
     }
 

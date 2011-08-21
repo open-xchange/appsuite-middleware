@@ -78,7 +78,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link FolderJob}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderJob extends AbstractMailSyncJob {
@@ -98,7 +98,7 @@ public final class FolderJob extends AbstractMailSyncJob {
 
     /**
      * Initializes a new {@link FolderJob}.
-     * 
+     *
      * @param accountId The account ID
      * @param userId The user ID
      * @param contextId The context ID

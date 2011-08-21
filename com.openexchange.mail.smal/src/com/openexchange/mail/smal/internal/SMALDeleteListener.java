@@ -74,7 +74,7 @@ public class SMALDeleteListener implements DeleteListener {
             deleteContextEntriesFromDB(event, writeCon);
         } else {
             return;
-        }        
+        }
     }
 
     private void deleteContextEntriesFromDB(final DeleteEvent event, final Connection writeCon) throws OXException {
@@ -93,7 +93,7 @@ public class SMALDeleteListener implements DeleteListener {
             throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
-        }        
+        }
     }
 
     private void deleteUserEntriesFromDB(final DeleteEvent event, final Connection writeCon) throws OXException {
@@ -112,7 +112,7 @@ public class SMALDeleteListener implements DeleteListener {
             throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
-        }        
+        }
     }
 
 }

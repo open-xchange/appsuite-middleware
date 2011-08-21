@@ -64,7 +64,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link SMALProvider}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SMALProvider extends AllMailProvider {
@@ -81,7 +81,7 @@ public final class SMALProvider extends AllMailProvider {
 
     /**
      * Gets the singleton instance of SMAL provider.
-     * 
+     *
      * @return The singleton instance of SMAL provider
      */
     public static SMALProvider getInstance() {

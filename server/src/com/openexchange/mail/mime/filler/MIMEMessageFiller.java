@@ -276,7 +276,7 @@ public class MIMEMessageFiller {
          * Add header X-Originating-IP containing the IP address of the client
          */
         if (MailProperties.getInstance().isAddClientIPAddress()) {
-            final String clientIp = (String) LogProperties.getLogProperties().get("com.openexchange.ajp13.requestIp");            
+            final String clientIp = (String) LogProperties.getLogProperties().get("com.openexchange.ajp13.requestIp");
             mimeMessage.setHeader("X-Originating-IP", clientIp == null ? session.getLocalIp() : clientIp);
         }
     }

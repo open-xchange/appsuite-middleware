@@ -65,7 +65,7 @@ public final class IndexServiceImpl implements IndexService {
 
     /**
      * Initializes a new {@link IndexServiceImpl}.
-     * 
+     *
      * @throws OXException If adapter start-up fails
      */
     public IndexServiceImpl(final IndexAdapter adapter) throws OXException {

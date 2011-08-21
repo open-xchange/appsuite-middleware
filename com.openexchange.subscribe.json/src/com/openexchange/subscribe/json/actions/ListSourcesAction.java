@@ -52,30 +52,19 @@ package com.openexchange.subscribe.json.actions;
 import java.util.List;
 
 import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.i18n.I18nService;
-import com.openexchange.i18n.I18nTranslator;
-import com.openexchange.i18n.Translator;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.SubscriptionSource;
-import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
-import com.openexchange.subscribe.json.I18nServices;
 import com.openexchange.subscribe.json.SubscriptionSourceJSONWriter;
-import com.openexchange.tools.session.ServerSession;
 
 /**
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  *
  */
-public class ListSourcesAction extends AbstractSubscribeSourcesAction{			
+public class ListSourcesAction extends AbstractSubscribeSourcesAction{
 
 	public ListSourcesAction(ServiceLookup services) {
 		this.services = services;
@@ -98,8 +87,8 @@ public class ListSourcesAction extends AbstractSubscribeSourcesAction{
 //		}
 //        return null;
 	}
-	
-	protected int getModule(String moduleAsString) {        
+
+	protected int getModule(String moduleAsString) {
         if(moduleAsString == null) {
             return -1;
         }
@@ -113,5 +102,5 @@ public class ListSourcesAction extends AbstractSubscribeSourcesAction{
             return FolderObject.INFOSTORE;
         }
         return -1;
-    }		
+    }
 }

@@ -276,7 +276,7 @@ public abstract class AbstractAppointmentAction implements AJAXActionService {
             appointmentList.add(appointmentObj);
         }
     }
-    
+
     protected void checkAndAddAppointmentAsNewOrModified(final CollectionDelta<Appointment> appointmentList, final Appointment appointmentObj, final Date betweenStart, final Date betweenEnd, final CalendarCollectionService calColl) {
         if (appointmentObj.getFullTime() && betweenStart != null && betweenEnd != null) {
             if (calColl.inBetween(appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime(), betweenStart.getTime(), betweenEnd.getTime())) {

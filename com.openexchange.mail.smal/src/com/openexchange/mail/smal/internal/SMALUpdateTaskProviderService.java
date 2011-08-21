@@ -63,7 +63,7 @@ import com.openexchange.mail.smal.internal.tasks.SMALCreateTableTask;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SMALUpdateTaskProviderService implements UpdateTaskProviderService {
-    
+
     private List<UpdateTaskV2> taskList;
 
     public SMALUpdateTaskProviderService(SMALCreateTableTask task) {

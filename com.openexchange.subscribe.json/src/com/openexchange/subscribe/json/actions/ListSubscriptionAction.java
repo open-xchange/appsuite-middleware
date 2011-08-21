@@ -57,9 +57,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.openexchange.ajax.fields.ResponseFields;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -68,7 +65,6 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ListSubscriptionAction}
@@ -84,7 +80,7 @@ public class ListSubscriptionAction extends AbstractSubscribeAction {
 	public ListSubscriptionAction(ServiceLookup services) {
 		super();
 		this.services = services;
-		
+
 	}
 
 	/* (non-Javadoc)
@@ -111,7 +107,7 @@ public class ListSubscriptionAction extends AbstractSubscribeAction {
 			} catch (JSONException e) {
 				throw new OXException(e);
 			}
-            
+
         }
         final String[] basicColumns = getBasicColumns((JSONObject)subscribeRequest.getRequestData().getData());
         Map<String, String[]> dynamicColumns;
@@ -122,9 +118,9 @@ public class ListSubscriptionAction extends AbstractSubscribeAction {
 	        return new AJAXRequestResult(json, "subscription");
 		} catch (JSONException e) {
 			throw new OXException(e);
-		}        
+		}
 	}
 
-	
+
 
 }

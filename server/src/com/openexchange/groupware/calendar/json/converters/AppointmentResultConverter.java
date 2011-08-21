@@ -49,11 +49,8 @@
 
 package com.openexchange.groupware.calendar.json.converters;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONArray;
@@ -73,8 +70,6 @@ import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.groupware.container.CommonObject;
-import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.results.CollectionDelta;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
@@ -164,7 +159,7 @@ public class AppointmentResultConverter extends AbstractCalendarJSONResultConver
 
         final List<Appointment> deletedAppointments = appointments.getDeleted();
         final List<Appointment> appointmentList = appointments.getNewAndModified();
-        
+
         final TimeZone timeZone;
         {
             final String timeZoneId = req.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
