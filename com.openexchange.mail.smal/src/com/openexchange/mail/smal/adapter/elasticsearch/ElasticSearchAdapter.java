@@ -128,6 +128,11 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
  */
 public final class ElasticSearchAdapter implements IndexAdapter {
 
+    /**
+     * 
+     */
+    private static final int MAX_SEARCH_RESULTS = 1 << 20;
+
     protected static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ElasticSearchAdapter.class));
 
@@ -136,7 +141,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
      */
     private static final String X_ELASTIC_SEARCH_UUID = "X-ElasticSearch-UUID";
 
-    protected volatile TransportClient client;
+    private volatile TransportClient client;
 
     private final String clusterName;
 
@@ -331,14 +336,14 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         if (null != sortField && null != order) {
             builder.addSort(sortField.getKey(), OrderDirection.DESC.equals(order) ? SortOrder.DESC : SortOrder.ASC);
         }
-        builder.setSize(null == mailIds ? 100000 : mailIds.length);
+        builder.setSize(null == mailIds ? MAX_SEARCH_RESULTS : mailIds.length);
         /*
          * Perform search
          */
         final SearchResponse rsp = builder.execute().actionGet();
         final SearchHit[] docs = rsp.getHits().getHits();
         final List<MailMessage> mails = new ArrayList<MailMessage>(docs.length);
-        final MailFields mailFields = new MailFields(fields);
+        final MailFields mailFields = null == fields ? new MailFields(true) : new MailFields(fields);
         for (final SearchHit sd : docs) {
             // to get explanation you'll need to enable this when querying:
             // System.out.println(sd.getExplanation().toString());
@@ -712,9 +717,9 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         }
         final String indexName = indexNamePrefix + session.getContextId();
         /*
-         * Request ids
+         * Request JSON representations
          */
-        final String[] uuids;
+        final List<Map<String, Object>> jsonObjects;
         {
             final String[] mailIds = new String[mails.size()];
             String fullName = null;
@@ -731,21 +736,20 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                     mailIds[i] = iterator.next().getMailId();
                 }
             }
-            final List<MailMessage> list = getMessages(mailIds, fullName, null, null, new MailFields(MailField.ID).toArray(), accountId, session);
-            uuids = new String[list.size()];
-            for (int i = 0; i < uuids.length; i++) {
-                uuids[i] = list.get(i).getFirstHeader(X_ELASTIC_SEARCH_UUID);
-            }
+            jsonObjects = getJSONMessages(mailIds, fullName, null, null, accountId, session);
         }
+        /*
+         * Apply new time stamp & flags and add to index
+         */
         int i = 0;
         final BulkRequestBuilder bulkRequest = client.prepareBulk();
         final long stamp = System.currentTimeMillis();
         for (final MailMessage mail : mails) {
-            final String uuid = uuids[i++];
-            final IndexRequestBuilder irb = client.prepareIndex(indexName, indexType, uuid);
+            final Map<String, Object> jsonObject = jsonObjects.get(i++);
+            final IndexRequestBuilder irb = client.prepareIndex(indexName, indexType, (String) jsonObject.get(Constants.FIELD_UUID));
             irb.setReplicationType(ReplicationType.ASYNC);
             irb.setOpType(OpType.INDEX);
-            irb.setSource(changeDoc(uuid, mail, mail.getAccountId(), session, stamp));
+            irb.setSource(changeDoc(mail, jsonObject, stamp));
             bulkRequest.add(irb);
         }
         if (bulkRequest.numberOfActions() > 0) {
@@ -754,27 +758,57 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         }
     }
 
-    private XContentBuilder changeDoc(final String id, final MailMessage mail, final int accountId, final Session session, final long stamp) throws OXException {
-        try {
-            final XContentBuilder b = JsonXContent.unCachedContentBuilder().startObject();
-            b.field(Constants.FIELD_TIMESTAMP, stamp);
-            /*
-             * Identifiers
-             */
-            b.field(Constants.FIELD_UUID, id);
-            // b.field(Constants.FIELD_USER, session.getUserId());
-            // b.field(Constants.FIELD_ACCOUNT_ID, accountId);
-            // b.field(Constants.FIELD_FULL_NAME, mail.getFolder());
-            // b.field(Constants.FIELD_ID, mail.getMailId());
-            /*
-             * Write flags
-             */
-            createFlags(mail, b);
-            b.endObject();
-            return b;
-        } catch (final IOException e) {
-            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+    private List<Map<String, Object>> getJSONMessages(final String[] mailIds, final String fullName, final MailSortField sortField, final OrderDirection order, final int accountId, final Session session) {
+        ensureStarted();
+        final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+        if (null != mailIds) {
+            if (0 <= mailIds.length) {
+                return Collections.<Map<String, Object>> emptyList();
+            }
+            boolQuery.must(QueryBuilders.inQuery(Constants.FIELD_ID, mailIds));
         }
+        boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_USER, session.getUserId()));
+        boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_ACCOUNT_ID, accountId));
+        boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_FULL_NAME, fullName));
+        /*
+         * Build search request
+         */
+        final SearchRequestBuilder builder = client.prepareSearch(indexNamePrefix + session.getContextId()).setTypes(indexType);
+        builder.setQuery(boolQuery).setSearchType(SearchType.DFS_QUERY_THEN_FETCH);
+        builder.setExplain(true);
+        builder.setOperationThreading(SearchOperationThreading.THREAD_PER_SHARD);
+        if (null != sortField && null != order) {
+            builder.addSort(sortField.getKey(), OrderDirection.DESC.equals(order) ? SortOrder.DESC : SortOrder.ASC);
+        }
+        builder.setSize(null == mailIds ? MAX_SEARCH_RESULTS : mailIds.length);
+        /*
+         * Perform search
+         */
+        final SearchResponse rsp = builder.execute().actionGet();
+        final SearchHit[] docs = rsp.getHits().getHits();
+        final List<Map<String, Object>> jsonObjects = new ArrayList<Map<String, Object>>(docs.length);
+        for (final SearchHit sd : docs) {
+            jsonObjects.add(sd.getSource());
+        }
+        return jsonObjects;
+    }
+
+    private Map<String, Object> changeDoc(final MailMessage mail, final Map<String, Object> jsonObject, final long stamp) {
+        jsonObject.put(Constants.FIELD_TIMESTAMP, Long.valueOf(stamp));
+        /*
+         * Write flags
+         */
+        final int flags = mail.getFlags();
+        jsonObject.put(Constants.FIELD_FLAG_ANSWERED, Boolean.valueOf((flags & MailMessage.FLAG_ANSWERED) > 0));
+        jsonObject.put(Constants.FIELD_FLAG_DELETED, Boolean.valueOf((flags & MailMessage.FLAG_DELETED) > 0));
+        jsonObject.put(Constants.FIELD_FLAG_DRAFT, Boolean.valueOf((flags & MailMessage.FLAG_DRAFT) > 0));
+        jsonObject.put(Constants.FIELD_FLAG_FLAGGED, Boolean.valueOf((flags & MailMessage.FLAG_FLAGGED) > 0));
+        jsonObject.put(Constants.FIELD_FLAG_SEEN, Boolean.valueOf((flags & MailMessage.FLAG_SEEN) > 0));
+        jsonObject.put(Constants.FIELD_FLAG_USER, Boolean.valueOf((flags & MailMessage.FLAG_USER) > 0));
+        jsonObject.put(Constants.FIELD_FLAG_SPAM, Boolean.valueOf((flags & MailMessage.FLAG_SPAM) > 0));
+        jsonObject.put(Constants.FIELD_FLAG_FORWARDED, Boolean.valueOf((flags & MailMessage.FLAG_FORWARDED) > 0));
+        jsonObject.put(Constants.FIELD_FLAG_READ_ACK, Boolean.valueOf((flags & MailMessage.FLAG_READ_ACK) > 0));
+        return jsonObject;
     }
 
     private static void createFlags(final MailMessage mail, final XContentBuilder b) throws IOException {
