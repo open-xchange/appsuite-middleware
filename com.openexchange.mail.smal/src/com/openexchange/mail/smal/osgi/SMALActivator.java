@@ -77,10 +77,11 @@ import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link SMALActivator} - The activator for Super-MAL bundle.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SMALActivator extends HousekeepingActivator {
@@ -96,7 +97,9 @@ public class SMALActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ThreadPoolService.class, MailAccountStorageService.class, SessiondService.class, DatabaseService.class };
+        return new Class<?>[] {
+            ConfigurationService.class, ThreadPoolService.class, TimerService.class, MailAccountStorageService.class,
+            SessiondService.class, DatabaseService.class };
     }
 
     @Override

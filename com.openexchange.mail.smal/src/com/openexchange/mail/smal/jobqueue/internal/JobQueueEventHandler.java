@@ -51,11 +51,12 @@ package com.openexchange.mail.smal.jobqueue.internal;
 
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
-import com.openexchange.imap.cache.ListLsubCache.Key;
 import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.mail.smal.jobqueue.Job;
 import com.openexchange.mail.smal.jobqueue.JobQueue;
@@ -64,6 +65,8 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link JobQueueEventHandler}
@@ -75,11 +78,30 @@ public final class JobQueueEventHandler implements EventHandler {
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(JobQueueEventHandler.class));
 
+    private final ConcurrentMap<Key, ConcurrentMap<String, Job>> periodicJobs;
+
+    private final ScheduledTimerTask timerTask;
+
     /**
      * Initializes a new {@link JobQueueEventHandler}.
      */
     public JobQueueEventHandler() {
         super();
+        periodicJobs = new ConcurrentHashMap<JobQueueEventHandler.Key, ConcurrentMap<String,Job>>();
+        timerTask = SMALServiceLookup.getServiceStatic(TimerService.class).scheduleWithFixedDelay(new PeriodicRunnable(periodicJobs), 3600000, 3600000);
+    }
+
+    private boolean addPeriodicJob(final Job job, final Session session) {
+        final Key key = keyFor(session);
+        ConcurrentMap<String, Job> jobs = periodicJobs.get(key);
+        if (null == jobs) {
+            final ConcurrentMap<String, Job> newjobs = new ConcurrentHashMap<String, Job>();
+            jobs = periodicJobs.putIfAbsent(key, newjobs);
+            if (null == jobs) {
+                jobs = newjobs;
+            }
+        }
+        return (null == jobs.putIfAbsent(job.getIdentifier(), job));
     }
 
     @Override
@@ -143,13 +165,11 @@ public final class JobQueueEventHandler implements EventHandler {
                 if (jobQueue.addJob(maj)) {
                     jobs.offer(maj);
                 }
+                /*
+                 * Add periodic job
+                 */
+                //addPeriodicJob(maj, session);
             }
-            /*
-             * Periodic job
-             */
-            as
-
-
         } catch (final Exception e) {
             // Failed handling session
             LOG.warn("Failed handling tracked added session.", e);
@@ -178,6 +198,29 @@ public final class JobQueueEventHandler implements EventHandler {
             session.setParameter("com.openexchange.mail.smal.jobqueue.jobs", jobs);
         }
         return jobs;
+    }
+
+    private static final class PeriodicRunnable implements Runnable {
+
+        private final ConcurrentMap<Key, ConcurrentMap<String, Job>> periodicJobs;
+
+        /**
+         * Initializes a new {@link JobQueueEventHandler.PeriodicRunnable}.
+         * @param periodicJobs 
+         */
+        public PeriodicRunnable(final ConcurrentMap<Key, ConcurrentMap<String, Job>> periodicJobs) {
+            super();
+            this.periodicJobs = periodicJobs;
+        }
+
+        @Override
+        public void run() {
+            for (final ConcurrentMap<String, Job> jobs : periodicJobs.values()) {
+                for (final Job job : jobs.values()) {
+                    JobQueue.getInstance().addJob(job);
+                }
+            }
+        }
     }
 
     private static Key keyFor(final Session session) {
