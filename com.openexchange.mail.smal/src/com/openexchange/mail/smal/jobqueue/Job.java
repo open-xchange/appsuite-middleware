@@ -145,6 +145,17 @@ public abstract class Job implements Task<Object>, Comparable<Job>, Serializable
         return SMALServiceLookup.getInstance().getService(IndexService.class).getAdapter();
     }
 
+    /**
+     * Resets this job.
+     */
+    public void reset() {
+        done = false;
+        canceled = false;
+        paused = false;
+        executionFailure = null;
+        future = null;
+    }
+
     @Override
     public int hashCode() {
         return getIdentifier().hashCode();

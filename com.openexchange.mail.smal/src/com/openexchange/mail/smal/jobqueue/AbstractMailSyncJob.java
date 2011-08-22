@@ -157,4 +157,99 @@ public abstract class AbstractMailSyncJob extends Job {
         }
     }
 
+    /**
+     * Updates the time stamp and unsets the sync flag.
+     * 
+     * @param fullName The folder full name
+     * @param stamp The time stamp
+     * @return <code>true</code> if operation was successful; otherwise <code>false</code>
+     * @throws OXException If an error occurs
+     */
+    protected boolean setTimestampAndUnsetSyncFlag(final String fullName, final long stamp) throws OXException {
+        final DatabaseService databaseService = SMALServiceLookup.getServiceStatic(DatabaseService.class);
+        if (null == databaseService) {
+            return false;
+        }
+        final Connection con = databaseService.getWritable(contextId);
+        PreparedStatement stmt = null;
+        try {
+            stmt =
+                con.prepareStatement("UPDATE mailSync SET sync = 0, timestamp = ? WHERE cid = ? AND user = ? AND accountId = ? AND fullName = ? AND sync = 1");
+            int pos = 1;
+            stmt.setLong(pos++, stamp);
+            stmt.setLong(pos++, contextId);
+            stmt.setLong(pos++, userId);
+            stmt.setLong(pos++, accountId);
+            stmt.setString(pos, fullName);
+            return stmt.executeUpdate() > 0;
+        } catch (final SQLException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+            databaseService.backWritable(contextId, con);
+        }
+    }
+
+    /**
+     * Unsets the sync flag.
+     * 
+     * @param fullName The folder full name
+     * @return <code>true</code> if operation was successful; otherwise <code>false</code>
+     * @throws OXException If an error occurs
+     */
+    protected boolean unsetSyncFlag(final String fullName) throws OXException {
+        final DatabaseService databaseService = SMALServiceLookup.getServiceStatic(DatabaseService.class);
+        if (null == databaseService) {
+            return false;
+        }
+        final Connection con = databaseService.getWritable(contextId);
+        PreparedStatement stmt = null;
+        try {
+            stmt =
+                con.prepareStatement("UPDATE mailSync SET sync = 0 WHERE cid = ? AND user = ? AND accountId = ? AND fullName = ? AND sync = 1");
+            int pos = 1;
+            stmt.setLong(pos++, contextId);
+            stmt.setLong(pos++, userId);
+            stmt.setLong(pos++, accountId);
+            stmt.setString(pos, fullName);
+            return stmt.executeUpdate() > 0;
+        } catch (final SQLException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+            databaseService.backWritable(contextId, con);
+        }
+    }
+
+    /**
+     * Checks if this call succeeds in setting the sync flag.
+     * 
+     * @param fullName The folder full name
+     * @return <code>true</code> if operation was successful; otherwise <code>false</code>
+     * @throws OXException If an error occurs
+     */
+    protected boolean wasAbleToSetSyncFlag(final String fullName) throws OXException {
+        final DatabaseService databaseService = SMALServiceLookup.getServiceStatic(DatabaseService.class);
+        if (null == databaseService) {
+            return false;
+        }
+        final Connection con = databaseService.getWritable(contextId);
+        PreparedStatement stmt = null;
+        try {
+            stmt =
+                con.prepareStatement("UPDATE mailSync SET sync = 1 WHERE cid = ? AND user = ? AND accountId = ? AND fullName = ? AND sync = 0");
+            int pos = 1;
+            stmt.setLong(pos++, contextId);
+            stmt.setLong(pos++, userId);
+            stmt.setLong(pos++, accountId);
+            stmt.setString(pos, fullName);
+            return stmt.executeUpdate() > 0;
+        } catch (final SQLException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+            databaseService.backWritable(contextId, con);
+        }
+    }
+
 }

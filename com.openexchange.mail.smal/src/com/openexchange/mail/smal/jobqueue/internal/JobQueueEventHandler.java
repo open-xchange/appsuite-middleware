@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.smal.jobqueue.internal;
 
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -58,13 +59,16 @@ import java.util.concurrent.locks.Lock;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.mail.smal.SMALServiceLookup;
+import com.openexchange.mail.smal.jobqueue.Constants;
 import com.openexchange.mail.smal.jobqueue.Job;
 import com.openexchange.mail.smal.jobqueue.JobQueue;
 import com.openexchange.mail.smal.jobqueue.MailAccountJob;
+import com.openexchange.mail.smal.jobqueue.PeriodicFolderJob;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
@@ -88,7 +92,24 @@ public final class JobQueueEventHandler implements EventHandler {
     public JobQueueEventHandler() {
         super();
         periodicJobs = new ConcurrentHashMap<JobQueueEventHandler.Key, ConcurrentMap<String,Job>>();
-        timerTask = SMALServiceLookup.getServiceStatic(TimerService.class).scheduleWithFixedDelay(new PeriodicRunnable(periodicJobs), 3600000, 3600000);
+        timerTask = SMALServiceLookup.getServiceStatic(TimerService.class).scheduleWithFixedDelay(new PeriodicRunnable(periodicJobs), Constants.HOUR_MILLIS, Constants.HOUR_MILLIS);
+    }
+
+    /**
+     * Closes this event handler.
+     */
+    public void close() {
+        for (final Iterator<ConcurrentMap<String, Job>> iter = periodicJobs.values().iterator(); iter.hasNext();) {
+            final ConcurrentMap<String, Job> jobs = iter.next();
+            iter.remove();
+            for (final Job job : jobs.values()) {
+                if (!job.isDone()) {
+                    job.cancel();
+                }
+            }
+        }
+        periodicJobs.clear();
+        timerTask.cancel(true);
     }
 
     private boolean addPeriodicJob(final Job job, final Session session) {
@@ -102,6 +123,20 @@ public final class JobQueueEventHandler implements EventHandler {
             }
         }
         return (null == jobs.putIfAbsent(job.getIdentifier(), job));
+    }
+
+    private void dropIfLast(final Session session) {
+        if (0 >= SMALServiceLookup.getServiceStatic(SessiondService.class).getUserSessions(session.getUserId(), session.getContextId())) {
+            final ConcurrentMap<String, Job> jobs = periodicJobs.remove(keyFor(session));
+            if (null == jobs) {
+                return;
+            }
+            for (final Job job : jobs.values()) {
+                if (!job.isDone()) {
+                    job.cancel();
+                }
+            }
+        }
     }
 
     @Override
@@ -142,6 +177,7 @@ public final class JobQueueEventHandler implements EventHandler {
                     }
                 }
             }
+            dropIfLast(session);
         } catch (final Exception e) {
             // Failed handling session
             LOG.warn("Failed handling tracked removed session.", e);
@@ -161,14 +197,15 @@ public final class JobQueueEventHandler implements EventHandler {
             final Queue<Job> jobs = getJobsFrom(session);
             final JobQueue jobQueue = JobQueue.getInstance();
             for (final MailAccount account : storageService.getUserMailAccounts(userId, contextId)) {
-                final MailAccountJob maj = new MailAccountJob(account.getId(), userId, contextId, "INBOX");
+                final int accountId = account.getId();
+                final MailAccountJob maj = new MailAccountJob(accountId, userId, contextId, "INBOX");
                 if (jobQueue.addJob(maj)) {
                     jobs.offer(maj);
                 }
                 /*
                  * Add periodic job
                  */
-                //addPeriodicJob(maj, session);
+                addPeriodicJob(new PeriodicFolderJob(accountId, userId, contextId), session);
             }
         } catch (final Exception e) {
             // Failed handling session
@@ -217,6 +254,7 @@ public final class JobQueueEventHandler implements EventHandler {
         public void run() {
             for (final ConcurrentMap<String, Job> jobs : periodicJobs.values()) {
                 for (final Job job : jobs.values()) {
+                    job.reset();
                     JobQueue.getInstance().addJob(job);
                 }
             }

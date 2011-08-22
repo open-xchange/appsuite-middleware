@@ -87,6 +87,7 @@ import com.openexchange.timer.TimerService;
 public class SMALActivator extends HousekeepingActivator {
 
     private IndexService indexService;
+    private JobQueueEventHandler eventHandler;
 
     /**
      * Initializes a new {@link SMALActivator}.
@@ -99,7 +100,7 @@ public class SMALActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             ConfigurationService.class, ThreadPoolService.class, TimerService.class, MailAccountStorageService.class,
-            SessiondService.class, DatabaseService.class };
+            SessiondService.class, DatabaseService.class, SessiondService.class };
     }
 
     @Override
@@ -141,7 +142,8 @@ public class SMALActivator extends HousekeepingActivator {
         {
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-            registerService(EventHandler.class, new JobQueueEventHandler(), serviceProperties);
+            eventHandler = new JobQueueEventHandler();
+            registerService(EventHandler.class, eventHandler, serviceProperties);
         }
         /*
          * Register update task, create table job and delete listener
@@ -156,6 +158,10 @@ public class SMALActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         JobQueue.dropInstance();
+        if (null != eventHandler) {
+            eventHandler.close();
+            eventHandler = null;
+        }
         cleanUp();
         if (null != indexService) {
             indexService.getAdapter().stop();
