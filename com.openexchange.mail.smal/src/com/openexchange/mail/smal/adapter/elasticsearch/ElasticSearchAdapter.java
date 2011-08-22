@@ -331,7 +331,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         if (null != sortField && null != order) {
             builder.addSort(sortField.getKey(), OrderDirection.DESC.equals(order) ? SortOrder.DESC : SortOrder.ASC);
         }
-        builder.setSize(Integer.MAX_VALUE);
+        builder.setSize(null == mailIds ? 100000 : mailIds.length);
         /*
          * Perform search
          */
@@ -598,7 +598,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     }
 
     @Override
-    public void add(final MailMessage[] mails, final Session session) throws OXException {
+    public void add(final Collection<MailMessage> mails, final Session session) throws OXException {
         ensureStarted();
         final String indexName = indexNamePrefix + session.getContextId();
         final BulkRequestBuilder bulkRequest = client.prepareBulk();
@@ -702,7 +702,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     }
 
     @Override
-    public void change(final MailMessage[] mails, final Session session) throws OXException {
+    public void change(final Collection<MailMessage> mails, final Session session) throws OXException {
         ensureStarted();
         final String indexName = indexNamePrefix + session.getContextId();
         /*
@@ -710,11 +710,22 @@ public final class ElasticSearchAdapter implements IndexAdapter {
          */
         final String[] uuids;
         {
-            final String[] mailIds = new String[mails.length];
+            final String[] mailIds = new String[mails.size()];
+            String fullName = null;
+            int accountId = -1;
+            final Iterator<MailMessage> iterator = mails.iterator();
+            boolean first = true;
             for (int i = 0; i < mailIds.length; i++) {
-                mailIds[i] = mails[i].getMailId();
+                if (first) {
+                    final MailMessage m = iterator.next();
+                    fullName = m.getFolder();
+                    accountId = m.getAccountId();
+                    first = false;
+                } else {
+                    mailIds[i] = iterator.next().getMailId();
+                }
             }
-            final List<MailMessage> list = getMessages(mailIds, mails[0].getFolder(), null, null, new MailFields(MailField.ID).toArray(), mails[0].getAccountId(), session);
+            final List<MailMessage> list = getMessages(mailIds, fullName, null, null, new MailFields(MailField.ID).toArray(), accountId, session);
             uuids = new String[list.size()];
             for (int i = 0; i < uuids.length; i++) {
                 uuids[i] = list.get(i).getFirstHeader(X_ELASTIC_SEARCH_UUID);
