@@ -55,7 +55,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.messaging.twitter"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.publish.online.infostore"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.messaging.rss"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.messaging.mail"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.messaging.facebook"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.subscribe.crawler"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.html"/>
