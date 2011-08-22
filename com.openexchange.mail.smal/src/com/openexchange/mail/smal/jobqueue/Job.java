@@ -51,6 +51,7 @@ package com.openexchange.mail.smal.jobqueue;
 
 import java.io.Serializable;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.log.Log;
@@ -77,6 +78,11 @@ public abstract class Job implements Task<Object>, Comparable<Job>, Serializable
     static final void set(final BlockingQueue<Job> newValue) {
         QUEUE_REF.set(newValue);
     }
+
+    /**
+     * The associated future object.
+     */
+    protected volatile Future<Object> future;
 
     /**
      * The execution failure (<code>null</code> for no error during execution).
@@ -131,6 +137,15 @@ public abstract class Job implements Task<Object>, Comparable<Job>, Serializable
      * Performs this job.
      */
     public abstract void perform();
+
+    /**
+     * Gets the associated future.
+     * 
+     * @return The associated future or <code>null</code> if not in progress
+     */
+    public final Future<Object> getAssociatedFuture() {
+        return future;
+    }
 
     /**
      * Gets the working queue.

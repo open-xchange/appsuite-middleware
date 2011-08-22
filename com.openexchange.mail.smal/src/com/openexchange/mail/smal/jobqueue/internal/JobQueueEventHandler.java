@@ -55,6 +55,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.Lock;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+import com.openexchange.imap.cache.ListLsubCache.Key;
 import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.mail.smal.jobqueue.Job;
 import com.openexchange.mail.smal.jobqueue.JobQueue;
@@ -138,7 +139,7 @@ public final class JobQueueEventHandler implements EventHandler {
             final Queue<Job> jobs = getJobsFrom(session);
             final JobQueue jobQueue = JobQueue.getInstance();
             for (final MailAccount account : storageService.getUserMailAccounts(userId, contextId)) {
-                final MailAccountJob maj = new MailAccountJob(account.getId(), userId, contextId);
+                final MailAccountJob maj = new MailAccountJob(account.getId(), userId, contextId, "INBOX");
                 if (jobQueue.addJob(maj)) {
                     jobs.offer(maj);
                 }
@@ -146,6 +147,7 @@ public final class JobQueueEventHandler implements EventHandler {
             /*
              * Periodic job
              */
+            as
 
 
         } catch (final Exception e) {
@@ -177,5 +179,53 @@ public final class JobQueueEventHandler implements EventHandler {
         }
         return jobs;
     }
+
+    private static Key keyFor(final Session session) {
+        return new Key(session.getUserId(), session.getContextId());
+    }
+
+    private static final class Key {
+
+        private final int cid;
+
+        private final int user;
+
+        private final int hash;
+
+        public Key(final int user, final int cid) {
+            super();
+            this.user = user;
+            this.cid = cid;
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + cid;
+            result = prime * result + user;
+            hash = result;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof Key)) {
+                return false;
+            }
+            final Key other = (Key) obj;
+            if (cid != other.cid) {
+                return false;
+            }
+            if (user != other.user) {
+                return false;
+            }
+            return true;
+        }
+
+    } // End of class Key
 
 }

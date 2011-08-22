@@ -52,10 +52,12 @@ package com.openexchange.concurrent;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import com.openexchange.threadpool.Task;
 
 /**
  * {@link CallerRunsCompletionService} - A {@link CompletionService} that uses submitting thread to perform the task.
@@ -95,6 +97,30 @@ public final class CallerRunsCompletionService<V> implements CompletionService<V
     public CallerRunsCompletionService() {
         super();
         this.completionQueue = new LinkedBlockingQueue<Future<V>>();
+    }
+
+    /**
+     * Submits specified task to this completion service.
+     * 
+     * @param task The task
+     * @return The associated future
+     */
+    public Future<V> submit(final Task<V> task) {
+        if (task == null) {
+            throw new NullPointerException();
+        }
+        final QueueingFuture<V> f = new QueueingFuture<V>(task, completionQueue);
+        task.beforeExecute(Thread.currentThread());
+        f.run();
+        try {
+            f.get();
+            task.afterExecute(null);
+        } catch (final InterruptedException e) {
+            // Cannot occur
+        } catch (final ExecutionException e) {
+            task.afterExecute(e.getCause());
+        }
+        return f;
     }
 
     @Override

@@ -49,8 +49,12 @@
 
 package com.openexchange.mail.smal.jobqueue;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -73,6 +77,8 @@ public final class MailAccountJob extends AbstractMailSyncJob {
 
     private final String identifier;
 
+    private final Set<String> filter;
+
     /**
      * Initializes a new {@link MailAccountJob}.
      *
@@ -81,10 +87,35 @@ public final class MailAccountJob extends AbstractMailSyncJob {
      * @param contextId
      */
     public MailAccountJob(final int accountId, final int userId, final int contextId) {
+        this(accountId, userId, contextId, Collections.<String> emptySet());
+    }
+
+    /**
+     * Initializes a new {@link MailAccountJob}.
+     *
+     * @param accountId
+     * @param userId
+     * @param contextId
+     * @param filterFullNames The filter full names
+     */
+    public MailAccountJob(final int accountId, final int userId, final int contextId, final String... filterFullNames) {
+        this(accountId, userId, contextId, new HashSet<String>(Arrays.asList(filterFullNames)));
+    }
+
+    /**
+     * Initializes a new {@link MailAccountJob}.
+     *
+     * @param accountId
+     * @param userId
+     * @param contextId
+     * @param filter The filter full names
+     */
+    public MailAccountJob(final int accountId, final int userId, final int contextId, final Set<String> filter) {
         super(accountId, userId, contextId);
         identifier =
             new StringBuilder(MailAccountJob.class.getSimpleName()).append('@').append(contextId).append('@').append(userId).append('@').append(
                 accountId).toString();
+        this.filter = new HashSet<String>(filter);
     }
 
     private List<String> getList() throws OXException {
@@ -124,13 +155,27 @@ public final class MailAccountJob extends AbstractMailSyncJob {
             final List<String> list = getList();
             final BlockingQueue<Job> queue = getQueue();
             final long now = System.currentTimeMillis();
-            for (final String fullName : list) {
-                try {
-                    if (shouldSync(fullName, now)) {
-                        queue.offer(new FolderJob(fullName, accountId, userId, contextId, false));
+            if (null == filter || filter.isEmpty()) {
+                for (final String fullName : list) {
+                    try {
+                        if (shouldSync(fullName, now)) {
+                            queue.offer(new FolderJob(fullName, accountId, userId, contextId, false));
+                        }
+                    } catch (final OXException e) {
+                        LOG.error("Couldn't look-up database.", e);
                     }
-                } catch (final OXException e) {
-                    LOG.error("Couldn't look-up database.", e);
+                }
+            } else {
+                for (final String fullName : list) {
+                    if (filter.contains(fullName)) {
+                        try {
+                            if (shouldSync(fullName, now)) {
+                                queue.offer(new FolderJob(fullName, accountId, userId, contextId, false));
+                            }
+                        } catch (final OXException e) {
+                            LOG.error("Couldn't look-up database.", e);
+                        }
+                    }
                 }
             }
         } catch (final Exception e) {
