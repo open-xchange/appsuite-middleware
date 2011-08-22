@@ -196,8 +196,10 @@ public class DispatcherActivator extends HousekeepingActivator {
             dispatcher.remove(module, thing);
 
             final SessionServletRegistration tracker = registrations.remove(module);
-            tracker.remove();
-            forgetTracker(tracker);
+            if (null != tracker) {
+                tracker.remove();
+                forgetTracker(tracker);
+            }
             final ServiceRegistration<AJAXActionServiceFactory> serviceRegistration = serviceRegistrations.remove(module);
             if (null != serviceRegistration) {
                 serviceRegistration.unregister();
