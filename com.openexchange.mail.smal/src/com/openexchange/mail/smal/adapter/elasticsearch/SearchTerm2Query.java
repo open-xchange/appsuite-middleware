@@ -120,7 +120,7 @@ public final class SearchTerm2Query {
             if (searchTerm.containsWildcard()) {
                 return QueryBuilders.wildcardQuery(getFieldNameFor(searchTerm), sPattern);
             }
-            return QueryBuilders.termQuery(getFieldNameFor(searchTerm), sPattern);
+            return QueryBuilders.textQuery(getFieldNameFor(searchTerm), sPattern);
         }
         /*
          * Size term
