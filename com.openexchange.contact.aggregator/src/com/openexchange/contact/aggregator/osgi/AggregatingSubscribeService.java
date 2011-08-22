@@ -69,7 +69,7 @@ import com.openexchange.subscribe.SubscriptionSource;
  */
 public class AggregatingSubscribeService extends AbstractSubscribeService {
 
-    private static final Log LOG = LogFactory.getLog(AggregatingSubscribeService.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AggregatingSubscribeService.class));
     
     private ContactAggregator aggregator = new ContactAggregator();
     
