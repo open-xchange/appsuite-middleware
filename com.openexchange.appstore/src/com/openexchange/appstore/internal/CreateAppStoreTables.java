@@ -53,16 +53,16 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.CreateTableUpdateTask;
 import com.openexchange.groupware.update.Schema;
 
-
 /**
  * {@link CreateAppStoreTables}
- *
+ * 
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class CreateAppStoreTables extends CreateTableUpdateTask {
 
     /**
      * Initializes a new {@link CreateAppStoreTables}.
+     * 
      * @param create
      * @param dependencies
      * @param version
@@ -70,20 +70,6 @@ public class CreateAppStoreTables extends CreateTableUpdateTask {
      */
     public CreateAppStoreTables(DatabaseService databaseService) {
         super(new AppStoreTables(), new String[0], Schema.NO_VERSION, databaseService);
-    }
-
-    protected String[] getCreateStatements() {
-        return new String[] { "CREATE TABLE applications (" + 
-                " application varchar(255) default NULL," + 
-                " path varchar(255) default NULL," + 
-                " description text default NULL," + 
-                " manifest text default NULL," + 
-                " PRIMARY KEY (application)" + 
-                ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"  };
-    }
-
-    public String[] tablesToCreate() {
-        return new String[] { "applications" };
     }
 
 }
