@@ -284,10 +284,10 @@ public final class ElasticSearchAdapter implements IndexAdapter {
 
     @Override
     public void deleteMessages(final Collection<String> mailIds, final String fullName, final int accountId, final Session session) throws OXException {
+        ensureStarted();
         if (null == mailIds || mailIds.isEmpty()) {
             return;
         }
-        ensureStarted();
         final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
         boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_USER, session.getUserId()));
         boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_ACCOUNT_ID, accountId));
@@ -600,6 +600,9 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     @Override
     public void add(final Collection<MailMessage> mails, final Session session) throws OXException {
         ensureStarted();
+        if (null == mails || mails.isEmpty()) {
+            return;
+        }
         final String indexName = indexNamePrefix + session.getContextId();
         final BulkRequestBuilder bulkRequest = client.prepareBulk();
         final long stamp = System.currentTimeMillis();
@@ -704,6 +707,9 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     @Override
     public void change(final Collection<MailMessage> mails, final Session session) throws OXException {
         ensureStarted();
+        if (null == mails || mails.isEmpty()) {
+            return;
+        }
         final String indexName = indexNamePrefix + session.getContextId();
         /*
          * Request ids
