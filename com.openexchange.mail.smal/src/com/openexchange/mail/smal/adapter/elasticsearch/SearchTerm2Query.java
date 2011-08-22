@@ -168,6 +168,9 @@ public final class SearchTerm2Query {
             if ((flags & MailMessage.FLAG_FLAGGED) > 0) {
                 boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_FLAG_FLAGGED, set));
             }
+            if ((flags & MailMessage.FLAG_RECENT) > 0) {
+                boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_FLAG_RECENT, set));
+            }
             if ((flags & MailMessage.FLAG_SEEN) > 0) {
                 boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_FLAG_SEEN, set));
             }
