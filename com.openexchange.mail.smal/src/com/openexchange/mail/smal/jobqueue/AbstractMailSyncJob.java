@@ -85,7 +85,7 @@ public abstract class AbstractMailSyncJob extends Job {
     }
 
     /**
-     * Checks if a sync shouzld be performed for specified full name.
+     * Checks if a sync should be performed for specified full name.
      *
      * @param fullName The full name
      * @param now The current time milliseconds
