@@ -50,9 +50,7 @@
 package com.openexchange.mail.smal.jobqueue;
 
 import java.io.Serializable;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.log.Log;
 import com.openexchange.mail.smal.SMALServiceLookup;
@@ -69,15 +67,6 @@ import com.openexchange.threadpool.ThreadRenamer;
 public abstract class Job implements Task<Object>, Comparable<Job>, Serializable {
 
     private static final long serialVersionUID = 5618306933455163193L;
-
-    private static final AtomicReference<BlockingQueue<Job>> QUEUE_REF = new AtomicReference<BlockingQueue<Job>>();
-
-    /**
-     * Sets the blocking queue.
-     */
-    static final void set(final BlockingQueue<Job> newValue) {
-        QUEUE_REF.set(newValue);
-    }
 
     /**
      * The associated future object.
@@ -145,15 +134,6 @@ public abstract class Job implements Task<Object>, Comparable<Job>, Serializable
      */
     public final Future<Object> getAssociatedFuture() {
         return future;
-    }
-
-    /**
-     * Gets the working queue.
-     *
-     * @return The working queue or <code>null</code>
-     */
-    public final BlockingQueue<Job> getQueue() {
-        return QUEUE_REF.get();
     }
 
     /**
