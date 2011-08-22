@@ -163,7 +163,7 @@ public final class FolderJob extends AbstractMailSyncJob {
             /*
              * Get the mails from index
              */
-            final List<MailMessage> indexedMails = indexAdapter.getMessages(fullName, null, null, FIELDS, accountId, session);
+            final List<MailMessage> indexedMails = indexAdapter.getMessages(null, fullName, null, null, FIELDS, accountId, session);
             final Map<String, MailMessage> indexedMap;
             if (indexedMails.isEmpty()) {
                 indexedMap = Collections.emptyMap();
