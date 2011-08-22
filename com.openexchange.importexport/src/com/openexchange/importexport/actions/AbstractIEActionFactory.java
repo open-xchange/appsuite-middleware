@@ -63,12 +63,12 @@ public abstract class AbstractIEActionFactory implements AJAXActionServiceFactor
 	public AJAXActionService createActionService(String action) throws OXException {
 		Format format = Format.getFormatByConstantName(action);
 		if(format == null) {
-	        throw AjaxExceptionCodes.UnknownAction.create( action);
+	        return null;
 	    }
 		
 	    AJAXActionService handler = getActions().get(format);
 	    if(handler == null) {
-	        throw AjaxExceptionCodes.UnknownAction.create( action);
+	        return null;
 	    }
 	    
 	    return handler;
