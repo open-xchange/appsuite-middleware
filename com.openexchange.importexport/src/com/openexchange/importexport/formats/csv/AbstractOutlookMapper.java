@@ -47,45 +47,42 @@
  *
  */
 
-package com.openexchange.tools.images.impl;
+package com.openexchange.importexport.formats.csv;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import javax.imageio.ImageIO;
-import com.mortennobel.imagescaling.DimensionConstrain;
-import com.mortennobel.imagescaling.ResampleOp;
-import com.openexchange.tools.images.ImageScalingService;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
-
+import java.util.Collection;
+import java.util.HashMap;
+import com.openexchange.groupware.contact.helpers.ContactField;
 
 /**
- * {@link JavaImageScalingService}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class JavaImageScalingService implements ImageScalingService {
+public abstract class AbstractOutlookMapper implements ContactFieldMapper {
 
-    @Override
-    public InputStream scale(InputStream pictureData, int maxWidth, int maxHeight) throws IOException {
-        BufferedImage image = ImageIO.read(pictureData);
+    protected final HashMap<String, ContactField> outlook2ox = new HashMap<String, ContactField>();
 
-        ResampleOp op = new ResampleOp(DimensionConstrain.createMaxDimension(maxWidth, maxHeight));
+    protected final HashMap<ContactField, String> ox2outlook = new HashMap<ContactField, String>();
 
-        BufferedImage scaled = op.filter(image, null);
-
-        UnsynchronizedByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(8192);
-
-        if (!ImageIO.write(scaled, "png", baos)) {
-            throw new IOException("Couldn't scale image");
-        }
-
-
-
-        return new ByteArrayInputStream(baos.toByteArray());
+    public ContactField getFieldByName(final String name) {
+        return outlook2ox.get(name);
     }
 
+    public String getNameOfField(final ContactField field) {
+        return ox2outlook.get(field);
+    }
 
+    public Collection<String> getNamesOfFields() {
+        return ox2outlook.values();
+    }
+
+    public Collection<ContactField> getSupportedFields() {
+        return outlook2ox.values();
+    }
+    
+    public void store(ContactField oxField, String outlookField){
+        if(outlookField != null && ! "".equals(outlookField))
+            outlook2ox.put(outlookField, oxField);
+        if(oxField != null)
+            ox2outlook.put(oxField, outlookField);
+    }
 
 }

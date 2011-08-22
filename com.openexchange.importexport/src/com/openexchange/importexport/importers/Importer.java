@@ -47,45 +47,52 @@
  *
  */
 
-package com.openexchange.tools.images.impl;
+package com.openexchange.importexport.importers;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import javax.imageio.ImageIO;
-import com.mortennobel.imagescaling.DimensionConstrain;
-import com.mortennobel.imagescaling.ResampleOp;
-import com.openexchange.tools.images.ImageScalingService;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
-
+import java.util.List;
+import java.util.Map;
+import com.openexchange.exception.OXException;
+import com.openexchange.importexport.ImportResult;
+import com.openexchange.importexport.formats.Format;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link JavaImageScalingService}
+ * This interface defines an importer, meaning a class able to
+ * import one or more data formats into the OX.
+ *  
+ * @author Tobias Prinz, mailto:tobias.prinz@open-xchange.com
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class JavaImageScalingService implements ImageScalingService {
+public interface Importer {
 
-    @Override
-    public InputStream scale(InputStream pictureData, int maxWidth, int maxHeight) throws IOException {
-        BufferedImage image = ImageIO.read(pictureData);
+	/**
+	 *
+	 * @param sessObj: Session object enabling us to check write access.
+	 * @param format: Format of the data that is meant to be imported
+	 * @param folders: Those folders the data is meant to be imported int
+	 * @param optionalParams: Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
+	 * @return true, if this importer can import this format for this module; false otherwise
+	 * @see com.openexchange.groupware.Types
+	 */
+	public abstract boolean canImport(ServerSession sessObj, Format format, List<String> folders, Map<String, String[]> optionalParams) throws OXException;
 
-        ResampleOp op = new ResampleOp(DimensionConstrain.createMaxDimension(maxWidth, maxHeight));
-
-        BufferedImage scaled = op.filter(image, null);
-
-        UnsynchronizedByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(8192);
-
-        if (!ImageIO.write(scaled, "png", baos)) {
-            throw new IOException("Couldn't scale image");
-        }
-
-
-
-        return new ByteArrayInputStream(baos.toByteArray());
-    }
-
-
+	/**
+	 * 
+	 * @param sessObj: session object enabling us to check access rights (write rights needed)
+	 * @param format: Format of the data to be imported
+	 * @param is: InputStream containing data to be imported
+	 * @param folders: Identifiers for folders (plus their type as int) - usually only one, but iCal may need two and future extensions might need even more (remember: Folders can have only one type, so type is not a necessary argument)
+	 * @param optionalParams: Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
+	 * @return
+	 * @throws OXException
+	 * @see com.openexchange.groupware.Types
+	 */
+	public abstract List<ImportResult> importData(
+			ServerSession sessObj,
+			Format format,
+			InputStream is,
+			List<String> folders, 
+			Map<String, String[]> optionalParams ) throws OXException;
 
 }

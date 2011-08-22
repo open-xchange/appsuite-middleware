@@ -46,46 +46,33 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.importexport.actions;
 
-package com.openexchange.tools.images.impl;
+import java.util.Map;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import javax.imageio.ImageIO;
-import com.mortennobel.imagescaling.DimensionConstrain;
-import com.mortennobel.imagescaling.ResampleOp;
-import com.openexchange.tools.images.ImageScalingService;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.importexport.formats.Format;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
+public abstract class AbstractIEActionFactory implements AJAXActionServiceFactory {
+   
+	protected abstract Map<Format, AJAXActionService> getActions();
 
-/**
- * {@link JavaImageScalingService}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- */
-public class JavaImageScalingService implements ImageScalingService {
-
-    @Override
-    public InputStream scale(InputStream pictureData, int maxWidth, int maxHeight) throws IOException {
-        BufferedImage image = ImageIO.read(pictureData);
-
-        ResampleOp op = new ResampleOp(DimensionConstrain.createMaxDimension(maxWidth, maxHeight));
-
-        BufferedImage scaled = op.filter(image, null);
-
-        UnsynchronizedByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(8192);
-
-        if (!ImageIO.write(scaled, "png", baos)) {
-            throw new IOException("Couldn't scale image");
-        }
-
-
-
-        return new ByteArrayInputStream(baos.toByteArray());
-    }
-
+	public AJAXActionService createActionService(String action) throws OXException {
+		Format format = Format.getFormatByConstantName(action);
+		if(format == null) {
+	        return null;
+	    }
+		
+	    AJAXActionService handler = getActions().get(format);
+	    if(handler == null) {
+	        return null;
+	    }
+	    
+	    return handler;
+	}
 
 
 }

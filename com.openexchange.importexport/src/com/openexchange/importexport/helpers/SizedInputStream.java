@@ -47,45 +47,90 @@
  *
  */
 
-package com.openexchange.tools.images.impl;
+package com.openexchange.importexport.helpers;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import javax.imageio.ImageIO;
-import com.mortennobel.imagescaling.DimensionConstrain;
-import com.mortennobel.imagescaling.ResampleOp;
-import com.openexchange.tools.images.ImageScalingService;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
+import com.openexchange.importexport.formats.Format;
 
 /**
- * {@link JavaImageScalingService}
+ * Defines a wrapper for an InputStream that also contains the size of this
+ * InputStream. This is necessary to be able to set the correct size when
+ * returning a HTTP-response - else the whole connection might be cancelled
+ * either too early (resulting in corrupt data) or to late (resulting in
+ * a lot of waiting).
+ * 
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class JavaImageScalingService implements ImageScalingService {
+public class SizedInputStream extends InputStream{
+	
+	private final InputStream in;
+	private final long size;
+	private final Format format; 
+	
+	public SizedInputStream(final InputStream in, final long size, final Format format){
+		this.size = size;
+		this.in = in;
+		this.format = format;
+	}
 
-    @Override
-    public InputStream scale(InputStream pictureData, int maxWidth, int maxHeight) throws IOException {
-        BufferedImage image = ImageIO.read(pictureData);
+	public long getSize() {
+		return this.size;
+	}
+	
+	public Format getFormat(){
+		return this.format;
+	}
 
-        ResampleOp op = new ResampleOp(DimensionConstrain.createMaxDimension(maxWidth, maxHeight));
+	@Override
+	public int read() throws IOException {
+		return in.read();
+	}
 
-        BufferedImage scaled = op.filter(image, null);
+	@Override
+	public int available() throws IOException {
+		return in.available();
+	}
 
-        UnsynchronizedByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(8192);
+	@Override
+	public void close() throws IOException {
+		in.close();
+	}
 
-        if (!ImageIO.write(scaled, "png", baos)) {
-            throw new IOException("Couldn't scale image");
-        }
+	@Override
+	public void mark(final int readlimit) {
+		synchronized (this) {
+			in.mark(readlimit);
+		}
+	}
 
+	@Override
+	public boolean markSupported() {
+		return in.markSupported();
+	}
 
+	@Override
+	public int read(final byte[] b, final int off, final int len) throws IOException {
+		return in.read(b, off, len);
+	}
 
-        return new ByteArrayInputStream(baos.toByteArray());
-    }
+	@Override
+	public int read(final byte[] b) throws IOException {
+		return in.read(b);
+	}
 
+	@Override
+	public void reset() throws IOException {
+		synchronized (this) {	
+			in.reset();
+		}
+	}
 
-
+	@Override
+	public long skip(final long n) throws IOException {
+		return in.skip(n);
+	}
+	
 }

@@ -47,45 +47,18 @@
  *
  */
 
-package com.openexchange.tools.images.impl;
+package com.openexchange.importexport.formats.csv;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import javax.imageio.ImageIO;
-import com.mortennobel.imagescaling.DimensionConstrain;
-import com.mortennobel.imagescaling.ResampleOp;
-import com.openexchange.tools.images.ImageScalingService;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
+import java.util.Collection;
+import com.openexchange.groupware.contact.helpers.ContactField;
 
+public interface ContactFieldMapper {
 
-/**
- * {@link JavaImageScalingService}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- */
-public class JavaImageScalingService implements ImageScalingService {
+	public abstract ContactField getFieldByName(String name);
 
-    @Override
-    public InputStream scale(InputStream pictureData, int maxWidth, int maxHeight) throws IOException {
-        BufferedImage image = ImageIO.read(pictureData);
+	public abstract String getNameOfField(ContactField field);
 
-        ResampleOp op = new ResampleOp(DimensionConstrain.createMaxDimension(maxWidth, maxHeight));
-
-        BufferedImage scaled = op.filter(image, null);
-
-        UnsynchronizedByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(8192);
-
-        if (!ImageIO.write(scaled, "png", baos)) {
-            throw new IOException("Couldn't scale image");
-        }
-
-
-
-        return new ByteArrayInputStream(baos.toByteArray());
-    }
-
-
-
+	public abstract Collection<String> getNamesOfFields();
+	
+	public abstract Collection<ContactField> getSupportedFields();
 }

@@ -47,45 +47,36 @@
  *
  */
 
-package com.openexchange.tools.images.impl;
+package com.openexchange.importexport.formats.vcard;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import javax.imageio.ImageIO;
-import com.mortennobel.imagescaling.DimensionConstrain;
-import com.mortennobel.imagescaling.ResampleOp;
-import com.openexchange.tools.images.ImageScalingService;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
-
+import com.openexchange.tools.versit.VersitDefinition;
 
 /**
- * {@link JavaImageScalingService}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * This class is a tuple containing a VCard/VCalendar/ICal (stored as byte array to be independent of the encoding used) and a related
+ * VersitDefinition, which means the information what kind of version it is.
+ * 
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  */
-public class JavaImageScalingService implements ImageScalingService {
+public class VCardFileToken {
 
-    @Override
-    public InputStream scale(InputStream pictureData, int maxWidth, int maxHeight) throws IOException {
-        BufferedImage image = ImageIO.read(pictureData);
+    protected VersitDefinition versitDefinition;
 
-        ResampleOp op = new ResampleOp(DimensionConstrain.createMaxDimension(maxWidth, maxHeight));
+    protected byte[] content;
 
-        BufferedImage scaled = op.filter(image, null);
-
-        UnsynchronizedByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(8192);
-
-        if (!ImageIO.write(scaled, "png", baos)) {
-            throw new IOException("Couldn't scale image");
-        }
-
-
-
-        return new ByteArrayInputStream(baos.toByteArray());
+    public byte[] getContent() {
+        return content;
     }
 
+    public void setContent(final byte[] content) {
+        this.content = content;
+    }
 
+    public VersitDefinition getVersitDefinition() {
+        return versitDefinition;
+    }
+
+    public void setVersitDefinition(final VersitDefinition versitDefinition) {
+        this.versitDefinition = versitDefinition;
+    }
 
 }

@@ -47,45 +47,63 @@
  *
  */
 
-package com.openexchange.tools.images.impl;
+package com.openexchange.importexport.helpers;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import javax.imageio.ImageIO;
-import com.mortennobel.imagescaling.DimensionConstrain;
-import com.mortennobel.imagescaling.ResampleOp;
-import com.openexchange.tools.images.ImageScalingService;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
-
+import static com.openexchange.java.Autoboxing.I;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.Types;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 
 /**
- * {@link JavaImageScalingService}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * This sad little class translates has the sad little task to translate between different constants that are used to identify types of
+ * modules. So, in case yo
+ * 
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  */
-public class JavaImageScalingService implements ImageScalingService {
+public final class ModuleTypeTranslator {
 
-    @Override
-    public InputStream scale(InputStream pictureData, int maxWidth, int maxHeight) throws IOException {
-        BufferedImage image = ImageIO.read(pictureData);
-
-        ResampleOp op = new ResampleOp(DimensionConstrain.createMaxDimension(maxWidth, maxHeight));
-
-        BufferedImage scaled = op.filter(image, null);
-
-        UnsynchronizedByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(8192);
-
-        if (!ImageIO.write(scaled, "png", baos)) {
-            throw new IOException("Couldn't scale image");
-        }
-
-
-
-        return new ByteArrayInputStream(baos.toByteArray());
+    private ModuleTypeTranslator() {
+        super();
     }
 
+    /**
+     * Translates a FolderObject value to a Types value.
+     */
+    public static int getTypesConstant(final int folderObjectConstant) throws OXException {
+        switch (folderObjectConstant) {
+        case FolderObject.CONTACT:
+            return Types.CONTACT;
+        case FolderObject.INFOSTORE:
+            return Types.INFOSTORE;
+        case FolderObject.MAIL:
+            return Types.EMAIL;
+        case FolderObject.TASK:
+            return Types.TASK;
+        case FolderObject.CALENDAR:
+            return Types.APPOINTMENT;
+        default:
+            throw ImportExportExceptionCodes.NO_TYPES_CONSTANT.create(I(folderObjectConstant));
+        }
+    }
 
-
+    /**
+     * Translates a Types value to a FolderObject value
+     */
+    public static int getFolderObjectConstant(final int typeConstant) throws OXException {
+        switch (typeConstant) {
+        case Types.CONTACT:
+            return FolderObject.CONTACT;
+        case Types.INFOSTORE:
+            return FolderObject.INFOSTORE;
+        case Types.EMAIL:
+            return FolderObject.MAIL;
+        case Types.TASK:
+            return FolderObject.TASK;
+        case Types.APPOINTMENT:
+            return FolderObject.CALENDAR;
+        default:
+            throw ImportExportExceptionCodes.NO_FOLDEROBJECT_CONSTANT.create(I(typeConstant));
+        }
+    }
 }

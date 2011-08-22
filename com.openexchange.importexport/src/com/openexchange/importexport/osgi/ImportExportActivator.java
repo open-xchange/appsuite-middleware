@@ -47,45 +47,49 @@
  *
  */
 
-package com.openexchange.tools.images.impl;
+package com.openexchange.importexport.osgi;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import javax.imageio.ImageIO;
-import com.mortennobel.imagescaling.DimensionConstrain;
-import com.mortennobel.imagescaling.ResampleOp;
-import com.openexchange.tools.images.ImageScalingService;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.data.conversion.ical.ICalEmitter;
+import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
+import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
+import com.openexchange.groupware.generic.FolderUpdaterRegistry;
+import com.openexchange.importexport.actions.ExportActionFactory;
+import com.openexchange.importexport.actions.ImportActionFactory;
 
 /**
- * {@link JavaImageScalingService}
+ * {@link ImportExportActivator}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author tobiasp
  */
-public class JavaImageScalingService implements ImageScalingService {
+public class ImportExportActivator extends AJAXModuleActivator{
 
-    @Override
-    public InputStream scale(InputStream pictureData, int maxWidth, int maxHeight) throws IOException {
-        BufferedImage image = ImageIO.read(pictureData);
-
-        ResampleOp op = new ResampleOp(DimensionConstrain.createMaxDimension(maxWidth, maxHeight));
-
-        BufferedImage scaled = op.filter(image, null);
-
-        UnsynchronizedByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(8192);
-
-        if (!ImageIO.write(scaled, "png", baos)) {
-            throw new IOException("Couldn't scale image");
-        }
-
-
-
-        return new ByteArrayInputStream(baos.toByteArray());
+    public ImportExportActivator() {
+        super();
     }
 
+	@Override
+	protected Class<?>[] getNeededServices() {
+		return new Class[]{
+			ContactInterfaceDiscoveryService.class,
+			FolderUpdaterRegistry.class,
+			ICalParser.class,
+			AppointmentSqlFactoryService.class,
+			CalendarCollectionService.class,
+			ConfigurationService.class,
+			ICalEmitter.class
+		};
+	}
 
+	@Override
+	protected void startBundle() throws Exception {
+		ImportExportServices.LOOKUP = this;
+		registerModule(new ImportActionFactory(), "import");
+		registerModule(new ExportActionFactory(), "export");
+	}
 
 }
