@@ -77,7 +77,7 @@ public class JavaImageScalingService implements ImageScalingService {
 
         UnsynchronizedByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(8192);
 
-        if (!ImageIO.write(scaled, "jpeg", baos)) {
+        if (!ImageIO.write(scaled, "png", baos)) {
             throw new IOException("Couldn't scale image");
         }
 

@@ -207,6 +207,6 @@ public class FileResponseRenderer implements ResponseRenderer {
 
         final InputStream scaled = scaler.scale(file.getStream(), width, height);
 
-        return new FileHolder(scaled, -1, "image/jpg", "");
+        return new FileHolder(scaled, -1, "image/png", "");
     }
 }
