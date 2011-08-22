@@ -686,7 +686,16 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             /*
              * Write flags
              */
-            createFlags(mail, b);
+            final int flags = mail.getFlags();
+            b.field(Constants.FIELD_FLAG_ANSWERED, (flags & MailMessage.FLAG_ANSWERED) > 0);
+            b.field(Constants.FIELD_FLAG_DELETED, (flags & MailMessage.FLAG_DELETED) > 0);
+            b.field(Constants.FIELD_FLAG_DRAFT, (flags & MailMessage.FLAG_DRAFT) > 0);
+            b.field(Constants.FIELD_FLAG_FLAGGED, (flags & MailMessage.FLAG_FLAGGED) > 0);
+            b.field(Constants.FIELD_FLAG_SEEN, (flags & MailMessage.FLAG_SEEN) > 0);
+            b.field(Constants.FIELD_FLAG_USER, (flags & MailMessage.FLAG_USER) > 0);
+            b.field(Constants.FIELD_FLAG_SPAM, (flags & MailMessage.FLAG_SPAM) > 0);
+            b.field(Constants.FIELD_FLAG_FORWARDED, (flags & MailMessage.FLAG_FORWARDED) > 0);
+            b.field(Constants.FIELD_FLAG_READ_ACK, (flags & MailMessage.FLAG_READ_ACK) > 0);
             /*
              * Subject
              */
@@ -809,19 +818,6 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         jsonObject.put(Constants.FIELD_FLAG_FORWARDED, Boolean.valueOf((flags & MailMessage.FLAG_FORWARDED) > 0));
         jsonObject.put(Constants.FIELD_FLAG_READ_ACK, Boolean.valueOf((flags & MailMessage.FLAG_READ_ACK) > 0));
         return jsonObject;
-    }
-
-    private static void createFlags(final MailMessage mail, final XContentBuilder b) throws IOException {
-        final int flags = mail.getFlags();
-        b.field(Constants.FIELD_FLAG_ANSWERED, (flags & MailMessage.FLAG_ANSWERED) > 0);
-        b.field(Constants.FIELD_FLAG_DELETED, (flags & MailMessage.FLAG_DELETED) > 0);
-        b.field(Constants.FIELD_FLAG_DRAFT, (flags & MailMessage.FLAG_DRAFT) > 0);
-        b.field(Constants.FIELD_FLAG_FLAGGED, (flags & MailMessage.FLAG_FLAGGED) > 0);
-        b.field(Constants.FIELD_FLAG_SEEN, (flags & MailMessage.FLAG_SEEN) > 0);
-        b.field(Constants.FIELD_FLAG_USER, (flags & MailMessage.FLAG_USER) > 0);
-        b.field(Constants.FIELD_FLAG_SPAM, (flags & MailMessage.FLAG_SPAM) > 0);
-        b.field(Constants.FIELD_FLAG_FORWARDED, (flags & MailMessage.FLAG_FORWARDED) > 0);
-        b.field(Constants.FIELD_FLAG_READ_ACK, (flags & MailMessage.FLAG_READ_ACK) > 0);
     }
 
     public void deleteById(final String mailId, final String indexName) {
