@@ -266,13 +266,8 @@ public final class TextProcessing {
             final int len = jsonArray.length();
             for (int i = 0; i < len; i++) {
                 final JSONObject attachment = jsonArray.getJSONObject(i);
-                if (attachment.hasAndNotNull(MailJSONField.CONTENT.getKey()) && attachment.getString(MailJSONField.CONTENT_TYPE.getKey()).regionMatches(
-                    true,
-                    0,
-                    "text/",
-                    0,
-                    5)) {
-                    return attachment.getString(MailJSONField.CONTENT.getKey());
+                if (attachment.hasAndNotNull(MailJSONField.CONTENT.getKey()) && attachment.getString(MailJSONField.CONTENT_TYPE.getKey()).regionMatches(true,0,"text/",0,5)) {
+                    return attachment.hasAndNotNull("plain_text") ? attachment.getString("plain_text") : attachment.getString(MailJSONField.CONTENT.getKey());
                 }
             }
             return null;
