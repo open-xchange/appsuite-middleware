@@ -54,16 +54,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
-import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.SubscriptionSource;
-import com.openexchange.subscribe.TargetFolderSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
 
 
 /**
@@ -77,9 +73,9 @@ public class AggregatingSubscribeService extends AbstractSubscribeService {
     
     private ContactAggregator aggregator = new ContactAggregator();
     
-    private SubscriptionSource source;
+    private final SubscriptionSource source;
     
-    public AggregatingSubscribeService(ContactAggregator aggregator) {
+    public AggregatingSubscribeService(final ContactAggregator aggregator) {
         super();
         this.aggregator = aggregator;
         source = new SubscriptionSource();
@@ -87,7 +83,7 @@ public class AggregatingSubscribeService extends AbstractSubscribeService {
         source.setDisplayName("OX Contact Aggregator");
         source.setFolderModule(FolderObject.CONTACT);
         
-        DynamicFormDescription form = new DynamicFormDescription();
+        final DynamicFormDescription form = new DynamicFormDescription();
         
         form.add(FormElement.input("displayName", "Display Name", true, "OX Contact Aggregator"));
         
@@ -95,13 +91,13 @@ public class AggregatingSubscribeService extends AbstractSubscribeService {
         source.setSubscribeService(this);
     }
 
-    public Collection<?> getContent(Subscription subscription) throws SubscriptionException {
+    public Collection<?> getContent(final Subscription subscription) throws OXException {
         try {
             return aggregator.aggregate(subscription.getSession());
-        } catch (AbstractOXException x) {
+        } catch (final OXException x) {
             LOG.error(x.getMessage(), x);
-            throw new SubscriptionException(x);
-        } catch (Throwable t) {
+            throw x;
+        } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(t);
         }
@@ -111,12 +107,12 @@ public class AggregatingSubscribeService extends AbstractSubscribeService {
         return source;
     }
 
-    public boolean handles(int folderModule) {
+    public boolean handles(final int folderModule) {
         return folderModule == FolderObject.CONTACT;
     }
     
     @Override
-    public void modifyOutgoing(Subscription subscription) throws SubscriptionException {
+    public void modifyOutgoing(final Subscription subscription) throws OXException {
         super.modifyOutgoing(subscription);
         subscription.setSource(source);
         subscription.setDisplayName(subscription.getConfiguration().get("displayName").toString());
