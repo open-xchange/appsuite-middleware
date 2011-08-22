@@ -82,6 +82,8 @@ public final class Constants {
 
     // ------------------- FIELD NAMES ----------------------
 
+    public static final String FIELD_TIMESTAMP = "timestamp";
+
     public static final String FIELD_UUID = "uuid";
 
     public static final String FIELD_USER = "user";

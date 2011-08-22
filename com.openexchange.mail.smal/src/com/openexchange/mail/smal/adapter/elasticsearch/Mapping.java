@@ -74,6 +74,7 @@ public final class Mapping {
     static {
         try {
             final JSONObject properties = new JSONObject();
+            properties.put(Constants.FIELD_TIMESTAMP, new JSONObject("{ \"type\": \"long\", \"index\": \"not_analyzed\", \"null_value\": 0 }"));
             properties.put(Constants.FIELD_UUID, new JSONObject("{ \"type\": \"string\", \"index\": \"not_analyzed\" }"));
             properties.put(Constants.FIELD_USER, new JSONObject("{ \"type\": \"string\", \"index\": \"not_analyzed\" }"));
             properties.put(Constants.FIELD_ACCOUNT_ID, new JSONObject("{ \"type\": \"string\", \"index\": \"not_analyzed\" }"));

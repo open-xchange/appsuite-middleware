@@ -52,6 +52,7 @@ package com.openexchange.mail.smal.adapter.elasticsearch;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -71,9 +72,11 @@ import org.elasticsearch.action.admin.indices.optimize.OptimizeResponse;
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.count.CountResponse;
 import org.elasticsearch.action.delete.DeleteResponse;
+import org.elasticsearch.action.index.IndexRequest.OpType;
 import org.elasticsearch.action.search.SearchOperationThreading;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
+import org.elasticsearch.action.support.replication.ReplicationType;
 import org.elasticsearch.client.action.admin.indices.mapping.put.PutMappingRequestBuilder;
 import org.elasticsearch.client.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.client.action.index.IndexRequestBuilder;
@@ -120,13 +123,18 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 
 /**
  * {@link ElasticSearchAdapter}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ElasticSearchAdapter implements IndexAdapter {
 
     protected static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ElasticSearchAdapter.class));
+
+    /**
+     * The special header for extracted ElkasticSearch UUID.
+     */
+    private static final String X_ELASTIC_SEARCH_UUID = "X-ElasticSearch-UUID";
 
     protected volatile TransportClient client;
 
@@ -301,9 +309,15 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     }
 
     @Override
-    public List<MailMessage> getMessages(final String fullName, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int accountId, final Session session) throws OXException {
+    public List<MailMessage> getMessages(final String[] mailIds, final String fullName, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int accountId, final Session session) throws OXException {
         ensureStarted();
         final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+        if (null != mailIds) {
+            if (0 <= mailIds.length) {
+                return Collections.<MailMessage> emptyList();
+            }
+            boolQuery.must(QueryBuilders.inQuery(Constants.FIELD_ID, mailIds));
+        }
         boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_USER, session.getUserId()));
         boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_ACCOUNT_ID, accountId));
         boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_FULL_NAME, fullName));
@@ -333,6 +347,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             // we need to include all necessary fields in query and then to use doc.getFields()
             // instead of doc.getSource()
             final MailMessage mail = readDoc(sd.getSource(), mailFields);
+            mail.setHeader(X_ELASTIC_SEARCH_UUID, sd.getId());
             mails.add(mail);
         }
         return mails;
@@ -369,6 +384,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                 // we need to include all necessary fields in query and then to use doc.getFields()
                 // instead of doc.getSource()
                 final MailMessage mail = readDoc(sd.getSource(), mailFields);
+                mail.setHeader(X_ELASTIC_SEARCH_UUID, sd.getId());
                 mails.add(mail);
             }
             return mails;
@@ -492,7 +508,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
 
     /**
      * Checks if specified index exists.
-     *
+     * 
      * @param indexName The index name
      * @return <code>true</code> if index exists; otherwise <code>false</code>
      */
@@ -554,7 +570,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
 
     /**
      * Gets the number of mails held in index.
-     *
+     * 
      * @return The number of mails
      */
     public long countAll(final String indexName) {
@@ -570,7 +586,10 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             final String indexName = indexNamePrefix + session.getContextId();
             final String id = UUID.randomUUID().toString();
             final IndexRequestBuilder irb = client.prepareIndex(indexName, indexType, id);
-            irb.setConsistencyLevel(WriteConsistencyLevel.DEFAULT).setSource(createDoc(id, mail, mail.getAccountId(), session));
+            irb.setReplicationType(ReplicationType.ASYNC);
+            irb.setOpType(OpType.CREATE);
+            irb.setConsistencyLevel(WriteConsistencyLevel.DEFAULT).setSource(
+                createDoc(id, mail, mail.getAccountId(), session, System.currentTimeMillis()));
             irb.execute().actionGet();
             refresh(indexName);
         } catch (final ElasticSearchException e) {
@@ -583,10 +602,13 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         ensureStarted();
         final String indexName = indexNamePrefix + session.getContextId();
         final BulkRequestBuilder bulkRequest = client.prepareBulk();
+        final long stamp = System.currentTimeMillis();
         for (final MailMessage mail : mails) {
             final String id = UUID.randomUUID().toString();
             final IndexRequestBuilder irb = client.prepareIndex(indexName, indexType, id);
-            irb.setSource(createDoc(id, mail, mail.getAccountId(), session));
+            irb.setReplicationType(ReplicationType.ASYNC);
+            irb.setOpType(OpType.CREATE);
+            irb.setSource(createDoc(id, mail, mail.getAccountId(), session, stamp));
             bulkRequest.add(irb);
         }
         if (bulkRequest.numberOfActions() > 0) {
@@ -595,9 +617,10 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         }
     }
 
-    private XContentBuilder createDoc(final String id, final MailMessage mail, final int accountId, final Session session) throws OXException {
+    private XContentBuilder createDoc(final String id, final MailMessage mail, final int accountId, final Session session, final long stamp) throws OXException {
         try {
             final XContentBuilder b = JsonXContent.unCachedContentBuilder().startObject();
+            b.field(Constants.FIELD_TIMESTAMP, stamp);
             /*
              * Body content
              */
@@ -607,9 +630,11 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             /*
              * Identifiers
              */
-            b.field(Constants.FIELD_ID, id);
+            b.field(Constants.FIELD_UUID, id);
             b.field(Constants.FIELD_USER, session.getUserId());
             b.field(Constants.FIELD_ACCOUNT_ID, accountId);
+            b.field(Constants.FIELD_FULL_NAME, mail.getFolder());
+            b.field(Constants.FIELD_ID, mail.getMailId());
             /*
              * Write address fields
              */
@@ -653,18 +678,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             /*
              * Write flags
              */
-            {
-                final int flags = mail.getFlags();
-                b.field(Constants.FIELD_FLAG_ANSWERED, (flags & MailMessage.FLAG_ANSWERED) > 0);
-                b.field(Constants.FIELD_FLAG_DELETED, (flags & MailMessage.FLAG_DELETED) > 0);
-                b.field(Constants.FIELD_FLAG_DRAFT, (flags & MailMessage.FLAG_DRAFT) > 0);
-                b.field(Constants.FIELD_FLAG_FLAGGED, (flags & MailMessage.FLAG_FLAGGED) > 0);
-                b.field(Constants.FIELD_FLAG_SEEN, (flags & MailMessage.FLAG_SEEN) > 0);
-                b.field(Constants.FIELD_FLAG_USER, (flags & MailMessage.FLAG_USER) > 0);
-                b.field(Constants.FIELD_FLAG_SPAM, (flags & MailMessage.FLAG_SPAM) > 0);
-                b.field(Constants.FIELD_FLAG_FORWARDED, (flags & MailMessage.FLAG_FORWARDED) > 0);
-                b.field(Constants.FIELD_FLAG_READ_ACK, (flags & MailMessage.FLAG_READ_ACK) > 0);
-            }
+            createFlags(mail, b);
             /*
              * Subject
              */
@@ -685,6 +699,78 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             ret[i] = addrs[i].toUnicodeString();
         }
         return ret;
+    }
+
+    @Override
+    public void change(final MailMessage[] mails, final Session session) throws OXException {
+        ensureStarted();
+        final String indexName = indexNamePrefix + session.getContextId();
+        /*
+         * Request ids
+         */
+        final String[] uuids;
+        {
+            final String[] mailIds = new String[mails.length];
+            for (int i = 0; i < mailIds.length; i++) {
+                mailIds[i] = mails[i].getMailId();
+            }
+            final List<MailMessage> list = getMessages(mailIds, mails[0].getFolder(), null, null, new MailFields(MailField.ID).toArray(), mails[0].getAccountId(), session);
+            uuids = new String[list.size()];
+            for (int i = 0; i < uuids.length; i++) {
+                uuids[i] = list.get(i).getFirstHeader(X_ELASTIC_SEARCH_UUID);
+            }
+        }
+        int i = 0;
+        final BulkRequestBuilder bulkRequest = client.prepareBulk();
+        final long stamp = System.currentTimeMillis();
+        for (final MailMessage mail : mails) {
+            final String uuid = uuids[i++];
+            final IndexRequestBuilder irb = client.prepareIndex(indexName, indexType, uuid);
+            irb.setReplicationType(ReplicationType.ASYNC);
+            irb.setOpType(OpType.INDEX);
+            irb.setSource(changeDoc(uuid, mail, mail.getAccountId(), session, stamp));
+            bulkRequest.add(irb);
+        }
+        if (bulkRequest.numberOfActions() > 0) {
+            bulkRequest.execute().actionGet();
+            refresh(indexName);
+        }
+    }
+
+    private XContentBuilder changeDoc(final String id, final MailMessage mail, final int accountId, final Session session, final long stamp) throws OXException {
+        try {
+            final XContentBuilder b = JsonXContent.unCachedContentBuilder().startObject();
+            b.field(Constants.FIELD_TIMESTAMP, stamp);
+            /*
+             * Identifiers
+             */
+            b.field(Constants.FIELD_UUID, id);
+            // b.field(Constants.FIELD_USER, session.getUserId());
+            // b.field(Constants.FIELD_ACCOUNT_ID, accountId);
+            // b.field(Constants.FIELD_FULL_NAME, mail.getFolder());
+            // b.field(Constants.FIELD_ID, mail.getMailId());
+            /*
+             * Write flags
+             */
+            createFlags(mail, b);
+            b.endObject();
+            return b;
+        } catch (final IOException e) {
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private static void createFlags(final MailMessage mail, final XContentBuilder b) throws IOException {
+        final int flags = mail.getFlags();
+        b.field(Constants.FIELD_FLAG_ANSWERED, (flags & MailMessage.FLAG_ANSWERED) > 0);
+        b.field(Constants.FIELD_FLAG_DELETED, (flags & MailMessage.FLAG_DELETED) > 0);
+        b.field(Constants.FIELD_FLAG_DRAFT, (flags & MailMessage.FLAG_DRAFT) > 0);
+        b.field(Constants.FIELD_FLAG_FLAGGED, (flags & MailMessage.FLAG_FLAGGED) > 0);
+        b.field(Constants.FIELD_FLAG_SEEN, (flags & MailMessage.FLAG_SEEN) > 0);
+        b.field(Constants.FIELD_FLAG_USER, (flags & MailMessage.FLAG_USER) > 0);
+        b.field(Constants.FIELD_FLAG_SPAM, (flags & MailMessage.FLAG_SPAM) > 0);
+        b.field(Constants.FIELD_FLAG_FORWARDED, (flags & MailMessage.FLAG_FORWARDED) > 0);
+        b.field(Constants.FIELD_FLAG_READ_ACK, (flags & MailMessage.FLAG_READ_ACK) > 0);
     }
 
     public void deleteById(final String mailId, final String indexName) {

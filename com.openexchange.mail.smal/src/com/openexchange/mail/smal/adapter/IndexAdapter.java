@@ -109,15 +109,16 @@ public interface IndexAdapter {
     public List<MailMessage> search(SearchTerm<?> searchTerm, MailSortField sortField, OrderDirection order, Session session) throws OXException;
 
     /**
-     * Checks if index contains mail located in specified folder.
+     * Gets specified mails located in given folder.
      *
+     * @param mailIds The mail identifiers; pass <code>null</code> to get all messages in folder
      * @param fullName The folder full name
      * @param accountId The account identifier
      * @param session The session
      * @return <code>true</code> if folder is contained; otherwise <code>false</code>
      * @throws OXException If check fails
      */
-    public List<MailMessage> getMessages(String fullName, MailSortField sortField, OrderDirection order, MailField[] fields, int accountId, Session session) throws OXException;
+    public List<MailMessage> getMessages(String[] mailIds, String fullName, MailSortField sortField, OrderDirection order, MailField[] fields, int accountId, Session session) throws OXException;
 
     /**
      * Deletes specified mails from index.
@@ -140,6 +141,15 @@ public interface IndexAdapter {
      * @throws OXException If check fails
      */
     public boolean containsFolder(String fullName, int accountId, Session session) throws OXException;
+
+    /**
+     * Changes the flags of specified mails in index.
+     * 
+     * @param mails The mails with changed flags
+     * @param session The user session
+     * @throws OXException If changing mails in index fails
+     */
+    public void change(MailMessage[] mails, Session session) throws OXException;
 
     /**
      * Adds specified mail to the index.
