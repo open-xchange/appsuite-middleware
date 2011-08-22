@@ -99,6 +99,19 @@ public final class FolderJob extends AbstractMailSyncJob {
     /**
      * Initializes a new {@link FolderJob}.
      *
+     * @param fullName The folder full name
+     * @param accountId The account ID
+     * @param userId The user ID
+     * @param contextId The context ID
+     */
+    public FolderJob(final String fullName, final int accountId, final int userId, final int contextId) {
+        this(fullName, accountId, userId, contextId, true);
+    }
+
+    /**
+     * Initializes a new {@link FolderJob}.
+     *
+     * @param fullName The folder full name
      * @param accountId The account ID
      * @param userId The user ID
      * @param contextId The context ID
