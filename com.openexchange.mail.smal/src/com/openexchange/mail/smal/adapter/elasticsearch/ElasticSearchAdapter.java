@@ -54,9 +54,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.mail.internet.AddressException;
@@ -439,6 +441,9 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                     if (((Boolean) source.get(Constants.FIELD_FLAG_READ_ACK)).booleanValue()) {
                         flags |= MailMessage.FLAG_READ_ACK;
                     }
+                    if (((Boolean) source.get(Constants.FIELD_FLAG_RECENT)).booleanValue()) {
+                        flags |= MailMessage.FLAG_RECENT;
+                    }
                     if (((Boolean) source.get(Constants.FIELD_FLAG_SEEN)).booleanValue()) {
                         flags |= MailMessage.FLAG_SEEN;
                     }
@@ -691,6 +696,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             b.field(Constants.FIELD_FLAG_DELETED, (flags & MailMessage.FLAG_DELETED) > 0);
             b.field(Constants.FIELD_FLAG_DRAFT, (flags & MailMessage.FLAG_DRAFT) > 0);
             b.field(Constants.FIELD_FLAG_FLAGGED, (flags & MailMessage.FLAG_FLAGGED) > 0);
+            b.field(Constants.FIELD_FLAG_RECENT, (flags & MailMessage.FLAG_RECENT) > 0);
             b.field(Constants.FIELD_FLAG_SEEN, (flags & MailMessage.FLAG_SEEN) > 0);
             b.field(Constants.FIELD_FLAG_USER, (flags & MailMessage.FLAG_USER) > 0);
             b.field(Constants.FIELD_FLAG_SPAM, (flags & MailMessage.FLAG_SPAM) > 0);
@@ -740,6 +746,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                     final MailMessage m = iterator.next();
                     fullName = m.getFolder();
                     accountId = m.getAccountId();
+                    mailIds[0] = m.getMailId();
                     first = false;
                 } else {
                     mailIds[i] = iterator.next().getMailId();
@@ -770,11 +777,28 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     private List<Map<String, Object>> getJSONMessages(final String[] mailIds, final String fullName, final MailSortField sortField, final OrderDirection order, final int accountId, final Session session) {
         ensureStarted();
         final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+        final Set<String> filter;
         if (null != mailIds) {
-            if (0 <= mailIds.length) {
+            if (0 >= mailIds.length) {
                 return Collections.<Map<String, Object>> emptyList();
             }
-            boolQuery.must(QueryBuilders.inQuery(Constants.FIELD_ID, mailIds));
+            if (mailIds.length <= 50) {
+                /*
+                 * Filtering is performed by query
+                 */
+                boolQuery.must(QueryBuilders.inQuery(Constants.FIELD_ID, mailIds));
+                filter = null;
+            } else {
+                /*
+                 * Request all and filter
+                 */
+                filter = new HashSet<String>(mailIds.length);
+                for (final String mailId : mailIds) {
+                    filter.add(mailId);
+                }
+            }
+        } else {
+            filter = null;
         }
         boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_USER, session.getUserId()));
         boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_ACCOUNT_ID, accountId));
@@ -797,7 +821,14 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         final SearchHit[] docs = rsp.getHits().getHits();
         final List<Map<String, Object>> jsonObjects = new ArrayList<Map<String, Object>>(docs.length);
         for (final SearchHit sd : docs) {
-            jsonObjects.add(sd.getSource());
+            if (null == filter) {
+                jsonObjects.add(sd.getSource());
+            } else {
+                final Map<String, Object> source = sd.getSource();
+                if (filter.contains(source.get(Constants.FIELD_ID))) {
+                    jsonObjects.add(source);
+                }
+            }
         }
         return jsonObjects;
     }
@@ -812,6 +843,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         jsonObject.put(Constants.FIELD_FLAG_DELETED, Boolean.valueOf((flags & MailMessage.FLAG_DELETED) > 0));
         jsonObject.put(Constants.FIELD_FLAG_DRAFT, Boolean.valueOf((flags & MailMessage.FLAG_DRAFT) > 0));
         jsonObject.put(Constants.FIELD_FLAG_FLAGGED, Boolean.valueOf((flags & MailMessage.FLAG_FLAGGED) > 0));
+        jsonObject.put(Constants.FIELD_FLAG_RECENT, Boolean.valueOf((flags & MailMessage.FLAG_RECENT) > 0));
         jsonObject.put(Constants.FIELD_FLAG_SEEN, Boolean.valueOf((flags & MailMessage.FLAG_SEEN) > 0));
         jsonObject.put(Constants.FIELD_FLAG_USER, Boolean.valueOf((flags & MailMessage.FLAG_USER) > 0));
         jsonObject.put(Constants.FIELD_FLAG_SPAM, Boolean.valueOf((flags & MailMessage.FLAG_SPAM) > 0));

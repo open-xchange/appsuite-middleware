@@ -120,6 +120,8 @@ public final class Constants {
 
     public static final String FIELD_FLAG_FLAGGED = "flagged";
 
+    public static final String FIELD_FLAG_RECENT = "recent";
+
     public static final String FIELD_FLAG_SEEN = "seen";
 
     public static final String FIELD_FLAG_USER = "user";
