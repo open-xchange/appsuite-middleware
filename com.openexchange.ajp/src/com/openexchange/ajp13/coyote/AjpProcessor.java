@@ -815,23 +815,10 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     listenerMonitor.incrementNumRequests();
                 } catch (final InterruptedIOException e) {
                     error = true;
-                } catch (final java.net.SocketException e) {
-                    /*
-                     * Thrown by either HttpServlet.service() or ServletResponse.flushBuffer() if socket died while processing
-                     */
-                    if (DEBUG) {
-                        final StringBuilder tmp = new StringBuilder(128).append("ajpprocessor.request.socket-error: ");
-                        appendRequestInfo(tmp);
-                        LOG.debug(tmp.toString(), e);
-                    }
-                    error = true;
-                    try {
-                        closeQuitely(socket);
-                    } finally {
-                        this.socket = null;
-                    }
-                    throw e;
+                } catch (final IOException e) {
+                    // Ignore
                 } catch (final Throwable t) {
+                    ExceptionUtils.handleThrowable(t);
                     final StringBuilder tmp = new StringBuilder(128).append("ajpprocessor.request.process: ");
                     appendRequestInfo(tmp);
                     LOG.error(tmp.toString(), t);
@@ -849,6 +836,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 try {
                     finish();
                 } catch (final Throwable t) {
+                    ExceptionUtils.handleThrowable(t);
                     error = true;
                 }
             }
