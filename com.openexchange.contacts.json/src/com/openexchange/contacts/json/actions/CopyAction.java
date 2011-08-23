@@ -65,6 +65,7 @@ import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.AttachmentMetadataFactory;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.LinkObject;
@@ -106,9 +107,12 @@ public class CopyAction extends ContactAction {
         final int folderId = req.getFolderFromJSON();
         final Context ctx = session.getContext();
 
-        final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folderId, session);
+        final ContactInterfaceDiscoveryService discoveryService = getContactInterfaceDiscoveryService();
+        final ContactInterface srcContactInterface = discoveryService.newContactInterface(inFolder, session);
 
-        final Contact contact = contactInterface.getObjectById(id, inFolder);
+        final ContactInterface contactInterface = discoveryService.newContactInterface(folderId, session);
+
+        final Contact contact = srcContactInterface.getObjectById(id, inFolder);
         final int origObjectId = contact.getObjectID();
         contact.removeObjectID();
         final int origFolderId = contact.getParentFolderID();
@@ -137,14 +141,14 @@ public class CopyAction extends ContactAction {
         final JSONObject response = new JSONObject();
         try {
             response.put("id", contact.getObjectID());
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }
 
         return new AJAXRequestResult(response, timestamp, "json");
     }
 
-    private static void copyLinks(final int folderId, final Session session, final Context ctx, final Contact contactObj, final int origObjectId, final int origFolderId, final User user) throws OXException {
+    public static void copyLinks(final int folderId, final Session session, final Context ctx, final Contact contactObj, final int origObjectId, final int origFolderId, final User user) throws OXException {
         /*
          * Get all
          */
@@ -195,7 +199,7 @@ public class CopyAction extends ContactAction {
         }
     }
 
-    private static void copyAttachments(final int folderId, final Session session, final Context ctx, final Contact contactObj, final int origObjectId, final int origFolderId, final User user, final UserConfiguration uc) throws OXException {
+    public static void copyAttachments(final int folderId, final Session session, final Context ctx, final Contact contactObj, final int origObjectId, final int origFolderId, final User user, final UserConfiguration uc) throws OXException {
         /*
          * Copy attachments
          */
