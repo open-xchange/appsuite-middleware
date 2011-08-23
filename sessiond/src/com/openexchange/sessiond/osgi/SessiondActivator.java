@@ -50,20 +50,18 @@
 package com.openexchange.sessiond.osgi;
 
 import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
-import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventHandler;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.session.SessionSpecificContainerRetrievalService;
 import com.openexchange.sessiond.SessiondService;
@@ -80,20 +78,18 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link SessiondActivator} - Activator for sessiond bundle.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SessiondActivator extends DeferredActivator {
+public final class SessiondActivator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessiondActivator.class));
 
-    private ServiceRegistration<SessiondService> sessiondServiceRegistration;
-    private List<ServiceTracker<?,?>> trackers;
-
     private ServiceRegistration<EventHandler> eventHandlerRegistration;
 
-    private ServiceRegistration<SessionSpecificContainerRetrievalService> retrievalServiceRegistration;
-
+    /**
+     * Initializes a new {@link SessiondActivator}.
+     */
     public SessiondActivator() {
         super();
     }
@@ -149,24 +145,19 @@ public final class SessiondActivator extends DeferredActivator {
                 LOG.info("starting bundle: com.openexchange.sessiond");
             }
             SessiondInit.getInstance().start();
-            sessiondServiceRegistration = context.registerService(SessiondService.class, new SessiondServiceImpl(), null);
-            trackers = new ArrayList<ServiceTracker<?,?>>(4);
-            trackers.add(new ServiceTracker<ManagementService,ManagementService>(context, ManagementService.class, new ManagementRegisterer(context)));
-            trackers.add(new ServiceTracker<ThreadPoolService,ThreadPoolService>(context, ThreadPoolService.class, new ThreadPoolTracker(context)));
-            trackers.add(new ServiceTracker<TimerService,TimerService>(context, TimerService.class, new TimerServiceTracker(context)));
-            for (final ServiceTracker<?,?> tracker : trackers) {
-                tracker.open();
-            }
+            registerService(SessiondService.class, new SessiondServiceImpl());
 
+            track(ManagementService.class, new ManagementRegisterer(context));
+            track(ThreadPoolService.class, new ThreadPoolTracker(context));
+            track(TimerService.class, new TimerServiceTracker(context));
+            openTrackers();
 
             final SessiondSessionSpecificRetrievalService retrievalService = new SessiondSessionSpecificRetrievalService();
             final SessiondEventHandler eventHandler = new SessiondEventHandler();
             eventHandler.addListener(retrievalService);
-
             eventHandlerRegistration = eventHandler.registerSessiondEventHandler(context);
 
-            retrievalServiceRegistration = context.registerService(SessionSpecificContainerRetrievalService.class, retrievalService, null);
-
+            registerService(SessionSpecificContainerRetrievalService.class, retrievalService);
         } catch (final Exception e) {
             LOG.error("SessiondActivator: start: ", e);
             // Try to stop what already has been started.
@@ -181,24 +172,11 @@ public final class SessiondActivator extends DeferredActivator {
             LOG.info("stopping bundle: com.openexchange.sessiond");
         }
         try {
-            if (null != sessiondServiceRegistration) {
-                sessiondServiceRegistration.unregister();
-                sessiondServiceRegistration = null;
-            }
             if (null != eventHandlerRegistration) {
                 eventHandlerRegistration.unregister();
                 eventHandlerRegistration = null;
             }
-            if(null != retrievalServiceRegistration) {
-                retrievalServiceRegistration.unregister();
-                retrievalServiceRegistration = null;
-            }
-            if (null != trackers) {
-                for (final ServiceTracker<?, ?> tracker : trackers) {
-                    tracker.close();
-                }
-                trackers = null;
-            }
+            cleanUp();
             // Put remaining sessions into cache for remote distribution
             final List<SessionControl> sessions = SessionHandler.getSessions();
             try {
