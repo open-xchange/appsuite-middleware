@@ -729,11 +729,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             } catch (final InterruptedIOException e) {
                 LOG.debug("ajpprocessor.io.read-timeout", e);
                 error = true;
-                try {
-                    closeQuitely(socket);
-                } finally {
-                    this.socket = null;
-                }
                 break;
             } catch (final IOException e) {
                 LOG.debug("ajpprocessor.io.error", e);
