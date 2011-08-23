@@ -262,9 +262,10 @@ public final class FolderJob extends AbstractMailSyncJob {
                     final int configuredBlockSize = Constants.CHUNK_SIZE;
                     blockSize = configuredBlockSize > size ? size : configuredBlockSize;
                 }
+                final String[] ids = newIds.toArray(new String[newIds.size()]);
                 int start = 0;
                 while (start < size) {
-                    final int num = add2Index(mails, start, blockSize, fullName, indexAdapter);
+                    final int num = add2Index(ids, start, blockSize, fullName, indexAdapter);
                     start += num;
                 }
                 setTimestampAndUnsetSyncFlag(fullName, System.currentTimeMillis());
@@ -282,7 +283,7 @@ public final class FolderJob extends AbstractMailSyncJob {
         }
     }
 
-    private int add2Index(final MailMessage[] mails, final int offset, final int len, final String fullName, final IndexAdapter indexAdapter) throws OXException {
+    private int add2Index(final String[] ids, final int offset, final int len, final String fullName, final IndexAdapter indexAdapter) throws OXException {
         final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
             SMALMailAccess.getDelegateInstance(userId, contextId, accountId);
         final Session session = mailAccess.getSession();
@@ -291,19 +292,19 @@ public final class FolderJob extends AbstractMailSyncJob {
             final int retval; // The number of mails added to index
             final int end; // The end position (exclusive)
             {
-                final int remaining = mails.length - offset;
+                final int remaining = ids.length - offset;
                 if (remaining >= len) {
                     end = offset + len;
                     retval = len;
                 } else {
-                    end = mails.length;
+                    end = ids.length;
                     retval = remaining;
                 }
             }
             final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
             final List<MailMessage> toAdd = new ArrayList<MailMessage>(retval);
             for (int i = offset; i < end; i++) {
-                final MailMessage mail = messageStorage.getMessage(fullName, mails[i].getMailId(), false);
+                final MailMessage mail = messageStorage.getMessage(fullName, ids[i], false);
                 mail.setAccountId(accountId);
                 toAdd.add(mail);
             }
