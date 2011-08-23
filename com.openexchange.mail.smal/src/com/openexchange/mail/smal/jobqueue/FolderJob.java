@@ -49,6 +49,9 @@
 
 package com.openexchange.mail.smal.jobqueue;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -57,8 +60,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.IndexRange;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
@@ -67,12 +72,14 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.smal.SMALMailAccess;
+import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.mail.smal.adapter.IndexAdapter;
 import com.openexchange.session.Session;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link FolderJob}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderJob extends AbstractMailSyncJob {
@@ -92,7 +99,7 @@ public final class FolderJob extends AbstractMailSyncJob {
 
     /**
      * Initializes a new {@link FolderJob}.
-     *
+     * 
      * @param fullName The folder full name
      * @param accountId The account ID
      * @param userId The user ID
@@ -104,7 +111,7 @@ public final class FolderJob extends AbstractMailSyncJob {
 
     /**
      * Initializes a new {@link FolderJob}.
-     *
+     * 
      * @param fullName The folder full name
      * @param accountId The account ID
      * @param userId The user ID
@@ -156,19 +163,26 @@ public final class FolderJob extends AbstractMailSyncJob {
                 final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
                     SMALMailAccess.getDelegateInstance(userId, contextId, accountId);
                 final Session session = mailAccess.getSession();
-                final List<MailMessage> indexedMails = indexAdapter.getMessages(null, fullName, null, null, FIELDS, accountId, session);
-                final Map<String, MailMessage> indexedMap;
-                if (indexedMails.isEmpty()) {
-                    indexedMap = Collections.emptyMap();
-                } else {
-                    indexedMap = new HashMap<String, MailMessage>(indexedMails.size());
-                    for (final MailMessage mailMessage : indexedMails) {
-                        indexedMap.put(mailMessage.getMailId(), mailMessage);
-                    }
-                }
+                /*
+                 * Get the mails from mail storage
+                 */
                 final MailMessage[] mails;
                 mailAccess.connect(true);
                 try {
+                    /*
+                     * At first check existence of denoted folder
+                     */
+                    if (!mailAccess.getFolderStorage().exists(fullName)) {
+                        /*
+                         * Drop entry from database and return
+                         */
+                        deleteDBEntry();
+                        unset = false;
+                        return;
+                    }
+                    /*
+                     * Fetch mails
+                     */
                     mails =
                         mailAccess.getMessageStorage().searchMessages(
                             fullName,
@@ -187,6 +201,20 @@ public final class FolderJob extends AbstractMailSyncJob {
                     storagedMap = new HashMap<String, MailMessage>(mails.length);
                     for (final MailMessage mailMessage : mails) {
                         storagedMap.put(mailMessage.getMailId(), mailMessage);
+                    }
+                }
+
+                /*
+                 * Get the mails from index
+                 */
+                final List<MailMessage> indexedMails = indexAdapter.getMessages(null, fullName, null, null, FIELDS, accountId, session);
+                final Map<String, MailMessage> indexedMap;
+                if (indexedMails.isEmpty()) {
+                    indexedMap = Collections.emptyMap();
+                } else {
+                    indexedMap = new HashMap<String, MailMessage>(indexedMails.size());
+                    for (final MailMessage mailMessage : indexedMails) {
+                        indexedMap.put(mailMessage.getMailId(), mailMessage);
                     }
                 }
                 /*
@@ -283,6 +311,29 @@ public final class FolderJob extends AbstractMailSyncJob {
             return retval;
         } finally {
             mailAccess.close(true);
+        }
+    }
+
+    private boolean deleteDBEntry() throws OXException {
+        final DatabaseService databaseService = SMALServiceLookup.getServiceStatic(DatabaseService.class);
+        if (null == databaseService) {
+            return false;
+        }
+        final Connection con = databaseService.getWritable(contextId);
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("DELETE FROM mailSync WHERE cid = ? AND user = ? AND accountId = ? AND fullName = ?");
+            int pos = 1;
+            stmt.setLong(pos++, contextId);
+            stmt.setLong(pos++, userId);
+            stmt.setLong(pos++, accountId);
+            stmt.setString(pos, fullName);
+            return stmt.executeUpdate() > 0;
+        } catch (final SQLException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+            databaseService.backWritable(contextId, con);
         }
     }
 
