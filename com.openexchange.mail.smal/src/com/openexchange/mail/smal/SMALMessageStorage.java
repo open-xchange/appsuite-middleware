@@ -52,6 +52,7 @@ package com.openexchange.mail.smal;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -63,6 +64,9 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.smal.adapter.IndexAdapter;
 import com.openexchange.mail.smal.adapter.IndexService;
+import com.openexchange.mail.smal.jobqueue.Constants;
+import com.openexchange.mail.smal.jobqueue.FolderJob;
+import com.openexchange.mail.smal.jobqueue.JobQueue;
 import com.openexchange.session.Session;
 
 /**
@@ -129,7 +133,12 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
             if (null == indexAdapter) {
                 return delegateMailAccess.getMessageStorage().searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
             }
+            final MailFields mfs = new MailFields(fields);
+            if (!indexAdapter.getIndexableFields().containsAll(mfs)) {
+                return delegateMailAccess.getMessageStorage().searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
+            }
             try {
+                JobQueue.getInstance().addJob(new FolderJob(folder, accountId, userId, contextId).setSpan(Constants.DEFAULT_MILLIS));
                 return indexAdapter.search(folder, searchTerm, sortField, order, accountId, session).toArray(new MailMessage[0]);
             } catch (final OXException e) {
                 return delegateMailAccess.getMessageStorage().searchMessages(folder, indexRange, sortField, order, searchTerm, fields);

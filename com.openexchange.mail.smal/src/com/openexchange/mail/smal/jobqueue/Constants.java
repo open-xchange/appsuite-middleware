@@ -69,6 +69,11 @@ public final class Constants {
     public static final int HOUR_MILLIS = 60 * 60 * 1000;
 
     /**
+     * Default (5 minutes) milliseconds.
+     */
+    public static final int DEFAULT_MILLIS = 5 * 60 * 1000;
+
+    /**
      * The size of a chunk for indexed messages for a bulk add.
      */
     public static final int CHUNK_SIZE = 100;

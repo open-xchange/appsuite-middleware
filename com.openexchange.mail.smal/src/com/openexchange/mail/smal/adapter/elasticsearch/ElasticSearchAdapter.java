@@ -90,6 +90,7 @@ import org.elasticsearch.common.collect.ImmutableMap;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.ImmutableSettings.Builder;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.trove.map.hash.TIntObjectHashMap;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.json.JsonXContent;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -117,6 +118,8 @@ import com.openexchange.mail.smal.SMALExceptionCodes;
 import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.mail.smal.adapter.IndexAdapter;
 import com.openexchange.mail.text.TextProcessing;
+import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -136,6 +139,48 @@ public final class ElasticSearchAdapter implements IndexAdapter {
 
     protected static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ElasticSearchAdapter.class));
+
+    private static interface MailAccountLookup {
+        
+        MailAccount getMailAccount(int accountId) throws OXException;
+    }
+
+    private static final class InMemoryMailAccountLookup implements MailAccountLookup {
+        
+        private final TIntObjectHashMap<MailAccount> map;
+
+        private final int userId;
+        
+        private final int contextId;
+
+        /**
+         * Initializes a new {@link ElasticSearchAdapter.InMemoryMailAccountLookup}.
+         */
+        public InMemoryMailAccountLookup(final Session session) {
+            this(session.getUserId(), session.getContextId());
+        }
+
+        /**
+         * Initializes a new {@link ElasticSearchAdapter.InMemoryMailAccountLookup}.
+         */
+        public InMemoryMailAccountLookup(final int userId, final int contextId) {
+            super();
+            this.contextId = contextId;
+            this.userId = userId;
+            map = new TIntObjectHashMap<MailAccount>(2);
+        }
+
+        @Override
+        public MailAccount getMailAccount(final int accountId) throws OXException {
+            MailAccount mailAccount = map.get(accountId);
+            if (null == mailAccount) {
+                mailAccount = SMALServiceLookup.getServiceStatic(MailAccountStorageService.class).getMailAccount(accountId, userId, contextId);
+                map.put(accountId, mailAccount);
+            }
+            return mailAccount;
+        }
+        
+    }
 
     /**
      * The special header for extracted ElkasticSearch UUID.
@@ -161,6 +206,11 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         clusterName = Constants.CLUSTER_NAME;
         indexNamePrefix = Constants.INDEX_NAME_PREFIX;
         indexType = Constants.INDEX_TYPE;
+    }
+
+    @Override
+    public MailFields getIndexableFields() throws OXException {
+        return Constants.INDEXABLE_FIELDS;
     }
 
     @Override
@@ -345,6 +395,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         final SearchHit[] docs = rsp.getHits().getHits();
         final List<MailMessage> mails = new ArrayList<MailMessage>(docs.length);
         final MailFields mailFields = null == fields ? new MailFields(true) : new MailFields(fields);
+        final MailAccountLookup lookup = new InMemoryMailAccountLookup(session);
         for (final SearchHit sd : docs) {
             // to get explanation you'll need to enable this when querying:
             // System.out.println(sd.getExplanation().toString());
@@ -352,7 +403,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             // if we use in mapping: "_source" : {"enabled" : false}
             // we need to include all necessary fields in query and then to use doc.getFields()
             // instead of doc.getSource()
-            final MailMessage mail = readDoc(sd.getSource(), mailFields);
+            final MailMessage mail = readDoc(sd.getSource(), mailFields, lookup);
             mail.setHeader(X_ELASTIC_SEARCH_UUID, sd.getId());
             mails.add(mail);
         }
@@ -394,6 +445,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             final SearchHit[] docs = rsp.getHits().getHits();
             final List<MailMessage> mails = new ArrayList<MailMessage>(docs.length);
             final MailFields mailFields = new MailFields(true);
+            final MailAccountLookup lookup = new InMemoryMailAccountLookup(session);
             for (final SearchHit sd : docs) {
                 // to get explanation you'll need to enable this when querying:
                 // System.out.println(sd.getExplanation().toString());
@@ -401,7 +453,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                 // if we use in mapping: "_source" : {"enabled" : false}
                 // we need to include all necessary fields in query and then to use doc.getFields()
                 // instead of doc.getSource()
-                final MailMessage mail = readDoc(sd.getSource(), mailFields);
+                final MailMessage mail = readDoc(sd.getSource(), mailFields, lookup);
                 mail.setHeader(X_ELASTIC_SEARCH_UUID, sd.getId());
                 mails.add(mail);
             }
@@ -411,13 +463,17 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         }
     }
 
-    private static MailMessage readDoc(final Map<String, Object> source, final MailFields fields) throws OXException {
+    private MailMessage readDoc(final Map<String, Object> source, final MailFields fields, final MailAccountLookup lookup) throws OXException {
         try {
             final MailMessage mail = new IDMailMessage(null, null);
             if (null != source) {
                 mail.setMailId((String) source.get(Constants.FIELD_ID));
                 mail.setFolder((String) source.get(Constants.FIELD_FULL_NAME));
-                mail.setAccountId(((Integer) source.get(Constants.FIELD_ACCOUNT_ID)).intValue());
+                {
+                    final int accountId = ((Integer) source.get(Constants.FIELD_ACCOUNT_ID)).intValue();
+                    mail.setAccountId(accountId);
+                    mail.setAccountName(lookup.getMailAccount(accountId).getName());
+                }
                 if (fields.contains(MailField.SUBJECT)) {
                     mail.setSubject((String) source.get(Constants.FIELD_SUBJECT));
                 }

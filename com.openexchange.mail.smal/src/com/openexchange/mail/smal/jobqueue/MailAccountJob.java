@@ -158,7 +158,7 @@ public final class MailAccountJob extends AbstractMailSyncJob {
                 for (final String fullName : list) {
                     try {
                         if (shouldSync(fullName, now)) {
-                            queue.addJob(new FolderJob(fullName, accountId, userId, contextId, false));
+                            queue.addJob(new FolderJob(fullName, accountId, userId, contextId, false).setSpan(Constants.HOUR_MILLIS));
                         }
                     } catch (final OXException e) {
                         LOG.error("Couldn't look-up database.", e);

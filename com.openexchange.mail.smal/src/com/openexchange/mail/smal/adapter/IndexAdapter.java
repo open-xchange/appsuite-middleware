@@ -53,6 +53,7 @@ import java.util.Collection;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -79,6 +80,14 @@ public interface IndexAdapter {
      * @throws OXException If shut-down fails
      */
     public void stop() throws OXException;
+
+    /**
+     * Gets the indexable fields.
+     * 
+     * @return The indexable fields
+     * @throws OXException If an error occurs
+     */
+    public MailFields getIndexableFields() throws OXException;
 
     /**
      * Invoked if a new session is added or restored from log-term container.

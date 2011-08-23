@@ -97,6 +97,8 @@ public final class FolderJob extends AbstractMailSyncJob {
 
     private volatile boolean error;
 
+    private volatile long span;
+
     /**
      * Initializes a new {@link FolderJob}.
      *
@@ -125,6 +127,18 @@ public final class FolderJob extends AbstractMailSyncJob {
         identifier =
             new StringBuilder(FolderJob.class.getSimpleName()).append('@').append(contextId).append('@').append(userId).append('@').append(
                 accountId).append('@').append(fullName).toString();
+        span = Constants.DEFAULT_MILLIS;
+    }
+
+    /**
+     * Sets the span
+     *
+     * @param span The span to set
+     * @return This folder job with specified span applied
+     */
+    public FolderJob setSpan(final long span) {
+        this.span = span;
+        return this;
     }
 
     @Override
@@ -148,7 +162,7 @@ public final class FolderJob extends AbstractMailSyncJob {
         try {
             final long now = System.currentTimeMillis();
             try {
-                if ((checkShouldSync && !shouldSync(fullName, now)) || !wasAbleToSetSyncFlag(fullName)) {
+                if ((checkShouldSync && !shouldSync(fullName, now, span)) || !wasAbleToSetSyncFlag(fullName)) {
                     return;
                 }
             } catch (final OXException e) {
