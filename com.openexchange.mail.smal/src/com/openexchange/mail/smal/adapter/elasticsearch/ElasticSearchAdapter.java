@@ -423,34 +423,44 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                 }
                 if (fields.contains(MailField.FLAGS)) {
                     int flags = 0;
-                    if (((Boolean) source.get(Constants.FIELD_FLAG_ANSWERED)).booleanValue()) {
+                    Boolean tmp = (Boolean) source.get(Constants.FIELD_FLAG_ANSWERED);
+                    if (null != tmp && tmp.booleanValue()) {
                         flags |= MailMessage.FLAG_ANSWERED;
                     }
-                    if (((Boolean) source.get(Constants.FIELD_FLAG_DELETED)).booleanValue()) {
+                    tmp = (Boolean) source.get(Constants.FIELD_FLAG_DELETED);
+                    if (null != tmp && tmp.booleanValue()) {
                         flags |= MailMessage.FLAG_DELETED;
                     }
-                    if (((Boolean) source.get(Constants.FIELD_FLAG_DRAFT)).booleanValue()) {
+                    tmp = (Boolean) source.get(Constants.FIELD_FLAG_DRAFT);
+                    if (null != tmp && tmp.booleanValue()) {
                         flags |= MailMessage.FLAG_DRAFT;
                     }
-                    if (((Boolean) source.get(Constants.FIELD_FLAG_FLAGGED)).booleanValue()) {
+                    tmp = (Boolean) source.get(Constants.FIELD_FLAG_FLAGGED);
+                    if (null != tmp && tmp.booleanValue()) {
                         flags |= MailMessage.FLAG_FLAGGED;
                     }
-                    if (((Boolean) source.get(Constants.FIELD_FLAG_FORWARDED)).booleanValue()) {
+                    tmp = (Boolean) source.get(Constants.FIELD_FLAG_FORWARDED);
+                    if (null != tmp && tmp.booleanValue()) {
                         flags |= MailMessage.FLAG_FORWARDED;
                     }
-                    if (((Boolean) source.get(Constants.FIELD_FLAG_READ_ACK)).booleanValue()) {
+                    tmp = (Boolean) source.get(Constants.FIELD_FLAG_READ_ACK);
+                    if (null != tmp && tmp.booleanValue()) {
                         flags |= MailMessage.FLAG_READ_ACK;
                     }
-                    if (((Boolean) source.get(Constants.FIELD_FLAG_RECENT)).booleanValue()) {
+                    tmp = (Boolean) source.get(Constants.FIELD_FLAG_RECENT);
+                    if (null != tmp && tmp.booleanValue()) {
                         flags |= MailMessage.FLAG_RECENT;
                     }
-                    if (((Boolean) source.get(Constants.FIELD_FLAG_SEEN)).booleanValue()) {
+                    tmp = (Boolean) source.get(Constants.FIELD_FLAG_SEEN);
+                    if (null != tmp && tmp.booleanValue()) {
                         flags |= MailMessage.FLAG_SEEN;
                     }
-                    if (((Boolean) source.get(Constants.FIELD_FLAG_SPAM)).booleanValue()) {
+                    tmp = (Boolean) source.get(Constants.FIELD_FLAG_SPAM);
+                    if (null != tmp && tmp.booleanValue()) {
                         flags |= MailMessage.FLAG_SPAM;
                     }
-                    if (((Boolean) source.get(Constants.FIELD_FLAG_USER)).booleanValue()) {
+                    tmp = (Boolean) source.get(Constants.FIELD_FLAG_USER);
+                    if (null != tmp && tmp.booleanValue()) {
                         flags |= MailMessage.FLAG_USER;
                     }
                     mail.setFlags(flags);
