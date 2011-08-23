@@ -369,9 +369,11 @@ public final class ElasticSearchAdapter implements IndexAdapter {
              * Compose search request
              */
             final SearchRequestBuilder builder = client.prepareSearch(indexNamePrefix + session.getContextId()).setTypes(indexType);
-            // builder.addSort("createdAt", SortOrder.DESC);
             // builder.setFrom(page * hitsPerPage).setSize(hitsPerPage);
-            builder.setSize(Integer.MAX_VALUE);
+            if (null != sortField && null != order) {
+                builder.addSort(sortField.getKey(), OrderDirection.DESC.equals(order) ? SortOrder.DESC : SortOrder.ASC);
+            }
+            builder.setSize(MAX_SEARCH_RESULTS);
             builder.setQuery(queryBuilder);
             builder.setSearchType(SearchType.DFS_QUERY_THEN_FETCH);
             builder.setExplain(true);
