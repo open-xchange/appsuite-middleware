@@ -203,7 +203,6 @@ public final class FolderJob extends AbstractMailSyncJob {
                         storagedMap.put(mailMessage.getMailId(), mailMessage);
                     }
                 }
-
                 /*
                  * Get the mails from index
                  */
