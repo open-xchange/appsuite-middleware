@@ -88,7 +88,7 @@ public final class SessiondActivator extends DeferredActivator {
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessiondActivator.class));
 
     private ServiceRegistration<SessiondService> sessiondServiceRegistration;
-    private final List<ServiceTracker<?,?>> trackers;
+    private List<ServiceTracker<?,?>> trackers;
 
     private ServiceRegistration<EventHandler> eventHandlerRegistration;
 
@@ -96,7 +96,6 @@ public final class SessiondActivator extends DeferredActivator {
 
     public SessiondActivator() {
         super();
-        trackers = new ArrayList<ServiceTracker<?,?>>(2);
     }
 
     @Override
@@ -151,6 +150,7 @@ public final class SessiondActivator extends DeferredActivator {
             }
             SessiondInit.getInstance().start();
             sessiondServiceRegistration = context.registerService(SessiondService.class, new SessiondServiceImpl(), null);
+            trackers = new ArrayList<ServiceTracker<?,?>>(4);
             trackers.add(new ServiceTracker<ManagementService,ManagementService>(context, ManagementService.class, new ManagementRegisterer(context)));
             trackers.add(new ServiceTracker<ThreadPoolService,ThreadPoolService>(context, ThreadPoolService.class, new ThreadPoolTracker(context)));
             trackers.add(new ServiceTracker<TimerService,TimerService>(context, TimerService.class, new TimerServiceTracker(context)));
@@ -193,11 +193,12 @@ public final class SessiondActivator extends DeferredActivator {
                 retrievalServiceRegistration.unregister();
                 retrievalServiceRegistration = null;
             }
-
-            for (final ServiceTracker<?,?> tracker : trackers) {
-                tracker.close();
+            if (null != trackers) {
+                for (final ServiceTracker<?, ?> tracker : trackers) {
+                    tracker.close();
+                }
+                trackers = null;
             }
-            trackers.clear();
             // Put remaining sessions into cache for remote distribution
             final List<SessionControl> sessions = SessionHandler.getSessions();
             try {
