@@ -474,41 +474,49 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                 }
                 if (fields.contains(MailField.FROM)) {
                     final String[] sAddrs = (String[]) source.get(Constants.FIELD_FROM);
-                    for (final String sAddr : sAddrs) {
-                        try {
-                            mail.addFrom(new QuotedInternetAddress(sAddr));
-                        } catch (final AddressException e) {
-                            mail.addFrom(new PlainTextAddress(sAddr));
+                    if (null != sAddrs) {
+                        for (final String sAddr : sAddrs) {
+                            try {
+                                mail.addFrom(new QuotedInternetAddress(sAddr));
+                            } catch (final AddressException e) {
+                                mail.addFrom(new PlainTextAddress(sAddr));
+                            }
                         }
                     }
                 }
                 if (fields.contains(MailField.TO)) {
                     final String[] sAddrs = (String[]) source.get(Constants.FIELD_TO);
-                    for (final String sAddr : sAddrs) {
-                        try {
-                            mail.addFrom(new QuotedInternetAddress(sAddr));
-                        } catch (final AddressException e) {
-                            mail.addFrom(new PlainTextAddress(sAddr));
+                    if (null != sAddrs) {
+                        for (final String sAddr : sAddrs) {
+                            try {
+                                mail.addFrom(new QuotedInternetAddress(sAddr));
+                            } catch (final AddressException e) {
+                                mail.addFrom(new PlainTextAddress(sAddr));
+                            }
                         }
                     }
                 }
                 if (fields.contains(MailField.CC)) {
                     final String[] sAddrs = (String[]) source.get(Constants.FIELD_CC);
-                    for (final String sAddr : sAddrs) {
-                        try {
-                            mail.addFrom(new QuotedInternetAddress(sAddr));
-                        } catch (final AddressException e) {
-                            mail.addFrom(new PlainTextAddress(sAddr));
+                    if (null != sAddrs) {
+                        for (final String sAddr : sAddrs) {
+                            try {
+                                mail.addFrom(new QuotedInternetAddress(sAddr));
+                            } catch (final AddressException e) {
+                                mail.addFrom(new PlainTextAddress(sAddr));
+                            }
                         }
                     }
                 }
                 if (fields.contains(MailField.BCC)) {
                     final String[] sAddrs = (String[]) source.get(Constants.FIELD_BCC);
-                    for (final String sAddr : sAddrs) {
-                        try {
-                            mail.addFrom(new QuotedInternetAddress(sAddr));
-                        } catch (final AddressException e) {
-                            mail.addFrom(new PlainTextAddress(sAddr));
+                    if (null != sAddrs) {
+                        for (final String sAddr : sAddrs) {
+                            try {
+                                mail.addFrom(new QuotedInternetAddress(sAddr));
+                            } catch (final AddressException e) {
+                                mail.addFrom(new PlainTextAddress(sAddr));
+                            }
                         }
                     }
                 }
