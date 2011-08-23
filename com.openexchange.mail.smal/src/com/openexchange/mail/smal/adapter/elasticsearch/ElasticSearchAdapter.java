@@ -414,12 +414,16 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                     mail.setSize(((Long) source.get(Constants.FIELD_ACCOUNT_ID)).longValue());
                 }
                 if (fields.contains(MailField.RECEIVED_DATE)) {
-                    final long value = ((Long) source.get(Constants.FIELD_RECEIVED_DATE)).longValue();
-                    mail.setReceivedDate(new Date(value));
+                    final Long l = (Long) source.get(Constants.FIELD_RECEIVED_DATE);
+                    if (null != l) {
+                        mail.setReceivedDate(new Date(l.longValue()));
+                    }
                 }
                 if (fields.contains(MailField.SENT_DATE)) {
-                    final long value = ((Long) source.get(Constants.FIELD_SENT_DATE)).longValue();
-                    mail.setReceivedDate(new Date(value));
+                    final Long l = (Long) source.get(Constants.FIELD_SENT_DATE);
+                    if (null != l) {
+                        mail.setReceivedDate(new Date(l.longValue()));
+                    }
                 }
                 if (fields.contains(MailField.FLAGS)) {
                     int flags = 0;
