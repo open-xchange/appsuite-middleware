@@ -244,7 +244,7 @@ public final class JobQueueEventHandler implements EventHandler {
 
         /**
          * Initializes a new {@link JobQueueEventHandler.PeriodicRunnable}.
-         * @param periodicJobs 
+         * @param periodicJobs
          */
         public PeriodicRunnable(final ConcurrentMap<Key, ConcurrentMap<String, Job>> periodicJobs) {
             super();

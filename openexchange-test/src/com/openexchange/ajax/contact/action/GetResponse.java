@@ -89,7 +89,7 @@ public class GetResponse extends AbstractAJAXResponse {
             JSONObject json = (JSONObject) getResponse().getData();
             new ContactParser(true, timeZone).parse(contactObj, json);
         }
-        
+
         return contactObj;
     }
 
@@ -100,18 +100,18 @@ public class GetResponse extends AbstractAJAXResponse {
         this.contactObj = contactObj;
     }
 
-    
+
     /**
      * Gets the imageUrl
      *
      * @return The imageUrl
-     * @throws OXException 
+     * @throws OXException
      */
     public String getImageUrl() throws OXException {
         extractImageUrl();
         return imageUrl;
     }
-    
+
     public String getImageUid() throws OXException {
         final String imageUrl = getImageUrl();
         if (imageUrl == null) {
@@ -119,17 +119,17 @@ public class GetResponse extends AbstractAJAXResponse {
         } else {
             final String path = "/ajax/image?uid=";
             int index = imageUrl.indexOf(path);
-            
+
             String uid;
             try {
                 uid = URLDecoder.decode(imageUrl.substring(index + path.length(), imageUrl.length()), "UTF-8");
                 return uid;
             } catch (UnsupportedEncodingException e) {
                 throw OXException.general(e.getMessage());
-            }            
+            }
         }
     }
-    
+
     private void extractImageUrl() throws OXException {
         JSONObject json = (JSONObject) getResponse().getData();
         if (imageUrl == null && json.hasAndNotNull("image1_url")) {

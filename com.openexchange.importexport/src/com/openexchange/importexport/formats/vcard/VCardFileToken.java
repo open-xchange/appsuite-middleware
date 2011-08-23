@@ -54,7 +54,7 @@ import com.openexchange.tools.versit.VersitDefinition;
 /**
  * This class is a tuple containing a VCard/VCalendar/ICal (stored as byte array to be independent of the encoding used) and a related
  * VersitDefinition, which means the information what kind of version it is.
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  */
 public class VCardFileToken {

@@ -51,14 +51,14 @@ package com.openexchange.sessiond;
 
 /**
  * {@link SessionCounter}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface SessionCounter {
 
     /**
      * Gets the number of active sessions for specified user.
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return The number of active sessions

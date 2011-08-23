@@ -53,7 +53,7 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link GetAction}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class GetAction extends AbstractAppStoreAction {
@@ -62,7 +62,7 @@ public class GetAction extends AbstractAppStoreAction {
 
     /**
      * Initializes a new {@link GetAction}.
-     * 
+     *
      * @param services
      */
     public GetAction(ServiceLookup services) {

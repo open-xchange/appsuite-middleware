@@ -144,7 +144,7 @@ public interface IndexAdapter {
 
     /**
      * Changes the flags of specified mails in index.
-     * 
+     *
      * @param mails The mails with changed flags
      * @param session The user session
      * @throws OXException If changing mails in index fails

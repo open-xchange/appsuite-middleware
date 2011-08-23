@@ -86,9 +86,9 @@ public class UpdateRequest extends AbstractContactRequest<UpdateResponse> {
         super();
         this.contactObj = entry;
         this.failOnError = failOnError;
-        this.originFolder = inFolder;        
+        this.originFolder = inFolder;
         this.withImage = contactObj.containsImage1() && (null != contactObj.getImage1());
-        
+
         if (withImage) {
             try {
                 fieldContent = convert(contactObj).toString();
@@ -115,7 +115,7 @@ public class UpdateRequest extends AbstractContactRequest<UpdateResponse> {
     /**
      * {@inheritDoc}
      */
-    public Parameter[] getParameters() {        
+    public Parameter[] getParameters() {
         if (withImage) {
             return new Parameter[] {
                 new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE),
@@ -126,7 +126,7 @@ public class UpdateRequest extends AbstractContactRequest<UpdateResponse> {
                 new FileParameter("file", "open-xchange_image.jpg", new ByteArrayInputStream(contactObj.getImage1()), "image/jpg")
             };
         }
-        
+
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE),
             new Parameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(this.originFolder)),

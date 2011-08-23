@@ -57,7 +57,7 @@ import com.openexchange.groupware.ldap.User;
 
 /**
  * {@link AppStoreService}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public interface AppStoreService {
@@ -66,7 +66,7 @@ public interface AppStoreService {
 
     /**
      * Lists all available Applications
-     * 
+     *
      * @return
      * @throws OXException
      */
@@ -74,7 +74,7 @@ public interface AppStoreService {
 
     /**
      * Lists Applications installed for the given user.
-     * 
+     *
      * @param user
      * @return
      * @throws OXException
@@ -83,7 +83,7 @@ public interface AppStoreService {
 
     /**
      * Lists all Applications for the given category.
-     * 
+     *
      * @param category
      * @return
      */
@@ -91,7 +91,7 @@ public interface AppStoreService {
 
     /**
      * Installs an Application
-     * 
+     *
      * @param user
      * @param id
      * @throws OXException
@@ -100,7 +100,7 @@ public interface AppStoreService {
 
     /**
      * Uninstalls an Application
-     * 
+     *
      * @param user
      * @param id
      * @throws OXException
@@ -109,7 +109,7 @@ public interface AppStoreService {
 
     /**
      * Crawl the file system and stores all available Applications in the database. Also removes no longer existing Applications.
-     * 
+     *
      * @param user
      * @param context
      * @return All available Applications
@@ -120,7 +120,7 @@ public interface AppStoreService {
     /**
      * Makes a given Application available for installation. If no context or user is given, the availability is global. If a context is
      * given, the availability is restrictied to this context. Same for user (needs both, user AND context).
-     * 
+     *
      * @param contextId
      * @param userId
      * @param application
@@ -131,7 +131,7 @@ public interface AppStoreService {
     /**
      * Revokes availability of an Application. If no context or user is given, the availability is global. If a context is given, the
      * availability is restrictied to this context. Same for user (needs both, user AND context).
-     * 
+     *
      * @param contextId
      * @param userId
      * @param application
@@ -141,7 +141,7 @@ public interface AppStoreService {
 
     /**
      * Returns all release status of a given application Id.
-     * 
+     *
      * @param applicationId
      * @return
      * @throws OXException

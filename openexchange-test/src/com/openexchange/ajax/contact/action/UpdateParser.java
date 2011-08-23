@@ -63,7 +63,7 @@ import com.openexchange.ajax.parser.ResponseParser;
 public class UpdateParser extends AbstractAJAXParser<UpdateResponse> {
 
     private boolean withImage;
-	
+
     /**
      * Initializes a new {@link UpdateParser}.
      * @param failOnError2
@@ -71,9 +71,9 @@ public class UpdateParser extends AbstractAJAXParser<UpdateResponse> {
      */
     public UpdateParser(boolean failOnError, boolean withImage) {
         super(failOnError);
-        this.withImage = withImage;        
+        this.withImage = withImage;
     }
-    
+
     @Override
     public UpdateResponse parse(String body) throws JSONException {
         final Response response;

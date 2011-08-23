@@ -64,7 +64,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactGetter;
 import com.openexchange.groupware.contact.helpers.ContactStringGetter;
@@ -156,6 +155,7 @@ public class CSVContactExporter implements Exporter {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CSVContactExporter.class));
 
+    @Override
     public boolean canExport(final ServerSession sessObj, final Format format, final String folder, final Map<String, String[]> optionalParams) {
         if (!format.equals(Format.CSV)) {
             return false;
@@ -184,6 +184,7 @@ public class CSVContactExporter implements Exporter {
         return perm.canReadAllObjects();
     }
 
+    @Override
     public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder, final int[] fieldsToBeExported, final Map<String, String[]> optionalParams) throws OXException {
         if (!canExport(sessObj, format, folder, optionalParams)) {
             throw ImportExportExceptionCodes.CANNOT_EXPORT.create(folder, format);
@@ -231,6 +232,7 @@ public class CSVContactExporter implements Exporter {
         return new SizedInputStream(new ByteArrayInputStream(bytes), bytes.length, Format.CSV);
     }
 
+    @Override
     public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder, final int objectId, final int[] fieldsToBeExported, final Map<String, String[]> optionalParams) throws OXException {
         if (!canExport(sessObj, format, folder, optionalParams)) {
             throw ImportExportExceptionCodes.CANNOT_EXPORT.create(folder, format);

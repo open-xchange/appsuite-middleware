@@ -129,7 +129,7 @@ public abstract class Job implements Task<Object>, Comparable<Job>, Serializable
 
     /**
      * Gets the associated future.
-     * 
+     *
      * @return The associated future or <code>null</code> if not in progress
      */
     public final Future<Object> getAssociatedFuture() {

@@ -66,7 +66,7 @@ import com.openexchange.tools.versit.old.VCard21;
 /**
  * This mighty class splits a given VCard file into several chunks/tokens (from each BEGIN to END), returns them, plus the VersitDefinition,
  * which basically is an information of which version they are and what parser would be recommended. State: Good enough.
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  */
 public class VCardTokenizer {
@@ -95,7 +95,7 @@ public class VCardTokenizer {
 
     /**
      * Creates a new instance that reads the content to be parsed from a reader.
-     * 
+     *
      * @param reader: Reader of the content of a VCard file. Reader will be closed.
      * @throws IOException
      */

@@ -53,7 +53,7 @@ import com.openexchange.database.AbstractCreateTableImpl;
 
 /**
  * {@link AppStoreTables}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class AppStoreTables extends AbstractCreateTableImpl {
@@ -70,29 +70,29 @@ public class AppStoreTables extends AbstractCreateTableImpl {
 
     @Override
     protected String[] getCreateStatements() {
-        return new String[] { "CREATE TABLE userApplications (" + 
-                " cid INT4 unsigned default NULL," + 
-                " userId INT4 unsigned default NULL," + 
-                " application varchar(255) default NULL," + 
-                " status varchar(64) default NULL," + 
-                " PRIMARY KEY (cid, userId, application)," + 
-                " FOREIGN KEY (cid, userId) REFERENCES user(cid, id) ON DELETE CASCADE" + 
+        return new String[] { "CREATE TABLE userApplications (" +
+                " cid INT4 unsigned default NULL," +
+                " userId INT4 unsigned default NULL," +
+                " application varchar(255) default NULL," +
+                " status varchar(64) default NULL," +
+                " PRIMARY KEY (cid, userId, application)," +
+                " FOREIGN KEY (cid, userId) REFERENCES user(cid, id) ON DELETE CASCADE" +
                 ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
 
-            "CREATE TABLE applications (" + 
-                " application varchar(255) default NULL," + 
-                " path varchar(255) default NULL," + 
-                " description text default NULL," + 
-                " manifest text default NULL," + 
-                " PRIMARY KEY (application)" + 
+            "CREATE TABLE applications (" +
+                " application varchar(255) default NULL," +
+                " path varchar(255) default NULL," +
+                " description text default NULL," +
+                " manifest text default NULL," +
+                " PRIMARY KEY (application)" +
                 ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
-                
-            "CREATE TABLE applicationReleases (" + 
-                " application varchar(255) default NULL," + 
-                " cid INT4 unsigned default NULL," + 
-                " userId INT4 unsigned default NULL," + 
-                " state varchar(64) default NULL," + 
-                " PRIMARY KEY (application, cid, userId)" + 
+
+            "CREATE TABLE applicationReleases (" +
+                " application varchar(255) default NULL," +
+                " cid INT4 unsigned default NULL," +
+                " userId INT4 unsigned default NULL," +
+                " state varchar(64) default NULL," +
+                " PRIMARY KEY (application, cid, userId)" +
                 ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"};
     }
 

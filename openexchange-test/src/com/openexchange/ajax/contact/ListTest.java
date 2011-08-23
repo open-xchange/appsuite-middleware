@@ -25,17 +25,17 @@ public class ListTest extends AbstractContactTest {
 		final int id1 = insertContact(contactObj);
 		final int id2 = insertContact(contactObj);
 		final int id3 = insertContact(contactObj);
-		
+
 		// prevent problems with master/slave
 		Thread.sleep(1000);
-		
+
 		final int[][] objectIdAndFolderId = { { id3, contactFolderId }, { id2, contactFolderId }, { id1, contactFolderId } };
-		
+
 		final int cols[] = new int[]{ Contact.OBJECT_ID, Contact.SUR_NAME, Contact.DISPLAY_NAME, Contact.FOLDER_ID } ;
-		
+
 		final Contact[] contactArray = listContact(objectIdAndFolderId, cols);
 		assertEquals("check response array", 3, contactArray.length);
-		
+
 		// Check order of returned contacts
 		for (int i = 0; i < contactArray.length; i++) {
             int[] ids = objectIdAndFolderId[i];
@@ -43,7 +43,7 @@ public class ListTest extends AbstractContactTest {
             assertTrue("Returned contacts folder id differs from the requested one.", ids[1] == contactArray[i].getParentFolderID());
         }
 	}
-	
+
 	public void testSortDuration() throws Exception {
 	    int size = 10000;
 	    List<Contact> contacts = new ArrayList<Contact>();
@@ -53,10 +53,10 @@ public class ListTest extends AbstractContactTest {
 	        Contact contact = createContactObject("testList");
 	        contact.setObjectID(objectId);
             contacts.add(contact);
-            
+
             objectIdsAndFolderIds[i] = new int[] { i, contactFolderId };
-        }	    
-	    
+        }
+
 	    // Sort loaded contacts in the order they were requested
 	    long start = System.currentTimeMillis();
         final List<Contact> sortedContacts = new ArrayList<Contact>(contacts.size());
@@ -64,7 +64,7 @@ public class ListTest extends AbstractContactTest {
             final int[] objectIdsAndFolderId = objectIdsAndFolderIds[i];
             final int objectId = objectIdsAndFolderId[0];
             final int folderId = objectIdsAndFolderId[1];
-            
+
             for (final Contact contact : contacts) {
                 if (contact.getObjectID() == objectId && contact.getParentFolderID() == folderId) {
                     sortedContacts.add(contact);
@@ -74,7 +74,7 @@ public class ListTest extends AbstractContactTest {
         }
         long end = System.currentTimeMillis();
         long diff = end -start;
-	    
+
 	    System.out.println("Duration: " + diff);
 	}
 
@@ -82,9 +82,9 @@ public class ListTest extends AbstractContactTest {
 		final Contact contactObject = createCompleteContactObject();
 
 		final int objectId = insertContact(contactObject);
-		
+
 		final int[][] objectIdAndFolderId = { { objectId, contactFolderId } };
-		
+
 		final Contact[] contactArray = listContact(objectIdAndFolderId, CONTACT_FIELDS);
 
 		assertEquals("check response array", 1, contactArray.length);
@@ -96,26 +96,26 @@ public class ListTest extends AbstractContactTest {
 	}
 
 	public void testListWithNotExistingEntries() throws Exception {
-		final Contact contactObject = createCompleteContactObject();		
+		final Contact contactObject = createCompleteContactObject();
 		final int objectId = insertContact(contactObject);
 		final int objectId2 = insertContact(contactObject);
 		final int cols[] = new int[]{ Contact.OBJECT_ID, Contact.SUR_NAME, Contact.DISPLAY_NAME } ;
 
 		// not existing object last
 		final int[][] objectIdAndFolderId1 = { { objectId, contactFolderId }, { objectId+100, contactFolderId } };
-		Contact[] contactArray = listContact(objectIdAndFolderId1, cols);		
+		Contact[] contactArray = listContact(objectIdAndFolderId1, cols);
 		assertEquals("check response array", 1, contactArray.length);
 
 		// not existing object first
 		final int[][] objectIdAndFolderId2 = { { objectId+100, contactFolderId }, { objectId, contactFolderId } };
-		contactArray = listContact(objectIdAndFolderId2, cols);		
+		contactArray = listContact(objectIdAndFolderId2, cols);
 		assertEquals("check response array", 1, contactArray.length);
 
 		// not existing object first
 		final int[][] objectIdAndFolderId3 = { { objectId+100, contactFolderId }, { objectId, contactFolderId }, { objectId2, contactFolderId } };
-		contactArray = listContact(objectIdAndFolderId3, cols);		
+		contactArray = listContact(objectIdAndFolderId3, cols);
 		assertEquals("check response array", 2, contactArray.length);
-		
+
 		deleteContact(objectId, contactFolderId);
 	}
 

@@ -66,7 +66,7 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class ImageParser extends AbstractAJAXParser<ImageResponse> {
-    
+
     private byte[] fileBytes;
 
     /**
@@ -76,7 +76,7 @@ public class ImageParser extends AbstractAJAXParser<ImageResponse> {
     protected ImageParser(boolean failOnError) {
         super(failOnError);
     }
-    
+
     /**
      * @see com.openexchange.ajax.framework.AbstractAJAXParser#checkResponse(org.apache.http.HttpResponse)
      */
@@ -85,7 +85,7 @@ public class ImageParser extends AbstractAJAXParser<ImageResponse> {
         assertEquals("Response code is not okay.", HttpStatus.SC_OK, resp.getStatusLine().getStatusCode());
         HttpEntity entity = resp.getEntity();
         fileBytes = EntityUtils.toByteArray(entity);
-        
+
         return null;
     }
 
@@ -96,7 +96,7 @@ public class ImageParser extends AbstractAJAXParser<ImageResponse> {
     protected ImageResponse createResponse(Response response) throws JSONException {
         return null;
     }
-    
+
     /**
      * @see com.openexchange.ajax.framework.AbstractAJAXParser#parse(java.lang.String)
      */

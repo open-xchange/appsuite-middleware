@@ -87,15 +87,15 @@ public class ContactFolderContactSourceFactory implements ContactSourceFactory {
             userConfig.getAccessibleModules(),
             FolderObject.CONTACT,
             session.getContext())).asQueue();
-        
+
         List<ContactSource> sources = new ArrayList<ContactSource>(queue.size());
         final ServerUserSetting serverUserSetting = ServerUserSetting.getInstance();
 
         final Integer ccollectorFolderId = serverUserSetting.getContactCollectionFolder(session.getContextId(), session.getUserId());
-        
+
         for (FolderObject folder : queue) {
             EffectivePermission permission = folder.getEffectiveUserPermission(user.getId(), userConfig);
-            
+
             if ((permission.canReadAllObjects() || permission.canReadOwnObjects())) {
                 if (ccollectorFolderId == null || folder.getObjectID() != ccollectorFolderId) {
                     sources.add(new ContactFolderContactSource(folder, new RdbContactSQLImpl(session), Type.CONFIRMED));
@@ -104,7 +104,7 @@ public class ContactFolderContactSourceFactory implements ContactSourceFactory {
                 }
             }
         }
-        
+
         return sources;
     }
 

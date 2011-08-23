@@ -159,7 +159,7 @@ public abstract class AbstractMailSyncJob extends Job {
 
     /**
      * Updates the time stamp and unsets the sync flag.
-     * 
+     *
      * @param fullName The folder full name
      * @param stamp The time stamp
      * @return <code>true</code> if operation was successful; otherwise <code>false</code>
@@ -192,7 +192,7 @@ public abstract class AbstractMailSyncJob extends Job {
 
     /**
      * Unsets the sync flag.
-     * 
+     *
      * @param fullName The folder full name
      * @return <code>true</code> if operation was successful; otherwise <code>false</code>
      * @throws OXException If an error occurs
@@ -223,7 +223,7 @@ public abstract class AbstractMailSyncJob extends Job {
 
     /**
      * Checks if this call succeeds in setting the sync flag.
-     * 
+     *
      * @param fullName The folder full name
      * @return <code>true</code> if operation was successful; otherwise <code>false</code>
      * @throws OXException If an error occurs

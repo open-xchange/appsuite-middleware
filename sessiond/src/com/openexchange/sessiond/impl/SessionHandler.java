@@ -81,7 +81,7 @@ import com.openexchange.timer.TimerService;
 public final class SessionHandler {
 
     public static final SessionCounter SESSION_COUNTER = new SessionCounter() {
-        
+
         @Override
         public int getNumberOfSessions(final int userId, final int contextId) {
             return sessionData.getNumOfUserSessions(userId, contextId);

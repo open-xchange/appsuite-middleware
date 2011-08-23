@@ -58,7 +58,7 @@ import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 /**
  * This sad little class translates has the sad little task to translate between different constants that are used to identify types of
  * modules. So, in case yo
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  */
 public final class ModuleTypeTranslator {

@@ -17,7 +17,7 @@ import com.openexchange.tools.session.ServerSession;
 public class FacebookArchiveImporter extends AbstractImporter {
 
 	protected FacebookFriendsImporter delegate = new FacebookFriendsImporter();
-	
+
 	@Override
 	protected String getNameForFieldInTruncationError(int id,
 			OXException dataTruncation) {
@@ -25,23 +25,25 @@ public class FacebookArchiveImporter extends AbstractImporter {
 		return null;
 	}
 
-	public boolean canImport(ServerSession sessObj, Format format,
+	@Override
+    public boolean canImport(ServerSession sessObj, Format format,
 			List<String> folders, Map<String, String[]> optionalParams)
 			throws OXException {
 		return format == Format.FacebookArchive;
 	}
 
-	public List<ImportResult> importData(ServerSession sessObj, Format format,
+	@Override
+    public List<ImportResult> importData(ServerSession sessObj, Format format,
 			InputStream is, List<String> folders,
 			Map<String, String[]> optionalParams) throws OXException {
-		
+
 
 		List<ImportResult> results = new LinkedList<ImportResult>();
         try {
             ZipInputStream zis = new ZipInputStream(new BufferedInputStream(is));
             ZipEntry entry;
 
-            
+
             while ((entry = zis.getNextEntry()) != null) {
             	if(! entry.getName().endsWith("/friends.html")){
             		continue;

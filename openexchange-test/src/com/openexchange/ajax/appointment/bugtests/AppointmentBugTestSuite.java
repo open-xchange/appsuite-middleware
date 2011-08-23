@@ -51,12 +51,10 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import com.openexchange.ajax.appointment.recurrence.Bug12212Test;
-import com.openexchange.ajax.appointment.recurrence.Bug12495Test;
 
 /**
  * Suite for appointment bug tests.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class AppointmentBugTestSuite extends TestSuite {

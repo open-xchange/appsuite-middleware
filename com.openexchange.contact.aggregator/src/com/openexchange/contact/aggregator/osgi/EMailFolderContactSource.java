@@ -68,17 +68,17 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link EMailFolderContactSource}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class EMailFolderContactSource implements ContactSource {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EMailFolderContactSource.class));
-    
+
     private final MailFolderDiscoverer discoverer;
     private int limit = 3000;
-    
+
 
     public EMailFolderContactSource(final MailFolderDiscoverer discoverer, final int limit) {
         this.discoverer = discoverer;

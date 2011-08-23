@@ -66,7 +66,7 @@ public class CopyRequest extends AbstractContactRequest<CopyResponse> {
     private int destinationFolderID;
     private int contactID;
     private boolean failOnError;
-    
+
     public CopyRequest(int contactID, int sourceFolderID, int destinationFolderID, boolean failOnError) {
         super();
         this.contactID = contactID;
@@ -78,7 +78,7 @@ public class CopyRequest extends AbstractContactRequest<CopyResponse> {
     public Object getBody() throws JSONException {
         JSONObject jso = new JSONObject();
         jso.put("folder_id", destinationFolderID);
-        return jso;        
+        return jso;
     }
 
     public Method getMethod() {
@@ -91,7 +91,7 @@ public class CopyRequest extends AbstractContactRequest<CopyResponse> {
         list.add(new Parameter("action", "copy"));
         list.add(new Parameter("folder", sourceFolderID));
         list.add(new Parameter("id", contactID));
-        
+
         return list.toArray(new Parameter[list.size()]);
     }
 
