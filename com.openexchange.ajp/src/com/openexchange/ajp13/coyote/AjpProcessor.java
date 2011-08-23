@@ -811,7 +811,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                          */
                         request.dumpToBuffer(bytes);
                     }
-                    if ((longRunning = isLongRunning()) && !AjpLongRunningRegistry.getInstance().registerLongRunning(request)) {
+                    if (isLongRunning() && !(longRunning = AjpLongRunningRegistry.getInstance().registerLongRunning(request))) {
                         /*
                          * Only one per host/port!
                          */
@@ -909,7 +909,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     // ----------------------------------------------------- ActionHook Methods
 
-    private static final int MAX_PING_COUNT = 3;
+    private static final int MAX_PING_COUNT = 0;
 
     /**
      * Send an action to the connector.
@@ -959,7 +959,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             final Lock hardLock = mainLock.writeLock();
             hardLock.lock();
             try {
-                if (++pingCount > MAX_PING_COUNT) {
+                final int maxPingCount = MAX_PING_COUNT;
+                if (maxPingCount > 0 && ++pingCount > maxPingCount) {
                     if (LOG.isInfoEnabled()) {
                         LOG.info("Max. keep-alive count reached. Canceling...");
                     }
