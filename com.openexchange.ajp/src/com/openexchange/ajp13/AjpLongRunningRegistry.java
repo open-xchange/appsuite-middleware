@@ -91,7 +91,7 @@ public final class AjpLongRunningRegistry {
      *         progress
      */
     public boolean registerLongRunning(final HttpServletRequest request) {
-        return (null == map.putIfAbsent(new Key(request.getRemoteAddr(), request.getRemotePort()), PRESENT));
+        return (null == map.putIfAbsent(new Key(request.getParameter("User"), request.getRemoteAddr(), request.getRemotePort()), PRESENT));
     }
 
     /**
@@ -100,7 +100,7 @@ public final class AjpLongRunningRegistry {
      * @param request The long-running request
      */
     public void deregisterLongRunning(final HttpServletRequest request) {
-        map.remove(new Key(request.getRemoteAddr(), request.getRemotePort()));
+        map.remove(new Key(request.getParameter("User"), request.getRemoteAddr(), request.getRemotePort()));
     }
 
     private static final class Key {
@@ -109,15 +109,19 @@ public final class AjpLongRunningRegistry {
 
         private final String host;
 
+        private final String user;
+
         private final int hash;
 
-        public Key(final String host, final int port) {
+        public Key(final String user, final String host, final int port) {
             super();
+            this.user = user;
             this.host = host;
             this.port = port;
             final int prime = 31;
             int result = 1;
             result = prime * result + (null == host ? 0 : host.hashCode());
+            result = prime * result + (null == user ? 0 : user.hashCode());
             result = prime * result + port;
             hash = result;
         }
@@ -136,6 +140,13 @@ public final class AjpLongRunningRegistry {
                 return false;
             }
             final Key other = (Key) obj;
+            if (null == user) {
+                if (null != other.user) {
+                    return false;
+                }
+            } else if (!user.equals(other.user)) {
+                return false;
+            }
             if (null == host) {
                 if (null != other.host) {
                     return false;
