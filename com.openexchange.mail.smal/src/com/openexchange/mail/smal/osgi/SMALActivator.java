@@ -101,7 +101,7 @@ public class SMALActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             ConfigurationService.class, ThreadPoolService.class, TimerService.class, MailAccountStorageService.class,
-            SessiondService.class, DatabaseService.class, SessiondService.class };
+            SessiondService.class, DatabaseService.class };
     }
 
     @Override
