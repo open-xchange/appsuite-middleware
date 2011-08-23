@@ -220,18 +220,18 @@ public final class FolderJob extends AbstractMailSyncJob {
                 /*
                  * New ones
                  */
-                final Set<String> newIds = new HashSet<String>(storagedMap.keySet());
+                Set<String> newIds = new HashSet<String>(storagedMap.keySet());
                 newIds.removeAll(indexedMap.keySet());
                 /*
                  * Removed ones
                  */
-                final Set<String> deletedIds = new HashSet<String>(indexedMap.keySet());
+                Set<String> deletedIds = new HashSet<String>(indexedMap.keySet());
                 deletedIds.removeAll(storagedMap.keySet());
                 /*
                  * Changed ones
                  */
-                final Set<String> changedIds = new HashSet<String>(indexedMap.keySet());
-                final List<MailMessage> changedMails = new ArrayList<MailMessage>(changedIds.size());
+                Set<String> changedIds = new HashSet<String>(indexedMap.keySet());
+                List<MailMessage> changedMails = new ArrayList<MailMessage>(changedIds.size());
                 changedIds.removeAll(deletedIds);
                 for (final Iterator<String> iterator = changedIds.iterator(); iterator.hasNext();) {
                     final String mailId = iterator.next();
@@ -245,14 +245,17 @@ public final class FolderJob extends AbstractMailSyncJob {
                         changedMails.add(storageMail);
                     }
                 }
+                changedIds = null;
                 /*
                  * Delete
                  */
                 indexAdapter.deleteMessages(deletedIds, fullName, accountId, session);
+                deletedIds = null;
                 /*
                  * Change flags
                  */
                 indexAdapter.change(changedMails, session);
+                changedMails = null;
                 /*
                  * Add
                  */
@@ -263,6 +266,7 @@ public final class FolderJob extends AbstractMailSyncJob {
                     blockSize = configuredBlockSize > size ? size : configuredBlockSize;
                 }
                 final String[] ids = newIds.toArray(new String[newIds.size()]);
+                newIds = null;
                 int start = 0;
                 while (start < size) {
                     final int num = add2Index(ids, start, blockSize, fullName, indexAdapter);
