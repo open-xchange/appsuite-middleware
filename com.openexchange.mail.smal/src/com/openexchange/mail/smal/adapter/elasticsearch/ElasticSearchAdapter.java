@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -97,6 +98,7 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.indices.IndexAlreadyExistsException;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.sort.SortOrder;
 import org.elasticsearch.transport.RemoteTransportException;
 import com.openexchange.exception.OXException;
@@ -826,7 +828,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         /*
          * Request JSON representations
          */
-        final List<Map<String, Object>> jsonObjects;
+        final Map<String, Map<String, Object>> jsonObjects;
         {
             final String[] mailIds = new String[mails.size()];
             String fullName = null;
@@ -849,16 +851,17 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         /*
          * Apply new time stamp & flags and add to index
          */
-        int i = 0;
         final BulkRequestBuilder bulkRequest = client.prepareBulk();
         final long stamp = System.currentTimeMillis();
         for (final MailMessage mail : mails) {
-            final Map<String, Object> jsonObject = jsonObjects.get(i++);
-            final IndexRequestBuilder irb = client.prepareIndex(indexName, indexType, (String) jsonObject.get(Constants.FIELD_UUID));
-            irb.setReplicationType(ReplicationType.ASYNC);
-            irb.setOpType(OpType.INDEX);
-            irb.setSource(changeDoc(mail, jsonObject, stamp));
-            bulkRequest.add(irb);
+            final Map<String, Object> jsonObject = jsonObjects.get(mail.getMailId());
+            if (null != jsonObject) {
+                final IndexRequestBuilder irb = client.prepareIndex(indexName, indexType, (String) jsonObject.get(Constants.FIELD_UUID));
+                irb.setReplicationType(ReplicationType.ASYNC);
+                irb.setOpType(OpType.INDEX);
+                irb.setSource(changeDoc(mail, jsonObject, stamp));
+                bulkRequest.add(irb);
+            }
         }
         if (bulkRequest.numberOfActions() > 0) {
             bulkRequest.execute().actionGet();
@@ -866,13 +869,13 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         }
     }
 
-    private List<Map<String, Object>> getJSONMessages(final String[] mailIds, final String fullName, final MailSortField sortField, final OrderDirection order, final int accountId, final Session session) {
+    private Map<String, Map<String, Object>> getJSONMessages(final String[] mailIds, final String fullName, final MailSortField sortField, final OrderDirection order, final int accountId, final Session session) {
         ensureStarted();
         final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
         final Set<String> filter;
         if (null != mailIds) {
             if (0 >= mailIds.length) {
-                return Collections.<Map<String, Object>> emptyList();
+                return Collections.emptyMap();
             }
             if (mailIds.length <= 50) {
                 /*
@@ -910,16 +913,14 @@ public final class ElasticSearchAdapter implements IndexAdapter {
          * Perform search
          */
         final SearchResponse rsp = builder.execute().actionGet();
-        final SearchHit[] docs = rsp.getHits().getHits();
-        final List<Map<String, Object>> jsonObjects = new ArrayList<Map<String, Object>>(docs.length);
+        final SearchHits searchHits = rsp.getHits();
+        final SearchHit[] docs = searchHits.getHits();
+        final Map<String, Map<String, Object>> jsonObjects = new HashMap<String, Map<String,Object>>(docs.length);
         for (final SearchHit sd : docs) {
-            if (null == filter) {
-                jsonObjects.add(sd.getSource());
-            } else {
-                final Map<String, Object> source = sd.getSource();
-                if (filter.contains(source.get(Constants.FIELD_ID))) {
-                    jsonObjects.add(source);
-                }
+            final Map<String, Object> source = sd.getSource();
+            final String mailId = (String) source.get(Constants.FIELD_ID);
+            if (null == filter || filter.contains(mailId)) {
+                jsonObjects.put(mailId, source);
             }
         }
         return jsonObjects;
