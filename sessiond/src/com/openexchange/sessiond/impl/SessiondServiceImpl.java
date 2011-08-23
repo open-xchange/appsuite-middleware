@@ -107,7 +107,7 @@ public class SessiondServiceImpl implements SessiondService {
 
     @Override
     public int getUserSessions(final int userId, final int contextId) {
-        return SessionHandler.getUserSessions(userId, contextId).length;
+        return SessionHandler.SESSION_COUNTER.getNumberOfSessions(userId, contextId);
     }
 
     @Override
