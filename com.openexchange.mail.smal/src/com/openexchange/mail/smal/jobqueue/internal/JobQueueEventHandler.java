@@ -67,8 +67,8 @@ import com.openexchange.mail.smal.jobqueue.PeriodicFolderJob;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessionCounter;
 import com.openexchange.sessiond.SessiondEventConstants;
-import com.openexchange.sessiond.SessiondService;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
@@ -125,16 +125,14 @@ public final class JobQueueEventHandler implements EventHandler {
         return (null == jobs.putIfAbsent(job.getIdentifier(), job));
     }
 
-    private void dropIfLast(final Session session) {
-        if (0 >= SMALServiceLookup.getServiceStatic(SessiondService.class).getUserSessions(session.getUserId(), session.getContextId())) {
-            final ConcurrentMap<String, Job> jobs = periodicJobs.remove(keyFor(session));
-            if (null == jobs) {
-                return;
-            }
-            for (final Job job : jobs.values()) {
-                if (!job.isDone()) {
-                    job.cancel();
-                }
+    private void dropForLast(final Session session) {
+        final ConcurrentMap<String, Job> jobs = periodicJobs.remove(keyFor(session));
+        if (null == jobs) {
+            return;
+        }
+        for (final Job job : jobs.values()) {
+            if (!job.isDone()) {
+                job.cancel();
             }
         }
     }
@@ -142,20 +140,21 @@ public final class JobQueueEventHandler implements EventHandler {
     @Override
     public void handleEvent(final Event event) {
         final String topic = event.getTopic();
+        final SessionCounter counter = (SessionCounter) event.getProperty(SessiondEventConstants.PROP_COUNTER);
         if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic)) {
             @SuppressWarnings("unchecked") final Map<String, Session> container =
                 (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
             for (final Session session : container.values()) {
-                handleDroppedSession(session);
+                handleDroppedSession(session, counter);
             }
         } else if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
             final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
-            handleDroppedSession(session);
+            handleDroppedSession(session, counter);
         } else if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
             @SuppressWarnings("unchecked") final Map<String, Session> container =
                 (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
             for (final Session session : container.values()) {
-                handleDroppedSession(session);
+                handleDroppedSession(session, counter);
             }
         } else if (SessiondEventConstants.TOPIC_ADD_SESSION.equals(topic)) {
             final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
@@ -166,7 +165,7 @@ public final class JobQueueEventHandler implements EventHandler {
         }
     }
 
-    private void handleDroppedSession(final Session session) {
+    private void handleDroppedSession(final Session session, final SessionCounter counter) {
         try {
             final Queue<Job> jobs = (Queue<Job>) session.getParameter("com.openexchange.mail.smal.jobqueue.jobs");
             if (null != jobs) {
@@ -177,7 +176,9 @@ public final class JobQueueEventHandler implements EventHandler {
                     }
                 }
             }
-            dropIfLast(session);
+            if (counter.getNumberOfSessions(session.getUserId(), session.getContextId()) <= 0) {
+                dropForLast(session);
+            }
         } catch (final Exception e) {
             // Failed handling session
             LOG.warn("Failed handling tracked removed session.", e);
@@ -243,7 +244,7 @@ public final class JobQueueEventHandler implements EventHandler {
 
         /**
          * Initializes a new {@link JobQueueEventHandler.PeriodicRunnable}.
-         * @param periodicJobs 
+         * @param periodicJobs
          */
         public PeriodicRunnable(final ConcurrentMap<Key, ConcurrentMap<String, Job>> periodicJobs) {
             super();

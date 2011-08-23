@@ -72,12 +72,12 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class ContactAggregator {
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactAggregator.class));
-    
+
     private final List<ContactSourceFactory> factories = new ArrayList<ContactSourceFactory>();
     private final List<ContactSource> sources = new ArrayList<ContactSource>();
-    
-    
-    
+
+
+
     public List<Contact> aggregate(final ServerSession session) throws Exception {
         final List<Contact> currentContacts = new ArrayList<Contact>();
         final List<ContactSource> allSources = new ArrayList<ContactSource>();
@@ -85,11 +85,11 @@ public class ContactAggregator {
         for(final ContactSourceFactory factory: factories) {
             allSources.addAll(factory.getSources(session));
         }
-        
+
         final List<ContactSource> confirmed = new ArrayList<ContactSource>();
         final List<ContactSource> contribs = new ArrayList<ContactSource>();
         partition(allSources, confirmed, contribs);
-        
+
         for (final ContactSource source : confirmed) {
             final List<Contact> fromSource = source.getContacts(session);
             LOG.debug("Got "+fromSource.size()+" contacts from "+source);
@@ -100,14 +100,14 @@ public class ContactAggregator {
                         update(knownContact, newContact);
                         updated = true;
                         break;
-                    }   
+                    }
                 }
                 if (!updated) {
                     currentContacts.add(newContact);
                 }
             }
         }
-        
+
         for (final ContactSource source : contribs) {
             final List<Contact> fromSource = source.getContacts(session);
             LOG.debug("Got "+fromSource.size()+" contacts from "+source);
@@ -120,18 +120,18 @@ public class ContactAggregator {
             }
         }
 
-        
+
         return currentContacts;
     }
-    
+
     private void partition(final List<ContactSource> allSources, final List<ContactSource> confirmed, final List<ContactSource> contribs) {
         for (final ContactSource contactSource : allSources) {
             if (Type.CONFIRMED == contactSource.getType()) {
-                confirmed.add(contactSource); 
+                confirmed.add(contactSource);
             } else {
                 contribs.add(contactSource);
             }
-            
+
         }
     }
 
@@ -146,7 +146,7 @@ public class ContactAggregator {
             }
         }
         final int[] mailColumns = new int[]{Contact.EMAIL1, Contact.EMAIL2, Contact.EMAIL3};
-        
+
         for(final int mailColumn : mailColumns) {
             final String mail = (String) addition.get(mailColumn);
             if (mail != null) {
@@ -174,7 +174,7 @@ public class ContactAggregator {
     public static int calculateSimilarityScore(final Contact original, final Contact candidate, final Object session) {
         int score = 0;
         final int threshold = 9; // Of course
-        
+
         if ((isset(original.getGivenName()) || isset(candidate.getGivenName())) && eq(original.getGivenName(), candidate.getGivenName())) {
             LOG.debug("givenName");
             score += 5;
@@ -183,12 +183,12 @@ public class ContactAggregator {
             LOG.debug("surName");
             score += 5;
         }
-        
+
         if ((isset(original.getDisplayName()) || isset(candidate.getDisplayName())) && compareDisplayNames(original.getDisplayName(), candidate.getDisplayName())) {
             LOG.debug("dispName");
             score += 10;
         }
-        
+
         if (isset(original.getDisplayName()) && isset(candidate.getSurName()) && isset(candidate.getGivenName())) {
             final String displayName = original.getDisplayName();
             if (displayName.contains(candidate.getGivenName()) && displayName.contains(candidate.getSurName())) {
@@ -196,7 +196,7 @@ public class ContactAggregator {
                 score += 10;
             }
         }
-        
+
         if (isset(candidate.getDisplayName()) && isset(original.getSurName()) && isset(original.getGivenName())) {
             final String displayName = candidate.getDisplayName();
             if (displayName.contains(original.getGivenName()) && displayName.contains(original.getSurName())) {
@@ -204,7 +204,7 @@ public class ContactAggregator {
                 score += 10;
             }
         }
-        
+
         // an email-address is unique so if this is identical the contact should be the same
         final Set<String> mails = new HashSet<String>();
         final List<String> mails1 = java.util.Arrays.asList(original.getEmail1(), original.getEmail2(), original.getEmail3());
@@ -217,11 +217,11 @@ public class ContactAggregator {
         for (final String mail : mails2) {
             if (mail != null && mails.contains(mail)) {
                 LOG.debug("mail "+mail+" in "+mails);
-                
+
                 score += 10;
             }
         }
-        
+
         final List<String> purged = getPurgedDisplayNameComponents(original.getDisplayName());
         for(final String mail : mails2) {
             if (mail == null) {
@@ -242,7 +242,7 @@ public class ContactAggregator {
                 }
             }
         }
-        
+
         final List<String> purged2 = getPurgedDisplayNameComponents(candidate.getDisplayName());
         for(final String mail : mails) {
             if (mail == null) {
@@ -263,19 +263,19 @@ public class ContactAggregator {
                 }
             }
         }
-        
+
         if (original.containsBirthday() && candidate.containsBirthday() && eq(original.getBirthday(), candidate.getBirthday())) {
             LOG.debug("bday");
             score += 5;
         }
-        
+
         if( score < threshold && original.matches(candidate, MATCH_COLUMNS)) { //the score check is only to speed the process up
             score = threshold + 1;
         }
         LOG.debug("Score: "+score+" "+original+" <-> "+candidate);
         return score;
     }
-    
+
     public static List<String> getPurgedDisplayNameComponents(final String displayName) {
         if (displayName == null) {
             return Collections.emptyList();
@@ -290,7 +290,7 @@ public class ContactAggregator {
         }
         return p1;
     }
-    
+
     public static boolean compareDisplayNames(final String displayName, final String displayName2) {
         if (eq(displayName, displayName2)) {
             return true;
@@ -300,7 +300,7 @@ public class ContactAggregator {
         }
         final List<String> p1 = getPurgedDisplayNameComponents(displayName);
         final List<String> p2 = getPurgedDisplayNameComponents(displayName2);
-        
+
         // any two must match
         int count = 0;
         for(final String string : p2) {
@@ -308,13 +308,13 @@ public class ContactAggregator {
                 count++;
             }
         }
-        
-        return count == Math.min(p1.size(), p2.size()) && count >= 2; 
+
+        return count == Math.min(p1.size(), p2.size()) && count >= 2;
     }
-    
+
     public static String purge(final String component) {
         // throw away non characters
-        
+
         final StringBuilder b = new StringBuilder(component.length());
         for(final char c : component.toCharArray()) {
             if (Character.isLetter(c)) {
@@ -331,7 +331,7 @@ public class ContactAggregator {
     public static boolean isset(final String s) {
         return s != null && s.length() > 0;
     }
-    
+
     public static boolean eq(final Object o1, final Object o2) {
         if (o1 == null || o2 == null) {
             return false;
@@ -346,8 +346,8 @@ public class ContactAggregator {
         return sources.add(arg0);
     }
 
-    
-    
+
+
 
 
 }

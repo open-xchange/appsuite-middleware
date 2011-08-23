@@ -62,22 +62,26 @@ public abstract class AbstractOutlookMapper implements ContactFieldMapper {
 
     protected final HashMap<ContactField, String> ox2outlook = new HashMap<ContactField, String>();
 
+    @Override
     public ContactField getFieldByName(final String name) {
         return outlook2ox.get(name);
     }
 
+    @Override
     public String getNameOfField(final ContactField field) {
         return ox2outlook.get(field);
     }
 
+    @Override
     public Collection<String> getNamesOfFields() {
         return ox2outlook.values();
     }
 
+    @Override
     public Collection<ContactField> getSupportedFields() {
         return outlook2ox.values();
     }
-    
+
     public void store(ContactField oxField, String outlookField){
         if(outlookField != null && ! "".equals(outlookField))
             outlook2ox.put(outlookField, oxField);

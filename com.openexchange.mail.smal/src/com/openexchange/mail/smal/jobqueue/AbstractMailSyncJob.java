@@ -85,7 +85,7 @@ public abstract class AbstractMailSyncJob extends Job {
     }
 
     /**
-     * Checks if a sync should be performed for specified full name.
+     * Checks if a sync should be performed for specified full name with default span of 1 hour.
      *
      * @param fullName The full name
      * @param now The current time milliseconds
@@ -93,6 +93,19 @@ public abstract class AbstractMailSyncJob extends Job {
      * @throws OXException If an error occurs
      */
     protected boolean shouldSync(final String fullName, final long now) throws OXException {
+        return shouldSync(fullName, now, Constants.HOUR_MILLIS);
+    }
+
+    /**
+     * Checks if a sync should be performed for specified full name.
+     *
+     * @param fullName The full name
+     * @param now The current time milliseconds
+     * @param span The max. allowed span; if exceeded the folder is considered to be synchronized
+     * @return <code>true</code> if a sync should be performed for passed full name; otherwise <code>false</code>
+     * @throws OXException If an error occurs
+     */
+    protected boolean shouldSync(final String fullName, final long now, final long span) throws OXException {
         final DatabaseService databaseService = SMALServiceLookup.getServiceStatic(DatabaseService.class);
         if (null == databaseService) {
             return false;
@@ -130,7 +143,7 @@ public abstract class AbstractMailSyncJob extends Job {
                 }
             }
             final long stamp = rs.getLong(1);
-            if ((now - stamp) > Constants.HOUR_MILLIS) {
+            if ((now - stamp) > span) {
                 /*
                  * Ensure sync flag is NOT set
                  */
@@ -159,7 +172,7 @@ public abstract class AbstractMailSyncJob extends Job {
 
     /**
      * Updates the time stamp and unsets the sync flag.
-     * 
+     *
      * @param fullName The folder full name
      * @param stamp The time stamp
      * @return <code>true</code> if operation was successful; otherwise <code>false</code>
@@ -192,7 +205,7 @@ public abstract class AbstractMailSyncJob extends Job {
 
     /**
      * Unsets the sync flag.
-     * 
+     *
      * @param fullName The folder full name
      * @return <code>true</code> if operation was successful; otherwise <code>false</code>
      * @throws OXException If an error occurs
@@ -223,7 +236,7 @@ public abstract class AbstractMailSyncJob extends Job {
 
     /**
      * Checks if this call succeeds in setting the sync flag.
-     * 
+     *
      * @param fullName The folder full name
      * @return <code>true</code> if operation was successful; otherwise <code>false</code>
      * @throws OXException If an error occurs

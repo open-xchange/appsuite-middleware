@@ -53,7 +53,7 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link InstallAction}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class InstallAction extends AbstractAppStoreAction {
@@ -62,7 +62,7 @@ public class InstallAction extends AbstractAppStoreAction {
 
     /**
      * Initializes a new {@link InstallAction}.
-     * 
+     *
      * @param services
      */
     public InstallAction(ServiceLookup services) {

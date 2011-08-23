@@ -120,6 +120,13 @@ public final class SessiondEventConstants {
     public static final String PROP_SESSION = "com.openexchange.sessiond.session";
 
     /**
+     * The property for a session counter kept in event's properties.
+     * <p>
+     * Target object is an instance of <tt>com.openexchange.sessiond.SessionCounter</tt>.
+     */
+    public static final String PROP_COUNTER = "com.openexchange.sessiond.counter";
+
+    /**
      * The property for a session container kept in event's properties.
      * <p>
      * Target object is an instance of <tt>java.util.Map&lt;String, Session&gt;</tt>.

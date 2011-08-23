@@ -92,7 +92,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * Importer for OX own CSV file format - this format is able to represent a contact with all fields that appear in the OX.
- * 
+ *
  * @see com.openexchange.importexport.importers.OutlookCSVContactImporter - imports files prduced by Outlook
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  */
@@ -100,6 +100,7 @@ public class CSVContactImporter extends AbstractImporter {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CSVContactImporter.class));
 
+    @Override
     public boolean canImport(final ServerSession session, final Format format, final List<String> folders, final Map<String, String[]> optionalParams) throws OXException {
         if (!format.equals(getResponsibleFor())) {
             return false;
@@ -153,6 +154,7 @@ public class CSVContactImporter extends AbstractImporter {
         return "UTF-8";
     }
 
+    @Override
     public List<ImportResult> importData(final ServerSession sessObj, final Format format, final InputStream is, final List<String> folders, final Map<String, String[]> optionalParams) throws OXException {
         final String folder = folders.get(0);
         if (!canImport(sessObj, format, folders, optionalParams)) {
@@ -180,21 +182,21 @@ public class CSVContactImporter extends AbstractImporter {
             // ...and writing them
             intentions.add(writeEntry(fields, iter.next(), folder, conSet, lineNumber++, sessObj));
         }
-        
+
         // Build a list of contacts to insert
-        
+
         final List<Contact> contacts = new LinkedList<Contact>();
         for(final ImportIntention intention : intentions) {
             if (intention.contact != null) {
                 contacts.add(intention.contact);
             }
         }
-        
+
         // Insert or update contacts
-        
+
         final FolderUpdaterRegistry updaterRegistry = ImportExportServices.getUpdaterRegistry();
         final TargetFolderDefinition target = new TargetFolderDefinition(folder, sessObj.getUserId(), sessObj.getContext());
-        
+
         try {
             final FolderUpdaterService<Contact> folderUpdater = updaterRegistry.getFolderUpdater(target);
             if (folderUpdater == null) {
@@ -204,12 +206,12 @@ public class CSVContactImporter extends AbstractImporter {
         } catch (final OXException e) {
             throw new OXException(e);
         }
-        
-        
+
+
         // Build result list
-        
+
         final List<ImportResult> results = new LinkedList<ImportResult>();
-        
+
         for(final ImportIntention intention : intentions) {
             if (intention.contact != null) {
                 final ImportResult result = new ImportResult();
@@ -224,7 +226,7 @@ public class CSVContactImporter extends AbstractImporter {
                 results.add(intention.result);
             }
         }
-        
+
         return results;
     }
 
@@ -295,7 +297,7 @@ public class CSVContactImporter extends AbstractImporter {
 //                result.setDate(contactObj.getLastModified());
                 if (result.getException() != null) {
                     return new ImportIntention(result, contactObj);
-                } 
+                }
                 return new ImportIntention(contactObj);
             } else {
                 result.setException(ImportExportExceptionCodes.NO_FIELD_IMPORTED.create(I(lineNumber)));
@@ -350,7 +352,7 @@ public class CSVContactImporter extends AbstractImporter {
 
     /**
      * Adds error information to a given ImportResult
-     * 
+     *
      * @param result ImportResult to be written into.
      * @param lineNumber Number of the buggy line in the CSV script.
      * @param entry CSV line that was buggy.
@@ -361,7 +363,7 @@ public class CSVContactImporter extends AbstractImporter {
 
     /**
      * Method used to find a ContactField based on the given field name
-     * 
+     *
      * @param name Name of the field
      * @return a ContactField that was identified by the given name
      */
@@ -403,19 +405,19 @@ public class CSVContactImporter extends AbstractImporter {
         }
         return field.getReadableName();
     }
-    
+
     private static final class ImportIntention {
         public Contact contact;
         public ImportResult result;
-        
+
         public ImportIntention(final Contact contact) {
             this.contact = contact;
         }
-        
+
         public ImportIntention(final ImportResult result) {
             this.result = result;
         }
-        
+
         public ImportIntention(final ImportResult result, final Contact contact) {
             this.result = result;
             this.contact = contact;

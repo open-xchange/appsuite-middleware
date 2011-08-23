@@ -72,7 +72,7 @@ import java.util.List;
 
 /**
  * {@link ApplicationInstaller}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class ApplicationInstaller {
@@ -94,11 +94,11 @@ public class ApplicationInstaller {
     public void dropUserApplications() throws OXException {
         final DatabaseService databaseService = serviceLookup.getService(DatabaseService.class);
         final DELETE delete = new DELETE().FROM(TABLE).WHERE(new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("userId", PLACEHOLDER)));
-        
+
         final List<Object> values = new ArrayList<Object>(2);
         values.add(Integer.valueOf(context.getContextId()));
         values.add(user.getId());
-        
+
         final Connection con = databaseService.getWritable(context);
         final StatementBuilder sb = new StatementBuilder();
         try {

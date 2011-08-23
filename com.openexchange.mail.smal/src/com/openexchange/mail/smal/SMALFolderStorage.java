@@ -69,8 +69,8 @@ public final class SMALFolderStorage extends AbstractSMALStorage implements IMai
     /**
      * Initializes a new {@link SMALFolderStorage}.
      */
-    public SMALFolderStorage(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> realMailAccess) {
-        super(session, accountId, realMailAccess);
+    public SMALFolderStorage(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess) {
+        super(session, accountId, delegateMailAccess);
     }
 
     @Override

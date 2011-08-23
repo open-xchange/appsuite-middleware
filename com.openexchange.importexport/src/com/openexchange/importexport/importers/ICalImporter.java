@@ -102,7 +102,7 @@ import com.openexchange.tools.session.ServerSession;
  * Imports ICal files. ICal files can be translated to either tasks or
  * appointments within the OX, so the importer works with both SQL interfaces.
  * If something is broken, it is their fault usually.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb'
  *         Prinz</a> (changes to new interface, bugfixes, maintenance)
@@ -113,7 +113,8 @@ public class ICalImporter extends AbstractImporter {
 
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ICalImporter.class));
 
-	public boolean canImport(final ServerSession session, final Format format,
+	@Override
+    public boolean canImport(final ServerSession session, final Format format,
 			final List<String> folders,
 			final Map<String, String[]> optionalParams)
 			throws OXException {
@@ -211,7 +212,8 @@ public class ICalImporter extends AbstractImporter {
 		return result;
 	}
 
-	public List<ImportResult> importData(final ServerSession session,
+	@Override
+    public List<ImportResult> importData(final ServerSession session,
 			final Format format, final InputStream is,
 			final List<String> folders,
 			final Map<String, String[]> optionalParams)
@@ -315,7 +317,8 @@ public class ICalImporter extends AbstractImporter {
 		if (!errorMap.isEmpty()) {
 			errorMap.forEachValue(new TObjectProcedure<ConversionError>() {
 
-				public boolean execute(final ConversionError error) {
+				@Override
+                public boolean execute(final ConversionError error) {
 					final ImportResult importResult = new ImportResult();
 					importResult.setEntryNumber(error.getIndex());
 					importResult.setException(new OXException(
@@ -352,7 +355,7 @@ public class ICalImporter extends AbstractImporter {
 		sortSeriesMastersFirst(appointments);
 		final Map<Integer, Integer> pos2Master = handleChangeExceptions(appointments);
 		final Map<Integer, Integer> master2id = new HashMap<Integer,Integer>();
-		
+
 		final TIntObjectHashMap<List<ConversionWarning>> warningMap = new TIntObjectHashMap<List<ConversionWarning>>();
 
 		for (final ConversionWarning warning : warnings) {
@@ -367,7 +370,7 @@ public class ICalImporter extends AbstractImporter {
 
 		int index = 0;
 		final Iterator<CalendarDataObject> iter = appointments.iterator();
-		
+
 		final boolean suppressNotification = (optionalParams != null && optionalParams
 				.containsKey("suppressNotification"));
 		while (iter.hasNext()) {
@@ -438,7 +441,8 @@ public class ICalImporter extends AbstractImporter {
 		if (!errorMap.isEmpty()) {
 			errorMap.forEachValue(new TObjectProcedure<ConversionError>() {
 
-				public boolean execute(final ConversionError error) {
+				@Override
+                public boolean execute(final ConversionError error) {
 					final ImportResult importResult = new ImportResult();
 					importResult.setEntryNumber(error.getIndex());
 					importResult.setException(new OXException(
@@ -462,7 +466,8 @@ public class ICalImporter extends AbstractImporter {
 
 	private void sortSeriesMastersFirst(final List<CalendarDataObject> appointments) {
 		Collections.sort(appointments, new Comparator<CalendarDataObject>(){
-			public int compare(final CalendarDataObject o1, final CalendarDataObject o2) {
+			@Override
+            public int compare(final CalendarDataObject o1, final CalendarDataObject o2) {
 				if( o1.containsRecurrenceType() && !o2.containsRecurrenceType()) {
                     return -1;
                 }
@@ -479,35 +484,35 @@ public class ICalImporter extends AbstractImporter {
 		final Map<String, Integer> uid2master = new HashMap<String,Integer>();
 		final Map<Integer, Integer> map = new HashMap<Integer, Integer>();
 		CalendarDataObject app;
-			
+
 		//find master
 		for(int pos = 0, len = appointments.size(); pos < len; pos++){
 			app = appointments.get(pos);
 			if(! app.containsUid()) {
                 continue;
             }
-			
+
 			final String uid = app.getUid();
 			if(! uid2master.containsKey(uid)) {
                 uid2master.put(uid, pos);
             }
 		}
-		
+
 		//references to master
 		for(int pos = 0, len = appointments.size(); pos < len; pos++){
 			app = appointments.get(pos);
 			if(! app.containsUid()) {
                 continue;
             }
-			
+
 			final String uid = app.getUid();
 			final Integer masterPos = uid2master.get(uid);
-				
+
 			if(pos > masterPos) {
                 map.put(pos, uid2master.get(uid));
             }
 		}
-		
+
 		return map;
 	}
 
@@ -554,7 +559,7 @@ public class ICalImporter extends AbstractImporter {
 	 * <p>
 	 * Moreover its start/end date is changed to match the date in UTC time
 	 * zone.
-	 * 
+	 *
 	 * @param appointmentObj
 	 *            The appointment to check
 	 */

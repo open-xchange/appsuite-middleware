@@ -144,7 +144,7 @@ public enum ImportExportExceptionCodes implements OXExceptionCode {
     /** Ignoring invalid value for field "%1$s": %2$s  */
     IGNORE_FIELD(ImportExportExceptionMessages.IGNORE_FIELD_MSG, CATEGORY_USER_INPUT, 1306),
     CONTACT_INTERFACE_MISSING(ImportExportExceptionMessages.CONTACT_INTERFACE_MISSING, Category.CATEGORY_ERROR, 1307),
-    COULD_NOT_WRITE(ImportExportExceptionMessages.COULD_NOT_WRITE, Category.CATEGORY_ERROR, 1308),    
+    COULD_NOT_WRITE(ImportExportExceptionMessages.COULD_NOT_WRITE, Category.CATEGORY_ERROR, 1308),
     NO_FILE_UPLOADED(ImportExportExceptionMessages.NO_FILE_UPLOADED, Category.CATEGORY_ERROR, 1309),
     ;
 
@@ -158,14 +158,17 @@ public enum ImportExportExceptionCodes implements OXExceptionCode {
         this.number = number;
     }
 
+    @Override
     public String getPrefix() {
         return EnumComponent.IMPORT_EXPORT.getAbbreviation();
     }
 
+    @Override
     public int getNumber() {
         return number;
     }
 
+    @Override
     public String getMessage() {
         return message;
     }
@@ -174,17 +177,19 @@ public enum ImportExportExceptionCodes implements OXExceptionCode {
         return null;
     }
 
+    @Override
     public Category getCategory() {
         return category;
     }
 
+    @Override
     public boolean equals(final OXException e) {
         return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -193,7 +198,7 @@ public enum ImportExportExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -203,7 +208,7 @@ public enum ImportExportExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

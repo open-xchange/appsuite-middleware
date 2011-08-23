@@ -68,6 +68,16 @@ public abstract class AbstractSMALStorage {
     protected final Session session;
 
     /**
+     * The user identifier obtained from session.
+     */
+    protected final int userId;
+
+    /**
+     * The context identifier obtained from session.
+     */
+    protected final int contextId;
+
+    /**
      * The account identifier.
      */
     protected final int accountId;
@@ -83,6 +93,8 @@ public abstract class AbstractSMALStorage {
     protected AbstractSMALStorage(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess) {
         super();
         this.session = session;
+        userId = session.getUserId();
+        contextId = session.getContextId();
         this.accountId = accountId;
         this.delegateMailAccess = delegateMailAccess;
     }

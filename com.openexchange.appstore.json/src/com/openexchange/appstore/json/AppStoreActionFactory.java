@@ -67,7 +67,7 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link AppStoreActionFactory}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class AppStoreActionFactory implements AJAXActionServiceFactory {

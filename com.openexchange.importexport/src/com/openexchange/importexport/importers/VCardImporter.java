@@ -102,6 +102,7 @@ public class VCardImporter extends AbstractImporter implements OXExceptionConsta
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(VCardImporter.class));
 
+    @Override
     public boolean canImport(final ServerSession session, final Format format, final List<String> folders, final Map<String, String[]> optionalParams) throws OXException {
         if (!format.equals(Format.VCARD)) {
             return false;
@@ -156,6 +157,7 @@ public class VCardImporter extends AbstractImporter implements OXExceptionConsta
         return true;
     }
 
+    @Override
     public List<ImportResult> importData(final ServerSession session, final Format format, final InputStream is,
             final List<String> folders, final Map<String, String[]> optionalParams) throws OXException {
 

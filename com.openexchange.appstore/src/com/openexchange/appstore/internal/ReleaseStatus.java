@@ -56,39 +56,39 @@ package com.openexchange.appstore.internal;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class ReleaseStatus {
-    
+
     private String target;
-    
+
     private Integer contextId;
-    
+
     private Integer userId;
 
-    
+
     public String getTarget() {
         return target;
     }
 
-    
+
     public void setTarget(String target) {
         this.target = target;
     }
 
-    
+
     public Integer getContextId() {
         return contextId;
     }
 
-    
+
     public void setContextId(Integer contextId) {
         this.contextId = contextId;
     }
 
-    
+
     public Integer getUserId() {
         return userId;
     }
 
-    
+
     public void setUserId(Integer userId) {
         this.userId = userId;
     }

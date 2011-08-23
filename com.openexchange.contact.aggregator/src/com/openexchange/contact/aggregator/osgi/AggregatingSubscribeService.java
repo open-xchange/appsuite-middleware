@@ -70,11 +70,11 @@ import com.openexchange.subscribe.SubscriptionSource;
 public class AggregatingSubscribeService extends AbstractSubscribeService {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AggregatingSubscribeService.class));
-    
+
     private ContactAggregator aggregator = new ContactAggregator();
-    
+
     private final SubscriptionSource source;
-    
+
     public AggregatingSubscribeService(final ContactAggregator aggregator) {
         super();
         this.aggregator = aggregator;
@@ -82,11 +82,11 @@ public class AggregatingSubscribeService extends AbstractSubscribeService {
         source.setId("com.openexchange.contact.aggregator");
         source.setDisplayName("OX Contact Aggregator");
         source.setFolderModule(FolderObject.CONTACT);
-        
+
         final DynamicFormDescription form = new DynamicFormDescription();
-        
+
         form.add(FormElement.input("displayName", "Display Name", true, "OX Contact Aggregator"));
-        
+
         source.setFormDescription(form);
         source.setSubscribeService(this);
     }
@@ -110,7 +110,7 @@ public class AggregatingSubscribeService extends AbstractSubscribeService {
     public boolean handles(final int folderModule) {
         return folderModule == FolderObject.CONTACT;
     }
-    
+
     @Override
     public void modifyOutgoing(final Subscription subscription) throws OXException {
         super.modifyOutgoing(subscription);

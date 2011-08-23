@@ -51,7 +51,7 @@ package com.openexchange.importexport.formats;
 
 /**
  * This enumeration lists formats for import or export.
- * 
+ *
  * @author Tobias Prinz, mailto:tobias.prinz@open-xchange.com
  *
  */
@@ -63,32 +63,32 @@ public enum Format {
     FacebookFriends("FacebookFriends", "FacebookFriends","text/html","html"),
     FacebookArchive("FacebookArchive", "FacebookArchive","application/zip","zip"),
     TNEF("TNEF" , "Transport Neutral Encapsulation Format" , "application/ms-tnef", "tnef");
-    
+
     private String constantName, mimetype, longName, extension;
-    
+
     private Format(final String constantName, final String longName, final String mimetype, final String extension) {
         this.constantName = constantName;
         this.longName = longName;
         this.mimetype = mimetype;
         this.extension = extension;
     }
-    
+
     public String getFullName() {
         return this.longName;
     }
-    
+
     public String getMimeType() {
         return this.mimetype;
     }
-    
+
     public String getExtension() {
         return this.extension;
     }
-    
+
     public String getConstantName() {
         return this.constantName;
     }
-    
+
     public static Format getFormatByMimeType(final String mimeType) {
         for (final Format f : Format.values()) {
             if (f.getMimeType().equals(mimeType)) {
@@ -112,7 +112,7 @@ public enum Format {
         }
         return null;
     }
-    
+
     public static Format getFormatByConstantName(final String constantName) {
         for (final Format f : Format.values()) {
             if (f.getConstantName().equalsIgnoreCase(constantName)) {
@@ -121,7 +121,7 @@ public enum Format {
         }
         return null;
     }
-    
+
     public static boolean containsConstantName(final String name) {
         for (final Format f : Format.values()) {
             if (name.equalsIgnoreCase(f.constantName)) {

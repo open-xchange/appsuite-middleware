@@ -70,13 +70,13 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link MailFolderDiscoverer}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class MailFolderDiscoverer {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MailFolderDiscoverer.class));
-    
+
     private final FolderService folderService;
 
     public MailFolderDiscoverer(final FolderService folderService) {

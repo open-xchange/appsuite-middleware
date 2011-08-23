@@ -63,8 +63,8 @@ import com.openexchange.ajax.framework.Header;
 public class ImageRequest implements AJAXRequest<ImageResponse> {
 
     private String uid;
-    
-    
+
+
     public ImageRequest(final String uid) {
         super();
         this.uid = uid;
@@ -82,7 +82,7 @@ public class ImageRequest implements AJAXRequest<ImageResponse> {
         Parameter[] parameters = new Parameter[] {
             new Parameter("uid", uid)
         };
-        
+
         return parameters;
     }
 

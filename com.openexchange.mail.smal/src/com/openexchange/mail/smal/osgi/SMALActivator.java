@@ -69,6 +69,7 @@ import com.openexchange.mail.smal.adapter.internal.IndexServiceImpl;
 import com.openexchange.mail.smal.internal.SMALDeleteListener;
 import com.openexchange.mail.smal.internal.SMALUpdateTaskProviderService;
 import com.openexchange.mail.smal.internal.tasks.CreateMailSyncTable;
+import com.openexchange.mail.smal.internal.tasks.SMALCheckTableTask;
 import com.openexchange.mail.smal.internal.tasks.SMALCreateTableTask;
 import com.openexchange.mail.smal.jobqueue.JobQueue;
 import com.openexchange.mail.smal.jobqueue.internal.JobQueueEventHandler;
@@ -81,7 +82,7 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link SMALActivator} - The activator for Super-MAL bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SMALActivator extends HousekeepingActivator {
@@ -100,7 +101,7 @@ public class SMALActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             ConfigurationService.class, ThreadPoolService.class, TimerService.class, MailAccountStorageService.class,
-            SessiondService.class, DatabaseService.class, SessiondService.class };
+            SessiondService.class, DatabaseService.class };
     }
 
     @Override
@@ -150,7 +151,7 @@ public class SMALActivator extends HousekeepingActivator {
          */
         {
             registerService(CreateTableService.class, new CreateMailSyncTable());
-            registerService(UpdateTaskProviderService.class, new SMALUpdateTaskProviderService(new SMALCreateTableTask()));
+            registerService(UpdateTaskProviderService.class, new SMALUpdateTaskProviderService(new SMALCreateTableTask(), new SMALCheckTableTask()));
             registerService(DeleteListener.class, new SMALDeleteListener());
         }
     }

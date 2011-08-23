@@ -61,7 +61,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public interface ContactSource {
     public enum Type {CONFIRMED, CONTRIBUTOR};
-    
+
     public List<Contact> getContacts(ServerSession session) throws Exception;
     public Type getType();
 }
