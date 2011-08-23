@@ -99,26 +99,28 @@ public interface IndexAdapter {
     /**
      * Performs the query derived from given search term.
      *
+     * @param optFullName The optional full name to restrict search results to specified folder
      * @param searchTerm The search term
      * @param sortField The sort field
      * @param order The order direction
+     * @param optAccountId The optional account identifier or <code>-1</code> to not restrict to a certain account
      * @param session The session
      * @return The search result
      * @throws OXException If search fails
      */
-    public List<MailMessage> search(SearchTerm<?> searchTerm, MailSortField sortField, OrderDirection order, Session session) throws OXException;
+    public List<MailMessage> search(String optFullName, SearchTerm<?> searchTerm, MailSortField sortField, OrderDirection order, int optAccountId, Session session) throws OXException;
 
     /**
      * Gets specified mails located in given folder.
      *
-     * @param mailIds The mail identifiers; pass <code>null</code> to get all messages in folder
+     * @param optMailIds The mail identifiers; pass <code>null</code> to get all messages in folder
      * @param fullName The folder full name
      * @param accountId The account identifier
      * @param session The session
      * @return <code>true</code> if folder is contained; otherwise <code>false</code>
      * @throws OXException If check fails
      */
-    public List<MailMessage> getMessages(String[] mailIds, String fullName, MailSortField sortField, OrderDirection order, MailField[] fields, int accountId, Session session) throws OXException;
+    public List<MailMessage> getMessages(String[] optMailIds, String fullName, MailSortField sortField, OrderDirection order, MailField[] fields, int accountId, Session session) throws OXException;
 
     /**
      * Deletes specified mails from index.

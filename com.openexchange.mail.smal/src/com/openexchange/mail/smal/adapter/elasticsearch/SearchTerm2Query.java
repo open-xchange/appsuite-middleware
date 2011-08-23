@@ -92,6 +92,9 @@ public final class SearchTerm2Query {
      * @return The resulting query (builder)
      */
     public static QueryBuilder searchTerm2Query(final SearchTerm<?> searchTerm) {
+        if (null == searchTerm) {
+            return null;
+        }
         if (searchTerm instanceof ANDTerm) {
             final ANDTerm andTerm = (ANDTerm) searchTerm;
             final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();

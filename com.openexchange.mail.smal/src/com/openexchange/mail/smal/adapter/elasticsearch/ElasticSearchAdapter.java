@@ -93,7 +93,6 @@ import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.json.JsonXContent;
 import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.indices.IndexAlreadyExistsException;
 import org.elasticsearch.search.SearchHit;
@@ -316,14 +315,14 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     }
 
     @Override
-    public List<MailMessage> getMessages(final String[] mailIds, final String fullName, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int accountId, final Session session) throws OXException {
+    public List<MailMessage> getMessages(final String[] optMailIds, final String fullName, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int accountId, final Session session) throws OXException {
         ensureStarted();
         final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-        if (null != mailIds) {
-            if (0 <= mailIds.length) {
+        if (null != optMailIds) {
+            if (0 <= optMailIds.length) {
                 return Collections.<MailMessage> emptyList();
             }
-            boolQuery.must(QueryBuilders.inQuery(Constants.FIELD_ID, mailIds));
+            boolQuery.must(QueryBuilders.inQuery(Constants.FIELD_ID, optMailIds));
         }
         boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_USER, session.getUserId()));
         boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_ACCOUNT_ID, accountId));
@@ -338,7 +337,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         if (null != sortField && null != order) {
             builder.addSort(sortField.getKey(), OrderDirection.DESC.equals(order) ? SortOrder.DESC : SortOrder.ASC);
         }
-        builder.setSize(null == mailIds ? MAX_SEARCH_RESULTS : mailIds.length);
+        builder.setSize(null == optMailIds ? MAX_SEARCH_RESULTS : optMailIds.length);
         /*
          * Perform search
          */
@@ -361,10 +360,20 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     }
 
     @Override
-    public List<MailMessage> search(final SearchTerm<?> searchTerm, final MailSortField sortField, final OrderDirection order, final Session session) throws OXException {
+    public List<MailMessage> search(final String optFullName, final SearchTerm<?> searchTerm, final MailSortField sortField, final OrderDirection order, final int optAccountId, final Session session) throws OXException {
         ensureStarted();
         try {
-            final QueryBuilder queryBuilder = SearchTerm2Query.searchTerm2Query(searchTerm);
+            final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+            boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_USER, session.getUserId()));
+            if (optAccountId >= 0) {
+                boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_ACCOUNT_ID, optAccountId));
+            }
+            if (null != optFullName) {
+                boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_FULL_NAME, optFullName));
+            }
+            if (null != searchTerm) {
+                boolQuery.must(SearchTerm2Query.searchTerm2Query(searchTerm));
+            }
             /*
              * Compose search request
              */
@@ -374,7 +383,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                 builder.addSort(sortField.getKey(), OrderDirection.DESC.equals(order) ? SortOrder.DESC : SortOrder.ASC);
             }
             builder.setSize(MAX_SEARCH_RESULTS);
-            builder.setQuery(queryBuilder);
+            builder.setQuery(boolQuery);
             builder.setSearchType(SearchType.DFS_QUERY_THEN_FETCH);
             builder.setExplain(true);
             builder.setOperationThreading(SearchOperationThreading.THREAD_PER_SHARD);
