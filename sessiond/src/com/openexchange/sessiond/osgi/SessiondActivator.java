@@ -64,6 +64,7 @@ import com.openexchange.management.ManagementService;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.session.SessionSpecificContainerRetrievalService;
+import com.openexchange.sessiond.SessionCounter;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.cache.SessionCache;
 import com.openexchange.sessiond.cache.SessionCacheConfiguration;
@@ -146,6 +147,7 @@ public final class SessiondActivator extends HousekeepingActivator {
             }
             SessiondInit.getInstance().start();
             registerService(SessiondService.class, new SessiondServiceImpl());
+            registerService(SessionCounter.class, SessionHandler.SESSION_COUNTER);
 
             track(ManagementService.class, new ManagementRegisterer(context));
             track(ThreadPoolService.class, new ThreadPoolTracker(context));
