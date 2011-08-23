@@ -77,6 +77,7 @@ import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.ajp13.AJPv13Response;
 import com.openexchange.ajp13.AJPv13ServiceRegistry;
+import com.openexchange.ajp13.AjpLongRunningRegistry;
 import com.openexchange.ajp13.coyote.util.ByteChunk;
 import com.openexchange.ajp13.coyote.util.CookieParser;
 import com.openexchange.ajp13.coyote.util.HexUtils;
@@ -780,6 +781,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             /*
              * Process the request in the servlet
              */
+            boolean longRunning = false;
             if (!error) {
                 try {
                     stage = STAGE_SERVICE;
@@ -809,10 +811,18 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                          */
                         request.dumpToBuffer(bytes);
                     }
-                    servlet.service(request, response);
-                    response.flushBuffer();
-                    listenerMonitor.addProcessingTime(System.currentTimeMillis() - request.getStartTime());
-                    listenerMonitor.incrementNumRequests();
+                    if ((longRunning = isLongRunning()) && !AjpLongRunningRegistry.getInstance().registerLongRunning(request)) {
+                        /*
+                         * Only one per host/port!
+                         */
+                        response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE, "Only one long-running request is permitted at once. Please retry later.");
+                        error = true;
+                    } else {
+                        servlet.service(request, response);
+                        response.flushBuffer();
+                        listenerMonitor.addProcessingTime(System.currentTimeMillis() - request.getStartTime());
+                        listenerMonitor.incrementNumRequests();
+                    }
                 } catch (final InterruptedIOException e) {
                     error = true;
                 } catch (final java.net.SocketException e) {
@@ -840,6 +850,9 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     error = true;
                 } finally {
                     listenerMonitor.decrementNumProcessing();
+                    if (longRunning) {
+                        AjpLongRunningRegistry.getInstance().deregisterLongRunning(request);
+                    }
                 }
             }
             /*
