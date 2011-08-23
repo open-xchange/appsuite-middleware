@@ -89,6 +89,8 @@ public final class FolderJob extends AbstractMailSyncJob {
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FolderJob.class));
 
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
     private final String fullName;
 
     private final String identifier;
@@ -171,6 +173,7 @@ public final class FolderJob extends AbstractMailSyncJob {
             /*
              * Sync mails with index...
              */
+            final long st = DEBUG ? System.currentTimeMillis() : 0L;
             boolean unset = true;
             try {
                 final IndexAdapter indexAdapter = getAdapter();
@@ -291,6 +294,10 @@ public final class FolderJob extends AbstractMailSyncJob {
                 if (unset) {
                     // Unset sync flag
                     unsetSyncFlag(fullName);
+                }
+                if (DEBUG) {
+                    final long dur = System.currentTimeMillis() - st;
+                    LOG.debug("Folder job \"" + identifier + "\" took " + dur + "msec.");
                 }
             }
         } catch (final Exception e) {

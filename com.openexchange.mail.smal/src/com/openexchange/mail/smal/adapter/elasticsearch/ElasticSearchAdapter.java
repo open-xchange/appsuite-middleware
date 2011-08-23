@@ -480,19 +480,19 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                     mail.setSubject((String) source.get(Constants.FIELD_SUBJECT));
                 }
                 if (fields.contains(MailField.SIZE)) {
-                    final Long l = (Long) source.get(Constants.FIELD_SIZE);
-                    if (null != l) {
-                        mail.setSize(l.longValue());
+                    final Number size = (Number) source.get(Constants.FIELD_SIZE);
+                    if (null != size) {
+                        mail.setSize(size.longValue());
                     }
                 }
                 if (fields.contains(MailField.RECEIVED_DATE)) {
-                    final Long l = (Long) source.get(Constants.FIELD_RECEIVED_DATE);
+                    final Number l = (Number) source.get(Constants.FIELD_RECEIVED_DATE);
                     if (null != l) {
                         mail.setReceivedDate(new Date(l.longValue()));
                     }
                 }
                 if (fields.contains(MailField.SENT_DATE)) {
-                    final Long l = (Long) source.get(Constants.FIELD_SENT_DATE);
+                    final Number l = (Number) source.get(Constants.FIELD_SENT_DATE);
                     if (null != l) {
                         mail.setReceivedDate(new Date(l.longValue()));
                     }
@@ -542,7 +542,8 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                     mail.setFlags(flags);
                 }
                 if (fields.contains(MailField.FROM)) {
-                    final String[] sAddrs = (String[]) source.get(Constants.FIELD_FROM);
+                    @SuppressWarnings("unchecked")
+                    final Collection<String> sAddrs = (Collection<String>) source.get(Constants.FIELD_FROM);
                     if (null != sAddrs) {
                         for (final String sAddr : sAddrs) {
                             try {
@@ -554,7 +555,8 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                     }
                 }
                 if (fields.contains(MailField.TO)) {
-                    final String[] sAddrs = (String[]) source.get(Constants.FIELD_TO);
+                    @SuppressWarnings("unchecked")
+                    final Collection<String> sAddrs = (Collection<String>) source.get(Constants.FIELD_TO);
                     if (null != sAddrs) {
                         for (final String sAddr : sAddrs) {
                             try {
@@ -566,7 +568,8 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                     }
                 }
                 if (fields.contains(MailField.CC)) {
-                    final String[] sAddrs = (String[]) source.get(Constants.FIELD_CC);
+                    @SuppressWarnings("unchecked")
+                    final Collection<String> sAddrs = (Collection<String>) source.get(Constants.FIELD_CC);
                     if (null != sAddrs) {
                         for (final String sAddr : sAddrs) {
                             try {
@@ -578,7 +581,8 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                     }
                 }
                 if (fields.contains(MailField.BCC)) {
-                    final String[] sAddrs = (String[]) source.get(Constants.FIELD_BCC);
+                    @SuppressWarnings("unchecked")
+                    final Collection<String> sAddrs = (Collection<String>) source.get(Constants.FIELD_BCC);
                     if (null != sAddrs) {
                         for (final String sAddr : sAddrs) {
                             try {

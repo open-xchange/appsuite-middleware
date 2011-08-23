@@ -76,6 +76,9 @@ import com.openexchange.session.Session;
  */
 public final class SMALMessageStorage extends AbstractSMALStorage implements IMailMessageStorage {
 
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SMALMessageStorage.class));
+
     /**
      * Initializes a new {@link SMALMessageStorage}.
      */
@@ -137,11 +140,16 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
             if (!indexAdapter.getIndexableFields().containsAll(mfs)) {
                 return delegateMailAccess.getMessageStorage().searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
             }
+            final long st = System.currentTimeMillis();
             try {
                 JobQueue.getInstance().addJob(new FolderJob(folder, accountId, userId, contextId).setSpan(Constants.DEFAULT_MILLIS));
                 return indexAdapter.search(folder, searchTerm, sortField, order, accountId, session).toArray(new MailMessage[0]);
             } catch (final OXException e) {
+                LOG.error(e.getMessage(), e);
                 return delegateMailAccess.getMessageStorage().searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
+            } finally {
+                final long dur = System.currentTimeMillis() - st;
+               System.out.println("SMALMessageStorage.searchMessages() took " + dur + "msec.");
             }
         } finally {
             close();
