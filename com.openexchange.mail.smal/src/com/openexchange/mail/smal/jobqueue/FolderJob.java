@@ -97,6 +97,8 @@ public final class FolderJob extends AbstractMailSyncJob {
 
     private final boolean checkShouldSync;
 
+    private volatile boolean reEnqueued;
+
     private volatile boolean error;
 
     private volatile long span;
@@ -162,13 +164,17 @@ public final class FolderJob extends AbstractMailSyncJob {
             return;
         }
         try {
-            final long now = System.currentTimeMillis();
-            try {
-                if ((checkShouldSync && !shouldSync(fullName, now, span)) || !wasAbleToSetSyncFlag(fullName)) {
-                    return;
+            if (reEnqueued) {
+                reEnqueued = false;
+            } else {
+                final long now = System.currentTimeMillis();
+                try {
+                    if ((checkShouldSync && !shouldSync(fullName, now, span)) || !wasAbleToSetSyncFlag(fullName)) {
+                        return;
+                    }
+                } catch (final OXException e) {
+                    LOG.error("Couldn't look-up database.", e);
                 }
-            } catch (final OXException e) {
-                LOG.error("Couldn't look-up database.", e);
             }
             /*
              * Sync mails with index...
@@ -285,7 +291,9 @@ public final class FolderJob extends AbstractMailSyncJob {
                 final List<MailMessage> list = new ArrayList<MailMessage>(blockSize);
                 newIds = null;
                 int start = 0;
-                while (start < size) {
+                int loopCount = 0;
+                final int maxChunksPerRun = Constants.MAX_CHUNKS_PER_RUN;
+                while (start < size && ++loopCount < maxChunksPerRun) {
                     final int num = add2Index(ids, start, blockSize, fullName, indexAdapter, list);
                     start += num;
                     if (DEBUG) {
@@ -294,6 +302,7 @@ public final class FolderJob extends AbstractMailSyncJob {
                     }
                 }
                 setTimestampAndUnsetSyncFlag(fullName, System.currentTimeMillis());
+                reEnqueued = (start < size);
                 unset = false;
             } finally {
                 if (unset) {
@@ -304,6 +313,10 @@ public final class FolderJob extends AbstractMailSyncJob {
                     final long dur = System.currentTimeMillis() - st;
                     LOG.debug("Folder job \"" + identifier + "\" took " + dur + "msec.");
                 }
+            }
+            if (reEnqueued) {
+                reset();
+                JobQueue.getInstance().addJob(this);
             }
         } catch (final Exception e) {
             error = true;
