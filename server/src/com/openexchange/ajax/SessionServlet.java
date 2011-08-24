@@ -235,6 +235,12 @@ public abstract class SessionServlet extends AJAXServlet {
                 log(RESPONSE_ERROR, e1);
                 sendError(resp);
             }
+        } finally {
+            if (LogProperties.isEnabled()) {
+                LogProperties.putLogProperty("com.openexchange.session.sessionId", null);
+                LogProperties.putLogProperty("com.openexchange.session.userId", null);
+                LogProperties.putLogProperty("com.openexchange.session.contextId", null);
+            }
         }
     }
 
