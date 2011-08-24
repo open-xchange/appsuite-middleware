@@ -11,3 +11,4 @@ com.openexchange.axis2/conf/axis2.properties
 com.openexchange.axis2/lib/*.jar
 com.openexchange.axis2/tmp/*
 open-xchange-config/development/Open-Xchange Configuration Generator.launch
+open-xchange-config/development/Open-Xchange Server (Development).launch

@@ -60,12 +60,15 @@ import java.util.Map;
 import java.util.UUID;
 import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.OverridingContactInterface;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.subscribe.TargetFolderSession;
+import com.openexchange.subscribe.osgi.SubscriptionServiceRegistry;
 import com.openexchange.tools.arrays.Arrays;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -210,9 +213,17 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
     }
 
     @Override
-    public Object startSession(final TargetFolderDefinition target) throws OXException {
-        final Map<Integer, Object> userInfo = new HashMap<Integer, Object>();
-        userInfo.put(SQL_INTERFACE, new RdbContactSQLImpl(new TargetFolderSession(target)));
+    public Object startSession(TargetFolderDefinition target) throws OXException {
+        Map<Integer, Object> userInfo = new HashMap<Integer, Object>();
+        TargetFolderSession session = new TargetFolderSession(target);
+        int folderID = target.getFolderIdAsInt();
+        
+        ContactInterface contactInterface = SubscriptionServiceRegistry.getInstance().getService(
+        		ContactInterfaceDiscoveryService.class).newContactInterface(
+        				folderID,
+        				session);
+
+        userInfo.put(SQL_INTERFACE, contactInterface);
         userInfo.put(TARGET, target);
         return userInfo;
     }
