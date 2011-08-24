@@ -3591,7 +3591,6 @@ public class Mail extends PermissionServlet implements UploadListener {
                     boolean keepgoing = true;
                     while (keepgoing && iter.hasNext()) {
                         final FileItemStream item = iter.next();
-                        final String filename = item.getName();
                         final InputStream is = item.openStream();
                         final MimeMessage message;
                         try {
@@ -3608,7 +3607,6 @@ public class Mail extends PermissionServlet implements UploadListener {
                             // Add from address
                             message.setFrom(defaultSendAddr);
                         }
-                        message.setFileName(filename);
                         while (keepgoing && !queue.offer(message, 1, TimeUnit.SECONDS)) {
                             keepgoing = !future.isDone();
                         }
