@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware;
 
-import com.openexchange.exception.OXException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.charset.spi.CharsetProvider;
@@ -102,6 +101,7 @@ import com.openexchange.event.impl.AppointmentEventInterface;
 import com.openexchange.event.impl.EventDispatcher;
 import com.openexchange.event.impl.EventQueue;
 import com.openexchange.event.impl.TaskEventInterface;
+import com.openexchange.exception.OXException;
 import com.openexchange.folder.FolderService;
 import com.openexchange.folder.internal.FolderInitialization;
 import com.openexchange.folder.internal.FolderServiceImpl;
@@ -214,7 +214,9 @@ public final class Init {
             public void start() throws OXException {
                 AJPv13Config.getInstance().start();
                 ServletConfigLoader.initDefaultInstance(AJPv13Config.getServletConfigs());
-                AJPv13Server.setInstance(new com.openexchange.ajp13.najp.AJPv13ServerImpl());
+                if (null == AJPv13Server.getInstance()) {
+                    AJPv13Server.setInstance(new com.openexchange.ajp13.najp.AJPv13ServerImpl());
+                }
                 AJPv13Server.startAJPServer();
                 HttpManagersInit.getInstance().start();
             }
