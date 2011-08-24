@@ -64,7 +64,7 @@ import com.openexchange.threadpool.ThreadRenamer;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 
 /**
- * {@link JobConsumer}
+ * {@link JobConsumer} - The job consumer which takes jobs from passed blocking queue.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

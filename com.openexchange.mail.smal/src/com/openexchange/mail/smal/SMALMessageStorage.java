@@ -152,7 +152,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
                 return delegateMailAccess.getMessageStorage().searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
             } finally {
                 final long dur = System.currentTimeMillis() - st;
-               System.out.println("SMALMessageStorage.searchMessages() took " + dur + "msec.");
+                System.out.println("SMALMessageStorage.searchMessages() took " + dur + "msec.");
             }
         } finally {
             close();

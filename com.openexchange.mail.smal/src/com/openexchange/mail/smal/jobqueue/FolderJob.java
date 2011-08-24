@@ -291,10 +291,6 @@ public final class FolderJob extends AbstractMailSyncJob {
                         final long dur = System.currentTimeMillis() - st;
                         LOG.debug("Folder job \"" + identifier + "\" inserted " + start + " of " + size + " messages in " + dur + "msec.");
                     }
-                    {
-                        final long dur = System.currentTimeMillis() - st;
-                        System.out.println("Folder job \"" + identifier + "\" inserted " + start + " of " + size + " messages in " + dur + "msec.");
-                    }
                 }
                 setTimestampAndUnsetSyncFlag(fullName, System.currentTimeMillis());
                 unset = false;
