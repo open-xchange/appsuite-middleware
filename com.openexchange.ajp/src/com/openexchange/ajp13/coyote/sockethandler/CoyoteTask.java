@@ -71,6 +71,9 @@ import com.openexchange.threadpool.ThreadRenamer;
  */
 public final class CoyoteTask implements Task<Object> {
 
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CoyoteTask.class));
+
     /**
      * The client socket.
      */
@@ -153,16 +156,16 @@ public final class CoyoteTask implements Task<Object> {
                 ajpProcessor.process(client);
             } catch (final java.net.SocketException e) {
                 // SocketExceptions are normal
-                com.openexchange.log.Log.valueOf(LogFactory.getLog(CoyoteTask.class)).debug(e.getMessage(), e);
+                LOG.debug(e.getMessage(), e);
             } catch (final java.io.IOException e) {
                 // IOExceptions are normal
-                com.openexchange.log.Log.valueOf(LogFactory.getLog(CoyoteTask.class)).debug(e.getMessage(), e);
+                LOG.debug(e.getMessage(), e);
             } catch (final Throwable e) {
                 /*
                  * Any other exception or error is odd.
                  */
                 ExceptionUtils.handleThrowable(e);
-                com.openexchange.log.Log.valueOf(LogFactory.getLog(CoyoteTask.class)).error(e.getMessage(), e);
+                LOG.error(e.getMessage(), e);
             } finally {
                 ajpProcessor.action(ActionCode.STOP, null);
                 //ajpProcessor.recycle();
