@@ -79,7 +79,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link FolderJob}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderJob extends AbstractMailSyncJob {
@@ -103,7 +103,7 @@ public final class FolderJob extends AbstractMailSyncJob {
 
     /**
      * Initializes a new {@link FolderJob}.
-     *
+     * 
      * @param fullName The folder full name
      * @param accountId The account ID
      * @param userId The user ID
@@ -115,7 +115,7 @@ public final class FolderJob extends AbstractMailSyncJob {
 
     /**
      * Initializes a new {@link FolderJob}.
-     *
+     * 
      * @param fullName The folder full name
      * @param accountId The account ID
      * @param userId The user ID
@@ -134,7 +134,7 @@ public final class FolderJob extends AbstractMailSyncJob {
 
     /**
      * Sets the span
-     *
+     * 
      * @param span The span to set
      * @return This folder job with specified span applied
      */
@@ -282,10 +282,11 @@ public final class FolderJob extends AbstractMailSyncJob {
                     blockSize = configuredBlockSize > size ? size : configuredBlockSize;
                 }
                 final String[] ids = newIds.toArray(new String[newIds.size()]);
+                final List<MailMessage> list = new ArrayList<MailMessage>(blockSize);
                 newIds = null;
                 int start = 0;
                 while (start < size) {
-                    final int num = add2Index(ids, start, blockSize, fullName, indexAdapter);
+                    final int num = add2Index(ids, start, blockSize, fullName, indexAdapter, list);
                     start += num;
                     if (DEBUG) {
                         final long dur = System.currentTimeMillis() - st;
@@ -311,7 +312,7 @@ public final class FolderJob extends AbstractMailSyncJob {
         }
     }
 
-    private int add2Index(final String[] ids, final int offset, final int len, final String fullName, final IndexAdapter indexAdapter) throws OXException {
+    private int add2Index(final String[] ids, final int offset, final int len, final String fullName, final IndexAdapter indexAdapter, final List<MailMessage> mails) throws OXException {
         final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
             SMALMailAccess.getUnwrappedInstance(userId, contextId, accountId);
         final Session session = mailAccess.getSession();
@@ -330,13 +331,13 @@ public final class FolderJob extends AbstractMailSyncJob {
                 }
             }
             final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-            final List<MailMessage> toAdd = new ArrayList<MailMessage>(retval);
             for (int i = offset; i < end; i++) {
                 final MailMessage mail = messageStorage.getMessage(fullName, ids[i], false);
                 mail.setAccountId(accountId);
-                toAdd.add(mail);
+                mails.add(mail);
             }
-            indexAdapter.add(toAdd, session);
+            indexAdapter.add(mails, session);
+            mails.clear();
             return retval;
         } finally {
             mailAccess.close(true);
