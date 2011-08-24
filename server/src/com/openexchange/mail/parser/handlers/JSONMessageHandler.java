@@ -100,7 +100,6 @@ import com.openexchange.mail.parser.MailMessageHandler;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.text.Enriched2HtmlConverter;
 import com.openexchange.mail.text.HTMLProcessing;
-import com.openexchange.mail.text.RTF2HTMLConverter;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.mail.uuencode.UUEncodedPart;
@@ -110,12 +109,13 @@ import com.openexchange.tools.TimeZoneUtils;
 
 /**
  * {@link JSONMessageHandler} - Generates a JSON message representation considering user-sensitive data.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JSONMessageHandler implements MailMessageHandler {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(JSONMessageHandler.class));
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(JSONMessageHandler.class));
 
     private static final class PlainTextContent {
 
@@ -178,7 +178,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 
     /**
      * Initializes a new {@link JSONMessageHandler}
-     *
+     * 
      * @param accountId The account ID
      * @param mailPath The unique mail path
      * @param displayMode The display mode
@@ -203,7 +203,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 
     /**
      * Initializes a new {@link JSONMessageHandler}
-     *
+     * 
      * @param accountId The account ID
      * @param mailPath The unique mail path
      * @param mail The mail message to add JSON fields not set by message parser traversal
@@ -446,11 +446,10 @@ public final class JSONMessageHandler implements MailMessageHandler {
     /**
      * These headers are covered by fields of {@link MailMessage}
      */
-    private static final Set<HeaderName> COVERED_HEADER_NAMES =
-        new HashSet<HeaderName>(Arrays.asList(new HeaderName[] {
-            MessageHeaders.CONTENT_DISPOSITION, MessageHeaders.CONTENT_ID, MessageHeaders.CONTENT_TYPE, MessageHeaders.BCC,
-            MessageHeaders.CC, MessageHeaders.DATE, MessageHeaders.DISP_NOT_TO, MessageHeaders.FROM, MessageHeaders.X_PRIORITY,
-            MessageHeaders.SUBJECT, MessageHeaders.TO }));
+    private static final Set<HeaderName> COVERED_HEADER_NAMES = new HashSet<HeaderName>(Arrays.asList(new HeaderName[] {
+        MessageHeaders.CONTENT_DISPOSITION, MessageHeaders.CONTENT_ID, MessageHeaders.CONTENT_TYPE, MessageHeaders.BCC, MessageHeaders.CC,
+        MessageHeaders.DATE, MessageHeaders.DISP_NOT_TO, MessageHeaders.FROM, MessageHeaders.X_PRIORITY, MessageHeaders.SUBJECT,
+        MessageHeaders.TO }));
 
     @Override
     public boolean handleHeaders(final int size, final Iterator<Entry<String, String>> iter) throws OXException {
@@ -559,7 +558,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
              */
             if (DisplayMode.MODIFYABLE.getMode() <= displayMode.getMode()) {
                 if (usm.isDisplayHtmlInlineContent()) {
-                    final JSONObject jsonObject = asDisplayHtml(id, contentType.getBaseType(), htmlContent, contentType.getCharsetParameter());
+                    final JSONObject jsonObject =
+                        asDisplayHtml(id, contentType.getBaseType(), htmlContent, contentType.getCharsetParameter());
                     try {
                         /*
                          * Try to convert the given HTML to regular text
@@ -646,18 +646,20 @@ public final class JSONMessageHandler implements MailMessageHandler {
                 if (DisplayMode.MODIFYABLE.getMode() <= displayMode.getMode()) {
                     final JSONObject textObject;
                     if (usm.isDisplayHtmlInlineContent()) {
-                        textObject = asDisplayHtml(
-                            id,
-                            contentType.getBaseType(),
-                            getHtmlDisplayVersion(contentType, plainTextContentArg),
-                            contentType.getCharsetParameter());
+                        textObject =
+                            asDisplayHtml(
+                                id,
+                                contentType.getBaseType(),
+                                getHtmlDisplayVersion(contentType, plainTextContentArg),
+                                contentType.getCharsetParameter());
                     } else {
-                        textObject = asDisplayText(
-                            id,
-                            contentType.getBaseType(),
-                            getHtmlDisplayVersion(contentType, plainTextContentArg),
-                            fileName,
-                            DisplayMode.DISPLAY.equals(displayMode));
+                        textObject =
+                            asDisplayText(
+                                id,
+                                contentType.getBaseType(),
+                                getHtmlDisplayVersion(contentType, plainTextContentArg),
+                                fileName,
+                                DisplayMode.DISPLAY.equals(displayMode));
                     }
                     if (!textObject.has("plain_text")) {
                         textObject.put("plain_text", plainTextContentArg);
@@ -694,7 +696,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
                      * A plain text message body has already been detected; append inline text as an attachment, too
                      */
                     final String content = HTMLProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode);
-                    final JSONObject textObject = asAttachment(id, contentType.getBaseType(), plainTextContentArg.length(), fileName, content);
+                    final JSONObject textObject =
+                        asAttachment(id, contentType.getBaseType(), plainTextContentArg.length(), fileName, content);
                     textObject.put("plain_text", plainTextContentArg);
                 }
             } else {
@@ -721,16 +724,18 @@ public final class JSONMessageHandler implements MailMessageHandler {
                 usm,
                 modified,
                 displayMode);
-        } else if (baseType.startsWith(MIMETypes.MIME_TEXT_RTF)) {
-            return HTMLProcessing.formatHTMLForDisplay(
-                RTF2HTMLConverter.convertRTFToHTML(src),
-                contentType.getCharsetParameter(),
-                session,
-                mailPath,
-                usm,
-                modified,
-                displayMode);
         }
+        // Causes SWING library being loaded...
+        // else if (baseType.startsWith(MIMETypes.MIME_TEXT_RTF)) {
+        // return HTMLProcessing.formatHTMLForDisplay(
+        // RTF2HTMLConverter.convertRTFToHTML(src),
+        // contentType.getCharsetParameter(),
+        // session,
+        // mailPath,
+        // usm,
+        // modified,
+        // displayMode);
+        // }
         return HTMLProcessing.formatTextForDisplay(src, usm, displayMode);
     }
 
@@ -866,7 +871,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
                 LOG.error(sb.toString());
                 return true;
             }
-            final JSONMessageHandler msgHandler = new JSONMessageHandler(accountId, null, null, displayMode, session, usm, ctx, token, ttlMillis);
+            final JSONMessageHandler msgHandler =
+                new JSONMessageHandler(accountId, null, null, displayMode, session, usm, ctx, token, ttlMillis);
             msgHandler.tokenFolder = tokenFolder;
             msgHandler.tokenMailId = tokenMailId;
             new MailMessageParser().parseMailMessage(nestedMail, msgHandler, id);
@@ -1073,7 +1079,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 
     /**
      * Gets the filled instance of {@link JSONObject}
-     *
+     * 
      * @return The filled instance of {@link JSONObject}
      */
     public JSONObject getJSONObject() {
