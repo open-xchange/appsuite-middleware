@@ -49,6 +49,9 @@
 
 package com.openexchange.mail.autoconfig.osgi;
 
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.mail.autoconfig.AutoconfigService;
+import com.openexchange.mail.autoconfig.internal.AutoconfigServiceImpl;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 
 /**
@@ -60,11 +63,12 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return null;
+        return new Class<?>[] { ConfigViewFactory.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
+        registerService(AutoconfigService.class, new AutoconfigServiceImpl(this));
     }
 
 }

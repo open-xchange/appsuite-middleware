@@ -6,9 +6,11 @@ Bundle-Version: 6.21.0.0
 Bundle-Activator: com.openexchange.mail.autoconfig.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.exception,
+Import-Package: com.openexchange.config.cascade,
+ com.openexchange.exception,
  com.openexchange.i18n,
  com.openexchange.mail.mime,
+ com.openexchange.server,
  com.openexchange.server.osgiservice,
  javax.mail.internet,
  org.osgi.framework

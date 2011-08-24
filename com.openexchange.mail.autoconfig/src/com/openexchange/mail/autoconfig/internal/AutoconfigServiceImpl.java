@@ -62,6 +62,7 @@ import com.openexchange.mail.autoconfig.sources.ConfigurationServer;
 import com.openexchange.mail.autoconfig.sources.Guess;
 import com.openexchange.mail.autoconfig.sources.ISPDB;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link AutoconfigServiceImpl}
@@ -71,8 +72,10 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
 public class AutoconfigServiceImpl implements AutoconfigService {
 
     private List<ConfigSource> sources;
+    private ServiceLookup services;
 
-    public AutoconfigServiceImpl() {
+    public AutoconfigServiceImpl(ServiceLookup services) {
+        this.services = services;
         sources = new LinkedList<ConfigSource>();
         sources.add(new ISPDB());
         sources.add(new ConfigurationServer());
