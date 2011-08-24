@@ -293,7 +293,7 @@ public final class MIMEMultipartMailPart extends MailPart {
      */
     private static final byte[] DELIM1 = "\n\r\n".getBytes();
 
-    private static int getHeaderEnd(final byte[] dataBytes) {
+    public static int getHeaderEnd(final byte[] dataBytes) {
         int headerEnd = indexOf(dataBytes, DELIM1, 0, dataBytes.length);
         if (-1 == headerEnd) {
             headerEnd = indexOf(dataBytes, DELIM2, 0, dataBytes.length);

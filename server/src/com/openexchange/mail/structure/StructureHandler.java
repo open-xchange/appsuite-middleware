@@ -64,25 +64,29 @@ import com.openexchange.mail.uuencode.UUEncodedPart;
  */
 public interface StructureHandler {
 
-    boolean handleAttachment(final MailPart part, final String id) throws OXException;
+    boolean handleAttachment(MailPart part, String id) throws OXException;
 
-    boolean handleHeaders(final Iterator<Entry<String, String>> iter) throws OXException;
+    boolean handleHeaders(Iterator<Entry<String, String>> iter) throws OXException;
 
-    boolean handleInlineUUEncodedAttachment(final UUEncodedPart part, final String id) throws OXException;
+    boolean handleInlineUUEncodedAttachment(UUEncodedPart part, String id) throws OXException;
 
-    boolean handleInlineUUEncodedPlainText(final String decodedTextContent, final ContentType contentType, final int size, final String fileName, final String id) throws OXException;
+    boolean handleInlineUUEncodedPlainText(String decodedTextContent, ContentType contentType, int size, String fileName, String id) throws OXException;
 
-    boolean handleMultipartStart(final ContentType contentType, final int bodyPartCount, final String id) throws OXException;
+    boolean handleSMIMEBodyText(MailPart part) throws OXException;
+
+    boolean handleSMIMEBodyData(byte[] data) throws OXException;
+
+    boolean handleMultipartStart(ContentType contentType, int bodyPartCount, String id) throws OXException;
 
     boolean handleMultipartEnd() throws OXException;
 
-    boolean handleNestedMessage(final MailPart mailPart, final String id) throws OXException;
+    boolean handleNestedMessage(MailPart mailPart, String id) throws OXException;
 
-    boolean handleReceivedDate(final Date receivedDate) throws OXException;
+    boolean handleReceivedDate(Date receivedDate) throws OXException;
 
-    boolean handleSystemFlags(final int flags) throws OXException;
+    boolean handleSystemFlags(int flags) throws OXException;
 
-    boolean handleUserFlags(final String[] userFlags) throws OXException;
+    boolean handleUserFlags(String[] userFlags) throws OXException;
 
-    boolean handleColorLabel(final int colorLabel) throws OXException;
+    boolean handleColorLabel(int colorLabel) throws OXException;
 }

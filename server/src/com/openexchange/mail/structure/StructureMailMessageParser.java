@@ -52,6 +52,7 @@ package com.openexchange.mail.structure;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -89,6 +90,7 @@ import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.TNEFBodyPart;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.dataobjects.MIMEMultipartMailPart;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.parser.MailMessageHandler;
@@ -405,6 +407,7 @@ public final class StructureMailMessageParser {
             if (!mailPart.containsSequenceId()) {
                 mailPart.setSequenceId(mpId);
             }
+            final List<MailPart> enclosedParts = isMultipartSigned(lcct) ? new ArrayList<MailPart>(count) : null;
             if (!handler.handleMultipartStart(mailPart.getContentType(), count, mpId)) {
                 stop = true;
                 return;
@@ -417,12 +420,47 @@ public final class StructureMailMessageParser {
                 multipartDetected = true;
             }
             for (int i = 0; i < count; i++) {
-                final MailPart enclosedContent = mailPart.getEnclosedMailPart(i);
-                parseMailContent(enclosedContent, handler, mpPrefix, i + 1);
+                final MailPart enclosedPart = mailPart.getEnclosedMailPart(i);
+                parseMailContent(enclosedPart, handler, mpPrefix, i + 1);
+                if (null != enclosedParts) {
+                    enclosedParts.add(enclosedPart);
+                }
             }
             if (!handler.handleMultipartEnd()) {
                 stop = true;
                 return;
+            }
+            /*
+             * Handle for multipart/signed
+             */
+            if (null != enclosedParts && !enclosedParts.isEmpty()) {
+                /*
+                 * Determine the part which is considered to be the message' text according to
+                 */
+                MailPart part = null;
+                for (int i = 0; null == part && i < count; i++) {
+                    final MailPart enclosedPart = enclosedParts.get(i);
+                    part = extractTextFrom(enclosedPart, 0); 
+                }
+                if (!handler.handleSMIMEBodyText(part)) {
+                    stop = true;
+                    return;
+                }
+                enclosedParts.clear();
+                part = null;
+                final ByteArrayOutputStream buf = new UnsynchronizedByteArrayOutputStream(2048);
+                final byte[] body = extractBodyFrom(mailPart, buf);
+                buf.reset();
+                {
+                    final String version = mailPart.getFirstHeader("MIME-Version");
+                    buf.write(("MIME-Version: " + (null == version ? "1.0" : version) + "\r\n").getBytes("US-ASCII"));
+                }
+                buf.write(("Content-Type: " + contentType.toString() + "\r\n").getBytes("US-ASCII"));
+                buf.write(body);
+                if (!handler.handleSMIMEBodyData(buf.toByteArray())) {
+                    stop = true;
+                    return;
+                }
             }
         } else if (isMessage(lcct)) {
             if (!mailPart.containsSequenceId()) {
@@ -676,6 +714,56 @@ public final class StructureMailMessageParser {
         }
     }
 
+    private MailPart extractTextFrom(final MailPart mailPart, final int altLevel) throws OXException {
+        if (!mailPart.containsContentType()) {
+            return null;
+        }
+        final ContentType contentType = mailPart.getContentType();
+        if (contentType.startsWith("text/")) {
+            return (altLevel <= 0) || contentType.startsWith("text/htm") ? mailPart : null;
+        }
+        if (contentType.startsWith("multipart/")) {
+            final boolean isAlternative = contentType.startsWith("multipart/alternative");
+            int alternative = altLevel;
+            if (isAlternative) {
+                alternative++;
+            }
+            final int count = mailPart.getEnclosedCount();
+            MailPart textPart = null;
+            for (int i = 0; i < count; i++) {
+                final MailPart enclosedPart = mailPart.getEnclosedMailPart(i);
+                final MailPart ret = extractTextFrom(enclosedPart, alternative);
+                if (null != ret) {
+                    return ret;
+                }
+                if (isAlternative && null == textPart && enclosedPart.getContentType().startsWith("text/")) {
+                    textPart = enclosedPart;
+                }
+            }
+            if (isAlternative) {
+                alternative--;
+                if (null != textPart) {
+                    return textPart;
+                }
+            }
+        }
+        return null;
+    }
+
+    private byte[] extractBodyFrom(final MailPart mailPart, final ByteArrayOutputStream sink) throws OXException {
+        mailPart.writeTo(sink);
+        final byte[] bytes = sink.toByteArray();
+        int pos = MIMEMultipartMailPart.getHeaderEnd(bytes);
+        if (pos <= 0) {
+            return bytes;
+        }
+        pos++; // Advance last LF character
+        final int len = bytes.length - pos;
+        final byte[] body = new byte[len];
+        System.arraycopy(bytes, pos, body, 0, len);
+        return body;
+    }
+
     private void parseEnvelope(final MailMessage mail, final StructureHandler handler) throws OXException {
         /*
          * RECEIVED DATE
@@ -853,6 +941,18 @@ public final class StructureMailMessageParser {
      */
     private static boolean isMultipart(final String contentType) {
         return contentType.startsWith(PRIMARY_MULTI, 0);
+    }
+
+    private static final String PRIMARY_MULTI_SIGNED = "multipart/signed";
+
+    /**
+     * Checks if content type matches <code>multipart/signed</code> content type.
+     * 
+     * @param contentType The content type
+     * @return <code>true</code> if content type matches <code>multipart/signed</code>; otherwise <code>false</code>
+     */
+    private static boolean isMultipartSigned(final String contentType) {
+        return contentType.startsWith(PRIMARY_MULTI_SIGNED, 0);
     }
 
     private static final String PRIMARY_RFC822 = "message/rfc822";

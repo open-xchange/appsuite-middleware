@@ -273,6 +273,35 @@ public final class MIMEStructureHandler implements StructureHandler {
     }
 
     @Override
+    public boolean handleSMIMEBodyText(final MailPart part) throws OXException {
+        try {
+            final JSONObject bodyObject = new JSONObject();
+            final JSONObject headerObject = new JSONObject();
+            fillBodyPart(bodyObject, part, headerObject, null);
+            bodyObject.put("type", headerObject.getJSONObject(CONTENT_TYPE).getString("type"));
+            /*
+             * Add body object to parental structure object
+             */
+            mailJsonObjectQueue.getFirst().put("smime_body_text", bodyObject);
+            return true;
+        } catch (final JSONException e) {
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    @Override
+    public boolean handleSMIMEBodyData(final byte[] data) throws OXException {
+        try {
+            mailJsonObjectQueue.getFirst().put("smime_body_data", new String(Base64.encodeBase64(data, false), "US-ASCII"));
+            return true;
+        } catch (final JSONException e) {
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+        } catch (final UnsupportedEncodingException e) {
+            throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    @Override
     public boolean handleColorLabel(final int colorLabel) throws OXException {
         try {
             /*-
@@ -564,7 +593,9 @@ public final class MIMEStructureHandler implements StructureHandler {
 
     private void fillBodyPart(final JSONObject bodyObject, final MailPart part, final JSONObject headerObject, final String id) throws OXException {
         try {
-            bodyObject.put(KEY_ID, id);
+            if (null != id) {
+                bodyObject.put(KEY_ID, id);
+            }
             final long size = part.getSize();
             if (maxSize > 0 && size > maxSize) {
                 bodyObject.put(DATA, JSONObject.NULL);
