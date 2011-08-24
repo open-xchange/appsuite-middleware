@@ -52,7 +52,6 @@ package com.openexchange.mail.structure;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -403,50 +402,19 @@ public final class StructureMailMessageParser {
             if (count == -1) {
                 throw MailExceptionCode.INVALID_MULTIPART_CONTENT.create();
             }
-            final String mpId = null == prefix && !multipartDetected ? "" : getSequenceId(prefix, partCount);
-            if (!mailPart.containsSequenceId()) {
-                mailPart.setSequenceId(mpId);
-            }
-            final List<MailPart> enclosedParts = isMultipartSigned(lcct) ? new ArrayList<MailPart>(count) : null;
-            if (!handler.handleMultipartStart(mailPart.getContentType(), count, mpId)) {
-                stop = true;
-                return;
-            }
-            final String mpPrefix;
-            if (multipartDetected) {
-                mpPrefix = mpId;
-            } else {
-                mpPrefix = prefix;
-                multipartDetected = true;
-            }
-            for (int i = 0; i < count; i++) {
-                final MailPart enclosedPart = mailPart.getEnclosedMailPart(i);
-                parseMailContent(enclosedPart, handler, mpPrefix, i + 1);
-                if (null != enclosedParts) {
-                    enclosedParts.add(enclosedPart);
-                }
-            }
-            if (!handler.handleMultipartEnd()) {
-                stop = true;
-                return;
-            }
-            /*
-             * Handle for multipart/signed
-             */
-            if (null != enclosedParts && !enclosedParts.isEmpty()) {
+            if (isMultipartSigned(lcct)) {
                 /*
                  * Determine the part which is considered to be the message' text according to
                  */
                 MailPart part = null;
                 for (int i = 0; null == part && i < count; i++) {
-                    final MailPart enclosedPart = enclosedParts.get(i);
+                    final MailPart enclosedPart = mailPart.getEnclosedMailPart(i);
                     part = extractTextFrom(enclosedPart, 0); 
                 }
                 if (!handler.handleSMIMEBodyText(part)) {
                     stop = true;
                     return;
                 }
-                enclosedParts.clear();
                 part = null;
                 final ByteArrayOutputStream buf = new UnsynchronizedByteArrayOutputStream(2048);
                 final byte[] body = extractBodyFrom(mailPart, buf);
@@ -458,6 +426,30 @@ public final class StructureMailMessageParser {
                 buf.write(("Content-Type: " + contentType.toString() + "\r\n").getBytes("US-ASCII"));
                 buf.write(body);
                 if (!handler.handleSMIMEBodyData(buf.toByteArray())) {
+                    stop = true;
+                    return;
+                }
+            } else {
+                final String mpId = null == prefix && !multipartDetected ? "" : getSequenceId(prefix, partCount);
+                if (!mailPart.containsSequenceId()) {
+                    mailPart.setSequenceId(mpId);
+                }
+                if (!handler.handleMultipartStart(mailPart.getContentType(), count, mpId)) {
+                    stop = true;
+                    return;
+                }
+                final String mpPrefix;
+                if (multipartDetected) {
+                    mpPrefix = mpId;
+                } else {
+                    mpPrefix = prefix;
+                    multipartDetected = true;
+                }
+                for (int i = 0; i < count; i++) {
+                    final MailPart enclosedPart = mailPart.getEnclosedMailPart(i);
+                    parseMailContent(enclosedPart, handler, mpPrefix, i + 1);
+                }
+                if (!handler.handleMultipartEnd()) {
                     stop = true;
                     return;
                 }
