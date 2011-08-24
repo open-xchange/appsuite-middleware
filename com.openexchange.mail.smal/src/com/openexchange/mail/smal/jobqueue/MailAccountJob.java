@@ -119,7 +119,7 @@ public final class MailAccountJob extends AbstractMailSyncJob {
 
     private List<String> getList() throws OXException {
         final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
-            SMALMailAccess.getDelegateInstance(userId, contextId, accountId);
+            SMALMailAccess.getUnwrappedInstance(userId, contextId, accountId);
         mailAccess.connect(true);
         try {
             final List<String> fullNames = new LinkedList<String>();

@@ -107,12 +107,21 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
         return SMALMailProviderRegistry.getMailProviderBySession(session, accountId).createNewMailAccess(session, accountId);
     }
 
-    public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getDelegateInstance(final int userId, final int contextId, final int accountId) throws OXException {
+    /**
+     * Gets an un-wrapped {@link MailAccess} instance for specified account and session.
+     * 
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param accountId The account identifier
+     * @return An un-wrapped {@link MailAccess} instance either fetched from cache or newly created
+     * @throws OXException If {@link MailAccess} instance cannot be returned
+     */
+    public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getUnwrappedInstance(final int userId, final int contextId, final int accountId) throws OXException {
         final SessiondService sessiondService = SMALServiceLookup.getServiceStatic(SessiondService.class);
         if (null != sessiondService) {
             final Collection<Session> sessions = sessiondService.getSessions(userId, contextId);
             if (!sessions.isEmpty()) {
-                return getDelegateInstance(sessions.iterator().next(), accountId);
+                return getUnwrappedInstance(sessions.iterator().next(), accountId);
             }
         }
         /*
@@ -121,13 +130,21 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
         throw MailExceptionCode.UNEXPECTED_ERROR.create("No appropriate session found.");
     }
 
-    public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getDelegateInstance(final Session session, final int accountId) throws OXException {
+    /**
+     * Gets an un-wrapped {@link MailAccess} instance for specified account and session.
+     * 
+     * @param session The session
+     * @param accountId The account identifier
+     * @return An un-wrapped {@link MailAccess} instance either fetched from cache or newly created
+     * @throws OXException If {@link MailAccess} instance cannot be returned
+     */
+    public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getUnwrappedInstance(final Session session, final int accountId) throws OXException {
         /*
          * Check MailAccessCache
          */
         {
             final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
-                getMailAccessCache().removeMailAccess(session, accountId);
+                SMALMailAccessCache.getInstance().removeMailAccess(session, accountId);
             if (mailAccess != null) {
                 return mailAccess;
             }
@@ -212,7 +229,10 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
             /*
              * Cache connection if desired/possible anymore
              */
-            if (put && delegateMailAccess.isCacheable() && SMALMailAccessCache.getInstance().putMailAccess(session, accountId, delegateMailAccess)) {
+            if (put && delegateMailAccess.isCacheable() && SMALMailAccessCache.getInstance().putMailAccess(
+                session,
+                accountId,
+                delegateMailAccess)) {
                 /*
                  * Successfully cached: return
                  */

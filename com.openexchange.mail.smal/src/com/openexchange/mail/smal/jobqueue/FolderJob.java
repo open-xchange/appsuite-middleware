@@ -178,7 +178,7 @@ public final class FolderJob extends AbstractMailSyncJob {
             try {
                 final IndexAdapter indexAdapter = getAdapter();
                 final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
-                    SMALMailAccess.getDelegateInstance(userId, contextId, accountId);
+                    SMALMailAccess.getUnwrappedInstance(userId, contextId, accountId);
                 final Session session = mailAccess.getSession();
                 /*
                  * Get the mails from mail storage
@@ -313,7 +313,7 @@ public final class FolderJob extends AbstractMailSyncJob {
 
     private int add2Index(final String[] ids, final int offset, final int len, final String fullName, final IndexAdapter indexAdapter) throws OXException {
         final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
-            SMALMailAccess.getDelegateInstance(userId, contextId, accountId);
+            SMALMailAccess.getUnwrappedInstance(userId, contextId, accountId);
         final Session session = mailAccess.getSession();
         mailAccess.connect(true);
         try {
