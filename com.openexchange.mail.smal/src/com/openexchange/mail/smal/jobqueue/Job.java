@@ -284,4 +284,9 @@ public abstract class Job implements Task<Object>, Comparable<Job>, Serializable
         return executionFailure;
     }
 
+    @Override
+    public String toString() {
+        return getIdentifier();
+    }
+
 }
