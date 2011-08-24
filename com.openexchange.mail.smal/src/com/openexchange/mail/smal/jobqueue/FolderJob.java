@@ -287,6 +287,14 @@ public final class FolderJob extends AbstractMailSyncJob {
                 while (start < size) {
                     final int num = add2Index(ids, start, blockSize, fullName, indexAdapter);
                     start += num;
+                    if (DEBUG) {
+                        final long dur = System.currentTimeMillis() - st;
+                        LOG.debug("Folder job \"" + identifier + "\" inserted " + start + " of " + size + " messages in " + dur + "msec.");
+                    }
+                    {
+                        final long dur = System.currentTimeMillis() - st;
+                        System.out.println("Folder job \"" + identifier + "\" inserted " + start + " of " + size + " messages in " + dur + "msec.");
+                    }
                 }
                 setTimestampAndUnsetSyncFlag(fullName, System.currentTimeMillis());
                 unset = false;

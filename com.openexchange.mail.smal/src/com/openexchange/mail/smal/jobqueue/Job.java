@@ -197,8 +197,7 @@ public abstract class Job implements Task<Object>, Comparable<Job>, Serializable
 
     @Override
     public void afterExecute(final Throwable t) {
-        done = true;
-        executionFailure = t;
+        // Nothing to do
     }
 
     @Override

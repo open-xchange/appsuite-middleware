@@ -155,4 +155,13 @@ public final class JobQueue {
         return (null == identifiers.putIfAbsent(job.getIdentifier(), PRESENT)) && queue.offer(job);
     }
 
+    /**
+     * Gets the identifier of the job currently being executed.
+     * 
+     * @return The current job's identifier or <code>null</code> if none is executed at the moment
+     */
+    public String currentJob() {
+        return consumer.currentJob();
+    }
+
 }

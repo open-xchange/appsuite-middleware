@@ -143,6 +143,9 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
             final long st = System.currentTimeMillis();
             try {
                 JobQueue.getInstance().addJob(new FolderJob(folder, accountId, userId, contextId).setSpan(Constants.DEFAULT_MILLIS));
+                /*
+                 * Return current index state...
+                 */
                 return indexAdapter.search(folder, searchTerm, sortField, order, accountId, session).toArray(new MailMessage[0]);
             } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);

@@ -55,15 +55,17 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadRenamer;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 
 /**
  * {@link JobConsumer}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class JobConsumer extends AbstractTask<Object> {
@@ -115,6 +117,8 @@ final class JobConsumer extends AbstractTask<Object> {
 
     private final AtomicBoolean keepgoing;
 
+    protected final AtomicReference<Job> currentJob;
+
     /**
      * Initializes a new {@link JobConsumer}.
      */
@@ -123,6 +127,7 @@ final class JobConsumer extends AbstractTask<Object> {
         keepgoing = new AtomicBoolean(true);
         this.queue = queue;
         this.identifiers = identifiers;
+        currentJob = new AtomicReference<Job>();
     }
 
     /**
@@ -141,6 +146,16 @@ final class JobConsumer extends AbstractTask<Object> {
              */
             Thread.currentThread().interrupt();
         }
+    }
+
+    /**
+     * Gets the identifier of the job currently being executed.
+     * 
+     * @return The current job's identifier or <code>null</code> if none is executed at the moment
+     */
+    protected String currentJob() {
+        final Job job = currentJob.get();
+        return null == job ? null : job.getIdentifier();
     }
 
     @Override
@@ -170,7 +185,8 @@ final class JobConsumer extends AbstractTask<Object> {
                     queue.drainTo(jobs);
                     final boolean quit = jobs.remove(POISON);
                     {
-                        final ThreadPoolService threadPool = DELEGATE ? SMALServiceLookup.getInstance().getService(ThreadPoolService.class) : null;
+                        final ThreadPoolService threadPool =
+                            DELEGATE ? SMALServiceLookup.getInstance().getService(ThreadPoolService.class) : null;
                         for (final Job job : jobs) {
                             /*
                              * Check if canceled in the meantime
@@ -186,16 +202,17 @@ final class JobConsumer extends AbstractTask<Object> {
                                     queue.offer(job);
                                 } else {
                                     identifiers.remove(job.getIdentifier());
+                                    final JobWrapper jobWrapper = wrapperFor(job);
                                     if (DELEGATE) {
-                                        final Future<Object> future = threadPool.submit(job, CallerRunsBehavior.getInstance());
+                                        final Future<Object> future = threadPool.submit(jobWrapper, CallerRunsBehavior.getInstance());
                                         job.future = future;
                                     } else {
-                                        job.beforeExecute(consumerThread);
+                                        jobWrapper.beforeExecute(consumerThread);
                                         try {
-                                            job.call();
-                                            job.afterExecute(null);
+                                            jobWrapper.call();
+                                            jobWrapper.afterExecute(null);
                                         } catch (final Throwable t) {
-                                            job.afterExecute(t);
+                                            jobWrapper.afterExecute(t);
                                         } finally {
                                             Thread.interrupted();
                                         }
@@ -217,6 +234,45 @@ final class JobConsumer extends AbstractTask<Object> {
             // Consumer failed...
         }
         return null;
+    }
+
+    private JobWrapper wrapperFor(final Job job) {
+        return new JobWrapper(job);
+    }
+
+    private final class JobWrapper implements Task<Object> {
+
+        private final Job job;
+
+        protected JobWrapper(final Job job) {
+            super();
+            this.job = job;
+        }
+
+        @Override
+        public void setThreadName(final ThreadRenamer threadRenamer) {
+            job.setThreadName(threadRenamer);
+        }
+
+        @Override
+        public void beforeExecute(final Thread t) {
+            currentJob.set(job);
+            job.beforeExecute(t);
+        }
+
+        @Override
+        public void afterExecute(final Throwable t) {
+            job.done = true;
+            job.executionFailure = t;
+            currentJob.set(null);
+            job.afterExecute(t);
+        }
+
+        @Override
+        public Object call() throws Exception {
+            return job.call();
+        }
+
     }
 
 }
