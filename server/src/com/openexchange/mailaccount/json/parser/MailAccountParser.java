@@ -115,13 +115,11 @@ public class MailAccountParser extends DataParser {
         } else {
             final SetSwitch setSwitch = new SetSwitch(account);
             for (final Attribute attribute : Attribute.MAIL_URL_ATTRIBUTES) {
-                final String name = attribute.getName();
-                if (!json.hasAndNotNull(name)) {
-                    throw OXJSONExceptionCodes.MISSING_FIELD.create(name);
+                if (json.has(attribute.getName())) {
+                    setSwitch.setValue(json.get(attribute.getName()));
+                    attribute.doSwitch(setSwitch);
+                    attributes.add(attribute);
                 }
-                setSwitch.setValue(json.get(name));
-                attribute.doSwitch(setSwitch);
-                attributes.add(attribute);
             }
             if (null != account.getMailProtocol()) {
                 account.setMailProtocol(account.getMailProtocol().trim());
