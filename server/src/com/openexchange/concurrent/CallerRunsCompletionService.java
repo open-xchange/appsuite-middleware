@@ -101,7 +101,7 @@ public final class CallerRunsCompletionService<V> implements CompletionService<V
 
     /**
      * Submits specified task to this completion service.
-     * 
+     *
      * @param task The task
      * @return The associated future
      */

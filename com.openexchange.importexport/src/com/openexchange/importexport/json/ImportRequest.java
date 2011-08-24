@@ -42,7 +42,7 @@ public class ImportRequest {
 			throw new OXException(); //TODO
 		}
 		this.folders = Arrays.asList(request.getParameter(AJAXServlet.PARAMETER_FOLDERID).split(","));
-		
+
 		if(! request.hasUploads()){
 			throw ImportExportExceptionCodes.NO_FILE_UPLOADED.create();
 		}
@@ -55,7 +55,7 @@ public class ImportRequest {
 			throw ImportExportExceptionCodes.IOEXCEPTION.create();
 		}
 	}
-	
+
 	public int getContextId() {
 		return session.getContextId();
 	}

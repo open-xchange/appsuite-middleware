@@ -82,7 +82,7 @@ public class SessiondServiceImpl implements SessiondService {
 
     @Override
     public String addSession(final AddSessionParameter param) throws OXException {
-        return SessionHandler.addSession(param.getUserId(), param.getUserLoginInfo(), param.getPassword(), param.getContext(), param.getClientIP(), param.getFullLogin(), param.getAuthId(), param.getHash(), param.getClient());
+        return SessionHandler.addSession(param.getUserId(), param.getUserLoginInfo(), param.getPassword(), param.getContext().getContextId(), param.getClientIP(), param.getFullLogin(), param.getAuthId(), param.getHash(), param.getClient());
     }
 
     @Override
@@ -107,7 +107,7 @@ public class SessiondServiceImpl implements SessiondService {
 
     @Override
     public int getUserSessions(final int userId, final int contextId) {
-        return SessionHandler.getUserSessions(userId, contextId).length;
+        return SessionHandler.SESSION_COUNTER.getNumberOfSessions(userId, contextId);
     }
 
     @Override

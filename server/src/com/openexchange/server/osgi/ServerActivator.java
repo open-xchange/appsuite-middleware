@@ -790,8 +790,8 @@ public final class ServerActivator extends DeferredActivator {
         // http.registerServlet("/ajax/quota", new com.openexchange.ajax.Quota(), null, null);
         http.registerServlet("/ajax/control", new com.openexchange.ajax.ConfigJump(), null, null);
         // http.registerServlet("/ajax/file", new com.openexchange.ajax.AJAXFile(), null, null);
-        http.registerServlet("/ajax/import", new com.openexchange.ajax.ImportServlet(), null, null);
-        http.registerServlet("/ajax/export", new com.openexchange.ajax.ExportServlet(), null, null);
+        // http.registerServlet("/ajax/import", new com.openexchange.ajax.ImportServlet(), null, null);
+        // http.registerServlet("/ajax/export", new com.openexchange.ajax.ExportServlet(), null, null);
         http.registerServlet("/ajax/image", new com.openexchange.image.servlet.ImageServlet(), null, null);
         http.registerServlet("/ajax/sync", new com.openexchange.ajax.SyncServlet(), null, null);
     }

@@ -69,6 +69,7 @@ import com.openexchange.mail.smal.adapter.internal.IndexServiceImpl;
 import com.openexchange.mail.smal.internal.SMALDeleteListener;
 import com.openexchange.mail.smal.internal.SMALUpdateTaskProviderService;
 import com.openexchange.mail.smal.internal.tasks.CreateMailSyncTable;
+import com.openexchange.mail.smal.internal.tasks.SMALCheckTableTask;
 import com.openexchange.mail.smal.internal.tasks.SMALCreateTableTask;
 import com.openexchange.mail.smal.jobqueue.JobQueue;
 import com.openexchange.mail.smal.jobqueue.internal.JobQueueEventHandler;
@@ -77,6 +78,7 @@ import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link SMALActivator} - The activator for Super-MAL bundle.
@@ -86,6 +88,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 public class SMALActivator extends HousekeepingActivator {
 
     private IndexService indexService;
+    private JobQueueEventHandler eventHandler;
 
     /**
      * Initializes a new {@link SMALActivator}.
@@ -96,7 +99,9 @@ public class SMALActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ThreadPoolService.class, MailAccountStorageService.class, SessiondService.class, DatabaseService.class };
+        return new Class<?>[] {
+            ConfigurationService.class, ThreadPoolService.class, TimerService.class, MailAccountStorageService.class,
+            SessiondService.class, DatabaseService.class };
     }
 
     @Override
@@ -138,14 +143,15 @@ public class SMALActivator extends HousekeepingActivator {
         {
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-            registerService(EventHandler.class, new JobQueueEventHandler(), serviceProperties);
+            eventHandler = new JobQueueEventHandler();
+            registerService(EventHandler.class, eventHandler, serviceProperties);
         }
         /*
          * Register update task, create table job and delete listener
          */
         {
             registerService(CreateTableService.class, new CreateMailSyncTable());
-            registerService(UpdateTaskProviderService.class, new SMALUpdateTaskProviderService(new SMALCreateTableTask()));
+            registerService(UpdateTaskProviderService.class, new SMALUpdateTaskProviderService(new SMALCreateTableTask(), new SMALCheckTableTask()));
             registerService(DeleteListener.class, new SMALDeleteListener());
         }
     }
@@ -153,6 +159,10 @@ public class SMALActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         JobQueue.dropInstance();
+        if (null != eventHandler) {
+            eventHandler.close();
+            eventHandler = null;
+        }
         cleanUp();
         if (null != indexService) {
             indexService.getAdapter().stop();

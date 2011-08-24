@@ -53,6 +53,7 @@ import java.util.Collection;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -81,6 +82,14 @@ public interface IndexAdapter {
     public void stop() throws OXException;
 
     /**
+     * Gets the indexable fields.
+     * 
+     * @return The indexable fields
+     * @throws OXException If an error occurs
+     */
+    public MailFields getIndexableFields() throws OXException;
+
+    /**
      * Invoked if a new session is added or restored from log-term container.
      *
      * @param session The session
@@ -99,26 +108,28 @@ public interface IndexAdapter {
     /**
      * Performs the query derived from given search term.
      *
+     * @param optFullName The optional full name to restrict search results to specified folder
      * @param searchTerm The search term
      * @param sortField The sort field
      * @param order The order direction
+     * @param optAccountId The optional account identifier or <code>-1</code> to not restrict to a certain account
      * @param session The session
      * @return The search result
      * @throws OXException If search fails
      */
-    public List<MailMessage> search(SearchTerm<?> searchTerm, MailSortField sortField, OrderDirection order, Session session) throws OXException;
+    public List<MailMessage> search(String optFullName, SearchTerm<?> searchTerm, MailSortField sortField, OrderDirection order, int optAccountId, Session session) throws OXException;
 
     /**
      * Gets specified mails located in given folder.
      *
-     * @param mailIds The mail identifiers; pass <code>null</code> to get all messages in folder
+     * @param optMailIds The mail identifiers; pass <code>null</code> to get all messages in folder
      * @param fullName The folder full name
      * @param accountId The account identifier
      * @param session The session
      * @return <code>true</code> if folder is contained; otherwise <code>false</code>
      * @throws OXException If check fails
      */
-    public List<MailMessage> getMessages(String[] mailIds, String fullName, MailSortField sortField, OrderDirection order, MailField[] fields, int accountId, Session session) throws OXException;
+    public List<MailMessage> getMessages(String[] optMailIds, String fullName, MailSortField sortField, OrderDirection order, MailField[] fields, int accountId, Session session) throws OXException;
 
     /**
      * Deletes specified mails from index.
@@ -144,12 +155,12 @@ public interface IndexAdapter {
 
     /**
      * Changes the flags of specified mails in index.
-     * 
+     *
      * @param mails The mails with changed flags
      * @param session The user session
      * @throws OXException If changing mails in index fails
      */
-    public void change(MailMessage[] mails, Session session) throws OXException;
+    public void change(Collection<MailMessage> mails, Session session) throws OXException;
 
     /**
      * Adds specified mail to the index.
@@ -167,7 +178,7 @@ public interface IndexAdapter {
      * @param session The session
      * @throws OXException If adding mails to index fails
      */
-    public void add(MailMessage[] mails, Session session) throws OXException;
+    public void add(Collection<MailMessage> mails, Session session) throws OXException;
 
     /**
      * Synchronizes mails contained given folder with the index.

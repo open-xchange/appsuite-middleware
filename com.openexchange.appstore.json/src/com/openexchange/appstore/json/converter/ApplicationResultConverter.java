@@ -50,8 +50,6 @@
 package com.openexchange.appstore.json.converter;
 
 import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -66,23 +64,27 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ApplicationResultConverter}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class ApplicationResultConverter implements ResultConverter {
 
+    @Override
     public String getInputFormat() {
         return "application";
     }
 
+    @Override
     public String getOutputFormat() {
         return "json";
     }
 
+    @Override
     public Quality getQuality() {
         return Quality.GOOD;
     }
 
+    @Override
     public void convert(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
         String action = request.getAction();
         if (action.equals("get") || action.equals("crawl")) {
@@ -104,7 +106,7 @@ public class ApplicationResultConverter implements ResultConverter {
                 json.put(value);
             }
         }
-        
+
         result.setResultObject(json, getOutputFormat());
     }
 

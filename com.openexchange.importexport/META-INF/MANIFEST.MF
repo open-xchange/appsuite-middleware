@@ -45,7 +45,7 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.tools.versit.converter,
  com.openexchange.tools.versit.old,
  gnu.trove,
- org.apache.commons.logging;version="1.1.1",
+ org.apache.commons.logging,
  org.json,
- org.osgi.framework;version="1.6.0"
+ org.osgi.framework
 Bundle-ActivationPolicy: lazy

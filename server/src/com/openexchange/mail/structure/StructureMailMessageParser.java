@@ -195,7 +195,7 @@ public final class StructureMailMessageParser {
 
     /**
      * Sets the behavior how to handle a message part.
-     * 
+     *
      * @param neverTreatMessageAsAttachment whether to treat a message part as an attachment
      * @return This parser with new behavior applied
      */

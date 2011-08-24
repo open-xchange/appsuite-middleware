@@ -99,7 +99,7 @@ import com.openexchange.test.OXTestToolkit;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class AbstractContactTest extends AbstractAJAXSession {
-    
+
     public static final String CONTENT_TYPE = "image/png";
 
     public static final byte[] image = { -119, 80, 78, 71, 13, 10, 26, 10, 0,
@@ -216,17 +216,17 @@ public class AbstractContactTest extends AbstractAJAXSession {
         Contact.USERFIELD20,
         Contact.DEFAULT_ADDRESS
     };
-    
+
     protected int contactFolderId = -1;
 
     protected long dateTime = 0;
 
     protected int userId = 0;
-    
+
     protected AJAXClient client;
 
     protected TimeZone tz;
-    
+
     /**
      * Initializes a new {@link AbstractContactTest}.
      * @param name
@@ -234,11 +234,11 @@ public class AbstractContactTest extends AbstractAJAXSession {
     protected AbstractContactTest(String name) {
         super(name);
     }
-    
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        
+
         client = getClient();
         contactFolderId = client.getValues().getPrivateContactFolder();
         userId = client.getValues().getUserId();
@@ -253,7 +253,7 @@ public class AbstractContactTest extends AbstractAJAXSession {
 
         dateTime = c.getTimeInMillis();
     }
-    
+
     protected int createContactWithDistributionList(final String title, final Contact contactEntry) throws Exception {
         final Contact contactObj = new Contact();
         contactObj.setSurName(title);
@@ -266,7 +266,7 @@ public class AbstractContactTest extends AbstractAJAXSession {
         entry[2].setEntryID(contactEntry.getObjectID());
 
         contactObj.setDistributionList(entry);
-        
+
         return insertContact(contactObj);
     }
 
@@ -539,7 +539,7 @@ public class AbstractContactTest extends AbstractAJAXSession {
         InsertRequest request = new InsertRequest(contactObj);
         InsertResponse response = client.execute(request);
         response.fillObject(contactObj);
-        
+
         return contactObj.getObjectID();
     }
 
@@ -565,7 +565,7 @@ public class AbstractContactTest extends AbstractAJAXSession {
         if (rightHandLimit > -1) {
             request.setRightHandLimit(rightHandLimit);
         }
-        
+
         CommonAllResponse response = client.execute(request);
         return jsonArray2ContactArray((JSONArray)response.getData(), cols);
     }
@@ -607,14 +607,14 @@ public class AbstractContactTest extends AbstractAJAXSession {
     public Contact loadUser(final int userId) throws OXException, IOException, JSONException {
         GetContactForUserRequest request = new GetContactForUserRequest(userId, true, tz);
         GetResponse response = client.execute(request);
-        
+
         return response.getContact();
     }
 
     public Contact loadContact(final int objectId, final int inFolder) throws Exception {
         GetRequest request = new GetRequest(inFolder, objectId, tz);
         GetResponse response = client.execute(request);
-        
+
         return response.getContact();
     }
 

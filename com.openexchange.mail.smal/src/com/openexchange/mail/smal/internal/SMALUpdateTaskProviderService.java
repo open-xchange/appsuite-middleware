@@ -50,11 +50,11 @@
 package com.openexchange.mail.smal.internal;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskV2;
-import com.openexchange.mail.smal.internal.tasks.SMALCreateTableTask;
 
 
 /**
@@ -64,12 +64,16 @@ import com.openexchange.mail.smal.internal.tasks.SMALCreateTableTask;
  */
 public class SMALUpdateTaskProviderService implements UpdateTaskProviderService {
 
-    private List<UpdateTaskV2> taskList;
+    private final List<UpdateTaskV2> taskList;
 
-    public SMALUpdateTaskProviderService(SMALCreateTableTask task) {
+    public SMALUpdateTaskProviderService(final UpdateTaskV2... tasks) {
         super();
-        taskList = new ArrayList<UpdateTaskV2>();
-        taskList.add(task);
+        if (null == tasks || 0 == tasks.length) {
+            taskList = new ArrayList<UpdateTaskV2>(1);
+        } else {
+            taskList = new ArrayList<UpdateTaskV2>(tasks.length);
+            taskList.addAll(Arrays.asList(tasks));
+        }
     }
 
     @Override

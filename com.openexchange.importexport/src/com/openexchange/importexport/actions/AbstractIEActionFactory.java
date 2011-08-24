@@ -54,23 +54,23 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.importexport.formats.Format;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 public abstract class AbstractIEActionFactory implements AJAXActionServiceFactory {
-   
+
 	protected abstract Map<Format, AJAXActionService> getActions();
 
-	public AJAXActionService createActionService(String action) throws OXException {
+	@Override
+    public AJAXActionService createActionService(String action) throws OXException {
 		Format format = Format.getFormatByConstantName(action);
 		if(format == null) {
 	        return null;
 	    }
-		
+
 	    AJAXActionService handler = getActions().get(format);
 	    if(handler == null) {
 	        return null;
 	    }
-	    
+
 	    return handler;
 	}
 

@@ -50,7 +50,6 @@
 package com.openexchange.contact.aggregator.osgi;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -58,10 +57,8 @@ import java.util.Set;
 import javax.mail.internet.InternetAddress;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.imap.IMAPException;
-import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.OrderDirection;
@@ -71,26 +68,26 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link EMailFolderContactSource}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class EMailFolderContactSource implements ContactSource {
 
-    private static final Log LOG = LogFactory.getLog(EMailFolderContactSource.class);
-    
-    private MailFolderDiscoverer discoverer;
-    private int limit = 3000;
-    
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EMailFolderContactSource.class));
 
-    public EMailFolderContactSource(MailFolderDiscoverer discoverer, int limit) {
+    private final MailFolderDiscoverer discoverer;
+    private int limit = 3000;
+
+
+    public EMailFolderContactSource(final MailFolderDiscoverer discoverer, final int limit) {
         this.discoverer = discoverer;
         this.limit = limit;
     }
 
-    public List<Contact> getContacts(ServerSession session) throws Exception {
+    public List<Contact> getContacts(final ServerSession session) throws Exception {
 
-        List<String> mailFolders = getAllVisibleEmailFolders(session);
+        final List<String> mailFolders = getAllVisibleEmailFolders(session);
         if (mailFolders != null) {
             return getContactsFromMailFolders(session, mailFolders);
         }
@@ -103,13 +100,13 @@ public class EMailFolderContactSource implements ContactSource {
      * @return
      * @throws Exception
      */
-    private List<Contact> getContactsFromMailFolders(ServerSession session, List<String> mailFolders) throws Exception {
-        List<Contact> contacts = new ArrayList<Contact>();
-        for (String mailFolder : mailFolders) {
+    private List<Contact> getContactsFromMailFolders(final ServerSession session, final List<String> mailFolders) throws Exception {
+        final List<Contact> contacts = new ArrayList<Contact>();
+        for (final String mailFolder : mailFolders) {
             try {
-                List<Contact> tempContacts = getAllContactsFromOneFolder(mailFolder, session);
+                final List<Contact> tempContacts = getAllContactsFromOneFolder(mailFolder, session);
                 contacts.addAll(tempContacts);
-            } catch (Exception x) {
+            } catch (final Exception x) {
                 LOG.error(x.getMessage(), x);
             }
         }
@@ -120,46 +117,46 @@ public class EMailFolderContactSource implements ContactSource {
      * @return
      * @throws Exception
      */
-    private List<Contact> getAllContactsFromOneFolder(String folder, ServerSession session) throws Exception {
-        List<Contact> contacts = new ArrayList<Contact>();
+    private List<Contact> getAllContactsFromOneFolder(final String folder, final ServerSession session) throws Exception {
+        final List<Contact> contacts = new ArrayList<Contact>();
         MailServletInterface mailInterface = null;
         try {
            mailInterface = MailServletInterface.getInstance(session);
-            int[] fields = { MailListField.FROM.getField(), MailListField.TO.getField(), MailListField.CC.getField() };
-            SearchIterator<MailMessage> messages = mailInterface.getAllMessages(folder, MailListField.RECEIVED_DATE.getField(), OrderDirection.DESC.getOrder(), fields, new int[]{0,limit});
-            Set<String> guardian = new HashSet<String>();
+            final int[] fields = { MailListField.FROM.getField(), MailListField.TO.getField(), MailListField.CC.getField() };
+            final SearchIterator<MailMessage> messages = mailInterface.getAllMessages(folder, MailListField.RECEIVED_DATE.getField(), OrderDirection.DESC.getOrder(), fields, new int[]{0,limit});
+            final Set<String> guardian = new HashSet<String>();
             while (messages.hasNext()) {
-                MailMessage message = messages.next();
-                InternetAddress[] froms = message.getFrom();
-                for (InternetAddress from : froms) {
+                final MailMessage message = messages.next();
+                final InternetAddress[] froms = message.getFrom();
+                for (final InternetAddress from : froms) {
                     if (from.getPersonal() == null) {
                         continue;
                     }
-                    Contact contact = new Contact();
+                    final Contact contact = new Contact();
                     contact.setDisplayName(from.getPersonal());
                     contact.setEmail1(from.getAddress());
                     if (guardian.add(contact.getDisplayName() + contact.getEmail1())) {
                         contacts.add(contact);
                     }
                 }
-                InternetAddress[] tos = message.getTo();
-                for (InternetAddress to : tos) {
+                final InternetAddress[] tos = message.getTo();
+                for (final InternetAddress to : tos) {
                     if (to.getPersonal() == null) {
                         continue;
                     }
-                    Contact contact = new Contact();
+                    final Contact contact = new Contact();
                     contact.setDisplayName(to.getPersonal());
                     contact.setEmail1(to.getAddress());
                     if (guardian.add(contact.getDisplayName() + contact.getEmail1())) {
                         contacts.add(contact);
                     }
                 }
-                InternetAddress[] ccs = message.getCc();
-                for (InternetAddress cc : ccs) {
+                final InternetAddress[] ccs = message.getCc();
+                for (final InternetAddress cc : ccs) {
                     if (cc.getPersonal() == null) {
                         continue;
                     }
-                    Contact contact = new Contact();
+                    final Contact contact = new Contact();
                     contact.setDisplayName(cc.getPersonal());
                     contact.setEmail1(cc.getAddress());
                     if (guardian.add(contact.getDisplayName() + contact.getEmail1())) {
@@ -168,9 +165,7 @@ public class EMailFolderContactSource implements ContactSource {
                 }
 
             }
-        } catch (MailException e) {
-            throw e;
-        } catch (AbstractOXException e) {
+        } catch (final OXException e) {
             throw e;
         } finally {
             if (mailInterface != null) {
@@ -180,10 +175,10 @@ public class EMailFolderContactSource implements ContactSource {
         return contacts;
     }
 
-    private List<String> getAllVisibleEmailFolders(ServerSession session) {
+    private List<String> getAllVisibleEmailFolders(final ServerSession session) {
         try {
             return discoverer.getMailFolder(session);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
         }
         return null;

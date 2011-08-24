@@ -11,7 +11,7 @@ import com.openexchange.server.ServiceLookup;
 
 public class ImportExportServices {
     public static ServiceLookup LOOKUP = null;
-    
+
     public static ContactInterfaceDiscoveryService getContactInterfaceDiscoveryService(){
     	return LOOKUP.getService(ContactInterfaceDiscoveryService.class);
     }

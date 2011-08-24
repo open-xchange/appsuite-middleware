@@ -64,7 +64,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public abstract class AbstractAppStoreAction implements AJAXActionService {
-    
+
     private ServiceLookup services;
 
     public AbstractAppStoreAction(ServiceLookup services) {
@@ -78,7 +78,7 @@ public abstract class AbstractAppStoreAction implements AJAXActionService {
     public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
         return null;
     }
-    
+
     protected AppStoreService getAppStoreService() {
         return services.getService(AppStoreService.class);
     }

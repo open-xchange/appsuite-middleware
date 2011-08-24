@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.threadpool.AbstractTask;
@@ -169,7 +170,7 @@ final class JobConsumer extends AbstractTask<Object> {
                     queue.drainTo(jobs);
                     final boolean quit = jobs.remove(POISON);
                     {
-                        final ThreadPoolService threadPool = SMALServiceLookup.getInstance().getService(ThreadPoolService.class);
+                        final ThreadPoolService threadPool = DELEGATE ? SMALServiceLookup.getInstance().getService(ThreadPoolService.class) : null;
                         for (final Job job : jobs) {
                             /*
                              * Check if canceled in the meantime
@@ -179,14 +180,15 @@ final class JobConsumer extends AbstractTask<Object> {
                             } else {
                                 if (job.isPaused()) {
                                     /*
-                                     * Unset "pasued" flag & re-enqueue
+                                     * Unset "paused" flag & re-enqueue
                                      */
                                     job.proceed();
                                     queue.offer(job);
                                 } else {
                                     identifiers.remove(job.getIdentifier());
                                     if (DELEGATE) {
-                                        threadPool.submit(job, CallerRunsBehavior.getInstance());
+                                        final Future<Object> future = threadPool.submit(job, CallerRunsBehavior.getInstance());
+                                        job.future = future;
                                     } else {
                                         job.beforeExecute(consumerThread);
                                         try {
@@ -194,6 +196,8 @@ final class JobConsumer extends AbstractTask<Object> {
                                             job.afterExecute(null);
                                         } catch (final Throwable t) {
                                             job.afterExecute(t);
+                                        } finally {
+                                            Thread.interrupted();
                                         }
                                     }
                                 }
