@@ -187,17 +187,17 @@ public abstract class Job implements Task<Object>, Comparable<Job>, Serializable
 
     @Override
     public void setThreadName(final ThreadRenamer threadRenamer) {
-        // Nothing to do
+        // Nothing to do; override if needed
     }
 
     @Override
     public void beforeExecute(final Thread t) {
-        // Nothing to do
+        // Nothing to do; override if needed
     }
 
     @Override
     public void afterExecute(final Throwable t) {
-        // Nothing to do
+        // Nothing to do; override if needed
     }
 
     @Override
