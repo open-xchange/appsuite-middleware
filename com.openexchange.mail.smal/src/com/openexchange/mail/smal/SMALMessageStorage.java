@@ -52,6 +52,7 @@ package com.openexchange.mail.smal;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -61,20 +62,28 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.search.SearchTerm;
+import com.openexchange.mail.smal.adapter.IndexAdapter;
+import com.openexchange.mail.smal.adapter.IndexService;
+import com.openexchange.mail.smal.jobqueue.Constants;
+import com.openexchange.mail.smal.jobqueue.FolderJob;
+import com.openexchange.mail.smal.jobqueue.JobQueue;
 import com.openexchange.session.Session;
 
 /**
  * {@link SMALMessageStorage}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SMALMessageStorage extends AbstractSMALStorage implements IMailMessageStorage {
 
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SMALMessageStorage.class));
+
     /**
      * Initializes a new {@link SMALMessageStorage}.
      */
-    public SMALMessageStorage(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> realMailAccess) {
-        super(session, accountId, realMailAccess);
+    public SMALMessageStorage(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess) {
+        super(session, accountId, delegateMailAccess);
     }
 
     @Override
@@ -112,8 +121,6 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
         connect();
         try {
 
-
-
             System.out.println("SMALMessageStorage.getMessages()");
             return delegateMailAccess.getMessageStorage().getMessages(folder, mailIds, fields);
         } finally {
@@ -125,8 +132,25 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
     public MailMessage[] searchMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
         connect();
         try {
-            System.out.println("SMALMessageStorage.searchMessages()");
-            return delegateMailAccess.getMessageStorage().searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
+            final IndexAdapter indexAdapter = getIndexAdapter();
+            if (null == indexAdapter) {
+                return delegateMailAccess.getMessageStorage().searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
+            }
+            final MailFields mfs = new MailFields(fields);
+            if (!indexAdapter.getIndexableFields().containsAll(mfs)) {
+                return delegateMailAccess.getMessageStorage().searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
+            }
+            final long st = System.currentTimeMillis();
+            try {
+                JobQueue.getInstance().addJob(new FolderJob(folder, accountId, userId, contextId).setSpan(Constants.DEFAULT_MILLIS));
+                return indexAdapter.search(folder, searchTerm, sortField, order, accountId, session).toArray(new MailMessage[0]);
+            } catch (final OXException e) {
+                LOG.error(e.getMessage(), e);
+                return delegateMailAccess.getMessageStorage().searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
+            } finally {
+                final long dur = System.currentTimeMillis() - st;
+               System.out.println("SMALMessageStorage.searchMessages() took " + dur + "msec.");
+            }
         } finally {
             close();
         }
@@ -250,6 +274,11 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
         } finally {
             close();
         }
+    }
+
+    private static IndexAdapter getIndexAdapter() {
+        final IndexService indexService = SMALServiceLookup.getServiceStatic(IndexService.class);
+        return null == indexService ? null : indexService.getAdapter();
     }
 
 }

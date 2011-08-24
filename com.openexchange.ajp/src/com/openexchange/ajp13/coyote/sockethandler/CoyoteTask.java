@@ -56,6 +56,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajp13.coyote.ActionCode;
 import com.openexchange.ajp13.coyote.AjpProcessor;
+import com.openexchange.ajp13.coyote.ExceptionUtils;
 import com.openexchange.ajp13.najp.AJPv13ServerImpl;
 import com.openexchange.ajp13.najp.AJPv13TaskMonitor;
 import com.openexchange.ajp13.watcher.AJPv13TaskWatcher;
@@ -160,6 +161,7 @@ public final class CoyoteTask implements Task<Object> {
                 /*
                  * Any other exception or error is odd.
                  */
+                ExceptionUtils.handleThrowable(e);
                 com.openexchange.log.Log.valueOf(LogFactory.getLog(CoyoteTask.class)).error(e.getMessage(), e);
             } finally {
                 ajpProcessor.action(ActionCode.STOP, null);

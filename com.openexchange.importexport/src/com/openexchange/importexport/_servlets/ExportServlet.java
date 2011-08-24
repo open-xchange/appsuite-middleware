@@ -72,7 +72,7 @@
 // * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (spring configuration and refactoring)
 // */
 //public class ExportServlet extends ImportExport {
-//    
+//
 //    /**
 //     * Logger.
 //     */
@@ -86,7 +86,7 @@
 //    public ExportServlet(){
 //        super();
 //    }
-//    
+//
 //    @Override
 //    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
 //        try {
@@ -103,7 +103,7 @@
 //
 //            final ServerSession session = new ServerSessionAdapter(getSessionObject(req));
 //            final SizedInputStream inputStream = importerExporter.exportData(session, format, folder, fieldsToBeExported, req.getParameterMap());
-//            
+//
 //            final OutputStream outputStream = resp.getOutputStream();
 //            resp.setContentLength((int) inputStream.getSize());
 //            resp.setContentType(inputStream.getFormat().getMimeType());
@@ -111,11 +111,11 @@
 //                + Helper.encodeFilename("export."+format.getExtension(), "UTF-8",isIE(req)) + "\"");
 //            Tools.removeCachingHeader(resp); // Some browsers don't like these in file downloads.
 //            final byte[] b = new byte[1024];
-//            int i = 0; 
+//            int i = 0;
 //            while ((i = inputStream.read(b)) != -1) {
 //                outputStream.write(b, 0, i);
 //                outputStream.flush();
-//            }        
+//            }
 //        } catch (final OXException e) {
 //            LOG.error(e.getMessage(), e);
 //        }

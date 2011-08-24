@@ -92,6 +92,9 @@ public final class SearchTerm2Query {
      * @return The resulting query (builder)
      */
     public static QueryBuilder searchTerm2Query(final SearchTerm<?> searchTerm) {
+        if (null == searchTerm) {
+            return null;
+        }
         if (searchTerm instanceof ANDTerm) {
             final ANDTerm andTerm = (ANDTerm) searchTerm;
             final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
@@ -120,7 +123,7 @@ public final class SearchTerm2Query {
             if (searchTerm.containsWildcard()) {
                 return QueryBuilders.wildcardQuery(getFieldNameFor(searchTerm), sPattern);
             }
-            return QueryBuilders.termQuery(getFieldNameFor(searchTerm), sPattern);
+            return QueryBuilders.wildcardQuery(getFieldNameFor(searchTerm), "*" + sPattern + "*");
         }
         /*
          * Size term
@@ -167,6 +170,9 @@ public final class SearchTerm2Query {
             }
             if ((flags & MailMessage.FLAG_FLAGGED) > 0) {
                 boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_FLAG_FLAGGED, set));
+            }
+            if ((flags & MailMessage.FLAG_RECENT) > 0) {
+                boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_FLAG_RECENT, set));
             }
             if ((flags & MailMessage.FLAG_SEEN) > 0) {
                 boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_FLAG_SEEN, set));

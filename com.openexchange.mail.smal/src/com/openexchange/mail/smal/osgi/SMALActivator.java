@@ -69,6 +69,7 @@ import com.openexchange.mail.smal.adapter.internal.IndexServiceImpl;
 import com.openexchange.mail.smal.internal.SMALDeleteListener;
 import com.openexchange.mail.smal.internal.SMALUpdateTaskProviderService;
 import com.openexchange.mail.smal.internal.tasks.CreateMailSyncTable;
+import com.openexchange.mail.smal.internal.tasks.SMALCheckTableTask;
 import com.openexchange.mail.smal.internal.tasks.SMALCreateTableTask;
 import com.openexchange.mail.smal.jobqueue.JobQueue;
 import com.openexchange.mail.smal.jobqueue.internal.JobQueueEventHandler;
@@ -81,12 +82,13 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link SMALActivator} - The activator for Super-MAL bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SMALActivator extends HousekeepingActivator {
 
     private IndexService indexService;
+    private JobQueueEventHandler eventHandler;
 
     /**
      * Initializes a new {@link SMALActivator}.
@@ -141,14 +143,15 @@ public class SMALActivator extends HousekeepingActivator {
         {
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-            registerService(EventHandler.class, new JobQueueEventHandler(), serviceProperties);
+            eventHandler = new JobQueueEventHandler();
+            registerService(EventHandler.class, eventHandler, serviceProperties);
         }
         /*
          * Register update task, create table job and delete listener
          */
         {
             registerService(CreateTableService.class, new CreateMailSyncTable());
-            registerService(UpdateTaskProviderService.class, new SMALUpdateTaskProviderService(new SMALCreateTableTask()));
+            registerService(UpdateTaskProviderService.class, new SMALUpdateTaskProviderService(new SMALCreateTableTask(), new SMALCheckTableTask()));
             registerService(DeleteListener.class, new SMALDeleteListener());
         }
     }
@@ -156,6 +159,10 @@ public class SMALActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         JobQueue.dropInstance();
+        if (null != eventHandler) {
+            eventHandler.close();
+            eventHandler = null;
+        }
         cleanUp();
         if (null != indexService) {
             indexService.getAdapter().stop();

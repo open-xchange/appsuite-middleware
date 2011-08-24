@@ -76,19 +76,19 @@ public class MoveTest extends AbstractContactTest {
         contactObj.setSurName("testMove2PrivateFolder");
         contactObj.setParentFolderID(contactFolderId);
         objectId = insertContact(contactObj);
-        
+
         folder = Create.createPrivateFolder("testCopy", FolderObject.CONTACT, userId);
         folder.setParentFolderID(client.getValues().getPrivateContactFolder());
         InsertResponse folderCreateResponse = client.execute(new InsertRequest(API.OUTLOOK, folder));
         folderCreateResponse.fillObject(folder);
-        
+
         targetFolder = folder.getObjectID();
 
         contactObj.setParentFolderID(targetFolder);
         updateContact(contactObj, contactFolderId);
         final Contact loadContact = loadContact(objectId, targetFolder);
         contactObj.setObjectID(objectId);
-        compareObject(contactObj, loadContact);       
+        compareObject(contactObj, loadContact);
     }
 
     public void testMove2PublicFolder() throws Exception {
@@ -101,7 +101,7 @@ public class MoveTest extends AbstractContactTest {
         folder.setParentFolderID(client.getValues().getPrivateContactFolder());
         InsertResponse folderCreateResponse = client.execute(new InsertRequest(API.OUTLOOK, folder));
         folderCreateResponse.fillObject(folder);
-        
+
         targetFolder = folder.getObjectID();
 
         contactObj.setParentFolderID(targetFolder);
@@ -110,12 +110,12 @@ public class MoveTest extends AbstractContactTest {
         contactObj.setObjectID(objectId);
         compareObject(contactObj, loadContact);
     }
-    
+
     @Override
     protected void tearDown() throws Exception {
         deleteContact(objectId, targetFolder);
         client.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(API.OUTLOOK, folder));
-        
+
         super.tearDown();
     }
 }

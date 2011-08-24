@@ -66,16 +66,16 @@ public class ImageResponse extends AbstractAJAXResponse {
      */
     public ImageResponse(final byte[] image) {
         super(null);
-        this.image = image;        
+        this.image = image;
     }
 
     /**
      * @param image
      */
     public void setImage(final byte[] image) {
-        this.image  = image;        
+        this.image  = image;
     }
-    
+
     public byte[] getImage() {
         return image;
     }

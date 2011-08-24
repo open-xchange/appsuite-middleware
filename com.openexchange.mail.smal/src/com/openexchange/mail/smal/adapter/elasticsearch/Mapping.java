@@ -102,6 +102,7 @@ public final class Mapping {
             properties.put(Constants.FIELD_FLAG_DELETED, new JSONObject("{ \"type\": \"boolean\", \"store\": \"yes\" }"));
             properties.put(Constants.FIELD_FLAG_DRAFT, new JSONObject("{ \"type\": \"boolean\", \"store\": \"yes\" }"));
             properties.put(Constants.FIELD_FLAG_FLAGGED, new JSONObject("{ \"type\": \"boolean\", \"store\": \"yes\" }"));
+            properties.put(Constants.FIELD_FLAG_RECENT, new JSONObject("{ \"type\": \"boolean\", \"store\": \"yes\" }"));
             properties.put(Constants.FIELD_FLAG_SEEN, new JSONObject("{ \"type\": \"boolean\", \"store\": \"yes\" }"));
             properties.put(Constants.FIELD_FLAG_USER, new JSONObject("{ \"type\": \"boolean\", \"store\": \"yes\" }"));
             properties.put(Constants.FIELD_FLAG_SPAM, new JSONObject("{ \"type\": \"boolean\", \"store\": \"yes\" }"));

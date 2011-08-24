@@ -231,6 +231,7 @@ public class Contact extends DataServlet {
         String action = ACTION_ERROR;
         try {
             action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
+            final ContactInterfaceDiscoveryService discoveryService = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class);
             if (action.equals(ACTION_NEW)) {
                 UploadEvent upload = null;
                 try {
@@ -271,8 +272,7 @@ public class Contact extends DataServlet {
                     }
                     contactobject.setImageContentType(uploadFile.getContentType());
 
-                    final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-                        ContactInterfaceDiscoveryService.class).newContactInterface(contactobject.getParentFolderID(), session);
+                    final ContactInterface contactInterface = discoveryService.newContactInterface(contactobject.getParentFolderID(), session);
                     // final ContactSQLInterface contactsql = new RdbContactSQLInterface(session);
                     contactInterface.insertContactObject(contactobject);
 
@@ -327,8 +327,7 @@ public class Contact extends DataServlet {
                         contactobject.setImageContentType(uploadFile.getContentType());
                     }
 
-                    final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-                        ContactInterfaceDiscoveryService.class).newContactInterface(contactobject.getParentFolderID(), session);
+                    final ContactInterface contactInterface = discoveryService.newContactInterface(contactobject.getParentFolderID(), session);
                     //final ContactSQLInterface contactsql = new RdbContactSQLInterface(session);
                     contactInterface.updateContactObject(contactobject, inFolder, timestamp);
                 } finally {

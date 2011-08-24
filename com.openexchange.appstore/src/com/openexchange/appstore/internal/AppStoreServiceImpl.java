@@ -86,23 +86,24 @@ import com.openexchange.sql.grammar.UPDATE;
 
 /**
  * {@link AppStoreServiceImpl}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class AppStoreServiceImpl implements AppStoreService {
-    
+
     static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AppStoreServiceImpl.class);
     private ServiceLookup serviceLookup;
 
     /**
      * Initializes a new {@link AppStoreServiceImpl}.
-     * @param activator 
+     * @param activator
      */
     public AppStoreServiceImpl(ServiceLookup serviceLookup) {
         super();
         this.serviceLookup = serviceLookup;
     }
 
+    @Override
     public List<Application> list(Context context, User user) throws OXException {
         List<Application> applications;
         applications = loadFromDB(getReleased(context, user));
@@ -130,6 +131,7 @@ public class AppStoreServiceImpl implements AppStoreService {
         appInstaller.dropUserApplications();
     }
 
+    @Override
     public List<Application> installed(Context context, User user) throws OXException {
         ApplicationInstaller appInstaller = new ApplicationInstaller(context, user, serviceLookup);
         List<Application> userApps = appInstaller.list();
@@ -147,6 +149,7 @@ public class AppStoreServiceImpl implements AppStoreService {
         return applications;
     }
 
+    @Override
     public boolean install(Context context, User user, String id) throws OXException {
         ApplicationInstaller appInstaller = new ApplicationInstaller(context, user, serviceLookup);
         Application app = new Application();
@@ -154,11 +157,13 @@ public class AppStoreServiceImpl implements AppStoreService {
         return appInstaller.install(app);
     }
 
+    @Override
     public List<Application> list(String category) {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public boolean uninstall(Context context, User user, String id) throws OXException {
         ApplicationInstaller appInstaller = new ApplicationInstaller(context, user, serviceLookup);
         Application app = new Application();
@@ -170,7 +175,7 @@ public class AppStoreServiceImpl implements AppStoreService {
         ConfigViewFactory service = serviceLookup.getService(ConfigViewFactory.class);
         ConfigView view = service.getView(userId, contextId);
         String property = view.get(locationProperty, String.class);
-        
+
         List<Application> retval = new ArrayList<Application>();
         if (property.endsWith("/")) {
             property = property.substring(0, property.length() - 2);
@@ -275,7 +280,7 @@ public class AppStoreServiceImpl implements AppStoreService {
         return foundDescription && foundManifest;
 
     }
-    
+
     /**
      * Loads all Applications from the database
      * @param names if not null, this list contains the applications to load. If null, all applications are loaded.
@@ -294,7 +299,7 @@ public class AppStoreServiceImpl implements AppStoreService {
         DatabaseService databaseService = serviceLookup.getService(DatabaseService.class);
         Connection con = databaseService.getReadOnly();
         StatementBuilder sb = new StatementBuilder();
-        
+
         List<Application> retval = new ArrayList<Application>();
         try {
             ResultSet resultSet = sb.executeQuery(con, select, names == null ? Collections.emptyList() : names);
@@ -313,19 +318,20 @@ public class AppStoreServiceImpl implements AppStoreService {
         databaseService.backReadOnly(con);
         return retval;
     }
-    
+
+    @Override
     public List<Application> crawl(User user, Context context) throws OXException {
         String table = "applications";
-        
+
         List<Application> applications;
         try {
             applications = loadAll(user.getId(), context.getContextId(), null);
         } catch (IOException e) {
             throw AppException.ioError();
         }
-        
+
         SELECT existingSelect = new SELECT("application").FROM(table);
-        
+
         List<String> existingApplications = new ArrayList<String>();
         DatabaseService databaseService = serviceLookup.getService(DatabaseService.class);
         Connection con = databaseService.getWritable();
@@ -340,10 +346,10 @@ public class AppStoreServiceImpl implements AppStoreService {
         } catch (SQLException e) {
             throw AppException.sqlException(e);
         }
-        
+
         List<Application> applicationsToAdd = new ArrayList<Application>();
         List<Application> applicationsToUpdate = new ArrayList<Application>();
-        
+
         for (Application application : applications) {
             if (existingApplications.contains(application.getName())) {
                 applicationsToUpdate.add(application);
@@ -352,7 +358,7 @@ public class AppStoreServiceImpl implements AppStoreService {
                 applicationsToAdd.add(application);
             }
         }
-        
+
         // Delete
         List<String> applicationsToRemove = existingApplications;
         if (!applicationsToRemove.isEmpty()) {
@@ -363,7 +369,7 @@ public class AppStoreServiceImpl implements AppStoreService {
                 throw AppException.sqlException(e);
             }
         }
-        
+
         // Insert
         INSERT insert = new INSERT().INTO(table)
             .SET("application", PLACEHOLDER)
@@ -382,7 +388,7 @@ public class AppStoreServiceImpl implements AppStoreService {
                 throw AppException.sqlException(e);
             }
         }
-        
+
         // Update
         for (Application application : applicationsToUpdate) {
             UPDATE update = new UPDATE(table)
@@ -401,19 +407,20 @@ public class AppStoreServiceImpl implements AppStoreService {
                 throw AppException.sqlException(e);
             }
         }
-        
+
         databaseService.backWritable(con);
-        
+
         return applications;
     }
-    
+
     //private List<Application> get
 
+    @Override
     public void release(Integer contextId, Integer userId, Application application) throws OXException {
         if (userId != null && contextId == null) {
             throw AppException.unexpected("Missing context");
         }
-        
+
         String table = "applicationReleases";
         DatabaseService databaseService = serviceLookup.getService(DatabaseService.class);
         Connection con = databaseService.getWritable();
@@ -434,7 +441,7 @@ public class AppStoreServiceImpl implements AppStoreService {
         } catch (SQLException e) {
             throw AppException.sqlException(e);
         }
-        
+
         INSERT insert = new INSERT().INTO(table)
             .SET("application", PLACEHOLDER)
             .SET("state", PLACEHOLDER);
@@ -442,26 +449,26 @@ public class AppStoreServiceImpl implements AppStoreService {
         values = new ArrayList<Object>();
         values.add(application.getName());
         values.add("released");
-        
+
         if (contextId != null) {
             insert = insert.SET("cid", PLACEHOLDER);
             values.add(contextId);
         }
-        
+
         if (userId != null) {
             insert = insert.SET("userId", PLACEHOLDER);
             values.add(userId);
         }
-        
+
         try {
             new StatementBuilder().executeStatement(con, insert, values);
         } catch (SQLException e) {
             throw AppException.sqlException(e);
         }
-        
+
         databaseService.backWritable(con);
     }
-    
+
     private List<String> getReleased(Context context, User user) throws OXException {
         Predicate where = new EQUALS("state", PLACEHOLDER);
         List<Object> values = new ArrayList<Object>();
@@ -480,9 +487,9 @@ public class AppStoreServiceImpl implements AppStoreService {
                 values.add(0);
             }
         }
-        
+
         SELECT select = new SELECT(ASTERISK).FROM("applicationReleases").WHERE(where);
-        
+
         DatabaseService databaseService = serviceLookup.getService(DatabaseService.class);
         Connection con = databaseService.getReadOnly();
         StatementBuilder sb = new StatementBuilder();
@@ -495,43 +502,45 @@ public class AppStoreServiceImpl implements AppStoreService {
         } catch (SQLException e) {
             throw AppException.sqlException(e);
         }
-        
+
         return retval;
     }
 
+    @Override
     public void revoke(Integer contextId, Integer userId, Application application) throws OXException {
         if (userId != null && contextId == null) {
             throw AppException.unexpected("Missing context");
         }
-        
+
         String table = "applicationReleases";
         DatabaseService databaseService = serviceLookup.getService(DatabaseService.class);
         Connection con = databaseService.getWritable();
-        
+
         DELETE delete = new DELETE().FROM(table).WHERE(new EQUALS("application", PLACEHOLDER).AND(new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("userId", PLACEHOLDER).AND(new EQUALS("state", PLACEHOLDER)))));
         List<Object> values = new ArrayList<Object>();
         values.add(application.getName());
         values.add(contextId != null ? contextId : 0);
         values.add(userId != null ? userId : 0);
         values.add("released");
-        
+
         try {
             new StatementBuilder().executeStatement(con, delete, values);
         } catch (SQLException e) {
             throw AppException.sqlException(e);
         }
-        
+
         databaseService.backWritable(con);
     }
 
+    @Override
     public List<ReleaseStatus> status(String applicationId) throws OXException {
         DatabaseService databaseService = serviceLookup.getService(DatabaseService.class);
         Connection con = databaseService.getReadOnly();
-        
+
         SELECT select = new SELECT(ASTERISK).FROM("applicationReleases").WHERE(new EQUALS("application", PLACEHOLDER));
         List<Object> values = new ArrayList<Object>();
         values.add(applicationId);
-        
+
         StatementBuilder sb = new StatementBuilder();
         List<ReleaseStatus> retval = new ArrayList<ReleaseStatus>();
         try {
@@ -540,19 +549,19 @@ public class AppStoreServiceImpl implements AppStoreService {
                 String target = null;
                 Integer contextId = resultSet.getInt("cid");
                 Integer userId = resultSet.getInt("userId");
-                
+
                 if (contextId == 0 && userId == 0)
                     target = "all";
                 else if (userId == 0)
                     target = "context";
                 else
                     target = "user";
-                
+
                 ReleaseStatus status = new ReleaseStatus();
                 status.setTarget(target);
                 status.setContextId(contextId);
                 status.setUserId(userId);
-                
+
                 retval.add(status);
             }
         } catch (SQLException e) {

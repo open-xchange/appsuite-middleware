@@ -549,11 +549,11 @@ public class ContactTestManager implements TestManager {
     private List<Contact> transform(JSONArray data) throws JSONException, OXException, OXException {
     	return transform(data, Contact.ALL_COLUMNS);
     }
-    
+
     private List<Contact> transform(JSONArray data, int[] columns) throws JSONException, OXException, OXException {
         List<Contact> contacts = new LinkedList<Contact>();
         for (int i = 0; i < data.length(); i++) {
-            final JSONArray jsonArray = data.getJSONArray(i);            
+            final JSONArray jsonArray = data.getJSONArray(i);
             JSONObject jsonObject = new JSONObject();
             for (int a = 0; a < jsonArray.length(); a++) {
                 if (!"null".equals(jsonArray.getString(a))) {

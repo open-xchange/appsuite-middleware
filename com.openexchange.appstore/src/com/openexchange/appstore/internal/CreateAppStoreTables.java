@@ -55,14 +55,14 @@ import com.openexchange.groupware.update.Schema;
 
 /**
  * {@link CreateAppStoreTables}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class CreateAppStoreTables extends CreateTableUpdateTask {
 
     /**
      * Initializes a new {@link CreateAppStoreTables}.
-     * 
+     *
      * @param create
      * @param dependencies
      * @param version

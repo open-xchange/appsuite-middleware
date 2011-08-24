@@ -56,6 +56,7 @@ import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
+import edu.emory.mathcs.backport.java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * {@link MailProvider} - The main intention of the provider class is to make the implementing classes available which define the abstract
@@ -67,11 +68,14 @@ public abstract class MailProvider {
 
     private boolean deprecated;
 
+    private final AtomicBoolean startupFlag;
+
     /**
      * Initializes a new {@link MailProvider}
      */
     protected MailProvider() {
         super();
+        startupFlag = new AtomicBoolean();
     }
 
     @Override
@@ -124,6 +128,12 @@ public abstract class MailProvider {
      * @throws OXException If start-up fails
      */
     public void startUp() throws OXException {
+        if (!startupFlag.compareAndSet(false, true)) {
+            /*
+             * Already started...
+             */
+            return;
+        }
         getProtocolProps().loadProperties();
         final MailAccess<?, ?> access = createNewMailAccess(null);
         if (null != access) {
@@ -137,6 +147,12 @@ public abstract class MailProvider {
      * @throws OXException if shut-down fails
      */
     public void shutDown() throws OXException {
+        if (!startupFlag.compareAndSet(true, false)) {
+            /*
+             * Already shut down...
+             */
+            return;
+        }
         final MailAccess<?, ?> access = createNewMailAccess(null);
         if (null != access) {
             MailAccess.shutdownImpl(access);

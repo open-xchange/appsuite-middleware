@@ -17,7 +17,7 @@ import com.openexchange.importexport.osgi.ImportExportServices;
 
 public class OutlookCsvImportAction extends AbstractImportAction {
 	public static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OutlookCsvImportAction.class));
-	
+
 	private Importer importer;
 
 	@Override

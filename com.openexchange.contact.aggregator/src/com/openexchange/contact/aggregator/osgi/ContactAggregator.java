@@ -71,48 +71,48 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ContactAggregator {
-    private static final Log LOG = LogFactory.getLog(ContactAggregator.class);
-    
-    private List<ContactSourceFactory> factories = new ArrayList<ContactSourceFactory>();
-    private List<ContactSource> sources = new ArrayList<ContactSource>();
-    
-    
-    
-    public List<Contact> aggregate(ServerSession session) throws Exception {
-        List<Contact> currentContacts = new ArrayList<Contact>();
-        List<ContactSource> allSources = new ArrayList<ContactSource>();
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactAggregator.class));
+
+    private final List<ContactSourceFactory> factories = new ArrayList<ContactSourceFactory>();
+    private final List<ContactSource> sources = new ArrayList<ContactSource>();
+
+
+
+    public List<Contact> aggregate(final ServerSession session) throws Exception {
+        final List<Contact> currentContacts = new ArrayList<Contact>();
+        final List<ContactSource> allSources = new ArrayList<ContactSource>();
         allSources.addAll(sources);
-        for(ContactSourceFactory factory: factories) {
+        for(final ContactSourceFactory factory: factories) {
             allSources.addAll(factory.getSources(session));
         }
-        
-        List<ContactSource> confirmed = new ArrayList<ContactSource>();
-        List<ContactSource> contribs = new ArrayList<ContactSource>();
+
+        final List<ContactSource> confirmed = new ArrayList<ContactSource>();
+        final List<ContactSource> contribs = new ArrayList<ContactSource>();
         partition(allSources, confirmed, contribs);
-        
-        for (ContactSource source : confirmed) {
-            List<Contact> fromSource = source.getContacts(session);
+
+        for (final ContactSource source : confirmed) {
+            final List<Contact> fromSource = source.getContacts(session);
             LOG.debug("Got "+fromSource.size()+" contacts from "+source);
-            for (Contact newContact : fromSource) {
+            for (final Contact newContact : fromSource) {
                 boolean updated = false;
-                for(Contact knownContact : new ArrayList<Contact>(currentContacts)) {
+                for(final Contact knownContact : new ArrayList<Contact>(currentContacts)) {
                     if (calculateSimilarityScore(newContact, knownContact, session) > 9) {
                         update(knownContact, newContact);
                         updated = true;
                         break;
-                    }   
+                    }
                 }
                 if (!updated) {
                     currentContacts.add(newContact);
                 }
             }
         }
-        
-        for (ContactSource source : contribs) {
-            List<Contact> fromSource = source.getContacts(session);
+
+        for (final ContactSource source : contribs) {
+            final List<Contact> fromSource = source.getContacts(session);
             LOG.debug("Got "+fromSource.size()+" contacts from "+source);
-            for (Contact newContact : fromSource) {
-                for(Contact knownContact : new ArrayList<Contact>(currentContacts)) {
+            for (final Contact newContact : fromSource) {
+                for(final Contact knownContact : new ArrayList<Contact>(currentContacts)) {
                     if (calculateSimilarityScore(newContact, knownContact, session) > 9) {
                         update(knownContact, newContact);
                     }
@@ -120,39 +120,39 @@ public class ContactAggregator {
             }
         }
 
-        
+
         return currentContacts;
     }
-    
-    private void partition(List<ContactSource> allSources, List<ContactSource> confirmed, List<ContactSource> contribs) {
-        for (ContactSource contactSource : allSources) {
+
+    private void partition(final List<ContactSource> allSources, final List<ContactSource> confirmed, final List<ContactSource> contribs) {
+        for (final ContactSource contactSource : allSources) {
             if (Type.CONFIRMED == contactSource.getType()) {
-                confirmed.add(contactSource); 
+                confirmed.add(contactSource);
             } else {
                 contribs.add(contactSource);
             }
-            
+
         }
     }
 
-    private void update(Contact aggregated, Contact addition) {
+    private void update(final Contact aggregated, final Contact addition) {
         LOG.debug("Merging "+aggregated+" with "+addition);
-        int[] columns = Contact.CONTENT_COLUMNS;
-        for (int field : columns){
+        final int[] columns = Contact.CONTENT_COLUMNS;
+        for (final int field : columns){
             if (aggregated.get(field) == null){
                 if (addition.get(field) != null){
                     aggregated.set(field, addition.get(field));
                 }
             }
         }
-        int[] mailColumns = new int[]{Contact.EMAIL1, Contact.EMAIL2, Contact.EMAIL3};
-        
-        for(int mailColumn : mailColumns) {
-            String mail = (String) addition.get(mailColumn);
+        final int[] mailColumns = new int[]{Contact.EMAIL1, Contact.EMAIL2, Contact.EMAIL3};
+
+        for(final int mailColumn : mailColumns) {
+            final String mail = (String) addition.get(mailColumn);
             if (mail != null) {
                 int columnCandidate = -1;
-                for(int mailColumn2 : mailColumns) {
-                    String mail2 = (String) aggregated.get(mailColumn2);
+                for(final int mailColumn2 : mailColumns) {
+                    final String mail2 = (String) aggregated.get(mailColumn2);
                     if (mail2 == null) {
                         if (columnCandidate == -1) {
                             columnCandidate = mailColumn2;
@@ -171,10 +171,10 @@ public class ContactAggregator {
 
     private static final int[] MATCH_COLUMNS = I2i(Arrays.remove(i2I(Contact.CONTENT_COLUMNS), I(Contact.USERFIELD20)));
 
-    public static int calculateSimilarityScore(Contact original, Contact candidate, Object session) {
+    public static int calculateSimilarityScore(final Contact original, final Contact candidate, final Object session) {
         int score = 0;
-        int threshold = 9; // Of course
-        
+        final int threshold = 9; // Of course
+
         if ((isset(original.getGivenName()) || isset(candidate.getGivenName())) && eq(original.getGivenName(), candidate.getGivenName())) {
             LOG.debug("givenName");
             score += 5;
@@ -183,47 +183,47 @@ public class ContactAggregator {
             LOG.debug("surName");
             score += 5;
         }
-        
+
         if ((isset(original.getDisplayName()) || isset(candidate.getDisplayName())) && compareDisplayNames(original.getDisplayName(), candidate.getDisplayName())) {
             LOG.debug("dispName");
             score += 10;
         }
-        
+
         if (isset(original.getDisplayName()) && isset(candidate.getSurName()) && isset(candidate.getGivenName())) {
-            String displayName = original.getDisplayName();
+            final String displayName = original.getDisplayName();
             if (displayName.contains(candidate.getGivenName()) && displayName.contains(candidate.getSurName())) {
                 LOG.debug("sur and given in disp");
                 score += 10;
             }
         }
-        
+
         if (isset(candidate.getDisplayName()) && isset(original.getSurName()) && isset(original.getGivenName())) {
-            String displayName = candidate.getDisplayName();
+            final String displayName = candidate.getDisplayName();
             if (displayName.contains(original.getGivenName()) && displayName.contains(original.getSurName())) {
                 LOG.debug("sur and given in disp 2");
                 score += 10;
             }
         }
-        
+
         // an email-address is unique so if this is identical the contact should be the same
-        Set<String> mails = new HashSet<String>();
-        List<String> mails1 = java.util.Arrays.asList(original.getEmail1(), original.getEmail2(), original.getEmail3());
-        for (String mail : mails1) {
+        final Set<String> mails = new HashSet<String>();
+        final List<String> mails1 = java.util.Arrays.asList(original.getEmail1(), original.getEmail2(), original.getEmail3());
+        for (final String mail : mails1) {
             if (mail != null) {
                 mails.add(mail);
             }
         }
-        List<String> mails2 = java.util.Arrays.asList(candidate.getEmail1(), candidate.getEmail2(), candidate.getEmail3());
-        for (String mail : mails2) {
+        final List<String> mails2 = java.util.Arrays.asList(candidate.getEmail1(), candidate.getEmail2(), candidate.getEmail3());
+        for (final String mail : mails2) {
             if (mail != null && mails.contains(mail)) {
                 LOG.debug("mail "+mail+" in "+mails);
-                
+
                 score += 10;
             }
         }
-        
-        List<String> purged = getPurgedDisplayNameComponents(original.getDisplayName());
-        for(String mail : mails2) {
+
+        final List<String> purged = getPurgedDisplayNameComponents(original.getDisplayName());
+        for(final String mail : mails2) {
             if (mail == null) {
                 continue;
             }
@@ -232,7 +232,7 @@ public class ContactAggregator {
             }
             if (purged.size() >= 2) {
                 int count = 0;
-                for(String comp : purged) {
+                for(final String comp : purged) {
                     if (mail.contains(comp.toLowerCase())) {
                         count++;
                     }
@@ -242,9 +242,9 @@ public class ContactAggregator {
                 }
             }
         }
-        
-        List<String> purged2 = getPurgedDisplayNameComponents(candidate.getDisplayName());
-        for(String mail : mails) {
+
+        final List<String> purged2 = getPurgedDisplayNameComponents(candidate.getDisplayName());
+        for(final String mail : mails) {
             if (mail == null) {
                 continue;
             }
@@ -253,7 +253,7 @@ public class ContactAggregator {
             }
             if (purged2.size() >= 2) {
                 int count = 0;
-                for(String comp : purged2) {
+                for(final String comp : purged2) {
                     if (mail.contains(comp.toLowerCase())) {
                         count++;
                     }
@@ -263,60 +263,60 @@ public class ContactAggregator {
                 }
             }
         }
-        
+
         if (original.containsBirthday() && candidate.containsBirthday() && eq(original.getBirthday(), candidate.getBirthday())) {
             LOG.debug("bday");
             score += 5;
         }
-        
+
         if( score < threshold && original.matches(candidate, MATCH_COLUMNS)) { //the score check is only to speed the process up
             score = threshold + 1;
         }
         LOG.debug("Score: "+score+" "+original+" <-> "+candidate);
         return score;
     }
-    
-    public static List<String> getPurgedDisplayNameComponents(String displayName) {
+
+    public static List<String> getPurgedDisplayNameComponents(final String displayName) {
         if (displayName == null) {
             return Collections.emptyList();
         }
-        List<String> d1 = java.util.Arrays.asList(displayName.split("\\s+"));
-        List<String> p1 = new ArrayList<String>();
-        for (String string : d1) {
-            String purged = purge(string);
+        final List<String> d1 = java.util.Arrays.asList(displayName.split("\\s+"));
+        final List<String> p1 = new ArrayList<String>();
+        for (final String string : d1) {
+            final String purged = purge(string);
             if (purged != null) {
                 p1.add(purged);
             }
         }
         return p1;
     }
-    
-    public static boolean compareDisplayNames(String displayName, String displayName2) {
+
+    public static boolean compareDisplayNames(final String displayName, final String displayName2) {
         if (eq(displayName, displayName2)) {
             return true;
         }
         if (displayName == null || displayName2 == null) {
             return false;
         }
-        List<String> p1 = getPurgedDisplayNameComponents(displayName);
-        List<String> p2 = getPurgedDisplayNameComponents(displayName2);
-        
+        final List<String> p1 = getPurgedDisplayNameComponents(displayName);
+        final List<String> p2 = getPurgedDisplayNameComponents(displayName2);
+
         // any two must match
         int count = 0;
-        for(String string : p2) {
+        for(final String string : p2) {
             if (p1.contains(string)) {
                 count++;
             }
         }
-        
-        return count == Math.min(p1.size(), p2.size()) && count >= 2; 
+
+        return count == Math.min(p1.size(), p2.size()) && count >= 2;
     }
-    
-    public static String purge(String component) {
+
+    public static String purge(final String component) {
         // throw away non characters
-        
-        StringBuilder b = new StringBuilder(component.length());
-        for(char c : component.toCharArray()) {
+
+        final StringBuilder b = new StringBuilder(component.length());
+        for(final char c : component.toCharArray()) {
             if (Character.isLetter(c)) {
                 b.append(c);
             }
@@ -328,26 +328,26 @@ public class ContactAggregator {
         return null;
     }
 
-    public static boolean isset(String s) {
+    public static boolean isset(final String s) {
         return s != null && s.length() > 0;
     }
-    
-    public static boolean eq(Object o1, Object o2) {
+
+    public static boolean eq(final Object o1, final Object o2) {
         if (o1 == null || o2 == null) {
             return false;
         }
         return o1.equals(o2);
     }
-    public boolean add(ContactSourceFactory arg0) {
+    public boolean add(final ContactSourceFactory arg0) {
         return factories.add(arg0);
     }
 
-    public boolean add(ContactSource arg0) {
+    public boolean add(final ContactSource arg0) {
         return sources.add(arg0);
     }
 
-    
-    
+
+
 
 
 }

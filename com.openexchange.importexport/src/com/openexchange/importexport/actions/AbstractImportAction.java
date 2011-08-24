@@ -23,10 +23,10 @@ public abstract class AbstractImportAction implements AJAXActionService {
 
 	public abstract Format getFormat();
 	public abstract Importer getImporter();
-	
+
 	private AJAXRequestResult perform(ImportRequest req) throws OXException {
         final List<ImportResult> importResult;
-        	
+
             importResult = getImporter().importData(req.getSession(), getFormat(), req.getImportFileAsStream(), req.getFolders(), null);
 
             ImportExportWriter writer = new ImportExportWriter(req.getSession());

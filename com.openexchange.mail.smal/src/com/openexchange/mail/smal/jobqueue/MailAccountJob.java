@@ -55,7 +55,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.BlockingQueue;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -153,13 +152,13 @@ public final class MailAccountJob extends AbstractMailSyncJob {
     public void perform() {
         try {
             final List<String> list = getList();
-            final BlockingQueue<Job> queue = getQueue();
+            final JobQueue queue = JobQueue.getInstance();
             final long now = System.currentTimeMillis();
             if (null == filter || filter.isEmpty()) {
                 for (final String fullName : list) {
                     try {
                         if (shouldSync(fullName, now)) {
-                            queue.offer(new FolderJob(fullName, accountId, userId, contextId, false));
+                            queue.addJob(new FolderJob(fullName, accountId, userId, contextId, false).setSpan(Constants.HOUR_MILLIS));
                         }
                     } catch (final OXException e) {
                         LOG.error("Couldn't look-up database.", e);
@@ -170,7 +169,7 @@ public final class MailAccountJob extends AbstractMailSyncJob {
                     if (filter.contains(fullName)) {
                         try {
                             if (shouldSync(fullName, now)) {
-                                queue.offer(new FolderJob(fullName, accountId, userId, contextId, false));
+                                queue.addJob(new FolderJob(fullName, accountId, userId, contextId, false));
                             }
                         } catch (final OXException e) {
                             LOG.error("Couldn't look-up database.", e);

@@ -51,7 +51,7 @@ package com.openexchange.appstore;
 
 /**
  * {@link Application}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Application {

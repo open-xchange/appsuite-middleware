@@ -63,8 +63,8 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.caching.objects.CachedSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessionCounter;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.cache.SessionCache;
@@ -80,11 +80,19 @@ import com.openexchange.timer.TimerService;
  */
 public final class SessionHandler {
 
+    public static final SessionCounter SESSION_COUNTER = new SessionCounter() {
+
+        @Override
+        public int getNumberOfSessions(final int userId, final int contextId) {
+            return sessionData.getNumOfUserSessions(userId, contextId);
+        }
+    };
+
     private static SessionIdGenerator sessionIdGenerator;
 
     private static SessiondConfigInterface config;
 
-    private static SessionData sessionData;
+    protected static volatile SessionData sessionData;
 
     private static boolean noLimit;
 
@@ -173,18 +181,18 @@ public final class SessionHandler {
      * @param userId The user ID
      * @param loginName The user's login name
      * @param password The user's password
-     * @param context The context
+     * @param contextId The context identifier
      * @param clientHost The client host name or IP address
      * @param login The full user's login; e.g. <i>test@foo.bar</i>
      * @return The session ID associated with newly created session
      * @throws OXException If creating a new session fails
      */
-    protected static String addSession(final int userId, final String loginName, final String password, final Context context, final String clientHost, final String login, final String authId, final String hash, final String client) throws OXException {
-        checkMaxSessPerUser(userId, context);
+    protected static String addSession(final int userId, final String loginName, final String password, final int contextId, final String clientHost, final String login, final String authId, final String hash, final String client) throws OXException {
+        checkMaxSessPerUser(userId, contextId);
         checkAuthId(login, authId);
         final String sessionId = sessionIdGenerator.createSessionId(loginName, clientHost);
         final SessionImpl session =
-            new SessionImpl(userId, loginName, password, context.getContextId(), sessionId, sessionIdGenerator.createSecretId(
+            new SessionImpl(userId, loginName, password, contextId, sessionId, sessionIdGenerator.createSecretId(
                 loginName,
                 Long.toString(System.currentTimeMillis())), sessionIdGenerator.createRandomId(), clientHost, login, authId, hash, client);
         // Add session
@@ -195,12 +203,12 @@ public final class SessionHandler {
         return sessionId;
     }
 
-    private static void checkMaxSessPerUser(final int userId, final Context context) throws OXException {
+    private static void checkMaxSessPerUser(final int userId, final int contextId) throws OXException {
         final int maxSessPerUser = config.getMaxSessionsPerUser();
         if (maxSessPerUser > 0) {
-            final int count = sessionData.getNumOfUserSessions(userId, context);
+            final int count = sessionData.getNumOfUserSessions(userId, contextId);
             if (count >= maxSessPerUser) {
-                throw SessionExceptionCodes.MAX_SESSION_PER_USER_EXCEPTION.create(I(userId), I(context.getContextId()));
+                throw SessionExceptionCodes.MAX_SESSION_PER_USER_EXCEPTION.create(I(userId), I(contextId));
             }
         }
     }
@@ -377,8 +385,9 @@ public final class SessionHandler {
 
     public static void close() {
         if (initialized.compareAndSet(true, false)) {
-            postContainerRemoval(sessionData.getShortTermSessions());
-            sessionData.clear();
+            final SessionData sd = sessionData;
+            postContainerRemoval(sd.getShortTermSessions());
+            sd.clear();
             sessionIdGenerator = null;
             config = null;
             noLimit = false;
@@ -392,8 +401,9 @@ public final class SessionHandler {
     private static void postSessionCreation(final Session session) {
         final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
         if (eventAdmin != null) {
-            final Dictionary<String, Object> dic = new Hashtable<String, Object>(1);
+            final Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
             dic.put(SessiondEventConstants.PROP_SESSION, session);
+            dic.put(SessiondEventConstants.PROP_COUNTER, SESSION_COUNTER);
             final Event event = new Event(SessiondEventConstants.TOPIC_ADD_SESSION, dic);
             eventAdmin.postEvent(event);
             if (DEBUG) {
@@ -405,8 +415,9 @@ public final class SessionHandler {
     private static void postSessionRemoval(final Session session) {
         final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
         if (eventAdmin != null) {
-            final Dictionary<String, Object> dic = new Hashtable<String, Object>(1);
+            final Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
             dic.put(SessiondEventConstants.PROP_SESSION, session);
+            dic.put(SessiondEventConstants.PROP_COUNTER, SESSION_COUNTER);
             final Event event = new Event(SessiondEventConstants.TOPIC_REMOVE_SESSION, dic);
             eventAdmin.postEvent(event);
             if (DEBUG) {
@@ -418,13 +429,14 @@ public final class SessionHandler {
     private static void postContainerRemoval(final List<SessionControl> sessionControls) {
         final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
         if (eventAdmin != null) {
-            final Dictionary<String, Object> dic = new Hashtable<String, Object>(1);
+            final Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
             final Map<String, Session> eventMap = new HashMap<String, Session>();
             for (final SessionControl sessionControl : sessionControls) {
                 final Session session = sessionControl.getSession();
                 eventMap.put(session.getSessionID(), session);
             }
             dic.put(SessiondEventConstants.PROP_CONTAINER, eventMap);
+            dic.put(SessiondEventConstants.PROP_COUNTER, SESSION_COUNTER);
             final Event event = new Event(SessiondEventConstants.TOPIC_REMOVE_CONTAINER, dic);
             eventAdmin.postEvent(event);
             if (DEBUG) {
@@ -436,13 +448,14 @@ public final class SessionHandler {
     private static void postSessionDataRemoval(final List<SessionControl> controls) {
         final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
         if (eventAdmin != null) {
-            final Dictionary<String, Object> dic = new Hashtable<String, Object>(1);
+            final Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
             final Map<String, Session> eventMap = new HashMap<String, Session>();
             for (final SessionControl sessionControl : controls) {
                 final Session session = sessionControl.getSession();
                 eventMap.put(session.getSessionID(), session);
             }
             dic.put(SessiondEventConstants.PROP_CONTAINER, eventMap);
+            dic.put(SessiondEventConstants.PROP_COUNTER, SESSION_COUNTER);
             final Event event = new Event(SessiondEventConstants.TOPIC_REMOVE_DATA, dic);
             eventAdmin.postEvent(event);
             if (DEBUG) {
@@ -454,8 +467,9 @@ public final class SessionHandler {
     static void postSessionReactivation(final Session session) {
         final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
         if (eventAdmin != null) {
-            final Dictionary<String, Object> dic = new Hashtable<String, Object>(1);
+            final Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
             dic.put(SessiondEventConstants.PROP_SESSION, session);
+            dic.put(SessiondEventConstants.PROP_COUNTER, SESSION_COUNTER);
             final Event event = new Event(SessiondEventConstants.TOPIC_ADD_SESSION, dic);
             eventAdmin.postEvent(event);
             if (DEBUG) {

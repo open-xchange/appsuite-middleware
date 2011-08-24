@@ -53,7 +53,7 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link CrawlAction}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class CrawlAction extends AbstractAppStoreAction {
@@ -62,7 +62,7 @@ public class CrawlAction extends AbstractAppStoreAction {
 
     /**
      * Initializes a new {@link CrawlAction}.
-     * 
+     *
      * @param services
      */
     public CrawlAction(ServiceLookup services) {

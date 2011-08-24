@@ -267,13 +267,13 @@ final class SessionData {
         return retval.toArray(new SessionControl[retval.size()]);
     }
 
-    int getNumOfUserSessions(final int userId, final Context context) {
+    int getNumOfUserSessions(final int userId, final int contextId) {
         // A read-only access to session list
         int count = 0;
         rlock.lock();
         try {
             for (final SessionContainer container : sessionList) {
-                count += container.numOfUserSessions(userId, context.getContextId());
+                count += container.numOfUserSessions(userId, contextId);
             }
         } finally {
             rlock.unlock();
@@ -283,7 +283,7 @@ final class SessionData {
             for (final Map<String, SessionControl> longTermMap : longTermList) {
                 for (final SessionControl control : longTermMap.values()) {
                     final Session session = control.getSession();
-                    if (session.getContextId() == context.getContextId() && session.getUserId() == userId) {
+                    if (session.getContextId() == contextId && session.getUserId() == userId) {
                         count++;
                     }
                 }

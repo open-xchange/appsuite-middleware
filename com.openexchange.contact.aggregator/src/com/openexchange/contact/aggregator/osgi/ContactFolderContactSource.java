@@ -52,7 +52,6 @@ package com.openexchange.contact.aggregator.osgi;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.api2.ContactSQLInterface;
-import com.openexchange.contact.aggregator.osgi.ContactSource.Type;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.iterator.SearchIterator;

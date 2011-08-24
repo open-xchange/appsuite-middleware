@@ -31,16 +31,18 @@ public class FacebookFriendsImporter extends AbstractImporter {
 		return null;
 	}
 
-	public boolean canImport(ServerSession sessObj, Format format,
+	@Override
+    public boolean canImport(ServerSession sessObj, Format format,
 			List<String> folders, Map<String, String[]> optionalParams)
 			throws OXException {
 		return Format.FacebookFriends == format;
 	}
 
-	public List<ImportResult> importData(ServerSession sessObj, Format format,
+	@Override
+    public List<ImportResult> importData(ServerSession sessObj, Format format,
 			InputStream is, List<String> folders,
 			Map<String, String[]> optionalParams) throws OXException {
-		
+
 		int fid = checkAndGetFolder(folders, sessObj);
 		Scanner scanner = new Scanner(is, "UTF-8");
 		StringBuilder html = new StringBuilder();
@@ -49,11 +51,11 @@ public class FacebookFriendsImporter extends AbstractImporter {
 		}
 		Pattern p= Pattern.compile("<div\\s+class\\s?=\\s?[\"']friend[\"']\\s?>\\s?<span\\s+class\\s?=\\s?[\"']profile[\"']\\s?>(.+?)</span\\s?>\\s?</div\\s?>");
 		Matcher m = p.matcher(html);
-		
+
         final List<ImportResult> list = new ArrayList<ImportResult>();
 
 		List<Contact> contacts = new LinkedList<Contact>();
-	
+
 		while(m.find()){
 			String displayName = m.group(1);
 			Contact c = new Contact();
@@ -68,10 +70,10 @@ public class FacebookFriendsImporter extends AbstractImporter {
 		} catch (OXException e1) {
 			throw ImportExportExceptionCodes.CONTACT_INTERFACE_MISSING.create();
 		}
-        
+
 
 		for(Contact c: contacts) {
-			ImportResult res = null; 
+			ImportResult res = null;
 			try {
 				contactInterface.insertContactObject(c);
 				res = new ImportResult(
@@ -85,12 +87,12 @@ public class FacebookFriendsImporter extends AbstractImporter {
 			}
 			list.add(res);
 		}
-		
+
 		return list;
 	}
 
 	private int checkAndGetFolder(List<String> folders, ServerSession session) throws OXException {
-        
+
         final OXFolderAccess folderAccess = new OXFolderAccess(session.getContext());
 
         for (String fid : folders) {

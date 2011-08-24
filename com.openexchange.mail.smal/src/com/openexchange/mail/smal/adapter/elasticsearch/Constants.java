@@ -49,11 +49,13 @@
 
 package com.openexchange.mail.smal.adapter.elasticsearch;
 
+import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailJSONField;
 
 /**
  * {@link Constants}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Constants {
@@ -79,6 +81,22 @@ public final class Constants {
      * The type for mail index.
      */
     public static final String INDEX_TYPE = "mail";
+
+    // ------------------- INDEXABLE FIELDS ----------------------
+
+    public static final MailFields INDEXABLE_FIELDS = new MailFields(
+        MailField.ACCOUNT_NAME,
+        MailField.ID,
+        MailField.FOLDER_ID,
+        MailField.FROM,
+        MailField.TO,
+        MailField.CC,
+        MailField.BCC,
+        MailField.FLAGS,
+        MailField.SIZE,
+        MailField.SUBJECT,
+        MailField.RECEIVED_DATE,
+        MailField.SENT_DATE);
 
     // ------------------- FIELD NAMES ----------------------
 
@@ -119,6 +137,8 @@ public final class Constants {
     public static final String FIELD_FLAG_DRAFT = "draft";
 
     public static final String FIELD_FLAG_FLAGGED = "flagged";
+
+    public static final String FIELD_FLAG_RECENT = "recent";
 
     public static final String FIELD_FLAG_SEEN = "seen";
 
