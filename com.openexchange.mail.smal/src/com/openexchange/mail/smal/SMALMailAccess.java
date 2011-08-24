@@ -64,7 +64,7 @@ import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link SMALMailAccess} - The SMAL mail access.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMessageStorage> {
@@ -83,17 +83,24 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
 
     /**
      * Initializes a new {@link SMALMailAccess}.
-     *
+     * 
      * @param session The session
      * @param accountId The account identifier
      * @throws OXException If initialization fails
      */
     public SMALMailAccess(final Session session, final int accountId) throws OXException {
         super(session, accountId);
-        this.delegateMailAccess =
-            null == session ? null : SMALMailProviderRegistry.getMailProviderBySession(session, accountId).createNewMailAccess(
-                session,
-                accountId);
+        if (null == session) {
+            delegateMailAccess = null;
+        } else {
+            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> dma =
+                SMALMailAccessCache.getInstance().removeMailAccess(session, accountId);
+            delegateMailAccess = null == dma ? newDelegate(session, accountId) : dma;
+        }
+    }
+
+    private static MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> newDelegate(final Session session, final int accountId) throws OXException {
+        return SMALMailProviderRegistry.getMailProviderBySession(session, accountId).createNewMailAccess(session, accountId);
     }
 
     public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getDelegateInstance(final int userId, final int contextId, final int accountId) throws OXException {
@@ -126,6 +133,11 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
          */
         final MailProvider mailProvider = SMALMailProviderRegistry.getMailProviderBySession(session, accountId);
         return mailProvider.createNewMailAccess(session, accountId);
+    }
+
+    @Override
+    public boolean isCacheable() {
+        return false;
     }
 
     @Override
@@ -230,6 +242,7 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
     @Override
     protected void shutdown() throws OXException {
         // Shut-down operations
+        SMALMailAccessCache.releaseInstance();
     }
 
 }

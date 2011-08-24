@@ -95,6 +95,16 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
      */
     private static final boolean DROP_TIMED_OUT_QUEUES = false;
 
+    /**
+     * Creates a new {@link EnqueueingMailAccessCache}
+     * 
+     * @return A new {@link EnqueueingMailAccessCache}
+     * @throws OXException If initialization fails
+     */
+    public static EnqueueingMailAccessCache newInstance(final int queueCapacity) throws OXException {
+        return new EnqueueingMailAccessCache(queueCapacity);
+    }
+
     private static volatile EnqueueingMailAccessCache singleton;
 
     /**
@@ -271,6 +281,11 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
         synchronized (accessQueue) {
             return !accessQueue.isDeprecated() && !accessQueue.isEmpty();
         }
+    }
+
+    @Override
+    public void close() {
+        dispose();
     }
 
     /**

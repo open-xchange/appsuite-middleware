@@ -307,7 +307,7 @@ public final class FolderJob extends AbstractMailSyncJob {
         } catch (final Exception e) {
             error = true;
             cancel();
-            LOG.error("Folder job failed.", e);
+            LOG.error("Folder job \"" + identifier + "\" failed.", e);
         }
     }
 

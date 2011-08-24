@@ -65,6 +65,7 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.dataobjects.MIMERawSource;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -256,7 +257,14 @@ public final class MessageUtility {
      * @throws OXException
      */
     public static String readMailPart(final MailPart mailPart, final String charset) throws IOException, OXException {
-        return readStream(mailPart.getInputStream(), charset);
+        try {
+            return readStream(mailPart.getInputStream(), charset);
+        } catch (final IOException e) {
+            if (!(mailPart instanceof MIMERawSource)) {
+                throw e;
+            }
+            return readStream(((MIMERawSource) mailPart).getRawInputStream(), charset);
+        }
     }
 
     private static final int BUFSIZE = 8192; // 8K

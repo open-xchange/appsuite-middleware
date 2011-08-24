@@ -73,6 +73,18 @@ public final class SingletonMailAccessCache implements IMailAccessCache {
     private static volatile SingletonMailAccessCache singleton;
 
     /**
+     * Creates a new {@link SingletonMailAccessCache}
+     * 
+     * @return A new {@link SingletonMailAccessCache}
+     * @throws OXException If initialization fails
+     */
+    public static SingletonMailAccessCache newInstance() throws OXException {
+        final SingletonMailAccessCache singletonCache = new SingletonMailAccessCache();
+        singletonCache.initCache();
+        return singletonCache;
+    }
+
+    /**
      * Gets the singleton instance.
      *
      * @return The singleton instance
@@ -143,6 +155,11 @@ public final class SingletonMailAccessCache implements IMailAccessCache {
         }
         timeoutMap.setDefaultTimeoutListener(new MailAccessTimeoutListener());
         defaultIdleSeconds = MailProperties.getInstance().getMailAccessCacheIdleSeconds();
+    }
+
+    @Override
+    public void close() {
+        releaseCache();
     }
 
     /**

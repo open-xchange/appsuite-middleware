@@ -50,6 +50,7 @@
 package com.openexchange.mail.smal;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailAccessWatcher;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
@@ -61,6 +62,9 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractSMALStorage {
+
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AbstractSMALStorage.class));
 
     /**
      * The session.
@@ -100,19 +104,62 @@ public abstract class AbstractSMALStorage {
     }
 
     /**
-     * Connects real mail access instance.
+     * Connects delegate mail access instance.
      *
      * @throws OXException If connect attempt fails
      */
     protected void connect() throws OXException {
-        delegateMailAccess.connect();
+        delegateMailAccess.connect(false);
     }
 
     /**
-     * Closes real mail access.
+     * Connects delegate mail access instance.
+     *
+     * @param checkDefaultFolders Whether existence of default folder should be checked
+     * @throws OXException If connect attempt fails
+     */
+    protected void connect(final boolean checkDefaultFolders) throws OXException {
+        delegateMailAccess.connect(checkDefaultFolders);
+    }
+
+    /**
+     * Closes delegate mail access.
      */
     protected void close() {
-        delegateMailAccess.close(true);
+        if (!delegateMailAccess.isConnectedUnsafe()) {
+            return;
+        }
+        boolean put = true;
+        try {
+            /*
+             * Release all used, non-cachable resources
+             */
+            delegateMailAccess.invokeReleaseResources();
+        } catch (final Throwable t) {
+            /*
+             * Dropping
+             */
+            LOG.error("Resources could not be properly released. Dropping mail connection for safety reasons", t);
+            put = false;
+        }
+        try {
+            /*
+             * Cache connection if desired/possible anymore
+             */
+            if (put && delegateMailAccess.isCacheable() && SMALMailAccessCache.getInstance().putMailAccess(session, accountId, delegateMailAccess)) {
+                /*
+                 * Successfully cached: return
+                 */
+                MailAccessWatcher.removeMailAccess(delegateMailAccess);
+                return;
+            }
+        } catch (final OXException e) {
+            LOG.error(e.getMessage(), e);
+        }
+        /*
+         * Couldn't be put into cache
+         */
+        delegateMailAccess.close(false);
     }
 
     /**

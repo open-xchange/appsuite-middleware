@@ -1637,6 +1637,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
          * Fetch a mail access (either from cache or a new instance)
          */
         final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, accountId);
+
+        System.out.println("MailServletInterfaceImpl.initMailAccess()");
+        System.out.println("MailAccess instanceof SMALMailAccess: " + ("com.openexchange.mail.smal.SMALMailAccess".equals(mailAccess.getClass().getName())));
+        
+        
         if (!mailAccess.isConnected()) {
             /*
              * Get new mail configuration

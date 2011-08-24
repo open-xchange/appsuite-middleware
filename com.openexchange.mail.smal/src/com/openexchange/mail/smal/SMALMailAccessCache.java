@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,60 +47,90 @@
  *
  */
 
-package com.openexchange.mail.cache;
+package com.openexchange.mail.smal;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.cache.EnqueueingMailAccessCache;
+import com.openexchange.mail.cache.IMailAccessCache;
+import com.openexchange.mail.cache.SingletonMailAccessCache;
 import com.openexchange.session.Session;
 
 /**
- * {@link IMailAccessCache} - A very volatile cache for already connected instances of {@link MailAccess}.
- *
+ * {@link SMALMailAccessCache}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface IMailAccessCache {
+public final class SMALMailAccessCache implements IMailAccessCache {
+
+    private static volatile SMALMailAccessCache cacheInstance;
 
     /**
-     * Removes and returns a mail access from cache.
-     *
-     * @param session The session
-     * @param accountId The account ID
-     * @return An active instance of {@link MailAccess} or <code>null</code>
+     * Gets the singleton instance.
+     * 
+     * @return The singleton instance
+     * @throws OXException If instance initialization fails
      */
-    public MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> removeMailAccess(Session session, int accountId);
+    public static IMailAccessCache getInstance() throws OXException {
+        IMailAccessCache tmp = cacheInstance;
+        if (null == tmp) {
+            synchronized (SingletonMailAccessCache.class) {
+                tmp = cacheInstance;
+                if (null == tmp) {
+                    final int max = MailAccess.MAX_PER_USER;
+                    tmp = cacheInstance = new SMALMailAccessCache(1 == max ? SingletonMailAccessCache.newInstance() : EnqueueingMailAccessCache.newInstance(max));
+                }
+            }
+        }
+        return tmp;
+    }
 
     /**
-     * Puts given mail access into cache if none user-bound connection is already contained in cache.
-     *
-     * @param session The session
-     * @param accountId The account ID
-     * @param mailAccess The mail access to put into cache
-     * @return <code>true</code> if mail access could be successfully cached; otherwise <code>false</code>
+     * Releases the singleton instance.
      */
-    public boolean putMailAccess(Session session, int accountId, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess);
+    public static void releaseInstance() {
+        if (null != cacheInstance) {
+            synchronized (SingletonMailAccessCache.class) {
+                if (null != cacheInstance) {
+                    cacheInstance.close();
+                    cacheInstance = null;
+                }
+            }
+        }
+    }
 
-    /**
-     * Checks if cache already holds a user-bound mail access for specified account.
-     *
-     * @param session The session
-     * @param accountId The account ID
-     * @return <code>true</code> if a user-bound mail access is already present in cache; otherwise <code>false</code>
-     */
-    public boolean containsMailAccess(Session session, int accountId);
+    private final IMailAccessCache delegate;
 
-    /**
-     * Clears the cache entries kept for specified user.
-     *
-     * @param session The session
-     * @throws OXException If clearing user entries fails
-     */
-    public void clearUserEntries(final Session session) throws OXException;
+    private SMALMailAccessCache(final IMailAccessCache delegate) {
+        super();
+        this.delegate = delegate;
+    }
 
-    /**
-     * Closes this cache.
-     */
-    public void close();
+    @Override
+    public MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> removeMailAccess(final Session session, final int accountId) {
+        return delegate.removeMailAccess(session, accountId);
+    }
+
+    @Override
+    public boolean putMailAccess(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) {
+        return delegate.putMailAccess(session, accountId, mailAccess);
+    }
+
+    @Override
+    public boolean containsMailAccess(final Session session, final int accountId) {
+        return delegate.containsMailAccess(session, accountId);
+    }
+
+    @Override
+    public void clearUserEntries(final Session session) throws OXException {
+        delegate.clearUserEntries(session);
+    }
+
+    @Override
+    public void close() {
+        delegate.close();
+    }
 
 }

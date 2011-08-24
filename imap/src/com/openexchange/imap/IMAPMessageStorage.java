@@ -675,7 +675,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             throw handleRuntimeException(e);
         } finally {
             System.out.println("IMAPMessageStorage.searchMessages()");
-            new Throwable().printStackTrace();
+            new Throwable().printStackTrace(System.out);
         }
     }
 
