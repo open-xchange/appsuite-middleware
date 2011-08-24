@@ -153,9 +153,8 @@ final class JobConsumer extends AbstractTask<Object> {
      * 
      * @return The current job's identifier or <code>null</code> if none is executed at the moment
      */
-    protected String currentJob() {
-        final Job job = currentJob.get();
-        return null == job ? null : job.getIdentifier();
+    protected Job currentJob() {
+        return currentJob.get();
     }
 
     @Override

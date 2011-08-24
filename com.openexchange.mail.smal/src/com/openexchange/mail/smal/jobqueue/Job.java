@@ -209,18 +209,23 @@ public abstract class Job implements Task<Object>, Comparable<Job>, Serializable
 
     @Override
     public final Object call() throws Exception {
-        if (getIdentifier().equals(JobQueue.getInstance().currentJob())) {
+        final Job currentJob = JobQueue.getInstance().currentJob();
+        if (this != currentJob && equals(currentJob)) {
             /*
              * Same or similar-intention job in progress
              */
             return null;
         }
+        performJob();
+        return null;
+    }
+
+    private void performJob() {
         try {
             perform();
         } catch (final Exception e) {
             Log.valueOf(LogFactory.getLog(Job.class)).error(e.getMessage(), e);
         }
-        return null;
     }
 
     /**
