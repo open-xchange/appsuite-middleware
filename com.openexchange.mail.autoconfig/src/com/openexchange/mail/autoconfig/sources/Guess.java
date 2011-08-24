@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.autoconfig.sources;
 
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.autoconfig.Autoconfig;
 
 
@@ -57,13 +59,13 @@ import com.openexchange.mail.autoconfig.Autoconfig;
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class Guess implements ConfigSource {
+public class Guess extends AbstractConfigSource {
 
     /* (non-Javadoc)
      * @see com.openexchange.mail.autoconfig.sources.ConfigSource#getAutoconfig(java.lang.String, java.lang.String)
      */
     @Override
-    public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain) {
+    public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, User user, Context context) {
         return null;
     }
 

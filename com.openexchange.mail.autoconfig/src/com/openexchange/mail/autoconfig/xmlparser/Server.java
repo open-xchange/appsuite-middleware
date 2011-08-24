@@ -54,8 +54,8 @@ package com.openexchange.mail.autoconfig.xmlparser;
  * 
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class Server {
-    
+public abstract class Server {
+
     public static final String TYPE = "type";
 
     public static final String POP3 = "pop3";
@@ -70,38 +70,74 @@ public class Server {
 
     public static final String SOCKET_TYPE = "socketType";
 
+    public static final String PLAIN = "plain";
+
+    public static final String STARTTLS = "STARTTLS";
+
+    public static final String SSL = "SSL";
+
     public static final String USERNAME = "username";
+    
+    public static final String EMAILADDRESS = "%EMAILADDRESS%";
+    
+    public static final String MAILLOCALPART = "%EMAILLOCALPART%";
+    
+    public static final String EMAILDOMAIN = "%EMAILDOMAIN%";
 
     public static final String AUTHENTICATION = "authentication";
-
-    private String type;
+    
+    public static final String PASSWORD_CLEAR = "password-cleartext";
+    
+    public static final String PASSWORD_ENC = "password-encrypted";
+    
+    public static final String NTLM = "NTLM";
+    
+    public static final String GSSAPI = "GSSAPI";
+    
+    public static final String IP_BASED = "client-IP-address";
+    
+    public static final String TLS = "TLS-client-cert";
+    
+    public static final String NONE = "none";
 
     private String hostname;
 
     private int port;
 
-    private String socketType;
+    private SocketType socketType;
 
     private String username;
 
     private String authentication;
 
-    /**
-     * Gets the type
-     * 
-     * @return The type
-     */
-    public String getType() {
-        return type;
-    }
+    public enum SocketType {
+        PLAIN(Server.PLAIN), STARTTLS(Server.STARTTLS), SSL(Server.SSL);
 
-    /**
-     * Sets the type
-     * 
-     * @param type The type to set
-     */
-    public void setType(String type) {
-        this.type = type;
+        private String keyword;
+
+        private SocketType(String keyword) {
+            this.keyword = keyword;
+        }
+
+        public static SocketType getSocketType(String keyword) {
+            if (keyword.equalsIgnoreCase(Server.PLAIN))
+                return PLAIN;
+            if (keyword.equalsIgnoreCase(Server.STARTTLS))
+                return STARTTLS;
+            if (keyword.equalsIgnoreCase(Server.SSL))
+                return SSL;
+            return null;
+        }
+
+        /**
+         * Gets the keyword
+         * 
+         * @return The keyword
+         */
+        public String getKeyword() {
+            return keyword;
+        }
+
     }
 
     /**
@@ -145,7 +181,7 @@ public class Server {
      * 
      * @return The socketType
      */
-    public String getSocketType() {
+    public SocketType getSocketType() {
         return socketType;
     }
 
@@ -155,7 +191,7 @@ public class Server {
      * @param socketType The socketType to set
      */
     public void setSocketType(String socketType) {
-        this.socketType = socketType;
+        this.socketType = SocketType.getSocketType(socketType);
     }
 
     /**
@@ -193,5 +229,7 @@ public class Server {
     public void setAuthentication(String authentication) {
         this.authentication = authentication;
     }
+    
+    public abstract void setType(String setType);
 
 }

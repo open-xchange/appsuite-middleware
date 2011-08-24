@@ -49,6 +49,9 @@
 
 package com.openexchange.mail.autoconfig.sources;
 
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.autoconfig.Autoconfig;
 
 /**
@@ -63,7 +66,10 @@ public interface ConfigSource {
      * 
      * @param emailLocalPart
      * @param emailDomain
+     * @param user
+     * @param context
      * @return An AtoConfig Object or null if generation fails.
+     * @throws OXException 
      */
-    public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain);
+    public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, User user, Context context) throws OXException;
 }

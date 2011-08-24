@@ -68,9 +68,9 @@ public class Autoconfig {
 
     private int transportPort;
 
-    private boolean mailSecure;
+    private String mailSecure;
 
-    private boolean transportSecure;
+    private String transportSecure;
 
     /**
      * Gets the mailServer
@@ -185,7 +185,7 @@ public class Autoconfig {
      * 
      * @return The mailSecure
      */
-    public boolean isMailSecure() {
+    public String isMailSecure() {
         return mailSecure;
     }
 
@@ -194,7 +194,7 @@ public class Autoconfig {
      * 
      * @param mailSecure The mailSecure to set
      */
-    public void setMailSecure(boolean mailSecure) {
+    public void setMailSecure(String mailSecure) {
         this.mailSecure = mailSecure;
     }
 
@@ -203,7 +203,7 @@ public class Autoconfig {
      * 
      * @return The transportSecure
      */
-    public boolean isTransportSecure() {
+    public String isTransportSecure() {
         return transportSecure;
     }
 
@@ -212,7 +212,7 @@ public class Autoconfig {
      * 
      * @param transportSecure The transportSecure to set
      */
-    public void setTransportSecure(boolean transportSecure) {
+    public void setTransportSecure(String transportSecure) {
         this.transportSecure = transportSecure;
     }
 

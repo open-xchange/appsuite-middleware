@@ -78,9 +78,9 @@ public class EmailProvider {
 
     private String displayShortName;
 
-    private Collection<Server> incomingServer;
+    private Collection<IncomingServer> incomingServer;
 
-    private Collection<Server> outgoingServer;
+    private Collection<OutgoingServer> outgoingServer;
 
     private Collection<Documentation> documentations;
 
@@ -161,7 +161,7 @@ public class EmailProvider {
      * 
      * @return The incomingServer
      */
-    public Collection<Server> getIncomingServer() {
+    public Collection<IncomingServer> getIncomingServer() {
         return incomingServer;
     }
 
@@ -170,7 +170,7 @@ public class EmailProvider {
      * 
      * @param incomingServer The incomingServer to set
      */
-    public void setIncomingServer(Collection<Server> incomingServer) {
+    public void setIncomingServer(Collection<IncomingServer> incomingServer) {
         this.incomingServer = incomingServer;
     }
 
@@ -179,7 +179,7 @@ public class EmailProvider {
      * 
      * @return The outgoingServer
      */
-    public Collection<Server> getOutgoingServer() {
+    public Collection<OutgoingServer> getOutgoingServer() {
         return outgoingServer;
     }
 
@@ -188,7 +188,7 @@ public class EmailProvider {
      * 
      * @param outgoingServer The outgoingServer to set
      */
-    public void setOutgoingServer(Collection<Server> outgoingServer) {
+    public void setOutgoingServer(Collection<OutgoingServer> outgoingServer) {
         this.outgoingServer = outgoingServer;
     }
 

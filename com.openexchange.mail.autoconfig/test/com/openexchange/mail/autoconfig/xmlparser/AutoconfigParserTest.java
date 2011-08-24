@@ -68,7 +68,7 @@ public class AutoconfigParserTest extends TestCase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        autoconfigFile = new FileInputStream("./testdata/autoconfig.xml");
+        autoconfigFile = new FileInputStream("./testdata/freenet.de.xml");
     }
     
     /**

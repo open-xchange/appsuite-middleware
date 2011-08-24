@@ -47,73 +47,59 @@
  *
  */
 
-package com.openexchange.mail.autoconfig.internal;
-
-import java.util.LinkedList;
-import java.util.List;
-import javax.mail.internet.AddressException;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.mail.autoconfig.Autoconfig;
-import com.openexchange.mail.autoconfig.AutoconfigException;
-import com.openexchange.mail.autoconfig.AutoconfigService;
-import com.openexchange.mail.autoconfig.sources.ConfigSource;
-import com.openexchange.mail.autoconfig.sources.ConfigurationFile;
-import com.openexchange.mail.autoconfig.sources.ConfigurationServer;
-import com.openexchange.mail.autoconfig.sources.Guess;
-import com.openexchange.mail.autoconfig.sources.ISPDB;
-import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.server.ServiceLookup;
+package com.openexchange.mail.autoconfig.xmlparser;
 
 /**
- * {@link AutoconfigServiceImpl}
+ * {@link OutgoingServer}
  * 
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class AutoconfigServiceImpl implements AutoconfigService {
+public class OutgoingServer extends Server {
 
-    private List<ConfigSource> sources;
+    private OutgoingType type;
 
-    private ServiceLookup services;
+    public enum OutgoingType {
+        SMTP(Server.SMTP);
 
-    public AutoconfigServiceImpl(ServiceLookup services) {
-        this.services = services;
-        sources = new LinkedList<ConfigSource>();
-        sources.add(new ISPDB());
-        sources.add(new ConfigurationServer());
-        sources.add(new ConfigurationFile(services));
-        sources.add(new Guess());
-    }
+        private String keyword;
 
-    @Override
-    public Autoconfig getConfig(String email, User user, Context context) throws OXException {
-        QuotedInternetAddress internetAddress;
-        try {
-            internetAddress = new QuotedInternetAddress(email);
-        } catch (AddressException e) {
-            throw AutoconfigException.invalidMail(email);
+        private OutgoingType(String keyword) {
+            this.keyword = keyword;
         }
 
-        String mailLocalPart = getLocalPart(internetAddress);
-        String mailDomain = getDomain(internetAddress);
-
-        for (ConfigSource source : sources) {
-            Autoconfig config = source.getAutoconfig(mailLocalPart, mailDomain, user, context);
-            if (config != null) {
-                return config;
-            }
+        public static OutgoingType getOutgoingType(String keyword) {
+            if (keyword.equalsIgnoreCase(Server.SMTP))
+                return SMTP;
+            return null;
         }
 
-        return null;
+        /**
+         * Gets the keyword
+         * 
+         * @return The keyword
+         */
+        public String getKeyword() {
+            return keyword;
+        }
+
     }
 
-    private String getDomain(QuotedInternetAddress internetAddress) {
-        return internetAddress.getAddress().split("@")[1];
+    /**
+     * Gets the type
+     *
+     * @return The type
+     */
+    public OutgoingType getType() {
+        return type;
     }
 
-    private String getLocalPart(QuotedInternetAddress internetAddress) {
-        return internetAddress.getAddress().split("@")[0];
+    /**
+     * Sets the type
+     *
+     * @param type The type to set
+     */
+    public void setType(String type) {
+        this.type = OutgoingType.getOutgoingType(type);
     }
 
 }

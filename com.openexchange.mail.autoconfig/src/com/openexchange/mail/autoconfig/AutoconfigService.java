@@ -50,6 +50,8 @@
 package com.openexchange.mail.autoconfig;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 
 /**
  * {@link AutoconfigService}
@@ -61,8 +63,10 @@ public interface AutoconfigService {
     /**
      * Tries to generate an Autoconfig Object just with the given mail address.
      * @param email
+     * @param user
+     * @param context
      * @return
      * @throws OXException 
      */
-    public Autoconfig getConfig(String email) throws OXException;
+    public Autoconfig getConfig(String email, User user, Context context) throws OXException;
 }

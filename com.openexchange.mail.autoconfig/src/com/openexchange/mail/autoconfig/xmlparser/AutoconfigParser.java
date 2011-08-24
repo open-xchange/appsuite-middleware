@@ -109,6 +109,8 @@ public class AutoconfigParser {
                 emailProvider.add(ep);
             }
             parser.require(END_TAG, null, CLIENT_CONFIG);
+            parser.next();
+            parser.require(XmlPullParser.END_DOCUMENT, null, null);
         } catch (XmlPullParserException e) {
             throw AutoconfigException.xml(e);
         } catch (IOException e) {
@@ -129,9 +131,9 @@ public class AutoconfigParser {
         ep.setDomains(domains);
         Collection<Documentation> docs = new ArrayList<Documentation>();
         ep.setDocumentations(docs);
-        Collection<Server> incomingServer = new ArrayList<Server>();
+        Collection<IncomingServer> incomingServer = new ArrayList<IncomingServer>();
         ep.setIncomingServer(incomingServer);
-        Collection<Server> outgoingServer = new ArrayList<Server>();
+        Collection<OutgoingServer> outgoingServer = new ArrayList<OutgoingServer>();
         ep.setOutgoingServer(outgoingServer);
 
         while (parser.nextTag() == START_TAG) {
@@ -143,9 +145,9 @@ public class AutoconfigParser {
             } else if (name.equalsIgnoreCase(DISPLAY_SHORT_NAME)) {
                 ep.setDisplayShortName(parseSimpleText(parser, DISPLAY_SHORT_NAME));
             } else if (name.equalsIgnoreCase(INCOMING_SERVER)) {
-                incomingServer.add(parseServer(parser, INCOMING_SERVER));
+                incomingServer.add((IncomingServer) parseServer(parser, INCOMING_SERVER));
             } else if (name.equalsIgnoreCase(OUTGOING_SERVER)) {
-                outgoingServer.add(parseServer(parser, OUTGOING_SERVER));
+                outgoingServer.add((OutgoingServer) parseServer(parser, OUTGOING_SERVER));
             } else if (name.equalsIgnoreCase(DOCUMENTATION)) {
                 docs.add(parseDocumentation(parser));
             }
@@ -184,7 +186,7 @@ public class AutoconfigParser {
      * @throws XmlPullParserException
      */
     private Server parseServer(XmlPullParser parser, String tag) throws XmlPullParserException, IOException {
-        Server server = new Server();
+        Server server = tag.equalsIgnoreCase(INCOMING_SERVER) ? new IncomingServer() : new OutgoingServer();
         parser.require(START_TAG, null, tag);
         server.setType(parser.getAttributeValue(null, TYPE));
         while (parser.nextTag() == START_TAG) {
