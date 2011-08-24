@@ -51,6 +51,7 @@ package com.openexchange.mail.smal;
 
 import java.util.Collection;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailAccessWatcher;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -70,6 +71,9 @@ import com.openexchange.sessiond.SessiondService;
 public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMessageStorage> {
 
     private static final long serialVersionUID = 3887048765113161340L;
+
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SMALMailAccess.class));
 
     private final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess;
 
@@ -137,12 +141,10 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
 
     @Override
     public boolean isCacheable() {
+        /*
+         * Return false to let closeInternal() being called
+         */
         return false;
-    }
-
-    @Override
-    protected void connectInternal() throws OXException {
-        connected = true;
     }
 
     @Override
@@ -168,12 +170,62 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
 
     @Override
     public void releaseResources() {
-        // Nothing to do
+        delegateMailAccess.invokeReleaseResources();
+    }
+
+    @Override
+    protected void connectInternal() throws OXException {
+        connected = true;
+        /*
+         * In any case invoke delegate's connect() method to let it be properly initialized: using thread, adding to watcher, etc.
+         */
+        delegateMailAccess.connect(false);
     }
 
     @Override
     protected void closeInternal() {
+        closeDelegate();
         connected = false;
+    }
+
+    /**
+     * Closes delegate mail access.
+     */
+    private void closeDelegate() {
+        if (!delegateMailAccess.isConnectedUnsafe()) {
+            return;
+        }
+        boolean put = true;
+        try {
+            /*
+             * Release all used, non-cachable resources
+             */
+            delegateMailAccess.invokeReleaseResources();
+        } catch (final Throwable t) {
+            /*
+             * Dropping
+             */
+            LOG.error("Resources could not be properly released. Dropping mail connection for safety reasons", t);
+            put = false;
+        }
+        try {
+            /*
+             * Cache connection if desired/possible anymore
+             */
+            if (put && delegateMailAccess.isCacheable() && SMALMailAccessCache.getInstance().putMailAccess(session, accountId, delegateMailAccess)) {
+                /*
+                 * Successfully cached: return
+                 */
+                MailAccessWatcher.removeMailAccess(delegateMailAccess);
+                return;
+            }
+        } catch (final OXException e) {
+            LOG.error(e.getMessage(), e);
+        }
+        /*
+         * Couldn't be put into cache
+         */
+        delegateMailAccess.close(false);
     }
 
     @Override

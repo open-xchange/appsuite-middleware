@@ -49,8 +49,6 @@
 
 package com.openexchange.mail.smal;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.mail.MailAccessWatcher;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
@@ -101,74 +99,6 @@ public abstract class AbstractSMALStorage {
         contextId = session.getContextId();
         this.accountId = accountId;
         this.delegateMailAccess = delegateMailAccess;
-    }
-
-    /**
-     * Connects delegate mail access instance.
-     *
-     * @throws OXException If connect attempt fails
-     */
-    protected void connect() throws OXException {
-        delegateMailAccess.connect(false);
-    }
-
-    /**
-     * Connects delegate mail access instance.
-     *
-     * @param checkDefaultFolders Whether existence of default folder should be checked
-     * @throws OXException If connect attempt fails
-     */
-    protected void connect(final boolean checkDefaultFolders) throws OXException {
-        delegateMailAccess.connect(checkDefaultFolders);
-    }
-
-    /**
-     * Closes delegate mail access.
-     */
-    protected void close() {
-        if (!delegateMailAccess.isConnectedUnsafe()) {
-            return;
-        }
-        boolean put = true;
-        try {
-            /*
-             * Release all used, non-cachable resources
-             */
-            delegateMailAccess.invokeReleaseResources();
-        } catch (final Throwable t) {
-            /*
-             * Dropping
-             */
-            LOG.error("Resources could not be properly released. Dropping mail connection for safety reasons", t);
-            put = false;
-        }
-        try {
-            /*
-             * Cache connection if desired/possible anymore
-             */
-            if (put && delegateMailAccess.isCacheable() && SMALMailAccessCache.getInstance().putMailAccess(session, accountId, delegateMailAccess)) {
-                /*
-                 * Successfully cached: return
-                 */
-                MailAccessWatcher.removeMailAccess(delegateMailAccess);
-                return;
-            }
-        } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
-        }
-        /*
-         * Couldn't be put into cache
-         */
-        delegateMailAccess.close(false);
-    }
-
-    /**
-     * Releases all used resources when closing parental {@link MailAccess}
-     *
-     * @throws OXException If resources cannot be released
-     */
-    public void releaseResources() throws OXException {
-        delegateMailAccess.invokeReleaseResources();
     }
 
 }

@@ -88,195 +88,115 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
 
     @Override
     public String[] appendMessages(final String destFolder, final MailMessage[] msgs) throws OXException {
-        connect();
-        try {
-            return delegateMailAccess.getMessageStorage().appendMessages(destFolder, msgs);
-        } finally {
-            close();
-        }
+        return delegateMailAccess.getMessageStorage().appendMessages(destFolder, msgs);
     }
 
     @Override
     public String[] copyMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws OXException {
-        connect();
-        try {
-            return delegateMailAccess.getMessageStorage().copyMessages(sourceFolder, destFolder, mailIds, fast);
-        } finally {
-            close();
-        }
+        return delegateMailAccess.getMessageStorage().copyMessages(sourceFolder, destFolder, mailIds, fast);
     }
 
     @Override
     public void deleteMessages(final String folder, final String[] mailIds, final boolean hardDelete) throws OXException {
-        connect();
-        try {
-            delegateMailAccess.getMessageStorage().deleteMessages(folder, mailIds, hardDelete);
-        } finally {
-            close();
-        }
+        delegateMailAccess.getMessageStorage().deleteMessages(folder, mailIds, hardDelete);
     }
 
     @Override
     public MailMessage[] getMessages(final String folder, final String[] mailIds, final MailField[] fields) throws OXException {
-        connect();
-        try {
 
-            System.out.println("SMALMessageStorage.getMessages()");
-            return delegateMailAccess.getMessageStorage().getMessages(folder, mailIds, fields);
-        } finally {
-            close();
-        }
+        System.out.println("SMALMessageStorage.getMessages()");
+        return delegateMailAccess.getMessageStorage().getMessages(folder, mailIds, fields);
     }
 
     @Override
     public MailMessage[] searchMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
-        connect();
+        final IndexAdapter indexAdapter = getIndexAdapter();
+        if (null == indexAdapter) {
+            return delegateMailAccess.getMessageStorage().searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
+        }
+        final MailFields mfs = new MailFields(fields);
+        if (!indexAdapter.getIndexableFields().containsAll(mfs)) {
+            return delegateMailAccess.getMessageStorage().searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
+        }
+        final long st = System.currentTimeMillis();
         try {
-            final IndexAdapter indexAdapter = getIndexAdapter();
-            if (null == indexAdapter) {
-                return delegateMailAccess.getMessageStorage().searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
-            }
-            final MailFields mfs = new MailFields(fields);
-            if (!indexAdapter.getIndexableFields().containsAll(mfs)) {
-                return delegateMailAccess.getMessageStorage().searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
-            }
-            final long st = System.currentTimeMillis();
-            try {
-                JobQueue.getInstance().addJob(new FolderJob(folder, accountId, userId, contextId).setSpan(Constants.DEFAULT_MILLIS));
-                /*
-                 * Return current index state...
-                 */
-                return indexAdapter.search(folder, searchTerm, sortField, order, accountId, session).toArray(new MailMessage[0]);
-            } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
-                return delegateMailAccess.getMessageStorage().searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
-            } finally {
-                final long dur = System.currentTimeMillis() - st;
-                System.out.println("SMALMessageStorage.searchMessages() took " + dur + "msec.");
-            }
+            JobQueue.getInstance().addJob(new FolderJob(folder, accountId, userId, contextId).setSpan(Constants.DEFAULT_MILLIS));
+            /*
+             * Return current index state...
+             */
+            return indexAdapter.search(folder, searchTerm, sortField, order, accountId, session).toArray(new MailMessage[0]);
+        } catch (final OXException e) {
+            LOG.error(e.getMessage(), e);
+            return delegateMailAccess.getMessageStorage().searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
         } finally {
-            close();
+            final long dur = System.currentTimeMillis() - st;
+            System.out.println("SMALMessageStorage.searchMessages() took " + dur + "msec.");
         }
     }
 
     @Override
     public void updateMessageFlags(final String folder, final String[] mailIds, final int flags, final boolean set) throws OXException {
-        connect();
-        try {
-            delegateMailAccess.getMessageStorage().updateMessageFlags(folder, mailIds, flags, set);
-        } finally {
-            close();
-        }
+        delegateMailAccess.getMessageStorage().updateMessageFlags(folder, mailIds, flags, set);
     }
 
     @Override
     public MailMessage[] getAllMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws OXException {
-        connect();
-        try {
-            return delegateMailAccess.getMessageStorage().getAllMessages(folder, indexRange, sortField, order, fields);
-        } finally {
-            close();
-        }
+        return delegateMailAccess.getMessageStorage().getAllMessages(folder, indexRange, sortField, order, fields);
     }
 
     @Override
     public MailPart getAttachment(final String folder, final String mailId, final String sequenceId) throws OXException {
-        connect();
-        try {
-            return delegateMailAccess.getMessageStorage().getAttachment(folder, mailId, sequenceId);
-        } finally {
-            close();
-        }
+        return delegateMailAccess.getMessageStorage().getAttachment(folder, mailId, sequenceId);
     }
 
     @Override
     public MailPart getImageAttachment(final String folder, final String mailId, final String contentId) throws OXException {
-        connect();
-        try {
-            return delegateMailAccess.getMessageStorage().getImageAttachment(folder, mailId, contentId);
-        } finally {
-            close();
-        }
+        return delegateMailAccess.getMessageStorage().getImageAttachment(folder, mailId, contentId);
     }
 
     @Override
     public MailMessage getMessage(final String folder, final String mailId, final boolean markSeen) throws OXException {
-        connect();
-        try {
-            return delegateMailAccess.getMessageStorage().getMessage(folder, mailId, markSeen);
-        } finally {
-            close();
-        }
+        return delegateMailAccess.getMessageStorage().getMessage(folder, mailId, markSeen);
     }
 
     @Override
     public MailMessage[] getThreadSortedMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
-        connect();
-        try {
-            return delegateMailAccess.getMessageStorage().getThreadSortedMessages(folder, indexRange, sortField, order, searchTerm, fields);
-        } finally {
-            close();
-        }
+        return delegateMailAccess.getMessageStorage().getThreadSortedMessages(folder, indexRange, sortField, order, searchTerm, fields);
     }
 
     @Override
     public MailMessage[] getUnreadMessages(final String folder, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int limit) throws OXException {
-        connect();
-        try {
-            return delegateMailAccess.getMessageStorage().getUnreadMessages(folder, sortField, order, fields, limit);
-        } finally {
-            close();
-        }
+        return delegateMailAccess.getMessageStorage().getUnreadMessages(folder, sortField, order, fields, limit);
     }
 
     @Override
     public String[] moveMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws OXException {
-        connect();
-        try {
-            return delegateMailAccess.getMessageStorage().moveMessages(sourceFolder, destFolder, mailIds, fast);
-        } finally {
-            close();
-        }
+        return delegateMailAccess.getMessageStorage().moveMessages(sourceFolder, destFolder, mailIds, fast);
     }
 
     @Override
     public MailMessage saveDraft(final String draftFullname, final ComposedMailMessage draftMail) throws OXException {
-        connect();
-        try {
-            return delegateMailAccess.getMessageStorage().saveDraft(draftFullname, draftMail);
-        } finally {
-            close();
-        }
+        return delegateMailAccess.getMessageStorage().saveDraft(draftFullname, draftMail);
     }
 
     @Override
     public void updateMessageColorLabel(final String folder, final String[] mailIds, final int colorLabel) throws OXException {
-        connect();
-        try {
-            delegateMailAccess.getMessageStorage().updateMessageColorLabel(folder, mailIds, colorLabel);
-        } finally {
-            close();
-        }
+        delegateMailAccess.getMessageStorage().updateMessageColorLabel(folder, mailIds, colorLabel);
     }
 
     @Override
     public MailMessage[] getNewAndModifiedMessages(final String folder, final MailField[] fields) throws OXException {
-        connect();
-        try {
-            return delegateMailAccess.getMessageStorage().getNewAndModifiedMessages(folder, fields);
-        } finally {
-            close();
-        }
+        return delegateMailAccess.getMessageStorage().getNewAndModifiedMessages(folder, fields);
     }
 
     @Override
     public MailMessage[] getDeletedMessages(final String folder, final MailField[] fields) throws OXException {
-        connect();
-        try {
-            return delegateMailAccess.getMessageStorage().getDeletedMessages(folder, fields);
-        } finally {
-            close();
-        }
+        return delegateMailAccess.getMessageStorage().getDeletedMessages(folder, fields);
+    }
+
+    @Override
+    public void releaseResources() throws OXException {
+        delegateMailAccess.getMessageStorage().releaseResources();
     }
 
     private static IndexAdapter getIndexAdapter() {
