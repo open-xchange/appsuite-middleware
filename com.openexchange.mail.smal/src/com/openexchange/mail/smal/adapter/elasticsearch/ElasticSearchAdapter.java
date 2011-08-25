@@ -723,10 +723,10 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             irb.setSource(createDoc(id, mail, mail.getAccountId(), session, stamp));
             bulkRequest.add(irb);
         }
-        SMALServiceLookup.getServiceStatic(ThreadPoolService.class).submit(ThreadPools.task(new TextFiller(fullName, accountId, session.getUserId(), session.getContextId(), list)));
         if (bulkRequest.numberOfActions() > 0) {
             bulkRequest.execute().actionGet();
             refresh(indexName);
+            SMALServiceLookup.getServiceStatic(ThreadPoolService.class).submit(ThreadPools.task(new TextFiller(fullName, accountId, session.getUserId(), session.getContextId(), list)));
         }
     }
 
