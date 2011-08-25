@@ -96,6 +96,7 @@ import com.openexchange.mail.parser.MailMessageHandler;
 import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedMultiPart;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -417,14 +418,21 @@ public final class StructureMailMessageParser {
                 }
                 part = null;
                 final ByteArrayOutputStream buf = new UnsynchronizedByteArrayOutputStream(2048);
-                final byte[] body = extractBodyFrom(mailPart, buf);
-                buf.reset();
+                final byte[] bytes;
+                {
+                    mailPart.writeTo(buf);
+                    bytes = buf.toByteArray();
+                    buf.reset();
+                }
                 {
                     final String version = mailPart.getFirstHeader("MIME-Version");
                     buf.write(("MIME-Version: " + (null == version ? "1.0" : version) + "\r\n").getBytes("US-ASCII"));
                 }
-                buf.write(("Content-Type: " + contentType.toString() + "\r\n").getBytes("US-ASCII"));
-                buf.write(body);
+                {
+                    final String ct = MIMEMessageUtility.extractHeader("Content-Type", new UnsynchronizedByteArrayInputStream(bytes), false);
+                    buf.write(("Content-Type:" + ct + "\r\n").getBytes("US-ASCII"));
+                }
+                buf.write(extractBodyFrom(bytes));
                 if (!handler.handleSMIMEBodyData(buf.toByteArray())) {
                     stop = true;
                     return;
@@ -742,9 +750,7 @@ public final class StructureMailMessageParser {
         return null;
     }
 
-    private byte[] extractBodyFrom(final MailPart mailPart, final ByteArrayOutputStream sink) throws OXException {
-        mailPart.writeTo(sink);
-        final byte[] bytes = sink.toByteArray();
+    private byte[] extractBodyFrom(final byte[] bytes) {
         int pos = MIMEMultipartMailPart.getHeaderEnd(bytes);
         if (pos <= 0) {
             return bytes;
