@@ -48,8 +48,7 @@
     </target>
 
     <target name="updateProject">
-        <echo message="Fetching bundle ${projectName} from SCM."/>
-    	<echo>Needs to be implemented for bundles in different repositories.</echo>
+    	<!-- TODO Fetching bundles from other repositories needs to be implemented. --> 
     </target>
 
     <target name="buildProject">
@@ -65,7 +64,7 @@
 				<ant dir="${checkoutDir}/${projectName}" antfile="build.xml" target="build"/>
     		</else>
     	</if>
-        <delete file="${checkoutDir}/${projectName}/build.xml" />
+        <!-- delete file="${checkoutDir}/${projectName}/build.xml" / -->
     </target>
 
 	<target name="buildProjects" depends="antExtensions,prepare">
