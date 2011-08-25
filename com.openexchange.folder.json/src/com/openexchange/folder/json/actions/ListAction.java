@@ -135,6 +135,9 @@ public final class ListAction extends AbstractFolderAction {
                 lastModified = ((lastModified >= time) ? lastModified : time);
             }
         }
+        
+        System.out.println("ListAction.perform() determined last-modified time stamp...");
+        
         /*
          * Write subfolders as JSON arrays to JSON array
          */

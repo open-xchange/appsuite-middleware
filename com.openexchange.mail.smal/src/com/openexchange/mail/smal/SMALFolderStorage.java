@@ -49,14 +49,20 @@
 
 package com.openexchange.mail.smal;
 
+import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.IndexRange;
+import com.openexchange.mail.MailSortField;
+import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.Quota;
 import com.openexchange.mail.Quota.Type;
 import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.session.Session;
 
 /**
@@ -64,13 +70,18 @@ import com.openexchange.session.Session;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SMALFolderStorage extends AbstractSMALStorage implements IMailFolderStorage {
+public final class SMALFolderStorage extends AbstractSMALStorage implements IMailFolderStorage, IMailFolderStorageEnhanced {
+
+    private final IMailFolderStorage folderStorage;
 
     /**
      * Initializes a new {@link SMALFolderStorage}.
+     * 
+     * @throws OXException If initialization fails
      */
-    public SMALFolderStorage(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess) {
+    public SMALFolderStorage(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess) throws OXException {
         super(session, accountId, delegateMailAccess);
+        folderStorage = delegateMailAccess.getFolderStorage();
     }
 
     @Override
@@ -78,130 +89,183 @@ public final class SMALFolderStorage extends AbstractSMALStorage implements IMai
         if (MailFolder.DEFAULT_FOLDER_ID.equals(fullName)) {
             return true;
         }
-        return delegateMailAccess.getFolderStorage().exists(fullName);
+        return folderStorage.exists(fullName);
     }
 
     @Override
     public MailFolder getFolder(final String fullName) throws OXException {
-        return delegateMailAccess.getFolderStorage().getFolder(fullName);
+        return folderStorage.getFolder(fullName);
     }
 
     @Override
     public MailFolder[] getSubfolders(final String parentFullName, final boolean all) throws OXException {
         System.out.println("SMALFolderStorage.getSubfolders()...");
-        final MailFolder[] subfolders = delegateMailAccess.getFolderStorage().getSubfolders(parentFullName, all);
+        final MailFolder[] subfolders = folderStorage.getSubfolders(parentFullName, all);
         System.out.println("\tSMALFolderStorage.getSubfolders() done.");
         return subfolders;
     }
 
     @Override
     public void checkDefaultFolders() throws OXException {
-        delegateMailAccess.getFolderStorage().checkDefaultFolders();
+        folderStorage.checkDefaultFolders();
     }
 
     @Override
     public String createFolder(final MailFolderDescription toCreate) throws OXException {
-        return delegateMailAccess.getFolderStorage().createFolder(toCreate);
+        return folderStorage.createFolder(toCreate);
     }
 
     @Override
     public String updateFolder(final String fullName, final MailFolderDescription toUpdate) throws OXException {
-        return delegateMailAccess.getFolderStorage().updateFolder(fullName, toUpdate);
+        return folderStorage.updateFolder(fullName, toUpdate);
     }
 
     @Override
     public String moveFolder(final String fullName, final String newFullName) throws OXException {
-        return delegateMailAccess.getFolderStorage().moveFolder(fullName, newFullName);
+        return folderStorage.moveFolder(fullName, newFullName);
     }
 
     @Override
     public String deleteFolder(final String fullName, final boolean hardDelete) throws OXException {
-        return delegateMailAccess.getFolderStorage().deleteFolder(fullName, hardDelete);
+        return folderStorage.deleteFolder(fullName, hardDelete);
     }
 
     @Override
     public void clearFolder(final String fullName, final boolean hardDelete) throws OXException {
-        delegateMailAccess.getFolderStorage().clearFolder(fullName, hardDelete);
+        folderStorage.clearFolder(fullName, hardDelete);
     }
 
     @Override
     public Quota[] getQuotas(final String fullName, final Type[] types) throws OXException {
-        return delegateMailAccess.getFolderStorage().getQuotas(fullName, types);
+        return folderStorage.getQuotas(fullName, types);
     }
 
     @Override
     public String getConfirmedHamFolder() throws OXException {
-        return delegateMailAccess.getFolderStorage().getConfirmedHamFolder();
+        return folderStorage.getConfirmedHamFolder();
     }
 
     @Override
     public String getConfirmedSpamFolder() throws OXException {
-        return delegateMailAccess.getFolderStorage().getConfirmedSpamFolder();
+        return folderStorage.getConfirmedSpamFolder();
     }
 
     @Override
     public String getDraftsFolder() throws OXException {
-        return delegateMailAccess.getFolderStorage().getDraftsFolder();
+        return folderStorage.getDraftsFolder();
     }
 
     @Override
     public String getSpamFolder() throws OXException {
-        return delegateMailAccess.getFolderStorage().getSpamFolder();
+        return folderStorage.getSpamFolder();
     }
 
     @Override
     public String getSentFolder() throws OXException {
-        return delegateMailAccess.getFolderStorage().getSentFolder();
+        return folderStorage.getSentFolder();
     }
 
     @Override
     public String getTrashFolder() throws OXException {
-        return delegateMailAccess.getFolderStorage().getTrashFolder();
+        return folderStorage.getTrashFolder();
     }
 
     @Override
     public MailFolder getRootFolder() throws OXException {
-        return delegateMailAccess.getFolderStorage().getFolder(MailFolder.DEFAULT_FOLDER_ID);
+        return folderStorage.getFolder(MailFolder.DEFAULT_FOLDER_ID);
     }
 
     @Override
     public String getDefaultFolderPrefix() throws OXException {
-        return delegateMailAccess.getFolderStorage().getDefaultFolderPrefix();
+        return folderStorage.getDefaultFolderPrefix();
     }
 
     @Override
     public String renameFolder(final String fullName, final String newName) throws OXException {
-        return delegateMailAccess.getFolderStorage().renameFolder(fullName, newName);
+        return folderStorage.renameFolder(fullName, newName);
     }
 
     @Override
     public String deleteFolder(final String fullName) throws OXException {
-        return delegateMailAccess.getFolderStorage().deleteFolder(fullName);
+        return folderStorage.deleteFolder(fullName);
     }
 
     @Override
     public void clearFolder(final String fullName) throws OXException {
-        delegateMailAccess.getFolderStorage().clearFolder(fullName);
+        folderStorage.clearFolder(fullName);
     }
 
     @Override
     public MailFolder[] getPath2DefaultFolder(final String fullName) throws OXException {
-        return delegateMailAccess.getFolderStorage().getPath2DefaultFolder(fullName);
+        return folderStorage.getPath2DefaultFolder(fullName);
     }
 
     @Override
     public Quota getStorageQuota(final String fullName) throws OXException {
-        return delegateMailAccess.getFolderStorage().getStorageQuota(fullName);
+        return folderStorage.getStorageQuota(fullName);
     }
 
     @Override
     public Quota getMessageQuota(final String fullName) throws OXException {
-        return delegateMailAccess.getFolderStorage().getMessageQuota(fullName);
+        return folderStorage.getMessageQuota(fullName);
     }
 
     @Override
     public void releaseResources() throws OXException {
-        delegateMailAccess.getFolderStorage().releaseResources();
+        folderStorage.releaseResources();
+    }
+
+    @Override
+    public int getUnreadCounter(final String fullName) throws OXException {
+        if (folderStorage instanceof IMailFolderStorageEnhanced) {
+            return ((IMailFolderStorageEnhanced) folderStorage).getUnreadCounter(ensureFullName(fullName));
+        }
+        return delegateMailAccess.getMessageStorage().getUnreadMessages(
+            ensureFullName(fullName),
+            MailSortField.RECEIVED_DATE,
+            OrderDirection.DESC,
+            FIELDS_ID,
+            -1).length;
+    }
+
+    private static String ensureFullName(final String fullName) {
+        return prepareMailFolderParam(fullName).getFullname();
+    }
+
+    @Override
+    public int getNewCounter(final String fullName) throws OXException {
+        if (folderStorage instanceof IMailFolderStorageEnhanced) {
+            return ((IMailFolderStorageEnhanced) folderStorage).getNewCounter(ensureFullName(fullName));
+        }
+        final MailMessage[] messages =
+            delegateMailAccess.getMessageStorage().searchMessages(
+                ensureFullName(fullName),
+                IndexRange.NULL,
+                MailSortField.RECEIVED_DATE,
+                OrderDirection.ASC,
+                null,
+                FIELDS_FLAGS);
+        int count = 0;
+        for (final MailMessage mailMessage : messages) {
+            if (mailMessage.isRecent()) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    @Override
+    public int getTotalCounter(final String fullName) throws OXException {
+        if (folderStorage instanceof IMailFolderStorageEnhanced) {
+            return ((IMailFolderStorageEnhanced) folderStorage).getTotalCounter(ensureFullName(fullName));
+        }
+        return delegateMailAccess.getMessageStorage().searchMessages(
+            ensureFullName(fullName),
+            IndexRange.NULL,
+            MailSortField.RECEIVED_DATE,
+            OrderDirection.ASC,
+            null,
+            FIELDS_ID).length;
     }
 
 }

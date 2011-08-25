@@ -68,14 +68,14 @@ public interface IMailMessageStorageExt extends IMailMessageStorage {
      * <p>
      * If any mail ID is invalid, <code>null</code> is returned for that entry.
      *
-     * @param folder The folder fullname
+     * @param fullName The folder full name
      * @param mailIds The mail IDs
      * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
      * @param headerNames The header names to pre-fill in returned instances of {@link MailMessage}
      * @return Corresponding mails as an array
      * @throws OXException If message could not be returned
      */
-    public MailMessage[] getMessages(String folder, String[] mailIds, MailField[] fields, String[] headerNames) throws OXException;
+    public MailMessage[] getMessages(String fullName, String[] mailIds, MailField[] fields, String[] headerNames) throws OXException;
 
     /**
      * Searches mails located in given folder. If the search yields no results, the constant {@link #EMPTY_RETVAL} may be returned. This
@@ -86,7 +86,7 @@ public interface IMailMessageStorageExt extends IMailMessageStorage {
      * <b>Note</b> that sorting needs not to be supported by underlying mailing system. This can be done on application side, too.<br>
      * Same is for search, but in most cases it's faster to search on mailing system, but this heavily depends on how mails are accessed.
      *
-     * @param folder The folder fullname
+     * @param fullName The folder full name
      * @param indexRange The index range specifying the desired sub-list in sorted list; may be <code>null</code> to obtain complete list.
      *            Range begins at the specified start index and extends to the message at index <code>end - 1</code>. Thus the length of the
      *            range is <code>end - start</code>.
@@ -98,6 +98,6 @@ public interface IMailMessageStorageExt extends IMailMessageStorage {
      * @return The desired, pre-filled instances of {@link MailMessage}
      * @throws OXException If mails cannot be returned
      */
-    //public MailMessage[] searchMessages(String folder, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] fields, String[] headerNames) throws OXException;
+    //public MailMessage[] searchMessages(String fullName, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] fields, String[] headerNames) throws OXException;
 
 }

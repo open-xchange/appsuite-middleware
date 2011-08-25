@@ -71,11 +71,11 @@ public interface IMailMessageStorageBatch extends IMailMessageStorage {
      * The color labels are user flags with the common prefix <code>"cl_"</code> and its numeric color code appended (currently numbers 0 to
      * 10).
      *
-     * @param folder The folder full name
+     * @param fullName The folder full name
      * @param colorLabel The color label to apply
      * @throws OXException If color label cannot be updated
      */
-    public void updateMessageColorLabel(String folder, int colorLabel) throws OXException;
+    public void updateMessageColorLabel(String fullName, int colorLabel) throws OXException;
 
     /**
      * Updates the flags of all messages located in given folder. If parameter <code>set</code> is
@@ -104,11 +104,11 @@ public interface IMailMessageStorageBatch extends IMailMessageStorage {
      * the {@link SpamHandler#handleSpam(String, String[], boolean, MailAccess)}/
      * {@link SpamHandler#handleHam(String, String[], boolean, MailAccess)} methods needs to be executed.
      *
-     * @param folder The folder full name
+     * @param fullName The folder full name
      * @param flags The bit pattern for the flags to alter
      * @param set <code>true</code> to enable the flags; otherwise <code>false</code>
      * @throws OXException If system flags cannot be updated
      */
-    public void updateMessageFlags(String folder, int flags, boolean set) throws OXException;
+    public void updateMessageFlags(String fullName, int flags, boolean set) throws OXException;
 
 }

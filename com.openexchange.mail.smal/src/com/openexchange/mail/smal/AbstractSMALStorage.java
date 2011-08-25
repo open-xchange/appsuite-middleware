@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.smal;
 
+import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
@@ -61,8 +62,15 @@ import com.openexchange.session.Session;
  */
 public abstract class AbstractSMALStorage {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AbstractSMALStorage.class));
+    /**
+     * The fields containing only the mail identifier.
+     */
+    protected static final MailField[] FIELDS_ID = new MailField[] { MailField.ID };
+
+    /**
+     * The fields containing only flags.
+     */
+    protected static final MailField[] FIELDS_FLAGS = new MailField[] { MailField.FLAGS };
 
     /**
      * The session.
