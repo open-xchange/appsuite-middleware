@@ -201,15 +201,15 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
 
     @Override
     protected void closeInternal() {
-        closeDelegate();
+        closeUnwrappedInstance(delegateMailAccess);
         connected = false;
     }
 
     /**
-     * Closes delegate mail access.
+     * Closes specified unwrapped mail access.
      */
-    private void closeDelegate() {
-        if (!delegateMailAccess.isConnectedUnsafe()) {
+    public static void closeUnwrappedInstance(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> uma) {
+        if (null == uma || !uma.isConnectedUnsafe()) {
             return;
         }
         boolean put = true;
@@ -217,7 +217,7 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
             /*
              * Release all used, non-cachable resources
              */
-            delegateMailAccess.invokeReleaseResources();
+            uma.invokeReleaseResources();
         } catch (final Throwable t) {
             /*
              * Dropping
@@ -229,14 +229,11 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
             /*
              * Cache connection if desired/possible anymore
              */
-            if (put && delegateMailAccess.isCacheable() && SMALMailAccessCache.getInstance().putMailAccess(
-                session,
-                accountId,
-                delegateMailAccess)) {
+            if (put && uma.isCacheable() && SMALMailAccessCache.getInstance().putMailAccess(uma.getSession(), uma.getAccountId(), uma)) {
                 /*
                  * Successfully cached: return
                  */
-                MailAccessWatcher.removeMailAccess(delegateMailAccess);
+                MailAccessWatcher.removeMailAccess(uma);
                 return;
             }
         } catch (final OXException e) {
@@ -245,7 +242,7 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
         /*
          * Couldn't be put into cache
          */
-        delegateMailAccess.close(false);
+        uma.close(false);
     }
 
     @Override

@@ -183,15 +183,16 @@ public final class FolderJob extends AbstractMailSyncJob {
             boolean unset = true;
             try {
                 final IndexAdapter indexAdapter = getAdapter();
-                final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
-                    SMALMailAccess.getUnwrappedInstance(userId, contextId, accountId);
-                final Session session = mailAccess.getSession();
-                /*
-                 * Get the mails from mail storage
-                 */
                 final MailMessage[] mails;
-                mailAccess.connect(true);
+                final Session session;
+                MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
                 try {
+                    mailAccess = SMALMailAccess.getUnwrappedInstance(userId, contextId, accountId);
+                    session = mailAccess.getSession();
+                    /*
+                     * Get the mails from mail storage
+                     */
+                    mailAccess.connect(true);
                     /*
                      * At first check existence of denoted folder
                      */
@@ -215,7 +216,8 @@ public final class FolderJob extends AbstractMailSyncJob {
                             null,
                             FIELDS);
                 } finally {
-                    mailAccess.close(true);
+                    SMALMailAccess.closeUnwrappedInstance(mailAccess);
+                    mailAccess = null;
                 }
                 final Map<String, MailMessage> storagedMap;
                 if (0 == mails.length) {
@@ -326,11 +328,11 @@ public final class FolderJob extends AbstractMailSyncJob {
     }
 
     private int add2Index(final String[] ids, final int offset, final int len, final String fullName, final IndexAdapter indexAdapter, final List<MailMessage> mails) throws OXException {
-        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
-            SMALMailAccess.getUnwrappedInstance(userId, contextId, accountId);
-        final Session session = mailAccess.getSession();
-        mailAccess.connect(true);
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         try {
+            mailAccess = SMALMailAccess.getUnwrappedInstance(userId, contextId, accountId);
+            final Session session = mailAccess.getSession();
+            mailAccess.connect(true);
             final int retval; // The number of mails added to index
             final int end; // The end position (exclusive)
             {
@@ -353,7 +355,7 @@ public final class FolderJob extends AbstractMailSyncJob {
             mails.clear();
             return retval;
         } finally {
-            mailAccess.close(true);
+            SMALMailAccess.closeUnwrappedInstance(mailAccess);
         }
     }
 

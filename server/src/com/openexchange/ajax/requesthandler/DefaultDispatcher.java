@@ -102,6 +102,10 @@ public class DefaultDispatcher implements Dispatcher {
 
     @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final AJAXState state, final ServerSession session) throws OXException {
+        
+        System.out.println("Incoming AJAX request: module=" + request.getModule() + ", action=" + request.getAction());
+        
+        
         List<AJAXActionCustomizer> outgoing = new ArrayList<AJAXActionCustomizer>(customizerFactories.size());
         final List<AJAXActionCustomizer> todo = new LinkedList<AJAXActionCustomizer>();
         /*
@@ -201,6 +205,11 @@ public class DefaultDispatcher implements Dispatcher {
                 }
             }
         }
+        
+        
+        System.out.println("\tOutgoing AJAX request: module=" + request.getModule() + ", action=" + request.getAction());
+        
+        
         return result;
     }
 

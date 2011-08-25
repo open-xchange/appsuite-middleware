@@ -103,13 +103,15 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
 
     @Override
     public MailMessage[] getMessages(final String folder, final String[] mailIds, final MailField[] fields) throws OXException {
-
-        System.out.println("SMALMessageStorage.getMessages()");
-        return delegateMailAccess.getMessageStorage().getMessages(folder, mailIds, fields);
+        System.out.println("SMALMessageStorage.getMessages()...");
+        final MailMessage[] messages = delegateMailAccess.getMessageStorage().getMessages(folder, mailIds, fields);
+        System.out.println("\tSMALMessageStorage.getMessages() done");
+        return messages;
     }
 
     @Override
     public MailMessage[] searchMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
+        System.out.println("SMALMessageStorage.searchMessages()...");
         final IndexAdapter indexAdapter = getIndexAdapter();
         if (null == indexAdapter) {
             return delegateMailAccess.getMessageStorage().searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
@@ -130,7 +132,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
             return delegateMailAccess.getMessageStorage().searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
         } finally {
             final long dur = System.currentTimeMillis() - st;
-            System.out.println("SMALMessageStorage.searchMessages() took " + dur + "msec.");
+            System.out.println("\tSMALMessageStorage.searchMessages() took " + dur + "msec.");
         }
     }
 

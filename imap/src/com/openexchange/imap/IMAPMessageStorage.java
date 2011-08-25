@@ -511,6 +511,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     @Override
     public MailMessage[] searchMessages(final String fullName, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] mailFields) throws OXException {
+        System.out.println("IMAPMessageStorage.searchMessages()...");
         try {
             imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_ONLY);
             if (imapFolder.getMessageCount() == 0) {
@@ -674,8 +675,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         } finally {
-            System.out.println("IMAPMessageStorage.searchMessages()");
-            new Throwable().printStackTrace(System.out);
+            System.out.println("\tIMAPMessageStorage.searchMessages() done");
         }
     }
 

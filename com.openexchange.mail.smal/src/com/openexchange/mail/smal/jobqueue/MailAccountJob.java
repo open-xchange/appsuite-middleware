@@ -118,15 +118,15 @@ public final class MailAccountJob extends AbstractMailSyncJob {
     }
 
     private List<String> getList() throws OXException {
-        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
-            SMALMailAccess.getUnwrappedInstance(userId, contextId, accountId);
-        mailAccess.connect(true);
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         try {
+            mailAccess = SMALMailAccess.getUnwrappedInstance(userId, contextId, accountId);
+            mailAccess.connect(true);
             final List<String> fullNames = new LinkedList<String>();
             handleSubfolders(MailFolder.DEFAULT_FOLDER_ID, mailAccess.getFolderStorage(), fullNames);
             return fullNames;
         } finally {
-            mailAccess.close(true);
+            SMALMailAccess.closeUnwrappedInstance(mailAccess);
         }
     }
 
