@@ -52,7 +52,6 @@ package com.openexchange.folder.json.writer;
 import gnu.trove.TIntArrayList;
 import gnu.trove.TIntIntHashMap;
 import gnu.trove.TIntObjectHashMap;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import org.json.JSONArray;
@@ -490,11 +489,6 @@ public final class FolderWriter {
             }
             ffws[i] = ffw;
         }
-        
-        
-        System.out.println("FolderWriter.writeMultiple2Array() writing columns: " + Arrays.toString(cols));
-        
-        
         try {
             final JSONArray jsonArray = new JSONArray();
             final JSONArrayPutter jsonPutter = new JSONArrayPutter();
@@ -503,7 +497,6 @@ public final class FolderWriter {
                 jsonPutter.setJSONArray(folderArray);
                 for (final FolderFieldWriter ffw : ffws) {
                     ffw.writeField(jsonPutter, folder);
-                    System.out.println("FolderWriter.writeMultiple2Array() current folder JSON array state: " + folderArray);
                 }
                 jsonArray.put(folderArray);
             }
