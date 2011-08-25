@@ -53,6 +53,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -65,6 +66,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -350,12 +352,18 @@ public final class FolderJob extends AbstractMailSyncJob {
                     retval = remaining;
                 }
             }
+            /*
+             * Specify fields
+             */
+            final MailFields fields = new MailFields(indexAdapter.getIndexableFields());
+            fields.removeMailField(MailField.BODY);
             final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-            for (int i = offset; i < end; i++) {
-                final MailMessage mail = messageStorage.getMessage(fullName, ids[i], false);
-                mail.setAccountId(accountId);
-                mails.add(mail);
-            }
+            final String[] mailIds = new String[retval];
+            System.arraycopy(ids, offset, mailIds, 0, retval);
+            mails.addAll(Arrays.asList(messageStorage.getMessages(fullName, mailIds, fields.toArray())));
+//            for (MailMessage mail : mails) {
+//                mail.setAccountId(accountId);
+//            }
             indexAdapter.add(mails, session);
             mails.clear();
             return retval;

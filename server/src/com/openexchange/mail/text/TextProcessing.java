@@ -49,27 +49,28 @@
 
 package com.openexchange.mail.text;
 
-import java.util.LinkedList;
-import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.io.IOException;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.MailJSONField;
+import com.openexchange.html.HTMLService;
+import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.json.writer.MessageWriter;
-import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.mail.utils.DisplayMode;
-import com.openexchange.session.Session;
-import com.openexchange.tools.servlet.OXJSONExceptionCodes;
+import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.utils.CharsetDetector;
+import com.openexchange.mail.utils.MessageUtility;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link TextProcessing} - Various methods for text processing
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TextProcessing {
+
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TextProcessing.class));
 
     private static final String SPLIT_LINES = "\r?\n";
 
@@ -185,7 +186,7 @@ public final class TextProcessing {
      * excluded.
      * <p>
      * If parameter <code>isHtml</code> is set to <code>true</code> the content is returned unchanged.
-     *
+     * 
      * @param content The plain text content to fold
      * @param linewrap The number of characters which may fit into a line
      * @return The line-folded content
@@ -247,36 +248,118 @@ public final class TextProcessing {
     }
 
     /**
-     * Gets the text from passed mail.
-     *
+     * Extracts plain-text content from specified mail.
+     * 
      * @param mail The mail
-     * @param session The session
-     * @return The extracted text or <code>null</code>
-     * @throws OXException If an error occurs
+     * @return The extracted plain-text content
+     * @throws OXException If text extraction fails
      */
-    public static String getTextFrom(final MailMessage mail, final Session session) throws OXException {
+    public static String extractTextFrom(final MailMessage mail) throws OXException {
+        final MailPart mailPart = extractTextFrom(mail, 0);
+        if (null == mailPart) {
+            return "";
+        }
         try {
-            final UserSettingMail usmNoSave = UserSettingMailStorage.getInstance().getUserSettingMail(session);
-            usmNoSave.setNoSave(true);
-            usmNoSave.setDisplayHtmlInlineContent(false);
-            final List<OXException> warnings = new LinkedList<OXException>();
-            final JSONObject jsonObject =
-                MessageWriter.writeMailMessage(mail.getAccountId(), mail, DisplayMode.DISPLAY, session, usmNoSave, warnings, false, -1);
-            final JSONArray jsonArray = jsonObject.getJSONArray(MailJSONField.ATTACHMENTS.getKey());
-            final int len = jsonArray.length();
-            for (int i = 0; i < len; i++) {
-                final JSONObject attachment = jsonArray.getJSONObject(i);
-                if (attachment.hasAndNotNull(MailJSONField.CONTENT.getKey()) && attachment.getString(MailJSONField.CONTENT_TYPE.getKey()).regionMatches(true,0,"text/",0,5)) {
-                    if (attachment.hasAndNotNull("plain_text")) {
-                        return attachment.getString("plain_text");
-                    }
-                    return attachment.getString(MailJSONField.CONTENT.getKey());
+            final ContentType contentType = mailPart.getContentType();
+            if (!contentType.startsWith("text/htm")) {
+                return readContent(mailPart, contentType);
+            }
+            /*
+             * Handle HTML content
+             */
+            final String html = readContent(mailPart, contentType);
+            final HTMLService htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
+            return htmlService.html2text(htmlService.getConformHTML(html, (String) null), true);
+        } catch (final IOException e) {
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private static MailPart extractTextFrom(final MailPart mailPart, final int altLevel) throws OXException {
+        if (!mailPart.containsContentType()) {
+            return null;
+        }
+        final ContentType contentType = mailPart.getContentType();
+        if (contentType.startsWith("text/")) {
+            return (altLevel <= 0) || contentType.startsWith("text/htm") ? mailPart : null;
+        }
+        if (contentType.startsWith("multipart/")) {
+            final boolean isAlternative = contentType.startsWith("multipart/alternative");
+            int alternative = altLevel;
+            if (isAlternative) {
+                alternative++;
+            }
+            final int count = mailPart.getEnclosedCount();
+            MailPart textPart = null;
+            for (int i = 0; i < count; i++) {
+                final MailPart enclosedPart = mailPart.getEnclosedMailPart(i);
+                final MailPart ret = extractTextFrom(enclosedPart, alternative);
+                if (null != ret) {
+                    return ret;
+                }
+                if (isAlternative && null == textPart && enclosedPart.getContentType().startsWith("text/")) {
+                    textPart = enclosedPart;
                 }
             }
-            return null;
-        } catch (final JSONException e) {
-            throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, e.getMessage());
+            if (isAlternative) {
+                alternative--;
+                if (null != textPart) {
+                    return textPart;
+                }
+            }
         }
+        return null;
+    }
+
+    private static String readContent(final MailPart mailPart, final ContentType contentType) throws OXException, IOException {
+        final String charset = getCharset(mailPart, contentType);
+        try {
+            return MessageUtility.readMailPart(mailPart, charset);
+        } catch (final java.io.CharConversionException e) {
+            // Obviously charset was wrong or bogus implementation of character conversion
+            final String fallback = "US-ASCII";
+            if (LOG.isWarnEnabled()) {
+                LOG.warn(
+                    new StringBuilder("Character conversion exception while reading content with charset \"").append(charset).append(
+                        "\". Using fallback charset \"").append(fallback).append("\" instead."),
+                    e);
+            }
+            return MessageUtility.readMailPart(mailPart, fallback);
+        }
+    }
+
+    private static String getCharset(final MailPart mailPart, final ContentType contentType) throws OXException {
+        final String charset;
+        if (mailPart.containsHeader(MessageHeaders.HDR_CONTENT_TYPE)) {
+            String cs = contentType.getCharsetParameter();
+            if (!CharsetDetector.isValid(cs)) {
+                StringBuilder sb = null;
+                if (null != cs) {
+                    sb = new StringBuilder(64).append("Illegal or unsupported encoding: \"").append(cs).append("\".");
+                }
+                if (contentType.startsWith("text/")) {
+                    cs = CharsetDetector.detectCharset(mailPart.getInputStream());
+                    if (LOG.isWarnEnabled() && null != sb) {
+                        sb.append(" Using auto-detected encoding: \"").append(cs).append('"');
+                        LOG.warn(sb.toString());
+                    }
+                } else {
+                    cs = MailProperties.getInstance().getDefaultMimeCharset();
+                    if (LOG.isWarnEnabled() && null != sb) {
+                        sb.append(" Using fallback encoding: \"").append(cs).append('"');
+                        LOG.warn(sb.toString());
+                    }
+                }
+            }
+            charset = cs;
+        } else {
+            if (contentType.startsWith("text/")) {
+                charset = CharsetDetector.detectCharset(mailPart.getInputStream());
+            } else {
+                charset = MailProperties.getInstance().getDefaultMimeCharset();
+            }
+        }
+        return charset;
     }
 
     /**
