@@ -88,6 +88,39 @@ public final class FolderWriter {
         super();
     }
 
+    /**
+     * {@link AdditionalFolderFieldWriter}
+     *
+     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+     */
+    private static final class AdditionalFolderFieldWriter implements FolderFieldWriter {
+
+        private final ServerSession serverSession;
+
+        private final AdditionalFolderField additionalFolderField;
+
+        protected AdditionalFolderFieldWriter(final ServerSession serverSession, final AdditionalFolderField additionalFolderField) {
+            this.serverSession = serverSession;
+            this.additionalFolderField = additionalFolderField;
+        }
+
+        @Override
+        public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
+            final FolderObject fo = new FolderObject();
+            final int numFolderId = getUnsignedInteger(folder.getID());
+            if (numFolderId < 0) {
+                fo.setFullName(folder.getID());
+            } else {
+                fo.setObjectID(numFolderId);
+            }
+            fo.setFolderName(folder.getName());
+            fo.setModule(folder.getContentType().getModule());
+            fo.setType(folder.getType().getType());
+            fo.setCreatedBy(folder.getCreatedBy());
+            jsonPutter.put(additionalFolderField.getColumnName(), additionalFolderField.getValue(fo, serverSession));
+        }
+    }
+
     private static interface JSONValuePutter {
 
         void put(String key, Object value) throws JSONException;
@@ -446,24 +479,7 @@ public final class FolderWriter {
             if (null == ffw) {
                 if (additionalFolderFieldList.knows(curCol)) {
                     final AdditionalFolderField additionalFolderField = additionalFolderFieldList.get(curCol);
-                    ffw = new FolderFieldWriter() {
-
-                        @Override
-                        public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
-                            final FolderObject fo = new FolderObject();
-                            final int numFolderId = getUnsignedInteger(folder.getID());
-                            if (numFolderId < 0) {
-                                fo.setFullName(folder.getID());
-                            } else {
-                                fo.setObjectID(numFolderId);
-                            }
-                            fo.setFolderName(folder.getName());
-                            fo.setModule(folder.getContentType().getModule());
-                            fo.setType(folder.getType().getType());
-                            fo.setCreatedBy(folder.getCreatedBy());
-                            jsonPutter.put(additionalFolderField.getColumnName(), additionalFolderField.getValue(fo, serverSession));
-                        }
-                    };
+                    ffw = new AdditionalFolderFieldWriter(serverSession, additionalFolderField);
                 } else {
                     if (LOG.isWarnEnabled()) {
                         LOG.warn("Unknown field: " + curCol, new Throwable());
@@ -545,24 +561,7 @@ public final class FolderWriter {
             if (null == ffw) {
                 if (additionalFolderFieldList.knows(curCol)) {
                     final AdditionalFolderField additionalFolderField = additionalFolderFieldList.get(curCol);
-                    ffw = new FolderFieldWriter() {
-
-                        @Override
-                        public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
-                            final FolderObject fo = new FolderObject();
-                            final int numFolderId = getUnsignedInteger(folder.getID());
-                            if (numFolderId < 0) {
-                                fo.setFullName(folder.getID());
-                            } else {
-                                fo.setObjectID(numFolderId);
-                            }
-                            fo.setFolderName(folder.getName());
-                            fo.setModule(folder.getContentType().getModule());
-                            fo.setType(folder.getType().getType());
-                            fo.setCreatedBy(folder.getCreatedBy());
-                            jsonPutter.put(additionalFolderField.getColumnName(), additionalFolderField.getValue(fo, serverSession));
-                        }
-                    };
+                    ffw = new AdditionalFolderFieldWriter(serverSession, additionalFolderField);
                 } else {
                     if (LOG.isWarnEnabled()) {
                         LOG.warn("Unknown field: " + curCol, new Throwable());
