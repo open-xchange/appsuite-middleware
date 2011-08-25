@@ -164,4 +164,14 @@ public final class JobQueue {
         return consumer.currentJob();
     }
 
+    /**
+     * Checks if there is a job in queue with a higher ranking than specified ranking.
+     * 
+     * @param ranking The ranking to check against
+     * @return <code>true</code> if there is a higher-ranked job; otherwise <code>false</code>
+     */
+    public boolean hasHigherRankedJobInQueue(final int ranking) {
+        return consumer.hasHigherRankedJobInQueue(ranking);
+    }
+
 }

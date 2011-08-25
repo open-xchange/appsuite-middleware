@@ -50,6 +50,7 @@
 package com.openexchange.mail.smal.jobqueue;
 
 import java.io.Serializable;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Future;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.log.Log;
@@ -92,6 +93,11 @@ public abstract class Job implements Task<Object>, Comparable<Job>, Serializable
      * The paused flag.
      */
     protected volatile boolean paused;
+
+    /**
+     * The volatile queue reference.
+     */
+    private volatile BlockingQueue<Job> queue;
 
     /**
      * Initializes a new {@link Job}.

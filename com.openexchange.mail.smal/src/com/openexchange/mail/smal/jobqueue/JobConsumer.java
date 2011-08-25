@@ -157,6 +157,17 @@ final class JobConsumer extends AbstractTask<Object> {
         return currentJob.get();
     }
 
+    /**
+     * Checks if there is a job in queue with a higher ranking than specified ranking.
+     * 
+     * @param ranking The ranking to check against
+     * @return <code>true</code> if there is a higher-ranked job; otherwise <code>false</code>
+     */
+    protected boolean hasHigherRankedJobInQueue(final int ranking) {
+        final Job peekedJob = queue.peek();
+        return null != peekedJob && peekedJob.getRanking() > ranking;
+    }
+
     @Override
     public void setThreadName(final ThreadRenamer threadRenamer) {
         threadRenamer.rename("Job-Consumer");
