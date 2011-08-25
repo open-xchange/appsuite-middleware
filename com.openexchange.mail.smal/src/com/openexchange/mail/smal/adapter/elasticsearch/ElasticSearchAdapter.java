@@ -74,9 +74,6 @@ import org.elasticsearch.action.admin.indices.optimize.OptimizeResponse;
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.count.CountResponse;
 import org.elasticsearch.action.delete.DeleteResponse;
-import org.elasticsearch.action.get.GetResponse;
-import org.elasticsearch.action.get.MultiGetItemResponse;
-import org.elasticsearch.action.get.MultiGetRequest;
 import org.elasticsearch.action.index.IndexRequest.OpType;
 import org.elasticsearch.action.search.SearchOperationThreading;
 import org.elasticsearch.action.search.SearchResponse;
@@ -109,22 +106,17 @@ import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
-import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.smal.SMALExceptionCodes;
-import com.openexchange.mail.smal.SMALMailAccess;
 import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.mail.smal.adapter.IndexAdapter;
-import com.openexchange.mail.text.TextProcessing;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.session.Session;
-import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.threadpool.ThreadPools;
 
 /**
  * {@link ElasticSearchAdapter}
@@ -185,17 +177,19 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     }
 
     /**
-     * The special header for extracted ElkasticSearch UUID.
+     * The special header for extracted ElasticSearch UUID.
      */
     private static final String X_ELASTIC_SEARCH_UUID = "X-ElasticSearch-UUID";
 
-    protected volatile TransportClient client;
+    private volatile TransportClient client;
 
     private final String clusterName;
 
-    protected final String indexNamePrefix;
+    private final String indexNamePrefix;
 
-    protected final String indexType;
+    private final String indexType;
+
+    private volatile ElasticSearchTextFillerQueue textFillerQueue;
 
     /**
      * Initializes a new {@link ElasticSearchAdapter}.
@@ -207,6 +201,15 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         indexType = Constants.INDEX_TYPE;
     }
 
+    /**
+     * Gets the ElasticSearch client
+     *
+     * @return The ElasticSearch client
+     */
+    public TransportClient getClient() {
+        return client;
+    }
+
     @Override
     public MailFields getIndexableFields() throws OXException {
         return Constants.INDEXABLE_FIELDS;
@@ -214,6 +217,8 @@ public final class ElasticSearchAdapter implements IndexAdapter {
 
     @Override
     public void start() throws OXException {
+        final ElasticSearchTextFillerQueue q = textFillerQueue = new ElasticSearchTextFillerQueue(this);
+        q.start();
         try {
             final Builder settingsBuilder = ImmutableSettings.settingsBuilder();
             /*
@@ -248,6 +253,11 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         if (null != client) {
             client.close();
             client = null;
+        }
+        final ElasticSearchTextFillerQueue q = textFillerQueue;
+        if (null != q) {
+            q.stop();
+            textFillerQueue = null;
         }
     }
 
@@ -707,26 +717,20 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         final String indexName = indexNamePrefix + session.getContextId();
         final BulkRequestBuilder bulkRequest = client.prepareBulk();
         final long stamp = System.currentTimeMillis();
-        final List<UUIDAndMailId> list = new ArrayList<ElasticSearchAdapter.UUIDAndMailId>(mails.size());
-        String fullName = null;
-        int accountId = -1;
+        final List<TextFiller> fillers = new ArrayList<TextFiller>(mails.size());
         for (final MailMessage mail : mails) {
-            final String id = UUID.randomUUID().toString();
-            if (null == fullName) {
-                fullName = mail.getFolder();
-                accountId = mail.getAccountId();
-            }
-            list.add(new UUIDAndMailId(mail.getMailId(), id));
-            final IndexRequestBuilder irb = client.prepareIndex(indexName, indexType, id);
+            final String uuid = UUID.randomUUID().toString();
+            fillers.add(TextFiller.fillerFor(uuid, mail, session));
+            final IndexRequestBuilder irb = client.prepareIndex(indexName, indexType, uuid);
             irb.setReplicationType(ReplicationType.ASYNC);
             irb.setOpType(OpType.CREATE);
-            irb.setSource(createDoc(id, mail, mail.getAccountId(), session, stamp));
+            irb.setSource(createDoc(uuid, mail, mail.getAccountId(), session, stamp));
             bulkRequest.add(irb);
         }
         if (bulkRequest.numberOfActions() > 0) {
             bulkRequest.execute().actionGet();
             refresh(indexName);
-            SMALServiceLookup.getServiceStatic(ThreadPoolService.class).submit(ThreadPools.task(new TextFiller(fullName, accountId, session.getUserId(), session.getContextId(), list)));
+            textFillerQueue.add(fillers);
         }
     }
 
@@ -969,104 +973,5 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         ensureStarted();
         return client.admin().indices().optimize(new OptimizeRequest(indexName).maxNumSegments(optimizeToSegmentsAfterUpdate)).actionGet();
     }
-
-    private final class TextFiller implements Runnable {
-
-        private final int contextId;
-
-        private final int userId;
-
-        private final int accountId;
-
-        private final String fullName;
-
-        private final Collection<UUIDAndMailId> uuidAndMailIds;
-
-        public TextFiller(final String fullName, final int accountId, final int userId, final int contextId, final Collection<UUIDAndMailId> uuidAndMailIds) {
-            super();
-            this.uuidAndMailIds = uuidAndMailIds;
-            this.fullName = fullName;
-            this.accountId = accountId;
-            this.contextId = contextId;
-            this.userId = userId;
-        }
-
-        @Override
-        public void run() {
-            ensureStarted();
-            try {
-                final String indexName = indexNamePrefix + contextId;
-                /*
-                 * Request JSON representations of mails
-                 */
-                final MultiGetRequest mgr = new MultiGetRequest();
-                for (final UUIDAndMailId uuidAndMailId : uuidAndMailIds) {
-                    mgr.add(indexName, indexType, uuidAndMailId.uuid);
-                }
-                final Map<String, Map<String, Object>> jsonObjects = new HashMap<String, Map<String,Object>>(uuidAndMailIds.size());
-                for (final Iterator<MultiGetItemResponse> iter = client.multiGet(mgr).actionGet().iterator(); iter.hasNext();) {
-                    final GetResponse getResponse = iter.next().getResponse();
-                    if (null != getResponse) {
-                        final Map<String, Object> jsonObject = getResponse.getSource();
-                        jsonObjects.put((String) jsonObject.get(Constants.FIELD_ID), jsonObject);
-                    }
-                }
-                /*
-                 * Extract text from associated mail
-                 */
-                MailAccess<?, ?> access = null;
-                try {
-                    access = SMALMailAccess.getUnwrappedInstance(userId, contextId, accountId);
-                    access.connect(false);
-                    for (final UUIDAndMailId uuidAndMailId : uuidAndMailIds) {
-                        final Map<String, Object> jsonObject = jsonObjects.get(uuidAndMailId.mailId);
-                        if (null != jsonObject) {
-                            final String text = TextProcessing.extractTextFrom(access.getMessageStorage().getMessage(fullName, uuidAndMailId.mailId, false));
-                            jsonObject.put(Constants.FIELD_BODY, text);
-                        }
-                    }
-                } finally {
-                    SMALMailAccess.closeUnwrappedInstance(access);
-                }
-                /*
-                 * Push them to index
-                 */
-                final BulkRequestBuilder bulkRequest = client.prepareBulk();
-                for (final Map<String, Object> jsonObject : jsonObjects.values()) {
-                    final IndexRequestBuilder irb = client.prepareIndex(indexName, indexType, (String) jsonObject.get(Constants.FIELD_UUID));
-                    irb.setReplicationType(ReplicationType.ASYNC);
-                    irb.setOpType(OpType.INDEX);
-                    irb.setSource(jsonObject);
-                    irb.setConsistencyLevel(WriteConsistencyLevel.DEFAULT);
-                    bulkRequest.add(irb);
-                }
-                if (bulkRequest.numberOfActions() > 0) {
-                    bulkRequest.execute().actionGet();
-                    refresh(indexName);
-                }
-            } catch (final OXException e) {
-                LOG.error("Failed pushing text content to indexed mails.", e);
-            } catch (final ElasticSearchException e) {
-                LOG.error("Failed pushing text content to indexed mails.", e);
-            } catch (final RuntimeException e) {
-                LOG.error("Failed pushing text content to indexed mails.", e);
-            }
-        }
-
-    } // End of TextFiller class
-
-    private static final class UUIDAndMailId {
-        
-        public final String uuid;
-        
-        public final String mailId;
-
-        public UUIDAndMailId(final String mailId, final String uuid) {
-            super();
-            this.mailId = mailId;
-            this.uuid = uuid;
-        }
-
-    } // End of class UUIDAndMailId
 
 }
