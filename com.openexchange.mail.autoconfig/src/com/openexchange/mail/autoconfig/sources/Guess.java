@@ -53,15 +53,15 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.autoconfig.Autoconfig;
 
-
 /**
  * {@link Guess}
- *
+ * 
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Guess extends AbstractConfigSource {
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.mail.autoconfig.sources.ConfigSource#getAutoconfig(java.lang.String, java.lang.String)
      */
     @Override
