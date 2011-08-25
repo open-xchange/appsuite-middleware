@@ -295,10 +295,8 @@ public final class FolderJob extends AbstractMailSyncJob {
                 final List<MailMessage> list = new ArrayList<MailMessage>(blockSize);
                 newIds = null;
                 int start = 0;
-                int loopCount = 0;
-                final int maxChunksPerRun = Constants.MAX_CHUNKS_PER_RUN;
                 final JobQueue queue = JobQueue.getInstance();
-                while (start < size && ++loopCount < maxChunksPerRun) {
+                while (start < size) {
                     final int num = add2Index(ids, start, blockSize, fullName, indexAdapter, list);
                     start += num;
                     if (DEBUG) {
@@ -306,12 +304,11 @@ public final class FolderJob extends AbstractMailSyncJob {
                         LOG.debug("Folder job \"" + identifier + "\" inserted " + start + " of " + size + " messages in " + dur + "msec.");
                     }
                     if (queue.hasHigherRankedJobInQueue(getRanking())) {
-                        reEnqueued = true;
                         break;
                     }
                 }
                 setTimestampAndUnsetSyncFlag(fullName, System.currentTimeMillis());
-                reEnqueued = reEnqueued || (start < size);
+                reEnqueued = (start < size);
                 unset = false;
             } finally {
                 if (unset) {
