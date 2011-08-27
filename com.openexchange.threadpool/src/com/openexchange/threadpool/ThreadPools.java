@@ -59,6 +59,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import com.openexchange.exception.OXException;
 import com.openexchange.threadpool.internal.CustomThreadFactory;
 
 /**
@@ -138,6 +139,23 @@ public final class ThreadPools {
             throw launderThrowable(e, factory.getType());
         }
     }
+
+    /**
+     * The default exception factory for {@link OXException} class.
+     */
+    public static final ExpectedExceptionFactory<OXException> DEFAULT_EXCEPTION_FACTORY = new ExpectedExceptionFactory<OXException>() {
+
+        @Override
+        public Class<OXException> getType() {
+            return OXException.class;
+        }
+
+        @Override
+        public OXException newUnexpectedError(final Throwable t) {
+            return new OXException(t);
+        }
+        
+    };
 
     /**
      * Takes from given completion service and returns its results as a list.

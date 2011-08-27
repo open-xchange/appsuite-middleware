@@ -62,6 +62,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.elasticsearch.ElasticSearchException;
 import org.elasticsearch.action.WriteConsistencyLevel;
 import org.elasticsearch.action.get.GetResponse;
@@ -77,8 +78,10 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.smal.SMALMailAccess;
 import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.mail.text.TextProcessing;
+import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.ThreadRenamer;
 
 /**
  * {@link ElasticSearchTextFillerQueue}
@@ -105,15 +108,29 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
     private volatile Future<Object> future;
 
     /**
+     * The counter for concurrent tasks.
+     */
+    protected final AtomicInteger taskCounter;
+
+    /**
      * Initializes a new {@link ElasticSearchTextFillerQueue}.
      */
     public ElasticSearchTextFillerQueue(final ElasticSearchAdapter adapter) {
         super();
+        taskCounter = new AtomicInteger();
         this.adapter = adapter;
         keepgoing = new AtomicBoolean(true);
         queue = new LinkedBlockingQueue<TextFiller>();
         indexPrefix = Constants.INDEX_NAME_PREFIX;
         type = Constants.INDEX_TYPE;
+    }
+
+    protected boolean isSubmittable() {
+        int cur;
+        do {
+            cur = taskCounter.get();
+        } while (!taskCounter.compareAndSet(cur, cur + 1));
+        return cur + 1 <= Constants.MAX_NUM_CONCURRENT_FILLER_TASKS;
     }
 
     /**
@@ -163,37 +180,60 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
 
     @Override
     public void run() {
-        final List<TextFiller> list = new ArrayList<TextFiller>(16);
-        while (keepgoing.get()) {
-            if (queue.isEmpty()) {
-                final TextFiller next;
-                try {
-                    next = queue.take();
-                } catch (final InterruptedException e) {
-                    Thread.currentThread().interrupt();
+        try {
+            final List<TextFiller> list = new ArrayList<TextFiller>(16);
+            while (keepgoing.get()) {
+                if (queue.isEmpty()) {
+                    final TextFiller next;
+                    try {
+                        next = queue.take();
+                    } catch (final InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        return;
+                    }
+                    if (POISON == next) {
+                        return;
+                    }
+                    list.add(next);
+                }
+                queue.drainTo(list);
+                final boolean quit = list.remove(POISON);
+                if (!list.isEmpty()) {
+                    final ThreadPoolService poolService = SMALServiceLookup.getServiceStatic(ThreadPoolService.class);
+                    if (null == poolService) {
+                        for (final List<TextFiller> fillers : TextFillerGrouper.groupTextFillersByFullName(list)) {
+                            handleFillers(fillers);
+                        }
+                    } else {
+                        for (final List<TextFiller> fillers : TextFillerGrouper.groupTextFillersByFullName(list)) {
+                            if (isSubmittable()) {
+                                poolService.submit(ThreadPools.task(new MaxAwareTask(fillers)));
+                            } else { // Caller runs...
+                                handleFillers(fillers);
+                            }
+                        }
+
+                    }
+                }
+                if (quit) {
                     return;
                 }
-                if (POISON == next) {
-                    return;
-                }
-                list.add(next);
+                list.clear();
             }
-            queue.drainTo(list);
-            final boolean quit = list.remove(POISON);
-            if (!list.isEmpty()) {
-                final List<List<TextFiller>> groupedTextFillers = TextFillerGrouper.groupTextFillers(list);
-                for (final List<TextFiller> fillers : groupedTextFillers) {
-                    handleFillers(fillers);
-                }
-            }
-            if (quit) {
-                return;
-            }
-            list.clear();
+        } catch (final Exception e) {
+            LOG.error("Failed text filler run.", e);
         }
     }
 
-    private void handleFillers(final List<TextFiller> fillers) {
+    /**
+     * Handles specified equally-grouped fillers
+     * 
+     * @param fillers The equally-grouped fillers
+     */
+    protected void handleFillers(final List<TextFiller> fillers) {
+        if (fillers.isEmpty()) {
+            return;
+        }
         try {
             final TextFiller first = fillers.get(0);
             final int contextId = first.getContextId();
@@ -202,7 +242,7 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
             final String indexName = indexPrefix + contextId;
             final int size = fillers.size();
             /*
-             * Request JSON representations of mails
+             * Request JSON representations of mails via multi-get
              */
             final MultiGetRequest mgr = new MultiGetRequest();
             Map<String, TextFiller> map = new HashMap<String, TextFiller>(size);
@@ -217,7 +257,9 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
                 final GetResponse getResponse = iter.next().getResponse();
                 if (null != getResponse) {
                     final Map<String, Object> jsonObject = getResponse.getSource();
-                    if (null == jsonObject) { // Missing JSON data for current UUID
+                    if (checkJSONData(jsonObject)) {
+                        jsonObjects.put((String) jsonObject.get(Constants.FIELD_ID), jsonObject);
+                    } else if (null == jsonObject) { // Missing JSON data for current UUID
                         final TextFiller filler = map.get(getResponse.getId());
                         if (filler.queuedCounter > 0) {
                             // Discard
@@ -225,8 +267,6 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
                             filler.queuedCounter = filler.queuedCounter + 1;
                             queue.offer(filler);
                         }
-                    } else {
-                        jsonObjects.put((String) jsonObject.get(Constants.FIELD_ID), jsonObject);
                     }
                 }
             }
@@ -252,7 +292,7 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
                 access = null;
             }
             /*
-             * Push them to index
+             * Push them to index with a bulk request
              */
             final BulkRequestBuilder bulkRequest = client.prepareBulk();
             for (final Map<String, Object> jsonObject : jsonObjects.values()) {
@@ -272,6 +312,42 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
         } catch (final RuntimeException e) {
             LOG.error("Failed pushing text content to indexed mails.", e);
         }
+    }
+
+    private static boolean checkJSONData(final Map<String, Object> jsonObject) {
+        return null != jsonObject && !jsonObject.containsKey(Constants.FIELD_BODY);
+    }
+
+    private final class MaxAwareTask implements Task<Object> {
+
+        private final List<TextFiller> fillers;
+
+        protected MaxAwareTask(final List<TextFiller> fillers) {
+            super();
+            this.fillers = fillers;
+        }
+
+        @Override
+        public void setThreadName(final ThreadRenamer threadRenamer) {
+            // Nope
+        }
+
+        @Override
+        public void beforeExecute(final Thread t) {
+            // Nope
+        }
+
+        @Override
+        public void afterExecute(final Throwable t) {
+            taskCounter.decrementAndGet();
+        }
+
+        @Override
+        public Object call() throws Exception {
+            handleFillers(fillers);
+            return null;
+        }
+
     }
 
 }

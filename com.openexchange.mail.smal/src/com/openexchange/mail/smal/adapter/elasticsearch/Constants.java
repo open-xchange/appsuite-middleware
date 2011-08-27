@@ -68,6 +68,11 @@ public final class Constants {
     }
 
     /**
+     * The max. number of concurrent filler tasks.
+     */
+    public static final int MAX_NUM_CONCURRENT_FILLER_TASKS = Runtime.getRuntime().availableProcessors();
+
+    /**
      * The name for the cluster.
      */
     public static final String CLUSTER_NAME = "mail_cluster";

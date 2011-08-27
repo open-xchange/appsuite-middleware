@@ -76,10 +76,10 @@ public final class TextFillerGrouper {
      * @param textFillers The text fillers to group
      * @return The grouped text fillers
      */
-    public static List<List<TextFiller>> groupTextFillers(final Collection<TextFiller> textFillers) {
+    public static List<List<TextFiller>> groupTextFillersByAccount(final Collection<TextFiller> textFillers) {
         final Map<Key, List<TextFiller>> map = new HashMap<TextFillerGrouper.Key, List<TextFiller>>(textFillers.size());
         for (final TextFiller textFiller : textFillers) {
-            final Key key = keyFor(textFiller);
+            final Key key = accountKeyFor(textFiller);
             List<TextFiller> list = map.get(key);
             if (null == list) {
                 list = new LinkedList<TextFiller>();
@@ -90,11 +90,37 @@ public final class TextFillerGrouper {
         return new ArrayList<List<TextFiller>>(map.values());
     }
 
-    private static Key keyFor(final TextFiller textFiller) {
-        return new Key(textFiller.getAccountId(), textFiller.getUserId(), textFiller.getContextId());
+    /**
+     * Groups passed text fillers by user account's folders.
+     * 
+     * @param textFillers The text fillers to group
+     * @return The grouped text fillers
+     */
+    public static List<List<TextFiller>> groupTextFillersByFullName(final Collection<TextFiller> textFillers) {
+        final Map<Key, List<TextFiller>> map = new HashMap<TextFillerGrouper.Key, List<TextFiller>>(textFillers.size());
+        for (final TextFiller textFiller : textFillers) {
+            final Key key = folderKeyFor(textFiller);
+            List<TextFiller> list = map.get(key);
+            if (null == list) {
+                list = new LinkedList<TextFiller>();
+                map.put(key, list);
+            }
+            list.add(textFiller);
+        }
+        return new ArrayList<List<TextFiller>>(map.values());
+    }
+
+    private static Key accountKeyFor(final TextFiller textFiller) {
+        return new Key(null, textFiller.getAccountId(), textFiller.getUserId(), textFiller.getContextId());
+    }
+
+    private static Key folderKeyFor(final TextFiller textFiller) {
+        return new Key(textFiller.getFullName(), textFiller.getAccountId(), textFiller.getUserId(), textFiller.getContextId());
     }
 
     private static final class Key {
+
+        private final String fullName;
 
         private final int accountId;
 
@@ -104,8 +130,9 @@ public final class TextFillerGrouper {
 
         private final int hash;
 
-        public Key(final int accountId, final int user, final int cid) {
+        public Key(final String fullName, final int accountId, final int user, final int cid) {
             super();
+            this.fullName = fullName;
             this.accountId = accountId;
             this.user = user;
             this.cid = cid;
@@ -113,6 +140,7 @@ public final class TextFillerGrouper {
             int result = 1;
             result = prime * result + accountId;
             result = prime * result + cid;
+            result = prime * result + ((fullName == null) ? 0 : fullName.hashCode());
             result = prime * result + user;
             hash = result;
         }
@@ -135,6 +163,13 @@ public final class TextFillerGrouper {
                 return false;
             }
             if (cid != other.cid) {
+                return false;
+            }
+            if (fullName == null) {
+                if (other.fullName != null) {
+                    return false;
+                }
+            } else if (!fullName.equals(other.fullName)) {
                 return false;
             }
             if (user != other.user) {
