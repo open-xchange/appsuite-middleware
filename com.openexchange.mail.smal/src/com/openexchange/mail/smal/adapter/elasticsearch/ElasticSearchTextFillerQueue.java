@@ -286,9 +286,8 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
                             final String text =
                                 TextProcessing.extractTextFrom(access.getMessageStorage().getMessage(filler.getFullName(), mailId, false));
                             jsonObject.put(Constants.FIELD_BODY, text);
-                        } catch (Exception e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
+                        } catch (final Exception e) {
+                            LOG.error("Text could not be extracted from: " + filler, e);
                         }
                     }
                 }
