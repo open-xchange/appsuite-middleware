@@ -293,8 +293,11 @@ public final class HTML2TextHandler implements HTMLHandler {
 
     @Override
     public void handleError(final String errorMsg) {
-        final StringBuilder sb = new StringBuilder(128 + errorMsg.length());
-        sb.append("HTML parsing error occurred: ").append(errorMsg);
+        final StringBuilder sb = new StringBuilder(128 + (null == errorMsg ? 0 : errorMsg.length()));
+        sb.append("HTML parsing error occurred: ");
+        if (null != errorMsg) {
+            sb.append(errorMsg);
+        }
         boolean prefix = false;
         if (0 != mailId) {
             if (!prefix) {
