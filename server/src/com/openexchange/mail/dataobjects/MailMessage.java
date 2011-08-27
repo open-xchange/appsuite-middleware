@@ -1208,7 +1208,8 @@ public abstract class MailMessage extends MailPart {
                 try {
                     setDispositionNotification(new QuotedInternetAddress(dispNotTo, true));
                 } catch (final AddressException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.debug(e.getMessage(), e);
+                    setDispositionNotification(new PlainTextAddress(dispNotTo));
                 }
             }
         }
