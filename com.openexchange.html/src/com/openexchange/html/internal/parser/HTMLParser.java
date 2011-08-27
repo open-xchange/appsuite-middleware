@@ -150,7 +150,10 @@ public final class HTMLParser {
                     }
                     ignoreWhitespace = false;
                     if (prevEvent == XmlPullParser.TEXT) {
-                        textBuilder.append('&').append(parser.getTextCharacters(holderForStartAndLength)).append(';');
+                        final char[] textCharacters = parser.getTextCharacters(holderForStartAndLength);
+                        if (null != textCharacters) {
+                            textBuilder.append('&').append(textCharacters).append(';');
+                        }
                     } else if (prevEvent == XmlPullParser.CDSECT) {
                         cdataBuilder.append('&').append(parser.getTextCharacters(holderForStartAndLength)).append(';');
                     } else {

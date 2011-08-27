@@ -404,7 +404,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
 
     private boolean isRemoveWholeTag(final String tag) {
         final String check = tag.toLowerCase(Locale.US);
-        return (SCRIPT.equals(check) || check.startsWith("w:worddocument"));
+        return (SCRIPT.equals(check) || check.startsWith("w:worddocument") || check.startsWith("o:officedocumentsettings"));
     }
 
     @Override
