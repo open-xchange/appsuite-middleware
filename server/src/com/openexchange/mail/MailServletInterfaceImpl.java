@@ -98,6 +98,7 @@ import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.importexport.MailImportResult;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.upload.quotachecker.MailUploadQuotaChecker;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -726,6 +727,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         for (int i = 1; i < arguments.length && sameAccount; i++) {
             sameAccount = accountId == arguments[i].getAccountId();
         }
+        final MailUploadQuotaChecker checker = new MailUploadQuotaChecker(usm);
+        final long maxPerMsg = checker.getFileQuotaMax();
+        final long max = checker.getQuotaMax();
         if (sameAccount) {
             initConnection(accountId);
             final MailMessage[] originalMails = new MailMessage[folders.length];
