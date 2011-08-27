@@ -341,9 +341,9 @@ public final class HTMLFilterHandler implements HTMLHandler {
     @Override
     public void handleEndTag(final String tag) {
         if (skipLevel == 0) {
-            if (body && BODY.equalsIgnoreCase(tag)) {
+            if (body && BODY.equals(tag)) {
                 body = false;
-            } else if (isCss && STYLE.equalsIgnoreCase(tag)) {
+            } else if (isCss && STYLE.equals(tag)) {
                 isCss = false;
             }
             if (depth == 0) {
@@ -381,9 +381,9 @@ public final class HTMLFilterHandler implements HTMLHandler {
             if (depth > 0) {
                 depth++;
             }
-            if (BODY.equalsIgnoreCase(tag)) {
+            if (BODY.equals(tag)) {
                 body = true;
-            } else if (STYLE.equalsIgnoreCase(tag)) {
+            } else if (STYLE.equals(tag)) {
                 isCss = true;
             }
             addStartTag(tag, attributes, false, htmlMap.get(tag));
@@ -457,7 +457,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
      */
     private void addStartTag(final String tag, final Map<String, String> a, final boolean simple, final Map<String, Set<String>> attribs) {
         attrBuilder.setLength(0);
-        if (simple && META.equalsIgnoreCase(tag) && a.containsKey(HTTP_EQUIV) && attribs.containsKey(HTTP_EQUIV)) {
+        if (simple && META.equals(tag) && a.containsKey(HTTP_EQUIV) && attribs.containsKey(HTTP_EQUIV)) {
             /*
              * Special handling for allowed meta tag which provides an allowed HTTP header indicated through 'http-equiv' attribute
              */
@@ -470,7 +470,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
         for (final Entry<String, String> e : a.entrySet()) {
             final String attr = e.getKey().toLowerCase(Locale.US);
             final String val = e.getValue();
-            if (STYLE.equalsIgnoreCase(attr)) {
+            if (STYLE.equals(attr)) {
                 /*
                  * Handle style attribute
                  */
@@ -484,7 +484,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
                         attrBuilder.append(' ').append(STYLE).append("='").append(checkedCSS).append('\'');
                     }
                 }
-            } else if (CLASS.equalsIgnoreCase(attr) || ID.equalsIgnoreCase(attr)) {
+            } else if (CLASS.equals(attr) || ID.equals(attr)) {
                 /*
                  * TODO: Is it safe to allow "class"/"id" attribute in any case
                  */
