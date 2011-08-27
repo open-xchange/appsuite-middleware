@@ -288,6 +288,7 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
                             jsonObject.put(Constants.FIELD_BODY, text);
                         } catch (final Exception e) {
                             LOG.error("Text could not be extracted from: " + filler, e);
+                            jsonObject.put(Constants.FIELD_BODY, "");
                         }
                     }
                 }
