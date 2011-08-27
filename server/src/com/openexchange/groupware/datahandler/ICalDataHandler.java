@@ -213,13 +213,16 @@ public abstract class ICalDataHandler implements DataHandler {
      * @param confirm
      */
     private void setConfirmation(final Session session, final CalendarDataObject appointment, final Confirm confirm) {
-        for (final Participant participant : appointment.getParticipants()) {
-            if (participant.getType() == Participant.USER) {
-                final UserParticipant user = (UserParticipant) participant;
-                if (user.getIdentifier() == session.getUserId()) {
-                    user.setConfirm(confirm.getConfirm());
-                    if (confirm.getConfirmMessage() != null) {
-                        user.setConfirmMessage(confirm.getConfirmMessage());
+        final Participant[] participants = appointment.getParticipants();
+        if (null != participants) {
+            for (final Participant participant : participants) {
+                if (participant.getType() == Participant.USER) {
+                    final UserParticipant user = (UserParticipant) participant;
+                    if (user.getIdentifier() == session.getUserId()) {
+                        user.setConfirm(confirm.getConfirm());
+                        if (confirm.getConfirmMessage() != null) {
+                            user.setConfirmMessage(confirm.getConfirmMessage());
+                        }
                     }
                 }
             }
