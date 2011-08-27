@@ -339,7 +339,8 @@ public final class HTMLFilterHandler implements HTMLHandler {
     }
 
     @Override
-    public void handleEndTag(final String tag) {
+    public void handleEndTag(final String sTag) {
+        final String tag = sTag.toLowerCase(Locale.US);
         if (skipLevel == 0) {
             if (body && BODY.equals(tag)) {
                 body = false;
@@ -372,11 +373,12 @@ public final class HTMLFilterHandler implements HTMLHandler {
     }
 
     @Override
-    public void handleStartTag(final String tag, final Map<String, String> attributes) {
+    public void handleStartTag(final String sTag, final Map<String, String> attributes) {
         if (skipLevel > 0) {
             skipLevel++;
             return;
         }
+        final String tag = sTag.toLowerCase(Locale.US);
         if (htmlMap.containsKey(tag)) {
             if (depth > 0) {
                 depth++;
