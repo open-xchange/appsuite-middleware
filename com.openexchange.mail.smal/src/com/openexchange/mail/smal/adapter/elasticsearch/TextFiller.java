@@ -163,4 +163,22 @@ public final class TextFiller {
         return contextId;
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder(64);
+        builder.append('(');
+        if (uuid != null) {
+            builder.append("uuid=").append(uuid).append(", ");
+        }
+        if (mailId != null) {
+            builder.append("mailId=").append(mailId).append(", ");
+        }
+        if (fullName != null) {
+            builder.append("fullName=").append(fullName).append(", ");
+        }
+        builder.append("accountId=").append(accountId).append(", userId=").append(userId).append(", contextId=").append(contextId).append(
+            ')');
+        return builder.toString();
+    }
+
 }
