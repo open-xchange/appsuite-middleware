@@ -73,6 +73,37 @@ public final class MailUploadQuotaChecker extends UploadQuotaChecker {
 
     /**
      * Initializes a new {@link MailUploadQuotaChecker}.
+     * 
+     * @param usm The settings
+     */
+    public MailUploadQuotaChecker(final UserSettingMail settings) {
+        super();
+        if (settings.getUploadQuota() > 0) {
+            uploadQuota = settings.getUploadQuota();
+        } else if (settings.getUploadQuota() == 0) {
+            uploadQuota = -1;
+        } else {
+            /*
+             * Fallback to global upload quota
+             */
+            int globalQuota;
+            try {
+                globalQuota = ServerConfig.getInt(Property.MAX_UPLOAD_SIZE);
+            } catch (final ConfigurationException e) {
+                LOG.error(e.getMessage(), e);
+                globalQuota = 0;
+            }
+            if (globalQuota > 0) {
+                uploadQuota = globalQuota;
+            } else {
+                uploadQuota = -1;
+            }
+        }
+        uploadQuotaPerFile = settings.getUploadQuotaPerFile() > 0 ? settings.getUploadQuotaPerFile() : -1;
+    }
+
+    /**
+     * Initializes a new {@link MailUploadQuotaChecker}.
      *
      * @param session The session
      * @param ctx The context
