@@ -2,10 +2,11 @@
 <project name="Bundle Builder" basedir=".">
 
     <!-- customizable values -->
+    <property name="destDir" value=""/>
     <property name="prefix" value="/opt/open-xchange"/>
+    <property name="tmpDir" value="tmp"/>
 	<property name="distDir" value=""/>
 
-    <property name="packageName" value="open-xchange-common"/>
 	<property name="branch" value="master"/>
 
 	<!-- Constants -->
@@ -15,6 +16,7 @@
 
     <!-- Install Constants -->
     <property name="bundlesDir" value="${prefix}/bundles"/>
+    <property name="bundle.dDir" value="${prefix}/etc/osgi/bundle.d"/>
 
 	<target name="antExtensions">
         <path id="ant3rdPartyLib">
@@ -22,7 +24,7 @@
         </path>
         <property name="build" value="build"/>
         <mkdir dir="${build}"/>
-        <javac srcdir="src" destdir="${build}" debug="true" debuglevel="lines,vars,source" encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5" includeantruntime="false">
+        <javac srcdir="src" destdir="${build}" debug="true" debuglevel="lines,vars,source" encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5" includeantruntime="true">
             <classpath refid="ant3rdPartyLib"/>
         </javac>
         <copy file="src/tasks.properties" todir="${build}"/>
@@ -40,6 +42,7 @@
 
     <target name="prepare" depends="antExtensions">
         <!-- reads the project sets and generates the ant properties for each project -->
+        <fail message="Please define package to build." unless="packageName"/>
         <createProjectList name="projectsList">
             <projectSets>
                 <fileset dir="${checkoutDir}/${packageName}" includes="*.psf"/>
@@ -52,7 +55,6 @@
     </target>
 
     <target name="buildProject">
-    	<!-- TODO only copy if build.xml is not there for custom builds -->
         <if>
             <not>
                 <available file="${checkoutDir}/${projectName}/build.xml" type="file"/>
@@ -73,7 +75,7 @@
     		</else>
     	</if>
         <if>
-            <equals arg1="${deleteBuildXML" arg2="true"/>
+            <equals arg1="${deleteBuildXML}" arg2="true"/>
             <then>
                 <delete file="${checkoutDir}/${projectName}/build.xml" />
             </then>
@@ -86,7 +88,6 @@
 		<mkdir dir="${bundlesDir}"/>
         <computeBuildOrder dir="${checkoutDir}" propertyName="projectsOrdered" projectList="${projectsList}">
             <classpath>
-                <dirset dir="${bundlesDir}" includes="com.openexchange.*"/>
                 <fileset dir="${bundlesDir}" includes="*.jar"/>
             </classpath>
         </computeBuildOrder>

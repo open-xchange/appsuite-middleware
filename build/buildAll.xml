@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="All Bundle Builder" basedir=".">
+
+    <taskdef resource="net/sf/antcontrib/antcontrib.properties"/>
+
+    <target name="buildPackage">
+        <ant antfile="build.xml" target="build">
+            <property name="packageName" value="${packageName}"/>
+        </ant>
+    </target>
+
+    <target name="build">
+        <loadfile property="packageList" srcFile="packages.txt">
+            <filterchain>
+                <prefixlines prefix=" "/>
+                <striplinebreaks/>
+                <trim/>
+                <replacestring from=" " to=","/>
+            </filterchain>
+        </loadfile>
+        <foreach list="${packageList}" target="buildPackage" param="packageName"/>
+    </target>
+
+</project>

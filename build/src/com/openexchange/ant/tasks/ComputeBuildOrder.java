@@ -95,7 +95,7 @@ public class ComputeBuildOrder extends Task {
     @Override
     public void execute() throws BuildException {
         // Parse ClassPath-Jars
-        log("using classpath " + classpath, Project.MSG_INFO);
+        log("using classpath: " + classpath, Project.MSG_INFO);
         String[] classpathFiles = classpath.list();
         List<AbstractModule> classpathModules = new ArrayList<AbstractModule>(classpathFiles.length);
         for (String classpathFilename : classpathFiles) {

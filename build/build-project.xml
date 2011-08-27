@@ -8,6 +8,7 @@
     <property name="simBinDir" value="sim-build"/>
     <property name="testSrcDir" value="test"/>
     <property name="testBinDir" value="test-build"/>
+    <property name="jarsDir" value="jars"/>
     <property file="META-INF/MANIFEST.MF"/>
     <property file="build.properties"/>
     <property name="testJarFile" value="${bundlesDir}/${Bundle-SymbolicName}-test.jar"/>
@@ -51,9 +52,44 @@
         </javac>
     </target>
 
+    <target name="bundleJar">
+        <jar jarfile="${jarsDir}/${Bundle-SymbolicName}.jar" manifest="META-INF/MANIFEST.MF">
+            <fileset dir="${binDir}"/>
+        </jar>
+    </target>
+
+    <target name="installJar">
+        <mkdir dir="${destDir}/${bundlesDir}"/>
+        <copy todir="${destDir}/${bundlesDir}">
+            <fileset dir="${jarsDir}">
+                <include name="*.jar"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="makeIni">
+        <!-- TODO fragment without @start -->
+        <propertyregex property="bundle.name" input="${jar}" regexp=".*/(.*)\.jar" select="\1"/>
+        <echo file="${destDir}/${bundle.dDir}/${bundle.name}.ini" message="${bundlesDir}/${bundle.name}.jar@start${line.separator}"/>
+    </target>
+
+    <target name="installConfig">
+        <mkdir dir="${destDir}/${bundle.dDir}"/>
+        <foreach target="makeIni" param="jar" inheritAll="true">
+            <path>
+                <fileset dir="${jarsDir}" includes="*.jar"/>
+            </path>
+        </foreach>
+    </target>
+
+    <target name="install" depends="installJar,installConfig"/>
+
     <target name="testForMainBuild">
         <if>
-            <equals arg1="${buildType}" arg2="bundle"/>
+            <and>
+                <equals arg1="${buildType}" arg2="bundle"/>
+                <available file="${mainSrcDir}" type="dir"/>
+            </and>
             <then>
                 <property name="buildMain" value="true"/>
                 <path id="mainBinClasses">
@@ -61,19 +97,9 @@
                 </path>
             </then>
             <else>
-                <if>
-                    <available file="${bundlesDir}/${projectName}" type="dir"/>
-                    <then>
-                        <path id="mainBinClasses">
-                            <pathelement location="${bundlesDir}/${projectName}/${projectName}.jar"/>
-                        </path>
-                    </then>
-                    <else>
-                        <path id="mainBinClasses">
-                            <pathelement location="${bundlesDir}/${projectName}.jar"/>
-                        </path>
-                    </else>
-                </if>
+                <path id="mainBinClasses">
+                    <pathelement location="${bundlesDir}/${projectName}.jar"/>
+                </path>
             </else>
         </if>
     </target>
@@ -83,6 +109,36 @@
             <param name="srcDir" value="${mainSrcDir}"/>
             <param name="binDir" value="${mainBinDir}"/>
             <param name="compileClasspath" value="mainCompileClasspath"/>
+        </antcall>
+    </target>
+
+    <target name="testForMainJar">
+        <condition property="mainJar">
+            <and>
+                <equals arg1="${buildType}" arg2="bundle"/>
+                <available file="${mainBinDir}" type="dir"/>
+            </and>
+        </condition>
+    </target>
+
+    <target name="mainJar" depends="testForMainJar" if="mainJar">
+        <antcall target="bundleJar" inheritrefs="true">
+            <param name="binDir" value="${mainBinDir}"/>
+        </antcall>
+    </target>
+
+    <target name="testForMainInstall">
+        <condition property="installMain">
+            <and>
+                <equals arg1="${buildType}" arg2="bundle"/>
+                <available file="${jarsDir}" type="dir"/>
+            </and>
+        </condition>
+    </target>
+
+    <target name="installMain" depends="testForMainInstall" if="installMain">
+        <antcall target="install" inheritrefs="true">
+            <param name="binDir" value="${mainBinDir}"/>
         </antcall>
     </target>
 
@@ -104,7 +160,7 @@
     </target>
 
     <target name="testForTestBuild">
-        <condition property="testIt">
+        <condition property="buildTest">
             <and>
                 <equals arg1="${buildType}" arg2="tests"/>
                 <available file="${testSrcDir}" type="dir"/>
@@ -112,7 +168,7 @@
         </condition>
     </target>
 
-    <target name="buildTest" depends="testForTestBuild" if="testIt">
+    <target name="buildTest" depends="testForTestBuild" if="buildTest">
         <antcall target="compile" inheritrefs="true">
             <param name="srcDir" value="${testSrcDir}"/>
             <param name="binDir" value="${testBinDir}"/>
@@ -121,7 +177,7 @@
     </target>
 
     <target name="testForTestJar">
-        <condition property="testJAR">
+        <condition property="testJar">
             <and>
                 <equals arg1="${buildType}" arg2="tests"/>
                 <or>
@@ -132,21 +188,35 @@
         </condition>
     </target>
 
-    <target name="addSimToJAR" if="buildSim">
+    <target name="addSimToJar" if="buildSim">
         <jar jarfile="${testJarFile}">
             <fileset dir="${simBinDir}"/>
         </jar>
     </target>
 
-    <target name="addTestToJAR" if="testIt">
+    <target name="addTestToJar" if="buildTest">
         <jar jarfile="${testJarFile}" update="true">
             <fileset dir="${testBinDir}"/>
         </jar>
     </target>
 
-    <target name="buildTestJAR" depends="buildTest,testForTestJar,addSimToJAR,addTestToJAR" if="testJAR"/>
+    <target name="testJar" depends="testForTestJar,addSimToJar,addTestToJar" if="testJar">
+        <fail message="not implemented"/>
+    </target>
 
-    <target name="runTests" depends="buildTestJAR" if="testIt">
+    <target name="testForTestRun">
+        <condition property="runTests">
+            <and>
+                <equals arg1="${buildType}" arg2="tests"/>
+                <or>
+                    <available file="${simSrcDir}" type="dir"/>
+                    <available file="${testSrcDir}" type="dir"/>
+                </or>
+            </and>
+        </condition>
+    </target>
+
+    <target name="runTests" depends="testForTestRun" if="runTests">
         <mkdir dir="${logDir}"/>
         <junit errorProperty="testFailed" failureProperty="testFailed" showoutput="yes" printsummary="yes" fork="yes" dir="${basedir}">
             <classpath>
@@ -161,7 +231,7 @@
         </junit>
     </target>
 
-    <target name="build" depends="prepareClasspath,buildMain,buildSim,runTests"/>
+    <target name="build" depends="prepareClasspath,buildMain,mainJar,installMain,buildSim,buildTest,testJar,runTests"/>
 
 	<target name="dist">
 		<property name="destDir" value="${distDir}/${packageName}/${projectName}"/>
@@ -175,6 +245,7 @@
 	</target>
 
     <target name="clean">
+        <delete dir="${mainBinDir}"/>
         <delete dir="${simBinDir}"/>
         <delete dir="${testBinDir}"/>
         <delete file="${testJarFile}"/>
