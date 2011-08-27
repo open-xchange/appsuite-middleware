@@ -743,7 +743,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 if (size <= 0) {
                     size = 2048; // Avg size
                 }
-                if (size > maxPerMsg) {
+                if (maxPerMsg > 0 && size > maxPerMsg) {
                     final String fileName = origMail.getSubject();
                     throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED_FOR_FILE.create(
                         Long.valueOf(maxPerMsg),
@@ -771,7 +771,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 if (size <= 0) {
                     size = 2048; // Avg size
                 }
-                if (size > maxPerMsg) {
+                if (maxPerMsg > 0 && size > maxPerMsg) {
                     final String fileName = origMail.getSubject();
                     throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED_FOR_FILE.create(
                         Long.valueOf(maxPerMsg),
