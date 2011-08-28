@@ -55,6 +55,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.groupware.downgrade.DowngradeListener;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -65,6 +66,11 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 public class InfostoreDowngrade extends DowngradeListener {
     @Override
 	public void downgradePerformed(final DowngradeEvent event) throws OXException {
+        final UserConfiguration newUserConfiguration = event.getNewUserConfiguration();
+        if (newUserConfiguration.hasInfostore()) {
+            // Still access to infostore...
+            return;
+        }
         final DBProvider provider = new StaticDBPoolProvider(event.getWriteCon());
 
         final ServerSession session = new ServerSessionAdapter(event.getSession(), event.getContext());
@@ -75,7 +81,7 @@ public class InfostoreDowngrade extends DowngradeListener {
         try {
 
             final OXFolderAccess access = new OXFolderAccess(event.getContext());
-            final FolderObject fo = access.getDefaultFolder(event.getNewUserConfiguration().getUserId(), FolderObject.INFOSTORE);
+            final FolderObject fo = access.getDefaultFolder(newUserConfiguration.getUserId(), FolderObject.INFOSTORE);
             final int folderId = fo.getObjectID();
 
 
