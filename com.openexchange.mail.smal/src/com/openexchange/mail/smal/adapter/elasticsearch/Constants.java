@@ -68,7 +68,7 @@ public final class Constants {
     }
 
     /**
-     * The max. number of concurrent filler tasks.
+     * The max. number of concurrent filler tasks: {@link Runtime#availableProcessors()}.
      */
     public static final int MAX_NUM_CONCURRENT_FILLER_TASKS = Runtime.getRuntime().availableProcessors();
 

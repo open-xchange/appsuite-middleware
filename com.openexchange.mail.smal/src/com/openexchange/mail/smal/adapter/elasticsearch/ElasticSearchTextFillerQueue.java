@@ -63,6 +63,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReferenceArray;
 import org.elasticsearch.ElasticSearchException;
 import org.elasticsearch.action.WriteConsistencyLevel;
 import org.elasticsearch.action.get.GetResponse;
@@ -95,6 +96,8 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
 
     private static final TextFiller POISON = new TextFiller(null, null, null, 0, 0, 0);
 
+    private static final int MAX_NUM_CONCURRENT_FILLER_TASKS = Constants.MAX_NUM_CONCURRENT_FILLER_TASKS;
+
     private final BlockingQueue<TextFiller> queue;
 
     private final AtomicBoolean keepgoing;
@@ -108,6 +111,11 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
     private volatile Future<Object> future;
 
     /**
+     * The container for currently running concurrent filler tasks.
+     */
+    protected final AtomicReferenceArray<Future<Object>> concurrentFutures;
+
+    /**
      * The counter for concurrent tasks.
      */
     protected final AtomicInteger taskCounter;
@@ -117,6 +125,7 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
      */
     public ElasticSearchTextFillerQueue(final ElasticSearchAdapter adapter) {
         super();
+        concurrentFutures = new AtomicReferenceArray<Future<Object>>(new Future[MAX_NUM_CONCURRENT_FILLER_TASKS]);
         taskCounter = new AtomicInteger();
         this.adapter = adapter;
         keepgoing = new AtomicBoolean(true);
@@ -125,12 +134,18 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
         type = Constants.INDEX_TYPE;
     }
 
-    protected boolean isSubmittable() {
-        int cur;
-        do {
-            cur = taskCounter.get();
-        } while (!taskCounter.compareAndSet(cur, cur + 1));
-        return cur + 1 <= Constants.MAX_NUM_CONCURRENT_FILLER_TASKS;
+    /**
+     * Checks if it is allowed to submit a further filler task to thread pool.
+     * 
+     * @return A positive number if it is allowed to submit to pool; otherwise <code>-1</code>
+     */
+    private int isSubmittable() {
+        final int inc = taskCounter.incrementAndGet();
+        if (inc > MAX_NUM_CONCURRENT_FILLER_TASKS) {
+            taskCounter.decrementAndGet();
+            return -1;
+        }
+        return inc;
     }
 
     /**
@@ -144,6 +159,13 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
      * Stop consuming from queue.
      */
     public void stop() {
+        final int length = concurrentFutures.length();
+        for (int i = 0; i < length; i++) {
+            final Future<Object> f = concurrentFutures.get(i);
+            if (null != f) {
+                f.cancel(true);
+            }
+        }
         keepgoing.set(false);
         queue.offer(POISON);
         try {
@@ -206,8 +228,10 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
                         }
                     } else {
                         for (final List<TextFiller> fillers : TextFillerGrouper.groupTextFillersByFullName(list)) {
-                            if (isSubmittable()) {
-                                poolService.submit(ThreadPools.task(new MaxAwareTask(fillers)));
+                            final int taskNum = isSubmittable();
+                            if (taskNum > 0) {
+                                final Future<Object> f = poolService.submit(ThreadPools.task(new MaxAwareTask(fillers, taskNum)));
+                                concurrentFutures.set(taskNum - 1, f);
                             } else { // Caller runs...
                                 handleFillers(fillers);
                             }
@@ -327,9 +351,12 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
 
         private final List<TextFiller> fillers;
 
-        protected MaxAwareTask(final List<TextFiller> fillers) {
+        private final int taskNum;
+
+        protected MaxAwareTask(final List<TextFiller> fillers, final int taskNum) {
             super();
             this.fillers = fillers;
+            this.taskNum = taskNum;
         }
 
         @Override
@@ -344,6 +371,7 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
 
         @Override
         public void afterExecute(final Throwable t) {
+            concurrentFutures.set(taskNum - 1, null);
             taskCounter.decrementAndGet();
         }
 
