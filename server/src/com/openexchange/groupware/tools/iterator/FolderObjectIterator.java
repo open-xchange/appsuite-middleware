@@ -830,9 +830,9 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
     }
 
-    protected static final Integer POISON = Integer.valueOf(-1);
-
     private static final class PermissionLoader {
+
+        private static final Integer POISON = Integer.valueOf(-1);
 
         private final ConcurrentTIntObjectHashMap<SetableFutureTask> permsMap;
 
