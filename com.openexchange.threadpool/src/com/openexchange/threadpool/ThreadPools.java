@@ -171,6 +171,7 @@ public final class ThreadPools {
      * @throws RuntimeException If cause is an unchecked {@link RuntimeException}
      * @throws Error If cause is an unchecked {@link Error}
      * @see #launderThrowable(ExecutionException, Class)
+     * @see #DEFAULT_EXCEPTION_FACTORY
      */
     public static <R, E extends Exception> java.util.List<R> takeCompletionService(final CompletionService<R> completionService, final int size, final ExpectedExceptionFactory<E> factory) throws E {
         /*
