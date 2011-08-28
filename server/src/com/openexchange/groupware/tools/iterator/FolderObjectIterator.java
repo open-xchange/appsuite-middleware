@@ -908,7 +908,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             ids.clear();
             flag.set(false);
             queue.offer(POISON);
-            cancelFuture(mainFuture);
+            mainFuture.cancel(true);
             queue.clear();
             permsMap.clear();
         }
