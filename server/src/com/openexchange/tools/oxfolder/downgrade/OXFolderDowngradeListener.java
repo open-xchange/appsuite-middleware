@@ -52,15 +52,20 @@ package com.openexchange.tools.oxfolder.downgrade;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Dictionary;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Set;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.StaticDBPoolProvider;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderEventConstants;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCache;
 import com.openexchange.groupware.contact.Contacts;
@@ -227,7 +232,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
                 TABLE_PERMISSIONS_WORKING,
                 event.getWriteCon());
             if (fuid != -1) {
-                removeFromFolderCache(new int[] { fuid }, event.getContext());
+                removeFromFolderCache(new int[] { fuid }, entity, event.getContext());
             }
             /*
              * Remove subfolders below default folder
@@ -244,7 +249,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
             /*
              * Update cache
              */
-            removeFromFolderCache(fuids, event.getContext());
+            removeFromFolderCache(fuids, entity, event.getContext());
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
@@ -322,7 +327,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
         /*
          * Update cache
          */
-        removeFromFolderCache(ids, event.getContext());
+        removeFromFolderCache(ids, entity, event.getContext());
     }
 
     /**
@@ -465,19 +470,19 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
         /*
          * Update cache
          */
-        removeFromFolderCache(set, event.getContext());
+        removeFromFolderCache(set, entity, event.getContext());
     }
 
-    private static void removeFromFolderCache(final Collection<Integer> collection, final Context ctx) {
+    private static void removeFromFolderCache(final Collection<Integer> collection, final int userId, final Context ctx) {
         final int[] ints = new int[collection.size()];
         final Iterator<Integer> iter = collection.iterator();
         for (int i = 0; i < ints.length; i++) {
             ints[i] = iter.next().intValue();
         }
-        removeFromFolderCache(ints, ctx);
+        removeFromFolderCache(ints, userId, ctx);
     }
 
-    private static void removeFromFolderCache(final int[] folderIDs, final Context ctx) {
+    private static void removeFromFolderCache(final int[] folderIDs, final int userId, final Context ctx) {
         /*
          * Remove from cache
          */
@@ -486,6 +491,18 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
                 FolderCacheManager.getInstance().removeFolderObjects(folderIDs, ctx);
             } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
+            }
+        }
+        final EventAdmin eventAdmin = ServerServiceRegistry.getInstance().getService(EventAdmin.class);
+        if (null != eventAdmin) {
+            for (int i = 0; i < folderIDs.length; i++) {
+                final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
+                props.put(FolderEventConstants.PROPERTY_FOLDER, String.valueOf(folderIDs[i]));
+                props.put(FolderEventConstants.PROPERTY_CONTEXT, Integer.valueOf(ctx.getContextId()));
+                props.put(FolderEventConstants.PROPERTY_USER, Integer.valueOf(userId));
+                props.put(FolderEventConstants.PROPERTY_CONTENT_RELATED, Boolean.FALSE);
+                final Event event = new Event(FolderEventConstants.TOPIC_ATTR, props);
+                eventAdmin.postEvent(event);
             }
         }
     }

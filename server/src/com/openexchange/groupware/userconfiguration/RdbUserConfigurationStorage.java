@@ -58,6 +58,8 @@ import java.sql.SQLException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.groupware.downgrade.DowngradeEvent;
+import com.openexchange.groupware.downgrade.DowngradeRegistry;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.impl.DBPool;
@@ -222,6 +224,13 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
                     UserConfigurationStorage.getInstance().removeUserConfiguration(userId, ctx);
                 } catch (final OXException e) {
                     LOG.warn("User Configuration could not be removed from cache", e);
+                }
+                try {
+                    final UserConfiguration userConfiguration = new UserConfiguration(permissionBits, userId, new int[0], ctx);
+                    final DowngradeEvent event = new DowngradeEvent(userConfiguration, writeCon, ctx);
+                    DowngradeRegistry.getInstance().fireDowngradeEvent(event);
+                } catch (final OXException e) {
+                    LOG.warn("New user configuration could not be propagated through system.", e);
                 }
             }
         } finally {
