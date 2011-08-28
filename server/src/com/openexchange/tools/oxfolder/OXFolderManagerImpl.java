@@ -949,8 +949,8 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         /*
          * This folder shall be shared to other users
          */
-        if (folderObj.getType() == FolderObject.PRIVATE && folderObj.getPermissions().size() > 1) {
-            final Set<Integer> diff = OXFolderUtility.getShareUsers(null, folderObj.getPermissions(), user.getId(), ctx);
+        if (storageObj.getType() == FolderObject.PRIVATE && storageObj.getPermissions().size() > 1) {
+            final Set<Integer> diff = OXFolderUtility.getShareUsers(null, storageObj.getPermissions(), user.getId(), ctx);
             if (!diff.isEmpty()) {
                 final FolderObject[] allSharedFolders;
                 try {
