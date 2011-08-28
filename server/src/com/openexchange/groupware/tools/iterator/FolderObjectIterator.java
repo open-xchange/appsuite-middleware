@@ -905,6 +905,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         }
 
         public void close() throws com.openexchange.exception.OXException {
+            ids.clear();
             flag.set(false);
             queue.offer(POISON);
             cancelFuture(mainFuture);
