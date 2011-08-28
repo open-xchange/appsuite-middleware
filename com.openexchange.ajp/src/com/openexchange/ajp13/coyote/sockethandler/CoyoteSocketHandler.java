@@ -50,7 +50,6 @@
 package com.openexchange.ajp13.coyote.sockethandler;
 
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.concurrent.Future;
 import javax.management.NotCompliantMBeanException;
 import com.openexchange.ajp13.AJPv13Config;
@@ -230,20 +229,6 @@ public final class CoyoteSocketHandler implements IAJPv13SocketHandler {
         final AjpProcessor ajpProcessor = new AjpProcessor(Constants.MAX_PACKET_SIZE, listenerMonitor);
         if (readTimeout > 0) {
             ajpProcessor.setKeepAliveTimeout(readTimeout);
-        }
-        try {
-            final int linger = this.linger > 0 ? this.linger : Constants.DEFAULT_CONNECTION_LINGER;
-            if (linger > 0) {
-                client.setSoLinger(true, linger);
-            }
-            final int to = Constants.DEFAULT_CONNECTION_TIMEOUT;
-            if (to > 0) {
-                client.setSoTimeout(to);
-            }
-            //client.setServerSoTimeout(Constants.DEFAULT_SERVER_SOCKET_TIMEOUT);
-            client.setTcpNoDelay(Constants.DEFAULT_TCP_NO_DELAY);
-        } catch (final SocketException e) {
-            // Eh...
         }
         final Future<Object> future = pool.submit(new CoyoteTask(client, ajpProcessor, listenerMonitor, watcher), behavior);
         ajpProcessor.setControl(future);

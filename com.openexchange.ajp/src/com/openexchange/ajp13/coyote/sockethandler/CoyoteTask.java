@@ -51,11 +51,13 @@ package com.openexchange.ajp13.coyote.sockethandler;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajp13.coyote.ActionCode;
 import com.openexchange.ajp13.coyote.AjpProcessor;
+import com.openexchange.ajp13.coyote.Constants;
 import com.openexchange.ajp13.coyote.ExceptionUtils;
 import com.openexchange.ajp13.najp.AJPv13ServerImpl;
 import com.openexchange.ajp13.najp.AJPv13TaskMonitor;
@@ -150,6 +152,20 @@ public final class CoyoteTask implements Task<Object> {
 
     @Override
     public Object call() throws Exception {
+        try {
+            final int linger = Constants.DEFAULT_CONNECTION_LINGER;
+            if (linger > 0) {
+                client.setSoLinger(true, linger);
+            }
+            final int to = Constants.DEFAULT_CONNECTION_TIMEOUT;
+            if (to > 0) {
+                client.setSoTimeout(to);
+            }
+            //client.setServerSoTimeout(Constants.DEFAULT_SERVER_SOCKET_TIMEOUT);
+            client.setTcpNoDelay(Constants.DEFAULT_TCP_NO_DELAY);
+        } catch (final SocketException e) {
+            // Eh...
+        }
         //while (!client.isClosed()) {
             try {
                 ajpProcessor.action(ActionCode.START, null);
