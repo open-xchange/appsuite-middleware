@@ -94,6 +94,8 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
     private static final org.apache.commons.logging.Log LOG =
         org.apache.commons.logging.LogFactory.getLog(ElasticSearchTextFillerQueue.class);
 
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
     private static final TextFiller POISON = new TextFiller(null, null, null, 0, 0, 0);
 
     private static final int MAX_NUM_CONCURRENT_FILLER_TASKS = Constants.MAX_NUM_CONCURRENT_FILLER_TASKS;
@@ -310,6 +312,9 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
                             final String text =
                                 TextProcessing.extractTextFrom(access.getMessageStorage().getMessage(filler.getFullName(), mailId, false));
                             jsonObject.put(Constants.FIELD_BODY, text);
+                            if (DEBUG) {
+                                LOG.debug("Text extracted and indexed for: " + filler);
+                            }
                         } catch (final Exception e) {
                             LOG.error("Text could not be extracted from: " + filler, e);
                             jsonObject.put(Constants.FIELD_BODY, "");

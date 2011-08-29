@@ -831,7 +831,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
     }
 
-    private static final class PermissionLoader {
+    private static final class PermissionLoader implements Callable<Object> {
 
         protected static final Integer POISON = Integer.valueOf(-1);
 
@@ -841,63 +841,65 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
         private final Future<Object> mainFuture;
 
+        private final Context ctx;
+
         public PermissionLoader(final Context ctx) throws OXException {
             super();
-            final ConcurrentTIntObjectHashMap<SetableFutureTask> permsMap = this.permsMap = new ConcurrentTIntObjectHashMap<SetableFutureTask>();
-            final BlockingQueue<Integer> queue = this.queue = new LinkedBlockingQueue<Integer>();
+            this.ctx = ctx;
+            this.permsMap = new ConcurrentTIntObjectHashMap<SetableFutureTask>();
+            this.queue = new LinkedBlockingQueue<Integer>();
             final ThreadPoolService tps = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
-            mainFuture = tps.submit(ThreadPools.task(new Callable<Object>() {
+            mainFuture = tps.submit(ThreadPools.task(this, PermissionLoader.class.getSimpleName()), CallerRunsBehavior.<Object> getInstance());
+        }
 
-                @Override
-                public Object call() throws Exception {
-                    //try {
-                        final Connection readCon = Database.get(ctx, false);
-                        try {
-                            /*
-                             * Stay active as long as no POISON is consumed
-                             */
-                            final int cid = ctx.getContextId();
-                            final Set<Integer> ids = new HashSet<Integer>();
-                            while (true) {
-                                /*
-                                 * Wait for IDs
-                                 */
-                                if (queue.isEmpty()) {
-                                    final Integer folderId = queue.take();
-                                    if (POISON == folderId) {
-                                        return null;
-                                    }
-                                    ids.add(folderId);
-                                }
-                                /*
-                                 * Gather possibly available IDs but don't wait
-                                 */
-                                queue.drainTo(ids);
-                                final boolean quit = ids.remove(POISON);
-                                /*
-                                 * Fill future(s) from concurrent map
-                                 */
-                                for (final Integer id : ids) {
-                                    final int fuid = id.intValue();
-                                    permsMap.get(fuid).set(loadFolderPermissions(fuid, cid, readCon));
-                                }
-                                ids.clear();
-                                if (quit) {
-                                    return null;
-                                }
+        @Override
+        public Object call() throws Exception {
+            //try {
+                final Connection readCon = Database.get(ctx, false);
+                try {
+                    /*
+                     * Stay active as long as no POISON is consumed
+                     */
+                    final int cid = ctx.getContextId();
+                    final Set<Integer> ids = new HashSet<Integer>();
+                    while (true) {
+                        /*
+                         * Wait for IDs
+                         */
+                        if (queue.isEmpty()) {
+                            final Integer folderId = queue.take();
+                            if (POISON == folderId) {
+                                return null;
                             }
-                        } finally {
-                            Database.back(ctx, false, readCon);
-                            /*
-                             * Needed to ensure termination of stopWhenEmpty() invocation
-                             */
-                            queue.clear();
+                            ids.add(folderId);
                         }
-                    //} catch (final InterruptedException e) {
-                    //    throw e;
-                    //}
+                        /*
+                         * Gather possibly available IDs but don't wait
+                         */
+                        queue.drainTo(ids);
+                        final boolean quit = ids.remove(POISON);
+                        /*
+                         * Fill future(s) from concurrent map
+                         */
+                        for (final Integer id : ids) {
+                            final int fuid = id.intValue();
+                            permsMap.get(fuid).set(loadFolderPermissions(fuid, cid, readCon));
+                        }
+                        ids.clear();
+                        if (quit) {
+                            return null;
+                        }
+                    }
+                } finally {
+                    Database.back(ctx, false, readCon);
+                    /*
+                     * Needed to ensure termination of stopWhenEmpty() invocation
+                     */
+                    queue.clear();
                 }
-            }, PermissionLoader.class.getSimpleName()), CallerRunsBehavior.<Object> getInstance());
+            //} catch (final InterruptedException e) {
+            //    throw e;
+            //}
         }
 
         public void close() {
