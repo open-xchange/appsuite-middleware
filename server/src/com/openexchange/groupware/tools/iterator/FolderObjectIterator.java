@@ -938,7 +938,6 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                 while (!queue.isEmpty()) {
                     // Nope
                 }
-                //flag.set(false);
                 queue.offer(POISON);
                 //cancelFuture(mainFuture);
             } else {
@@ -951,7 +950,6 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                         while (!q.isEmpty()) {
                             // Nope
                         }
-                        //fl.set(false);
                         q.offer(POISON);
                         //cancelFuture(f);
                         return null;
