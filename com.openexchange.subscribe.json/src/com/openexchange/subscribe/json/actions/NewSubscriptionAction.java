@@ -87,8 +87,8 @@ public class NewSubscriptionAction extends AbstractSubscribeAction {
 				urlPrefix = subscribeRequest.getRequestData().getParameter("__serverURL");
 			}
 	        JSONObject jsonTemp =  new SubscriptionJSONWriter().write(subscription, subscription.getSource().getFormDescription(), urlPrefix);
-	        JSONObject json = new JSONObject("{\"data\":"+jsonTemp+"}");
-	        return new AJAXRequestResult(json, "json");
+	        //JSONObject json = new JSONObject("{\"data\":"+jsonTemp.getInt("id")+"}");
+	        return new AJAXRequestResult(jsonTemp.getInt("id"), "json");
 		} catch (JSONException e) {
 			throw new OXException(e);
 		}

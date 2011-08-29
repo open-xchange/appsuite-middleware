@@ -92,11 +92,11 @@ public class RefreshSubscriptionAction extends AbstractSubscribeAction {
 			throws OXException {
 		final List<Subscription> subscriptionsToRefresh = new ArrayList<Subscription>(10);
         final Set<Integer> ids = new HashSet<Integer>();
-        JSONObject request = (JSONObject) subscribeRequest.getRequestData().getData();
-        if (request.has("folder")) {
+        JSONObject parameters = new JSONObject(subscribeRequest.getRequestData().getParameters());
+        if (parameters.has("folder")) {
             String folderId;
 			try {
-				folderId = request.getString("folder");
+				folderId = parameters.getString("folder");
 				List<Subscription> allSubscriptions = null;
 	            allSubscriptions = getSubscriptionsInFolder(subscribeRequest.getServerSession(), folderId, services.getService(SecretService.class).getSecret(subscribeRequest.getServerSession()));
 	            Collections.sort(allSubscriptions, new Comparator<Subscription>() {
@@ -119,23 +119,23 @@ public class RefreshSubscriptionAction extends AbstractSubscribeAction {
 			}
 
         }
-        if (request.has("id")) {
+        if (parameters.has("id")) {
             int id;
 			try {
-				id = request.getInt("id");
-				final Subscription subscription = loadSubscription(id, subscribeRequest.getServerSession(), request.optString("source"), services.getService(SecretService.class).getSecret(subscribeRequest.getServerSession()));
+				id = parameters.getInt("id");
+				final Subscription subscription = loadSubscription(id, subscribeRequest.getServerSession(), parameters.optString("source"), services.getService(SecretService.class).getSecret(subscribeRequest.getServerSession()));
 	            if (!ids.contains(id)) {
 	                ids.add(id);
 	                subscriptionsToRefresh.add(subscription);
 	            }
 	            int resultCode = services.getService(SubscriptionExecutionService.class).executeSubscriptions(subscriptionsToRefresh, subscribeRequest.getServerSession());
 	            String urlPrefix = "";
-				if (subscribeRequest.getRequestData().getParameter("__serverURL") != null){
-					urlPrefix = subscribeRequest.getRequestData().getParameter("__serverURL");
+				if (parameters.has("__serverURL")){
+					urlPrefix = parameters.getString("__serverURL");
 				}
 
 	    			JSONObject json = new SubscriptionJSONWriter().write(subscription, subscription.getSource().getFormDescription(), urlPrefix);
-	    			return new AJAXRequestResult(json, "subscription");
+	    			return new AJAXRequestResult(json, "json");
 
 			} catch (JSONException e) {
 				throw new OXException(e);
