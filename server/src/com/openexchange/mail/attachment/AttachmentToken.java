@@ -58,7 +58,9 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.utils.MailFolderUtility;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.systemname.SystemNameService;
 
 /**
  * {@link AttachmentToken}
@@ -72,6 +74,8 @@ public final class AttachmentToken implements AttachmentTokenConstants {
     private final long ttlMillis;
 
     private final AtomicLong timeoutStamp;
+
+    private final String systemName;
 
     private int contextId;
 
@@ -108,6 +112,16 @@ public final class AttachmentToken implements AttachmentTokenConstants {
                 UUIDs.getUnformattedString(UUID.randomUUID())).toString();
         this.ttlMillis = ttlMillis;
         timeoutStamp = new AtomicLong(System.currentTimeMillis() + ttlMillis);
+        systemName = ServerServiceRegistry.getInstance().getService(SystemNameService.class).getSystemName();
+    }
+
+    /**
+     * Gets the system name.
+     *
+     * @return The system name
+     */
+    public String getSystemName() {
+        return systemName;
     }
 
     /**
