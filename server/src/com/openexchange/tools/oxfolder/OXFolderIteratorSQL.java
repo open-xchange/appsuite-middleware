@@ -53,6 +53,9 @@ import static com.openexchange.tools.oxfolder.OXFolderUtility.folderModule2Strin
 import static com.openexchange.tools.oxfolder.OXFolderUtility.getUserName;
 import static com.openexchange.tools.sql.DBUtils.closeResources;
 import gnu.trove.TIntArrayList;
+import gnu.trove.TIntHashSet;
+import gnu.trove.TIntIntHashMap;
+import gnu.trove.TIntIntIterator;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -1038,6 +1041,9 @@ public final class OXFolderIteratorSQL {
      * @throws OXException If module's visible public folders that are not visible in hierarchic tree-view cannot be determined
      */
     public static boolean hasVisibleFoldersNotSeenInTreeView(final int module, final int userId, final int[] groups, final UserConfiguration userConfig, final Context ctx, final Connection readCon) throws OXException {
+        final StringBuilder condBuilder = new StringBuilder(32).append("AND (ot.type = ").append(FolderObject.PUBLIC);
+        condBuilder.append(") AND (ot.module = ").append(module);
+        condBuilder.append(')');
         Connection rc = readCon;
         boolean closeReadCon = false;
         PreparedStatement stmt = null;
@@ -1051,9 +1057,14 @@ public final class OXFolderIteratorSQL {
             /*
              * Statement to select all user-visible public folders
              */
-            final String sqlSelectStr = buildQueryNonTreeVisibleFolders(Integer.valueOf(module), userId, groups, userConfig, contextId);
+            stmt =
+                rc.prepareStatement(getSQLUserVisibleFolders(
+                    "ot.fuid, ot.parent", // fuid, parent, ...
+                    StringCollection.getSqlInString(userId, groups),
+                    StringCollection.getSqlInString(userConfig.getAccessibleModules()),
+                    condBuilder.toString(),
+                    getSubfolderOrderBy(STR_OT)));
             int pos = 1;
-            stmt = rc.prepareStatement(sqlSelectStr);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
@@ -1068,7 +1079,29 @@ public final class OXFolderIteratorSQL {
             }
 
             rs = stmt.executeQuery();
-            return rs.next();
+            if (!rs.next()) {
+                closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
+                return false;
+            }
+            final TIntIntHashMap fuid2parent = new TIntIntHashMap(128);
+            final TIntHashSet fuids = new TIntHashSet(128);
+            do {
+                final int fuid = rs.getInt(1);
+                fuid2parent.put(fuid, rs.getInt(2));
+                fuids.add(fuid);
+            } while (rs.next());
+            closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
+            /*
+             * Check for a parent not contained in keys
+             */
+            for (final TIntIntIterator iterator = fuid2parent.iterator(); iterator.hasNext();) {
+                iterator.advance();
+                final int parent = iterator.value();
+                if (parent >= FolderObject.MIN_FOLDER_ID && !fuids.contains(parent)) {
+                    return true;
+                }
+            }
+            return false;
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException t) {
@@ -1079,6 +1112,11 @@ public final class OXFolderIteratorSQL {
     }
 
     private static SearchIterator<FolderObject> getVisibleFoldersNotSeenInTreeViewNew(final Integer module, final int userId, final int[] groups, final UserConfiguration userConfig, final Context ctx, final Connection readCon) throws OXException {
+        final StringBuilder condBuilder = new StringBuilder(32).append("AND (ot.type = ").append(FolderObject.PUBLIC);
+        if (null != module) {
+            condBuilder.append(") AND (ot.module = ").append(module.intValue());
+        }
+        condBuilder.append(')');
         Connection rc = readCon;
         boolean closeReadCon = false;
         PreparedStatement stmt = null;
@@ -1092,9 +1130,14 @@ public final class OXFolderIteratorSQL {
             /*
              * Statement to select all user-visible public folders
              */
-            final String sqlSelectStr = buildQueryNonTreeVisibleFolders(module, userId, groups, userConfig, contextId);
+            stmt =
+                rc.prepareStatement(getSQLUserVisibleFolders(
+                    "ot.fuid, ot.parent", // fuid, parent, ...
+                    StringCollection.getSqlInString(userId, groups),
+                    StringCollection.getSqlInString(userConfig.getAccessibleModules()),
+                    condBuilder.toString(),
+                    getSubfolderOrderBy(STR_OT)));
             int pos = 1;
-            stmt = rc.prepareStatement(sqlSelectStr);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
@@ -1109,11 +1152,50 @@ public final class OXFolderIteratorSQL {
             }
 
             rs = stmt.executeQuery();
-            return new FolderObjectIterator(rs, stmt, false, ctx, readCon, closeReadCon);
+            if (!rs.next()) {
+                closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
+                return FolderObjectIterator.EMPTY_FOLDER_ITERATOR;
+            }
+            final TIntIntHashMap fuid2parent = new TIntIntHashMap(128);
+            final TIntHashSet fuids = new TIntHashSet(128);
+            do {
+                final int fuid = rs.getInt(1);
+                fuid2parent.put(fuid, rs.getInt(2));
+                fuids.add(fuid);
+            } while (rs.next());
+            closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
+            /*
+             * Remove those fuids with a parent contained as a key
+             */
+            for (final TIntIntIterator iterator = fuid2parent.iterator(); iterator.hasNext();) {
+                iterator.advance();
+                final int parent = iterator.value();
+                if (parent < FolderObject.MIN_FOLDER_ID || fuids.contains(parent)) {
+                    iterator.remove();
+                }
+            }
+            /*
+             * Remaining entries have a non-visible parent
+             */
+            if (fuid2parent.isEmpty()) {
+                closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
+                return FolderObjectIterator.EMPTY_FOLDER_ITERATOR;
+            }
+            stmt = rc.prepareStatement("SELECT " + FolderObjectIterator.getFieldsForSQL(STR_OT) + " FROM oxfolder_tree AS ot WHERE ot.cid = ? AND ot.fuid IN " + StringCollection.getSqlInString(fuid2parent.keys()) + ' ' + getSubfolderOrderBy(STR_OT));
+            stmt.setInt(1, contextId);
+            rs = stmt.executeQuery();
         } catch (final SQLException e) {
+            closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException t) {
+            closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(t, Integer.valueOf(contextId));
+        }
+        try {
+            return new FolderObjectIterator(rs, stmt, false, ctx, readCon, closeReadCon);
+        } catch (final SearchIteratorException e) {
+            closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
+            throw e;
         }
     }
 
