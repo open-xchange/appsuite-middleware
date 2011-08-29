@@ -276,6 +276,16 @@ public final class DispatcherServlet extends SessionServlet {
                 retval.putParameter(entry.getKey(), entry.getValue()[0]);
             }
         }
+        /*
+         * Check for ETag header to support client caching
+         */
+        final String eTag = req.getHeader("etag");
+        if (null != eTag) {
+            retval.setETag(eTag);
+        }
+        /*
+         * Set request body
+         */
         if (isFileUpload) {
             final UploadEvent upload = processUploadStatic(req);
             final Iterator<UploadFile> iterator = upload.getUploadFilesIterator();

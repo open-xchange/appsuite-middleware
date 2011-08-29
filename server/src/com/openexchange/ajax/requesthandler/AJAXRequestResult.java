@@ -85,8 +85,6 @@ public final class AJAXRequestResult {
 
     private String format;
 
-    private String eTag;
-
     /**
      * Initializes a new {@link AJAXRequestResult} with data and time stamp set to <code>null</code>.
      * 
@@ -305,24 +303,6 @@ public final class AJAXRequestResult {
     public void setResultObject(final Object object, final String format) {
         setResultObject(object);
         setFormat(format);
-    }
-
-    /**
-     * Gets the ETag
-     * 
-     * @return The ETag
-     */
-    public String getETag() {
-        return eTag;
-    }
-
-    /**
-     * Sets the ETag
-     * 
-     * @param eTag The ETag to set
-     */
-    public void setETag(final String eTag) {
-        this.eTag = eTag;
     }
 
 }

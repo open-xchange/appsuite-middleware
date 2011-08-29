@@ -118,6 +118,8 @@ public class AJAXRequestData {
 
     private AJAXState state;
 
+    private String eTag;
+
     /**
      * Initializes a new {@link AJAXRequestData}.
      *
@@ -146,6 +148,24 @@ public class AJAXRequestData {
         super();
         params = new LinkedHashMap<String, String>();
         headers = new LinkedHashMap<String, String>();
+    }
+
+    /**
+     * Gets the ETag
+     * 
+     * @return The ETag
+     */
+    public String getETag() {
+        return eTag;
+    }
+
+    /**
+     * Sets the ETag
+     * 
+     * @param eTag The ETag to set
+     */
+    public void setETag(final String eTag) {
+        this.eTag = eTag;
     }
 
     /**
