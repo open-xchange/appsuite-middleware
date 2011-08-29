@@ -901,6 +901,10 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                             }
                         } finally {
                             Database.back(ctx, false, readCon);
+                            /*
+                             * Needed to ensure termination of stopWhenEmpty() invocation
+                             */
+                            queue.clear();
                         }
                     //} catch (final InterruptedException e) {
                     //    throw e;
