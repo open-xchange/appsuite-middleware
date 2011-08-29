@@ -248,12 +248,16 @@ public final class MailFolderImpl extends AbstractFolder {
                 if (mailFolder.isInbox()) {
                     mailFolderType = MailFolderType.INBOX;
                 } else if (mailFolder.isTrash()) {
+                    name = new StringHelper(user.getLocale()).getString(MailStrings.TRASH);
                     mailFolderType = MailFolderType.TRASH;
                 } else if (mailFolder.isSent()) {
+                    name = new StringHelper(user.getLocale()).getString(MailStrings.SENT);
                     mailFolderType = MailFolderType.SENT;
                 } else if (mailFolder.isSpam()) {
+                    name = new StringHelper(user.getLocale()).getString(MailStrings.SPAM);
                     mailFolderType = MailFolderType.SPAM;
                 } else if (mailFolder.isDrafts()) {
+                    name = new StringHelper(user.getLocale()).getString(MailStrings.DRAFTS);
                     mailFolderType = MailFolderType.DRAFTS;
                 } else {
                     mailFolderType = MailFolderType.NONE;
@@ -264,14 +268,18 @@ public final class MailFolderImpl extends AbstractFolder {
                 } else {
                     try {
                         if (fullName.equals(fullnameProvider.getDraftsFolder())) {
+                            name = new StringHelper(user.getLocale()).getString(MailStrings.DRAFTS);
                             mailFolderType = MailFolderType.DRAFTS;
                         } else if (fullName.equals(fullnameProvider.getINBOXFolder())) {
                             mailFolderType = MailFolderType.INBOX;
                         } else if (fullName.equals(fullnameProvider.getSentFolder())) {
+                            name = new StringHelper(user.getLocale()).getString(MailStrings.SENT);
                             mailFolderType = MailFolderType.SENT;
                         } else if (fullName.equals(fullnameProvider.getSpamFolder())) {
+                            name = new StringHelper(user.getLocale()).getString(MailStrings.SPAM);
                             mailFolderType = MailFolderType.SPAM;
                         } else if (fullName.equals(fullnameProvider.getTrashFolder())) {
+                            name = new StringHelper(user.getLocale()).getString(MailStrings.TRASH);
                             mailFolderType = MailFolderType.TRASH;
                         } else {
                             mailFolderType = MailFolderType.NONE;

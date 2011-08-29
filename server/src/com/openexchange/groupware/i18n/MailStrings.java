@@ -68,6 +68,25 @@ public class MailStrings implements LocalizableStrings {
     // The internationalized name for the INBOX mail folder
     public static final String INBOX = "Inbox";
 
+    // The internationalized name for the trash mail folder
+    public static final String TRASH = "Trash";
+
+    // The internationalized name for the drafts mail folder
+    public static final String DRAFTS = "Drafts";
+
+    // The internationalized name for the sent mail folder
+    public static final String SENT = "Sent objects";
+
+    // The internationalized name for the spam mail folder
+    public static final String SPAM = "Spam";
+
+    // The internationalized name for the confirmed-spam mail folder
+    public static final String CPNFIRMED_SPAM = "Confirmed spam";
+
+    // The internationalized name for the confirmed-spam mail folder
+    public static final String CPNFIRMED_HAM = "Confirmed ham";
+
+
     // The internationalized subject for a read acknowledgement
     public static final String ACK_SUBJECT = "Read Acknowledgement";
 

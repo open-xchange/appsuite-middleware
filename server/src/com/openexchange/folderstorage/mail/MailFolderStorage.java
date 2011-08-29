@@ -872,7 +872,31 @@ public final class MailFolderStorage implements FolderStorage {
                     for (final MailFolder child : children) {
                         if ("INBOX".equals(child.getFullname())) {
                             child.setName(new StringHelper(locale).getString(MailStrings.INBOX));
-                        }
+                        } else {
+                            if (child.containsDefaultFolderType()) {
+                                if (child.isTrash()) {
+                                    child.setName(new StringHelper(locale).getString(MailStrings.TRASH));
+                                } else if (child.isSent()) {
+                                    child.setName(new StringHelper(locale).getString(MailStrings.SENT));
+                                } else if (child.isSpam()) {
+                                    child.setName(new StringHelper(locale).getString(MailStrings.SPAM));
+                                } else if (child.isDrafts()) {
+                                    child.setName(new StringHelper(locale).getString(MailStrings.DRAFTS));
+                                }
+                            } else {
+                                final String fullName = child.getFullname();
+                                final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
+                                if (fullName.equals(folderStorage.getDraftsFolder())) {
+                                    child.setName(new StringHelper(locale).getString(MailStrings.TRASH));
+                                } else if (fullName.equals(folderStorage.getSentFolder())) {
+                                    child.setName(new StringHelper(locale).getString(MailStrings.SENT));
+                                } else if (fullName.equals(folderStorage.getSpamFolder())) {
+                                    child.setName(new StringHelper(locale).getString(MailStrings.SPAM));
+                                } else if (fullName.equals(folderStorage.getTrashFolder())) {
+                                    child.setName(new StringHelper(locale).getString(MailStrings.TRASH));
+                                }
+                            }
+                         }
                     }
                 }
             }
