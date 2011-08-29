@@ -1193,7 +1193,7 @@ public final class OXFolderIteratorSQL {
         }
         try {
             return new FolderObjectIterator(rs, stmt, false, ctx, readCon, closeReadCon);
-        } catch (final SearchIteratorException e) {
+        } catch (final OXException e) {
             closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
             throw e;
         }
