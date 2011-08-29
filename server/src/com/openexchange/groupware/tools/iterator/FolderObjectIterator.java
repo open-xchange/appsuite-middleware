@@ -904,18 +904,18 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             }, PermissionLoader.class.getSimpleName()), CallerRunsBehavior.<Object> getInstance());
         }
 
-        public void close() throws com.openexchange.exception.OXException {
+        public void close() {
             ids.clear();
             flag.set(false);
             queue.offer(POISON);
-            mainFuture.cancel(true);
+            cancelFuture();
             queue.clear();
             permsMap.clear();
         }
 
-        protected void cancelFuture(final Future<Object> f) {
+        protected void cancelFuture() {
             try {
-                f.get(2, TimeUnit.SECONDS);
+                mainFuture.get(100, TimeUnit.MILLISECONDS);
             } catch (final InterruptedException e) {
                 // Keep interrupted flag
                 Thread.currentThread().interrupt();
@@ -925,7 +925,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                 LOG.error(cause.getMessage(), cause);
             } catch (final TimeoutException e) {
                 // Halt it
-                f.cancel(true);
+                mainFuture.cancel(true);
             }
         }
 
