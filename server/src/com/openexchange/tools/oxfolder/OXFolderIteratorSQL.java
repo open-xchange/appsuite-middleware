@@ -519,7 +519,12 @@ public final class OXFolderIteratorSQL {
             closeResources(rs, stmt, readCon, true, ctx);
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(t, Integer.valueOf(contextId));
         }
-        return new FolderObjectIterator(rs, stmt, true, ctx, readCon, true);
+        try {
+            return new FolderObjectIterator(rs, stmt, true, ctx, readCon, true);
+        } catch (final OXException e) {
+            closeResources(rs, stmt, readCon, true, ctx);
+            throw e;
+        }
     }
 
     /**
