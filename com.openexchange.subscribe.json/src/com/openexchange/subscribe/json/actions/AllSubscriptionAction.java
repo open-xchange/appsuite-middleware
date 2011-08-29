@@ -53,6 +53,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -97,18 +99,20 @@ public class AllSubscriptionAction extends AbstractSubscribeAction {
 
         List<Subscription> allSubscriptions = null;
         if (containsFolder) {
-            allSubscriptions = getSubscriptionsInFolder(subscribeRequest.getServerSession(), folderId, services.getService(SecretService.class).getSecret(subscribeRequest.getServerSession()));
+        	SecretService secretService = services.getService(SecretService.class);
+            allSubscriptions = getSubscriptionsInFolder(subscribeRequest.getServerSession(), folderId, secretService.getSecret(subscribeRequest.getServerSession()));            
         } else {
             allSubscriptions = getAllSubscriptions(subscribeRequest.getServerSession(), services.getService(SecretService.class).getSecret(subscribeRequest.getServerSession()));
         }
 
-        final String[] basicColumns = getBasicColumns((JSONObject)subscribeRequest.getRequestData().getData());
+        JSONObject parameters = new JSONObject(subscribeRequest.getRequestData().getParameters());
+        final String[] basicColumns = getBasicColumns(parameters);
         Map<String, String[]> dynamicColumns;
 		try {
-			dynamicColumns = getDynamicColumns((JSONObject)subscribeRequest.getRequestData().getData());
-			final List<String> dynamicColumnOrder = getDynamicColumnOrder((JSONObject)subscribeRequest.getRequestData().getData());
-	        JSONObject json = (JSONObject) createResponse(allSubscriptions, basicColumns, dynamicColumns, dynamicColumnOrder);
-	        return new AJAXRequestResult(json, "subscription");
+			dynamicColumns = getDynamicColumns(parameters);
+			final List<String> dynamicColumnOrder = getDynamicColumnOrder(parameters);
+	        JSONArray jsonArray = (JSONArray) createResponse(allSubscriptions, basicColumns, dynamicColumns, dynamicColumnOrder);	        
+	        return new AJAXRequestResult(jsonArray, "json");
 		} catch (JSONException e) {
 			throw new OXException(e);
 		}

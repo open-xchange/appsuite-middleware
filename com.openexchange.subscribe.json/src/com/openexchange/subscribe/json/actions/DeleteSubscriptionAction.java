@@ -80,11 +80,10 @@ public class DeleteSubscriptionAction  extends AbstractSubscribeAction {
 
 	@Override
 	public AJAXRequestResult perform(SubscribeRequest subscribeRequest)
-			throws OXException {
-		JSONObject request = (JSONObject) subscribeRequest.getRequestData().getData();
-		 JSONArray ids;
+			throws OXException {		
+		 
 		try {
-			ids = request.getJSONArray(ResponseFields.DATA);
+			JSONArray ids = (JSONArray) subscribeRequest.getRequestData().getData();
 			final Context context = subscribeRequest.getServerSession().getContext();
 	        for (int i = 0, size = ids.length(); i < size; i++) {
 	            final int id = ids.getInt(i);
@@ -102,7 +101,7 @@ public class DeleteSubscriptionAction  extends AbstractSubscribeAction {
 			throw new OXException(e);
 		}
 
-		return new AJAXRequestResult(1, "subscription");
+		return new AJAXRequestResult(1, "json");
 	}
 
 

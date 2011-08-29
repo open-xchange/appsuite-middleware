@@ -90,6 +90,7 @@ public class ListSubscriptionAction extends AbstractSubscribeAction {
 	public AJAXRequestResult perform(SubscribeRequest subscribeRequest)
 			throws OXException {
 		final JSONArray ids = (JSONArray) subscribeRequest.getRequestData().getData();
+		final JSONObject parameters = new JSONObject(subscribeRequest.getRequestData().getParameters());
         final Context context = subscribeRequest.getServerSession().getContext();
         final List<Subscription> subscriptions = new ArrayList<Subscription>(ids.length());
         for (int i = 0, size = ids.length(); i < size; i++) {
@@ -109,13 +110,13 @@ public class ListSubscriptionAction extends AbstractSubscribeAction {
 			}
 
         }
-        final String[] basicColumns = getBasicColumns((JSONObject)subscribeRequest.getRequestData().getData());
+        final String[] basicColumns = getBasicColumns(parameters);
         Map<String, String[]> dynamicColumns;
 		try {
-			dynamicColumns = getDynamicColumns((JSONObject)subscribeRequest.getRequestData().getData());
-			final List<String> dynamicColumnOrder = getDynamicColumnOrder((JSONObject)subscribeRequest.getRequestData().getData());
+			dynamicColumns = getDynamicColumns(parameters);
+			final List<String> dynamicColumnOrder = getDynamicColumnOrder(parameters);
 	        JSONObject json = (JSONObject) createResponse(subscriptions, basicColumns, dynamicColumns, dynamicColumnOrder);
-	        return new AJAXRequestResult(json, "subscription");
+	        return new AJAXRequestResult(json, "json");
 		} catch (JSONException e) {
 			throw new OXException(e);
 		}

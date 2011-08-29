@@ -89,7 +89,7 @@ public class UpdateSubscriptionAction extends AbstractSubscribeAction {
 			if (subscribeRequest.getRequestData().getParameter("__serverURL") != null){
 				urlPrefix = subscribeRequest.getRequestData().getParameter("__serverURL");
 			}
-			return new AJAXRequestResult(1, "subscription");
+			return new AJAXRequestResult(1, "json");
 		} catch (JSONException e) {
 			throw new OXException(e);
 		}
