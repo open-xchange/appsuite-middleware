@@ -154,7 +154,7 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
      * Starts consuming from queue.
      */
     public void start() {
-        future = SMALServiceLookup.getServiceStatic(ThreadPoolService.class).submit(ThreadPools.task(this));
+        future = SMALServiceLookup.getServiceStatic(ThreadPoolService.class).submit(ThreadPools.task(this, getClass().getSimpleName()));
     }
 
     /**
