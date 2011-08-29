@@ -129,13 +129,8 @@ public class RefreshSubscriptionAction extends AbstractSubscribeAction {
 	                subscriptionsToRefresh.add(subscription);
 	            }
 	            int resultCode = services.getService(SubscriptionExecutionService.class).executeSubscriptions(subscriptionsToRefresh, subscribeRequest.getServerSession());
-	            String urlPrefix = "";
-				if (parameters.has("__serverURL")){
-					urlPrefix = parameters.getString("__serverURL");
-				}
-
-	    			JSONObject json = new SubscriptionJSONWriter().write(subscription, subscription.getSource().getFormDescription(), urlPrefix);
-	    			return new AJAXRequestResult(json, "json");
+	            
+	    		return new AJAXRequestResult(1, "json");
 
 			} catch (JSONException e) {
 				throw new OXException(e);
