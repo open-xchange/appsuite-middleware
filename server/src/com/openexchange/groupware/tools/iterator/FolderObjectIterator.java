@@ -73,7 +73,6 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.caching.ElementAttributes;
 import com.openexchange.configuration.ServerConfig;
@@ -832,17 +831,16 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
     private static final class PermissionLoader {
 
+        protected static final Integer POISON = Integer.valueOf(-1);
+
         private final ConcurrentTIntObjectHashMap<SetableFutureTask> permsMap;
 
         private final BlockingQueue<Integer> queue;
 
         private final Future<Object> mainFuture;
 
-        private final AtomicBoolean flag;
-
         public PermissionLoader(final Context ctx) throws OXException {
             super();
-            final AtomicBoolean flag = this.flag = new AtomicBoolean(true);
             final ConcurrentTIntObjectHashMap<SetableFutureTask> permsMap = this.permsMap = new ConcurrentTIntObjectHashMap<SetableFutureTask>();
             final BlockingQueue<Integer> queue = this.queue = new LinkedBlockingQueue<Integer>();
             final ThreadPoolService tps = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
@@ -871,12 +869,22 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                              */
                             final List<Integer> ids = new ArrayList<Integer>();
                             final int cid = ctx.getContextId();
-                            while (flag.get()) {
+                            while (true) {
                                 /*
                                  * Wait for IDs
                                  */
-                                ids.clear();
-                                waitForIDs(ids);
+                                if (queue.isEmpty()) {
+                                    final Integer folderId = queue.take();
+                                    if (POISON == folderId) {
+                                        return null;
+                                    }
+                                    ids.add(folderId);
+                                }
+                                /*
+                                 * Gather possibly available IDs but don't wait
+                                 */
+                                queue.drainTo(ids);
+                                final boolean quit = ids.remove(POISON);
                                 /*
                                  * Fill future(s) from concurrent map
                                  */
@@ -884,14 +892,14 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                                     final int fuid = id.intValue();
                                     permsMap.get(fuid).set(loadFolderPermissions(fuid, cid, readCon));
                                 }
+                                ids.clear();
+                                if (quit) {
+                                    return null;
+                                }
                             }
                         } finally {
                             Database.back(ctx, false, readCon);
                         }
-                        /*
-                         * Return
-                         */
-                        return null;
                     //} catch (final InterruptedException e) {
                     //    throw e;
                     //}
@@ -900,10 +908,26 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         }
 
         public void close() {
-            flag.set(false);
-            mainFuture.cancel(true);
+            queue.offer(POISON);
+            cancelFuture(mainFuture);
             queue.clear();
             permsMap.clear();
+        }
+
+        protected void cancelFuture(final Future<Object> f) {
+            try {
+                f.get(2, TimeUnit.SECONDS);
+            } catch (final InterruptedException e) {
+                // Keep interrupted flag
+                Thread.currentThread().interrupt();
+            } catch (final ExecutionException e) {
+                // Error
+                final Throwable cause = e.getCause();
+                LOG.error(cause.getMessage(), cause);
+            } catch (final TimeoutException e) {
+                // Halt it
+                f.cancel(true);
+            }
         }
 
         public void stopWhenEmpty() {
@@ -912,12 +936,12 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                 while (!queue.isEmpty()) {
                     // Nope
                 }
-                flag.set(false);
-                mainFuture.cancel(true);
+                //flag.set(false);
+                queue.offer(POISON);
+                //cancelFuture(mainFuture);
             } else {
                 final BlockingQueue<Integer> q = queue;
                 final Future<Object> f = mainFuture;
-                final AtomicBoolean fl = flag;
                 tps.submit(ThreadPools.task(new Callable<Object>() {
     
                     @Override
@@ -925,8 +949,9 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                         while (!q.isEmpty()) {
                             // Nope
                         }
-                        fl.set(false);
-                        f.cancel(true);
+                        //fl.set(false);
+                        q.offer(POISON);
+                        //cancelFuture(f);
                         return null;
                     }
                     
