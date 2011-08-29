@@ -832,13 +832,9 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
     private static final class PermissionLoader {
 
-        protected static final Integer POISON = Integer.valueOf(-1);
-
         private final ConcurrentTIntObjectHashMap<SetableFutureTask> permsMap;
 
         private final BlockingQueue<Integer> queue;
-
-        private final Queue<Integer> ids;
 
         private final Future<Object> mainFuture;
 
@@ -846,12 +842,24 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
         public PermissionLoader(final Context ctx) throws OXException {
             super();
-            final Queue<Integer> ids = this.ids = new LinkedList<Integer>();
             final AtomicBoolean flag = this.flag = new AtomicBoolean(true);
             final ConcurrentTIntObjectHashMap<SetableFutureTask> permsMap = this.permsMap = new ConcurrentTIntObjectHashMap<SetableFutureTask>();
             final BlockingQueue<Integer> queue = this.queue = new LinkedBlockingQueue<Integer>();
             final ThreadPoolService tps = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
             mainFuture = tps.submit(ThreadPools.task(new Callable<Object>() {
+
+                private final void waitForIDs(final List<Integer> ids) throws InterruptedException {
+                    if (queue.isEmpty()) {
+                        /*
+                         * Wait for an ID to become available
+                         */
+                        ids.add(queue.take());
+                    }
+                    /*
+                     * Gather possibly available IDs but don't wait
+                     */
+                    queue.drainTo(ids);
+                }
 
                 @Override
                 public Object call() throws Exception {
@@ -861,33 +869,20 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                             /*
                              * Stay active as long as flag is true
                              */
+                            final List<Integer> ids = new ArrayList<Integer>();
                             final int cid = ctx.getContextId();
                             while (flag.get()) {
                                 /*
                                  * Wait for IDs
                                  */
-                                if (queue.isEmpty()) {
-                                    final Integer folderId = queue.take();
-                                    if (POISON == folderId) {
-                                        return null;
-                                    }
-                                    ids.add(folderId);
-                                }
-                                /*
-                                 * Gather possibly available IDs but don't wait
-                                 */
-                                queue.drainTo(ids);
-                                final boolean quit = ids.remove(POISON);
+                                ids.clear();
+                                waitForIDs(ids);
                                 /*
                                  * Fill future(s) from concurrent map
                                  */
                                 for (final Integer id : ids) {
                                     final int fuid = id.intValue();
                                     permsMap.get(fuid).set(loadFolderPermissions(fuid, cid, readCon));
-                                }
-                                ids.clear();
-                                if (quit) {
-                                    return null;
                                 }
                             }
                         } finally {
@@ -905,34 +900,38 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         }
 
         public void close() {
-            ids.clear();
             flag.set(false);
-            queue.offer(POISON);
-            cancelFuture();
+            mainFuture.cancel(true);
             queue.clear();
             permsMap.clear();
         }
 
-        protected void cancelFuture() {
-            try {
-                mainFuture.get(100, TimeUnit.MILLISECONDS);
-            } catch (final InterruptedException e) {
-                // Keep interrupted flag
-                Thread.currentThread().interrupt();
-            } catch (final ExecutionException e) {
-                // Error
-                final Throwable cause = e.getCause();
-                LOG.error(cause.getMessage(), cause);
-            } catch (final TimeoutException e) {
-                // Halt it
-                mainFuture.cancel(true);
-            }
-        }
-
         public void stopWhenEmpty() {
-            flag.set(false);
-            queue.offer(POISON);
-            //cancelFuture(mainFuture);
+            final ThreadPoolService tps = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
+            if (null == tps) {
+                while (!queue.isEmpty()) {
+                    // Nope
+                }
+                flag.set(false);
+                mainFuture.cancel(true);
+            } else {
+                final BlockingQueue<Integer> q = queue;
+                final Future<Object> f = mainFuture;
+                final AtomicBoolean fl = flag;
+                tps.submit(ThreadPools.task(new Callable<Object>() {
+    
+                    @Override
+                    public Object call() throws Exception {
+                        while (!q.isEmpty()) {
+                            // Nope
+                        }
+                        fl.set(false);
+                        f.cancel(true);
+                        return null;
+                    }
+                    
+                }), CallerRunsBehavior.<Object> getInstance());
+            }
         }
 
         public void submitPermissionsFor(final int folderId) {
