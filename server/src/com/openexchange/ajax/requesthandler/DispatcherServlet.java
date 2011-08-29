@@ -185,13 +185,18 @@ public final class DispatcherServlet extends SessionServlet {
         final Dispatcher dispatcher = DISPATCHER.get();
         try {
             final ServerSession session = getSessionObject(req);
-
+            /*
+             * Parse AJAXRequestData
+             */
             request = parseRequest(req, preferStream, FileUploadBase.isMultipartContent(new ServletRequestContext(req)), session);
-
+            /*
+             * Start dispatcher processing
+             */
             state = dispatcher.begin();
-
+            /*
+             * Perform request
+             */
             result = dispatcher.perform(request, state, session);
-
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             JSONResponseRenderer.writeResponse(new Response().setException(e), action, req, resp);
