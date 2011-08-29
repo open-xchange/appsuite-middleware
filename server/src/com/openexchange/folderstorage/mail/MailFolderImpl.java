@@ -236,6 +236,7 @@ public final class MailFolderImpl extends AbstractFolder {
             }
         } else {
             mp = mailFolder.getOwnPermission();
+            mailFolderType = MailFolderType.NONE;
             /*
              * Check if entity's permission allows to read the folder: Every mail folder listed is at least visible to user
              */
@@ -263,8 +264,6 @@ public final class MailFolderImpl extends AbstractFolder {
                     name = new StringHelper(user.getLocale()).getString(MailStrings.CONFIRMED_SPAM);
                 } else if (mailFolder.isConfirmedHam()) {
                     name = new StringHelper(user.getLocale()).getString(MailStrings.CONFIRMED_HAM);
-                } else {
-                    mailFolderType = MailFolderType.NONE;
                 }
             } else if (null != fullName) {
                 if (null == fullnameProvider) {
@@ -289,8 +288,6 @@ public final class MailFolderImpl extends AbstractFolder {
                             name = new StringHelper(user.getLocale()).getString(MailStrings.CONFIRMED_SPAM);
                         } else if (fullName.equals(fullnameProvider.getConfirmedHamFolder())) {
                             name = new StringHelper(user.getLocale()).getString(MailStrings.CONFIRMED_HAM);
-                        } else {
-                            mailFolderType = MailFolderType.NONE;
                         }
                     } catch (final OXException e) {
                         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailFolderImpl.class)).error(e.getMessage(), e);
