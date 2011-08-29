@@ -868,36 +868,42 @@ public final class MailFolderStorage implements FolderStorage {
                 /*
                  * i18n INBOX name
                  */
-                if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname)) {
-                    for (final MailFolder child : children) {
-                        if ("INBOX".equals(child.getFullname())) {
-                            child.setName(new StringHelper(locale).getString(MailStrings.INBOX));
-                        } else {
-                            if (child.containsDefaultFolderType()) {
-                                if (child.isTrash()) {
-                                    child.setName(new StringHelper(locale).getString(MailStrings.TRASH));
-                                } else if (child.isSent()) {
-                                    child.setName(new StringHelper(locale).getString(MailStrings.SENT));
-                                } else if (child.isSpam()) {
-                                    child.setName(new StringHelper(locale).getString(MailStrings.SPAM));
-                                } else if (child.isDrafts()) {
-                                    child.setName(new StringHelper(locale).getString(MailStrings.DRAFTS));
-                                }
-                            } else {
-                                final String fullName = child.getFullname();
-                                final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
-                                if (fullName.equals(folderStorage.getDraftsFolder())) {
-                                    child.setName(new StringHelper(locale).getString(MailStrings.TRASH));
-                                } else if (fullName.equals(folderStorage.getSentFolder())) {
-                                    child.setName(new StringHelper(locale).getString(MailStrings.SENT));
-                                } else if (fullName.equals(folderStorage.getSpamFolder())) {
-                                    child.setName(new StringHelper(locale).getString(MailStrings.SPAM));
-                                } else if (fullName.equals(folderStorage.getTrashFolder())) {
-                                    child.setName(new StringHelper(locale).getString(MailStrings.TRASH));
-                                }
+                for (final MailFolder child : children) {
+                    if ("INBOX".equals(child.getFullname())) {
+                        child.setName(new StringHelper(locale).getString(MailStrings.INBOX));
+                    } else {
+                        if (child.containsDefaultFolderType()) {
+                            if (child.isTrash()) {
+                                child.setName(new StringHelper(locale).getString(MailStrings.TRASH));
+                            } else if (child.isSent()) {
+                                child.setName(new StringHelper(locale).getString(MailStrings.SENT));
+                            } else if (child.isSpam()) {
+                                child.setName(new StringHelper(locale).getString(MailStrings.SPAM));
+                            } else if (child.isDrafts()) {
+                                child.setName(new StringHelper(locale).getString(MailStrings.DRAFTS));
+                            } else if (child.isConfirmedSpam()) {
+                                child.setName(new StringHelper(locale).getString(MailStrings.CONFIRMED_SPAM));
+                            } else if (child.isConfirmedHam()) {
+                                child.setName(new StringHelper(locale).getString(MailStrings.CONFIRMED_HAM));
                             }
-                         }
-                    }
+                        } else {
+                            final String fullName = child.getFullname();
+                            final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
+                            if (fullName.equals(folderStorage.getDraftsFolder())) {
+                                child.setName(new StringHelper(locale).getString(MailStrings.TRASH));
+                            } else if (fullName.equals(folderStorage.getSentFolder())) {
+                                child.setName(new StringHelper(locale).getString(MailStrings.SENT));
+                            } else if (fullName.equals(folderStorage.getSpamFolder())) {
+                                child.setName(new StringHelper(locale).getString(MailStrings.SPAM));
+                            } else if (fullName.equals(folderStorage.getTrashFolder())) {
+                                child.setName(new StringHelper(locale).getString(MailStrings.TRASH));
+                            } else if (fullName.equals(folderStorage.getConfirmedSpamFolder())) {
+                                child.setName(new StringHelper(locale).getString(MailStrings.CONFIRMED_SPAM));
+                            } else if (fullName.equals(folderStorage.getConfirmedHamFolder())) {
+                                child.setName(new StringHelper(locale).getString(MailStrings.CONFIRMED_HAM));
+                            }
+                        }
+                     }
                 }
             }
             /*

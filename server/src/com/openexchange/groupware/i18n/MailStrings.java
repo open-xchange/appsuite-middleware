@@ -81,10 +81,10 @@ public class MailStrings implements LocalizableStrings {
     public static final String SPAM = "Spam";
 
     // The internationalized name for the confirmed-spam mail folder
-    public static final String CPNFIRMED_SPAM = "Confirmed spam";
+    public static final String CONFIRMED_SPAM = "Confirmed spam";
 
     // The internationalized name for the confirmed-spam mail folder
-    public static final String CPNFIRMED_HAM = "Confirmed ham";
+    public static final String CONFIRMED_HAM = "Confirmed ham";
 
 
     // The internationalized subject for a read acknowledgement

@@ -259,6 +259,10 @@ public final class MailFolderImpl extends AbstractFolder {
                 } else if (mailFolder.isDrafts()) {
                     name = new StringHelper(user.getLocale()).getString(MailStrings.DRAFTS);
                     mailFolderType = MailFolderType.DRAFTS;
+                } else if (mailFolder.isConfirmedSpam()) {
+                    name = new StringHelper(user.getLocale()).getString(MailStrings.CONFIRMED_SPAM);
+                } else if (mailFolder.isConfirmedHam()) {
+                    name = new StringHelper(user.getLocale()).getString(MailStrings.CONFIRMED_HAM);
                 } else {
                     mailFolderType = MailFolderType.NONE;
                 }
@@ -281,6 +285,10 @@ public final class MailFolderImpl extends AbstractFolder {
                         } else if (fullName.equals(fullnameProvider.getTrashFolder())) {
                             name = new StringHelper(user.getLocale()).getString(MailStrings.TRASH);
                             mailFolderType = MailFolderType.TRASH;
+                        } else if (fullName.equals(fullnameProvider.getConfirmedSpamFolder())) {
+                            name = new StringHelper(user.getLocale()).getString(MailStrings.CONFIRMED_SPAM);
+                        } else if (fullName.equals(fullnameProvider.getConfirmedHamFolder())) {
+                            name = new StringHelper(user.getLocale()).getString(MailStrings.CONFIRMED_HAM);
                         } else {
                             mailFolderType = MailFolderType.NONE;
                         }
