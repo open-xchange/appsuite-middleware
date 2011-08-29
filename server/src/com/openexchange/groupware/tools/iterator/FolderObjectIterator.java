@@ -61,10 +61,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -865,10 +867,10 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                         final Connection readCon = Database.get(ctx, false);
                         try {
                             /*
-                             * Stay active as long as flag is true
+                             * Stay active as long as no POISON is consumed
                              */
-                            final List<Integer> ids = new ArrayList<Integer>();
                             final int cid = ctx.getContextId();
+                            final Set<Integer> ids = new HashSet<Integer>();
                             while (true) {
                                 /*
                                  * Wait for IDs
