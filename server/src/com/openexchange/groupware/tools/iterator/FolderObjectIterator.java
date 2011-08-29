@@ -848,19 +848,6 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             final ThreadPoolService tps = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
             mainFuture = tps.submit(ThreadPools.task(new Callable<Object>() {
 
-                private final void waitForIDs(final List<Integer> ids) throws InterruptedException {
-                    if (queue.isEmpty()) {
-                        /*
-                         * Wait for an ID to become available
-                         */
-                        ids.add(queue.take());
-                    }
-                    /*
-                     * Gather possibly available IDs but don't wait
-                     */
-                    queue.drainTo(ids);
-                }
-
                 @Override
                 public Object call() throws Exception {
                     //try {
