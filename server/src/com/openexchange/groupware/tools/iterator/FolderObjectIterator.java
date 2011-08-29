@@ -930,33 +930,9 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         }
 
         public void stopWhenEmpty() {
-            final ThreadPoolService tps = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
-            if (null == tps) {
-                while (!queue.isEmpty()) {
-                    // Nope
-                }
-                flag.set(false);
-                queue.offer(POISON);
-                cancelFuture(mainFuture);
-            } else {
-                final BlockingQueue<Integer> q = queue;
-                final Future<Object> f = mainFuture;
-                final AtomicBoolean fl = flag;
-                tps.submit(ThreadPools.task(new Callable<Object>() {
-
-                    @Override
-                    public Object call() throws Exception {
-                        while (!q.isEmpty()) {
-                            // Nope
-                        }
-                        fl.set(false);
-                        q.offer(POISON);
-                        cancelFuture(f);
-                        return null;
-                    }
-
-                }), CallerRunsBehavior.<Object> getInstance());
-            }
+            flag.set(false);
+            queue.offer(POISON);
+            //cancelFuture(mainFuture);
         }
 
         public void submitPermissionsFor(final int folderId) {
