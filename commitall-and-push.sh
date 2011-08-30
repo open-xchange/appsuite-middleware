@@ -11,14 +11,13 @@ echo "3: $alias3"
 
 comment=$1
 
-dc="changed something"
 if [ "" = "$comment" ]; then
- echo -n "Empty comment. Please enter comment (default is \"$dc\"): "
+ echo -n "Empty comment. Please enter comment (default is \"$alias1\"): "
  read comment
 fi
 
 if [ "" = "$comment" ]; then
- comment="$dc"
+ comment="$alias1"
 elif [ "1" = "$comment" ]; then
  comment="$alias1"
 elif [ "2" = "$comment" ]; then
