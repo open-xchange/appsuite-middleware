@@ -143,8 +143,6 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.html.HTMLService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.id.IDGeneratorService;
-import com.openexchange.image.ImageService;
-import com.openexchange.image.internal.ImageSessionEventHandler;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.mail.MailCounterImpl;
 import com.openexchange.mail.MailIdleCounterImpl;
@@ -185,7 +183,6 @@ import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.WhiteboardFactoryService;
 import com.openexchange.server.services.ServerRequestHandlerRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.osgi.SpamHandlerServiceTracker;
@@ -553,20 +550,6 @@ public final class ServerActivator extends DeferredActivator {
             registrationList.add(context.registerService(EventHandler.class.getName(), new MailSessionEventHandler(), serviceProperties));
             registrationList.add(context.registerService(MailCounter.class.getName(), new MailCounterImpl(), null));
             registrationList.add(context.registerService(MailIdleCounter.class.getName(), new MailIdleCounterImpl(), null));
-        }
-        {
-            final ImageService imageService = ServerServiceRegistry.getInstance().getService(ImageService.class);
-            if (null == imageService) {
-                LOG.warn("Missing service: " + ImageService.class.getName());
-            } else {
-                registrationList.add(context.registerService(ImageService.class.getName(), imageService, null));
-            }
-        }
-        {
-            // Register ImageSessionEventHandler
-            final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-            serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-            registrationList.add(context.registerService(EventHandler.class.getName(), new ImageSessionEventHandler(), serviceProperties));
         }
         // TODO: Register search service here until its encapsulated in an own bundle
         registrationList.add(context.registerService(SearchService.class.getName(), new SearchServiceImpl(), null));

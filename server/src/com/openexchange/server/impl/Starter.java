@@ -165,10 +165,6 @@ public class Starter implements Initialization {
      */
     new com.openexchange.groupware.links.LinkInit(),
     /**
-     * Image registry initialization
-     */
-    new com.openexchange.image.internal.ImageRegistryInit(),
-    /**
      * Managed file initialization
      */
     new com.openexchange.filemanagement.internal.ManagedFileInitialization(),
@@ -241,10 +237,6 @@ public class Starter implements Initialization {
      * Downgrade registry start-up
      */
     com.openexchange.groupware.downgrade.DowngradeRegistryInit.getInstance(),
-    /**
-     * Image registry initialization
-     */
-    new com.openexchange.image.internal.ImageRegistryInit(),
     new com.openexchange.mailaccount.internal.MailAccountStorageInit(),
     new com.openexchange.groupware.impl.id.IDGeneratorInit() };
 

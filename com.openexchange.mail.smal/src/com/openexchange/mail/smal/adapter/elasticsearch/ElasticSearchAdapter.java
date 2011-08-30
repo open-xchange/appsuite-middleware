@@ -203,7 +203,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
 
     /**
      * Gets the ElasticSearch client
-     *
+     * 
      * @return The ElasticSearch client
      */
     public TransportClient getClient() {
@@ -330,7 +330,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     public boolean containsFolder(final String fullName, final int accountId, final Session session) throws OXException {
         ensureStarted();
         final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-        boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_USER, session.getUserId()));
+        boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_USER_ID, session.getUserId()));
         boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_ACCOUNT_ID, accountId));
         boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_FULL_NAME, fullName));
         /*
@@ -354,7 +354,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             return;
         }
         final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-        boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_USER, session.getUserId()));
+        boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_USER_ID, session.getUserId()));
         boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_ACCOUNT_ID, accountId));
         boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_FULL_NAME, fullName));
         {
@@ -383,13 +383,14 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             }
             boolQuery.must(QueryBuilders.inQuery(Constants.FIELD_ID, optMailIds));
         }
-        boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_USER, session.getUserId()));
+        boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_USER_ID, session.getUserId()));
         boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_ACCOUNT_ID, accountId));
         boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_FULL_NAME, fullName));
         /*
          * Build search request
          */
-        final SearchRequestBuilder builder = client.prepareSearch(indexNamePrefix + session.getContextId()).setTypes(indexType);
+        final int contextId = session.getContextId();
+        final SearchRequestBuilder builder = client.prepareSearch(indexNamePrefix + contextId).setTypes(indexType);
         builder.setQuery(boolQuery).setSearchType(SearchType.DFS_QUERY_THEN_FETCH);
         builder.setExplain(true);
         builder.setOperationThreading(SearchOperationThreading.THREAD_PER_SHARD);
@@ -412,7 +413,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             // if we use in mapping: "_source" : {"enabled" : false}
             // we need to include all necessary fields in query and then to use doc.getFields()
             // instead of doc.getSource()
-            final MailMessage mail = readDoc(sd.getSource(), mailFields, lookup);
+            final MailMessage mail = readDoc(sd.getSource(), mailFields, lookup, contextId);
             mail.setHeader(X_ELASTIC_SEARCH_UUID, sd.getId());
             mails.add(mail);
         }
@@ -424,7 +425,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         ensureStarted();
         try {
             final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-            boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_USER, session.getUserId()));
+            boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_USER_ID, session.getUserId()));
             if (optAccountId >= 0) {
                 boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_ACCOUNT_ID, optAccountId));
             }
@@ -437,7 +438,8 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             /*
              * Compose search request
              */
-            final SearchRequestBuilder builder = client.prepareSearch(indexNamePrefix + session.getContextId()).setTypes(indexType);
+            final int contextId = session.getContextId();
+            final SearchRequestBuilder builder = client.prepareSearch(indexNamePrefix + contextId).setTypes(indexType);
             // builder.setFrom(page * hitsPerPage).setSize(hitsPerPage);
             if (null != sortField && null != order) {
                 builder.addSort(sortField.getKey(), OrderDirection.DESC.equals(order) ? SortOrder.DESC : SortOrder.ASC);
@@ -462,7 +464,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                 // if we use in mapping: "_source" : {"enabled" : false}
                 // we need to include all necessary fields in query and then to use doc.getFields()
                 // instead of doc.getSource()
-                final MailMessage mail = readDoc(sd.getSource(), mailFields, lookup);
+                final MailMessage mail = readDoc(sd.getSource(), mailFields, lookup, contextId);
                 mail.setHeader(X_ELASTIC_SEARCH_UUID, sd.getId());
                 mails.add(mail);
             }
@@ -472,10 +474,13 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         }
     }
 
-    private MailMessage readDoc(final Map<String, Object> source, final MailFields fields, final MailAccountLookup lookup) throws OXException {
+    private MailMessage readDoc(final Map<String, Object> source, final MailFields fields, final MailAccountLookup lookup, final int contextId) throws OXException {
         try {
             final MailMessage mail = new IDMailMessage(null, null);
             if (null != source) {
+                if (!source.containsKey(Constants.FIELD_BODY)) {
+                    textFillerQueue.add(TextFiller.fillerFor(source, contextId));
+                }
                 mail.setMailId((String) source.get(Constants.FIELD_ID));
                 mail.setFolder((String) source.get(Constants.FIELD_FULL_NAME));
                 {
@@ -748,7 +753,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
              * Identifiers
              */
             b.field(Constants.FIELD_UUID, id);
-            b.field(Constants.FIELD_USER, session.getUserId());
+            b.field(Constants.FIELD_USER_ID, session.getUserId());
             b.field(Constants.FIELD_ACCOUNT_ID, accountId);
             b.field(Constants.FIELD_FULL_NAME, mail.getFolder());
             b.field(Constants.FIELD_ID, mail.getMailId());
@@ -834,7 +839,8 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         if (null == mails || mails.isEmpty()) {
             return;
         }
-        final String indexName = indexNamePrefix + session.getContextId();
+        final int contextId = session.getContextId();
+        final String indexName = indexNamePrefix + contextId;
         /*
          * Request JSON representations
          */
@@ -869,7 +875,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                 final IndexRequestBuilder irb = client.prepareIndex(indexName, indexType, (String) jsonObject.get(Constants.FIELD_UUID));
                 irb.setReplicationType(ReplicationType.ASYNC);
                 irb.setOpType(OpType.INDEX);
-                irb.setSource(changeDoc(mail, jsonObject, stamp));
+                irb.setSource(changeDoc(mail, jsonObject, stamp, contextId));
                 bulkRequest.add(irb);
             }
         }
@@ -905,7 +911,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         } else {
             filter = null;
         }
-        boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_USER, session.getUserId()));
+        boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_USER_ID, session.getUserId()));
         boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_ACCOUNT_ID, accountId));
         boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_FULL_NAME, fullName));
         /*
@@ -936,8 +942,14 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         return jsonObjects;
     }
 
-    private Map<String, Object> changeDoc(final MailMessage mail, final Map<String, Object> jsonObject, final long stamp) {
+    private Map<String, Object> changeDoc(final MailMessage mail, final Map<String, Object> jsonObject, final long stamp, final int contextId) {
         jsonObject.put(Constants.FIELD_TIMESTAMP, Long.valueOf(stamp));
+        /*
+         * Content present?
+         */
+        if (!jsonObject.containsKey(Constants.FIELD_BODY)) {
+            textFillerQueue.add(TextFiller.fillerFor(jsonObject, contextId));
+        }
         /*
          * Write flags
          */

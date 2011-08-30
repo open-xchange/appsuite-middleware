@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.smal.adapter.elasticsearch;
 
+import java.util.Map;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.session.Session;
 
@@ -69,6 +70,19 @@ public final class TextFiller {
      */
     public static TextFiller fillerFor(final String uuid, final MailMessage mail, final Session session) {
         return new TextFiller(uuid, mail.getMailId(), mail.getFolder(), mail.getAccountId(), session.getUserId(), session.getContextId());
+    }
+
+    /**
+     * Gets the filler for specified JSON object.
+     * 
+     * @param jsonObject The JSON object
+     * @param contextId The context identifier
+     * @return The text filler
+     */
+    public static TextFiller fillerFor(final Map<String, Object> jsonObject, final int contextId) {
+        final int accountId = ((Integer) jsonObject.get(Constants.FIELD_ACCOUNT_ID)).intValue();
+        final int userId = ((Integer) jsonObject.get(Constants.FIELD_USER_ID)).intValue();
+        return new TextFiller((String) jsonObject.get(Constants.FIELD_UUID), (String) jsonObject.get(Constants.FIELD_ID), (String) jsonObject.get(Constants.FIELD_FULL_NAME), accountId, userId, contextId);
     }
 
     private final String uuid;

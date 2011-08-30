@@ -49,21 +49,84 @@
 
 package com.openexchange.image;
 
+import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataSource;
-
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
  * {@link ImageDataSource} - An image data source.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ImageDataSource extends DataSource {
 
     /**
+     * The image servlet's alias
+     */
+    public static final String ALIAS = "ajax/image";
+
+    public static final long SECOND_IN_MILLIS = 1000;
+
+    public static final long MINUTE_IN_MILLIS = SECOND_IN_MILLIS * 60;
+
+    public static final long HOUR_IN_MILLIS = MINUTE_IN_MILLIS * 60;
+
+    public static final long DAY_IN_MILLIS = HOUR_IN_MILLIS * 24;
+
+    public static final long WEEK_IN_MILLIS = DAY_IN_MILLIS * 7;
+
+    /**
+     * This constant is actually the length of 364 days, not of a year!
+     */
+    public static final long YEAR_IN_MILLIS = WEEK_IN_MILLIS * 52;
+
+    /**
      * Gets this data source's registration name.
-     *
+     * 
      * @return The registration name
      */
     String getRegistrationName();
+
+    /**
+     * Generates appropriate data arguments for specified image location.
+     * 
+     * @param imageLocation The image location
+     * @return The appropriate data arguments
+     */
+    DataArguments generateDataArgumentsFrom(ImageLocation imageLocation);
+
+    /**
+     * Generates the URL linking to image data
+     * 
+     * @return The image URL
+     */
+    String generateUrl(ImageLocation imageLocation, Session session);
+
+    /**
+     * Gets the signature for this image data source.
+     * 
+     * @param imageLocation The image location
+     * @param session The session
+     * @return The signature
+     */
+    String getSignature(ImageLocation imageLocation, Session session);
+
+    /**
+     * Checks if ETag is eternal.
+     * 
+     * @return <code>true</code> if ETag is eternal; otherwise <code>false</code>
+     */
+    boolean isETagEternal();
+
+    /**
+     * Gets the ETag for this image data source.
+     * 
+     * @param imageLocation The image location
+     * @param session The session
+     * @return The ETag
+     * @throws OXException If ETag cannot be returned
+     */
+    String getETag(ImageLocation imageLocation, Session session) throws OXException;
 
 }

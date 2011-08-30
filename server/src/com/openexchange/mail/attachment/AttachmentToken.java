@@ -58,9 +58,7 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.utils.MailFolderUtility;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.systemname.SystemNameService;
 
 /**
  * {@link AttachmentToken}
@@ -74,8 +72,6 @@ public final class AttachmentToken implements AttachmentTokenConstants {
     private final long ttlMillis;
 
     private final AtomicLong timeoutStamp;
-
-    private final String systemName;
 
     private int contextId;
 
@@ -99,6 +95,8 @@ public final class AttachmentToken implements AttachmentTokenConstants {
 
     private String userAgent;
 
+    private String jsessionId;
+
     /**
      * Initializes a new {@link AttachmentToken}.
      */
@@ -112,16 +110,15 @@ public final class AttachmentToken implements AttachmentTokenConstants {
                 UUIDs.getUnformattedString(UUID.randomUUID())).toString();
         this.ttlMillis = ttlMillis;
         timeoutStamp = new AtomicLong(System.currentTimeMillis() + ttlMillis);
-        systemName = ServerServiceRegistry.getInstance().getService(SystemNameService.class).getSystemName();
     }
 
     /**
-     * Gets the system name.
+     * Gets the JSESSIONID.
      *
-     * @return The system name
+     * @return The JSESSIONID
      */
-    public String getSystemName() {
-        return systemName;
+    public String getJSessionId() {
+        return jsessionId;
     }
 
     /**
@@ -133,6 +130,7 @@ public final class AttachmentToken implements AttachmentTokenConstants {
      */
     public AttachmentToken setAccessInfo(final int accountId, final Session session) {
         this.accountId = accountId;
+        this.jsessionId = (String) session.getParameter("JSESSIONID");
         this.contextId = session.getContextId();
         this.userId = session.getUserId();
         this.sessionId = session.getSessionID();

@@ -903,13 +903,24 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         }
 
         public void close() {
-            queue.offer(POISON);
-            cancelFuture(mainFuture);
-            queue.clear();
-            permsMap.clear();
+            if (mainFuture.isDone()) {
+                return;
+            }
+            synchronized (mainFuture) {
+                if (mainFuture.isDone()) {
+                    return;
+                }
+                queue.offer(POISON);
+                cancelFuture(mainFuture);
+                queue.clear();
+                permsMap.clear();
+            }
         }
 
         protected void cancelFuture(final Future<Object> f) {
+            if (f.isDone()) {
+                return;
+            }
             try {
                 f.get(2, TimeUnit.SECONDS);
             } catch (final InterruptedException e) {
@@ -926,29 +937,39 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         }
 
         public void stopWhenEmpty() {
-            final ThreadPoolService tps = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
-            if (null == tps) {
-                while (!queue.isEmpty()) {
-                    // Nope
+            if (mainFuture.isDone()) {
+                return;
+            }
+            synchronized (mainFuture) {
+                if (mainFuture.isDone()) {
+                    return;
                 }
-                queue.offer(POISON);
-                //cancelFuture(mainFuture);
-            } else {
-                final BlockingQueue<Integer> q = queue;
-                final Future<Object> f = mainFuture;
-                tps.submit(ThreadPools.task(new Callable<Object>() {
-    
-                    @Override
-                    public Object call() throws Exception {
-                        while (!q.isEmpty()) {
-                            // Nope
-                        }
-                        q.offer(POISON);
-                        //cancelFuture(f);
-                        return null;
+                final ThreadPoolService tps = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
+                if (null == tps) {
+                    while (!queue.isEmpty()) {
+                        // Nope
                     }
-                    
-                }), CallerRunsBehavior.<Object> getInstance());
+                    queue.offer(POISON);
+                    //cancelFuture(mainFuture);
+                } else {
+                    final BlockingQueue<Integer> q = queue;
+                    final Future<Object> f = mainFuture;
+                    tps.submit(ThreadPools.task(new Callable<Object>() {
+
+                        @Override
+                        public Object call() throws Exception {
+                            if (f.isDone()) {
+                                return null;
+                            }
+                            while (!q.isEmpty()) {
+                                // Nope
+                            }
+                            q.offer(POISON);
+                            return null;
+                        }
+
+                    }), CallerRunsBehavior.<Object> getInstance());
+                }
             }
         }
 

@@ -59,6 +59,8 @@ import com.openexchange.conversion.DataSource;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
 import com.openexchange.image.ImageDataSource;
+import com.openexchange.image.ImageLocation;
+import com.openexchange.image.ImageUtility;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -111,6 +113,57 @@ public final class InlineImageDataSource implements ImageDataSource {
         } finally {
             mailAccess.close(true);
         }
+    }
+
+    @Override
+    public String generateUrl(final ImageLocation imageLocation, final Session session) {
+        final StringBuilder sb = new StringBuilder(64);
+        /*
+         * Nothing special...
+         */
+        ImageUtility.startImageUrl(imageLocation, session, this, sb);
+        return sb.toString();
+    }
+
+    @Override
+    public DataArguments generateDataArgumentsFrom(final ImageLocation imageLocation) {
+        final DataArguments dataArguments = new DataArguments(3);
+        dataArguments.put(ARGS[0], imageLocation.getFolder());
+        dataArguments.put(ARGS[1], imageLocation.getId());
+        dataArguments.put(ARGS[2], imageLocation.getImageId());
+        return dataArguments;
+    }
+
+    @Override
+    public String getSignature(final ImageLocation imageLocation, final Session session) {
+        final char delim = '#';
+        final StringBuilder builder = new StringBuilder(128);
+        builder.append(delim).append(imageLocation.getFolder());
+        builder.append(delim).append(imageLocation.getId());
+        builder.append(delim).append(imageLocation.getImageId());
+        builder.append(delim).append(session.getUserId());
+        builder.append(delim).append(session.getContextId());
+        builder.append(delim).append(session.getSecret());
+        builder.append(delim);
+        return ImageUtility.getMD5(builder.toString(), "hex");
+    }
+
+    @Override
+    public boolean isETagEternal() {
+        return true;
+    }
+
+    @Override
+    public String getETag(final ImageLocation imageLocation, final Session session) {
+        final char delim = '#';
+        final StringBuilder builder = new StringBuilder(128);
+        builder.append(delim).append(imageLocation.getFolder());
+        builder.append(delim).append(imageLocation.getId());
+        builder.append(delim).append(imageLocation.getImageId());
+        builder.append(delim).append(session.getUserId());
+        builder.append(delim).append(session.getContextId());
+        builder.append(delim);
+        return ImageUtility.getMD5(builder.toString(), "hex");
     }
 
     /**

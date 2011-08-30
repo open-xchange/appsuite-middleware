@@ -309,7 +309,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
                 AttachmentTokenRegistry.getInstance().putToken(token, session);
                 final JSONObject attachmentObject = new JSONObject();
                 attachmentObject.put("id", token.getId());
-                attachmentObject.put("systemName", token.getSystemName());
+                attachmentObject.put("jsessionid", token.getJSessionId());
                 jsonObject.put("token", attachmentObject);
             } catch (final Exception e) {
                 LOG.warn("Adding attachment token failed.", e);

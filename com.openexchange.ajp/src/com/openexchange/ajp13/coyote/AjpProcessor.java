@@ -1474,8 +1474,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         if (null == charEnc) {
             charEnc = AJPv13Config.getServerProperty(Property.DefaultEncoding);
         }
-        for (final String paramsNVP2 : paramsNVPs) {
-            final String paramsNVP = paramsNVP2.trim();
+        for (String paramsNVP : paramsNVPs) {
+            paramsNVP = paramsNVP.trim();
             if (paramsNVP.length() > 0) {
                 // Look-up character '='
                 final int pos = paramsNVP.indexOf('=');

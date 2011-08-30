@@ -384,8 +384,8 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
             servletRequest.setQueryString(queryStr);
         }
         final String[] paramsNVPs = PATTERN_SPLIT.split(queryStr, 0);
-        for (final String paramsNVP2 : paramsNVPs) {
-            final String paramsNVP = paramsNVP2.trim();
+        for (String paramsNVP : paramsNVPs) {
+            paramsNVP = paramsNVP.trim();
             if (paramsNVP.length() > 0) {
                 // Look-up character '='
                 final int pos = paramsNVP.indexOf('=');

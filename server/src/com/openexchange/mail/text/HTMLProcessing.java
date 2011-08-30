@@ -69,9 +69,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import com.openexchange.conversion.DataArguments;
 import com.openexchange.html.HTMLService;
-import com.openexchange.image.ImageService;
+import com.openexchange.image.ImageLocation;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.conversion.InlineImageDataSource;
@@ -546,19 +545,11 @@ public final class HTMLProcessing {
                     /*
                      * Compose corresponding image data
                      */
-                    final ImageService imageService = ServerServiceRegistry.getInstance().getService(ImageService.class);
                     final String imageURL;
-                    if (null == imageService) {
-                        LOG.warn("Missing image service.", new Throwable());
-                        imageURL = "";
-                    } else {
+                    {
                         final InlineImageDataSource imgSource = new InlineImageDataSource();
-                        final DataArguments args = new DataArguments();
-                        final String[] argsNames = imgSource.getRequiredArguments();
-                        args.put(argsNames[0], prepareFullname(msgUID.getAccountId(), msgUID.getFolder()));
-                        args.put(argsNames[1], String.valueOf(msgUID.getMailID()));
-                        args.put(argsNames[2], cid);
-                        imageURL = imageService.addImageData(session, imgSource, args, 60000).getImageURL();
+                        final ImageLocation imageLocation = new ImageLocation(null, prepareFullname(msgUID.getAccountId(), msgUID.getFolder()), String.valueOf(msgUID.getMailID()), cid);
+                        imageURL = imgSource.generateUrl(imageLocation, session);
                     }
                     linkBuilder.setLength(0);
                     linkBuilder.append(imgMatcher.group(1)).append("background=\"").append(imageURL).append('"').append(imgMatcher.group(4));
@@ -614,18 +605,11 @@ public final class HTMLProcessing {
                             /*
                              * Compose corresponding image data
                              */
-                            final ImageService imageService = ServerServiceRegistry.getInstance().getService(ImageService.class);
                             final String imageURL;
-                            if (null == imageService) {
-                                imageURL = "";
-                            } else {
+                            {
                                 final InlineImageDataSource imgSource = new InlineImageDataSource();
-                                final DataArguments args = new DataArguments();
-                                final String[] argsNames = imgSource.getRequiredArguments();
-                                args.put(argsNames[0], prepareFullname(msgUID.getAccountId(), msgUID.getFolder()));
-                                args.put(argsNames[1], String.valueOf(msgUID.getMailID()));
-                                args.put(argsNames[2], filename);
-                                imageURL = imageService.addImageData(session, imgSource, args, 60000).getImageURL();
+                                final ImageLocation imageLocation = new ImageLocation(null, prepareFullname(msgUID.getAccountId(), msgUID.getFolder()), String.valueOf(msgUID.getMailID()), filename);
+                                imageURL = imgSource.generateUrl(imageLocation, session);
                             }
                             linkBuilder.setLength(0);
                             linkBuilder.append(STR_SRC).append('"').append(imageURL).append('"');
@@ -662,19 +646,11 @@ public final class HTMLProcessing {
                 /*
                  * Compose corresponding image data
                  */
-                final ImageService imageService = ServerServiceRegistry.getInstance().getService(ImageService.class);
                 final String imageURL;
-                if (null == imageService) {
-                    LOG.warn("Missing image service.", new Throwable());
-                    imageURL = "";
-                } else {
+                {
                     final InlineImageDataSource imgSource = new InlineImageDataSource();
-                    final DataArguments args = new DataArguments();
-                    final String[] argsNames = imgSource.getRequiredArguments();
-                    args.put(argsNames[0], prepareFullname(msgUID.getAccountId(), msgUID.getFolder()));
-                    args.put(argsNames[1], String.valueOf(msgUID.getMailID()));
-                    args.put(argsNames[2], cid);
-                    imageURL = imageService.addImageData(session, imgSource, args, 60000).getImageURL();
+                    final ImageLocation imageLocation = new ImageLocation(null, prepareFullname(msgUID.getAccountId(), msgUID.getFolder()), String.valueOf(msgUID.getMailID()), cid);
+                    imageURL = imgSource.generateUrl(imageLocation, session);
                 }
                 linkBuilder.setLength(0);
                 linkBuilder.append(STR_SRC).append('"').append(imageURL).append('"');

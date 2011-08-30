@@ -85,6 +85,7 @@ import javax.mail.internet.MimeUtility;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
+import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.exception.OXException;
@@ -102,8 +103,9 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.html.HTMLService;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.image.ImageData;
-import com.openexchange.image.ImageService;
+import com.openexchange.image.ImageDataSource;
+import com.openexchange.image.ImageLocation;
+import com.openexchange.image.ImageUtility;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
@@ -1345,7 +1347,7 @@ public class MIMEMessageFiller {
         if (m.find()) {
             msgFiller.uploadFileIDs = new HashSet<String>();
             final ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
-            final ImageService imageService = ServerServiceRegistry.getInstance().getService(ImageService.class);
+            final ConversionService conversionService = ServerServiceRegistry.getInstance().getService(ConversionService.class);
             final Session session = msgFiller.session;
             final StringBuilder tmp = new StringBuilder(128);
             do {
@@ -1373,11 +1375,8 @@ public class MIMEMessageFiller {
                         continue;
                     }
                 } else {
-                    ImageData imageData = imageService.getImageData(session, id);
-                    if (imageData == null) {
-                        imageData = imageService.getImageData(session, id);
-                    }
-                    if (imageData == null) {
+                    final ImageLocation imageLocation = ImageUtility.parseImageLocationFrom(m.group());
+                    if (null == imageLocation) {
                         if (LOG.isWarnEnabled()) {
                             tmp.setLength(0);
                             LOG.warn(tmp.append("No image found with id \"").append(id).append("\". Referenced image is skipped.").toString());
@@ -1393,8 +1392,25 @@ public class MIMEMessageFiller {
                                 "src=\"cid:" + tmp.append(id).append('@').append("notfound").toString() + "\""));
                         continue;
                     }
+                    final ImageDataSource dataSource = (ImageDataSource) conversionService.getDataSource(imageLocation.getRegistrationName());
+                    if (null == dataSource) {
+                        if (LOG.isWarnEnabled()) {
+                            tmp.setLength(0);
+                            LOG.warn(tmp.append("No image data source found with id \"").append(imageLocation.getRegistrationName()).append("\". Referenced image is skipped.").toString());
+                        }
+                        /*
+                         * Anyway, replace image tag
+                         */
+                        tmp.setLength(0);
+                        mr.appendLiteralReplacement(
+                            sb,
+                            m.group().replaceFirst(
+                                "(?i)src=\"[^\"]*\"",
+                                "src=\"cid:" + tmp.append(id).append('@').append("notfound").toString() + "\""));
+                        continue;
+                    }
                     try {
-                        imageProvider = new ImageDataImageProvider(imageData, session);
+                        imageProvider = new ImageDataImageProvider(dataSource, imageLocation, session);
                     } catch (final OXException e) {
                         if (e.isPrefix("MSG") && MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.getNumber() == e.getCode()) {
                             tmp.setLength(0);
@@ -1574,13 +1590,9 @@ public class MIMEMessageFiller {
 
         private final String fileName;
 
-        public ImageDataImageProvider(final ImageData imageData, final Session session) throws OXException {
+        public ImageDataImageProvider(final ImageDataSource imageData, final ImageLocation imageLocation, final Session session) throws OXException {
             super();
-            try {
-                this.data = imageData.getImageData(session);
-            } catch (final OXException e) {
-                throw new OXException(e);
-            }
+            this.data = imageData.getData(InputStream.class, imageData.generateDataArgumentsFrom(imageLocation), session);
             final DataProperties dataProperties = data.getDataProperties();
             contentType = dataProperties.get(DataProperties.PROPERTY_CONTENT_TYPE);
             fileName = dataProperties.get(DataProperties.PROPERTY_NAME);
