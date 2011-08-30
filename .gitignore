@@ -21,3 +21,4 @@ management/jars
 com.openexchange.threadpool/jars
 cache/jars
 com.openexchange.tx/jars
+com.openexchange.xml/jars
