@@ -23,3 +23,6 @@ cache/jars
 com.openexchange.tx/jars
 com.openexchange.xml/jars
 com.openexchange.sql/jars
+com.openexchange.conversion/jars
+com.openexchange.crypto/jars
+com.openexchange.dataretention/jars
