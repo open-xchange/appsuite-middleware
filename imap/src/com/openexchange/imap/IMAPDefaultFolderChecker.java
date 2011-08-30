@@ -69,6 +69,7 @@ import com.openexchange.imap.cache.NamespaceFoldersCache;
 import com.openexchange.imap.cache.RootSubfolderCache;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.services.IMAPServiceRegistry;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.config.MailProperties;
@@ -268,8 +269,15 @@ public final class IMAPDefaultFolderChecker {
                     /*
                      * Get connection
                      */
-
-                    final Connection con = IMAPServiceRegistry.getService(DatabaseService.class, true).getWritable(session.getContextId());
+                    final DatabaseService databaseService = IMAPServiceRegistry.getService(DatabaseService.class, true);
+                    Connection con = null;
+                    boolean readOnly = false;
+                    try {
+                        con = databaseService.getWritable(session.getContextId());
+                    } catch (final OXException e) {
+                        con = databaseService.getReadOnly(session.getContextId());
+                        readOnly = true;
+                    }
                     try {
                         /*
                          * Get storage service
@@ -281,6 +289,18 @@ public final class IMAPDefaultFolderChecker {
                             try {
                                 sequentiallyCheckFolders(prefix, sep, type, storageService, mailSessionCache, con);
                             } catch (final RetryOtherPrefixException e) {
+                                if (readOnly) { // Not possible to recover...
+                                    final Throwable cause = e.getCause();
+                                    if (cause instanceof MessagingException) {
+                                        throw MIMEMailException.handleMessagingException((MessagingException) cause);
+                                    }
+                                    throw MailExceptionCode.DEFAULT_FOLDER_CHECK_FAILED.create(
+                                        imapConfig.getServer(),
+                                        imapConfig.getLogin(),
+                                        Integer.valueOf(session.getUserId()),
+                                        Integer.valueOf(session.getContextId()),
+                                        null == cause ? "" : cause.getMessage());
+                                }
                                 prefix = e.getPrefix();
                                 final MailAccount mailAccount = getMailAccount(storageService, con);
                                 final MailAccountDescription mad = new MailAccountDescription();
@@ -358,15 +378,8 @@ public final class IMAPDefaultFolderChecker {
                             }
                         }
                     } finally {
-                        try {
-                            IMAPServiceRegistry.getService(DatabaseService.class, true).backWritable(session.getContextId(), con);
-                        } catch (final OXException e) {
-                            try {
-                                con.close();
-                            } catch (final Exception ignore) {
-                                // Ignore
-                            }
-                            throw e;
+                        if (null != con) {
+                            databaseService.backWritable(session.getContextId(), con);
                         }
                     }
                     /*
