@@ -14,15 +14,15 @@
     <property name="testJarFile" value="${bundlesDir}/${Bundle-SymbolicName}-test.jar"/>
 
     <target name="prepareClasspath" depends="testForMainBuild">
-        <!-- propertycopy name="reqClasspath" from="${projectName}.requiredClasspath" override="true"/>
-        <echo message="${reqClasspath}"/ -->
+        <propertycopy name="reqClasspath" from="${projectName}.requiredClasspath" override="true"/>
+        <!-- echo message="${reqClasspath}"/ -->
         <setProjectDependencies projectName="${projectName}" binDir="${mainBinDir}" pathId="mainDependencies" deepPathId="mainDeepDependencies"/>
         <setProjectDependencies projectName="${projectName}" binDir="${simBinDir}" pathId="simDependencies" deepPathId="simDeepDependencies"/>
         <setProjectDependencies projectName="${projectName}" binDir="${testBinDir}" pathId="testDependencies" deepPathId="testDeepDependencies"/>
         <path id="mainCompileClasspath">
             <path refid="mainDependencies"/>
         </path>
-        <!-- property name="printablePath" refid="mainBinClasses"/>
+        <!-- property name="printablePath" refid="mainCompileClasspath"/>
         <echo message="${printablePath}"/ -->
         <path id="simCompileClasspath">
             <path refid="mainCompileClasspath"/>
@@ -56,6 +56,21 @@
         <jar jarfile="${jarsDir}/${Bundle-SymbolicName}.jar" manifest="META-INF/MANIFEST.MF">
             <fileset dir="${binDir}"/>
         </jar>
+        <foreach list="${reqClasspath}" target="addLibToBundleJar" param="lib" inheritAll="true"/>
+    </target>
+
+    <target name="addLibToBundleJar">
+        <if>
+            <contains string="${lib}" substring="${projectName}/lib"/>
+            <then>
+                <propertyregex property="jarFile" input="${lib}" regexp=".*/(.*\.jar)" select="\1"/>
+                <jar jarfile="${jarsDir}/${Bundle-SymbolicName}.jar" update="true">
+                    <fileset dir=".">
+                        <include name="lib/${jarFile}"/>
+                    </fileset>
+                </jar>
+            </then>
+        </if>
     </target>
 
     <target name="installJar">
