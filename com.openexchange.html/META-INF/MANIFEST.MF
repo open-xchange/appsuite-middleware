@@ -5,11 +5,10 @@ Bundle-SymbolicName: com.openexchange.html
 Bundle-Version: 6.20.0.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Bundle-ClassPath: com.openexchange.html.jar,
+Bundle-ClassPath: .,
  lib/htmlcleaner-2.2.jar,
  lib/kxml.jar,
- lib/jTidy.jar,
- .
+ lib/jTidy.jar
 Import-Package: com.openexchange.config,
  com.openexchange.exception,
  com.openexchange.log,

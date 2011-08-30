@@ -18,5 +18,8 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.datatypes.genericonf"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.file.storage"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.file.storage.composition"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,monitoring"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.proxy"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.html"/>
 </provider>
 </psf>

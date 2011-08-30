@@ -29,3 +29,6 @@ com.openexchange.dataretention/jars
 com.openexchange.datatypes.genericonf/jars
 com.openexchange.file.storage.composition/jars
 com.openexchange.file.storage/jars
+com.openexchange.html/jars
+com.openexchange.proxy/jars
+monitoring/jars
