@@ -8,6 +8,7 @@
     <property name="simBinDir" value="sim-build"/>
     <property name="testSrcDir" value="test"/>
     <property name="testBinDir" value="test-build"/>
+    <property name="libDir" value="lib"/>
     <property name="jarsDir" value="jars"/>
     <property file="META-INF/MANIFEST.MF"/>
     <property file="build.properties"/>
@@ -52,52 +53,92 @@
         </javac>
     </target>
 
-    <target name="bundleJar">
-        <jar jarfile="${jarsDir}/${Bundle-SymbolicName}.jar" manifest="META-INF/MANIFEST.MF">
-            <fileset dir="${binDir}"/>
-        </jar>
-        <foreach list="${reqClasspath}" target="addLibToBundleJar" param="lib" inheritAll="true"/>
+    <target name="testFor3rdPartyLib">
+        <condition property="3rdPartyLib">
+            <contains string="${reqClasspath}" substring="${projectName}/${libDir}"/>
+        </condition>
     </target>
 
-    <target name="addLibToBundleJar">
+    <target name="bundle" depends="testFor3rdPartyLib">
+        <delete file="${jarsDir}/${Bundle-SymbolicName}.jar"/>
+        <delete dir="${jarsDir}/${Bundle-SymbolicName}"/>
         <if>
-            <contains string="${lib}" substring="${projectName}/lib"/>
+            <istrue value="${3rdPartyLib}"/>
             <then>
-                <propertyregex property="jarFile" input="${lib}" regexp=".*/(.*\.jar)" select="\1"/>
-                <jar jarfile="${jarsDir}/${Bundle-SymbolicName}.jar" update="true">
-                    <fileset dir=".">
-                        <include name="lib/${jarFile}"/>
-                    </fileset>
+                <mkdir dir="${jarsDir}/${Bundle-SymbolicName}"/>
+                <jar jarfile="${jarsDir}/${Bundle-SymbolicName}/${Bundle-SymbolicName}.jar">
+                    <fileset dir="${binDir}"/>
                 </jar>
+                <copy todir="${jarsDir}/${Bundle-SymbolicName}">
+                    <fileset dir=".">
+                        <include name="META-INF/MANIFEST.MF"/>
+                    </fileset>
+                </copy>
+                <foreach list="${reqClasspath}" target="add3rdPartyLibToBundle" param="lib" inheritAll="true"/>
+                <!-- Eclipse puts "." as path into MANIFEST.MF. We need to replace this with Bundle-SymbolicName.jar -->
+                <replace file="${jarsDir}/${Bundle-SymbolicName}/META-INF/MANIFEST.MF">
+                    <replacefilter token="Bundle-ClassPath: .," value="Bundle-ClassPath: ${Bundle-SymbolicName}.jar,"/>
+                </replace>
+            </then>
+            <else>
+                <jar jarfile="${jarsDir}/${Bundle-SymbolicName}.jar" manifest="META-INF/MANIFEST.MF">
+                    <fileset dir="${binDir}"/>
+                </jar>
+            </else>
+        </if>
+    </target>
+
+    <target name="add3rdPartyLibToBundle">
+        <if>
+            <matches string="${lib}" pattern="${projectName}/${libDir}/.*\.jar"/>
+            <then>
+                <propertyregex property="jarFile" input="${lib}" regexp=".*/(${libDir}/.*\.jar)" select="\1"/>
+                <copy todir="${jarsDir}/${Bundle-SymbolicName}">
+                    <fileset dir=".">
+                        <include name="${jarFile}"/>
+                    </fileset>
+                </copy>
             </then>
         </if>
     </target>
 
-    <target name="installJar">
+    <target name="installBundle">
         <mkdir dir="${destDir}/${bundlesDir}"/>
         <copy todir="${destDir}/${bundlesDir}">
             <fileset dir="${jarsDir}">
+                <!-- OSGi platform only contains jars directory and all *.jar from there must be installed. -->
                 <include name="*.jar"/>
+                <!-- Bundle is generated as a directory due to 3rd party libs -->
+                <include name="${Bundle-SymbolicName}/**"/>
             </fileset>
         </copy>
     </target>
 
     <target name="makeIni">
         <!-- TODO fragment without @start -->
-        <propertyregex property="bundle.name" input="${jar}" regexp=".*/(.*)\.jar" select="\1"/>
-        <echo file="${destDir}/${bundle.dDir}/${bundle.name}.ini" message="${bundlesDir}/${bundle.name}.jar@start${line.separator}"/>
+        <propertyregex property="bundleName" input="${bundleFileOrDir}" regexp="^.*/(.*?)(\.jar)?$" select="\1"/>
+        <propertyregex property="fileOrDir" input="${bundleFileOrDir}" regexp="^.*/(.*?(\.jar)?)$" select="\1"/>
+        <echo file="${destDir}/${bundle.dDir}/${bundleName}.ini" message="${bundlesDir}/${fileOrDir}@start${line.separator}"/>
     </target>
 
     <target name="installConfig">
         <mkdir dir="${destDir}/${bundle.dDir}"/>
-        <foreach target="makeIni" param="jar" inheritAll="true">
+        <foreach target="makeIni" param="bundleFileOrDir" inheritAll="true">
             <path>
-                <fileset dir="${jarsDir}" includes="*.jar"/>
+                <!-- OSGi platform only contains jars directory and all *.jar from there must be installed. -->
+                <fileset dir="${jarsDir}" >
+                    <include name="*.jar"/>
+                </fileset>
+                <!-- Bundle is generated as a directory due to 3rd party libs -->
+                <dirset dir="${jarsDir}">
+                    <include name="${Bundle-SymbolicName}"/>
+                </dirset>
             </path>
         </foreach>
+        <!-- TODO configuration files -->
     </target>
 
-    <target name="install" depends="installJar,installConfig"/>
+    <target name="install" depends="installBundle,installConfig"/>
 
     <target name="testForMainBuild">
         <if>
@@ -127,8 +168,8 @@
         </antcall>
     </target>
 
-    <target name="testForMainJar">
-        <condition property="mainJar">
+    <target name="testForBundleMain">
+        <condition property="bundleMain">
             <and>
                 <equals arg1="${buildType}" arg2="bundle"/>
                 <available file="${mainBinDir}" type="dir"/>
@@ -136,8 +177,8 @@
         </condition>
     </target>
 
-    <target name="mainJar" depends="testForMainJar" if="mainJar">
-        <antcall target="bundleJar" inheritrefs="true">
+    <target name="bundleMain" depends="testForBundleMain" if="bundleMain">
+        <antcall target="bundle" inheritrefs="true">
             <param name="binDir" value="${mainBinDir}"/>
         </antcall>
     </target>
@@ -246,7 +287,7 @@
         </junit>
     </target>
 
-    <target name="build" depends="prepareClasspath,buildMain,mainJar,installMain,buildSim,buildTest,testJar,runTests"/>
+    <target name="build" depends="prepareClasspath,buildMain,bundleMain,installMain,buildSim,buildTest,testJar,runTests"/>
 
 	<target name="dist">
 		<property name="destDir" value="${distDir}/${packageName}/${projectName}"/>
