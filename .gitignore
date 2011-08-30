@@ -15,3 +15,4 @@ open-xchange-config/development/Open-Xchange Server (Development).launch
 com.openexchange.common/jars
 build/build
 global/jars
+com.openexchange.config.cascade/jars
