@@ -127,6 +127,21 @@ public final class Tools {
     }
 
     /**
+     * Sets specified ETag header (and implicitly removes/replaces any existing cache-controlling header: <i>Expires</i>, <i>Cache-Control</i>, and <i>Pragma</i>)
+     * 
+     * @param eTag The ETag value
+     * @param expires The expires date
+     * @param resp The HTTP servlet response to apply to
+     */
+    public static void setETag(final String eTag, final Date expires, final HttpServletResponse resp) {
+        removeCachingHeader(resp);
+        resp.setHeader("etag", eTag);
+        synchronized (HEADER_DATEFORMAT) {
+            resp.setHeader(EXPIRES_KEY, HEADER_DATEFORMAT.format(expires));
+        }
+    }
+
+    /**
      * The magic spell to disable caching. Do not use these headers if response is directly written into servlet's output stream to initiate
      * a download.
      *
@@ -321,14 +336,14 @@ public final class Tools {
      * @param req The HttpServletRequest used to contact this server
      * @return "http://" or "https://" depending on what was deemed more appropriate
      */
-    public static String getProtocol(HttpServletRequest req) {
+    public static String getProtocol(final HttpServletRequest req) {
         return (considerSecure(req)) ? "https://" : "http://";
     }
 
-    public static boolean considerSecure(HttpServletRequest req) {
-        ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+    public static boolean considerSecure(final HttpServletRequest req) {
+        final ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
         if (configurationService != null) {
-            boolean force = configurationService.getBoolProperty(ServerConfig.Property.FORCE_HTTPS.getPropertyName(), false);
+            final boolean force = configurationService.getBoolProperty(ServerConfig.Property.FORCE_HTTPS.getPropertyName(), false);
             if (force) {
                 return true;
             }
@@ -338,14 +353,14 @@ public final class Tools {
 
     public static final Map<String, List<String>> copyHeaders(final HttpServletRequest req) {
         final Map<String, List<String>> headers = new HashMap<String, List<String>>();
-        for (Enumeration<?> e = req.getHeaderNames(); e.hasMoreElements(); ) {
-            String name = (String) e.nextElement();
+        for (final Enumeration<?> e = req.getHeaderNames(); e.hasMoreElements(); ) {
+            final String name = (String) e.nextElement();
             List<String> values = headers.get(name);
             if (null == values) {
                 values = new ArrayList<String>();
                 headers.put(name, values);
             }
-            for (Enumeration<?> valueEnum = req.getHeaders(name); valueEnum.hasMoreElements(); ) {
+            for (final Enumeration<?> valueEnum = req.getHeaders(name); valueEnum.hasMoreElements(); ) {
                 values.add((String) valueEnum.nextElement());
             }
 
