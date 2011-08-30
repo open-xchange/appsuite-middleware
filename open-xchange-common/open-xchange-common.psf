@@ -10,5 +10,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,cache"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.tx"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.xml"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.sql"/>
 </provider>
 </psf>
