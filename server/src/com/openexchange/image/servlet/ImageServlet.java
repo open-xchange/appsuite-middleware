@@ -97,7 +97,7 @@ public final class ImageServlet extends HttpServlet {
      */
     public static final String PARAMETER_UID = "uid";
 
-    private CookieHashSource hashSource;
+    private volatile CookieHashSource hashSource;
 
     /**
      * Initializes a new {@link ImageServlet}
@@ -114,7 +114,7 @@ public final class ImageServlet extends HttpServlet {
 
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        Tools.disableCaching(resp);
+        // Tools.disableCaching(resp);
         super.service(req, resp);
     }
 
