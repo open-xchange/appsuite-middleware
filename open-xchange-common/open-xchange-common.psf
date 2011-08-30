@@ -4,5 +4,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.common"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,global"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.config.cascade"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,config"/>
 </provider>
 </psf>
