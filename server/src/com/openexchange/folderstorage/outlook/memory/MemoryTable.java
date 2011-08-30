@@ -276,11 +276,22 @@ public final class MemoryTable {
     private void initialize(final int userId, final int contextId) throws OXException {
         final DatabaseService databaseService = Utility.getDatabaseService();
         // Get a connection
-        final Connection con = databaseService.getWritable(contextId);
+        boolean readOnly = false;
+        Connection con;
+        try {
+            con = databaseService.getWritable(contextId);
+        } catch (final OXException e) {
+            con = databaseService.getReadOnly(contextId);
+            readOnly = true;
+        }
         try {
             initialize(userId, contextId, con);
         } finally {
-            databaseService.backWritable(contextId, con);
+            if (readOnly) {
+                databaseService.backReadOnly(contextId, con);
+            } else {
+                databaseService.backWritable(contextId, con);
+            }
         }
     }
 
