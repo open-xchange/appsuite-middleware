@@ -453,8 +453,9 @@ public abstract class SessionServlet extends AJAXServlet {
      * @param req servlet request.
      * @param session session to remember.
      */
-    public static void rememberSession(final ServletRequest req, final ServerSession session) {
+    public static void rememberSession(final HttpServletRequest req, final ServerSession session) {
         req.setAttribute(SESSION_KEY, session);
+        session.setParameter("JSESSIONID", req.getSession().getId());
     }
 
     /**
