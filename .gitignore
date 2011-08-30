@@ -26,3 +26,6 @@ com.openexchange.sql/jars
 com.openexchange.conversion/jars
 com.openexchange.crypto/jars
 com.openexchange.dataretention/jars
+com.openexchange.datatypes.genericonf/jars
+com.openexchange.file.storage.composition/jars
+com.openexchange.file.storage/jars
