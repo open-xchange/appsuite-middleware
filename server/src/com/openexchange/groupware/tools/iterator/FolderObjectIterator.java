@@ -932,11 +932,11 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         }
 
         public void stopWhenEmpty() {
+            if (mainFuture.isDone()) {
+                return;
+            }
             final ThreadPoolService tps = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
             if (null == tps) {
-                if (mainFuture.isDone()) {
-                    return;
-                }
                 while (!queue.isEmpty()) {
                     // Nope
                 }
