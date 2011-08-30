@@ -19,3 +19,5 @@ com.openexchange.config.cascade/jars
 config/jars
 management/jars
 com.openexchange.threadpool/jars
+cache/jars
+com.openexchange.tx/jars
