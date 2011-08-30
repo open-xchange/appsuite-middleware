@@ -66,7 +66,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.contacts.json.RequestTools;
-import com.openexchange.conversion.DataArguments;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.datasource.ContactImageDataSource;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -74,7 +73,7 @@ import com.openexchange.groupware.contact.helpers.ContactGetter;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;
-import com.openexchange.image.ImageService;
+import com.openexchange.image.ImageLocation;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -88,8 +87,6 @@ public class ContactJSONResultConverter implements ResultConverter {
     private static final Map<Integer, String> specialColumns = new HashMap<Integer, String>();
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ContactJSONResultConverter.class));
-
-    private final ImageService imageService;
 
     private ServerSession session;
 
@@ -112,9 +109,8 @@ public class ContactJSONResultConverter implements ResultConverter {
      *
      * @param imageService
      */
-    public ContactJSONResultConverter(final ImageService imageService) {
+    public ContactJSONResultConverter() {
         super();
-        this.imageService = imageService;
     }
 
     @Override
@@ -199,7 +195,7 @@ public class ContactJSONResultConverter implements ResultConverter {
         return json;
     }
 
-    private Object convertListOfContacts(final List<Contact> contacts, int[] columns) throws OXException {
+    private Object convertListOfContacts(final List<Contact> contacts, final int[] columns) throws OXException {
         final JSONArray resultArray = new JSONArray();
         for (final Contact contact : contacts) {
             final JSONArray contactArray = new JSONArray();
@@ -265,21 +261,14 @@ public class ContactJSONResultConverter implements ResultConverter {
             return calendar.getTime().getTime();
         } else if (type.equals("image")) {
             String imageUrl = null;
-            final ImageService imageService = getImageService();
-            if (null == imageService) {
-                LOG.warn("Contact image URL cannot be written. Missing service: " + ImageService.class.getName());
-            } else {
+            {
                 final byte[] imageData = contact.getImage1();
                 if (imageData != null) {
                     final ContactImageDataSource imgSource = new ContactImageDataSource();
-                    final DataArguments args = new DataArguments();
-                    final String[] argsNames = imgSource.getRequiredArguments();
-                    args.put(argsNames[0], String.valueOf(contact.getParentFolderID()));
-                    args.put(argsNames[1], String.valueOf(contact.getObjectID()));
-                    imageUrl = imageService.addImageData(session, imgSource, args).getImageURL();
+                    final ImageLocation il = new ImageLocation(null, String.valueOf(contact.getParentFolderID()), String.valueOf(contact.getObjectID()), null);
+                    imageUrl = imgSource.generateUrl(il, session);
                 }
             }
-
             return imageUrl;
         } else if (type.equals("distributionlist")) {
             JSONArray distributionList = null;
@@ -300,9 +289,9 @@ public class ContactJSONResultConverter implements ResultConverter {
 
             return links;
         } else if (type.equals("remove_if_zero")) {
-            Integer value = (Integer) field.doSwitch(cg, contact);
+            final Integer value = (Integer) field.doSwitch(cg, contact);
             if (value != null) {
-                int intValue = value.intValue();
+                final int intValue = value.intValue();
                 if (intValue != 0) {
                     return intValue;
                 }
@@ -361,7 +350,4 @@ public class ContactJSONResultConverter implements ResultConverter {
         return null;
     }
 
-    protected ImageService getImageService() {
-        return imageService;
-    }
 }

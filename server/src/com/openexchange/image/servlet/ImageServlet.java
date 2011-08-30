@@ -52,33 +52,47 @@ package com.openexchange.image.servlet;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.UndeclaredThrowableException;
+import java.util.Date;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.openexchange.ajax.SessionServlet;
+import org.osgi.framework.ServiceException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.Login;
 import com.openexchange.ajax.helper.CombinedInputStream;
+import com.openexchange.ajax.login.HashCalculator;
+import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.context.ContextService;
+import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.exception.OXException;
-import com.openexchange.image.ImageData;
-import com.openexchange.image.ImageService;
-import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.image.ImageDataSource;
+import com.openexchange.image.ImageLocation;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.ImageTypeDetector;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.user.UserService;
 
 /**
  * {@link ImageServlet} - The servlet serving requests to <i>ajax/image</i>
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ImageServlet extends HttpServlet {
+
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageServlet.class));
 
     private static final int BUFLEN = 0xFFFF;
 
@@ -90,7 +104,7 @@ public final class ImageServlet extends HttpServlet {
     /**
      * The image servlet's alias
      */
-    public static final String ALIAS = "ajax/image";
+    public static final String ALIAS = ImageDataSource.ALIAS;
 
     /**
      * The <code>"uid"</code> parameter
@@ -114,77 +128,231 @@ public final class ImageServlet extends HttpServlet {
 
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        // Tools.disableCaching(resp);
+        Tools.disableCaching(resp);
         super.service(req, resp);
     }
 
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        writeImage(req, resp, hashSource);
-    }
-
-    /**
-     * Writes image denoted by request to given response.
-     *
-     * @param req The request
-     * @param resp The response
-     * @param hashSource The hash source
-     * @throws IOException If an I/O error occurs
-     */
-    public static void writeImage(final HttpServletRequest req, final HttpServletResponse resp, final CookieHashSource hashSource) throws IOException {
+        Context context = null;
+        User user = null;
+        Session session = null;
+        /*-
+         * Try to resolve user by cookies & parameters
+         * 
+         * Look-up up cookies
+         */
+        final SessiondService sessiondService;
+        String secret = null;
         try {
-            final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-            if (sessiondService == null) {
-                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
+            final Cookie[] cookies = req.getCookies();
+            if (null == cookies) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing request cookies.");
+                return;
             }
-            final String uid = req.getParameter(PARAMETER_UID);
-            if (uid == null) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing URL parameter " + PARAMETER_UID);
-            }
-            final ImageService imageService = ServerServiceRegistry.getInstance().getService(ImageService.class, true);
-            final String sessionId = imageService.getSessionForUID(uid);
-            final String errorMsg = "Image not found";
-            if(sessionId != null) {
-                final Session session = sessiondService.getSession(sessionId);
-                final String secret = SessionServlet.extractSecret(hashSource, req, session.getHash(), session.getClient());
-
-                if (session.getSecret().equals(secret)) {
-                    final ImageData imageData = imageService.getImageData(session, uid);
-                    if(imageData != null) {
-                        outputImageData(imageData, session, resp);
-                    } else {
-                        final String logMsg = "No image found for session " + sessionId + " and uid " + uid;
-                        sendErrorAndLog(resp, HttpServletResponse.SC_NOT_FOUND, errorMsg, logMsg);
+            sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class, true);
+            final String hash = HashCalculator.getHash(req);
+            final String sessionCookieName = Login.SESSION_PREFIX + hash;
+            final String secretCookieName = Login.SECRET_PREFIX + hash;
+            NextCookie: for (final Cookie cookie : cookies) {
+                final String cookieName = cookie.getName();
+                if (cookieName.startsWith(sessionCookieName)) {
+                    final String sessionId = cookie.getValue();
+                    if (sessiondService.refreshSession(sessionId)) {
+                        session = sessiondService.getSession(sessionId);
+                        try {
+                            context =
+                                ServerServiceRegistry.getInstance().getService(ContextService.class, true).getContext(
+                                    session.getContextId());
+                            user =
+                                ServerServiceRegistry.getInstance().getService(UserService.class, true).getUser(
+                                    session.getUserId(),
+                                    context);
+                            if (!context.isEnabled() || !user.isMailEnabled()) {
+                                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid credentials.");
+                                return;
+                            }
+                        } catch (final UndeclaredThrowableException e) {
+                            throw LoginExceptionCodes.UNKNOWN.create(e);
+                        }
+                        /*
+                         * Secret already found?
+                         */
+                        if (null != secret) {
+                            break NextCookie;
+                        }
                     }
-                } else {
-                    final String logMsg = "Wrong secret " + secret + " for session " + sessionId;
-                    sendErrorAndLog(resp, HttpServletResponse.SC_NOT_FOUND, errorMsg, logMsg);
+                } else if (cookieName.startsWith(secretCookieName)) {
+                    secret = cookie.getValue();
+                    /*
+                     * Session already found?
+                     */
+                    if (null != session) {
+                        break NextCookie;
+                    }
                 }
-            } else {
-                final String logMsg = "No session found for uid " + uid;
-                sendErrorAndLog(resp, HttpServletResponse.SC_NOT_FOUND, errorMsg, logMsg);
+            }
+            if (null == secret) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing secret cookie.");
+                return;
+            }
+            if (null != session && !secret.equals(session.getSecret())) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid secret cookie.");
+                return;
             }
         } catch (final OXException e) {
-            sendErrorAndLog(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, null, e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
+        if (null == context) {
+            context = getContext(req);
+            if (null == context) {
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Unable to determine context.");
+                return;
+            }
+        }
+        if (null == user) {
+            final String mailAddress = getMailAddress(req);
+            if (null == mailAddress) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unable to determine mail address.");
+                return;
+            }
+            user = findUser(mailAddress, context);
+            if (null == user) {
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Unable to resolve mail address to a user.");
+                return;
+            }
+        }
+        if (!context.isEnabled() || !user.isMailEnabled()) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid credentials.");
+            return;
+        }
+        if (null == session) {
+            /*
+             * Find an appropriate session for secret
+             */
+            for (final Session ses : sessiondService.getSessions(user.getId(), context.getContextId())) {
+                if (secret.equals(ses.getSecret())) {
+                    session = ses;
+                    break;
+                }
+            }
+            if (null == session) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid secret cookie.");
+                return;
+            }
+        }
+        /*
+         * Get image data source
+         */
+        final ImageDataSource dataSource;
+        try {
+            final String registrationName = req.getParameter("source");
+            if (null == registrationName) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing source parameter.");
+                return;
+            }
+            final ConversionService conversionService = ServerServiceRegistry.getInstance().getService(ConversionService.class, true);
+            dataSource = (ImageDataSource) conversionService.getDataSource(registrationName);
+            if (null == dataSource) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid source parameter.");
+                return;
+            }
+        } catch (final OXException e) {
+            LOG.error(e.getMessage(), e);
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
+        /*
+         * Generate image location
+         */
+        final ImageLocation imageLocation;
+        {
+            final String folder = req.getParameter(AJAXServlet.PARAMETER_FOLDERID);
+            final String id = req.getParameter(AJAXServlet.PARAMETER_ID);
+            final String imageId = req.getParameter(AJAXServlet.PARAMETER_UID);
+            imageLocation = new ImageLocation(null, folder, id, imageId);
+        }
+        /*
+         * Check signature equality
+         */
+        {
+            final String signature = req.getParameter("signature");
+            if (null == signature) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing signature parameter.");
+                return;
+            }
+            if (!signature.equals(dataSource.getSignature(imageLocation, session))) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Signature does not match.");
+                return;
+            }
+        }
+        /*
+         * Output image
+         */
+        try {
+            /*
+             * Check for ETag headers
+             */
+            if (dataSource.getETag(imageLocation, session).equals(req.getHeader("If-None-Match")) ) {
+                resp.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                return;
+            }
+            outputImageData(dataSource, imageLocation, session, resp);
+        } catch (final OXException e) {
+            LOG.error(e.getMessage(), e);
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return;
         }
     }
 
-    private static void sendErrorAndLog(final HttpServletResponse resp, final int errorCode, final String errorMsg, final String logMsg, final Throwable... throwable) throws IOException {
-        if (throwable != null && throwable.length > 0) {
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageServlet.class)).error(logMsg, throwable[0]);
-        } else {
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageServlet.class)).error(logMsg);
-        }
-
-        if (errorMsg != null) {
-            resp.sendError(errorCode, errorMsg);
-        } else {
-            resp.sendError(errorCode);
+    private static User findUser(final String mailAddress, final Context context) {
+        try {
+            return ServerServiceRegistry.getInstance().getService(UserService.class, true).searchUser(mailAddress, context);
+        } catch (final ServiceException e) {
+            LOG.error(e.getMessage(), e);
+            return null;
+        } catch (final OXException e) {
+            LOG.debug("User '" + mailAddress + "' not found.");
+            return null;
         }
     }
 
-    private static void outputImageData(final ImageData imageData, final Session session, final HttpServletResponse resp) throws OXException, IOException {
-        final Data<InputStream> data = imageData.getImageData(session);
+    private static Context getContext(final HttpServletRequest request) {
+        final String sContextId = request.getParameter("contextid");
+        if (sContextId == null) {
+            return null;
+        }
+        final int contextId;
+        try {
+            contextId = Integer.parseInt(sContextId.trim());
+        } catch (final NumberFormatException e) {
+            LOG.error("Unable to parse context identifier.", e);
+            return null;
+        }
+        try {
+            return ServerServiceRegistry.getInstance().getService(ContextService.class, true).getContext(contextId);
+        } catch (final ServiceException e) {
+            LOG.error(e.getMessage(), e);
+            return null;
+        } catch (final OXException e) {
+            LOG.error("Can not load context.", e);
+            return null;
+        }
+    }
+
+    private static String getMailAddress(final HttpServletRequest request) {
+        final String userName = request.getParameter("username");
+        final String serverName = request.getParameter("server");
+        if (null == userName || null == serverName) {
+            return null;
+        }
+        return userName + '@' + serverName;
+    }
+
+    private static void outputImageData(final ImageDataSource dataSource, final ImageLocation imageLocation, final Session session, final HttpServletResponse resp) throws IOException, OXException {
+        final Data<InputStream> data = dataSource.getData(InputStream.class, dataSource.generateDataArgumentsFrom(imageLocation), session);
         final String ct;
         final String fileName;
         {
@@ -248,10 +416,11 @@ public final class ImageServlet extends HttpServlet {
         }
         try {
             /*
-             * Reset response header values since we are going to directly write into servlet's output stream and then some browsers do not
-             * allow header "Pragma"
+             * Set ETag
              */
-            Tools.removeCachingHeader(resp);
+            final long millis =
+                System.currentTimeMillis() + (dataSource.isETagEternal() ? ImageDataSource.YEAR_IN_MILLIS * 50 : ImageDataSource.WEEK_IN_MILLIS);
+            Tools.setETag(dataSource.getETag(imageLocation, session), new Date(millis), resp);
             /*
              * Select response's output stream
              */

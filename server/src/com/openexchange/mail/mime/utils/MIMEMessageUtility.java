@@ -82,8 +82,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.image.ImageData;
-import com.openexchange.image.ImageService;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -329,7 +327,7 @@ public final class MIMEMessageUtility {
     }
 
     public static final Pattern PATTERN_REF_IMG = Pattern.compile(
-        "(<img[^>]*?)(src=\")([^\"]+?)((?:uid=|id=))([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)",
+        "(<img[^>]*?)(src=\")([^\"]+?)((?:uid=|signature=))([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)",
         Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     /**
@@ -355,29 +353,17 @@ public final class MIMEMessageUtility {
             final ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
             do {
                 final String uid = m.group(5);
-                if ("uid=".equals(m.group(4))) {
-                    // Touch image
-                    touchImage(uid, session);
+                if ("signature=".equals(m.group(4))) {
+                    // Touch image no more possible
                 } else {
                     if (!mfm.contains(uid)) {
-                        touchImage(uid, session);
+                        // Touch image no more possible
                     }
                 }
             } while (m.find());
             return true;
         }
         return false;
-    }
-
-    private static void touchImage(final String uid, final Session session) {
-        final ImageService imageService = ServerServiceRegistry.getInstance().getService(ImageService.class);
-        ImageData imageData = imageService.getImageData(session, uid);
-        if (imageData == null) {
-            imageData = imageService.getImageData(session, uid);
-        }
-        if (imageData != null) {
-            imageData.touch();
-        }
     }
 
     /**

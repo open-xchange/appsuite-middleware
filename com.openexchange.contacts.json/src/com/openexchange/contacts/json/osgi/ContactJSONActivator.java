@@ -54,19 +54,15 @@ import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.contacts.json.converters.ContactJSONResultConverter;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
-import com.openexchange.image.ImageService;
 
 /**
  * {@link ContactJSONActivator} - OSGi Activator for the Contact JSON interface.
- *
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class ContactJSONActivator extends AJAXModuleActivator {
 
-    private static final Class<?>[] NEEDED = new Class[] {
-                                                ContactInterfaceDiscoveryService.class,
-                                                ImageService.class
-                                                };
+    private static final Class<?>[] NEEDED = new Class[] { ContactInterfaceDiscoveryService.class };
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -76,7 +72,7 @@ public class ContactJSONActivator extends AJAXModuleActivator {
     @Override
     protected void startBundle() throws Exception {
         registerModule(new ContactActionFactory(this), "contacts");
-        registerService(ResultConverter.class, new ContactJSONResultConverter(getService(ImageService.class)));
+        registerService(ResultConverter.class, new ContactJSONResultConverter());
     }
 
 }

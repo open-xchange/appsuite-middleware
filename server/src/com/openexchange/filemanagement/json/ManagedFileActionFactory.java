@@ -54,8 +54,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.filemanagement.json.actions.GetAction;
-import com.openexchange.filemanagement.json.actions.KeepaliveAction;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -75,8 +73,9 @@ public class ManagedFileActionFactory implements AJAXActionServiceFactory {
     public ManagedFileActionFactory(final ServiceLookup services) {
         super();
         actions = new ConcurrentHashMap<String, AJAXActionService>(2);
-        actions.put("keepalive", new KeepaliveAction(services));
-        actions.put("get", new GetAction(services));
+        actions.put("keepalive", new com.openexchange.filemanagement.json.actions.KeepaliveAction(services));
+        actions.put("get", new com.openexchange.filemanagement.json.actions.GetAction(services));
+        actions.put("new", new com.openexchange.filemanagement.json.actions.NewAction(services));
     }
 
     @Override

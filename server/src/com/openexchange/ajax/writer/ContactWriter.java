@@ -56,14 +56,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.DistributionListFields;
-import com.openexchange.conversion.DataArguments;
 import com.openexchange.groupware.contact.datasource.ContactImageDataSource;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;
-import com.openexchange.image.ImageService;
-import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.image.ImageLocation;
 import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
 
@@ -138,26 +136,12 @@ public class ContactWriter extends CommonWriter {
         writeParameter(ContactFields.FAX_OTHER, contact.getFaxOther(), json);
         writeParameter(ContactFields.NUMBER_OF_IMAGES, contact.getNumberOfImages(), json);
         if (contact.containsImage1()) {
-            final ImageService imageService = ServerServiceRegistry.getInstance().getService(ImageService.class);
-            if (null == imageService) {
-                final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ContactWriter.class));
-                if (logger.isWarnEnabled()) {
-                    logger.warn("Contact image URL cannot be written. Missing service: " + ImageService.class.getName());
-                }
-            } else {
-                final byte[] imageData = contact.getImage1();
-                if (imageData != null) {
-                    final String imageURL;
-                    {
-                        final ContactImageDataSource imgSource = new ContactImageDataSource();
-                        final DataArguments args = new DataArguments();
-                        final String[] argsNames = imgSource.getRequiredArguments();
-                        args.put(argsNames[0], String.valueOf(contact.getParentFolderID()));
-                        args.put(argsNames[1], String.valueOf(contact.getObjectID()));
-                        imageURL = imageService.addImageData(session, imgSource, args).getImageURL();
-                    }
-                    writeParameter(ContactFields.IMAGE1_URL, imageURL, json);
-                }
+            final byte[] imageData = contact.getImage1();
+            if (imageData != null) {
+                final ContactImageDataSource imgSource = new ContactImageDataSource();
+                final ImageLocation imageLocation = new ImageLocation(null, String.valueOf(contact.getParentFolderID()), String.valueOf(contact.getObjectID()), null);
+                final String imageURL = imgSource.generateUrl(imageLocation, session);
+                writeParameter(ContactFields.IMAGE1_URL, imageURL, json);
             }
         }
         // writeParameter(ContactFields.IMAGE1, contactobject.getImage1());
@@ -667,19 +651,9 @@ public class ContactWriter extends CommonWriter {
                     if (imageData2 == null) {
                         writeValueNull(jsonArray);
                     } else {
-                        final String imageURL;
-                        {
-                            final ContactImageDataSource imgSource = new ContactImageDataSource();
-                            final DataArguments args = new DataArguments();
-                            final String[] argsNames = imgSource.getRequiredArguments();
-                            args.put(argsNames[0], String.valueOf(contactObject.getParentFolderID()));
-                            args.put(argsNames[1], String.valueOf(contactObject.getObjectID()));
-                            imageURL =
-                                ServerServiceRegistry.getInstance().getService(ImageService.class).addImageData(
-                                    session,
-                                    imgSource,
-                                    args).getImageURL();
-                        }
+                        final ContactImageDataSource imgSource = new ContactImageDataSource();
+                        final ImageLocation imageLocation = new ImageLocation(null, String.valueOf(contactObject.getParentFolderID()), String.valueOf(contactObject.getObjectID()), null);
+                        final String imageURL = imgSource.generateUrl(imageLocation, session);
                         writeValue(imageURL, jsonArray);
                     }
                 } else {

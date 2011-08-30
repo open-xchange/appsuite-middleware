@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,76 +47,94 @@
  *
  */
 
-package com.openexchange.image.internal;
-
-import com.openexchange.conversion.DataArguments;
-import com.openexchange.image.ImageData;
-import com.openexchange.image.ImageDataSource;
-import com.openexchange.image.ImageService;
-import com.openexchange.session.Session;
+package com.openexchange.image;
 
 /**
- * {@link ImageServiceImpl} - Implementation of {@link ImageService} using {@link ImageRegistry}.
- *
+ * {@link ImageLocation} - An image location description.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ImageServiceImpl implements ImageService {
+public final class ImageLocation {
+
+    private final String accountId;
+
+    private final String folder;
+
+    private final String id;
+
+    private final String imageId;
+
+    private String registrationName;
 
     /**
-     * Initializes a new {@link ImageServiceImpl}
+     * Initializes a new {@link ImageLocation}.
+     * 
+     * @param folder The folder identifier
+     * @param id The object identifier
+     * @param imageId The image identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
      */
-    public ImageServiceImpl() {
+    public ImageLocation(final String accountId, final String folder, final String id, final String imageId) {
         super();
+        this.accountId = accountId;
+        this.folder = folder;
+        this.id = id;
+        this.imageId = imageId;
     }
 
-    @Override
-    public ImageData addImageData(final Session session, final ImageDataSource imageSource, final DataArguments imageArguments, final int timeToLive) {
-        return ImageRegistry.getInstance().addImageData(session, imageSource, imageArguments, timeToLive);
+    /**
+     * Gets the account identifier
+     * 
+     * @return The account identifier
+     */
+    public String getAccountId() {
+        return accountId;
     }
 
-    @Override
-    public ImageData addImageData(final Session session, final ImageDataSource imageSource, final DataArguments imageArguments) {
-        return ImageRegistry.getInstance().addImageData(session, imageSource, imageArguments);
+    /**
+     * Gets the folder identifier
+     * 
+     * @return The folder identifier
+     */
+    public String getFolder() {
+        return folder;
     }
 
-    @Override
-    public void addImageData(final Session session, final ImageData imageData) {
-        ImageRegistry.getInstance().addImageData(session, imageData);
+    /**
+     * Gets the object identifier
+     * 
+     * @return The object identifier
+     */
+    public String getId() {
+        return id;
     }
 
-    @Override
-    public void clearRegistry() {
-        ImageRegistry.getInstance().clearRegistry();
+    /**
+     * Gets the image identifier
+     * 
+     * @return The image identifier
+     */
+    public String getImageId() {
+        return imageId;
     }
 
-    @Override
-    public boolean containsImageData(final Session session, final String uniqueId) {
-        return ImageRegistry.getInstance().containsImageData(session, uniqueId);
+    /**
+     * Gets the registration name
+     * 
+     * @return The registration name
+     */
+    public String getRegistrationName() {
+        return registrationName;
     }
 
-    @Override
-    public ImageData[] getImageData(final Session session) {
-        return ImageRegistry.getInstance().getImageData(session);
-    }
-
-    @Override
-    public ImageData getImageData(final Session session, final String uniqueId) {
-        return ImageRegistry.getInstance().getImageData(session, uniqueId);
-    }
-
-    @Override
-    public String getSessionForUID(final String uniqueId) {
-        return ImageRegistry.getInstance().getSessionForUID(uniqueId);
-    }
-
-    @Override
-    public ImageData getSessionBoundImageData(final String uniqueID) {
-        return ImageRegistry.getInstance().getSessionBoundImageData(uniqueID);
-    }
-
-    @Override
-    public void removeImageData(final Session session) {
-        ImageRegistry.getInstance().removeImageToSessionMappings(session);
+    /**
+     * Sets the registration name
+     * 
+     * @param registrationName The registration name to set
+     */
+    public void setRegistrationName(final String registrationName) {
+        this.registrationName = registrationName;
     }
 
 }
