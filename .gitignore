@@ -12,3 +12,6 @@ com.openexchange.axis2/lib/*.jar
 com.openexchange.axis2/tmp/*
 open-xchange-config/development/Open-Xchange Configuration Generator.launch
 open-xchange-config/development/Open-Xchange Server (Development).launch
+com.openexchange.common/jars
+build/build
+global/jars
