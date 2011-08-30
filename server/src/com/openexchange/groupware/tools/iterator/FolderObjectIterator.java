@@ -910,6 +910,9 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         }
 
         protected void cancelFuture(final Future<Object> f) {
+            if (f.isDone()) {
+                return;
+            }
             try {
                 f.get(2, TimeUnit.SECONDS);
             } catch (final InterruptedException e) {
@@ -928,6 +931,9 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         public void stopWhenEmpty() {
             final ThreadPoolService tps = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
             if (null == tps) {
+                if (mainFuture.isDone()) {
+                    return;
+                }
                 while (!queue.isEmpty()) {
                     // Nope
                 }
@@ -940,6 +946,9 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
     
                     @Override
                     public Object call() throws Exception {
+                        if (f.isDone()) {
+                            return null;
+                        }
                         while (!q.isEmpty()) {
                             // Nope
                         }
