@@ -82,6 +82,25 @@
         </if>
     </target>
 
+    <target name="buildOnBuilt">
+        <echo message="${projectsOrdered} ${projectName}"/>
+        <propertyregex property="notBuilt" input="${projectsOrdered}" regexp=".*?,?(${projectName}.*)" select="\1"/>
+        <echo message="Not built: ${notBuilt}"/>
+        <if>
+            <isset property="notBuilt"/>
+            <then>
+                <!-- changes path to use already built modules -->
+                <computeBuildOrder dir="${checkoutDir}" propertyName="nextProjects" projectList="${notBuilt}">
+                    <classpath>
+                        <fileset dir="${bundlesDir}" includes="*.jar"/>
+                        <dirset dir="${bundlesDir}" includes="*"/>
+                    </classpath>
+                </computeBuildOrder>
+            </then>
+        </if>
+        <antcall target="buildProject" inheritall="true"/>
+    </target>
+
 	<target name="buildProjects" depends="antExtensions,prepare">
         <foreach list="${projectsList}" target="updateProject" param="projectName"/>
         <!-- Computes the dependencies and sorts the projects accordingly -->
@@ -91,7 +110,7 @@
                 <fileset dir="${bundlesDir}" includes="*.jar"/>
             </classpath>
         </computeBuildOrder>
-        <foreach list="${projectsOrdered}" target="buildProject" param="projectName" inheritAll="true"/>
+        <foreach list="${projectsOrdered}" target="buildOnBuilt" param="projectName" inheritAll="true"/>
     </target>
 
     <target name="setBuild">
