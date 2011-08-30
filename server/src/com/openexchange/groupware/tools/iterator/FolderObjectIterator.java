@@ -903,6 +903,9 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         }
 
         public void close() {
+            if (mainFuture.isDone()) {
+                return;
+            }
             queue.offer(POISON);
             cancelFuture(mainFuture);
             queue.clear();
