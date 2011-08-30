@@ -906,10 +906,15 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             if (mainFuture.isDone()) {
                 return;
             }
-            queue.offer(POISON);
-            cancelFuture(mainFuture);
-            queue.clear();
-            permsMap.clear();
+            synchronized (mainFuture) {
+                if (mainFuture.isDone()) {
+                    return;
+                }
+                queue.offer(POISON);
+                cancelFuture(mainFuture);
+                queue.clear();
+                permsMap.clear();
+            }
         }
 
         protected void cancelFuture(final Future<Object> f) {
@@ -935,32 +940,36 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             if (mainFuture.isDone()) {
                 return;
             }
-            final ThreadPoolService tps = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
-            if (null == tps) {
-                while (!queue.isEmpty()) {
-                    // Nope
+            synchronized (mainFuture) {
+                if (mainFuture.isDone()) {
+                    return;
                 }
-                queue.offer(POISON);
-                //cancelFuture(mainFuture);
-            } else {
-                final BlockingQueue<Integer> q = queue;
-                final Future<Object> f = mainFuture;
-                tps.submit(ThreadPools.task(new Callable<Object>() {
-    
-                    @Override
-                    public Object call() throws Exception {
-                        if (f.isDone()) {
+                final ThreadPoolService tps = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
+                if (null == tps) {
+                    while (!queue.isEmpty()) {
+                        // Nope
+                    }
+                    queue.offer(POISON);
+                    //cancelFuture(mainFuture);
+                } else {
+                    final BlockingQueue<Integer> q = queue;
+                    final Future<Object> f = mainFuture;
+                    tps.submit(ThreadPools.task(new Callable<Object>() {
+
+                        @Override
+                        public Object call() throws Exception {
+                            if (f.isDone()) {
+                                return null;
+                            }
+                            while (!q.isEmpty()) {
+                                // Nope
+                            }
+                            q.offer(POISON);
                             return null;
                         }
-                        while (!q.isEmpty()) {
-                            // Nope
-                        }
-                        q.offer(POISON);
-                        //cancelFuture(f);
-                        return null;
-                    }
-                    
-                }), CallerRunsBehavior.<Object> getInstance());
+
+                    }), CallerRunsBehavior.<Object> getInstance());
+                }
             }
         }
 
