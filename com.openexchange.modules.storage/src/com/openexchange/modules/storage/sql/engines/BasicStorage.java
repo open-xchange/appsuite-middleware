@@ -66,11 +66,11 @@ import com.openexchange.modules.model.Tools;
 import com.openexchange.modules.storage.sql.Builder;
 import com.openexchange.modules.storage.sql.SQLTools;
 import com.openexchange.sql.builder.StatementBuilder;
-import com.openexchange.sql.grammar.Command;
 import com.openexchange.sql.grammar.Constant;
 import com.openexchange.sql.grammar.DELETE;
 import com.openexchange.sql.grammar.EQUALS;
 import com.openexchange.sql.grammar.INSERT;
+import com.openexchange.sql.grammar.ModifyCommand;
 import com.openexchange.sql.grammar.Predicate;
 import com.openexchange.sql.grammar.SELECT;
 import com.openexchange.sql.grammar.UPDATE;
@@ -131,7 +131,7 @@ public class BasicStorage<T extends Model<T>> implements Storage<T> {
         return executeQuery(select, primaryKey, new ResultSetHandler<T>() {
 
             @Override
-            public T handle(final ResultSet rs) throws OXException, SQLException {
+            public T handle(final ResultSet rs) throws SQLException {
                 if(!rs.next()){
                     return null;
                 }
@@ -169,7 +169,7 @@ public class BasicStorage<T extends Model<T>> implements Storage<T> {
         return executeQuery(select, values, new ResultSetHandler<List<T>>() {
 
             @Override
-            public List<T> handle(final ResultSet rs) throws OXException, SQLException {
+            public List<T> handle(final ResultSet rs) throws SQLException {
                 final LinkedList<T> list = new LinkedList<T>();
                 while(rs.next()) {
                     final T thing = metadata.create();
@@ -217,7 +217,7 @@ public class BasicStorage<T extends Model<T>> implements Storage<T> {
         return executeQuery(select, primaryKey, new ResultSetHandler<Boolean>() {
 
             @Override
-            public Boolean handle(final ResultSet rs) throws OXException, SQLException {
+            public Boolean handle(final ResultSet rs) throws SQLException {
                 return rs.next();
             }
 
@@ -243,24 +243,24 @@ public class BasicStorage<T extends Model<T>> implements Storage<T> {
         return new LinkedList<Object>(Arrays.asList(ctxId));
     }
 
-    protected <M> M executeQuery(final Command command, final List<Object> values, final ResultSetHandler<M> handler) throws SQLException, OXException {
+    protected <M> M executeQuery(final SELECT select, final List<Object> values, final ResultSetHandler<M> handler) throws SQLException, OXException {
         Connection con = null;
         ResultSet rs = null;
         final StatementBuilder sBuilder = new StatementBuilder();
         try {
-            con = dbService.getWritable(ctxId);
-            rs = sBuilder.executeQuery(con, command, values);
+            con = dbService.getReadOnly(ctxId);
+            rs = sBuilder.executeQuery(con, select, values);
             return handler.handle(rs);
 
         } finally {
             sBuilder.closePreparedStatement(null, rs);
             if(con != null) {
-                dbService.backWritable(ctxId, con);
+                dbService.backReadOnly(ctxId, con);
             }
         }
     }
 
-    protected void executeUpdate(final Command command, final List<Object> values) throws OXException, SQLException {
+    protected void executeUpdate(final ModifyCommand command, final List<Object> values) throws OXException, SQLException {
         Connection con = null;
 
         try {
