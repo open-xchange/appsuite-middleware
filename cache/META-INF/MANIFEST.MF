@@ -18,9 +18,8 @@ Import-Package: com.openexchange.config,
  org.osgi.framework,
  org.osgi.util.tracker
 Bundle-Activator: com.openexchange.caching.osgi.CacheActivator
-Bundle-ClassPath: com.openexchange.caching.jar,
+Bundle-ClassPath: .,
  lib/concurrent-1.3.4.jar,
- lib/jcs-1.3-custom.jar,
- .
+ lib/jcs-1.3-custom.jar
 Export-Package: com.openexchange.caching,
  com.openexchange.caching.objects

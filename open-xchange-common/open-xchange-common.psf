@@ -7,5 +7,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,config"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,management"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.threadpool"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,cache"/>
 </provider>
 </psf>
