@@ -330,7 +330,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     public boolean containsFolder(final String fullName, final int accountId, final Session session) throws OXException {
         ensureStarted();
         final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-        boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_USER, session.getUserId()));
+        boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_USER_ID, session.getUserId()));
         boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_ACCOUNT_ID, accountId));
         boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_FULL_NAME, fullName));
         /*
@@ -354,7 +354,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             return;
         }
         final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-        boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_USER, session.getUserId()));
+        boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_USER_ID, session.getUserId()));
         boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_ACCOUNT_ID, accountId));
         boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_FULL_NAME, fullName));
         {
@@ -383,7 +383,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             }
             boolQuery.must(QueryBuilders.inQuery(Constants.FIELD_ID, optMailIds));
         }
-        boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_USER, session.getUserId()));
+        boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_USER_ID, session.getUserId()));
         boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_ACCOUNT_ID, accountId));
         boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_FULL_NAME, fullName));
         /*
@@ -425,7 +425,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         ensureStarted();
         try {
             final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-            boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_USER, session.getUserId()));
+            boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_USER_ID, session.getUserId()));
             if (optAccountId >= 0) {
                 boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_ACCOUNT_ID, optAccountId));
             }
@@ -753,7 +753,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
              * Identifiers
              */
             b.field(Constants.FIELD_UUID, id);
-            b.field(Constants.FIELD_USER, session.getUserId());
+            b.field(Constants.FIELD_USER_ID, session.getUserId());
             b.field(Constants.FIELD_ACCOUNT_ID, accountId);
             b.field(Constants.FIELD_FULL_NAME, mail.getFolder());
             b.field(Constants.FIELD_ID, mail.getMailId());
@@ -911,7 +911,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         } else {
             filter = null;
         }
-        boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_USER, session.getUserId()));
+        boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_USER_ID, session.getUserId()));
         boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_ACCOUNT_ID, accountId));
         boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_FULL_NAME, fullName));
         /*

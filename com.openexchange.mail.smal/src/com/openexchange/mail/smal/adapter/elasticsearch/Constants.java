@@ -109,7 +109,7 @@ public final class Constants {
 
     public static final String FIELD_UUID = "uuid";
 
-    public static final String FIELD_USER = "user";
+    public static final String FIELD_USER_ID = "userid";
 
     public static final String FIELD_ACCOUNT_ID = MailJSONField.ACCOUNT_NAME.getKey();
 

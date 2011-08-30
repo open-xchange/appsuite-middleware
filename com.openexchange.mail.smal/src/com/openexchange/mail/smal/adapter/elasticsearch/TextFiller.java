@@ -80,7 +80,9 @@ public final class TextFiller {
      * @return The text filler
      */
     public static TextFiller fillerFor(final Map<String, Object> jsonObject, final int contextId) {
-        return new TextFiller((String) jsonObject.get(Constants.FIELD_UUID), (String) jsonObject.get(Constants.FIELD_ID), (String) jsonObject.get(Constants.FIELD_FULL_NAME), ((Integer) jsonObject.get(Constants.FIELD_ACCOUNT_ID)).intValue(), ((Integer) jsonObject.get(Constants.FIELD_USER)).intValue(), contextId);
+        final int accountId = ((Integer) jsonObject.get(Constants.FIELD_ACCOUNT_ID)).intValue();
+        final int userId = ((Integer) jsonObject.get(Constants.FIELD_USER_ID)).intValue();
+        return new TextFiller((String) jsonObject.get(Constants.FIELD_UUID), (String) jsonObject.get(Constants.FIELD_ID), (String) jsonObject.get(Constants.FIELD_FULL_NAME), accountId, userId, contextId);
     }
 
     private final String uuid;
