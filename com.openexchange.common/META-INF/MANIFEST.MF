@@ -17,7 +17,6 @@ Import-Package: javax.activation,
  org.apache.commons.logging,
  org.osgi.framework
 Bundle-ClassPath: .,
- common.jar,
  lib/chardet-1.1.jar,
  lib/commons-codec-1.4.jar,
  lib/commons-fileupload-1.2.1.jar,
