@@ -16,3 +16,4 @@ com.openexchange.common/jars
 build/build
 global/jars
 com.openexchange.config.cascade/jars
+config/jars
