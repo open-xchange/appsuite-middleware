@@ -11,14 +11,6 @@ echo "3: $alias3"
 
 comment=$1
 
-if [ "1" = "$comment" ]; then
- comment="$alias1"
-elif [ "2" = "$comment" ]; then
- comment="$alias2"
-elif [ "3" = "$comment" ]; then
- comment="$alias3"
-fi
-
 dc="changed something"
 if [ "" = "$comment" ]; then
  echo -n "Empty comment. Please enter comment (default is \"$dc\"): "
@@ -27,6 +19,12 @@ fi
 
 if [ "" = "$comment" ]; then
  comment="$dc"
+elif [ "1" = "$comment" ]; then
+ comment="$alias1"
+elif [ "2" = "$comment" ]; then
+ comment="$alias2"
+elif [ "3" = "$comment" ]; then
+ comment="$alias3"
 fi
 
 git add --all && git commit -m "$comment" && git push origin master
