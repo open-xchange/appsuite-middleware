@@ -535,9 +535,10 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                 final long st = DEBUG ? System.currentTimeMillis() : 0L;
                 final SearchResponse rsp = srb.execute().actionGet(Constants.TIMEOUT_MILLIS);
                 final SearchHit[] hits = rsp.getHits().getHits();
+                offset += size;
                 if (DEBUG) {
                     final long dur = System.currentTimeMillis() - st;
-                    LOG.debug("ES search took " + dur + "msec with " + hits.length + " results in " + (null == optFullName ? "all folders" : optFullName) + " for " + (optAccountId >= 0 ? "account "+optAccountId : "all accounts"));
+                    LOG.debug("ES search took " + dur + "msec with " + hits.length + " results in " + (null == optFullName ? "all folders" : optFullName) + " for " + (optAccountId >= 0 ? "account "+optAccountId+". " : "all accounts. ") + (total - offset) + " to go...");
                 }
                 for (final SearchHit searchHit : hits) {
                     final MailMessage mail;
@@ -561,7 +562,6 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                     mail.setHeader(X_ELASTIC_SEARCH_UUID, searchHit.getId());
                     mails.add(mail);
                 }
-                offset += size;
             }
             /*
              * Finally return mails
