@@ -760,13 +760,13 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         }
     }
 
-    private static Map<String, Object> createDoc(final String id, final MailMessage mail, final int accountId, final Session session, final long stamp) {
+    private static Map<String, Object> createDoc(final String uuid, final MailMessage mail, final int accountId, final Session session, final long stamp) {
         final Map<String, Object> jsonObject = new HashMap<String, Object>(24);
         jsonObject.put(Constants.FIELD_TIMESTAMP, Long.valueOf(stamp));
         /*
          * Identifiers
          */
-        jsonObject.put(Constants.FIELD_UUID, id);
+        jsonObject.put(Constants.FIELD_UUID, uuid);
         jsonObject.put(Constants.FIELD_USER_ID, Long.valueOf(session.getUserId()));
         jsonObject.put(Constants.FIELD_ACCOUNT_ID, Integer.valueOf(accountId));
         jsonObject.put(Constants.FIELD_FULL_NAME, mail.getFolder());

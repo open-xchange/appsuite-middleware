@@ -289,23 +289,23 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
     }
 
     /**
-     * Handles specified equally-grouped fillers
+     * Handles specified chunk of equally-grouped fillers
      * 
-     * @param fillers The equally-grouped fillers
+     * @param fillersChunk The chunk of equally-grouped fillers
      * @param threadDesc The thread description
      */
-    protected void handleFillersSublist(final List<TextFiller> fillers, final String threadDesc) {
-        if (fillers.isEmpty()) {
+    protected void handleFillersSublist(final List<TextFiller> fillersChunk, final String threadDesc) {
+        if (fillersChunk.isEmpty()) {
             return;
         }
         try {
             /*
              * Handle fillers in chunks
              */
-            final int size = fillers.size();
+            final int size = fillersChunk.size();
             final int configuredBlockSize = Constants.MAX_FILLER_CHUNK;
             if (size <= configuredBlockSize) {
-                pushMailTextBodies(fillers, threadDesc);
+                pushMailTextBodies(fillersChunk, threadDesc);
             } else {
                 int fromIndex = 0;
                 while (fromIndex < size) {
@@ -313,7 +313,7 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
                     if (toIndex > size) {
                         toIndex = size;
                     }
-                    pushMailTextBodies(fillers.subList(fromIndex, toIndex), threadDesc);
+                    pushMailTextBodies(fillersChunk.subList(fromIndex, toIndex), threadDesc);
                     fromIndex = toIndex;
                 }
             }
