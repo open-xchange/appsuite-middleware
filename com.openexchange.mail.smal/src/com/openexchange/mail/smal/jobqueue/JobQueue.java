@@ -152,7 +152,18 @@ public final class JobQueue {
         if (null == job || queue.size() >= CAPACITY) {
             return false;
         }
-        return (null == identifiers.putIfAbsent(job.getIdentifier(), PRESENT)) && queue.offer(job);
+        final String identifier = job.getIdentifier();
+        if (null == identifiers.putIfAbsent(identifier, PRESENT)) {
+            /*
+             * Not yet contained in queue
+             */
+            if (!queue.offer(job)) {
+                identifiers.remove(identifier);
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 
     /**

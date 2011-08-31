@@ -135,8 +135,12 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
              * Return current index state...
              */
             final List<MailMessage> mails = indexAdapter.search(folder, searchTerm, sortField, order, accountId, session);
-            
-            System.out.println("SMALMessageStorage.searchMessages() retrieved " + mails.size() + " messages from index for " + folder);
+            /*
+             * Schedule folder task
+             */
+            final boolean scheduled = JobQueue.getInstance().addJob(new FolderJob(folder, accountId, userId, contextId).setSpan(-1L));
+
+            System.out.println("SMALMessageStorage.searchMessages() retrieved " + mails.size() + " messages from index for " + folder + (scheduled ? " AND scheduled an immediate folder job." : ""));
             
             return mails.toArray(new MailMessage[mails.size()]);
         } catch (final OXException e) {
