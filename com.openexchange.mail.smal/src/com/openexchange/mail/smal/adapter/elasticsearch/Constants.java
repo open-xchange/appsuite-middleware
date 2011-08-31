@@ -119,7 +119,7 @@ public final class Constants {
 
     public static final String FIELD_UUID = "uuid";
 
-    public static final String FIELD_USER_ID = "user_id";
+    public static final String FIELD_USER_ID = "user";
 
     public static final String FIELD_ACCOUNT_ID = MailJSONField.ACCOUNT_NAME.getKey();
 
@@ -145,24 +145,24 @@ public final class Constants {
 
     public static final String FIELD_SIZE = MailJSONField.SIZE.getKey();
 
-    public static final String FIELD_FLAG_ANSWERED = "answered";
+    public static final String FIELD_FLAG_ANSWERED = "flag_answered";
 
-    public static final String FIELD_FLAG_DELETED = "deleted";
+    public static final String FIELD_FLAG_DELETED = "flag_deleted";
 
-    public static final String FIELD_FLAG_DRAFT = "draft";
+    public static final String FIELD_FLAG_DRAFT = "flag_draft";
 
-    public static final String FIELD_FLAG_FLAGGED = "flagged";
+    public static final String FIELD_FLAG_FLAGGED = "flag_flagged";
 
-    public static final String FIELD_FLAG_RECENT = "recent";
+    public static final String FIELD_FLAG_RECENT = "flag_recent";
 
-    public static final String FIELD_FLAG_SEEN = "seen";
+    public static final String FIELD_FLAG_SEEN = "flag_seen";
 
-    public static final String FIELD_FLAG_USER = "user";
+    public static final String FIELD_FLAG_USER = "flag_user";
 
-    public static final String FIELD_FLAG_SPAM = "spam";
+    public static final String FIELD_FLAG_SPAM = "flag_spam";
 
-    public static final String FIELD_FLAG_FORWARDED = "forwarded";
+    public static final String FIELD_FLAG_FORWARDED = "flag_forwarded";
 
-    public static final String FIELD_FLAG_READ_ACK = "read_ack";
+    public static final String FIELD_FLAG_READ_ACK = "flag_read_ack";
 
 }

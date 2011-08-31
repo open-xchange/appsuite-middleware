@@ -760,8 +760,8 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         }
     }
 
-    private static Map<String, Object> createDoc(final String id, final MailMessage mail, final int accountId, final Session session, final long stamp) throws OXException {
-        final Map<String, Object> jsonObject = new HashMap<String, Object>(32);
+    private static Map<String, Object> createDoc(final String id, final MailMessage mail, final int accountId, final Session session, final long stamp) {
+        final Map<String, Object> jsonObject = new HashMap<String, Object>(24);
         jsonObject.put(Constants.FIELD_TIMESTAMP, Long.valueOf(stamp));
         /*
          * Identifiers
