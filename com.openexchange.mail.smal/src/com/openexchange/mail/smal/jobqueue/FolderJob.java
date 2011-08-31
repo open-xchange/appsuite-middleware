@@ -174,7 +174,7 @@ public final class FolderJob extends AbstractMailSyncJob {
             } else {
                 final long now = System.currentTimeMillis();
                 try {
-                    if ((checkShouldSync && (span > 0 ? !shouldSync(fullName, now, span) : true)) || !wasAbleToSetSyncFlag(fullName)) {
+                    if ((checkShouldSync && (span > 0 ? !shouldSync(fullName, now, span) : false)) || !wasAbleToSetSyncFlag(fullName)) {
                         return;
                     }
                 } catch (final OXException e) {
