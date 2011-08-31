@@ -80,7 +80,7 @@ public final class Constants {
     /**
      * The timeout in milliseconds applied when performing a request to ElasticSearch server.
      */
-    public static final long TIMEOUT_MILLIS = 3500;
+    public static final long TIMEOUT_MILLIS = 60000;
 
     /**
      * The name for the cluster.

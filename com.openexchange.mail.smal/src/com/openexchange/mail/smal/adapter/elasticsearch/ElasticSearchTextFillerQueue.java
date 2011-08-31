@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.smal.adapter.elasticsearch;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -74,7 +75,10 @@ import org.elasticsearch.action.support.replication.ReplicationType;
 import org.elasticsearch.client.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.client.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.json.JsonXContent;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.smal.SMALMailAccess;
 import com.openexchange.mail.smal.SMALServiceLookup;
@@ -392,7 +396,8 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
                         final IndexRequestBuilder irb = client.prepareIndex(indexName, type, (String) jsonObject.get(Constants.FIELD_UUID));
                         irb.setReplicationType(ReplicationType.ASYNC).setOpType(OpType.INDEX).setConsistencyLevel(
                             WriteConsistencyLevel.DEFAULT);
-                        irb.setSource(jsonObject);
+                        irb.setSource(changeDoc(text, jsonObject));
+                        irb.setType(type);
                         bulkRequest.add(irb);
                         /*
                          * Remove from map
@@ -426,6 +431,86 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
             sb.append(" of user ").append(userId);
             sb.append(" in context ").append(contextId);
             LOG.debug(sb.toString());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static XContentBuilder changeDoc(final String text, final Map<String, Object> jsonObject) throws OXException {
+        try {
+            final XContentBuilder b = JsonXContent.unCachedContentBuilder().startObject();
+            b.field(Constants.FIELD_TIMESTAMP, ((Number) jsonObject.get(Constants.FIELD_USER_ID)).longValue());
+            /*
+             * Content present?
+             */
+            b.field(Constants.FIELD_BODY, text);
+            /*
+             * Identifiers
+             */
+            b.field(Constants.FIELD_UUID, (String) jsonObject.get(Constants.FIELD_UUID));
+            b.field(Constants.FIELD_USER_ID, ((Number) jsonObject.get(Constants.FIELD_USER_ID)).intValue());
+            b.field(Constants.FIELD_ACCOUNT_ID, ((Number) jsonObject.get(Constants.FIELD_ACCOUNT_ID)).intValue());
+            b.field(Constants.FIELD_FULL_NAME, (String) jsonObject.get(Constants.FIELD_FULL_NAME));
+            b.field(Constants.FIELD_ID, (String) jsonObject.get(Constants.FIELD_ID));
+            /*
+             * Write address fields
+             */
+            {
+                List<String> tmp = (List<String>) jsonObject.get(Constants.FIELD_FROM);
+                if (null != tmp) {
+                    b.field(Constants.FIELD_FROM, tmp.toArray(new String[0]));
+                }
+                tmp = (List<String>) jsonObject.get(Constants.FIELD_TO);
+                if (null != tmp) {
+                    b.field(Constants.FIELD_TO, tmp.toArray(new String[0]));
+                }
+                tmp = (List<String>) jsonObject.get(Constants.FIELD_CC);
+                if (null != tmp) {
+                    b.field(Constants.FIELD_CC, tmp.toArray(new String[0]));
+                }
+                tmp = (List<String>) jsonObject.get(Constants.FIELD_BCC);
+                if (null != tmp) {
+                    b.field(Constants.FIELD_BCC, tmp.toArray(new String[0]));
+                }
+            }
+            /*
+             * Write size
+             */
+            Number number = (Number) jsonObject.get(Constants.FIELD_SIZE);
+            if (null != number) {
+                b.field(Constants.FIELD_SIZE, number.longValue());
+            }
+            /*
+             * Write date fields
+             */
+            number = (Number) jsonObject.get(Constants.FIELD_RECEIVED_DATE);
+            if (null != number) {
+                b.field(Constants.FIELD_RECEIVED_DATE, number.longValue());
+            }
+            number = (Number) jsonObject.get(Constants.FIELD_SENT_DATE);
+            if (null != number) {
+                b.field(Constants.FIELD_SENT_DATE, number.longValue());
+            }
+            /*
+             * Write flags
+             */
+            b.field(Constants.FIELD_FLAG_ANSWERED, jsonObject.get(Constants.FIELD_FLAG_ANSWERED));
+            b.field(Constants.FIELD_FLAG_DELETED, jsonObject.get(Constants.FIELD_FLAG_DELETED));
+            b.field(Constants.FIELD_FLAG_DRAFT, jsonObject.get(Constants.FIELD_FLAG_DRAFT));
+            b.field(Constants.FIELD_FLAG_FLAGGED, jsonObject.get(Constants.FIELD_FLAG_FLAGGED));
+            b.field(Constants.FIELD_FLAG_RECENT, jsonObject.get(Constants.FIELD_FLAG_RECENT));
+            b.field(Constants.FIELD_FLAG_SEEN, jsonObject.get(Constants.FIELD_FLAG_SEEN));
+            b.field(Constants.FIELD_FLAG_USER, jsonObject.get(Constants.FIELD_FLAG_USER));
+            b.field(Constants.FIELD_FLAG_SPAM, jsonObject.get(Constants.FIELD_FLAG_SPAM));
+            b.field(Constants.FIELD_FLAG_FORWARDED, jsonObject.get(Constants.FIELD_FLAG_FORWARDED));
+            b.field(Constants.FIELD_FLAG_READ_ACK, jsonObject.get(Constants.FIELD_FLAG_READ_ACK));
+            /*
+             * Subject
+             */
+            b.field(Constants.FIELD_SUBJECT, (String) jsonObject.get(Constants.FIELD_SUBJECT));
+            b.endObject();
+            return b;
+        } catch (final IOException e) {
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
