@@ -68,6 +68,11 @@ public final class Constants {
     }
 
     /**
+     * The max. chunk size for text fillers.
+     */
+    public static final int MAX_FILLER_CHUNK = 25;
+
+    /**
      * The max. number of concurrent filler tasks: {@link Runtime#availableProcessors()}.
      */
     public static final int MAX_NUM_CONCURRENT_FILLER_TASKS = Runtime.getRuntime().availableProcessors();
@@ -109,7 +114,7 @@ public final class Constants {
 
     public static final String FIELD_UUID = "uuid";
 
-    public static final String FIELD_USER_ID = "userid";
+    public static final String FIELD_USER_ID = "user_id";
 
     public static final String FIELD_ACCOUNT_ID = MailJSONField.ACCOUNT_NAME.getKey();
 

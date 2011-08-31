@@ -261,6 +261,7 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
             return;
         }
         try {
+            final long st = DEBUG ? System.currentTimeMillis() : 0L;
             final TextFiller first = fillers.get(0);
             final int contextId = first.getContextId();
             final int userId = first.getUserId();
@@ -300,30 +301,27 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
             /*
              * Extract text from associated mails and put into JSON data
              */
-            MailAccess<?, ?> access = null;
-            try {
-                access = SMALMailAccess.getUnwrappedInstance(userId, contextId, accountId);
-                access.connect(false);
-                for (final TextFiller filler : fillers) {
-                    final String mailId = filler.getMailId();
-                    final Map<String, Object> jsonObject = jsonObjects.get(mailId);
-                    if (null != jsonObject) {
-                        try {
-                            final String text =
-                                TextProcessing.extractTextFrom(access.getMessageStorage().getMessage(filler.getFullName(), mailId, false));
-                            jsonObject.put(Constants.FIELD_BODY, text);
-                            if (DEBUG) {
-                                LOG.debug("Text extracted and indexed for: " + filler);
-                            }
-                        } catch (final Exception e) {
-                            LOG.error("Text could not be extracted from: " + filler, e);
-                            jsonObject.put(Constants.FIELD_BODY, "");
-                        }
-                    }
+            final int configuredBlockSize = Constants.MAX_FILLER_CHUNK;
+            if (size <= configuredBlockSize) {
+                addMailTextBodies(fillers, jsonObjects, accountId, userId, contextId);
+                if (DEBUG) {
+                    final long dur = System.currentTimeMillis() - st;
+                    LOG.debug("Added " + size + " mail bodies in " + dur + "msec for account " + accountId + " of user " + userId + " in context " + contextId);
                 }
-            } finally {
-                SMALMailAccess.closeUnwrappedInstance(access);
-                access = null;
+            } else {
+                int fromIndex = 0;
+                while (fromIndex < size) {
+                    int toIndex = fromIndex + configuredBlockSize;
+                    if (toIndex > size) {
+                        toIndex = size;
+                    }
+                    addMailTextBodies(fillers.subList(fromIndex, toIndex), jsonObjects, accountId, userId, contextId);
+                    if (DEBUG) {
+                        final long dur = System.currentTimeMillis() - st;
+                        LOG.debug("Added " + fromIndex + " of " + size + " mail bodies in " + dur + "msec for account " + accountId + " of user " + userId + " in context " + contextId);
+                    }
+                    fromIndex = toIndex;
+                }
             }
             /*
              * Push them to index with a bulk request
@@ -345,6 +343,34 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
             LOG.error("Failed pushing text content to indexed mails.", e);
         } catch (final RuntimeException e) {
             LOG.error("Failed pushing text content to indexed mails.", e);
+        }
+    }
+
+    private static void addMailTextBodies(final List<TextFiller> fillers, final Map<String, Map<String, Object>> jsonObjects, final int accountId, final int userId, final int contextId) throws OXException {
+        MailAccess<?, ?> access = null;
+        try {
+            access = SMALMailAccess.getUnwrappedInstance(userId, contextId, accountId);
+            access.connect(false);
+            for (final TextFiller filler : fillers) {
+                final String mailId = filler.getMailId();
+                final Map<String, Object> jsonObject = jsonObjects.get(mailId);
+                if (null != jsonObject) {
+                    try {
+                        final String text =
+                            TextProcessing.extractTextFrom(access.getMessageStorage().getMessage(filler.getFullName(), mailId, false));
+                        jsonObject.put(Constants.FIELD_BODY, text);
+                        if (DEBUG) {
+                            LOG.debug("Text extracted and indexed for: " + filler);
+                        }
+                    } catch (final Exception e) {
+                        LOG.error("Text could not be extracted from: " + filler, e);
+                        jsonObject.put(Constants.FIELD_BODY, "");
+                    }
+                }
+            }
+        } finally {
+            SMALMailAccess.closeUnwrappedInstance(access);
+            access = null;
         }
     }
 
