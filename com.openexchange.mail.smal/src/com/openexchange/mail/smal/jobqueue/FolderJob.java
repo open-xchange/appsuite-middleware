@@ -106,7 +106,8 @@ public final class FolderJob extends AbstractMailSyncJob {
     private volatile long span;
 
     /**
-     * Initializes a new {@link FolderJob}.
+     * Initializes a new {@link FolderJob} with default span which does not check if span is exceeded but only if able to exclusively set
+     * sync flag.
      * 
      * @param fullName The folder full name
      * @param accountId The account ID
@@ -118,7 +119,9 @@ public final class FolderJob extends AbstractMailSyncJob {
     }
 
     /**
-     * Initializes a new {@link FolderJob}.
+     * Initializes a new {@link FolderJob} with default span.
+     * <p>
+     * This job is performed is span is exceeded and if able to exclusively set sync flag.
      * 
      * @param fullName The folder full name
      * @param accountId The account ID
@@ -359,10 +362,13 @@ public final class FolderJob extends AbstractMailSyncJob {
             final MailFields fields = new MailFields(indexAdapter.getIndexableFields());
             fields.removeMailField(MailField.BODY);
             fields.removeMailField(MailField.FULL);
-            mails.addAll(Arrays.asList(mailAccess.getMessageStorage().getMessages(fullName, ids.subList(offset, end).toArray(new String[retval]), fields.toArray())));
-//            for (MailMessage mail : mails) {
-//                mail.setAccountId(accountId);
-//            }
+            mails.addAll(Arrays.asList(mailAccess.getMessageStorage().getMessages(
+                fullName,
+                ids.subList(offset, end).toArray(new String[retval]),
+                fields.toArray())));
+            // for (MailMessage mail : mails) {
+            // mail.setAccountId(accountId);
+            // }
             for (int i = offset; i < end; i++) {
                 ids.set(i, null);
             }
