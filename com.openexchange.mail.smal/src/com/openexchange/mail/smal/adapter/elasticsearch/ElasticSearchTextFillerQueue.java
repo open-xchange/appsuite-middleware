@@ -122,6 +122,8 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
      */
     protected final AtomicInteger taskCounter;
 
+    private final String simpleName;
+
     /**
      * Initializes a new {@link ElasticSearchTextFillerQueue}.
      */
@@ -134,6 +136,7 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
         queue = new LinkedBlockingQueue<TextFiller>();
         indexPrefix = Constants.INDEX_NAME_PREFIX;
         type = Constants.INDEX_TYPE;
+        simpleName = getClass().getSimpleName();
     }
 
     /**
@@ -154,7 +157,7 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
      * Starts consuming from queue.
      */
     public void start() {
-        future = SMALServiceLookup.getServiceStatic(ThreadPoolService.class).submit(ThreadPools.task(this, getClass().getSimpleName()));
+        future = SMALServiceLookup.getServiceStatic(ThreadPoolService.class).submit(ThreadPools.task(this, simpleName));
     }
 
     /**
@@ -226,16 +229,16 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
                     final ThreadPoolService poolService = SMALServiceLookup.getServiceStatic(ThreadPoolService.class);
                     if (null == poolService) {
                         for (final List<TextFiller> fillers : TextFillerGrouper.groupTextFillersByFullName(list)) {
-                            handleFillers(fillers);
+                            handleFillers(fillers, simpleName);
                         }
                     } else {
                         for (final List<TextFiller> fillers : TextFillerGrouper.groupTextFillersByFullName(list)) {
                             final int taskNum = isSubmittable();
                             if (taskNum > 0) {
-                                final Future<Object> f = poolService.submit(ThreadPools.task(new MaxAwareTask(fillers, taskNum)));
+                                final Future<Object> f = poolService.submit(ThreadPools.task(new MaxAwareTask(fillers, taskNum - 1)));
                                 concurrentFutures.set(taskNum - 1, f);
                             } else { // Caller runs...
-                                handleFillers(fillers);
+                                handleFillers(fillers, simpleName);
                             }
                         }
 
@@ -255,8 +258,9 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
      * Handles specified equally-grouped fillers
      * 
      * @param fillers The equally-grouped fillers
+     * @param threadDesc The thread description
      */
-    protected void handleFillers(final List<TextFiller> fillers) {
+    protected void handleFillers(final List<TextFiller> fillers, final String threadDesc) {
         if (fillers.isEmpty()) {
             return;
         }
@@ -306,7 +310,14 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
                 addMailTextBodies(fillers, jsonObjects, accountId, userId, contextId);
                 if (DEBUG) {
                     final long dur = System.currentTimeMillis() - st;
-                    LOG.debug("Added " + size + " mail bodies in " + dur + "msec for account " + accountId + " of user " + userId + " in context " + contextId);
+                    final StringBuilder sb = new StringBuilder(64);
+                    sb.append("Thread \"").append(threadDesc);
+                    sb.append("\" added ").append(size);
+                    sb.append(" mail bodies in ").append(dur);
+                    sb.append("msec for account ").append(accountId);
+                    sb.append(" of user ").append(userId);
+                    sb.append(" in context ").append(contextId);
+                    LOG.debug(sb.toString());
                 }
             } else {
                 int fromIndex = 0;
@@ -382,12 +393,12 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
 
         private final List<TextFiller> fillers;
 
-        private final int taskNum;
+        private final int indexPos;
 
-        protected MaxAwareTask(final List<TextFiller> fillers, final int taskNum) {
+        protected MaxAwareTask(final List<TextFiller> fillers, final int indexPos) {
             super();
             this.fillers = fillers;
-            this.taskNum = taskNum;
+            this.indexPos = indexPos;
         }
 
         @Override
@@ -402,13 +413,13 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
 
         @Override
         public void afterExecute(final Throwable t) {
-            concurrentFutures.set(taskNum - 1, null);
+            concurrentFutures.set(indexPos, null);
             taskCounter.decrementAndGet();
         }
 
         @Override
         public Object call() throws Exception {
-            handleFillers(fillers);
+            handleFillers(fillers, String.valueOf(indexPos + 1));
             return null;
         }
 
