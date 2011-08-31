@@ -137,7 +137,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
             /*
              * Return current index state...
              */
-            final List<MailMessage> mails = indexAdapter.search(folder, searchTerm, sortField, order, accountId, session);
+            final List<MailMessage> mails = indexAdapter.search(folder, searchTerm, sortField, order, fields, accountId, session);
             /*
              * Schedule folder task
              */

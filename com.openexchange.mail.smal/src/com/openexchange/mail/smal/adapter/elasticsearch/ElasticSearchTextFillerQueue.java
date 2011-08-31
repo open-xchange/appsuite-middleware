@@ -63,7 +63,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 import org.elasticsearch.ElasticSearchException;
 import org.elasticsearch.action.WriteConsistencyLevel;
@@ -100,6 +99,34 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
+    private static final Future<Object> PLACEHOLDER = new Future<Object>() {
+        
+        @Override
+        public boolean isDone() {
+            return true;
+        }
+        
+        @Override
+        public boolean isCancelled() {
+            return false;
+        }
+        
+        @Override
+        public Object get(final long timeout, final TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+            return null;
+        }
+        
+        @Override
+        public Object get() throws InterruptedException, ExecutionException {
+            return null;
+        }
+        
+        @Override
+        public boolean cancel(final boolean mayInterruptIfRunning) {
+            return false;
+        }
+    };
+
     private static final TextFiller POISON = new TextFiller(null, null, null, 0, 0, 0);
 
     private static final int MAX_NUM_CONCURRENT_FILLER_TASKS = Constants.MAX_NUM_CONCURRENT_FILLER_TASKS;
@@ -121,20 +148,17 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
      */
     protected final AtomicReferenceArray<Future<Object>> concurrentFutures;
 
-    /**
-     * The counter for concurrent tasks.
-     */
-    protected final AtomicInteger taskCounter;
-
     private final String simpleName;
+
+    private final int maxNumConcurrentFillerTasks;
 
     /**
      * Initializes a new {@link ElasticSearchTextFillerQueue}.
      */
     public ElasticSearchTextFillerQueue(final ElasticSearchAdapter adapter) {
         super();
-        concurrentFutures = new AtomicReferenceArray<Future<Object>>(new Future[MAX_NUM_CONCURRENT_FILLER_TASKS]);
-        taskCounter = new AtomicInteger();
+        maxNumConcurrentFillerTasks = MAX_NUM_CONCURRENT_FILLER_TASKS;
+        concurrentFutures = new AtomicReferenceArray<Future<Object>>(new Future[maxNumConcurrentFillerTasks]);
         this.adapter = adapter;
         keepgoing = new AtomicBoolean(true);
         queue = new LinkedBlockingQueue<TextFiller>();
@@ -149,12 +173,12 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
      * @return A positive number if it is allowed to submit to pool; otherwise <code>-1</code>
      */
     private int isSubmittable() {
-        final int inc = taskCounter.incrementAndGet();
-        if (inc > MAX_NUM_CONCURRENT_FILLER_TASKS) {
-            taskCounter.decrementAndGet();
-            return -1;
+        for (int i = 0; i < maxNumConcurrentFillerTasks; i++) {
+            if (concurrentFutures.compareAndSet(i, null, PLACEHOLDER)) {
+                return i;
+            }
         }
-        return inc;
+        return -1;
     }
 
     /**
@@ -276,13 +300,15 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
              */
             handleFillersSublist(groupedFillersSublist, simpleName);
         } else {
-            final int taskNum = isSubmittable();
-            if (taskNum > 0) {
+            final int index = isSubmittable();
+            if (index > 0) {
                 /*
                  * Submit to a free worker thread
                  */
-                final Future<Object> f = poolService.submit(ThreadPools.task(new MaxAwareTask(groupedFillersSublist, taskNum - 1)));
-                concurrentFutures.set(taskNum - 1, f);
+                final MaxAwareTask task = new MaxAwareTask(groupedFillersSublist, index);
+                final Future<Object> f = poolService.submit(ThreadPools.task(task));
+                concurrentFutures.set(index, f);
+                task.start();
             } else {
                 /*
                  * Caller runs because other worker threads are busy
@@ -521,10 +547,20 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
 
         private final int indexPos;
 
+        private volatile boolean start;
+
         protected MaxAwareTask(final List<TextFiller> fillers, final int indexPos) {
             super();
+            start = false;
             this.fillers = fillers;
             this.indexPos = indexPos;
+        }
+
+        /**
+         * Opens this task for processing.
+         */
+        protected void start() {
+            start = true;
         }
 
         @Override
@@ -540,11 +576,13 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
         @Override
         public void afterExecute(final Throwable t) {
             concurrentFutures.set(indexPos, null);
-            taskCounter.decrementAndGet();
         }
 
         @Override
         public Object call() throws Exception {
+            while (!start) {
+                //
+            }
             handleFillersSublist(fillers, String.valueOf(indexPos + 1));
             return null;
         }

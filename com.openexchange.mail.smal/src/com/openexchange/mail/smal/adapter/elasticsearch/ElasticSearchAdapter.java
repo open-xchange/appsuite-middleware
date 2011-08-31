@@ -61,6 +61,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.elasticsearch.ElasticSearchException;
@@ -116,6 +120,8 @@ import com.openexchange.mail.smal.adapter.IndexAdapter;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 
 /**
  * {@link ElasticSearchAdapter}
@@ -124,13 +130,12 @@ import com.openexchange.session.Session;
  */
 public final class ElasticSearchAdapter implements IndexAdapter {
 
-    /**
-     *
-     */
     private static final int MAX_SEARCH_RESULTS = 1 << 20;
 
     protected static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ElasticSearchAdapter.class));
+
+    protected static final boolean DEBUG = LOG.isDebugEnabled();
 
     private static interface MailAccountLookup {
 
@@ -236,7 +241,34 @@ public final class ElasticSearchAdapter implements IndexAdapter {
              * Create the (transport) client
              */
             client = new TransportClient(settingsBuilder.build());
-            client.addTransportAddress(new InetSocketTransportAddress("192.168.32.36", 9300));
+            /*
+             * Safe start-up in separate thread
+             */
+            final ThreadPoolService threadPool = SMALServiceLookup.getInstance().getService(ThreadPoolService.class);
+            final TransportClient transportClient = client;
+            final Future<Object> elasticSearchStartup = threadPool.submit(ThreadPools.task(new Runnable() {
+
+                @Override
+                public void run() {
+                    transportClient.addTransportAddress(new InetSocketTransportAddress("192.168.32.36", 9300));
+                }
+            }));
+            /*
+             * Wait for start-up for 5 seconds
+             */
+            try {
+                elasticSearchStartup.get(5, TimeUnit.SECONDS);
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            } catch (final ExecutionException e) {
+                throw ThreadPools.launderThrowable(e, ElasticSearchException.class);
+            } catch (final TimeoutException e) {
+                throw SMALExceptionCodes.INDEX_FAULT.create("Failed start-up of ElasticSearch cluster within 5 seconds.");
+            }
+            /*
+             * Output cluster information
+             */
             clusterInfo();
         } catch (final NoNodeAvailableException e) {
             throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
@@ -432,9 +464,14 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     }
 
     @Override
-    public List<MailMessage> search(final String optFullName, final SearchTerm<?> searchTerm, final MailSortField sortField, final OrderDirection order, final int optAccountId, final Session session) throws OXException {
+    public List<MailMessage> search(final String optFullName, final SearchTerm<?> searchTerm, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int optAccountId, final Session session) throws OXException {
         try {
             ensureStarted();
+            final int contextId = session.getContextId();
+            final String indexName = indexNamePrefix + contextId;
+            /*
+             * Build search query
+             */
             final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
             boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_USER_ID, session.getUserId()));
             if (optAccountId >= 0) {
@@ -447,41 +484,137 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                 boolQuery.must(SearchTerm2Query.searchTerm2Query(searchTerm));
             }
             /*
-             * Compose search request
+             * Count results
              */
-            final int contextId = session.getContextId();
-            final SearchRequestBuilder builder = client.prepareSearch(indexNamePrefix + contextId).setTypes(indexType);
-            // builder.setFrom(page * hitsPerPage).setSize(hitsPerPage);
-            if (null != sortField && null != order) {
-                builder.addSort(sortField.getKey(), OrderDirection.DESC.equals(order) ? SortOrder.DESC : SortOrder.ASC);
+            final long total;
+            {
+                final SearchRequestBuilder srb = client.prepareSearch(indexName).setTypes(indexType).addField(Constants.FIELD_ID);
+                if (null != sortField && null != order) {
+                    srb.addSort(sortField.getKey(), OrderDirection.DESC.equals(order) ? SortOrder.DESC : SortOrder.ASC);
+                }
+                srb.setQuery(boolQuery);
+                srb.setSearchType(SearchType.COUNT);
+                srb.setExplain(true);
+                srb.setOperationThreading(SearchOperationThreading.THREAD_PER_SHARD);
+                total = srb.execute().actionGet(Constants.TIMEOUT_MILLIS).getHits().getTotalHits();
             }
-            builder.setSize(MAX_SEARCH_RESULTS);
-            builder.setQuery(boolQuery);
-            builder.setSearchType(SearchType.DFS_QUERY_THEN_FETCH);
-            builder.setExplain(true);
-            builder.setOperationThreading(SearchOperationThreading.THREAD_PER_SHARD);
+            if (DEBUG) {
+                LOG.debug("Search in " + (null == optFullName ? "all folders" : optFullName) + " for " + (optAccountId >= 0 ? optAccountId+" accounts" : "all accounts") + " yields " + total + " results.");
+            }
             /*
-             * Perform search
+             * Page-wise retrieval of search results
              */
-            final SearchResponse rsp = builder.execute().actionGet(Constants.TIMEOUT_MILLIS);
-            final SearchHit[] docs = rsp.getHits().getHits();
-            final List<MailMessage> mails = new ArrayList<MailMessage>(docs.length);
-            final MailFields mailFields = new MailFields(true);
+            final List<MailMessage> mails = new ArrayList<MailMessage>((int) total);
             final MailAccountLookup lookup = new InMemoryMailAccountLookup(session);
-            for (final SearchHit sd : docs) {
-                // to get explanation you'll need to enable this when querying:
-                // System.out.println(sd.getExplanation().toString());
-
-                // if we use in mapping: "_source" : {"enabled" : false}
-                // we need to include all necessary fields in query and then to use doc.getFields()
-                // instead of doc.getSource()
-                final MailMessage mail = readDoc(sd.getSource(), mailFields, lookup, contextId);
-                mail.setHeader(X_ELASTIC_SEARCH_UUID, sd.getId());
-                mails.add(mail);
+            final MailFields allFields = new MailFields(true);
+            final int hitsPerPage = Constants.MAX_FILLER_CHUNK;
+            int page = 0;
+            int offset = 0;
+            while (offset < total) {
+                final SearchRequestBuilder srb = client.prepareSearch(indexName).setTypes(indexType).addField(Constants.FIELD_ID);
+                if (null != fields) {
+                    applyFields2Builder(fields, srb);
+                }
+                if (null != sortField && null != order) {
+                    srb.addSort(sortField.getKey(), OrderDirection.DESC.equals(order) ? SortOrder.DESC : SortOrder.ASC);
+                }
+                srb.setFrom(page * hitsPerPage).setSize(hitsPerPage);
+                srb.setQuery(boolQuery);
+                srb.setSearchType(SearchType.DFS_QUERY_THEN_FETCH);
+                srb.setExplain(true);
+                srb.setOperationThreading(SearchOperationThreading.THREAD_PER_SHARD);
+                /*
+                 * Execute search & iterate hits
+                 */
+                final SearchResponse rsp = srb.execute().actionGet(Constants.TIMEOUT_MILLIS);
+                final SearchHit[] hits = rsp.getHits().getHits();
+                for (final SearchHit searchHit : hits) {
+                    final MailMessage mail;
+                    if (null == fields) {
+                        /*
+                         * Read from source
+                         */
+                        mail = readDoc(searchHit.getSource(), allFields, lookup, contextId);
+                    } else {
+                        /*
+                         * Read from search fields
+                         */
+                        mail = readDoc(searchHit, fields, lookup);
+                    }
+                    if (null != optFullName) {
+                        mail.setFolder(optFullName);
+                    }
+                    if (optAccountId >= 0) {
+                        mail.setAccountId(optAccountId);
+                    }
+                    mail.setHeader(X_ELASTIC_SEARCH_UUID, searchHit.getId());
+                    mails.add(mail);
+                }
+                
+                offset += hitsPerPage;
+                page++;
             }
+            /*
+             * Finally return mails
+             */
             return mails;
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
+        }
+    }
+
+    private static void applyFields2Builder(final MailField[] fields, final SearchRequestBuilder srb) {
+        for (final MailField mailField : fields) {
+            switch (mailField) {
+            case ACCOUNT_NAME:
+                srb.addField(Constants.FIELD_ACCOUNT_ID);
+                break;
+            case ID:
+                srb.addField(Constants.FIELD_ID);
+                break;
+            case FOLDER_ID:
+                srb.addField(Constants.FIELD_FULL_NAME);
+                break;
+            case FROM:
+                srb.addField(Constants.FIELD_FROM);
+                break;
+            case TO:
+                srb.addField(Constants.FIELD_TO);
+                break;
+            case CC:
+                srb.addField(Constants.FIELD_CC);
+                break;
+            case BCC:
+                srb.addField(Constants.FIELD_BCC);
+                break;
+            case SUBJECT:
+                srb.addField(Constants.FIELD_SUBJECT);
+                break;
+            case RECEIVED_DATE:
+                srb.addField(Constants.FIELD_RECEIVED_DATE);
+                break;
+            case SENT_DATE:
+                srb.addField(Constants.FIELD_SENT_DATE);
+                break;
+            case SIZE:
+                srb.addField(Constants.FIELD_SIZE);
+                break;
+            case FLAGS:
+                srb.addFields(
+                    Constants.FIELD_FLAG_ANSWERED,
+                    Constants.FIELD_FLAG_DELETED,
+                    Constants.FIELD_FLAG_DRAFT,
+                    Constants.FIELD_FLAG_FLAGGED,
+                    Constants.FIELD_FLAG_FORWARDED,
+                    Constants.FIELD_FLAG_READ_ACK,
+                    Constants.FIELD_FLAG_RECENT,
+                    Constants.FIELD_FLAG_SEEN,
+                    Constants.FIELD_FLAG_SPAM,
+                    Constants.FIELD_FLAG_USER);
+                break;
+            default:
+                break;
+            }
         }
     }
 
@@ -619,6 +752,144 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         } catch (final RuntimeException e) {
             throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private MailMessage readDoc(final SearchHit searchHit, final MailField[] fields, final MailAccountLookup lookup) throws OXException {
+        final IDMailMessage mail = new IDMailMessage(null, null);
+        for (final MailField mailField : fields) {
+            switch (mailField) {
+            case ACCOUNT_NAME:
+                {
+                    final int accountId = ((Number)searchHit.field(Constants.FIELD_ACCOUNT_ID).value()).intValue();
+                    mail.setAccountId(accountId);
+                    mail.setAccountName(lookup.getMailAccount(accountId).getName());
+                }
+                break;
+            case ID:
+                mail.setMailId((String) searchHit.field(Constants.FIELD_ID).value());
+                break;
+            case FOLDER_ID:
+                mail.setFolder((String) searchHit.field(Constants.FIELD_FULL_NAME).value());
+                break;
+            case FROM:
+                {
+                    @SuppressWarnings("unchecked") final List<Object> sAddrs = searchHit.field(Constants.FIELD_FROM).getValues();
+                    if (null != sAddrs) {
+                        for (final Object sAddr : sAddrs) {
+                            try {
+                                mail.addFrom(new QuotedInternetAddress(sAddr.toString()));
+                            } catch (final AddressException e) {
+                                mail.addFrom(new PlainTextAddress(sAddr.toString()));
+                            }
+                        }
+                    } 
+                }
+                break;
+            case TO:
+                {
+                    @SuppressWarnings("unchecked") final List<Object> sAddrs = searchHit.field(Constants.FIELD_TO).getValues();
+                    if (null != sAddrs) {
+                        for (final Object sAddr : sAddrs) {
+                            try {
+                                mail.addTo(new QuotedInternetAddress(sAddr.toString()));
+                            } catch (final AddressException e) {
+                                mail.addTo(new PlainTextAddress(sAddr.toString()));
+                            }
+                        }
+                    } 
+                }
+                break;
+            case CC:
+                {
+                    @SuppressWarnings("unchecked") final List<Object> sAddrs = searchHit.field(Constants.FIELD_CC).getValues();
+                    if (null != sAddrs) {
+                        for (final Object sAddr : sAddrs) {
+                            try {
+                                mail.addCc(new QuotedInternetAddress(sAddr.toString()));
+                            } catch (final AddressException e) {
+                                mail.addCc(new PlainTextAddress(sAddr.toString()));
+                            }
+                        }
+                    } 
+                }
+                break;
+            case BCC:
+                {
+                    @SuppressWarnings("unchecked") final List<Object> sAddrs = searchHit.field(Constants.FIELD_BCC).getValues();
+                    if (null != sAddrs) {
+                        for (final Object sAddr : sAddrs) {
+                            try {
+                                mail.addBcc(new QuotedInternetAddress(sAddr.toString()));
+                            } catch (final AddressException e) {
+                                mail.addBcc(new PlainTextAddress(sAddr.toString()));
+                            }
+                        }
+                    } 
+                }
+                break;
+            case SUBJECT:
+                mail.setSubject((String) searchHit.field(Constants.FIELD_SUBJECT).value());
+                break;
+            case RECEIVED_DATE:
+                mail.setReceivedDate(new Date(((Number)searchHit.field(Constants.FIELD_RECEIVED_DATE).value()).longValue()));
+                break;
+            case SENT_DATE:
+                mail.setSentDate(new Date(((Number)searchHit.field(Constants.FIELD_SENT_DATE).value()).longValue()));
+                break;
+            case SIZE:
+                mail.setSize(((Number)searchHit.field(Constants.FIELD_SIZE).value()).longValue());
+                break;
+            case FLAGS:
+                {
+                    int flags = 0;
+                    Boolean tmp = (Boolean) searchHit.field(Constants.FIELD_FLAG_ANSWERED).value();
+                    if (null != tmp && tmp.booleanValue()) {
+                        flags |= MailMessage.FLAG_ANSWERED;
+                    }
+                    tmp = (Boolean) searchHit.field(Constants.FIELD_FLAG_DELETED).value();
+                    if (null != tmp && tmp.booleanValue()) {
+                        flags |= MailMessage.FLAG_DELETED;
+                    }
+                    tmp = (Boolean) searchHit.field(Constants.FIELD_FLAG_DRAFT).value();
+                    if (null != tmp && tmp.booleanValue()) {
+                        flags |= MailMessage.FLAG_DRAFT;
+                    }
+                    tmp = (Boolean) searchHit.field(Constants.FIELD_FLAG_FLAGGED).value();
+                    if (null != tmp && tmp.booleanValue()) {
+                        flags |= MailMessage.FLAG_FLAGGED;
+                    }
+                    tmp = (Boolean) searchHit.field(Constants.FIELD_FLAG_FORWARDED).value();
+                    if (null != tmp && tmp.booleanValue()) {
+                        flags |= MailMessage.FLAG_FORWARDED;
+                    }
+                    tmp = (Boolean) searchHit.field(Constants.FIELD_FLAG_READ_ACK).value();
+                    if (null != tmp && tmp.booleanValue()) {
+                        flags |= MailMessage.FLAG_READ_ACK;
+                    }
+                    tmp = (Boolean) searchHit.field(Constants.FIELD_FLAG_RECENT).value();
+                    if (null != tmp && tmp.booleanValue()) {
+                        flags |= MailMessage.FLAG_RECENT;
+                    }
+                    tmp = (Boolean) searchHit.field(Constants.FIELD_FLAG_SEEN).value();
+                    if (null != tmp && tmp.booleanValue()) {
+                        flags |= MailMessage.FLAG_SEEN;
+                    }
+                    tmp = (Boolean) searchHit.field(Constants.FIELD_FLAG_SPAM).value();
+                    if (null != tmp && tmp.booleanValue()) {
+                        flags |= MailMessage.FLAG_SPAM;
+                    }
+                    tmp = (Boolean) searchHit.field(Constants.FIELD_FLAG_USER).value();
+                    if (null != tmp && tmp.booleanValue()) {
+                        flags |= MailMessage.FLAG_USER;
+                    }
+                    mail.setFlags(flags);
+                }
+                break;
+            default:
+                break;
+            }
+        }
+        return mail;
     }
 
     /**
