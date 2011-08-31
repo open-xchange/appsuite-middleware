@@ -69,45 +69,45 @@ import org.jdom.input.SAXBuilder;
  */
 public class ProjectSetFileReader {
 
-    public static Map<String, Repository> parse(String projectSetFileName) {
+    public static Map<String, Repository> parse(final String projectSetFileName) {
         try {
-            Document document = new SAXBuilder().build(new File(projectSetFileName));
-            Element psf = document.getRootElement();
+            final Document document = new SAXBuilder().build(new File(projectSetFileName));
+            final Element psf = document.getRootElement();
             if (!"psf".equals(psf.getName())) {
                 throw new BuildException("Root element is not a PSF but a " + psf.toString());
             }
             final Map<String, Repository> projects = new HashMap<String, Repository>();
-            for (Object tmp : psf.getChildren()) {
+            for (final Object tmp : psf.getChildren()) {
                 if (!(tmp instanceof Element)) {
                     throw new BuildException("PSF child is not an element but a " + tmp.getClass().getName());
                 }
-                for (Repository repository : parseProvider((Element) tmp)) {
+                for (final Repository repository : parseProvider((Element) tmp)) {
                     projects.put(repository.getProjectName(), repository);
                 }
             }
             return projects;
-        } catch (Exception e) {
-            StringWriter sw = new StringWriter();
+        } catch (final Exception e) {
+            final StringWriter sw = new StringWriter();
             e.printStackTrace(new PrintWriter(sw));
-            throw new BuildException("lala" + sw.toString());
+            throw new BuildException(sw.toString());
         }
     }
 
-    private static Set<Repository> parseProvider(Element providerElement) {
+    private static Set<Repository> parseProvider(final Element providerElement) {
         if (!"provider".equals(providerElement.getName())) {
             throw new BuildException("PSF child is not a provider but a " + providerElement.getName());
         }
-        Attribute id = providerElement.getAttribute("id");
+        final Attribute id = providerElement.getAttribute("id");
         if (null == id) {
             throw new BuildException("Attribute id for tag provider is missing");
         }
-        String providerName = id.getValue();
-        RepositoryType type = RepositoryType.byProvider(providerName);
+        final String providerName = id.getValue();
+        final RepositoryType type = RepositoryType.byProvider(providerName);
         if (null == type) {
             throw new BuildException("Unknown provider " + providerName);
         }
         final Set<Repository> repositories = new HashSet<Repository>();
-        for (Object tmp : providerElement.getChildren()) {
+        for (final Object tmp : providerElement.getChildren()) {
             if (!(tmp instanceof Element)) {
                 throw new BuildException("Provider child is not an element but a " + tmp.getClass().getName());
             }
@@ -116,64 +116,28 @@ public class ProjectSetFileReader {
         return repositories;
     }
 
-    private static Repository parseProject(Element projectElement, RepositoryType type) {
+    private static Repository parseProject(final Element projectElement, final RepositoryType type) {
         if (!"project".equals(projectElement.getName())) {
             throw new BuildException("Provider child is not a project but a " + projectElement.getName());
         }
-        Attribute reference = projectElement.getAttribute("reference");
+        final Attribute reference = projectElement.getAttribute("reference");
         if (null == reference) {
             throw new BuildException("Attribute reference for tag project is missing");
         }
-        String projectReference = reference.getValue();
+        final String projectReference = reference.getValue();
         final Repository repository;
         switch (type) {
         case CVS:
-            repository = parseCVSReference(projectReference);
+            repository = CVSRepository.parseCVSReference(projectReference);
             break;
         case SVN:
-            repository = parseSVNReference(projectReference);
-            break;
+            throw new BuildException("Parsing a SVN repository reference is currently not implemented.");
         case Git:
-            repository = parseGitReference(projectReference);
+            repository = GitRepository.parseGitReference(projectReference);
             break;
         default:
             throw new BuildException("Unknown repository type " + type.name());
         }
         return repository;
-    }
-
-    private static CVSRepository parseCVSReference(String reference) {
-        final CVSRepository retval;
-        String[] parts = reference.split(",");
-        if (!"1.0".equals(parts[0])) {
-            throw new BuildException("Unknown CVS reference version " + parts[0]);
-        }
-        switch (parts.length) {
-        case 4:
-            retval = new CVSRepository(parts[1], parts[2], parts[3]);
-            break;
-        case 5:
-            retval = new CVSRepository(parts[1], parts[2], parts[3], parts[4]);
-            break;
-        default:
-            throw new BuildException("Unknown number of CVS reference definition parts.");
-        }
-        return retval;
-    }
-
-    private static Repository parseSVNReference(String reference) {
-        throw new BuildException("Parsing a SVN repository reference is currently not implemented.");
-    }
-
-    private static Repository parseGitReference(String reference) {
-        // 1.0,https://git.open-xchange.com/git/wd/backend,master,build
-        String[] parts = reference.split(",");
-        if (4 != parts.length) {
-            throw new BuildException("Unknown number of Git reference definition parts.");
-        }
-        if (!"1.0".equals(parts[0])) {
-            throw new BuildException("Unknown CVS reference version " + parts[0]);
-        }
-        return new GitRepository(parts[1], parts[2], parts[3]);
     }
 }

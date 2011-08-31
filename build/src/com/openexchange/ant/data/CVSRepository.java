@@ -49,6 +49,8 @@
 
 package com.openexchange.ant.data;
 
+import org.apache.tools.ant.BuildException;
+
 /**
  * Represents a CVS repository.
  *
@@ -57,16 +59,14 @@ package com.openexchange.ant.data;
 public class CVSRepository extends Repository {
 
     private final String cvsRoot;
-
     private final String repositoryLocation;
-
     private final String branch;
 
-    public CVSRepository(String cvsRoot, String repositoryLocation, String projectName) {
+    public CVSRepository(final String cvsRoot, final String repositoryLocation, final String projectName) {
     	this(cvsRoot, repositoryLocation, projectName, "HEAD");
     }
 
-    public CVSRepository(String cvsRoot, String repositoryLocation, String projectName, String branch) {
+    public CVSRepository(final String cvsRoot, final String repositoryLocation, final String projectName, final String branch) {
         super(projectName);
         this.cvsRoot = cvsRoot;
         this.repositoryLocation = repositoryLocation;
@@ -88,5 +88,24 @@ public class CVSRepository extends Repository {
 
     public String getBranch() {
     	return branch;
+    }
+
+    static CVSRepository parseCVSReference(final String reference) {
+        final CVSRepository retval;
+        final String[] parts = reference.split(",");
+        if (!"1.0".equals(parts[0])) {
+            throw new BuildException("Unknown CVS reference version " + parts[0]);
+        }
+        switch (parts.length) {
+        case 4:
+            retval = new CVSRepository(parts[1], parts[2], parts[3]);
+            break;
+        case 5:
+            retval = new CVSRepository(parts[1], parts[2], parts[3], parts[4]);
+            break;
+        default:
+            throw new BuildException("Unknown number of CVS reference definition parts.");
+        }
+        return retval;
     }
 }

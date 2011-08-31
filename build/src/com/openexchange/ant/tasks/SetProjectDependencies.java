@@ -50,53 +50,54 @@
 package com.openexchange.ant.tasks;
 
 import java.io.File;
-
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 import org.apache.tools.ant.types.Path;
 
+/**
+ * Creates a path for compiling the sources. This is useful because otherwise project references in the .classpath files are hard to get
+ * into the class path required for the build.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
 public class SetProjectDependencies extends Task {
 
     private String projectName;
-
     private String binDir;
-
     private String pathId;
+    private String projectProperty;
 
-    private String deepPathId;
+    public SetProjectDependencies() {
+        super();
+    }
 
-    public final void setBinDir(String binDir) {
+    public final void setBinDir(final String binDir) {
         this.binDir = binDir;
     }
 
-    public final void setProjectName(String projectName) {
+    public final void setProjectName(final String projectName) {
         this.projectName = projectName;
     }
 
-    public final void setPathId(String pathId) {
+    public final void setPathId(final String pathId) {
         this.pathId = pathId;
     }
 
-    public void setDeepPathId(String deepPathId) {
-        this.deepPathId = deepPathId;
+    public void setProjectProperty(final String projectProperty) {
+        this.projectProperty = projectProperty;
     }
 
     @Override
     public final void execute() {
-        setPath("requiredClasspath", pathId);
-        setPath("deepClasspath", deepPathId);
-    }
-
-    private void setPath(String extension, String reference) {
-        String classpath = getProject().getProperty(projectName + '.' + extension);
+        String classpath = getProject().getProperty(projectName + '.' + projectProperty);
         classpath = classpath.replaceAll("<bin>", binDir);
-        Path path = new Path(getProject());
+        final Path path = new Path(getProject());
         if (classpath.trim().length() != 0) {
-            for (String pathElement : classpath.split(",")) {
+            for (final String pathElement : classpath.split(",")) {
                 path.createPathElement().setLocation(new File(pathElement));
             }
         }
-        getProject().addReference(reference, path);
-        log(projectName + ' ' + reference + ' ' + path, Project.MSG_DEBUG);
+        getProject().addReference(pathId, path);
+        log(projectName + ' ' + pathId + ' ' + path, Project.MSG_DEBUG);
     }
 }

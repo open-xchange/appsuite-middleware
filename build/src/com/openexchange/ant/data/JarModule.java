@@ -56,9 +56,13 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
-
 import org.apache.tools.ant.BuildException;
 
+/**
+ * Represents a bundle contained in a JAR file.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
 public class JarModule extends AbstractModule {
 
     private File file;
@@ -66,8 +70,8 @@ public class JarModule extends AbstractModule {
     public JarModule(final File file) {
         this.file = file;
         try {
-            JarFile jarFile = new JarFile(file);
-            Manifest manifest = jarFile.getManifest();
+            final JarFile jarFile = new JarFile(file);
+            final Manifest manifest = jarFile.getManifest();
             if (manifest != null) {
                 this.osgiManifest = new OSGIManifest(manifest);
                 this.name = osgiManifest.getEntry(OSGIManifest.BUNDLE_SYMBOLIC_NAME);
@@ -75,14 +79,14 @@ public class JarModule extends AbstractModule {
             if (this.name == null) {
                 this.name = file.getName();
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new BuildException(e);
         }
     }
 
     @Override
     public Set<String> getExportedClasspath() {
-        Set<String> retval = new HashSet<String>();
+        final Set<String> retval = new HashSet<String>();
         retval.add(file.getAbsolutePath());
         return Collections.unmodifiableSet(retval);
     }
