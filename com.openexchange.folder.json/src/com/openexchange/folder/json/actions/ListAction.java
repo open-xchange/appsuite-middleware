@@ -118,11 +118,6 @@ public final class ListAction extends AbstractFolderAction {
                 all,
                 session,
                 new FolderServiceDecorator().setTimeZone(Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes));
-        
-        
-        System.out.println("ListAction.perform() invoked FolderService.getSubfolders()...");
-        
-        
         /*
          * Determine max. last-modified time stamp
          */
@@ -135,18 +130,10 @@ public final class ListAction extends AbstractFolderAction {
                 lastModified = ((lastModified >= time) ? lastModified : time);
             }
         }
-        
-        System.out.println("ListAction.perform() determined last-modified time stamp...");
-        
         /*
          * Write subfolders as JSON arrays to JSON array
          */
         final JSONArray jsonArray = FolderWriter.writeMultiple2Array(columns, subfolders, session, Constants.ADDITIONAL_FOLDER_FIELD_LIST);
-        
-        
-        System.out.println("ListAction.perform() JSON array composed...");
-        
-        
         /*
          * Return appropriate result
          */
