@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.smal.adapter.elasticsearch;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -73,7 +72,6 @@ import org.elasticsearch.action.admin.indices.optimize.OptimizeRequest;
 import org.elasticsearch.action.admin.indices.optimize.OptimizeResponse;
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.count.CountResponse;
-import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.index.IndexRequest.OpType;
 import org.elasticsearch.action.search.SearchOperationThreading;
 import org.elasticsearch.action.search.SearchResponse;
@@ -91,8 +89,6 @@ import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.ImmutableSettings.Builder;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.trove.map.hash.TIntObjectHashMap;
-import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.common.xcontent.json.JsonXContent;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.indices.IndexAlreadyExistsException;
@@ -101,7 +97,6 @@ import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.sort.SortOrder;
 import org.elasticsearch.transport.RemoteTransportException;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailSortField;
@@ -765,90 +760,85 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         }
     }
 
-    private static XContentBuilder createDoc(final String id, final MailMessage mail, final int accountId, final Session session, final long stamp) throws OXException {
-        try {
-            final XContentBuilder b = JsonXContent.unCachedContentBuilder().startObject();
-            b.field(Constants.FIELD_TIMESTAMP, stamp);
-            /*
-             * Identifiers
-             */
-            b.field(Constants.FIELD_UUID, id);
-            b.field(Constants.FIELD_USER_ID, session.getUserId());
-            b.field(Constants.FIELD_ACCOUNT_ID, accountId);
-            b.field(Constants.FIELD_FULL_NAME, mail.getFolder());
-            b.field(Constants.FIELD_ID, mail.getMailId());
-            /*
-             * Write address fields
-             */
-            {
-                String[] tmp = toStringArray(mail.getFrom());
-                if (null != tmp) {
-                    b.field(Constants.FIELD_FROM, tmp);
-                }
-                tmp = toStringArray(mail.getTo());
-                if (null != tmp) {
-                    b.field(Constants.FIELD_TO, tmp);
-                }
-                tmp = toStringArray(mail.getCc());
-                if (null != tmp) {
-                    b.field(Constants.FIELD_CC, tmp);
-                }
-                tmp = toStringArray(mail.getBcc());
-                if (null != tmp) {
-                    b.field(Constants.FIELD_BCC, tmp);
-                }
+    private static Map<String, Object> createDoc(final String id, final MailMessage mail, final int accountId, final Session session, final long stamp) throws OXException {
+        final Map<String, Object> jsonObject = new HashMap<String, Object>(32);
+        jsonObject.put(Constants.FIELD_TIMESTAMP, Long.valueOf(stamp));
+        /*
+         * Identifiers
+         */
+        jsonObject.put(Constants.FIELD_UUID, id);
+        jsonObject.put(Constants.FIELD_USER_ID, Long.valueOf(session.getUserId()));
+        jsonObject.put(Constants.FIELD_ACCOUNT_ID, Integer.valueOf(accountId));
+        jsonObject.put(Constants.FIELD_FULL_NAME, mail.getFolder());
+        jsonObject.put(Constants.FIELD_ID, mail.getMailId());
+        /*
+         * Write address fields
+         */
+        {
+            List<String> tmp = toStringList(mail.getFrom());
+            if (null != tmp) {
+                jsonObject.put(Constants.FIELD_FROM, tmp);
             }
-            /*
-             * Write size
-             */
-            if (mail.containsSize()) {
-                b.field(Constants.FIELD_SIZE, mail.getSize());
+            tmp = toStringList(mail.getTo());
+            if (null != tmp) {
+                jsonObject.put(Constants.FIELD_TO, tmp);
             }
-            /*
-             * Write date fields
-             */
-            {
-                java.util.Date d = mail.getReceivedDate();
-                if (null != d) {
-                    b.field(Constants.FIELD_RECEIVED_DATE, d.getTime());
-                }
-                d = mail.getSentDate();
-                if (null != d) {
-                    b.field(Constants.FIELD_SENT_DATE, d.getTime());
-                }
+            tmp = toStringList(mail.getCc());
+            if (null != tmp) {
+                jsonObject.put(Constants.FIELD_CC, tmp);
             }
-            /*
-             * Write flags
-             */
-            final int flags = mail.getFlags();
-            b.field(Constants.FIELD_FLAG_ANSWERED, (flags & MailMessage.FLAG_ANSWERED) > 0);
-            b.field(Constants.FIELD_FLAG_DELETED, (flags & MailMessage.FLAG_DELETED) > 0);
-            b.field(Constants.FIELD_FLAG_DRAFT, (flags & MailMessage.FLAG_DRAFT) > 0);
-            b.field(Constants.FIELD_FLAG_FLAGGED, (flags & MailMessage.FLAG_FLAGGED) > 0);
-            b.field(Constants.FIELD_FLAG_RECENT, (flags & MailMessage.FLAG_RECENT) > 0);
-            b.field(Constants.FIELD_FLAG_SEEN, (flags & MailMessage.FLAG_SEEN) > 0);
-            b.field(Constants.FIELD_FLAG_USER, (flags & MailMessage.FLAG_USER) > 0);
-            b.field(Constants.FIELD_FLAG_SPAM, (flags & MailMessage.FLAG_SPAM) > 0);
-            b.field(Constants.FIELD_FLAG_FORWARDED, (flags & MailMessage.FLAG_FORWARDED) > 0);
-            b.field(Constants.FIELD_FLAG_READ_ACK, (flags & MailMessage.FLAG_READ_ACK) > 0);
-            /*
-             * Subject
-             */
-            b.field(Constants.FIELD_SUBJECT, mail.getSubject());
-            b.endObject();
-            return b;
-        } catch (final IOException e) {
-            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+            tmp = toStringList(mail.getBcc());
+            if (null != tmp) {
+                jsonObject.put(Constants.FIELD_BCC, tmp);
+            }
         }
+        /*
+         * Write size
+         */
+        if (mail.containsSize()) {
+            jsonObject.put(Constants.FIELD_SIZE, Long.valueOf(mail.getSize()));
+        }
+        /*
+         * Write date fields
+         */
+        {
+            java.util.Date d = mail.getReceivedDate();
+            if (null != d) {
+                jsonObject.put(Constants.FIELD_RECEIVED_DATE, Long.valueOf(d.getTime()));
+            }
+            d = mail.getSentDate();
+            if (null != d) {
+                jsonObject.put(Constants.FIELD_SENT_DATE, Long.valueOf(d.getTime()));
+            }
+        }
+        /*
+         * Write flags
+         */
+        final int flags = mail.getFlags();
+        jsonObject.put(Constants.FIELD_FLAG_ANSWERED, Boolean.valueOf((flags & MailMessage.FLAG_ANSWERED) > 0));
+        jsonObject.put(Constants.FIELD_FLAG_DELETED, Boolean.valueOf((flags & MailMessage.FLAG_DELETED) > 0));
+        jsonObject.put(Constants.FIELD_FLAG_DRAFT, Boolean.valueOf((flags & MailMessage.FLAG_DRAFT) > 0));
+        jsonObject.put(Constants.FIELD_FLAG_FLAGGED, Boolean.valueOf((flags & MailMessage.FLAG_FLAGGED) > 0));
+        jsonObject.put(Constants.FIELD_FLAG_RECENT, Boolean.valueOf((flags & MailMessage.FLAG_RECENT) > 0));
+        jsonObject.put(Constants.FIELD_FLAG_SEEN, Boolean.valueOf((flags & MailMessage.FLAG_SEEN) > 0));
+        jsonObject.put(Constants.FIELD_FLAG_USER, Boolean.valueOf((flags & MailMessage.FLAG_USER) > 0));
+        jsonObject.put(Constants.FIELD_FLAG_SPAM, Boolean.valueOf((flags & MailMessage.FLAG_SPAM) > 0));
+        jsonObject.put(Constants.FIELD_FLAG_FORWARDED, Boolean.valueOf((flags & MailMessage.FLAG_FORWARDED) > 0));
+        jsonObject.put(Constants.FIELD_FLAG_READ_ACK, Boolean.valueOf((flags & MailMessage.FLAG_READ_ACK) > 0));
+        /*
+         * Subject
+         */
+        jsonObject.put(Constants.FIELD_SUBJECT, mail.getSubject());
+        return jsonObject;
     }
 
-    private static String[] toStringArray(final InternetAddress[] addrs) {
+    private static List<String> toStringList(final InternetAddress[] addrs) {
         if (addrs == null || addrs.length <= 0) {
             return null;
         }
-        final String[] ret = new String[addrs.length];
-        for (int i = 0; i < ret.length; i++) {
-            ret[i] = addrs[i].toUnicodeString();
+        final List<String> ret = new ArrayList<String>(addrs.length);
+        for (int i = 0; i < addrs.length; i++) {
+            ret.add(addrs[i].toUnicodeString());
         }
         return ret;
     }
@@ -993,7 +983,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
 
     public void deleteById(final String mailId, final String indexName) throws OXException {
         try {
-            final DeleteResponse response = client.prepareDelete(indexName, indexType, mailId).execute().actionGet();
+            /*final DeleteResponse response = */client.prepareDelete(indexName, indexType, mailId).execute().actionGet();
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         }
