@@ -526,8 +526,13 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                 /*
                  * Execute search & iterate hits
                  */
+                final long st = DEBUG ? System.currentTimeMillis() : 0L;
                 final SearchResponse rsp = srb.execute().actionGet(Constants.TIMEOUT_MILLIS);
                 final SearchHit[] hits = rsp.getHits().getHits();
+                if (DEBUG) {
+                    final long dur = System.currentTimeMillis() - st;
+                    LOG.debug("ES search took " + dur + "msec with " + hits.length + " results in " + (null == optFullName ? "all folders" : optFullName) + " for " + (optAccountId >= 0 ? optAccountId+" accounts" : "all accounts"));
+                }
                 for (final SearchHit searchHit : hits) {
                     final MailMessage mail;
                     if (null == fields) {
