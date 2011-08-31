@@ -302,7 +302,7 @@ public final class FolderJob extends AbstractMailSyncJob {
                         start += num;
                         if (DEBUG) {
                             final long dur = System.currentTimeMillis() - st;
-                            LOG.debug("Folder job \"" + identifier + "\" inserted " + start + " of " + size + " messages in " + dur + "msec.");
+                            LOG.debug("Folder job \"" + identifier + "\" inserted " + start + " of " + size + " messages in " + dur + "msec in folder " + fullName + " in account " + accountId);
                         }
                         if (queue.hasHigherRankedJobInQueue(getRanking())) {
                             break;
