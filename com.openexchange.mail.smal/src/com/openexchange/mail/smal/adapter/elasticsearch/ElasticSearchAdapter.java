@@ -499,7 +499,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                 total = srb.execute().actionGet(Constants.TIMEOUT_MILLIS).getHits().getTotalHits();
             }
             if (DEBUG) {
-                LOG.debug("Search in " + (null == optFullName ? "all folders" : optFullName) + " for " + (optAccountId >= 0 ? optAccountId+" accounts" : "all accounts") + " yields " + total + " results.");
+                LOG.debug("Search in " + (null == optFullName ? "all folders" : optFullName) + " for " + (optAccountId >= 0 ? "account "+optAccountId : "all accounts") + " yields " + total + " results.");
             }
             /*
              * Page-wise retrieval of search results
@@ -508,7 +508,6 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             final MailAccountLookup lookup = new InMemoryMailAccountLookup(session);
             final MailFields allFields = new MailFields(true);
             final int hitsPerPage = Constants.MAX_FILLER_CHUNK;
-            int page = 0;
             int offset = 0;
             while (offset < total) {
                 final SearchRequestBuilder srb = client.prepareSearch(indexName).setTypes(indexType).addField(Constants.FIELD_ID);
@@ -518,7 +517,14 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                 if (null != sortField && null != order) {
                     srb.addSort(sortField.getKey(), OrderDirection.DESC.equals(order) ? SortOrder.DESC : SortOrder.ASC);
                 }
-                srb.setFrom(page * hitsPerPage).setSize(hitsPerPage);
+                /*
+                 * Calculate the number of search hits to return
+                 */
+                int size = (int) (total - offset);
+                if (size > hitsPerPage) {
+                    size = hitsPerPage;
+                }
+                srb.setFrom(offset).setSize(size);
                 srb.setQuery(boolQuery);
                 srb.setSearchType(SearchType.DFS_QUERY_THEN_FETCH);
                 srb.setExplain(true);
@@ -531,7 +537,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                 final SearchHit[] hits = rsp.getHits().getHits();
                 if (DEBUG) {
                     final long dur = System.currentTimeMillis() - st;
-                    LOG.debug("ES search took " + dur + "msec with " + hits.length + " results in " + (null == optFullName ? "all folders" : optFullName) + " for " + (optAccountId >= 0 ? optAccountId+" accounts" : "all accounts"));
+                    LOG.debug("ES search took " + dur + "msec with " + hits.length + " results in " + (null == optFullName ? "all folders" : optFullName) + " for " + (optAccountId >= 0 ? "account "+optAccountId : "all accounts"));
                 }
                 for (final SearchHit searchHit : hits) {
                     final MailMessage mail;
@@ -555,9 +561,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                     mail.setHeader(X_ELASTIC_SEARCH_UUID, searchHit.getId());
                     mails.add(mail);
                 }
-                
-                offset += hitsPerPage;
-                page++;
+                offset += size;
             }
             /*
              * Finally return mails
