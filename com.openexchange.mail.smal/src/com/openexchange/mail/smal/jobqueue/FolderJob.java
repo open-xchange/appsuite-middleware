@@ -291,7 +291,7 @@ public final class FolderJob extends AbstractMailSyncJob {
                     final int configuredBlockSize = Constants.CHUNK_SIZE;
                     blockSize = configuredBlockSize > size ? size : configuredBlockSize;
                 }
-                final String[] ids = newIds.toArray(new String[newIds.size()]);
+                final List<String> ids = new ArrayList<String>(newIds);
                 final List<MailMessage> list = new ArrayList<MailMessage>(blockSize);
                 newIds = null;
                 int start = 0;
@@ -331,7 +331,7 @@ public final class FolderJob extends AbstractMailSyncJob {
         }
     }
 
-    private int add2Index(final String[] ids, final int offset, final int len, final String fullName, final IndexAdapter indexAdapter, final List<MailMessage> mails) throws OXException {
+    private int add2Index(final List<String> ids, final int offset, final int len, final String fullName, final IndexAdapter indexAdapter, final List<MailMessage> mails) throws OXException {
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         try {
             mailAccess = SMALMailAccess.getUnwrappedInstance(userId, contextId, accountId);
@@ -340,12 +340,12 @@ public final class FolderJob extends AbstractMailSyncJob {
             final int retval; // The number of mails added to index
             final int end; // The end position (exclusive)
             {
-                final int remaining = ids.length - offset;
+                final int remaining = ids.size() - offset;
                 if (remaining >= len) {
                     end = offset + len;
                     retval = len;
                 } else {
-                    end = ids.length;
+                    end = ids.size();
                     retval = remaining;
                 }
             }
@@ -355,13 +355,13 @@ public final class FolderJob extends AbstractMailSyncJob {
             final MailFields fields = new MailFields(indexAdapter.getIndexableFields());
             fields.removeMailField(MailField.BODY);
             fields.removeMailField(MailField.FULL);
-            final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-            final String[] mailIds = new String[retval];
-            System.arraycopy(ids, offset, mailIds, 0, retval);
-            mails.addAll(Arrays.asList(messageStorage.getMessages(fullName, mailIds, fields.toArray())));
+            mails.addAll(Arrays.asList(mailAccess.getMessageStorage().getMessages(fullName, ids.subList(offset, end).toArray(new String[retval]), fields.toArray())));
 //            for (MailMessage mail : mails) {
 //                mail.setAccountId(accountId);
 //            }
+            for (int i = offset; i < end; i++) {
+                ids.set(i, null);
+            }
             indexAdapter.add(mails, session);
             mails.clear();
             return retval;

@@ -765,16 +765,10 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         }
     }
 
-    private XContentBuilder createDoc(final String id, final MailMessage mail, final int accountId, final Session session, final long stamp) throws OXException {
+    private static XContentBuilder createDoc(final String id, final MailMessage mail, final int accountId, final Session session, final long stamp) throws OXException {
         try {
             final XContentBuilder b = JsonXContent.unCachedContentBuilder().startObject();
             b.field(Constants.FIELD_TIMESTAMP, stamp);
-            /*
-             * Body content
-             */
-            {
-                // b.field(Constants.FIELD_BODY, TextProcessing.extractTextFrom(mail));
-            }
             /*
              * Identifiers
              */

@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.smal;
 
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailField;
@@ -133,7 +134,11 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
             /*
              * Return current index state...
              */
-            return indexAdapter.search(folder, searchTerm, sortField, order, accountId, session).toArray(new MailMessage[0]);
+            final List<MailMessage> mails = indexAdapter.search(folder, searchTerm, sortField, order, accountId, session);
+            
+            System.out.println("SMALMessageStorage.searchMessages() retrieved " + mails.size() + " messages from index for " + folder);
+            
+            return mails.toArray(new MailMessage[mails.size()]);
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
