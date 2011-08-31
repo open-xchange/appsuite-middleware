@@ -78,6 +78,11 @@ public final class Constants {
     public static final int MAX_NUM_CONCURRENT_FILLER_TASKS = Runtime.getRuntime().availableProcessors();
 
     /**
+     * The timeout in milliseconds applied when performing a request to ElasticSearch server.
+     */
+    public static final long TIMEOUT_MILLIS = 3500;
+
+    /**
      * The name for the cluster.
      */
     public static final String CLUSTER_NAME = "mail_cluster";

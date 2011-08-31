@@ -313,8 +313,9 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
                     final StringBuilder sb = new StringBuilder(64);
                     sb.append("Thread \"").append(threadDesc);
                     sb.append("\" added ").append(size);
-                    sb.append(" mail bodies in ").append(dur);
-                    sb.append("msec for account ").append(accountId);
+                    sb.append(" mail bodies in ").append(dur).append("msec");
+                    sb.append(" from folder \"").append(fillers.get(0).getFullName()).append('"');
+                    sb.append(" for account ").append(accountId);
                     sb.append(" of user ").append(userId);
                     sb.append(" in context ").append(contextId);
                     LOG.debug(sb.toString());
@@ -329,7 +330,16 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
                     addMailTextBodies(fillers.subList(fromIndex, toIndex), jsonObjects, accountId, userId, contextId);
                     if (DEBUG) {
                         final long dur = System.currentTimeMillis() - st;
-                        LOG.debug("Added " + fromIndex + " of " + size + " mail bodies in " + dur + "msec for account " + accountId + " of user " + userId + " in context " + contextId);
+                        final StringBuilder sb = new StringBuilder(64);
+                        sb.append("Thread \"").append(threadDesc);
+                        sb.append("\" added ").append(toIndex);
+                        sb.append(" of ").append(size);
+                        sb.append(" mail bodies in ").append(dur).append("msec");
+                        sb.append(" from folder \"").append(fillers.get(0).getFullName()).append('"');
+                        sb.append(" for account ").append(accountId);
+                        sb.append(" of user ").append(userId);
+                        sb.append(" in context ").append(contextId);
+                        LOG.debug(sb.toString());
                     }
                     fromIndex = toIndex;
                 }

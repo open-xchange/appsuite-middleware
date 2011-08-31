@@ -354,6 +354,7 @@ public final class FolderJob extends AbstractMailSyncJob {
              */
             final MailFields fields = new MailFields(indexAdapter.getIndexableFields());
             fields.removeMailField(MailField.BODY);
+            fields.removeMailField(MailField.FULL);
             final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
             final String[] mailIds = new String[retval];
             System.arraycopy(ids, offset, mailIds, 0, retval);
