@@ -285,30 +285,34 @@ public final class FolderJob extends AbstractMailSyncJob {
                 /*
                  * Add
                  */
-                final int blockSize;
-                final int size = newIds.size();
-                {
-                    final int configuredBlockSize = Constants.CHUNK_SIZE;
-                    blockSize = configuredBlockSize > size ? size : configuredBlockSize;
-                }
-                final List<String> ids = new ArrayList<String>(newIds);
-                final List<MailMessage> list = new ArrayList<MailMessage>(blockSize);
-                newIds = null;
-                int start = 0;
-                final JobQueue queue = JobQueue.getInstance();
-                while (start < size) {
-                    final int num = add2Index(ids, start, blockSize, fullName, indexAdapter, list);
-                    start += num;
-                    if (DEBUG) {
-                        final long dur = System.currentTimeMillis() - st;
-                        LOG.debug("Folder job \"" + identifier + "\" inserted " + start + " of " + size + " messages in " + dur + "msec.");
+                if (!newIds.isEmpty()) {
+                    final int blockSize;
+                    final int size = newIds.size();
+                    {
+                        final int configuredBlockSize = Constants.CHUNK_SIZE;
+                        blockSize = configuredBlockSize > size ? size : configuredBlockSize;
                     }
-                    if (queue.hasHigherRankedJobInQueue(getRanking())) {
-                        break;
+                    final List<String> ids = new ArrayList<String>(newIds);
+                    final List<MailMessage> list = new ArrayList<MailMessage>(blockSize);
+                    newIds = null;
+                    int start = 0;
+                    final JobQueue queue = JobQueue.getInstance();
+                    while (start < size) {
+                        final int num = add2Index(ids, start, blockSize, fullName, indexAdapter, list);
+                        start += num;
+                        if (DEBUG) {
+                            final long dur = System.currentTimeMillis() - st;
+                            LOG.debug("Folder job \"" + identifier + "\" inserted " + start + " of " + size + " messages in " + dur + "msec.");
+                        }
+                        if (queue.hasHigherRankedJobInQueue(getRanking())) {
+                            break;
+                        }
                     }
+                    reEnqueued = (start < size);
+                } else if (DEBUG) {
+                    LOG.debug("Folder job \"" + identifier + "\" detected no new messages in folder " + fullName + " in account " + accountId);
                 }
                 setTimestampAndUnsetSyncFlag(fullName, System.currentTimeMillis());
-                reEnqueued = (start < size);
                 unset = false;
             } finally {
                 if (unset) {
@@ -317,7 +321,7 @@ public final class FolderJob extends AbstractMailSyncJob {
                 }
                 if (DEBUG) {
                     final long dur = System.currentTimeMillis() - st;
-                    LOG.debug("Folder job \"" + identifier + "\" took " + dur + "msec.");
+                    LOG.debug("Folder job \"" + identifier + "\" took " + dur + "msec for folder " + fullName + " in account " + accountId);
                 }
             }
             if (reEnqueued) {
