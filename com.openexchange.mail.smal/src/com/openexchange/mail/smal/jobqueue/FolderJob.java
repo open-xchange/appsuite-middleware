@@ -140,7 +140,7 @@ public final class FolderJob extends AbstractMailSyncJob {
     }
 
     /**
-     * Sets the span
+     * Sets the span; a negative span enforces this job to run if able to exclusively set sync flag
      * 
      * @param span The span to set
      * @return This folder job with specified span applied
