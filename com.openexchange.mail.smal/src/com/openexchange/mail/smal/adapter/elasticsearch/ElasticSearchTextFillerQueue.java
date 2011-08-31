@@ -265,61 +265,13 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
             return;
         }
         try {
-            final long st = DEBUG ? System.currentTimeMillis() : 0L;
-            final TextFiller first = fillers.get(0);
-            final int contextId = first.getContextId();
-            final int userId = first.getUserId();
-            final int accountId = first.getAccountId();
-            final String indexName = indexPrefix + contextId;
+            /*
+             * Handle fillers in chunks
+             */
             final int size = fillers.size();
-            /*
-             * Request JSON representations of mails via multi-get
-             */
-            final MultiGetRequest mgr = new MultiGetRequest();
-            Map<String, TextFiller> map = new HashMap<String, TextFiller>(size);
-            for (final TextFiller filler : fillers) {
-                final String uuid = filler.getUuid();
-                mgr.add(indexName, type, uuid);
-                map.put(uuid, filler);
-            }
-            final TransportClient client = adapter.getClient();
-            final Map<String, Map<String, Object>> jsonObjects = new HashMap<String, Map<String, Object>>(size);
-            for (final Iterator<MultiGetItemResponse> iter = client.multiGet(mgr).actionGet().iterator(); iter.hasNext();) {
-                final GetResponse getResponse = iter.next().getResponse();
-                if (null != getResponse) {
-                    final Map<String, Object> jsonObject = getResponse.getSource();
-                    if (checkJSONData(jsonObject)) {
-                        jsonObjects.put((String) jsonObject.get(Constants.FIELD_ID), jsonObject);
-                    } else if (null == jsonObject) { // Missing JSON data for current UUID
-                        final TextFiller filler = map.get(getResponse.getId());
-                        if (filler.queuedCounter > 0) {
-                            // Discard
-                        } else {
-                            filler.queuedCounter = filler.queuedCounter + 1;
-                            queue.offer(filler);
-                        }
-                    }
-                }
-            }
-            map = null;
-            /*
-             * Extract text from associated mails and put into JSON data
-             */
             final int configuredBlockSize = Constants.MAX_FILLER_CHUNK;
             if (size <= configuredBlockSize) {
-                addMailTextBodies(fillers, jsonObjects, accountId, userId, contextId);
-                if (DEBUG) {
-                    final long dur = System.currentTimeMillis() - st;
-                    final StringBuilder sb = new StringBuilder(64);
-                    sb.append("Thread \"").append(threadDesc);
-                    sb.append("\" added ").append(size);
-                    sb.append(" mail bodies in ").append(dur).append("msec");
-                    sb.append(" from folder \"").append(fillers.get(0).getFullName()).append('"');
-                    sb.append(" for account ").append(accountId);
-                    sb.append(" of user ").append(userId);
-                    sb.append(" in context ").append(contextId);
-                    LOG.debug(sb.toString());
-                }
+                pushMailTextBodies(fillers, threadDesc);
             } else {
                 int fromIndex = 0;
                 while (fromIndex < size) {
@@ -327,36 +279,9 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
                     if (toIndex > size) {
                         toIndex = size;
                     }
-                    addMailTextBodies(fillers.subList(fromIndex, toIndex), jsonObjects, accountId, userId, contextId);
-                    if (DEBUG) {
-                        final long dur = System.currentTimeMillis() - st;
-                        final StringBuilder sb = new StringBuilder(64);
-                        sb.append("Thread \"").append(threadDesc);
-                        sb.append("\" added ").append(toIndex);
-                        sb.append(" of ").append(size);
-                        sb.append(" mail bodies in ").append(dur).append("msec");
-                        sb.append(" from folder \"").append(fillers.get(0).getFullName()).append('"');
-                        sb.append(" for account ").append(accountId);
-                        sb.append(" of user ").append(userId);
-                        sb.append(" in context ").append(contextId);
-                        LOG.debug(sb.toString());
-                    }
+                    pushMailTextBodies(fillers.subList(fromIndex, toIndex), threadDesc);
                     fromIndex = toIndex;
                 }
-            }
-            /*
-             * Push them to index with a bulk request
-             */
-            final BulkRequestBuilder bulkRequest = client.prepareBulk();
-            for (final Map<String, Object> jsonObject : jsonObjects.values()) {
-                final IndexRequestBuilder irb = client.prepareIndex(indexName, type, (String) jsonObject.get(Constants.FIELD_UUID));
-                irb.setReplicationType(ReplicationType.ASYNC).setOpType(OpType.INDEX).setConsistencyLevel(WriteConsistencyLevel.DEFAULT);
-                irb.setSource(jsonObject);
-                bulkRequest.add(irb);
-            }
-            if (bulkRequest.numberOfActions() > 0) {
-                bulkRequest.execute().actionGet();
-                adapter.refresh(indexName);
             }
         } catch (final OXException e) {
             LOG.error("Failed pushing text content to indexed mails.", e);
@@ -367,7 +292,54 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
         }
     }
 
-    private static void addMailTextBodies(final List<TextFiller> fillers, final Map<String, Map<String, Object>> jsonObjects, final int accountId, final int userId, final int contextId) throws OXException {
+    private void pushMailTextBodies(final List<TextFiller> fillers, final String threadDesc) throws OXException {
+        if (fillers.isEmpty()) {
+            return;
+        }
+        final TextFiller first = fillers.get(0);
+        final int contextId = first.getContextId();
+        final int userId = first.getUserId();
+        final int accountId = first.getAccountId();
+        final String indexName = indexPrefix + contextId;
+        final int size = fillers.size();
+        /*
+         * Request JSON representations of mails via multi-get
+         */
+        final long st = DEBUG ? System.currentTimeMillis() : 0L;
+        final MultiGetRequest mgr = new MultiGetRequest();
+        Map<String, TextFiller> map = new HashMap<String, TextFiller>(size);
+        for (final TextFiller filler : fillers) {
+            final String uuid = filler.getUuid();
+            mgr.add(indexName, type, uuid);
+            map.put(uuid, filler);
+        }
+        final TransportClient client = adapter.getClient();
+        final Map<String, Map<String, Object>> jsonObjects = new HashMap<String, Map<String, Object>>(size);
+        for (final Iterator<MultiGetItemResponse> iter = client.multiGet(mgr).actionGet().iterator(); iter.hasNext();) {
+            final GetResponse getResponse = iter.next().getResponse();
+            if (null != getResponse) {
+                final Map<String, Object> jsonObject = getResponse.getSource();
+                if (checkJSONData(jsonObject)) {
+                    jsonObjects.put((String) jsonObject.get(Constants.FIELD_ID), jsonObject);
+                } else if (null == jsonObject) { // Missing JSON data for current UUID
+                    final TextFiller filler = map.get(getResponse.getId());
+                    if (filler.queuedCounter > 0) {
+                        // Discard
+                    } else {
+                        filler.queuedCounter = filler.queuedCounter + 1;
+                        queue.offer(filler);
+                    }
+                }
+            }
+        }
+        map = null;
+        /*
+         * Initialize bulk request
+         */
+        final BulkRequestBuilder bulkRequest = client.prepareBulk();
+        /*
+         * Iterate fillers & extract text
+         */
         MailAccess<?, ?> access = null;
         try {
             access = SMALMailAccess.getUnwrappedInstance(userId, contextId, accountId);
@@ -383,6 +355,15 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
                         if (DEBUG) {
                             LOG.debug("Text extracted and indexed for: " + filler);
                         }
+                        final IndexRequestBuilder irb = client.prepareIndex(indexName, type, (String) jsonObject.get(Constants.FIELD_UUID));
+                        irb.setReplicationType(ReplicationType.ASYNC).setOpType(OpType.INDEX).setConsistencyLevel(
+                            WriteConsistencyLevel.DEFAULT);
+                        irb.setSource(jsonObject);
+                        bulkRequest.add(irb);
+                        /*
+                         * Remove from map
+                         */
+                        jsonObjects.remove(mailId);
                     } catch (final Exception e) {
                         LOG.error("Text could not be extracted from: " + filler, e);
                         jsonObject.put(Constants.FIELD_BODY, "");
@@ -392,6 +373,25 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
         } finally {
             SMALMailAccess.closeUnwrappedInstance(access);
             access = null;
+        }
+        /*
+         * Push them to index with a bulk request
+         */
+        if (bulkRequest.numberOfActions() > 0) {
+            bulkRequest.execute().actionGet();
+            adapter.refresh(indexName);
+        }
+        if (DEBUG) {
+            final long dur = System.currentTimeMillis() - st;
+            final StringBuilder sb = new StringBuilder(64);
+            sb.append("Thread \"").append(threadDesc);
+            sb.append("\" added ").append(size);
+            sb.append(" mail bodies in ").append(dur).append("msec");
+            sb.append(" from folder \"").append(fillers.get(0).getFullName()).append('"');
+            sb.append(" for account ").append(accountId);
+            sb.append(" of user ").append(userId);
+            sb.append(" in context ").append(contextId);
+            LOG.debug(sb.toString());
         }
     }
 
