@@ -226,22 +226,8 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
                 queue.drainTo(list);
                 final boolean quit = list.remove(POISON);
                 if (!list.isEmpty()) {
-                    final ThreadPoolService poolService = SMALServiceLookup.getServiceStatic(ThreadPoolService.class);
-                    if (null == poolService) {
-                        for (final List<TextFiller> fillers : TextFillerGrouper.groupTextFillersByFullName(list)) {
-                            handleFillers(fillers, simpleName);
-                        }
-                    } else {
-                        for (final List<TextFiller> fillers : TextFillerGrouper.groupTextFillersByFullName(list)) {
-                            final int taskNum = isSubmittable();
-                            if (taskNum > 0) {
-                                final Future<Object> f = poolService.submit(ThreadPools.task(new MaxAwareTask(fillers, taskNum - 1)));
-                                concurrentFutures.set(taskNum - 1, f);
-                            } else { // Caller runs...
-                                handleFillers(fillers, simpleName);
-                            }
-                        }
-
+                    for (final List<TextFiller> fillers : TextFillerGrouper.groupTextFillersByFullName(list)) {
+                        handleFillers(fillers);
                     }
                 }
                 if (quit) {
@@ -257,10 +243,58 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
     /**
      * Handles specified equally-grouped fillers
      * 
+     * @param groupedFillers The equally-grouped fillers
+     * @param threadDesc The thread description
+     */
+    protected void handleFillers(final List<TextFiller> groupedFillers) {
+        final ThreadPoolService poolService = SMALServiceLookup.getServiceStatic(ThreadPoolService.class);
+        final int size = groupedFillers.size();
+        final int configuredBlockSize = Constants.MAX_FILLER_CHUNK;
+        if (size <= configuredBlockSize) {
+            scheduleFillers(groupedFillers, poolService);
+        } else {
+            int fromIndex = 0;
+            while (fromIndex < size) {
+                int toIndex = fromIndex + configuredBlockSize;
+                if (toIndex > size) {
+                    toIndex = size;
+                }
+                scheduleFillers(groupedFillers.subList(fromIndex, toIndex), poolService);
+                fromIndex = toIndex;
+            }
+        }
+    }
+
+    private void scheduleFillers(final List<TextFiller> groupedFillersSublist, final ThreadPoolService poolService) {
+        if (null == poolService) {
+            /*
+             * Caller runs because thread pool is absent
+             */
+            handleFillersSublist(groupedFillersSublist, simpleName);
+        } else {
+            final int taskNum = isSubmittable();
+            if (taskNum > 0) {
+                /*
+                 * Submit to a free worker thread
+                 */
+                final Future<Object> f = poolService.submit(ThreadPools.task(new MaxAwareTask(groupedFillersSublist, taskNum - 1)));
+                concurrentFutures.set(taskNum - 1, f);
+            } else {
+                /*
+                 * Caller runs because other worker threads are busy
+                 */
+                handleFillersSublist(groupedFillersSublist, simpleName);
+            }
+        }
+    }
+
+    /**
+     * Handles specified equally-grouped fillers
+     * 
      * @param fillers The equally-grouped fillers
      * @param threadDesc The thread description
      */
-    protected void handleFillers(final List<TextFiller> fillers, final String threadDesc) {
+    protected void handleFillersSublist(final List<TextFiller> fillers, final String threadDesc) {
         if (fillers.isEmpty()) {
             return;
         }
@@ -429,7 +463,7 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
 
         @Override
         public Object call() throws Exception {
-            handleFillers(fillers, String.valueOf(indexPos + 1));
+            handleFillersSublist(fillers, String.valueOf(indexPos + 1));
             return null;
         }
 
