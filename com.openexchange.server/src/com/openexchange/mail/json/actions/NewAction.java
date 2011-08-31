@@ -113,7 +113,7 @@ public final class NewAction extends AbstractMailAction {
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
         final AJAXRequestData request = req.getRequest();
         try {
-            if (request.hasUploads()) {
+            if (request.hasUploads() || request.getParameter(Mail.UPLOAD_FORMFIELD_MAIL) != null) {
                 final ServerSession session = req.getSession();
                 final UploadEvent uploadEvent = request.getUploadEvent();
                 String msgIdentifier = null;
