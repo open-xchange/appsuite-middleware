@@ -66,6 +66,7 @@ import org.htmlcleaner.PrettyXmlSerializer;
 import org.htmlcleaner.Serializer;
 import org.htmlcleaner.TagNode;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
 import com.openexchange.html.HTMLService;
 import com.openexchange.html.internal.parser.HTMLParser;
 import com.openexchange.html.internal.parser.handler.HTML2TextHandler;
@@ -74,7 +75,6 @@ import com.openexchange.html.internal.parser.handler.HTMLImageFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
 import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.proxy.ImageContentTypeRestriction;
-import com.openexchange.exception.OXException;
 import com.openexchange.proxy.ProxyRegistration;
 import com.openexchange.proxy.ProxyRegistry;
 
@@ -795,7 +795,7 @@ public final class HTMLServiceImpl implements HTMLService {
                 final StringBuilder sb = new StringBuilder(html);
                 final String cs;
                 if (null == charset) {
-                    if (LOG.isWarnEnabled()) {
+                    if (LOG.isDebugEnabled()) {
                         LOG.warn("Missing charset. Using fallback \"UTF-8\" instead.");
                     }
                     cs = CHARSET_UTF_8;

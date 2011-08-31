@@ -390,9 +390,6 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
                         final String text =
                             TextProcessing.extractTextFrom(access.getMessageStorage().getMessage(filler.getFullName(), mailId, false));
                         jsonObject.put(Constants.FIELD_BODY, text);
-                        if (DEBUG) {
-                            LOG.debug("Text extracted and indexed for: " + filler);
-                        }
                         final IndexRequestBuilder irb = client.prepareIndex(indexName, type, (String) jsonObject.get(Constants.FIELD_UUID));
                         irb.setReplicationType(ReplicationType.ASYNC).setOpType(OpType.INDEX).setConsistencyLevel(
                             WriteConsistencyLevel.DEFAULT);
