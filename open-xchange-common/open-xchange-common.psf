@@ -24,5 +24,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.messaging"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.publish"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.push"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,server"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.secret"/>
 </provider>
 </psf>

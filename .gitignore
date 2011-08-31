@@ -35,3 +35,5 @@ monitoring/jars
 com.openexchange.messaging/jars
 com.openexchange.publish/jars
 com.openexchange.push/jars
+com.openexchange.secret/jars
+server/jars
