@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.smal;
 
+import java.util.Arrays;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.IndexRange;
@@ -122,10 +123,12 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
         System.out.println("SMALMessageStorage.searchMessages()...");
         final IndexAdapter indexAdapter = getIndexAdapter();
         if (null == indexAdapter) {
+            System.out.println("MISSING INDEX ADAPTER!");
             return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
         }
         final MailFields mfs = new MailFields(fields);
         if (!indexAdapter.getIndexableFields().containsAll(mfs)) {
+            System.out.println("REQUESTED ONE OR MORE NON.INDEXED FIELDS: " + Arrays.toString(mfs.toArray()));
             return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
         }
         final long st = System.currentTimeMillis();
@@ -145,6 +148,10 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
             return mails.toArray(new MailMessage[mails.size()]);
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
+            
+            System.out.println("AN ERROR OCCURRED RETRIEVING MAILS FROM INDEX!");
+            e.printStackTrace(System.out);
+            
             return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
         } finally {
             final long dur = System.currentTimeMillis() - st;

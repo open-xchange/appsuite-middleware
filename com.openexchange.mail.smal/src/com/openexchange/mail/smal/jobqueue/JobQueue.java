@@ -107,7 +107,7 @@ public final class JobQueue {
 
     private final ConcurrentMap<String, Object> identifiers;
 
-    private final Future<Object> future;
+    private final Future<Object> consumerFuture;
 
     private final JobConsumer consumer;
 
@@ -119,7 +119,7 @@ public final class JobQueue {
         queue = new PriorityBlockingQueue<Job>(CAPACITY);
         identifiers = new ConcurrentHashMap<String, Object>(CAPACITY);
         consumer = new JobConsumer(queue, identifiers);
-        future = threadPool.submit(consumer, AbortBehavior.getInstance());
+        consumerFuture = threadPool.submit(consumer, AbortBehavior.getInstance());
     }
 
     /**
@@ -128,10 +128,10 @@ public final class JobQueue {
     public void stop() {
         consumer.stop();
         try {
-            future.get(1, TimeUnit.SECONDS);
+            consumerFuture.get(1, TimeUnit.SECONDS);
         } catch (final TimeoutException e) {
             // Wait time elapsed; enforce cancelation
-            future.cancel(true);
+            consumerFuture.cancel(true);
         } catch (final InterruptedException e) {
             /*
              * Cannot occur, but keep interrupted state

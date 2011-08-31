@@ -314,6 +314,11 @@ public final class FolderJob extends AbstractMailSyncJob {
                     reEnqueued = (start < size);
                 } else if (DEBUG) {
                     LOG.debug("Folder job \"" + identifier + "\" detected no new messages in folder " + fullName + " in account " + accountId);
+                    
+                    
+                    System.out.println("NO NEW MAILS FOR FOLDER " + fullName + " OF ACCOUNT " + accountId);
+                    
+                    
                 }
                 setTimestampAndUnsetSyncFlag(fullName, System.currentTimeMillis());
                 unset = false;
