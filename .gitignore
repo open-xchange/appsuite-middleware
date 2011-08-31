@@ -32,3 +32,6 @@ com.openexchange.file.storage/jars
 com.openexchange.html/jars
 com.openexchange.proxy/jars
 monitoring/jars
+com.openexchange.messaging/jars
+com.openexchange.publish/jars
+com.openexchange.push/jars

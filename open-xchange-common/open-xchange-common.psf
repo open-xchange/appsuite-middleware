@@ -21,5 +21,8 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,monitoring"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.proxy"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.html"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.messaging"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.publish"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.push"/>
 </provider>
 </psf>
