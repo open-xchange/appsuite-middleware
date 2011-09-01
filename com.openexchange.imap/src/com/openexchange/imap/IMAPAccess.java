@@ -457,7 +457,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             String tmpPass = config.getPassword();
             if (tmpPass != null) {
                 try {
-                    tmpPass = new String(tmpPass.getBytes(imapConfProps.getImapAuthEnc()), CHARENC_ISO8859);
+                    final String imapAuthEnc = imapConfProps.getImapAuthEnc();
+                    tmpPass = new String(tmpPass.getBytes(null == imapAuthEnc ? MailProperties.getInstance().getDefaultMimeCharset() : imapAuthEnc), CHARENC_ISO8859);
                 } catch (final UnsupportedEncodingException e) {
                     LOG.error(e.getMessage(), e);
                 }
