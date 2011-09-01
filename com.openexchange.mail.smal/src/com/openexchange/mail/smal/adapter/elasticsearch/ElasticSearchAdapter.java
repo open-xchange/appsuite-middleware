@@ -788,7 +788,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                 break;
             case FROM:
                 {
-                    @SuppressWarnings("unchecked") final List<Object> sAddrs = searchHit.field(Constants.FIELD_FROM).getValues();
+                    final List<Object> sAddrs = searchHit.field(Constants.FIELD_FROM).getValues();
                     if (null != sAddrs) {
                         for (final Object sAddr : sAddrs) {
                             try {
@@ -802,7 +802,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                 break;
             case TO:
                 {
-                    @SuppressWarnings("unchecked") final List<Object> sAddrs = searchHit.field(Constants.FIELD_TO).getValues();
+                    final List<Object> sAddrs = searchHit.field(Constants.FIELD_TO).getValues();
                     if (null != sAddrs) {
                         for (final Object sAddr : sAddrs) {
                             try {
@@ -816,7 +816,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                 break;
             case CC:
                 {
-                    @SuppressWarnings("unchecked") final List<Object> sAddrs = searchHit.field(Constants.FIELD_CC).getValues();
+                    final List<Object> sAddrs = searchHit.field(Constants.FIELD_CC).getValues();
                     if (null != sAddrs) {
                         for (final Object sAddr : sAddrs) {
                             try {
@@ -830,7 +830,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                 break;
             case BCC:
                 {
-                    @SuppressWarnings("unchecked") final List<Object> sAddrs = searchHit.field(Constants.FIELD_BCC).getValues();
+                    final List<Object> sAddrs = searchHit.field(Constants.FIELD_BCC).getValues();
                     if (null != sAddrs) {
                         for (final Object sAddr : sAddrs) {
                             try {
