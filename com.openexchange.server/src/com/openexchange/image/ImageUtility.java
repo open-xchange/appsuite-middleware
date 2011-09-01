@@ -53,6 +53,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.NoSuchAlgorithmException;
+import java.util.Locale;
 import java.util.regex.Pattern;
 import jonelo.jacksum.JacksumAPI;
 import jonelo.jacksum.algorithm.AbstractChecksum;
@@ -104,7 +105,7 @@ public final class ImageUtility {
         String imageId = null;
         String registrationName = null;
         for (String nvp : nvps) {
-            nvp = nvp.trim();
+            nvp = nvp.trim().toLowerCase(Locale.US);
             if (nvp.length() > 0) {
                 // Look-up character '='
                 final int pos = nvp.indexOf('=');
