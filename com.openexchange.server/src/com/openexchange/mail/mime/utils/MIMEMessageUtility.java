@@ -327,7 +327,7 @@ public final class MIMEMessageUtility {
     }
 
     public static final Pattern PATTERN_REF_IMG = Pattern.compile(
-        "(<img[^>]*?)(src=\")([^\"]+?)((?:uid=|signature=))([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)",
+        "(<img[^>]*?)(src=\")([^\"]+?)((?:id=|signature=))([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)",
         Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     /**
