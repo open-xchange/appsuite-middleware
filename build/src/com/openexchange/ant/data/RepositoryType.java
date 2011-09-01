@@ -51,6 +51,7 @@ package com.openexchange.ant.data;
 
 /**
  * Enumeration for the possible types of repositories.
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public enum RepositoryType {
@@ -60,12 +61,12 @@ public enum RepositoryType {
 
     private String provider;
 
-    private RepositoryType(String provider) {
+    private RepositoryType(final String provider) {
         this.provider = provider;
     }
 
-    static RepositoryType byProvider(String provider) {
-        for (RepositoryType type : values()) {
+    static RepositoryType byProvider(final String provider) {
+        for (final RepositoryType type : values()) {
             if (type.provider.equals(provider)) {
                 return type;
             }

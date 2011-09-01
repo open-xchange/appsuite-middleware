@@ -54,29 +54,28 @@ import org.apache.tools.ant.Task;
 
 /**
  * Inserts the cvs user into the cvsroot.
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class PatchCVSRoot extends Task {
 
     private String name;
-
     private String cvsRoot;
-
     private String cvsUser;
 
     public PatchCVSRoot() {
         super();
     }
 
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 
-    public void setCvsRoot(String cvsRoot) {
+    public void setCvsRoot(final String cvsRoot) {
         this.cvsRoot = cvsRoot;
     }
 
-    public void setCvsUser(String cvsUser) {
+    public void setCvsUser(final String cvsUser) {
         this.cvsUser = cvsUser;
     }
 
