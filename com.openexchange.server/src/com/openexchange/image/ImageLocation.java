@@ -49,12 +49,18 @@
 
 package com.openexchange.image;
 
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 /**
  * {@link ImageLocation} - An image location description.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ImageLocation {
+
+    public static final String PROPERTY_REGISTRATION_NAME = "registrationName";
 
     private final String accountId;
 
@@ -64,7 +70,7 @@ public final class ImageLocation {
 
     private final String imageId;
 
-    private String registrationName;
+    private final ConcurrentMap<String, Object> properties;
 
     /**
      * Initializes a new {@link ImageLocation}.
@@ -77,10 +83,77 @@ public final class ImageLocation {
      */
     public ImageLocation(final String accountId, final String folder, final String id, final String imageId) {
         super();
+        properties = new ConcurrentHashMap<String, Object>(2);
         this.accountId = accountId;
         this.folder = folder;
         this.id = id;
         this.imageId = imageId;
+    }
+
+    /**
+     * Puts specified property if none associated with given name before.
+     * 
+     * @param name The name
+     * @param value The value
+     * @return <code>true</code> if property has been put; otherwise <code>false</code> if another already exists
+     */
+    public boolean putPropertyIfAbsent(final String name, final Object value) {
+        return null == properties.putIfAbsent(name, value);
+    }
+
+    /**
+     * Checks presence of denoted property.
+     * 
+     * @param name The name
+     * @return <code>true</code> if present; otherwise <code>false</code> if absent
+     */
+    public boolean containsProperty(final String name) {
+        return properties.containsKey(name);
+    }
+
+    /**
+     * Gets denoted property
+     * 
+     * @param name The name
+     * @return The associated value
+     */
+    public Object getProperty(final String name) {
+        return properties.get(name);
+    }
+
+    /**
+     * Puts specified property.
+     * 
+     * @param name The name
+     * @param value The value associated with the name
+     */
+    public void putProperty(final String name, final Object value) {
+        properties.put(name, value);
+    }
+
+    /**
+     * Removes denoted property.
+     * 
+     * @param name The property name
+     */
+    public void removeProperty(final String name) {
+        properties.remove(name);
+    }
+
+    /**
+     * Clears all properties.
+     */
+    public void clearProperties() {
+        properties.clear();
+    }
+
+    /**
+     * Gets a set of all property names
+     * 
+     * @return The property names
+     */
+    public Set<String> propertyNames() {
+        return properties.keySet();
     }
 
     /**
@@ -125,7 +198,7 @@ public final class ImageLocation {
      * @return The registration name
      */
     public String getRegistrationName() {
-        return registrationName;
+        return (String) properties.get(PROPERTY_REGISTRATION_NAME);
     }
 
     /**
@@ -134,7 +207,7 @@ public final class ImageLocation {
      * @param registrationName The registration name to set
      */
     public void setRegistrationName(final String registrationName) {
-        this.registrationName = registrationName;
+        properties.putIfAbsent(PROPERTY_REGISTRATION_NAME, registrationName);
     }
 
 }

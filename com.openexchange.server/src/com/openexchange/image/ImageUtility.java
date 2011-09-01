@@ -59,7 +59,6 @@ import jonelo.jacksum.JacksumAPI;
 import jonelo.jacksum.algorithm.AbstractChecksum;
 import jonelo.jacksum.algorithm.MD;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.configuration.ServerConfig;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
@@ -112,15 +111,15 @@ public final class ImageUtility {
                 if (pos >= 0) {
                     final String name = nvp.substring(0, pos);
                     if ("accountId".equals(name)) {
-                        accountId = decodeQueryStringValue(UTF_8, nvp.substring(pos + 1));
+                        accountId = decodeQueryStringValue(nvp.substring(pos + 1));
                     } else if (AJAXServlet.PARAMETER_FOLDERID.equals(name)) {
-                        folder = decodeQueryStringValue(UTF_8, nvp.substring(pos + 1));
+                        folder = decodeQueryStringValue(nvp.substring(pos + 1));
                     } else if (AJAXServlet.PARAMETER_ID.equals(name)) {
-                        id = decodeQueryStringValue(UTF_8, nvp.substring(pos + 1));
+                        id = decodeQueryStringValue(nvp.substring(pos + 1));
                     } else if (AJAXServlet.PARAMETER_UID.equals(name)) {
-                        imageId = decodeQueryStringValue(UTF_8, nvp.substring(pos + 1));
+                        imageId = decodeQueryStringValue(nvp.substring(pos + 1));
                     } else if ("source".equals(name)) {
-                        registrationName = decodeQueryStringValue(UTF_8, nvp.substring(pos + 1));
+                        registrationName = decodeQueryStringValue(nvp.substring(pos + 1));
                     }
                 }
             }
@@ -130,9 +129,9 @@ public final class ImageUtility {
         return il;
     }
 
-    private static String decodeQueryStringValue(final String charEnc, final String queryStringValue) {
+    private static String decodeQueryStringValue(final String queryStringValue) {
         try {
-            return URLDecoder.decode(queryStringValue, charEnc == null ? ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding) : charEnc);
+            return URLDecoder.decode(queryStringValue, UTF_8);
         } catch (final UnsupportedEncodingException e) {
             return queryStringValue;
         }
