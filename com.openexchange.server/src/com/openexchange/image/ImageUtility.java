@@ -59,8 +59,10 @@ import jonelo.jacksum.algorithm.AbstractChecksum;
 import jonelo.jacksum.algorithm.MD;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.configuration.ServerConfig;
-import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.crypto.CryptoService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
@@ -183,28 +185,41 @@ public final class ImageUtility {
                 sb.setLength(0);
             }
         }
-        sb.append(prefix).append('/').append(ImageDataSource.ALIAS);
-        sb.append('?').append("contextid").append(session.getContextId());
+        /*
+         * Compose signature
+         */
+        String signParam;
         {
-            final String mail = UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getMail();
-            final int pos = mail.indexOf('@');
-            sb.append('&').append("username").append(urlEncodeSafe(mail.substring(0, pos)));
-            sb.append('&').append("server").append(urlEncodeSafe(mail.substring(pos + 1)));
+            final String signature = imageDataSource.getSignature(imageLocation, session);
+            final int contextId = session.getContextId();
+            final int userId = session.getUserId();
+            sb.append(contextId).append('.').append(userId).append('.').append(signature);
+            try {
+                final CryptoService cryptoService = ServerServiceRegistry.getInstance().getService(CryptoService.class);
+                signParam = cryptoService.encrypt(sb.toString(), imageDataSource.getRegistrationName());
+            } catch (final OXException e) {
+                signParam = sb.toString();
+            }
+            sb.setLength(0);
         }
-        sb.append('&').append("signature").append(urlEncodeSafe(imageDataSource.getSignature(imageLocation, session)));
-        sb.append('&').append("source").append(urlEncodeSafe(imageDataSource.getRegistrationName()));
+        /*
+         * Compose URL parameters
+         */
+        sb.append(prefix).append('/').append(ImageDataSource.ALIAS);
+        sb.append('?').append("signature=").append(urlEncodeSafe(signParam));
+        sb.append('&').append("source=").append(urlEncodeSafe(imageDataSource.getRegistrationName()));
         /*
          * Image location data
          */
-        sb.append('&').append(AJAXServlet.PARAMETER_FOLDERID).append(urlEncodeSafe(imageLocation.getFolder()));
-        sb.append('&').append(AJAXServlet.PARAMETER_ID).append(urlEncodeSafe(imageLocation.getId()));
+        sb.append('&').append(AJAXServlet.PARAMETER_FOLDERID).append('=').append(urlEncodeSafe(imageLocation.getFolder()));
+        sb.append('&').append(AJAXServlet.PARAMETER_ID).append('=').append(urlEncodeSafe(imageLocation.getId()));
         final String imageId = imageLocation.getImageId();
         if (null != imageId) {
-            sb.append('&').append(AJAXServlet.PARAMETER_UID).append(urlEncodeSafe(imageId));
+            sb.append('&').append(AJAXServlet.PARAMETER_UID).append('=').append(urlEncodeSafe(imageId));
         }
         final String accountId = imageLocation.getAccountId();
         if (null != accountId) {
-            sb.append('&').append("accountId").append(urlEncodeSafe(accountId));
+            sb.append('&').append("accountId=").append(urlEncodeSafe(accountId));
         }
     }
 

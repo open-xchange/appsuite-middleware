@@ -666,7 +666,7 @@ public class MIMEMessageFiller {
             /*
              * Check for referenced images (by cid oder locally available)
              */
-            embeddedImages = MIMEMessageUtility.hasEmbeddedImages(content) || MIMEMessageUtility.hasReferencedLocalImages(content, session);
+            embeddedImages = MIMEMessageUtility.hasEmbeddedImages(content) || MIMEMessageUtility.hasReferencedLocalImages(content);
         } else {
             embeddedImages = false;
         }
