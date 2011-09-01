@@ -47,65 +47,26 @@
  *
  */
 
-package com.openexchange.mail.autoconfig.sources;
+package com.openexchange.mail.autoconfig.json.actions;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FilenameFilter;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.mail.autoconfig.Autoconfig;
-import com.openexchange.mail.autoconfig.AutoconfigException;
-import com.openexchange.mail.autoconfig.xmlparser.AutoconfigParser;
-import com.openexchange.mail.autoconfig.xmlparser.ClientConfig;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.mail.autoconfig.AutoconfigService;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link ConfigurationFile}
+ * {@link AutoconfigAction}
  * 
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class ConfigurationFile extends AbstractConfigSource {
-
-    private static final String locationProperty = "com.openexchange.mail.autoconfig.path";
+public abstract class AutoconfigAction implements AJAXActionService {
 
     private ServiceLookup services;
 
-    public ConfigurationFile(ServiceLookup services) {
+    public AutoconfigAction(ServiceLookup services) {
         this.services = services;
     }
 
-    @Override
-    public Autoconfig getAutoconfig(String emailLocalPart, final String emailDomain, User user, Context context) throws OXException {
-        ConfigViewFactory configViewFactory = services.getService(ConfigViewFactory.class);
-        ConfigView view = configViewFactory.getView(user.getId(), context.getContextId());
-        String fileLocation = view.get(locationProperty, String.class);
-        File configFolder = new File(fileLocation);
-
-        File[] files = configFolder.listFiles(new FilenameFilter() {
-
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.equalsIgnoreCase(emailDomain + ".xml");
-            }
-        });
-
-        FileInputStream fis;
-        try {
-            fis = new FileInputStream(files[0]);
-        } catch (FileNotFoundException e) {
-            throw AutoconfigException.io(e);
-        }
-        AutoconfigParser parser = new AutoconfigParser(fis);
-        ClientConfig clientConfig = parser.getConfig();
-
-        Autoconfig autoconfig = getBestConfiguration(clientConfig, emailDomain);
-        replaceUsername(autoconfig, emailLocalPart, emailDomain);
-        return autoconfig;
+    protected AutoconfigService getAutoconfigService() {
+        return services.getService(AutoconfigService.class);
     }
-
 }

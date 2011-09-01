@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.autoconfig.sources;
 
+import static com.openexchange.mail.autoconfig.xmlparser.Server.EMAILADDRESS;
+import static com.openexchange.mail.autoconfig.xmlparser.Server.MAILLOCALPART;
 import com.openexchange.mail.autoconfig.Autoconfig;
 import com.openexchange.mail.autoconfig.xmlparser.ClientConfig;
 import com.openexchange.mail.autoconfig.xmlparser.EmailProvider;
@@ -129,10 +131,26 @@ public abstract class AbstractConfigSource implements ConfigSource {
             autoconfig.setTransportSecure(outgoingSocket == SocketType.SSL || outgoingSocket == SocketType.STARTTLS);
             autoconfig.setTransportServer(currentOutgoingServer.getHostname());
 
+            autoconfig.setUsername(currentIncomingServer.getUsername());
+            
             break;
         }
 
         return autoconfig;
+    }
+
+    /**
+     * @param autoconfig
+     * @param emailLocalPart
+     * @param emailDomain
+     */
+    protected void replaceUsername(Autoconfig autoconfig, String emailLocalPart, String emailDomain) {
+
+        if (autoconfig.getUsername().equalsIgnoreCase(EMAILADDRESS)) {
+            autoconfig.setUsername(emailLocalPart + "@" + emailDomain);
+        } else if (autoconfig.getUsername().equalsIgnoreCase(MAILLOCALPART)) {
+            autoconfig.setUsername(emailLocalPart);
+        }
     }
 
 }

@@ -71,6 +71,8 @@ public class Autoconfig {
     private boolean mailSecure;
 
     private boolean transportSecure;
+    
+    private String username;
 
     /**
      * Gets the mailServer
@@ -214,6 +216,24 @@ public class Autoconfig {
      */
     public void setTransportSecure(boolean transportSecure) {
         this.transportSecure = transportSecure;
+    }
+
+    /**
+     * Gets the username
+     *
+     * @return The username
+     */
+    public String getUsername() {
+        return username;
+    }
+
+    /**
+     * Sets the username
+     *
+     * @param username The username to set
+     */
+    public void setUsername(String username) {
+        this.username = username;
     }
 
 }

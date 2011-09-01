@@ -80,9 +80,9 @@ public class AutoconfigServiceImpl implements AutoconfigService {
     public AutoconfigServiceImpl(ServiceLookup services) {
         this.services = services;
         sources = new LinkedList<ConfigSource>();
+        sources.add(new ConfigurationFile(this.services));
         sources.add(new ISPDB());
         sources.add(new ConfigurationServer());
-        sources.add(new ConfigurationFile(services));
         sources.add(new Guess());
     }
 
