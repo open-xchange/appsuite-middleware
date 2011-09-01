@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Build bundle">
 
+    <description>
+        This is the universal build script to build all bundles.
+    </description>
+
+    <!-- customizable values -->
+    <property name="destDir" value=""/><!-- Necessary to build the bundles into a distro package -->
+    <property name="prefix" value="/opt/open-xchange"/><!-- Installation path on destination system -->
+
     <!-- Constants -->
 	<property name="mainSrcDir" value="src"/>
     <property name="mainBinDir" value="build"/>
@@ -13,6 +21,11 @@
     <property file="META-INF/MANIFEST.MF"/>
     <property file="build.properties"/>
     <property name="testJarFile" value="${bundlesDir}/${Bundle-SymbolicName}-test.jar"/>
+
+    <!-- Install Constants -->
+    <property name="bundlesDir" value="${prefix}/bundles"/>
+    <property name="confInstallDir" value="${prefix}/etc"/>
+    <property name="bundle.dDir" value="${prefix}/osgi/bundle.d"/>
 
     <target name="prepareClasspath" depends="testForMainBuild" description="Prepares all the necessary class path for compiling or running.">
         <!-- Copies the required class path from the project specific property to an easier named one. -->
@@ -145,7 +158,7 @@
                 </dirset>
             </path>
         </foreach>
-        <!-- TODO configuration files -->
+        <!-- TODO configuration files to confInstallDir -->
     </target>
 
     <target name="install" depends="installBundle,installConfig" description="Combines installBundle and installConfig targets."/>

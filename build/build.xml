@@ -2,7 +2,7 @@
 <project name="Bundle Builder" basedir=".">
 
     <description>
-        
+        Reads a ProjectSet file and builds all bundles referenced in that ProjectSet file.
     </description>
 
     <!-- customizable values -->
