@@ -237,6 +237,9 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     void processPropertiesFile(final File propFile) {
         try {
+            if (!propFile.exists() || !propFile.canRead()) {
+                return;
+            }
             final Properties tmp = loadProperties(propFile);
             final String propFilePath = propFile.getPath();
             propertiesByFile.put(propFilePath, tmp);
