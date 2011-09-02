@@ -172,13 +172,14 @@ public final class ConfigurationImpl implements ConfigurationService {
             if (null == directories[i]) {
                 throw new IllegalArgumentException("Given configuration directory path is null.");
             }
-            dirs[i] = new File(directories[i]);
-            if (!dirs[i].exists()) {
+            final File dir = new File(directories[i]);
+            dirs[i] = dir;
+            if (!dir.exists()) {
                 throw new IllegalArgumentException(MessageFormat.format("Not found: \"{0}\".", directories[i]));
-            } else if (!dirs[i].isDirectory()) {
+            } else if (!dir.isDirectory()) {
                 throw new IllegalArgumentException(MessageFormat.format("Not a directory: {0}", directories[i]));
             }
-            processDirectory(dirs[i], fileFilter, new FileProcessor() {
+            processDirectory(dir, fileFilter, new FileProcessor() {
 
                 @Override
                 public void processFile(final File file) {
@@ -187,7 +188,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 
             });
 
-            processDirectory(dirs[i], new FileFilter() {
+            processDirectory(dir, new FileFilter() {
 
                 @Override
                 public boolean accept(final File pathname) {
