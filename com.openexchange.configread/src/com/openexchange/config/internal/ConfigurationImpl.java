@@ -181,7 +181,7 @@ public final class ConfigurationImpl implements ConfigurationService {
             processDirectory(dirs[i], fileFilter, new FileProcessor() {
 
                 @Override
-                public void processFile(File file) {
+                public void processFile(final File file) {
                     processPropertiesFile(file);
                 }
 
@@ -190,7 +190,7 @@ public final class ConfigurationImpl implements ConfigurationService {
             processDirectory(dirs[i], new FileFilter() {
 
                 @Override
-                public boolean accept(File pathname) {
+                public boolean accept(final File pathname) {
                     return pathname.isDirectory() || pathname.getName().endsWith(".yml") || pathname.getName().endsWith(".yaml");
                 }
 
@@ -199,11 +199,11 @@ public final class ConfigurationImpl implements ConfigurationService {
             new FileProcessor() {
 
                 @Override
-                public void processFile(File file) {
+                public void processFile(final File file) {
                     Object o = null;
                     try {
                         o = Yaml.load(file);
-                    } catch (FileNotFoundException e) {
+                    } catch (final FileNotFoundException e) {
                         // IGNORE
                         return;
                     }
@@ -219,7 +219,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         public void processFile(File file);
     }
 
-    private void processDirectory(final File dir, final FileFilter fileFilter, FileProcessor processor) {
+    private void processDirectory(final File dir, final FileFilter fileFilter, final FileProcessor processor) {
         final File[] files = dir.listFiles(fileFilter);
         if (files == null) {
             LOG.info(MessageFormat.format("Can't read {0}. Skipping.", dir));
@@ -259,7 +259,7 @@ public final class ConfigurationImpl implements ConfigurationService {
                 propertiesFiles.put(propName, propFilePath);
             }
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.warn("An error occurred while processing property file \"" + propFile + "\".", e);
         }
     }
 
@@ -497,7 +497,7 @@ public final class ConfigurationImpl implements ConfigurationService {
     }
 
     @Override
-    public Object getYaml(String filename) {
+    public Object getYaml(final String filename) {
         String path = yamlPaths.get(filename);
         if (path == null) {
             path = yamlPaths.get(filename+".yml");
@@ -514,7 +514,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 
 
     @Override
-    public Map<String, Object> getYamlInFolder(String folderName) {
+    public Map<String, Object> getYamlInFolder(final String folderName) {
         final Map<String, Object> retval = new HashMap<String, Object>();
         final Iterator<Entry<String, String>> iter = yamlPaths.entrySet().iterator();
         String fldName = folderName;
