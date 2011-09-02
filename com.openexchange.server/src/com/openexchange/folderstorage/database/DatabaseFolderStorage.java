@@ -122,12 +122,13 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link DatabaseFolderStorage} - The database folder storage.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DatabaseFolderStorage implements FolderStorage {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DatabaseFolderStorage.class));
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DatabaseFolderStorage.class));
 
     /**
      * Simple interface for providing and closing a connection.
@@ -136,10 +137,17 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
         /**
          * Gets the (active) connection.
-         *
+         * 
          * @return The connection
          */
         Connection getConnection();
+
+        /**
+         * Gets an active fall-back connection
+         * 
+         * @return The fgall-back connection
+         */
+        Connection getFallbackConnection();
 
         /**
          * Closes underlying connection.
@@ -151,19 +159,43 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
         private final Connection connection;
 
-        protected NonClosingConnectionProvider(final Connection connection) {
+        private final DatabaseService databaseService;
+
+        private final int contextId;
+
+        private volatile Connection fallbackCon;
+
+        protected NonClosingConnectionProvider(final Connection connection, final DatabaseService databaseService, final int contextId) {
             super();
             this.connection = connection;
+            this.databaseService = databaseService;
+            this.contextId = contextId;
+        }
+
+        @Override
+        public Connection getFallbackConnection() {
+            if (null != fallbackCon) {
+                try {
+                    fallbackCon = databaseService.getWritable(contextId);
+                } catch (final OXException e) {
+                    LOG.warn("No connection to master database.", e);
+                    return null;
+                }
+            }
+            return fallbackCon;
         }
 
         @Override
         public Connection getConnection() {
-            return connection;
+            return null == fallbackCon ? connection : fallbackCon;
         }
 
         @Override
         public void close() {
-            // Nothing to do
+            if (null != fallbackCon) {
+                databaseService.backWritable(contextId, connection);
+                fallbackCon = null;
+            }
         }
     }
 
@@ -171,9 +203,9 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
         private final DatabaseService databaseService;
 
-        private final Connection connection;
+        private volatile Connection connection;
 
-        private final boolean writeable;
+        private volatile boolean writeable;
 
         private final int contextId;
 
@@ -183,6 +215,19 @@ public final class DatabaseFolderStorage implements FolderStorage {
             this.databaseService = databaseService;
             this.writeable = writeable;
             this.contextId = contextId;
+        }
+
+        @Override
+        public Connection getFallbackConnection() {
+            close();
+            try {
+                writeable = true;
+                connection = databaseService.getWritable(contextId);
+            } catch (final OXException e) {
+                LOG.warn("No connection to master database.", e);
+                return null;
+            }
+            return connection;
         }
 
         @Override
@@ -662,7 +707,12 @@ public final class DatabaseFolderStorage implements FolderStorage {
             if (getFolderAccess(storageParameters).getFolderLastModified(folderId).after(new Date(lastModified))) {
                 throw FolderExceptionErrorMessage.CONCURRENT_MODIFICATION.create();
             }
-            OXFolderSQL.updateLastModified(folderId, lastModified, storageParameters.getUserId(), con, ctx);
+            try {
+                OXFolderSQL.updateLastModified(folderId, lastModified, storageParameters.getUserId(), con, ctx);
+            } catch (final SQLException e) {
+                // Retry with fall-back connection
+                OXFolderSQL.updateLastModified(folderId, lastModified, storageParameters.getUserId(), provider.getFallbackConnection(), ctx);
+            }
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -1300,9 +1350,10 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
             if (DatabaseFolderStorageUtility.hasSharedPrefix(id)) {
                 final int owner = Integer.parseInt(id.substring(FolderObject.SHARED_PREFIX.length()));
-                throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(OXFolderUtility.getUserName(
-                    session.getUserId(),
-                    context), UserStorage.getStorageUser(owner, context).getDisplayName(), Integer.valueOf(context.getContextId()));
+                throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(
+                    OXFolderUtility.getUserName(session.getUserId(), context),
+                    UserStorage.getStorageUser(owner, context).getDisplayName(),
+                    Integer.valueOf(context.getContextId()));
             }
 
             final int folderId = Integer.parseInt(id);
@@ -1628,12 +1679,12 @@ public final class DatabaseFolderStorage implements FolderStorage {
     }
 
     private static ConnectionProvider getConnection(final boolean modify, final StorageParameters storageParameters) throws OXException {
-        Connection connection = optParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
-        if (null != connection) {
-            return new NonClosingConnectionProvider(connection);
-        }
         final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
         final Context context = storageParameters.getContext();
+        Connection connection = optParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+        if (null != connection) {
+            return new NonClosingConnectionProvider(connection, databaseService, context.getContextId());
+        }
         connection = modify ? databaseService.getWritable(context) : databaseService.getReadOnly(context);
         return new ClosingConnectionProvider(connection, modify, databaseService, context.getContextId());
     }
