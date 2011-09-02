@@ -143,13 +143,6 @@ public final class DatabaseFolderStorage implements FolderStorage {
         Connection getConnection();
 
         /**
-         * Gets an active fall-back connection
-         * 
-         * @return The fgall-back connection
-         */
-        Connection getFallbackConnection();
-
-        /**
          * Closes underlying connection.
          */
         void close();
@@ -163,8 +156,6 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
         private final int contextId;
 
-        private volatile Connection fallbackCon;
-
         protected NonClosingConnectionProvider(final Connection connection, final DatabaseService databaseService, final int contextId) {
             super();
             this.connection = connection;
@@ -173,29 +164,13 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
 
         @Override
-        public Connection getFallbackConnection() {
-            if (null != fallbackCon) {
-                try {
-                    fallbackCon = databaseService.getWritable(contextId);
-                } catch (final OXException e) {
-                    LOG.warn("No connection to master database.", e);
-                    return null;
-                }
-            }
-            return fallbackCon;
-        }
-
-        @Override
         public Connection getConnection() {
-            return null == fallbackCon ? connection : fallbackCon;
+            return connection;
         }
 
         @Override
         public void close() {
-            if (null != fallbackCon) {
-                databaseService.backWritable(contextId, connection);
-                fallbackCon = null;
-            }
+            // Nothing to do
         }
     }
 
@@ -203,9 +178,9 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
         private final DatabaseService databaseService;
 
-        private volatile Connection connection;
+        private final Connection connection;
 
-        private volatile boolean writeable;
+        private final boolean writeable;
 
         private final int contextId;
 
@@ -215,19 +190,6 @@ public final class DatabaseFolderStorage implements FolderStorage {
             this.databaseService = databaseService;
             this.writeable = writeable;
             this.contextId = contextId;
-        }
-
-        @Override
-        public Connection getFallbackConnection() {
-            close();
-            try {
-                writeable = true;
-                connection = databaseService.getWritable(contextId);
-            } catch (final OXException e) {
-                LOG.warn("No connection to master database.", e);
-                return null;
-            }
-            return connection;
         }
 
         @Override
@@ -707,12 +669,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
             if (getFolderAccess(storageParameters).getFolderLastModified(folderId).after(new Date(lastModified))) {
                 throw FolderExceptionErrorMessage.CONCURRENT_MODIFICATION.create();
             }
-            try {
-                OXFolderSQL.updateLastModified(folderId, lastModified, storageParameters.getUserId(), con, ctx);
-            } catch (final SQLException e) {
-                // Retry with fall-back connection
-                OXFolderSQL.updateLastModified(folderId, lastModified, storageParameters.getUserId(), provider.getFallbackConnection(), ctx);
-            }
+            OXFolderSQL.updateLastModified(folderId, lastModified, storageParameters.getUserId(), con, ctx);
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -1307,14 +1264,35 @@ public final class DatabaseFolderStorage implements FolderStorage {
     @Override
     public boolean startTransaction(final StorageParameters parameters, final boolean modify) throws OXException {
         final FolderType folderType = getFolderType();
-        if (null != parameters.getParameter(folderType, DatabaseParameterConstants.PARAM_CONNECTION)) {
-            // Connection already present
-            return false;
-        }
         try {
             final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
             final Context context = parameters.getContext();
-            final Connection con = modify ? databaseService.getWritable(context) : databaseService.getReadOnly(context);
+            Connection con = parameters.getParameter(folderType, DatabaseParameterConstants.PARAM_CONNECTION);
+            if (null != con) {
+                final Boolean readWrite = parameters.getParameter(folderType, DatabaseParameterConstants.PARAM_WRITABLE);
+                if (Boolean.valueOf(modify).equals(readWrite)) {
+                    // Connection already present in proper access mode
+                    return false;
+                }
+                /*-
+                 * Connection in wrong access mode:
+                 * 
+                 * commit, restore auto-commit & push to pool
+                 */
+                try {
+                    con.commit();
+                } catch (final Exception e) {
+                    // Ignore
+                    DBUtils.rollback(con);
+                }
+                DBUtils.autocommit(con);
+                if (null != readWrite && readWrite.booleanValue()) {
+                    databaseService.backWritable(context, con);
+                } else {
+                    databaseService.backReadOnly(context, con);
+                }
+            }
+            con = modify ? databaseService.getWritable(context) : databaseService.getReadOnly(context);
             con.setAutoCommit(false);
             // Put to parameters
             if (parameters.putParameterIfAbsent(folderType, DatabaseParameterConstants.PARAM_CONNECTION, con)) {
