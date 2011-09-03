@@ -307,7 +307,7 @@ public final class MimeForward {
                 compositeMail.addAdditionalParts(mailPart);
             }
             forwardMail = compositeMail;
-        } else if (originalContentType.startsWith(TEXT)) {
+        } else if (originalContentType.startsWith(TEXT) && !MimeProcessingUtility.isSpecial(originalContentType.getBaseType())) {
             /*
              * Original message is a simple text mail: Add message body prefixed with forward text
              */
@@ -477,7 +477,7 @@ public final class MimeForward {
         for (int i = 0; i < count; i++) {
             final MailPart part = multipartPart.getEnclosedMailPart(i);
             partContentType.setContentType(part.getContentType());
-            if (partContentType.startsWith(TEXT) && MimeProcessingUtility.isInline(part, partContentType)) {
+            if (partContentType.startsWith(TEXT) && MimeProcessingUtility.isInline(part, partContentType) && !MimeProcessingUtility.isSpecial(contentType.getBaseType())) {
                 final String charset = MessageUtility.checkCharset(part, partContentType);
                 retvalContentType.setContentType(partContentType);
                 retvalContentType.setCharsetParameter(charset);
