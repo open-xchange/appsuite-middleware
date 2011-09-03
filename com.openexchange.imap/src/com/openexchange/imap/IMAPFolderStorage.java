@@ -1567,9 +1567,21 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 /*
                  * Check for standard folder & possible subscribe operation
                  */
-                final boolean defaultFolder = getChecker().isDefaultFolder(fullName);
+                final IMAPDefaultFolderChecker checker = getChecker();
+                boolean defaultFolder = false;
+                if ("INBOX".equals(fullName)) {
+                    defaultFolder = true;
+                } else if (fullName.equals(checker.getDefaultFolder(StorageUtility.INDEX_TRASH)) ) {
+                    defaultFolder = true;
+                } else if (fullName.equals(checker.getDefaultFolder(StorageUtility.INDEX_DRAFTS)) ) {
+                    defaultFolder = true;
+                } else if (fullName.equals(checker.getDefaultFolder(StorageUtility.INDEX_SENT)) ) {
+                    defaultFolder = true;
+                } else if (fullName.equals(checker.getDefaultFolder(StorageUtility.INDEX_SPAM)) ) {
+                    defaultFolder = true;
+                }
                 final boolean performSubscription = MailProperties.getInstance().isIgnoreSubscription() && defaultFolder ? false : performSubscribe(toUpdate, updateMe);
-                if (performSubscription && defaultFolder) {
+                if (performSubscription && defaultFolder && !toUpdate.isSubscribed()) {
                     throw IMAPException.create(IMAPException.Code.NO_DEFAULT_FOLDER_UNSUBSCRIBE, imapConfig, session, fullName);
                 }
                 /*
