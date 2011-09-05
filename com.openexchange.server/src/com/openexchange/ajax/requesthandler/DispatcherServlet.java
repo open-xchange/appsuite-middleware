@@ -279,9 +279,11 @@ public final class DispatcherServlet extends SessionServlet {
         /*
          * Check for ETag header to support client caching
          */
-        final String eTag = req.getHeader("etag");
-        if (null != eTag) {
-            retval.setETag(eTag);
+        {
+            final String eTag = req.getHeader("etag");
+            if (null != eTag) {
+                retval.setETag(eTag);
+            }
         }
         /*
          * Set request body
