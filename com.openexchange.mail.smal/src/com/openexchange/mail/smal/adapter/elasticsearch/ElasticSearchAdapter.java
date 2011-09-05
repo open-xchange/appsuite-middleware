@@ -274,7 +274,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
         } catch (final ElasticSearchException e) {
             throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (final RuntimeException e) {
             throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
