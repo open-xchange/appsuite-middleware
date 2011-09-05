@@ -55,12 +55,15 @@ import java.io.InputStream;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.ETagAwareAJAXActionService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -87,7 +90,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class GetAttachmentAction extends AbstractMailAction {
+public final class GetAttachmentAction extends AbstractMailAction implements ETagAwareAJAXActionService {
 
     /**
      * Initializes a new {@link GetAttachmentAction}.
@@ -96,6 +99,23 @@ public final class GetAttachmentAction extends AbstractMailAction {
      */
     public GetAttachmentAction(final ServiceLookup services) {
         super(services);
+    }
+
+    @Override
+    public boolean checkETag(final String clientETag, final AJAXRequestData request, final ServerSession session) throws OXException {
+        if (clientETag == null || clientETag.length() == 0) {
+            return false;
+        }
+        /*
+         * Any ETag is valid because an attachment cannot change
+         */
+        return true;
+    }
+
+    @Override
+    public void setETag(final String eTag, final long expires, final AJAXRequestResult result) throws OXException {
+        result.setExpires(expires);
+        result.setHeader("ETag", eTag);
     }
 
     @Override
@@ -188,7 +208,15 @@ public final class GetAttachmentAction extends AbstractMailAction {
             final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(out.toByteArray());
             fileHolder.setName(mailPart.getFileName());
             fileHolder.setContentType(saveToDisk ? "application/octet-stream" : mailPart.getContentType().toString());
-            return new AJAXRequestResult(fileHolder, "file");
+            final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
+            /*
+             * Set ETag
+             */
+            setETag(UUID.randomUUID().toString(), AJAXRequestResult.YEAR_IN_MILLIS * 50, result);
+            /*
+             * Return result
+             */
+            return result;
         } catch (final IOException e) {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
