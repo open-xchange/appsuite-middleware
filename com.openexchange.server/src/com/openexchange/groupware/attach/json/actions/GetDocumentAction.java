@@ -98,6 +98,7 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
         moduleId = requireNumber(request, Attachment.PARAMETER_MODULE);
         id = requireNumber(request, Attachment.PARAMETER_ID);
 
+        request.setFormat("file");
         return document(
             folderId,
             attachedId,

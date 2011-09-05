@@ -184,6 +184,7 @@ public final class GetAttachmentAction extends AbstractMailAction {
             /*
              * Create file holder
              */
+            req.getRequest().setFormat("file");
             final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(out.toByteArray());
             fileHolder.setName(mailPart.getFileName());
             fileHolder.setContentType(saveToDisk ? "application/octet-stream" : mailPart.getContentType().toString());

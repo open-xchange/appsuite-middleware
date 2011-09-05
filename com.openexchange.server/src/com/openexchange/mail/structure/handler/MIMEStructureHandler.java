@@ -101,6 +101,7 @@ import com.openexchange.mail.mime.ParameterizedHeader;
 import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.dataobjects.MIMEMultipartMailPart;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.structure.Base64JSONString;
 import com.openexchange.mail.structure.StructureHandler;
@@ -189,6 +190,40 @@ public final class MIMEStructureHandler implements StructureHandler {
     public MIMEStructureHandler setForceJSONArray4Multipart(final boolean forceJSONArray4Multipart) {
         this.forceJSONArray4Multipart = forceJSONArray4Multipart;
         return this;
+    }
+
+    @Override
+    public boolean handleEnd(final MailMessage mail) throws OXException {
+        /*
+         * Write message to byte array
+         */
+        byte[] bytes;
+        {
+            final ByteArrayOutputStream buf = new UnsynchronizedByteArrayOutputStream(2048);
+            mail.writeTo(buf);
+            bytes = buf.toByteArray();
+        }
+        /*
+         * Detect first empty line
+         */
+        final int pos = MIMEMultipartMailPart.getHeaderEnd(bytes);
+        if (pos <= 0) {
+            // No headers ?
+            return true;
+        }
+        final byte[] bs = new byte[pos + 1]; // Append last \n
+        System.arraycopy(bytes, 0, bs, 0, pos + 1);
+        bytes = null;
+        /*
+         * Insert literal base64-encoded headers
+         */
+        try {
+            final JSONObject headersJsonObject = mailJsonObjectQueue.getFirst().getJSONObject(KEY_HEADERS);
+            headersJsonObject.put("x-original-headers", new String(Base64.encodeBase64(bs))); // ASCII-only, no charset needed
+        } catch (final JSONException e) {
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+        }
+        return true;
     }
 
     /**

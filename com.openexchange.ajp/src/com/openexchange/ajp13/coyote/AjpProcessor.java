@@ -1205,7 +1205,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 }
             }
         }
-        LogProperties.putLogProperty("com.openexchange.ajp13.requestIp", request.getRemoteAddr());
         /*
          * Decode extra attributes
          */
@@ -1363,11 +1362,15 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
          * Determine addressed servlet instance
          */
         setServletInstance(request.getRequestURI());
-        if (LogProperties.isEnabled()) {
+        {
             final Map<String, Object> properties = LogProperties.getLogProperties();
-            properties.put("com.openexchange.ajp13.requestURI", request.getRequestURI());
-            properties.put("com.openexchange.ajp13.servletPath", request.getServletPath());
-            properties.put("com.openexchange.ajp13.pathInfo", request.getPathInfo());
+            if (LogProperties.isEnabled()) {
+                properties.put("com.openexchange.ajp13.requestURI", request.getRequestURI());
+                properties.put("com.openexchange.ajp13.servletPath", request.getServletPath());
+                properties.put("com.openexchange.ajp13.pathInfo", request.getPathInfo());
+            }
+            properties.put("com.openexchange.ajp13.requestIp", request.getRemoteAddr());
+            properties.put("com.openexchange.ajp13.serverName", request.getServerName());
         }
         /*
          * Set proper JSESSIONID cookie and pre-create associated HTTP session

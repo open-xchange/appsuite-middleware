@@ -55,9 +55,12 @@ import static com.openexchange.mail.text.TextProcessing.performLineFolding;
 import static java.util.regex.Matcher.quoteReplacement;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -78,7 +81,9 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -118,6 +123,19 @@ public final class SMTPTransport extends MailTransport {
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SMTPTransport.class));
 
     private static final String CHARENC_ISO_8859_1 = "ISO-8859-1";
+
+    private static volatile String staticHostName;
+
+    private static volatile UnknownHostException warnSpam;
+
+    static {
+        try {
+            staticHostName = InetAddress.getLocalHost().getCanonicalHostName();
+        } catch (final UnknownHostException e) {
+            staticHostName = "localhost";
+            warnSpam = e;
+        }
+    }
 
     private final Queue<Runnable> pendingInvocations;
 
@@ -647,7 +665,7 @@ public final class SMTPTransport extends MailTransport {
         }
     }
 
-    private static void saveChangesSafe(final SMTPMessage smtpMessage) throws OXException {
+    private void saveChangesSafe(final SMTPMessage smtpMessage) throws OXException {
         try {
             try {
                 smtpMessage.saveChanges();
@@ -663,9 +681,54 @@ public final class SMTPTransport extends MailTransport {
                  */
                 smtpMessage.saveChanges();
             }
+            /*
+             * Change Message-Id header appropriately
+             */
+            final String messageId = smtpMessage.getHeader("Message-ID", null);
+            if (null != messageId) {
+                /*
+                 * Somewhat of: <744810669.1.1314981157714.JavaMail.username@host.com>
+                 */
+                final HostnameService hostnameService = SMTPServiceRegistry.getServiceRegistry().getService(HostnameService.class);
+                String hostName;
+                if (null == hostnameService) {
+                    hostName = getHostName();
+                } else {
+                    hostName = hostnameService.getHostname(session.getUserId(), session.getContextId());
+                }
+                if (null == hostName) {
+                    hostName = getHostName();
+                }
+                final int pos = messageId.indexOf('@');
+                if (pos > 0 ) {
+                    smtpMessage.setHeader("Message-ID", messageId.substring(0, pos + 1) + hostName);
+                } else {
+                    smtpMessage.setHeader("Message-ID", messageId + hostName);
+                }
+            }
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
         }
+    }
+
+    private static String getHostName() {
+        final Map<String, Object> logProperties = LogProperties.optLogProperties();
+        if (null == logProperties) {
+            return getStaticHostName();
+        }
+        final String serverName = (String) logProperties.get("com.openexchange.ajp13.serverName");
+        if (null == serverName) {
+            return getStaticHostName();
+        }
+        return serverName;
+    }
+
+    private static String getStaticHostName() {
+        final UnknownHostException warning = warnSpam;
+        if (warning != null) {
+            LOG.error("Can't resolve my own hostname, using 'localhost' instead, which is certainly not what you want!", warning);
+        }
+        return staticHostName;
     }
 
     private static void sanitizeContentTypeHeaders(final Part part, final ContentType sanitizer) throws OXException {

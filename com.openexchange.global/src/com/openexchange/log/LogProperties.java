@@ -115,7 +115,7 @@ public final class LogProperties {
     /**
      * Gets the thread-local log properties.
      *
-     * @return The log properties
+     * @return The log properties or <code>null</code>
      * @see #isEnabled()
      */
     public static Map<String, Object> optLogProperties() {

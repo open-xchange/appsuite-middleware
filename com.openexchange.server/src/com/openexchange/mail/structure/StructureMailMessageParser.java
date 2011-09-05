@@ -286,6 +286,10 @@ public final class StructureMailMessageParser {
              * Parse content
              */
             parseMailContent(mail, handler, prefix, 1);
+            /*
+             * Mark end of parsing
+             */
+            handler.handleEnd(mail);
         } catch (final IOException e) {
             throw MailExceptionCode.UNREADBALE_PART_CONTENT.create(e, Long.valueOf(mail.getMailId()), mail.getFolder());
         }

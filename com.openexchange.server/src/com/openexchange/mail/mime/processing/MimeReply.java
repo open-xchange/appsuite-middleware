@@ -516,7 +516,7 @@ public final class MimeReply {
             final ParameterContainer pc =
                 new ParameterContainer(retvalContentType, textBuilder, strHelper, usm, mailSession, ltz, replyTexts);
             found |= gatherAllTextContents(msg, contentType, pc);
-        } else if (contentType.startsWith(TEXT)) {
+        } else if (contentType.startsWith(TEXT) && !MimeProcessingUtility.isSpecial(contentType.getBaseType())) {
             if (retvalContentType.getPrimaryType() == null) {
                 final String text = MimeProcessingUtility.handleInlineTextPart(msg, contentType, usm.isDisplayHtmlInlineContent());
                 retvalContentType.setContentType(contentType);
@@ -650,7 +650,7 @@ public final class MimeReply {
         for (int i = 0; !found && i < count; i++) {
             final MailPart part = multipartPart.getEnclosedMailPart(i);
             partContentType.setContentType(part.getContentType());
-            if (partContentType.startsWith(preferHTML ? TEXT_HTM : TEXT) && MimeProcessingUtility.isInline(part, partContentType)) {
+            if (partContentType.startsWith(preferHTML ? TEXT_HTM : TEXT) && MimeProcessingUtility.isInline(part, partContentType) && !MimeProcessingUtility.isSpecial(partContentType.getBaseType())) {
                 if (pc.retvalContentType.getPrimaryType() == null) {
                     pc.retvalContentType.setContentType(partContentType);
                     final String charset = MessageUtility.checkCharset(part, partContentType);

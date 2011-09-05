@@ -52,7 +52,7 @@ package com.openexchange.image.servlet;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.UndeclaredThrowableException;
+import java.util.Collection;
 import java.util.Date;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -63,15 +63,15 @@ import javax.servlet.http.HttpServletResponse;
 import org.osgi.framework.ServiceException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Login;
+import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.helper.CombinedInputStream;
-import com.openexchange.ajax.login.HashCalculator;
-import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.context.ContextService;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataProperties;
+import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -113,11 +113,14 @@ public final class ImageServlet extends HttpServlet {
 
     private volatile CookieHashSource hashSource;
 
+    private final String secretPrefix;
+
     /**
      * Initializes a new {@link ImageServlet}
      */
     public ImageServlet() {
         super();
+        secretPrefix = Login.SECRET_PREFIX;
     }
 
     @Override
@@ -134,69 +137,100 @@ public final class ImageServlet extends HttpServlet {
 
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        Context context = null;
-        User user = null;
-        Session session = null;
-        /*-
-         * Try to resolve user by cookies & parameters
-         * 
+        final String registrationName = req.getParameter("source");
+        if (null == registrationName) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing source parameter.");
+            return;
+        }
+        final String signParam;
+        try {
+            final CryptoService cryptoService = ServerServiceRegistry.getInstance().getService(CryptoService.class);
+            final String param = req.getParameter("signature");
+            if (null == param) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing signature parameter.");
+                return;
+            }
+            signParam = cryptoService.decrypt(param, registrationName);
+        } catch (final OXException e) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid signature parameter.");
+            return;
+        }
+        if (null == signParam) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing signature parameter.");
+            return;
+        }
+        int beginIndex = 0;
+        int endIndex = signParam.indexOf('.');
+        if (endIndex <= 0) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid signature parameter.");
+            return;
+        }
+        final Context context = getContext(signParam.substring(beginIndex, endIndex));
+        if (null == context) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Unable to determine context.");
+            return;
+        }
+        beginIndex = endIndex;
+        endIndex = signParam.indexOf('.', beginIndex + 1);
+        if (endIndex <= 0) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid signature parameter.");
+            return;
+        }
+        final String signature = signParam.substring(beginIndex + 1, endIndex);
+        final User user = getUser(signParam.substring(endIndex + 1), context);
+        if (null == user) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Unable to determine user.");
+            return;
+        }
+        if (!context.isEnabled() || !user.isMailEnabled()) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid credentials.");
+            return;
+        }
+        /*
          * Look-up up cookies
          */
-        final SessiondService sessiondService;
         String secret = null;
+        String secretCookieName = null;
+        Session session = null;
         try {
             final Cookie[] cookies = req.getCookies();
             if (null == cookies) {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing request cookies.");
                 return;
             }
-            sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class, true);
-            final String hash = HashCalculator.getHash(req);
-            final String sessionCookieName = Login.SESSION_PREFIX + hash;
-            final String secretCookieName = Login.SECRET_PREFIX + hash;
+            /*
+             * Get user's sessions
+             */
+            final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class, true);
+            final Collection<Session> sessions = sessiondService.getSessions(user.getId(), context.getContextId());
+            /*
+             * Find secret cookie
+             */
             NextCookie: for (final Cookie cookie : cookies) {
                 final String cookieName = cookie.getName();
-                if (cookieName.startsWith(sessionCookieName)) {
-                    final String sessionId = cookie.getValue();
-                    if (sessiondService.refreshSession(sessionId)) {
-                        session = sessiondService.getSession(sessionId);
-                        try {
-                            context =
-                                ServerServiceRegistry.getInstance().getService(ContextService.class, true).getContext(
-                                    session.getContextId());
-                            user =
-                                ServerServiceRegistry.getInstance().getService(UserService.class, true).getUser(
-                                    session.getUserId(),
-                                    context);
-                            if (!context.isEnabled() || !user.isMailEnabled()) {
-                                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid credentials.");
-                                return;
-                            }
-                        } catch (final UndeclaredThrowableException e) {
-                            throw LoginExceptionCodes.UNKNOWN.create(e);
-                        }
-                        /*
-                         * Secret already found?
-                         */
-                        if (null != secret) {
+                if (cookieName.startsWith(secretPrefix)) {
+                    secret = cookie.getValue();
+                    /*
+                     * Find an appropriate session for secret
+                     */
+                    for (final Session ses : sessions) {
+                        if (secret.equals(ses.getSecret())) {
+                            secretCookieName = cookieName;
+                            session = ses;
                             break NextCookie;
                         }
                     }
-                } else if (cookieName.startsWith(secretCookieName)) {
-                    secret = cookie.getValue();
-                    /*
-                     * Session already found?
-                     */
-                    if (null != session) {
-                        break NextCookie;
-                    }
                 }
             }
-            if (null == secret) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing secret cookie.");
+            if (null == session) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing or invalid secret cookie.");
                 return;
             }
-            if (null != session && !secret.equals(session.getSecret())) {
+            /*
+             * Verify hash
+             */
+            final String expectedSecretCookieName = secretPrefix + SessionServlet.getHash(hashSource, req, session.getHash(), session.getClient());
+            if (null == secretCookieName || !secretCookieName.equals(expectedSecretCookieName)) {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid secret cookie.");
                 return;
             }
@@ -205,54 +239,11 @@ public final class ImageServlet extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-        if (null == context) {
-            context = getContext(req);
-            if (null == context) {
-                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Unable to determine context.");
-                return;
-            }
-        }
-        if (null == user) {
-            final String mailAddress = getMailAddress(req);
-            if (null == mailAddress) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unable to determine mail address.");
-                return;
-            }
-            user = findUser(mailAddress, context);
-            if (null == user) {
-                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Unable to resolve mail address to a user.");
-                return;
-            }
-        }
-        if (!context.isEnabled() || !user.isMailEnabled()) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid credentials.");
-            return;
-        }
-        if (null == session) {
-            /*
-             * Find an appropriate session for secret
-             */
-            for (final Session ses : sessiondService.getSessions(user.getId(), context.getContextId())) {
-                if (secret.equals(ses.getSecret())) {
-                    session = ses;
-                    break;
-                }
-            }
-            if (null == session) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid secret cookie.");
-                return;
-            }
-        }
         /*
          * Get image data source
          */
         final ImageDataSource dataSource;
         try {
-            final String registrationName = req.getParameter("source");
-            if (null == registrationName) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing source parameter.");
-                return;
-            }
             final ConversionService conversionService = ServerServiceRegistry.getInstance().getService(ConversionService.class, true);
             dataSource = (ImageDataSource) conversionService.getDataSource(registrationName);
             if (null == dataSource) {
@@ -277,16 +268,9 @@ public final class ImageServlet extends HttpServlet {
         /*
          * Check signature equality
          */
-        {
-            final String signature = req.getParameter("signature");
-            if (null == signature) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing signature parameter.");
-                return;
-            }
-            if (!signature.equals(dataSource.getSignature(imageLocation, session))) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Signature does not match.");
-                return;
-            }
+        if (!signature.equals(dataSource.getSignature(imageLocation, session))) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Signature does not match.");
+            return;
         }
         /*
          * Output image
@@ -295,7 +279,8 @@ public final class ImageServlet extends HttpServlet {
             /*
              * Check for ETag headers
              */
-            if (dataSource.getETag(imageLocation, session).equals(req.getHeader("If-None-Match")) ) {
+            final String eTag = req.getHeader("If-None-Match");
+            if (null != eTag && dataSource.getETag(imageLocation, session).equals(eTag) ) {
                 resp.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
                 return;
             }
@@ -307,23 +292,23 @@ public final class ImageServlet extends HttpServlet {
         }
     }
 
-    private static User findUser(final String mailAddress, final Context context) {
+    private static User getUser(final String sUserId, final Context context) {
+        final int userId;
         try {
-            return ServerServiceRegistry.getInstance().getService(UserService.class, true).searchUser(mailAddress, context);
-        } catch (final ServiceException e) {
-            LOG.error(e.getMessage(), e);
+            userId = Integer.parseInt(sUserId.trim());
+        } catch (final NumberFormatException e) {
+            LOG.error("Unable to parse user identifier.", e);
             return null;
+        }
+        try {
+            return ServerServiceRegistry.getInstance().getService(UserService.class, true).getUser(userId, context);
         } catch (final OXException e) {
-            LOG.debug("User '" + mailAddress + "' not found.");
+            LOG.debug("User '" + sUserId + "' not found.");
             return null;
         }
     }
 
-    private static Context getContext(final HttpServletRequest request) {
-        final String sContextId = request.getParameter("contextid");
-        if (sContextId == null) {
-            return null;
-        }
+    private static Context getContext(final String sContextId) {
         final int contextId;
         try {
             contextId = Integer.parseInt(sContextId.trim());
@@ -428,9 +413,10 @@ public final class ImageServlet extends HttpServlet {
             /*
              * Write from content's input stream to response output stream
              */
-            final byte[] buffer = new byte[BUFLEN];
-            for (int len; (len = in.read(buffer, 0, buffer.length)) != -1;) {
-                out.write(buffer, 0, len);
+            final int len = BUFLEN;
+            final byte[] buffer = new byte[len];
+            for (int read; (read = in.read(buffer, 0, len)) != -1;) {
+                out.write(buffer, 0, read);
             }
             out.flush();
         } finally {

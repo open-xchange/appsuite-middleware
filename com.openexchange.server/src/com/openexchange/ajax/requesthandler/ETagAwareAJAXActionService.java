@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,45 +52,22 @@ package com.openexchange.ajax.requesthandler;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
-
-
 /**
- * A {@link Dispatcher} is marked as a top level dispatcher for the entire framework.
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link ETagAwareAJAXActionService} - Introduces <i>ETag</i> awareness to an {@link AJAXActionService}.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Dispatcher {
+public interface ETagAwareAJAXActionService extends AJAXActionService {
 
     /**
-     * Performs given request.
-     *
-     * @param request The request to perform
-     * @param state The state
-     * @param session The session providing needed user data
-     * @return The result yielded from given request
-     * @throws OXException If an error occurs
+     * Checks for equality of passed client ETag compared to currently valid ETag for requested resource.
+     * 
+     * @param clientETag The client's ETag
+     * @param request The request data
+     * @param session The session
+     * @return <code>true</code> if ETags are equal; otherwise <code>false</code>
+     * @throws OXException If checking ETag fails
      */
-    AJAXRequestResult perform(AJAXRequestData request, AJAXState state, ServerSession session) throws OXException;
+    boolean checkETag(String clientETag, AJAXRequestData request, ServerSession session) throws OXException;
 
-    /**
-     * Begins a dispatcher cycle.
-     *
-     * @return The state
-     * @throws OXException If start-up fails
-     */
-    AJAXState begin() throws OXException;
-
-    /**
-     * Ends a dispatcher cycle.
-     *
-     * @param state The state
-     */
-    void end(AJAXState state);
-
-    /**
-     * Returns whether the dispatcher knows about the given module.
-     * @param module
-     * @return true if it can handle the module request, false otherwise
-     */
-    boolean handles(String module);
 }

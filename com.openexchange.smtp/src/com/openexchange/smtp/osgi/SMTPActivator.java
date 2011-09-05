@@ -54,10 +54,13 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.RegistryCustomizer;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.smtp.SMTPProvider;
 
@@ -74,6 +77,8 @@ public final class SMTPActivator extends DeferredActivator {
 
     private ServiceRegistration smtpServiceRegistration;
 
+    private ServiceTracker<HostnameService,HostnameService> tracker;
+
     /**
      * Initializes a new {@link SMTPActivator}
      */
@@ -85,7 +90,7 @@ public final class SMTPActivator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, MailAccountStorageService.class };
+        return new Class<?>[] { ConfigurationService.class, MailAccountStorageService.class, HostnameService.class };
     }
 
     @Override
@@ -124,6 +129,8 @@ public final class SMTPActivator extends DeferredActivator {
                     }
                 }
             }
+            tracker = new ServiceTracker<HostnameService,HostnameService>(context, HostnameService.class.getName(), new RegistryCustomizer<HostnameService>(context, HostnameService.class, getServiceRegistry()));
+            tracker.open();
             smtpServiceRegistration = context.registerService(TransportProvider.class.getName(), SMTPProvider.getInstance(), dictionary);
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
@@ -138,6 +145,10 @@ public final class SMTPActivator extends DeferredActivator {
             if (null != smtpServiceRegistration) {
                 smtpServiceRegistration.unregister();
                 smtpServiceRegistration = null;
+            }
+            if (null != tracker) {
+                tracker.close();
+                tracker = null;
             }
             /*
              * Clear service registry

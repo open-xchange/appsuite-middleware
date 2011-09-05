@@ -53,14 +53,16 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.NoSuchAlgorithmException;
+import java.util.Locale;
 import java.util.regex.Pattern;
 import jonelo.jacksum.JacksumAPI;
 import jonelo.jacksum.algorithm.AbstractChecksum;
 import jonelo.jacksum.algorithm.MD;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.configuration.ServerConfig;
-import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.crypto.CryptoService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
@@ -102,22 +104,22 @@ public final class ImageUtility {
         String imageId = null;
         String registrationName = null;
         for (String nvp : nvps) {
-            nvp = nvp.trim();
+            nvp = nvp.trim().toLowerCase(Locale.US);
             if (nvp.length() > 0) {
                 // Look-up character '='
                 final int pos = nvp.indexOf('=');
                 if (pos >= 0) {
                     final String name = nvp.substring(0, pos);
                     if ("accountId".equals(name)) {
-                        accountId = decodeQueryStringValue(UTF_8, nvp.substring(pos + 1));
+                        accountId = decodeQueryStringValue(nvp.substring(pos + 1));
                     } else if (AJAXServlet.PARAMETER_FOLDERID.equals(name)) {
-                        folder = decodeQueryStringValue(UTF_8, nvp.substring(pos + 1));
+                        folder = decodeQueryStringValue(nvp.substring(pos + 1));
                     } else if (AJAXServlet.PARAMETER_ID.equals(name)) {
-                        id = decodeQueryStringValue(UTF_8, nvp.substring(pos + 1));
+                        id = decodeQueryStringValue(nvp.substring(pos + 1));
                     } else if (AJAXServlet.PARAMETER_UID.equals(name)) {
-                        imageId = decodeQueryStringValue(UTF_8, nvp.substring(pos + 1));
+                        imageId = decodeQueryStringValue(nvp.substring(pos + 1));
                     } else if ("source".equals(name)) {
-                        registrationName = decodeQueryStringValue(UTF_8, nvp.substring(pos + 1));
+                        registrationName = decodeQueryStringValue(nvp.substring(pos + 1));
                     }
                 }
             }
@@ -127,9 +129,9 @@ public final class ImageUtility {
         return il;
     }
 
-    private static String decodeQueryStringValue(final String charEnc, final String queryStringValue) {
+    private static String decodeQueryStringValue(final String queryStringValue) {
         try {
-            return URLDecoder.decode(queryStringValue, charEnc == null ? ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding) : charEnc);
+            return URLDecoder.decode(queryStringValue, UTF_8);
         } catch (final UnsupportedEncodingException e) {
             return queryStringValue;
         }
@@ -183,28 +185,41 @@ public final class ImageUtility {
                 sb.setLength(0);
             }
         }
-        sb.append(prefix).append('/').append(ImageDataSource.ALIAS);
-        sb.append('?').append("contextid").append(session.getContextId());
+        /*
+         * Compose signature
+         */
+        String signParam;
         {
-            final String mail = UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getMail();
-            final int pos = mail.indexOf('@');
-            sb.append('&').append("username").append(urlEncodeSafe(mail.substring(0, pos)));
-            sb.append('&').append("server").append(urlEncodeSafe(mail.substring(pos + 1)));
+            final String signature = imageDataSource.getSignature(imageLocation, session);
+            final int contextId = session.getContextId();
+            final int userId = session.getUserId();
+            sb.append(contextId).append('.').append(signature).append('.').append(userId);
+            try {
+                final CryptoService cryptoService = ServerServiceRegistry.getInstance().getService(CryptoService.class);
+                signParam = cryptoService.encrypt(sb.toString(), imageDataSource.getRegistrationName());
+            } catch (final OXException e) {
+                signParam = sb.toString();
+            }
+            sb.setLength(0);
         }
-        sb.append('&').append("signature").append(urlEncodeSafe(imageDataSource.getSignature(imageLocation, session)));
-        sb.append('&').append("source").append(urlEncodeSafe(imageDataSource.getRegistrationName()));
+        /*
+         * Compose URL parameters
+         */
+        sb.append(prefix).append('/').append(ImageDataSource.ALIAS);
+        sb.append('?').append("signature=").append(urlEncodeSafe(signParam));
+        sb.append('&').append("source=").append(urlEncodeSafe(imageDataSource.getRegistrationName()));
         /*
          * Image location data
          */
-        sb.append('&').append(AJAXServlet.PARAMETER_FOLDERID).append(urlEncodeSafe(imageLocation.getFolder()));
-        sb.append('&').append(AJAXServlet.PARAMETER_ID).append(urlEncodeSafe(imageLocation.getId()));
+        sb.append('&').append(AJAXServlet.PARAMETER_FOLDERID).append('=').append(urlEncodeSafe(imageLocation.getFolder()));
+        sb.append('&').append(AJAXServlet.PARAMETER_ID).append('=').append(urlEncodeSafe(imageLocation.getId()));
         final String imageId = imageLocation.getImageId();
         if (null != imageId) {
-            sb.append('&').append(AJAXServlet.PARAMETER_UID).append(urlEncodeSafe(imageId));
+            sb.append('&').append(AJAXServlet.PARAMETER_UID).append('=').append(urlEncodeSafe(imageId));
         }
         final String accountId = imageLocation.getAccountId();
         if (null != accountId) {
-            sb.append('&').append("accountId").append(urlEncodeSafe(accountId));
+            sb.append('&').append("accountId=").append(urlEncodeSafe(accountId));
         }
     }
 

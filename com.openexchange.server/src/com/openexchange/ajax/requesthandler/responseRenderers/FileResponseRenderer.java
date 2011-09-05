@@ -52,6 +52,7 @@ package com.openexchange.ajax.requesthandler.responseRenderers;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -69,18 +70,21 @@ import com.openexchange.exception.OXException;
 import com.openexchange.tools.images.ImageScalingService;
 import com.openexchange.tools.servlet.http.Tools;
 
-
 /**
  * {@link FileResponseRenderer}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FileResponseRenderer implements ResponseRenderer {
 
     private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(FileResponseRenderer.class));
 
+    private static final int BUFLEN = 2048;
+
     private static final String PARAMETER_CONTENT_DISPOSITION = "content_disposition";
+
     private static final String PARAMETER_CONTENT_TYPE = "content_type";
+
     protected static final String SAVE_AS_TYPE = "application/octet-stream";
 
     private ImageScalingService scaler = null;
@@ -107,7 +111,6 @@ public class FileResponseRenderer implements ResponseRenderer {
     public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) {
         IFileHolder file = (IFileHolder) result.getResultObject();
 
-
         final String contentType = req.getParameter(PARAMETER_CONTENT_TYPE);
         final String userAgent = req.getHeader("user-agent");
         String contentDisposition = req.getParameter(PARAMETER_CONTENT_DISPOSITION);
@@ -126,47 +129,62 @@ public class FileResponseRenderer implements ResponseRenderer {
                 Tools.setHeaderForFileDownload(userAgent, resp, name, contentDisposition);
                 resp.setContentType(contentType);
             } else {
-                final CheckedDownload checkedDownload = DownloadUtility.checkInlineDownload(
-                    documentData,
-                    name,
-                    file.getContentType(),
-                    contentDisposition,
-                    userAgent);
-                if(contentDisposition != null) {
+                final CheckedDownload checkedDownload =
+                    DownloadUtility.checkInlineDownload(documentData, name, file.getContentType(), contentDisposition, userAgent);
+                if (contentDisposition != null) {
                     resp.setHeader("Content-Disposition", contentDisposition);
                 } else {
                     resp.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
                 }
-                if(contentType != null) {
+                if (contentType != null) {
                     resp.setContentType(contentType);
                 } else {
                     resp.setContentType(checkedDownload.getContentType());
                 }
                 documentData = checkedDownload.getInputStream();
             }
-            // Browsers don't like the Pragma header the way we usually set
-            // this. Especially if files are sent to the browser. So removing
-            // pragma header
+            /*
+             * Browsers don't like the Pragma header the way we usually set this. Especially if files are sent to the browser. So removing
+             * pragma header.
+             */
             Tools.removeCachingHeader(resp);
-
-            int i = -1;
-            while ((i = documentData.read()) != -1) {
-                outputStream.write(i);
+            /*
+             * ETag present?
+             */
+            final String eTag = result.getHeader("ETag");
+            if (null != eTag) {
+                final long expires = result.getExpires();
+                if (expires > 0) {
+                    final long millis = System.currentTimeMillis() + expires;
+                    Tools.setETag(eTag, new Date(millis), resp);
+                }
+            }
+            /*
+             * Output binary content
+             */
+            final int len = BUFLEN;
+            final byte[] buf = new byte[len];
+            for (int read; (read = documentData.read(buf, 0, len)) > 0;) {
+                outputStream.write(buf, 0, read);
             }
             outputStream.flush();
-
         } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         } finally {
-            if (documentData != null) {
-                try {
-                    documentData.close();
-                } catch (final IOException e) {
-                    // Ignore, we did all we could here.
-                }
-            }
+            closeStream(documentData);
+        }
+    }
+
+    private static void closeStream(final InputStream in) {
+        if (null == in) {
+            return;
+        }
+        try {
+            in.close();
+        } catch (final IOException e) {
+            // Ignore
         }
     }
 

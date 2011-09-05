@@ -274,7 +274,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
         } catch (final ElasticSearchException e) {
             throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (final RuntimeException e) {
             throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -769,9 +769,15 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             switch (mailField) {
             case ACCOUNT_NAME:
                 {
-                    final int accountId = ((Number)searchHit.field(Constants.FIELD_ACCOUNT_ID).value()).intValue();
-                    mail.setAccountId(accountId);
-                    mail.setAccountName(lookup.getMailAccount(accountId).getName());
+                    final Object tmp = searchHit.field(Constants.FIELD_ACCOUNT_ID).value();
+                    if (null == tmp) {
+                        mail.setAccountId(-1);
+                        mail.setAccountName(null);
+                    } else {
+                        final int accountId = Integer.parseInt(tmp.toString());
+                        mail.setAccountId(accountId);
+                        mail.setAccountName(lookup.getMailAccount(accountId).getName());
+                    }
                 }
                 break;
             case ID:
@@ -782,7 +788,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                 break;
             case FROM:
                 {
-                    @SuppressWarnings("unchecked") final List<Object> sAddrs = searchHit.field(Constants.FIELD_FROM).getValues();
+                    final List<Object> sAddrs = searchHit.field(Constants.FIELD_FROM).getValues();
                     if (null != sAddrs) {
                         for (final Object sAddr : sAddrs) {
                             try {
@@ -796,7 +802,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                 break;
             case TO:
                 {
-                    @SuppressWarnings("unchecked") final List<Object> sAddrs = searchHit.field(Constants.FIELD_TO).getValues();
+                    final List<Object> sAddrs = searchHit.field(Constants.FIELD_TO).getValues();
                     if (null != sAddrs) {
                         for (final Object sAddr : sAddrs) {
                             try {
@@ -810,7 +816,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                 break;
             case CC:
                 {
-                    @SuppressWarnings("unchecked") final List<Object> sAddrs = searchHit.field(Constants.FIELD_CC).getValues();
+                    final List<Object> sAddrs = searchHit.field(Constants.FIELD_CC).getValues();
                     if (null != sAddrs) {
                         for (final Object sAddr : sAddrs) {
                             try {
@@ -824,7 +830,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                 break;
             case BCC:
                 {
-                    @SuppressWarnings("unchecked") final List<Object> sAddrs = searchHit.field(Constants.FIELD_BCC).getValues();
+                    final List<Object> sAddrs = searchHit.field(Constants.FIELD_BCC).getValues();
                     if (null != sAddrs) {
                         for (final Object sAddr : sAddrs) {
                             try {
@@ -837,58 +843,86 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                 }
                 break;
             case SUBJECT:
-                mail.setSubject((String) searchHit.field(Constants.FIELD_SUBJECT).value());
+                {
+                    final Object tmp = searchHit.field(Constants.FIELD_SUBJECT).value();
+                    if (null == tmp) {
+                        mail.setSubject(null);
+                    } else {
+                        mail.setSubject(tmp.toString());
+                    }
+                }
                 break;
             case RECEIVED_DATE:
-                mail.setReceivedDate(new Date(((Number)searchHit.field(Constants.FIELD_RECEIVED_DATE).value()).longValue()));
+                {
+                    final Object tmp = searchHit.field(Constants.FIELD_RECEIVED_DATE).value().toString();
+                    if (null == tmp) {
+                        mail.setReceivedDate(null);
+                    } else {
+                        mail.setReceivedDate(new Date(Long.parseLong(tmp.toString())));
+                    }
+                }
                 break;
             case SENT_DATE:
-                mail.setSentDate(new Date(((Number)searchHit.field(Constants.FIELD_SENT_DATE).value()).longValue()));
+                {
+                    final Object tmp = searchHit.field(Constants.FIELD_SENT_DATE).value().toString();
+                    if (null == tmp) {
+                        mail.setSentDate(null);
+                    } else {
+                        mail.setSentDate(new Date(Long.parseLong(tmp.toString())));
+                    }
+                }
                 break;
             case SIZE:
-                mail.setSize(((Number)searchHit.field(Constants.FIELD_SIZE).value()).longValue());
+                {
+                    final Object tmp = searchHit.field(Constants.FIELD_SIZE).value().toString();
+                    if (null == tmp) {
+                        mail.setSize(-1L);
+                    } else {
+                        mail.setSize(Long.parseLong(tmp.toString()));
+                    }
+                }
                 break;
             case FLAGS:
                 {
                     int flags = 0;
-                    Boolean tmp = (Boolean) searchHit.field(Constants.FIELD_FLAG_ANSWERED).value();
-                    if (null != tmp && tmp.booleanValue()) {
+                    Object tmp = searchHit.field(Constants.FIELD_FLAG_ANSWERED).value();
+                    if (null != tmp && Boolean.parseBoolean(tmp.toString())) {
                         flags |= MailMessage.FLAG_ANSWERED;
                     }
-                    tmp = (Boolean) searchHit.field(Constants.FIELD_FLAG_DELETED).value();
-                    if (null != tmp && tmp.booleanValue()) {
+                    tmp = searchHit.field(Constants.FIELD_FLAG_DELETED).value();
+                    if (null != tmp && Boolean.parseBoolean(tmp.toString())) {
                         flags |= MailMessage.FLAG_DELETED;
                     }
-                    tmp = (Boolean) searchHit.field(Constants.FIELD_FLAG_DRAFT).value();
-                    if (null != tmp && tmp.booleanValue()) {
+                    tmp = searchHit.field(Constants.FIELD_FLAG_DRAFT).value();
+                    if (null != tmp && Boolean.parseBoolean(tmp.toString())) {
                         flags |= MailMessage.FLAG_DRAFT;
                     }
-                    tmp = (Boolean) searchHit.field(Constants.FIELD_FLAG_FLAGGED).value();
-                    if (null != tmp && tmp.booleanValue()) {
+                    tmp = searchHit.field(Constants.FIELD_FLAG_FLAGGED).value();
+                    if (null != tmp && Boolean.parseBoolean(tmp.toString())) {
                         flags |= MailMessage.FLAG_FLAGGED;
                     }
-                    tmp = (Boolean) searchHit.field(Constants.FIELD_FLAG_FORWARDED).value();
-                    if (null != tmp && tmp.booleanValue()) {
+                    tmp = searchHit.field(Constants.FIELD_FLAG_FORWARDED).value();
+                    if (null != tmp && Boolean.parseBoolean(tmp.toString())) {
                         flags |= MailMessage.FLAG_FORWARDED;
                     }
-                    tmp = (Boolean) searchHit.field(Constants.FIELD_FLAG_READ_ACK).value();
-                    if (null != tmp && tmp.booleanValue()) {
+                    tmp = searchHit.field(Constants.FIELD_FLAG_READ_ACK).value();
+                    if (null != tmp && Boolean.parseBoolean(tmp.toString())) {
                         flags |= MailMessage.FLAG_READ_ACK;
                     }
-                    tmp = (Boolean) searchHit.field(Constants.FIELD_FLAG_RECENT).value();
-                    if (null != tmp && tmp.booleanValue()) {
+                    tmp = searchHit.field(Constants.FIELD_FLAG_RECENT).value();
+                    if (null != tmp && Boolean.parseBoolean(tmp.toString())) {
                         flags |= MailMessage.FLAG_RECENT;
                     }
-                    tmp = (Boolean) searchHit.field(Constants.FIELD_FLAG_SEEN).value();
-                    if (null != tmp && tmp.booleanValue()) {
+                    tmp = searchHit.field(Constants.FIELD_FLAG_SEEN).value();
+                    if (null != tmp && Boolean.parseBoolean(tmp.toString())) {
                         flags |= MailMessage.FLAG_SEEN;
                     }
-                    tmp = (Boolean) searchHit.field(Constants.FIELD_FLAG_SPAM).value();
-                    if (null != tmp && tmp.booleanValue()) {
+                    tmp = searchHit.field(Constants.FIELD_FLAG_SPAM).value();
+                    if (null != tmp && Boolean.parseBoolean(tmp.toString())) {
                         flags |= MailMessage.FLAG_SPAM;
                     }
-                    tmp = (Boolean) searchHit.field(Constants.FIELD_FLAG_USER).value();
-                    if (null != tmp && tmp.booleanValue()) {
+                    tmp = searchHit.field(Constants.FIELD_FLAG_USER).value();
+                    if (null != tmp && Boolean.parseBoolean(tmp.toString())) {
                         flags |= MailMessage.FLAG_USER;
                     }
                     mail.setFlags(flags);

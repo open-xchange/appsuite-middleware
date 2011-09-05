@@ -122,12 +122,13 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link DatabaseFolderStorage} - The database folder storage.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DatabaseFolderStorage implements FolderStorage {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DatabaseFolderStorage.class));
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DatabaseFolderStorage.class));
 
     /**
      * Simple interface for providing and closing a connection.
@@ -136,7 +137,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
         /**
          * Gets the (active) connection.
-         *
+         * 
          * @return The connection
          */
         Connection getConnection();
@@ -151,9 +152,15 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
         private final Connection connection;
 
-        protected NonClosingConnectionProvider(final Connection connection) {
+        private final DatabaseService databaseService;
+
+        private final int contextId;
+
+        protected NonClosingConnectionProvider(final Connection connection, final DatabaseService databaseService, final int contextId) {
             super();
             this.connection = connection;
+            this.databaseService = databaseService;
+            this.contextId = contextId;
         }
 
         @Override
@@ -1257,14 +1264,35 @@ public final class DatabaseFolderStorage implements FolderStorage {
     @Override
     public boolean startTransaction(final StorageParameters parameters, final boolean modify) throws OXException {
         final FolderType folderType = getFolderType();
-        if (null != parameters.getParameter(folderType, DatabaseParameterConstants.PARAM_CONNECTION)) {
-            // Connection already present
-            return false;
-        }
         try {
             final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
             final Context context = parameters.getContext();
-            final Connection con = modify ? databaseService.getWritable(context) : databaseService.getReadOnly(context);
+            Connection con = parameters.getParameter(folderType, DatabaseParameterConstants.PARAM_CONNECTION);
+            if (null != con) {
+                final Boolean readWrite = parameters.getParameter(folderType, DatabaseParameterConstants.PARAM_WRITABLE);
+                if (Boolean.valueOf(modify).equals(readWrite)) {
+                    // Connection already present in proper access mode
+                    return false;
+                }
+                /*-
+                 * Connection in wrong access mode:
+                 * 
+                 * commit, restore auto-commit & push to pool
+                 */
+                try {
+                    con.commit();
+                } catch (final Exception e) {
+                    // Ignore
+                    DBUtils.rollback(con);
+                }
+                DBUtils.autocommit(con);
+                if (null != readWrite && readWrite.booleanValue()) {
+                    databaseService.backWritable(context, con);
+                } else {
+                    databaseService.backReadOnly(context, con);
+                }
+            }
+            con = modify ? databaseService.getWritable(context) : databaseService.getReadOnly(context);
             con.setAutoCommit(false);
             // Put to parameters
             if (parameters.putParameterIfAbsent(folderType, DatabaseParameterConstants.PARAM_CONNECTION, con)) {
@@ -1300,9 +1328,10 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
             if (DatabaseFolderStorageUtility.hasSharedPrefix(id)) {
                 final int owner = Integer.parseInt(id.substring(FolderObject.SHARED_PREFIX.length()));
-                throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(OXFolderUtility.getUserName(
-                    session.getUserId(),
-                    context), UserStorage.getStorageUser(owner, context).getDisplayName(), Integer.valueOf(context.getContextId()));
+                throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(
+                    OXFolderUtility.getUserName(session.getUserId(), context),
+                    UserStorage.getStorageUser(owner, context).getDisplayName(),
+                    Integer.valueOf(context.getContextId()));
             }
 
             final int folderId = Integer.parseInt(id);
@@ -1628,12 +1657,12 @@ public final class DatabaseFolderStorage implements FolderStorage {
     }
 
     private static ConnectionProvider getConnection(final boolean modify, final StorageParameters storageParameters) throws OXException {
-        Connection connection = optParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
-        if (null != connection) {
-            return new NonClosingConnectionProvider(connection);
-        }
         final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
         final Context context = storageParameters.getContext();
+        Connection connection = optParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+        if (null != connection) {
+            return new NonClosingConnectionProvider(connection, databaseService, context.getContextId());
+        }
         connection = modify ? databaseService.getWritable(context) : databaseService.getReadOnly(context);
         return new ClosingConnectionProvider(connection, modify, databaseService, context.getContextId());
     }
