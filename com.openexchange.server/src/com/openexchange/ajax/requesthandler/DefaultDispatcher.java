@@ -148,6 +148,18 @@ public class DefaultDispatcher implements Dispatcher {
             throw AjaxExceptionCodes.UNKNOWN_ACTION.create(modifiedRequest.getAction());
         }
         /*
+         * Is it possible to serve request by ETag?
+         */
+        {
+            final String eTag = modifiedRequest.getETag();
+            if (null != eTag && (action instanceof ETagAwareAJAXActionService)) {
+                final ETagAwareAJAXActionService eTagAwareAction = (ETagAwareAJAXActionService) action;
+                if (eTagAwareAction.checkETag(eTag, modifiedRequest, session)) {
+                    return AJAXRequestResult.ETAG_REQUEST_RESULT;
+                }
+            }
+        }
+        /*
          * Check for Action annotation
          */
         final Action actionMetadata = getActionMetadata(action);

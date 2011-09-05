@@ -413,9 +413,10 @@ public final class ImageServlet extends HttpServlet {
             /*
              * Write from content's input stream to response output stream
              */
-            final byte[] buffer = new byte[BUFLEN];
-            for (int len; (len = in.read(buffer, 0, buffer.length)) != -1;) {
-                out.write(buffer, 0, len);
+            final int len = BUFLEN;
+            final byte[] buffer = new byte[len];
+            for (int read; (read = in.read(buffer, 0, len)) != -1;) {
+                out.write(buffer, 0, read);
             }
             out.flush();
         } finally {

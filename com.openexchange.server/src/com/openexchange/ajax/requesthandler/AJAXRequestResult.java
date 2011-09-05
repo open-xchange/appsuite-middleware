@@ -66,12 +66,34 @@ import com.openexchange.exception.OXException;
  */
 public final class AJAXRequestResult {
 
+    public static final long SECOND_IN_MILLIS = 1000;
+
+    public static final long MINUTE_IN_MILLIS = SECOND_IN_MILLIS * 60;
+
+    public static final long HOUR_IN_MILLIS = MINUTE_IN_MILLIS * 60;
+
+    public static final long DAY_IN_MILLIS = HOUR_IN_MILLIS * 24;
+
+    public static final long WEEK_IN_MILLIS = DAY_IN_MILLIS * 7;
+
+    /**
+     * This constant is actually the length of 364 days, not of a year!
+     */
+    public static final long YEAR_IN_MILLIS = WEEK_IN_MILLIS * 52;
+
     /**
      * The constant representing an empty AJAX request result.
      * <p>
      * Both data and time stamp are set to <code>null</code>.
      */
     public static final AJAXRequestResult EMPTY_REQUEST_RESULT = new AJAXRequestResult();
+
+    /**
+     * The constant marking an incoming request being served with an ETag response.
+     * <p>
+     * Both data and time stamp are set to <code>null</code>.
+     */
+    public static final AJAXRequestResult ETAG_REQUEST_RESULT = new AJAXRequestResult();
 
     private Object resultObject;
 
@@ -84,6 +106,8 @@ public final class AJAXRequestResult {
     private final Map<String, String> headers;
 
     private String format;
+
+    private long expires;
 
     /**
      * Initializes a new {@link AJAXRequestResult} with data and time stamp set to <code>null</code>.
@@ -140,6 +164,25 @@ public final class AJAXRequestResult {
         } else {
             this.format = format;
         }
+        expires = -1;
+    }
+
+    /**
+     * Gets the expires time.
+     *
+     * @return The expires time or <code>-1</code> for no expiry
+     */
+    public long getExpires() {
+        return expires;
+    }
+
+    /**
+     * Sets the expires time
+     *
+     * @param expires The expires time or <code>-1</code> for no expiry
+     */
+    public void setExpires(final long expires) {
+        this.expires = expires;
     }
 
     /**
