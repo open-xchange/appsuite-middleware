@@ -56,7 +56,6 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
@@ -72,12 +71,16 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.extensions.ServicePublisher;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.session.Session;
+import com.openexchange.tools.strings.StringParser;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class Activator implements BundleActivator {
+public class Activator extends HousekeepingActivator {
+
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
 
     private static final String PREFERENCE_PATH = "preferencePath";
 
@@ -85,21 +88,28 @@ public class Activator implements BundleActivator {
 
     private ServicePublisher services;
 
-    private BundleContext context;
-
     private ServiceTracker<ConfigViewFactory, ConfigViewFactory> serviceTracker;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
+    /**
+     * Initializes a new {@link Activator}.
+     */
+    public Activator() {
+        super();
+    }
 
     @Override
-    public void start(final BundleContext bundleContext) throws Exception {
-        services = new OSGiServicePublisher(bundleContext);
-        context = bundleContext;
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { StringParser.class };
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        services = new OSGiServicePublisher(context);
         registerListenerForConfigurationService();
     }
 
     @Override
-    public void stop(final BundleContext bundleContext) throws Exception {
+    protected void stopBundle() throws Exception {
         unregisterListenerForConfigurationService();
         services.removeAllServices();
     }
