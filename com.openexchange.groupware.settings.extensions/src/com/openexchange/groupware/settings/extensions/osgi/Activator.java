@@ -110,6 +110,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
+        super.stopBundle();
         unregisterListenerForConfigurationService();
         services.removeAllServices();
     }
