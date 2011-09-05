@@ -56,6 +56,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.DistributionListFields;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.datasource.ContactImageDataSource;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.Contact;
@@ -138,10 +139,14 @@ public class ContactWriter extends CommonWriter {
         if (contact.containsImage1()) {
             final byte[] imageData = contact.getImage1();
             if (imageData != null) {
-                final ContactImageDataSource imgSource = new ContactImageDataSource();
-                final ImageLocation imageLocation = new ImageLocation(null, String.valueOf(contact.getParentFolderID()), String.valueOf(contact.getObjectID()), null);
-                final String imageURL = imgSource.generateUrl(imageLocation, session);
-                writeParameter(ContactFields.IMAGE1_URL, imageURL, json);
+                try {
+                    final ContactImageDataSource imgSource = new ContactImageDataSource();
+                    final ImageLocation imageLocation = new ImageLocation(null, String.valueOf(contact.getParentFolderID()), String.valueOf(contact.getObjectID()), null);
+                    final String imageURL = imgSource.generateUrl(imageLocation, session);
+                    writeParameter(ContactFields.IMAGE1_URL, imageURL, json);
+                } catch (final OXException e) {
+                    org.apache.commons.logging.LogFactory.getLog(ContactWriter.class).warn("Contact image URL could not be generated.", e);
+                }
             }
         }
         // writeParameter(ContactFields.IMAGE1, contactobject.getImage1());
@@ -651,10 +656,15 @@ public class ContactWriter extends CommonWriter {
                     if (imageData2 == null) {
                         writeValueNull(jsonArray);
                     } else {
-                        final ContactImageDataSource imgSource = new ContactImageDataSource();
-                        final ImageLocation imageLocation = new ImageLocation(null, String.valueOf(contactObject.getParentFolderID()), String.valueOf(contactObject.getObjectID()), null);
-                        final String imageURL = imgSource.generateUrl(imageLocation, session);
-                        writeValue(imageURL, jsonArray);
+                        try {
+                            final ContactImageDataSource imgSource = new ContactImageDataSource();
+                            final ImageLocation imageLocation = new ImageLocation(null, String.valueOf(contactObject.getParentFolderID()), String.valueOf(contactObject.getObjectID()), null);
+                            final String imageURL = imgSource.generateUrl(imageLocation, session);
+                            writeValue(imageURL, jsonArray);
+                        } catch (final OXException e) {
+                            org.apache.commons.logging.LogFactory.getLog(ContactWriter.class).warn("Contact image URL could not be generated.", e);
+                            writeValueNull(jsonArray);
+                        }
                     }
                 } else {
                     writeValueNull(jsonArray);
