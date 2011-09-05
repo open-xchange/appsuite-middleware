@@ -714,21 +714,21 @@ public final class SMTPTransport extends MailTransport {
     private static String getHostName() {
         final Map<String, Object> logProperties = LogProperties.optLogProperties();
         if (null == logProperties) {
-            final UnknownHostException warning = warnSpam;
-            if (warning != null) {
-                LOG.error("Can't resolve my own hostname, using 'localhost' instead, which is certainly not what you want!", warning);
-            }
-            return staticHostName;
+            return getStaticHostName();
         }
         final String serverName = (String) logProperties.get("com.openexchange.ajp13.serverName");
         if (null == serverName) {
-            final UnknownHostException warning = warnSpam;
-            if (warning != null) {
-                LOG.error("Can't resolve my own hostname, using 'localhost' instead, which is certainly not what you want!", warning);
-            }
-            return staticHostName;
+            return getStaticHostName();
         }
         return serverName;
+    }
+
+    private static String getStaticHostName() {
+        final UnknownHostException warning = warnSpam;
+        if (warning != null) {
+            LOG.error("Can't resolve my own hostname, using 'localhost' instead, which is certainly not what you want!", warning);
+        }
+        return staticHostName;
     }
 
     private static void sanitizeContentTypeHeaders(final Part part, final ContentType sanitizer) throws OXException {
