@@ -90,14 +90,9 @@ public final class Tools {
     private static final String CACHE_CONTROL_KEY = "Cache-Control";
 
     /**
-     * First Cache-Control value.
+     * Cache-Control value.
      */
-    private static final String CACHE_VALUE1 = "no-store, no-cache, must-revalidate";
-
-    /**
-     * Second Cache-Control value.
-     */
-    private static final String CACHE_VALUE2 = "post-check=0, pre-check=0";
+    private static final String CACHE_VALUE = "no-store, no-cache, must-revalidate, post-check=0, pre-check=0";
 
     /**
      * Expires HTTP header name.
@@ -164,8 +159,7 @@ public final class Tools {
      */
     public static void disableCaching(final HttpServletResponse resp) {
         resp.setHeader(EXPIRES_KEY, EXPIRES_DATE);
-        resp.setHeader(CACHE_CONTROL_KEY, CACHE_VALUE1);
-        resp.setHeader(CACHE_CONTROL_KEY, CACHE_VALUE2);
+        resp.setHeader(CACHE_CONTROL_KEY, CACHE_VALUE);
         resp.setHeader(PRAGMA_KEY, PRAGMA_VALUE);
     }
 
