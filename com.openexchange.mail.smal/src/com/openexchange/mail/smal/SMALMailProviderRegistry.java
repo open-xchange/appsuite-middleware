@@ -58,14 +58,13 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.Protocol;
-import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.session.Session;
 
 /**
- * {@link SMALMailProviderRegistry}
+ * {@link SMALMailProviderRegistry} - The {@link MailProvider} registry for SMAL bundle.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -208,10 +207,8 @@ public final class SMALMailProviderRegistry {
                 return false;
             }
             /*
-             * Startup
+             * No startup
              */
-            provider.startUp();
-            provider.setDeprecated(false);
             return true;
         } catch (final OXException e) {
             throw e;
@@ -225,20 +222,6 @@ public final class SMALMailProviderRegistry {
      * Unregisters all mail providers
      */
     public static void unregisterAll() {
-        for (final Iterator<MailProvider> iter = PROVIDERS.values().iterator(); iter.hasNext();) {
-            final MailProvider provider = iter.next();
-            /*
-             * Perform shutdown
-             */
-            try {
-                provider.setDeprecated(true);
-                provider.shutDown();
-            } catch (final OXException e) {
-                LOG.error("Mail connection implementation could not be shut down", e);
-            } catch (final RuntimeException t) {
-                LOG.error("Mail connection implementation could not be shut down", t);
-            }
-        }
         /*
          * Clear registry
          */
@@ -250,9 +233,8 @@ public final class SMALMailProviderRegistry {
      *
      * @param provider The mail provider to unregister
      * @return The unregistered mail provider, or <code>null</code>
-     * @throws OXException If provider's shut-down fails
      */
-    public static MailProvider unregisterMailProvider(final MailProvider provider) throws OXException {
+    public static MailProvider unregisterMailProvider(final MailProvider provider) {
         final Protocol protocol = provider.getProtocol();
         if (Protocol.PROTOCOL_ALL.equals(protocol)) {
             return null;
@@ -260,24 +242,7 @@ public final class SMALMailProviderRegistry {
         /*
          * Unregister
          */
-        final MailProvider removed = PROVIDERS.remove(protocol);
-        if (null == removed) {
-            return null;
-        }
-        /*
-         * Perform shutdown
-         */
-        MailAccess.clearCounterMap();
-        try {
-            removed.setDeprecated(true);
-            removed.shutDown();
-            return removed;
-        } catch (final OXException e) {
-            throw e;
-        } catch (final RuntimeException t) {
-            LOG.error(t.getMessage(), t);
-            return removed;
-        }
+        return PROVIDERS.remove(protocol);
     }
 
     /**
@@ -286,9 +251,8 @@ public final class SMALMailProviderRegistry {
      * @param protocol The protocol
      * @return The unregistered instance of {@link MailProvider}, or <code>null</code> if there was no provider supporting specified
      *         protocol
-     * @throws OXException If provider's shut-down fails
      */
-    public static MailProvider unregisterMailProviderByProtocol(final String protocol) throws OXException {
+    public static MailProvider unregisterMailProviderByProtocol(final String protocol) {
         if (Protocol.ALL.equals(protocol)) {
             return null;
         }
@@ -299,9 +263,6 @@ public final class SMALMailProviderRegistry {
             final Map.Entry<Protocol, MailProvider> entry = iter.next();
             if (entry.getKey().isSupported(protocol)) {
                 iter.remove();
-                MailAccess.clearCounterMap();
-                entry.getValue().setDeprecated(true);
-                entry.getValue().shutDown();
                 return entry.getValue();
             }
         }

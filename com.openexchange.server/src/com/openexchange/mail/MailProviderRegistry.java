@@ -279,23 +279,26 @@ public final class MailProviderRegistry {
     public static MailProvider unregisterMailProvider(final MailProvider provider) throws OXException {
         final Protocol protocol = provider.getProtocol();
         if (Protocol.PROTOCOL_ALL.equals(protocol)) {
-            final MailProvider all = ALL_PROVIDER.get();
-            if (null != all) {
-                /*
-                 * Perform shutdown
-                 */
-                MailAccess.clearCounterMap();
-                try {
-                    all.setDeprecated(true);
-                    all.shutDown();
-                    ALL_PROVIDER.set(null);
-                } catch (final OXException e) {
-                    throw e;
-                } catch (final RuntimeException t) {
-                    LOG.error(t.getMessage(), t);
-                    return all;
-                }
+            AllMailProvider all;
+            do {
+                all = ALL_PROVIDER.get();
+            } while (!ALL_PROVIDER.compareAndSet(all, null));
+            if (null == all) {
+                return null;
             }
+            /*
+             * Perform shutdown
+             */
+            MailAccess.clearCounterMap();
+            try {
+                all.setDeprecated(true);
+                all.shutDown();
+            } catch (final OXException e) {
+                throw e;
+            } catch (final RuntimeException t) {
+                LOG.error(t.getMessage(), t);
+            }
+            return all;
         }
         /*
          * Unregister
@@ -330,16 +333,26 @@ public final class MailProviderRegistry {
      */
     public static MailProvider unregisterMailProviderByProtocol(final String protocol) throws OXException {
         if (Protocol.ALL.equals(protocol)) {
-            final MailProvider all = ALL_PROVIDER.get();
-            if (null != all) {
-                /*
-                 * Perform shutdown
-                 */
-                MailAccess.clearCounterMap();
+            AllMailProvider all;
+            do {
+                all = ALL_PROVIDER.get();
+            } while (!ALL_PROVIDER.compareAndSet(all, null));
+            if (null == all) {
+                return null;
+            }
+            /*
+             * Perform shutdown
+             */
+            MailAccess.clearCounterMap();
+            try {
                 all.setDeprecated(true);
                 all.shutDown();
-                ALL_PROVIDER.set(null);
+            } catch (final OXException e) {
+                throw e;
+            } catch (final RuntimeException t) {
+                LOG.error(t.getMessage(), t);
             }
+            return all;
         }
         /*
          * Non-all
