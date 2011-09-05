@@ -76,6 +76,8 @@ import com.openexchange.session.Session;
  */
 public final class InlineImageDataSource implements ImageDataSource {
 
+    private static final long EXPIRES = ImageDataSource.YEAR_IN_MILLIS * 50;
+
     /**
      * Common required arguments for uniquely determining a mail part:
      * <ul>
@@ -149,8 +151,8 @@ public final class InlineImageDataSource implements ImageDataSource {
     }
 
     @Override
-    public boolean isETagEternal() {
-        return true;
+    public long getExpires() {
+        return EXPIRES;
     }
 
     @Override

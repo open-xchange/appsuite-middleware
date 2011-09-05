@@ -104,8 +104,8 @@ public final class ContactImageDataSource implements ImageDataSource {
     }
 
     @Override
-    public boolean isETagEternal() {
-        return false;
+    public long getExpires() {
+        return -1L;
     }
 
     @Override

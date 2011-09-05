@@ -145,7 +145,7 @@ public final class Tools {
      */
     public static void setETag(final String eTag, final Date expires, final HttpServletResponse resp) {
         removeCachingHeader(resp);
-        resp.setHeader("etag", eTag);
+        resp.setHeader("ETag", eTag);
         if (null != expires) {
             synchronized (HEADER_DATEFORMAT) {
                 resp.setHeader(EXPIRES_KEY, HEADER_DATEFORMAT.format(expires));

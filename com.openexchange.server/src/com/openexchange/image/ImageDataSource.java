@@ -113,11 +113,11 @@ public interface ImageDataSource extends DataSource {
     String getSignature(ImageLocation imageLocation, Session session);
 
     /**
-     * Checks if ETag is eternal.
+     * Gets the expires (time-to-live)
      * 
-     * @return <code>true</code> if ETag is eternal; otherwise <code>false</code>
+     * @return The expires or <code>-1</code> for no expiry
      */
-    boolean isETagEternal();
+    long getExpires();
 
     /**
      * Gets the ETag for this image data source.

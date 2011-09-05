@@ -403,9 +403,13 @@ public final class ImageServlet extends HttpServlet {
             /*
              * Set ETag
              */
-            final long millis =
-                System.currentTimeMillis() + (dataSource.isETagEternal() ? ImageDataSource.YEAR_IN_MILLIS * 50 : ImageDataSource.WEEK_IN_MILLIS);
-            Tools.setETag(dataSource.getETag(imageLocation, session), new Date(millis), resp);
+            final long expires = dataSource.getExpires();
+            if (expires > 0) {
+                final long millis = System.currentTimeMillis() + (expires);
+                Tools.setETag(dataSource.getETag(imageLocation, session), new Date(millis), resp);
+            } else {
+                Tools.setETag(dataSource.getETag(imageLocation, session), resp);
+            }
             /*
              * Select response's output stream
              */
