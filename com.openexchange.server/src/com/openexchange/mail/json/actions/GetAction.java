@@ -221,6 +221,7 @@ public final class GetAction extends AbstractMailAction {
                     /*
                      * Create appropriate file holder
                      */
+                    req.getRequest().setFormat("file");
                     final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(baos.toByteArray());
                     fileHolder.setContentType("application/octet-stream");
                     fileHolder.setName(new StringBuilder(mail.getSubject()).append(".eml").toString());

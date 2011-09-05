@@ -49,14 +49,25 @@
 
 package com.openexchange.ajax.requesthandler;
 
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ETagAwareAJAXActionService} - Introduces <i>ETag</i> awareness to an {@link AJAXActionService}.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ETagAwareAJAXActionService extends AJAXActionService {
 
-    
-    
+    /**
+     * Checks for equality of passed client ETag compared to currently valid ETag for requested resource.
+     * 
+     * @param clientETag The client's ETag
+     * @param request The request data
+     * @param session The session
+     * @return <code>true</code> if ETags are equal; otherwise <code>false</code>
+     * @throws OXException If checking ETag fails
+     */
+    boolean checkETag(String clientETag, AJAXRequestData request, ServerSession session) throws OXException;
+
 }

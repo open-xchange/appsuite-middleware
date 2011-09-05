@@ -170,6 +170,9 @@ public class DefaultDispatcher implements Dispatcher {
             }
         }
         modifiedRequest.setState(state);
+        /*
+         * Perform request
+         */
         AJAXRequestResult result;
         try {
             result = action.perform(modifiedRequest, session);

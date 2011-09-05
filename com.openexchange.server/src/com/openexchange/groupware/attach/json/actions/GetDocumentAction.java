@@ -55,7 +55,6 @@ import com.openexchange.ajax.Attachment;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.Action;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.contexts.Context;
@@ -71,7 +70,6 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(defaultFormat="file")
 public final class GetDocumentAction extends AbstractAttachmentAction {
 
     private static final org.apache.commons.logging.Log LOG =
@@ -100,6 +98,7 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
         moduleId = requireNumber(request, Attachment.PARAMETER_MODULE);
         id = requireNumber(request, Attachment.PARAMETER_ID);
 
+        request.setFormat("file");
         return document(
             folderId,
             attachedId,

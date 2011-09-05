@@ -55,7 +55,6 @@ import java.io.InputStream;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.Action;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.mail.MailExceptionCode;
@@ -69,7 +68,6 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(defaultFormat="file")
 public final class GetMultipleMessagesAction extends AbstractMailAction {
 
     /**
@@ -119,8 +117,9 @@ public final class GetMultipleMessagesAction extends AbstractMailAction {
                     zipInputStream.close();
                 }
                 /*
-                 * Create fgile holder
+                 * Create file holder
                  */
+                req.getRequest().setFormat("file");
                 final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(out.toByteArray());
                 fileHolder.setName(fileName);
                 fileHolder.setContentType("application/octet-stream");
