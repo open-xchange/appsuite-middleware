@@ -100,8 +100,9 @@ public interface ImageDataSource extends DataSource {
      * Generates the URL linking to image data
      * 
      * @return The image URL
+     * @throws OXException If generating the URL fails
      */
-    String generateUrl(ImageLocation imageLocation, Session session);
+    String generateUrl(ImageLocation imageLocation, Session session) throws OXException;
 
     /**
      * Gets the signature for this image data source.
