@@ -193,7 +193,7 @@ public final class ImageUtility {
             final String signature = imageDataSource.getSignature(imageLocation, session);
             final int contextId = session.getContextId();
             final int userId = session.getUserId();
-            sb.append(contextId).append('.').append(userId).append('.').append(signature);
+            sb.append(contextId).append('.').append(signature).append('.').append(userId);
             try {
                 final CryptoService cryptoService = ServerServiceRegistry.getInstance().getService(CryptoService.class);
                 signParam = cryptoService.encrypt(sb.toString(), imageDataSource.getRegistrationName());

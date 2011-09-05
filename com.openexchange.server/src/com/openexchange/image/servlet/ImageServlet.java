@@ -176,16 +176,16 @@ public final class ImageServlet extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid signature parameter.");
             return;
         }
-        final User user = getUser(signParam.substring(beginIndex + 1, endIndex), context);
+        final String signature = signParam.substring(beginIndex + 1, endIndex);
+        final User user = getUser(signParam.substring(endIndex + 1), context);
         if (null == user) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Unable to resolve mail address to a user.");
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Unable to determine user.");
             return;
         }
         if (!context.isEnabled() || !user.isMailEnabled()) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid credentials.");
             return;
         }
-        final String signature = signParam.substring(endIndex + 1);
         /*
          * Look-up up cookies
          */
