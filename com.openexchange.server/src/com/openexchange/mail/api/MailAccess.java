@@ -464,14 +464,6 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
                 getMailAccessCache().removeMailAccess(session, accountId);
             if (mailAccess != null) {
-                
-                if (!"com.openexchange.mail.smal.SMALMailAccess".equals(mailAccess.getClass().getName())) {
-                    System.out.println("Detected Non-SMAL MailAccess: " + mailAccess.getClass().getName() + " at: ");
-                    new Throwable().printStackTrace(System.out);
-                    System.out.println(mailAccess.getTrace());
-                }
-                
-                
                 return mailAccess;
             }
         }
@@ -811,16 +803,6 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                     /*
                      * Successfully cached: return
                      */
-                    
-                    
-                    if (!"com.openexchange.mail.smal.SMALMailAccess".equals(getClass().getName())) {
-                        System.out.println("---> Detected closure of Non-SMAL MailAccess: " + getClass().getName() + " at: ");
-                        new Throwable().printStackTrace(System.out);
-                        System.out.println(getTrace());
-                    }
-                    
-                    
-                    
                     signalClosed(this);
                     return;
                 }
