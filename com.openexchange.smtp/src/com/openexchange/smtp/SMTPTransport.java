@@ -60,6 +60,7 @@ import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -82,6 +83,7 @@ import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -690,20 +692,12 @@ public final class SMTPTransport extends MailTransport {
                 final HostnameService hostnameService = SMTPServiceRegistry.getServiceRegistry().getService(HostnameService.class);
                 String hostName;
                 if (null == hostnameService) {
-                    final UnknownHostException warning = warnSpam;
-                    if (warning != null) {
-                        LOG.error("Can't resolve my own hostname, using 'localhost' instead, which is certainly not what you want!", warning);
-                    }
-                    hostName = staticHostName;
+                    hostName = getHostName();
                 } else {
                     hostName = hostnameService.getHostname(session.getUserId(), session.getContextId());
                 }
                 if (null == hostName) {
-                    final UnknownHostException warning = warnSpam;
-                    if (warning != null) {
-                        LOG.error("Can't resolve my own hostname, using 'localhost' instead, which is certainly not what you want!", warning);
-                    }
-                    hostName = staticHostName;
+                    hostName = getHostName();
                 }
                 final int pos = messageId.indexOf('@');
                 if (pos > 0 ) {
@@ -715,6 +709,26 @@ public final class SMTPTransport extends MailTransport {
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
         }
+    }
+
+    private static String getHostName() {
+        final Map<String, Object> logProperties = LogProperties.optLogProperties();
+        if (null == logProperties) {
+            final UnknownHostException warning = warnSpam;
+            if (warning != null) {
+                LOG.error("Can't resolve my own hostname, using 'localhost' instead, which is certainly not what you want!", warning);
+            }
+            return staticHostName;
+        }
+        final String serverName = (String) logProperties.get("com.openexchange.ajp13.serverName");
+        if (null == serverName) {
+            final UnknownHostException warning = warnSpam;
+            if (warning != null) {
+                LOG.error("Can't resolve my own hostname, using 'localhost' instead, which is certainly not what you want!", warning);
+            }
+            return staticHostName;
+        }
+        return serverName;
     }
 
     private static void sanitizeContentTypeHeaders(final Part part, final ContentType sanitizer) throws OXException {
