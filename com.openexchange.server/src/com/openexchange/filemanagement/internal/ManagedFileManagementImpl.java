@@ -151,8 +151,6 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
 
     private static final String SUFFIX = ".tmp";
 
-    private static final int TIME_TO_LIVE = 300000;
-
     /**
      * Gets the file management instance.
      *

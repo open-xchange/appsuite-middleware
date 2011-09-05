@@ -61,6 +61,11 @@ import com.openexchange.exception.OXException;
 public interface ManagedFileManagement {
 
     /**
+     * The idle time-to-live for a managed file.
+     */
+    public static final int TIME_TO_LIVE = 300000;
+
+    /**
      * Clears all files kept by this file management.
      */
     public void clear();

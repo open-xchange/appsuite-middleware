@@ -89,11 +89,20 @@ public final class AJAXRequestResult {
     public static final AJAXRequestResult EMPTY_REQUEST_RESULT = new AJAXRequestResult();
 
     /**
-     * The constant marking an incoming request being served with an ETag response.
-     * <p>
-     * Both data and time stamp are set to <code>null</code>.
+     * The request result type.
      */
-    public static final AJAXRequestResult ETAG_REQUEST_RESULT = new AJAXRequestResult();
+    public static enum ResultType {
+        /**
+         * A common request result which should be further handled.
+         */
+        COMMON,
+        /**
+         * An <i>ETag</i> request result.
+         */
+        ETAG;
+    }
+
+    private ResultType resultType;
 
     private Object resultObject;
 
@@ -164,11 +173,32 @@ public final class AJAXRequestResult {
         } else {
             this.format = format;
         }
+        resultType = ResultType.COMMON;
         expires = -1;
     }
 
     /**
+     * Gets the result type
+     *
+     * @return The result type
+     */
+    public ResultType getType() {
+        return resultType;
+    }
+
+    /**
+     * Sets the result type
+     *
+     * @param resultType The result type to set
+     */
+    public void setType(final ResultType resultType) {
+        this.resultType = resultType;
+    }
+
+    /**
      * Gets the expires time.
+     * <p>
+     * Have a notion of a time-to-live value.
      *
      * @return The expires time or <code>-1</code> for no expiry
      */

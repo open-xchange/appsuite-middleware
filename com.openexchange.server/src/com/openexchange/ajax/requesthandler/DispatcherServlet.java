@@ -196,12 +196,15 @@ public final class DispatcherServlet extends SessionServlet {
              */
             final AJAXRequestResult result = dispatcher.perform(request, state, session);
             /*
-             * Check result
+             * Check result's type
              */
-            if (AJAXRequestResult.ETAG_REQUEST_RESULT == result) {
+            if (AJAXRequestResult.ResultType.ETAG.equals(result.getType())) {
                 resp.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
                 return;
             }
+            /*
+             * A common result
+             */
             sendResponse(request, result, req, resp);
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);

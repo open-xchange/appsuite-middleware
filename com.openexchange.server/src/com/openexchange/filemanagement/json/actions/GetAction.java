@@ -50,15 +50,16 @@
 package com.openexchange.filemanagement.json.actions;
 
 import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import com.openexchange.ajax.AJAXFile;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Action;
+import com.openexchange.ajax.requesthandler.ETagAwareAJAXActionService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileExceptionErrorMessage;
@@ -71,20 +72,43 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
-
 /**
  * {@link GetAction}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(defaultFormat="file")
-public final class GetAction implements AJAXActionService {
+@Action(defaultFormat = "file")
+public final class GetAction implements ETagAwareAJAXActionService {
 
     private final ServiceLookup services;
 
     public GetAction(final ServiceLookup services) {
         super();
         this.services = services;
+    }
+
+    @Override
+    public boolean checkETag(final String clientETag, final AJAXRequestData request, final ServerSession session) throws OXException {
+        if (clientETag == null || clientETag.length() == 0) {
+            return false;
+        }
+        try {
+            final ManagedFileManagement management = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
+            management.getByID(clientETag);
+            request.setExpires(ManagedFileManagement.TIME_TO_LIVE);
+            return true;
+        } catch (final OXException e) {
+            if (ManagedFileExceptionErrorMessage.NOT_FOUND.equals(e)) {
+                return false;
+            }
+            throw e;
+        }
+    }
+
+    @Override
+    public void setETag(final String eTag, final long expires, final AJAXRequestResult result) throws OXException {
+        result.setExpires(expires);
+        result.setHeader("ETag", eTag);
     }
 
     @Override
@@ -115,19 +139,15 @@ public final class GetAction implements AJAXActionService {
              * Write from content's input stream to response output stream
              */
             final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream();
-            InputStream contentInputStream = null;
+            final InputStream contentInputStream = new FileInputStream(file.getFile());
             try {
-                contentInputStream = new FileInputStream(file.getFile());
                 final byte[] buffer = new byte[0xFFFF];
                 for (int len; (len = contentInputStream.read(buffer)) != -1;) {
                     out.write(buffer, 0, len);
                 }
                 out.flush();
             } finally {
-                if (contentInputStream != null) {
-                    contentInputStream.close();
-                    contentInputStream = null;
-                }
+                close(contentInputStream);
             }
             /*
              * Create file holder
@@ -135,9 +155,28 @@ public final class GetAction implements AJAXActionService {
             final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(out.toByteArray());
             fileHolder.setName(fileName);
             fileHolder.setContentType(contentType.toString());
-            return new AJAXRequestResult(fileHolder, "file");
+            final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
+            /*
+             * Set ETag
+             */
+            setETag(id, ManagedFileManagement.TIME_TO_LIVE, result);
+            /*
+             * Return result
+             */
+            return result;
         } catch (final IOException e) {
             throw ManagedFileExceptionErrorMessage.IO_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private static void close(final Closeable toClose) {
+        if (null == toClose) {
+            return;
+        }
+        try {
+            toClose.close();
+        } catch (final IOException e) {
+            // Ignore
         }
     }
 

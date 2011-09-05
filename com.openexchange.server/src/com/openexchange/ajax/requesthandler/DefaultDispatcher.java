@@ -152,11 +152,14 @@ public class DefaultDispatcher implements Dispatcher {
          */
         {
             final String eTag = modifiedRequest.getETag();
-            if (null != eTag && (action instanceof ETagAwareAJAXActionService)) {
-                final ETagAwareAJAXActionService eTagAwareAction = (ETagAwareAJAXActionService) action;
-                if (eTagAwareAction.checkETag(eTag, modifiedRequest, session)) {
-                    return AJAXRequestResult.ETAG_REQUEST_RESULT;
+            if (null != eTag && (action instanceof ETagAwareAJAXActionService) && ((ETagAwareAJAXActionService) action).checkETag(eTag, modifiedRequest, session)) {
+                final AJAXRequestResult etagResult = new AJAXRequestResult();
+                etagResult.setType(AJAXRequestResult.ResultType.ETAG);
+                final long newExpires = modifiedRequest.getExpires();
+                if (newExpires > 0) {
+                    etagResult.setExpires(newExpires);
                 }
+                return etagResult;
             }
         }
         /*

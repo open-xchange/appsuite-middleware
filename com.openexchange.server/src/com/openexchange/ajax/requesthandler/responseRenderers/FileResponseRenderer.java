@@ -157,6 +157,8 @@ public class FileResponseRenderer implements ResponseRenderer {
                 if (expires > 0) {
                     final long millis = System.currentTimeMillis() + expires;
                     Tools.setETag(eTag, new Date(millis), resp);
+                } else {
+                    Tools.setETag(eTag, null, resp);
                 }
             }
             /*

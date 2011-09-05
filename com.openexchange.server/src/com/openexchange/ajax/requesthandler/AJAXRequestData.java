@@ -120,6 +120,8 @@ public class AJAXRequestData {
 
     private String eTag;
 
+    private long expires;
+
     /**
      * Initializes a new {@link AJAXRequestData}.
      *
@@ -148,6 +150,27 @@ public class AJAXRequestData {
         super();
         params = new LinkedHashMap<String, String>();
         headers = new LinkedHashMap<String, String>();
+        expires = -1;
+    }
+
+    /**
+     * Gets the expires time.
+     * <p>
+     * Have a notion of a time-to-live value.
+     *
+     * @return The expires time or <code>-1</code> for no expiry
+     */
+    public long getExpires() {
+        return expires;
+    }
+
+    /**
+     * Sets the expires time
+     *
+     * @param expires The expires time or <code>-1</code> for no expiry
+     */
+    public void setExpires(final long expires) {
+        this.expires = expires;
     }
 
     /**

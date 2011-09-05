@@ -61,6 +61,8 @@ public interface ETagAwareAJAXActionService extends AJAXActionService {
 
     /**
      * Checks for equality of passed client ETag compared to currently valid ETag for requested resource.
+     * <p>
+     * A new expiry may be specified by setting "X-ETag-Expiry" header in passed {@link AJAXRequestData} instance.
      * 
      * @param clientETag The client's ETag
      * @param request The request data
@@ -70,4 +72,13 @@ public interface ETagAwareAJAXActionService extends AJAXActionService {
      */
     boolean checkETag(String clientETag, AJAXRequestData request, ServerSession session) throws OXException;
 
+    /**
+     * Sets specified <i>ETag</i> header with given optional expires value to specified request result.
+     * 
+     * @param eTag The <i>ETag</i> header value
+     * @param expires The optional expires; set to <code>-1</code> for no expiry
+     * @param result The request result
+     * @throws OXException If setting <i>ETag</i> fails
+     */
+    void setETag(String eTag, long expires, AJAXRequestResult result) throws OXException;
 }

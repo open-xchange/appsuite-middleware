@@ -130,14 +130,26 @@ public final class Tools {
      * Sets specified ETag header (and implicitly removes/replaces any existing cache-controlling header: <i>Expires</i>, <i>Cache-Control</i>, and <i>Pragma</i>)
      * 
      * @param eTag The ETag value
-     * @param expires The expires date
+     * @param resp The HTTP servlet response to apply to
+     */
+    public static void setETag(final String eTag, final HttpServletResponse resp) {
+        setETag(eTag, null, resp);
+    }
+
+    /**
+     * Sets specified ETag header (and implicitly removes/replaces any existing cache-controlling header: <i>Expires</i>, <i>Cache-Control</i>, and <i>Pragma</i>)
+     * 
+     * @param eTag The ETag value
+     * @param expires The optional expires date, pass <code>null</code> to not set any expiry
      * @param resp The HTTP servlet response to apply to
      */
     public static void setETag(final String eTag, final Date expires, final HttpServletResponse resp) {
         removeCachingHeader(resp);
         resp.setHeader("etag", eTag);
-        synchronized (HEADER_DATEFORMAT) {
-            resp.setHeader(EXPIRES_KEY, HEADER_DATEFORMAT.format(expires));
+        if (null != expires) {
+            synchronized (HEADER_DATEFORMAT) {
+                resp.setHeader(EXPIRES_KEY, HEADER_DATEFORMAT.format(expires));
+            }
         }
     }
 
