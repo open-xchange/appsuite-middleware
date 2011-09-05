@@ -218,8 +218,8 @@ public final class MIMEStructureHandler implements StructureHandler {
          * Insert literal base64-encoded headers
          */
         try {
-            final JSONObject jsonObject = mailJsonObjectQueue.getFirst();
-            jsonObject.put("x-original-headers", new String(Base64.encodeBase64(bs))); // ASCII-only, no charset needed
+            final JSONObject headersJsonObject = mailJsonObjectQueue.getFirst().getJSONObject(KEY_HEADERS);
+            headersJsonObject.put("x-original-headers", new String(Base64.encodeBase64(bs))); // ASCII-only, no charset needed
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
