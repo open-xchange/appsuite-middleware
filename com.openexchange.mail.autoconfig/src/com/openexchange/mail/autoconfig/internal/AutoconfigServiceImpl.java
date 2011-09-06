@@ -60,7 +60,7 @@ import com.openexchange.mail.autoconfig.AutoconfigException;
 import com.openexchange.mail.autoconfig.AutoconfigService;
 import com.openexchange.mail.autoconfig.sources.ConfigSource;
 import com.openexchange.mail.autoconfig.sources.ConfigurationFile;
-import com.openexchange.mail.autoconfig.sources.ConfigurationServer;
+import com.openexchange.mail.autoconfig.sources.ISPDB;
 import com.openexchange.mail.autoconfig.sources.Guess;
 import com.openexchange.mail.autoconfig.sources.ConfigServer;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -82,7 +82,7 @@ public class AutoconfigServiceImpl implements AutoconfigService {
         sources = new LinkedList<ConfigSource>();
         sources.add(new ConfigurationFile(this.services));
         sources.add(new ConfigServer());
-        sources.add(new ConfigurationServer(this.services));
+        sources.add(new ISPDB(this.services));
         sources.add(new Guess());
     }
 

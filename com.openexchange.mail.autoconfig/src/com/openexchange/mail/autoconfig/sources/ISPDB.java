@@ -82,15 +82,15 @@ import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
  * 
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class ConfigurationServer extends AbstractConfigSource {
+public class ISPDB extends AbstractConfigSource {
 
-    static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ConfigurationServer.class);
+    static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ISPDB.class);
 
     private static final String locationProperty = "com.openexchange.mail.autoconfig.ispdb";
 
     private ServiceLookup services;
 
-    public ConfigurationServer(ServiceLookup services) {
+    public ISPDB(ServiceLookup services) {
         this.services = services;
     }
 
