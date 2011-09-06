@@ -49,6 +49,7 @@
 
 package com.openexchange.java;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
@@ -71,7 +72,7 @@ public class Streams {
      */
     public static byte[] stream2bytes(final InputStream is) throws IOException {
         try {
-            final ByteArrayOutputStream bos = new UnsynchronizedByteArrayOutputStream(8192);
+            final ByteArrayOutputStream bos = newByteArrayOutputStream(4096);
             final int buflen = 2048;
             final byte[] buf = new byte[buflen];
             for (int read; (read = is.read(buf, 0, buflen)) > 0;) {
@@ -81,6 +82,46 @@ public class Streams {
         } finally {
             close(is);
         }
+    }
+
+    /**
+     * Creates a new non-thread-safe {@link ByteArrayOutputStream} instance with default initial capacity of <code>32</code>.
+     * 
+     * @return A new non-thread-safe {@link ByteArrayOutputStream} instance
+     */
+    public static ByteArrayOutputStream newByteArrayOutputStream() {
+        return new UnsynchronizedByteArrayOutputStream(32);
+    }
+
+    /**
+     * Creates a new non-thread-safe {@link ByteArrayOutputStream} instance.
+     * 
+     * @param capacity The initial capacity
+     * @return A new non-thread-safe {@link ByteArrayOutputStream} instance
+     */
+    public static ByteArrayOutputStream newByteArrayOutputStream(final int capacity) {
+        return new UnsynchronizedByteArrayOutputStream(capacity);
+    }
+
+    /**
+     * Creates a new non-thread-safe {@link ByteArrayInputStream} instance carrying specified input stream's data.
+     * 
+     * @param inputStream The input stream
+     * @return A new non-thread-safe {@link ByteArrayInputStream} instance
+     * @throws IOException If an I/O error occurs
+     */
+    public static ByteArrayInputStream newByteArrayInputStream(final InputStream inputStream) throws IOException {
+        return new UnsynchronizedByteArrayInputStream(stream2bytes(inputStream));
+    }
+
+    /**
+     * Creates a new non-thread-safe {@link ByteArrayInputStream} instance carrying specified bytes.
+     * 
+     * @param bytes The bytes
+     * @return A new non-thread-safe {@link ByteArrayInputStream} instance
+     */
+    public static ByteArrayInputStream newByteArrayInputStream(final byte[] bytes) {
+        return new UnsynchronizedByteArrayInputStream(bytes);
     }
 
     /**
