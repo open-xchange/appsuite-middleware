@@ -88,13 +88,25 @@ public class FileResponseRenderer implements ResponseRenderer {
 
     protected static final String SAVE_AS_TYPE = "application/octet-stream";
 
-    private ImageScalingService scaler = null;
+    private volatile ImageScalingService scaler;
+
+    /**
+     * Initializes a new {@link FileResponseRenderer}.
+     */
+    public FileResponseRenderer() {
+        super();
+    }
 
     @Override
     public int getRanking() {
         return 0;
     }
 
+    /**
+     * Sets the image scaler.
+     * 
+     * @param scaler The image scaler
+     */
     public void setScaler(final ImageScalingService scaler) {
         this.scaler = scaler;
     }
@@ -189,6 +201,7 @@ public class FileResponseRenderer implements ResponseRenderer {
      * @throws OXException If an Open-Xchange error occurs
      */
     private IFileHolder scaleIfImage(final AJAXRequestData request, final IFileHolder file) throws IOException, OXException {
+        final ImageScalingService scaler = this.scaler;
         if (scaler == null) {
             return file;
         }
