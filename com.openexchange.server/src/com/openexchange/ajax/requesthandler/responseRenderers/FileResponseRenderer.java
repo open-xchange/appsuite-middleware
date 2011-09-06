@@ -130,15 +130,15 @@ public class FileResponseRenderer implements ResponseRenderer {
             } else {
                 final CheckedDownload checkedDownload =
                     DownloadUtility.checkInlineDownload(documentData, name, file.getContentType(), contentDisposition, userAgent);
-                if (contentDisposition != null) {
-                    resp.setHeader("Content-Disposition", contentDisposition);
-                } else {
+                if (contentDisposition == null) {
                     resp.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
-                }
-                if (contentType != null) {
-                    resp.setContentType(contentType);
                 } else {
+                    resp.setHeader("Content-Disposition", contentDisposition);
+                }
+                if (contentType == null) {
                     resp.setContentType(checkedDownload.getContentType());
+                } else {
+                    resp.setContentType(contentType);
                 }
                 documentData = checkedDownload.getInputStream();
             }
