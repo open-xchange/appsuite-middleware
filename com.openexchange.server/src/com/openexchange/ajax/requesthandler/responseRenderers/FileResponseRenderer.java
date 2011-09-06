@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.requesthandler.responseRenderers;
 
+import static com.openexchange.java.Streams.close;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -120,10 +121,8 @@ public class FileResponseRenderer implements ResponseRenderer {
         final String name = file.getName();
 
         InputStream documentData = null;
-        ServletOutputStream outputStream = null;
         try {
             file = scaleIfImage(request, file);
-            outputStream = resp.getOutputStream();
             documentData = new BufferedInputStream(file.getStream());
             if (SAVE_AS_TYPE.equals(contentType)) {
                 Tools.setHeaderForFileDownload(userAgent, resp, name, contentDisposition);
@@ -164,6 +163,7 @@ public class FileResponseRenderer implements ResponseRenderer {
             /*
              * Output binary content
              */
+            final ServletOutputStream outputStream = resp.getOutputStream();
             final int len = BUFLEN;
             final byte[] buf = new byte[len];
             for (int read; (read = documentData.read(buf, 0, len)) > 0;) {
@@ -175,58 +175,51 @@ public class FileResponseRenderer implements ResponseRenderer {
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         } finally {
-            closeStream(documentData);
-        }
-    }
-
-    private static void closeStream(final InputStream in) {
-        if (null == in) {
-            return;
-        }
-        try {
-            in.close();
-        } catch (final IOException e) {
-            // Ignore
+             close(documentData);
         }
     }
 
     /**
-     * @param request
-     * @param file
-     * @return
-     * @throws IOException
-     * @throws OXException
+     * Scale possible image data.
+     * 
+     * @param request The request data
+     * @param file The file holder
+     * @return The possibly scaled file holder
+     * @throws IOException If an I/O error occurs
+     * @throws OXException If an Open-Xchange error occurs
      */
     private IFileHolder scaleIfImage(final AJAXRequestData request, final IFileHolder file) throws IOException, OXException {
         if (scaler == null) {
             return file;
         }
-
+        /*
+         * Check content type
+         */
         String contentType = file.getContentType();
-
-        if (!contentType.startsWith("image")) {
+        if (!contentType.startsWith("image/")) {
             contentType = MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(file.getName());
-            if (!contentType.startsWith("image")) {
+            if (!contentType.startsWith("image/")) {
                 return file;
             }
         }
-
+        /*
+         * Start scaling if appropriate parameters are present
+         */
         int width = -1, height = -1;
-
         if (request.isSet("width")) {
             width = request.getParameter("width", int.class).intValue();
         }
-
         if (request.isSet("height")) {
             height = request.getParameter("height", int.class).intValue();
         }
-
         if (width == -1 && height == -1) {
             return file;
         }
-
+        /*
+         * Scale to new input stream
+         */
         final InputStream scaled = scaler.scale(file.getStream(), width, height);
-
         return new FileHolder(scaled, -1, "image/png", "");
     }
+
 }
