@@ -86,15 +86,6 @@ public class StringResponseRenderer implements ResponseRenderer {
 
     @Override
     public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) {
-        final String output;
-        {
-            final Object resultObject = result.getResultObject();
-            if (resultObject == null) {
-                output = "";
-            } else {
-                output = resultObject.toString();
-            }
-        }
         /*
          * Write headers
          */
@@ -106,7 +97,8 @@ public class StringResponseRenderer implements ResponseRenderer {
          * Write output to OutputStream
          */
         try {
-            resp.getWriter().write(output);
+            final Object resultObject = result.getResultObject();
+            resp.getWriter().write(resultObject == null ? "" : resultObject.toString());
         } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
         } catch (final RuntimeException e) {
