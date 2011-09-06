@@ -211,8 +211,14 @@ public final class ImageUtility {
         /*
          * Image location data
          */
-        sb.append('&').append(AJAXServlet.PARAMETER_FOLDERID).append('=').append(urlEncodeSafe(imageLocation.getFolder()));
-        sb.append('&').append(AJAXServlet.PARAMETER_ID).append('=').append(urlEncodeSafe(imageLocation.getId()));
+        final String folder = imageLocation.getFolder();
+        if (null != folder) {
+            sb.append('&').append(AJAXServlet.PARAMETER_FOLDERID).append('=').append(urlEncodeSafe(folder));
+        }
+        final String objectId = imageLocation.getId();
+        if (null != objectId) {
+            sb.append('&').append(AJAXServlet.PARAMETER_ID).append('=').append(urlEncodeSafe(objectId));
+        }
         final String imageId = imageLocation.getImageId();
         if (null != imageId) {
             sb.append('&').append(AJAXServlet.PARAMETER_UID).append('=').append(urlEncodeSafe(imageId));
