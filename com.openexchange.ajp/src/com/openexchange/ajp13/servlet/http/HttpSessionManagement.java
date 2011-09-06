@@ -66,7 +66,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class HttpSessionManagement {
 
-    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(HttpSessionManagement.class));
+    protected static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(HttpSessionManagement.class));
 
     private static volatile Map<String, HttpSessionWrapper> sessions;
 
