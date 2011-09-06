@@ -82,7 +82,7 @@ public class AutoconfigServiceImpl implements AutoconfigService {
         sources = new LinkedList<ConfigSource>();
         sources.add(new ConfigurationFile(this.services));
         sources.add(new ISPDB());
-        sources.add(new ConfigurationServer());
+        sources.add(new ConfigurationServer(this.services));
         sources.add(new Guess());
     }
 

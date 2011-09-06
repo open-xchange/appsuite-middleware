@@ -49,24 +49,161 @@
 
 package com.openexchange.mail.autoconfig.sources;
 
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
+import java.net.Socket;
+import java.net.SocketAddress;
+import java.net.URL;
+import java.net.UnknownHostException;
+import org.apache.commons.httpclient.ConnectTimeoutException;
+import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.params.HttpConnectionParams;
+import org.apache.commons.httpclient.params.HttpMethodParams;
+import org.apache.commons.httpclient.protocol.Protocol;
+import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.autoconfig.Autoconfig;
+import com.openexchange.mail.autoconfig.xmlparser.AutoconfigParser;
+import com.openexchange.mail.autoconfig.xmlparser.ClientConfig;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
- * {@link ConfigurationServer}
+ * Connects to the Mozilla ISPDB. For more information see https://developer.mozilla.org/en/Thunderbird/Autoconfiguration
  * 
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class ConfigurationServer extends AbstractConfigSource {
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.autoconfig.sources.ConfigSource#getAutoconfig(java.lang.String, java.lang.String)
-     */
+    static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ConfigurationServer.class);
+
+    private static final String locationProperty = "com.openexchange.mail.autoconfig.ispdb";
+
+    private ServiceLookup services;
+
+    public ConfigurationServer(ServiceLookup services) {
+        this.services = services;
+    }
+
     @Override
-    public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, User user, Context context) {
-        return null;
+    public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, User user, Context context) throws OXException {
+        ConfigViewFactory configViewFactory = services.getService(ConfigViewFactory.class);
+        ConfigView view = configViewFactory.getView(user.getId(), context.getContextId());
+        String url = view.get(locationProperty, String.class);
+
+        if (!url.endsWith("/")) {
+            url += "/";
+        }
+        url += emailDomain;
+
+        HttpClient client = new HttpClient();
+        int timeout = 3000;
+        client.getParams().setSoTimeout(timeout);
+        client.getParams().setIntParameter("http.connection.timeout", timeout);
+        client.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(0, false));
+
+        URL javaURL;
+        try {
+            javaURL = new URL(url);
+        } catch (MalformedURLException e) {
+            LOG.warn("Unable to parse URL: " + url, e);
+            return null;
+        }
+
+        GetMethod getMethod;
+
+        if (javaURL.getProtocol().equalsIgnoreCase("https")) {
+            int port = javaURL.getPort();
+            if (port == -1) {
+                port = 443;
+            }
+
+            Protocol https = new Protocol("https", new TrustAllAdapter(), 443);
+            client.getHostConfiguration().setHost(javaURL.getHost(), port, https);
+
+            getMethod = new GetMethod(javaURL.getFile());
+
+            getMethod.getParams().setSoTimeout(1000);
+            getMethod.setQueryString(javaURL.getQuery());
+        } else {
+            getMethod = new GetMethod(url);
+        }
+
+        try {
+
+            int httpCode = client.executeMethod(getMethod);
+
+            if (httpCode != 200) {
+                LOG.warn("Could not retrieve config XML. Return code was: " + httpCode);
+                return null;
+            }
+            AutoconfigParser parser = new AutoconfigParser(getMethod.getResponseBodyAsStream());
+            ClientConfig clientConfig = parser.getConfig();
+
+            Autoconfig autoconfig = getBestConfiguration(clientConfig, emailDomain);
+            replaceUsername(autoconfig, emailLocalPart, emailDomain);
+            return autoconfig;
+
+        } catch (HttpException e) {
+            LOG.warn("Could not retrieve config XML.", e);
+            return null;
+        } catch (IOException e) {
+            LOG.warn("Could not retrieve config XML.", e);
+            return null;
+        }
+    }
+
+    private class TrustAllAdapter implements ProtocolSocketFactory {
+
+        private final TrustAllSSLSocketFactory delegate = (TrustAllSSLSocketFactory) TrustAllSSLSocketFactory.getDefault();
+
+        @Override
+        public Socket createSocket(String host, int port) throws IOException, UnknownHostException {
+            return delegate.createSocket(host, port);
+        }
+
+        @Override
+        public Socket createSocket(String host, int port, InetAddress localAddress, int localPort) throws IOException, UnknownHostException {
+            return delegate.createSocket(host, port, localAddress, localPort);
+        }
+
+        @Override
+        public Socket createSocket(String host, int port, InetAddress localAddress, int localPort, HttpConnectionParams params) throws IOException, UnknownHostException, ConnectTimeoutException {
+            Socket socket;
+            int timeout = params.getConnectionTimeout();
+            if (timeout == 0) {
+                socket = createSocket(host, port, localAddress, localPort);
+            } else {
+                socket = delegate.createSocket();
+                SocketAddress localaddr = new InetSocketAddress(localAddress, localPort);
+                SocketAddress remoteaddr = new InetSocketAddress(host, port);
+                socket.bind(localaddr);
+                socket.connect(remoteaddr, timeout);
+                return socket;
+            }
+
+            int linger = params.getLinger();
+            if (linger == 0) {
+                socket.setSoLinger(false, 0);
+            } else if (linger > 0) {
+                socket.setSoLinger(true, linger);
+            }
+
+            socket.setSoTimeout(params.getSoTimeout());
+            socket.setTcpNoDelay(params.getTcpNoDelay());
+
+            return socket;
+        }
+
     }
 
 }

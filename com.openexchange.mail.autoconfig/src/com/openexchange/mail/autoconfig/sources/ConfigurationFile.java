@@ -70,6 +70,8 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class ConfigurationFile extends AbstractConfigSource {
+    
+    static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ConfigurationFile.class);
 
     private static final String locationProperty = "com.openexchange.mail.autoconfig.path";
 
@@ -94,11 +96,16 @@ public class ConfigurationFile extends AbstractConfigSource {
             }
         });
 
+        if (files == null || files.length == 0) {
+            return null;
+        }
+        
         FileInputStream fis;
         try {
             fis = new FileInputStream(files[0]);
         } catch (FileNotFoundException e) {
-            throw AutoconfigException.io(e);
+            LOG.warn("Unable to find file: " + files[0], e);
+            return null;
         }
         AutoconfigParser parser = new AutoconfigParser(fis);
         ClientConfig clientConfig = parser.getConfig();

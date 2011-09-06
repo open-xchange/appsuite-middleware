@@ -65,7 +65,7 @@ public interface AutoconfigService {
      * @param email
      * @param user
      * @param context
-     * @return
+     * @return An autoconfig Object if generation was successfull, null otherwise.
      * @throws OXException 
      */
     public Autoconfig getConfig(String email, User user, Context context) throws OXException;

@@ -14,7 +14,13 @@ Import-Package: com.openexchange.config.cascade,
  com.openexchange.mail.mime,
  com.openexchange.server,
  com.openexchange.server.osgiservice,
+ com.openexchange.tools.ssl,
  javax.mail.internet,
+ org.apache.commons.httpclient,
+ org.apache.commons.httpclient.methods,
+ org.apache.commons.httpclient.params,
+ org.apache.commons.httpclient.protocol,
+ org.apache.commons.logging,
  org.osgi.framework
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: lib/kxml.jar,

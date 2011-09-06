@@ -91,6 +91,10 @@ public class AutoconfigResultConverter implements ResultConverter {
 
     private JSONObject convert(Autoconfig autoconfig) throws OXException {
         JSONObject json = new JSONObject();
+        
+        if (autoconfig == null) {
+            return json;
+        }
 
         try {
             json.put("username", autoconfig.getUsername());
