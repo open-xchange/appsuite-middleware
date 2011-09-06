@@ -50,18 +50,23 @@
 package com.openexchange.filemanagement.internal;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.server.Initialization;
+import com.openexchange.server.osgi.ServerActivator;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link ManagedFileInitialization} - Initialization for {@link ManagedFileManagement}.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ManagedFileInitialization implements Initialization {
 
     private final AtomicBoolean started;
+
+    private volatile ServiceRegistration<ManagedFileManagement> registerService;
 
     /**
      * Initializes a new {@link ManagedFileInitialization}
@@ -78,12 +83,21 @@ public final class ManagedFileInitialization implements Initialization {
         }
         // Simulate bundle registration
         ServerServiceRegistry.getInstance().addService(ManagedFileManagement.class, ManagedFileManagementImpl.getInstance());
+        final BundleContext context = ServerActivator.getContext();
+        if (null != context) {
+            registerService = context.registerService(ManagedFileManagement.class, ManagedFileManagementImpl.getInstance(), null);
+        }
     }
 
     @Override
     public void stop() {
         if (!started.compareAndSet(true, false)) {
             return;
+        }
+        final ServiceRegistration<ManagedFileManagement> registerService = this.registerService;
+        if (null != registerService) {
+            registerService.unregister();
+            this.registerService = null;
         }
         // Simulate bundle shut-down
         ServerServiceRegistry.getInstance().removeService(ManagedFileManagement.class);

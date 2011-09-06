@@ -259,6 +259,17 @@ public final class ServerActivator extends DeferredActivator {
             FileStorageServiceRegistry.class, CryptoService.class, HttpService.class, SystemNameService.class, FolderUpdaterRegistry.class, ConfigViewFactory.class, StringParser.class
         };
 
+    private static volatile BundleContext CONTEXT;
+
+    /**
+     * Gets the bundle context.
+     *
+     * @return The bundle context or <code>null</code> if not started, yet
+     */
+    public static BundleContext getContext() {
+        return CONTEXT;
+    }
+
     private final List<ServiceRegistration<?>> registrationList;
 
     private final List<ServiceTracker<?,?>> serviceTrackerList;
@@ -340,6 +351,7 @@ public final class ServerActivator extends DeferredActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        CONTEXT = context;
         // get version information from MANIFEST file
         final Dictionary<?, ?> headers = context.getBundle().getHeaders();
         Version.buildnumber = "Rev" + (String) headers.get("OXRevision");
@@ -725,6 +737,7 @@ public final class ServerActivator extends DeferredActivator {
         } finally {
             started.set(false);
             adminBundleInstalled = null;
+            CONTEXT = null;
         }
     }
 
