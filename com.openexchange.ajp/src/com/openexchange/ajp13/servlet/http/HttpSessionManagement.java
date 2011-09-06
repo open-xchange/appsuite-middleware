@@ -68,9 +68,9 @@ public final class HttpSessionManagement {
 
     static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(HttpSessionManagement.class));
 
-    private static Map<String, HttpSessionWrapper> sessions;
+    private static volatile Map<String, HttpSessionWrapper> sessions;
 
-    private static ScheduledTimerTask sessionRemover;
+    private static volatile ScheduledTimerTask sessionRemover;
 
     /**
      * Initializes HTTP session management
@@ -161,12 +161,13 @@ public final class HttpSessionManagement {
      */
     public static HttpSession createAndGetHttpSession(final String uniqueId) {
         final HttpSessionWrapper httpSession;
-        if (sessions.containsKey(uniqueId)) {
-            httpSession = sessions.get(uniqueId);
+        final Map<String, HttpSessionWrapper> sessionMap = sessions;
+        if (sessionMap.containsKey(uniqueId)) {
+            httpSession = sessionMap.get(uniqueId);
             httpSession.touch(); // Touch last-accessed time stamp
         } else {
             httpSession = new HttpSessionWrapper(uniqueId);
-            sessions.put(uniqueId, httpSession);
+            sessionMap.put(uniqueId, httpSession);
         }
         return httpSession;
     }
@@ -177,12 +178,13 @@ public final class HttpSessionManagement {
      * @param uniqueId The unique ID to apply to HTTP session
      */
     public static void createHttpSession(final String uniqueId) {
-        HttpSessionWrapper httpSession = sessions.get(uniqueId);
+        final Map<String, HttpSessionWrapper> sessionMap = sessions;
+        HttpSessionWrapper httpSession = sessionMap.get(uniqueId);
         if (null != httpSession) {
             return;
         }
         httpSession = new HttpSessionWrapper(uniqueId);
-        sessions.put(uniqueId, httpSession);
+        sessionMap.put(uniqueId, httpSession);
     }
 
     /**
@@ -216,7 +218,8 @@ public final class HttpSessionManagement {
      * @return <code>true</code> if valid; otherwise <code>false</code>
      */
     public static boolean isHttpSessionValid(final String sessionId) {
-        final HttpSessionWrapper httpSession = sessions.get(sessionId);
+        final Map<String, HttpSessionWrapper> sessionMap = sessions;
+        final HttpSessionWrapper httpSession = sessionMap.get(sessionId);
         if (null == httpSession) {
             /*
              * HTTP session must be present
@@ -227,7 +230,7 @@ public final class HttpSessionManagement {
             /*
              * Expired
              */
-            sessions.remove(sessionId);
+            sessionMap.remove(sessionId);
             return false;
         }
         /*
