@@ -125,23 +125,22 @@ public class FileResponseRenderer implements ResponseRenderer {
         IFileHolder file = (IFileHolder) result.getResultObject();
 
         final String contentType = req.getParameter(PARAMETER_CONTENT_TYPE);
-        final String userAgent = req.getHeader("user-agent");
         String contentDisposition = req.getParameter(PARAMETER_CONTENT_DISPOSITION);
         if (null == contentDisposition) {
             contentDisposition = file.getDisposition();
         }
-        final String name = file.getName();
 
         InputStream documentData = null;
         try {
             file = scaleIfImage(request, file);
             documentData = new BufferedInputStream(file.getStream());
+            final String userAgent = req.getHeader("user-agent");
             if (SAVE_AS_TYPE.equals(contentType)) {
-                Tools.setHeaderForFileDownload(userAgent, resp, name, contentDisposition);
+                Tools.setHeaderForFileDownload(userAgent, resp, file.getName(), contentDisposition);
                 resp.setContentType(contentType);
             } else {
                 final CheckedDownload checkedDownload =
-                    DownloadUtility.checkInlineDownload(documentData, name, file.getContentType(), contentDisposition, userAgent);
+                    DownloadUtility.checkInlineDownload(documentData, file.getName(), file.getContentType(), contentDisposition, userAgent);
                 if (contentDisposition == null) {
                     resp.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
                 } else {
