@@ -377,7 +377,21 @@ public class MIMEMessageFiller {
          * Reply-To
          */
         if (usm.getReplyToAddr() == null || usm.getReplyToAddr().length() == 0) {
-            if (mail.containsFrom()) {
+            InternetAddress[] replyTo = null;
+            final MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+            if (null != mass) {
+                final String sReplyTo = mass.getMailAccount(mail.getAccountId(), session.getUserId(), session.getContextId()).getReplyTo();
+                if (null != sReplyTo) {
+                    try {
+                        replyTo = QuotedInternetAddress.parse(usm.getReplyToAddr(), true);
+                    } catch (final AddressException e) {
+                        LOG.error("Default Reply-To address cannot be parsed", e);
+                    }
+                }
+            }
+            if (null != replyTo) {
+                mimeMessage.setReplyTo(replyTo);
+            } else if (mail.containsFrom()) {
                 mimeMessage.setReplyTo(mail.getFrom());
             }
         } else {
