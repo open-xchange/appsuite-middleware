@@ -55,11 +55,11 @@ import com.openexchange.mail.autoconfig.Autoconfig;
 
 
 /**
- * {@link ISPDB}
+ * {@link ConfigServer}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class ISPDB extends AbstractConfigSource {
+public class ConfigServer extends AbstractConfigSource {
 
     /* (non-Javadoc)
      * @see com.openexchange.mail.autoconfig.sources.ConfigSource#getAutoconfig(java.lang.String, java.lang.String)
