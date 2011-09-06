@@ -86,6 +86,23 @@ public interface ManagedFileManagement {
     public File newTempFile() throws OXException;
 
     /**
+     * Creates a new temporary file.
+     * <p>
+     * If this method returns successfully then it is guaranteed that:
+     * <ol>
+     * <li>The file denoted by the returned abstract pathname did not exist before this method was invoked, and</li>
+     * <li>Neither this method nor any of its variants will return the same abstract pathname again in the current invocation of the virtual
+     * machine.</li>
+     * </ol>
+     *
+     * @param prefix The file prefix; e.g. <code>"open-xchange-"</code>
+     * @param suffix The file suffix; e.g. <code>".tmp"</code>
+     * @return A new temporary file
+     * @throws OXException If a temporary file could not be created
+     */
+    public File newTempFile(String prefix, String suffix) throws OXException;
+
+    /**
      * Creates a new managed file from specified temporary file.
      *
      * @param temporaryFile A temporary file (previously obtained from {@link #newTempFile()}

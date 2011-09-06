@@ -237,11 +237,7 @@ public final class InlineImageDataSource implements ImageDataSource {
             }
             properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(mailPart.getSize()));
             properties.put(DataProperties.PROPERTY_NAME, mailPart.getFileName());
-            try {
-                return new SimpleData<D>((D) mailPart.getInputStream(), properties);
-            } catch (final OXException e) {
-                throw new OXException(e);
-            }
+            return new SimpleData<D>((D) mailPart.getInputStream(), properties);
         }
     }
 
