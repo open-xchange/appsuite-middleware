@@ -95,6 +95,13 @@ public class JSONResponseRenderer implements ResponseRenderer {
 
     /**
      * Write specified response to Servlet output stream either as HTML callback or as JSON data.
+     * <p>
+     * The response is considered as HTML callback if one of these conditions is met:
+     * <ul>
+     * <li>The HTTP Servlet request indicates <i>multipart/*</i> content type</li>
+     * <li>The HTTP Servlet request has the <code>"respondWithHTML"</code> parameter set to <code>"true"</code></li>
+     * <li>The HTTP Servlet request contains non-<code>null</code> <code>"callback"</code> parameter</li>
+     * </ul>
      * 
      * @param response The response to write
      * @param action The request's action
