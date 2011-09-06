@@ -53,6 +53,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -113,13 +114,14 @@ public final class HttpSessionManagement {
 
     /**
      * Gets the HTTP session whose unique ID matches given <code>sessionId</code>.
+     * <p>
+     * Don't forget to touch last-accessed time stamp if returned by {@link HttpServletRequest#getSession()} via {@link HttpSessionWrapper#touch()}.
      *
      * @param sessionId The session ID
      * @return The HTTP session whose unique ID matches given <code>sessionId</code>.
      */
     public static HttpSessionWrapper getHttpSession(final String sessionId) {
-        final HttpSessionWrapper ret = sessions.get(sessionId);
-        return null == ret ? null : ret.touch();
+        return sessions.get(sessionId);
     }
 
     /**

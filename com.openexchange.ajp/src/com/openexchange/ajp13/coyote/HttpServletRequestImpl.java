@@ -1038,9 +1038,9 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
                 /*
                  * Add JSESSIONID cookie
                  */
-                configureCookie(sessionCookie);
-                response.addCookie(sessionCookie);
-                return session;
+                // configureCookie(sessionCookie);
+                // response.addCookie(sessionCookie);
+                return session.touch();
             }
             /*
              * Invalidate session
