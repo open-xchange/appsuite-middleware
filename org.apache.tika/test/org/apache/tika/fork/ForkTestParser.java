@@ -35,10 +35,12 @@ class ForkTestParser implements Parser {
     /** Serial version UID */
     private static final long serialVersionUID = -5492269783593452319L;
 
+    @Override
     public Set<MediaType> getSupportedTypes(ParseContext context) {
         return Collections.singleton(MediaType.TEXT_PLAIN);
     }
 
+    @Override
     public void parse(
             InputStream stream, ContentHandler handler,
             Metadata metadata, ParseContext context)
@@ -50,6 +52,7 @@ class ForkTestParser implements Parser {
         xhtml.endDocument();
     }
 
+    @Override
     public void parse(
             InputStream stream, ContentHandler handler, Metadata metadata)
             throws IOException, SAXException, TikaException {

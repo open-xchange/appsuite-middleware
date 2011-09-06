@@ -54,7 +54,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ETagAwareAJAXActionService} - Introduces <i>ETag</i> awareness to an {@link AJAXActionService}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ETagAwareAJAXActionService extends AJAXActionService {
@@ -63,7 +63,7 @@ public interface ETagAwareAJAXActionService extends AJAXActionService {
      * Checks for equality of passed client ETag compared to currently valid ETag for requested resource.
      * <p>
      * A new expiry may be specified by setting "X-ETag-Expiry" header in passed {@link AJAXRequestData} instance.
-     * 
+     *
      * @param clientETag The client's ETag
      * @param request The request data
      * @param session The session
@@ -74,7 +74,7 @@ public interface ETagAwareAJAXActionService extends AJAXActionService {
 
     /**
      * Sets specified <i>ETag</i> header with given optional expires value to specified request result.
-     * 
+     *
      * @param eTag The <i>ETag</i> header value
      * @param expires The optional expires; set to <code>-1</code> for no expiry
      * @param result The request result

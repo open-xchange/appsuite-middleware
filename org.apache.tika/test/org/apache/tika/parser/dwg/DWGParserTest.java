@@ -58,7 +58,7 @@ public class DWGParserTest extends TestCase {
 
             assertEquals("image/vnd.dwg", metadata.get(Metadata.CONTENT_TYPE));
 
-            assertEquals("The quick brown fox jumps over the lazy dog", 
+            assertEquals("The quick brown fox jumps over the lazy dog",
                     metadata.get(Metadata.TITLE));
             assertEquals("Gym class featuring a brown fox and lazy dog",
                     metadata.get(Metadata.SUBJECT));
@@ -87,7 +87,7 @@ public class DWGParserTest extends TestCase {
             new DWGParser().parse(input, handler, metadata);
 
             assertEquals("image/vnd.dwg", metadata.get(Metadata.CONTENT_TYPE));
-            
+
             assertNull(metadata.get(Metadata.TITLE));
             assertNull(metadata.get(Metadata.SUBJECT));
             assertNull(metadata.get(Metadata.AUTHOR));

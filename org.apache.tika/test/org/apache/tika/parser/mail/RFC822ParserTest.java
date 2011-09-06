@@ -81,7 +81,7 @@ public class RFC822ParserTest extends TestCase {
         } catch (Exception e) {
             fail("Exception thrown: " + e.getMessage());
         }
-        
+
         //repeat, this time looking at content
         parser = new RFC822Parser();
         metadata = new Metadata();

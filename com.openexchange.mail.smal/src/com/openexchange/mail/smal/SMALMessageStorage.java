@@ -75,7 +75,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link SMALMessageStorage}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SMALMessageStorage extends AbstractSMALStorage implements IMailMessageStorage, IMailMessageStorageExt, IMailMessageStorageBatch {
@@ -87,7 +87,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
 
     /**
      * Initializes a new {@link SMALMessageStorage}.
-     * 
+     *
      * @throws OXException If init fails
      */
     public SMALMessageStorage(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess) throws OXException {
@@ -144,14 +144,14 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
             final boolean scheduled = JobQueue.getInstance().addJob(new FolderJob(folder, accountId, userId, contextId).setSpan(-1L));
 
             System.out.println("SMALMessageStorage.searchMessages() retrieved " + mails.size() + " messages from index for " + folder + (scheduled ? " AND scheduled an immediate folder job." : ""));
-            
+
             return mails.toArray(new MailMessage[mails.size()]);
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
-            
+
             System.out.println("AN ERROR OCCURRED RETRIEVING MAILS FROM INDEX!");
             e.printStackTrace(System.out);
-            
+
             return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
         } finally {
             final long dur = System.currentTimeMillis() - st;

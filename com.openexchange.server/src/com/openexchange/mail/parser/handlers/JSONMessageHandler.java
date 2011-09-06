@@ -109,7 +109,7 @@ import com.openexchange.tools.TimeZoneUtils;
 
 /**
  * {@link JSONMessageHandler} - Generates a JSON message representation considering user-sensitive data.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JSONMessageHandler implements MailMessageHandler {
@@ -178,7 +178,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 
     /**
      * Initializes a new {@link JSONMessageHandler}
-     * 
+     *
      * @param accountId The account ID
      * @param mailPath The unique mail path
      * @param displayMode The display mode
@@ -203,7 +203,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 
     /**
      * Initializes a new {@link JSONMessageHandler}
-     * 
+     *
      * @param accountId The account ID
      * @param mailPath The unique mail path
      * @param mail The mail message to add JSON fields not set by message parser traversal
@@ -1082,7 +1082,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 
     /**
      * Gets the filled instance of {@link JSONObject}
-     * 
+     *
      * @return The filled instance of {@link JSONObject}
      */
     public JSONObject getJSONObject() {

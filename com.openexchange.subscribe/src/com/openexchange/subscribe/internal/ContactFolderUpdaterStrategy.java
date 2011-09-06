@@ -217,7 +217,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
         Map<Integer, Object> userInfo = new HashMap<Integer, Object>();
         TargetFolderSession session = new TargetFolderSession(target);
         int folderID = target.getFolderIdAsInt();
-        
+
         ContactInterface contactInterface = SubscriptionServiceRegistry.getInstance().getService(
         		ContactInterfaceDiscoveryService.class).newContactInterface(
         				folderID,

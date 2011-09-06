@@ -29,6 +29,7 @@ public class PatternsTest extends TestCase {
     private MimeTypes types;
     private MimeType text;
 
+    @Override
     protected void setUp() throws MimeTypeException {
         patterns = new Patterns(new MediaTypeRegistry());
         types = new MimeTypes();

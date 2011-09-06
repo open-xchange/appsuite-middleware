@@ -29,9 +29,9 @@ import org.apache.tika.config.TikaConfig;
 import org.apache.tika.metadata.Metadata;
 
 /**
- * 
+ *
  * Test Suite for the {@link MimeTypes} repository.
- * 
+ *
  */
 public class TestMimeTypes extends TestCase {
 
@@ -137,12 +137,12 @@ public class TestMimeTypes extends TestCase {
         //  so our mime magic will spot them
         assertTypeByData("application/x-tika-ooxml", "testEXCEL.xlsx");
         assertTypeByData("application/x-tika-ooxml", "testPPT.pptx");
-        
+
         // This one quite legitimately doesn't have its [Content_Types].xml
         //  file as one of the first couple of entries
         // As such, our mime magic can't figure it out...
         assertTypeByData("application/zip", "testWORD.docx");
-        
+
         assertTypeByNameAndData("application/vnd.ms-excel.sheet.binary.macroenabled.12","testEXCEL.xlsb");
         assertTypeByNameAndData("application/vnd.ms-powerpoint.presentation.macroenabled.12", "testPPT.pptm");
         assertTypeByNameAndData("application/vnd.ms-powerpoint.template.macroenabled.12", "testPPT.potm");
@@ -159,11 +159,11 @@ public class TestMimeTypes extends TestCase {
        assertTypeByName("application/vnd.apple.keynote", "testKeynote.key");
        assertTypeByName("application/vnd.apple.numbers", "testNumbers.numbers");
        assertTypeByName("application/vnd.apple.pages", "testPages.pages");
-       
+
        // We can't do it by data, as we'd need to unpack
-       //  the zip file to check the XML 
+       //  the zip file to check the XML
        assertTypeByData("application/zip", "testKeynote.key");
-       
+
        assertTypeByNameAndData("application/vnd.apple.keynote", "testKeynote.key");
        assertTypeByNameAndData("application/vnd.apple.numbers", "testNumbers.numbers");
        assertTypeByNameAndData("application/vnd.apple.pages", "testPages.pages");
@@ -320,7 +320,7 @@ public class TestMimeTypes extends TestCase {
         assertNotNull(this.repo.getMimeType(testFileName));
         assertNotSame("foo/bar2", this.repo.getMimeType(testFileName).getName());
     }
-    
+
     public void testRawDetection() throws Exception {
         assertTypeByName("image/x-raw-adobe", "x.dng");
         assertTypeByName("image/x-raw-adobe", "x.DNG");
@@ -418,7 +418,7 @@ public class TestMimeTypes extends TestCase {
             stream.close();
         }
     }
-    
+
     private void assertTypeByNameAndData(String expected, String filename)
 	    throws IOException {
 	InputStream stream = TestMimeTypes.class.getResourceAsStream(

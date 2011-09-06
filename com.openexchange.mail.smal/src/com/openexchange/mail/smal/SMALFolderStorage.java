@@ -67,7 +67,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link SMALFolderStorage} - The SMAL folder storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SMALFolderStorage extends AbstractSMALStorage implements IMailFolderStorage, IMailFolderStorageEnhanced {
@@ -76,7 +76,7 @@ public final class SMALFolderStorage extends AbstractSMALStorage implements IMai
 
     /**
      * Initializes a new {@link SMALFolderStorage}.
-     * 
+     *
      * @throws OXException If initialization fails
      */
     public SMALFolderStorage(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess) throws OXException {

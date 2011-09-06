@@ -89,7 +89,7 @@ import com.openexchange.threadpool.ThreadRenamer;
 
 /**
  * {@link ElasticSearchTextFillerQueue}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ElasticSearchTextFillerQueue implements Runnable {
@@ -100,27 +100,27 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
     private static final Future<Object> PLACEHOLDER = new Future<Object>() {
-        
+
         @Override
         public boolean isDone() {
             return true;
         }
-        
+
         @Override
         public boolean isCancelled() {
             return false;
         }
-        
+
         @Override
         public Object get(final long timeout, final TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
             return null;
         }
-        
+
         @Override
         public Object get() throws InterruptedException, ExecutionException {
             return null;
         }
-        
+
         @Override
         public boolean cancel(final boolean mayInterruptIfRunning) {
             return false;
@@ -169,7 +169,7 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
 
     /**
      * Checks if it is allowed to submit a further filler task to thread pool.
-     * 
+     *
      * @return A positive number if it is allowed to submit to pool; otherwise <code>-1</code>
      */
     private int isSubmittable() {
@@ -215,7 +215,7 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
 
     /**
      * Adds specified text filler
-     * 
+     *
      * @param filler The text filler
      */
     public void add(final TextFiller filler) {
@@ -224,7 +224,7 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
 
     /**
      * Adds specified text fillers
-     * 
+     *
      * @param fillers The text fillers
      */
     public void add(final Collection<TextFiller> fillers) {
@@ -270,7 +270,7 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
 
     /**
      * Handles specified equally-grouped fillers
-     * 
+     *
      * @param groupedFillers The equally-grouped fillers
      * @param threadDesc The thread description
      */
@@ -320,7 +320,7 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
 
     /**
      * Handles specified chunk of equally-grouped fillers
-     * 
+     *
      * @param fillersChunk The chunk of equally-grouped fillers
      * @param threadDesc The thread description
      */

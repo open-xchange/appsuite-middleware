@@ -168,7 +168,7 @@ public final class JobQueue {
 
     /**
      * Gets the identifier of the job currently being executed.
-     * 
+     *
      * @return The current job's identifier or <code>null</code> if none is executed at the moment
      */
     public Job currentJob() {
@@ -177,7 +177,7 @@ public final class JobQueue {
 
     /**
      * Checks if there is a job in queue with a higher ranking than specified ranking.
-     * 
+     *
      * @param ranking The ranking to check against
      * @return <code>true</code> if there is a higher-ranked job; otherwise <code>false</code>
      */

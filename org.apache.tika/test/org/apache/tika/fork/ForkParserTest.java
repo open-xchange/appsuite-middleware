@@ -73,6 +73,7 @@ public class ForkParserTest extends TestCase {
                 final ContentHandler o = new BodyContentHandler();
                 output[i] = o;
                 threads[i] = new Thread() {
+                    @Override
                     public void run() {
                         try {
                             InputStream stream =

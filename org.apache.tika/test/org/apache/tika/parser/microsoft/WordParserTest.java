@@ -75,7 +75,7 @@ public class WordParserTest extends TestCase {
     public void testWordHTML() throws Exception {
         InputStream input = null;
         Metadata metadata = new Metadata();
-        
+
         StringWriter sw = new StringWriter();
         SAXTransformerFactory factory = (SAXTransformerFactory)
                  SAXTransformerFactory.newInstance();
@@ -115,7 +115,7 @@ public class WordParserTest extends TestCase {
         } finally {
             input.close();
         }
-        
+
         // Try with a document that contains images
         sw = new StringWriter();
         handler.setResult(new StreamResult(sw));
@@ -123,12 +123,12 @@ public class WordParserTest extends TestCase {
         try {
             new OfficeParser().parse(TikaInputStream.get(input), handler, metadata, new ParseContext());
             String xml = sw.toString();
-            
+
             // Images 1-3
             assertTrue("Image not found in:\n"+xml, xml.contains("<img src=\"embedded:image1.png\"/>"));
             assertTrue("Image not found in:\n"+xml, xml.contains("<img src=\"embedded:image2.jpg\"/>"));
             assertTrue("Image not found in:\n"+xml, xml.contains("<img src=\"embedded:image3.png\"/>"));
-            
+
             // Text too
             assertTrue(xml.contains("<p>The end!"));
         } finally {

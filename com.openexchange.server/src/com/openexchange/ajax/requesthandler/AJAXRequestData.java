@@ -175,7 +175,7 @@ public class AJAXRequestData {
 
     /**
      * Gets the ETag
-     * 
+     *
      * @return The ETag
      */
     public String getETag() {
@@ -184,7 +184,7 @@ public class AJAXRequestData {
 
     /**
      * Sets the ETag
-     * 
+     *
      * @param eTag The ETag to set
      */
     public void setETag(final String eTag) {

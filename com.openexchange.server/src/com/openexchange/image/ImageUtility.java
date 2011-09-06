@@ -85,7 +85,7 @@ public final class ImageUtility {
 
     /**
      * Parses image location from specified image URI.
-     * 
+     *
      * @param imageUri The image URI
      * @return The parsed image location
      */
@@ -139,7 +139,7 @@ public final class ImageUtility {
 
     /**
      * Starts the image URL in given {@link StringBuilder} instance.
-     * 
+     *
      * @param imageLocation The image location
      * @param session The session
      * @param imageDataSource The data source

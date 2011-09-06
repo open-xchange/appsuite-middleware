@@ -48,7 +48,7 @@ public class TXTParserTest extends TestCase {
         String content = writer.toString();
 
         assertEquals("text/plain", metadata.get(Metadata.CONTENT_TYPE));
-        
+
         // TIKA-501: Remove language detection from TXTParser
         assertNull(metadata.get(Metadata.CONTENT_LANGUAGE));
         assertNull(metadata.get(Metadata.LANGUAGE));
@@ -85,7 +85,7 @@ public class TXTParserTest extends TestCase {
     /**
      * Test case for TIKA-240: Drop the BOM when extracting plain text
      *
-     * @see <a href="https://issues.apache.org/jira/browse/TIKA-240">TIKA-240</a> 
+     * @see <a href="https://issues.apache.org/jira/browse/TIKA-240">TIKA-240</a>
      */
     public void testDropByteOrderMark() throws Exception {
         assertExtractText("UTF-8 BOM", "test", new byte[] {
@@ -99,7 +99,7 @@ public class TXTParserTest extends TestCase {
     /**
      * Test case for TIKA-335: using incoming charset
      *
-     * @see <a href="https://issues.apache.org/jira/browse/TIKA-335">TIKA-335</a> 
+     * @see <a href="https://issues.apache.org/jira/browse/TIKA-335">TIKA-335</a>
      */
     public void testUseIncomingCharsetAsHint() throws Exception {
         // Could be UTF-8 or ISO 8859-1 or ...
@@ -110,21 +110,21 @@ public class TXTParserTest extends TestCase {
         parser.parse(
                 new ByteArrayInputStream(test2.getBytes("UTF-8")),
                 new BodyContentHandler(),  metadata, new ParseContext());
-        
+
         assertEquals("UTF-8", metadata.get(Metadata.CONTENT_ENCODING));
 
         metadata.set(Metadata.CONTENT_ENCODING, "ISO-8859-1");
         parser.parse(
                 new ByteArrayInputStream(test2.getBytes("UTF-8")),
                 new BodyContentHandler(),  metadata, new ParseContext());
-        
+
         assertEquals("ISO-8859-1", metadata.get(Metadata.CONTENT_ENCODING));
     }
 
     /**
      * Test case for TIKA-341: using charset in content-type
      *
-     * @see <a href="https://issues.apache.org/jira/browse/TIKA-341">TIKA-341</a> 
+     * @see <a href="https://issues.apache.org/jira/browse/TIKA-341">TIKA-341</a>
      */
     public void testUsingCharsetInContentTypeHeader() throws Exception {
         // Could be UTF-8 or ISO 8859-1 or ...
@@ -150,6 +150,7 @@ public class TXTParserTest extends TestCase {
     private void assertExtractText(String msg, String expected, byte[] input)
             throws Exception {
         ContentHandler handler = new BodyContentHandler() {
+            @Override
             public void ignorableWhitespace(char[] ch, int off, int len) {
                 // Ignore the whitespace added by XHTMLContentHandler
             }
@@ -163,7 +164,7 @@ public class TXTParserTest extends TestCase {
     /**
      * Test case for TIKA-339: don't override incoming language
      *
-     * @see <a href="https://issues.apache.org/jira/browse/TIKA-335">TIKA-335</a> 
+     * @see <a href="https://issues.apache.org/jira/browse/TIKA-335">TIKA-335</a>
      */
     public void testRetainIncomingLanguage() throws Exception {
         final String test = "Simple Content";

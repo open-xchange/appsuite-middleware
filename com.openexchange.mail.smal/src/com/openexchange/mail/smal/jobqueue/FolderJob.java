@@ -81,7 +81,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link FolderJob}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderJob extends AbstractMailSyncJob {
@@ -108,7 +108,7 @@ public final class FolderJob extends AbstractMailSyncJob {
     /**
      * Initializes a new {@link FolderJob} with default span which does not check if span is exceeded but only if able to exclusively set
      * sync flag.
-     * 
+     *
      * @param fullName The folder full name
      * @param accountId The account ID
      * @param userId The user ID
@@ -122,7 +122,7 @@ public final class FolderJob extends AbstractMailSyncJob {
      * Initializes a new {@link FolderJob} with default span.
      * <p>
      * This job is performed is span is exceeded and if able to exclusively set sync flag.
-     * 
+     *
      * @param fullName The folder full name
      * @param accountId The account ID
      * @param userId The user ID
@@ -141,7 +141,7 @@ public final class FolderJob extends AbstractMailSyncJob {
 
     /**
      * Sets the span; a negative span enforces this job to run if able to exclusively set sync flag
-     * 
+     *
      * @param span The span to set
      * @return This folder job with specified span applied
      */
@@ -314,11 +314,11 @@ public final class FolderJob extends AbstractMailSyncJob {
                     reEnqueued = (start < size);
                 } else if (DEBUG) {
                     LOG.debug("Folder job \"" + identifier + "\" detected no new messages in folder " + fullName + " in account " + accountId);
-                    
-                    
+
+
                     System.out.println("NO NEW MAILS FOR FOLDER " + fullName + " OF ACCOUNT " + accountId);
-                    
-                    
+
+
                 }
                 setTimestampAndUnsetSyncFlag(fullName, System.currentTimeMillis());
                 unset = false;

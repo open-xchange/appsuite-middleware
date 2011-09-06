@@ -24,8 +24,6 @@ import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
 import org.apache.tika.sax.BodyContentHandler;
 import org.xml.sax.ContentHandler;
-import org.xml.sax.SAXException;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -210,9 +208,9 @@ public class AutoDetectParserTest extends TestCase {
         } finally {
             tgz.close();
         }
-    
+
     }
-    
+
     /**
      * Test case for TIKA-514. Provide constructor for AutoDetectParser that has explicit
      * list of supported parsers.
@@ -220,44 +218,48 @@ public class AutoDetectParserTest extends TestCase {
      */
     public void testSpecificParserList() throws Exception {
         AutoDetectParser parser = new AutoDetectParser(new MyDetector(), new MyParser());
-        
+
         InputStream is = new ByteArrayInputStream("test".getBytes());
         Metadata metadata = new Metadata();
         parser.parse(is, new BodyContentHandler(), metadata, new ParseContext());
-        
+
         assertEquals("value", metadata.get("MyParser"));
     }
 
     private static final MediaType MY_MEDIA_TYPE = new MediaType("application", "x-myparser");
-    
+
     /**
      * A test detector which always returns the type supported
      *  by the test parser
      */
     @SuppressWarnings("serial")
     private static class MyDetector implements Detector {
+        @Override
         public MediaType detect(InputStream input, Metadata metadata) throws IOException {
             return MY_MEDIA_TYPE;
         }
     }
-    
+
     @SuppressWarnings("serial")
     private static class MyParser implements Parser {
+        @Override
         public Set<MediaType> getSupportedTypes(ParseContext context) {
             Set<MediaType> supportedTypes = new HashSet<MediaType>();
             supportedTypes.add(MY_MEDIA_TYPE);
             return supportedTypes;
         }
 
+        @Override
         public void parse(InputStream stream, ContentHandler handler, Metadata metadata, ParseContext context) {
             metadata.add("MyParser", "value");
         }
 
+        @Override
         public void parse(InputStream stream, ContentHandler handler, Metadata metadata) {
             parse(stream, handler, metadata, new ParseContext());
         }
     }
-    
+
     /**
      * Minimal class to encapsulate all parameters -- the main reason for
      * its existence is to aid in debugging via its toString() method.
@@ -298,6 +300,7 @@ public class AutoDetectParserTest extends TestCase {
          *   expectedContentFragment = Sample Excel Worksheet
          * </pre>
          */
+        @Override
         public String toString() {
             return "Test parameters:\n"
                 + "  resourceRealName        = " + resourceRealName + "\n"

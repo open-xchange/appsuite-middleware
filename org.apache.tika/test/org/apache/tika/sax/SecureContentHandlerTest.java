@@ -36,6 +36,7 @@ public class SecureContentHandlerTest extends TestCase {
 
     private SecureContentHandler handler;
 
+    @Override
     protected void setUp() {
         stream = new CountingInputStream(new NullInputStream(MANY_BYTES));
         handler = new SecureContentHandler(new DefaultHandler(), stream);

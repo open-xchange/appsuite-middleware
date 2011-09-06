@@ -97,7 +97,7 @@ public class OutlookParserTest extends TestCase {
     }
 
     /**
-     * Test case for TIKA-395, to ensure parser works for new Outlook formats. 
+     * Test case for TIKA-395, to ensure parser works for new Outlook formats.
      *
      * @see <a href="https://issues.apache.org/jira/browse/TIKA-395">TIKA-395</a>
      */

@@ -921,7 +921,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                 final Future<Object> f = mainFuture;
                 final AtomicBoolean fl = flag;
                 tps.submit(ThreadPools.task(new Callable<Object>() {
-    
+
                     @Override
                     public Object call() throws Exception {
                         while (!q.isEmpty()) {
@@ -931,7 +931,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                         f.cancel(true);
                         return null;
                     }
-                    
+
                 }), CallerRunsBehavior.<Object> getInstance());
             }
         }

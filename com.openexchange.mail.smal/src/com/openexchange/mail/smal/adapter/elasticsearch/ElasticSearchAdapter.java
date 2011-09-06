@@ -125,7 +125,7 @@ import com.openexchange.threadpool.ThreadPools;
 
 /**
  * {@link ElasticSearchAdapter}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ElasticSearchAdapter implements IndexAdapter {
@@ -207,7 +207,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
 
     /**
      * Gets the ElasticSearch client
-     * 
+     *
      * @return The ElasticSearch client
      */
     public TransportClient getClient() {
@@ -797,7 +797,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                                 mail.addFrom(new PlainTextAddress(sAddr.toString()));
                             }
                         }
-                    } 
+                    }
                 }
                 break;
             case TO:
@@ -811,7 +811,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                                 mail.addTo(new PlainTextAddress(sAddr.toString()));
                             }
                         }
-                    } 
+                    }
                 }
                 break;
             case CC:
@@ -825,7 +825,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                                 mail.addCc(new PlainTextAddress(sAddr.toString()));
                             }
                         }
-                    } 
+                    }
                 }
                 break;
             case BCC:
@@ -839,7 +839,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                                 mail.addBcc(new PlainTextAddress(sAddr.toString()));
                             }
                         }
-                    } 
+                    }
                 }
                 break;
             case SUBJECT:
@@ -937,7 +937,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
 
     /**
      * Logs some cluster information.
-     * 
+     *
      * @throws OXException
      */
     public void clusterInfo() throws OXException {
@@ -955,7 +955,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
 
     /**
      * Checks if specified index exists.
-     * 
+     *
      * @param indexName The index name
      * @return <code>true</code> if index exists; otherwise <code>false</code>
      * @throws OXException
@@ -1022,7 +1022,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
 
     /**
      * Gets the number of mails held in index.
-     * 
+     *
      * @return The number of mails
      */
     public long countAll(final String indexName) {

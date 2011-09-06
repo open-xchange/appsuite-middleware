@@ -65,7 +65,6 @@ import com.openexchange.secret.SecretService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionExecutionService;
-import com.openexchange.subscribe.json.SubscriptionJSONWriter;
 
 /**
  * {@link RefreshSubscriptionAction}
@@ -129,7 +128,7 @@ public class RefreshSubscriptionAction extends AbstractSubscribeAction {
 	                subscriptionsToRefresh.add(subscription);
 	            }
 	            int resultCode = services.getService(SubscriptionExecutionService.class).executeSubscriptions(subscriptionsToRefresh, subscribeRequest.getServerSession());
-	            
+
 	    		return new AJAXRequestResult(1, "json");
 
 			} catch (JSONException e) {

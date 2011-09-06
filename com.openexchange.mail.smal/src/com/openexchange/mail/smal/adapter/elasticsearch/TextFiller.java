@@ -55,14 +55,14 @@ import com.openexchange.session.Session;
 
 /**
  * {@link TextFiller} - A test filler.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TextFiller {
 
     /**
      * Gets the filler for specified arguments.
-     * 
+     *
      * @param uuid The UUID
      * @param mail The mail
      * @param session The session
@@ -74,7 +74,7 @@ public final class TextFiller {
 
     /**
      * Gets the filler for specified JSON object.
-     * 
+     *
      * @param jsonObject The JSON object
      * @param contextId The context identifier
      * @return The text filler
@@ -104,7 +104,7 @@ public final class TextFiller {
 
     /**
      * Initializes a new {@link TextFiller}.
-     * 
+     *
      * @param uuid
      * @param mailId
      * @param fullName
@@ -125,7 +125,7 @@ public final class TextFiller {
 
     /**
      * Gets the UUID
-     * 
+     *
      * @return The UUID
      */
     public String getUuid() {
@@ -134,7 +134,7 @@ public final class TextFiller {
 
     /**
      * Gets the mail identifier
-     * 
+     *
      * @return The mail identifier
      */
     public String getMailId() {
@@ -143,7 +143,7 @@ public final class TextFiller {
 
     /**
      * Gets the full name
-     * 
+     *
      * @return The full name
      */
     public String getFullName() {
@@ -152,7 +152,7 @@ public final class TextFiller {
 
     /**
      * Gets the account identifier
-     * 
+     *
      * @return The account identifier
      */
     public int getAccountId() {
@@ -161,7 +161,7 @@ public final class TextFiller {
 
     /**
      * Gets the user identifier
-     * 
+     *
      * @return The user identifier
      */
     public int getUserId() {
@@ -170,7 +170,7 @@ public final class TextFiller {
 
     /**
      * Gets the context identifier
-     * 
+     *
      * @return The context identifier
      */
     public int getContextId() {

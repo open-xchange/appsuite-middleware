@@ -39,10 +39,10 @@ public abstract class AbstractPOIContainerExtractionTest extends TestCase {
     public static final MediaType TYPE_PPTX = MediaType.application("vnd.openxmlformats-officedocument.presentationml.presentation");
     public static final MediaType TYPE_XLSX = MediaType.application("vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     public static final MediaType TYPE_MSG = MediaType.application("vnd.ms-outlook");
-    
+
     public static final MediaType TYPE_TXT = MediaType.text("plain");
     public static final MediaType TYPE_PDF = MediaType.application("pdf");
-    
+
     public static final MediaType TYPE_JPG = MediaType.image("jpeg");
     public static final MediaType TYPE_GIF = MediaType.image("gif");
     public static final MediaType TYPE_PNG = MediaType.image("png");
@@ -52,12 +52,12 @@ public abstract class AbstractPOIContainerExtractionTest extends TestCase {
         InputStream input = AbstractPOIContainerExtractionTest.class.getResourceAsStream(
              "/test-documents/" + filename);
         assertNotNull(filename + " not found", input);
-        
+
         TikaInputStream stream = TikaInputStream.get(input);
         assertNotNull(stream);
-        
+
         assertEquals(true, extractor.isSupported(stream));
-        
+
         // Process it
         TrackingHandler handler = new TrackingHandler();
         if(recurse) {
@@ -65,16 +65,17 @@ public abstract class AbstractPOIContainerExtractionTest extends TestCase {
         } else {
            extractor.extract(stream, null, handler);
         }
-        
+
         // So they can check what happened
         return handler;
     }
-    
+
     protected static class TrackingHandler implements EmbeddedResourceHandler {
        public List<String> filenames = new ArrayList<String>();
        public List<MediaType> mediaTypes = new ArrayList<MediaType>();
-       
-       public void handle(String filename, MediaType mediaType,
+
+       @Override
+    public void handle(String filename, MediaType mediaType,
             InputStream stream) {
           filenames.add(filename);
           mediaTypes.add(mediaType);

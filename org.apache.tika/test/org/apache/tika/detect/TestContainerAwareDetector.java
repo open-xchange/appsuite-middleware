@@ -137,7 +137,7 @@ public class TestContainerAwareDetector extends TestCase {
             xlsx.close();
         }
 
-        // Now a truncated OLE2 file 
+        // Now a truncated OLE2 file
         TikaInputStream xls = getTruncatedFile("testEXCEL.xls", 400);
         try {
             assertEquals(

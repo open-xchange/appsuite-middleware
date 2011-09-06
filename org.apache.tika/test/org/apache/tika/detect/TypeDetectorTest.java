@@ -31,14 +31,14 @@ import org.apache.tika.mime.MediaType;
 public class TypeDetectorTest extends TestCase {
 
     private Detector detector = new TypeDetector();
-    
+
     private static final Map<String, String> params = new
         TreeMap<String, String>();
     static{
         params.put("a", "b");
     }
-    
-    private static final MediaType TEXT_PLAIN_A_EQ_B = 
+
+    private static final MediaType TEXT_PLAIN_A_EQ_B =
           new MediaType("text", "plain", params);
 
     public void testDetect() {

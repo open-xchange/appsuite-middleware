@@ -123,7 +123,7 @@ public final class Tools {
 
     /**
      * Sets specified ETag header (and implicitly removes/replaces any existing cache-controlling header: <i>Expires</i>, <i>Cache-Control</i>, and <i>Pragma</i>)
-     * 
+     *
      * @param eTag The ETag value
      * @param resp The HTTP servlet response to apply to
      */
@@ -133,7 +133,7 @@ public final class Tools {
 
     /**
      * Sets specified ETag header (and implicitly removes/replaces any existing cache-controlling header: <i>Expires</i>, <i>Cache-Control</i>, and <i>Pragma</i>)
-     * 
+     *
      * @param eTag The ETag value
      * @param expires The optional expires date, pass <code>null</code> to not set any expiry
      * @param resp The HTTP servlet response to apply to

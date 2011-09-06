@@ -55,7 +55,7 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * {@link ImageLocation} - An image location description.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ImageLocation {
@@ -74,7 +74,7 @@ public final class ImageLocation {
 
     /**
      * Initializes a new {@link ImageLocation}.
-     * 
+     *
      * @param folder The folder identifier
      * @param id The object identifier
      * @param imageId The image identifier
@@ -92,7 +92,7 @@ public final class ImageLocation {
 
     /**
      * Puts specified property if none associated with given name before.
-     * 
+     *
      * @param name The name
      * @param value The value
      * @return <code>true</code> if property has been put; otherwise <code>false</code> if another already exists
@@ -103,7 +103,7 @@ public final class ImageLocation {
 
     /**
      * Checks presence of denoted property.
-     * 
+     *
      * @param name The name
      * @return <code>true</code> if present; otherwise <code>false</code> if absent
      */
@@ -113,7 +113,7 @@ public final class ImageLocation {
 
     /**
      * Gets denoted property
-     * 
+     *
      * @param name The name
      * @return The associated value
      */
@@ -123,7 +123,7 @@ public final class ImageLocation {
 
     /**
      * Puts specified property.
-     * 
+     *
      * @param name The name
      * @param value The value associated with the name
      */
@@ -133,7 +133,7 @@ public final class ImageLocation {
 
     /**
      * Removes denoted property.
-     * 
+     *
      * @param name The property name
      */
     public void removeProperty(final String name) {
@@ -149,7 +149,7 @@ public final class ImageLocation {
 
     /**
      * Gets a set of all property names
-     * 
+     *
      * @return The property names
      */
     public Set<String> propertyNames() {
@@ -158,7 +158,7 @@ public final class ImageLocation {
 
     /**
      * Gets the account identifier
-     * 
+     *
      * @return The account identifier
      */
     public String getAccountId() {
@@ -167,7 +167,7 @@ public final class ImageLocation {
 
     /**
      * Gets the folder identifier
-     * 
+     *
      * @return The folder identifier
      */
     public String getFolder() {
@@ -176,7 +176,7 @@ public final class ImageLocation {
 
     /**
      * Gets the object identifier
-     * 
+     *
      * @return The object identifier
      */
     public String getId() {
@@ -185,7 +185,7 @@ public final class ImageLocation {
 
     /**
      * Gets the image identifier
-     * 
+     *
      * @return The image identifier
      */
     public String getImageId() {
@@ -194,7 +194,7 @@ public final class ImageLocation {
 
     /**
      * Gets the registration name
-     * 
+     *
      * @return The registration name
      */
     public String getRegistrationName() {
@@ -203,7 +203,7 @@ public final class ImageLocation {
 
     /**
      * Sets the registration name
-     * 
+     *
      * @param registrationName The registration name to set
      */
     public void setRegistrationName(final String registrationName) {

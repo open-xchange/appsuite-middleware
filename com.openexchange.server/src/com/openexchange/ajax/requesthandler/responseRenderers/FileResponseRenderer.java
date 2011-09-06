@@ -73,7 +73,7 @@ import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * {@link FileResponseRenderer}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FileResponseRenderer implements ResponseRenderer {
@@ -104,7 +104,7 @@ public class FileResponseRenderer implements ResponseRenderer {
 
     /**
      * Sets the image scaler.
-     * 
+     *
      * @param scaler The image scaler
      */
     public void setScaler(final ImageScalingService scaler) {
@@ -192,7 +192,7 @@ public class FileResponseRenderer implements ResponseRenderer {
 
     /**
      * Scale possible image data.
-     * 
+     *
      * @param request The request data
      * @param file The file holder
      * @return The possibly scaled file holder

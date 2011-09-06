@@ -55,7 +55,7 @@ import com.openexchange.mail.MailJSONField;
 
 /**
  * {@link Constants}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Constants {

@@ -49,8 +49,8 @@ public class PDFParserTest extends TestCase {
         assertEquals("application/pdf", metadata.get(Metadata.CONTENT_TYPE));
         assertEquals("Bertrand Delacr\u00e9taz", metadata.get(Metadata.AUTHOR));
         assertEquals("Apache Tika - Apache Tika", metadata.get(Metadata.TITLE));
-        
-        // Can't reliably test dates yet - see TIKA-451 
+
+        // Can't reliably test dates yet - see TIKA-451
 //        assertEquals("Sat Sep 15 10:02:31 BST 2007", metadata.get(Metadata.CREATION_DATE));
 //        assertEquals("Sat Sep 15 10:02:31 BST 2007", metadata.get(Metadata.LAST_MODIFIED));
 
@@ -60,9 +60,9 @@ public class PDFParserTest extends TestCase {
         assertTrue(content.contains("incubator"));
         assertTrue(content.contains("Apache Software Foundation"));
         // testing how the end of one paragraph is separated from start of the next one
-        assertTrue("should have word boundary after headline", 
+        assertTrue("should have word boundary after headline",
                 !content.contains("ToolkitApache"));
-        assertTrue("should have word boundary between paragraphs", 
+        assertTrue("should have word boundary between paragraphs",
                 !content.contains("libraries.Apache"));
     }
 
@@ -83,17 +83,17 @@ public class PDFParserTest extends TestCase {
         assertEquals("application/pdf", metadata.get(Metadata.CONTENT_TYPE));
         assertEquals("Document author", metadata.get(Metadata.AUTHOR));
         assertEquals("Document title", metadata.get(Metadata.TITLE));
-        
+
         assertEquals("Custom Value", metadata.get("Custom Property"));
         assertEquals("Array Entry 1", metadata.get("Custom Array"));
         assertEquals(2, metadata.getValues("Custom Array").length);
         assertEquals("Array Entry 1", metadata.getValues("Custom Array")[0]);
         assertEquals("Array Entry 2", metadata.getValues("Custom Array")[1]);
-        
+
         String content = handler.toString();
         assertTrue(content.contains("Hello World!"));
     }
-    
+
     /**
      * PDFs can be "protected" with the default password. This means
      *  they're encrypted (potentially both text and metadata),

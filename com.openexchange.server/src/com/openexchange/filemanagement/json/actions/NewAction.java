@@ -71,7 +71,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link NewAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class NewAction implements AJAXActionService {

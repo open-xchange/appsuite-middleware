@@ -414,7 +414,7 @@ public final class StructureMailMessageParser {
                 MailPart part = null;
                 for (int i = 0; null == part && i < count; i++) {
                     final MailPart enclosedPart = mailPart.getEnclosedMailPart(i);
-                    part = extractTextFrom(enclosedPart, 0); 
+                    part = extractTextFrom(enclosedPart, 0);
                 }
                 if (!handler.handleSMIMEBodyText(part)) {
                     stop = true;
@@ -949,7 +949,7 @@ public final class StructureMailMessageParser {
 
     /**
      * Checks if content type matches <code>multipart/signed</code> content type.
-     * 
+     *
      * @param contentType The content type
      * @return <code>true</code> if content type matches <code>multipart/signed</code>; otherwise <code>false</code>
      */

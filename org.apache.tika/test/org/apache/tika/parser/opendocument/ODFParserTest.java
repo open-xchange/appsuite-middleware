@@ -39,7 +39,7 @@ public class ODFParserTest extends TestCase {
             assertEquals(
                     "application/vnd.oasis.opendocument.text",
                     metadata.get(Metadata.CONTENT_TYPE));
-            
+
             String content = handler.toString();
             assertTrue(content.contains("Tika is part of the Lucene project."));
             assertTrue(content.contains("Solr"));

@@ -51,9 +51,6 @@ package com.openexchange.subscribe.json.actions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -80,8 +77,8 @@ public class DeleteSubscriptionAction  extends AbstractSubscribeAction {
 
 	@Override
 	public AJAXRequestResult perform(SubscribeRequest subscribeRequest)
-			throws OXException {		
-		 
+			throws OXException {
+
 		try {
 			JSONArray ids = (JSONArray) subscribeRequest.getRequestData().getData();
 			final Context context = subscribeRequest.getServerSession().getContext();

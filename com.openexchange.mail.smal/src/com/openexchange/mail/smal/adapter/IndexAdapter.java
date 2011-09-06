@@ -83,7 +83,7 @@ public interface IndexAdapter {
 
     /**
      * Gets the indexable fields.
-     * 
+     *
      * @return The indexable fields
      * @throws OXException If an error occurs
      */

@@ -56,7 +56,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link ImageDataSource} - An image data source.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ImageDataSource extends DataSource {
@@ -83,14 +83,14 @@ public interface ImageDataSource extends DataSource {
 
     /**
      * Gets this data source's registration name.
-     * 
+     *
      * @return The registration name
      */
     String getRegistrationName();
 
     /**
      * Generates appropriate data arguments for specified image location.
-     * 
+     *
      * @param imageLocation The image location
      * @return The appropriate data arguments
      */
@@ -98,7 +98,7 @@ public interface ImageDataSource extends DataSource {
 
     /**
      * Generates the URL linking to image data
-     * 
+     *
      * @return The image URL
      * @throws OXException If generating the URL fails
      */
@@ -106,7 +106,7 @@ public interface ImageDataSource extends DataSource {
 
     /**
      * Gets the signature for this image data source.
-     * 
+     *
      * @param imageLocation The image location
      * @param session The session
      * @return The signature
@@ -115,14 +115,14 @@ public interface ImageDataSource extends DataSource {
 
     /**
      * Gets the expires (time-to-live)
-     * 
+     *
      * @return The expires or <code>-1</code> for no expiry
      */
     long getExpires();
 
     /**
      * Gets the ETag for this image data source.
-     * 
+     *
      * @param imageLocation The image location
      * @param session The session
      * @return The ETag

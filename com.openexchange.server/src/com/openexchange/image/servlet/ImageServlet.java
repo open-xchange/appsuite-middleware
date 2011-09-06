@@ -86,7 +86,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link ImageServlet} - The servlet serving requests to <i>ajax/image</i>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ImageServlet extends HttpServlet {

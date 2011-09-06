@@ -122,7 +122,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link DatabaseFolderStorage} - The database folder storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DatabaseFolderStorage implements FolderStorage {
@@ -137,7 +137,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
         /**
          * Gets the (active) connection.
-         * 
+         *
          * @return The connection
          */
         Connection getConnection();
@@ -1276,7 +1276,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 }
                 /*-
                  * Connection in wrong access mode:
-                 * 
+                 *
                  * commit, restore auto-commit & push to pool
                  */
                 try {

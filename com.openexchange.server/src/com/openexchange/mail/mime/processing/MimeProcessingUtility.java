@@ -227,7 +227,7 @@ public final class MimeProcessingUtility {
      * <li><code>text/calendar</code></li>
      * <li><code>text/x-vcalendar</code></li>
      * </ul>
-     * 
+     *
      * @param contentType The content type
      * @return <code>true</code> if content type matches special; otherwise <code>false</code>
      */

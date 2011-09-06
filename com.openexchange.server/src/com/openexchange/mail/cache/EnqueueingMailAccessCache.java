@@ -97,7 +97,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
 
     /**
      * Creates a new {@link EnqueueingMailAccessCache}
-     * 
+     *
      * @return A new {@link EnqueueingMailAccessCache}
      * @throws OXException If initialization fails
      */

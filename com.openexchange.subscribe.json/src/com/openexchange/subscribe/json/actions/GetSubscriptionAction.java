@@ -61,7 +61,7 @@ import com.openexchange.secret.SecretService;
 
 /**
  * {@link GetSubscriptionAction}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class GetSubscriptionAction extends AbstractSubscribeAction {
