@@ -69,6 +69,8 @@ public class EmailProvider {
     public static final String OUTGOING_SERVER = "outgoingServer";
     
     public static final String DOCUMENTATION = "documentation";
+    
+    public static final String INSTRUCTION = "instruction";
 
     private String provider;
 
@@ -83,6 +85,8 @@ public class EmailProvider {
     private Collection<OutgoingServer> outgoingServer;
 
     private Collection<Documentation> documentations;
+    
+    private Collection<Instruction> instructions;
 
     /**
      * Gets the provider
@@ -208,5 +212,23 @@ public class EmailProvider {
      */
     public void setDocumentations(Collection<Documentation> documentations) {
         this.documentations = documentations;
+    }
+
+    /**
+     * Gets the instructions
+     *
+     * @return The instructions
+     */
+    public Collection<Instruction> getInstructions() {
+        return instructions;
+    }
+
+    /**
+     * Sets the instructions
+     *
+     * @param instructions The instructions to set
+     */
+    public void setInstructions(Collection<Instruction> instructions) {
+        this.instructions = instructions;
     }
 }

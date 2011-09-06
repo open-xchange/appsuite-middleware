@@ -49,24 +49,77 @@
 
 package com.openexchange.mail.autoconfig.sources;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.httpclient.NameValuePair;
+import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.params.HttpMethodParams;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.autoconfig.Autoconfig;
-
+import com.openexchange.mail.autoconfig.xmlparser.AutoconfigParser;
+import com.openexchange.mail.autoconfig.xmlparser.ClientConfig;
 
 /**
  * {@link ConfigServer}
- *
+ * 
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class ConfigServer extends AbstractConfigSource {
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.autoconfig.sources.ConfigSource#getAutoconfig(java.lang.String, java.lang.String)
-     */
+    static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ConfigServer.class);
+
     @Override
-    public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, User user, Context context) {
-        return null;
+    public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, User user, Context context) throws OXException {
+        String url = "http://autoconfig." + emailDomain + "/mail/config-v1.1.xml";
+
+        HttpClient client = new HttpClient();
+        int timeout = 3000;
+        client.getParams().setSoTimeout(timeout);
+        client.getParams().setIntParameter("http.connection.timeout", timeout);
+        client.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(0, false));
+
+        GetMethod getMethod = new GetMethod(url);
+
+        Map<String, String> values = new HashMap<String, String>();
+        values.put("emailaddress", emailLocalPart + "@" + emailDomain);
+
+        NameValuePair[] nameValuePairs = new NameValuePair[values.size()];
+        int i = 0;
+        for (Map.Entry<String, String> entry : values.entrySet()) {
+            NameValuePair pair = new NameValuePair(entry.getKey(), entry.getValue());
+            nameValuePairs[i++] = pair;
+        }
+
+        getMethod.setQueryString(nameValuePairs);
+
+        try {
+
+            int httpCode = client.executeMethod(getMethod);
+
+            if (httpCode != 200) {
+                LOG.info("Could not retrieve config XML. Return code was: " + httpCode);
+                return null;
+            }
+            AutoconfigParser parser = new AutoconfigParser(getMethod.getResponseBodyAsStream());
+            ClientConfig clientConfig = parser.getConfig();
+
+            Autoconfig autoconfig = getBestConfiguration(clientConfig, emailDomain);
+            replaceUsername(autoconfig, emailLocalPart, emailDomain);
+            return autoconfig;
+
+        } catch (HttpException e) {
+            LOG.warn("Could not retrieve config XML.", e);
+            return null;
+        } catch (IOException e) {
+            LOG.warn("Could not retrieve config XML.", e);
+            return null;
+        }
     }
 
 }

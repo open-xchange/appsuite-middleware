@@ -50,32 +50,24 @@
 package com.openexchange.mail.autoconfig.sources;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
-import java.net.Socket;
-import java.net.SocketAddress;
 import java.net.URL;
-import java.net.UnknownHostException;
-import org.apache.commons.httpclient.ConnectTimeoutException;
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.params.HttpConnectionParams;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.httpclient.protocol.Protocol;
-import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.autoconfig.Autoconfig;
+import com.openexchange.mail.autoconfig.tools.TrustAllAdapter;
 import com.openexchange.mail.autoconfig.xmlparser.AutoconfigParser;
 import com.openexchange.mail.autoconfig.xmlparser.ClientConfig;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
  * Connects to the Mozilla ISPDB. For more information see https://developer.mozilla.org/en/Thunderbird/Autoconfiguration
@@ -143,7 +135,7 @@ public class ISPDB extends AbstractConfigSource {
             int httpCode = client.executeMethod(getMethod);
 
             if (httpCode != 200) {
-                LOG.warn("Could not retrieve config XML. Return code was: " + httpCode);
+                LOG.info("Could not retrieve config XML. Return code was: " + httpCode);
                 return null;
             }
             AutoconfigParser parser = new AutoconfigParser(getMethod.getResponseBodyAsStream());
@@ -160,50 +152,6 @@ public class ISPDB extends AbstractConfigSource {
             LOG.warn("Could not retrieve config XML.", e);
             return null;
         }
-    }
-
-    private class TrustAllAdapter implements ProtocolSocketFactory {
-
-        private final TrustAllSSLSocketFactory delegate = (TrustAllSSLSocketFactory) TrustAllSSLSocketFactory.getDefault();
-
-        @Override
-        public Socket createSocket(String host, int port) throws IOException, UnknownHostException {
-            return delegate.createSocket(host, port);
-        }
-
-        @Override
-        public Socket createSocket(String host, int port, InetAddress localAddress, int localPort) throws IOException, UnknownHostException {
-            return delegate.createSocket(host, port, localAddress, localPort);
-        }
-
-        @Override
-        public Socket createSocket(String host, int port, InetAddress localAddress, int localPort, HttpConnectionParams params) throws IOException, UnknownHostException, ConnectTimeoutException {
-            Socket socket;
-            int timeout = params.getConnectionTimeout();
-            if (timeout == 0) {
-                socket = createSocket(host, port, localAddress, localPort);
-            } else {
-                socket = delegate.createSocket();
-                SocketAddress localaddr = new InetSocketAddress(localAddress, localPort);
-                SocketAddress remoteaddr = new InetSocketAddress(host, port);
-                socket.bind(localaddr);
-                socket.connect(remoteaddr, timeout);
-                return socket;
-            }
-
-            int linger = params.getLinger();
-            if (linger == 0) {
-                socket.setSoLinger(false, 0);
-            } else if (linger > 0) {
-                socket.setSoLinger(true, linger);
-            }
-
-            socket.setSoTimeout(params.getSoTimeout());
-            socket.setTcpNoDelay(params.getTcpNoDelay());
-
-            return socket;
-        }
-
     }
 
 }

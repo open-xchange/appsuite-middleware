@@ -59,6 +59,7 @@ import static com.openexchange.mail.autoconfig.xmlparser.EmailProvider.DISPLAY_S
 import static com.openexchange.mail.autoconfig.xmlparser.EmailProvider.DOCUMENTATION;
 import static com.openexchange.mail.autoconfig.xmlparser.EmailProvider.DOMAIN;
 import static com.openexchange.mail.autoconfig.xmlparser.EmailProvider.INCOMING_SERVER;
+import static com.openexchange.mail.autoconfig.xmlparser.EmailProvider.INSTRUCTION;
 import static com.openexchange.mail.autoconfig.xmlparser.EmailProvider.OUTGOING_SERVER;
 import static com.openexchange.mail.autoconfig.xmlparser.Server.AUTHENTICATION;
 import static com.openexchange.mail.autoconfig.xmlparser.Server.HOSTNAME;
@@ -131,6 +132,8 @@ public class AutoconfigParser {
         ep.setDomains(domains);
         Collection<Documentation> docs = new ArrayList<Documentation>();
         ep.setDocumentations(docs);
+        Collection<Instruction> instructions = new ArrayList<Instruction>();
+        ep.setInstructions(instructions);
         Collection<IncomingServer> incomingServer = new ArrayList<IncomingServer>();
         ep.setIncomingServer(incomingServer);
         Collection<OutgoingServer> outgoingServer = new ArrayList<OutgoingServer>();
@@ -150,6 +153,8 @@ public class AutoconfigParser {
                 outgoingServer.add((OutgoingServer) parseServer(parser, OUTGOING_SERVER));
             } else if (name.equalsIgnoreCase(DOCUMENTATION)) {
                 docs.add(parseDocumentation(parser));
+            } else if (name.equalsIgnoreCase(INSTRUCTION)) {
+                instructions.add(parseInstruction(parser));
             }
         }
         parser.require(END_TAG, null, EMAIL_PROVIDER);
@@ -177,6 +182,29 @@ public class AutoconfigParser {
         }
         parser.require(END_TAG, null, DOCUMENTATION);
         return doc;
+    }
+
+    /**
+     * @param parser
+     * @return
+     * @throws IOException
+     * @throws XmlPullParserException
+     */
+    private Instruction parseInstruction(XmlPullParser parser) throws XmlPullParserException, IOException {
+        Instruction instruction = new Instruction();
+        Map<String, String> descriptions = new HashMap<String, String>();
+        instruction.setDescriptions(descriptions);
+        parser.require(START_TAG, null, INSTRUCTION);
+        instruction.setUrl(parser.getAttributeValue(null, URL));
+        while (parser.nextTag() == START_TAG) {
+            parser.require(START_TAG, null, DESC);
+            String lang = parser.getAttributeValue(null, LANG);
+            String desc = parser.nextText();
+            descriptions.put(lang, desc);
+            parser.require(END_TAG, null, DESC);
+        }
+        parser.require(END_TAG, null, INSTRUCTION);
+        return instruction;
     }
 
     /**
