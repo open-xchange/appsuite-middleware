@@ -69,7 +69,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.MultipleAdapterServletNew;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.responseRenderers.JSONResponseRenderer;
@@ -94,7 +93,7 @@ public final class DispatcherServlet extends SessionServlet {
 
     private static final long serialVersionUID = -8060034833311074781L;
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(MultipleAdapterServletNew.class));
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(DispatcherServlet.class));
 
     private static final class HTTPRequestInputStreamProvider implements AJAXRequestData.InputStreamProvider {
 
