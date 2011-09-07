@@ -69,7 +69,7 @@ public final class HostDataImpl implements HostData {
     private boolean secure;
 
     /**
-     * Initializes a new {@link HostDataImpl}.
+     * Initializes a new {@link HostDataImpl} from specified arguments.
      * 
      * @param httpRequest The HTTP Servlet request
      */
@@ -90,7 +90,7 @@ public final class HostDataImpl implements HostData {
     }
 
     /**
-     * Initializes a new {@link HostDataImpl}.
+     * Initializes a new empty {@link HostDataImpl}.
      */
     public HostDataImpl() {
         super();
