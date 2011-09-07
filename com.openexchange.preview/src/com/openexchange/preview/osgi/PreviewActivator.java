@@ -49,11 +49,24 @@
 
 package com.openexchange.preview.osgi;
 
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
+import com.openexchange.conversion.ConversionService;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.html.HTMLService;
+import com.openexchange.java.Streams;
+import com.openexchange.preview.PreviewOutput;
 import com.openexchange.preview.PreviewService;
 import com.openexchange.preview.internal.TikaPreviewService;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondEventConstants;
 
 /**
  * {@link PreviewActivator}
@@ -71,27 +84,46 @@ public class PreviewActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HTMLService.class, ManagedFileManagement.class };
+        return new Class<?>[] { HTMLService.class, ManagedFileManagement.class, ConversionService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         final TikaPreviewService tikaPreviewService = new TikaPreviewService(this);
         registerService(PreviewService.class, tikaPreviewService);
-        
-        
-//        final String content = tikaPreviewService.getPreviewFor("file:///Users/thorben/git/backend/org.apache.tika/test-documents/testWORD_1img.docx", PreviewOutput.HTML).getContent();
-//        
-//        System.out.println(content);
-//        
-//        final Writer writer = new OutputStreamWriter(new FileOutputStream("/Users/thorben/Documents/test-tika.html"), "UTF-8");
-//        try {
-//            writer.write(content);
-//            writer.flush();
-//        } finally {
-//            Streams.close(writer);
-//        }
-        
+
+        {
+            final EventHandler eventHandler = new EventHandler() {
+
+                @Override
+                public void handleEvent(final Event event) {
+                    final String topic = event.getTopic();
+                    if (SessiondEventConstants.TOPIC_ADD_SESSION.equals(topic)) {
+                        try {
+                            final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
+                            
+                            final String content = tikaPreviewService.getPreviewFor("file:///Users/thorben/git/backend/org.apache.tika/test-documents/testWORD_embeded.doc", PreviewOutput.HTML, session).getContent();
+                            
+                            System.out.println(content);
+                            
+                            final Writer writer = new OutputStreamWriter(new FileOutputStream("/Users/thorben/Documents/test-tika.html"), "UTF-8");
+                            try {
+                                writer.write(content);
+                                writer.flush();
+                            } finally {
+                                Streams.close(writer);
+                            }
+                        } catch (final Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            };
+            final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
+            dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+            //registerService(EventHandler.class, eventHandler, dict);
+        }
+
     }
 
 }

@@ -54,11 +54,13 @@ import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
+import com.openexchange.conversion.ConversionService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
+import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
-import com.openexchange.image.ManagedFileImageDataSource;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * A content handler that re-writes image src attributes, and passes everything else on to the real one.
@@ -72,7 +74,7 @@ public final class TikaImageRewritingContentHandler extends ContentHandlerDecora
 
     private final TikaDocumentHandler documentHandler;
 
-    private final ManagedFileImageDataSource imgSource;
+    private final ImageDataSource imgSource;
 
     private final ManagedFileManagement fileManagement;
 
@@ -85,8 +87,9 @@ public final class TikaImageRewritingContentHandler extends ContentHandlerDecora
     public TikaImageRewritingContentHandler(final ContentHandler handler, final TikaDocumentHandler documentHandler) {
         super(handler);
         this.documentHandler = documentHandler;
-        imgSource = new ManagedFileImageDataSource();
-        fileManagement = documentHandler.serviceLookup.getService(ManagedFileManagement.class);
+        final ServiceLookup serviceLookup = documentHandler.serviceLookup;
+        imgSource = (ImageDataSource) serviceLookup.getService(ConversionService.class).getDataSource("com.openexchange.image.managedFile");
+        fileManagement = serviceLookup.getService(ManagedFileManagement.class);
     }
 
     @Override
