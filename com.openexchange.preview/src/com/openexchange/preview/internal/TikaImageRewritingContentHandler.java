@@ -49,7 +49,6 @@
 
 package com.openexchange.preview.internal;
 
-import java.io.File;
 import org.apache.tika.sax.ContentHandlerDecorator;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
@@ -102,13 +101,9 @@ public final class TikaImageRewritingContentHandler extends ContentHandlerDecora
         /*
          * Handle image tag
          */
-        AttributesImpl attrs;
-        if (origAttrs instanceof AttributesImpl) {
-            attrs = (AttributesImpl) origAttrs;
-        } else {
-            attrs = new AttributesImpl(origAttrs);
-        }
-        for (int i = 0; i < attrs.getLength(); i++) {
+        final AttributesImpl attrs = origAttrs instanceof AttributesImpl ? (AttributesImpl) origAttrs : new AttributesImpl(origAttrs);
+        final int length = attrs.getLength();
+        for (int i = 0; i < length; i++) {
             if ("src".equals(attrs.getLocalName(i))) {
                 final String src = attrs.getValue(i);
                 if (src.startsWith(EMBEDDED_PREFIX)) {
