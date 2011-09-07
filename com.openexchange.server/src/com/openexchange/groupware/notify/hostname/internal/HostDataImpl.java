@@ -53,7 +53,6 @@ import javax.servlet.http.HttpServletRequest;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.systemname.SystemNameService;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
@@ -89,7 +88,7 @@ public final class HostDataImpl implements HostData {
             }
         }
         port = httpRequest.getServerPort();
-        route = httpRequest.getSession(true).getId() + '.' + ServerServiceRegistry.getInstance().getService(SystemNameService.class).getSystemName();
+        route = Tools.getRoute(httpRequest.getSession(true).getId());
     }
 
     /**

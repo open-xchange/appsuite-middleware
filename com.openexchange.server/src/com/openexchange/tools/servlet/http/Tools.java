@@ -69,12 +69,13 @@ import com.openexchange.ajax.helper.BrowserDetector;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.systemname.SystemNameService;
 import com.openexchange.tools.encoding.Charsets;
 import com.openexchange.tools.encoding.Helper;
 
 /**
  * Convenience methods for servlets.
- *
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Tools {
@@ -122,8 +123,9 @@ public final class Tools {
     }
 
     /**
-     * Sets specified ETag header (and implicitly removes/replaces any existing cache-controlling header: <i>Expires</i>, <i>Cache-Control</i>, and <i>Pragma</i>)
-     *
+     * Sets specified ETag header (and implicitly removes/replaces any existing cache-controlling header: <i>Expires</i>,
+     * <i>Cache-Control</i>, and <i>Pragma</i>)
+     * 
      * @param eTag The ETag value
      * @param resp The HTTP servlet response to apply to
      */
@@ -132,8 +134,9 @@ public final class Tools {
     }
 
     /**
-     * Sets specified ETag header (and implicitly removes/replaces any existing cache-controlling header: <i>Expires</i>, <i>Cache-Control</i>, and <i>Pragma</i>)
-     *
+     * Sets specified ETag header (and implicitly removes/replaces any existing cache-controlling header: <i>Expires</i>,
+     * <i>Cache-Control</i>, and <i>Pragma</i>)
+     * 
      * @param eTag The ETag value
      * @param expires The optional expires date, pass <code>null</code> to not set any expiry
      * @param resp The HTTP servlet response to apply to
@@ -153,7 +156,7 @@ public final class Tools {
     /**
      * The magic spell to disable caching. Do not use these headers if response is directly written into servlet's output stream to initiate
      * a download.
-     *
+     * 
      * @param resp the servlet response.
      * @see #removeCachingHeader(HttpServletResponse)
      */
@@ -166,7 +169,7 @@ public final class Tools {
     /**
      * Remove <tt>Pragma</tt> response header value if we are going to write directly into servlet's output stream cause then some browsers
      * do not allow this header.
-     *
+     * 
      * @param resp the servlet response.
      */
     public static void removeCachingHeader(final HttpServletResponse resp) {
@@ -177,7 +180,7 @@ public final class Tools {
 
     /**
      * Formats a date for HTTP headers.
-     *
+     * 
      * @param date date to format.
      * @return the string with the formated date.
      */
@@ -189,7 +192,7 @@ public final class Tools {
 
     /**
      * Parses a date from a HTTP date header.
-     *
+     * 
      * @param str The HTTP date header value
      * @return The parsed <code>java.util.Date</code> object
      * @throws ParseException If the date header value cannot be parsed
@@ -223,7 +226,7 @@ public final class Tools {
     /**
      * This method integrates interesting HTTP header values into a string for logging purposes. This is usefull if a client sent an illegal
      * request for discovering the cause of the illegal request.
-     *
+     * 
      * @param req the servlet request.
      * @return a string containing interesting HTTP headers.
      */
@@ -263,7 +266,7 @@ public final class Tools {
 
     /**
      * Deletes all OX specific cookies.
-     *
+     * 
      * @param req The HTTP servlet request.
      * @param resp The HTTP servlet response.
      */
@@ -273,7 +276,7 @@ public final class Tools {
 
     /**
      * Deletes all cookies which satisfy specified matcher.
-     *
+     * 
      * @param req The HTTP servlet request.
      * @param resp The HTTP servlet response.
      * @param matcher The cookie name matcher determining which cookie shall be deleted
@@ -292,13 +295,14 @@ public final class Tools {
             }
         }
     }
+
     public static void setHeaderForFileDownload(final String userAgent, final HttpServletResponse resp, final String fileName) throws UnsupportedEncodingException {
         setHeaderForFileDownload(userAgent, resp, fileName, null);
     }
 
     public static void setHeaderForFileDownload(final String userAgent, final HttpServletResponse resp, final String fileName, String contentDisposition) throws UnsupportedEncodingException {
         final BrowserDetector detector = new BrowserDetector(userAgent);
-        if(contentDisposition == null) {
+        if (contentDisposition == null) {
             contentDisposition = "attachment";
         }
         String filename = null;
@@ -311,8 +315,9 @@ public final class Tools {
             filename = Helper.escape(Helper.encodeFilename(fileName, "UTF-8"));
         }
 
-        if(!contentDisposition.contains(";") && filename != null) {
-            contentDisposition = new StringBuilder(64).append(contentDisposition).append("; filename=\"").append(filename).append("\"").toString();
+        if (!contentDisposition.contains(";") && filename != null) {
+            contentDisposition =
+                new StringBuilder(64).append(contentDisposition).append("; filename=\"").append(filename).append("\"").toString();
         }
 
         resp.setHeader("Content-Disposition", contentDisposition);
@@ -331,7 +336,7 @@ public final class Tools {
 
         /**
          * Indicates if specified cookie name matches.
-         *
+         * 
          * @param cookieName The cookie name to check
          * @return <code>true</code> if specified cookie name matches; otherwise <code>false</code>
          */
@@ -339,8 +344,10 @@ public final class Tools {
     }
 
     /**
-     * Tries to determine the best protocol used for accessing this server instance. If the configuration property com.openexchange.forceHTTPS is set to true, this will always be https://, otherwise
-     * the request will be used to determine the protocol. https:// if it was a secure request, http:// otherwise
+     * Tries to determine the best protocol used for accessing this server instance. If the configuration property
+     * com.openexchange.forceHTTPS is set to true, this will always be https://, otherwise the request will be used to determine the
+     * protocol. https:// if it was a secure request, http:// otherwise
+     * 
      * @param req The HttpServletRequest used to contact this server
      * @return "http://" or "https://" depending on what was deemed more appropriate
      */
@@ -356,16 +363,30 @@ public final class Tools {
         return req.isSecure();
     }
 
+    /**
+     * Gets the route for specified HTTP session identifier to be used along with <i>";jsessionid"</i> URL part.
+     * 
+     * @param httpSessionId The HTTP session identifier
+     * @return The route
+     */
+    public static String getRoute(final String httpSessionId) {
+        if (null == httpSessionId) {
+            return null;
+        }
+        final int pos = httpSessionId.indexOf('.');
+        return pos > 0 ? httpSessionId : httpSessionId + '.' + ServerServiceRegistry.getInstance().getService(SystemNameService.class).getSystemName();
+    }
+
     public static final Map<String, List<String>> copyHeaders(final HttpServletRequest req) {
         final Map<String, List<String>> headers = new HashMap<String, List<String>>();
-        for (final Enumeration<?> e = req.getHeaderNames(); e.hasMoreElements(); ) {
+        for (final Enumeration<?> e = req.getHeaderNames(); e.hasMoreElements();) {
             final String name = (String) e.nextElement();
             List<String> values = headers.get(name);
             if (null == values) {
                 values = new LinkedList<String>();
                 headers.put(name, values);
             }
-            for (final Enumeration<?> valueEnum = req.getHeaders(name); valueEnum.hasMoreElements(); ) {
+            for (final Enumeration<?> valueEnum = req.getHeaders(name); valueEnum.hasMoreElements();) {
                 values.add((String) valueEnum.nextElement());
             }
 

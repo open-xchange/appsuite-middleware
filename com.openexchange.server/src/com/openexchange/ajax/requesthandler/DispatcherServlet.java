@@ -77,7 +77,6 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.systemname.SystemNameService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -246,7 +245,7 @@ public final class DispatcherServlet extends SessionServlet {
                 retval.setHostname(null == hn ? req.getServerName() : hn);
             }
         }
-        retval.setRoute(req.getSession(true).getId() + '.' + ServerServiceRegistry.getInstance().getService(SystemNameService.class).getSystemName());
+        retval.setRoute(Tools.getRoute(req.getSession(true).getId()));
         /*
          * Set the module
          */

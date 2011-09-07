@@ -81,7 +81,6 @@ import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.multiple.PathAware;
 import com.openexchange.multiple.internal.MultipleHandlerRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.systemname.SystemNameService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
@@ -220,7 +219,7 @@ public class Multiple extends SessionServlet {
                     jsonObj.put(MultipleHandler.HOSTNAME, null == hn ? req.getServerName() : hn);
                 }
             }
-            jsonObj.put(MultipleHandler.ROUTE, req.getSession(true).getId() + '.' + ServerServiceRegistry.getInstance().getService(SystemNameService.class).getSystemName());
+            jsonObj.put(MultipleHandler.ROUTE, Tools.getRoute(req.getSession(true).getId()));
             final Dispatcher dispatcher = getDispatcher();
             if (dispatcher.handles(module)) {
                 final AJAXRequestData request = MultipleAdapter.parse(module, action, jsonObj, session, Tools.considerSecure(req));
