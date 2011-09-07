@@ -59,6 +59,11 @@ import java.util.concurrent.LinkedBlockingQueue;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileExceptionErrorMessage;
+import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.image.ImageLocation;
+import com.openexchange.image.ManagedFileImageDataSource;
+import com.openexchange.session.Session;
 
 /**
  * {@link ManagedFileImpl} - Implementation of a managed file.
@@ -68,6 +73,8 @@ import com.openexchange.filemanagement.ManagedFileExceptionErrorMessage;
 final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ManagedFileImpl.class));
+
+    private static final ManagedFileImageDataSource IMAGE_DATA_SOURCE = new ManagedFileImageDataSource();
 
     private final String id;
 
@@ -95,6 +102,48 @@ final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry {
         this.file = file;
         lastAccessed = System.currentTimeMillis();
         listeners = new LinkedBlockingQueue<FileRemovedListener>();
+    }
+
+    @Override
+    public String constructURL(final Session session) throws OXException {
+        if (null != contentType && contentType.regionMatches(true, 0, "image/", 0, 6)) {
+            return IMAGE_DATA_SOURCE.generateUrl(new ImageLocation.Builder(id).build(), session);
+        }
+        final StringBuilder sb = new StringBuilder(64);
+        final String prefix;
+        final String route;
+        {
+            final HostData hostData = (HostData) session.getParameter(HostnameService.PARAM_HOST_DATA);
+            if (hostData == null) {
+                /*
+                 * Compose relative URL
+                 */
+                prefix = "";
+                route = null;
+            } else {
+                /*
+                 * Compose absolute URL
+                 */
+                sb.append(hostData.isSecure() ? "https://" : "http://");
+                sb.append(hostData.getHost());
+                final int port = hostData.getPort();
+                if ((hostData.isSecure() && port != 443) || (!hostData.isSecure() && port != 80)) {
+                    sb.append(':').append(port);
+                }
+                prefix = sb.toString();
+                sb.setLength(0);
+                route = hostData.getRoute();
+            }
+        }
+        /*
+         * Compose URL parameters
+         */
+        sb.append(prefix).append("/ajax/file");
+        if (null != route) {
+            sb.append(";jsessionid=").append(route);
+        }
+        sb.append('?').append("id=").append(id);
+        return sb.toString();
     }
 
     @Override

@@ -52,6 +52,7 @@ package com.openexchange.filemanagement;
 import java.io.File;
 import java.io.InputStream;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
  * {@link ManagedFile} - Holds a file on disk with a time-out setting.
@@ -59,6 +60,15 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ManagedFile {
+
+    /**
+     * Constructs an URL to the resource held by this managed file.
+     * 
+     * @param session The session
+     * @return The URL to managed resource
+     * @throws OXException If URL cannot be constructed
+     */
+    public String constructURL(Session session) throws OXException;
 
     /**
      * Gets the (optional) file name.
