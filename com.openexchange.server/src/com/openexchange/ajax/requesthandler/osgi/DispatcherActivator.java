@@ -64,8 +64,10 @@ import com.openexchange.ajax.requesthandler.DefaultDispatcher;
 import com.openexchange.ajax.requesthandler.DispatcherServlet;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.ajax.requesthandler.converters.BasicTypeAPIResponseConverter;
+import com.openexchange.ajax.requesthandler.converters.BasicTypeAPIResultConverter;
 import com.openexchange.ajax.requesthandler.converters.DebugConverter;
+import com.openexchange.ajax.requesthandler.converters.preview.HTMLPreviewResultConverter;
+import com.openexchange.ajax.requesthandler.converters.preview.TextPreviewResultConverter;
 import com.openexchange.ajax.requesthandler.customizer.ConversionCustomizer;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.JSONResponseRenderer;
@@ -85,19 +87,28 @@ public class DispatcherActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[0];
+        return EMPTY_CLASSES;
     }
 
     @Override
     protected void startBundle() throws Exception {
         final DefaultDispatcher dispatcher = new DefaultDispatcher();
-
+        /*
+         * Specify default converters
+         */
         final DefaultConverter defaultConverter = new DefaultConverter();
         defaultConverter.addConverter(new DebugConverter());
-
-        for(final ResultConverter converter : BasicTypeAPIResponseConverter.CONVERTERS) {
+        /*
+         * Add basic converters
+         */
+        for(final ResultConverter converter : BasicTypeAPIResultConverter.CONVERTERS) {
         	defaultConverter.addConverter(converter);
         }
+        /*
+         * Add preview converters
+         */
+        defaultConverter.addConverter(new HTMLPreviewResultConverter());
+        defaultConverter.addConverter(new TextPreviewResultConverter());
 
         track(ResultConverter.class, new SimpleRegistryListener<ResultConverter>() {
 
