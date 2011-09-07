@@ -73,7 +73,7 @@ public interface HostData {
     /**
      * Indicates if a secure connection has been established.
      * 
-     * @return <code>true</code> for a secure connection; otherwsie <code>false</code>
+     * @return <code>true</code> for a secure connection; otherwise <code>false</code>
      */
     boolean isSecure();
 }
