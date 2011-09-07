@@ -51,6 +51,8 @@ package com.openexchange.groupware.notify.hostname.internal;
 
 import javax.servlet.http.HttpServletRequest;
 import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
@@ -71,9 +73,18 @@ public final class HostDataImpl implements HostData {
      * 
      * @param httpRequest The HTTP Servlet request
      */
-    public HostDataImpl(final HttpServletRequest httpRequest) {
+    public HostDataImpl(final HttpServletRequest httpRequest, final int userId, final int contextId) {
         this();
         secure = Tools.considerSecure(httpRequest);
+        {
+            final HostnameService hostnameService = ServerServiceRegistry.getInstance().getService(HostnameService.class);
+            if (null == hostnameService) {
+                host = httpRequest.getServerName();
+            } else {
+                final String hn = hostnameService.getHostname(userId, contextId);
+                host = null == hn ? httpRequest.getServerName() : hn;
+            }
+        }
         port = httpRequest.getServerPort();
         host = httpRequest.getServerName();
     }

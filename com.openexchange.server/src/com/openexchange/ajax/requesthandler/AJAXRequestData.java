@@ -641,7 +641,7 @@ public class AJAXRequestData {
     }
 
     /**
-     * Gets the AJP route.
+     * Gets the AJP route: &lt;http-session-id&gt; + <code>"." </code>+ &lt;route&gt;
      *
      * @return The AJP route
      */
@@ -650,7 +650,7 @@ public class AJAXRequestData {
     }
 
     /**
-     * Sets the AJP route.
+     * Sets the AJP route: &lt;http-session-id&gt; + <code>"." </code>+ &lt;route&gt;
      *
      * @param route The AJP route
      */

@@ -220,7 +220,7 @@ public class Multiple extends SessionServlet {
                     jsonObj.put(MultipleHandler.HOSTNAME, null == hn ? req.getServerName() : hn);
                 }
             }
-            jsonObj.put(MultipleHandler.ROUTE, ServerServiceRegistry.getInstance().getService(SystemNameService.class).getSystemName());
+            jsonObj.put(MultipleHandler.ROUTE, req.getSession(true).getId() + '.' + ServerServiceRegistry.getInstance().getService(SystemNameService.class).getSystemName());
             final Dispatcher dispatcher = getDispatcher();
             if (dispatcher.handles(module)) {
                 final AJAXRequestData request = MultipleAdapter.parse(module, action, jsonObj, session, Tools.considerSecure(req));

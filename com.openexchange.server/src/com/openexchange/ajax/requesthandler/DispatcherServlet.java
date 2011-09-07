@@ -246,8 +246,7 @@ public final class DispatcherServlet extends SessionServlet {
                 retval.setHostname(null == hn ? req.getServerName() : hn);
             }
         }
-        retval.setRoute(ServerServiceRegistry.getInstance().getService(SystemNameService.class).getSystemName()); // Maybe use system name
-                                                                                                                  // service
+        retval.setRoute(req.getSession(true).getId() + '.' + ServerServiceRegistry.getInstance().getService(SystemNameService.class).getSystemName());
         /*
          * Set the module
          */
