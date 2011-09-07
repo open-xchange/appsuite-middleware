@@ -54,12 +54,9 @@ import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
-import com.openexchange.conversion.ConversionService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
-import com.openexchange.image.ImageDataSource;
-import com.openexchange.image.ImageLocation;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -67,14 +64,9 @@ import com.openexchange.server.ServiceLookup;
  */
 public final class TikaImageRewritingContentHandler extends ContentHandlerDecorator {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TikaImageRewritingContentHandler.class));
-
     private static final String EMBEDDED_PREFIX = "embedded:";
 
     private final TikaDocumentHandler documentHandler;
-
-    private final ImageDataSource imgSource;
 
     private final ManagedFileManagement fileManagement;
 
@@ -88,7 +80,6 @@ public final class TikaImageRewritingContentHandler extends ContentHandlerDecora
         super(handler);
         this.documentHandler = documentHandler;
         final ServiceLookup serviceLookup = documentHandler.serviceLookup;
-        imgSource = (ImageDataSource) serviceLookup.getService(ConversionService.class).getDataSource("com.openexchange.image.managedFile");
         fileManagement = serviceLookup.getService(ManagedFileManagement.class);
     }
 
@@ -113,8 +104,9 @@ public final class TikaImageRewritingContentHandler extends ContentHandlerDecora
                     final String resourceName = src.substring(EMBEDDED_PREFIX.length());
                     try {
                         final ManagedFile managedFile = fileManagement.createManagedFile(fileManagement.newTempFile());
+                        managedFile.setContentType("image/*");
                         documentHandler.extractedFiles.put(resourceName, managedFile);
-                        attrs.setValue(i, generateImageURL(managedFile));
+                        attrs.setValue(i, managedFile.constructURL(documentHandler.session));
                     } catch (final OXException e) {
                         throw new SAXException("Couldn't create image file.", e);
                     }
@@ -124,7 +116,4 @@ public final class TikaImageRewritingContentHandler extends ContentHandlerDecora
         super.startElement(uri, localName, qName, attrs);
     }
 
-    private String generateImageURL(final ManagedFile managedFile) throws OXException {
-        return imgSource.generateUrl(new ImageLocation.Builder(managedFile.getID()).build(), documentHandler.session);
-    }
 }
