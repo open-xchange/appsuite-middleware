@@ -54,10 +54,10 @@ import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -351,10 +351,7 @@ public final class Tools {
     public static boolean considerSecure(final HttpServletRequest req) {
         final ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
         if (configurationService != null) {
-            final boolean force = configurationService.getBoolProperty(ServerConfig.Property.FORCE_HTTPS.getPropertyName(), false);
-            if (force) {
-                return true;
-            }
+            return configurationService.getBoolProperty(ServerConfig.Property.FORCE_HTTPS.getPropertyName(), false);
         }
         return req.isSecure();
     }
@@ -365,7 +362,7 @@ public final class Tools {
             final String name = (String) e.nextElement();
             List<String> values = headers.get(name);
             if (null == values) {
-                values = new ArrayList<String>();
+                values = new LinkedList<String>();
                 headers.put(name, values);
             }
             for (final Enumeration<?> valueEnum = req.getHeaders(name); valueEnum.hasMoreElements(); ) {
