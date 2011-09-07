@@ -611,7 +611,7 @@ public class AJAXRequestData {
             url.append(path);
         }
         if (withRoute) {
-            url.append(";jsessionid=12345.").append(route);
+            url.append(";jsessionid=").append(route);
         }
         if (query != null) {
             if (!query.startsWith("?")) {
