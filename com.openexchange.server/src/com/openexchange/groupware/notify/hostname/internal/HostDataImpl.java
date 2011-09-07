@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,36 +47,70 @@
  *
  */
 
-package com.openexchange.groupware.notify.hostname;
+package com.openexchange.groupware.notify.hostname.internal;
+
+import com.openexchange.groupware.notify.hostname.HostData;
 
 /**
- * {@link HostnameService} - A simple interface providing the host name part in generated links to internal objects, e.g. for notifications:
- *
- * <pre>
- * http://[hostname]/[uiwebpath]#m=[module]&i=[object]&f=[folder]
- * </pre>
- *
+ * {@link HostDataImpl} - The {@link HostData} implementation.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface HostnameService {
+public final class HostDataImpl implements HostData {
+
+    private String host;
+
+    private int port;
+
+    private boolean secure;
 
     /**
-     * The parameter name for host data.
-     *
-     * @type <code>com.openexchange.groupware.notify.hostname.HostData</code>
+     * Initializes a new {@link HostDataImpl}.
      */
-    public static final String PARAM_HOST_DATA = "com.openexchange.groupware.hostdata";
+    public HostDataImpl() {
+        super();
+    }
+
+    @Override
+    public String getHost() {
+        return host;
+    }
+
+    @Override
+    public int getPort() {
+        return port;
+    }
+
+    @Override
+    public boolean isSecure() {
+        return secure;
+    }
 
     /**
-     * Returns the host name part used in generated links to internal objects; meaning the replacement for &quot;[hostname]&quot; in URL
-     * template defined by property &quot;object_link&quot; in properties file &quot;notification.properties&quot;. Additionally this
-     * service may be used for the host name when generating direct links into the UI.
-     *
-     * @param userId The user ID or a value less than/equal to zero if not available
-     * @param contextId The context ID or a value less than/equal to zero if not available
-     * @return The host name part used in generated links to internal objects or <code>null</code> (if user ID and/or context ID could not
-     *         be resolved or any error occurred).
+     * Sets the host
+     * 
+     * @param host The host to set
      */
-    String getHostname(int userId, int contextId);
+    public void setHost(final String host) {
+        this.host = host;
+    }
+
+    /**
+     * Sets the port
+     * 
+     * @param port The port to set
+     */
+    public void setPort(final int port) {
+        this.port = port;
+    }
+
+    /**
+     * Sets the secure
+     * 
+     * @param secure The secure to set
+     */
+    public void setSecure(final boolean secure) {
+        this.secure = secure;
+    }
 
 }

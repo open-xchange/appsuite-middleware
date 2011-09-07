@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,33 +50,30 @@
 package com.openexchange.groupware.notify.hostname;
 
 /**
- * {@link HostnameService} - A simple interface providing the host name part in generated links to internal objects, e.g. for notifications:
- *
- * <pre>
- * http://[hostname]/[uiwebpath]#m=[module]&i=[object]&f=[folder]
- * </pre>
- *
+ * {@link HostData} - Provides host data.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface HostnameService {
+public interface HostData {
 
     /**
-     * The parameter name for host data.
-     *
-     * @type <code>com.openexchange.groupware.notify.hostname.HostData</code>
+     * Gets the host name.
+     * 
+     * @return The host name
      */
-    public static final String PARAM_HOST_DATA = "com.openexchange.groupware.hostdata";
+    String getHost();
 
     /**
-     * Returns the host name part used in generated links to internal objects; meaning the replacement for &quot;[hostname]&quot; in URL
-     * template defined by property &quot;object_link&quot; in properties file &quot;notification.properties&quot;. Additionally this
-     * service may be used for the host name when generating direct links into the UI.
-     *
-     * @param userId The user ID or a value less than/equal to zero if not available
-     * @param contextId The context ID or a value less than/equal to zero if not available
-     * @return The host name part used in generated links to internal objects or <code>null</code> (if user ID and/or context ID could not
-     *         be resolved or any error occurred).
+     * Gets the port.
+     * 
+     * @return The port
      */
-    String getHostname(int userId, int contextId);
+    int getPort();
 
+    /**
+     * Indicates if a secure connection has been established.
+     * 
+     * @return <code>true</code> for a secure connection; otherwsie <code>false</code>
+     */
+    boolean isSecure();
 }

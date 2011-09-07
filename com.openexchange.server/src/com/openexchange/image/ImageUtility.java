@@ -61,6 +61,7 @@ import jonelo.jacksum.algorithm.MD;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -148,10 +149,8 @@ public final class ImageUtility {
     public static void startImageUrl(final ImageLocation imageLocation, final Session session, final ImageDataSource imageDataSource, final StringBuilder sb) {
         final String prefix;
         {
-            final String hostName = (String) session.getParameter(HostnameService.PARAM_HOST_NAME);
-            final Integer port = (Integer) session.getParameter(HostnameService.PARAM_PORT);
-            final Boolean secure = (Boolean) session.getParameter(HostnameService.PARAM_SECURE);
-            if ((hostName == null) || (port == null) || (secure == null)) {
+            final HostData hostData = (HostData) session.getParameter(HostnameService.PARAM_HOST_DATA);
+            if (hostData == null) {
                 /*
                  * Compose relative URL
                  */
@@ -162,9 +161,9 @@ public final class ImageUtility {
                  */
                 final String p;
                 final String sPort;
-                if (secure.booleanValue()) {
+                if (hostData.isSecure()) {
                     p = "https://";
-                    final int por = port.intValue();
+                    final int por = hostData.getPort();
                     if (por == 443) {
                         sPort = "";
                     } else {
@@ -173,7 +172,7 @@ public final class ImageUtility {
                     }
                 } else {
                     p = "http://";
-                    final int por = port.intValue();
+                    final int por = hostData.getPort();
                     if (por == 80) {
                         sPort = "";
                     } else {
@@ -181,7 +180,7 @@ public final class ImageUtility {
                         sb.setLength(0);
                     }
                 }
-                prefix = sb.append(p).append(hostName).append(sPort).toString();
+                prefix = sb.append(p).append(hostData.getHost()).append(sPort).toString();
                 sb.setLength(0);
             }
         }
