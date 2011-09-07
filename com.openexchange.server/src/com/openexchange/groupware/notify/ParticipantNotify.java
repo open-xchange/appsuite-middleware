@@ -82,6 +82,8 @@ import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalSession;
 import com.openexchange.data.conversion.ical.ITipContainer;
 import com.openexchange.data.conversion.ical.ITipMethod;
+import com.openexchange.data.conversion.ical.SimpleMode;
+import com.openexchange.data.conversion.ical.ZoneInfo;
 import com.openexchange.event.impl.AppointmentEventInterface2;
 import com.openexchange.event.impl.TaskEventInterface2;
 import com.openexchange.exception.OXException;
@@ -1063,7 +1065,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
              */
             final Appointment app = (Appointment) cal;
             final ICalEmitter emitter = ServerServiceRegistry.getInstance().getService(ICalEmitter.class);
-            final ICalSession icalSession = emitter.createSession();
+            final ICalSession icalSession = emitter.createSession(new SimpleMode(ZoneInfo.OUTLOOK));
             Date until = null;
             if (Appointment.NO_RECURRENCE != app.getRecurrenceType()) {
                 until = app.getEndDate();

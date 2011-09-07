@@ -52,8 +52,8 @@ import java.util.List;
 import java.util.TimeZone;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.Transp;
-import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
@@ -62,13 +62,18 @@ import com.openexchange.groupware.contexts.Context;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class Transparency extends AbstractVerifyingAttributeConverter<VEvent, Appointment> {
+
+    public Transparency() {
+        super();
+    }
+
     @Override
     public boolean isSet(final Appointment appointment) {
         return appointment.containsShownAs();
     }
 
     @Override
-    public void emit(final int index, final Appointment appointment, final VEvent event, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
+    public void emit(final Mode mode, final int index, final Appointment appointment, final VEvent event, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
         switch(appointment.getShownAs()) {
             case Appointment.RESERVED :
                 event.getProperties().add(new Transp("OPAQUE"));
@@ -86,7 +91,7 @@ public class Transparency extends AbstractVerifyingAttributeConverter<VEvent, Ap
     }
 
     @Override
-    public void parse(final int index, final VEvent event, final Appointment appointment, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
+    public void parse(final int index, final VEvent event, final Appointment appointment, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
         final String value = event.getProperty("TRANSP").getValue().toLowerCase();
         if("opaque".equals(value))  {
             appointment.setShownAs(Appointment.RESERVED);

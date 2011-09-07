@@ -54,8 +54,8 @@ import java.util.List;
 import java.util.TimeZone;
 import net.fortuna.ical4j.model.component.VToDo;
 import net.fortuna.ical4j.model.property.Completed;
-import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
 import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
@@ -68,47 +68,30 @@ import com.openexchange.groupware.tasks.Task;
  */
 public class DateCompleted extends AbstractVerifyingAttributeConverter<VToDo, Task> {
 
-    /**
-     * Default constructor.
-     */
     public DateCompleted() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean isSet(final Task task) {
         return task.containsDateCompleted();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void emit(final int index, final Task task, final VToDo vToDo,
-                     final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
+    public void emit(final Mode mode, final int index, final Task task, final VToDo vToDo, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
         final Completed completed = new Completed(EmitterTools.toDateTime(task.getDateCompleted()));
         vToDo.getProperties().add(completed);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean hasProperty(final VToDo vToDo) {
         return vToDo.getDateCompleted() != null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void parse(final int index, final VToDo vToDo, final Task task, final TimeZone timeZone,
-        final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
-        final Completed completed =  vToDo.getDateCompleted();
-        final Date completedDate = ParserTools.toDateConsideringDateType(completed,timeZone);
+    public void parse(final int index, final VToDo vToDo, final Task task, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
+        final Completed completed = vToDo.getDateCompleted();
+        final Date completedDate = ParserTools.toDateConsideringDateType(completed, timeZone);
         task.setDateCompleted(completedDate);
     }
 }

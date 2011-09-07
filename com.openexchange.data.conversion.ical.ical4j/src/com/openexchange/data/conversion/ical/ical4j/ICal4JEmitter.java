@@ -72,6 +72,9 @@ import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalItem;
 import com.openexchange.data.conversion.ical.ICalSession;
 import com.openexchange.data.conversion.ical.ITipContainer;
+import com.openexchange.data.conversion.ical.Mode;
+import com.openexchange.data.conversion.ical.SimpleMode;
+import com.openexchange.data.conversion.ical.ZoneInfo;
 import com.openexchange.data.conversion.ical.ical4j.internal.AppointmentConverters;
 import com.openexchange.data.conversion.ical.ical4j.internal.AttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
@@ -90,38 +93,38 @@ public class ICal4JEmitter implements ICalEmitter {
         final Calendar calendar = new Calendar();
         initCalendar(calendar);
         int i = 0;
+        final Mode mode = new SimpleMode(ZoneInfo.FULL);
         for(final Appointment appointment : appointmentObjects) {
-            final VEvent event = createEvent(i++, appointment, ctx, errors, warnings);
+            final VEvent event = createEvent(mode, i++, appointment, ctx, errors, warnings);
             calendar.getComponents().add(event);
-            addVTimeZone(calendar, appointment);
+            addVTimeZone(mode.getZoneInfo(), calendar, appointment);
         }
         return calendar.toString();
     }
 
     @Override
-    public String writeAppointmentRequest(final Appointment appointment, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
+    public String writeAppointmentRequest(final Appointment appointment, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) {
         final Calendar calendar = new Calendar();
         initCalendar(calendar);
-        final VEvent event = createEvent(0, appointment, ctx, errors, warnings);
+        final Mode mode = new SimpleMode(ZoneInfo.OUTLOOK);
+        final VEvent event = createEvent(mode, 0, appointment, ctx, errors, warnings);
         calendar.getComponents().add(event);
-        addVTimeZone(calendar, appointment);
+        addVTimeZone(mode.getZoneInfo(), calendar, appointment);
         return calendar.toString();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String writeTasks(final List<Task> tasks,
         final List<ConversionError> errors,
         final List<ConversionWarning> warnings, final Context ctx) {
         final Calendar calendar = new Calendar();
         initCalendar(calendar);
+        final Mode mode = new SimpleMode(ZoneInfo.FULL);
         int i = 0;
         for (final Task task : tasks) {
             final VToDo vtodo;
             try {
-                vtodo = createEvent(i++, task, ctx, warnings);
+                vtodo = createEvent(mode, i++, task, ctx, warnings);
                 calendar.getComponents().add(vtodo);
             } catch (final ConversionError conversionError) {
                 errors.add( conversionError );
@@ -130,12 +133,11 @@ public class ICal4JEmitter implements ICalEmitter {
         return calendar.toString();
     }
 
-    private VEvent createEvent(final int index, final Appointment appointment, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) {
-        return createEvent(index, appointment, ctx, errors, warnings, new ITipContainer());
+    private VEvent createEvent(final Mode mode, final int index, final Appointment appointment, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) {
+        return createEvent(mode, index, appointment, ctx, errors, warnings, new ITipContainer());
     }
 
-    private VEvent createEvent(final int index, final Appointment appointment, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings, final ITipContainer iTip) {
-
+    private VEvent createEvent(final Mode mode, final int index, final Appointment appointment, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings, final ITipContainer iTip) {
         final VEvent vevent = new VEvent();
         AttributeConverter<VEvent, Appointment>[] converters = null;
         switch (iTip.getMethod()) {
@@ -154,7 +156,7 @@ public class ICal4JEmitter implements ICalEmitter {
         for (final AttributeConverter<VEvent, Appointment> converter : converters) {
             if (converter.isSet(appointment)) {
                 try {
-                    converter.emit(index, appointment, vevent, warnings, ctx, iTip);
+                    converter.emit(mode, index, appointment, vevent, warnings, ctx, iTip);
                 } catch (final ConversionError conversionError) {
                     errors.add( conversionError );
                 }
@@ -166,22 +168,30 @@ public class ICal4JEmitter implements ICalEmitter {
 
     /**
      * Converts a task object into an iCal event.
+     * @param mode defines the mode how the iCal emitter should work.
      * @param task task to convert.
      * @return the iCal event representing the task.
      */
-    private VToDo createEvent(final int index, final Task task, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
+    private VToDo createEvent(final Mode mode, final int index, final Task task, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
         final VToDo vtodo = new VToDo();
         for (final AttributeConverter<VToDo, Task> converter : TaskConverters.ALL) {
             if (converter.isSet(task)) {
-                converter.emit(index, task, vtodo, warnings, ctx);
+                converter.emit(mode, index, task, vtodo, warnings, ctx);
             }
         }
         return vtodo;
     }
 
     @Override
+    public ICalSession createSession(final Mode mode) {
+        final ICal4jSession retval = new ICal4jSession(mode);
+        initCalendar(retval.getCalendar());
+        return retval;
+    }
+
+    @Override
     public ICalSession createSession() {
-        final ICal4jSession retval = new ICal4jSession();
+        final ICal4jSession retval = new ICal4jSession(new SimpleMode(ZoneInfo.FULL));
         initCalendar(retval.getCalendar());
         return retval;
     }
@@ -204,13 +214,13 @@ public class ICal4JEmitter implements ICalEmitter {
             break;
         }
 
-        final VEvent event = createEvent(getAndIncreaseIndex(session), appointment,ctx, errors, warnings, iTip);
+        final VEvent event = createEvent(session.getMode(), getAndIncreaseIndex(session), appointment,ctx, errors, warnings, iTip);
         calendar.getComponents().add(event);
-        addVTimeZone(calendar, appointment);
+        addVTimeZone(session.getZoneInfo(), calendar, appointment);
         return new ICal4jItem(event);
     }
 
-    private void addVTimeZone(Calendar calendar, Appointment appointment) {
+    private void addVTimeZone(final ZoneInfo zoneInfo, final Calendar calendar, final Appointment appointment) {
         if (appointment.getTimezone() != null && !appointment.getTimezone().trim().equals("")) {
             String tzid = appointment.getTimezone().trim();
             for (Object o : calendar.getComponents(Component.VTIMEZONE)) {
@@ -219,7 +229,7 @@ public class ICal4JEmitter implements ICalEmitter {
                     return;
                 }
             }
-            TimeZone timeZone = EmitterTools.getTimeZoneRegistry().getTimeZone(tzid);
+            TimeZone timeZone = new EmitterTools(zoneInfo).getTimeZoneRegistry().getTimeZone(tzid);
             if (null != timeZone) {
                 VTimeZone vTimeZone = timeZone.getVTimeZone();
                 calendar.getComponents().add(vTimeZone);
@@ -228,14 +238,13 @@ public class ICal4JEmitter implements ICalEmitter {
     }
 
     @Override
-    public ICalItem writeAppointment(final ICalSession session,
-        final Appointment appointment, final Context ctx,
-        final List<ConversionError> errors, final List<ConversionWarning> warnings)
-        throws ConversionError {
-
-        return writeAppointment(session, appointment, ctx, new ITipContainer(), errors, warnings);
+    public ICalItem writeAppointment(final ICalSession session, final Appointment appointment, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
+        final Calendar calendar = getCalendar(session);
+        final VEvent event = createEvent(session.getMode(), getAndIncreaseIndex(session),appointment, ctx, errors, warnings);
+        calendar.getComponents().add(event);
+        addVTimeZone(session.getZoneInfo(), calendar, appointment);
+        return new ICal4jItem(event);
     }
-
 
     @Override
     public void writeSession(final ICalSession session, final OutputStream stream) throws ConversionError {
@@ -255,7 +264,7 @@ public class ICal4JEmitter implements ICalEmitter {
         final Context context, final List<ConversionError> errors,
         final List<ConversionWarning> warnings) throws ConversionError {
         final Calendar calendar = getCalendar(session);
-        final VToDo vToDo = createEvent(getAndIncreaseIndex(session), task,context, warnings);
+        final VToDo vToDo = createEvent(session.getMode(), getAndIncreaseIndex(session),task, context, warnings);
         calendar.getComponents().add(vToDo);
         return new ICal4jItem(vToDo);
     }

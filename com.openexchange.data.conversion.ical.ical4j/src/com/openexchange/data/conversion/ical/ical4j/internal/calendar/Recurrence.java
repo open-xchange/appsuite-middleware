@@ -70,6 +70,7 @@ import net.fortuna.ical4j.model.property.RRule;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ConversionWarning.Code;
+import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
 import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
@@ -107,24 +108,22 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
         date.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    public Recurrence() {
+        super();
+    }
+
     @Override
     public boolean hasProperty(final T component) {
         return null != component.getProperty("RRULE");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean isSet(final U calendar) {
         return calendar.containsRecurrenceType();
     }
 
     @Override
-    public void emit(final int index, final U calendar, final T component, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
+    public void emit(final Mode mode, final int index, final U calendar, final T component, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
         if (calendar.isException()) {
             return;
         }

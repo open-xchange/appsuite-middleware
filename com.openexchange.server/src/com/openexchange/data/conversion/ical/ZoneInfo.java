@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,45 +47,22 @@
  *
  */
 
-package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
-
-import java.util.List;
-import java.util.TimeZone;
-import net.fortuna.ical4j.model.component.CalendarComponent;
-import net.fortuna.ical4j.model.property.Summary;
-import com.openexchange.data.conversion.ical.ConversionWarning;
-import com.openexchange.data.conversion.ical.Mode;
-import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
-import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.groupware.contexts.Context;
+package com.openexchange.data.conversion.ical;
 
 /**
+ * {@link ZoneInfo}
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class Title<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T,U> {
+public enum ZoneInfo {
 
-    public Title() {
-        super();
-    }
+    /**
+     * Use full time zone information. Outlook is mostly overstrained with this and refuses the iCal file then.
+     */
+    FULL,
 
-    @Override
-    public boolean isSet(final U calendarObject) {
-        return calendarObject.containsTitle();
-    }
-
-    @Override
-    public void emit(final Mode mode, final int index, final U calendarObject, final T calendarComponent, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
-        calendarComponent.getProperties().add(new Summary(calendarObject.getTitle()));
-    }
-
-    @Override
-    public boolean hasProperty(final T calendarComponent) {
-        return null != calendarComponent.getProperty(Summary.SUMMARY);
-    }
-
-    @Override
-    public void parse(final int index, final T calendarComponent, final U calendarObject, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
-        calendarObject.setTitle(calendarComponent.getProperty(Summary.SUMMARY).getValue());
-    }
+    /**
+     * Use only Outlook compatible time zone informations. This may lead to inaccurate times in appointments.
+     */
+    OUTLOOK;
 }

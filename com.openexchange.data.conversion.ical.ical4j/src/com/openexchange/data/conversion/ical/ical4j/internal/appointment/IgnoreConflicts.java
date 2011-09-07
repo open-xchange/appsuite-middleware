@@ -53,58 +53,40 @@ import java.util.List;
 import java.util.TimeZone;
 import net.fortuna.ical4j.model.component.VEvent;
 import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 
 /**
- *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class IgnoreConflicts extends AbstractVerifyingAttributeConverter<VEvent, Appointment> {
 
-    /**
-     * Default constructor.
-     */
     public IgnoreConflicts() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean isSet(final Appointment appointment) {
         // Ignore this always on output.
         return false;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void emit(final int index, final Appointment appointment, final VEvent vEvent,
-        final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
+    public void emit(final Mode mode, final int index, final Appointment appointment, final VEvent vEvent, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
         // Ignore this always on output.
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean hasProperty(final VEvent vEvent) {
         // Set it always on input.
         return true;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void parse(final int index, final VEvent vEvent, final Appointment appointment,
-        final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
+    public void parse(final int index, final VEvent vEvent, final Appointment appointment, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
         // Set it always on input.
         appointment.setIgnoreConflicts(true);
     }
-
 }

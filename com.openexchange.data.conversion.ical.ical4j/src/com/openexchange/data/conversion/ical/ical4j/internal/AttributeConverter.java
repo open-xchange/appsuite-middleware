@@ -54,6 +54,7 @@ import java.util.TimeZone;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
 
@@ -70,7 +71,7 @@ public interface AttributeConverter<T extends CalendarComponent, U extends Calen
      */
     boolean isSet(U u);
 
-    void emit(int index, U u, T t, List<ConversionWarning> warnings, Context ctx, Object... args) throws ConversionError;
+    void emit(Mode mode, int index, U u, T t, List<ConversionWarning> warnings, Context ctx, Object... args) throws ConversionError;
 
     boolean hasProperty(T t);
 
