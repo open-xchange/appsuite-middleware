@@ -65,6 +65,8 @@ import com.openexchange.tools.session.ServerSession;
 public class GetAction extends AutoconfigAction {
 
     private static final String EMAIL = "email";
+    
+    private static final String PASSWORD = "password";
 
     /**
      * Initializes a new {@link GetAction}.
@@ -82,8 +84,10 @@ public class GetAction extends AutoconfigAction {
      */
     @Override
     public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
+        String mail = request.getParameter(EMAIL, String.class);
+        String password = request.getParameter(PASSWORD, String.class);
         AutoconfigService autoconfigService = getAutoconfigService();
-        Autoconfig autoconfig = autoconfigService.getConfig(request.getParameter(EMAIL, String.class), session.getUser(), session.getContext());
+        Autoconfig autoconfig = autoconfigService.getConfig(mail, password, session.getUser(), session.getContext());
         return new AJAXRequestResult(autoconfig, "autoconfig");
     }
 

@@ -60,6 +60,7 @@ import com.openexchange.mail.autoconfig.AutoconfigException;
 import com.openexchange.mail.autoconfig.AutoconfigService;
 import com.openexchange.mail.autoconfig.sources.ConfigSource;
 import com.openexchange.mail.autoconfig.sources.ConfigurationFile;
+import com.openexchange.mail.autoconfig.sources.Database;
 import com.openexchange.mail.autoconfig.sources.ISPDB;
 import com.openexchange.mail.autoconfig.sources.Guess;
 import com.openexchange.mail.autoconfig.sources.ConfigServer;
@@ -83,11 +84,12 @@ public class AutoconfigServiceImpl implements AutoconfigService {
         sources.add(new ConfigurationFile(this.services));
         sources.add(new ConfigServer());
         sources.add(new ISPDB(this.services));
+        sources.add(new Database(this.services));
         sources.add(new Guess());
     }
 
     @Override
-    public Autoconfig getConfig(String email, User user, Context context) throws OXException {
+    public Autoconfig getConfig(String email, String password, User user, Context context) throws OXException {
         QuotedInternetAddress internetAddress;
         try {
             internetAddress = new QuotedInternetAddress(email);
@@ -99,7 +101,7 @@ public class AutoconfigServiceImpl implements AutoconfigService {
         String mailDomain = getDomain(internetAddress);
 
         for (ConfigSource source : sources) {
-            Autoconfig config = source.getAutoconfig(mailLocalPart, mailDomain, user, context);
+            Autoconfig config = source.getAutoconfig(mailLocalPart, mailDomain, password, user, context);
             if (config != null) {
                 return config;
             }

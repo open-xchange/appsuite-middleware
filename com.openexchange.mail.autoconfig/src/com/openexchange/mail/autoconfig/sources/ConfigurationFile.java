@@ -81,7 +81,7 @@ public class ConfigurationFile extends AbstractConfigSource {
     }
 
     @Override
-    public Autoconfig getAutoconfig(String emailLocalPart, final String emailDomain, User user, Context context) throws OXException {
+    public Autoconfig getAutoconfig(String emailLocalPart, final String emailDomain, String password, User user, Context context) throws OXException {
         ConfigViewFactory configViewFactory = services.getService(ConfigViewFactory.class);
         ConfigView view = configViewFactory.getView(user.getId(), context.getContextId());
         String fileLocation = view.get(locationProperty, String.class);

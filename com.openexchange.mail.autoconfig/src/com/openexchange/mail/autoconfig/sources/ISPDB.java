@@ -87,7 +87,7 @@ public class ISPDB extends AbstractConfigSource {
     }
 
     @Override
-    public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, User user, Context context) throws OXException {
+    public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context) throws OXException {
         ConfigViewFactory configViewFactory = services.getService(ConfigViewFactory.class);
         ConfigView view = configViewFactory.getView(user.getId(), context.getContextId());
         String url = view.get(locationProperty, String.class);

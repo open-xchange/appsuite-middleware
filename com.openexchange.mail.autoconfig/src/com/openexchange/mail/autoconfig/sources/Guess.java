@@ -65,7 +65,7 @@ public class Guess extends AbstractConfigSource {
      * @see com.openexchange.mail.autoconfig.sources.ConfigSource#getAutoconfig(java.lang.String, java.lang.String)
      */
     @Override
-    public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, User user, Context context) {
+    public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context) {
         return null;
     }
 

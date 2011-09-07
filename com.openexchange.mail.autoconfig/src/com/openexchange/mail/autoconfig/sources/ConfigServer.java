@@ -75,7 +75,7 @@ public class ConfigServer extends AbstractConfigSource {
     static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ConfigServer.class);
 
     @Override
-    public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, User user, Context context) throws OXException {
+    public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context) throws OXException {
         String url = "http://autoconfig." + emailDomain + "/mail/config-v1.1.xml";
 
         HttpClient client = new HttpClient();

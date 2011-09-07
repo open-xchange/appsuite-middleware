@@ -47,30 +47,35 @@
  *
  */
 
-package com.openexchange.mail.autoconfig.sources;
+package com.openexchange.mail.autoconfig.tools;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.mail.autoconfig.Autoconfig;
+import junit.framework.TestCase;
 
 /**
- * {@link ConfigSource}
+ * {@link MailValidatorTest}
  * 
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public interface ConfigSource {
+public class MailValidatorTest extends TestCase {
 
-    /**
-     * Generates an Autoconfig Object with the given Mail information.
-     * 
-     * @param emailLocalPart
-     * @param emailDomain
-     * @param password
-     * @param user
-     * @param context
-     * @return An AtoConfig Object or null if generation fails.
-     * @throws OXException 
-     */
-    public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context) throws OXException;
+    private static final String HOST = "ox.synapps.de";
+
+    private static final String USER = "mah@synapps.de";
+
+    private static final String PASSWORD = "bla";
+
+    public void testPOP3() throws Exception {
+        assertTrue("Non secure POP3 Connection failed", MailValidator.validatePop3(HOST, 110, USER, PASSWORD));
+        assertTrue("Secure POP3 Connection failed", MailValidator.validatePop3(HOST, 995, USER, PASSWORD));
+    }
+
+    public void testIMAP() throws Exception {
+        assertTrue("Non secure IMAP Connection failed", MailValidator.validateImap(HOST, 143, USER, PASSWORD));
+        assertTrue("Secure IMAP Connection failed", MailValidator.validateImap(HOST, 993, USER, PASSWORD));
+    }
+
+    public void testSMTP() throws Exception {
+        assertTrue("Non secure SMTP Connection failed", MailValidator.validateSmtp(HOST, 25, USER, PASSWORD));
+        assertTrue("Secure SMTP Connection failed", MailValidator.validateSmtp(HOST, 465, USER, PASSWORD));
+    }
 }

@@ -63,10 +63,11 @@ public interface AutoconfigService {
     /**
      * Tries to generate an Autoconfig Object just with the given mail address.
      * @param email
+     * @param password
      * @param user
      * @param context
      * @return An autoconfig Object if generation was successfull, null otherwise.
      * @throws OXException 
      */
-    public Autoconfig getConfig(String email, User user, Context context) throws OXException;
+    public Autoconfig getConfig(String email, String password, User user, Context context) throws OXException;
 }
