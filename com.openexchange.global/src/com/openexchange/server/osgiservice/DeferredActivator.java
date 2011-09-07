@@ -440,8 +440,10 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
     /**
      * Adds specified service (if absent).
      *
+     * @param <S> Type of service's class
+     * @param clazz The service's class
      * @param service The service to add
-     * @return <code>true</code> if service is added; otherwsie <code>false</code> if not initialized or such a service already exists
+     * @return <code>true</code> if service is added; otherwise <code>false</code> if not initialized or such a service already exists
      */
     protected final <S> boolean addService(final Class<S> clazz, final S service) {
         if (null == services || !clazz.isInstance(service)) {
@@ -451,6 +453,23 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
             return false;
         }
         return (null == services.putIfAbsent(clazz, service));
+    }
+
+    /**
+     * Removes specified service.
+     * 
+     * @param <S> Type of service's class
+     * @param clazz The service's class
+     * @return <code>true</code> if service is removes; otherwise <code>false</code> if not initialized or absent
+     */
+    protected final <S> boolean removeService(final Class<S> clazz) {
+        if (null == services) {
+            /*
+             * Services not initialized
+             */
+            return false;
+        }
+        return (null != services.remove(clazz));
     }
 
     /**
