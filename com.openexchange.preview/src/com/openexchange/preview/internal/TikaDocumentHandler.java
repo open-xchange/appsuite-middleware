@@ -121,8 +121,6 @@ public final class TikaDocumentHandler {
 
     protected final Session session;
 
-    protected TikaDocumentHandler thisDocumentHandler;
-
     protected ContainerExtractor extractor;
 
     protected MediaType mediaType;
@@ -163,7 +161,6 @@ public final class TikaDocumentHandler {
             parser = null == mimeType ? new AutoDetectParser(detector) : ParseUtils.getParser(mimeType, TikaConfig.getDefaultConfig());
             context.set(Parser.class, parser);
             // context.set(EmbeddedDocumentExtractor.class, new FileEmbeddedDocumentExtractor(this));
-            thisDocumentHandler = this;
         } catch (final TikaException e) {
             throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
         }
@@ -195,7 +192,7 @@ public final class TikaDocumentHandler {
     public String getDocumentType(final InputStream in) throws OXException {
         final InputStream stream = getTikaInputStream(in);
         try {
-            DETECT.process(in, null);
+            DETECT.process(in, null, this);
             return mediaType.toString();
         } finally {
             Streams.close(stream);
@@ -212,7 +209,7 @@ public final class TikaDocumentHandler {
     public String getDocumentLanguage(final InputStream in) throws OXException {
         final InputStream stream = getTikaInputStream(in);
         try {
-            LANGUAGE.process(in, Streams.newByteArrayOutputStream(8192));
+            LANGUAGE.process(in, Streams.newByteArrayOutputStream(8192), this);
             return language;
         } finally {
             Streams.close(stream);
@@ -256,7 +253,7 @@ public final class TikaDocumentHandler {
                 break;
             }
             final ByteArrayOutputStream bout = Streams.newByteArrayOutputStream(8192);
-            type.process(stream, bout);
+            type.process(stream, bout, this);
             if (HTML_ALIKE.contains(output)) {
                 return serviceLookup.getService(HTMLService.class).getConformHTML(new String(bout.toByteArray(), encoding), encoding);
             }
@@ -268,7 +265,7 @@ public final class TikaDocumentHandler {
         }
     }
 
-    private class OutputType {
+    private static class OutputType {
 
         /**
          * Initializes a new {@link TikaDocumentHandler.OutputType}.
@@ -277,9 +274,13 @@ public final class TikaDocumentHandler {
             super();
         }
 
-        public void process(final InputStream input, final OutputStream output) throws OXException {
+        public void process(final InputStream input, final OutputStream output, final TikaDocumentHandler documentHandler) throws OXException {
             try {
-                parser.parse(input, getContentHandler(output), metadata, context);
+                documentHandler.parser.parse(
+                    input,
+                    getContentHandler(output, documentHandler),
+                    documentHandler.metadata,
+                    documentHandler.context);
             } catch (final IOException e) {
                 throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
             } catch (final SAXException e) {
@@ -289,19 +290,21 @@ public final class TikaDocumentHandler {
             }
         }
 
-        protected ContentHandler getContentHandler(final OutputStream output) throws OXException {
+        protected ContentHandler getContentHandler(final OutputStream output, final TikaDocumentHandler documentHandler) throws OXException {
             throw new UnsupportedOperationException();
         }
 
     }
 
-    private final OutputType XML = new OutputType() {
+    private static final OutputType XML = new OutputType() {
 
         @Override
-        public void process(final InputStream input, final OutputStream output) throws OXException {
+        public void process(final InputStream input, final OutputStream output, final TikaDocumentHandler documentHandler) throws OXException {
+            final ParseContext parseContext = documentHandler.context;
+            final Parser parser = documentHandler.parser;
             try {
-                context.set(Parser.class, new TikaImageExtractingParser(thisDocumentHandler));
-                parser.parse(input, getContentHandler(output), metadata, context);
+                parseContext.set(Parser.class, new TikaImageExtractingParser(documentHandler));
+                parser.parse(input, getContentHandler(output, documentHandler), documentHandler.metadata, parseContext);
             } catch (final IOException e) {
                 throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
             } catch (final SAXException e) {
@@ -310,27 +313,29 @@ public final class TikaDocumentHandler {
                 throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
             } finally {
                 // Restore context
-                context.set(Parser.class, parser);
+                parseContext.set(Parser.class, parser);
             }
         }
 
         @Override
-        protected ContentHandler getContentHandler(final OutputStream output) throws OXException {
+        protected ContentHandler getContentHandler(final OutputStream output, final TikaDocumentHandler documentHandler) throws OXException {
             try {
-                return new TikaImageRewritingContentHandler(getTransformerHandler(output, "xml", encoding), thisDocumentHandler);
+                return new TikaImageRewritingContentHandler(getTransformerHandler(output, "xml", documentHandler.encoding), documentHandler);
             } catch (final TransformerConfigurationException e) {
                 throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
             }
         }
     };
 
-    private final OutputType HTML = new OutputType() {
+    private static final OutputType HTML = new OutputType() {
 
         @Override
-        public void process(final InputStream input, final OutputStream output) throws OXException {
+        public void process(final InputStream input, final OutputStream output, final TikaDocumentHandler documentHandler) throws OXException {
+            final ParseContext parseContext = documentHandler.context;
+            final Parser parser = documentHandler.parser;
             try {
-                context.set(Parser.class, new TikaImageExtractingParser(thisDocumentHandler));
-                parser.parse(input, getContentHandler(output), metadata, context);
+                parseContext.set(Parser.class, new TikaImageExtractingParser(documentHandler));
+                parser.parse(input, getContentHandler(output, documentHandler), documentHandler.metadata, parseContext);
             } catch (final IOException e) {
                 throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
             } catch (final SAXException e) {
@@ -339,72 +344,74 @@ public final class TikaDocumentHandler {
                 throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
             } finally {
                 // Restore context
-                context.set(Parser.class, parser);
+                parseContext.set(Parser.class, parser);
             }
         }
 
         @Override
-        protected ContentHandler getContentHandler(final OutputStream output) throws OXException {
+        protected ContentHandler getContentHandler(final OutputStream output, final TikaDocumentHandler documentHandler) throws OXException {
             try {
-                return new TikaImageRewritingContentHandler(getTransformerHandler(output, "html", encoding), thisDocumentHandler);
+                return new TikaImageRewritingContentHandler(
+                    getTransformerHandler(output, "html", documentHandler.encoding),
+                    documentHandler);
             } catch (final TransformerConfigurationException e) {
                 throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
             }
         }
     };
 
-    private final OutputType TEXT = new OutputType() {
+    private static final OutputType TEXT = new OutputType() {
 
         @Override
-        protected ContentHandler getContentHandler(final OutputStream output) throws OXException {
+        protected ContentHandler getContentHandler(final OutputStream output, final TikaDocumentHandler documentHandler) throws OXException {
             try {
-                return new BodyContentHandler(getOutputWriter(output, encoding));
+                return new BodyContentHandler(getOutputWriter(output, documentHandler.encoding));
             } catch (final UnsupportedEncodingException e) {
                 throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
             }
         }
     };
 
-    private final OutputType TEXT_MAIN = new OutputType() {
+    private static final OutputType TEXT_MAIN = new OutputType() {
 
         @Override
-        protected ContentHandler getContentHandler(final OutputStream output) throws OXException {
+        protected ContentHandler getContentHandler(final OutputStream output, final TikaDocumentHandler documentHandler) throws OXException {
             try {
-                return new BoilerpipeContentHandler(getOutputWriter(output, encoding));
+                return new BoilerpipeContentHandler(getOutputWriter(output, documentHandler.encoding));
             } catch (final UnsupportedEncodingException e) {
                 throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
             }
         }
     };
 
-    private final OutputType METADATA = new OutputType() {
+    private static final OutputType METADATA = new OutputType() {
 
         @Override
-        protected ContentHandler getContentHandler(final OutputStream output) {
+        protected ContentHandler getContentHandler(final OutputStream output, final TikaDocumentHandler documentHandler) {
             return new DefaultHandler();
         }
     };
 
-    private final OutputType LANGUAGE = new OutputType() {
+    private static final OutputType LANGUAGE = new OutputType() {
 
         @Override
-        protected ContentHandler getContentHandler(final OutputStream output) {
+        protected ContentHandler getContentHandler(final OutputStream output, final TikaDocumentHandler documentHandler) {
             return new ProfilingHandler() {
 
                 @Override
                 public void endDocument() {
-                    language = getLanguage().getLanguage();
+                    documentHandler.language = getLanguage().getLanguage();
                 }
             };
         }
     };
 
-    private final OutputType DETECT = new OutputType() {
+    private static final OutputType DETECT = new OutputType() {
 
         @Override
-        public void process(final InputStream stream, final OutputStream output) throws OXException {
+        public void process(final InputStream stream, final OutputStream output, final TikaDocumentHandler documentHandler) throws OXException {
             try {
-                mediaType = detector.detect(stream, metadata);
+                documentHandler.mediaType = documentHandler.detector.detect(stream, documentHandler.metadata);
             } catch (final IOException e) {
                 throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
             }
