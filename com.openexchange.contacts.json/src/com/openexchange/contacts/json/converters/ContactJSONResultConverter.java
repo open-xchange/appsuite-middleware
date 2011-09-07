@@ -265,7 +265,7 @@ public class ContactJSONResultConverter implements ResultConverter {
                 final byte[] imageData = contact.getImage1();
                 if (imageData != null) {
                     final ContactImageDataSource imgSource = new ContactImageDataSource();
-                    final ImageLocation il = new ImageLocation(null, String.valueOf(contact.getParentFolderID()), String.valueOf(contact.getObjectID()), null);
+                    final ImageLocation il = new ImageLocation.Builder().folder(String.valueOf(contact.getParentFolderID())).id(String.valueOf(contact.getObjectID())).build();
                     imageUrl = imgSource.generateUrl(il, session);
                 }
             }
