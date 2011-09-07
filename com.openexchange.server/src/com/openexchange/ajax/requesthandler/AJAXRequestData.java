@@ -110,6 +110,9 @@ public class AJAXRequestData {
 
     private String servletRequestUri;
 
+    /**
+     * The AJP route: &lt;http-session-id&gt; + <code>"." </code>+ &lt;route&gt;
+     */
     private String route;
 
     private UploadEvent uploadEvent;

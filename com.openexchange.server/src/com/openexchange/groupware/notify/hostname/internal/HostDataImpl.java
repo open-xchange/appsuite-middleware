@@ -53,6 +53,7 @@ import javax.servlet.http.HttpServletRequest;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.systemname.SystemNameService;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
@@ -63,6 +64,8 @@ import com.openexchange.tools.servlet.http.Tools;
 public final class HostDataImpl implements HostData {
 
     private String host;
+
+    private String route;
 
     private int port;
 
@@ -86,7 +89,7 @@ public final class HostDataImpl implements HostData {
             }
         }
         port = httpRequest.getServerPort();
-        host = httpRequest.getServerName();
+        route = httpRequest.getSession(true).getId() + '.' + ServerServiceRegistry.getInstance().getService(SystemNameService.class).getSystemName();
     }
 
     /**
@@ -94,6 +97,11 @@ public final class HostDataImpl implements HostData {
      */
     public HostDataImpl() {
         super();
+    }
+
+    @Override
+    public String getRoute() {
+        return route;
     }
 
     @Override
@@ -109,6 +117,15 @@ public final class HostDataImpl implements HostData {
     @Override
     public boolean isSecure() {
         return secure;
+    }
+
+    /**
+     * Sets the route: &lt;http-session-id&gt; + <code>"." </code>+ &lt;route&gt;
+     *
+     * @param route The route to set
+     */
+    public void setRoute(final String route) {
+        this.route = route;
     }
 
     /**
