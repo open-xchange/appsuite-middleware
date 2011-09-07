@@ -69,7 +69,14 @@ public interface ICalEmitter {
 
     public String writeTasks(List<Task> tasks, List<ConversionError> errors, List<ConversionWarning> warnings, Context ctx) throws ConversionError;
 
-    public ICalSession createSession();
+    /**
+     * Creates a new {@link ICalSession} to collect the iCal information.
+     * @param mode Operation mode to use.
+     * @return a newly generated {@link ICalSession}.
+     */
+    public ICalSession createSession(Mode mode);
+
+    ICalSession createSession();
 
     public ICalItem writeAppointment(ICalSession session, Appointment appointment, Context ctx, ITipContainer iTip, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
 

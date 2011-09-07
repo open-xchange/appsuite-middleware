@@ -1,3 +1,7 @@
+* 2011-09-04 - marcus.klein@open-xchange.com
+
+ - Fix for bug 19295: Using more simple and special time zone information when sending iCal invitations otherwise Exchange 2010 refuses them.
+
 * 2011-08-11 - marcus.klein@open-xchange.com
 
  - Fix for bug 19447: Adding UID to iCal attachment sent to invited external participant on an appointment change.

@@ -57,6 +57,7 @@ import java.util.TimeZone;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.DtEnd;
 import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
 import com.openexchange.groupware.container.Appointment;
@@ -69,21 +70,15 @@ import com.openexchange.groupware.contexts.Context;
  */
 public final class End<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T,U> {
 
-    /**
-     * Default constructor.
-     */
     public End() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void emit(final int index, final U calendar, final T component, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
+    public void emit(final Mode mode, final int index, final U calendar, final T component, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
         final DtEnd end = new DtEnd();
         String tz = EmitterTools.extractTimezoneIfPossible(calendar);
-        final net.fortuna.ical4j.model.Date date = (needsDate(calendar)) ? toDate(calendar.getEndDate(),tz) : toDateTime(calendar.getEndDate(),tz);
+        final net.fortuna.ical4j.model.Date date = (needsDate(calendar)) ? toDate(calendar.getEndDate(),tz) : toDateTime(mode.getZoneInfo(), calendar.getEndDate(),tz);
         end.setDate(date);
         component.getProperties().add(end);
     }

@@ -53,8 +53,8 @@ import java.util.List;
 import java.util.TimeZone;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.CalendarComponent;
-import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
@@ -67,8 +67,12 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class Sequence<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T, U> {
 
+    public Sequence() {
+        super();
+    }
+
     @Override
-    public void emit(final int index, final U u, final T t, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
+    public void emit(final Mode mode, final int index, final U u, final T t, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
         final net.fortuna.ical4j.model.property.Sequence sequence = new net.fortuna.ical4j.model.property.Sequence();
         sequence.setValue(String.valueOf(u.getSequence()));
         t.getProperties().add(sequence);
@@ -85,8 +89,7 @@ public class Sequence<T extends CalendarComponent, U extends CalendarObject> ext
     }
 
     @Override
-    public void parse(final int index, final T t, final U u, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
+    public void parse(final int index, final T t, final U u, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
         u.setSequence(Integer.valueOf(t.getProperty(Property.SEQUENCE).getValue()));
     }
-
 }

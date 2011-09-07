@@ -54,8 +54,8 @@ import java.util.List;
 import java.util.TimeZone;
 import net.fortuna.ical4j.model.component.VToDo;
 import net.fortuna.ical4j.model.property.Due;
-import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
 import com.openexchange.groupware.contexts.Context;
@@ -67,41 +67,32 @@ import com.openexchange.groupware.tasks.Task;
  */
 public class DueDate extends AbstractVerifyingAttributeConverter<VToDo, Task> {
 
-    /**
-     * Default constructor.
-     */
     public DueDate() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean isSet(final Task task) {
         return false;  // EndDate only
     }
 
     @Override
-    public void emit(final int index, final Task task, final VToDo vToDo, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
+    public void emit(final Mode mode, final int index, final Task task, final VToDo vToDo, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
        return; // EndDate only
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean hasProperty(final VToDo vToDo) {
         return null != vToDo.getDue();
     }
 
     @Override
-    public void parse(final int index, final VToDo vToDo, final Task task, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
-        if(task.containsEndDate()) {
+    public void parse(final int index, final VToDo vToDo, final Task task, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
+        if (task.containsEndDate()) {
             return;
         }
         final Due due = vToDo.getDue();
-        if(null == due) {
+        if (null == due) {
             return;
         }
         final Date endDate = ParserTools.toDateConsideringDateType(due, timeZone);

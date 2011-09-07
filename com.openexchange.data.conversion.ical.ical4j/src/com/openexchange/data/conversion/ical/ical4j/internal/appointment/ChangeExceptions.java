@@ -59,8 +59,8 @@ import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.RecurrenceId;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
 import com.openexchange.exception.OXException;
@@ -92,7 +92,7 @@ public class ChangeExceptions extends AbstractVerifyingAttributeConverter<VEvent
     }
 
     @Override
-    public void emit(final int index, final Appointment appointment, final VEvent vEvent, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
+    public void emit(final Mode mode, final int index, final Appointment appointment, final VEvent vEvent, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
         final java.util.Date changeException = appointment.getRecurrenceDatePosition();
         if (null == changeException) {
             return;
@@ -138,7 +138,7 @@ public class ChangeExceptions extends AbstractVerifyingAttributeConverter<VEvent
     }
 
     @Override
-    public void parse(final int index, final VEvent vEvent, final Appointment appointment, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
+    public void parse(final int index, final VEvent vEvent, final Appointment appointment, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
         appointment.setRecurrenceDatePosition(recalculateMidnight(parseDate(vEvent,new RecurrenceId(), timeZone), UTC));
     }
 

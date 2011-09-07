@@ -53,8 +53,8 @@ import java.util.List;
 import java.util.TimeZone;
 import net.fortuna.ical4j.model.PropertyList;
 import net.fortuna.ical4j.model.component.CalendarComponent;
-import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
@@ -69,7 +69,7 @@ public class Categories<T extends CalendarComponent, U extends CalendarObject> e
     }
 
     @Override
-    public void emit(final int index, final U u, final T t, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
+    public void emit(final Mode mode, final int index, final U u, final T t, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
         final String categories = u.getCategories();
         if(null == categories){
             return;
@@ -84,7 +84,7 @@ public class Categories<T extends CalendarComponent, U extends CalendarObject> e
     }
 
     @Override
-    public void parse(final int index, final T component, final U cObj, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
+    public void parse(final int index, final T component, final U cObj, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
        final PropertyList categoriesList = component.getProperties("CATEGORIES");
         final StringBuilder bob = new StringBuilder();
         for(int i = 0, size = categoriesList.size(); i < size; i++) {
