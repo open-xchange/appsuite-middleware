@@ -143,6 +143,7 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.html.HTMLService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.id.IDGeneratorService;
+import com.openexchange.image.ManagedFileImageDataSource;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.mail.MailCounterImpl;
 import com.openexchange.mail.MailIdleCounterImpl;
@@ -614,6 +615,12 @@ public final class ServerActivator extends DeferredActivator {
         }
         {
             final ContactImageDataSource dataSource = new ContactImageDataSource();
+            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
+            props.put(STR_IDENTIFIER, dataSource.getRegistrationName());
+            registrationList.add(context.registerService(DataSource.class.getName(), dataSource, props));
+        }
+        {
+            final ManagedFileImageDataSource dataSource = new ManagedFileImageDataSource();
             final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put(STR_IDENTIFIER, dataSource.getRegistrationName());
             registrationList.add(context.registerService(DataSource.class.getName(), dataSource, props));
