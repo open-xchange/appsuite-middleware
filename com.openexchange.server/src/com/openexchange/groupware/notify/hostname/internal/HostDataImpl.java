@@ -49,7 +49,9 @@
 
 package com.openexchange.groupware.notify.hostname.internal;
 
+import javax.servlet.http.HttpServletRequest;
 import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * {@link HostDataImpl} - The {@link HostData} implementation.
@@ -63,6 +65,16 @@ public final class HostDataImpl implements HostData {
     private int port;
 
     private boolean secure;
+
+    /**
+     * Initializes a new {@link HostDataImpl}.
+     */
+    public HostDataImpl(final HttpServletRequest httpRequest) {
+        this();
+        secure = Tools.considerSecure(httpRequest);
+        port = httpRequest.getServerPort();
+        host = httpRequest.getServerName();
+    }
 
     /**
      * Initializes a new {@link HostDataImpl}.
