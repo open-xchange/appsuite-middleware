@@ -64,18 +64,22 @@ public class MailValidatorTest extends TestCase {
 
     private static final String PASSWORD = "bla";
 
-    public void testPOP3() throws Exception {
+    public void _testPOP3() throws Exception {
         assertTrue("Non secure POP3 Connection failed", MailValidator.validatePop3(HOST, 110, USER, PASSWORD));
         assertTrue("Secure POP3 Connection failed", MailValidator.validatePop3(HOST, 995, USER, PASSWORD));
     }
 
-    public void testIMAP() throws Exception {
+    public void _testIMAP() throws Exception {
         assertTrue("Non secure IMAP Connection failed", MailValidator.validateImap(HOST, 143, USER, PASSWORD));
         assertTrue("Secure IMAP Connection failed", MailValidator.validateImap(HOST, 993, USER, PASSWORD));
     }
 
-    public void testSMTP() throws Exception {
+    public void _testSMTP() throws Exception {
         assertTrue("Non secure SMTP Connection failed", MailValidator.validateSmtp(HOST, 25, USER, PASSWORD));
         assertTrue("Secure SMTP Connection failed", MailValidator.validateSmtp(HOST, 465, USER, PASSWORD));
+    }
+    
+    public void testZeug() throws Exception {
+        assertTrue("bla", MailValidator.checkForPop3("pop.gmx.net", 995));
     }
 }

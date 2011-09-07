@@ -49,12 +49,11 @@
 
 package com.openexchange.mail.autoconfig.tools;
 
-import java.util.Properties;
-import javax.mail.AuthenticationFailedException;
-import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.Store;
-import javax.mail.Transport;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
@@ -65,63 +64,231 @@ import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 public class MailValidator {
 
     public static boolean validateImap(String host, int port, String user, String pwd) {
-//        try {
-//            Properties props = new Properties();
-//            if (port == 993) {
-//                String socketFactoryClass = TrustAllSSLSocketFactory.class.getName();
-//                props.put("mail.imap.socketFactory.class", socketFactoryClass);
-//            }
-//            props.put("mail.imap.connectiontimeout", 100);
-//            Session session = Session.getInstance(props, null);
-//            Store store = session.getStore("imap");
-//            store.connect(host, port, user, pwd);
-//            store.close();
-//        } catch (AuthenticationFailedException e) {
-//            return false;
-//        } catch (MessagingException e) {
-//            return false;
-//        }
+        // try {
+        // Properties props = new Properties();
+        // if (port == 993) {
+        // String socketFactoryClass = TrustAllSSLSocketFactory.class.getName();
+        // props.put("mail.imap.socketFactory.class", socketFactoryClass);
+        // }
+        // props.put("mail.imap.connectiontimeout", 100);
+        // Session session = Session.getInstance(props, null);
+        // Store store = session.getStore("imap");
+        // store.connect(host, port, user, pwd);
+        // store.close();
+        // } catch (AuthenticationFailedException e) {
+        // return false;
+        // } catch (MessagingException e) {
+        // return false;
+        // }
         return true;
     }
 
     public static boolean validatePop3(String host, int port, String user, String pwd) {
-//        try {
-//            Properties props = new Properties();
-//            if (port == 995) {
-//                String socketFactoryClass = TrustAllSSLSocketFactory.class.getName();
-//                props.put("mail.imap.socketFactory.class", socketFactoryClass);
-//            }
-//            props.put("mail.pop3.connectiontimeout", 100);
-//            Session session = Session.getInstance(props, null);
-//            Store store = session.getStore("pop3");
-//            store.connect(host, port, user, pwd);
-//            store.close();
-//        } catch (AuthenticationFailedException e) {
-//            return false;
-//        } catch (MessagingException e) {
-//            return false;
-//        }
+        // try {
+        // Properties props = new Properties();
+        // if (port == 995) {
+        // String socketFactoryClass = TrustAllSSLSocketFactory.class.getName();
+        // props.put("mail.imap.socketFactory.class", socketFactoryClass);
+        // }
+        // props.put("mail.pop3.connectiontimeout", 100);
+        // Session session = Session.getInstance(props, null);
+        // Store store = session.getStore("pop3");
+        // store.connect(host, port, user, pwd);
+        // store.close();
+        // } catch (AuthenticationFailedException e) {
+        // return false;
+        // } catch (MessagingException e) {
+        // return false;
+        // }
         return true;
     }
 
     public static boolean validateSmtp(String host, int port, String user, String pwd) {
-//        try {
-//            Properties props = new Properties();
-//            if (port == 465) {
-//                String socketFactoryClass = TrustAllSSLSocketFactory.class.getName();
-//                props.put("mail.imap.socketFactory.class", socketFactoryClass);
-//            }
-//            props.put("mail.smtp.auth", "true");
-//            props.put("mail.smtp.connectiontimeout", 100);
-//            Session session = Session.getInstance(props, null);
-//            Transport transport = session.getTransport("smtp");
-//            transport.connect(host, port, user, pwd);
-//            transport.close();
-//        } catch (AuthenticationFailedException e) {
-//            return false;
-//        } catch (MessagingException e) {
-//            return false;
-//        }
+        // try {
+        // Properties props = new Properties();
+        // if (port == 465) {
+        // String socketFactoryClass = TrustAllSSLSocketFactory.class.getName();
+        // props.put("mail.imap.socketFactory.class", socketFactoryClass);
+        // }
+        // props.put("mail.smtp.auth", "true");
+        // props.put("mail.smtp.connectiontimeout", 100);
+        // Session session = Session.getInstance(props, null);
+        // Transport transport = session.getTransport("smtp");
+        // transport.connect(host, port, user, pwd);
+        // transport.close();
+        // } catch (AuthenticationFailedException e) {
+        // return false;
+        // } catch (MessagingException e) {
+        // return false;
+        // }
         return true;
+    }
+
+    public static boolean checkForImap(String host, int port) throws IOException {
+        Socket s = null;
+        String greeting = null;
+        try {
+            if (port == 993) {
+                s = TrustAllSSLSocketFactory.getDefault().createSocket();
+            } else {
+                s = new Socket();
+            }
+            /*
+             * Set connect timeout
+             */
+            s.connect(new InetSocketAddress(host, port), 1000);
+            s.setSoTimeout(1000);
+            InputStream in = s.getInputStream();
+            OutputStream out = s.getOutputStream();
+            StringBuilder sb = new StringBuilder(512);
+            /*
+             * Read IMAP server greeting on connect
+             */
+            boolean eol = false;
+            boolean skipLF = false;
+            int i = -1;
+            while (!eol && ((i = in.read()) != -1)) {
+                final char c = (char) i;
+                if (c == '\r') {
+                    eol = true;
+                    skipLF = true;
+                } else if (c == '\n') {
+                    eol = true;
+                    skipLF = false;
+                } else {
+                    sb.append(c);
+                }
+            }
+            greeting = sb.toString();
+            
+            if (skipLF) {
+                /*
+                 * Consume final LF
+                 */
+                i = in.read();
+                skipLF = false;
+            }
+
+            out.write("A11 LOGOUT\r\n".getBytes());
+            out.flush();
+        } catch (Exception e) {
+            return false;
+        } finally {
+            s.close();
+        }
+        System.out.println(greeting);
+        return greeting != null;
+    }
+    
+    public static boolean checkForSmtp(String host, int port) throws IOException {
+        Socket s = null;
+        String greeting = null;
+        try {
+            if (port == 465) {
+                s = TrustAllSSLSocketFactory.getDefault().createSocket();
+            } else {
+                s = new Socket();
+            }
+            /*
+             * Set connect timeout
+             */
+            s.connect(new InetSocketAddress(host, port), 1000);
+            s.setSoTimeout(1000);
+            InputStream in = s.getInputStream();
+            OutputStream out = s.getOutputStream();
+            StringBuilder sb = new StringBuilder(512);
+            /*
+             * Read IMAP server greeting on connect
+             */
+            boolean eol = false;
+            boolean skipLF = false;
+            int i = -1;
+            while (!eol && ((i = in.read()) != -1)) {
+                final char c = (char) i;
+                if (c == '\r') {
+                    eol = true;
+                    skipLF = true;
+                } else if (c == '\n') {
+                    eol = true;
+                    skipLF = false;
+                } else {
+                    sb.append(c);
+                }
+            }
+            greeting = sb.toString();
+            
+            if (skipLF) {
+                /*
+                 * Consume final LF
+                 */
+                i = in.read();
+                skipLF = false;
+            }
+
+            out.write("QUIT\r\n".getBytes());
+            out.flush();
+        } catch (Exception e) {
+            return false;
+        } finally {
+            s.close();
+        }
+        System.out.println(greeting);
+        return greeting != null;
+    }
+    
+    public static boolean checkForPop3(String host, int port) throws IOException {
+        Socket s = null;
+        String greeting = null;
+        try {
+            if (port == 995) {
+                s = TrustAllSSLSocketFactory.getDefault().createSocket();
+            } else {
+                s = new Socket();
+            }
+            /*
+             * Set connect timeout
+             */
+            s.connect(new InetSocketAddress(host, port), 1000);
+            s.setSoTimeout(1000);
+            InputStream in = s.getInputStream();
+            OutputStream out = s.getOutputStream();
+            StringBuilder sb = new StringBuilder(512);
+            /*
+             * Read IMAP server greeting on connect
+             */
+            boolean eol = false;
+            boolean skipLF = false;
+            int i = -1;
+            while (!eol && ((i = in.read()) != -1)) {
+                final char c = (char) i;
+                if (c == '\r') {
+                    eol = true;
+                    skipLF = true;
+                } else if (c == '\n') {
+                    eol = true;
+                    skipLF = false;
+                } else {
+                    sb.append(c);
+                }
+            }
+            greeting = sb.toString();
+            
+            if (skipLF) {
+                /*
+                 * Consume final LF
+                 */
+                i = in.read();
+                skipLF = false;
+            }
+
+            out.write("QUIT\r\n".getBytes());
+            out.flush();
+        } catch (Exception e) {
+            return false;
+        } finally {
+            s.close();
+        }
+        System.out.println(greeting);
+        return greeting != null;
     }
 }
