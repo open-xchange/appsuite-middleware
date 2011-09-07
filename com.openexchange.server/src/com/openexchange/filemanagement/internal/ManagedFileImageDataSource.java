@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.image;
+package com.openexchange.filemanagement.internal;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -60,6 +60,9 @@ import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
+import com.openexchange.image.ImageDataSource;
+import com.openexchange.image.ImageLocation;
+import com.openexchange.image.ImageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 

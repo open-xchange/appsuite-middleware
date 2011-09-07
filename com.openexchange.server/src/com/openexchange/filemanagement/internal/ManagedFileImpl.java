@@ -62,7 +62,6 @@ import com.openexchange.filemanagement.ManagedFileExceptionErrorMessage;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.image.ImageLocation;
-import com.openexchange.image.ManagedFileImageDataSource;
 import com.openexchange.session.Session;
 
 /**
