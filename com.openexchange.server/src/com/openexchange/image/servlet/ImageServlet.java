@@ -286,7 +286,7 @@ public final class ImageServlet extends HttpServlet {
             }
             outputImageData(dataSource, imageLocation, session, resp);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.debug(e.getMessage(), e);
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
