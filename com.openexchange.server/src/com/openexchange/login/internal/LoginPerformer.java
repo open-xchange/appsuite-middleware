@@ -92,6 +92,11 @@ public final class LoginPerformer {
 
     private static final LoginPerformer SINGLETON = new LoginPerformer();
 
+    /**
+     * Gets the {@link LoginPerformer} instance.
+     * 
+     * @return The instance
+     */
     public static LoginPerformer getInstance() {
         return SINGLETON;
     }
@@ -148,7 +153,7 @@ public final class LoginPerformer {
             // Create session
             final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class, true);
             final String sessionId = sessiondService.addSession(new AddSessionParameterImpl(username, request, user, ctx));
-            Session session = sessiondService.getSession(sessionId);
+            final Session session = sessiondService.getSession(sessionId);
             if (SessionEnhancement.class.isInstance(authed)) {
                 ((SessionEnhancement) authed).enhanceSession(session);
             }

@@ -351,10 +351,7 @@ public final class Tools {
     public static boolean considerSecure(final HttpServletRequest req) {
         final ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
         if (configurationService != null) {
-            final boolean force = configurationService.getBoolProperty(ServerConfig.Property.FORCE_HTTPS.getPropertyName(), false);
-            if (force) {
-                return true;
-            }
+            return configurationService.getBoolProperty(ServerConfig.Property.FORCE_HTTPS.getPropertyName(), false);
         }
         return req.isSecure();
     }
