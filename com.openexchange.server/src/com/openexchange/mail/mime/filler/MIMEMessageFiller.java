@@ -476,14 +476,27 @@ public class MIMEMessageFiller {
         /*
          * Reply-To
          */
-        if (usm.getReplyToAddr() == null || usm.getReplyToAddr().length() == 0) {
+        final String hdrReplyTo = mail.getFirstHeader("Reply-To");
+        if (null != hdrReplyTo) {
+            InternetAddress[] replyTo = null;
+            try {
+                replyTo = QuotedInternetAddress.parse(hdrReplyTo, true);
+            } catch (final AddressException e) {
+                LOG.error("Specified Reply-To address cannot be parsed", e);
+            }
+            if (null != replyTo) {
+                mimeMessage.setReplyTo(replyTo);
+            } else if (mail.containsFrom()) {
+                mimeMessage.setReplyTo(mail.getFrom());
+            }
+        } else if (usm.getReplyToAddr() == null || usm.getReplyToAddr().length() == 0) {
             InternetAddress[] replyTo = null;
             final MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
             if (null != mass) {
                 final String sReplyTo = mass.getMailAccount(mail.getAccountId(), session.getUserId(), session.getContextId()).getReplyTo();
                 if (null != sReplyTo) {
                     try {
-                        replyTo = QuotedInternetAddress.parse(usm.getReplyToAddr(), true);
+                        replyTo = QuotedInternetAddress.parse(sReplyTo, true);
                     } catch (final AddressException e) {
                         LOG.error("Default Reply-To address cannot be parsed", e);
                     }
