@@ -50,17 +50,15 @@
 package com.openexchange.preview.internal;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.TransformerConfigurationException;
@@ -72,13 +70,10 @@ import org.apache.tika.detect.DefaultDetector;
 import org.apache.tika.detect.Detector;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.extractor.ContainerExtractor;
-import org.apache.tika.extractor.EmbeddedDocumentExtractor;
-import org.apache.tika.io.IOUtils;
 import org.apache.tika.io.TikaInputStream;
 import org.apache.tika.language.ProfilingHandler;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
-import org.apache.tika.mime.MimeTypeException;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
@@ -90,16 +85,12 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
-import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.html.HTMLService;
-import com.openexchange.image.ImageLocation;
-import com.openexchange.image.ManagedFileImageDataSource;
 import com.openexchange.java.Streams;
 import com.openexchange.preview.PreviewExceptionCodes;
 import com.openexchange.preview.PreviewOutput;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.tools.regex.MatcherReplacer;
 
 /**
  * {@link TikaDocumentHandler}
@@ -110,6 +101,9 @@ import com.openexchange.tools.regex.MatcherReplacer;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TikaDocumentHandler {
+
+    protected static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TikaDocumentHandler.class));
 
     protected final Map<String, ManagedFile> extractedFiles;
 
@@ -126,6 +120,8 @@ public final class TikaDocumentHandler {
     protected final Metadata metadata;
 
     protected final Session session;
+
+    protected TikaDocumentHandler thisDocumentHandler;
 
     protected ContainerExtractor extractor;
 
@@ -166,7 +162,8 @@ public final class TikaDocumentHandler {
             detector = new DefaultDetector();
             parser = null == mimeType ? new AutoDetectParser(detector) : ParseUtils.getParser(mimeType, TikaConfig.getDefaultConfig());
             context.set(Parser.class, parser);
-            context.set(EmbeddedDocumentExtractor.class, new FileEmbeddedDocumentExtractor(extractedFiles, serviceLookup.getService(ManagedFileManagement.class)));
+            // context.set(EmbeddedDocumentExtractor.class, new FileEmbeddedDocumentExtractor(this));
+            thisDocumentHandler = this;
         } catch (final TikaException e) {
             throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
         }
@@ -224,6 +221,8 @@ public final class TikaDocumentHandler {
 
     private static final Pattern PATTERN_EMBEDDED_IMAGE = Pattern.compile("(<img[^>]*?src=\")embedded:([^>\"]+)(\"[^>]*?>)");
 
+    private static final EnumSet<PreviewOutput> HTML_ALIKE = EnumSet.of(PreviewOutput.HTML, PreviewOutput.XHTML);
+
     /**
      * Gets the document's content.
      * 
@@ -258,33 +257,8 @@ public final class TikaDocumentHandler {
             }
             final ByteArrayOutputStream bout = Streams.newByteArrayOutputStream(8192);
             type.process(stream, bout);
-            if (PreviewOutput.HTML.equals(output)) {
-                final String conformHTML = serviceLookup.getService(HTMLService.class).getConformHTML(new String(bout.toByteArray(), encoding), encoding);
-                final Matcher m = PATTERN_EMBEDDED_IMAGE.matcher(conformHTML);
-                if (m.find() && null != session) {
-                    final MatcherReplacer mr = new MatcherReplacer(m, conformHTML);
-                    final StringBuilder sb = new StringBuilder(conformHTML.length());
-                    final StringBuilder tmp = new StringBuilder(48);
-                    do {
-                        final String name = m.group(2);
-                        final ManagedFile managedFile = extractedFiles.get(name);
-                        if (null == managedFile) {
-                            mr.appendLiteralReplacement(sb, m.group());
-                        } else {
-                            tmp.setLength(0);
-                            tmp.append(m.group(1));
-                            final ManagedFileImageDataSource imgSource = new ManagedFileImageDataSource();
-                            final ImageLocation imageLocation = new ImageLocation(null, null, null, managedFile.getID());
-                            final String imageURL = imgSource.generateUrl(imageLocation, session);
-                            tmp.append(imageURL);
-                            tmp.append(m.group(3));
-                            mr.appendLiteralReplacement(sb, tmp.toString());
-                        }
-                    } while (m.find());
-                    mr.appendTail(sb);
-                    return sb.toString();
-                }
-                return conformHTML;
+            if (HTML_ALIKE.contains(output)) {
+                return serviceLookup.getService(HTMLService.class).getConformHTML(new String(bout.toByteArray(), encoding), encoding);
             }
             return new String(bout.toByteArray(), encoding);
         } catch (final UnsupportedEncodingException e) {
@@ -305,9 +279,7 @@ public final class TikaDocumentHandler {
 
         public void process(final InputStream input, final OutputStream output) throws OXException {
             try {
-                final Parser p = parser;
-                final ContentHandler handler = getContentHandler(output);
-                p.parse(input, handler, metadata, context);
+                parser.parse(input, getContentHandler(output), metadata, context);
             } catch (final IOException e) {
                 throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
             } catch (final SAXException e) {
@@ -326,9 +298,26 @@ public final class TikaDocumentHandler {
     private final OutputType XML = new OutputType() {
 
         @Override
+        public void process(final InputStream input, final OutputStream output) throws OXException {
+            try {
+                context.set(Parser.class, new TikaImageExtractingParser(thisDocumentHandler));
+                parser.parse(input, getContentHandler(output), metadata, context);
+            } catch (final IOException e) {
+                throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            } catch (final SAXException e) {
+                throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
+            } catch (final TikaException e) {
+                throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
+            } finally {
+                // Restore context
+                context.set(Parser.class, parser);
+            }
+        }
+
+        @Override
         protected ContentHandler getContentHandler(final OutputStream output) throws OXException {
             try {
-                return getTransformerHandler(output, "xml", encoding);
+                return new TikaImageRewritingContentHandler(getTransformerHandler(output, "xml", encoding), thisDocumentHandler);
             } catch (final TransformerConfigurationException e) {
                 throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
             }
@@ -338,9 +327,26 @@ public final class TikaDocumentHandler {
     private final OutputType HTML = new OutputType() {
 
         @Override
+        public void process(final InputStream input, final OutputStream output) throws OXException {
+            try {
+                context.set(Parser.class, new TikaImageExtractingParser(thisDocumentHandler));
+                parser.parse(input, getContentHandler(output), metadata, context);
+            } catch (final IOException e) {
+                throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            } catch (final SAXException e) {
+                throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
+            } catch (final TikaException e) {
+                throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
+            } finally {
+                // Restore context
+                context.set(Parser.class, parser);
+            }
+        }
+
+        @Override
         protected ContentHandler getContentHandler(final OutputStream output) throws OXException {
             try {
-                return getTransformerHandler(output, "html", encoding);
+                return new TikaImageRewritingContentHandler(getTransformerHandler(output, "html", encoding), thisDocumentHandler);
             } catch (final TransformerConfigurationException e) {
                 throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
             }
@@ -445,66 +451,6 @@ public final class TikaDocumentHandler {
             return new OutputStreamWriter(output, "UTF-8");
         } else {
             return new OutputStreamWriter(output);
-        }
-    }
-
-    private static final class FileEmbeddedDocumentExtractor implements EmbeddedDocumentExtractor {
-
-        private final ManagedFileManagement fileManagement;
-
-        private int count;
-
-        private final TikaConfig config;
-
-        private final Map<String, ManagedFile> extractedFiles;
-
-        public FileEmbeddedDocumentExtractor(final Map<String, ManagedFile> extractedFiles, final ManagedFileManagement fileManagement) {
-            super();
-            this.extractedFiles = extractedFiles;
-            this.fileManagement = fileManagement;
-            count = 0;
-            config = TikaConfig.getDefaultConfig();
-        }
-
-        @Override
-        public boolean shouldParseEmbedded(final Metadata metadata) {
-            return true;
-        }
-
-        @Override
-        public void parseEmbedded(final InputStream inputStream, final ContentHandler contentHandler, final Metadata metadata, final boolean outputHtml) throws SAXException, IOException {
-            String name = metadata.get(Metadata.RESOURCE_NAME_KEY);
-            if (name == null) {
-                name = Integer.toString(count);
-            }
-            /*
-             * MIME type
-             */
-            final String contentType = metadata.get(Metadata.CONTENT_TYPE);
-            if (name.indexOf('.') == -1 && contentType != null) {
-                try {
-                    name += config.getMimeRepository().forName(contentType).getExtension();
-                } catch (final MimeTypeException e) {
-                    e.printStackTrace();
-                }
-            }
-            /*
-             * Copy to new file
-             */
-            try {
-                final int pos = name.indexOf('.');
-                final File outputFile = fileManagement.newTempFile(name.substring(0, pos), name.substring(pos));
-                final FileOutputStream os = new FileOutputStream(outputFile);
-                try {
-                    IOUtils.copy(inputStream, os);
-                } finally {
-                    IOUtils.closeQuietly(os);
-                }
-                extractedFiles.put(name, fileManagement.createManagedFile(outputFile));
-                count++;
-            } catch (final OXException e) {
-                throw new IOException("Managed file could not be created.", e);
-            }
         }
     }
 

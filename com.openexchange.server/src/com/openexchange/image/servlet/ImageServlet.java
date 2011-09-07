@@ -370,7 +370,7 @@ public final class ImageServlet extends HttpServlet {
             final InputStream remainee = data.getData();
             try {
                 final int nRead = remainee.read(sequence, 0, sequence.length);
-                if (nRead < sequence.length) {
+                if (nRead > 0 && nRead < sequence.length) {
                     final byte[] tmp = sequence;
                     sequence = new byte[nRead];
                     System.arraycopy(tmp, 0, sequence, 0, nRead);
