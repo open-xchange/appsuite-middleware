@@ -113,7 +113,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
     /**
      * Indicates whether to auto-detect passed content.
      * 
-     * @return <code>true</code> to auto-detect; otherwsie <code>false</code>
+     * @return <code>true</code> to auto-detect; otherwise <code>false</code>
      */
     protected abstract boolean autoDetect();
 
