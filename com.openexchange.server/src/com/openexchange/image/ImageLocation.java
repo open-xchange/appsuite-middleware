@@ -62,6 +62,37 @@ public final class ImageLocation {
 
     public static final String PROPERTY_REGISTRATION_NAME = "registrationName";
 
+    /**
+     * The builder for a {@link ImageLocation}.
+     */
+    public static class Builder {
+        private final String imageId;
+        private String accountId;
+        private String folder;
+        private String id;
+
+        public Builder() {
+            super();
+            this.imageId = null;
+        }
+        public Builder(final String imageId) {
+            super();
+            this.imageId = imageId;
+        }
+        public Builder accountId(final String accountId) {
+            this.accountId = accountId; return this;
+        }
+        public Builder folder(final String folder) {
+            this.folder = folder; return this;
+        }
+        public Builder id(final String id) {
+            this.id = id; return this;
+        }
+        public ImageLocation build() {
+            return new ImageLocation(this);
+        }
+    }
+
     private final String accountId;
 
     private final String folder;
@@ -75,19 +106,15 @@ public final class ImageLocation {
     /**
      * Initializes a new {@link ImageLocation}.
      *
-     * @param folder The folder identifier
-     * @param id The object identifier
-     * @param imageId The image identifier
-     * @param userId The user identifier
-     * @param contextId The context identifier
+     * @param builder The builder
      */
-    public ImageLocation(final String accountId, final String folder, final String id, final String imageId) {
+    protected ImageLocation(final Builder builder) {
         super();
         properties = new ConcurrentHashMap<String, Object>(2);
-        this.accountId = accountId;
-        this.folder = folder;
-        this.id = id;
-        this.imageId = imageId;
+        this.accountId = builder.accountId;
+        this.folder = builder.folder;
+        this.id = builder.id;
+        this.imageId = builder.imageId;
     }
 
     /**

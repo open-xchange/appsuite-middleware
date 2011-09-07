@@ -125,7 +125,7 @@ public final class ImageUtility {
                 }
             }
         }
-        final ImageLocation il = new ImageLocation(accountId, folder, id, imageId);
+        final ImageLocation il = new ImageLocation.Builder(imageId).accountId(accountId).folder(folder).id(id).build();
         il.setRegistrationName(registrationName);
         return il;
     }

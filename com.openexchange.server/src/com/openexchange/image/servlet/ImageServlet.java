@@ -263,7 +263,7 @@ public final class ImageServlet extends HttpServlet {
             final String folder = req.getParameter(AJAXServlet.PARAMETER_FOLDERID);
             final String id = req.getParameter(AJAXServlet.PARAMETER_ID);
             final String imageId = req.getParameter(AJAXServlet.PARAMETER_UID);
-            imageLocation = new ImageLocation(null, folder, id, imageId);
+            imageLocation = new ImageLocation.Builder(imageId).folder(folder).id(id) .build();
         }
         /*
          * Check signature equality
