@@ -61,6 +61,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.preview.PreviewOutput;
 import com.openexchange.preview.PreviewService;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -85,7 +86,14 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
 
     @Override
     public void convert(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
-        final FileHolder fileHolder = (FileHolder) result.getResultObject();
+        final FileHolder fileHolder;
+        {
+            final Object resultObject = result.getResultObject();
+            if (!(resultObject instanceof FileHolder)) {
+                throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(FileHolder.class.getSimpleName(), null == resultObject ? "null" : resultObject.getClass().getSimpleName());
+            }
+            fileHolder = (FileHolder) resultObject;
+        }
         /*
          * Obtain preview service
          */
