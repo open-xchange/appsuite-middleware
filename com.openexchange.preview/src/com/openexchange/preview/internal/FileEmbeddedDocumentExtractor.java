@@ -53,109 +53,116 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.tika.config.TikaConfig;
-import org.apache.tika.exception.TikaException;
+import org.apache.tika.extractor.EmbeddedDocumentExtractor;
 import org.apache.tika.io.IOUtils;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
-import org.apache.tika.parser.ParseContext;
-import org.apache.tika.parser.Parser;
+import org.apache.tika.mime.MimeTypeException;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
-import com.openexchange.filemanagement.ManagedFile;
+import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
+import com.openexchange.java.Streams;
 
 /**
- * {@link TikaImageExtractingParser}
- * 
+ * {@link FileEmbeddedDocumentExtractor}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class TikaImageExtractingParser implements Parser {
-
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TikaImageExtractingParser.class));
-
-    private static final Set<MediaType> TYPES;
-
-    static {
-        final Set<MediaType> types = new HashSet<MediaType>(6);
-        types.add(MediaType.image("bmp"));
-        types.add(MediaType.image("gif"));
-        types.add(MediaType.image("jpg"));
-        types.add(MediaType.image("jpeg"));
-        types.add(MediaType.image("png"));
-        types.add(MediaType.image("tiff"));
-        TYPES = Collections.unmodifiableSet(types);
-    }
+public final class FileEmbeddedDocumentExtractor implements EmbeddedDocumentExtractor {
 
     private final TikaDocumentHandler documentHandler;
 
-    private final TikaConfig config;
-
     private final ManagedFileManagement fileManagement;
 
-    private final int count = 0;
+    private int count;
 
-    public TikaImageExtractingParser(final TikaDocumentHandler documentHandler) {
+    private final TikaConfig config;
+
+    private final Set<MediaType> imageTypes;
+
+    /**
+     * Initializes a new {@link FileEmbeddedDocumentExtractor}.
+     * 
+     * @param documentHandler
+     */
+    public FileEmbeddedDocumentExtractor(final TikaDocumentHandler documentHandler) {
         super();
         this.documentHandler = documentHandler;
+        this.fileManagement = documentHandler.serviceLookup.getService(ManagedFileManagement.class);
+        count = 1;
         config = TikaConfig.getDefaultConfig();
-        fileManagement = documentHandler.serviceLookup.getService(ManagedFileManagement.class);
-    }
-
-    @Override
-    public Set<MediaType> getSupportedTypes(final ParseContext context) {
-        return TYPES;
-    }
-
-    @Override
-    public void parse(final InputStream stream, final ContentHandler handler, final Metadata metadata, final ParseContext context) throws IOException, SAXException, TikaException {
         /*
-         * Is it a supported image?
+         * Image type
          */
-        final String filename = metadata.get(Metadata.RESOURCE_NAME_KEY);
-        final String type = metadata.get(Metadata.CONTENT_TYPE);
-        if (type != null) {
-            for (final MediaType mt : TYPES) {
-                if (mt.toString().equals(type)) {
-                    handleImage(stream, filename, type);
-                    return;
-                }
-            }
-        }
-        if (filename != null) {
-            for (final MediaType mt : TYPES) {
-                final String ext = "." + mt.getSubtype();
-                if (filename.endsWith(ext)) {
-                    handleImage(stream, filename, type);
-                    return;
-                }
-            }
-        }
+        imageTypes = new HashSet<MediaType>();
+        imageTypes.add(MediaType.image("bmp"));
+        imageTypes.add(MediaType.image("gif"));
+        imageTypes.add(MediaType.image("jpg"));
+        imageTypes.add(MediaType.image("jpeg"));
+        imageTypes.add(MediaType.image("png"));
+        imageTypes.add(MediaType.image("tiff"));
     }
 
     @Override
-    public void parse(final InputStream stream, final ContentHandler handler, final Metadata metadata) throws IOException, SAXException, TikaException {
-        parse(stream, handler, metadata, new ParseContext());
+    public boolean shouldParseEmbedded(final Metadata metadata) {
+        return true;
     }
 
-    private void handleImage(final InputStream stream, final String filename, final String type) throws IOException {
-        final InputStream in = stream;
+    @Override
+    public void parseEmbedded(final InputStream inputStream, final ContentHandler contentHandler, final Metadata metadata, final boolean outputHtml) throws SAXException, IOException {
+        InputStream in = inputStream;
         try {
-            final ManagedFile managedFile = documentHandler.extractedFiles.get(filename);
-            final File outputFile = managedFile.getFile();
+            final String resourceName = metadata.get(Metadata.RESOURCE_NAME_KEY);
+            String name = resourceName;
+            if (name == null) {
+                name = Integer.toString(count++);
+            }
+            // ²contentHandler.s
+            /*
+             * MIME type
+             */
+            String contentType = metadata.get(Metadata.CONTENT_TYPE);
+            if (name.indexOf('.') == -1 && contentType != null) {
+                try {
+                    name += config.getMimeRepository().forName(contentType).getExtension();
+                } catch (final MimeTypeException e) {
+                    TikaDocumentHandler.LOG.debug("Invalid MIME type encountered: " + contentType, e);
+                }
+                if (name.indexOf('.') == -1) {
+                    final byte[] bytes = Streams.stream2bytes(in);
+                    contentType = documentHandler.getDocumentType(Streams.newByteArrayInputStream(bytes));
+                    try {
+                        name += config.getMimeRepository().forName(contentType).getExtension();
+                    } catch (final MimeTypeException e) {
+                        TikaDocumentHandler.LOG.debug("Invalid MIME type encountered: " + contentType, e);
+                    }
+                    in = Streams.newByteArrayInputStream(bytes);
+                }
+            }
+            /*
+             * Copy to new file
+             */
+            final int pos = name.indexOf('.');
+            String prefix = name.substring(0, pos);
+            if (prefix.length() < 2) {
+                prefix += "00";
+            }
+            final File outputFile = fileManagement.newTempFile(prefix + '-', name.substring(pos));
             final FileOutputStream os = new FileOutputStream(outputFile);
             try {
                 IOUtils.copy(in, os);
             } finally {
                 IOUtils.closeQuietly(os);
             }
+            documentHandler.extractedFiles.put(resourceName, fileManagement.createManagedFile(outputFile));
+        } catch (final OXException e) {
+            throw new IOException("An Open-Xchange error occurred.", e);
         } finally {
             IOUtils.closeQuietly(in);
         }
     }
-
 }
