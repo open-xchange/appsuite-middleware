@@ -111,7 +111,7 @@ public final class TikaImageRewritingContentHandler extends ContentHandlerDecora
                     try {
                         final ManagedFile managedFile = fileManagement.createManagedFile(fileManagement.newTempFile());
                         documentHandler.extractedFiles.put(resourceName, managedFile);
-                        attrs.setValue(i, imgSource.generateUrl(new ImageLocation.Builder(managedFile.getID()).build(), documentHandler.session));
+                        attrs.setValue(i, generateImageURL(managedFile));
                     } catch (final OXException e) {
                         throw new SAXException("Couldn't create image file.", e);
                     }
@@ -119,5 +119,9 @@ public final class TikaImageRewritingContentHandler extends ContentHandlerDecora
             }
         }
         super.startElement(uri, localName, qName, attrs);
+    }
+
+    private String generateImageURL(final ManagedFile managedFile) throws OXException {
+        return imgSource.generateUrl(new ImageLocation.Builder(managedFile.getID()).build(), documentHandler.session);
     }
 }
