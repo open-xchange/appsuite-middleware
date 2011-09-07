@@ -116,21 +116,21 @@ public final class TikaImageExtractingParser implements Parser {
         /*
          * Is it a supported image?
          */
-        final String filename = metadata.get(Metadata.RESOURCE_NAME_KEY);
+        final String fileName = metadata.get(Metadata.RESOURCE_NAME_KEY);
         final String type = metadata.get(Metadata.CONTENT_TYPE);
         if (type != null) {
             for (final MediaType mt : TYPES) {
                 if (mt.toString().equals(type)) {
-                    handleImage(stream, filename, type);
+                    handleImage(stream, fileName, type);
                     return;
                 }
             }
         }
-        if (filename != null) {
+        if (fileName != null) {
             for (final MediaType mt : TYPES) {
                 final String ext = "." + mt.getSubtype();
-                if (filename.endsWith(ext)) {
-                    handleImage(stream, filename, type);
+                if (fileName.endsWith(ext)) {
+                    handleImage(stream, fileName, type);
                     return;
                 }
             }
@@ -142,10 +142,12 @@ public final class TikaImageExtractingParser implements Parser {
         parse(stream, handler, metadata, new ParseContext());
     }
 
-    private void handleImage(final InputStream stream, final String filename, final String type) throws IOException {
+    private void handleImage(final InputStream stream, final String fileName, final String type) throws IOException {
         final InputStream in = stream;
         try {
-            final ManagedFile managedFile = documentHandler.extractedFiles.get(filename);
+            final ManagedFile managedFile = documentHandler.extractedFiles.get(fileName);
+            managedFile.setContentType(type);
+            managedFile.setFileName(fileName);
             final File outputFile = managedFile.getFile();
             final FileOutputStream os = new FileOutputStream(outputFile);
             try {
