@@ -148,6 +148,7 @@ public final class ImageUtility {
      */
     public static void startImageUrl(final ImageLocation imageLocation, final Session session, final ImageDataSource imageDataSource, final StringBuilder sb) {
         final String prefix;
+        final String route;
         {
             final HostData hostData = (HostData) session.getParameter(HostnameService.PARAM_HOST_DATA);
             if (hostData == null) {
@@ -155,33 +156,20 @@ public final class ImageUtility {
                  * Compose relative URL
                  */
                 prefix = "";
+                route = null;
             } else {
                 /*
                  * Compose absolute URL
                  */
-                final String p;
-                final String sPort;
-                if (hostData.isSecure()) {
-                    p = "https://";
-                    final int por = hostData.getPort();
-                    if (por == 443) {
-                        sPort = "";
-                    } else {
-                        sPort = sb.append(':').append(por).toString();
-                        sb.setLength(0);
-                    }
-                } else {
-                    p = "http://";
-                    final int por = hostData.getPort();
-                    if (por == 80) {
-                        sPort = "";
-                    } else {
-                        sPort = sb.append(':').append(por).toString();
-                        sb.setLength(0);
-                    }
+                sb.append(hostData.isSecure() ? "https://" : "http://");
+                sb.append(hostData.getHost());
+                final int port = hostData.getPort();
+                if ((hostData.isSecure() && port != 443) || (!hostData.isSecure() && port != 80)) {
+                    sb.append(':').append(port);
                 }
-                prefix = sb.append(p).append(hostData.getHost()).append(sPort).toString();
+                prefix = sb.toString();
                 sb.setLength(0);
+                route = hostData.getRoute();
             }
         }
         /*
@@ -205,6 +193,9 @@ public final class ImageUtility {
          * Compose URL parameters
          */
         sb.append(prefix).append('/').append(ImageDataSource.ALIAS);
+        if (null != route) {
+            sb.append(";jsessionid=").append(route);
+        }
         sb.append('?').append("signature=").append(urlEncodeSafe(signParam));
         sb.append('&').append("source=").append(urlEncodeSafe(imageDataSource.getRegistrationName()));
         /*
