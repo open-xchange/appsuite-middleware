@@ -54,7 +54,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.push.internal.PushClientWhitelist;
+import com.openexchange.push.PushClientWhitelist;
 
 /**
  * {@link WhitelistServiceTracker} - The service tracker for push managers.

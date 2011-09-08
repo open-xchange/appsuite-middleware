@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.push.internal;
+package com.openexchange.push;
 
 import java.util.HashSet;
 import java.util.Set;
