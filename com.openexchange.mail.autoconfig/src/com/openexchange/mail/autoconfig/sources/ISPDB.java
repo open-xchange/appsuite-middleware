@@ -71,7 +71,7 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  * Connects to the Mozilla ISPDB. For more information see https://developer.mozilla.org/en/Thunderbird/Autoconfiguration
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class ISPDB extends AbstractConfigSource {

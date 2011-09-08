@@ -60,7 +60,7 @@ import com.openexchange.mail.autoconfig.xmlparser.Server.SocketType;
 
 /**
  * {@link AbstractConfigSource}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public abstract class AbstractConfigSource implements ConfigSource {
@@ -132,7 +132,7 @@ public abstract class AbstractConfigSource implements ConfigSource {
             autoconfig.setTransportServer(currentOutgoingServer.getHostname());
 
             autoconfig.setUsername(currentIncomingServer.getUsername());
-            
+
             break;
         }
 

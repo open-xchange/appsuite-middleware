@@ -53,15 +53,15 @@ import java.util.Map;
 
 /**
  * {@link Documentation}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Documentation {
-    
+
     public static final String URL = "url";
-    
+
     public static final String LANG = "lang";
-    
+
     public static final String DESC = "descr";
 
     private String url;
@@ -70,7 +70,7 @@ public class Documentation {
 
     /**
      * Gets the url
-     * 
+     *
      * @return The url
      */
     public String getUrl() {
@@ -79,7 +79,7 @@ public class Documentation {
 
     /**
      * Sets the url
-     * 
+     *
      * @param url The url to set
      */
     public void setUrl(String url) {
@@ -88,7 +88,7 @@ public class Documentation {
 
     /**
      * Gets the description
-     * 
+     *
      * @return The description
      */
     public Map<String, String> getDescriptions() {
@@ -97,7 +97,7 @@ public class Documentation {
 
     /**
      * Sets the description
-     * 
+     *
      * @param descriptions The description to set
      */
     public void setDescriptions(Map<String, String> descriptions) {

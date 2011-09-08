@@ -68,11 +68,11 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link Database}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Database extends AbstractConfigSource {
-    
+
     static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Database.class);
 
     private ServiceLookup services;
@@ -107,10 +107,10 @@ public class Database extends AbstractConfigSource {
     @Override
     public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context) throws OXException {
         Autoconfig autoconfig = new Autoconfig();
-        
+
         DatabaseService database = services.getService(DatabaseService.class);
         Connection connection = database.getReadOnly(context);
-        
+
         try {
             getStore(connection, autoconfig, emailLocalPart, emailDomain, password);
             String username = autoconfig.getUsername();
@@ -131,7 +131,7 @@ public class Database extends AbstractConfigSource {
         if (autoconfig.getMailServer() == null || autoconfig.getTransportServer() == null) {
             return null;
         }
-        
+
         return autoconfig;
     }
 
@@ -150,7 +150,7 @@ public class Database extends AbstractConfigSource {
             String username;
 
             String url = rs.getString("url");
-            
+
             try {
 
                 URI uri = URIParser.parse(url, URIDefaults.SMTP);
@@ -164,7 +164,7 @@ public class Database extends AbstractConfigSource {
                         port = URIDefaults.SMTP.getPort();
                     }
                 }
-                
+
                 if (!MailValidator.checkForSmtp(host, port)) {
                     continue;
                 }
@@ -178,7 +178,7 @@ public class Database extends AbstractConfigSource {
                 } else {
                     continue;
                 }
-                
+
                 if (!MailValidator.validateSmtp(host, port, username, password)) {
                     continue;
                 }
@@ -186,7 +186,7 @@ public class Database extends AbstractConfigSource {
                 // Try next entry, if any problem occurs.
                 continue;
             }
-            
+
             autoconfig.setTransportServer(host);
             autoconfig.setTransportProtocol(protocol);
             autoconfig.setTransportSecure(secure);
@@ -240,7 +240,7 @@ public class Database extends AbstractConfigSource {
                         port = uriDefaults.getPort();
                     }
                 }
-                
+
                 if (uriDefaults == URIDefaults.IMAP && !MailValidator.checkForImap(host, port)) {
                     continue;
                 }
@@ -275,14 +275,14 @@ public class Database extends AbstractConfigSource {
                 // Try next entry, if any problem occurs.
                 continue;
             }
-            
+
             tempConfig.setMailServer(host);
             tempConfig.setMailProtocol(protocol);
             tempConfig.setMailSecure(secure);
             tempConfig.setMailPort(port);
             tempConfig.setUsername(username);
         }
-        
+
         autoconfig.setMailServer(tempConfig.getMailServer());
         autoconfig.setMailProtocol(tempConfig.getMailProtocol());
         autoconfig.setMailSecure(tempConfig.isTransportSecure());

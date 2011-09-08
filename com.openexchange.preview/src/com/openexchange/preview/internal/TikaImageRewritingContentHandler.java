@@ -72,7 +72,7 @@ public final class TikaImageRewritingContentHandler extends ContentHandlerDecora
 
     /**
      * Initializes a new {@link TikaImageRewritingContentHandler}.
-     * 
+     *
      * @param handler The delegate handler
      * @param documentHandler The document handler
      */

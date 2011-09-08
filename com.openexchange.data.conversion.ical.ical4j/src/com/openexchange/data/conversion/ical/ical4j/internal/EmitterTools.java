@@ -115,7 +115,7 @@ public final class EmitterTools {
     public static DateTime toDateTime(final ZoneInfo zoneInfo, final java.util.Date date, final String tzid) {
         return toDateTime(getRegistry(zoneInfo), date, tzid);
     }
-    
+
     private static DateTime toDateTime(final TimeZoneRegistry registry, final java.util.Date date, final String tzid) {
         if (null == tzid) {
             return toDateTime(date);

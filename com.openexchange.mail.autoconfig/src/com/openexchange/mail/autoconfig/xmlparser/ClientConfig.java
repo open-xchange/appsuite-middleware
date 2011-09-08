@@ -53,7 +53,7 @@ import java.util.Collection;
 
 /**
  * {@link ClientConfig}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class ClientConfig {
@@ -66,7 +66,7 @@ public class ClientConfig {
 
     /**
      * Gets the emailProvider
-     * 
+     *
      * @return The emailProvider
      */
     public Collection<EmailProvider> getEmailProvider() {
@@ -75,7 +75,7 @@ public class ClientConfig {
 
     /**
      * Sets the emailProvider
-     * 
+     *
      * @param emailProvider The emailProvider to set
      */
     public void setEmailProvider(Collection<EmailProvider> emailProvider) {

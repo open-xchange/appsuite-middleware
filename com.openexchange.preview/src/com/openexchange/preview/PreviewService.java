@@ -56,14 +56,14 @@ import com.openexchange.session.Session;
 
 /**
  * {@link PreviewService} - The preview service.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface PreviewService {
 
     /**
      * Detects the MIME type of passed input stream's data.
-     * 
+     *
      * @param inputStream The input stream providing the data
      * @return The detected MIME type
      * @throws OXException If an error occurs
@@ -72,7 +72,7 @@ public interface PreviewService {
 
     /**
      * Gets the preview document for specified argument and output format.
-     * 
+     *
      * @param arg The argument either denotes an URL or a file
      * @param output The output format
      * @param session The session
@@ -83,7 +83,7 @@ public interface PreviewService {
 
     /**
      * Gets the preview document for specified input stream's data and output format.
-     * 
+     *
      * @param inputStream The input stream providing the data
      * @param output The output format
      * @param session The session
@@ -94,7 +94,7 @@ public interface PreviewService {
 
     /**
      * Gets the preview document for specified s data and output format.
-     * 
+     *
      * @param documentData The data
      * @param output The output format
      * @param session The session

@@ -55,7 +55,7 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link AutoconfigAction}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public abstract class AutoconfigAction implements AJAXActionService {

@@ -66,7 +66,7 @@ import com.openexchange.groupware.contexts.Context;
 
 /**
  * {@link Klass} - Represents the attribute converter for <code>"CLASS"</code> element.
- * 
+ *
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class Klass<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T, U> {

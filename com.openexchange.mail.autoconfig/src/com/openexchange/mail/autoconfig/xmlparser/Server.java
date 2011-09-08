@@ -51,7 +51,7 @@ package com.openexchange.mail.autoconfig.xmlparser;
 
 /**
  * {@link Server}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public abstract class Server {
@@ -77,27 +77,27 @@ public abstract class Server {
     public static final String SSL = "SSL";
 
     public static final String USERNAME = "username";
-    
+
     public static final String EMAILADDRESS = "%EMAILADDRESS%";
-    
+
     public static final String MAILLOCALPART = "%EMAILLOCALPART%";
-    
+
     public static final String EMAILDOMAIN = "%EMAILDOMAIN%";
 
     public static final String AUTHENTICATION = "authentication";
-    
+
     public static final String PASSWORD_CLEAR = "password-cleartext";
-    
+
     public static final String PASSWORD_ENC = "password-encrypted";
-    
+
     public static final String NTLM = "NTLM";
-    
+
     public static final String GSSAPI = "GSSAPI";
-    
+
     public static final String IP_BASED = "client-IP-address";
-    
+
     public static final String TLS = "TLS-client-cert";
-    
+
     public static final String NONE = "none";
 
     private String hostname;
@@ -131,7 +131,7 @@ public abstract class Server {
 
         /**
          * Gets the keyword
-         * 
+         *
          * @return The keyword
          */
         public String getKeyword() {
@@ -142,7 +142,7 @@ public abstract class Server {
 
     /**
      * Gets the hostname
-     * 
+     *
      * @return The hostname
      */
     public String getHostname() {
@@ -151,7 +151,7 @@ public abstract class Server {
 
     /**
      * Sets the hostname
-     * 
+     *
      * @param hostname The hostname to set
      */
     public void setHostname(String hostname) {
@@ -160,7 +160,7 @@ public abstract class Server {
 
     /**
      * Gets the port
-     * 
+     *
      * @return The port
      */
     public int getPort() {
@@ -169,7 +169,7 @@ public abstract class Server {
 
     /**
      * Sets the port
-     * 
+     *
      * @param port The port to set
      */
     public void setPort(int port) {
@@ -178,7 +178,7 @@ public abstract class Server {
 
     /**
      * Gets the socketType
-     * 
+     *
      * @return The socketType
      */
     public SocketType getSocketType() {
@@ -187,7 +187,7 @@ public abstract class Server {
 
     /**
      * Sets the socketType
-     * 
+     *
      * @param socketType The socketType to set
      */
     public void setSocketType(String socketType) {
@@ -196,7 +196,7 @@ public abstract class Server {
 
     /**
      * Gets the username
-     * 
+     *
      * @return The username
      */
     public String getUsername() {
@@ -205,7 +205,7 @@ public abstract class Server {
 
     /**
      * Sets the username
-     * 
+     *
      * @param username The username to set
      */
     public void setUsername(String username) {
@@ -214,7 +214,7 @@ public abstract class Server {
 
     /**
      * Gets the authentication
-     * 
+     *
      * @return The authentication
      */
     public String getAuthentication() {
@@ -223,13 +223,13 @@ public abstract class Server {
 
     /**
      * Sets the authentication
-     * 
+     *
      * @param authentication The authentication to set
      */
     public void setAuthentication(String authentication) {
         this.authentication = authentication;
     }
-    
+
     public abstract void setType(String setType);
 
 }

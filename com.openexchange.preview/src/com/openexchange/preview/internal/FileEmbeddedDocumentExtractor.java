@@ -86,7 +86,7 @@ public final class FileEmbeddedDocumentExtractor implements EmbeddedDocumentExtr
 
     /**
      * Initializes a new {@link FileEmbeddedDocumentExtractor}.
-     * 
+     *
      * @param documentHandler
      */
     public FileEmbeddedDocumentExtractor(final TikaDocumentHandler documentHandler) {

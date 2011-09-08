@@ -66,17 +66,19 @@ public final class ICal4jSession implements ICalSession {
 
     /**
      * Default constructor.
-     * @param mode 
+     * @param mode
      */
     public ICal4jSession(Mode mode) {
         super();
         this.mode = mode;
     }
 
+    @Override
     public Mode getMode() {
         return mode;
     }
 
+    @Override
     public ZoneInfo getZoneInfo() {
         return mode.getZoneInfo();
     }

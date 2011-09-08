@@ -62,7 +62,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AutoconfigResultConverter}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class AutoconfigResultConverter implements ResultConverter {
@@ -91,7 +91,7 @@ public class AutoconfigResultConverter implements ResultConverter {
 
     private JSONObject convert(Autoconfig autoconfig) throws OXException {
         JSONObject json = new JSONObject();
-        
+
         if (autoconfig == null) {
             return json;
         }

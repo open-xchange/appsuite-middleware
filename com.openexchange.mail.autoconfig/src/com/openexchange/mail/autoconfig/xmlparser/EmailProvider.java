@@ -53,7 +53,7 @@ import java.util.Collection;
 
 /**
  * {@link EmailProvider}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class EmailProvider {
@@ -67,9 +67,9 @@ public class EmailProvider {
     public static final String INCOMING_SERVER = "incomingServer";
 
     public static final String OUTGOING_SERVER = "outgoingServer";
-    
+
     public static final String DOCUMENTATION = "documentation";
-    
+
     public static final String INSTRUCTION = "instruction";
 
     private String provider;
@@ -85,12 +85,12 @@ public class EmailProvider {
     private Collection<OutgoingServer> outgoingServer;
 
     private Collection<Documentation> documentations;
-    
+
     private Collection<Instruction> instructions;
 
     /**
      * Gets the provider
-     * 
+     *
      * @return The provider
      */
     public String getProvider() {
@@ -99,7 +99,7 @@ public class EmailProvider {
 
     /**
      * Sets the provider
-     * 
+     *
      * @param provider The provider to set
      */
     public void setProvider(String provider) {
@@ -108,7 +108,7 @@ public class EmailProvider {
 
     /**
      * Gets the domains
-     * 
+     *
      * @return The domains
      */
     public Collection<String> getDomains() {
@@ -117,7 +117,7 @@ public class EmailProvider {
 
     /**
      * Sets the domains
-     * 
+     *
      * @param domains The domains to set
      */
     public void setDomains(Collection<String> domains) {
@@ -126,7 +126,7 @@ public class EmailProvider {
 
     /**
      * Gets the displayName
-     * 
+     *
      * @return The displayName
      */
     public String getDisplayName() {
@@ -135,7 +135,7 @@ public class EmailProvider {
 
     /**
      * Sets the displayName
-     * 
+     *
      * @param displayName The displayName to set
      */
     public void setDisplayName(String displayName) {
@@ -144,7 +144,7 @@ public class EmailProvider {
 
     /**
      * Gets the displayShortName
-     * 
+     *
      * @return The displayShortName
      */
     public String getDisplayShortName() {
@@ -153,7 +153,7 @@ public class EmailProvider {
 
     /**
      * Sets the displayShortName
-     * 
+     *
      * @param displayShortName The displayShortName to set
      */
     public void setDisplayShortName(String displayShortName) {
@@ -162,7 +162,7 @@ public class EmailProvider {
 
     /**
      * Gets the incomingServer
-     * 
+     *
      * @return The incomingServer
      */
     public Collection<IncomingServer> getIncomingServer() {
@@ -171,7 +171,7 @@ public class EmailProvider {
 
     /**
      * Sets the incomingServer
-     * 
+     *
      * @param incomingServer The incomingServer to set
      */
     public void setIncomingServer(Collection<IncomingServer> incomingServer) {
@@ -180,7 +180,7 @@ public class EmailProvider {
 
     /**
      * Gets the outgoingServer
-     * 
+     *
      * @return The outgoingServer
      */
     public Collection<OutgoingServer> getOutgoingServer() {
@@ -189,7 +189,7 @@ public class EmailProvider {
 
     /**
      * Sets the outgoingServer
-     * 
+     *
      * @param outgoingServer The outgoingServer to set
      */
     public void setOutgoingServer(Collection<OutgoingServer> outgoingServer) {
@@ -198,7 +198,7 @@ public class EmailProvider {
 
     /**
      * Gets the documentations
-     * 
+     *
      * @return The documentations
      */
     public Collection<Documentation> getDocumentations() {
@@ -207,7 +207,7 @@ public class EmailProvider {
 
     /**
      * Sets the documentations
-     * 
+     *
      * @param documentations The documentations to set
      */
     public void setDocumentations(Collection<Documentation> documentations) {

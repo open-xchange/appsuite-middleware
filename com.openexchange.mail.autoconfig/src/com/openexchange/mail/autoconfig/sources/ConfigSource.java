@@ -56,21 +56,21 @@ import com.openexchange.mail.autoconfig.Autoconfig;
 
 /**
  * {@link ConfigSource}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public interface ConfigSource {
 
     /**
      * Generates an Autoconfig Object with the given Mail information.
-     * 
+     *
      * @param emailLocalPart
      * @param emailDomain
      * @param password
      * @param user
      * @param context
      * @return An AtoConfig Object or null if generation fails.
-     * @throws OXException 
+     * @throws OXException
      */
     public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context) throws OXException;
 }

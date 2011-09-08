@@ -51,7 +51,7 @@ package com.openexchange.mail.autoconfig.xmlparser;
 
 /**
  * {@link IncomingServer}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class IncomingServer extends Server {
@@ -77,7 +77,7 @@ public class IncomingServer extends Server {
 
         /**
          * Gets the keyword
-         * 
+         *
          * @return The keyword
          */
         public String getKeyword() {
@@ -87,7 +87,7 @@ public class IncomingServer extends Server {
 
     /**
      * Gets the type
-     * 
+     *
      * @return The type
      */
     public IncomingType getType() {
@@ -96,9 +96,10 @@ public class IncomingServer extends Server {
 
     /**
      * Sets the type
-     * 
+     *
      * @param type The type to set
      */
+    @Override
     public void setType(String type) {
         this.type = IncomingType.getIncomingType(type);
     }

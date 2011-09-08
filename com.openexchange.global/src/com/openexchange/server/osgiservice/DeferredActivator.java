@@ -457,7 +457,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
 
     /**
      * Removes specified service.
-     * 
+     *
      * @param <S> Type of service's class
      * @param clazz The service's class
      * @return <code>true</code> if service is removes; otherwise <code>false</code> if not initialized or absent

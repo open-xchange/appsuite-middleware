@@ -59,18 +59,18 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link GetAction}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class GetAction extends AutoconfigAction {
 
     private static final String EMAIL = "email";
-    
+
     private static final String PASSWORD = "password";
 
     /**
      * Initializes a new {@link GetAction}.
-     * 
+     *
      * @param services
      */
     public GetAction(ServiceLookup services) {

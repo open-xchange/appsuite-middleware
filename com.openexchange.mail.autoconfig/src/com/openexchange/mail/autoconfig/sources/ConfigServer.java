@@ -67,7 +67,7 @@ import com.openexchange.mail.autoconfig.xmlparser.ClientConfig;
 
 /**
  * {@link ConfigServer}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class ConfigServer extends AbstractConfigSource {

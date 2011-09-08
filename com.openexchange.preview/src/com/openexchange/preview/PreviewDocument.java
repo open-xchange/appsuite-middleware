@@ -53,7 +53,7 @@ import java.util.Map;
 
 /**
  * {@link PreviewDocument}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface PreviewDocument {
@@ -70,14 +70,14 @@ public interface PreviewDocument {
      * <li><code>"author"</code></li>
      * <li>...</li>
      * </ul>
-     * 
+     *
      * @return The meta data as a {@link Map}
      */
     Map<String, String> getMetaData();
 
     /**
      * Gets the document's content in its output format.
-     * 
+     *
      * @return The content (or <code>null</code> if output format does not imply a content; e.g. {@link PreviewOutput#METADATA})
      */
     String getContent();

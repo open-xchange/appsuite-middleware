@@ -57,7 +57,7 @@ import com.openexchange.server.osgiservice.HousekeepingActivator;
 
 /**
  * {@link Activator}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Activator extends HousekeepingActivator {

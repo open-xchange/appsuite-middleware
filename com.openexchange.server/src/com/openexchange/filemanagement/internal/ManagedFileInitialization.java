@@ -59,7 +59,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link ManagedFileInitialization} - Initialization for {@link ManagedFileManagement}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ManagedFileInitialization implements Initialization {

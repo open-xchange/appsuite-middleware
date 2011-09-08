@@ -51,35 +51,35 @@ package com.openexchange.groupware.notify.hostname;
 
 /**
  * {@link HostData} - Provides host data.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface HostData {
 
     /**
      * Gets the AJP route: : &lt;http-session-id&gt; + <code>"." </code>+ &lt;route&gt;
-     * 
+     *
      * @return The route
      */
     String getRoute();
 
     /**
      * Gets the host name.
-     * 
+     *
      * @return The host name
      */
     String getHost();
 
     /**
      * Gets the port.
-     * 
+     *
      * @return The port
      */
     int getPort();
 
     /**
      * Indicates if a secure connection has been established.
-     * 
+     *
      * @return <code>true</code> for a secure connection; otherwise <code>false</code>
      */
     boolean isSecure();

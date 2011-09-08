@@ -57,7 +57,7 @@ import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * {@link HostDataImpl} - The {@link HostData} implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HostDataImpl implements HostData {
@@ -72,7 +72,7 @@ public final class HostDataImpl implements HostData {
 
     /**
      * Initializes a new {@link HostDataImpl} from specified arguments.
-     * 
+     *
      * @param httpRequest The HTTP Servlet request
      */
     public HostDataImpl(final HttpServletRequest httpRequest, final int userId, final int contextId) {
@@ -129,7 +129,7 @@ public final class HostDataImpl implements HostData {
 
     /**
      * Sets the host
-     * 
+     *
      * @param host The host to set
      */
     public void setHost(final String host) {
@@ -138,7 +138,7 @@ public final class HostDataImpl implements HostData {
 
     /**
      * Sets the port
-     * 
+     *
      * @param port The port to set
      */
     public void setPort(final int port) {
@@ -147,7 +147,7 @@ public final class HostDataImpl implements HostData {
 
     /**
      * Sets the secure
-     * 
+     *
      * @param secure The secure to set
      */
     public void setSecure(final boolean secure) {

@@ -63,6 +63,7 @@ public final class SimpleMode implements Mode {
         this.zoneInfo = zoneInfo;
     }
 
+    @Override
     public ZoneInfo getZoneInfo() {
         return zoneInfo;
     }

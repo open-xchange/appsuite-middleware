@@ -84,7 +84,7 @@ import com.openexchange.mail.autoconfig.AutoconfigException;
 
 /**
  * {@link AutoconfigParser}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class AutoconfigParser {

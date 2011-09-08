@@ -871,7 +871,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             final MailAccountGetSwitch storageGetSwitch = new MailAccountGetSwitch(storageVersion);
             final GetSwitch getSwitch = new GetSwitch(mailAccount);
             /*
-             * Iterate attributes and compare their values except the one for Attribute.UNIFIED_INBOX_ENABLED_LITERAL, 
+             * Iterate attributes and compare their values except the one for Attribute.UNIFIED_INBOX_ENABLED_LITERAL,
              * Attribute.PERSONAL_LITERAL and Attribute.REPLY_TO_LITERAL
              */
             for (final Attribute attribute : attributes) {

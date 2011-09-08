@@ -70,7 +70,7 @@ import com.openexchange.filemanagement.ManagedFileManagement;
 
 /**
  * {@link TikaImageExtractingParser}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TikaImageExtractingParser implements Parser {
@@ -78,16 +78,27 @@ public final class TikaImageExtractingParser implements Parser {
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TikaImageExtractingParser.class));
 
+    private static final Set<MediaType> TYPES_IMAGE;
+
+    private static final Set<MediaType> TYPES_EXCEL;
+
     private static final Set<MediaType> TYPES;
 
     static {
-        final Set<MediaType> types = new HashSet<MediaType>(6);
+        Set<MediaType> types = new HashSet<MediaType>(6);
         types.add(MediaType.image("bmp"));
         types.add(MediaType.image("gif"));
         types.add(MediaType.image("jpg"));
         types.add(MediaType.image("jpeg"));
         types.add(MediaType.image("png"));
         types.add(MediaType.image("tiff"));
+        TYPES_IMAGE = Collections.unmodifiableSet(types);
+        types = new HashSet<MediaType>(1);
+        types.add(MediaType.image("vnd.ms-excel"));
+        TYPES_EXCEL = Collections.unmodifiableSet(types);
+
+        types = new HashSet<MediaType>(TYPES_IMAGE);
+        types.addAll(TYPES_EXCEL);
         TYPES = Collections.unmodifiableSet(types);
     }
 
@@ -113,28 +124,52 @@ public final class TikaImageExtractingParser implements Parser {
 
     @Override
     public void parse(final InputStream stream, final ContentHandler handler, final Metadata metadata, final ParseContext context) throws IOException, SAXException, TikaException {
+        if (handledImage(stream, metadata)) {
+            return;
+        }
+        if (handledExcel(stream, metadata)) {
+            return;
+        }
+    }
+
+    private boolean handledExcel(final InputStream stream, final Metadata metadata) throws IOException {
+        final String fileName = metadata.get(Metadata.RESOURCE_NAME_KEY);
+        final String type = metadata.get(Metadata.CONTENT_TYPE);
+        if (type != null) {
+            for (final MediaType mt : TYPES_EXCEL) {
+                if (mt.toString().equals(type)) {
+                    //handleImage(stream, fileName, type);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean handledImage(final InputStream stream, final Metadata metadata) throws IOException {
         /*
          * Is it a supported image?
          */
         final String fileName = metadata.get(Metadata.RESOURCE_NAME_KEY);
         final String type = metadata.get(Metadata.CONTENT_TYPE);
         if (type != null) {
-            for (final MediaType mt : TYPES) {
+            for (final MediaType mt : TYPES_IMAGE) {
                 if (mt.toString().equals(type)) {
                     handleImage(stream, fileName, type);
-                    return;
+                    return true;
                 }
             }
         }
         if (fileName != null) {
-            for (final MediaType mt : TYPES) {
+            for (final MediaType mt : TYPES_IMAGE) {
                 final String ext = "." + mt.getSubtype();
                 if (fileName.endsWith(ext)) {
                     handleImage(stream, fileName, type);
-                    return;
+                    return true;
                 }
             }
         }
+        return false;
     }
 
     @Override

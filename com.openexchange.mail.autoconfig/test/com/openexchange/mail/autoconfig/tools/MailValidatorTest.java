@@ -53,7 +53,7 @@ import junit.framework.TestCase;
 
 /**
  * {@link MailValidatorTest}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class MailValidatorTest extends TestCase {

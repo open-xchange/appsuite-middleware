@@ -56,7 +56,7 @@ import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link AutoconfigException}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class AutoconfigException extends OXException implements LocalizableStrings {
@@ -74,11 +74,11 @@ public class AutoconfigException extends OXException implements LocalizableStrin
     public static OXException invalidMail(String mail) {
         return new OXException(2, INVALID_MAIL, mail).setPrefix(PREFIX);
     }
-    
+
     public static OXException xml(XmlPullParserException e) {
         return new OXException(3, null, e).setPrefix(PREFIX);
     }
-    
+
     public static OXException io(IOException e) {
         return new OXException(4, null, e).setPrefix(PREFIX);
     }

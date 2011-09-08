@@ -97,7 +97,7 @@ public final class LoginPerformer {
 
     /**
      * Gets the {@link LoginPerformer} instance.
-     * 
+     *
      * @return The instance
      */
     public static LoginPerformer getInstance() {

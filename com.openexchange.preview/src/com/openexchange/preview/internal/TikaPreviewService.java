@@ -71,7 +71,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link TikaPreviewService}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TikaPreviewService implements PreviewService {

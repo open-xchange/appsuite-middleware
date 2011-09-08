@@ -1813,7 +1813,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
         /**
          * Initializes a new {@link ConnectionMode}.
-         * 
+         *
          * @param connection
          * @param readWrite
          */

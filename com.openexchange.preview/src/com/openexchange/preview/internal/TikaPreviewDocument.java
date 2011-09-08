@@ -55,7 +55,7 @@ import com.openexchange.preview.PreviewDocument;
 
 /**
  * {@link TikaPreviewDocument}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TikaPreviewDocument implements PreviewDocument {
@@ -66,7 +66,7 @@ public final class TikaPreviewDocument implements PreviewDocument {
 
     /**
      * Initializes a new {@link TikaPreviewDocument}.
-     * 
+     *
      * @param content
      * @param map
      */

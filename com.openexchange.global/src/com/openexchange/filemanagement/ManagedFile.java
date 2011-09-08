@@ -63,7 +63,7 @@ public interface ManagedFile {
 
     /**
      * Constructs an URL to the resource held by this managed file.
-     * 
+     *
      * @param session The session
      * @return The URL to managed resource
      * @throws OXException If URL cannot be constructed

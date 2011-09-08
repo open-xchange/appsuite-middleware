@@ -9,7 +9,7 @@ import com.openexchange.mail.autoconfig.json.converter.AutoconfigResultConverter
 
 /**
  * {@link Activator}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Activator extends AJAXModuleActivator {

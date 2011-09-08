@@ -97,7 +97,7 @@ import com.openexchange.session.Session;
  * <p>
  * http://svn.alfresco.com/repos/alfresco-open-mirror/alfresco/HEAD/root/projects/repository/source/java/org/alfresco/repo/rendition/
  * executer/HTMLRenderingEngine.java
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TikaDocumentHandler {
@@ -129,7 +129,7 @@ public final class TikaDocumentHandler {
 
     /**
      * Initializes a new {@link TikaDocumentHandler}.
-     * 
+     *
      * @param encoding The character encoding (default is UTF-8)
      * @param serviceLookup The service look-up
      * @param session The session
@@ -141,7 +141,7 @@ public final class TikaDocumentHandler {
 
     /**
      * Initializes a new {@link TikaDocumentHandler}.
-     * 
+     *
      * @param mimeType The MIME type; e.g. <code>"application/pdf"</code> or <code>"application/vnd.ms-powerpoint"</code>
      * @param encoding The character encoding (default is UTF-8)
      * @param serviceLookup The service look-up
@@ -175,7 +175,7 @@ public final class TikaDocumentHandler {
 
     /**
      * Gets the meta data.
-     * 
+     *
      * @return The meta data
      */
     public Metadata getMetadata() {
@@ -184,7 +184,7 @@ public final class TikaDocumentHandler {
 
     /**
      * Gets the document's type.
-     * 
+     *
      * @param in The document's input stream
      * @return The type
      * @throws OXException If an error occurs
@@ -201,7 +201,7 @@ public final class TikaDocumentHandler {
 
     /**
      * Gets the document's language.
-     * 
+     *
      * @param in The document's input stream
      * @return The language
      * @throws OXException If an error occurs
@@ -222,7 +222,7 @@ public final class TikaDocumentHandler {
 
     /**
      * Gets the document's content.
-     * 
+     *
      * @param in The document's input stream
      * @param output The output format
      * @return The content according to output format
@@ -421,7 +421,7 @@ public final class TikaDocumentHandler {
     /**
      * Returns a transformer handler that serializes incoming SAX events to XHTML or HTML (depending the given method) using the given
      * output encoding.
-     * 
+     *
      * @param output The output stream
      * @param method Either "xml" or "html"
      * @param encoding The output encoding, or <code>null</code> for the platform default
@@ -442,7 +442,7 @@ public final class TikaDocumentHandler {
 
     /**
      * Returns a output writer with the given encoding.
-     * 
+     *
      * @param output output stream
      * @param encoding output encoding, or <code>null</code> for the platform default
      * @return output writer

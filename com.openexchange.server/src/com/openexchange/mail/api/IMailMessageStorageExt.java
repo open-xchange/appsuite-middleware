@@ -81,7 +81,7 @@ public interface IMailMessageStorageExt extends IMailMessageStorage {
      * Gets the identifiers if the mails whose <i>"Message-ID"</i> header is contained in specified list.
      * <p>
      * If any <i>"Message-ID"</i> header cannot be found, <code>null</code> is located at associated index position in returned array.
-     * 
+     *
      * @param messageIDs The <i>"Message-ID"</i> header list
      * @return An array providing the looked-up mails with ID and folder set
      * @throws OXException If mail identifiers could not be returned

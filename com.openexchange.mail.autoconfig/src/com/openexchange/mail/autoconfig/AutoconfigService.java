@@ -55,7 +55,7 @@ import com.openexchange.groupware.ldap.User;
 
 /**
  * {@link AutoconfigService}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public interface AutoconfigService {
@@ -67,7 +67,7 @@ public interface AutoconfigService {
      * @param user
      * @param context
      * @return An autoconfig Object if generation was successfull, null otherwise.
-     * @throws OXException 
+     * @throws OXException
      */
     public Autoconfig getConfig(String email, String password, User user, Context context) throws OXException;
 }

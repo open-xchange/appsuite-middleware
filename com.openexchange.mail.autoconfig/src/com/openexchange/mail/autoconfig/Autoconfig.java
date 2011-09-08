@@ -51,7 +51,7 @@ package com.openexchange.mail.autoconfig;
 
 /**
  * {@link Autoconfig}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Autoconfig {
@@ -71,12 +71,12 @@ public class Autoconfig {
     private boolean mailSecure;
 
     private boolean transportSecure;
-    
+
     private String username;
 
     /**
      * Gets the mailServer
-     * 
+     *
      * @return The mailServer
      */
     public String getMailServer() {
@@ -85,7 +85,7 @@ public class Autoconfig {
 
     /**
      * Sets the mailServer
-     * 
+     *
      * @param mailServer The mailServer to set
      */
     public void setMailServer(String mailServer) {
@@ -94,7 +94,7 @@ public class Autoconfig {
 
     /**
      * Gets the transportServer
-     * 
+     *
      * @return The transportServer
      */
     public String getTransportServer() {
@@ -103,7 +103,7 @@ public class Autoconfig {
 
     /**
      * Sets the transportServer
-     * 
+     *
      * @param transportServer The transportServer to set
      */
     public void setTransportServer(String transportServer) {
@@ -112,7 +112,7 @@ public class Autoconfig {
 
     /**
      * Gets the mailProtocol
-     * 
+     *
      * @return The mailProtocol
      */
     public String getMailProtocol() {
@@ -121,7 +121,7 @@ public class Autoconfig {
 
     /**
      * Sets the mailProtocol
-     * 
+     *
      * @param mailProtocol The mailProtocol to set
      */
     public void setMailProtocol(String mailProtocol) {
@@ -130,7 +130,7 @@ public class Autoconfig {
 
     /**
      * Gets the transportProtocol
-     * 
+     *
      * @return The transportProtocol
      */
     public String getTransportProtocol() {
@@ -139,7 +139,7 @@ public class Autoconfig {
 
     /**
      * Sets the transportProtocol
-     * 
+     *
      * @param transportProtocol The transportProtocol to set
      */
     public void setTransportProtocol(String transportProtocol) {
@@ -148,7 +148,7 @@ public class Autoconfig {
 
     /**
      * Gets the mailPort
-     * 
+     *
      * @return The mailPort
      */
     public int getMailPort() {
@@ -157,7 +157,7 @@ public class Autoconfig {
 
     /**
      * Sets the mailPort
-     * 
+     *
      * @param mailPort The mailPort to set
      */
     public void setMailPort(int mailPort) {
@@ -166,7 +166,7 @@ public class Autoconfig {
 
     /**
      * Gets the transportPort
-     * 
+     *
      * @return The transportPort
      */
     public int getTransportPort() {
@@ -175,7 +175,7 @@ public class Autoconfig {
 
     /**
      * Sets the transportPort
-     * 
+     *
      * @param transportPort The transportPort to set
      */
     public void setTransportPort(int transportPort) {
@@ -184,7 +184,7 @@ public class Autoconfig {
 
     /**
      * Gets the mailSecure
-     * 
+     *
      * @return The mailSecure
      */
     public boolean isMailSecure() {
@@ -193,7 +193,7 @@ public class Autoconfig {
 
     /**
      * Sets the mailSecure
-     * 
+     *
      * @param mailSecure The mailSecure to set
      */
     public void setMailSecure(boolean mailSecure) {
@@ -202,7 +202,7 @@ public class Autoconfig {
 
     /**
      * Gets the transportSecure
-     * 
+     *
      * @return The transportSecure
      */
     public boolean isTransportSecure() {
@@ -211,7 +211,7 @@ public class Autoconfig {
 
     /**
      * Sets the transportSecure
-     * 
+     *
      * @param transportSecure The transportSecure to set
      */
     public void setTransportSecure(boolean transportSecure) {

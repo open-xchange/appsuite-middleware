@@ -2865,7 +2865,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Finds corresponding UIDs of messages whose Message-ID header is contained in given message IDs.
-     * 
+     *
      * @param imapFolder The IMAP folder to search in
      * @param messageIds The message IDs
      * @return The UIDs of matching message or <code>-1</code> if none found
