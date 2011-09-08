@@ -229,6 +229,26 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
         return null == indexService ? null : indexService.getAdapter();
     }
 
+    /**
+     * The fields containing only the mail identifier.
+     */
+    protected static final MailField[] FIELDS_ID_AND_FOLDER = new MailField[] { MailField.ID, MailField.FOLDER_ID };
+
+    @Override
+    public MailMessage[] getMessagesByMessageID(final String... messageIDs) throws OXException {
+        if (messageStorage instanceof IMailMessageStorageExt) {
+            final IMailMessageStorageExt messageStorageExt = (IMailMessageStorageExt) messageStorage;
+            return messageStorageExt.getMessagesByMessageID(messageIDs);
+        }
+        final SearchTerm<?> searchTerm;
+        if (1 == messageIDs.length) {
+            searchTerm = new com.openexchange.mail.search.HeaderTerm("Message-ID", messageIDs[0]);
+        } else {
+            return EMPTY_RETVAL;
+        }
+        return messageStorage.searchMessages("INBOX", IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.ASC, searchTerm, FIELDS_ID_AND_FOLDER);
+    }
+
     private static final MailField[] FIELDS_HEADERS = { MailField.ID, MailField.HEADERS };
 
     @Override

@@ -140,6 +140,7 @@ import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.internal.RdbMailAccountStorage;
+import com.openexchange.push.PushClientWhitelist;
 import com.openexchange.push.PushEventConstants;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -2039,6 +2040,21 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
     }
 
+    private boolean isExtClient() {
+        return PushClientWhitelist.getInstance().isAllowed(session.getClient());
+    }
+
+    private static boolean equals(final String s1, final String s2) {
+        if (null == s2) {
+            if (null != s1) {
+                return false;
+            }
+        } else if (!s1.equals(s2)) {
+            return false;
+        }
+        return true;
+    }
+
     @Override
     public String sendMessage(final ComposedMailMessage composedMail, final ComposeType type, final int accountId) throws OXException {
         /*
@@ -2061,6 +2077,34 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 setRateLimitTime(rateLimit);
             } else {
                 sentMail = transport.sendMailMessage(composedMail, type);
+            }
+            /*
+             * Manually detect&set \Answered flag
+             */
+            if (ComposeType.NEW.equals(type) && isExtClient() && (mailAccess.getMessageStorage() instanceof IMailMessageStorageExt)) {
+                final List<String> lst = new ArrayList<String>(2);
+                {
+                    final String inReplyTo = sentMail.getFirstHeader("In-Reply-To");
+                    String references = sentMail.getFirstHeader("References");
+                    if (equals(inReplyTo, references)) {
+                        references = null;
+                    }
+                    if (null != inReplyTo) {
+                        lst.add(inReplyTo);
+                    }
+                    if (null != references) {
+                        lst.add(references);
+                    }
+                }
+                if (!lst.isEmpty()) {
+                    final IMailMessageStorageExt messageStorageExt = (IMailMessageStorageExt) mailAccess.getMessageStorage();
+                    final MailMessage[] mails = messageStorageExt.getMessagesByMessageID(lst.toArray(new String[lst.size()]));
+                    for (final MailMessage mail : mails) {
+                        if (null != mail) {
+                            setFlagReply(new MailPath(accountId, mail.getFolder(), mail.getMailId()));
+                        }
+                    }
+                }
             }
             /*
              * Email successfully sent, trigger data retention

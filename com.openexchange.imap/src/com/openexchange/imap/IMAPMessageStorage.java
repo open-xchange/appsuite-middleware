@@ -172,6 +172,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     private static final String STR_MSEC = "msec";
 
+    private static final boolean LOOK_UP_INBOX_ONLY = true;
+
     /*-
      * Members
      */
@@ -409,6 +411,58 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
         }
         return map;
+    }
+
+    @Override
+    public MailMessage[] getMessagesByMessageID(final String... messageIDs) throws OXException {
+        try {
+            final int length = messageIDs.length;
+            int count = 0;
+            final MailMessage[] retval = new MailMessage[length];
+            imapFolder = setAndOpenFolder(imapFolder, "INBOX", Folder.READ_ONLY);
+            final long[] uids = IMAPCommandsCollection.messageId2UID(imapFolder, messageIDs);
+            for (int i = 0; i < uids.length; i++) {
+                final long uid = uids[i];
+                if (uid != -1) {
+                    retval[i] = new IDMailMessage("INBOX", String.valueOf(uid));
+                    count++;
+                }
+            }
+            if (count == length || LOOK_UP_INBOX_ONLY) {
+                return retval;
+            }
+            /*
+             * Look-up other folders
+             */
+            recursiveMessageIDLookUp((IMAPFolder) imapStore.getDefaultFolder(), messageIDs, retval, count);
+            return retval;
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
+        }
+    }
+
+    private int recursiveMessageIDLookUp(final IMAPFolder parentFolder, final String[] messageIDs, final MailMessage[] retval, final int countArg) throws OXException, MessagingException {
+        int count = countArg;
+        final Folder[] folders = parentFolder.list();
+        for (int i = 0; count >= 0 && i < folders.length; i++) {
+            final String fullName = folders[i].getFullName();
+            final IMAPFolder imapFolder = setAndOpenFolder(fullName, Folder.READ_ONLY);
+            final long[] uids = IMAPCommandsCollection.messageId2UID(imapFolder, messageIDs);
+            for (int k = 0; k < uids.length; k++) {
+                final long uid = uids[k];
+                if (uid != -1) {
+                    retval[k] = new IDMailMessage(fullName, String.valueOf(uid));
+                    count++;
+                }
+            }
+            if (count == messageIDs.length) {
+                return -1;
+            }
+            count = recursiveMessageIDLookUp(imapFolder, messageIDs, retval, count);
+        }
+        return count;
     }
 
     @Override
@@ -2080,7 +2134,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Find this message ID in destination folder
                  */
-                long startUID = IMAPCommandsCollection.messageId2UID(messageId, destFolder);
+                long startUID = IMAPCommandsCollection.messageId2UID(destFolder, messageId)[0];
                 if (startUID != -1) {
                     for (int i = 0; i < msgUIDs.length; i++) {
                         retval[i] = startUID++;

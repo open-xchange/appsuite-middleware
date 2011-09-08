@@ -78,6 +78,17 @@ public interface IMailMessageStorageExt extends IMailMessageStorage {
     public MailMessage[] getMessages(String fullName, String[] mailIds, MailField[] fields, String[] headerNames) throws OXException;
 
     /**
+     * Gets the identifiers if the mails whose <i>"Message-ID"</i> header is contained in specified list.
+     * <p>
+     * If any <i>"Message-ID"</i> header cannot be found, <code>null</code> is located at associated index position in returned array.
+     * 
+     * @param messageIDs The <i>"Message-ID"</i> header list
+     * @return An array providing the looked-up mails with ID and folder set
+     * @throws OXException If mail identifiers could not be returned
+     */
+    public MailMessage[] getMessagesByMessageID(String... messageIDs) throws OXException;
+
+    /**
      * Searches mails located in given folder. If the search yields no results, the constant {@link #EMPTY_RETVAL} may be returned. This
      * method's purpose is to return filtered mails' headers for a <b>fast</b> list view. Therefore this method's <code>fields</code>
      * parameter should only contain instances of {@link MailField} which are marked as <b>[low cost]</b>. Otherwise pre-filling of returned

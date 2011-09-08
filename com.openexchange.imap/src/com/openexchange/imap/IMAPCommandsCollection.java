@@ -55,6 +55,7 @@ import gnu.trove.TIntHashSet;
 import gnu.trove.TIntLongHashMap;
 import gnu.trove.TLongArrayList;
 import gnu.trove.TLongIntHashMap;
+import gnu.trove.TObjectIntHashMap;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -2863,44 +2864,50 @@ public final class IMAPCommandsCollection {
     private static final String COMMAND_FETCH_ENV_UID = "FETCH 1:* (ENVELOPE UID)";
 
     /**
-     * Finds corresponding UID of message whose Message-ID header matches given message ID.
-     *
-     * @param messageId The message ID
-     * @param imapFolder The IMAP folder
-     * @return The UID of matching message or <code>-1</code> if none found
+     * Finds corresponding UIDs of messages whose Message-ID header is contained in given message IDs.
+     * 
+     * @param imapFolder The IMAP folder to search in
+     * @param messageIds The message IDs
+     * @return The UIDs of matching message or <code>-1</code> if none found
      * @throws MessagingException
      */
-    public static long messageId2UID(final String messageId, final IMAPFolder imapFolder) throws MessagingException {
-        if ((messageId == null) || (messageId.length() == 0)) {
-            return -1L;
+    public static long[] messageId2UID(final IMAPFolder imapFolder, final String... messageIds) throws MessagingException {
+        if (0 == messageIds.length) {
+            return new long[0];
         }
         if (imapFolder.getMessageCount() == 0) {
-            return -1L;
+            final long[] uids = new long[messageIds.length];
+            Arrays.fill(uids, -1);
+            return uids;
         }
-        final Long retval = (Long) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+        return (long[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
-            /*
-             * (non-Javadoc)
-             * @see com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com.sun .mail.imap.protocol.IMAPProtocol)
-             */
             @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
                 final Response[] r = p.command(COMMAND_FETCH_ENV_UID, null);
                 final Response response = r[r.length - 1];
                 final Long retval = Long.valueOf(-1L);
                 if (response.isOK()) {
+                    final TObjectIntHashMap<String> map = new TObjectIntHashMap<String>(messageIds.length);
+                    for (int i = 0; i < messageIds.length; i++) {
+                        map.put(messageIds[i], i + 1);
+                    }
+                    final long[] uids = new long[messageIds.length];
+                    Arrays.fill(uids, -1);
                     for (int i = 0, len = r.length - 1; i < len; i++) {
                         if (!(r[i] instanceof FetchResponse)) {
                             continue;
                         }
                         final FetchResponse fetchResponse = (FetchResponse) r[i];
-                        if (messageId.equals(getItemOf(ENVELOPE.class, fetchResponse, "ENVELOPE").messageId)) {
+                        final int num = map.get(getItemOf(ENVELOPE.class, fetchResponse, "ENVELOPE").messageId);
+                        if (num > 0) {
                             final UID uidItem = getItemOf(UID.class, fetchResponse, STR_UID);
-                            return Long.valueOf(uidItem.uid);
+                            uids[num - 1] = uidItem.uid;
                         }
                         r[i] = null;
                     }
                     p.notifyResponseHandlers(r);
+                    return uids;
                 } else if (response.isBAD()) {
                     throw new BadCommandException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
@@ -2917,7 +2924,6 @@ public final class IMAPCommandsCollection {
                 return retval;
             }
         });
-        return retval.longValue();
     }
 
     private static final Pattern PATTERN_QUOTE_ARG = Pattern.compile("[\\s\\*%\\(\\)\\{\\}\"\\\\]");
