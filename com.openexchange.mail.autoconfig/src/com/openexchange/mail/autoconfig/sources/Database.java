@@ -128,6 +128,10 @@ public class Database extends AbstractConfigSource {
             database.backReadOnly(context, connection);
         }
 
+        if (autoconfig.getMailServer() == null || autoconfig.getTransportServer() == null) {
+            return null;
+        }
+        
         return autoconfig;
     }
 
@@ -160,6 +164,10 @@ public class Database extends AbstractConfigSource {
                         port = URIDefaults.SMTP.getPort();
                     }
                 }
+                
+                if (!MailValidator.checkForSmtp(host, port)) {
+                    continue;
+                }
 
                 String login = rs.getString("login");
                 String sendAddr = rs.getString("send_addr");
@@ -170,12 +178,12 @@ public class Database extends AbstractConfigSource {
                 } else {
                     continue;
                 }
+                
+                if (!MailValidator.validateSmtp(host, port, username, password)) {
+                    continue;
+                }
             } catch (Throwable t) {
                 // Try next entry, if any problem occurs.
-                continue;
-            }
-            
-            if (!MailValidator.validateSmtp(host, port, username, password)) {
                 continue;
             }
             
@@ -231,6 +239,13 @@ public class Database extends AbstractConfigSource {
                     } else {
                         port = uriDefaults.getPort();
                     }
+                }
+                
+                if (uriDefaults == URIDefaults.IMAP && !MailValidator.checkForImap(host, port)) {
+                    continue;
+                }
+                if (uriDefaults == POP3 && !MailValidator.checkForPop3(host, port)) {
+                    continue;
                 }
 
                 String login = rs.getString("login");

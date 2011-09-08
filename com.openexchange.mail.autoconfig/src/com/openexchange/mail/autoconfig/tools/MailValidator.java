@@ -54,6 +54,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.Properties;
+import javax.mail.AuthenticationFailedException;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Store;
+import javax.mail.Transport;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
@@ -64,63 +70,91 @@ import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 public class MailValidator {
 
     public static boolean validateImap(String host, int port, String user, String pwd) {
-        // try {
-        // Properties props = new Properties();
-        // if (port == 993) {
-        // String socketFactoryClass = TrustAllSSLSocketFactory.class.getName();
-        // props.put("mail.imap.socketFactory.class", socketFactoryClass);
-        // }
-        // props.put("mail.imap.connectiontimeout", 100);
-        // Session session = Session.getInstance(props, null);
-        // Store store = session.getStore("imap");
-        // store.connect(host, port, user, pwd);
-        // store.close();
-        // } catch (AuthenticationFailedException e) {
-        // return false;
-        // } catch (MessagingException e) {
-        // return false;
-        // }
+        try {
+            String socketFactoryClass = TrustAllSSLSocketFactory.class.getName();
+            Properties props = new Properties();
+            if (port == 993) {
+                props.put("mail.imap.socketFactory.class", socketFactoryClass);
+            } else if (port == 143) {
+                props.put("mail.imap.ssl.socketFactory.class", socketFactoryClass);
+                props.put("mail.imap.ssl.protocols", "SSLv3 TLSv1");
+                props.put("mail.imap.ssl.socketFactory.port", port);
+            } else {
+                return false;
+            }
+            props.put("mail.imap.socketFactory.fallback", "false");
+            props.put("mail.imap.connectiontimeout", 100);
+            props.put("mail.imap.timeout", 100);
+            props.put("mail.imap.socketFactory.port", port);
+            Session session = Session.getInstance(props, null);
+            Store store = session.getStore("imap");
+            store.connect(host, port, user, pwd);
+            store.close();
+        } catch (AuthenticationFailedException e) {
+            return false;
+        } catch (MessagingException e) {
+            return false;
+        }
         return true;
     }
 
     public static boolean validatePop3(String host, int port, String user, String pwd) {
-        // try {
-        // Properties props = new Properties();
-        // if (port == 995) {
-        // String socketFactoryClass = TrustAllSSLSocketFactory.class.getName();
-        // props.put("mail.imap.socketFactory.class", socketFactoryClass);
-        // }
-        // props.put("mail.pop3.connectiontimeout", 100);
-        // Session session = Session.getInstance(props, null);
-        // Store store = session.getStore("pop3");
-        // store.connect(host, port, user, pwd);
-        // store.close();
-        // } catch (AuthenticationFailedException e) {
-        // return false;
-        // } catch (MessagingException e) {
-        // return false;
-        // }
+        try {
+            Properties props = new Properties();
+            String socketFactoryClass = TrustAllSSLSocketFactory.class.getName();
+            if (port == 995) {
+                props.put("mail.pop3.socketFactory.class", socketFactoryClass);
+            } else if (port == 110) {
+                props.put("mail.pop3.ssl.socketFactory.class", socketFactoryClass);
+                props.put("mail.pop3.ssl.socketFactory.port", port);
+                props.put("mail.pop3.ssl.protocols", "SSLv3 TLSv1");
+            } else {
+                return false;
+            }
+            props.put("mail.pop3.socketFactory.fallback", "false");
+            props.put("mail.pop3.socketFactory.port", port);
+            props.put("mail.pop3.connectiontimeout", 1000);
+            props.put("mail.pop3.timeout", 1000);
+            Session session = Session.getInstance(props, null);
+            Store store = session.getStore("pop3");
+            store.connect(host, port, user, pwd);
+            store.close();
+        } catch (AuthenticationFailedException e) {
+            return false;
+        } catch (MessagingException e) {
+            return false;
+        }
         return true;
     }
 
     public static boolean validateSmtp(String host, int port, String user, String pwd) {
-        // try {
-        // Properties props = new Properties();
-        // if (port == 465) {
-        // String socketFactoryClass = TrustAllSSLSocketFactory.class.getName();
-        // props.put("mail.imap.socketFactory.class", socketFactoryClass);
-        // }
-        // props.put("mail.smtp.auth", "true");
-        // props.put("mail.smtp.connectiontimeout", 100);
-        // Session session = Session.getInstance(props, null);
-        // Transport transport = session.getTransport("smtp");
-        // transport.connect(host, port, user, pwd);
-        // transport.close();
-        // } catch (AuthenticationFailedException e) {
-        // return false;
-        // } catch (MessagingException e) {
-        // return false;
-        // }
+        try {
+            String socketFactoryClass = TrustAllSSLSocketFactory.class.getName();
+            Properties props = new Properties();
+            if (port == 465) {
+                props.put("mail.smtp.socketFactory.class", socketFactoryClass);
+            } else if (port == 25) {
+                props.put("mail.smtp.ssl.socketFactory.class", socketFactoryClass);
+                props.put("mail.smtp.ssl.socketFactory.port", port);
+                props.put("mail.smtp.ssl.protocols", "SSLv3 TLSv1");
+            } else {
+                return false;
+            }
+            props.put("mail.smtp.socketFactory.port", port);
+            //props.put("mail.smtp.auth", "true");
+            props.put("mail.smtp.connectiontimeout", 1000);
+            props.put("mail.smtp.timeout", 1000);
+            props.put("mail.smtp.socketFactory.fallback", "false");
+            Session session = Session.getInstance(props, null);
+            Transport transport = session.getTransport("smtp");
+            transport.connect(host, port, user, pwd);
+            transport.close();
+        } catch (AuthenticationFailedException e) {
+            return false;
+        } catch (MessagingException e) {
+            e.printStackTrace();
+            return false;
+        }
         return true;
     }
 
@@ -160,7 +194,7 @@ public class MailValidator {
                 }
             }
             greeting = sb.toString();
-            
+
             if (skipLF) {
                 /*
                  * Consume final LF
@@ -176,10 +210,9 @@ public class MailValidator {
         } finally {
             s.close();
         }
-        System.out.println(greeting);
         return greeting != null;
     }
-    
+
     public static boolean checkForSmtp(String host, int port) throws IOException {
         Socket s = null;
         String greeting = null;
@@ -216,7 +249,7 @@ public class MailValidator {
                 }
             }
             greeting = sb.toString();
-            
+
             if (skipLF) {
                 /*
                  * Consume final LF
@@ -232,10 +265,9 @@ public class MailValidator {
         } finally {
             s.close();
         }
-        System.out.println(greeting);
         return greeting != null;
     }
-    
+
     public static boolean checkForPop3(String host, int port) throws IOException {
         Socket s = null;
         String greeting = null;
@@ -272,7 +304,7 @@ public class MailValidator {
                 }
             }
             greeting = sb.toString();
-            
+
             if (skipLF) {
                 /*
                  * Consume final LF
@@ -288,7 +320,6 @@ public class MailValidator {
         } finally {
             s.close();
         }
-        System.out.println(greeting);
         return greeting != null;
     }
 }

@@ -97,8 +97,14 @@ public class AutoconfigServiceImpl implements AutoconfigService {
             throw AutoconfigException.invalidMail(email);
         }
 
-        String mailLocalPart = getLocalPart(internetAddress);
-        String mailDomain = getDomain(internetAddress);
+        String mailLocalPart = null;
+        String mailDomain = null;
+        try {
+            mailLocalPart = getLocalPart(internetAddress);
+            mailDomain = getDomain(internetAddress);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            return null;
+        }
 
         for (ConfigSource source : sources) {
             Autoconfig config = source.getAutoconfig(mailLocalPart, mailDomain, password, user, context);
