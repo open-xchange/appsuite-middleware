@@ -161,7 +161,7 @@ public class SchemaStoreImpl extends SchemaStore {
 
     private static void insertLock(final Connection con, final Schema schema, final String idiom) throws OXException {
         // Check for existing lock exclusively
-        final ExecutedTask[] tasks = readUpdateTasks(con);
+        final ExecutedTask[] tasks = readUpdateTasks(con, true);
         for (final ExecutedTask task : tasks) {
             if (idiom.equals(task.getTaskName())) {
                 throw SchemaExceptionCodes.ALREADY_LOCKED.create(schema.getSchema());
@@ -249,7 +249,7 @@ public class SchemaStoreImpl extends SchemaStore {
 
     private static void deleteLock(final Connection con, final Schema schema, final String idiom) throws OXException {
         // Check for existing lock exclusively
-        final ExecutedTask[] tasks = readUpdateTasks(con);
+        final ExecutedTask[] tasks = readUpdateTasks(con, true);
         boolean found = false;
         for (final ExecutedTask task : tasks) {
             if (idiom.equals(task.getTaskName())) {
@@ -370,7 +370,7 @@ public class SchemaStoreImpl extends SchemaStore {
     }
 
     private static void loadUpdateTasks(final Connection con, final SchemaUpdateStateImpl state) throws OXException {
-        for (final ExecutedTask task : readUpdateTasks(con)) {
+        for (final ExecutedTask task : readUpdateTasks(con, false)) {
             if (LOCKED.equals(task.getTaskName())) {
                 state.setBlockingUpdatesRunning(true);
             } else if (BACKGROUND.equals(task.getTaskName())) {
@@ -381,30 +381,101 @@ public class SchemaStoreImpl extends SchemaStore {
         }
     }
 
-    private static ExecutedTask[] readUpdateTasks(final Connection con) throws OXException {
-        final String sql = "SELECT taskName,successful,lastModified FROM updateTask WHERE cid=0 FOR UPDATE";
-        Statement stmt = null;
-        ResultSet result = null;
-        final List<ExecutedTask> retval = new ArrayList<ExecutedTask>();
-        try {
-            stmt = con.createStatement();
-            result = stmt.executeQuery(sql);
-            while (result.next()) {
-                final ExecutedTask task = new ExecutedTaskImpl(result.getString(1), result.getBoolean(2), new Date(result.getLong(3)));
-                retval.add(task);
+    private static ExecutedTask[] readUpdateTasks(final Connection con, final boolean readWrite) throws OXException {
+        final String sql;
+        if (readWrite) {
+            sql = "SELECT taskName,successful,lastModified FROM updateTask WHERE cid=0 FOR UPDATE";
+            while (!lock(con)) {
+                // Couldn't acquire lock
+                try {
+                    Thread.sleep(100);
+                } catch (final InterruptedException e) {
+                    // Ignore
+                }
             }
+        } else {
+            final boolean isLocked = isLocked(con);
+            if (isLocked) {
+                sql = "SELECT taskName,successful,lastModified FROM updateTask WHERE cid=0 FOR UPDATE";
+            } else {
+                sql = "SELECT taskName,successful,lastModified FROM updateTask WHERE cid=0";
+            }
+        }
+        try {
+            Statement stmt = null;
+            ResultSet result = null;
+            final List<ExecutedTask> retval = new ArrayList<ExecutedTask>();
+            try {
+                stmt = con.createStatement();
+                result = stmt.executeQuery(sql);
+                while (result.next()) {
+                    final ExecutedTask task = new ExecutedTaskImpl(result.getString(1), result.getBoolean(2), new Date(result.getLong(3)));
+                    retval.add(task);
+                }
+            } catch (final SQLException e) {
+                throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+            } finally {
+                closeSQLStuff(result, stmt);
+            }
+            return retval.toArray(new ExecutedTask[retval.size()]);
+        } finally {
+            if (readWrite) {
+                unlock(con);
+            }
+        }
+    }
+
+    private static boolean isLocked(final Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement("SELECT taskName FROM updateTask WHERE cid=0 AND taskName=?");
+            stmt.setString(1, "lock");
+            result = stmt.executeQuery();
+            return result.next();
         } catch (final SQLException e) {
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
         }
-        return retval.toArray(new ExecutedTask[retval.size()]);
+    }
+
+    private static boolean lock(final Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("INSERT INTO updateTask (cid,successful,lastModified,taskName) VALUES (0,?,?,?)");
+            stmt.setInt(1, 1);
+            stmt.setLong(2, 1);
+            stmt.setString(3, "lock");
+            try {
+                return (stmt.executeUpdate() > 0);
+            } catch (final SQLException e) {
+                return false;
+            }
+        } catch (final SQLException e) {
+            throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
+    private static void unlock(final Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("DELETE FROM updateTask WHERE cid=0 AND taskName=?");
+            stmt.setString(1, "lock");
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
     }
 
     @Override
     public void addExecutedTask(final Connection con, final String taskName, final boolean success) throws OXException {
         boolean update = false;
-        for (final ExecutedTask executed : readUpdateTasks(con)) {
+        for (final ExecutedTask executed : readUpdateTasks(con, true)) {
             if (taskName.equals(executed.getTaskName())) {
                 update = true;
                 break;
@@ -436,7 +507,7 @@ public class SchemaStoreImpl extends SchemaStore {
         final ExecutedTask[] retval;
         try {
             con.setAutoCommit(false);
-            retval = readUpdateTasks(con);
+            retval = readUpdateTasks(con, true);
             con.commit();
         } catch (final SQLException e) {
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
