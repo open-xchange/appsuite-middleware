@@ -788,6 +788,7 @@ class UpdateData {
                     final Task actual = ti.next();
                     final boolean percentComplete = actual.getPercentComplete() == updated.getPercentComplete();
                     final boolean createdBy = actual.getCreatedBy() == updated.getCreatedBy();
+                    final boolean title = null != actual.getTitle() && actual.getTitle().equals(updated.getTitle());
                     boolean startDate;
 
                     if (actual.getStartDate() != null) {
@@ -801,7 +802,7 @@ class UpdateData {
                             startDate = false;
                         }
                     }
-                    if (percentComplete && createdBy && startDate) {
+                    if (percentComplete && createdBy && startDate && title) {
 
                         duplicateExists = true;
                         break;
