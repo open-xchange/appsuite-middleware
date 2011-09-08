@@ -89,6 +89,7 @@ import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.Type;
+import com.openexchange.folderstorage.database.DatabaseFolderStorage.ConnectionMode;
 import com.openexchange.folderstorage.database.DatabaseFolderType;
 import com.openexchange.folderstorage.database.DatabaseParameterConstants;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
@@ -2300,16 +2301,16 @@ public final class OutlookFolderStorage implements FolderStorage {
     }
 
     static Connection checkReadConnection(final StorageParameters storageParameters) {
-        return storageParameters.<Connection> getParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_CONNECTION);
+        final ConnectionMode con =
+            storageParameters.<ConnectionMode> getParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_CONNECTION);
+        return null == con ? null : con.connection;
     }
 
     static Connection checkWriteConnection(final StorageParameters storageParameters) {
-        final Connection con =
-            storageParameters.<Connection> getParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_CONNECTION);
-        final Boolean writable =
-            storageParameters.<Boolean> getParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_WRITABLE);
-        if (null != con && null != writable && writable.booleanValue()) {
-            return con;
+        final ConnectionMode con =
+            storageParameters.<ConnectionMode> getParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_CONNECTION);
+        if (null != con && con.readWrite) {
+            return con.connection;
         }
         return null;
     }
