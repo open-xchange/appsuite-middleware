@@ -2041,7 +2041,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     private boolean isExtClient() {
-        return PushClientWhitelist.getInstance().isAllowed(session.getClient());
+        final PushClientWhitelist clientWhitelist = PushClientWhitelist.getInstance();
+        return clientWhitelist.isEmpty() || clientWhitelist.isAllowed(session.getClient());
     }
 
     private static boolean equals(final String s1, final String s2) {
