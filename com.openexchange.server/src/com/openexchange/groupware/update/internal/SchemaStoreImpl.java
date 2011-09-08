@@ -78,6 +78,8 @@ import com.openexchange.tools.update.Tools;
  */
 public class SchemaStoreImpl extends SchemaStore {
 
+    private static final String LOCK = "table.lock";
+
     private static final String TABLE_NAME = "updateTask";
 
     private static final String LOCKED = "LOCKED";
@@ -430,7 +432,7 @@ public class SchemaStoreImpl extends SchemaStore {
         ResultSet result = null;
         try {
             stmt = con.prepareStatement("SELECT taskName FROM updateTask WHERE cid=0 AND taskName=?");
-            stmt.setString(1, "lock");
+            stmt.setString(1, LOCK);
             result = stmt.executeQuery();
             return result.next();
         } catch (final SQLException e) {
@@ -446,7 +448,7 @@ public class SchemaStoreImpl extends SchemaStore {
             stmt = con.prepareStatement("INSERT INTO updateTask (cid,successful,lastModified,taskName) VALUES (0,?,?,?)");
             stmt.setInt(1, 1);
             stmt.setLong(2, 1);
-            stmt.setString(3, "lock");
+            stmt.setString(3, LOCK);
             try {
                 return (stmt.executeUpdate() > 0);
             } catch (final SQLException e) {
@@ -463,7 +465,7 @@ public class SchemaStoreImpl extends SchemaStore {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("DELETE FROM updateTask WHERE cid=0 AND taskName=?");
-            stmt.setString(1, "lock");
+            stmt.setString(1, LOCK);
             stmt.executeUpdate();
         } catch (final SQLException e) {
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
