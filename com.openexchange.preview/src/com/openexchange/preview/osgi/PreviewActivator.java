@@ -71,7 +71,7 @@ import com.openexchange.sessiond.SessiondEventConstants;
 
 /**
  * {@link PreviewActivator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class PreviewActivator extends HousekeepingActivator {
@@ -128,15 +128,21 @@ public class PreviewActivator extends HousekeepingActivator {
 
                 @Override
                 public void handleEvent(final Event event) {
+                    /*-
+                     * http://www.artofsolving.com/opensource/jodconverter
+                     *
+                     *
+                     *
+                     */
                     final String topic = event.getTopic();
                     if (SessiondEventConstants.TOPIC_ADD_SESSION.equals(topic)) {
                         try {
                             final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
-                            
+
                             final String content = tikaPreviewService.getPreviewFor("file:///Users/thorben/git/backend/org.apache.tika/test-documents/testWORD_embeded.doc", PreviewOutput.HTML, session).getContent();
-                            
+
                             System.out.println(content);
-                            
+
                             final Writer writer = new OutputStreamWriter(new FileOutputStream("/Users/thorben/Documents/test-tika.html"), "UTF-8");
                             try {
                                 writer.write(content);
