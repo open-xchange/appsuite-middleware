@@ -977,6 +977,9 @@ public final class MailMessageParser {
                 }
                 if (contentType.startsWith(PRIMARY_TEXT)) {
                     cs = CharsetDetector.detectCharset(mailPart.getInputStream());
+                    if ("US-ASCII".equalsIgnoreCase(cs)) {
+                        cs = "ISO-8859-1";
+                    }
                     if (WARN_ENABLED && null != sb) {
                         sb.append(" Using auto-detected encoding: \"").append(cs).append('"');
                         LOG.warn(sb.toString());
