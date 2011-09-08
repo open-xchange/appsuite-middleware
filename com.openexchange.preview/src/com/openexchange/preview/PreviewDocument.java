@@ -65,6 +65,7 @@ public interface PreviewDocument {
      * <ul>
      * <li><code>"title"</code></li>
      * <li><code>"subject"</code></li>
+     * <li><code>"resourcename"</code></li>
      * <li><code>"content-type"</code></li>
      * <li><code>"author"</code></li>
      * <li>...</li>
