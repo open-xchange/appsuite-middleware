@@ -445,7 +445,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      * @param service The service to add
      * @return <code>true</code> if service is added; otherwise <code>false</code> if not initialized or such a service already exists
      */
-    protected final <S> boolean addService(final Class<S> clazz, final S service) {
+    protected final <S> boolean addService(final Class<? extends S> clazz, final S service) {
         if (null == services || !clazz.isInstance(service)) {
             /*
              * Services not initialized
@@ -462,7 +462,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      * @param clazz The service's class
      * @return <code>true</code> if service is removes; otherwise <code>false</code> if not initialized or absent
      */
-    protected final <S> boolean removeService(final Class<S> clazz) {
+    protected final <S> boolean removeService(final Class<? extends S> clazz) {
         if (null == services) {
             /*
              * Services not initialized
