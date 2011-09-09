@@ -81,19 +81,21 @@ public abstract class Refresher<T extends Serializable> {
      * The cache region name.
      */
     private final String regionName;
+    private final boolean removeBeforePut;
 
     /**
      * Default constructor.
      *
      * @throws IllegalArgumentException If provided region name is <code>null</code>
      */
-    protected Refresher(final OXObjectFactory<T> factory, final String regionName) {
+    protected Refresher(final OXObjectFactory<T> factory, final String regionName, final boolean removeBeforePut) {
         super();
         this.factory = factory;
         if (null == regionName) {
             throw new IllegalArgumentException("Cache region name is null");
         }
         this.regionName = regionName;
+        this.removeBeforePut = removeBeforePut;
     }
 
     private Cache getCache() throws OXException {
@@ -109,7 +111,7 @@ public abstract class Refresher<T extends Serializable> {
      * @throws OXException TODO
      */
     protected T refresh() throws OXException {
-        return refresh(regionName, factory);
+        return refresh(regionName, factory, removeBeforePut);
     }
 
     public static <T extends Serializable> T cache(final T obj, final Cache cache, final OXObjectFactory<T> factory) throws OXException {
@@ -137,11 +139,11 @@ public abstract class Refresher<T extends Serializable> {
         return retval;
     }
 
-    public static <T extends Serializable> T refresh(final String regionName, final OXObjectFactory<T> factory) throws OXException {
-        return refresh(regionName, getCache(regionName), factory);
+    public static <T extends Serializable> T refresh(final String regionName, final OXObjectFactory<T> factory, final boolean removeBeforePut) throws OXException {
+        return refresh(regionName, getCache(regionName), factory, removeBeforePut);
     }
 
-    public static <T extends Serializable> T refresh(final String regionName, final Cache cache, final OXObjectFactory<T> factory) throws OXException {
+    public static <T extends Serializable> T refresh(final String regionName, final Cache cache, final OXObjectFactory<T> factory, final boolean removeBeforePut) throws OXException {
         if (null == cache) {
             return factory.load();
         }
@@ -199,7 +201,7 @@ public abstract class Refresher<T extends Serializable> {
             try {
                 // Do we replace an existing value?
                 final Object prev = cache.get(key);
-                if (null != prev && !(prev instanceof Condition)) {
+                if (removeBeforePut && null != prev && !(prev instanceof Condition)) {
                     // Issue remove for lateral distribution
                     cache.remove(key);
                 }

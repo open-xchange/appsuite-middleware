@@ -92,21 +92,22 @@ public class LastVersionedUpdateTask extends UpdateTaskAdapter {
     }
 
     @Override
-    public void perform(PerformParameters params) throws OXException {
-        Schema schema = params.getSchema();
+    public void perform(final PerformParameters params) throws OXException {
+        final Schema schema = params.getSchema();
         List<String> executed = determineExecuted(schema.getDBVersion(), Updater.getInstance().getAvailableUpdateTasks());
-        int contextId = params.getContextId();
-        DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
+        final int contextId = params.getContextId();
+        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
+        final int poolId = dbService.getWritablePool(contextId);
         final Connection con = dbService.getForUpdateTask(contextId);
         try {
             con.setAutoCommit(false);
             executed = excludeAlreadyListed(con, executed);
-            insertTasks(con, executed);
+            insertTasks(con, executed, poolId, schema.getSchema());
             con.commit();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (OXException e) {
+        } catch (final OXException e) {
             rollback(con);
             throw e;
         } finally {
@@ -115,16 +116,16 @@ public class LastVersionedUpdateTask extends UpdateTaskAdapter {
         }
     }
 
-    public static void insertTasks(Connection con, List<String> executed) throws OXException {
-        SchemaStore store = SchemaStore.getInstance();
-        for (String taskName : executed) {
-            store.addExecutedTask(con, taskName, true);
+    public static void insertTasks(final Connection con, final List<String> executed, final int poolId, final String schema) throws OXException {
+        final SchemaStore store = SchemaStore.getInstance();
+        for (final String taskName : executed) {
+            store.addExecutedTask(con, taskName, true, poolId, schema);
         }
     }
 
-    private List<String> determineExecuted(int version, UpdateTask[] tasks) {
-        List<String> retval = new ArrayList<String>();
-        for (UpdateTask task : tasks) {
+    private List<String> determineExecuted(final int version, final UpdateTask[] tasks) {
+        final List<String> retval = new ArrayList<String>();
+        for (final UpdateTask task : tasks) {
             if (task.addedWithVersion() != Schema.NO_VERSION && task.addedWithVersion() <= version) {
                 retval.add(task.getClass().getName());
             }
@@ -132,19 +133,19 @@ public class LastVersionedUpdateTask extends UpdateTaskAdapter {
         return retval;
     }
 
-    private List<String> excludeAlreadyListed(Connection con, List<String> executed) throws OXException {
+    private List<String> excludeAlreadyListed(final Connection con, final List<String> executed) throws OXException {
         Statement stmt = null;
         ResultSet result = null;
         try {
             stmt = con.createStatement();
             result = stmt.executeQuery("SELECT taskName FROM updateTask WHERE cid=0");
             while (result.next()) {
-                int pos = executed.indexOf(result.getString(1));
+                final int pos = executed.indexOf(result.getString(1));
                 if (pos != -1) {
                     executed.remove(pos);
                 }
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);

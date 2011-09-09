@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,53 +47,40 @@
  *
  */
 
-package com.openexchange.groupware.update;
+package com.openexchange.groupware.update.osgi;
 
-import java.io.Serializable;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.caching.CacheService;
+import com.openexchange.groupware.update.SchemaStore;
 
 /**
- * Interface to the data container for the update information of a database
- * schema.
+ * Puts a found cache service in the schema store implementation.
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Schema extends Serializable {
+public final class CacheCustomizer implements ServiceTrackerCustomizer<CacheService, CacheService> {
 
-    static final int FINAL_VERSION = 200;
+    private final BundleContext context;
 
-    static final int NO_VERSION = -1;
+    public CacheCustomizer(BundleContext context) {
+        super();
+        this.context = context;
+    }
 
-    /**
-     * @return the database version number stored in the database.
-     */
-    int getDBVersion();
+    public CacheService addingService(ServiceReference<CacheService> reference) {
+        final CacheService cacheService = context.getService(reference);
+        SchemaStore.getInstance().setCacheService(cacheService);
+        return cacheService;
+    }
 
-    /**
-     * @return if this schema can be used with an OX that database version
-     * number is directly before the actual.
-     */
-    boolean isGroupwareCompatible();
+    public void modifiedService(ServiceReference<CacheService> reference, CacheService service) {
+        // Nothing to do.
+    }
 
-    /**
-     * @return if this schema can be used with an OX admin daemon that database
-     * version number is directly before the actual.
-     */
-    boolean isAdminCompatible();
-
-    /**
-     * @return <code>true</code> if the schema will currently be updated.
-     */
-    boolean isLocked();
-
-    /**
-     * @return name of the server that is currently updating the schema or
-     * <code>null</code>.
-     */
-    String getServer();
-
-    /**
-     * @return schema name
-     */
-    String getSchema();
-
+    public void removedService(ServiceReference<CacheService> reference, CacheService service) {
+        SchemaStore.getInstance().removeCacheService();
+        context.ungetService(reference);
+    }
 }

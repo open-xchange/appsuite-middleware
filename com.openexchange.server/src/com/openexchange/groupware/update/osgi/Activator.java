@@ -54,6 +54,7 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
@@ -79,7 +80,7 @@ public class Activator implements BundleActivator {
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
+    public void start(final BundleContext context) {
         createTableRegistration = context.registerService(CreateTableService.class, new CreateUpdateTaskTable(), null);
         trackers.push(new ServiceTracker<ConfigurationService, ConfigurationService>(
             context,
@@ -89,6 +90,7 @@ public class Activator implements BundleActivator {
             context,
             UpdateTaskProviderService.class,
             new UpdateTaskCustomizer(context)));
+        trackers.push(new ServiceTracker<CacheService, CacheService>(context, CacheService.class.getName(), new CacheCustomizer(context)));
         InternalList.getInstance().start();
         for (final ServiceTracker<?, ?> tracker : trackers) {
             tracker.open();
@@ -96,7 +98,7 @@ public class Activator implements BundleActivator {
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
+    public void stop(final BundleContext context) {
         while (!trackers.isEmpty()) {
             trackers.pop().close();
         }

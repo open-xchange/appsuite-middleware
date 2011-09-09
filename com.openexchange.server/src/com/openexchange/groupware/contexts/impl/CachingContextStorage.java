@@ -190,7 +190,7 @@ public class CachingContextStorage extends ContextStorage {
         final Cache cache = cacheService.getCache(REGION_NAME);
         cacheLock.lock();
         try {
-            cache.remove(Integer.valueOf(contextId));
+            cache.remove(I(contextId));
         } finally {
             cacheLock.unlock();
         }

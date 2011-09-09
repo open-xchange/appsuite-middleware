@@ -264,7 +264,7 @@ public final class FolderCacheManager {
                 putFolderObject(loadFolderObjectInternal(objectId, ctx, readCon), ctx, true, null);
             }
             // Return refreshable object
-            return Refresher.refresh(FOLDER_CACHE_REGION_NAME, folderCache, new FolderFactory(ctx, objectId)).clone();
+            return Refresher.refresh(FOLDER_CACHE_REGION_NAME, folderCache, new FolderFactory(ctx, objectId), true).clone();
         } catch (final OXException e) {
             throw e;
         }
@@ -335,7 +335,7 @@ public final class FolderCacheManager {
         if (null != readCon) {
             putIfAbsent(loadFolderObjectInternal(folderId, ctx, readCon), ctx, null);
         }
-        return Refresher.refresh(FOLDER_CACHE_REGION_NAME, folderCache, new FolderFactory(ctx, folderId)).clone();
+        return Refresher.refresh(FOLDER_CACHE_REGION_NAME, folderCache, new FolderFactory(ctx, folderId), true).clone();
     }
 
     /**

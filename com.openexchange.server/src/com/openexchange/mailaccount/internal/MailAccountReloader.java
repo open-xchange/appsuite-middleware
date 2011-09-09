@@ -75,7 +75,7 @@ final class MailAccountReloader extends Refresher<MailAccount> implements MailAc
      * @throws OXException If initial load of the object fails.
      */
     public MailAccountReloader(final OXObjectFactory<MailAccount> factory, final String regionName) throws OXException {
-        super(factory, regionName);
+        super(factory, regionName, true);
         delegate = refresh();
     }
 

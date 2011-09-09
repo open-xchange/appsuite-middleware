@@ -57,7 +57,9 @@ import com.openexchange.groupware.update.Schema;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SchemaImpl implements Schema {
+public abstract class SchemaImpl implements Schema {
+
+    private static final long serialVersionUID = 8722328691217424068L;
 
     private boolean locked;
 
@@ -71,7 +73,7 @@ public class SchemaImpl implements Schema {
 
     private String schema;
 
-    public SchemaImpl() {
+    protected SchemaImpl() {
         super();
     }
 

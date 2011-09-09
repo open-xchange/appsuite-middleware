@@ -80,12 +80,12 @@ final class UserReloader extends Refresher<User> implements User {
      * @throws OXException if initially loading the object fails.
      */
     UserReloader(final OXObjectFactory<User> factory, final String regionName) throws OXException {
-        super(factory, regionName);
+        super(factory, regionName, false);
         this.delegate = refresh();
     }
 
     public UserReloader(final OXObjectFactory<User> factory, final User user, final String regionName) throws OXException {
-        super(factory, regionName);
+        super(factory, regionName, false);
         delegate = user;
         cache(user);
     }

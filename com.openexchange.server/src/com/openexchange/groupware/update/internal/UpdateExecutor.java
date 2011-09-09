@@ -140,6 +140,7 @@ public final class UpdateExecutor {
             } else {
                 scheduled.addAll(blocking ? separatedTasks.getBlocking() : separatedTasks.getBackground());
             }
+            final int poolId = Database.resolvePool(contextId, true);
             // Perform updates
             for (final UpdateTask task : scheduled) {
                 final String taskName = task.getClass().getSimpleName();
@@ -162,7 +163,7 @@ public final class UpdateExecutor {
                 } else {
                     LOG.info("Update task " + taskName + " on schema " + state.getSchema() + " failed.");
                 }
-                addExecutedTask(task.getClass().getName(), success);
+                addExecutedTask(task.getClass().getName(), success, poolId, state.getSchema());
             }
             LOG.info("Finished " + (blocking ? "blocking" : "background") + " updates on schema " + state.getSchema());
         } catch (final OXException e) {
@@ -190,8 +191,8 @@ public final class UpdateExecutor {
         store.unlockSchema(state, contextId, !blocking);
     }
 
-    private final void addExecutedTask(final String taskName, final boolean success) throws OXException {
-        store.addExecutedTask(contextId, taskName, success);
+    private final void addExecutedTask(final String taskName, final boolean success, final int poolId, final String schema) throws OXException {
+        store.addExecutedTask(contextId, taskName, success, poolId, schema);
     }
 
     private final void removeContexts() throws OXException {

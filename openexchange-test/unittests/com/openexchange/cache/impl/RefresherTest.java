@@ -285,7 +285,7 @@ public class RefresherTest extends TestCase {
     private static class Refreshed extends Refresher<Integer> {
         private Integer delegate;
         private Refreshed() throws OXException {
-            super(factory, KEY);
+            super(factory, KEY, false);
             delegate = refresh();
         }
         private int getValue() {

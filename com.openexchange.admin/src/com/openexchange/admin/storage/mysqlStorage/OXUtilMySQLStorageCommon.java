@@ -117,7 +117,7 @@ public class OXUtilMySQLStorageCommon {
             con.setCatalog(db.getScheme());
             pumpData2DatabaseOld(con, createTableStatements);
             pumpData2DatabaseNew(con, CreateTableRegistry.getInstance().getList());
-            initUpdateTaskTable(con);
+            initUpdateTaskTable(con, db.getMasterId().intValue(), db.getScheme());
             con.commit();
         } catch (SQLException e) {
             rollback(con);
@@ -237,12 +237,12 @@ public class OXUtilMySQLStorageCommon {
         return null;
     }
 
-    private void initUpdateTaskTable(Connection con) throws StorageException {
+    private void initUpdateTaskTable(Connection con, int poolId, String schema) throws StorageException {
         UpdateTask[] tasks = Updater.getInstance().getAvailableUpdateTasks();
         SchemaStore store = SchemaStore.getInstance();
         try {
             for (UpdateTask task : tasks) {
-                store.addExecutedTask(con, task.getClass().getName(), true);
+                store.addExecutedTask(con, task.getClass().getName(), true, poolId, schema);
             }
         } catch (SchemaException e) {
             throw new StorageException(e.getMessage(), e);

@@ -60,6 +60,8 @@ import com.openexchange.groupware.update.SchemaUpdateState;
  */
 public class SchemaUpdateStateImpl extends SchemaImpl implements SchemaUpdateState {
 
+    private static final long serialVersionUID = -2760325392823131336L;
+
     private final Set<String> executedTasks = new HashSet<String>();
 
     private boolean backgroundUpdatesRunning;

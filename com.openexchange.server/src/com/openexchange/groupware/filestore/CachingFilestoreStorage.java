@@ -66,12 +66,10 @@ import com.openexchange.server.services.ServerServiceRegistry;
 public class CachingFilestoreStorage extends FilestoreStorage {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CachingFilestoreStorage.class));
-
     private static final String REGION_NAME = "Filestore";
+    private static final Lock CACHE_LOCK = new ReentrantLock();
 
     private final FilestoreStorage delegate;
-
-    private static final Lock CACHE_LOCK = new ReentrantLock();
 
     public CachingFilestoreStorage(final FilestoreStorage fs) {
         this.delegate = fs;
@@ -139,18 +137,13 @@ public class CachingFilestoreStorage extends FilestoreStorage {
         if (null == retval) {
             retval = delegate.getFilestore(con, id);
             if (null != filestoreCache) {
-                synchronized (filestoreCache) {
-                    try {
-                        // Do we replace an existing value?
-                        final Object prev = filestoreCache.get(I(id));
-                        if (prev instanceof Filestore) {
-                            // Issue remove for lateral distribution
-                            filestoreCache.remove(I(id));
-                        }
-                        filestoreCache.put(I(id), retval);
-                    } catch (final OXException e) {
-                        LOG.error(e.getMessage(), e);
-                    }
+                CACHE_LOCK.lock();
+                try {
+                    filestoreCache.put(I(id), retval);
+                } catch (final OXException e) {
+                    LOG.error(e.getMessage(), e);
+                } finally {
+                    CACHE_LOCK.unlock();
                 }
             }
         }

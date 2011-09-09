@@ -164,13 +164,7 @@ public class CachedObjectInvocationHandler<T> implements InvocationHandler {
             lock.lock();
             try {
                 cond.signalAll();
-                final Serializable key = factory.getKey();
-                final Object prev = cache.get(key);
-                if (null != prev && !(prev instanceof Condition)) {
-                    // Issue remove for lateral distribution
-                    cache.remove(key);
-                }
-                cache.put(key, (Serializable) cached);
+                cache.put(factory.getKey(), (Serializable) cached);
             } finally {
                 lock.unlock();
             }
