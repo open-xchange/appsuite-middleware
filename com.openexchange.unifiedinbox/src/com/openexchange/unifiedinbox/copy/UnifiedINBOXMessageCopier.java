@@ -251,15 +251,18 @@ public final class UnifiedINBOXMessageCopier {
             if (move && sourceFullname.equals(destFullname)) {
                 throw UnifiedINBOXException.Code.NO_EQUAL_MOVE.create();
             }
-            final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, sourceFullnameArgument.getAccountId());
-            mailAccess.connect();
+            MailAccess<?, ?> mailAccess = null;
             try {
+                mailAccess = MailAccess.getInstance(session, sourceFullnameArgument.getAccountId());
+                mailAccess.connect();
                 if (move) {
                     return mailAccess.getMessageStorage().moveMessages(sourceFullname, destFullname, mailIds, fast);
                 }
                 return mailAccess.getMessageStorage().copyMessages(sourceFullname, destFullname, mailIds, fast);
             } finally {
-                mailAccess.close(true);
+                if (null != mailAccess) {
+                    mailAccess.close(true);
+                }
             }
         }
         final String[] retval;
