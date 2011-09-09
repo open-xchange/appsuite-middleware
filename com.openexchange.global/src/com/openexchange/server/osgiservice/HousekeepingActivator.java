@@ -187,8 +187,8 @@ public abstract class HousekeepingActivator extends DeferredActivator {
      * @param customizer The customizer applied to newly created {@link ServiceTracker} instance
      * @return The newly created {@link ServiceTracker} instance
      */
-    protected <S> ServiceTracker<S, S> track(final Class<? extends S> clazz, final ServiceTrackerCustomizer<S, S> customizer) {
-        final ServiceTracker<S, S> tracker = new ServiceTracker<S, S>(context, clazz.getName(), customizer);
+    protected <S> ServiceTracker<S, S> track(final Class<S> clazz, final ServiceTrackerCustomizer<S, S> customizer) {
+        final ServiceTracker<S, S> tracker = new ServiceTracker<S, S>(context, clazz, customizer);
         rememberTracker(tracker);
         return tracker;
     }
@@ -216,7 +216,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
      * @param clazz The service's class
      * @return The newly created {@link ServiceTracker} instance
      */
-    protected <S> ServiceTracker<S, S> track(final Class<? extends S> clazz) {
+    protected <S> ServiceTracker<S, S> track(final Class<S> clazz) {
         return track(clazz, (ServiceTrackerCustomizer<S, S>) null);
     }
 
@@ -241,7 +241,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
      * @param listener The service's listener triggered on {@link ServiceTracker#addingService(ServiceReference)} and so on
      * @return The newly created {@link ServiceTracker} instance
      */
-    protected <S> ServiceTracker<S, S> track(final Class<? extends S> clazz, final SimpleRegistryListener<S> listener) {
+    protected <S> ServiceTracker<S, S> track(final Class<S> clazz, final SimpleRegistryListener<S> listener) {
         return track(clazz, new ServiceTrackerCustomizer<S, S>() {
 
             @Override
