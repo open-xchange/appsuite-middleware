@@ -61,6 +61,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -250,7 +251,16 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
          * Perform blocking enqueue (waiting if necessary for space to become available).
          */
         try {
-            queue.put(PRESENT);
+            final int timeout = 10;
+            Throwable t = null;
+            int count = 0;
+            while(!queue.offer(PRESENT, timeout, TimeUnit.SECONDS)) {
+                final String message = "Thread waited more than " + (++count * timeout) + " seconds for free MailAccess slot.";
+                if (null == t) {
+                    t = new Throwable();
+                }
+                LOG.info(message, t);
+            }
             return false;
         } catch (final InterruptedException e) {
             throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
