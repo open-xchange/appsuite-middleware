@@ -61,7 +61,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.TimeUnit;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -76,12 +75,12 @@ import com.openexchange.mail.cache.SingletonMailAccessCache;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
-import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link MailAccess} - Handles connecting to the mailing system while using an internal cache for connected access objects (see
@@ -186,14 +185,14 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     /**
      * Signal a closed {@link MailAccess} instance.
      *
-     * @param mailAccess The mail access which has been closed
+     * @param accountId The account ID
+     * @param session The session
      */
-    private static void signalClosed(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) {
-        if (MailAccount.DEFAULT_ID != mailAccess.accountId) {
-            final Session session = mailAccess.session;
+    private static void freeSlot(final int accountId, final Session session) {
+        if (MailAccount.DEFAULT_ID != accountId) {
             final BlockingQueue<Object> queue =
-                COUNTER_MAP.get(getUserKey(session.getUserId(), mailAccess.accountId, session.getContextId()));
-            if (null != queue) {
+                COUNTER_MAP.get(getUserKey(session.getUserId(), accountId, session.getContextId()));
+            if (null != queue && !NO_RESTRICTION.equals(queue)) {
                 /*
                  * Dequeue
                  */
@@ -201,8 +200,6 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             }
         }
     }
-
-    private static final long MAX_RUNNING_MILLIS = StorageUtility.getMaxRunningMillis();
 
     /**
      * Signals that specified {@link MailAccess} which shall be connected. Waiting if capacity bounds specified for a closed
@@ -214,7 +211,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @return <code>true</code> if an immediate enqueue was possible; otherwise <code>false</code> for a blocking enqueue.
      * @throws OXException If protocol specifies capacity bounds and waiting for space is interrupted
      */
-    private static boolean signalConnectAttempt(final int accountId, final Session session, final MailProvider provider) throws OXException {
+    private static boolean occupySlot(final int accountId, final Session session, final MailProvider provider) throws OXException {
         if (MailAccount.DEFAULT_ID == accountId) {
             /*
              * No capacity restrictions for primary account.
@@ -253,7 +250,8 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
          * Perform blocking enqueue (waiting if necessary for space to become available).
          */
         try {
-            return !queue.offer(PRESENT, MAX_RUNNING_MILLIS, TimeUnit.MILLISECONDS);
+            queue.put(PRESENT);
+            return false;
         } catch (final InterruptedException e) {
             throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
         }
@@ -457,16 +455,6 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         if (!MailInitialization.getInstance().isInitialized()) {
             throw MailExceptionCode.INITIALIZATION_PROBLEM.create();
         }
-        /*
-         * Check MailAccessCache
-         */
-        {
-            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
-                getMailAccessCache().removeMailAccess(session, accountId);
-            if (mailAccess != null) {
-                return mailAccess;
-            }
-        }
         if (MailAccount.DEFAULT_ID == accountId) {
             /*
              * No cached connection available, check for admin login
@@ -474,23 +462,15 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             checkAdminLogin(session, accountId);
         }
         /*
-         * Return new MailAccess instance
+         * Occupy free slot
          */
         final MailProvider mailProvider = MailProviderRegistry.getMailProviderBySession(session, accountId);
-        if (signalConnectAttempt(accountId, session, mailProvider)) {
-            /*
-             * Immediate enqueue performed
-             */
-            return mailProvider.createNewMailAccess(session, accountId).setProvider(mailProvider);
+        occupySlot(accountId, session, mailProvider);
+        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = getMailAccessCache().removeMailAccess(session, accountId);
+        if (mailAccess != null) {
+            return mailAccess;
         }
-        /*-
-         * Blocking enqueue performed:
-         *
-         * Re-check cache
-         */
-        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
-            getMailAccessCache().removeMailAccess(session, accountId);
-        return null == mailAccess ? mailProvider.createNewMailAccess(session, accountId).setProvider(mailProvider) : mailAccess;
+        return mailProvider.createNewMailAccess(session, accountId).setProvider(mailProvider);
     }
 
     /**
@@ -778,7 +758,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     public final void close(final boolean put2Cache) {
         try {
             if (!isConnectedUnsafe()) {
-                signalClosed(this);
+                freeSlot(accountId, session);
                 return;
             }
             boolean put = put2Cache;
@@ -803,7 +783,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                     /*
                      * Successfully cached: return
                      */
-                    signalClosed(this);
+                    freeSlot(accountId, session);
                     return;
                 }
             } catch (final OXException e) {
@@ -817,7 +797,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                 /*
                  * Not closed by MailAccessCache
                  */
-                signalClosed(this);
+                freeSlot(accountId, session);
             }
         } finally {
             /*
@@ -930,10 +910,10 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
              * Admin mail login is not permitted per configuration
              */
             final Context ctx;
-            try {
+            if (session instanceof ServerSession) {
+                ctx = ((ServerSession) session).getContext();
+            } else {
                 ctx = ContextStorage.getStorageContext(session.getContextId());
-            } catch (final OXException e) {
-                throw new OXException(e);
             }
             if (session.getUserId() == ctx.getMailadmin()) {
                 throw MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.create(Integer.valueOf(ctx.getContextId()));
