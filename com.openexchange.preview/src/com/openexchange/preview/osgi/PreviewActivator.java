@@ -54,7 +54,6 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
@@ -65,7 +64,6 @@ import com.openexchange.preview.PreviewOutput;
 import com.openexchange.preview.PreviewService;
 import com.openexchange.preview.internal.TikaPreviewService;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
-import com.openexchange.server.osgiservice.SimpleRegistryListener;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 
@@ -121,30 +119,8 @@ public class PreviewActivator extends HousekeepingActivator {
         /*
          * Trackers
          */
-        track(ManagedFileManagement.class, new SimpleRegistryListener<ManagedFileManagement>() {
-
-            @Override
-            public void added(final ServiceReference<ManagedFileManagement> ref, final ManagedFileManagement service) {
-                addService(ManagedFileManagement.class, service);
-            }
-
-            @Override
-            public void removed(final ServiceReference<ManagedFileManagement> ref, final ManagedFileManagement service) {
-                removeService(ManagedFileManagement.class);
-            }
-        });
-        track(HTMLService.class, new SimpleRegistryListener<HTMLService>() {
-
-            @Override
-            public void added(final ServiceReference<HTMLService> ref, final HTMLService service) {
-                addService(HTMLService.class, service);
-            }
-
-            @Override
-            public void removed(final ServiceReference<HTMLService> ref, final HTMLService service) {
-                removeService(HTMLService.class);
-            }
-        });
+        trackService(ManagedFileManagement.class);
+        trackService(HTMLService.class);
         openTrackers();
         /*
          * Possible event handlers
