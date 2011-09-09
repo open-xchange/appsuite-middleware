@@ -390,7 +390,7 @@ public class SchemaStoreImpl extends SchemaStore {
         }
         Statement stmt = null;
         ResultSet result = null;
-        final List<ExecutedTask> retval = new ArrayList<ExecutedTask>();
+        final List<ExecutedTask> retval = new ArrayList<ExecutedTask>(128);
         try {
             stmt = con.createStatement();
             result = stmt.executeQuery(sql);
