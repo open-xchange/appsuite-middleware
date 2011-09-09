@@ -26,5 +26,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.push"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.server"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.secret"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.preview"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,org.apache.tika"/>
 </provider>
 </psf>
