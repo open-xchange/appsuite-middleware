@@ -387,91 +387,25 @@ public class SchemaStoreImpl extends SchemaStore {
         final String sql;
         if (readWrite) {
             sql = "SELECT taskName,successful,lastModified FROM updateTask WHERE cid=0 FOR UPDATE";
-            while (!lock(con)) {
-                // Couldn't acquire lock
-                try {
-                    Thread.sleep(100);
-                } catch (final InterruptedException e) {
-                    // Ignore
-                }
-            }
         } else {
-            final boolean isLocked = isLocked(con);
-            if (isLocked) {
-                sql = "SELECT taskName,successful,lastModified FROM updateTask WHERE cid=0 FOR UPDATE";
-            } else {
-                sql = "SELECT taskName,successful,lastModified FROM updateTask WHERE cid=0";
-            }
+            sql = "SELECT taskName,successful,lastModified FROM updateTask WHERE cid=0";
         }
-        try {
-            Statement stmt = null;
-            ResultSet result = null;
-            final List<ExecutedTask> retval = new ArrayList<ExecutedTask>();
-            try {
-                stmt = con.createStatement();
-                result = stmt.executeQuery(sql);
-                while (result.next()) {
-                    final ExecutedTask task = new ExecutedTaskImpl(result.getString(1), result.getBoolean(2), new Date(result.getLong(3)));
-                    retval.add(task);
-                }
-            } catch (final SQLException e) {
-                throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-            } finally {
-                closeSQLStuff(result, stmt);
-            }
-            return retval.toArray(new ExecutedTask[retval.size()]);
-        } finally {
-            if (readWrite) {
-                unlock(con);
-            }
-        }
-    }
-
-    private static boolean isLocked(final Connection con) throws OXException {
-        PreparedStatement stmt = null;
+        Statement stmt = null;
         ResultSet result = null;
+        final List<ExecutedTask> retval = new ArrayList<ExecutedTask>();
         try {
-            stmt = con.prepareStatement("SELECT taskName FROM updateTask WHERE cid=0 AND taskName=?");
-            stmt.setString(1, LOCK);
-            result = stmt.executeQuery();
-            return result.next();
+            stmt = con.createStatement();
+            result = stmt.executeQuery(sql);
+            while (result.next()) {
+                final ExecutedTask task = new ExecutedTaskImpl(result.getString(1), result.getBoolean(2), new Date(result.getLong(3)));
+                retval.add(task);
+            }
         } catch (final SQLException e) {
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
         }
-    }
-
-    private static boolean lock(final Connection con) throws OXException {
-        PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement("INSERT INTO updateTask (cid,successful,lastModified,taskName) VALUES (0,?,?,?)");
-            stmt.setInt(1, 1);
-            stmt.setLong(2, 1);
-            stmt.setString(3, LOCK);
-            try {
-                return (stmt.executeUpdate() > 0);
-            } catch (final SQLException e) {
-                return false;
-            }
-        } catch (final SQLException e) {
-            throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(stmt);
-        }
-    }
-
-    private static void unlock(final Connection con) throws OXException {
-        PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement("DELETE FROM updateTask WHERE cid=0 AND taskName=?");
-            stmt.setString(1, LOCK);
-            stmt.executeUpdate();
-        } catch (final SQLException e) {
-            throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(stmt);
-        }
+        return retval.toArray(new ExecutedTask[retval.size()]);
     }
 
     @Override
