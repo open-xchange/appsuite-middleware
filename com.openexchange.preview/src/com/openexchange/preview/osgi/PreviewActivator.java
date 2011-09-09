@@ -71,10 +71,36 @@ import com.openexchange.sessiond.SessiondEventConstants;
 
 /**
  * {@link PreviewActivator}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class PreviewActivator extends HousekeepingActivator {
+
+    /*-
+     * I managed to converted RTF/Doc files to PDF using OpenOffice, here my steps: 1) Installed OpenOffice 2.4 (I failed to compile in
+     * OpenOffice 3 coz they have changed the jar files folder structure) 2) You need these 3 files in your classpath: unoil.jar, juh.jar,
+     * ridl.jar You will find them in: "C:\Program Files\OpenOffice.org 2.4\program\classes
+     * " (Note: Do NOT copy out these 3 files, you must linked them in the original location, or else you will get runtime error for not able to find the executable) ---------------------------------- try { // get the remote office component context com.sun.star.uno.XComponentContext xContext = com.sun.star.comp.helper.Bootstrap.bootstrap(); // get the remote office service manager com.sun.star.lang.XMultiComponentFactory xMCF = xContext.getServiceManager(); Object oDesktop = xMCF.createInstanceWithContext( "
+     * com.sun.star.frame.Desktop
+     * ", xContext); com.sun.star.frame.XComponentLoader xCompLoader = (com.sun.star.frame.XComponentLoader) UnoRuntime.queryInterface( com.sun.star.frame.XComponentLoader.class, oDesktop); java.io.File file = new java.io.File(sourceFile); StringBuffer sLoadUrl = new StringBuffer("
+     * file:///"); sLoadUrl.append(file.getCanonicalPath().replace(' ', '/')); file = new java.io.File(outputFile); StringBuffer sSaveUrl =
+     * new StringBuffer("file:///"); sSaveUrl.append(file.getCanonicalPath().replace(' ', '/')); com.sun.star.beans.PropertyValue[]
+     * propertyValue = new com.sun.star.beans.PropertyValue[1]; propertyValue[0] = new com.sun.star.beans.PropertyValue();
+     * propertyValue[0].Name = "Hidden"; propertyValue[0].Value = new Boolean(true); Object oDocToStore = xCompLoader.loadComponentFromURL(
+     * sLoadUrl.toString(), "_blank", 0, propertyValue ); com.sun.star.frame.XStorable xStorable =
+     * (com.sun.star.frame.XStorable)UnoRuntime.queryInterface( com.sun.star.frame.XStorable.class, oDocToStore ); propertyValue = new
+     * com.sun.star.beans.PropertyValue[ 2 ]; propertyValue[0] = new com.sun.star.beans.PropertyValue(); propertyValue[0].Name =
+     * "Overwrite"; propertyValue[0].Value = new Boolean(true); propertyValue[1] = new com.sun.star.beans.PropertyValue();
+     * propertyValue[1].Name = "FilterName"; propertyValue[1].Value = "writer_pdf_Export"; xStorable.storeToURL( sSaveUrl.toString(),
+     * propertyValue ); System.out.println("\nDocument \"" + sLoadUrl + "\" saved under \"" + sSaveUrl + "\"\n");
+     * com.sun.star.util.XCloseable xCloseable = (com.sun.star.util.XCloseable)
+     * UnoRuntime.queryInterface(com.sun.star.util.XCloseable.class, oDocToStore ); if (xCloseable != null ) { xCloseable.close(false); }
+     * else { com.sun.star.lang.XComponent xComp = (com.sun.star.lang.XComponent) UnoRuntime.queryInterface(
+     * com.sun.star.lang.XComponent.class, oDocToStore ); xComp.dispose(); } System.out.println("document closed!"); System.exit(0);
+     * ---------------------------------- Hope that helps, enjoy!
+     * 
+     * http://java.dzone.com/news/integrate-openoffice-java
+     */
 
     /**
      * Initializes a new {@link PreviewActivator}.
@@ -139,11 +165,16 @@ public class PreviewActivator extends HousekeepingActivator {
                         try {
                             final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
 
-                            final String content = tikaPreviewService.getPreviewFor("file:///Users/thorben/git/backend/org.apache.tika/test-documents/testWORD_embeded.doc", PreviewOutput.HTML, session).getContent();
+                            final String content =
+                                tikaPreviewService.getPreviewFor(
+                                    "file:///Users/thorben/git/backend/org.apache.tika/test-documents/testWORD_embeded.doc",
+                                    PreviewOutput.HTML,
+                                    session).getContent();
 
                             System.out.println(content);
 
-                            final Writer writer = new OutputStreamWriter(new FileOutputStream("/Users/thorben/Documents/test-tika.html"), "UTF-8");
+                            final Writer writer =
+                                new OutputStreamWriter(new FileOutputStream("/Users/thorben/Documents/test-tika.html"), "UTF-8");
                             try {
                                 writer.write(content);
                                 writer.flush();
@@ -158,7 +189,7 @@ public class PreviewActivator extends HousekeepingActivator {
             };
             final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
             dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-            registerService(EventHandler.class, eventHandler, dict);
+            // registerService(EventHandler.class, eventHandler, dict);
         }
 
     }
