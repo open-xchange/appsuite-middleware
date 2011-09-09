@@ -78,8 +78,6 @@ import com.openexchange.tools.update.Tools;
  */
 public class SchemaStoreImpl extends SchemaStore {
 
-    private static final String LOCK = "table.lock";
-
     private static final String TABLE_NAME = "updateTask";
 
     private static final String LOCKED = "LOCKED";
