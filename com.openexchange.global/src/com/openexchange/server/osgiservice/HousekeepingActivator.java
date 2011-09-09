@@ -144,13 +144,13 @@ public abstract class HousekeepingActivator extends DeferredActivator {
     }
 
     /**
-     * Creates and remembers a new {@link ServiceTracker}. The tracked service is automatically added to/removed from tracked services and
-     * thus available/disappearing when using this activator as {@link ServiceLookup service look-up}.
+     * Creates and remembers a new {@link ServiceTracker}. The tracked service is automatically {@link #addService(Class, Object) added to}/
+     * {@link #removeService(Class) removed} from tracked services and thus available/disappearing when using this activator as
+     * {@link ServiceLookup service look-up}.
      * <p>
      * <b>NOTE</b>: Don't forget to open tracker(s) with {@link #openTrackers()}.
      * 
      * @param clazz The class of the tracked service
-     * @param customizer The customizer applied to newly created {@link ServiceTracker} instance
      * @return The newly created {@link ServiceTracker} instance
      */
     protected <S> ServiceTracker<S, S> trackService(final Class<S> clazz) {
