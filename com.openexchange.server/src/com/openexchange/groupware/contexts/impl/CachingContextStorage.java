@@ -100,7 +100,7 @@ public class CachingContextStorage extends ContextStorage {
             }
             contextId = I(persistantImpl.getContextId(loginInfo));
             if (NOT_FOUND != contextId.intValue()) {
-                cache.put(loginInfo, contextId);
+                cache.putSafe(loginInfo, contextId);
             }
         } else if (LOG.isTraceEnabled()) {
             LOG.trace("Cache HIT. Login info: " + loginInfo);

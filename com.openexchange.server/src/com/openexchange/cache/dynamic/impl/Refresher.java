@@ -198,15 +198,10 @@ public abstract class Refresher<T extends Serializable> {
             lock.lock();
             try {
                 // Do we replace an existing value?
-                try {
-                    final Object prev = cache.get(key);
-                    if (null != prev) {
-                        @SuppressWarnings("unchecked")
-                        final T co = (T) prev; // Type check
-                        cache.remove(key); // Distribute
-                    }
-                } catch (final Exception e) {
-                    // Ignore
+                final Object prev = cache.get(key);
+                if (null != prev && !(prev instanceof Condition)) {
+                    // Issue remove for lateral distribution
+                    cache.remove(key);
                 }
                 cache.put(key, retval);
                 cond.signalAll();

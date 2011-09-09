@@ -139,10 +139,18 @@ public class CachingFilestoreStorage extends FilestoreStorage {
         if (null == retval) {
             retval = delegate.getFilestore(con, id);
             if (null != filestoreCache) {
-                try {
-                    filestoreCache.put(I(id), retval);
-                } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                synchronized (filestoreCache) {
+                    try {
+                        // Do we replace an existing value?
+                        final Object prev = filestoreCache.get(I(id));
+                        if (prev instanceof Filestore) {
+                            // Issue remove for lateral distribution
+                            filestoreCache.remove(I(id));
+                        }
+                        filestoreCache.put(I(id), retval);
+                    } catch (final OXException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
                 }
             }
         }

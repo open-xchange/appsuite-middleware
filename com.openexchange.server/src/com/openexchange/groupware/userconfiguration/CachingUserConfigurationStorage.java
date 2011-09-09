@@ -217,7 +217,12 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
         for (final UserConfiguration userConfig : userConfigs) {
             cacheWriteLock.lock();
             try {
-                cache.put(getKey(userConfig.getUserId(), ctx), userConfig);
+                final CacheKey key = getKey(userConfig.getUserId(), ctx);
+                final Object prev = cache.get(key);
+                if (prev instanceof UserConfiguration) {
+                    cache.remove(key);
+                }
+                cache.put(key, userConfig);
             } catch (final RuntimeException rte) {
                 return getFallback().getUserConfiguration(ctx, users);
             } finally {

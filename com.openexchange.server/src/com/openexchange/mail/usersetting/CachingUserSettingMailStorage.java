@@ -62,6 +62,7 @@ import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -190,7 +191,11 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
                 cacheWriteLock.lock();
                 try {
                     usm.setNoSave(false);
-                    cache.put(cache.newCacheKey(ctx.getContextId(), user), (Serializable) usm.clone());
+                    final CacheKey key = cache.newCacheKey(ctx.getContextId(), user);
+                    if (null != cache.get(key)) {
+                        cache.remove(key);
+                    }
+                    cache.put(key, (Serializable) usm.clone());
                 } catch (final OXException e) {
                     LOG.error("UserSettingMail could not be put into cache", e);
                 } finally {
@@ -235,7 +240,11 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
                 cacheWriteLock.lock();
                 try {
                     usm.setNoSave(false);
-                    cache.put(cache.newCacheKey(ctx.getContextId(), user), (Serializable) usm.clone());
+                    final CacheKey key = cache.newCacheKey(ctx.getContextId(), user);
+                    if (null != cache.get(key)) {
+                        cache.remove(key);
+                    }
+                    cache.put(key, (Serializable) usm.clone());
                 } catch (final OXException e) {
                     LOG.error("UserSettingMail could not be put into cache", e);
                 } finally {

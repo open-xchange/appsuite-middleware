@@ -110,7 +110,14 @@ public abstract class Refresher<T extends Serializable> implements Serializable 
     protected void cache(final T obj) throws OXException {
         final Cache cache = getCache();
         if (null != cache) {
-            cache.put(key, obj);
+            synchronized (cache) {
+                final Object prev = cache.get(key);
+                if (null != prev && !(prev instanceof Condition)) {
+                    // Issue remove for lateral distribution
+                    cache.remove(key);
+                }
+                cache.put(key, obj);
+            }
         }
     }
 
@@ -172,6 +179,11 @@ public abstract class Refresher<T extends Serializable> implements Serializable 
             }
             lock.lock();
             try {
+                final Object prev = cache.get(key);
+                if (null != prev && !(prev instanceof Condition)) {
+                    // Issue remove for lateral distribution
+                    cache.remove(key);
+                }
                 cache.put(key, retval);
                 cond.signalAll();
             } catch (final OXException e) {

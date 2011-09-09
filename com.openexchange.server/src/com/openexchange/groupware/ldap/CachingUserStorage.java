@@ -278,6 +278,9 @@ public class CachingUserStorage extends UserStorage {
             if (null == tmp) {
                 identifiers = delegate.resolveIMAPLogin(imapLogin, context);
                 try {
+                    if (null != cache.get(key)) {
+                        cache.remove(key);
+                    }
                     cache.put(key, identifiers);
                 } catch (final OXException e) {
                     throw UserExceptionCode.CACHE_PROBLEM.create(e);
