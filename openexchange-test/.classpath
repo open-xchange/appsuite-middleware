@@ -24,7 +24,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.configread"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.global"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.server"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/javax.activation"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.charset"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/net.freeutils.jcharset"/>
 	<classpathentry kind="src" path="/com.openexchange.publish"/>
@@ -51,7 +50,7 @@
 	<classpathentry kind="lib" path="lib/nekohtml.jar"/>
 	<classpathentry kind="lib" path="lib/xercesImpl.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.logging_1.0.4.v200706111724.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.messaging.twitter"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.publish.online.infostore"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.messaging.rss"/>
