@@ -81,6 +81,10 @@ public abstract class Refresher<T extends Serializable> {
      * The cache region name.
      */
     private final String regionName;
+
+    /**
+     * Whether to issue a cache remove operation before replacing a cache element.
+     */
     private final boolean removeBeforePut;
 
     /**
@@ -108,7 +112,8 @@ public abstract class Refresher<T extends Serializable> {
 
     /**
      * Checks if the object was removed from the cache and must be reloaded from the database.
-     * @throws OXException TODO
+     * 
+     * @throws OXException If refresh fails
      */
     protected T refresh() throws OXException {
         return refresh(regionName, factory, removeBeforePut);
