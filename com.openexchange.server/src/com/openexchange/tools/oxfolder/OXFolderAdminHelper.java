@@ -137,6 +137,16 @@ public final class OXFolderAdminHelper {
      * @throws OXException If an error occurs
      */
     public boolean isPublicFolderEditable(final int cid, final int userId, final Connection readCon) throws OXException {
+        final int admin;
+        try {
+            admin = getContextAdminID(cid, readCon);
+        } catch (final OXException e) {
+            LOG.error(e.getMessage(), e);
+            return false;
+        }
+        if (admin != userId) {
+            return false;
+        }
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -193,13 +203,14 @@ public final class OXFolderAdminHelper {
             ResultSet rs = null;
             try {
                 stmt =
-                    writeCon.prepareStatement("SELECT permission_id,system FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND permission_id = ?");
+                    writeCon.prepareStatement("SELECT permission_id, admin_flag FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND permission_id = ?");
                 int pos = 1;
                 stmt.setInt(pos++, cid);
                 stmt.setInt(pos++, id);
                 stmt.setInt(pos++, userId);
                 rs = stmt.executeQuery();
                 final boolean update = rs.next();
+                final boolean prevEditable = update && rs.getInt(2) > 0;
                 final int system;
                 if(update) {
                     system = rs.getInt(2);
@@ -208,6 +219,16 @@ public final class OXFolderAdminHelper {
                 }
                 DBUtils.closeSQLStuff(rs, stmt);
                 rs = null;
+                /*
+                 * Check user
+                 */
+                if (admin != userId) {
+                    if (prevEditable == editable) {
+                        // No-op
+                        return;
+                    }
+                    throw OXFolderExceptionCode.ADMIN_OP_ONLY.create();
+                }
                 /*
                  * Insert/Update
                  */
@@ -222,7 +243,7 @@ public final class OXFolderAdminHelper {
                     stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // odp
                     stmt.setInt(pos++, cid);
                     stmt.setInt(pos++, id);
-                    stmt.setInt(pos++, userId);
+                    stmt.setInt(pos++, admin);
                     stmt.setInt(pos++, system);
                     stmt.executeUpdate();
                 } else {
@@ -231,7 +252,7 @@ public final class OXFolderAdminHelper {
                     pos = 1;
                     stmt.setInt(pos++, cid); // cid
                     stmt.setInt(pos++, id); // fuid
-                    stmt.setInt(pos++, userId); // permission_id
+                    stmt.setInt(pos++, admin); // permission_id
                     stmt.setInt(pos++, OCLPermission.CREATE_SUB_FOLDERS); // fp
                     stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // orp
                     stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // owp
