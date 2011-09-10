@@ -199,11 +199,13 @@ public abstract class Refresher<T extends Serializable> {
             }
             lock.lock();
             try {
-                // Do we replace an existing value?
-                final Object prev = cache.get(key);
-                if (removeBeforePut && null != prev && !(prev instanceof Condition)) {
-                    // Issue remove for lateral distribution
-                    cache.remove(key);
+                if (removeBeforePut) {
+                    // Do we replace an existing value?
+                    final Object prev = cache.get(key);
+                    if (null != prev && !(prev instanceof Condition)) {
+                        // Issue remove for lateral distribution
+                        cache.remove(key);
+                    }
                 }
                 cache.put(key, retval);
                 cond.signalAll();
