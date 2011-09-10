@@ -49,14 +49,30 @@
 
 package com.openexchange.preview.osgi;
 
+import java.awt.Graphics2D;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import org.artofsolving.jodconverter.OfficeDocumentConverter;
+import org.artofsolving.jodconverter.office.DefaultOfficeManagerConfiguration;
+import org.artofsolving.jodconverter.office.OfficeManager;
+import org.jopendocument.model.OpenDocument;
+import org.jopendocument.renderer.ODTRenderer;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.Rectangle;
+import com.itextpdf.text.pdf.PdfContentByte;
+import com.itextpdf.text.pdf.PdfDocument;
+import com.itextpdf.text.pdf.PdfTemplate;
+import com.itextpdf.text.pdf.PdfWriter;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.html.HTMLService;
 import com.openexchange.java.Streams;
@@ -97,7 +113,22 @@ public class PreviewActivator extends HousekeepingActivator {
      * com.sun.star.lang.XComponent.class, oDocToStore ); xComp.dispose(); } System.out.println("document closed!"); System.exit(0);
      * ---------------------------------- Hope that helps, enjoy!
      * 
+     * http://www.artofsolving.com/opensource/jodconverter
+     * 
      * http://java.dzone.com/news/integrate-openoffice-java
+     * 
+     * http://www.jopendocument.org/
+     * http://www.jopendocument.org/tutorial_pdf.html
+     * 
+     * http://jodconverter.svn.sourceforge.net/viewvc/jodconverter/branches/3.0.x-200801-commons-pool/
+     * 
+     * http://shervinasgari.blogspot.com/2008/12/dynamically-generate-odt-and-pdf.html
+     * 
+     * http://oodaemon.sourceforge.net/
+     * 
+     * http://code.google.com/p/java2word/
+     * 
+     * http://www.tutego.de/blog/javainsel/2011/08/microsoft-office-dokumente-in-java-verarbeiten/
      */
 
     /**
@@ -168,6 +199,77 @@ public class PreviewActivator extends HousekeepingActivator {
             // registerService(EventHandler.class, eventHandler, dict);
         }
 
+        /*
+         * PDF generation
+         */
+        pdfWithOpenDocument();
+    }
+
+    private void pdfWithJodConverter() {
+        final OfficeManager om = new DefaultOfficeManagerConfiguration()
+        .setOfficeHome("/usr/lib/openoffice")
+        .setPortNumbers(8100, 8101, 8102, 8103)
+        .buildOfficeManager();
+        
+        final OfficeManager officeManager = new DefaultOfficeManagerConfiguration().buildOfficeManager();
+        officeManager.start();
+
+        final OfficeDocumentConverter converter = new OfficeDocumentConverter(officeManager);
+        converter.convert(new File("/Users/thorben/git/backend/org.apache.tika/test-documents/testWORD_embeded.doc"), new File("/Users/thorben/git/backend/org.apache.tika/test-documents/mytest.pdf"));
+            
+        officeManager.stop();
+    }
+
+    private void pdfWithOpenDocument() throws FileNotFoundException, DocumentException {
+        // Load the ODS file
+        final OpenDocument doc = new OpenDocument();
+        doc.loadFrom("/Users/thorben/git/backend/org.apache.tika/test-documents/testOpenOffice2.odt");
+
+        // Open the PDF document
+        final Document document = new Document(PageSize.A4);
+        final File outFile = new File("/Users/thorben/git/backend/org.apache.tika/test-documents/mytest.pdf");
+
+        final PdfDocument pdf = new PdfDocument();
+
+        document.addDocListener(pdf);
+
+        final FileOutputStream fileOutputStream = new FileOutputStream(outFile);
+        final PdfWriter writer = PdfWriter.getInstance(pdf, fileOutputStream);
+        pdf.addWriter(writer);
+
+        document.open();
+
+        // Create a template and a Graphics2D object 
+        final Rectangle pageSize = document.getPageSize();
+        final int w = (int) (pageSize.getWidth() * 0.9);
+        final int h = (int) (pageSize.getHeight() * 0.95);
+        final PdfContentByte cb = writer.getDirectContent();
+        final PdfTemplate tp = cb.createTemplate(w, h);
+
+        final Graphics2D g2 = tp.createPrinterGraphics(w, h, null);
+        // If you want to prevent copy/paste, you can use
+        // g2 = tp.createGraphicsShapes(w, h, true, 0.9f);
+                   
+        tp.setWidth(w);
+        tp.setHeight(h);
+
+        // Configure the renderer
+        final ODTRenderer renderer = new ODTRenderer(doc);
+        renderer.setIgnoreMargins(true);
+        renderer.setPaintMaxResolution(true);
+                   
+        // Scale the renderer to fit width
+        renderer.setResizeFactor(renderer.getPrintWidth() / w);
+        // Render
+        renderer.paintComponent(g2);
+        g2.dispose();
+
+        // Add our spreadsheet in the middle of the page
+        final float offsetX = (pageSize.getWidth() - w) / 2;
+        final float offsetY = (pageSize.getHeight() - h) / 2;
+        cb.addTemplate(tp, offsetX, offsetY);
+        // Close the PDF document
+        document.close();
     }
 
 }
