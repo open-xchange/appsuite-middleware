@@ -54,11 +54,12 @@ import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.i2I;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
@@ -167,23 +168,27 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
 
     @Override
     public Collection<Contact> getData(final TargetFolderDefinition target, final Object session) throws OXException {
-        final OverridingContactInterface contacts = (OverridingContactInterface) getFromSession(SQL_INTERFACE, session);
-
-        final int folderId = target.getFolderIdAsInt();
-        final int numberOfContacts = contacts.getNumberOfContacts(folderId);
-        final SearchIterator<Contact> contactsInFolder = contacts.getContactsInFolder(
-            folderId,
-            0,
-            numberOfContacts,
-            Contact.OBJECT_ID,
-            Order.ASCENDING,
-            null,
-            COMPARISON_COLUMNS);
-        final List<Contact> retval = new ArrayList<Contact>();
-        while (contactsInFolder.hasNext()) {
-            retval.add(contactsInFolder.next());
+        final Object sqlInterface = getFromSession(SQL_INTERFACE, session);
+        if (sqlInterface instanceof ContactInterface) {
+            final ContactInterface contacts = (ContactInterface) getFromSession(SQL_INTERFACE, session);
+    
+            final int folderId = target.getFolderIdAsInt();
+            final int numberOfContacts = contacts.getNumberOfContacts(folderId);
+            final SearchIterator<Contact> contactsInFolder = contacts.getContactsInFolder(
+                folderId,
+                0,
+                numberOfContacts,
+                Contact.OBJECT_ID,
+                Order.ASCENDING,
+                null,
+                COMPARISON_COLUMNS);
+            final List<Contact> retval = new ArrayList<Contact>();
+            while (contactsInFolder.hasNext()) {
+                retval.add(contactsInFolder.next());
+            }
+            return retval;
         }
-        return retval;
+        return Collections.emptyList();
     }
 
     @Override
@@ -198,14 +203,15 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
 
     @Override
     public void save(final Contact newElement, final Object session) throws OXException {
-        final OverridingContactInterface contacts = (OverridingContactInterface) getFromSession(SQL_INTERFACE, session);
-        final TargetFolderDefinition target = (TargetFolderDefinition) getFromSession(TARGET, session);
-        newElement.setParentFolderID(target.getFolderIdAsInt());
-
-        // as this is a new contact it needs a UUID to make later aggregation possible. This has to be a new one.
-        newElement.setUserField20(UUID.randomUUID().toString());
-
-        contacts.forceInsertContactObject(newElement);
+        final Object sqlInterface = getFromSession(SQL_INTERFACE, session);
+        if (sqlInterface instanceof OverridingContactInterface) {
+            final OverridingContactInterface contacts = (OverridingContactInterface) sqlInterface;
+            final TargetFolderDefinition target = (TargetFolderDefinition) getFromSession(TARGET, session);
+            newElement.setParentFolderID(target.getFolderIdAsInt());
+            // as this is a new contact it needs a UUID to make later aggregation possible. This has to be a new one.
+            newElement.setUserField20(UUID.randomUUID().toString());
+            contacts.forceInsertContactObject(newElement);
+        }
     }
 
     private Object getFromSession(final int key, final Object session) {
@@ -213,12 +219,12 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
     }
 
     @Override
-    public Object startSession(TargetFolderDefinition target) throws OXException {
-        Map<Integer, Object> userInfo = new HashMap<Integer, Object>();
-        TargetFolderSession session = new TargetFolderSession(target);
-        int folderID = target.getFolderIdAsInt();
+    public Object startSession(final TargetFolderDefinition target) throws OXException {
+        final Map<Integer, Object> userInfo = new HashMap<Integer, Object>();
+        final TargetFolderSession session = new TargetFolderSession(target);
+        final int folderID = target.getFolderIdAsInt();
 
-        ContactInterface contactInterface = SubscriptionServiceRegistry.getInstance().getService(
+        final ContactInterface contactInterface = SubscriptionServiceRegistry.getInstance().getService(
         		ContactInterfaceDiscoveryService.class).newContactInterface(
         				folderID,
         				session);
@@ -230,15 +236,18 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
 
     @Override
     public void update(final Contact original, final Contact update, final Object session) throws OXException {
-        final RdbContactSQLImpl contacts = (RdbContactSQLImpl) getFromSession(SQL_INTERFACE, session);
+        final Object sqlInterface = getFromSession(SQL_INTERFACE, session);
+        if (sqlInterface instanceof ContactInterface) {
+            final ContactInterface contactInterface = (ContactInterface) sqlInterface;
 
-        update.setParentFolderID(original.getParentFolderID());
-        update.setObjectID(original.getObjectID());
-        update.setLastModified(original.getLastModified());
-        // We need to carry over the UUID to keep existing relations
-        update.setUserField20(original.getUserField20());
+            update.setParentFolderID(original.getParentFolderID());
+            update.setObjectID(original.getObjectID());
+            update.setLastModified(new Date(System.currentTimeMillis()));
+            // We need to carry over the UUID to keep existing relations
+            update.setUserField20(original.getUserField20());
 
-        contacts.updateContactObject(update, update.getParentFolderID(), update.getLastModified());
+            contactInterface.updateContactObject(update, update.getParentFolderID(), update.getLastModified());
+        }
     }
 
 }
