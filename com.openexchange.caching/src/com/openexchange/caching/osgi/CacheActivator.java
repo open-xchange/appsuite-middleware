@@ -77,6 +77,17 @@ public final class CacheActivator extends HousekeepingActivator {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CacheActivator.class));
 
+    private static volatile CacheService cacheService;
+
+    /**
+     * Gets the cacheService
+     *
+     * @return The cacheService or <code>null</code>
+     */
+    public static CacheService getCacheService() {
+        return cacheService;
+    }
+
     private ObjectName objectName;
 
     /**
@@ -118,7 +129,9 @@ public final class CacheActivator extends HousekeepingActivator {
          */
         final Dictionary<String, String> dictionary = new Hashtable<String, String>();
         dictionary.put("name", "oxcache");
-        registerService(CacheService.class, JCSCacheService.getInstance(), dictionary);
+        final JCSCacheService jcsCacheService = JCSCacheService.getInstance();
+        registerService(CacheService.class, jcsCacheService, dictionary);
+        cacheService = jcsCacheService;
         final class ServiceTrackerCustomizerImpl implements ServiceTrackerCustomizer<ManagementService, ManagementService> {
 
             private final BundleContext bundleContext;
@@ -153,6 +166,7 @@ public final class CacheActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() {
+        cacheService = null;
         cleanUp();
         /*
          * Stop cache

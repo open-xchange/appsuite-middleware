@@ -47,92 +47,109 @@
  *
  */
 
-package com.openexchange.file.storage.rdb.internal;
+package com.openexchange.caching.dynamic;
 
 import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
+import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheExceptionCode;
 import com.openexchange.caching.CacheService;
+import com.openexchange.caching.osgi.CacheActivator;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.rdb.services.FileStorageRdbServiceRegistry;
 
 /**
- * {@link Refresher} - A copy of <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>'s Refresher class.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.18.2
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class Refresher<T extends Serializable> implements Serializable {
+public abstract class Refresher<T extends Serializable> {
 
-    private static final long serialVersionUID = 6921419705777107829L;
+    /**
+     * Logger.
+     */
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Refresher.class));
 
     /**
      * Factory for reloading cached objects.
      */
-    private final FileStorageFactory<T> factory;
-
-    /**
-     * Cache key of the cached object.
-     */
-    private final Serializable key;
+    private final OXObjectFactory<T> factory;
 
     /**
      * The cache region name.
      */
     private final String regionName;
+    private final boolean removeBeforePut;
 
     /**
      * Default constructor.
      *
      * @throws IllegalArgumentException If provided region name is <code>null</code>
      */
-    protected Refresher(final FileStorageFactory<T> factory, final String regionName) {
+    protected Refresher(final OXObjectFactory<T> factory, final String regionName, final boolean removeBeforePut) {
         super();
         this.factory = factory;
-        this.key = factory.getKey();
         if (null == regionName) {
             throw new IllegalArgumentException("Cache region name is null");
         }
         this.regionName = regionName;
+        this.removeBeforePut = removeBeforePut;
     }
 
     private Cache getCache() throws OXException {
-        final CacheService service = FileStorageRdbServiceRegistry.getServiceRegistry().getService(CacheService.class);
-        if (null == service) {
-            return null;
-        }
-        return service.getCache(regionName);
+        return getCache(regionName);
     }
 
     protected void cache(final T obj) throws OXException {
-        final Cache cache = getCache();
-        if (null != cache) {
-            synchronized (cache) {
-                final Object prev = cache.get(key);
-                if (null != prev && !(prev instanceof Condition)) {
-                    // Issue remove for lateral distribution
-                    cache.remove(key);
-                }
-                cache.put(key, obj);
-            }
-        }
+        cache(obj, getCache(), factory);
     }
 
     /**
      * Checks if the object was removed from the cache and must be reloaded from the database.
-     *
-     * @throws OXException if loading or putting into cache fails.
+     * @throws OXException TODO
      */
     protected T refresh() throws OXException {
-        final Cache cache = getCache();
+        return refresh(regionName, factory, removeBeforePut);
+    }
+
+    public static <T extends Serializable> T cache(final T obj, final Cache cache, final OXObjectFactory<T> factory) throws OXException {
+        T retval = null;
+        final Lock lock = factory.getCacheLock();
+        final Serializable key = factory.getKey();
+        lock.lock();
+        try {
+            final Object tmp = cache.get(key);
+            if (null == tmp) {
+                cache.put(key, obj);
+            } else if (tmp instanceof Condition) {
+                cache.put(key, obj);
+                ((Condition) tmp).signalAll();
+            } else {
+                // If object is already in cache, return it instead of putting new object into cache.
+                @SuppressWarnings("unchecked")
+                final
+                T tmp2 = (T) tmp;
+                retval = tmp2;
+            }
+        } finally {
+            lock.unlock();
+        }
+        return retval;
+    }
+
+    public static <T extends Serializable> T refresh(final String regionName, final OXObjectFactory<T> factory, final boolean removeBeforePut) throws OXException {
+        return refresh(regionName, getCache(regionName), factory, removeBeforePut);
+    }
+
+    public static <T extends Serializable> T refresh(final String regionName, final Cache cache, final OXObjectFactory<T> factory, final boolean removeBeforePut) throws OXException {
         if (null == cache) {
             return factory.load();
         }
         T retval = null;
         final Lock lock = factory.getCacheLock();
+        final Serializable key = factory.getKey();
         Condition cond = null;
         lock.lock();
         try {
@@ -141,10 +158,8 @@ public abstract class Refresher<T extends Serializable> implements Serializable 
                 // I am the thread to load the object. Put temporary condition
                 // into cache.
                 cond = lock.newCondition();
-                try {
+                {
                     cache.putSafe(key, (Serializable) cond);
-                } catch (final OXException e) {
-                    throw e;
                 }
             } else if (tmp instanceof Condition) {
                 // I have to wait for another thread to load the object.
@@ -153,21 +168,25 @@ public abstract class Refresher<T extends Serializable> implements Serializable 
                     // Other thread finished loading the object.
                     final Object tmp2 = cache.get(key);
                     if (null != tmp2 && !(tmp2 instanceof Condition)) {
-                        retval = (T) tmp2;
+                        @SuppressWarnings("unchecked")
+                        final
+                        T tmp3 = (T) tmp2;
+                        retval = tmp3;
                         cond = null;
                     }
                 } else {
                     // We have to load it, too.
-                    com.openexchange.log.Log.valueOf(LogFactory.getLog(Refresher.class)).warn(
-                        "Found 2 threads loading object \"" + String.valueOf(key) + "\" after 1 second into Cache \"" + regionName + "\"");
+                    LOG.warn("Found 2 threads loading object \"" + String.valueOf(key) + "\" after 1 second into Cache \"" + regionName + "\"");
                 }
             } else {
-                // Only other option is that the cache contains the delegate
-                // object.
-                retval = (T) tmp;
+                // Only other option is that the cache contains the delegate object.
+                @SuppressWarnings("unchecked")
+                final
+                T tmp2 = (T) tmp;
+                retval = tmp2;
             }
         } catch (final InterruptedException e) {
-            com.openexchange.log.Log.valueOf(LogFactory.getLog(Refresher.class)).error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         } finally {
             lock.unlock();
         }
@@ -180,20 +199,29 @@ public abstract class Refresher<T extends Serializable> implements Serializable 
             }
             lock.lock();
             try {
-                final Object prev = cache.get(key);
-                if (null != prev && !(prev instanceof Condition)) {
-                    // Issue remove for lateral distribution
-                    cache.remove(key);
+                if (removeBeforePut) {
+                    // Do we replace an existing value?
+                    final Object prev = cache.get(key);
+                    if (null != prev && !(prev instanceof Condition)) {
+                        // Issue remove for lateral distribution
+                        cache.remove(key);
+                    }
                 }
                 cache.put(key, retval);
                 cond.signalAll();
-            } catch (final OXException e) {
-                throw e;
             } finally {
                 lock.unlock();
             }
         }
         return retval;
+    }
+
+    public static Cache getCache(final String regionName) throws OXException {
+        if (null == regionName) {
+            throw CacheExceptionCode.INVALID_CACHE_REGION_NAME.create(regionName);
+        }
+        final CacheService service = CacheActivator.getCacheService();
+        return null == service ? null : service.getCache(regionName);
     }
 
 }

@@ -49,7 +49,6 @@
 
 package com.openexchange.cache.impl;
 
-import com.openexchange.exception.OXException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -57,8 +56,6 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import junit.framework.TestCase;
-import com.openexchange.cache.dynamic.impl.OXObjectFactory;
-import com.openexchange.cache.dynamic.impl.Refresher;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheElement;
 import com.openexchange.caching.CacheExceptionCode;
@@ -66,6 +63,9 @@ import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.CacheStatistics;
 import com.openexchange.caching.ElementAttributes;
+import com.openexchange.caching.dynamic.OXObjectFactory;
+import com.openexchange.caching.dynamic.Refresher;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -107,12 +107,15 @@ public class RefresherTest extends TestCase {
         ServerServiceRegistry.getInstance().addService(CacheService.class, new CacheService() {
             private final Cache cache = new Cache() {
                 private Serializable value;
+                @Override
                 public void clear() {
                     throw new UnsupportedOperationException();
                 }
+                @Override
                 public void dispose() {
                     throw new UnsupportedOperationException();
                 }
+                @Override
                 public Object get(final Serializable key) {
                     Object retval = null;
                     if (KEY.equals(key)) {
@@ -120,27 +123,35 @@ public class RefresherTest extends TestCase {
                     }
                     return retval;
                 }
+                @Override
                 public CacheElement getCacheElement(final Serializable key) {
                     throw new UnsupportedOperationException();
                 }
+                @Override
                 public ElementAttributes getDefaultElementAttributes() {
                     throw new UnsupportedOperationException();
                 }
+                @Override
                 public Object getFromGroup(final Serializable key, final String group) {
                     throw new UnsupportedOperationException();
                 }
+                @Override
                 public CacheStatistics getStatistics() {
                     throw new UnsupportedOperationException();
                 }
+                @Override
                 public void invalidateGroup(final String group) {
                     throw new UnsupportedOperationException();
                 }
+                @Override
                 public CacheKey newCacheKey(final int contextId, final int objectId) {
                     throw new UnsupportedOperationException();
                 }
+                @Override
                 public CacheKey newCacheKey(final int contextId, final Serializable... obj) {
                     throw new UnsupportedOperationException();
                 }
+                @Override
                 public void put(final Serializable key, final Serializable obj) throws OXException {
                     if (!KEY.equals(key)) {
                         throw CacheExceptionCode.CACHE_ERROR.create(key);
@@ -157,15 +168,19 @@ public class RefresherTest extends TestCase {
 //                        this.value = null;
 //                    }
                 }
+                @Override
                 public void put(final Serializable key, final Serializable val, final ElementAttributes attr) {
                     throw new UnsupportedOperationException();
                 }
+                @Override
                 public void putInGroup(final Serializable key, final String groupName, final Object value, final ElementAttributes attr) {
                     throw new UnsupportedOperationException();
                 }
+                @Override
                 public void putInGroup(final Serializable key, final String groupName, final Serializable value) {
                     throw new UnsupportedOperationException();
                 }
+                @Override
                 public void putSafe(final Serializable key, final Serializable obj) throws OXException {
                     if (!KEY.equals(key)) {
                         throw CacheExceptionCode.CACHE_ERROR.create(key);
@@ -185,6 +200,7 @@ public class RefresherTest extends TestCase {
 //                        this.value = null;
 //                    }
                 }
+                @Override
                 public void remove(final Serializable key) throws OXException {
                     if (!KEY.equals(key)) {
                         throw CacheExceptionCode.CACHE_ERROR.create(key);
@@ -194,16 +210,20 @@ public class RefresherTest extends TestCase {
                         value = null;
                     }
                 }
+                @Override
                 public void removeFromGroup(final Serializable key, final String group) {
                     throw new UnsupportedOperationException();
                 }
+                @Override
                 public void setDefaultElementAttributes(final ElementAttributes attr) {
                     throw new UnsupportedOperationException();
                 }
             };
+            @Override
             public void freeCache(final String name) {
                 throw new UnsupportedOperationException();
             }
+            @Override
             public Cache getCache(final String name) {
                 Cache retval = null;
                 if (KEY.equals(name)) {
@@ -211,21 +231,27 @@ public class RefresherTest extends TestCase {
                 }
                 return retval;
             }
+            @Override
             public void loadConfiguration(final String cacheConfigFile) {
                 throw new UnsupportedOperationException();
             }
+            @Override
             public void loadConfiguration(final InputStream inputStream) throws OXException {
                 throw new UnsupportedOperationException();
             }
+            @Override
             public void loadDefaultConfiguration() {
                 throw new UnsupportedOperationException();
             }
+            @Override
             public CacheKey newCacheKey(final int contextId, final int objectId) {
                 throw new UnsupportedOperationException();
             }
+            @Override
             public CacheKey newCacheKey(final int contextId, final Serializable obj) {
                 throw new UnsupportedOperationException();
             }
+            @Override
             public CacheKey newCacheKey(final int contextId, final Serializable... objs) {
                 throw new UnsupportedOperationException();
             }
@@ -266,12 +292,15 @@ public class RefresherTest extends TestCase {
 
     private static final OXObjectFactory<Integer> factory = new OXObjectFactory<Integer>() {
         private final Lock lock = new ReentrantLock();
+        @Override
         public Lock getCacheLock() {
             return lock;
         }
+        @Override
         public Serializable getKey() {
             return KEY;
         }
+        @Override
         public Integer load() throws OXException {
             try {
                 Thread.sleep(100);
@@ -314,6 +343,7 @@ public class RefresherTest extends TestCase {
         public void stop() {
             run.set(false);
         }
+        @Override
         public void run() {
             try {
                 while (run.get()) {
@@ -335,6 +365,7 @@ public class RefresherTest extends TestCase {
         public void stop() {
             run.set(false);
         }
+        @Override
         public void run() {
             try {
                 final Cache cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(KEY);

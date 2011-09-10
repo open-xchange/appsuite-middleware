@@ -51,6 +51,7 @@ package com.openexchange.file.storage.rdb.internal;
 
 import gnu.trove.TIntArrayList;
 import gnu.trove.TIntProcedure;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -59,6 +60,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
+import com.openexchange.caching.dynamic.OXObjectFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageService;
@@ -160,12 +162,31 @@ public final class CachingFileStorageAccountStorage implements FileStorageAccoun
             return delegatee.getAccount(serviceId, id, session);
         }
         try {
-            return new FileStorageAccountReloader(new FileStorageAccountFactory(id, serviceId, session, cacheLock, newCacheKey(
-                cacheService,
-                serviceId,
-                id,
-                session.getUserId(),
-                session.getContextId()), delegatee), REGION_NAME);
+            final RdbFileStorageAccountStorage accountStorage = delegatee;
+            final Lock lock = cacheLock;
+            final OXObjectFactory<FileStorageAccount> factory = new OXObjectFactory<FileStorageAccount>() {
+
+                @Override
+                public Serializable getKey() {
+                    return newCacheKey(cacheService,
+                        serviceId,
+                        id,
+                        session.getUserId(),
+                        session.getContextId());
+                }
+
+                @Override
+                public FileStorageAccount load() throws OXException {
+                    return accountStorage.getAccount(serviceId, id, session);
+                }
+
+                @Override
+                public Lock getCacheLock() {
+                    return lock;
+                }
+                
+            };
+            return new FileStorageAccountReloader(factory, REGION_NAME);
         } catch (final OXException e) {
             throw e;
         }

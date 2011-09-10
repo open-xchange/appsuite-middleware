@@ -50,8 +50,8 @@
 package com.openexchange.mailaccount.internal;
 
 import java.util.Map;
-import com.openexchange.cache.dynamic.impl.OXObjectFactory;
-import com.openexchange.cache.dynamic.impl.Refresher;
+import com.openexchange.caching.dynamic.OXObjectFactory;
+import com.openexchange.caching.dynamic.Refresher;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccount;
 

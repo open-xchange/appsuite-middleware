@@ -50,6 +50,8 @@
 package com.openexchange.messaging.generic.internal;
 
 import java.util.Map;
+import com.openexchange.caching.dynamic.OXObjectFactory;
+import com.openexchange.caching.dynamic.Refresher;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingService;
@@ -75,7 +77,7 @@ public final class MessagingAccountReloader extends Refresher<MessagingAccount> 
      * @throws OXException If initial load of the object fails.
      */
     public MessagingAccountReloader(final OXObjectFactory<MessagingAccount> factory, final String regionName) throws OXException {
-        super(factory, regionName);
+        super(factory, regionName, true);
         delegate = refresh();
     }
 

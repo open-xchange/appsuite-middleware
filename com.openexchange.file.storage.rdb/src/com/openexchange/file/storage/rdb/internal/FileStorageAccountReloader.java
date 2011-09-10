@@ -50,6 +50,8 @@
 package com.openexchange.file.storage.rdb.internal;
 
 import java.util.Map;
+import com.openexchange.caching.dynamic.OXObjectFactory;
+import com.openexchange.caching.dynamic.Refresher;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageService;
@@ -74,8 +76,8 @@ public final class FileStorageAccountReloader extends Refresher<FileStorageAccou
      *
      * @throws OXException If initial load of the object fails.
      */
-    public FileStorageAccountReloader(final FileStorageFactory<FileStorageAccount> factory, final String regionName) throws OXException {
-        super(factory, regionName);
+    public FileStorageAccountReloader(final OXObjectFactory<FileStorageAccount> factory, final String regionName) throws OXException {
+        super(factory, regionName, true);
         delegate = refresh();
     }
 

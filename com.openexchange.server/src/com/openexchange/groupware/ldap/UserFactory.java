@@ -51,8 +51,8 @@ package com.openexchange.groupware.ldap;
 
 import java.io.Serializable;
 import java.util.concurrent.locks.Lock;
-import com.openexchange.cache.dynamic.impl.OXObjectFactory;
 import com.openexchange.caching.CacheService;
+import com.openexchange.caching.dynamic.OXObjectFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 
