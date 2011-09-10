@@ -76,6 +76,44 @@ import com.openexchange.session.Session;
  */
 public final class CachingFileStorageAccountStorage implements FileStorageAccountStorage {
 
+    private static final class FileStorageAccountFactory implements OXObjectFactory<FileStorageAccount> {
+
+        private final FileStorageAccountStorage accountStorage;
+        private final String serviceId;
+        private final CacheService cacheService;
+        private final int accountId;
+        private final Session session;
+        private final Lock lock;
+
+        protected FileStorageAccountFactory(final String serviceId, final int accountId, final FileStorageAccountStorage accountStorage, final CacheService cacheService, final Session session, final Lock lock) {
+            this.accountStorage = accountStorage;
+            this.serviceId = serviceId;
+            this.cacheService = cacheService;
+            this.accountId = accountId;
+            this.session = session;
+            this.lock = lock;
+        }
+
+        @Override
+        public Serializable getKey() {
+            return newCacheKey(cacheService,
+                serviceId,
+                accountId,
+                session.getUserId(),
+                session.getContextId());
+        }
+
+        @Override
+        public FileStorageAccount load() throws OXException {
+            return accountStorage.getAccount(serviceId, accountId, session);
+        }
+
+        @Override
+        public Lock getCacheLock() {
+            return lock;
+        }
+    }
+
     private static final CachingFileStorageAccountStorage INSTANCE = new CachingFileStorageAccountStorage();
 
     private static final String REGION_NAME = "FileStorageAccount";
@@ -162,30 +200,7 @@ public final class CachingFileStorageAccountStorage implements FileStorageAccoun
             return delegatee.getAccount(serviceId, id, session);
         }
         try {
-            final FileStorageAccountStorage accountStorage = delegatee;
-            final Lock lock = cacheLock;
-            final OXObjectFactory<FileStorageAccount> factory = new OXObjectFactory<FileStorageAccount>() {
-
-                @Override
-                public Serializable getKey() {
-                    return newCacheKey(cacheService,
-                        serviceId,
-                        id,
-                        session.getUserId(),
-                        session.getContextId());
-                }
-
-                @Override
-                public FileStorageAccount load() throws OXException {
-                    return accountStorage.getAccount(serviceId, id, session);
-                }
-
-                @Override
-                public Lock getCacheLock() {
-                    return lock;
-                }
-                
-            };
+            final OXObjectFactory<FileStorageAccount> factory = new FileStorageAccountFactory(serviceId, id, delegatee, cacheService, session, cacheLock);
             return new FileStorageAccountReloader(factory, REGION_NAME);
         } catch (final OXException e) {
             throw e;
