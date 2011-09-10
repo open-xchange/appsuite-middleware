@@ -311,7 +311,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
             try {
                 defaultMailAccess.close(true);
             } catch (final Exception e) {
-                // Ignroe
+                // Ignore
             }
             defaultMailAccess = null;
         }
