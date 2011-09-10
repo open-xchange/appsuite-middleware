@@ -77,9 +77,11 @@ public final class IMAPProtocol extends Protocol {
         return INSTANCE;
     }
 
-    private ConcurrentMap<InetAddress, Integer> map;
+    private volatile ConcurrentMap<InetAddress, Integer> map;
 
-    private Integer overallMaxCount;
+    private volatile Integer overallExternalMaxCount;
+    
+    private volatile Integer maxCount;
 
     /**
      * Initializes a new {@link IMAPProtocol}.
@@ -87,25 +89,34 @@ public final class IMAPProtocol extends Protocol {
     private IMAPProtocol() {
         super("imap", "imaps");
         map = null;
-        overallMaxCount = Integer.valueOf(-1);
+        overallExternalMaxCount = Integer.valueOf(-1);
     }
 
     /**
-     * Sets the overall max. count.
-     *
+     * Sets the max. count.
+     * 
+     * @param maxCount The max. count
+     */
+    public void setMaxCount(final int maxCount) {
+        this.maxCount = Integer.valueOf(maxCount);
+    }
+
+    /**
+     * Sets the overall max. count for external accounts.
+     * 
      * @param overallMaxCount The max. count
      */
-    public void setOverallMaxCount(final int overallMaxCount) {
+    public void setOverallExternalMaxCount(final int overallMaxCount) {
         map = null;
-        this.overallMaxCount = Integer.valueOf(overallMaxCount);
+        this.overallExternalMaxCount = Integer.valueOf(overallMaxCount);
     }
 
     /**
      * Initializes the max-count map.
      */
-    public void initMaxCountMap() {
+    public void initExtMaxCountMap() {
         map = new ConcurrentHashMap<InetAddress, Integer>(4);
-        overallMaxCount = null;
+        overallExternalMaxCount = null;
     }
 
     /**
@@ -117,11 +128,12 @@ public final class IMAPProtocol extends Protocol {
      * @throws OXException If insert fails
      */
     public boolean putIfAbsent(final String host, final int maxCount) throws OXException {
-        if (null == map) {
+        final ConcurrentMap<InetAddress, Integer> concurrentMap = map;
+        if (null == concurrentMap) {
             return false;
         }
         try {
-            return (null == map.putIfAbsent(InetAddress.getByName(host), Integer.valueOf(maxCount)));
+            return (null == concurrentMap.putIfAbsent(InetAddress.getByName(host), Integer.valueOf(maxCount)));
         } catch (final UnknownHostException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -144,19 +156,33 @@ public final class IMAPProtocol extends Protocol {
     }
 
     @Override
-    public int getMaxCount(final String host) throws OXException {
-        if (null != overallMaxCount) {
-            return overallMaxCount.intValue();
+    public int getMaxCount(final String host, final boolean primary) throws OXException {
+        final Integer thisMaxCount = maxCount;
+        if (primary) {
+            return null == thisMaxCount ? -1 : thisMaxCount.intValue();
         }
-        if (null == map) {
-            return -1;
+        final Integer maxCount = overallExternalMaxCount;
+        if (null != maxCount) {
+            return minOf(maxCount.intValue(), thisMaxCount);
+        }
+        final ConcurrentMap<InetAddress, Integer> concurrentMap = map;
+        if (null == concurrentMap) {
+            return null == thisMaxCount ? -1 : thisMaxCount.intValue();
         }
         try {
-            final Integer mc = map.get(InetAddress.getByName(host));
-            return mc == null ? -1 : mc.intValue();
+            final Integer mc = concurrentMap.get(InetAddress.getByName(host));
+            return mc == null ? (null == thisMaxCount ? -1 : thisMaxCount.intValue()) : minOf(mc.intValue(), thisMaxCount);
         } catch (final UnknownHostException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private static int minOf(final int maxCount, final Integer thisMaxCount) {
+        if (null == thisMaxCount) {
+            return maxCount;
+        }
+        final int thisMC = thisMaxCount.intValue();
+        return thisMC <= maxCount ? thisMC : maxCount;
     }
 
 }

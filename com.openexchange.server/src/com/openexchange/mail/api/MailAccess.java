@@ -213,19 +213,14 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @throws OXException If protocol specifies capacity bounds and waiting for space is interrupted
      */
     private static boolean occupySlot(final int accountId, final Session session, final MailProvider provider) throws OXException {
-        if (MailAccount.DEFAULT_ID == accountId) {
-            /*
-             * No capacity restrictions for primary account.
-             */
-            return true;
-        }
+        final boolean primary = (MailAccount.DEFAULT_ID == accountId);
         final int userId = session.getUserId();
         final int contextId = session.getContextId();
         final Key key = getUserKey(userId, accountId, contextId);
         BlockingQueue<Object> queue = COUNTER_MAP.get(key);
         if (null == queue) {
             final MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-            final int max = provider.getProtocol().getMaxCount(mass.getMailAccount(accountId, userId, contextId).getMailServer());
+            final int max = provider.getProtocol().getMaxCount(mass.getMailAccount(accountId, userId, contextId).getMailServer(), primary);
             if (max > 0) {
                 final BlockingQueue<Object> nq = new ArrayBlockingQueue<Object>(max);
                 queue = COUNTER_MAP.putIfAbsent(key, nq);

@@ -122,6 +122,8 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
     private int blockSize;
 
+    private int maxNumConnection;
+
     private final Map<String, Boolean> newACLExtMap;
 
     private String spamHandlerName;
@@ -135,6 +137,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
      */
     private IMAPProperties() {
         super();
+        maxNumConnection = -1;
         newACLExtMap = new ConcurrentHashMap<String, Boolean>();
         mailProperties = MailProperties.getInstance();
         propagateHostNames = Collections.emptySet();
@@ -295,7 +298,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             if (null != tmp) {
                 tmp = tmp.trim();
                 if (0 == tmp.length()) {
-                    IMAPProtocol.getInstance().setOverallMaxCount(-1);
+                    IMAPProtocol.getInstance().setOverallExternalMaxCount(-1);
                     logBuilder.append("\tMax. Number of External Connections: ").append("No restrictions").append('\n');
                 } else if (tmp.indexOf(':') > 0) {
                     // Expect a comma-separated list
@@ -303,7 +306,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                     if (sa.length > 0) {
                         try {
                             final IMAPProtocol imapProtocol = IMAPProtocol.getInstance();
-                            imapProtocol.initMaxCountMap();
+                            imapProtocol.initExtMaxCountMap();
                             final StringBuilder sb = new StringBuilder(128).append("\tMax. Number of External Connections: ");
                             boolean first = true;
                             for (final String desc : sa) {
@@ -324,11 +327,11 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                             }
                             logBuilder.append(sb).append('\n');
                         } catch (final NumberFormatException e) {
-                            IMAPProtocol.getInstance().setOverallMaxCount(-1);
+                            IMAPProtocol.getInstance().setOverallExternalMaxCount(-1);
                             logBuilder.append("\tMax. Number of External Connections: Invalid value \"").append(tmp).append(
                                 "\". Setting to fallback: No restrictions").append('\n');
                         } catch (final OXException e) {
-                            IMAPProtocol.getInstance().setOverallMaxCount(-1);
+                            IMAPProtocol.getInstance().setOverallExternalMaxCount(-1);
                             logBuilder.append("\tMax. Number of External Connections: Invalid value \"").append(tmp).append(
                                 "\". Setting to fallback: No restrictions").append('\n');
                         }
@@ -336,15 +339,30 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                 } else {
                     // Expect a single integer value
                     try {
-                        IMAPProtocol.getInstance().setOverallMaxCount(Integer.parseInt(tmp));
+                        IMAPProtocol.getInstance().setOverallExternalMaxCount(Integer.parseInt(tmp));
                         logBuilder.append("\tMax. Number of External Connections: ").append(tmp).append(
                             " (applied to all external IMAP accounts)").append('\n');
                     } catch (final NumberFormatException e) {
-                        IMAPProtocol.getInstance().setOverallMaxCount(-1);
+                        IMAPProtocol.getInstance().setOverallExternalMaxCount(-1);
                         logBuilder.append("\tMax. Number of External Connections: Invalid value \"").append(tmp).append(
                             "\". Setting to fallback: No restrictions").append('\n');
                     }
                 }
+            }
+        }
+
+        {
+            final String tmp = configuration.getProperty("com.openexchange.imap.maxNumConnections", "-1").trim();
+            try {
+                maxNumConnection = Integer.parseInt(tmp);
+                logBuilder.append("\tMax. Number of connections: ").append(maxNumConnection).append('\n');
+                if (maxNumConnection > 0) {
+                    IMAPProtocol.getInstance().setMaxCount(maxNumConnection);
+                }
+            } catch (final NumberFormatException e) {
+                maxNumConnection = -1;
+                logBuilder.append("\tMax. Number of connections: Invalid value \"").append(tmp).append("\". Setting to fallback: ").append(
+                    maxNumConnection).append('\n');
             }
         }
 
@@ -372,6 +390,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         imapAuthEnc = null;
         entity2AclImpl = null;
         blockSize = 0;
+        maxNumConnection = -1;
         spamHandlerName = null;
         notifyRecent = false;
         notifyFrequencySeconds = 300;
@@ -460,6 +479,11 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     @Override
     public int getBlockSize() {
         return blockSize;
+    }
+
+    @Override
+    public int getMaxNumConnection() {
+        return maxNumConnection;
     }
 
     @Override
