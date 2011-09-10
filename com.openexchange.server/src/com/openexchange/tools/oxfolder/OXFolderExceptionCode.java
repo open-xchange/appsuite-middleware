@@ -472,6 +472,10 @@ public enum OXFolderExceptionCode implements OXExceptionCode {
      * Delete cannot be performed because of locked documents in folder %1$s in context %2$s.
      */
     DELETE_FAILED_LOCKED_DOCUMENTS("Delete cannot be performed because of locked documents in folder %1$s in context %2$s.", Category.CATEGORY_PERMISSION_DENIED, 88),
+    /**
+     * Operation may only be performed for context administrator.
+     */
+    ADMIN_OP_ONLY("Operation may only be performed for context administrator.", Category.CATEGORY_PERMISSION_DENIED, 89),
 
     ;
 
