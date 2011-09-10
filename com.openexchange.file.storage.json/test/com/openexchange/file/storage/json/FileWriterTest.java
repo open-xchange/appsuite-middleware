@@ -49,7 +49,27 @@
 
 package com.openexchange.file.storage.json;
 
-import static com.openexchange.file.storage.File.Field.*;
+import static com.openexchange.file.storage.File.Field.CATEGORIES;
+import static com.openexchange.file.storage.File.Field.COLOR_LABEL;
+import static com.openexchange.file.storage.File.Field.CREATED;
+import static com.openexchange.file.storage.File.Field.CREATED_BY;
+import static com.openexchange.file.storage.File.Field.CURRENT_VERSION;
+import static com.openexchange.file.storage.File.Field.DESCRIPTION;
+import static com.openexchange.file.storage.File.Field.FILENAME;
+import static com.openexchange.file.storage.File.Field.FILE_MD5SUM;
+import static com.openexchange.file.storage.File.Field.FILE_MIMETYPE;
+import static com.openexchange.file.storage.File.Field.FILE_SIZE;
+import static com.openexchange.file.storage.File.Field.FOLDER_ID;
+import static com.openexchange.file.storage.File.Field.ID;
+import static com.openexchange.file.storage.File.Field.LAST_MODIFIED;
+import static com.openexchange.file.storage.File.Field.LAST_MODIFIED_UTC;
+import static com.openexchange.file.storage.File.Field.LOCKED_UNTIL;
+import static com.openexchange.file.storage.File.Field.MODIFIED_BY;
+import static com.openexchange.file.storage.File.Field.NUMBER_OF_VERSIONS;
+import static com.openexchange.file.storage.File.Field.TITLE;
+import static com.openexchange.file.storage.File.Field.URL;
+import static com.openexchange.file.storage.File.Field.VERSION;
+import static com.openexchange.file.storage.File.Field.VERSION_COMMENT;
 import static com.openexchange.json.JSONAssertion.assertValidates;
 import static com.openexchange.time.TimeTools.D;
 import java.util.Arrays;

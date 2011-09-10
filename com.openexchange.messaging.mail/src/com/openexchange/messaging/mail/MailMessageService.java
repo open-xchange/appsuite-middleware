@@ -49,7 +49,33 @@
 
 package com.openexchange.messaging.mail;
 
-import static com.openexchange.messaging.mail.FormStrings.*;
+import static com.openexchange.messaging.mail.FormStrings.FORM_LABEL_CONFIRMED_HAM;
+import static com.openexchange.messaging.mail.FormStrings.FORM_LABEL_CONFIRMED_HAM_FULLNAME;
+import static com.openexchange.messaging.mail.FormStrings.FORM_LABEL_CONFIRMED_SPAM;
+import static com.openexchange.messaging.mail.FormStrings.FORM_LABEL_CONFIRMED_SPAM_FULLNAME;
+import static com.openexchange.messaging.mail.FormStrings.FORM_LABEL_DRAFTS;
+import static com.openexchange.messaging.mail.FormStrings.FORM_LABEL_DRAFTS_FULLNAME;
+import static com.openexchange.messaging.mail.FormStrings.FORM_LABEL_LOGIN;
+import static com.openexchange.messaging.mail.FormStrings.FORM_LABEL_PASSWORD;
+import static com.openexchange.messaging.mail.FormStrings.FORM_LABEL_PERSONAL;
+import static com.openexchange.messaging.mail.FormStrings.FORM_LABEL_PORT;
+import static com.openexchange.messaging.mail.FormStrings.FORM_LABEL_PRIMARY_ADDRESS;
+import static com.openexchange.messaging.mail.FormStrings.FORM_LABEL_PROTOCOL;
+import static com.openexchange.messaging.mail.FormStrings.FORM_LABEL_SECURE;
+import static com.openexchange.messaging.mail.FormStrings.FORM_LABEL_SENT;
+import static com.openexchange.messaging.mail.FormStrings.FORM_LABEL_SENT_FULLNAME;
+import static com.openexchange.messaging.mail.FormStrings.FORM_LABEL_SERVER;
+import static com.openexchange.messaging.mail.FormStrings.FORM_LABEL_SPAM;
+import static com.openexchange.messaging.mail.FormStrings.FORM_LABEL_SPAM_FULLNAME;
+import static com.openexchange.messaging.mail.FormStrings.FORM_LABEL_TRANSPORT_LOGIN;
+import static com.openexchange.messaging.mail.FormStrings.FORM_LABEL_TRANSPORT_PASSWORD;
+import static com.openexchange.messaging.mail.FormStrings.FORM_LABEL_TRANSPORT_PORT;
+import static com.openexchange.messaging.mail.FormStrings.FORM_LABEL_TRANSPORT_PROTOCOL;
+import static com.openexchange.messaging.mail.FormStrings.FORM_LABEL_TRANSPORT_SECURE;
+import static com.openexchange.messaging.mail.FormStrings.FORM_LABEL_TRANSPORT_SERVER;
+import static com.openexchange.messaging.mail.FormStrings.FORM_LABEL_TRASH;
+import static com.openexchange.messaging.mail.FormStrings.FORM_LABEL_TRASH_FULLNAME;
+import static com.openexchange.messaging.mail.FormStrings.FORM_LABEL_UNIFIED_MAIL_ENABLED;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
