@@ -103,7 +103,7 @@ public final class CachingFileStorageAccountStorage implements FileStorageAccoun
      *
      * @return The new cache key
      */
-    private static CacheKey newCacheKey(final CacheService cacheService, final String serviceId, final int id, final int user, final int cid) {
+    protected static CacheKey newCacheKey(final CacheService cacheService, final String serviceId, final int id, final int user, final int cid) {
         return cacheService.newCacheKey(cid, serviceId, Integer.valueOf(id), Integer.valueOf(user));
     }
 
@@ -162,7 +162,7 @@ public final class CachingFileStorageAccountStorage implements FileStorageAccoun
             return delegatee.getAccount(serviceId, id, session);
         }
         try {
-            final RdbFileStorageAccountStorage accountStorage = delegatee;
+            final FileStorageAccountStorage accountStorage = delegatee;
             final Lock lock = cacheLock;
             final OXObjectFactory<FileStorageAccount> factory = new OXObjectFactory<FileStorageAccount>() {
 
