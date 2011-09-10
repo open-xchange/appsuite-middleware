@@ -57,6 +57,7 @@ import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.tasks.AllowTextInValuesOfDynamicContextAttributesTask;
 import com.openexchange.groupware.update.tasks.AllowTextInValuesOfDynamicUserAttributesTask;
 import com.openexchange.groupware.update.tasks.CorrectAttachmentCountInAppointments;
+import com.openexchange.groupware.update.tasks.CorrectFileAsInContacts;
 import com.openexchange.groupware.update.tasks.CorrectOrganizerInAppointments;
 import com.openexchange.groupware.update.tasks.CreateIndexOnContextAttributesTask;
 import com.openexchange.groupware.update.tasks.CreateIndexOnUserAttributesForAliasLookupTask;
@@ -393,6 +394,9 @@ public final class InternalList {
         // Corrects the organizer in appointments. When exporting iCal and importing it again the organizer gets value 'null' instead of SQL
         // NULL. This task corrects this.
         new CorrectOrganizerInAppointments(),
+
+        // Corrects field90 aka fileAs in contacts to have proper contact names in card view of Outlook OXtender 2.
+        new CorrectFileAsInContacts(),
 
         // Add "replyTo" column to mail/transport account table
         new MailAccountAddReplyToTask(),

@@ -1,3 +1,8 @@
+* 2011-09-09 - marcus.klein@open-xchange.com
+
+ - Fix for bug 19234: Writing fileAs for contacts when it is empty and the displayName is changed. Added update task to correct wrong
+   contacts.
+
 * 2011-09-07 - marcus.klein@open-xchange.com
 
  - Fix for bug 20196: Considering also the title when looking for the same task to prevent duplication.

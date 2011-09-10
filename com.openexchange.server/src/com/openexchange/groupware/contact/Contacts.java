@@ -341,7 +341,9 @@ public final class Contacts {
         Connection readcon = null;
 
         Context context = null;
-
+        if (!contact.containsFileAs() && contact.containsDisplayName()) {
+            contact.setFileAs(contact.getDisplayName());
+        }
         try {
             validateEmailAddress(contact);
             contactSql = new ContactMySql(session);

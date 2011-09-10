@@ -434,10 +434,17 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 if (returntype.equalsIgnoreCase("java.lang.String")) {
                     final String result = (java.lang.String) method.invoke(usrdata, (Object[]) null);
                     if (null != result || test) {
-                        contact_query.append(Mapper.method2field.get(methodname));
+                        final String fieldName = Mapper.method2field.get(methodname);
+                        contact_query.append(fieldName);
                         contact_query.append(" = ?, ");
                         methodlist2.add(method);
                         returntypes.add(returntype);
+                        if ("field01".equals(fieldName)) {
+                            contact_query.append("field90");
+                            contact_query.append("=?, ");
+                            methodlist2.add(method);
+                            returntypes.add(returntype);
+                        }
                         prg_contacts_update_needed = true;
                     }
                 } else if (returntype.equalsIgnoreCase("java.lang.Integer")) {
