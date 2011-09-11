@@ -121,14 +121,22 @@ public class PreviewActivator extends HousekeepingActivator {
      * http://www.jopendocument.org/tutorial_pdf.html
      * 
      * http://jodconverter.svn.sourceforge.net/viewvc/jodconverter/branches/3.0.x-200801-commons-pool/
+     * http://stackoverflow.com/questions/625241/how-can-i-use-openoffice-in-server-mode-as-a-multithreaded-service
+     * --> soffice -headless "-accept=socket,host=localhost,port=8100;urp;" 
+     * 
+     * http://user.services.openoffice.org/en/forum/viewtopic.php?f=20&t=16567
+     * --> OO in OSGi
      * 
      * http://shervinasgari.blogspot.com/2008/12/dynamically-generate-odt-and-pdf.html
      * 
      * http://oodaemon.sourceforge.net/
      * 
+     * 
      * http://code.google.com/p/java2word/
      * 
      * http://www.tutego.de/blog/javainsel/2011/08/microsoft-office-dokumente-in-java-verarbeiten/
+     * 
+     * http://blogs.reucon.com/srt/2007/02/25/using_openoffice_org_from_java_applications.html
      */
 
     /**
@@ -202,7 +210,7 @@ public class PreviewActivator extends HousekeepingActivator {
         /*
          * PDF generation
          */
-        pdfWithOpenDocument();
+        // pdfWithOpenDocument();
     }
 
     private void pdfWithJodConverter() {
