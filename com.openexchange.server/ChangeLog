@@ -1,3 +1,7 @@
+* 2011-09-12 - francisco.laguna@open-xchange.com
+
+ - Fix for bug 16740: Try to look up current session in thread local session container.
+
 * 2011-09-12 - thorben.betten@open-xchange.com
 
  - Fix for bug 18135: Equal value for last-modified and image-last-modified time stamp
