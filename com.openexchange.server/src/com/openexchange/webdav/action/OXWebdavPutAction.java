@@ -50,7 +50,7 @@
 package com.openexchange.webdav.action;
 
 import com.openexchange.groupware.infostore.utils.InfostoreConfigUtils;
-import com.openexchange.sessiond.impl.SessionHolder;
+import com.openexchange.tools.session.SessionHolder;
 
 public class OXWebdavPutAction extends WebdavPutAction {
 

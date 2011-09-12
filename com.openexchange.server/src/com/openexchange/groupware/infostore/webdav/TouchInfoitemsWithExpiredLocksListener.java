@@ -51,9 +51,9 @@ package com.openexchange.groupware.infostore.webdav;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.tools.session.SessionHolder;
 
 /**
  * {@link TouchInfoitemsWithExpiredLocksListener}

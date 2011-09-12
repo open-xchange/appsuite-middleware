@@ -82,6 +82,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.SessionHolder;
 
 /**
  * {@link MailAccess} - Handles connecting to the mailing system while using an internal cache for connected access objects (see

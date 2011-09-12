@@ -68,7 +68,7 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.infostore.webdav.URLCache.Type;
-import com.openexchange.sessiond.impl.SessionHolder;
+import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.Protocol.WEBDAV_METHOD;

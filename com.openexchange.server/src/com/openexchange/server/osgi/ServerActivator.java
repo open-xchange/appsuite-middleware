@@ -186,11 +186,13 @@ import com.openexchange.server.osgiservice.WhiteboardFactoryService;
 import com.openexchange.server.services.ServerRequestHandlerRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.osgi.SpamHandlerServiceTracker;
 import com.openexchange.systemname.SystemNameService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
+import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tools.strings.StringParser;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
@@ -682,7 +684,11 @@ public final class ServerActivator extends DeferredActivator {
         final ContactInterfaceDiscoveryService cids = ContactInterfaceDiscoveryServiceImpl.getInstance();
         registrationList.add(context.registerService(ContactInterfaceDiscoveryService.class.getName(), cids, null));
         ServerServiceRegistry.getInstance().addService(ContactInterfaceDiscoveryService.class, cids);
-
+        
+        // Register SessionHolder
+        registrationList.add(context.registerService(SessionHolder.class.getName(), ThreadLocalSessionHolder.getInstance(), null));
+        ServerServiceRegistry.getInstance().addService(SessionHolder.class, ThreadLocalSessionHolder.getInstance());
+        
         // Fake bundle start
         activators.add(new FolderStorageActivator());
         for (final BundleActivator activator : activators) {

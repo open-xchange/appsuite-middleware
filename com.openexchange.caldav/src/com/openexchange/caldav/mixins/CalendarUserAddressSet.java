@@ -50,7 +50,7 @@
 package com.openexchange.caldav.mixins;
 
 import com.openexchange.caldav.CaldavProtocol;
-import com.openexchange.sessiond.impl.SessionHolder;
+import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**

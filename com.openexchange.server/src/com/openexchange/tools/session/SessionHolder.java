@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.tools.session;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;

@@ -50,7 +50,7 @@
 package com.openexchange.webdav.directory.internal;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.sessiond.impl.SessionHolder;
+import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavPath;

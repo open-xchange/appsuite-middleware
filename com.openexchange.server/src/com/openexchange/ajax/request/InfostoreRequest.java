@@ -81,7 +81,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
-import com.openexchange.groupware.infostore.ThreadLocalSessionHolder;
+import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.database.impl.GetSwitch;
 import com.openexchange.groupware.infostore.database.impl.SetSwitch;

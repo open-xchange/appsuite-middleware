@@ -107,6 +107,7 @@ import com.openexchange.sql.grammar.Command;
 import com.openexchange.sql.grammar.INSERT;
 import com.openexchange.sql.grammar.UPDATE;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.SessionHolder;
 
 /**
  * An {@link OAuthService} Implementation using the RDB for storage and Scribe OAuth library for the OAuth interaction.
@@ -453,6 +454,14 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
     }
 
     private static Session getUserSession(final int userId, final int contextId) {
+     // Firstly let's see if the currently active session matches the one we need here and prefer that one.
+        final SessionHolder sessionHolder = ServiceRegistry.getInstance().getService(SessionHolder.class);
+        if (sessionHolder != null) {
+            Session session = sessionHolder.getSessionObject();
+            if (session != null && session.getUserId() == userId && session.getContextId() == contextId) {
+                return session;
+            }
+        }
         final SessiondService service = ServiceRegistry.getInstance().getService(SessiondService.class);
         if (null == service) {
             return null;

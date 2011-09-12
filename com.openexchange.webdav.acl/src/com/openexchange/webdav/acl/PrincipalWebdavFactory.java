@@ -51,7 +51,7 @@ package com.openexchange.webdav.acl;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.sessiond.impl.SessionHolder;
+import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
