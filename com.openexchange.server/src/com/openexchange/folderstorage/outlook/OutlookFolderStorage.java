@@ -2090,34 +2090,30 @@ public final class OutlookFolderStorage implements FolderStorage {
                 try {
                     mailIDs = getSubfolders(fullname, realTreeId, folderStorage, storageParameters);
                 } catch (final OXException e) {
-                    final Throwable cause = e.getCause();
-                    if (cause instanceof OXException) {
-                        final OXException me = (OXException) cause;
-                        if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.equals(me)) {
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug(e.getMessage(), e);
-                            }
-                            /*
-                             * Return empty map
-                             */
-                            return new TreeMap<String, List<String>>(comparator);
-                        } else if (MIMEMailExceptionCode.INVALID_CREDENTIALS.equals(me)) {
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug(e.getMessage(), e);
-                            }
-                            /*
-                             * Return empty map
-                             */
-                            return new TreeMap<String, List<String>>(comparator);
-                        } else if (MIMEMailExceptionCode.CONNECT_ERROR.equals(me)) {
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug(e.getMessage(), e);
-                            }
-                            /*
-                             * Return empty map
-                             */
-                            return new TreeMap<String, List<String>>(comparator);
+                    if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.equals(e)) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug(e.getMessage(), e);
                         }
+                        /*
+                         * Return empty map
+                         */
+                        return new TreeMap<String, List<String>>(comparator);
+                    } else if (MIMEMailExceptionCode.INVALID_CREDENTIALS.equals(e)) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug(e.getMessage(), e);
+                        }
+                        /*
+                         * Return empty map
+                         */
+                        return new TreeMap<String, List<String>>(comparator);
+                    } else if (MIMEMailExceptionCode.CONNECT_ERROR.equals(e)) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug(e.getMessage(), e);
+                        }
+                        /*
+                         * Return empty map
+                         */
+                        return new TreeMap<String, List<String>>(comparator);
                     }
                     throw e;
                 }
