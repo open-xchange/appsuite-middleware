@@ -342,6 +342,10 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     @Override
     public void migratePasswords(final int user, final int cid, final String oldSecret, final String newSecret) throws OXException {
         delegate.migratePasswords(user, cid, oldSecret, newSecret);
+        final int[] ids = delegate.getUserMailAccountIDs(user, cid);
+        for (int id : ids) {
+            invalidateMailAccount(id, user, cid);
+        }
     }
 
 }
