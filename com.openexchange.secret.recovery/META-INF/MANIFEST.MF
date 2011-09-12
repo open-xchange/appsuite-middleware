@@ -14,6 +14,7 @@ Import-Package: com.openexchange.exception,
  com.openexchange.secret.osgi.tools,
  com.openexchange.session,
  com.openexchange.tools.session,
+ org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker
 Export-Package: com.openexchange.secret.recovery

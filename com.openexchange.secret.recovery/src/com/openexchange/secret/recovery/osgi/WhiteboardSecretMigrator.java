@@ -49,8 +49,11 @@
 
 package com.openexchange.secret.recovery.osgi;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.tools.session.ServerSession;
@@ -62,6 +65,9 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class WhiteboardSecretMigrator extends ServiceTracker implements SecretMigrator {
+	
+	private static final Log LOG = LogFactory.getLog(WhiteboardSecretMigrator.class);
+	
     public WhiteboardSecretMigrator(final BundleContext context) {
         super(context, SecretMigrator.class.getName(), null);
     }
@@ -69,12 +75,21 @@ public class WhiteboardSecretMigrator extends ServiceTracker implements SecretMi
     @Override
     public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws OXException {
         final Object[] services = getServices();
+        OXException exception = null;
         for (final Object object : services) {
             if(object == this) {
                 continue;
             }
             final SecretMigrator migrator = (SecretMigrator) object;
-            migrator.migrate(oldSecret, newSecret, session);
+            try {
+                migrator.migrate(oldSecret, newSecret, session);
+            } catch (OXException x) {
+            	exception = x;
+            	LOG.error(x.getMessage(), x);
+            }
+        }
+        if (exception != null) {
+        	throw exception;
         }
     }
 }
