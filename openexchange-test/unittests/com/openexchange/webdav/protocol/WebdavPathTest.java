@@ -1,7 +1,6 @@
 package com.openexchange.webdav.protocol;
 
 import java.util.Arrays;
-
 import junit.framework.TestCase;
 
 /*
