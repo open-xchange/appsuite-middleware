@@ -49,7 +49,8 @@
 
 package com.openexchange.ajp13;
 
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -98,9 +99,9 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 
     private static final int BYTE_COOKIE = 0x09;
 
-    private static final TIntObjectHashMap<String> httpHeaderMapping;
+    private static final TIntObjectMap<String> httpHeaderMapping;
 
-    private static final TIntObjectHashMap<String> attributeMapping;
+    private static final TIntObjectMap<String> attributeMapping;
 
     private static final String DEFAULT_ENCODING = ServerConfig.getProperty(Property.DefaultEncoding);
 
