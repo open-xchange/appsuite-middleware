@@ -242,6 +242,7 @@ public static class Parser {
                 if (null != bufferedWriter) {
                     bufferedWriter.close();
                 }
+                in.close();
             }
             final PoolIdSchemaAndVersionInfo poolIdAndSchema = new PoolIdSchemaAndVersionInfo(pool_id, schema, versionInformation);
             return poolIdAndSchema;
