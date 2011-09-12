@@ -100,6 +100,11 @@ public final class EffectivePermission implements Permission {
     private Permission underlyingPerm;
 
     /**
+     * The entity identifier.
+     */
+    private int entityId;
+
+    /**
      * The context.
      */
     private Context context;
@@ -132,6 +137,7 @@ public final class EffectivePermission implements Permission {
             set.add(FolderObject.UNBOUND);
             this.allowedContentTypes = set;
         }
+        entityId = -1;
     }
 
     /**
@@ -242,7 +248,7 @@ public final class EffectivePermission implements Permission {
 
     @Override
     public int getEntity() {
-        return underlyingPerm.getEntity();
+        return entityId <= 0 ? underlyingPerm.getEntity() : entityId;
     }
 
     @Override
@@ -324,7 +330,7 @@ public final class EffectivePermission implements Permission {
 
     @Override
     public void setEntity(final int entity) {
-        throw new UnsupportedOperationException("EffectivePermission.setEntity()");
+        this.entityId = entity;
     }
 
     @Override
