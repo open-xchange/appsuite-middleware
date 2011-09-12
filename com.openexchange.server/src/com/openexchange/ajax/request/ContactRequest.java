@@ -87,6 +87,7 @@ import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.ContactSearchMultiplexer;
 import com.openexchange.groupware.contact.ContactUnificationState;
+import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -306,13 +307,64 @@ public class ContactRequest {
 
         contactobject.setObjectID(id);
 
-        final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
+        final ContactInterfaceDiscoveryService discoveryService = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class);
+        final ContactInterface contactIface = discoveryService.newContactInterface(
             inFolder,
             session);
 
-        contactInterface.updateContactObject(contactobject, inFolder, timestamp);
+        if (contactobject.containsParentFolderID() && contactobject.getParentFolderID() > 0) {
+            /*
+             * A move to another folder
+             */
+            final int folderId = contactobject.getParentFolderID();
+            final ContactInterface targetContactIface = discoveryService.newContactInterface(folderId, session);
+            if (!contactIface.getClass().equals(targetContactIface.getClass())) {
+                final Contact toMove = move2AnotherProvider(id, inFolder, contactobject, contactIface, folderId, targetContactIface, session, timestamp);
+                timestamp = toMove.getLastModified();
+                return new JSONObject();
+            }
+        }
+
+        contactIface.updateContactObject(contactobject, inFolder, timestamp);
         timestamp = contactobject.getLastModified();
         return new JSONObject();
+    }
+
+    public static Contact move2AnotherProvider(final int id, final int inFolder, final Contact contact, final ContactInterface contactIface, final int newFolderId, final ContactInterface targetContactIface, final ServerSession session, final Date timestamp) throws OXException {
+        /*
+         * A move to another contact service
+         */
+        final Contact toMove = contactIface.getObjectById(id, inFolder);
+        for (int i = 0; i < 650; i++) {
+            if (null != Contacts.mapping[i]) {
+                final int field = i + 1;
+                if (contact.contains(field)) {
+                    toMove.set(field, contact.get(field));
+                }
+            }
+        }
+        toMove.removeObjectID();
+        if (inFolder == FolderObject.SYSTEM_LDAP_FOLDER_ID) {
+            toMove.removeInternalUserId();
+        }
+        toMove.setNumberOfAttachments(0);
+        targetContactIface.insertContactObject(toMove);
+
+        final User user = session.getUser();
+        final UserConfiguration uc = session.getUserConfiguration();
+        /*
+         * Check attachments
+         */
+        copyAttachments(newFolderId, session, session.getContext(), toMove, id, inFolder, user, uc);
+        /*
+         * Check links
+         */
+        copyLinks(newFolderId, session, session.getContext(), toMove, id, inFolder, user);
+        /*
+         * Delete original
+         */
+        contactIface.deleteContactObject(id, inFolder, timestamp);
+        return toMove;
     }
 
     public JSONArray actionUpdates(final JSONObject jsonObj) throws JSONException, OXException {
