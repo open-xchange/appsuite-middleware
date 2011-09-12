@@ -49,6 +49,9 @@
 
 package com.openexchange.login;
 
+import java.util.Collection;
+import java.util.Iterator;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
@@ -85,4 +88,34 @@ public interface LoginResult {
      * @return The resolved user.
      */
     User getUser();
+
+    /**
+     * Checks if this result has warnings.
+     * 
+     * @return <code>true</code> if this result has warnings; otherwise <code>false</code>
+     */
+    boolean hasWarnings();
+
+    /**
+     * Gets an {@link Iterator} for the warnings contained in this result.
+     * <p>
+     * Method {@link Iterator#remove()} is <b>NOT</b> supported!
+     * 
+     * @return An {@link Iterator} for the warnings
+     */
+    Iterator<OXException> warnings();
+
+    /**
+     * Adds specified warning to this result.
+     * 
+     * @param warning The warning to add
+     */
+    void addWarning(OXException warning);
+
+    /**
+     * Adds specified warnings to this result.
+     * 
+     * @param warnings The warnings to add
+     */
+    void addWarnings(Collection<? extends OXException> warnings);
 }

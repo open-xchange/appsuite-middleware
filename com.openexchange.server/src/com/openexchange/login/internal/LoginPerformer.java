@@ -50,9 +50,12 @@
 package com.openexchange.login.internal;
 
 import static com.openexchange.java.Autoboxing.I;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -122,6 +125,8 @@ public final class LoginPerformer {
         return doLogin(request, new HashMap<String, Object>());
     }
 
+    private static final Pattern SPLIT = Pattern.compile(" *, *");
+
     /**
      * Performs the login for specified login request.
      *
@@ -157,10 +162,24 @@ public final class LoginPerformer {
             final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class, true);
             final String sessionId = sessiondService.addSession(new AddSessionParameterImpl(username, request, user, ctx));
             final Session session = sessiondService.getSession(sessionId);
+            // Initial parameters
             {
                 final HttpServletRequest req = (HttpServletRequest) properties.get("http.request");
                 if (null != req) {
                     session.setParameter(HostnameService.PARAM_HOST_DATA, new HostDataImpl(req, user.getId(), ctx.getContextId()));
+                }
+                final String capabilities = (String) properties.get("client.capabilities");
+                if (null == capabilities) {
+                    session.setParameter(Session.PARAM_CAPABILITIES, Collections.<String> emptyList());
+                    retval.addWarning(LoginExceptionCodes.MISSING_CAPABILITIES.create());
+                } else {
+                    final String[] sa = SPLIT.split(capabilities, 0);
+                    final int length = sa.length;
+                    if (0 == length) {
+                        session.setParameter(Session.PARAM_CAPABILITIES, Collections.<String> emptyList());
+                    } else {
+                        session.setParameter(Session.PARAM_CAPABILITIES, Collections.<String> unmodifiableList(Arrays.asList(sa)));
+                    }
                 }
             }
             if (SessionEnhancement.class.isInstance(authed)) {
