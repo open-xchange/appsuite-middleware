@@ -79,7 +79,14 @@ public interface Session {
      * }
      * </pre>
      */
-    public static final String PARAM_LOCK = "com.openexchange.session.lock";
+    public static final String PARAM_LOCK = "session.lock";
+
+    /**
+     * The parameter for client capabilities.
+     * 
+     * @type <code>java.util.List&lt;String&gt;</code>
+     */
+    public static final String PARAM_CAPABILITIES = "session.clientCapabilities";
 
     /**
      * @return the context identifier.
