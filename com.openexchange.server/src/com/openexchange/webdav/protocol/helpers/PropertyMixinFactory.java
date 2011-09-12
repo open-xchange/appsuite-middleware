@@ -49,7 +49,7 @@
 
 package com.openexchange.webdav.protocol.helpers;
 
-import com.openexchange.sessiond.impl.SessionHolder;
+import com.openexchange.tools.session.SessionHolder;
 
 
 /**

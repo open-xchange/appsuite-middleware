@@ -51,6 +51,7 @@ package com.openexchange.oauth.osgi;
 
 import org.osgi.framework.BundleActivator;
 import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import com.openexchange.tools.session.SessionHolder;
 
 /**
  * {@link Activator}

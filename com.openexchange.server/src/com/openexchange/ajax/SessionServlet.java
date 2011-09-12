@@ -90,6 +90,7 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.IPRange;
+import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -236,6 +237,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 sendError(resp);
             }
         } finally {
+            ThreadLocalSessionHolder.getInstance().setSession(null);
             if (LogProperties.isEnabled()) {
                 LogProperties.putLogProperty("com.openexchange.session.sessionId", null);
                 LogProperties.putLogProperty("com.openexchange.session.userId", null);

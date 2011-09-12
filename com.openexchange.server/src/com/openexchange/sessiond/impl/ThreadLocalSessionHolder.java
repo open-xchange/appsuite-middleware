@@ -47,46 +47,42 @@
  *
  */
 
-package com.openexchange.groupware.infostore;
+package com.openexchange.sessiond.impl;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.SessionHolder;
 
 
 /**
  * {@link ThreadLocalSessionHolder}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class ThreadLocalSessionHolder implements SessionHolder {
 
     private static final ThreadLocalSessionHolder INSTANCE = new ThreadLocalSessionHolder();
-
-    private final ThreadLocal<ServerSession> session = new ThreadLocal<ServerSession>();
+    
+    private ThreadLocal<ServerSession> session = new ThreadLocal<ServerSession>();
 
     public void setSession(ServerSession serverSession) {
         session.set(serverSession);
     }
-
+    
     public void clear() {
         session.remove();
     }
-
-    @Override
+    
     public Context getContext() {
         return session.get().getContext();
     }
 
-    @Override
     public Session getSessionObject() {
         return session.get();
     }
 
-    @Override
     public User getUser() {
         return session.get().getUser();
     }
