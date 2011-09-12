@@ -49,7 +49,7 @@
 
 package com.openexchange.file.storage.rdb.internal;
 
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

@@ -49,9 +49,11 @@
 
 package com.openexchange.groupware.calendar.json.actions;
 
-import gnu.trove.TIntArrayList;
-import gnu.trove.TIntIntHashMap;
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -104,11 +106,11 @@ public final class ListAction extends AbstractAppointmentAction {
 
         SearchIterator<Appointment> it = null;
 
-        final TIntObjectHashMap<TIntArrayList> recurrencePositionMap = new TIntObjectHashMap<TIntArrayList>();
+        final TIntObjectMap<TIntArrayList> recurrencePositionMap = new TIntObjectHashMap<TIntArrayList>();
         final JSONArray jData = req.getData();
         final boolean bRecurrenceMaster = req.parseBoolean(AppointmentRequest.RECURRENCE_MASTER);
 
-        final TIntIntHashMap objectIdMap = new TIntIntHashMap();
+        final TIntIntMap objectIdMap = new TIntIntHashMap();
         for (int a = 0; a < jData.length(); a++) {
             JSONObject jObject = null;
             try {

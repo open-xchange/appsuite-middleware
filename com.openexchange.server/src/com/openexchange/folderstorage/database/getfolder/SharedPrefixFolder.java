@@ -49,10 +49,12 @@
 
 package com.openexchange.folderstorage.database.getfolder;
 
-import gnu.trove.TIntArrayList;
-import gnu.trove.TIntObjectHashMap;
-import gnu.trove.TIntProcedure;
-import gnu.trove.TObjectProcedure;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TIntProcedure;
+import gnu.trove.procedure.TObjectProcedure;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -83,9 +85,9 @@ public final class SharedPrefixFolder {
 
     private static final class RemovingProcedure implements TIntProcedure {
 
-        private final TIntObjectHashMap<FolderObject> map;
+        private final TIntObjectMap<FolderObject> map;
 
-        public RemovingProcedure(final TIntObjectHashMap<FolderObject> map) {
+        public RemovingProcedure(final TIntObjectMap<FolderObject> map) {
             this.map = map;
         }
 
@@ -98,11 +100,11 @@ public final class SharedPrefixFolder {
 
     private static final class DetectDirectSubfoldersProcedure implements TObjectProcedure<FolderObject> {
 
-        private final TIntObjectHashMap<FolderObject> map;
+        private final TIntObjectMap<FolderObject> map;
 
-        private final TIntArrayList toRemove;
+        private final TIntList toRemove;
 
-        public DetectDirectSubfoldersProcedure(final TIntObjectHashMap<FolderObject> map, final TIntArrayList toRemove) {
+        public DetectDirectSubfoldersProcedure(final TIntObjectMap<FolderObject> map, final TIntList toRemove) {
             this.map = map;
             this.toRemove = toRemove;
         }
@@ -239,18 +241,18 @@ public final class SharedPrefixFolder {
          * Get first level shared folders
          */
         final int size = q.size();
-        final TIntObjectHashMap<FolderObject> set = getFirstLevelSharedFolders(q, size);
+        final TIntObjectMap<FolderObject> set = getFirstLevelSharedFolders(q, size);
         /*
          * Return filtered list
          */
-        final TIntArrayList ret = new TIntArrayList(q.size());
+        final TIntList ret = new TIntArrayList(q.size());
         for (final FolderObject fo : q) {
             final int folderId = fo.getObjectID();
             if (set.containsKey(folderId)) {
                 ret.add(folderId);
             }
         }
-        return ret.toNativeArray();
+        return ret.toArray();
     }
 
     /**
@@ -294,7 +296,7 @@ public final class SharedPrefixFolder {
          * Get first level shared folders
          */
         final int size = q.size();
-        final TIntObjectHashMap<FolderObject> set = getFirstLevelSharedFolders(q, size);
+        final TIntObjectMap<FolderObject> set = getFirstLevelSharedFolders(q, size);
         /*
          * Return filtered list
          */
@@ -308,11 +310,11 @@ public final class SharedPrefixFolder {
         return ret;
     }
 
-    private static TIntObjectHashMap<FolderObject> getFirstLevelSharedFolders(final Queue<FolderObject> q, final int size) {
+    private static TIntObjectMap<FolderObject> getFirstLevelSharedFolders(final Queue<FolderObject> q, final int size) {
         /*
          * Generate mapping
          */
-        final TIntObjectHashMap<FolderObject> map = new TIntObjectHashMap<FolderObject>(size);
+        final TIntObjectMap<FolderObject> map = new TIntObjectHashMap<FolderObject>(size);
         for (final FolderObject fo : q) {
             map.put(fo.getObjectID(), fo);
         }
@@ -320,7 +322,7 @@ public final class SharedPrefixFolder {
          * Strip direct subfolders
          */
         {
-            final TIntArrayList toRemove = new TIntArrayList(size >> 1);
+            final TIntList toRemove = new TIntArrayList(size >> 1);
             map.forEachValue(new DetectDirectSubfoldersProcedure(map, toRemove));
             toRemove.forEach(new RemovingProcedure(map));
         }

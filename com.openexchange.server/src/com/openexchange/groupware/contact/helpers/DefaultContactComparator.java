@@ -49,7 +49,8 @@
 
 package com.openexchange.groupware.contact.helpers;
 
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.Comparator;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
@@ -63,7 +64,7 @@ import com.openexchange.groupware.search.Order;
  */
 public class DefaultContactComparator implements Comparator<Contact>{
 
-    private static final TIntObjectHashMap<Comparator<Contact>> SPECIAL_COMPARATORS = new TIntObjectHashMap<Comparator<Contact>>() {{
+    private static final TIntObjectMap<Comparator<Contact>> SPECIAL_COMPARATORS = new TIntObjectHashMap<Comparator<Contact>>() {{
         put(Contact.SPECIAL_SORTING, new SpecialAlphanumSortContactComparator());
         put(Contact.USE_COUNT_GLOBAL_FIRST, new UseCountGlobalFirstComparator());
     }};

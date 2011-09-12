@@ -49,7 +49,8 @@
 
 package com.openexchange.groupware.infostore.webdav;
 
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -110,8 +111,8 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         public final Map<WebdavPath, OXWebdavResource> lockNull = new HashMap<WebdavPath, OXWebdavResource>();
 
 
-        public final TIntObjectHashMap<FolderCollection> collectionsById = new TIntObjectHashMap<FolderCollection>();
-        public final TIntObjectHashMap<DocumentMetadataResource> resourcesById = new TIntObjectHashMap<DocumentMetadataResource>();
+        public final TIntObjectMap<FolderCollection> collectionsById = new TIntObjectHashMap<FolderCollection>();
+        public final TIntObjectMap<DocumentMetadataResource> resourcesById = new TIntObjectHashMap<DocumentMetadataResource>();
 
         public void addResource(final OXWebdavResource res) {
             if(res.isCollection()) {

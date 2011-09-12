@@ -50,7 +50,8 @@
 package com.openexchange.ajax.request;
 
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import java.sql.Connection;
 import java.util.Date;
 import java.util.List;
@@ -605,7 +606,7 @@ public class ContactRequest {
 
     // Removes virtual columns or exchanges them agains real columns
     private int[] removeVirtual(final int[] columns) {
-        final TIntArrayList helper = new TIntArrayList(columns.length);
+        final TIntList helper = new TIntArrayList(columns.length);
         for (final int col : columns) {
             if (col == Contact.LAST_MODIFIED_UTC) {
                 // SKIP
@@ -616,7 +617,7 @@ public class ContactRequest {
             }
 
         }
-        return helper.toNativeArray();
+        return helper.toArray();
     }
 
     public JSONObject actionGet(final JSONObject jsonObj) throws JSONException, OXException {

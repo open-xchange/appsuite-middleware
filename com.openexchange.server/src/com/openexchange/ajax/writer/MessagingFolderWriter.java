@@ -49,7 +49,8 @@
 
 package com.openexchange.ajax.writer;
 
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -158,7 +159,7 @@ public final class MessagingFolderWriter {
     /**
      * Maps folder field constants to corresponding instance of {@link MessagingFolderFieldWriter}
      */
-    private static final TIntObjectHashMap<MessagingFolderFieldWriter> WRITERS_MAP = new TIntObjectHashMap<MessagingFolderFieldWriter>(20);
+    private static final TIntObjectMap<MessagingFolderFieldWriter> WRITERS_MAP = new TIntObjectHashMap<MessagingFolderFieldWriter>(20);
 
     static {
         WRITERS_MAP.put(DataObject.OBJECT_ID, new MessagingFolderFieldWriter() {

@@ -49,8 +49,8 @@
 
 package com.openexchange.imap.command;
 
-import gnu.trove.TIntArrayList;
-import gnu.trove.TLongArrayList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.list.array.TLongArrayList;
 import java.util.ArrayList;
 import java.util.List;
 import javax.mail.Message;

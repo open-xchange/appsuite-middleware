@@ -49,7 +49,8 @@
 
 package com.openexchange.folderstorage.outlook;
 
-import gnu.trove.TObjectIntHashMap;
+import gnu.trove.map.TObjectIntMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.Collator;
@@ -807,7 +808,7 @@ public final class OutlookFolderStorage implements FolderStorage {
     @Override
     public List<Folder> getFolders(final String treeId, final List<String> folderIds, final StorageType storageType, final StorageParameters storageParameters) throws OXException {
         final Folder[] ret = new Folder[folderIds.size()];
-        final TObjectIntHashMap<String> map = new TObjectIntHashMap<String>(folderIds.size());
+        final TObjectIntMap<String> map = new TObjectIntHashMap<String>(folderIds.size());
         for (int i = 0; i < ret.length; i++) {
             final String folderId = folderIds.get(i);
             if (PREPARED_FULLNAME_DEFAULT.equals(folderId)) {

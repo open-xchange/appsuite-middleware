@@ -50,9 +50,11 @@
 package com.openexchange.ajax.request;
 
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
-import gnu.trove.TIntArrayList;
-import gnu.trove.TIntIntHashMap;
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -514,7 +516,7 @@ public class AppointmentRequest extends CalendarRequest {
 
         SearchIterator<Appointment> it = null;
 
-        final TIntObjectHashMap<TIntArrayList> recurrencePositionMap = new TIntObjectHashMap<TIntArrayList>();
+        final TIntObjectMap<TIntArrayList> recurrencePositionMap = new TIntObjectHashMap<TIntArrayList>();
 
         final String[] sColumns = split(DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS));
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
@@ -527,7 +529,7 @@ public class AppointmentRequest extends CalendarRequest {
 
         final boolean bRecurrenceMaster = DataParser.parseBoolean(jsonObj, RECURRENCE_MASTER);
 
-        final TIntIntHashMap objectIdMap = new TIntIntHashMap();
+        final TIntIntMap objectIdMap = new TIntIntHashMap();
         for (int a = 0; a < jData.length(); a++) {
             JSONObject jObject = null;
             try {

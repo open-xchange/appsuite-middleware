@@ -49,8 +49,8 @@
 
 package com.openexchange.file.storage.rdb.internal;
 
-import gnu.trove.TIntArrayList;
-import gnu.trove.TIntProcedure;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.procedure.TIntProcedure;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;

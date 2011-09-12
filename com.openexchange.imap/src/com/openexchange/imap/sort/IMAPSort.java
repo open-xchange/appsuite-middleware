@@ -52,7 +52,8 @@ package com.openexchange.imap.sort;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
 import static com.openexchange.mail.utils.StorageUtility.EMPTY_MSGS;
-import gnu.trove.TLongArrayList;
+import gnu.trove.list.TLongList;
+import gnu.trove.list.array.TLongArrayList;
 import java.util.Locale;
 import javax.mail.FetchProfile;
 import javax.mail.FolderClosedException;
@@ -335,7 +336,7 @@ public final class IMAPSort {
             final String command = new StringBuilder("UID SORT (").append(descending ? "REVERSE " : "").append("ARRIVAL) UTF-8 ALL").toString();
             final Response[] r = p.command(command, null);
             final Response response = r[r.length - 1];
-            final TLongArrayList list = new TLongArrayList(256);
+            final TLongList list = new TLongArrayList(256);
             if (response.isOK()) {
                 final String key = "SORT";
                 for (int i = 0, len = r.length; i < len; i++) {
@@ -373,7 +374,7 @@ public final class IMAPSort {
             /*
              * Return UIDs
              */
-            return list.toNativeArray();
+            return list.toArray();
         }
     } // End of SORTProtocolCommand
 

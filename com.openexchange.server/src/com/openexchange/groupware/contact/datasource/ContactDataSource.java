@@ -51,7 +51,8 @@ package com.openexchange.groupware.contact.datasource;
 
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_FOLDERID;
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_ID;
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -136,7 +137,7 @@ public final class ContactDataSource implements DataSource {
             final ContactInterfaceDiscoveryService discoveryService = ServerServiceRegistry.getInstance().getService(
                 ContactInterfaceDiscoveryService.class,
                 true);
-            final TIntObjectHashMap<ContactInterface> tmp = new TIntObjectHashMap<ContactInterface>(len);
+            final TIntObjectMap<ContactInterface> tmp = new TIntObjectHashMap<ContactInterface>(len);
             for (int i = 0; i < len; i++) {
                 final int folderId = folderIds[i];
                 ContactInterface contactInterface = tmp.get(folderId);

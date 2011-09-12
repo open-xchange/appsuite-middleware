@@ -49,7 +49,8 @@
 
 package com.openexchange.webdav;
 
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.Date;
 
 /**
@@ -59,7 +60,7 @@ import java.util.Date;
  */
 public class LastModifiedCache {
 
-    private final TIntObjectHashMap<LastModifiedMemory> storage;
+    private final TIntObjectMap<LastModifiedMemory> storage;
 
     /**
      * Initializes a new {@link LastModifiedCache}.

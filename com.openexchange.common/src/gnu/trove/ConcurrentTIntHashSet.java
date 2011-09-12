@@ -49,6 +49,9 @@
 
 package gnu.trove;
 
+import gnu.trove.iterator.TIntIterator;
+import gnu.trove.procedure.TIntProcedure;
+import gnu.trove.set.hash.TIntHashSet;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -61,7 +64,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ConcurrentTIntHashSet extends TIntHashSet {
+public final class ConcurrentTIntHashSet extends TIntHashSet implements Cloneable {
 
     private final TIntHashSet set;
 
@@ -81,35 +84,10 @@ public final class ConcurrentTIntHashSet extends TIntHashSet {
      *
      * @param initialCapacity used to find a prime capacity for the table.
      * @param loadFactor used to calculate the threshold over which rehashing takes place.
-     * @param strategy used to compute hash codes and to compare keys.
-     */
-    public ConcurrentTIntHashSet(final int initialCapacity, final float loadFactor, final TIntHashingStrategy strategy) {
-        super();
-        set = new TIntHashSet(initialCapacity, loadFactor, strategy);
-        readWriteLock = new ReentrantReadWriteLock();
-    }
-
-    /**
-     * Initializes a new {@link ConcurrentTIntHashSet}.
-     *
-     * @param initialCapacity used to find a prime capacity for the table.
-     * @param loadFactor used to calculate the threshold over which rehashing takes place.
      */
     public ConcurrentTIntHashSet(final int initialCapacity, final float loadFactor) {
         super();
         set = new TIntHashSet(initialCapacity, loadFactor);
-        readWriteLock = new ReentrantReadWriteLock();
-    }
-
-    /**
-     * Initializes a new {@link ConcurrentTIntHashSet}.
-     *
-     * @param initialCapacity used to find a prime capacity for the table.
-     * @param strategy used to compute hash codes and to compare keys.
-     */
-    public ConcurrentTIntHashSet(final int initialCapacity, final TIntHashingStrategy strategy) {
-        super();
-        set = new TIntHashSet(initialCapacity, strategy);
         readWriteLock = new ReentrantReadWriteLock();
     }
 
@@ -128,18 +106,6 @@ public final class ConcurrentTIntHashSet extends TIntHashSet {
      * Initializes a new {@link ConcurrentTIntHashSet}.
      *
      * @param array an array of int primitives
-     * @param strategy used to compute hash codes and to compare keys.
-     */
-    public ConcurrentTIntHashSet(final int[] array, final TIntHashingStrategy strategy) {
-        super();
-        set = new TIntHashSet(array, strategy);
-        readWriteLock = new ReentrantReadWriteLock();
-    }
-
-    /**
-     * Initializes a new {@link ConcurrentTIntHashSet}.
-     *
-     * @param array an array of int primitives
      */
     public ConcurrentTIntHashSet(final int[] array) {
         super();
@@ -147,22 +113,16 @@ public final class ConcurrentTIntHashSet extends TIntHashSet {
         readWriteLock = new ReentrantReadWriteLock();
     }
 
-    /**
-     * Initializes a new {@link ConcurrentTIntHashSet}.
-     *
-     * @param strategy used to compute hash codes and to compare keys.
-     */
-    public ConcurrentTIntHashSet(final TIntHashingStrategy strategy) {
-        super();
-        set = new TIntHashSet(strategy);
-        readWriteLock = new ReentrantReadWriteLock();
-    }
-
     @Override
     public ConcurrentTIntHashSet clone() {
-        final ConcurrentTIntHashSet clone = (ConcurrentTIntHashSet) super.clone();
-        clone.readWriteLock = new ReentrantReadWriteLock();
-        return clone;
+        try {
+            final ConcurrentTIntHashSet clone = (ConcurrentTIntHashSet) super.clone();
+            clone.readWriteLock = new ReentrantReadWriteLock();
+            return clone;
+        } catch (final CloneNotSupportedException e) {
+            // Cannot occur
+            throw new InternalError("Clone not supported although Cloneable implemented.");
+        }
     }
 
     @Override

@@ -49,7 +49,8 @@
 
 package com.openexchange.ajax.writer;
 
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -157,10 +158,10 @@ public class TaskWriter extends CalendarWriter {
      * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      */
 
-    private static final TIntObjectHashMap<TaskFieldWriter> WRITER_MAP;
+    private static final TIntObjectMap<TaskFieldWriter> WRITER_MAP;
 
     static {
-        final TIntObjectHashMap<TaskFieldWriter> m = new TIntObjectHashMap<TaskFieldWriter>(25, 1);
+        final TIntObjectMap<TaskFieldWriter> m = new TIntObjectHashMap<TaskFieldWriter>(25, 1);
         m.put(Task.TITLE, new TaskFieldWriter() {
             @Override
             public void write(final Task taskObject, final JSONArray jsonArray) {

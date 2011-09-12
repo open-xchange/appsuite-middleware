@@ -49,12 +49,13 @@
 
 package com.openexchange.tx;
 
-import gnu.trove.TLongObjectHashMap;
+import gnu.trove.map.TLongObjectMap;
+import gnu.trove.map.hash.TLongObjectHashMap;
 
 public abstract class AbstractService<T> implements TransactionAware {
 
-    private final TLongObjectHashMap<T> txIds = new TLongObjectHashMap<T>();
-    private final TLongObjectHashMap<StackTraceElement[]> startedTx = new TLongObjectHashMap<StackTraceElement[]>();
+    private final TLongObjectMap<T> txIds = new TLongObjectHashMap<T>();
+    private final TLongObjectMap<StackTraceElement[]> startedTx = new TLongObjectHashMap<StackTraceElement[]>();
 
     protected abstract T createTransaction()throws TransactionException;
     protected abstract void commit(T transaction) throws TransactionException;

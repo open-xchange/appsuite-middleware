@@ -51,7 +51,8 @@ package com.openexchange.groupware.tools.iterator;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import gnu.trove.ConcurrentTIntObjectHashMap;
-import gnu.trove.TIntHashSet;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -153,7 +154,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
     private final boolean closeCon;
 
-    private final TIntHashSet folderIds;
+    private final TIntSet folderIds;
 
     private FolderObject next;
 

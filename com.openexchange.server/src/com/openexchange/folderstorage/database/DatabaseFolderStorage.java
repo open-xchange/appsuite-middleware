@@ -50,9 +50,12 @@
 package com.openexchange.folderstorage.database;
 
 import static com.openexchange.folderstorage.database.DatabaseFolderStorageUtility.getUnsignedInteger;
-import gnu.trove.TIntArrayList;
-import gnu.trove.TIntHashSet;
-import gnu.trove.TIntIntHashMap;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.Collator;
@@ -239,7 +242,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
              * Determine folder with non-existing parents
              */
             int[] nonExistingParents = OXFolderSQL.getNonExistingParents(session.getContext(), con);
-            final TIntHashSet shared = new TIntHashSet();
+            final TIntSet shared = new TIntHashSet();
             final OXFolderManager manager = OXFolderManager.getInstance(session, con, con);
             final OXFolderAccess folderAccess = getFolderAccess(storageParameters);
             final int userId = session.getUserId();
@@ -254,7 +257,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         }
                     }
                 }
-                final TIntHashSet tmp = new TIntHashSet(OXFolderSQL.getNonExistingParents(session.getContext(), con));
+                final TIntSet tmp = new TIntHashSet(OXFolderSQL.getNonExistingParents(session.getContext(), con));
                 tmp.removeAll(shared.toArray());
                 for (int i = 0; i < FolderObject.MIN_FOLDER_ID; i++) {
                     tmp.remove(i);
@@ -795,7 +798,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
             if (StorageType.WORKING.equals(storageType)) {
                 final int size = folderIdentifiers.size();
                 final Folder[] ret = new Folder[size];
-                final TIntIntHashMap map = new TIntIntHashMap(size);
+                final TIntIntMap map = new TIntIntHashMap(size);
                 /*
                  * Check for special folder identifier
                  */
@@ -856,13 +859,13 @@ public final class DatabaseFolderStorage implements FolderStorage {
             /*
              * Get from backup tables
              */
-            final TIntArrayList list = new TIntArrayList(folderIdentifiers.size());
+            final TIntList list = new TIntArrayList(folderIdentifiers.size());
             for (final String folderIdentifier : folderIdentifiers) {
                 list.add(getUnsignedInteger(folderIdentifier));
             }
             final List<FolderObject> folders =
                 OXFolderBatchLoader.loadFolderObjectsFromDB(
-                    list.toNativeArray(),
+                    list.toArray(),
                     ctx,
                     con,
                     true,
@@ -1596,7 +1599,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
          */
         final int length = folderIds.length;
         final FolderObject[] ret = new FolderObject[length];
-        final TIntIntHashMap toLoad = new TIntIntHashMap(length);
+        final TIntIntMap toLoad = new TIntIntHashMap(length);
         final FolderCacheManager cacheManager = FolderCacheManager.getInstance();
         for (int index = 0; index < length; index++) {
             final int folderId = folderIds[index];

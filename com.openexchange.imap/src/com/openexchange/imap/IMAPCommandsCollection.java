@@ -50,12 +50,15 @@
 package com.openexchange.imap;
 
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
-import gnu.trove.TIntArrayList;
-import gnu.trove.TIntHashSet;
-import gnu.trove.TIntLongHashMap;
-import gnu.trove.TLongArrayList;
-import gnu.trove.TLongIntHashMap;
-import gnu.trove.TObjectIntHashMap;
+import gnu.trove.list.TLongList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.list.array.TLongArrayList;
+import gnu.trove.map.TLongIntMap;
+import gnu.trove.map.hash.TIntLongHashMap;
+import gnu.trove.map.hash.TLongIntHashMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -1618,7 +1621,7 @@ public final class IMAPCommandsCollection {
                                     /*
                                      * Sort all
                                      */
-                                    final TIntHashSet set = new TIntHashSet(tmp);
+                                    final TIntSet set = new TIntHashSet(tmp);
                                     tmp = IMAPCommandsCollection.getServerSortList(imapFolder, sortCriteria);
                                     final TIntArrayList list = new TIntArrayList(limit);
                                     for (int i = 0, k = 0; i < tmp.length && k < limit; i++) {
@@ -1628,7 +1631,7 @@ public final class IMAPCommandsCollection {
                                             k++;
                                         }
                                     }
-                                    tmp = list.toNativeArray();
+                                    tmp = list.toArray();
                                 } else {
                                     /*
                                      * Sort specified sequence numbers
@@ -2181,7 +2184,7 @@ public final class IMAPCommandsCollection {
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
                 Response[] r = null;
                 Response response = null;
-                final TLongArrayList uids = new TLongArrayList(messageCount);
+                final TLongList uids = new TLongArrayList(messageCount);
                 /*-
                  * Arguments:  sequence set
                  * message data item names or macro
@@ -2218,7 +2221,7 @@ public final class IMAPCommandsCollection {
                 } else {
                     p.handleResult(response);
                 }
-                return uids.toNativeArray();
+                return uids.toArray();
             }
 
         }));
@@ -2322,7 +2325,7 @@ public final class IMAPCommandsCollection {
      * @return A map resolving specified UIDs to current corresponding sequence numbers
      * @throws MessagingException If a messaging error occurs
      */
-    public static TLongIntHashMap uids2SeqNumsMap(final IMAPFolder imapFolder, final long[] uids) throws MessagingException {
+    public static TLongIntMap uids2SeqNumsMap(final IMAPFolder imapFolder, final long[] uids) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount == 0) {
             /*
@@ -2330,7 +2333,7 @@ public final class IMAPCommandsCollection {
              */
             return new TLongIntHashMap(0);
         }
-        return (TLongIntHashMap) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+        return (TLongIntMap) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {

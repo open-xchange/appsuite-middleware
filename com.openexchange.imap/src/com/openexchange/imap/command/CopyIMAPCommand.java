@@ -50,7 +50,8 @@
 package com.openexchange.imap.command;
 
 import static com.openexchange.imap.IMAPCommandsCollection.prepareStringArgument;
-import gnu.trove.TLongArrayList;
+import gnu.trove.list.TLongList;
+import gnu.trove.list.array.TLongArrayList;
 import java.util.Arrays;
 import java.util.Locale;
 import javax.mail.MessagingException;
@@ -332,7 +333,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
          * @return The corresponding array of <code>long</code>.
          */
         private static long[] toLongArray(final String uidSet) {
-            final TLongArrayList arr = new TLongArrayList(32);
+            final TLongList arr = new TLongArrayList(32);
             final String[] sa = uidSet.split(" *, *");
             Next: for (int i = 0; i < sa.length; i++) {
                 final int pos = sa[i].indexOf(':');
@@ -345,7 +346,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
                     arr.add(j);
                 }
             }
-            return arr.toNativeArray();
+            return arr.toArray();
         }
     }
 

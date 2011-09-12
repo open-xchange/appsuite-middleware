@@ -50,7 +50,8 @@
 package com.openexchange.folderstorage.internal.performers;
 
 import static com.openexchange.server.services.ServerServiceRegistry.getInstance;
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -235,14 +236,14 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                 /*
                  * Collect by folder storage
                  */
-                final Map<FolderStorage, TIntArrayList> map = new HashMap<FolderStorage, TIntArrayList>(4);
+                final Map<FolderStorage, TIntList> map = new HashMap<FolderStorage, TIntList>(4);
                 for (int i = 0; i < subfolderIds.length; i++) {
                     final String id = subfolderIds[i];
                     final FolderStorage tmp = folderStorageDiscoverer.getFolderStorage(treeId, id);
                     if (null == tmp) {
                         throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, id);
                     }
-                    TIntArrayList list = map.get(tmp);
+                    TIntList list = map.get(tmp);
                     if (null == list) {
                         list = new TIntArrayList();
                         map.put(tmp, list);
@@ -267,9 +268,9 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                     paramsProvider = null == session ? new SessionStorageParametersProvider(user, context) : new SessionStorageParametersProvider(session);
                 }
                 int taskCount = 0;
-                for (final Entry<FolderStorage, TIntArrayList> entry : map.entrySet()) {
+                for (final Entry<FolderStorage, TIntList> entry : map.entrySet()) {
                     final FolderStorage tmp = entry.getKey();
-                    final int[] indexes = entry.getValue().toNativeArray();
+                    final int[] indexes = entry.getValue().toArray();
                     final Log log = LOG;
                     completionService.submit(new Callable<Object>() {
 
@@ -508,14 +509,14 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
         /*
          * Collect by folder storage
          */
-        final Map<FolderStorage, TIntArrayList> map = new HashMap<FolderStorage, TIntArrayList>(4);
+        final Map<FolderStorage, TIntList> map = new HashMap<FolderStorage, TIntList>(4);
         for (int i = 0; i < size; i++) {
             final String id = allSubfolderIds.get(i).getId();
             final FolderStorage tmp = folderStorageDiscoverer.getFolderStorage(treeId, id);
             if (null == tmp) {
                 throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, id);
             }
-            TIntArrayList list = map.get(tmp);
+            TIntList list = map.get(tmp);
             if (null == list) {
                 list = new TIntArrayList();
                 map.put(tmp, list);
@@ -539,9 +540,9 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
             paramsProvider = null == session ? new SessionStorageParametersProvider(user, context) : new SessionStorageParametersProvider(session);
         }
         int taskCount = 0;
-        for (final Entry<FolderStorage, TIntArrayList> entry : map.entrySet()) {
+        for (final Entry<FolderStorage, TIntList> entry : map.entrySet()) {
             final FolderStorage tmp = entry.getKey();
-            final int[] indexes = entry.getValue().toNativeArray();
+            final int[] indexes = entry.getValue().toArray();
             final Log log = LOG;
             completionService.submit(new Callable<Object>() {
 

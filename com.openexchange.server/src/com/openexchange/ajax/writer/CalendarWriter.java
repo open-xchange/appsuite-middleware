@@ -49,7 +49,8 @@
 
 package com.openexchange.ajax.writer;
 
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.Date;
 import java.util.TimeZone;
 import org.json.JSONArray;
@@ -285,7 +286,7 @@ public abstract class CalendarWriter extends CommonWriter {
     };
 
     static {
-        final TIntObjectHashMap<FieldWriter<CalendarObject>> m = new TIntObjectHashMap<FieldWriter<CalendarObject>>(1, 1);
+        final TIntObjectMap<FieldWriter<CalendarObject>> m = new TIntObjectHashMap<FieldWriter<CalendarObject>>(1, 1);
         m.put(CalendarObject.CONFIRMATIONS, CONFIRMATIONS_WRITER);
         m.put(CalendarObject.ORGANIZER, ORGANIZER_WRITER);
         m.put(CalendarObject.UID, UID_WRITER);
@@ -293,5 +294,5 @@ public abstract class CalendarWriter extends CommonWriter {
         WRITER_MAP = m;
     }
 
-    private static final TIntObjectHashMap<FieldWriter<CalendarObject>> WRITER_MAP;
+    private static final TIntObjectMap<FieldWriter<CalendarObject>> WRITER_MAP;
 }

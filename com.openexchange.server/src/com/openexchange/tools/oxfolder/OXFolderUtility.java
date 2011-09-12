@@ -49,7 +49,7 @@
 
 package com.openexchange.tools.oxfolder;
 
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;

@@ -49,9 +49,10 @@
 
 package com.openexchange.tools.oxfolder;
 
-import gnu.trove.TIntArrayList;
-import gnu.trove.TIntObjectHashMap;
-import gnu.trove.TIntObjectProcedure;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TIntObjectProcedure;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.SQLException;
@@ -345,11 +346,11 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     throwException = true;
                 }
             } else {
-                final TIntArrayList folders = OXFolderSQL.lookUpFolders(parentFolderID, folderName, folderObj.getModule(), readCon, ctx);
+                final TIntList folders = OXFolderSQL.lookUpFolders(parentFolderID, folderName, folderObj.getModule(), readCon, ctx);
                 /*
                  * Check if the user is owner of one of these folders. In this case throw a duplicate folder exception
                  */
-                for (final int fuid : folders.toNativeArray()) {
+                for (final int fuid : folders.toArray()) {
                     final FolderObject toCheck = getOXFolderAccess().getFolderObject(fuid);
                     if (toCheck.getCreatedBy() == (folderObj.containsCreatedBy() ? folderObj.getCreatedBy() : user.getId())) {
                         /*
@@ -916,11 +917,11 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     throwException = true;
                 }
             } else {
-                final TIntArrayList folders = OXFolderSQL.lookUpFolders(parentFolderID, folderName, storageObj.getModule(), readCon, ctx);
+                final TIntList folders = OXFolderSQL.lookUpFolders(parentFolderID, folderName, storageObj.getModule(), readCon, ctx);
                 /*
                  * Check if the user is owner of one of these folders. In this case throw a duplicate folder exception
                  */
-                for (final int fuid : folders.toNativeArray()) {
+                for (final int fuid : folders.toArray()) {
                     final FolderObject toCheck = getOXFolderAccess().getFolderObject(fuid);
                     if (toCheck.getCreatedBy() == (folderObj.containsCreatedBy() ? folderObj.getCreatedBy() : user.getId())) {
                         /*
@@ -1035,11 +1036,11 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     throwException = true;
                 }
             } else {
-                final TIntArrayList folders = OXFolderSQL.lookUpFolders(parentFolderID, folderName, storageSrc.getModule(), readCon, ctx);
+                final TIntList folders = OXFolderSQL.lookUpFolders(parentFolderID, folderName, storageSrc.getModule(), readCon, ctx);
                 /*
                  * Check if the user is owner of one of these folders. In this case throw a duplicate folder exception
                  */
-                for (final int fuid : folders.toNativeArray()) {
+                for (final int fuid : folders.toArray()) {
                     final FolderObject toCheck = getOXFolderAccess().getFolderObject(fuid);
                     if (toCheck.getCreatedBy() == (createdBy > 0 ? createdBy : user.getId())) {
                         /*

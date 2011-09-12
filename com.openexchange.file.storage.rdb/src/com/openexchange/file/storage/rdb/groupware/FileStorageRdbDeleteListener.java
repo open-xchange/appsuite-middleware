@@ -49,8 +49,9 @@
 
 package com.openexchange.file.storage.rdb.groupware;
 
-import gnu.trove.TIntArrayList;
-import gnu.trove.TIntProcedure;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.procedure.TIntProcedure;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -92,7 +93,7 @@ public final class FileStorageRdbDeleteListener implements DeleteListener {
         PreparedStatement stmt = null;
         try {
             final int userId = event.getId();
-            final TIntArrayList confIds;
+            final TIntList confIds;
             {
                 ResultSet rs = null;
                 try {

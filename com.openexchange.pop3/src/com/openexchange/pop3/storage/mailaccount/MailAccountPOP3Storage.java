@@ -49,7 +49,8 @@
 
 package com.openexchange.pop3.storage.mailaccount;
 
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.security.SecureRandom;
@@ -528,7 +529,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                         return;
                     }
                     final Vector<POP3Message> messageCache = getMessageCache(inbox);
-                    final TIntObjectHashMap<String> seqnum2uidl;
+                    final TIntObjectMap<String> seqnum2uidl;
                     {
                         /*
                          * The current UIDLs
@@ -636,7 +637,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
         return null == property ? false : Boolean.parseBoolean(property.trim());
     }
 
-    private int add2Storage(final POP3Folder inbox, final int start, final int len, final boolean containsWarnings, final int messageCount, final TIntObjectHashMap<String> seqnum2uidl) throws MessagingException, OXException {
+    private int add2Storage(final POP3Folder inbox, final int start, final int len, final boolean containsWarnings, final int messageCount, final TIntObjectMap<String> seqnum2uidl) throws MessagingException, OXException {
         final int retval; // The number of messages added to storage
         final int end; // The ending sequence number (inclusive)
         {
@@ -707,7 +708,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
         }
     };
 
-    private void doBatchAppendWithFallback(final POP3Folder inbox, final Message[] msgs, final TIntObjectHashMap<String> seqnum2uidl) throws MessagingException, OXException {
+    private void doBatchAppendWithFallback(final POP3Folder inbox, final Message[] msgs, final TIntObjectMap<String> seqnum2uidl) throws MessagingException, OXException {
         /*
          * Fetch ENVELOPE for new messages
          */

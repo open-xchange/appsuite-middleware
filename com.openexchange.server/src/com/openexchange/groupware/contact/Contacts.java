@@ -56,7 +56,8 @@ import static com.openexchange.tools.sql.DBUtils.closeResources;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.getStatement;
 import static com.openexchange.tools.sql.DBUtils.rollback;
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -1214,7 +1215,7 @@ public final class Contacts {
         }
         sb.deleteCharAt(0);
         contactSQL.setSelect(contactSQL.iFgetContactById(sb.toString()).toString());
-        final TIntObjectHashMap<Contact> contacts = new TIntObjectHashMap<Contact>(userIds.length, 1);
+        final TIntObjectMap<Contact> contacts = new TIntObjectHashMap<Contact>(userIds.length, 1);
         for (int i = 0; i < userIds.length; i += LIMIT) {
             contactSQL.setInternalUsers(com.openexchange.tools.arrays.Arrays.extract(userIds, i, LIMIT));
             contacts.putAll(fillContactObject(contactSQL, user, memberInGroups, ctx, uc, readCon));

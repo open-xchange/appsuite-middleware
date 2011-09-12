@@ -49,7 +49,8 @@
 
 package com.openexchange.messaging.generic.internal;
 
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -253,7 +254,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
      * @return The identifiers of user-associated accounts of a certain service
      * @throws OXException If identifiers cannot be returned
      */
-    public TIntArrayList getAccountIDs(final String serviceId, final Session session) throws OXException {
+    public TIntList getAccountIDs(final String serviceId, final Session session) throws OXException {
         final DatabaseService databaseService = getService(CLAZZ_DB);
         /*
          * Readable connection
@@ -265,7 +266,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
         } catch (final OXException e) {
             throw new OXException(e);
         }
-        TIntArrayList accounts;
+        TIntList accounts;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {

@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.writer;
 
-import gnu.trove.TObjectProcedure;
+import gnu.trove.procedure.TObjectProcedure;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;

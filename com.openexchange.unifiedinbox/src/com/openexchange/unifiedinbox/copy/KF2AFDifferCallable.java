@@ -49,7 +49,8 @@
 
 package com.openexchange.unifiedinbox.copy;
 
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.linked.TIntLinkedList;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.mail.api.MailAccess;
@@ -74,7 +75,7 @@ final class KF2AFDifferCallable implements Task<Object> {
 
     private final List<String> srcFullnameList;
 
-    private final TIntArrayList indexList;
+    private final TIntList indexList;
 
     private final boolean fast;
 
@@ -91,7 +92,7 @@ final class KF2AFDifferCallable implements Task<Object> {
         this.move = move;
         idList = new ArrayList<String>();
         srcFullnameList = new ArrayList<String>();
-        indexList = new TIntArrayList();
+        indexList = new TIntLinkedList();
     }
 
     void addIdAndFullnameAndIndex(final String id, final String srcFullname, final int index) {

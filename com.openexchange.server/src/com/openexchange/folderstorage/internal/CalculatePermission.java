@@ -49,8 +49,9 @@
 
 package com.openexchange.folderstorage.internal;
 
-import gnu.trove.TIntHashSet;
-import gnu.trove.TIntIntHashMap;
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -258,7 +259,7 @@ public final class CalculatePermission {
         if (null == allowedContentTypes || allowedContentTypes.isEmpty()) {
             return true;
         }
-        final TIntHashSet set = new TIntHashSet(allowedContentTypes.size() + 2);
+        final TIntSet set = new TIntHashSet(allowedContentTypes.size() + 2);
         for (final ContentType allowedContentType : allowedContentTypes) {
             set.add(allowedContentType.getModule());
         }

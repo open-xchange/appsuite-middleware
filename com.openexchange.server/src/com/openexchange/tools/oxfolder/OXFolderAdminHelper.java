@@ -51,7 +51,8 @@ package com.openexchange.tools.oxfolder;
 
 import static com.openexchange.tools.sql.DBUtils.closeResources;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -1336,7 +1337,7 @@ public final class OXFolderAdminHelper {
             stmt.setInt(2, cid);
             stmt.setInt(3, group);
             rs = stmt.executeQuery();
-            final TIntArrayList list = new TIntArrayList();
+            final TIntList list = new TIntArrayList();
             while (rs.next()) {
                 list.add(rs.getInt(1));
             }
@@ -1346,7 +1347,7 @@ public final class OXFolderAdminHelper {
             if (!list.isEmpty()) {
                 stmt = writeCon.prepareStatement(SQL_UPDATE_FOLDER_TIMESTAMP.replaceFirst("#FT#", STR_OXFOLDERTREE));
                 do {
-                    final int fuid = list.remove(0);
+                    final int fuid = list.removeAt(0);
                     stmt.setLong(1, lastModified);
                     stmt.setInt(2, cid);
                     stmt.setInt(3, fuid);

@@ -49,7 +49,8 @@
 
 package com.openexchange.ajax.writer;
 
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -327,10 +328,10 @@ public class ContactWriter extends CommonWriter {
      * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      */
 
-    private static final TIntObjectHashMap<ContactFieldWriter> WRITER_MAP;
+    private static final TIntObjectMap<ContactFieldWriter> WRITER_MAP;
 
     static {
-        final TIntObjectHashMap<ContactFieldWriter> m = new TIntObjectHashMap<ContactFieldWriter>(128);
+        final TIntObjectMap<ContactFieldWriter> m = new TIntObjectHashMap<ContactFieldWriter>(128);
 
         m.put(Contact.OBJECT_ID, new ContactFieldWriter() {
 

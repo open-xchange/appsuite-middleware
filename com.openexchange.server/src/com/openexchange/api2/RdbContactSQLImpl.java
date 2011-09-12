@@ -56,7 +56,8 @@ import static com.openexchange.tools.StringCollection.prepareForSearch;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.forSQLCommand;
 import static com.openexchange.tools.sql.DBUtils.getStatement;
-import gnu.trove.TIntHashSet;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -1055,7 +1056,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
     }
 
     private int[] checkColumns(final int[] cols) {
-        final TIntHashSet tmp = new TIntHashSet();
+        final TIntSet tmp = new TIntHashSet();
         for (final int col : cols) {
             if (Contacts.mapping[col] != null) {
                 tmp.add(col);

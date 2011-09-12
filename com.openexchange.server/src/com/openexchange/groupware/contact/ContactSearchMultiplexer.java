@@ -50,7 +50,8 @@
 package com.openexchange.groupware.contact;
 
 import static com.openexchange.java.Autoboxing.I;
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -132,7 +133,7 @@ public class ContactSearchMultiplexer {
         final int contextId = session.getContextId();
         final List<SearchIterator<Contact>> searchIterators = new LinkedList<SearchIterator<Contact>>();
         if(null != folders && folders.size() > 0) {
-            final TIntArrayList foldersForDefaultSearch = new TIntArrayList(folders.size());
+            final TIntList foldersForDefaultSearch = new TIntArrayList(folders.size());
             for (final String folderStr : folders) {
             	final int folderId = Integer.parseInt(folderStr);
                 if(discoveryService.hasSpecificContactInterface(folderId, contextId)) {

@@ -51,7 +51,8 @@ package com.openexchange.imap.search;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import javax.mail.FolderClosedException;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -121,13 +122,13 @@ public final class IMAPSearch {
              * plain-text out of HTML content.
              */
             final Message[] allMsgs = imapFolder.getMessages();
-            final TIntArrayList list = new TIntArrayList(msgCount);
+            final TIntList list = new TIntArrayList(msgCount);
             for (int i = 0; i < allMsgs.length; i++) {
                 if (searchTerm.matches(allMsgs[i])) {
                     list.add(allMsgs[i].getMessageNumber());
                 }
             }
-            return list.toNativeArray();
+            return list.toArray();
         }
         /*
          * Perform an IMAP-based search if IMAP search is enabled through configuration or number of messages to search in exceeds limit.
@@ -150,13 +151,13 @@ public final class IMAPSearch {
                     imapConfig.getIMAPProperties().isFastFetch()), msgCount).doCommand();
             mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
         }
-        final TIntArrayList list = new TIntArrayList(msgCount);
+        final TIntList list = new TIntArrayList(msgCount);
         for (int i = 0; i < allMsgs.length; i++) {
             if (searchTerm.matches(allMsgs[i])) {
                 list.add(allMsgs[i].getMessageNumber());
             }
         }
-        return list.toNativeArray();
+        return list.toArray();
     }
 
     private static int[] issueIMAPSearch(final IMAPFolder imapFolder, final com.openexchange.mail.search.SearchTerm<?> searchTerm) throws OXException, FolderClosedException, StoreClosedException {
@@ -251,14 +252,14 @@ public final class IMAPSearch {
      */
     private static int[] searchWithUmlautSupport(final com.openexchange.mail.search.SearchTerm<?> searchTerm, final int[] seqNums, final IMAPFolder imapFolder) throws OXException {
         try {
-            final TIntArrayList results = new TIntArrayList(seqNums.length);
+            final TIntList results = new TIntArrayList(seqNums.length);
             for (int i = 0; i < seqNums.length; i++) {
                 final int msgnum = seqNums[i];
                 if (searchTerm.matches(imapFolder.getMessage(msgnum))) {
                     results.add(msgnum);
                 }
             }
-            return results.toNativeArray();
+            return results.toArray();
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
         }
@@ -282,14 +283,14 @@ public final class IMAPSearch {
                 }
             }
         });
-        final TIntArrayList validSeqNums = new TIntArrayList(seqNums.length);
+        final TIntList validSeqNums = new TIntArrayList(seqNums.length);
         for (int i = 0; i < seqNums.length; i++) {
             final int seqNum = seqNums[i];
             if (seqNum >= 1 && seqNum <= messageCount) {
                 validSeqNums.add(seqNum);
             }
         }
-        return validSeqNums.toNativeArray();
+        return validSeqNums.toArray();
     }
 
 }
