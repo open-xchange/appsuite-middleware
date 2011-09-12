@@ -485,7 +485,7 @@ public final class Contacts {
                     checkImageSize(contact.getImage1().length, Integer.parseInt(ContactConfig.getInstance().getProperty(PROP_MAX_IMAGE_SIZE)));
                 }
 
-                writeContactImage(contact.getObjectID(), contact.getImage1(), session.getContextId(), contact.getImageContentType(), writecon);
+                writeContactImage(contact.getObjectID(), contact.getImage1(), session.getContextId(), contact.getImageContentType(), lmd, writecon);
             }
             writecon.commit();
         } catch (final DataTruncation se) {
@@ -813,9 +813,9 @@ public final class Contacts {
                     }
 
                     if (original.containsImage1()) {
-                        updateContactImage(co.getObjectID(), co.getImage1(), ctx.getContextId(), co.getImageContentType(), writecon);
+                        updateContactImage(co.getObjectID(), co.getImage1(), ctx.getContextId(), co.getImageContentType(), lmd, writecon);
                     } else {
-                        writeContactImage(co.getObjectID(), co.getImage1(), ctx.getContextId(), co.getImageContentType(), writecon);
+                        writeContactImage(co.getObjectID(), co.getImage1(), ctx.getContextId(), co.getImageContentType(), lmd, writecon);
                     }
 
                 } else if (original.containsImage1()) {
@@ -1135,9 +1135,9 @@ public final class Contacts {
                             PROP_MAX_IMAGE_SIZE)));
                     }
                     if (original.containsImage1()) {
-                        updateContactImage(contact.getObjectID(), contact.getImage1(), ctx.getContextId(), contact.getImageContentType(), writecon);
+                        updateContactImage(contact.getObjectID(), contact.getImage1(), ctx.getContextId(), contact.getImageContentType(), lmd, writecon);
                     } else {
-                        writeContactImage(contact.getObjectID(), contact.getImage1(), ctx.getContextId(), contact.getImageContentType(), writecon);
+                        writeContactImage(contact.getObjectID(), contact.getImage1(), ctx.getContextId(), contact.getImageContentType(), lmd, writecon);
                     }
                 } else if (original.containsImage1()) {
                     try {
@@ -1898,7 +1898,7 @@ public final class Contacts {
         }
     }
 
-    public static void writeContactImage(final int contact_id, final byte[] img, final int cid, final String mime, final Connection writecon) throws OXException, OXException {
+    public static void writeContactImage(final int contact_id, final byte[] img, final int cid, final String mime, final long lastModified, final Connection writecon) throws OXException, OXException {
         if ((contact_id < 1) || (img == null) || (img.length < 1) || (cid < 1) || (mime == null) || (mime.length() < 1)) {
             throw ContactExceptionCodes.IMAGE_BROKEN.create();
         }
@@ -1921,7 +1921,7 @@ public final class Contacts {
         }
     }
 
-    public static void updateContactImage(final int contact_id, final byte[] img, final int cid, final String mime, final Connection writecon) throws OXException, OXException {
+    public static void updateContactImage(final int contact_id, final byte[] img, final int cid, final String mime, final long lastModified, final Connection writecon) throws OXException, OXException {
         if ((contact_id < 1) || (img == null) || (img.length < 1) || (cid < 1) || (mime == null) || (mime.length() < 1)) {
             throw ContactExceptionCodes.IMAGE_BROKEN.create();
         }
@@ -1933,8 +1933,9 @@ public final class Contacts {
             ps.setBytes(2, img);
             ps.setString(3, mime);
             ps.setInt(4, cid);
-            ps.setInt(5, contact_id);
-            ps.setInt(6, cid);
+            ps.setLong(5, lastModified);
+            ps.setInt(6, contact_id);
+            ps.setInt(7, cid);
             if (DEBUG) {
                 LOG.debug(new StringBuilder("UPDATE IMAGE ").append(getStatementString(ps)));
             }
