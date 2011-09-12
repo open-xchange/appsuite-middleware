@@ -671,12 +671,12 @@ public final class OXFolderSQL {
     private static final String SQL_GETSUBFLDIDS = "SELECT fuid FROM oxfolder_tree WHERE cid = ? AND parent = ?";
 
     /**
-     * Creates a <tt>TIntArrayList</tt> instance containing all subfolder IDs of given folder
+     * Creates a <tt>TIntList</tt> instance containing all subfolder IDs of given folder
      *
-     * @return a <tt>TIntArrayList</tt> instance containing all subfolder IDs of given folder
+     * @return a <tt>TIntList</tt> instance containing all subfolder IDs of given folder
      */
-    public static TIntArrayList getSubfolderIDs(final int folderId, final Connection readConArg, final Context ctx) throws OXException, SQLException {
-        final TIntArrayList retval = new TIntArrayList();
+    public static TIntList getSubfolderIDs(final int folderId, final Connection readConArg, final Context ctx) throws OXException, SQLException {
+        final TIntList retval = new TIntArrayList();
         Connection readCon = readConArg;
         boolean closeReadCon = false;
         PreparedStatement stmt = null;

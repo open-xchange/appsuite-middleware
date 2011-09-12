@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.rdb.internal;
 
+import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -253,7 +254,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
      * @return The identifiers of user-associated accounts of a certain service
      * @throws OXException If identifiers cannot be returned
      */
-    public TIntArrayList getAccountIDs(final String serviceId, final Session session) throws OXException {
+    public TIntList getAccountIDs(final String serviceId, final Session session) throws OXException {
         final DatabaseService databaseService = getService(CLAZZ_DB);
         /*
          * Readable connection
@@ -265,7 +266,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
         } catch (final OXException e) {
             throw new OXException(e);
         }
-        TIntArrayList accounts;
+        TIntList accounts;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -559,7 +560,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
         if (secretProperties.isEmpty()) {
             return true;
         }
-        final TIntArrayList confIds = getConfIDsForUser(session.getContextId(), session.getUserId(), parentService.getId());
+        final TIntList confIds = getConfIDsForUser(session.getContextId(), session.getUserId(), parentService.getId());
         final GenericConfigurationStorageService genericConfStorageService = getService(CLAZZ_GEN_CONF);
         final CryptoService cryptoService = getService(CryptoService.class);
 
@@ -584,8 +585,8 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
         return true;
     }
 
-    private TIntArrayList getConfIDsForUser(final int contextId, final int userId, final String serviceId) throws OXException {
-        final TIntArrayList confIds = new TIntArrayList(20);
+    private TIntList getConfIDsForUser(final int contextId, final int userId, final String serviceId) throws OXException {
+        final TIntList confIds = new TIntArrayList(20);
         final DatabaseService databaseService = getService(CLAZZ_DB);
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -623,7 +624,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
         if (secretProperties.isEmpty()) {
             return;
         }
-        final TIntArrayList confIds = getConfIDsForUser(session.getContextId(), session.getUserId(), parentService.getId());
+        final TIntList confIds = getConfIDsForUser(session.getContextId(), session.getUserId(), parentService.getId());
         final GenericConfigurationStorageService genericConfStorageService = getService(CLAZZ_GEN_CONF);
         final CryptoService cryptoService = getService(CryptoService.class);
 

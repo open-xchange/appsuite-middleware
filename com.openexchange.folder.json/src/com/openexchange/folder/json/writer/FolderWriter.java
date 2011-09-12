@@ -49,6 +49,7 @@
 
 package com.openexchange.folder.json.writer;
 
+import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntIntHashMap;
@@ -197,7 +198,7 @@ public final class FolderWriter {
     private static final int[] ALL_FIELDS;
 
     static {
-        final TIntObjectHashMap<FolderFieldWriter> m = new TIntObjectHashMap<FolderFieldWriter>(32);
+        final TIntObjectMap<FolderFieldWriter> m = new TIntObjectHashMap<FolderFieldWriter>(32);
         m.put(FolderField.ID.getColumn(), new FolderFieldWriter() {
 
             @Override
@@ -585,7 +586,7 @@ public final class FolderWriter {
     }
 
     private static int[] getAllFields(final AdditionalFolderFieldList additionalFolderFieldList) {
-        final TIntArrayList list = new TIntArrayList();
+        final TIntList list = new TIntArrayList();
         list.add(ALL_FIELDS);
         list.add(additionalFolderFieldList.getKnownFields());
         return list.toArray();

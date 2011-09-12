@@ -93,6 +93,7 @@ import org.elasticsearch.common.collect.ImmutableMap;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.ImmutableSettings.Builder;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.trove.map.TIntObjectMap;
 import org.elasticsearch.common.trove.map.hash.TIntObjectHashMap;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.json.JsonXContent;
@@ -144,7 +145,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
 
     private static final class InMemoryMailAccountLookup implements MailAccountLookup {
 
-        private final TIntObjectHashMap<MailAccount> map;
+        private final TIntObjectMap<MailAccount> map;
 
         private final int userId;
 

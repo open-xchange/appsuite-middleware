@@ -53,6 +53,7 @@ import static com.openexchange.tools.sql.DBUtils.closeResources;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.list.linked.TIntLinkedList;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -330,7 +331,7 @@ public final class OXFolderAdminHelper {
             /*
              * Get context's users
              */
-            final TIntArrayList users;
+            final TIntList users;
             {
                 PreparedStatement stmt = null;
                 ResultSet rs = null;
@@ -339,7 +340,7 @@ public final class OXFolderAdminHelper {
                     final int pos = 1;
                     stmt.setInt(pos, cid);
                     rs = stmt.executeQuery();
-                    users = new TIntArrayList();
+                    users = new TIntLinkedList();
                     while (rs.next()) {
                         users.add(rs.getInt(pos));
                     }
@@ -356,12 +357,12 @@ public final class OXFolderAdminHelper {
                 final Integer admin = Integer.valueOf(getContextAdminID(cid, writeCon));
                 final int size = users.size();
                 for (int i = 1; i < size; i++) {
-                    setGlobalAddressBookDisabled(cid, users.getQuick(i), !enable, writeCon, admin, false);
+                    setGlobalAddressBookDisabled(cid, users.get(i), !enable, writeCon, admin, false);
                 }
                 /*
                  * Propagate with last update
                  */
-                setGlobalAddressBookDisabled(cid, users.getQuick(0), !enable, writeCon, admin, true);
+                setGlobalAddressBookDisabled(cid, users.get(0), !enable, writeCon, admin, true);
             }
         } finally {
             Database.back(cid, true, writeCon);

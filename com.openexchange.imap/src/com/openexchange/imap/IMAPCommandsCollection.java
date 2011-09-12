@@ -50,6 +50,7 @@
 package com.openexchange.imap;
 
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
+import gnu.trove.list.TIntList;
 import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.array.TLongArrayList;
@@ -1623,7 +1624,7 @@ public final class IMAPCommandsCollection {
                                      */
                                     final TIntSet set = new TIntHashSet(tmp);
                                     tmp = IMAPCommandsCollection.getServerSortList(imapFolder, sortCriteria);
-                                    final TIntArrayList list = new TIntArrayList(limit);
+                                    final TIntList list = new TIntArrayList(limit);
                                     for (int i = 0, k = 0; i < tmp.length && k < limit; i++) {
                                         final int seqNum = tmp[i];
                                         if (set.contains(seqNum)) {

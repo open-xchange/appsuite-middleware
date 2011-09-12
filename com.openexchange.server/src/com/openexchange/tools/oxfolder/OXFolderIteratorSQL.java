@@ -905,7 +905,7 @@ public final class OXFolderIteratorSQL {
             if (!rs.next()) {
                 return new TIntArrayList(0);
             }
-            final TIntArrayList retval = new TIntArrayList(16);
+            final TIntList retval = new TIntArrayList(16);
             do {
                 retval.add(rs.getInt(1));
             } while (rs.next());

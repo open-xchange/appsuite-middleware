@@ -50,6 +50,7 @@
 package com.openexchange.ajax.request;
 
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
+import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.TIntObjectMap;
@@ -614,7 +615,7 @@ public class AppointmentRequest extends CalendarRequest {
                         // Commented this because this is done in CalendarOperation.next():726 that calls extractRecurringInformation()
                         // appointment.calculateRecurrence();
                         if (recurrencePositionMap.containsKey(appointment.getObjectID())) {
-                            final TIntArrayList recurrencePosList = recurrencePositionMap.get(appointment.getObjectID());
+                            final TIntList recurrencePosList = recurrencePositionMap.get(appointment.getObjectID());
 
                             final int listSize = recurrencePosList.size();
                             for (int a = 0; a < listSize; a++) {
@@ -624,7 +625,7 @@ public class AppointmentRequest extends CalendarRequest {
                                     appointment,
                                     0,
                                     0,
-                                    recurrencePosList.getQuick(a));
+                                    recurrencePosList.get(a));
                                 if (recuResults.size() > 0) {
                                     final RecurringResultInterface result = recuResults.getRecurringResult(0);
                                     appointment.setStartDate(new Date(result.getStart()));

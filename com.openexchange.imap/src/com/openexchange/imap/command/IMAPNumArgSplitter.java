@@ -49,6 +49,7 @@
 
 package com.openexchange.imap.command;
 
+import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.array.TLongArrayList;
 import java.util.ArrayList;
@@ -188,7 +189,7 @@ public final class IMAPNumArgSplitter {
      * @return an appropriate array of command arguments
      */
     public static String[] getSeqNumArg(final int[] arr, final boolean keepOrder, final boolean split, final int consumed) {
-        final TIntArrayList l = new TIntArrayList(arr.length);
+        final TIntList l = new TIntArrayList(arr.length);
         for (int i = 0; i < arr.length; i++) {
             final int seqNum = arr[i];
             if (seqNum > 0) {
@@ -218,7 +219,7 @@ public final class IMAPNumArgSplitter {
      * @return an appropriate array of command arguments
      */
     public static String[] splitMessageArg(final Message[] arr, final boolean keepOrder, final int consumed) {
-        final TIntArrayList l = new TIntArrayList(arr.length);
+        final TIntList l = new TIntArrayList(arr.length);
         for (int i = 0; i < arr.length; i++) {
             final int messageNumber = arr[i].getMessageNumber();
             if (messageNumber > 0) {
@@ -275,17 +276,17 @@ public final class IMAPNumArgSplitter {
      * @param numbers The list of numbers; either sequence numbers or UIDs
      * @return The number argument or an empty string if specified numbers are empty
      */
-    public static String getNumArg(final TIntArrayList numbers) {
+    public static String getNumArg(final TIntList numbers) {
         final int size = numbers.size();
         if (0 == size) {
             return "";
         }
-        int prev = numbers.getQuick(0);
+        int prev = numbers.get(0);
         boolean contiguous = false;
         final StringBuilder sb = new StringBuilder(size << 2);
         sb.append(prev);
         for (int i = 1; i < size; i++) {
-            final int current = numbers.getQuick(i);
+            final int current = numbers.get(i);
             if (prev + 1 == current) {
                 prev++;
                 contiguous = true;

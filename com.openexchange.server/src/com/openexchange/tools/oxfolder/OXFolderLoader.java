@@ -382,7 +382,7 @@ public final class OXFolderLoader {
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
             rs = stmt.executeQuery();
-            final TIntArrayList retval = new TIntArrayList();
+            final TIntList retval = new TIntArrayList();
             while (rs.next()) {
                 retval.add(rs.getInt(1));
             }

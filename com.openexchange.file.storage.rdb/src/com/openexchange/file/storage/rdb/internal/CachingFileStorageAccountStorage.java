@@ -49,7 +49,7 @@
 
 package com.openexchange.file.storage.rdb.internal;
 
-import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.list.TIntList;
 import gnu.trove.procedure.TIntProcedure;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -209,7 +209,7 @@ public final class CachingFileStorageAccountStorage implements FileStorageAccoun
 
     @Override
     public List<FileStorageAccount> getAccounts(final String serviceId, final Session session) throws OXException {
-        final TIntArrayList ids = delegatee.getAccountIDs(serviceId, session);
+        final TIntList ids = delegatee.getAccountIDs(serviceId, session);
         if (ids.isEmpty()) {
             return Collections.emptyList();
         }

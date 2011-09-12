@@ -562,7 +562,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
         if (secretProperties.isEmpty()) {
             return null;
         }
-        final TIntArrayList confIds = getConfIDsForUser(session.getContextId(), session.getUserId(), parentService.getId());
+        final TIntList confIds = getConfIDsForUser(session.getContextId(), session.getUserId(), parentService.getId());
         final GenericConfigurationStorageService genericConfStorageService = getService(CLAZZ_GEN_CONF);
         final CryptoService cryptoService = getService(CryptoService.class);
 
@@ -588,8 +588,8 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
         return null;
     }
 
-    private TIntArrayList getConfIDsForUser(final int contextId, final int userId, final String serviceId) throws OXException {
-        final TIntArrayList confIds = new TIntArrayList(20);
+    private TIntList getConfIDsForUser(final int contextId, final int userId, final String serviceId) throws OXException {
+        final TIntList confIds = new TIntArrayList(20);
         final DatabaseService databaseService = getService(CLAZZ_DB);
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -627,7 +627,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
         if (secretProperties.isEmpty()) {
             return;
         }
-        final TIntArrayList confIds = getConfIDsForUser(session.getContextId(), session.getUserId(), parentService.getId());
+        final TIntList confIds = getConfIDsForUser(session.getContextId(), session.getUserId(), parentService.getId());
         final GenericConfigurationStorageService genericConfStorageService = getService(CLAZZ_GEN_CONF);
         final CryptoService cryptoService = getService(CryptoService.class);
 

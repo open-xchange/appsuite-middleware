@@ -1295,8 +1295,8 @@ public final class Contacts {
         return co;
     }
 
-    private static TIntObjectHashMap<Contact> fillContactObject(final ContactSql contactSQL, final int user, final int[] group, final Context ctx, final UserConfiguration uc, final Connection con) throws OXException {
-        final TIntObjectHashMap<Contact> contacts = new TIntObjectHashMap<Contact>();
+    private static TIntObjectMap<Contact> fillContactObject(final ContactSql contactSQL, final int user, final int[] group, final Context ctx, final UserConfiguration uc, final Connection con) throws OXException {
+        final TIntObjectMap<Contact> contacts = new TIntObjectHashMap<Contact>();
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {

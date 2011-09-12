@@ -51,6 +51,7 @@ package com.openexchange.tools.oxfolder;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TIntObjectProcedure;
 import java.sql.Connection;
@@ -1113,7 +1114,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 /*
                  * Check if target is a descendant folder
                  */
-                final TIntArrayList parentIDList = new TIntArrayList(1);
+                final TIntList parentIDList = new TIntArrayList(1);
                 parentIDList.add(storageSrc.getObjectID());
                 if (OXFolderUtility.isDescendentFolder(parentIDList, targetFolderId, readCon, ctx)) {
                     throw OXFolderExceptionCode.NO_SUBFOLDER_MOVE.create(OXFolderUtility.getFolderName(storageSrc),
@@ -1373,7 +1374,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         /*
          * Gather all deletable subfolders
          */
-        final TIntObjectHashMap<TIntObjectHashMap<?>> deleteableFolders;
+        final TIntObjectMap<TIntObjectMap<?>> deleteableFolders;
         try {
             deleteableFolders = gatherDeleteableFolders(
                 fo.getObjectID(),
@@ -1455,7 +1456,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
      * @param type The folder type
      * @throws OXException If deletion fails for any folder
      */
-    void deleteValidatedFolders(final TIntObjectHashMap<TIntObjectHashMap<?>> deleteableIDs, final long lastModified, final int type) throws OXException {
+    void deleteValidatedFolders(final TIntObjectMap<TIntObjectMap<?>> deleteableIDs, final long lastModified, final int type) throws OXException {
         final DeleteValidatedFoldersProcedure procedure = new DeleteValidatedFoldersProcedure(lastModified, type);
         if (!deleteableIDs.forEachEntry(procedure)) {
             final OXException error = procedure.error;
@@ -1465,7 +1466,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         }
     }
 
-    private final class DeleteValidatedFoldersProcedure implements TIntObjectProcedure<TIntObjectHashMap<?>> {
+    private final class DeleteValidatedFoldersProcedure implements TIntObjectProcedure<TIntObjectMap<?>> {
 
         public OXException error;
 
@@ -1480,11 +1481,11 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         }
 
         @Override
-        public boolean execute(final int folderId, final TIntObjectHashMap<?> hashMap) {
+        public boolean execute(final int folderId, final TIntObjectMap<?> hashMap) {
             if (null == error) {
                 try {
                     if (null != hashMap) {
-                        final @SuppressWarnings("unchecked") TIntObjectHashMap<TIntObjectHashMap<?>> tmp = (TIntObjectHashMap<TIntObjectHashMap<?>>) hashMap;
+                        final @SuppressWarnings("unchecked") TIntObjectMap<TIntObjectMap<?>> tmp = (TIntObjectMap<TIntObjectMap<?>>) hashMap;
                         deleteValidatedFolders(tmp, lastModified, type);
                     }
                     deleteValidatedFolder(folderId, lastModified, type, false);
@@ -1762,8 +1763,8 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     /**
      * Gathers all folders which are allowed to be deleted
      */
-    private TIntObjectHashMap<TIntObjectHashMap<?>> gatherDeleteableFolders(final int folderID, final int userId, final UserConfiguration userConfig, final String permissionIDs) throws OXException, OXException, SQLException {
-        final TIntObjectHashMap<TIntObjectHashMap<?>> deleteableIDs = new TIntObjectHashMap<TIntObjectHashMap<?>>();
+    private TIntObjectMap<TIntObjectMap<?>> gatherDeleteableFolders(final int folderID, final int userId, final UserConfiguration userConfig, final String permissionIDs) throws OXException, OXException, SQLException {
+        final TIntObjectMap<TIntObjectMap<?>> deleteableIDs = new TIntObjectHashMap<TIntObjectMap<?>>();
         gatherDeleteableSubfoldersRecursively(folderID, userId, userConfig, permissionIDs, deleteableIDs, folderID);
         return deleteableIDs;
     }
@@ -1771,7 +1772,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     /**
      * Gathers all folders which are allowed to be deleted in a recursive manner
      */
-    private void gatherDeleteableSubfoldersRecursively(final int folderID, final int userId, final UserConfiguration userConfig, final String permissionIDs, final TIntObjectHashMap<TIntObjectHashMap<?>> deleteableIDs, final int initParent) throws OXException, OXException, SQLException {
+    private void gatherDeleteableSubfoldersRecursively(final int folderID, final int userId, final UserConfiguration userConfig, final String permissionIDs, final TIntObjectMap<TIntObjectMap<?>> deleteableIDs, final int initParent) throws OXException, OXException, SQLException {
         final FolderObject delFolder = getOXFolderAccess().getFolderObject(folderID);
         /*
          * Check if shared
@@ -1843,15 +1844,15 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         /*
          * No subfolders detected
          */
-        final TIntArrayList subfolders = OXFolderSQL.getSubfolderIDs(delFolder.getObjectID(), readCon, ctx);
+        final TIntList subfolders = OXFolderSQL.getSubfolderIDs(delFolder.getObjectID(), readCon, ctx);
         if (subfolders.isEmpty()) {
             deleteableIDs.put(folderID, null);
             return;
         }
-        final TIntObjectHashMap<TIntObjectHashMap<?>> subMap = new TIntObjectHashMap<TIntObjectHashMap<?>>();
+        final TIntObjectMap<TIntObjectMap<?>> subMap = new TIntObjectHashMap<TIntObjectMap<?>>();
         final int size = subfolders.size();
         for (int i = 0; i < size; i++) {
-            gatherDeleteableSubfoldersRecursively(subfolders.getQuick(i), userId, userConfig, permissionIDs, subMap, initParent);
+            gatherDeleteableSubfoldersRecursively(subfolders.get(i), userId, userConfig, permissionIDs, subMap, initParent);
         }
         deleteableIDs.put(folderID, subMap);
     }
