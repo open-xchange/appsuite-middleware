@@ -145,11 +145,12 @@ public final class IMAPProtocol extends Protocol {
      * @param host The mail system's host name
      */
     public void remove(final String host) {
-        if (null == map) {
+        final ConcurrentMap<InetAddress, Integer> concurrentMap = map;
+        if (null == concurrentMap) {
             return;
         }
         try {
-            map.remove(InetAddress.getByName(host));
+            concurrentMap.remove(InetAddress.getByName(host));
         } catch (final UnknownHostException e) {
             com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IMAPProtocol.class)).warn("Couldn't remove max-count setting for: " + host, e);
         }
