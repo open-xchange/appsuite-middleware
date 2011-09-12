@@ -39,11 +39,11 @@ import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
  * This class contains the implementation of the API defined in {@link OXContextRestoreInterface}
  * 
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
- *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>: Bugfix 20044
  */
 public class OXContextRestore extends OXCommonImpl implements OXContextRestoreInterface {
 
-    public static class Parser {
+public static class Parser {
         
         public class PoolIdSchemaAndVersionInfo {
             private final int pool_id;
@@ -55,9 +55,9 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             /**
              * @param pool_id
              * @param schema
-             * @param versionInformation TODO
+             * @param versionInformation
              */
-            private PoolIdSchemaAndVersionInfo(int pool_id, String schema, VersionInformation versionInformation) {
+            protected PoolIdSchemaAndVersionInfo(int pool_id, String schema, VersionInformation versionInformation) {
                 this.pool_id = pool_id;
                 this.schema = schema;
                 this.versionInformation = versionInformation;
@@ -81,7 +81,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
 
         }
         
-        private final static Pattern database = Pattern.compile("^Current\\s+Database:\\s+`([^`]*)`.*$");
+        private final static Pattern database = Pattern.compile("^.*?\\s+Database:\\s+`?([^` ]*)`?.*$");
         
         private final static Pattern table = Pattern.compile("^Table\\s+structure\\s+for\\s+table\\s+`([^`]*)`.*$");
         
@@ -95,7 +95,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
         
         private final static Pattern insertIntoVersion = Pattern.compile("^INSERT INTO `version` VALUES \\((?:([^\\),]*),)(?:([^\\),]*),)(?:([^\\),]*),)(?:([^\\),]*),)([^\\),]*)\\).*$");
 
-        public PoolIdSchemaAndVersionInfo start(final int cid, final String filename) throws FileNotFoundException, IOException, SQLException, OXContextRestoreException, StorageException {
+        public PoolIdSchemaAndVersionInfo start(final int cid, final String filename) throws FileNotFoundException, IOException, OXContextRestoreException {
             final BufferedReader in = new BufferedReader(new FileReader(filename));
             BufferedWriter bufferedWriter = null;
             int c;
@@ -107,25 +107,25 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             boolean furthersearch = true;
             // Defines if we have found a contextserver2pool table
             boolean searchcontext = false;
-//            boolean searchdbpool = false;
+            // boolean searchdbpool = false;
             int pool_id = -1;
             String schema = null;
             VersionInformation versionInformation = null;
             try {
                 while ((c = in.read()) != -1) {
                     if (0 == state && c == '-') {
-                        state = 1;
+                        state = 1; // Started comment line
                         continue;
                     } else if (1 == state) {
                         if (c == '-') {
-                            state = 2;
-                            continue;
-                        } else {
-                            state = oldstate;
+                            state = 2; // Read comment prefix "--"
                             continue;
                         }
+                        // Not a comment prefix; an interpretable line
+                        state = oldstate;
+                        continue;
                     } else if (2 == state) {
-                        if (c == ' ') {
+                        if (c == ' ') { // Comment line: "-- " + <rest-of-line>
                             final String readLine = in.readLine();
                             final Matcher dbmatcher = database.matcher(readLine);
                             final Matcher tablematcher = table.matcher(readLine);
@@ -183,9 +183,9 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                                 oldstate = 0;
                             }
                             continue;
-                        } else {
-                            state = oldstate;
                         }
+                        // Reset to old state
+                        state = oldstate;
                     } else if (3 == state && c == 'C') {
                         final String creatematchpart = "REATE";
                         state = returnRightStateToString(in, creatematchpart, 4, 3);
@@ -418,13 +418,11 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             if ((i = in.read(arr)) != -1 && length == i) {
                 if (string.equals(new String(arr))) {
                     return successstate;
-                } else {
-                    return failstate;
                 }
-            } else {
-                // File at the end or no more chars
-                return -1;
+                return failstate;
             }
+            // File at the end or no more chars
+            return -1;
         }
         
         /**
@@ -455,11 +453,10 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                 columnpos++;
                 readLine = in.readLine();
             }
-            if (found) {
-                return columnpos;
-            } else {
+            if (!found) {
                 return -1;
             }
+            return columnpos;
         }
         
         private List<String> searchingForeignKey(final BufferedReader in) throws IOException {
@@ -493,7 +490,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
 
     }
 
-    private final static Log LOG = LogFactory.getLog(OXContextRestore.class);
+    protected final static Log LOG = LogFactory.getLog(OXContextRestore.class);
     
     private final BasicAuthenticator basicauth;
 
@@ -522,13 +519,13 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
 
         final Parser parser = new Parser();
         LOG.info("Context: " + ctx);
-        LOG.info("Filenames: " + filenames);
+        LOG.info("Filenames: " + Arrays.toString(filenames));
         
         try {
             VersionInformation versionInfo = null;
             PoolIdSchemaAndVersionInfo result = null; 
             for (final String filename : filenames) {
-                PoolIdSchemaAndVersionInfo start = parser.start(ctx.getId(), filename);
+                PoolIdSchemaAndVersionInfo start = parser.start(ctx.getId().intValue(), filename);
                 final VersionInformation versionInformation = start.getVersionInformation();
                 final String schema = start.getSchema();
                 final int pool_id = start.getPool_id();
@@ -562,10 +559,9 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             }
             if (dryrun) {
                 return "Done nothing (dry run)";
-            } else {
-                // We have to do the exists check beforehand otherwise you'll find a stack trace in the logs
-                return instance.restorectx(ctx, result);
             }
+            // We have to do the exists check beforehand otherwise you'll find a stack trace in the logs
+            return instance.restorectx(ctx, result);
         } catch (final StorageException e) {
             LOG.error(e.getMessage(), e);
             throw e;
