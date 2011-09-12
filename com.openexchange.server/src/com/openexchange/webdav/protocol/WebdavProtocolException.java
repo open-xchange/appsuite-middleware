@@ -53,6 +53,8 @@ import org.apache.webdav.lib.WebdavException;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.groupware.EnumComponent;
 
@@ -66,7 +68,7 @@ import com.openexchange.groupware.EnumComponent;
  */
 public class WebdavProtocolException extends OXException implements WebdavStatus<Object> {
 
-    public static enum Code {
+    public static enum Code implements OXExceptionCode {
 
         /**
          * A WebDAV error occurred.
@@ -113,24 +115,29 @@ public class WebdavProtocolException extends OXException implements WebdavStatus
             this.category = category;
         }
 
+        @Override
         public String getPrefix() {
             return EnumComponent.WEBDAV.getAbbreviation();
         }
 
+        @Override
         public Category getCategory() {
             return category;
         }
 
+        @Override
         public int getNumber() {
             return detailNumber;
         }
 
+        @Override
         public String getMessage() {
             return message;
         }
 
+        @Override
         public boolean equals(final OXException e) {
-            return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
+            return OXExceptionFactory.getInstance().equals(this, e);
         }
 
         /**
