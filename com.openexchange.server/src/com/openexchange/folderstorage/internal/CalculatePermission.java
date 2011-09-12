@@ -126,13 +126,17 @@ public final class CalculatePermission {
                     final int userId = userIds[i];
                     if (toLoad.containsKey(userId)) {
                         final int index = toLoad.get(userId);
+                        UserConfiguration userConfig = configurations[i];
+                        if (null == userConfig) {
+                            userConfig = userConfStorage.getUserConfiguration(userId, context);
+                        }
                         userizedPermissions[index] = new EffectivePermission(
                             staticPermissions[index],
                             id,
                             type,
                             contentType,
-                            configurations[i],
-                            Collections.<ContentType> emptyList());
+                            userConfig,
+                            Collections.<ContentType> emptyList()).setEntityInfo(userId, context);
                     }
                 }
             } catch (final OXException e) {
@@ -199,7 +203,7 @@ public final class CalculatePermission {
             folder.getType(),
             folder.getContentType(),
             userConfiguration,
-            allowedContentTypes);
+            allowedContentTypes).setEntityInfo(user.getId(), context);
     }
 
     public static boolean isVisible(final Folder folder, final User user, final Context context, final java.util.List<ContentType> allowedContentTypes) throws OXException {

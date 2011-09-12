@@ -2,6 +2,7 @@
 
  - Fix for bug 18135: Equal value for last-modified and image-last-modified time stamp
  - Fix for bug 20312: Safely dispatching remaining IMAP responses
+ - Fix for bug 20322: Address possible NPE when calculation effective folder permissions
 
 * 2011-09-10 - thorben.betten@open-xchange.com
 
