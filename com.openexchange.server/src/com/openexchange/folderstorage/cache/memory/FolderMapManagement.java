@@ -130,7 +130,7 @@ public final class FolderMapManagement {
      * @return The folder map or <code>null</code> if absent
      */
     public FolderMap optFor(final Session session) {
-        return map.get(keyFor(session));
+        return null == session ? null : map.get(keyFor(session));
     }
 
     /**
