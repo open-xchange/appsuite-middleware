@@ -819,14 +819,19 @@ public class Login extends AJAXServlet {
         try {
             final Map<String, Object> properties = new HashMap<String, Object>(1);
             properties.put("http.request", req);
+            {
+                final String capabilities = req.getParameter("capabilities");
+                if (null != capabilities) {
+                    properties.put("client.capabilities", capabilities);
+                }
+            }
             result = LoginPerformer.getInstance().doLogin(request, properties);
             result.getSession().setParameter("user-agent", req.getHeader("user-agent"));
             // Write response
             final JSONObject json = new JSONObject();
-            final Session session = result.getSession();
-            LoginWriter.write(session, json);
+            LoginWriter.write(result, json);
             // Append "config/modules"
-            appendModules(session, json, req);
+            appendModules(result.getSession(), json, req);
             response.setData(json);
         } catch (final OXException e) {
             if (Category.CATEGORY_USER_INPUT == e.getCategory()) {
@@ -1030,6 +1035,12 @@ public class Login extends AJAXServlet {
         final LoginRequest request = parseLogin(req, LoginFields.LOGIN_PARAM, true);
         final Map<String, Object> properties = new HashMap<String, Object>(1);
         properties.put("http.request", req);
+        {
+            final String capabilities = req.getParameter("capabilities");
+            if (null != capabilities) {
+                properties.put("client.capabilities", capabilities);
+            }
+        }
         final LoginResult result = LoginPerformer.getInstance().doLogin(request, properties);
         final Session session = result.getSession();
 
@@ -1100,6 +1111,12 @@ public class Login extends AJAXServlet {
         };
         final Map<String, Object> properties = new HashMap<String, Object>(1);
         properties.put("http.request", req);
+        {
+            final String capabilities = req.getParameter("capabilities");
+            if (null != capabilities) {
+                properties.put("client.capabilities", capabilities);
+            }
+        }
         final LoginResult result = LoginPerformer.getInstance().doLogin(request, properties);
         final Session session = result.getSession();
         Tools.disableCaching(resp);
