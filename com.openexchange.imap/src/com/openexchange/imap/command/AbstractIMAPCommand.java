@@ -140,9 +140,14 @@ public abstract class AbstractIMAPCommand<T> {
                             }
                         }
                         /*
-                         * Dispatch unhandled responses
+                         * Safely dispatch unhandled responses
                          */
-                        protocol.notifyResponseHandlers(r);
+                        try {
+                            protocol.notifyResponseHandlers(r);
+                        } catch (final RuntimeException e) {
+                            // Ignore runtime error in trailing Protocol.notifyResponseHandlers() invocation
+                            LOG.debug("Runtime error during Protocol.notifyResponseHandlers() invocation.", e);
+                        }
                     } catch (final MessagingException e) {
                         final ProtocolException pe = new ProtocolException(response);
                         pe.initCause(e);
