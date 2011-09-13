@@ -218,15 +218,15 @@ public class Mail extends PermissionServlet implements UploadListener {
      * @return The wrapping {@link AbstractOXException}
      */
     protected static final OXException getWrappingOXException(final Exception cause) {
+        final String message = cause.getMessage();
         if (LOG.isWarnEnabled()) {
             final StringBuilder warnBuilder = new StringBuilder(140);
             warnBuilder.append("An unexpected exception occurred, which is going to be wrapped for proper display.\n");
             warnBuilder.append("For safety reason its original content is displayed here.\n");
-            warnBuilder.append(cause.getMessage()).append('\n');
+            warnBuilder.append(null == message ? "[Not available]" : message).append('\n');
             appendStackTrace(cause.getStackTrace(), warnBuilder);
             LOG.warn(warnBuilder.toString());
         }
-        final String message = cause.getMessage();
         return MailExceptionCode.UNEXPECTED_ERROR.create(cause, null == message ? "[Not available]" : message);
     }
 
