@@ -138,7 +138,19 @@ public final class CookieParser {
                 }
             }
             prevEnd = m.end();
-            final Cookie c = new Cookie(name, prepare(m.group(4)));
+            final Cookie c;
+            try {
+                c = new Cookie(name, prepare(m.group(4)));
+            } catch (final RuntimeException e) {
+                /*
+                 * Cookie name contains illegal characters (for example, a comma, space, or semicolon) or it is one of the tokens reserved
+                 * for use by the cookie protocol
+                 */
+                if (DEBUG) {
+                    LOG.debug("Invalid cookie name detected. Ignoring...", e);
+                }
+                continue;
+            }
             c.setVersion(version);
             String attr = m.group(5);
             if (attr != null) {

@@ -1,3 +1,7 @@
+* 2011-09-13 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20348: Dealing with possible invalid Cookie name
+
 * 2011-09-12 - francisco.laguna@open-xchange.com
 
  - Fix for bug 16740: Try to look up current session in thread local session container.
