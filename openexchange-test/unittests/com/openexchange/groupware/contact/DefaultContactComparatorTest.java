@@ -49,13 +49,13 @@
 
 package com.openexchange.groupware.contact;
 
+import static com.openexchange.groupware.calendar.TimeTools.D;
+import java.util.Locale;
+import junit.framework.TestCase;
 import com.openexchange.groupware.contact.helpers.DefaultContactComparator;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.Order;
-import junit.framework.TestCase;
-
-import static com.openexchange.groupware.calendar.TimeTools.D;
 
 public class DefaultContactComparatorTest extends TestCase {
 
@@ -114,12 +114,12 @@ public class DefaultContactComparatorTest extends TestCase {
 
 
 
-    private void assertBigger(Contact c1, Contact c2, int field) {
+    private void assertBigger(final Contact c1, final Contact c2, final int field) {
         assertBigger(c1, c2, field, Order.ASCENDING);
     }
 
-    private void assertBigger(Contact c1, Contact c2, int field, Order order) {
-        assertTrue("c1 was lower or equal than c2", 0 < new DefaultContactComparator(field, order).compare(c1, c2));
+    private void assertBigger(final Contact c1, final Contact c2, final int field, final Order order) {
+        assertTrue("c1 was lower or equal than c2", 0 < new DefaultContactComparator(field, order, Locale.US).compare(c1, c2));
     }
 
 }
