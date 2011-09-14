@@ -187,7 +187,11 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
             return false;
         }
         // Now try to connect
-        return mailAccess.ping();
+        final boolean success = mailAccess.ping();
+        if (success) {
+            warnings.addAll(mailAccess.getWarnings());
+        }
+        return success;
     }
 
     private static boolean checkTransportServerURL(final MailAccountDescription accountDescription, final ServerSession session, final List<OXException> warnings) throws OXException {
