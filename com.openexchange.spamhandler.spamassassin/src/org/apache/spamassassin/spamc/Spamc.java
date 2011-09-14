@@ -979,7 +979,11 @@ public class Spamc {
     private SpamdResponse sendCommand(final String command, final Map headers,
 	    final String message) throws UnknownHostException, IOException {
 	final String query = constructQuery(command, headers, message);
-	return new SpamdResponse(getQueryResponse(query));
+	final String queryResponse = getQueryResponse(query);
+    if (isEmpty(queryResponse)) {
+        throw new IllegalArgumentException("Received no response from spamc for query:\n\t" + query);
+    }
+	return new SpamdResponse(queryResponse);
     }
 
     /**
@@ -2625,4 +2629,17 @@ public class Spamc {
 
 	return flags;
     }
+
+    private static boolean isEmpty(final String str) {
+        if (null == str) {
+            return true;
+        }
+        final char[] chars = str.toCharArray();
+        boolean empty = true;
+        for (int i = 0; empty && i < chars.length; i++) {
+            empty = Character.isWhitespace(chars[i]);
+        }
+        return empty;
+    }
+
 }
