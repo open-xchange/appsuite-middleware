@@ -237,7 +237,8 @@ public class PushRequest {
 
         final int length = parseLength(s, pos++);
 
-        if (currentLength >= b.length) {
+
+        if (currentLength + length > b.length || length < 0) {
             /*
              * Strange datagram package
              */
