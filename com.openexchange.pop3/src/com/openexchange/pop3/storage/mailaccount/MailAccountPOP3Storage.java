@@ -143,7 +143,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
             if (null == tmp) {
                 final OXException e = POP3ExceptionCode.MISSING_PATH.create(Integer.valueOf(session.getUserId()),
                     Integer.valueOf(session.getContextId()));
-                LOG.warn("Path is null. Error: " + e.getMessage(), e);
+                LOG.debug("Path is null. Error: " + e.getMessage(), e);
                 // Try to compose path
                 tmp = composeUniquePath(pop3Access.getAccountId(), session.getUserId(), session.getContextId());
                 // Add to properties
