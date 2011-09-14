@@ -25,6 +25,7 @@
 package com.openexchange.groupware.contact.helpers;
 
 import java.util.Comparator;
+import java.util.Locale;
 import com.davekoelle.AlphanumComparator;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
@@ -56,6 +57,20 @@ public class SpecialAlphanumSortContactComparator implements Comparator<Contact>
          * The glorious alphanum comparator used to compare non-null strings.
          */
         stringComparator = new AlphanumComparator();
+        inverse = 1;
+    }
+
+    /**
+     * Initializes a new {@link SpecialAlphanumSortContactComparator}.
+     * 
+     * @param locale The locale
+     */
+    public SpecialAlphanumSortContactComparator(final Locale locale) {
+        super();
+        /*
+         * The glorious alphanum comparator used to compare non-null strings.
+         */
+        stringComparator = new AlphanumComparator(locale);
         inverse = 1;
     }
 

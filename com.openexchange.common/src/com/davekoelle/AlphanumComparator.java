@@ -63,14 +63,16 @@ public class AlphanumComparator implements Comparator<String> {
     private final Locale locale;
 
     /**
-     * Default constructor.
+     * Default constructor with default location US.
      */
     public AlphanumComparator() {
         this(null);
     }
 
     /**
-     * Default constructor.
+     * Initializes a new {@link AlphanumComparator}.
+     * 
+     * @param locale The locale
      */
     public AlphanumComparator(final Locale locale) {
         super();

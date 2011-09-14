@@ -70,6 +70,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import org.apache.commons.logging.Log;
@@ -124,6 +125,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorDelegator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.sql.DBUtils;
 
 public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContactInterface, FinalContactInterface {
@@ -137,6 +139,8 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
     private final Session session;
 
     private final UserConfiguration userConfiguration;
+
+    private Locale locale;
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RdbContactSQLImpl.class));
 
@@ -156,6 +160,17 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         this.memberInGroups = UserStorage.getStorageUser(session.getUserId(), ctx).getGroups();
         this.session = session;
         userConfiguration = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx);
+    }
+
+    private Locale getLocale() {
+        if (null == locale) {
+            if (session instanceof ServerSession) {
+                locale = ((ServerSession) session).getUser().getLocale();
+            } else {
+                locale = UserStorage.getStorageUser(session.getUserId(), ctx).getLocale();
+            }
+        }
+        return locale;
     }
 
     @Override
@@ -317,9 +332,9 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             DBPool.closeReaderSilent(ctx, con);
         }
         if (order_field == Contact.USE_COUNT_GLOBAL_FIRST) {
-            java.util.Arrays.sort(contacts, new UseCountComparator(false));
+            java.util.Arrays.sort(contacts, new UseCountComparator(false, getLocale()));
         } else if(collation == null) {
-        	java.util.Arrays.sort(contacts, new SpecialAlphanumSortContactComparator());
+        	java.util.Arrays.sort(contacts, new SpecialAlphanumSortContactComparator(getLocale()));
         }
 
         return new ArrayIterator<Contact>(contacts);
@@ -391,9 +406,9 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             if (null != collation) {
                 sortByCollation(tmp, order_field, order, collation);
             } else if (order_field == Contact.USE_COUNT_GLOBAL_FIRST) {
-                java.util.Collections.sort(tmp, new UseCountComparator(specialSort));
+                java.util.Collections.sort(tmp, new UseCountComparator(specialSort, getLocale()));
             } else if (specialSort) {
-                java.util.Collections.sort(tmp, new SpecialAlphanumSortContactComparator());
+                java.util.Collections.sort(tmp, new SpecialAlphanumSortContactComparator(getLocale()));
             }
             contacts = tmp.toArray(new Contact[tmp.size()]);
         } catch (final SQLException e) {
@@ -602,9 +617,9 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         }
 
         if (order_field == Contact.USE_COUNT_GLOBAL_FIRST) {
-            java.util.Collections.sort(contacts, new UseCountComparator(specialSort));
+            java.util.Collections.sort(contacts, new UseCountComparator(specialSort, getLocale()));
         } else if (specialSort) {
-            java.util.Collections.sort(contacts, new SpecialAlphanumSortContactComparator());
+            java.util.Collections.sort(contacts, new SpecialAlphanumSortContactComparator(getLocale()));
         }
         return new SearchIteratorAdapter<Contact>(contacts.iterator(), contacts.size());
     }
