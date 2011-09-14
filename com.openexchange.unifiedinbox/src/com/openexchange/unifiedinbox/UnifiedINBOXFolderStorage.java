@@ -60,7 +60,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -350,7 +349,7 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
                         mailAccess = MailAccess.getInstance(getSession(), mailAccount.getId());
                         mailAccess.connect();
                     } catch (final OXException e) {
-                        getLogger().error(e.getMessage(), e);
+                        getLogger().debug(e.getMessage(), e);
                         return null;
                     }
                     try {

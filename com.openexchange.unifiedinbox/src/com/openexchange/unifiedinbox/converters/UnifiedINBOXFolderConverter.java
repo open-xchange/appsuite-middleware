@@ -284,7 +284,7 @@ public final class UnifiedINBOXFolderConverter {
                             mailAccess = MailAccess.getInstance(session, mailAccount.getId());
                             mailAccess.connect();
                         } catch (final OXException e) {
-                            getLogger().error(e.getMessage(), e);
+                            getLogger().debug(e.getMessage(), e);
                             return EMPTY_COUNTS;
                         }
                         try {
