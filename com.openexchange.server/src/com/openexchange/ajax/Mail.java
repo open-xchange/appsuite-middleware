@@ -149,6 +149,7 @@ import com.openexchange.mail.json.writer.MessageWriter.MailFieldWriter;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mail.mime.MIMEMailExceptionCode;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -2511,7 +2512,16 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            if (MIMEMailExceptionCode.INVALID_EMAIL_ADDRESS.equals(e)) {
+                e.setCategory(Category.CATEGORY_USER_INPUT);
+                if (DEBUG) {
+                    LOG.warn(e.getMessage(), e);
+                } else {
+                    LOG.warn(e.getMessage());
+                }
+            } else {
+                LOG.error(e.getMessage(), e);
+            }
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
