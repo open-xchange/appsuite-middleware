@@ -883,11 +883,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     }
 
     private void appendRequestInfo(final StringBuilder builder) {
-        builder.append("request-URI=``");
+        builder.append("request-URI=''");
         builder.append(request.getRequestURI());
-        builder.append("лл, query-string=``");
+        builder.append("'', query-string=''");
         builder.append(request.getQueryString());
-        builder.append("лл");
+        builder.append("''");
     }
 
     // ----------------------------------------------------- ActionHook Methods
