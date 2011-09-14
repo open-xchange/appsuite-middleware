@@ -195,6 +195,13 @@ public final class MIMEStructureHandler implements StructureHandler {
     @Override
     public boolean handleEnd(final MailMessage mail) throws OXException {
         /*
+         * Probe for "headers" existence
+         */
+        final JSONObject headersJsonObject = mailJsonObjectQueue.getFirst().optJSONObject(KEY_HEADERS);
+        if (null == headersJsonObject) {
+            return true;
+        }
+        /*
          * Write message to byte array
          */
         byte[] bytes;
@@ -218,7 +225,6 @@ public final class MIMEStructureHandler implements StructureHandler {
          * Insert literal base64-encoded headers
          */
         try {
-            final JSONObject headersJsonObject = mailJsonObjectQueue.getFirst().getJSONObject(KEY_HEADERS);
             headersJsonObject.put("x-original-headers", new String(Base64.encodeBase64(bs))); // ASCII-only, no charset needed
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
@@ -317,7 +323,11 @@ public final class MIMEStructureHandler implements StructureHandler {
             /*
              * Add body object to parental structure object
              */
-            mailJsonObjectQueue.getFirst().put("smime_body_text", bodyObject);
+            final JSONObject jsonObject = mailJsonObjectQueue.getFirst();
+            for (final String name : new HashSet<String>(jsonObject.keySet())) {
+                jsonObject.remove(name);
+            }
+            jsonObject.put("smime_body_text", bodyObject);
             return true;
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
