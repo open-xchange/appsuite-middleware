@@ -214,6 +214,7 @@ public class PreviewActivator extends HousekeepingActivator {
     }
 
     private void pdfWithJodConverter() {
+        // http://shervinasgari.blogspot.com/2010/08/migrating-from-jodconverter-2-to.html
         final OfficeManager om = new DefaultOfficeManagerConfiguration()
         .setOfficeHome("/usr/lib/openoffice")
         .setPortNumbers(8100, 8101, 8102, 8103)
