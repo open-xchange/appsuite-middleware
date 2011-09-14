@@ -49,9 +49,12 @@
 
 package com.openexchange.groupware.calendar.json.actions;
 
-import gnu.trove.TIntArrayList;
-import gnu.trove.TIntIntHashMap;
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -104,11 +107,11 @@ public final class ListAction extends AbstractAppointmentAction {
 
         SearchIterator<Appointment> it = null;
 
-        final TIntObjectHashMap<TIntArrayList> recurrencePositionMap = new TIntObjectHashMap<TIntArrayList>();
+        final TIntObjectMap<TIntList> recurrencePositionMap = new TIntObjectHashMap<TIntList>();
         final JSONArray jData = req.getData();
         final boolean bRecurrenceMaster = req.parseBoolean(AppointmentRequest.RECURRENCE_MASTER);
 
-        final TIntIntHashMap objectIdMap = new TIntIntHashMap();
+        final TIntIntMap objectIdMap = new TIntIntHashMap();
         for (int a = 0; a < jData.length(); a++) {
             JSONObject jObject = null;
             try {
@@ -134,7 +137,7 @@ public final class ListAction extends AbstractAppointmentAction {
 
             if (tempRecurrencePosition > 0) {
                 final int recurrencePosition = tempRecurrencePosition;
-                TIntArrayList recurrencePosList = null;
+                TIntList recurrencePosList = null;
                 if (recurrencePositionMap.containsKey(objectId)) {
                     recurrencePosList = recurrencePositionMap.get(objectId);
                 } else {
@@ -192,7 +195,7 @@ public final class ListAction extends AbstractAppointmentAction {
                         // Commented this because this is done in CalendarOperation.next():726 that calls extractRecurringInformation()
                         // appointment.calculateRecurrence();
                         if (recurrencePositionMap.containsKey(appointment.getObjectID())) {
-                            final TIntArrayList recurrencePosList = recurrencePositionMap.get(appointment.getObjectID());
+                            final TIntList recurrencePosList = recurrencePositionMap.get(appointment.getObjectID());
 
                             final int listSize = recurrencePosList.size();
                             for (int a = 0; a < listSize; a++) {
@@ -203,7 +206,7 @@ public final class ListAction extends AbstractAppointmentAction {
                                     appointment,
                                     0,
                                     0,
-                                    recurrencePosList.getQuick(a));
+                                    recurrencePosList.get(a));
                                 if (recuResults.size() > 0) {
                                     final RecurringResultInterface result = recuResults.getRecurringResult(0);
                                     appointment.setStartDate(new Date(result.getStart()));

@@ -49,7 +49,8 @@
 
 package com.openexchange.unifiedinbox.copy;
 
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.linked.TIntLinkedList;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.mail.api.MailAccess;
@@ -72,7 +73,7 @@ final class KF2AFEqualCallable implements Task<Object> {
 
     private final List<String> idList;
 
-    private final TIntArrayList indexList;
+    private final TIntList indexList;
 
     private final boolean fast;
 
@@ -88,7 +89,7 @@ final class KF2AFEqualCallable implements Task<Object> {
         this.fast = fast;
         this.move = move;
         idList = new ArrayList<String>();
-        indexList = new TIntArrayList();
+        indexList = new TIntLinkedList();
     }
 
     void addIdAndIndex(final String id, final int index) {

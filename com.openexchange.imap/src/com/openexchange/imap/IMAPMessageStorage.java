@@ -53,8 +53,9 @@ import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.fold;
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
-import gnu.trove.TLongIntHashMap;
-import gnu.trove.TLongObjectHashMap;
+import gnu.trove.map.TLongIntMap;
+import gnu.trove.map.TLongObjectMap;
+import gnu.trove.map.hash.TLongObjectHashMap;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -285,10 +286,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     messages[i] = fetchedMsgs.get(uids[i]);
                 }
             } else {
-                final TLongIntHashMap seqNumsMap = IMAPCommandsCollection.uids2SeqNumsMap(imapFolder, uids);
-                final TLongObjectHashMap<MailMessage> fetchedMsgs =
+                final TLongIntMap seqNumsMap = IMAPCommandsCollection.uids2SeqNumsMap(imapFolder, uids);
+                final TLongObjectMap<MailMessage> fetchedMsgs =
                     fetchValidWithFallbackFor(
-                        seqNumsMap.getValues(),
+                        seqNumsMap.values(),
                         seqNumsMap.size(),
                         getFetchProfile(fields, headerNames, null, null, getIMAPProperties().isFastFetch()),
                         imapConfig.getImapCapabilities().hasIMAP4rev1(),

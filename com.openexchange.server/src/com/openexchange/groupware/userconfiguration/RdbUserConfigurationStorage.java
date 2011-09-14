@@ -50,7 +50,8 @@
 package com.openexchange.groupware.userconfiguration;
 
 import static com.openexchange.tools.sql.DBUtils.closeResources;
-import gnu.trove.TIntIntHashMap;
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.hash.TIntIntHashMap;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -406,7 +407,7 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
         ResultSet result = null;
         final UserConfiguration[] retval = new UserConfiguration[length];
         try {
-            final TIntIntHashMap userMap;
+            final TIntIntMap userMap;
             if (length <= LIMIT) {
                 final StringBuilder sb = new StringBuilder(512);
                 sb.append("SELECT u.user, u.permissions FROM user_configuration AS u");

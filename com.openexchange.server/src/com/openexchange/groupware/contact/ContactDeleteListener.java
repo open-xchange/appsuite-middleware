@@ -49,7 +49,8 @@
 
 package com.openexchange.groupware.contact;
 
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -130,7 +131,7 @@ public final class ContactDeleteListener implements DeleteListener {
             /*
              * Check if any distribution list has no entry after deleting user's entries
              */
-            final TIntArrayList toDelete = new TIntArrayList();
+            final TIntList toDelete = new TIntArrayList();
             sql = "SELECT COUNT(intfield02) FROM " + dlistTable + " WHERE cid = ? AND intfield01 = ?";
             for (final int[] arr : l) {
                 final int dlistId = arr[0];
@@ -155,7 +156,7 @@ public final class ContactDeleteListener implements DeleteListener {
             if (!toDelete.isEmpty()) {
                 sql = "DELETE FROM " + contactTable + " WHERE cid = ? AND intfield01 = ?";
                 stmt = writeCon.prepareStatement(sql);
-                for (final int id : toDelete.toNativeArray()) {
+                for (final int id : toDelete.toArray()) {
                     stmt.setInt(1, contextId);
                     stmt.setInt(2, id);
                     stmt.addBatch();

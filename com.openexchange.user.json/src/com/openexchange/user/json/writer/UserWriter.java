@@ -49,7 +49,8 @@
 
 package com.openexchange.user.json.writer;
 
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -61,11 +62,11 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.user.json.Utility;
 import com.openexchange.user.json.field.DistributionListField;
@@ -236,12 +237,12 @@ public final class UserWriter {
         }
     };
 
-    private static final TIntObjectHashMap<UserFieldWriter> STATIC_WRITERS_MAP;
+    private static final TIntObjectMap<UserFieldWriter> STATIC_WRITERS_MAP;
 
     private static final int[] ALL_FIELDS;
 
     static {
-        final TIntObjectHashMap<UserFieldWriter> m = new TIntObjectHashMap<UserFieldWriter>();
+        final TIntObjectMap<UserFieldWriter> m = new TIntObjectHashMap<UserFieldWriter>();
         m.put(UserField.ID.getColumn(), new UserFieldWriter() {
 
             @Override

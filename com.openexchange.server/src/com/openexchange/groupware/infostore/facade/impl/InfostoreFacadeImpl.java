@@ -50,7 +50,8 @@
 package com.openexchange.groupware.infostore.facade.impl;
 
 import static com.openexchange.java.Autoboxing.I;
-import gnu.trove.TLongObjectHashMap;
+import gnu.trove.map.TLongObjectMap;
+import gnu.trove.map.hash.TLongObjectHashMap;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -1058,7 +1059,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             idSet.add(Integer.valueOf(i));
         }
 
-        final TLongObjectHashMap<EffectivePermission> perms = new TLongObjectHashMap<EffectivePermission>();
+        final TLongObjectMap<EffectivePermission> perms = new TLongObjectHashMap<EffectivePermission>();
 
         final List<DocumentMetadata> toDeleteDocs = new ArrayList<DocumentMetadata>();
         final List<DocumentMetadata> toDeleteVersions = new ArrayList<DocumentMetadata>();

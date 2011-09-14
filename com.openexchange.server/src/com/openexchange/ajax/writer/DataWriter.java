@@ -49,7 +49,8 @@
 
 package com.openexchange.ajax.writer;
 
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Date;
@@ -189,7 +190,7 @@ public class DataWriter {
         writeParameter(name, Long.toString(value), json, condition);
     }
 
-    public static void writeParameter(String name, Long value, JSONObject json, boolean condition) throws JSONException {
+    public static void writeParameter(final String name, final Long value, final JSONObject json, final boolean condition) throws JSONException {
         if (null == value) {
             writeNull(name, json, condition);
         } else {
@@ -360,7 +361,7 @@ public class DataWriter {
      * @param condition <code>true</code> to put; otherwise <code>false</code>
      * to put {@link JSONObject#NULL}
      */
-    public static void writeValue(Float value, final JSONArray jsonArray, final boolean condition) {
+    public static void writeValue(final Float value, final JSONArray jsonArray, final boolean condition) {
         // Floats must be written as strings
         if (condition) {
             writeValue(floatFormat.format(value), jsonArray);
@@ -381,7 +382,7 @@ public class DataWriter {
         writeValue(Long.toString(value), jsonArray, condition);
     }
 
-    public static void writeValue(Long value, JSONArray json, boolean condition) {
+    public static void writeValue(final Long value, final JSONArray json, final boolean condition) {
         // Large values of long must be written as string. See bug 11311.
         if (condition) {
             writeValue(value.toString(), json);
@@ -390,11 +391,11 @@ public class DataWriter {
         }
     }
 
-    protected static void writeNull(JSONArray json) {
+    protected static void writeNull(final JSONArray json) {
         json.put(JSONObject.NULL);
     }
 
-    protected static void writeNull(String name, JSONObject json, boolean condition) throws JSONException {
+    protected static void writeNull(final String name, final JSONObject json, final boolean condition) throws JSONException {
         if (condition) {
             json.put(name, JSONObject.NULL);
         }
@@ -593,7 +594,7 @@ public class DataWriter {
     };
 
     static {
-        final TIntObjectHashMap<FieldWriter<DataObject>> m = new TIntObjectHashMap<FieldWriter<DataObject>>(6, 1);
+        final TIntObjectMap<FieldWriter<DataObject>> m = new TIntObjectHashMap<FieldWriter<DataObject>>(6, 1);
         m.put(DataObject.OBJECT_ID, OBJECT_ID_WRITER);
         m.put(DataObject.CREATED_BY, CREATED_BY_WRITER);
         m.put(DataObject.CREATION_DATE, CREATION_DATE_WRITER);
@@ -603,6 +604,6 @@ public class DataWriter {
         WRITER_MAP = m;
     }
 
-    private static final TIntObjectHashMap<FieldWriter<DataObject>> WRITER_MAP;
+    private static final TIntObjectMap<FieldWriter<DataObject>> WRITER_MAP;
 
 }

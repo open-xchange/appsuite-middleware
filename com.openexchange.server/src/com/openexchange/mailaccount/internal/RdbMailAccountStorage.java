@@ -54,7 +54,8 @@ import static com.openexchange.mail.utils.ProviderUtility.toSocketAddr;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -1696,7 +1697,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 return new int[0];
             }
             final CustomMailAccount tmp = new CustomMailAccount();
-            final TIntArrayList ids = new TIntArrayList(6);
+            final TIntList ids = new TIntArrayList(6);
             do {
                 tmp.parseMailServerURL(result.getString(2));
                 if (set.contains(tmp.getMailServer().toLowerCase(Locale.ENGLISH))) {
@@ -1706,7 +1707,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             if (ids.isEmpty()) {
                 return new int[0];
             }
-            final int[] array = ids.toNativeArray();
+            final int[] array = ids.toArray();
             Arrays.sort(array);
             return array;
         } catch (final SQLException e) {

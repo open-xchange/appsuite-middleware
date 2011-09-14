@@ -51,7 +51,8 @@ package com.openexchange.tools.oxfolder;
 
 import static com.openexchange.tools.sql.DBUtils.closeResources;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -352,7 +353,7 @@ public final class OXFolderLoader {
      * @throws SQLException If a SQL error occurs
      * @throws OXException If a pooling error occurs
      */
-    public static TIntArrayList getSubfolderInts(final int folderId, final Context ctx, final Connection readConArg) throws SQLException, OXException {
+    public static TIntList getSubfolderInts(final int folderId, final Context ctx, final Connection readConArg) throws SQLException, OXException {
         return getSubfolderInts(folderId, ctx, readConArg, TABLE_OT);
     }
 
@@ -367,7 +368,7 @@ public final class OXFolderLoader {
      * @throws SQLException If a SQL error occurs
      * @throws OXException If a pooling error occurs
      */
-    public static TIntArrayList getSubfolderInts(final int folderId, final Context ctx, final Connection readConArg, final String table) throws SQLException, OXException {
+    public static TIntList getSubfolderInts(final int folderId, final Context ctx, final Connection readConArg, final String table) throws SQLException, OXException {
         Connection readCon = readConArg;
         boolean closeCon = false;
         PreparedStatement stmt = null;
@@ -381,7 +382,7 @@ public final class OXFolderLoader {
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
             rs = stmt.executeQuery();
-            final TIntArrayList retval = new TIntArrayList();
+            final TIntList retval = new TIntArrayList();
             while (rs.next()) {
                 retval.add(rs.getInt(1));
             }

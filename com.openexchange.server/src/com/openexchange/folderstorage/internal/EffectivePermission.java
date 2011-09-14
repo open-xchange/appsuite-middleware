@@ -49,7 +49,8 @@
 
 package com.openexchange.folderstorage.internal;
 
-import gnu.trove.TIntHashSet;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
@@ -77,7 +78,7 @@ public final class EffectivePermission implements Permission {
     /**
      * The allowed content types.
      */
-    private TIntHashSet allowedContentTypes;
+    private TIntSet allowedContentTypes;
 
     /**
      * The type of the referenced folder.
@@ -128,7 +129,7 @@ public final class EffectivePermission implements Permission {
         if (null == allowedContentTypes || allowedContentTypes.isEmpty()) {
             this.allowedContentTypes = new TIntHashSet(1);
         } else {
-            final TIntHashSet set = new TIntHashSet(allowedContentTypes.size() + 1);
+            final TIntSet set = new TIntHashSet(allowedContentTypes.size() + 1);
             for (final ContentType allowedContentType : allowedContentTypes) {
                 set.add(allowedContentType.getModule());
             }

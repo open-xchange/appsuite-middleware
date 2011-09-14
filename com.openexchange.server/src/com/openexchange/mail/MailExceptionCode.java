@@ -353,6 +353,10 @@ public enum MailExceptionCode implements OXExceptionCode {
      * Mail attachment expired or absent.
      */
     ATTACHMENT_EXPIRED("Mail attachment expired or absent.", Category.CATEGORY_USER_INPUT, 78),
+    /**
+     * Cannot establish a secure connection to mail server %1$s.
+     */
+    NON_SECURE_WARNING("Cannot establish a secure connection to mail server %1$s.", Category.CATEGORY_WARNING, 79),
 
     ;
 
@@ -400,7 +404,7 @@ public enum MailExceptionCode implements OXExceptionCode {
 
     @Override
     public boolean equals(final OXException e) {
-        return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
+        return OXExceptionFactory.getInstance().equals(this, e);
     }
 
     /**

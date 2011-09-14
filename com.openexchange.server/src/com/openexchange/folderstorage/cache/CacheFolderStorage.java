@@ -49,8 +49,10 @@
 
 package com.openexchange.folderstorage.cache;
 
-import gnu.trove.TIntArrayList;
-import gnu.trove.TObjectIntHashMap;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TObjectIntMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -832,7 +834,7 @@ public final class CacheFolderStorage implements FolderStorage {
     public List<Folder> getFolders(final String treeId, final List<String> folderIds, final StorageType storageType, final StorageParameters storageParameters) throws OXException {
         final int size = folderIds.size();
         final Folder[] ret = new Folder[size];
-        final TObjectIntHashMap<String> toLoad = new TObjectIntHashMap<String>(size);
+        final TObjectIntMap<String> toLoad = new TObjectIntHashMap<String>(size);
         /*
          * Get the ones from cache
          */
@@ -1244,14 +1246,14 @@ public final class CacheFolderStorage implements FolderStorage {
          * Collect by folder storage
          */
         final int size = folderIds.size();
-        final Map<FolderStorage, TIntArrayList> map = new HashMap<FolderStorage, TIntArrayList>(4);
+        final Map<FolderStorage, TIntList> map = new HashMap<FolderStorage, TIntList>(4);
         for (int i = 0; i < size; i++) {
             final String id = folderIds.get(i);
             final FolderStorage tmp = registry.getFolderStorage(treeId, id);
             if (null == tmp) {
                 throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, id);
             }
-            TIntArrayList list = map.get(tmp);
+            TIntList list = map.get(tmp);
             if (null == list) {
                 list = new TIntArrayList();
                 map.put(tmp, list);
@@ -1280,9 +1282,9 @@ public final class CacheFolderStorage implements FolderStorage {
          */
         final Map<String, Folder> ret = new ConcurrentHashMap<String, Folder>(size);
         int taskCount = 0;
-        for (final java.util.Map.Entry<FolderStorage, TIntArrayList> entry : map.entrySet()) {
+        for (final java.util.Map.Entry<FolderStorage, TIntList> entry : map.entrySet()) {
             final FolderStorage tmp = entry.getKey();
-            final int[] indexes = entry.getValue().toNativeArray();
+            final int[] indexes = entry.getValue().toArray();
             completionService.submit(new Callable<Object>() {
 
                 @Override

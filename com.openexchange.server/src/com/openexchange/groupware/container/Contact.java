@@ -4056,6 +4056,8 @@ public class Contact extends CommonObject implements Serializable {
             return containsNumberOfDistributionLists();
         case CONTACT_NUMBER_OF_LINKS:
             return containsNumberOfLinks();
+        case NUMBER_OF_IMAGES:
+            return containsImage1();
         case USE_COUNT:
             return containsUseCount();
         case YOMI_FIRST_NAME:

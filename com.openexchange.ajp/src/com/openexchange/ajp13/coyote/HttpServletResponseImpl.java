@@ -49,7 +49,8 @@
 
 package com.openexchange.ajp13.coyote;
 
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -125,9 +126,9 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
     private static final String ERROR_PAGE_TEMPL =
         "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\r\n" + "<html><head>\r\n" + "<title>#STATUS_CODE# #STATUS_MSG#</title>\r\n" + "</head><body>\r\n" + "<h1>#STATUS_CODE# #STATUS_MSG#</h1>\r\n" + "<p>#STATUS_DESC#</p>\r\n" + "<hr>\r\n" + "<address>#DATE#,&nbsp;Open-Xchange v#VERSION#</address>\r\n" + "</body></html>";
 
-    public static final TIntObjectHashMap<String> STATUS_MSGS;
+    public static final TIntObjectMap<String> STATUS_MSGS;
 
-    public static final TIntObjectHashMap<String> STATUS_DESC;
+    public static final TIntObjectMap<String> STATUS_DESC;
 
     private static final DateFormat HEADER_DATE_FORMAT = HttpDateFormatRegistry.getInstance().getDefaultDateFormat();
 

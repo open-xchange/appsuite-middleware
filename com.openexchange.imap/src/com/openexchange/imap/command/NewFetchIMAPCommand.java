@@ -49,8 +49,8 @@
 
 package com.openexchange.imap.command;
 
-import gnu.trove.TIntIntHashMap;
-import gnu.trove.TLongIntHashMap;
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.map.hash.TLongIntHashMap;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;

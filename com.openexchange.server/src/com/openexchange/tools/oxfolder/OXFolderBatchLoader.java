@@ -53,8 +53,9 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.IN_LIMIT;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.getIN;
-import gnu.trove.TIntObjectHashMap;
-import gnu.trove.TObjectProcedure;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TObjectProcedure;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -79,9 +80,9 @@ public final class OXFolderBatchLoader {
 
     private static final class FolderPermissionProcedure implements TObjectProcedure<FolderObject> {
 
-        private final TIntObjectHashMap<List<OCLPermission>> folderPermissions;
+        private final TIntObjectMap<List<OCLPermission>> folderPermissions;
 
-        public FolderPermissionProcedure(final TIntObjectHashMap<List<OCLPermission>> folderPermissions) {
+        public FolderPermissionProcedure(final TIntObjectMap<List<OCLPermission>> folderPermissions) {
             super();
             this.folderPermissions = folderPermissions;
         }
@@ -100,9 +101,9 @@ public final class OXFolderBatchLoader {
 
     private static final class SubfolderProcedure implements TObjectProcedure<FolderObject> {
 
-        private final TIntObjectHashMap<ArrayList<Integer>> subfolderIds;
+        private final TIntObjectMap<ArrayList<Integer>> subfolderIds;
 
-        public SubfolderProcedure(final TIntObjectHashMap<ArrayList<Integer>> subfolderIds) {
+        public SubfolderProcedure(final TIntObjectMap<ArrayList<Integer>> subfolderIds) {
             super();
             this.subfolderIds = subfolderIds;
         }
@@ -177,7 +178,7 @@ public final class OXFolderBatchLoader {
                 closeCon = true;
             }
             final FolderObject[] array = new FolderObject[folderIds.length];
-            final TIntObjectHashMap<FolderObject> map = loadFolderObjectsFromDB0(folderIds, ctx, readCon, loadPermissions, loadSubfolderList, table, permTable);
+            final TIntObjectMap<FolderObject> map = loadFolderObjectsFromDB0(folderIds, ctx, readCon, loadPermissions, loadSubfolderList, table, permTable);
             for (int i = 0; i < folderIds.length; i++) {
                 final int fuid = folderIds[i];
                 final FolderObject fo = map.get(fuid);
@@ -191,9 +192,9 @@ public final class OXFolderBatchLoader {
         }
     }
 
-    private static final TIntObjectHashMap<FolderObject> loadFolderObjectsFromDB0(final int[] folderIds, final Context ctx, final Connection readCon, final boolean loadPermissions, final boolean loadSubfolderList, final String table, final String permTable) throws OXException {
+    private static final TIntObjectMap<FolderObject> loadFolderObjectsFromDB0(final int[] folderIds, final Context ctx, final Connection readCon, final boolean loadPermissions, final boolean loadSubfolderList, final String table, final String permTable) throws OXException {
         try {
-            final TIntObjectHashMap<FolderObject> folders = new TIntObjectHashMap<FolderObject>();
+            final TIntObjectMap<FolderObject> folders = new TIntObjectHashMap<FolderObject>();
             for (int i = 0; i < folderIds.length; i += IN_LIMIT) {
                 PreparedStatement stmt = null;
                 ResultSet rs = null;
@@ -240,7 +241,7 @@ public final class OXFolderBatchLoader {
                 }
             }
             if (loadPermissions) {
-                final TIntObjectHashMap<List<OCLPermission>> permissions = getFolderPermissions(folderIds, ctx, readCon, permTable);
+                final TIntObjectMap<List<OCLPermission>> permissions = getFolderPermissions(folderIds, ctx, readCon, permTable);
                 final FolderPermissionProcedure procedure = new FolderPermissionProcedure(permissions);
                 if (!folders.forEachValue(procedure)) {
                     throw OXFolderExceptionCode.RUNTIME_ERROR.create(I(ctx.getContextId()));
@@ -262,7 +263,7 @@ public final class OXFolderBatchLoader {
      * @throws SQLException If a SQL error occurs
      * @throws OXException If a pooling error occurs
      */
-    public static final TIntObjectHashMap<List<OCLPermission>> getFolderPermissions(final int[] folderIds, final Context ctx, final Connection readConArg) throws SQLException, OXException {
+    public static final TIntObjectMap<List<OCLPermission>> getFolderPermissions(final int[] folderIds, final Context ctx, final Connection readConArg) throws SQLException, OXException {
         return getFolderPermissions(folderIds, ctx, readConArg, TABLE_OP);
     }
 
@@ -277,7 +278,7 @@ public final class OXFolderBatchLoader {
      * @throws SQLException If a SQL error occurs
      * @throws OXException If a pooling error occurs
      */
-    public static final TIntObjectHashMap<List<OCLPermission>> getFolderPermissions(final int[] folderIds, final Context ctx, final Connection readConArg, final String table) throws SQLException, OXException {
+    public static final TIntObjectMap<List<OCLPermission>> getFolderPermissions(final int[] folderIds, final Context ctx, final Connection readConArg, final String table) throws SQLException, OXException {
         Connection readCon = readConArg;
         boolean closeCon = false;
         if (readCon == null) {
@@ -285,7 +286,7 @@ public final class OXFolderBatchLoader {
             closeCon = true;
         }
         try {
-            final TIntObjectHashMap<List<OCLPermission>> ret = new TIntObjectHashMap<List<OCLPermission>>(folderIds.length);
+            final TIntObjectMap<List<OCLPermission>> ret = new TIntObjectHashMap<List<OCLPermission>>(folderIds.length);
             for (int i = 0; i < folderIds.length; i+= IN_LIMIT) {
                 PreparedStatement stmt = null;
                 ResultSet rs = null;
@@ -338,7 +339,7 @@ public final class OXFolderBatchLoader {
      * @throws SQLException If a SQL error occurs
      * @throws OXException If a pooling error occurs
      */
-    public static final TIntObjectHashMap<ArrayList<Integer>> getSubfolderIds(final int[] folderIds, final Context ctx, final Connection readConArg) throws SQLException, OXException {
+    public static final TIntObjectMap<ArrayList<Integer>> getSubfolderIds(final int[] folderIds, final Context ctx, final Connection readConArg) throws SQLException, OXException {
         return getSubfolderIds(folderIds, ctx, readConArg, TABLE_OT);
     }
 
@@ -353,7 +354,7 @@ public final class OXFolderBatchLoader {
      * @throws SQLException If a SQL error occurs
      * @throws OXException If a pooling error occurs
      */
-    public static final TIntObjectHashMap<ArrayList<Integer>> getSubfolderIds(final int[] folderIds, final Context ctx, final Connection readConArg, final String table) throws SQLException, OXException {
+    public static final TIntObjectMap<ArrayList<Integer>> getSubfolderIds(final int[] folderIds, final Context ctx, final Connection readConArg, final String table) throws SQLException, OXException {
         Connection readCon = readConArg;
         boolean closeCon = false;
         if (readCon == null) {
@@ -361,7 +362,7 @@ public final class OXFolderBatchLoader {
             closeCon = true;
         }
         try {
-            final TIntObjectHashMap<ArrayList<Integer>> ret = new TIntObjectHashMap<ArrayList<Integer>>(folderIds.length);
+            final TIntObjectMap<ArrayList<Integer>> ret = new TIntObjectHashMap<ArrayList<Integer>>(folderIds.length);
             for (int i = 0; i < folderIds.length; i += IN_LIMIT) {
 		        PreparedStatement stmt = null;
 		        ResultSet rs = null;

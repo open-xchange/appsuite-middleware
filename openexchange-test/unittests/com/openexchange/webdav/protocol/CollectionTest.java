@@ -7,9 +7,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import javax.servlet.http.HttpServletResponse;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.collections.Collector;
 import com.openexchange.tools.collections.Injector;

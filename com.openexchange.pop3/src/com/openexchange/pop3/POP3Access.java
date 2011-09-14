@@ -394,6 +394,16 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
             } catch (final MessagingException e) {
                 LOG.warn(e.getMessage(), e);
             }
+            /*
+             * Add warning if non-secure
+             */
+            try {
+                if (!config.isSecure() && !pop3Store.capabilities().containsKey("STLS")) {
+                    warnings.add(MailExceptionCode.NON_SECURE_WARNING.create());
+                }
+            } catch (final MessagingException e) {
+                // Ignore
+            }
         } catch (final OXException e) {
             throw e;
         }

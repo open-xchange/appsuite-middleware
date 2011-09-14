@@ -49,7 +49,8 @@
 
 package com.openexchange.groupware.upload.impl;
 
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link UploadUtility} - Utility class for uploads.
@@ -58,7 +59,7 @@ import gnu.trove.TIntObjectHashMap;
  */
 public final class UploadUtility {
 
-    private static final TIntObjectHashMap<String> M = new TIntObjectHashMap<String>(13);
+    private static final TIntObjectMap<String> M = new TIntObjectHashMap<String>(13);
 
     static {
         int pos = 0;

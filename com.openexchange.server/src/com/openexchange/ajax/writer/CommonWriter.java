@@ -49,7 +49,8 @@
 
 package com.openexchange.ajax.writer;
 
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -181,7 +182,7 @@ public class CommonWriter extends FolderChildWriter {
         }
     };
     static {
-        final TIntObjectHashMap<FieldWriter<CommonObject>> m = new TIntObjectHashMap<FieldWriter<CommonObject>>(6, 1);
+        final TIntObjectMap<FieldWriter<CommonObject>> m = new TIntObjectHashMap<FieldWriter<CommonObject>>(6, 1);
         m.put(CommonObject.CATEGORIES, CATEGORIES_WRITER);
         m.put(CommonObject.PRIVATE_FLAG, PRIVATE_FLAG_WRITER);
         m.put(CommonObject.COLOR_LABEL, COLORLABEL_WRITER);
@@ -191,5 +192,5 @@ public class CommonWriter extends FolderChildWriter {
         WRITER_MAP = m;
     }
 
-    private static final TIntObjectHashMap<FieldWriter<CommonObject>> WRITER_MAP;
+    private static final TIntObjectMap<FieldWriter<CommonObject>> WRITER_MAP;
 }

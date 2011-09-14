@@ -212,7 +212,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                             mailAccess = MailAccess.getInstance(getSession(), accountId);
                             mailAccess.connect();
                         } catch (final OXException e) {
-                            getLogger().error(e.getMessage(), e);
+                            getLogger().debug(e.getMessage(), e);
                             return GetMessagesResult.EMPTY_RESULT;
                         }
                         try {
@@ -408,7 +408,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                             mailAccess = MailAccess.getInstance(getSession(), accountId);
                             mailAccess.connect();
                         } catch (final OXException e) {
-                            getLogger().error(e.getMessage(), e);
+                            getLogger().debug(e.getMessage(), e);
                             return Collections.emptyList();
                         }
                         String fn = null;
@@ -525,7 +525,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                             mailAccess = MailAccess.getInstance(getSession(), mailAccount.getId());
                             mailAccess.connect();
                         } catch (final OXException e) {
-                            getLogger().error(e.getMessage(), e);
+                            getLogger().debug(e.getMessage(), e);
                             return Collections.emptyList();
                         }
                         try {
@@ -618,7 +618,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                             mailAccess = MailAccess.getInstance(getSession(), accountId);
                             mailAccess.connect();
                         } catch (final OXException e) {
-                            getLogger().error(e.getMessage(), e);
+                            getLogger().debug(e.getMessage(), e);
                             return null;
                         }
                         try {
@@ -722,7 +722,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                             mailAccess = MailAccess.getInstance(getSession(), accountId);
                             mailAccess.connect();
                         } catch (final OXException e) {
-                            getLogger().error(e.getMessage(), e);
+                            getLogger().debug(e.getMessage(), e);
                             return null;
                         }
                         try {
@@ -799,7 +799,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                             mailAccess = MailAccess.getInstance(getSession(), accountId);
                             mailAccess.connect();
                         } catch (final OXException e) {
-                            getLogger().error(e.getMessage(), e);
+                            getLogger().debug(e.getMessage(), e);
                             return null;
                         }
                         try {

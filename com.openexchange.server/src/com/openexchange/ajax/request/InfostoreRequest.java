@@ -49,9 +49,12 @@
 
 package com.openexchange.ajax.request;
 
-import gnu.trove.TIntArrayList;
-import gnu.trove.TIntHashSet;
-import gnu.trove.TIntIntHashMap;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -81,7 +84,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
-import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.database.impl.GetSwitch;
 import com.openexchange.groupware.infostore.database.impl.SetSwitch;
@@ -90,6 +92,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -206,7 +209,7 @@ public class InfostoreRequest extends CommonRequest {
                     return true;
                 }
                 final Object toDelete = req.getBody();
-                final TIntIntHashMap folderMapping = new TIntIntHashMap();
+                final TIntIntMap folderMapping = new TIntIntHashMap();
                 final int[] ids = parseIDList(toDelete, folderMapping);
                 final long timestamp = Long.parseLong(req.getParameter(AJAXServlet.PARAMETER_TIMESTAMP));
                 delete(ids, folderMapping, timestamp);
@@ -324,7 +327,7 @@ public class InfostoreRequest extends CommonRequest {
         }
     }
 
-    protected int[] parseIDList(final Object toDelete, final TIntIntHashMap folderMapping) throws JSONException {
+    protected int[] parseIDList(final Object toDelete, final TIntIntMap folderMapping) throws JSONException {
         if(JSONArray.class.isAssignableFrom(toDelete.getClass())) {
             final JSONArray array = (JSONArray) toDelete;
             final int[] ids = new int[array.length()];
@@ -543,7 +546,7 @@ public class InfostoreRequest extends CommonRequest {
                 throw AjaxExceptionCodes.CONFLICT.create();
             }
             iter = result.results();
-            final TIntArrayList versions;
+            final TIntList versions;
             try {
                 versions = new TIntArrayList();
                 while (iter.hasNext()) {
@@ -556,7 +559,7 @@ public class InfostoreRequest extends CommonRequest {
             } finally {
                 iter.close();
             }
-            infostore.removeVersion(id, versions.toNativeArray(), session);
+            infostore.removeVersion(id, versions.toArray(), session);
             timestamp = infostore.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, ctx,
                     user, userConfiguration).getSequenceNumber();
             infostore.commit();
@@ -780,7 +783,7 @@ public class InfostoreRequest extends CommonRequest {
         }
     }
 
-    protected void delete(final int[] ids, final TIntIntHashMap folderMapping, final long timestamp) {
+    protected void delete(final int[] ids, final TIntIntMap folderMapping, final long timestamp) {
         final InfostoreFacade infostore = getInfostore();
         final InfostoreSearchEngine searchEngine = getSearchEngine();
 
@@ -793,7 +796,7 @@ public class InfostoreRequest extends CommonRequest {
 
                 notDeleted = infostore.removeDocument(ids, timestamp, session);
 
-                final TIntHashSet notDeletedSet = new TIntHashSet();
+                final TIntSet notDeletedSet = new TIntHashSet();
                 for (final int nd : notDeleted) {
                     notDeletedSet.add(nd);
                 }

@@ -49,8 +49,9 @@
 
 package com.openexchange.webdav;
 
-import gnu.trove.TIntObjectHashMap;
-import gnu.trove.TObjectProcedure;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TObjectProcedure;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.Connection;
@@ -205,7 +206,7 @@ public final class ical extends PermissionServlet {
             final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
             SearchIterator<Appointment> iter = null;
             try {
-                final TIntObjectHashMap<SeriesUIDPatcher> patchers = new TIntObjectHashMap<SeriesUIDPatcher>();
+                final TIntObjectMap<SeriesUIDPatcher> patchers = new TIntObjectHashMap<SeriesUIDPatcher>();
                 iter = appointmentSql.getModifiedAppointmentsInFolder(calendarfolderId, APPOINTMENT_FIELDS, new Date(0));
                 while (iter.hasNext()) {
                     final Appointment appointment = iter.next();

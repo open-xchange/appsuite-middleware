@@ -49,7 +49,8 @@
 
 package com.openexchange.mail;
 
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
@@ -187,7 +188,7 @@ public enum MailListField {
 
     private static final MailListField[] EMPTY_FIELDS = new MailListField[0];
 
-    private static final TIntObjectHashMap<MailListField> FIELDS_MAP = new TIntObjectHashMap<MailListField>(25);
+    private static final TIntObjectMap<MailListField> FIELDS_MAP = new TIntObjectHashMap<MailListField>(25);
 
     static {
         final MailListField[] fields = MailListField.values();

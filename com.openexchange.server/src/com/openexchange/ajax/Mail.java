@@ -149,6 +149,7 @@ import com.openexchange.mail.json.writer.MessageWriter.MailFieldWriter;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mail.mime.MIMEMailExceptionCode;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -218,14 +219,45 @@ public class Mail extends PermissionServlet implements UploadListener {
      * @return The wrapping {@link AbstractOXException}
      */
     protected static final OXException getWrappingOXException(final Exception cause) {
+        final String message = cause.getMessage();
         if (LOG.isWarnEnabled()) {
             final StringBuilder warnBuilder = new StringBuilder(140);
             warnBuilder.append("An unexpected exception occurred, which is going to be wrapped for proper display.\n");
-            warnBuilder.append("For safety reason its original content is displayed here.");
-            LOG.warn(warnBuilder.toString(), cause);
+            warnBuilder.append("For safety reason its original content is displayed here.\n");
+            warnBuilder.append(null == message ? "[Not available]" : message).append('\n');
+            appendStackTrace(cause.getStackTrace(), warnBuilder);
+            LOG.warn(warnBuilder.toString());
         }
-        final String message = cause.getMessage();
         return MailExceptionCode.UNEXPECTED_ERROR.create(cause, null == message ? "[Not available]" : message);
+    }
+
+    private static void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb) {
+        if (null == trace) {
+            sb.append("<missing stack trace>\n");
+            return;
+        }
+        for (final StackTraceElement ste : trace) {
+            final String className = ste.getClassName();
+            if (null != className) {
+                sb.append("\tat ").append(className).append('.').append(ste.getMethodName());
+                if (ste.isNativeMethod()) {
+                    sb.append("(Native Method)");
+                } else {
+                    final String fileName = ste.getFileName();
+                    if (null == fileName) {
+                        sb.append("(Unknown Source)");
+                    } else {
+                        final int lineNumber = ste.getLineNumber();
+                        sb.append('(').append(fileName);
+                        if (lineNumber >= 0) {
+                            sb.append(':').append(lineNumber);
+                        }
+                        sb.append(')');
+                    }
+                }
+                sb.append("\n");
+            }
+        }
     }
 
     private static final String UPLOAD_PARAM_MAILINTERFACE = "msint";
@@ -2480,7 +2512,16 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            if (MIMEMailExceptionCode.INVALID_EMAIL_ADDRESS.equals(e)) {
+                e.setCategory(Category.CATEGORY_USER_INPUT);
+                if (DEBUG) {
+                    LOG.warn(e.getMessage(), e);
+                } else {
+                    LOG.warn(e.getMessage());
+                }
+            } else {
+                LOG.error(e.getMessage(), e);
+            }
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);

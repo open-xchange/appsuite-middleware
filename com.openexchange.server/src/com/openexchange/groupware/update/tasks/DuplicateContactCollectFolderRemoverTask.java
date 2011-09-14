@@ -52,8 +52,9 @@ package com.openexchange.groupware.update.tasks;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
-import gnu.trove.TIntObjectHashMap;
-import gnu.trove.TIntObjectProcedure;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TIntObjectProcedure;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -132,7 +133,7 @@ public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAd
         /*
          * Get all contexts with contained users
          */
-        final TIntObjectHashMap<List<Integer>> m = new TIntObjectHashMap<List<Integer>>();
+        final TIntObjectMap<List<Integer>> m = new TIntObjectHashMap<List<Integer>>();
         final int total = getAllUsers(params.getContextId(), m);
         status.setTotal(total);
         /*
@@ -158,7 +159,7 @@ public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAd
         });
     }
 
-    private static int getAllUsers(final int contextId, final TIntObjectHashMap<List<Integer>> m) throws OXException {
+    private static int getAllUsers(final int contextId, final TIntObjectMap<List<Integer>> m) throws OXException {
         final Connection con = Database.getNoTimeout(contextId, true);
         PreparedStatement stmt = null;
         ResultSet rs = null;

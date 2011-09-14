@@ -49,7 +49,8 @@
 
 package com.openexchange.groupware.attach;
 
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.groupware.Types;
@@ -65,8 +66,8 @@ import com.openexchange.tools.service.SpecificServiceChooser;
 
 public abstract class Attachments {
 
-    private static final TIntObjectHashMap<SpecificServiceChooser<AttachmentAuthorization>> authz = new TIntObjectHashMap<SpecificServiceChooser<AttachmentAuthorization>>(3);
-    private static final TIntObjectHashMap<SpecificServiceChooser<AttachmentListener>> listener = new TIntObjectHashMap<SpecificServiceChooser<AttachmentListener>>(3);
+    private static final TIntObjectMap<SpecificServiceChooser<AttachmentAuthorization>> authz = new TIntObjectHashMap<SpecificServiceChooser<AttachmentAuthorization>>(3);
+    private static final TIntObjectMap<SpecificServiceChooser<AttachmentListener>> listener = new TIntObjectHashMap<SpecificServiceChooser<AttachmentListener>>(3);
 
     private static final AttachmentBaseImpl impl = new AttachmentBaseImpl(new DBPoolProvider());
 

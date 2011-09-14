@@ -49,7 +49,8 @@
 
 package com.openexchange.ajax.customizer.folder;
 
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.logging.Log;
@@ -69,7 +70,7 @@ public class AdditionalFolderFieldList {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AdditionalFolderFieldList.class));
 
-    private final TIntObjectHashMap<AdditionalFolderField> byColId = new TIntObjectHashMap<AdditionalFolderField>();
+    private final TIntObjectMap<AdditionalFolderField> byColId = new TIntObjectHashMap<AdditionalFolderField>();
     private final Map<String, AdditionalFolderField> byName = new HashMap<String, AdditionalFolderField>();
 
     /**

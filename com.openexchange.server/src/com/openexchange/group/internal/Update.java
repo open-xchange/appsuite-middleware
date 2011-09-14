@@ -50,8 +50,9 @@
 package com.openexchange.group.internal;
 
 import static com.openexchange.java.Autoboxing.I;
-import gnu.trove.TIntHashSet;
-import gnu.trove.TIntIterator;
+import gnu.trove.iterator.TIntIterator;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
@@ -107,12 +108,12 @@ final class Update {
     /**
      * Added members.
      */
-    private final TIntHashSet addedMembers = new TIntHashSet();
+    private final TIntSet addedMembers = new TIntHashSet();
 
     /**
      * Removed members.
      */
-    private final TIntHashSet removedMembers = new TIntHashSet();
+    private final TIntSet removedMembers = new TIntHashSet();
 
     /**
      * Default constructor.

@@ -49,7 +49,8 @@
 
 package com.openexchange.group.internal;
 
-import gnu.trove.TIntHashSet;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.util.Date;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
@@ -208,7 +209,7 @@ public final class Logic {
         }
         try {
             final UserStorage storage = UserStorage.getInstance();
-            final TIntHashSet set = new TIntHashSet();
+            final TIntSet set = new TIntHashSet();
             for (final int userId : storage.listAllUser(ctx)) {
                 set.add(userId);
             }
