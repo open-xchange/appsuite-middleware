@@ -317,7 +317,11 @@ public final class MIMEStructureHandler implements StructureHandler {
             /*
              * Add body object to parental structure object
              */
-            mailJsonObjectQueue.getFirst().put("smime_body_text", bodyObject);
+            final JSONObject jsonObject = mailJsonObjectQueue.getFirst();
+            for (final String name : new HashSet<String>(jsonObject.keySet())) {
+                jsonObject.remove(name);
+            }
+            jsonObject.put("smime_body_text", bodyObject);
             return true;
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
