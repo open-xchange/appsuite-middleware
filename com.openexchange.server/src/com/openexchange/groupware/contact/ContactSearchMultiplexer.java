@@ -56,6 +56,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import com.openexchange.ajax.parser.ContactSearchtermSqlConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.CollationContactComparator;
@@ -123,7 +124,7 @@ public class ContactSearchMultiplexer {
         if(searchIterators.size() == 1) {
             return searchIterators.get(0);
         }
-        return new ContactMergerator(new DefaultContactComparator(orderBy, order), searchIterators);
+        return new ContactMergerator(new DefaultContactComparator(orderBy, order, session.getUser().getLocale()), searchIterators);
     }
 
     public SearchIterator<Contact> extendedSearch(final ServerSession session, final SearchTerm<?> searchTerm, final int orderBy, final Order order, final String collation, final int[] cols) throws OXException {
@@ -164,13 +165,13 @@ public class ContactSearchMultiplexer {
         if(searchIterators.size() == 1) {
             return searchIterators.get(0);
         }
-        final Comparator<Contact> comparator = getContactComparator(orderBy, order, collation);
+        final Comparator<Contact> comparator = getContactComparator(orderBy, order, collation, , session.getUser().getLocale());
         return new ContactMergerator(comparator, searchIterators);
     }
 
-	private Comparator<Contact> getContactComparator(final int orderBy, final Order order, final String collation) {
+	private Comparator<Contact> getContactComparator(final int orderBy, final Order order, final String collation, final Locale locale) {
 		if(collation == null) {
-            return new DefaultContactComparator(orderBy, order);
+            return new DefaultContactComparator(orderBy, order, locale);
         }
 
 		final SuperCollator myI18nMap = SuperCollator.get(collation);
