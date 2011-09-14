@@ -179,6 +179,9 @@ public class OXUtilMySQLStorageCommon {
             }
             stmt.executeBatch();
         } catch (final SQLException e) {
+            if (e.getMessage().indexOf("already exists") < 0) { // MySQL error: "PROCEDURE get_mail_service_id already exists"
+                throw new StorageException(e.getMessage(), e);
+            }
             closeSQLStuff(stmt);
             stmt = null;
             if (LOG.isDebugEnabled()) {
