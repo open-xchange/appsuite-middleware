@@ -1,6 +1,7 @@
 * 2011-09-14 - thorben.betten@open-xchange.com
 
  - Fix for bug 20343: Lowered log level and logging stack trace only for DEBUG log level
+ - Fix for bug 20353: Lowered log level to DEBUG
 
 * 2011-09-13 - thorben.betten@open-xchange.com
 
