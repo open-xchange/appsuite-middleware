@@ -335,14 +335,13 @@ public class ContactRequest {
          * A move to another contact service
          */
         final Contact toMove = contactIface.getObjectById(id, inFolder);
-        for (int i = 1; i <= 650; i++) {
+        for (int i = 1; i < Contacts.mapping.length; i++) {
             if (null != Contacts.mapping[i]) {
                 if (contact.contains(i)) {
                     toMove.set(i, contact.get(i));
                 }
             }
         }
-        toMove.removeObjectID();
         if (inFolder == FolderObject.SYSTEM_LDAP_FOLDER_ID) {
             toMove.removeInternalUserId();
         }
