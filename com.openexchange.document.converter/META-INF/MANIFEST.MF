@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Document Converter Bundle
+Bundle-SymbolicName: com.openexchange.document.converter
+Bundle-Version: 6.21.0.0
+Bundle-Activator: com.openexchange.document.converter.osgi.DocumentConverterActivator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.exception,
+ com.openexchange.log,
+ org.apache.commons.cli,
+ org.apache.commons.io,
+ org.apache.commons.io.output,
+ org.apache.commons.logging,
+ org.osgi.framework,
+ org.osgi.util.tracker
+Export-Package: com.openexchange.document.converter
+Bundle-ClassPath: .,
+ lib/jodconverter-core-3.0-beta-4.jar,
+ lib/json-20090211.jar,
+ lib/juh-3.2.1.jar,
+ lib/jurt-3.2.1.jar,
+ lib/ridl-3.2.1.jar,
+ lib/unoil-3.2.1.jar
