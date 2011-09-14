@@ -169,14 +169,45 @@ public class OXUtilMySQLStorageCommon {
     private void pumpData2DatabaseOld(Connection con, List<String> db_queries) throws StorageException {
         Statement stmt = null;
         try {
-            stmt = con.createStatement();
-            for (String sqlCreate : db_queries) {
+            try {
+                stmt = con.createStatement();
+            } catch (final SQLException e) {
+                throw new StorageException(e.getMessage(), e);
+            }
+            for (final String sqlCreate : db_queries) {
                 stmt.addBatch(sqlCreate);
             }
             stmt.executeBatch();
-        } catch (SQLException e) {
-            LOG.error("SQL Error", e);
-            throw new StorageException(e.getMessage(), e);
+        } catch (final SQLException e) {
+            closeSQLStuff(stmt);
+            stmt = null;
+            if (LOG.isDebugEnabled()) {
+                LOG.info("Batch table creation failed.", e);
+            } else {
+                LOG.info("Batch table creation failed.");
+            }
+            /*
+             * Execute them one-by-one...
+             */
+            try {
+                for (final String sqlCreate : db_queries) {
+                    stmt = con.createStatement();
+                    try {
+                        stmt.executeUpdate(sqlCreate);
+                    } catch (final SQLException sqlException) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.warn("Following SQL CREATE statement failed with \"" + sqlException.getMessage() + "\": "  + sqlCreate, sqlException);
+                        } else {
+                            LOG.warn("Following SQL CREATE statement failed with \"" + sqlException.getMessage() + "\": "  + sqlCreate);
+                        }
+                    } finally {
+                        closeSQLStuff(stmt);
+                        stmt = null;
+                    }
+                }
+            } catch (final SQLException abort) {
+                throw new StorageException(abort.getMessage(), abort);
+            }
         } finally {
             closeSQLStuff(stmt);
         }
