@@ -335,11 +335,10 @@ public class ContactRequest {
          * A move to another contact service
          */
         final Contact toMove = contactIface.getObjectById(id, inFolder);
-        for (int i = 0; i < 650; i++) {
+        for (int i = 1; i <= 650; i++) {
             if (null != Contacts.mapping[i]) {
-                final int field = i + 1;
-                if (contact.contains(field)) {
-                    toMove.set(field, contact.get(field));
+                if (contact.contains(i)) {
+                    toMove.set(i, contact.get(i));
                 }
             }
         }
