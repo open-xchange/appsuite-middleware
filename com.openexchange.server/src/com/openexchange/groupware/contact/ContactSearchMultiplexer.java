@@ -165,7 +165,7 @@ public class ContactSearchMultiplexer {
         if(searchIterators.size() == 1) {
             return searchIterators.get(0);
         }
-        final Comparator<Contact> comparator = getContactComparator(orderBy, order, collation, , session.getUser().getLocale());
+        final Comparator<Contact> comparator = getContactComparator(orderBy, order, collation, session.getUser().getLocale());
         return new ContactMergerator(comparator, searchIterators);
     }
 
