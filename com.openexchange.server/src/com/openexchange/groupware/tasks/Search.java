@@ -154,7 +154,7 @@ public class Search {
                     continue;
                 }
                 Permission.checkReadInFolder(ctx, user, config, folder);
-                if (folder.isShared(getUserId())) {
+                if (folder.isShared(getUserId()) && !Permission.canReadInFolder(ctx, user, config, folder)) {
                     shared.add(Integer.valueOf(folder.getObjectID()));
                 } else if (Permission.canReadInFolder(ctx, user, config, folder)) {
                     own.add(Integer.valueOf(folder.getObjectID()));
