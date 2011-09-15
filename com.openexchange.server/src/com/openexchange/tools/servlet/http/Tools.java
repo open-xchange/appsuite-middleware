@@ -311,6 +311,14 @@ public final class Tools {
         if (detector.isMSIE()) {
             filename = Helper.encodeFilenameForIE(fileName, Charsets.UTF_8);
         } else if (detector.isSafari5()) {
+            /*-
+             * On socket layer characters are casted to byte values.
+             * 
+             * See AJPv13Response.writeString():
+             * sink.write((byte) chars[i]);
+             * 
+             * Therefore ensure we have a one-character-per-byte charset, as it is with ISO-5589-1
+             */
             filename = new String(fileName.getBytes(Charsets.UTF_8), Charsets.ISO_8859_1);
         } else {
             filename = Helper.escape(Helper.encodeFilename(fileName, "UTF-8"));
