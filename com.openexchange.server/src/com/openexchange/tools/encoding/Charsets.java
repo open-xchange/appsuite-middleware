@@ -77,6 +77,11 @@ public final class Charsets {
     public static final Charset UTF_8 = Charset.forName(UTF_8_NAME);
 
     /**
+     * ISO-8859-1 character set.
+     */
+    public static final Charset ISO_8859_1 = Charset.forName("ISO-8859-1");
+
+    /**
      * The charset cache.
      */
     private static final ConcurrentMap<String, Charset> CACHE = new ConcurrentHashMap<String, Charset>();
