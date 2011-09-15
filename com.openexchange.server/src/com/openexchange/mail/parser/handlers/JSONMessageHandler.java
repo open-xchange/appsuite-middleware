@@ -191,7 +191,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
      */
     public JSONMessageHandler(final int accountId, final String mailPath, final DisplayMode displayMode, final Session session, final UserSettingMail usm, final boolean token, final int ttlMillis) throws OXException {
         super();
-        attachHTMLAlternativePart = false;
+        attachHTMLAlternativePart = !usm.isSuppressHTMLAlternativePart();
         this.accountId = accountId;
         modified = new boolean[1];
         this.session = session;
@@ -235,7 +235,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
      */
     private JSONMessageHandler(final int accountId, final MailPath mailPath, final MailMessage mail, final DisplayMode displayMode, final Session session, final UserSettingMail usm, final Context ctx, final boolean token, final int ttlMillis) throws OXException {
         super();
-        attachHTMLAlternativePart = false;
+        attachHTMLAlternativePart = !usm.isSuppressHTMLAlternativePart();
         this.ttlMillis = ttlMillis;
         this.token = token;
         this.accountId = accountId;

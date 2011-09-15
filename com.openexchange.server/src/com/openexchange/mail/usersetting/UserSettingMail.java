@@ -259,6 +259,8 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
     private boolean displayHtmlInlineContent;
 
+    private boolean suppressHTMLAlternativePart;
+
     private boolean useColorQuote;
 
     private boolean showGraphicEmoticons;
@@ -570,6 +572,15 @@ public final class UserSettingMail implements Cloneable, Serializable {
     }
 
     /**
+     * Whether to suppress HTML parts in text-only mode for <i>multipart/alternative</i>.
+     * 
+     * @return <code>true</code> to suppress HTML parts in text-only mode for <i>multipart/alternative</i>; otherwise <code>false</code>
+     */
+    public boolean isSuppressHTMLAlternativePart() {
+        return suppressHTMLAlternativePart;
+    }
+
+    /**
      * Checks if a forwarded message is supposed to be added as an attachment; otherwise it is added inline.
      *
      * @return <code>true</code> if a forwarded message is supposed to be added as an attachment; otherwise <code>false</code> if it is
@@ -834,6 +845,15 @@ public final class UserSettingMail implements Cloneable, Serializable {
     public void setDisplayHtmlInlineContent(final boolean htmlPreview) {
         displayHtmlInlineContent = htmlPreview;
         modifiedDuringSession = true;
+    }
+
+    /**
+     * Sets whether to suppress HTML parts in text-only mode for <i>multipart/alternative</i>.
+     * 
+     * @param suppressHTMLAlternativePart <code>true</code> to suppress HTML parts in text-only mode for <i>multipart/alternative</i>; otherwise <code>false</code>
+     */
+    public void setSuppressHTMLAlternativePart(final boolean suppressHTMLAlternativePart) {
+        this.suppressHTMLAlternativePart = suppressHTMLAlternativePart;
     }
 
     public void setDisplayMsgHeaders(final String[] displayMsgHeaders) {

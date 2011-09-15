@@ -323,6 +323,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 
     private static final String VIEW_TEXT = "text";
 
+    private static final String VIEW_TEXT_NO_HTML_ATTACHMENT = "textNoHtmlAttach";
+
     private static final String VIEW_HTML = "html";
 
     private static final String VIEW_HTML_BLOCKED_IMAGES = "noimg";
@@ -1423,6 +1425,10 @@ public class Mail extends PermissionServlet implements UploadListener {
         if (null != view) {
             if (VIEW_RAW.equals(view)) {
                 displayMode = DisplayMode.RAW;
+            } else if (VIEW_TEXT_NO_HTML_ATTACHMENT.equals(view)) {
+                usmNoSave.setDisplayHtmlInlineContent(false);
+                usmNoSave.setSuppressHTMLAlternativePart(true);
+                displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
             } else if (VIEW_TEXT.equals(view)) {
                 usmNoSave.setDisplayHtmlInlineContent(false);
                 displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
@@ -2221,6 +2227,9 @@ public class Mail extends PermissionServlet implements UploadListener {
             if (null != view) {
                 if (VIEW_TEXT.equals(view)) {
                     usmNoSave.setDisplayHtmlInlineContent(false);
+                } else if (VIEW_TEXT_NO_HTML_ATTACHMENT.equals(view)) {
+                    usmNoSave.setDisplayHtmlInlineContent(false);
+                    usmNoSave.setSuppressHTMLAlternativePart(true);
                 } else if (VIEW_HTML.equals(view)) {
                     usmNoSave.setDisplayHtmlInlineContent(true);
                     usmNoSave.setAllowHTMLImages(true);
