@@ -553,7 +553,12 @@ public final class JSONMessageHandler implements MailMessageHandler {
                      * Add HTML alternative part as attachment
                      */
                     if (attachHTMLAlternativePart) {
-                        asAttachment(id, contentType.getBaseType(), htmlContent.length(), fileName, null);
+                        try {
+                            final JSONObject attachment = asAttachment(id, contentType.getBaseType(), htmlContent.length(), fileName, null);
+                            attachment.put("___PRE-END___", true);
+                        } catch (final JSONException e) {
+                            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+                        }
                     }
                 } else if (DisplayMode.RAW.equals(displayMode)) {
                     /*
@@ -826,8 +831,11 @@ public final class JSONMessageHandler implements MailMessageHandler {
                 for (int i = 0; i < len; i++) {
                     final JSONObject attachment = attachments.getJSONObject(i);
                     if (attachment.hasAndNotNull(dispKey) && Part.ATTACHMENT.equalsIgnoreCase(attachment.getString(dispKey))) {
-                        jsonObject.put(MailJSONField.HAS_ATTACHMENTS.getKey(), true);
-                        i = len;
+                        if (attachment.hasAndNotNull("___PRE-END___") && attachment.getBoolean("___PRE-END___")) {
+                            attachment.remove("___PRE-END___");
+                        } else {
+                            jsonObject.put(MailJSONField.HAS_ATTACHMENTS.getKey(), true);
+                        }
                     }
                 }
             }
