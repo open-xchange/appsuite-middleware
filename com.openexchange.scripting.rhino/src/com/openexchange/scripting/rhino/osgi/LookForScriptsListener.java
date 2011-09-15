@@ -3,11 +3,10 @@ package com.openexchange.scripting.rhino.osgi;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.util.HashMap;
 
 import org.mozilla.javascript.Context;
-import org.mozilla.javascript.NativeJavaObject;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.osgi.framework.Bundle;
@@ -40,12 +39,11 @@ public class LookForScriptsListener implements BundleListener {
 		}
 	}
 
-	private void runStartScripts(Bundle bundle) {
+	private void runStartScripts(final Bundle bundle) {
 		URL entry = bundle.getEntry("/main.js");
 		if (entry == null) {
 			return;
 		}
-		
 		Reader r = null;
 		try {
 			r = new InputStreamReader(entry.openStream(), "UTF-8");
@@ -53,7 +51,11 @@ public class LookForScriptsListener implements BundleListener {
 			Scriptable serviceScope = cx.newObject(SHARED_SCOPE);
 			serviceScope.setParentScope(null);
 			serviceScope.setPrototype(SHARED_SCOPE);
-			RequireSupport.initialize(serviceScope, cx, bundle);
+			
+			HashMap<String, Object> additionalModules = new HashMap<String, Object>();
+			additionalModules.put("osgi", new OSGiSupport(bundle.getBundleContext(), SHARED_SCOPE));
+			
+			RequireSupport.initialize(serviceScope, cx, new BundleJSBundle(bundle), additionalModules);
 			
 			cx.evaluateReader(serviceScope, r, entry.toExternalForm(), 1, null);
 			
