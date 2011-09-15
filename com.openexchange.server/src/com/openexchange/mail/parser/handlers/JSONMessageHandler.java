@@ -176,6 +176,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
 
     private final int ttlMillis;
 
+    private boolean attachHTMLAlternativePart;
+
     /**
      * Initializes a new {@link JSONMessageHandler}
      *
@@ -189,6 +191,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
      */
     public JSONMessageHandler(final int accountId, final String mailPath, final DisplayMode displayMode, final Session session, final UserSettingMail usm, final boolean token, final int ttlMillis) throws OXException {
         super();
+        attachHTMLAlternativePart = false;
         this.accountId = accountId;
         modified = new boolean[1];
         this.session = session;
@@ -232,6 +235,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
      */
     private JSONMessageHandler(final int accountId, final MailPath mailPath, final MailMessage mail, final DisplayMode displayMode, final Session session, final UserSettingMail usm, final Context ctx, final boolean token, final int ttlMillis) throws OXException {
         super();
+        attachHTMLAlternativePart = false;
         this.ttlMillis = ttlMillis;
         this.token = token;
         this.accountId = accountId;
@@ -269,6 +273,17 @@ public final class JSONMessageHandler implements MailMessageHandler {
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
+    }
+
+    /**
+     * Sets whether the HTML part of a <i>multipart/alternative</i> content shall be attached.
+     * 
+     * @param attachHTMLAlternativePart Whether the HTML part of a <i>multipart/alternative</i> content shall be attached
+     * @return The {@link JSONMessageHandler} with new behavior applied
+     */
+    public JSONMessageHandler setAttachHTMLAlternativePart(final boolean attachHTMLAlternativePart) {
+        this.attachHTMLAlternativePart = attachHTMLAlternativePart;
+        return this;
     }
 
     private JSONArray getAttachmentsArr() throws JSONException {
@@ -537,7 +552,9 @@ public final class JSONMessageHandler implements MailMessageHandler {
                     /*
                      * Add HTML alternative part as attachment
                      */
-                    asAttachment(id, contentType.getBaseType(), htmlContent.length(), fileName, null);
+                    if (attachHTMLAlternativePart) {
+                        asAttachment(id, contentType.getBaseType(), htmlContent.length(), fileName, null);
+                    }
                 } else if (DisplayMode.RAW.equals(displayMode)) {
                     /*
                      * Return HTML content as-is
@@ -876,6 +893,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
             }
             final JSONMessageHandler msgHandler =
                 new JSONMessageHandler(accountId, null, null, displayMode, session, usm, ctx, token, ttlMillis);
+            msgHandler.attachHTMLAlternativePart = attachHTMLAlternativePart;
             msgHandler.tokenFolder = tokenFolder;
             msgHandler.tokenMailId = tokenMailId;
             new MailMessageParser().parseMailMessage(nestedMail, msgHandler, id);
