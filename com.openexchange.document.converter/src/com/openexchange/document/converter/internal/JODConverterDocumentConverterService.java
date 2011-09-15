@@ -71,7 +71,9 @@ import com.openexchange.document.converter.DocumentConverterExceptionCodes;
 import com.openexchange.document.converter.DocumentConverterService;
 import com.openexchange.document.converter.FileDocumentContent;
 import com.openexchange.exception.OXException;
+import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Streams;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link JODConverterDocumentConverterService} - The {@link DocumentConverterService} implementation based on <a
@@ -86,6 +88,8 @@ public class JODConverterDocumentConverterService implements DocumentConverterSe
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(JODConverterDocumentConverterService.class));
 
+    private final ServiceLookup serviceLookup;
+
     private final OfficeManager officeManager;
 
     private volatile OfficeDocumentConverter converter;
@@ -95,8 +99,9 @@ public class JODConverterDocumentConverterService implements DocumentConverterSe
     /**
      * Initializes a new {@link JODConverterDocumentConverterService}.
      */
-    public JODConverterDocumentConverterService() {
+    public JODConverterDocumentConverterService(final ServiceLookup serviceLookup) {
         super();
+        this.serviceLookup = serviceLookup;
         /*
          * Start-up JODConverter
          */
@@ -286,11 +291,18 @@ public class JODConverterDocumentConverterService implements DocumentConverterSe
                 }
                 final long conversionTime = System.currentTimeMillis() - startTime;
                 LOG.info(String.format(
-                    "Successful conversion: %s [%db] to %s in %dms",
+                    "Successful conversion: %s [%db] to %s in %dmsec",
                     inputExtension,
                     Long.valueOf(inputFile.length()),
                     extension,
                     Long.valueOf(conversionTime)));
+                /*
+                 * Add resulting file to file management
+                 */
+                final ManagedFileManagement fileManagement = serviceLookup.getService(ManagedFileManagement.class);
+                if (null != fileManagement) {
+                    fileManagement.createManagedFile(outputFile);
+                }
                 return new FileDocumentContent(outputFile);
             } finally {
                 deleteOnExit(outputFile);

@@ -51,20 +51,17 @@ package com.openexchange.document.converter.osgi;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.document.converter.DocumentConverterService;
 import com.openexchange.document.converter.internal.JODConverterDocumentConverterService;
+import com.openexchange.filemanagement.ManagedFileManagement;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 
 /**
  * {@link DocumentConverterActivator}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class DocumentConverterActivator implements BundleActivator {
-
-    private ServiceRegistration<DocumentConverterService> registration;
+public class DocumentConverterActivator extends HousekeepingActivator {
 
     private JODConverterDocumentConverterService documentConverterService;
 
@@ -76,13 +73,20 @@ public class DocumentConverterActivator implements BundleActivator {
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
+    protected Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
         final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(DocumentConverterActivator.class));
         logger.info("Starting bundle: com.openexchange.document.converter");
         try {
+            trackService(ManagedFileManagement.class);
+            openTrackers();
             System.getProperties().put("java.library.path", "/usr/lib/ure/lib"); // TODO: Where ever this is located
-            documentConverterService = new JODConverterDocumentConverterService().startUp();
-            registration = context.registerService(DocumentConverterService.class, documentConverterService, null);
+            documentConverterService = new JODConverterDocumentConverterService(this).startUp();
+            registerService(DocumentConverterService.class, documentConverterService, null);
         } catch (final Exception e) {
             logger.error("Starting bundle failed: com.openexchange.document.converter", e);
             throw e;
@@ -90,14 +94,11 @@ public class DocumentConverterActivator implements BundleActivator {
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
+    protected void stopBundle() throws Exception {
         final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(DocumentConverterActivator.class));
         logger.info("Stopping bundle: com.openexchange.document.converter");
         try {
-            if (null != registration) {
-                registration.unregister();
-                registration = null;
-            }
+            cleanUp();
             if (null != documentConverterService) {
                 documentConverterService.shutDown();
                 documentConverterService = null;

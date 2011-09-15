@@ -7,9 +7,12 @@ Bundle-Activator: com.openexchange.document.converter.osgi.DocumentConverterActi
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.exception,
+ com.openexchange.filemanagement,
  com.openexchange.i18n,
  com.openexchange.java,
  com.openexchange.log,
+ com.openexchange.server,
+ com.openexchange.server.osgiservice,
  org.apache.commons.cli,
  org.apache.commons.io,
  org.apache.commons.io.output,
