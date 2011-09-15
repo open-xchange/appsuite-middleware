@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,50 +49,44 @@
 
 package com.openexchange.document.converter;
 
-import java.io.File;
-import java.io.InputStream;
 import com.openexchange.exception.OXException;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link DocumentContent} - The content of a document for input for or result from a conversion operation.
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * Exception messages for {@link OXException} that must be translated.
+ *
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public interface DocumentContent {
+public final class DocumentConverterExceptionMessages implements LocalizableStrings {
+
+    public static final String TYPE_NOT_SUPPORTED_MSG = "The given type of %1$s is not supported";
+
+    public static final String MISSING_ARGUMENT_MSG = "Missing argument %1$s";
+
+    public static final String INVALID_ARGUMENT_MSG = "Invalid value for argument %1$s: ``%2$s''";
+
+    public static final String UNKNOWN_DATA_SOURCE_MSG = "Unknown data source identifier: %1$s";
+
+    public static final String UNKNOWN_DATA_HANDLER_MSG = "Unknown data handler identifier: %1$s";
+
+    public static final String NO_MATCHING_TYPE_MSG = "No matching type could be found for data source %1$s and data handler %2$s";
+
+    public static final String ERROR_MSG = "An error occurred: %1$s";
+
+    public static final String TRUNCATED_MSG = "The following field(s) are too long: %1$s";
+
+    public static final String UNABLE_TO_CHANGE_DATA_MSG = "Unable to change data. (%1$s)";
+
+    // An I/O error occurred: %1$s
+    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
+
+    // An OpenOffice error occurred: %1$s
+    public static final String OFFICE_ERROR_MSG = "An OpenOffice error occurred: %1$s";
 
     /**
-     * This method returns an <code>InputStream</code> representing the data and throws the appropriate exception if it can not do so. Note
-     * that a new <code>InputStream</code> object must be returned each time this method is called, and the stream must be positioned at the
-     * beginning of the data.
-     * 
-     * @return An input stream
-     * @throws OXException If input stream cannot be returned
+     * Prevent instantiation.
      */
-    public InputStream getInputStream() throws OXException;
-
-    /**
-     * Gets the optional file carrying the content provided by {@link #getInputStream()}.
-     * 
-     * @return The file or <code>null</code>
-     * @throws OXException If file cannot be returned
-     */
-    public File optFile() throws OXException;
-
-    /**
-     * This method returns the MIME type of the data in the form of a string. It should always return a valid type. It is suggested that
-     * getContentType return "application/octet-stream" if the InputContent implementation can not determine the data type.
-     * 
-     * @return The MIME Type
-     */
-    public String getContentType();
-
-    /**
-     * Return the <i>name</i> of this object where the name of the object is dependent on the nature of the underlying objects. InputContent
-     * encapsulating files may choose to return the filename of the object. (Typically this would be the last component of the filename, not
-     * an entire pathname.)
-     * 
-     * @return The name
-     */
-    public String getName();
-
+    private DocumentConverterExceptionMessages() {
+        super();
+    }
 }

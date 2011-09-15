@@ -49,12 +49,29 @@
 
 package com.openexchange.document.converter.internal;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
+import org.apache.commons.io.FilenameUtils;
+import org.artofsolving.jodconverter.OfficeDocumentConverter;
+import org.artofsolving.jodconverter.document.DefaultDocumentFormatRegistry;
+import org.artofsolving.jodconverter.document.DocumentFamily;
+import org.artofsolving.jodconverter.document.DocumentFormat;
+import org.artofsolving.jodconverter.document.DocumentFormatRegistry;
 import org.artofsolving.jodconverter.office.DefaultOfficeManagerConfiguration;
 import org.artofsolving.jodconverter.office.OfficeConnectionProtocol;
+import org.artofsolving.jodconverter.office.OfficeException;
 import org.artofsolving.jodconverter.office.OfficeManager;
 import com.openexchange.document.converter.DocumentContent;
+import com.openexchange.document.converter.DocumentConverterExceptionCodes;
 import com.openexchange.document.converter.DocumentConverterService;
+import com.openexchange.document.converter.FileDocumentContent;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 
 /**
  * {@link JODConverterDocumentConverterService} - The {@link DocumentConverterService} implementation based on <a
@@ -66,7 +83,14 @@ import com.openexchange.exception.OXException;
  */
 public class JODConverterDocumentConverterService implements DocumentConverterService {
 
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(JODConverterDocumentConverterService.class));
+
     private final OfficeManager officeManager;
+
+    private volatile OfficeDocumentConverter converter;
+
+    private volatile OfficeDocumentConverter pdfConverter;
 
     /**
      * Initializes a new {@link JODConverterDocumentConverterService}.
@@ -79,10 +103,58 @@ public class JODConverterDocumentConverterService implements DocumentConverterSe
         final DefaultOfficeManagerConfiguration configuration = new DefaultOfficeManagerConfiguration();
         configuration.setOfficeHome("/usr/lib/openoffice");
         configuration.setConnectionProtocol(OfficeConnectionProtocol.PIPE);
-        configuration.setPipeNames("office1", "office2");
+        {
+            final int processors = Runtime.getRuntime().availableProcessors();
+            final String[] pipes = new String[processors];
+            final StringBuilder sb = new StringBuilder("office");
+            for (int i = 0; i < pipes.length; i++) {
+                sb.setLength(6);
+                pipes[i] = sb.append(i + 1).toString();
+            }
+            configuration.setPipeNames(pipes);
+        }
         configuration.setTaskExecutionTimeout(240000L); // 4 minutes
         configuration.setTaskQueueTimeout(60000L); // 1 minute
         officeManager = configuration.buildOfficeManager();
+    }
+
+    /**
+     * Gets the all-purpose converter
+     * 
+     * @return The all-purpose converter
+     */
+    private OfficeDocumentConverter getConverter() {
+        OfficeDocumentConverter tmp = converter;
+        if (null == tmp) {
+            synchronized (this) {
+                tmp = converter;
+                if (null == tmp) {
+                    converter = tmp = new OfficeDocumentConverter(officeManager);
+                }
+            }
+        }
+        return tmp;
+    }
+
+    /**
+     * Gets the PDF converter
+     * 
+     * @return The PDF converter
+     */
+    private OfficeDocumentConverter getPDFConverter() {
+        OfficeDocumentConverter tmp = pdfConverter;
+        if (null == tmp) {
+            synchronized (this) {
+                tmp = pdfConverter;
+                if (null == tmp) {
+                    final DocumentFormatRegistry formatRegistry = new DefaultDocumentFormatRegistry();
+                    formatRegistry.getFormatByExtension(PDF).setInputFamily(DocumentFamily.DRAWING);
+                    tmp = new OfficeDocumentConverter(officeManager, formatRegistry);
+                    converter = tmp;
+                }
+            }
+        }
+        return tmp;
     }
 
     /**
@@ -102,10 +174,155 @@ public class JODConverterDocumentConverterService implements DocumentConverterSe
         officeManager.stop();
     }
 
-    @Override
-    public DocumentContent convert(final DocumentContent inputContent, final String extension) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+    private static final int BUFLEN = 2048;
+
+    private static final String PDF = "pdf";
+
+    private static final Integer PDFX1A2001 = Integer.valueOf(1);
+
+    /**
+     * This DocumentFormat must be used when converting from document (not pdf) to pdf/a For some reason "PDF/A-1" is called
+     * "SelectPdfVersion" internally; maybe they plan to add other PdfVersions later.
+     */
+    private DocumentFormat toFormatPDFA() {
+        final DocumentFormat format = new DocumentFormat("PDF/A", PDF, "application/pdf");
+        final Map<String, Object> properties = new HashMap<String, Object>();
+        properties.put("FilterName", "writer_pdf_Export");
+
+        final Map<String, Object> filterData = new HashMap<String, Object>();
+        filterData.put("SelectPdfVersion", PDFX1A2001);
+        properties.put("FilterData", filterData);
+
+        format.setStoreProperties(DocumentFamily.TEXT, properties);
+        return format;
     }
 
+    /**
+     * This DocumentFormat must be used when converting from pdf to pdf/a For some reason "PDF/A-1" is called "SelectPdfVersion" internally;
+     * maybe they plan to add other PdfVersions later.
+     */
+    private DocumentFormat toFormatPDFA_DRAW() {
+        final DocumentFormat format = new DocumentFormat("PDF/A", PDF, "application/pdf");
+        final Map<String, Object> properties = new HashMap<String, Object>();
+        properties.put("FilterName", "draw_pdf_Export");
+
+        final Map<String, Object> filterData = new HashMap<String, Object>();
+        filterData.put("SelectPdfVersion", PDFX1A2001);
+        properties.put("FilterData", filterData);
+
+        format.setStoreProperties(DocumentFamily.DRAWING, properties);
+        return format;
+    }
+
+    @Override
+    public DocumentContent convert(final DocumentContent inputContent, final String extension) throws OXException {
+        if (null == inputContent) {
+            throw DocumentConverterExceptionCodes.MISSING_ARGUMENT.create("inputContent");
+        }
+        if (isEmpty(extension)) {
+            throw DocumentConverterExceptionCodes.MISSING_ARGUMENT.create("extension");
+        }
+        try {
+            String ext = extension;
+            if (ext.charAt(0) == '.') {
+                ext = ext.substring(1);
+            }
+            final String inputExtension = FilenameUtils.getExtension(inputContent.getName());
+            /*
+             * If inputContent is a PDF you will need to use another FormatRegistery, namely DRAWING
+             */
+            final boolean pdf2pdf;
+            final OfficeDocumentConverter converter;
+            if (PDF.equalsIgnoreCase(ext) && PDF.equalsIgnoreCase(inputExtension)) {
+                converter = getPDFConverter();
+                pdf2pdf = true;
+            } else {
+                converter = getConverter();
+                pdf2pdf = false;
+            }
+            /*
+             * Get (generate if absent) input file
+             */
+            File inputFile = inputContent.optFile();
+            if (null == inputFile) {
+                OutputStream outputStream = null;
+                InputStream inputStream = null;
+                try {
+                    inputFile = File.createTempFile(FilenameUtils.getBaseName(inputContent.getName()), "." + inputExtension);
+                    outputStream = new FileOutputStream(inputFile);
+                    inputStream = inputContent.getInputStream();
+                    final byte[] buf = new byte[BUFLEN];
+                    for (int read; (read = inputStream.read(buf, 0, BUFLEN)) > 0;) {
+                        outputStream.write(buf, 0, read);
+                    }
+                    outputStream.flush();
+                } finally {
+                    deleteOnExit(inputFile);
+                    Streams.close(outputStream);
+                    Streams.close(inputStream);
+                }
+            }
+            if (null == inputFile) {
+                throw DocumentConverterExceptionCodes.ERROR.create("Input file is null.");
+            }
+            /*
+             * Create output file
+             */
+            final File outputFile = File.createTempFile(FilenameUtils.getBaseName(inputContent.getName()), "." + ext);
+            try {
+                final long startTime = System.currentTimeMillis();
+                /*
+                 * If both input and output file is PDF
+                 */
+                if (pdf2pdf) {
+                    /*
+                     * Add the DocumentFormat with DRAW
+                     */
+                    converter.convert(inputFile, outputFile, toFormatPDFA_DRAW());
+                } else if (PDF.equalsIgnoreCase(ext)) {
+                    converter.convert(inputFile, outputFile, toFormatPDFA());
+                } else {
+                    converter.convert(inputFile, outputFile);
+                }
+                final long conversionTime = System.currentTimeMillis() - startTime;
+                LOG.info(String.format(
+                    "Successful conversion: %s [%db] to %s in %dms",
+                    inputExtension,
+                    Long.valueOf(inputFile.length()),
+                    extension,
+                    Long.valueOf(conversionTime)));
+                return new FileDocumentContent(outputFile);
+            } finally {
+                deleteOnExit(outputFile);
+            }
+        } catch (final IOException e) {
+            throw DocumentConverterExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (final OfficeException e) {
+            throw DocumentConverterExceptionCodes.OFFICE_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw DocumentConverterExceptionCodes.ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final char[] chars = string.toCharArray();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < chars.length; i++) {
+            isWhitespace = Character.isWhitespace(chars[i]);
+        }
+        return isWhitespace;
+    }
+
+    private static void deleteOnExit(final File file) {
+        if (null != file) {
+            try {
+                file.deleteOnExit();
+            } catch (final Exception e) {
+                // Ignore
+            }
+        }
+    }
 }

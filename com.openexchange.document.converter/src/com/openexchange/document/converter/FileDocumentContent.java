@@ -50,49 +50,89 @@
 package com.openexchange.document.converter;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import org.apache.tika.detect.DefaultDetector;
+import org.apache.tika.metadata.Metadata;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
+
 
 /**
- * {@link DocumentContent} - The content of a document for input for or result from a conversion operation.
- * 
+ * {@link FileDocumentContent} - The {@link DocumentContent} backed by a {@link File file}.
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface DocumentContent {
+public final class FileDocumentContent implements DocumentContent {
+
+    private final File file;
+
+    private String contentType;
 
     /**
-     * This method returns an <code>InputStream</code> representing the data and throws the appropriate exception if it can not do so. Note
-     * that a new <code>InputStream</code> object must be returned each time this method is called, and the stream must be positioned at the
-     * beginning of the data.
+     * Initializes a new {@link FileDocumentContent}.
      * 
-     * @return An input stream
-     * @throws OXException If input stream cannot be returned
+     * @param file The backing file
      */
-    public InputStream getInputStream() throws OXException;
+    public FileDocumentContent(final File file) {
+        super();
+        if (null == file) {
+            throw new IllegalArgumentException("file is null.");
+        }
+        this.file = file;
+    }
 
     /**
-     * Gets the optional file carrying the content provided by {@link #getInputStream()}.
+     * Initializes a new {@link FileDocumentContent}.
      * 
-     * @return The file or <code>null</code>
-     * @throws OXException If file cannot be returned
+     * @param file The backing file
+     * @param contentType The content type
      */
-    public File optFile() throws OXException;
+    public FileDocumentContent(final File file, final String contentType) {
+        super();
+        if (null == file) {
+            throw new IllegalArgumentException("file is null.");
+        }
+        this.file = file;
+        this.contentType = contentType;
+    }
 
-    /**
-     * This method returns the MIME type of the data in the form of a string. It should always return a valid type. It is suggested that
-     * getContentType return "application/octet-stream" if the InputContent implementation can not determine the data type.
-     * 
-     * @return The MIME Type
-     */
-    public String getContentType();
+    @Override
+    public InputStream getInputStream() throws OXException {
+        try {
+            return new FileInputStream(file);
+        } catch (final FileNotFoundException e) {
+            throw DocumentConverterExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        }
+    }
 
-    /**
-     * Return the <i>name</i> of this object where the name of the object is dependent on the nature of the underlying objects. InputContent
-     * encapsulating files may choose to return the filename of the object. (Typically this would be the last component of the filename, not
-     * an entire pathname.)
-     * 
-     * @return The name
-     */
-    public String getName();
+    @Override
+    public File optFile() throws OXException {
+        return file;
+    }
+
+    @Override
+    public String getContentType() {
+        if (null == contentType) {
+            FileInputStream stream = null;
+            try {
+                stream = new FileInputStream(file);
+                contentType = new DefaultDetector().detect(stream, new Metadata()).toString();
+            } catch (final IOException e) {
+                // Ignore
+                contentType = "application/octet-stream";
+            } finally {
+                Streams.close(stream);
+            }
+        }
+        return contentType;
+    }
+
+    @Override
+    public String getName() {
+        return file.getName();
+    }
 
 }
