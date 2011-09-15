@@ -3,7 +3,11 @@
  - Fix for bug 10251: If searching for tasks and a folder is shared with "only own" permission the task is not shown anymore if not created
    by current user.
 
-* 2011-09-14 - marcus.klein@open-xchange.com
+* 2011-09-15 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20124: Proper "attachment" field in returned JSON mail object
+
+* 2011-09-14 - marcus.klein@open-xchange.com 
 
  - Fix for bug 20325: Correctly adding echo header configuration property.
 
