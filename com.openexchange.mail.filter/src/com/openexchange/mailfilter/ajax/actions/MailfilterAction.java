@@ -667,7 +667,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
          * Establish SieveHandler
          */
         final String credsrc = config.getProperty(MailFilterProperties.Values.SIEVE_CREDSRC.property);
-        if (MailFilterProperties.CredSrc.SESSION.name.equals(credsrc)) {
+        if (MailFilterProperties.CredSrc.SESSION.name.equals(credsrc) || MailFilterProperties.CredSrc.SESSION_FULL_LOGIN.name.equals(credsrc)) {
             final String username = creds.getUsername();
             final String authname = creds.getAuthname();
             final String password = getRightPassword(config, creds);
