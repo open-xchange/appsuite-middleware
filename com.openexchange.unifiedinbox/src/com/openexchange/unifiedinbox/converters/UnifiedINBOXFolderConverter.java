@@ -188,7 +188,7 @@ public final class UnifiedINBOXFolderConverter {
         tmp.setHoldsMessages(true);
         {
             final MailPermission ownPermission = new DefaultMailPermission();
-            ownPermission.setFolderPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER);
+            ownPermission.setFolderPermission(OCLPermission.READ_FOLDER);
             ownPermission.setAllObjectPermission(OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.DELETE_ALL_OBJECTS);
             ownPermission.setFolderAdmin(false);
             tmp.setOwnPermission(ownPermission);
@@ -197,7 +197,7 @@ public final class UnifiedINBOXFolderConverter {
             final MailPermission permission = new DefaultMailPermission();
             permission.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
             permission.setGroupPermission(true);
-            permission.setFolderPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER);
+            permission.setFolderPermission(OCLPermission.READ_FOLDER);
             permission.setAllObjectPermission(OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.DELETE_ALL_OBJECTS);
             permission.setFolderAdmin(false);
             tmp.addPermission(permission);
@@ -231,7 +231,7 @@ public final class UnifiedINBOXFolderConverter {
         ownPermission.setEntity(userId);
         ownPermission.setGroupPermission(false);
         ownPermission.setFolderPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER);
-        ownPermission.setAllObjectPermission(OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+        ownPermission.setAllObjectPermission(OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.DELETE_ALL_OBJECTS);
         ownPermission.setFolderAdmin(false);
         mailFolder.setOwnPermission(ownPermission);
     }
@@ -241,7 +241,7 @@ public final class UnifiedINBOXFolderConverter {
         permission.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
         permission.setGroupPermission(true);
         permission.setFolderPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER);
-        permission.setAllObjectPermission(OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+        permission.setAllObjectPermission(OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.DELETE_ALL_OBJECTS);
         permission.setFolderAdmin(false);
         mailFolder.removePermissions();
         mailFolder.addPermission(permission);
