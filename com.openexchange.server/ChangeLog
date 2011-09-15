@@ -9,6 +9,7 @@
  - Fix for bug 19956: Read-folder permissions for root Unified Mail folders
  - Fix for bug 20291: Introduced new property value "session-full-login" to allow the full login string being taken as SIEVE user name
  - Fix for bug 20364: Quoting replacement string on reply/forward operation
+ - Fix for bug 20266: Proper "filename" parameter
 
 * 2011-09-14 - marcus.klein@open-xchange.com 
 
