@@ -117,6 +117,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(JSONMessageHandler.class));
 
+    private static final String VIRTUAL = "___VIRTUAL___";
+
     private static final class PlainTextContent {
 
         final String id;
@@ -553,7 +555,12 @@ public final class JSONMessageHandler implements MailMessageHandler {
                      * Add HTML alternative part as attachment
                      */
                     if (attachHTMLAlternativePart) {
-                        asAttachment(id, contentType.getBaseType(), htmlContent.length(), fileName, null);
+                        try {
+                            final JSONObject attachment = asAttachment(id, contentType.getBaseType(), htmlContent.length(), fileName, null);
+                            attachment.put(VIRTUAL, true);
+                        } catch (final JSONException e) {
+                            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+                        }
                     }
                 } else if (DisplayMode.RAW.equals(displayMode)) {
                     /*
@@ -826,8 +833,11 @@ public final class JSONMessageHandler implements MailMessageHandler {
                 for (int i = 0; i < len; i++) {
                     final JSONObject attachment = attachments.getJSONObject(i);
                     if (attachment.hasAndNotNull(dispKey) && Part.ATTACHMENT.equalsIgnoreCase(attachment.getString(dispKey))) {
-                        jsonObject.put(MailJSONField.HAS_ATTACHMENTS.getKey(), true);
-                        i = len;
+                        if (attachment.hasAndNotNull(VIRTUAL) && attachment.getBoolean(VIRTUAL)) {
+                            attachment.remove(VIRTUAL);
+                        } else {
+                            jsonObject.put(MailJSONField.HAS_ATTACHMENTS.getKey(), true);
+                        }
                     }
                 }
             }
