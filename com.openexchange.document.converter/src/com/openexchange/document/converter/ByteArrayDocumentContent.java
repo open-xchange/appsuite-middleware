@@ -50,77 +50,74 @@
 package com.openexchange.document.converter;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import org.apache.tika.detect.DefaultDetector;
 import org.apache.tika.metadata.Metadata;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Streams;
-
+import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 
 /**
- * {@link FileDocumentContent} - The {@link DocumentContent} backed by a {@link File file}.
- *
+ * {@link ByteArrayDocumentContent} - The {@link DocumentContent} backed by a <code>byte</code> array.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FileDocumentContent implements DocumentContent {
+public final class ByteArrayDocumentContent implements DocumentContent {
 
-    private final File file;
+    private final byte[] bytes;
+
+    private final String name;
 
     private String contentType;
 
     /**
-     * Initializes a new {@link FileDocumentContent}.
+     * Initializes a new {@link ByteArrayDocumentContent}.
      * 
-     * @param file The backing file
+     * @param bytes The backing byte array
+     * @param name The file name
      */
-    public FileDocumentContent(final File file) {
-        this(file, null);
+    public ByteArrayDocumentContent(final byte[] bytes, final String name) {
+        this(bytes, name, null);
     }
 
     /**
-     * Initializes a new {@link FileDocumentContent}.
+     * Initializes a new {@link ByteArrayDocumentContent}.
      * 
-     * @param file The backing file
+     * @param bytes The backing byte array
+     * @param name The file name
      * @param contentType The content type
      */
-    public FileDocumentContent(final File file, final String contentType) {
+    public ByteArrayDocumentContent(final byte[] bytes, final String name, final String contentType) {
         super();
-        if (null == file) {
-            throw new IllegalArgumentException("file is null.");
+        if (null == bytes) {
+            throw new IllegalArgumentException("byte array is null.");
         }
-        this.file = file;
+        if (null == name) {
+            throw new IllegalArgumentException("name is null.");
+        }
+        this.name = name;
+        this.bytes = bytes;
         this.contentType = contentType;
     }
 
     @Override
     public InputStream getInputStream() throws OXException {
-        try {
-            return new FileInputStream(file);
-        } catch (final FileNotFoundException e) {
-            throw DocumentConverterExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        }
+        return new UnsynchronizedByteArrayInputStream(bytes);
     }
 
     @Override
     public File optFile() throws OXException {
-        return file;
+        return null;
     }
 
     @Override
     public String getContentType() {
         if (null == contentType) {
-            FileInputStream stream = null;
             try {
-                stream = new FileInputStream(file);
-                contentType = new DefaultDetector().detect(stream, new Metadata()).toString();
+                contentType = new DefaultDetector().detect(new UnsynchronizedByteArrayInputStream(bytes), new Metadata()).toString();
             } catch (final IOException e) {
                 // Ignore
                 contentType = "application/octet-stream";
-            } finally {
-                Streams.close(stream);
             }
         }
         return contentType;
@@ -128,7 +125,7 @@ public final class FileDocumentContent implements DocumentContent {
 
     @Override
     public String getName() {
-        return file.getName();
+        return name;
     }
 
 }
