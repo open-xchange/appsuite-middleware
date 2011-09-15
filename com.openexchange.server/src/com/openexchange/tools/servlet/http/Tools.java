@@ -65,13 +65,12 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.Login;
+import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.helper.BrowserDetector;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.systemname.SystemNameService;
-import com.openexchange.tools.encoding.Charsets;
-import com.openexchange.tools.encoding.Helper;
 
 /**
  * Convenience methods for servlets.
@@ -305,19 +304,9 @@ public final class Tools {
         if (contentDisposition == null) {
             contentDisposition = "attachment";
         }
-        String filename = null;
 
-        if (detector.isMSIE()) {
-            filename = Helper.encodeFilenameForIE(fileName, Charsets.UTF_8);
-        } else if (detector.isSafari5()) {
-            // Leave empty
-        } else {
-            filename = Helper.escape(Helper.encodeFilename(fileName, "UTF-8"));
-        }
-
-        if (!contentDisposition.contains(";") && filename != null) {
-            contentDisposition =
-                new StringBuilder(64).append(contentDisposition).append("; filename=\"").append(filename).append("\"").toString();
+        if (!contentDisposition.contains(";") && fileName != null) {
+            contentDisposition = Mail.getAttachmentDispositionValue(fileName, null);
         }
 
         resp.setHeader("Content-Disposition", contentDisposition);

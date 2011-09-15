@@ -171,6 +171,7 @@ import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadRenamer;
 import com.openexchange.tools.encoding.Helper;
+import com.openexchange.tools.encoding.URLCoder;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
@@ -1266,14 +1267,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         contentType.setSubType("octet-stream");
                         final HttpServletResponse httpResponse = paramContainer.getHttpServletResponse();
                         httpResponse.setContentType(contentType.toString());
-                        final String preparedFileName =
-                            getSaveAsFileName(
-                                new StringBuilder(mail.getSubject()).append(".eml").toString(),
-                                isMSIEOnWindows(paramContainer.getHeader(STR_USER_AGENT)),
-                                null);
-                        httpResponse.setHeader(
-                            "Content-disposition",
-                            new StringBuilder(64).append("attachment; filename=\"").append(preparedFileName).append('"').toString());
+                        httpResponse.setHeader("Content-disposition", getAttachmentDispositionValue(new StringBuilder(mail.getSubject()).append(".eml").toString(), null));
                         Tools.removeCachingHeader(httpResponse);
                         // Write output stream in max. 8K chunks
                         final OutputStream out = httpResponse.getOutputStream();
@@ -1805,12 +1799,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 contentType.setPrimaryType("application");
                 contentType.setSubType("octet-stream");
                 resp.setContentType(contentType.toString());
-                final String userAgent = req.getHeader(STR_USER_AGENT);
-                final String preparedFileName =
-                    getSaveAsFileName(fileName, isMSIEOnWindows(userAgent == null ? "" : userAgent), "application/zip");
-                resp.setHeader(
-                    "Content-disposition",
-                    new StringBuilder(64).append("attachment; filename=\"").append(preparedFileName).append('"').toString());
+                resp.setHeader("Content-disposition", getAttachmentDispositionValue(fileName, null));
                 /*
                  * Reset response header values since we are going to directly write into servlet's output stream and then some browsers do
                  * not allow header "Pragma"
@@ -1887,12 +1876,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 contentType.setPrimaryType("application");
                 contentType.setSubType("octet-stream");
                 resp.setContentType(contentType.toString());
-                final String userAgent = req.getHeader(STR_USER_AGENT);
-                final String preparedFileName =
-                    getSaveAsFileName(fileName, isMSIEOnWindows(userAgent == null ? "" : userAgent), "application/zip");
-                resp.setHeader(
-                    "Content-disposition",
-                    new StringBuilder(64).append("attachment; filename=\"").append(preparedFileName).append('"').toString());
+                resp.setHeader("Content-disposition", getAttachmentDispositionValue(fileName, null));
                 /*
                  * Reset response header values since we are going to directly write into servlet's output stream and then some browsers do
                  * not allow header "Pragma"
@@ -2031,11 +2015,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     contentType.setPrimaryType("application");
                     contentType.setSubType("octet-stream");
                     resp.setContentType(contentType.toString());
-                    final String preparedFileName =
-                        getSaveAsFileName(fileName, isMSIEOnWindows(req.getHeader(STR_USER_AGENT)), mailPart.getContentType().toString());
-                    resp.setHeader(
-                        "Content-disposition",
-                        new StringBuilder(64).append("attachment; filename=\"").append(preparedFileName).append('"').toString());
+                    resp.setHeader("Content-disposition", getAttachmentDispositionValue(fileName, mailPart.getContentType().getBaseType()));
                 } else {
                     final CheckedDownload checkedDownload =
                         DownloadUtility.checkInlineDownload(
@@ -2121,14 +2101,19 @@ public class Mail extends PermissionServlet implements UploadListener {
         return (browserDetector.isMSIE() && browserDetector.isWindows());
     }
 
-    private static final Pattern PART_FILENAME_PATTERN = Pattern.compile("(part )([0-9]+)(?:(\\.)([0-9]+))*", Pattern.CASE_INSENSITIVE);
-
     private static final Pattern PAT_BSLASH = Pattern.compile("\\\\");
 
     private static final Pattern PAT_QUOTE = Pattern.compile("\"");
 
+    private static String escapeBackslashAndQuote(final String str) {
+        return PAT_QUOTE.matcher(PAT_BSLASH.matcher(str).replaceAll("\\\\\\\\")).replaceAll("\\\\\\\"");
+    }
+
+    private static final Pattern PART_FILENAME_PATTERN = Pattern.compile("(part )([0-9]+)(?:(\\.)([0-9]+))*", Pattern.CASE_INSENSITIVE);
+
     private static final String DEFAULT_FILENAME = "file.dat";
 
+    @Deprecated
     public static final String getSaveAsFileName(final String fileName, final boolean internetExplorer, final String baseCT) {
         if (null == fileName) {
             return DEFAULT_FILENAME;
@@ -2157,7 +2142,45 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
             }
         }
-        return PAT_QUOTE.matcher(PAT_BSLASH.matcher(tmp.toString()).replaceAll("\\\\\\\\")).replaceAll("\\\\\\\"");
+        return escapeBackslashAndQuote(tmp.toString());
+    }
+
+    public static String getAttachmentDispositionValue(final String fileName, final String baseCT) {
+        if (null == fileName) {
+            return new StringBuilder("attachment; filename=\"").append(DEFAULT_FILENAME).append('"').toString();
+        }
+        final Matcher m = PART_FILENAME_PATTERN.matcher(fileName);
+        if (m.matches()) {
+            return new StringBuilder("attachment; filename=\"").append(escapeBackslashAndQuote(fileName.replaceAll(" ", "_"))).append('"').toString();
+        }
+        String fn = fileName;
+        if (null != baseCT) {
+            if (baseCT.regionMatches(true, 0, MIME_TEXT_PLAIN, 0, MIME_TEXT_PLAIN.length())) {
+                if (!fn.toLowerCase(Locale.ENGLISH).endsWith(".txt")) {
+                    fn += ".txt";
+                }
+            } else if (baseCT.regionMatches(true, 0, MIME_TEXT_HTML, 0, MIME_TEXT_HTML.length())) {
+                if (!fn.toLowerCase(Locale.ENGLISH).endsWith(".htm") && !fileName.toLowerCase(Locale.ENGLISH).endsWith(".html")) {
+                    fn += ".html";
+                }
+            }
+        }
+        fn = escapeBackslashAndQuote(fn);
+        /*-
+         * On socket layer characters are casted to byte values.
+         * 
+         * See AJPv13Response.writeString():
+         * sink.write((byte) chars[i]);
+         * 
+         * Therefore ensure we have a one-character-per-byte charset, as it is with ISO-5589-1
+         */
+        String foo;
+        try {
+            foo = new String(fn.getBytes("UTF-8"), "ISO-8859-1");
+        } catch (final UnsupportedEncodingException e) {
+            foo = null;
+        }
+        return new StringBuilder("attachment; filename*=UTF-8''").append(URLCoder.encode(fn)).append("; filename=\"").append(null == foo ? fn : foo).append('"').toString();
     }
 
     public void actionPutForwardMultiple(final ServerSession session, final JSONWriter writer, final JSONObject jsonObj, final MailServletInterface mi) throws JSONException {
