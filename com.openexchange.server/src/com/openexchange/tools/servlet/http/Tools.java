@@ -65,12 +65,13 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.Login;
-import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.helper.BrowserDetector;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.systemname.SystemNameService;
+import com.openexchange.tools.encoding.Charsets;
+import com.openexchange.tools.encoding.Helper;
 
 /**
  * Convenience methods for servlets.
@@ -299,17 +300,27 @@ public final class Tools {
         setHeaderForFileDownload(userAgent, resp, fileName, null);
     }
 
-    public static void setHeaderForFileDownload(final String userAgent, final HttpServletResponse resp, final String fileName, String contentDisposition) throws UnsupportedEncodingException {
+    public static void setHeaderForFileDownload(final String userAgent, final HttpServletResponse resp, final String fileName, final String contentDisposition) throws UnsupportedEncodingException {
         final BrowserDetector detector = new BrowserDetector(userAgent);
-        if (contentDisposition == null) {
-            contentDisposition = "attachment";
+        String cd = contentDisposition;
+        if (cd == null) {
+            cd = "attachment";
+        }
+        String filename = null;
+
+        if (detector.isMSIE()) {
+            filename = Helper.encodeFilenameForIE(fileName, Charsets.UTF_8);
+        } else if (detector.isSafari5()) {
+            filename = new String(fileName.getBytes(Charsets.UTF_8), Charsets.ISO_8859_1);
+        } else {
+            filename = Helper.escape(Helper.encodeFilename(fileName, "UTF-8"));
         }
 
-        if (!contentDisposition.contains(";") && fileName != null) {
-            contentDisposition = Mail.getAttachmentDispositionValue(fileName, null);
+        if (cd.indexOf(';') < 0 && filename != null) {
+            cd = new StringBuilder(64).append(cd).append("; filename=\"").append(filename).append("\"").toString();
         }
 
-        resp.setHeader("Content-Disposition", contentDisposition);
+        resp.setHeader("Content-Disposition", cd);
     }
 
     static {
