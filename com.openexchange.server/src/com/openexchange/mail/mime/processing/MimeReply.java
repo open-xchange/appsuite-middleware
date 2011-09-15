@@ -51,6 +51,7 @@ package com.openexchange.mail.mime.processing;
 
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.parseAddressList;
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.unfold;
+import static java.util.regex.Matcher.quoteReplacement;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -535,7 +536,7 @@ public final class MimeReply {
                 try {
                     replyPrefix =
                         PATTERN_DATE.matcher(replyPrefix).replaceFirst(
-                            date == null ? "" : MimeProcessingUtility.getFormattedDate(date, DateFormat.LONG, ltz.locale, ltz.timeZone));
+                            date == null ? "" : quoteReplacement(MimeProcessingUtility.getFormattedDate(date, DateFormat.LONG, ltz.locale, ltz.timeZone)));
                 } catch (final Exception e) {
                     if (LOG.isWarnEnabled()) {
                         LOG.warn(e.getMessage(), e);
@@ -546,7 +547,7 @@ public final class MimeReply {
                 try {
                     replyPrefix =
                         PATTERN_TIME.matcher(replyPrefix).replaceFirst(
-                            date == null ? "" : MimeProcessingUtility.getFormattedTime(date, DateFormat.SHORT, ltz.locale, ltz.timeZone));
+                            date == null ? "" : quoteReplacement(MimeProcessingUtility.getFormattedTime(date, DateFormat.SHORT, ltz.locale, ltz.timeZone)));
                 } catch (final Exception e) {
                     if (LOG.isWarnEnabled()) {
                         LOG.warn(e.getMessage(), e);
@@ -557,7 +558,7 @@ public final class MimeReply {
             {
                 final InternetAddress[] from = msg.getFrom();
                 replyPrefix =
-                    PATTERN_SENDER.matcher(replyPrefix).replaceFirst(from == null || from.length == 0 ? "" : from[0].toUnicodeString());
+                    PATTERN_SENDER.matcher(replyPrefix).replaceFirst(from == null || from.length == 0 ? "" : quoteReplacement(from[0].toUnicodeString()));
             }
             {
                 final char nextLine = '\n';
