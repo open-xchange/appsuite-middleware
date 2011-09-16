@@ -1911,6 +1911,7 @@ public final class Contacts {
             ps.setBytes(2, img);
             ps.setString(3, mime);
             ps.setInt(4, cid);
+            ps.setLong(5, lastModified);
             if (DEBUG) {
                 LOG.debug(new StringBuilder("INSERT IMAGE ").append(getStatementString(ps)));
             }
