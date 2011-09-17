@@ -49,7 +49,6 @@
 
 package com.openexchange.messaging.json;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -61,11 +60,13 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import org.apache.commons.codec.binary.Base64InputStream;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.Log;
 import com.openexchange.mail.text.HTMLProcessing;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.messaging.BinaryContent;
@@ -244,6 +245,8 @@ public class MessagingMessageWriter {
 
     }
 
+    private static final int BUFLEN = 2048;
+
     protected static class BinaryContentRenderer implements MessagingContentWriter {
 
         @Override
@@ -254,29 +257,36 @@ public class MessagingMessageWriter {
         @Override
         public Object write(final MessagingPart part, final MessagingContent content, final ServerSession session, final DisplayMode mode) throws OXException {
             final BinaryContent binContent = (BinaryContent) content;
-            final InputStream is = new BufferedInputStream(new Base64InputStream(binContent.getData(), true, -1, null));
             final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream();
-            int i = 0;
-            try {
-                while ((i = is.read()) > 0) {
-                    baos.write(i);
-                }
-            } catch (final IOException e) {
-                throw MessagingExceptionCodes.IO_ERROR.create(e, e.getMessage());
-            } finally {
+            {
+                final InputStream is = binContent.getData();
                 try {
-                    is.close();
+                    final byte[] buf = new byte[BUFLEN];
+                    for (int read; (read = is.read(buf, 0, BUFLEN)) > 0;) {
+                        baos.write(buf, 0, read);
+                    }
+                    // No flush needed for ByteArrayOutputStream
                 } catch (final IOException e) {
-                    com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MessagingMessageWriter.class)).error("Closing input stream failed.", e);
+                    throw MessagingExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                } catch (final RuntimeException e) {
+                    throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                } finally {
+                    try {
+                        is.close();
+                    } catch (final IOException e) {
+                        Log.valueOf(LogFactory.getLog(MessagingMessageWriter.class)).error("Closing input stream failed.", e);
+                    }
                 }
             }
+            /*
+             * Return as base64-encoded string
+             */
             try {
-                return new String(baos.toByteArray(), "US-ASCII");
+                return new String(Base64.encodeBase64(baos.toByteArray(), false), "US-ASCII");
             } catch (final UnsupportedEncodingException e) {
-                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MessagingMessageWriter.class)).error("Unsupported encoding: " + e.getMessage(), e);
+                Log.valueOf(LogFactory.getLog(MessagingMessageWriter.class)).error("Unsupported encoding: " + e.getMessage(), e);
                 return null;
             }
-
         }
 
         @Override
