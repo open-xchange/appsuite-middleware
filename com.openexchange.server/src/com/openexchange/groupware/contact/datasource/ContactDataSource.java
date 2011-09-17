@@ -173,10 +173,10 @@ public final class ContactDataSource implements DataSource {
             properties);
     }
 
-    private static void writeVCard2Stream(final Contact contact, final ByteArrayOutputStream byteArrayOutputStream, final VersitDefinition contactDef, final Session session) throws OXException {
+    private static void writeVCard2Stream(final Contact contact, final ByteArrayOutputStream stream, final VersitDefinition contactDef, final Session session) throws OXException {
         final VersitDefinition.Writer versitWriter;
         try {
-            versitWriter = contactDef.getWriter(byteArrayOutputStream, "UTF-8");
+            versitWriter = contactDef.getWriter(stream, "UTF-8");
         } catch (final IOException e) {
             throw DataExceptionCodes.ERROR.create(e, e.getMessage());
         }
