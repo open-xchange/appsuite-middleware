@@ -61,10 +61,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.Log;
 import com.openexchange.mail.text.HTMLProcessing;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.messaging.BinaryContent;
@@ -272,7 +274,7 @@ public class MessagingMessageWriter {
                     try {
                         is.close();
                     } catch (final IOException e) {
-                        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MessagingMessageWriter.class)).error("Closing input stream failed.", e);
+                        Log.valueOf(LogFactory.getLog(MessagingMessageWriter.class)).error("Closing input stream failed.", e);
                     }
                 }
             }
@@ -282,7 +284,7 @@ public class MessagingMessageWriter {
             try {
                 return new String(Base64.encodeBase64(baos.toByteArray(), false), "US-ASCII");
             } catch (final UnsupportedEncodingException e) {
-                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MessagingMessageWriter.class)).error("Unsupported encoding: " + e.getMessage(), e);
+                Log.valueOf(LogFactory.getLog(MessagingMessageWriter.class)).error("Unsupported encoding: " + e.getMessage(), e);
                 return null;
             }
         }
