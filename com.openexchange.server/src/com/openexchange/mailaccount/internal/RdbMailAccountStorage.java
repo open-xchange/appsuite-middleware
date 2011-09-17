@@ -456,15 +456,6 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             }
             final DeleteListenerRegistry registry = DeleteListenerRegistry.getInstance();
             registry.triggerOnBeforeDeletion(id, properties, user, cid, con);
-            // A POP3 account?
-            final String pop3Path = getPOP3Path(id, user, cid, con);
-            if (null != pop3Path) {
-                try {
-                    cleanseFromPrimary(pop3Path, user, cid);
-                } catch (final OXException e) {
-                    LOG.warn("Couldn't delete POP3 backup folders in primary mail account", e);
-                }
-            }
             // First delete properties
             deleteProperties(cid, user, id, con);
             deleteTransportProperties(cid, user, id, con);
