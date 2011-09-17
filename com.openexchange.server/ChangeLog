@@ -1,3 +1,12 @@
+* 2011-09-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20302: Write and respectively honor participants' FN field for distribution lists
+
+* 2011-09-16 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20380: Fixed SQL error when inserting contact with image
+ - Fix for bug 20369: Fixed context change operation
+
 * 2011-09-15 - marcus.klein@open-xchange.com
 
  - Fix for bug 10251: If searching for tasks and a folder is shared with "only own" permission the task is not shown anymore if not created
