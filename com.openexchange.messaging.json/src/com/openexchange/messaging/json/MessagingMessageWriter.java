@@ -231,11 +231,10 @@ public class MessagingMessageWriter {
 
         @Override
         public Object write(final MessagingPart part, final MessagingContent content, final ServerSession session, final DisplayMode mode) {
-            final String data = ((StringContent) content).getData();
             if (null == session || null == mode) {
-                return data;
+                return ((StringContent) content).getData();
             }
-            return HTMLProcessing.formatTextForDisplay(data, session.getUserSettingMail(), mode);
+            return HTMLProcessing.formatTextForDisplay(((StringContent) content).getData(), session.getUserSettingMail(), mode);
         }
 
         @Override
