@@ -1170,15 +1170,9 @@ public final class IMAPCommandsCollection {
                 if (response.isOK()) {
                     return Boolean.TRUE;
                 } else if (response.isBAD()) {
-                    throw new BadCommandException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        command,
-                        response.toString()));
+                    throw new BadCommandException(response.toString());
                 } else if (response.isNO()) {
-                    throw new CommandFailedException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        command,
-                        response.toString()));
+                    throw new CommandFailedException(response.toString());
                 } else {
                     protocol.handleResult(response);
                 }

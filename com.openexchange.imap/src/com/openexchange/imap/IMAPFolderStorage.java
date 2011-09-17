@@ -1238,13 +1238,14 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         session,
                         e,
                         renameMe.getFullName(),
-                        newFullName);
+                        newFullName,
+                        e.getMessage());
                 }
                 /*
                  * Success?
                  */
                 if (!success) {
-                    throw IMAPException.create(IMAPException.Code.RENAME_FAILED, imapConfig, session, renameMe.getFullName(), newFullName);
+                    throw IMAPException.create(IMAPException.Code.RENAME_FAILED, imapConfig, session, renameMe.getFullName(), newFullName, "<not-available>");
                 }
                 renameMe = getIMAPFolder(oldFullName);
                 if (renameMe.exists()) {
@@ -1548,14 +1549,15 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                             session,
                             e,
                             moveMe.getFullName(),
-                            newFullName);
+                            newFullName,
+                            e.getMessage());
 
                     }
                     /*
                      * Success?
                      */
                     if (!success) {
-                        throw IMAPException.create(IMAPException.Code.RENAME_FAILED, imapConfig, session, moveMe.getFullName(), newFullName);
+                        throw IMAPException.create(IMAPException.Code.RENAME_FAILED, imapConfig, session, moveMe.getFullName(), newFullName, "<not-available>");
                     }
                     moveMe = getIMAPFolder(oldFullName);
                     if (doesExist(moveMe, false)) {
