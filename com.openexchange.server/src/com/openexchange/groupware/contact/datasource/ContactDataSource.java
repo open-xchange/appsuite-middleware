@@ -190,6 +190,7 @@ public final class ContactDataSource implements DataSource {
          * Convert
          */
         try {
+            oxContainerConverter.setAddDisplayName4DList(true);
             final VersitObject versitObject = oxContainerConverter.convertContact(contact, "3.0");
             contactDef.write(versitWriter, versitObject);
             versitWriter.flush();
