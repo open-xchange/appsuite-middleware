@@ -82,6 +82,10 @@ import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.mime.MIMEMailExceptionCode;
 import com.openexchange.mail.utils.DefaultFolderNamesProvider;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MailPasswordUtil;
@@ -443,6 +447,15 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         try {
             final DeleteListenerRegistry registry = DeleteListenerRegistry.getInstance();
             registry.triggerOnBeforeDeletion(id, properties, user, cid, con);
+            // A POP3 account?
+            final String pop3Path = getPOP3Path(id, user, cid, con);
+            if (null != pop3Path) {
+                try {
+                    cleanseFromPrimary(pop3Path, user, cid);
+                } catch (final OXException e) {
+                    LOG.warn("Couldn't delete POP3 backup folders in primary mail account", e);
+                }
+            }
             // First delete properties
             deleteProperties(cid, user, id, con);
             deleteTransportProperties(cid, user, id, con);
@@ -481,6 +494,63 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
+        }
+    }
+
+    private static String getPOP3Path(final int id, final int user, final int cid, final Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT url FROM user_mail_account WHERE cid = ? AND id = ? AND user = ?");
+            stmt.setLong(1, cid);
+            stmt.setLong(2, id);
+            stmt.setLong(3, user);
+            rs = stmt.executeQuery();
+            if (!rs.next() || !rs.getString(1).startsWith("pop3")) {
+                return null;
+            }
+            closeSQLStuff(rs, stmt);
+            stmt = con.prepareStatement("SELECT value FROM user_mail_account_properties WHERE cid = ? AND id = ? AND user = ? AND name = ?");
+            stmt.setLong(1, cid);
+            stmt.setLong(2, id);
+            stmt.setLong(3, user);
+            stmt.setString(4, "pop3.path");
+            rs = stmt.executeQuery();
+            return rs.next() ? rs.getString(1) : null;
+        } catch (final SQLException e) {
+            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(rs, stmt);
+        }
+    }
+
+    private static void cleanseFromPrimary(final String path, final int user, final int cid) throws OXException {
+        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> defaultMailAccess = MailAccess.getInstance(user, cid);
+        if (defaultMailAccess.isConnected()) {
+            try {
+                defaultMailAccess.getFolderStorage().deleteFolder(path, true);
+            } catch (final OXException e) {
+                if (MIMEMailExceptionCode.FOLDER_NOT_FOUND.equals(e)) {
+                    // Ignore
+                    LOG.trace(e.getMessage(), e);
+                } else {
+                    throw e;
+                }
+            }
+        } else {
+            defaultMailAccess.connect(false);
+            try {
+                defaultMailAccess.getFolderStorage().deleteFolder(path, true);
+            } catch (final OXException e) {
+                if (MIMEMailExceptionCode.FOLDER_NOT_FOUND.equals(e)) {
+                    // Ignore
+                    LOG.trace(e.getMessage(), e);
+                } else {
+                    throw e;
+                }
+            } finally {
+                defaultMailAccess.close(true);
+            }
         }
     }
 
