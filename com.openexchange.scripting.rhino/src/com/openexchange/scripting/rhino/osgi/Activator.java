@@ -1,31 +1,43 @@
 package com.openexchange.scripting.rhino.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
-public class Activator implements BundleActivator {
+import com.openexchange.scripting.rhino.require.DeferredResolution;
+import com.openexchange.scripting.rhino.require.RequireSupport;
+import com.openexchange.scripting.rhino.require.ResolveEnhancement;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.server.osgiservice.SimpleRegistryListener;
 
-	private static BundleContext context;
+public class Activator extends HousekeepingActivator {
 
-	static BundleContext getContext() {
-		return context;
+
+	@Override
+	protected Class<?>[] getNeededServices() {
+		return null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
-	 */
-	public void start(BundleContext bundleContext) throws Exception {
-		bundleContext.addBundleListener(new LookForScriptsListener());
-		Activator.context = bundleContext;
-	}
+	@Override
+	protected void startBundle() throws Exception {
+		context.addBundleListener(new LookForScriptsListener());
+		track(ResolveEnhancement.class, new SimpleRegistryListener<ResolveEnhancement>() {
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-	 */
-	public void stop(BundleContext bundleContext) throws Exception {
-		Activator.context = null;
+			@Override
+			public void added(ServiceReference<ResolveEnhancement> ref,
+					ResolveEnhancement service) {
+				RequireSupport.addResolveEnhancement(service);
+
+			}
+
+			@Override
+			public void removed(ServiceReference<ResolveEnhancement> ref,
+					ResolveEnhancement service) {
+				//RequireSupport.resolveEnhancements.remove(service);
+				// TODO
+			}
+		});
+		
+		openTrackers();
 	}
+	
 
 }

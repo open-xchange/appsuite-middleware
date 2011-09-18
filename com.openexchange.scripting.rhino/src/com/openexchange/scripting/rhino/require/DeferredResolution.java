@@ -20,7 +20,7 @@ public class DeferredResolution {
 		try {
 			LOCK.lock();
 			Context cx = Context.enter();
-			Iterator<DeferredResolution> iterator = outstanding.iterator();
+			Iterator<DeferredResolution> iterator = new LinkedList<DeferredResolution>(outstanding).iterator();
 			while(iterator.hasNext()) {
 				DeferredResolution next = iterator.next();
 				if (resolver.knows(next.id) && next.callback != null) {
@@ -33,6 +33,8 @@ public class DeferredResolution {
 			
 		}
 	}
+	
+
 
 	private String id;
 	private Scriptable scope;
@@ -71,5 +73,6 @@ public class DeferredResolution {
 			cb.handle(retval);
 		}
 	}
+
 	
 }

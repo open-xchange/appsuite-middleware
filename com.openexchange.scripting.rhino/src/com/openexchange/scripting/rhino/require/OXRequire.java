@@ -2,6 +2,7 @@ package com.openexchange.scripting.rhino.require;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
+import org.mozilla.javascript.NativeArray;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.Wrapper;
@@ -23,11 +24,15 @@ public class OXRequire extends ScriptableObject implements Function {
 			if (arg instanceof Wrapper) {
 				arg = ((Wrapper)arg).unwrap();
 			}
-			if (arg instanceof String[]) {
+			if (arg instanceof NativeArray) {
 				if (dependencies == null) {
-					dependencies = (String[]) arg;
+					NativeArray deps = (NativeArray) arg;
+					dependencies = new String[(int)deps.getLength()];
+					for(int i = 0; i < dependencies.length; i++) {
+						dependencies[i] = deps.get(i).toString();
+					}
 				} else {
-					throw new IllegalArgumentException("Invalid call to 'require'");
+					throw new IllegalArgumentException("Invalid call to 'define'");
 				}
 			}
 			
@@ -35,19 +40,20 @@ public class OXRequire extends ScriptableObject implements Function {
 				if (fun == null) {
 					fun = (Function) arg;
 				} else {
-					throw new IllegalArgumentException("Invalid call to 'require'");
+					throw new IllegalArgumentException("Invalid call to 'define'");
 				}
 			}
 		}
 		
 		if (fun == null) {
-			throw new IllegalArgumentException("Invalid call to 'require'");
+			throw new IllegalArgumentException("Invalid call to 'define'");
 		}
 		
 		if (dependencies == null) {
-			dependencies = new String[]{"require", "exports", "module"};
+			dependencies = new String[]{"require"}; // TODO: exports, module
 			
 		}
+		
 		Object[] resolved = new Object[dependencies.length];
 		for (int i = 0; i < dependencies.length; i++) {
 			resolved[i] = resolver.get(dependencies[i], cx, scope);

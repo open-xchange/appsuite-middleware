@@ -117,6 +117,10 @@ public class DependencyResolver {
 	public void remember(String id, Object object) {
 		registeredModules.put(id, object);
 	}
+
+	public JSBundle getBundle() {
+		return bundle;
+	}
 	
 
 }

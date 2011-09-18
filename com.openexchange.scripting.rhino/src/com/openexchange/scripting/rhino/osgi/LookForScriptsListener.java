@@ -8,29 +8,16 @@ import java.util.HashMap;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.ScriptableObject;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
+import static com.openexchange.scripting.rhino.SharedScope.*;
 
 import com.openexchange.scripting.rhino.require.RequireSupport;
 
 public class LookForScriptsListener implements BundleListener {
 
-	private static final ScriptableObject SHARED_SCOPE;
-	static {
-		Context cx;
-		try {
-			 cx = Context.enter();
-			 SHARED_SCOPE = cx.initStandardObjects(null, true);
-
-			// Force the LiveConnect stuff to be loaded. 
-			String loadMe = "RegExp; getClass; java; Packages; JavaAdapter;";
-			cx.evaluateString(SHARED_SCOPE , loadMe, "lazyLoad", 0, null);
-		} finally {
-			Context.exit();
-		}
-	}
+	
 	
 	@Override
 	public void bundleChanged(BundleEvent event) {
@@ -57,7 +44,7 @@ public class LookForScriptsListener implements BundleListener {
 			
 			RequireSupport.initialize(serviceScope, cx, new BundleJSBundle(bundle), additionalModules);
 			
-			cx.evaluateReader(serviceScope, r, entry.toExternalForm(), 1, null);
+			cx.evaluateReader(serviceScope, r, bundle.getSymbolicName()+"/main.js", 1, null);
 			
 		} catch (Throwable t) {
 			t.printStackTrace();
