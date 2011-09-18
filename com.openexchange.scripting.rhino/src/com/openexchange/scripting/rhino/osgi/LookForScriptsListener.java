@@ -13,6 +13,7 @@ import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
 import static com.openexchange.scripting.rhino.SharedScope.*;
 
+import com.openexchange.scripting.rhino.libs.Console;
 import com.openexchange.scripting.rhino.require.RequireSupport;
 
 public class LookForScriptsListener implements BundleListener {
@@ -43,6 +44,7 @@ public class LookForScriptsListener implements BundleListener {
 			additionalModules.put("osgi", new OSGiSupport(bundle.getBundleContext(), SHARED_SCOPE));
 			
 			RequireSupport.initialize(serviceScope, cx, new BundleJSBundle(bundle), additionalModules);
+			Console.initialize(serviceScope, bundle.getSymbolicName());
 			
 			cx.evaluateReader(serviceScope, r, bundle.getSymbolicName()+"/main.js", 1, null);
 			
