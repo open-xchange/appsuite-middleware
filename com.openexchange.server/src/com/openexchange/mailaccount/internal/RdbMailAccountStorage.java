@@ -525,6 +525,9 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     }
 
     private static void cleanseFromPrimary(final String path, final int user, final int cid) throws OXException {
+        if (isEmpty(path)) {
+            return;
+        }
         final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> defaultMailAccess = MailAccess.getInstance(user, cid);
         if (defaultMailAccess.isConnected()) {
             try {
