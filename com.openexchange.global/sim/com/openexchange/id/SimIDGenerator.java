@@ -63,8 +63,17 @@ public class SimIDGenerator implements IDGeneratorService {
     private static final AtomicInteger id = new AtomicInteger(1);
 
     @Override
-    public int getId(String type, int contextId) throws OXException {
+    public int getId(final String type, final int contextId) throws OXException {
         return id.getAndIncrement();
+    }
+
+    @Override
+    public int getId(final String type, final int contextId, final int minId) throws OXException {
+        int ret = id.getAndIncrement();
+        while (ret < minId) {
+            ret = id.getAndIncrement();
+        }
+        return ret;
     }
 
 }
