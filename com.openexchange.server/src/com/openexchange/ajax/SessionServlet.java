@@ -235,7 +235,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 counter = (AtomicInteger) session.getParameter(Session.PARAM_COUNTER);
                 if (null != counter) {
                     final int currentCount = counter.incrementAndGet();
-                    if (currentCount > 1) {
+                    if (currentCount > maxConcurrentRequests) {
                         throw AjaxExceptionCodes.TOO_MANY_REQUESTS.create();
                     }
                 }
