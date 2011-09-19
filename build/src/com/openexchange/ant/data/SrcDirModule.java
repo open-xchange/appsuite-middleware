@@ -93,6 +93,7 @@ public class SrcDirModule extends DirModule {
                 // read Bundle-ClassPath:
                 for (final String classpathEntry : osgiManifest.getListEntry(OSGIManifest.BUNDLE_CLASSPATH)) {
                     // All class files are added through the <bin> directory
+                    // TODO Only libs which have a corresponding export entry.
                     if (!classpathEntry.equals(".")) {
                         exportedClasspath.add(classpathEntry);
                     }
