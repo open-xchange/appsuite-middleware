@@ -75,4 +75,13 @@ public final class OSGiIDGeneratorService extends AbstractOSGiDelegateService<ID
         }
     }
 
+    @Override
+    public int getId(final String type, final int contextId, final int minId) throws OXException {
+        try {
+            return getService().getId(type, contextId, minId);
+        } catch (final OXException e) {
+            throw e;
+        }
+    }
+
 }
