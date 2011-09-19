@@ -227,6 +227,9 @@ public abstract class SessionServlet extends AJAXServlet {
         try {
             initializeSession(req);
             final ServerSession session = getSessionObject(req);
+            /*
+             * Check max. concurrent AJAX request
+             */
             final int maxConcurrentRequests = getMaxConcurrentRequests(session);
             if (maxConcurrentRequests > 0) {
                 counter = (AtomicInteger) session.getParameter(Session.PARAM_COUNTER);
