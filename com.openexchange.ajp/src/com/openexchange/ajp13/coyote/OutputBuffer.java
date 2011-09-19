@@ -37,4 +37,11 @@ public interface OutputBuffer {
      */
     public int doWrite(ByteChunk chunk) throws IOException;
 
+    /**
+     * Gets the packet size.
+     * 
+     * @return The packet size
+     */
+    public int getPacketSize();
+
 }
