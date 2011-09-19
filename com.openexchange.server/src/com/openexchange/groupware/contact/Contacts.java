@@ -785,7 +785,7 @@ public final class Contacts {
 
             ps.execute();
 
-            if (co.containsNumberOfDistributionLists() && (co.getSizeOfDistributionListArray() > 0)) {
+            if (co.containsNumberOfDistributionLists()) {
                 writeDistributionListArrayUpdate(
                     co.getDistributionList(),
                     original.getDistributionList(),
