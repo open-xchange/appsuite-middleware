@@ -47,46 +47,62 @@
  *
  */
 
-package com.openexchange.database;
+package com.openexchange.folderstorage.virtual.sql;
 
 import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.folderstorage.Folder;
+import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.virtual.VirtualServiceRegistry;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
- * If your bundle needs to create database tables for working properly this service must be implemented. Its method are called if a new
- * schema for contexts is created. The order of executing {@link CreateTableService} instances is calculated by the string arrays given from
- * the methods {@link #requiredTables()} and {@link #tablesToCreate()}. The {@link #perform(Connection)} method should then create the
- * tables needed for your bundle.
+ * {@link Update} - SQL for updating a virtual folder.
  *
- * The table must be created in its newest version. {@link UpdateTask}s are not executed after all tables have been created and the schema
- * is marked in that way that all {@link UpdateTask}s have already been executed.
- *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface CreateTableService {
+public final class Update {
 
     /**
-     * This method should give all table names that have to exist before the {@link #perform(Connection)} method is called. You can use this
-     * if your table has foreign keys to some other tables.
-     * @return an array with table names that have to exist before the {@link #perform(Connection)} method is called.
+     * Initializes a new {@link Update}.
      */
-    String[] requiredTables();
+    private Update() {
+        super();
+    }
 
     /**
-     * This method must give all names of tables that are create during call of the {@link #perform(Connection)} method. Maybe some other
-     * tables require your before they can be created.
-     * @return an array with table names that are created during call of the {@link #perform(Connection)} method.
+     * Updates specified folder.
+     *
+     * @param cid The context identifier
+     * @param tree The tree identifier
+     * @param user The user identifier
+     * @param folder The folder
+     * @throws OXException If update fails
      */
-    String[] tablesToCreate();
-
-    /**
-     * The implementation of this method should create the required tables on the given database connection. The connection is already
-     * configured to use the correct schema. The given connection is already in a transaction. Do not modify the transaction state of the
-     * connection.
-     * @param con writable connection in a transaction state.
-     * @throws OXException should be thrown if creating the table fails.
-     */
-    void perform(Connection con) throws OXException;
+    public static void updateFolder(final int cid, final int tree, final int user, final Folder folder) throws OXException {
+        final DatabaseService databaseService = VirtualServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
+        // Get a connection
+        final Connection con = databaseService.getWritable(cid);
+        try {
+            con.setAutoCommit(false); // BEGIN
+            Delete.deleteFolder(cid, tree, user, folder.getID(), false, con);
+            Insert.insertFolder(cid, tree, user, folder, con);
+            con.commit(); // COMMIT
+        } catch (final SQLException e) {
+            DBUtils.rollback(con); // ROLLBACK
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } catch (final OXException e) {
+            DBUtils.rollback(con); // ROLLBACK
+            throw e;
+        } catch (final Exception e) {
+            DBUtils.rollback(con); // ROLLBACK
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.autocommit(con);
+            databaseService.backWritable(cid, con);
+        }
+    }
 
 }
