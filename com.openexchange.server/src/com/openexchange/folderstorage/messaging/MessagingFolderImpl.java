@@ -56,7 +56,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Permission;
@@ -69,6 +68,9 @@ import com.openexchange.folderstorage.messaging.contentType.TrashContentType;
 import com.openexchange.folderstorage.type.MailType;
 import com.openexchange.folderstorage.type.SystemType;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.i18n.MailStrings;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingFolder.DefaultFolderType;
 import com.openexchange.messaging.MessagingPermission;
@@ -148,9 +150,8 @@ public final class MessagingFolderImpl extends AbstractFolder {
      * @param messagingFolder The underlying messaging folder
      * @param accountId The account identifier
      * @param serviceId The service identifier
-     * @param fullnameProvider The (optional) fullname provider
      */
-    public MessagingFolderImpl(final MessagingFolder messagingFolder, final int accountId, final String serviceId, final DefaultFolderFullnameProvider fullnameProvider) {
+    public MessagingFolderImpl(final MessagingFolder messagingFolder, final int accountId, final String serviceId, final User user) {
         super();
         final String fullname = messagingFolder.getId();
         id = MessagingFolderIdentifier.getFQN(serviceId, accountId, fullname);
@@ -187,22 +188,25 @@ public final class MessagingFolderImpl extends AbstractFolder {
         if (messagingFolder.containsDefaultFolderType()) {
             messagingFolderType = TYPES.get(messagingFolder.getDefaultFolderType());
         } else if (null != fullname) {
-            try {
-                if (fullname.equals(fullnameProvider.getDraftsFolder())) {
-                    messagingFolderType = MessagingFolderType.DRAFTS;
-                } else if (fullname.equals(fullnameProvider.getINBOXFolder())) {
-                    messagingFolderType = MessagingFolderType.INBOX;
-                } else if (fullname.equals(fullnameProvider.getSentFolder())) {
-                    messagingFolderType = MessagingFolderType.SENT;
-                } else if (fullname.equals(fullnameProvider.getSpamFolder())) {
-                    messagingFolderType = MessagingFolderType.SPAM;
-                } else if (fullname.equals(fullnameProvider.getTrashFolder())) {
-                    messagingFolderType = MessagingFolderType.TRASH;
-                } else {
-                    messagingFolderType = MessagingFolderType.NONE;
-                }
-            } catch (final OXException e) {
-                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MessagingFolderImpl.class)).error(e.getMessage(), e);
+            if (fullname.equals(MailStrings.DRAFTS)) {
+                name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.DRAFTS);
+                messagingFolderType = MessagingFolderType.DRAFTS;
+            } else if (fullname.equals("INBOX")) {
+                messagingFolderType = MessagingFolderType.INBOX;
+            } else if (fullname.equals(MailStrings.SENT)) {
+                name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.SENT);
+                messagingFolderType = MessagingFolderType.SENT;
+            } else if (fullname.equals(MailStrings.SPAM)) {
+                name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.SPAM);
+                messagingFolderType = MessagingFolderType.SPAM;
+            } else if (fullname.equals(MailStrings.TRASH)) {
+                name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.TRASH);
+                messagingFolderType = MessagingFolderType.TRASH;
+            } else if (fullname.equals(MailStrings.CONFIRMED_SPAM)) {
+                name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.CONFIRMED_SPAM);
+            } else if (fullname.equals(MailStrings.CONFIRMED_HAM)) {
+                name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.CONFIRMED_HAM);
+            } else {
                 messagingFolderType = MessagingFolderType.NONE;
             }
         } else if (messagingFolder.isRootFolder()) {

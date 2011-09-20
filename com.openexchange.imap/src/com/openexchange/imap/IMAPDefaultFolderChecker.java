@@ -425,15 +425,14 @@ public final class IMAPDefaultFolderChecker {
         final String[] names;
         final SpamHandler spamHandler;
         {
-            final DefaultFolderNamesProvider defaultFolderNamesProvider =
-                new DefaultFolderNamesProvider(accountId, session.getUserId(), session.getContextId());
+            final DefaultFolderNamesProvider defaultFolderNamesProvider = new DefaultFolderNamesProvider();
             if (isSpamOptionEnabled) {
                 fullNames = defaultFolderNamesProvider.getDefaultFolderFullnames(mailAccount, true);
-                names = defaultFolderNamesProvider.getDefaultFolderNames(mailAccount, true);
+                names = defaultFolderNamesProvider.getDefaultFolderNames(true);
                 spamHandler = SpamHandlerRegistry.getSpamHandlerBySession(session, accountId);
             } else {
                 fullNames = defaultFolderNamesProvider.getDefaultFolderFullnames(mailAccount, false);
-                names = defaultFolderNamesProvider.getDefaultFolderNames(mailAccount, false);
+                names = defaultFolderNamesProvider.getDefaultFolderNames(false);
                 spamHandler = NoSpamHandler.getInstance();
             }
         }

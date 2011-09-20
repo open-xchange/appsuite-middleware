@@ -593,8 +593,7 @@ public final class MailFolderStorage implements FolderStorage {
                             rootFolder,
                             accountId,
                             mailAccess.getMailConfig(),
-                            storageParameters,
-                            null);
+                            storageParameters);
                     addWarnings(mailAccess, storageParameters);
                     hasSubfolders = rootFolder.hasSubfolders();
                 } else {
@@ -619,8 +618,7 @@ public final class MailFolderStorage implements FolderStorage {
                         mailFolder,
                         accountId,
                         mailAccess.getMailConfig(),
-                        storageParameters,
-                        new MailAccessFullnameProvider(mailAccess));
+                        storageParameters);
                 hasSubfolders = mailFolder.hasSubfolders();
                 /*
                  * Check if denoted parent can hold default folders like Trash, Sent, etc.
@@ -873,18 +871,27 @@ public final class MailFolderStorage implements FolderStorage {
                         child.setName(StringHelper.valueOf(locale).getString(MailStrings.INBOX));
                     } else {
                         if (child.containsDefaultFolderType()) {
-                            if (child.isTrash()) {
+                            switch (child.getDefaultFolderType()) {
+                            case TRASH:
                                 child.setName(StringHelper.valueOf(locale).getString(MailStrings.TRASH));
-                            } else if (child.isSent()) {
+                                break;
+                            case SENT:
                                 child.setName(StringHelper.valueOf(locale).getString(MailStrings.SENT));
-                            } else if (child.isSpam()) {
+                                break;
+                            case SPAM:
                                 child.setName(StringHelper.valueOf(locale).getString(MailStrings.SPAM));
-                            } else if (child.isDrafts()) {
+                                break;
+                            case DRAFTS:
                                 child.setName(StringHelper.valueOf(locale).getString(MailStrings.DRAFTS));
-                            } else if (child.isConfirmedSpam()) {
+                                break;
+                            case CONFIRMED_SPAM:
                                 child.setName(StringHelper.valueOf(locale).getString(MailStrings.CONFIRMED_SPAM));
-                            } else if (child.isConfirmedHam()) {
+                                break;
+                            case CONFIRMED_HAM:
                                 child.setName(StringHelper.valueOf(locale).getString(MailStrings.CONFIRMED_HAM));
+                                break;
+                            default:
+                                // Nope
                             }
                         } else {
                             final String fullName = child.getFullname();

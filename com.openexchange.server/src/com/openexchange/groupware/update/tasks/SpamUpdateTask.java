@@ -60,10 +60,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.mail.usersetting.UserSettingMail;
 
 /**
  * SpamUpdateTask - Inserts columns <tt>confirmed_spam</tt> and
@@ -123,8 +123,8 @@ public class SpamUpdateTask implements UpdateTask {
 				stmt.executeUpdate();
 				stmt.close();
 				stmt = writeCon.prepareStatement(SQL_UPDATE);
-				stmt.setString(1, UserSettingMail.STD_CONFIRMED_SPAM);
-				stmt.setString(2, UserSettingMail.STD_CONFIRMED_HAM);
+				stmt.setString(1, MailStrings.CONFIRMED_SPAM);
+                stmt.setString(2, MailStrings.CONFIRMED_HAM);
 				stmt.executeUpdate();
 			} catch (final SQLException e) {
 	            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());

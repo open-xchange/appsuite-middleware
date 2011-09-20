@@ -1581,9 +1581,9 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 /*
                  * Default folder names: trash, sent, drafts, spam, confirmed_spam, confirmed_ham
                  */
-                final DefaultFolderNamesProvider defaultFolderNamesProvider = new DefaultFolderNamesProvider(id, user, cid);
+                final DefaultFolderNamesProvider defaultFolderNamesProvider = new DefaultFolderNamesProvider();
                 {
-                    final String[] defaultFolderNames = defaultFolderNamesProvider.getDefaultFolderNames(mailAccount, true);
+                    final String[] defaultFolderNames = defaultFolderNamesProvider.getDefaultFolderNames(true);
                     setOptionalString(stmt, pos++, defaultFolderNames[StorageUtility.INDEX_TRASH]);
                     setOptionalString(stmt, pos++, defaultFolderNames[StorageUtility.INDEX_SENT]);
                     setOptionalString(stmt, pos++, defaultFolderNames[StorageUtility.INDEX_DRAFTS]);
@@ -1699,8 +1699,6 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             dropPOP3StorageFolders(user, cid);
         } catch (final SQLException e) {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             closeSQLStuff(null, stmt);
         }

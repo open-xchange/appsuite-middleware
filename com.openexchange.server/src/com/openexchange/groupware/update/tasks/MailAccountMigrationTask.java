@@ -65,6 +65,7 @@ import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.RdbUserStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -315,32 +316,32 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
 
         @Override
         public String getConfirmedHam() {
-            return UserSettingMail.STD_CONFIRMED_HAM;
+            return MailStrings.CONFIRMED_HAM;
         }
 
         @Override
         public String getConfirmedSpam() {
-            return UserSettingMail.STD_CONFIRMED_SPAM;
+            return MailStrings.CONFIRMED_SPAM;
         }
 
         @Override
         public String getDrafts() {
-            return UserSettingMail.STD_DRAFTS;
+            return MailStrings.DRAFTS;
         }
 
         @Override
         public String getSent() {
-            return UserSettingMail.STD_SENT;
+            return MailStrings.SENT;
         }
 
         @Override
         public String getSpam() {
-            return UserSettingMail.STD_SPAM;
+            return MailStrings.SPAM;
         }
 
         @Override
         public String getTrash() {
-            return UserSettingMail.STD_TRASH;
+            return MailStrings.TRASH;
         }
     };
 

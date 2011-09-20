@@ -236,18 +236,6 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
     public static final int MSG_FORMAT_BOTH = 3;
 
-    public static final String STD_TRASH = "Trash";
-
-    public static final String STD_DRAFTS = "Drafts";
-
-    public static final String STD_SENT = "Sent";
-
-    public static final String STD_SPAM = "Spam";
-
-    public static final String STD_CONFIRMED_SPAM = "Confirmed Spam";
-
-    public static final String STD_CONFIRMED_HAM = "Confirmed Ham";
-
     /*-
      * Member fields
      */
