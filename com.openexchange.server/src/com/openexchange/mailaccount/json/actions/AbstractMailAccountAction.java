@@ -502,7 +502,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
         case StorageUtility.INDEX_CONFIRMED_HAM:
             retval = primaryAccount.getConfirmedHam();
             if (null == retval) {
-                retval = DefaultFolderNamesProvider.DEFAULT_PROVIDER.getConfirmeHam();
+                retval = DefaultFolderNamesProvider.DEFAULT_PROVIDER.getConfirmedHam();
             }
             break;
         default:

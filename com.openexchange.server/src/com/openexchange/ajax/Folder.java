@@ -414,7 +414,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
         try {
             final Context ctx = session.getContext();
             final Locale locale = session.getUser().getLocale();
-            final StringHelper strHelper = new StringHelper(locale);
+            final StringHelper strHelper = StringHelper.valueOf(locale);
             /*
              * Read in parameters
              */
@@ -1381,7 +1381,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
             {
                 final UserConfiguration userConf = session.getUserConfiguration();
                 final UserStorage us = UserStorage.getInstance();
-                final StringHelper strHelper = new StringHelper(session.getUser().getLocale());
+                final StringHelper strHelper = StringHelper.valueOf(session.getUser().getLocale());
                 final boolean sharedFolderAccess = userConf.hasFullSharedFolderAccess();
                 for (int i = 0; i < size; i++) {
                     final FolderObject fo = iter.next();

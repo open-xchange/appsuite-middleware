@@ -490,6 +490,9 @@ public class RdbUserStorage extends UserStorage {
 
     @Override
     public void setUserAttribute(final String name, final String value, final int userId, final Context context) throws OXException {
+        if (null == name) {
+            throw LdapExceptionCode.UNEXPECTED_ERROR.create("Attribute name is null.").setPrefix("USR");
+        }
         final String attrName = new StringBuilder("attr_").append(name).toString();
         setAttribute(attrName, value, userId, context);
     }

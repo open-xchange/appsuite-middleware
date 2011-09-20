@@ -53,6 +53,7 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -129,6 +130,7 @@ public final class SessionImpl implements Session {
         this.client = client;
         parameters = new ConcurrentHashMap<String, Object>();
         parameters.put(PARAM_LOCK, new ReentrantLock());
+        parameters.put(PARAM_COUNTER, new AtomicInteger());
     }
 
     /**
@@ -155,6 +157,7 @@ public final class SessionImpl implements Session {
             parameters.put(entry.getKey(), entry.getValue());
         }
         parameters.put(PARAM_LOCK, new ReentrantLock());
+        parameters.put(PARAM_COUNTER, new AtomicInteger());
     }
 
     /**

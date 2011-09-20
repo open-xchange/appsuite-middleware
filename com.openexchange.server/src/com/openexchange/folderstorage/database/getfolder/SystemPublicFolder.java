@@ -206,7 +206,7 @@ public final class SystemPublicFolder {
                     null,
                     con)).asQueue();
             final List<String[]> subfolderIds = new ArrayList<String[]>(q.size());
-            final StringHelper sh = new StringHelper(user.getLocale());
+            final StringHelper sh = StringHelper.valueOf(user.getLocale());
             /*
              * Add global address book and subfolders
              */

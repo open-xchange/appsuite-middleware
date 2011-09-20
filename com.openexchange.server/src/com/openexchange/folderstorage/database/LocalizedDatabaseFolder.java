@@ -129,7 +129,7 @@ public class LocalizedDatabaseFolder extends DatabaseFolder {
 
                 @Override
                 public String call() throws Exception {
-                    return new StringHelper(locale).getString(fname);
+                    return StringHelper.valueOf(locale).getString(fname);
                 }
             });
             future = localizedNames.putIfAbsent(locale, ft);

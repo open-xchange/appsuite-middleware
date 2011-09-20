@@ -47,79 +47,47 @@
  *
  */
 
-package com.openexchange.folderstorage.mail;
+package com.openexchange.groupware.update.tasks;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.mail.api.IMailFolderStorage;
-import com.openexchange.mail.api.MailAccess;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.update.Tools.columnExists;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import com.openexchange.groupware.update.SimpleUpdateTask;
 
 /**
- * {@link MailAccessFullnameProvider} - TODO Short description of this class' purpose.
+ * {@link VirtualFolderAddSortNumTask} - Add "sortNum" column to virtual folder table.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailAccessFullnameProvider implements DefaultFolderFullnameProvider {
+public final class VirtualFolderAddSortNumTask extends SimpleUpdateTask {
 
-    /**
-     * The connected mail access instance.
-     */
-    private final MailAccess<?, ?> mailAccess;
-
-    /**
-     * The folder storage instance.
-     */
-    private IMailFolderStorage folderStorage;
-
-    /**
-     * Initializes a new {@link MailAccessFullnameProvider}.
-     *
-     * @param mailAccess The connected mail access instance
-     */
-    public MailAccessFullnameProvider(final MailAccess<?, ?> mailAccess) {
+    public VirtualFolderAddSortNumTask() {
         super();
-        this.mailAccess = mailAccess;
-    }
-
-    private IMailFolderStorage getFolderStorage() throws OXException {
-        if (null == folderStorage) {
-            folderStorage = mailAccess.getFolderStorage();
-        }
-        return folderStorage;
     }
 
     @Override
-    public String getConfirmedHamFolder() throws OXException {
-        return getFolderStorage().getConfirmedHamFolder();
-    }
-
-    @Override
-    public String getConfirmedSpamFolder() throws OXException {
-        return getFolderStorage().getConfirmedSpamFolder();
-    }
-
-    @Override
-    public String getDraftsFolder() throws OXException {
-        return getFolderStorage().getDraftsFolder();
-    }
-
-    @Override
-    public String getINBOXFolder() throws OXException {
-        return "INBOX";
-    }
-
-    @Override
-    public String getSentFolder() throws OXException {
-        return getFolderStorage().getSentFolder();
-    }
-
-    @Override
-    public String getSpamFolder() throws OXException {
-        return getFolderStorage().getSpamFolder();
-    }
-
-    @Override
-    public String getTrashFolder() throws OXException {
-        return getFolderStorage().getTrashFolder();
+    protected void perform(final Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            if (!columnExists(con, "virtualTree", "sortNum")) {
+                stmt =
+                    con.prepareStatement("ALTER TABLE virtualTree ADD COLUMN sortNum INT4 UNSIGNED DEFAULT NULL");
+                stmt.executeUpdate();
+                stmt.close();
+                stmt = null;
+            }
+            if (!columnExists(con, "virtualBackupTree", "sortNum")) {
+                stmt =
+                    con.prepareStatement("ALTER TABLE virtualBackupTree ADD COLUMN sortNum INT4 UNSIGNED DEFAULT NULL");
+                stmt.executeUpdate();
+                stmt.close();
+                stmt = null;
+            }
+        } finally {
+            closeSQLStuff(stmt);
+        }  
     }
 
 }

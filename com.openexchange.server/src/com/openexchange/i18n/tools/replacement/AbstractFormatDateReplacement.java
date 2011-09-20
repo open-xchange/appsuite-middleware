@@ -119,10 +119,10 @@ public abstract class AbstractFormatDateReplacement extends AbstractDateReplacem
 
         final String result;
         if ((date == null || dateRepl.length() == 0) && fallback != null) {
-            final StringHelper sh = new StringHelper(locale == null ? Locale.ENGLISH : locale);
+            final StringHelper sh = StringHelper.valueOf(locale == null ? Locale.ENGLISH : locale);
             result = String.format(sh.getString(format), sh.getString(fallback));
         } else {
-            result = String.format(new StringHelper(locale == null ? Locale.ENGLISH : locale).getString(format),
+            result = String.format(StringHelper.valueOf(locale == null ? Locale.ENGLISH : locale).getString(format),
                     dateRepl);
         }
         if (changed) {
