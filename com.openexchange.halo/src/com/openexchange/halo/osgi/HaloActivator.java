@@ -3,7 +3,6 @@ package com.openexchange.halo.osgi;
 import org.osgi.framework.ServiceReference;
 
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
-import com.openexchange.halo.AsynchronousHaloContactDataSource;
 import com.openexchange.halo.ContactHalo;
 import com.openexchange.halo.internal.ContactHaloImpl;
 import com.openexchange.halo.HaloContactDataSource;
@@ -46,23 +45,6 @@ public class HaloActivator extends HousekeepingActivator {
 				halo.removeContactDataSource(service);
 			}
 			
-		});
-		
-		track(AsynchronousHaloContactDataSource.class, new SimpleRegistryListener<AsynchronousHaloContactDataSource>() {
-
-			@Override
-			public void added(
-					ServiceReference<AsynchronousHaloContactDataSource> ref,
-					AsynchronousHaloContactDataSource service) {
-				halo.addAsyncContactDataSource(service);
-			}
-
-			@Override
-			public void removed(
-					ServiceReference<AsynchronousHaloContactDataSource> ref,
-					AsynchronousHaloContactDataSource service) {
-				halo.removeAsyncContactDataSource(service);
-			}
 		});
 		
 	}
