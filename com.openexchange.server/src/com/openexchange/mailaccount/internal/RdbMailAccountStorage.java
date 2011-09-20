@@ -1699,8 +1699,6 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             dropPOP3StorageFolders(user, cid);
         } catch (final SQLException e) {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             closeSQLStuff(null, stmt);
         }

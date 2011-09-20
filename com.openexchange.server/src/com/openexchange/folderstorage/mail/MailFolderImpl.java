@@ -246,24 +246,34 @@ public final class MailFolderImpl extends AbstractFolder {
                 }
             }
             if (mailFolder.containsDefaultFolderType()) {
-                if (mailFolder.isInbox()) {
+                switch (mailFolder.getDefaultFolderType()) {
+                case INBOX:
                     mailFolderType = MailFolderType.INBOX;
-                } else if (mailFolder.isTrash()) {
+                    break;
+                case TRASH:
                     name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.TRASH);
                     mailFolderType = MailFolderType.TRASH;
-                } else if (mailFolder.isSent()) {
+                    break;
+                case SENT:
                     name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.SENT);
                     mailFolderType = MailFolderType.SENT;
-                } else if (mailFolder.isSpam()) {
+                    break;
+                case SPAM:
                     name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.SPAM);
                     mailFolderType = MailFolderType.SPAM;
-                } else if (mailFolder.isDrafts()) {
+                    break;
+                case DRAFTS:
                     name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.DRAFTS);
                     mailFolderType = MailFolderType.DRAFTS;
-                } else if (mailFolder.isConfirmedSpam()) {
+                    break;
+                case CONFIRMED_SPAM:
                     name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.CONFIRMED_SPAM);
-                } else if (mailFolder.isConfirmedHam()) {
+                    break;
+                case CONFIRMED_HAM:
                     name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.CONFIRMED_HAM);
+                    break;
+                default:
+                    // Nope
                 }
             } else if (null != fullName) {
                 if (null == fullnameProvider) {

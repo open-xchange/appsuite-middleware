@@ -225,7 +225,7 @@ public final class OXFolderAdminHelper {
                  * Check user
                  */
                 if (admin != userId) {
-                    if (prevEditable == editable) {
+                    if (prevEditable == editable || !editable) {
                         // No-op
                         return;
                     }

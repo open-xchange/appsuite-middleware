@@ -49,17 +49,17 @@
 
 package com.openexchange.mailaccount.json.actions;
 
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.rollback;
+import java.sql.Connection;
+import java.sql.SQLException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.api.IMailFolderStorage;
-import com.openexchange.mail.api.IMailMessageStorage;
-import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.utils.DefaultFolderNamesProvider;
-import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
@@ -112,10 +112,43 @@ public final class NewAction extends AbstractMailAccountAction {
             final MailAccountStorageService storageService =
                 ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
-            checkFullNames(accountDescription, storageService, session);
-
-            final int id =
-                storageService.insertMailAccount(accountDescription, session.getUserId(), session.getContext(), getSecret(session));
+            final int cid = session.getContextId();
+            Connection con = null;
+            try {
+                con = Database.get(cid, true);
+            } catch (final OXException e) {
+                throw e;
+            }
+            final int id;
+            try {
+                con.setAutoCommit(false);
+                id = storageService.insertMailAccount(accountDescription, session.getUserId(), session.getContext(), getSecret(session), con);
+                // Check full names after successful creation
+                MailAccount newAccount = null;
+                final MailAccount[] accounts = storageService.getUserMailAccounts(session.getUserId(), cid, con);
+                for (final MailAccount mailAccount : accounts) {
+                    if (mailAccount.getId() == id) {
+                        newAccount = mailAccount;
+                        break;
+                    }
+                }
+                if (null != newAccount) {
+                    checkFullNames(newAccount, storageService, session, con);
+                }
+                con.commit();
+            } catch (final SQLException e) {
+                rollback(con);
+                throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            } catch (final OXException e) {
+                rollback(con);
+                throw e;
+            } catch (final RuntimeException e) {
+                rollback(con);
+                throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            } finally {
+                autocommit(con);
+                Database.back(cid, true, con);
+            }
 
             final JSONObject jsonAccount =
                 MailAccountWriter.write(checkFullNames(
@@ -126,207 +159,6 @@ public final class NewAction extends AbstractMailAccountAction {
             return new AJAXRequestResult(jsonAccount);
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
-        }
-    }
-
-    private static void checkFullNames(final MailAccountDescription account, final MailAccountStorageService storageService, final ServerSession session) {
-        /*
-         * Variables
-         */
-        String prefix = null;
-        StringBuilder tmp = null;
-        MailAccount primaryAccount = null;
-        /*
-         * Check full names
-         */
-        try {
-            String fullName = account.getConfirmedHamFullname();
-            if (null == fullName) {
-                prefix = getPrefix(account, session);
-                String name = account.getConfirmedHam();
-                if (null == name) {
-                    primaryAccount = storageService.getDefaultMailAccount(session.getUserId(), session.getContextId());
-                    name = getName(StorageUtility.INDEX_CONFIRMED_HAM, primaryAccount);
-                }
-                account.setConfirmedHam(name);
-                tmp = 0 == prefix.length() ? null : new StringBuilder(prefix);
-                account.setConfirmedHamFullname(null == tmp ? name : tmp.append(name).toString());
-            }
-            // Confirmed-Ham
-            fullName = account.getConfirmedSpamFullname();
-            if (null == fullName) {
-                if (null == prefix) {
-                    prefix = getPrefix(account, session);
-                    tmp = 0 == prefix.length() ? null : new StringBuilder(prefix);
-                } else {
-                    if (null != tmp) {
-                        tmp.setLength(prefix.length());
-                    }
-                }
-                String name = account.getConfirmedSpam();
-                if (null == name) {
-                    if (null == primaryAccount) {
-                        primaryAccount = storageService.getDefaultMailAccount(session.getUserId(), session.getContextId());
-                    }
-                    name = getName(StorageUtility.INDEX_CONFIRMED_SPAM, primaryAccount);
-                }
-                account.setConfirmedSpam(name);
-                account.setConfirmedSpamFullname(null == tmp ? name : tmp.append(name).toString());
-            }
-            // Drafts
-            fullName = account.getDraftsFullname();
-            if (null == fullName) {
-                if (null == prefix) {
-                    prefix = getPrefix(account, session);
-                    tmp = 0 == prefix.length() ? null : new StringBuilder(prefix);
-                } else {
-                    if (null != tmp) {
-                        tmp.setLength(prefix.length());
-                    }
-                }
-                String name = account.getDrafts();
-                if (null == name) {
-                    if (null == primaryAccount) {
-                        primaryAccount = storageService.getDefaultMailAccount(session.getUserId(), session.getContextId());
-                    }
-                    name = getName(StorageUtility.INDEX_DRAFTS, primaryAccount);
-                }
-                account.setDrafts(name);
-                account.setDraftsFullname(null == tmp ? name : tmp.append(name).toString());
-            }
-            // Sent
-            fullName = account.getSentFullname();
-            if (null == fullName) {
-                if (null == prefix) {
-                    prefix = getPrefix(account, session);
-                    tmp = 0 == prefix.length() ? null : new StringBuilder(prefix);
-                } else {
-                    if (null != tmp) {
-                        tmp.setLength(prefix.length());
-                    }
-                }
-                String name = account.getSent();
-                if (null == name) {
-                    if (null == primaryAccount) {
-                        primaryAccount = storageService.getDefaultMailAccount(session.getUserId(), session.getContextId());
-                    }
-                    name = getName(StorageUtility.INDEX_SENT, primaryAccount);
-                }
-                account.setSent(name);
-                account.setSentFullname(null == tmp ? name : tmp.append(name).toString());
-            }
-            // Spam
-            fullName = account.getSpamFullname();
-            if (null == fullName) {
-                if (null == prefix) {
-                    prefix = getPrefix(account, session);
-                    tmp = 0 == prefix.length() ? null : new StringBuilder(prefix);
-                } else {
-                    if (null != tmp) {
-                        tmp.setLength(prefix.length());
-                    }
-                }
-                String name = account.getSpam();
-                if (null == name) {
-                    if (null == primaryAccount) {
-                        primaryAccount = storageService.getDefaultMailAccount(session.getUserId(), session.getContextId());
-                    }
-                    name = getName(StorageUtility.INDEX_SPAM, primaryAccount);
-                }
-                account.setSpam(name);
-                account.setSpamFullname(null == tmp ? name : tmp.append(name).toString());
-            }
-            // Trash
-            fullName = account.getTrashFullname();
-            if (null == fullName) {
-                if (null == prefix) {
-                    prefix = getPrefix(account, session);
-                    tmp = 0 == prefix.length() ? null : new StringBuilder(prefix);
-                } else {
-                    if (null != tmp) {
-                        tmp.setLength(prefix.length());
-                    }
-                }
-                String name = account.getTrash();
-                if (null == name) {
-                    if (null == primaryAccount) {
-                        primaryAccount = storageService.getDefaultMailAccount(session.getUserId(), session.getContextId());
-                    }
-                    name = getName(StorageUtility.INDEX_TRASH, primaryAccount);
-                }
-                account.setTrash(name);
-                account.setTrashFullname(null == tmp ? name : tmp.append(name).toString());
-            }
-        } catch (final OXException e) {
-            /*
-             * Checking full names failed
-             */
-            final StringBuilder sb = new StringBuilder("Checking default folder full names for account ");
-            sb.append(account.getId()).append(" failed with user ").append(session.getUserId());
-            sb.append(" in context ").append(session.getContextId());
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AbstractMailAccountAction.class)).warn(sb.toString(), e);
-        }
-    }
-
-    private static String getName(final int index, final MailAccount primaryAccount) {
-        String retval;
-        switch (index) {
-        case StorageUtility.INDEX_DRAFTS:
-            retval = primaryAccount.getDrafts();
-            if (null == retval) {
-                retval = DefaultFolderNamesProvider.DEFAULT_PROVIDER.getDrafts();
-            }
-            break;
-        case StorageUtility.INDEX_SENT:
-            retval = primaryAccount.getSent();
-            if (null == retval) {
-                retval = DefaultFolderNamesProvider.DEFAULT_PROVIDER.getSent();
-            }
-            break;
-        case StorageUtility.INDEX_SPAM:
-            retval = primaryAccount.getSpam();
-            if (null == retval) {
-                retval = DefaultFolderNamesProvider.DEFAULT_PROVIDER.getSpam();
-            }
-            break;
-        case StorageUtility.INDEX_TRASH:
-            retval = primaryAccount.getTrash();
-            if (null == retval) {
-                retval = DefaultFolderNamesProvider.DEFAULT_PROVIDER.getTrash();
-            }
-            break;
-        case StorageUtility.INDEX_CONFIRMED_SPAM:
-            retval = primaryAccount.getConfirmedSpam();
-            if (null == retval) {
-                retval = DefaultFolderNamesProvider.DEFAULT_PROVIDER.getConfirmedSpam();
-            }
-            break;
-        case StorageUtility.INDEX_CONFIRMED_HAM:
-            retval = primaryAccount.getConfirmedHam();
-            if (null == retval) {
-                retval = DefaultFolderNamesProvider.DEFAULT_PROVIDER.getConfirmeHam();
-            }
-            break;
-        default:
-            throw new IllegalArgumentException("Unknown index value: " + index);
-        }
-        return retval;
-    }
-
-    private static String getPrefix(final MailAccountDescription description, final ServerSession session) throws OXException {
-        if (description.getMailProtocol().startsWith("pop3")) {
-            return "";
-        }
-        try {
-            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> access = getMailAccess(description, session);
-            access.connect(false);
-            try {
-                return access.getFolderStorage().getDefaultFolderPrefix();
-            } finally {
-                access.close(true);
-            }
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
     }
 

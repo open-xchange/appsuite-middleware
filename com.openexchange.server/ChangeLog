@@ -1,3 +1,12 @@
+* 2011-09-20 - francisco.laguna@open-xchange.com
+
+ - Fix for bug 20399: Use correct protocol for publication URLs
+
+* 2011-09-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 19615: Safely set \Seen flag
+ - Fix for bug 20402 and bug 20401: Fixed translation of mail default folders.
+
 * 2011-09-19 - tobias.prinz@open-xchange.com
 
  - Fix for bug 20383: Distribution lists don't lose members anymore when moved

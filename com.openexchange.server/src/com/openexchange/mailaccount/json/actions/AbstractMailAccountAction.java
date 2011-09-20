@@ -52,6 +52,7 @@ package com.openexchange.mailaccount.json.actions;
 import static com.openexchange.mailaccount.json.Tools.getUnsignedInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.sql.Connection;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -317,6 +318,18 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
      * @return The mail account with full names present
      */
     protected static MailAccount checkFullNames(final MailAccount account, final MailAccountStorageService storageService, final ServerSession session) {
+        return checkFullNames(account, storageService, session, null);
+    }
+
+    /**
+     * Checks for presence of default folder full names and creates them if absent.
+     *
+     * @param account The corresponding account
+     * @param storageService The storage service (needed for update)
+     * @param session The session providing needed user information
+     * @return The mail account with full names present
+     */
+    protected static MailAccount checkFullNames(final MailAccount account, final MailAccountStorageService storageService, final ServerSession session, final Connection con) {
         final int accountId = account.getId();
         if (MailAccount.DEFAULT_ID == accountId) {
             /*
@@ -450,10 +463,20 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
                 return account;
             }
             /*
-             * Update and return refetched account instance
+             * Update and return re-fetched account instance
              */
-            storageService.updateMailAccount(mad, attributes, session.getUserId(), session.getContextId(), session.getPassword());
-            return storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
+            if (null == con) {
+                storageService.updateMailAccount(mad, attributes, session.getUserId(), session.getContextId(), session.getPassword());
+                return storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
+            }
+            storageService.updateMailAccount(mad, attributes, session.getUserId(), session.getContextId(), session.getPassword(), con, false);
+            final MailAccount[] accounts = storageService.getUserMailAccounts(session.getUserId(), session.getContextId(), con);
+            for (final MailAccount macc : accounts) {
+                if (macc.getId() == accountId) {
+                    return macc;
+                }
+            }
+            return null;
         } catch (final OXException e) {
             /*
              * Checking full names failed
@@ -502,7 +525,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
         case StorageUtility.INDEX_CONFIRMED_HAM:
             retval = primaryAccount.getConfirmedHam();
             if (null == retval) {
-                retval = DefaultFolderNamesProvider.DEFAULT_PROVIDER.getConfirmeHam();
+                retval = DefaultFolderNamesProvider.DEFAULT_PROVIDER.getConfirmedHam();
             }
             break;
         default:

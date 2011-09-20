@@ -988,14 +988,14 @@ public class ContactRequest {
                 try {
                     attachmentBase.rollback();
                 } catch (final OXException e1) {
-                    LOG.error("Attachment transaction rollback failed", e);
+                    LOG.error("Attachment transaction rollback failed", e1);
                 }
                 throw new OXException(e);
             } catch (final OXException e) {
                 try {
                     attachmentBase.rollback();
                 } catch (final OXException e1) {
-                    LOG.error("Attachment transaction rollback failed", e);
+                    LOG.error("Attachment transaction rollback failed", e1);
                 }
                 throw e;
             } finally {

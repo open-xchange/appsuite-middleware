@@ -139,7 +139,13 @@ public class ContactJSONResultConverter implements ResultConverter {
             final Contact contact = (Contact) resultObject;
             newResultObject = convertSingleContact(contact);
         } else {
-            final int[] columns = RequestTools.getColumnsAsIntArray(request, "columns");
+        	
+            final int[] columns;
+            if (request.isSet("columns")) {
+            	columns = RequestTools.getColumnsAsIntArray(request, "columns");
+            } else {
+            	columns = Contact.ALL_COLUMNS;
+            }
 
             if (request.getAction().equals("updates")) {
 

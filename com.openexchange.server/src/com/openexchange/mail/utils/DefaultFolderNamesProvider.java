@@ -49,12 +49,6 @@
 
 package com.openexchange.mail.utils;
 
-import static com.openexchange.mail.usersetting.UserSettingMail.STD_CONFIRMED_HAM;
-import static com.openexchange.mail.usersetting.UserSettingMail.STD_CONFIRMED_SPAM;
-import static com.openexchange.mail.usersetting.UserSettingMail.STD_DRAFTS;
-import static com.openexchange.mail.usersetting.UserSettingMail.STD_SENT;
-import static com.openexchange.mail.usersetting.UserSettingMail.STD_SPAM;
-import static com.openexchange.mail.usersetting.UserSettingMail.STD_TRASH;
 import static com.openexchange.mail.utils.StorageUtility.INDEX_CONFIRMED_HAM;
 import static com.openexchange.mail.utils.StorageUtility.INDEX_CONFIRMED_SPAM;
 import static com.openexchange.mail.utils.StorageUtility.INDEX_DRAFTS;
@@ -62,6 +56,7 @@ import static com.openexchange.mail.utils.StorageUtility.INDEX_SENT;
 import static com.openexchange.mail.utils.StorageUtility.INDEX_SPAM;
 import static com.openexchange.mail.utils.StorageUtility.INDEX_TRASH;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -105,7 +100,7 @@ public final class DefaultFolderNamesProvider {
     }
 
     /**
-     * Determines the default folder names (<b>not</b> fullnames). The returned array of {@link String} indexes the names as given through
+     * Determines the default folder names (<b>not</b> full names). The returned array of {@link String} indexes the names as given through
      * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
      *
      * @param mailAccount The mail account providing the names
@@ -124,7 +119,7 @@ public final class DefaultFolderNamesProvider {
     }
 
     /**
-     * Determines the default folder names (<b>not</b> fullnames). The returned array of {@link String} indexes the names as given through
+     * Determines the default folder names (<b>not</b> full names). The returned array of {@link String} indexes the names as given through
      * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
      *
      * @param mailAccount The mail account providing the names
@@ -143,7 +138,7 @@ public final class DefaultFolderNamesProvider {
     }
 
     /**
-     * Determines the default folder names (<b>not</b> fullnames). The returned array of {@link String} indexes the names as given through
+     * Determines the default folder names (<b>not</b> full names). The returned array of {@link String} indexes the names as given through
      * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
      *
      * @param trash The trash name
@@ -160,7 +155,7 @@ public final class DefaultFolderNamesProvider {
         if ((drafts == null) || (drafts.length() == 0)) {
             if (LOG.isWarnEnabled()) {
                 // final OXException e = new OXException(OXException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_DRAFTS);
-                LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, STD_DRAFTS));
+                LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, fallbackProvider.getDrafts()));
             }
             names[INDEX_DRAFTS] = fallbackProvider.getDrafts();
         } else {
@@ -169,7 +164,7 @@ public final class DefaultFolderNamesProvider {
         if ((sent == null) || (sent.length() == 0)) {
             if (LOG.isWarnEnabled()) {
                 // final OXException e = new OXException(OXException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_SENT);
-                LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, STD_SENT));
+                LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, fallbackProvider.getSent()));
             }
             names[INDEX_SENT] = fallbackProvider.getSent();
         } else {
@@ -178,7 +173,7 @@ public final class DefaultFolderNamesProvider {
         if ((spam == null) || (spam.length() == 0)) {
             if (LOG.isWarnEnabled()) {
                 // final OXException e = new OXException(OXException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_SPAM);
-                LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, STD_SPAM));
+                LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, fallbackProvider.getSpam()));
             }
             names[INDEX_SPAM] = fallbackProvider.getSpam();
         } else {
@@ -187,7 +182,7 @@ public final class DefaultFolderNamesProvider {
         if ((trash == null) || (trash.length() == 0)) {
             if (LOG.isWarnEnabled()) {
                 // final OXException e = new OXException(OXException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_TRASH);
-                LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, STD_TRASH));
+                LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, fallbackProvider.getTrash()));
             }
             names[INDEX_TRASH] = fallbackProvider.getTrash();
         } else {
@@ -197,7 +192,7 @@ public final class DefaultFolderNamesProvider {
             if ((confirmedSpam == null) || (confirmedSpam.length() == 0)) {
                 if (LOG.isWarnEnabled()) {
                     // final OXException e = new OXException(OXException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_CONFIRMED_SPAM);
-                    LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, STD_CONFIRMED_SPAM));
+                    LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, fallbackProvider.getConfirmedSpam()));
                 }
                 names[INDEX_CONFIRMED_SPAM] = fallbackProvider.getConfirmedSpam();
             } else {
@@ -206,9 +201,9 @@ public final class DefaultFolderNamesProvider {
             if ((confirmedHam == null) || (confirmedHam.length() == 0)) {
                 if (LOG.isWarnEnabled()) {
                     // final OXException e = new OXException(OXException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_CONFIRMED_HAM);
-                    LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, STD_CONFIRMED_HAM));
+                    LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, fallbackProvider.getConfirmedHam()));
                 }
-                names[INDEX_CONFIRMED_HAM] = fallbackProvider.getConfirmeHam();
+                names[INDEX_CONFIRMED_HAM] = fallbackProvider.getConfirmedHam();
             } else {
                 names[INDEX_CONFIRMED_HAM] = confirmedHam;
             }
@@ -217,12 +212,12 @@ public final class DefaultFolderNamesProvider {
     }
 
     /**
-     * Determines the default folder fullnames (<b>not</b> names). The returned array of {@link String} indexes the names as given through
+     * Determines the default folder full names (<b>not</b> names). The returned array of {@link String} indexes the names as given through
      * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
      *
-     * @param mailAccount The mail account providing the fullnames
+     * @param mailAccount The mail account providing the full names
      * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
-     * @return The default folder fullnames as an array of {@link String}
+     * @return The default folder full names as an array of {@link String}
      */
     public String[] getDefaultFolderFullnames(final MailAccount mailAccount, final boolean isSpamEnabled) {
         return getDefaultFolderFullnames(
@@ -236,12 +231,12 @@ public final class DefaultFolderNamesProvider {
     }
 
     /**
-     * Determines the default folder fullnames (<b>not</b> names). The returned array of {@link String} indexes the names as given through
+     * Determines the default folder full names (<b>not</b> names). The returned array of {@link String} indexes the names as given through
      * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
      *
-     * @param mailAccount The mail account providing the fullnames
+     * @param mailAccount The mail account providing the full names
      * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
-     * @return The default folder fullnames as an array of {@link String}
+     * @return The default folder full names as an array of {@link String}
      */
     public String[] getDefaultFolderFullnames(final MailAccountDescription mailAccount, final boolean isSpamEnabled) {
         return getDefaultFolderFullnames(
@@ -259,17 +254,17 @@ public final class DefaultFolderNamesProvider {
     }
 
     /**
-     * Determines the default folder fullnames (<b>not</b> names). The returned array of {@link String} indexes the names as given through
+     * Determines the default folder full names (<b>not</b> names). The returned array of {@link String} indexes the names as given through
      * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
      *
-     * @param trashFullname The trash fullname
-     * @param sentFullname The sent fullname
-     * @param draftsFullname The drafts fullname
-     * @param spamFullname The spam fullname
-     * @param confirmedSpamFullname The confirmed-spam fullname
-     * @param confirmedHamFullname The confirmed-ham fullname
+     * @param trashFullname The trash full name
+     * @param sentFullname The sent full name
+     * @param draftsFullname The drafts full name
+     * @param spamFullname The spam full name
+     * @param confirmedSpamFullname The confirmed-spam full name
+     * @param confirmedHamFullname The confirmed-ham full name
      * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
-     * @return The default folder fullnames as an array of {@link String}
+     * @return The default folder full names as an array of {@link String}
      */
     public String[] getDefaultFolderFullnames(final String trashFullname, final String sentFullname, final String draftsFullname, final String spamFullname, final String confirmedSpamFullname, final String confirmedHamFullname, final boolean isSpamEnabled) {
         final String[] fullnames = new String[isSpamEnabled ? 6 : 4];
@@ -328,7 +323,7 @@ public final class DefaultFolderNamesProvider {
 
         String getConfirmedSpam();
 
-        String getConfirmeHam();
+        String getConfirmedHam();
     }
 
     private static final class DefaultAccountProvider implements FallbackProvider {
@@ -341,10 +336,10 @@ public final class DefaultFolderNamesProvider {
         }
 
         @Override
-        public String getConfirmeHam() {
+        public String getConfirmedHam() {
             final String ret = defaultAccount.getConfirmedHam();
             if (ret == null || ret.length() == 0) {
-                return DEFAULT_PROVIDER.getConfirmeHam();
+                return DEFAULT_PROVIDER.getConfirmedHam();
             }
             return ret;
         }
@@ -402,33 +397,33 @@ public final class DefaultFolderNamesProvider {
     public static final FallbackProvider DEFAULT_PROVIDER = new FallbackProvider() {
 
         @Override
-        public String getConfirmeHam() {
-            return STD_CONFIRMED_HAM;
+        public String getConfirmedHam() {
+            return MailStrings.CONFIRMED_HAM;
         }
 
         @Override
         public String getConfirmedSpam() {
-            return STD_CONFIRMED_HAM;
+            return MailStrings.CONFIRMED_SPAM;
         }
 
         @Override
         public String getDrafts() {
-            return STD_DRAFTS;
+            return MailStrings.DRAFTS;
         }
 
         @Override
         public String getSent() {
-            return STD_SENT;
+            return MailStrings.SENT;
         }
 
         @Override
         public String getSpam() {
-            return STD_SPAM;
+            return MailStrings.SPAM;
         }
 
         @Override
         public String getTrash() {
-            return STD_TRASH;
+            return MailStrings.TRASH;
         }
     };
 }

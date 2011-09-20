@@ -99,6 +99,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.ImageTypeDetector;
@@ -754,7 +755,7 @@ public class OXContainerConverter {
                 boolean isProperEmailAddress = value != null && value.length() > 0;
                 if (isProperEmailAddress) {
                     try {
-                        new InternetAddress(value).validate();
+                    	new InternetAddress(QuotedInternetAddress.toACE(value)).validate();
                     } catch (final AddressException e) {
                         isProperEmailAddress = false;
                     }
