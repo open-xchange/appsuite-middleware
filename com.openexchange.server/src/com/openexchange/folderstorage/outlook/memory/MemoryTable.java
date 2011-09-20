@@ -57,7 +57,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.locks.Lock;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -65,7 +66,9 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.outlook.memory.impl.MemoryFolderImpl;
 import com.openexchange.folderstorage.outlook.memory.impl.MemoryTreeImpl;
 import com.openexchange.folderstorage.outlook.sql.Utility;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -74,8 +77,6 @@ import com.openexchange.tools.sql.DBUtils;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MemoryTable {
-
-    private static final String PARAM_MEMORY_TABLE = "com.openexchange.folderstorage.outlook.memory.memoryTable";
 
     /**
      * Gets the memory table for specified session, creates it if absent for given session.
@@ -114,34 +115,26 @@ public final class MemoryTable {
      * @throws OXException If creation of memory table fails
      */
     private static MemoryTable getMemoryTableFor(final Session session, final boolean createIfAbsent) throws OXException {
-        final Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
-        if (null != lock) {
-            lock.lock();
-            try {
-                return getMemoryTable0(session, createIfAbsent);
-            } finally {
-                lock.unlock();
-            }
-        }
-        /*
-         * Standard synchronization
-         */
-        synchronized (session) {
-            return getMemoryTable0(session, createIfAbsent);
-        }
+        return getMemoryTable0(session, createIfAbsent);
     }
 
+    private static final ConcurrentMap<Key, MemoryTable> MAP = new ConcurrentHashMap<Key, MemoryTable>(1024);
+
     private static MemoryTable getMemoryTable0(final Session session, final boolean createIfAbsent) throws OXException {
-        MemoryTable memoryTable = (MemoryTable) session.getParameter(PARAM_MEMORY_TABLE);
+        final Key key = keyFor(session);
+        MemoryTable memoryTable = MAP.get(key);
         if (null != memoryTable) {
             return memoryTable;
         }
         if (!createIfAbsent) {
             return null;
         }
-        memoryTable = new MemoryTable();
-        memoryTable.initialize(session.getUserId(), session.getContextId());
-        session.setParameter(PARAM_MEMORY_TABLE, memoryTable);
+        final MemoryTable nuMemoryTable = new MemoryTable();
+        nuMemoryTable.initialize(session.getUserId(), session.getContextId());
+        memoryTable = MAP.putIfAbsent(key, nuMemoryTable);
+        if (null == memoryTable) {
+            memoryTable = nuMemoryTable;
+        }
         return memoryTable;
     }
 
@@ -151,18 +144,9 @@ public final class MemoryTable {
      * @param session The session
      */
     public static void dropMemoryTableFrom(final Session session) {
-        final Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
-        if (null != lock) {
-            lock.lock();
-            try {
-                session.setParameter(PARAM_MEMORY_TABLE, null);
-            } finally {
-                lock.unlock();
-            }
-        } else {
-            synchronized (MemoryTable.class) {
-                session.setParameter(PARAM_MEMORY_TABLE, null);
-            }
+        final SessiondService service = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+        if (service.getUserSessions(session.getUserId(), session.getContextId()) <= 0) {
+            MAP.remove(keyFor(session));
         }
     }
 
@@ -310,7 +294,7 @@ public final class MemoryTable {
                 return;
             }
             int tree = rs.getInt(1);
-            MemoryTree memoryTree = new MemoryTreeImpl();
+            MemoryTree memoryTree = new MemoryTreeImpl(tree);
             treeMap.put(tree, memoryTree);
             do {
                 /*
@@ -320,7 +304,7 @@ public final class MemoryTable {
                     final int tid = rs.getInt(1);
                     if (tree != tid) {
                         tree = tid;
-                        memoryTree = new MemoryTreeImpl();
+                        memoryTree = new MemoryTreeImpl(tree);
                         treeMap.put(tree, memoryTree);
                     }
                 }
@@ -408,7 +392,7 @@ public final class MemoryTable {
             stmt.setInt(2, userId);
             stmt.setInt(3, treeId);
             rs = stmt.executeQuery();
-            final MemoryTree memoryTree = new MemoryTreeImpl();
+            final MemoryTree memoryTree = new MemoryTreeImpl(treeId);
             treeMap.put(treeId, memoryTree);
             if (!rs.next()) {
                 return memoryTree;
@@ -577,6 +561,58 @@ public final class MemoryTable {
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
         }
+    }
+
+    private static Key keyFor(final Session session) {
+        return new Key(session.getUserId(), session.getContextId());
+    }
+
+    private static Key keyFor(final int userId, final int contextId) {
+        return new Key(userId, contextId);
+    }
+
+    private static final class Key {
+
+        private final int cid;
+
+        private final int user;
+
+        private final int hash;
+
+        protected Key(final int user, final int cid) {
+            super();
+            this.user = user;
+            this.cid = cid;
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + cid;
+            result = prime * result + user;
+            hash = result;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof Key)) {
+                return false;
+            }
+            final Key other = (Key) obj;
+            if (cid != other.cid) {
+                return false;
+            }
+            if (user != other.user) {
+                return false;
+            }
+            return true;
+        }
+
     }
 
 }

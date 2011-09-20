@@ -49,6 +49,8 @@
 
 package com.openexchange.folderstorage.outlook.memory.impl;
 
+import gnu.trove.ConcurrentTIntHashSet;
+import gnu.trove.set.TIntSet;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -64,6 +66,7 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.outlook.OutlookFolder;
+import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.folderstorage.outlook.memory.MemoryCRUD;
 import com.openexchange.folderstorage.outlook.memory.MemoryFolder;
 import com.openexchange.folderstorage.outlook.memory.MemoryTree;
@@ -82,11 +85,15 @@ public final class MemoryTreeImpl implements MemoryTree {
 
     private final MemoryCRUD crud;
 
+    private final int treeId;
+
     /**
      * Initializes a new {@link MemoryTreeImpl}.
+     * @param treeId 
      */
-    public MemoryTreeImpl() {
+    public MemoryTreeImpl(final int treeId) {
         super();
+        this.treeId = treeId;
         folderMap = new ConcurrentHashMap<String, MemoryFolder>(128);
         parentMap = new ConcurrentHashMap<String, Set<MemoryFolder>>(128);
         crud = new MemoryCRUDImpl(folderMap, parentMap);
@@ -147,11 +154,13 @@ public final class MemoryTreeImpl implements MemoryTree {
         return new ArrayList<String>(folderMap.keySet());
     }
 
+    private static final TIntSet KNOWN_TREES = new ConcurrentTIntHashSet(new int[] {Integer.parseInt(FolderStorage.REAL_TREE_ID), Integer.parseInt(OutlookFolderStorage.OUTLOOK_TREE_ID)});
+
     @Override
     public String[] getSubfolderIds(final Locale locale, final String parentId, final List<String[]> realSubfolderIds) {
         final List<String[]> ids = getSubfolderIds(parentId);
         final List<String> subfolderIds;
-        if (FolderStorage.ROOT_ID.equals(parentId)) {
+        if (FolderStorage.ROOT_ID.equals(parentId) && KNOWN_TREES.contains(treeId)) {
             /*
              * Proper sort of top level folders 1. Private 2. Public 3. Shared . . . n Sorted external email accounts
              */
