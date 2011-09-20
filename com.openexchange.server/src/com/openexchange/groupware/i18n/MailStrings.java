@@ -66,25 +66,32 @@ public class MailStrings implements LocalizableStrings {
     }
 
     // The internationalized name for the INBOX mail folder
-    public static final String INBOX = "Inbox".intern();
+    public static final String INBOX = "Inbox"
+        .intern();
 
     // The internationalized name for the trash mail folder
-    public static final String TRASH = "Trash".intern();
+    public static final String TRASH = "Trash"
+        .intern();
 
     // The internationalized name for the drafts mail folder
-    public static final String DRAFTS = "Drafts".intern();
+    public static final String DRAFTS = "Drafts"
+        .intern();
 
     // The internationalized name for the sent mail folder
-    public static final String SENT = "Sent objects".intern();
+    public static final String SENT = "Sent objects"
+        .intern();
 
     // The internationalized name for the spam mail folder
-    public static final String SPAM = "Spam".intern();
+    public static final String SPAM = "Spam"
+        .intern();
 
     // The internationalized name for the confirmed-spam mail folder
-    public static final String CONFIRMED_SPAM = "Confirmed spam".intern();
+    public static final String CONFIRMED_SPAM = "Confirmed spam"
+        .intern();
 
     // The internationalized name for the confirmed-spam mail folder
-    public static final String CONFIRMED_HAM = "Confirmed ham".intern();
+    public static final String CONFIRMED_HAM = "Confirmed ham"
+        .intern();
 
 
     // The internationalized subject for a read acknowledgement
@@ -128,15 +135,19 @@ public class MailStrings implements LocalizableStrings {
     public static final String GREETING = "Dear Sir or Madam";
 
     // The name for trash folder
-    public static final String DEFAULT_TRASH = "Trash".intern();
+    public static final String DEFAULT_TRASH = "Trash"
+        .intern();
 
     // The name for trash folder
-    public static final String DEFAULT_DRAFTS = "Drafts".intern();
+    public static final String DEFAULT_DRAFTS = "Drafts"
+        .intern();
 
     // The name for trash folder
-    public static final String DEFAULT_SENT = "Sent objects".intern();
+    public static final String DEFAULT_SENT = "Sent objects"
+        .intern();
 
     // The name for trash folder
-    public static final String DEFAULT_SPAM = "Spam".intern();
+    public static final String DEFAULT_SPAM = "Spam"
+        .intern();
 
 }
