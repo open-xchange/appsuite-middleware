@@ -63,6 +63,7 @@ import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.mime.HeaderName;
+import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -176,20 +177,41 @@ public final class StorageUtility {
     private static final String SWITCH_DEFAULT_FOLDER = "Switching to default value %s";
 
     /**
-     * Determines the default folder names (<b>not</b> fullnames). The returned array of {@link String} indexes the names as given through
+     * Determines the default folder names (<b>not</b> full names). The returned array of {@link String} indexes the names as given through
+     * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
+     *
+     * @param accountId The account ID
+     * @param usm The user's mail settings
+     * @return The default folder names as an array of {@link String}
+     * @throws OXException If spam enablement/disablement cannot be determined
+     */
+    public static String[] getDefaultFolderNames(final int accountId, final UserSettingMail usm) throws OXException {
+        return getDefaultFolderNames(accountId, usm, usm.isSpamEnabled());
+    }
+
+    /**
+     * Determines the default folder names (<b>not</b> full names). The returned array of {@link String} indexes the names as given through
      * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
      *
      * @param accountId The account ID
      * @param usm The user's mail settings
      * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
      * @return The default folder names as an array of {@link String}
+     * @throws OXException If spam enablement/disablement cannot be determined
      */
-    public static String[] getDefaultFolderNames(final boolean isSpamEnabled) {
-        return new DefaultFolderNamesProvider().getDefaultFolderNames(isSpamEnabled);
+    public static String[] getDefaultFolderNames(final int accountId, final UserSettingMail usm, final boolean isSpamEnabled) throws OXException {
+        return new DefaultFolderNamesProvider(accountId, usm.getUserId(), usm.getCid()).getDefaultFolderNames(
+            usm.getStdTrashName(),
+            usm.getStdSentName(),
+            usm.getStdDraftsName(),
+            usm.getStdSpamName(),
+            usm.getConfirmedSpam(),
+            usm.getConfirmedHam(),
+            isSpamEnabled);
     }
 
     /**
-     * Determines the default folder names (<b>not</b> fullnames). The returned array of {@link String} indexes the names as given through
+     * Determines the default folder names (<b>not</b> full names). The returned array of {@link String} indexes the names as given through
      * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
      *
      * @param trash The trash name

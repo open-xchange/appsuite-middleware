@@ -575,7 +575,7 @@ public final class MessagingFolderStorage implements FolderStorage {
                     openMessagingAccess(accountAccess);
 
                     final MessagingFolder rootFolder = accountAccess.getFolderAccess().getRootFolder();
-                    retval = new MessagingFolderImpl(rootFolder, accountId, serviceId, null);
+                    retval = new MessagingFolderImpl(rootFolder, accountId, serviceId, storageParameters.getUser(), null);
                     /*
                      * Set proper name
                      */
@@ -596,7 +596,8 @@ public final class MessagingFolderStorage implements FolderStorage {
                         messagingFolder,
                         accountId,
                         serviceId,
-                        storageParameters.getUser());
+                        storageParameters.getUser(),
+                        new MessagingAccountAccessFullnameProvider(accountAccess));
                 hasSubfolders = messagingFolder.hasSubfolders();
                 /*
                  * Check if denoted parent can hold default folders like Trash, Sent, etc.

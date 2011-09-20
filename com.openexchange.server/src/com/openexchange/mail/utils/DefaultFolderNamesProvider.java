@@ -55,9 +55,12 @@ import static com.openexchange.mail.utils.StorageUtility.INDEX_DRAFTS;
 import static com.openexchange.mail.utils.StorageUtility.INDEX_SENT;
 import static com.openexchange.mail.utils.StorageUtility.INDEX_SPAM;
 import static com.openexchange.mail.utils.StorageUtility.INDEX_TRASH;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link DefaultFolderNamesProvider} - Provides the default folder (full-)names for a certain mail account.
@@ -65,6 +68,11 @@ import com.openexchange.mailaccount.MailAccountDescription;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DefaultFolderNamesProvider {
+
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DefaultFolderNamesProvider.class));
+
+    private static final String SWITCH_DEFAULT_FOLDER = "Switching to default value %s";
 
     /*
      * Member
@@ -74,39 +82,142 @@ public final class DefaultFolderNamesProvider {
 
     /**
      * Initializes a new {@link DefaultFolderNamesProvider}.
+     *
+     * @param accountId The account ID
+     * @param user The user ID
+     * @param cid The context ID
+     * @throws OXException If initialization fails
      */
-    public DefaultFolderNamesProvider() {
+    public DefaultFolderNamesProvider(final int accountId, final int user, final int cid) throws OXException {
         super();
-        fallbackProvider = DEFAULT_PROVIDER;
+        if (MailAccount.DEFAULT_ID == accountId) {
+            fallbackProvider = DEFAULT_PROVIDER;
+        } else {
+            final MailAccountStorageService storageService =
+                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+            fallbackProvider = new DefaultAccountProvider(storageService.getDefaultMailAccount(user, cid));
+        }
     }
 
     /**
-     * Determines the default folder names (<b>not</b> full names). The returned array of {@link String} indexes the names as given through
+     * Determines the default folder names (<b>not</b> fullnames). The returned array of {@link String} indexes the names as given through
      * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
      *
+     * @param mailAccount The mail account providing the names
      * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
      * @return The default folder names as an array of {@link String}
      */
-    public String[] getDefaultFolderNames(final boolean isSpamEnabled) {
+    public String[] getDefaultFolderNames(final MailAccount mailAccount, final boolean isSpamEnabled) {
+        return getDefaultFolderNames(
+            mailAccount.getTrash(),
+            mailAccount.getSent(),
+            mailAccount.getDrafts(),
+            mailAccount.getSpam(),
+            mailAccount.getConfirmedSpam(),
+            mailAccount.getConfirmedHam(),
+            isSpamEnabled);
+    }
+
+    /**
+     * Determines the default folder names (<b>not</b> fullnames). The returned array of {@link String} indexes the names as given through
+     * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
+     *
+     * @param mailAccount The mail account providing the names
+     * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
+     * @return The default folder names as an array of {@link String}
+     */
+    public String[] getDefaultFolderNames(final MailAccountDescription mailAccount, final boolean isSpamEnabled) {
+        return getDefaultFolderNames(
+            mailAccount.getTrash(),
+            mailAccount.getSent(),
+            mailAccount.getDrafts(),
+            mailAccount.getSpam(),
+            mailAccount.getConfirmedSpam(),
+            mailAccount.getConfirmedHam(),
+            isSpamEnabled);
+    }
+
+    /**
+     * Determines the default folder names (<b>not</b> fullnames). The returned array of {@link String} indexes the names as given through
+     * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
+     *
+     * @param trash The trash name
+     * @param sent The sent name
+     * @param drafts The drafts name
+     * @param spam The spam name
+     * @param confirmedSpam The confirmed-spam name
+     * @param confirmedHam The confirmed-ham name
+     * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
+     * @return The default folder names as an array of {@link String}
+     */
+    public String[] getDefaultFolderNames(final String trash, final String sent, final String drafts, final String spam, final String confirmedSpam, final String confirmedHam, final boolean isSpamEnabled) {
         final String[] names = new String[isSpamEnabled ? 6 : 4];
-        names[INDEX_DRAFTS] = fallbackProvider.getDrafts();
-        names[INDEX_SENT] = fallbackProvider.getSent();
-        names[INDEX_SPAM] = fallbackProvider.getSpam();
-        names[INDEX_TRASH] = fallbackProvider.getTrash();
+        if ((drafts == null) || (drafts.length() == 0)) {
+            if (LOG.isWarnEnabled()) {
+                // final OXException e = new OXException(OXException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_DRAFTS);
+                LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, MailStrings.DRAFTS));
+            }
+            names[INDEX_DRAFTS] = fallbackProvider.getDrafts();
+        } else {
+            names[INDEX_DRAFTS] = drafts;
+        }
+        if ((sent == null) || (sent.length() == 0)) {
+            if (LOG.isWarnEnabled()) {
+                // final OXException e = new OXException(OXException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_SENT);
+                LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, MailStrings.SENT));
+            }
+            names[INDEX_SENT] = fallbackProvider.getSent();
+        } else {
+            names[INDEX_SENT] = sent;
+        }
+        if ((spam == null) || (spam.length() == 0)) {
+            if (LOG.isWarnEnabled()) {
+                // final OXException e = new OXException(OXException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_SPAM);
+                LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, MailStrings.SPAM));
+            }
+            names[INDEX_SPAM] = fallbackProvider.getSpam();
+        } else {
+            names[INDEX_SPAM] = spam;
+        }
+        if ((trash == null) || (trash.length() == 0)) {
+            if (LOG.isWarnEnabled()) {
+                // final OXException e = new OXException(OXException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_TRASH);
+                LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, MailStrings.TRASH));
+            }
+            names[INDEX_TRASH] = fallbackProvider.getTrash();
+        } else {
+            names[INDEX_TRASH] = trash;
+        }
         if (isSpamEnabled) {
-            names[INDEX_CONFIRMED_SPAM] = fallbackProvider.getConfirmedSpam();
-            names[INDEX_CONFIRMED_HAM] = fallbackProvider.getConfirmedHam();
+            if ((confirmedSpam == null) || (confirmedSpam.length() == 0)) {
+                if (LOG.isWarnEnabled()) {
+                    // final OXException e = new OXException(OXException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_CONFIRMED_SPAM);
+                    LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, MailStrings.CONFIRMED_SPAM));
+                }
+                names[INDEX_CONFIRMED_SPAM] = fallbackProvider.getConfirmedSpam();
+            } else {
+                names[INDEX_CONFIRMED_SPAM] = confirmedSpam;
+            }
+            if ((confirmedHam == null) || (confirmedHam.length() == 0)) {
+                if (LOG.isWarnEnabled()) {
+                    // final OXException e = new OXException(OXException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_CONFIRMED_HAM);
+                    LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, MailStrings.CONFIRMED_HAM));
+                }
+                names[INDEX_CONFIRMED_HAM] = fallbackProvider.getConfirmedHam();
+            } else {
+                names[INDEX_CONFIRMED_HAM] = confirmedHam;
+            }
         }
         return names;
     }
 
     /**
-     * Determines the default folder full names (<b>not</b> names). The returned array of {@link String} indexes the names as given through
+     * Determines the default folder fullnames (<b>not</b> names). The returned array of {@link String} indexes the names as given through
      * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
      *
-     * @param mailAccount The mail account providing the full names
+     * @param mailAccount The mail account providing the fullnames
      * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
-     * @return The default folder full names as an array of {@link String}
+     * @return The default folder fullnames as an array of {@link String}
      */
     public String[] getDefaultFolderFullnames(final MailAccount mailAccount, final boolean isSpamEnabled) {
         return getDefaultFolderFullnames(
@@ -120,12 +231,12 @@ public final class DefaultFolderNamesProvider {
     }
 
     /**
-     * Determines the default folder full names (<b>not</b> names). The returned array of {@link String} indexes the names as given through
+     * Determines the default folder fullnames (<b>not</b> names). The returned array of {@link String} indexes the names as given through
      * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
      *
-     * @param mailAccount The mail account providing the full names
+     * @param mailAccount The mail account providing the fullnames
      * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
-     * @return The default folder full names as an array of {@link String}
+     * @return The default folder fullnames as an array of {@link String}
      */
     public String[] getDefaultFolderFullnames(final MailAccountDescription mailAccount, final boolean isSpamEnabled) {
         return getDefaultFolderFullnames(
@@ -143,17 +254,17 @@ public final class DefaultFolderNamesProvider {
     }
 
     /**
-     * Determines the default folder full names (<b>not</b> names). The returned array of {@link String} indexes the names as given through
+     * Determines the default folder fullnames (<b>not</b> names). The returned array of {@link String} indexes the names as given through
      * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
      *
-     * @param trashFullname The trash full name
-     * @param sentFullname The sent full name
-     * @param draftsFullname The drafts full name
-     * @param spamFullname The spam full name
-     * @param confirmedSpamFullname The confirmed-spam full name
-     * @param confirmedHamFullname The confirmed-ham full name
+     * @param trashFullname The trash fullname
+     * @param sentFullname The sent fullname
+     * @param draftsFullname The drafts fullname
+     * @param spamFullname The spam fullname
+     * @param confirmedSpamFullname The confirmed-spam fullname
+     * @param confirmedHamFullname The confirmed-ham fullname
      * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
-     * @return The default folder full names as an array of {@link String}
+     * @return The default folder fullnames as an array of {@link String}
      */
     public String[] getDefaultFolderFullnames(final String trashFullname, final String sentFullname, final String draftsFullname, final String spamFullname, final String confirmedSpamFullname, final String confirmedHamFullname, final boolean isSpamEnabled) {
         final String[] fullnames = new String[isSpamEnabled ? 6 : 4];
@@ -213,6 +324,71 @@ public final class DefaultFolderNamesProvider {
         String getConfirmedSpam();
 
         String getConfirmedHam();
+    }
+
+    private static final class DefaultAccountProvider implements FallbackProvider {
+
+        private final MailAccount defaultAccount;
+
+        public DefaultAccountProvider(final MailAccount defaultAccount) {
+            super();
+            this.defaultAccount = defaultAccount;
+        }
+
+        @Override
+        public String getConfirmedHam() {
+            final String ret = defaultAccount.getConfirmedHam();
+            if (ret == null || ret.length() == 0) {
+                return DEFAULT_PROVIDER.getConfirmedHam();
+            }
+            return ret;
+        }
+
+        @Override
+        public String getConfirmedSpam() {
+            final String ret = defaultAccount.getConfirmedSpam();
+            if (ret == null || ret.length() == 0) {
+                return DEFAULT_PROVIDER.getConfirmedSpam();
+            }
+            return ret;
+        }
+
+        @Override
+        public String getDrafts() {
+            final String ret = defaultAccount.getDrafts();
+            if (ret == null || ret.length() == 0) {
+                return DEFAULT_PROVIDER.getDrafts();
+            }
+            return ret;
+        }
+
+        @Override
+        public String getSent() {
+            final String ret = defaultAccount.getSent();
+            if (ret == null || ret.length() == 0) {
+                return DEFAULT_PROVIDER.getSent();
+            }
+            return ret;
+        }
+
+        @Override
+        public String getSpam() {
+            final String ret = defaultAccount.getSpam();
+            if (ret == null || ret.length() == 0) {
+                return DEFAULT_PROVIDER.getSpam();
+            }
+            return ret;
+        }
+
+        @Override
+        public String getTrash() {
+            final String ret = defaultAccount.getTrash();
+            if (ret == null || ret.length() == 0) {
+                return DEFAULT_PROVIDER.getTrash();
+            }
+            return ret;
+        }
+
     }
 
     /**

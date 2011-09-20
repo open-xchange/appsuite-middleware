@@ -1581,9 +1581,9 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 /*
                  * Default folder names: trash, sent, drafts, spam, confirmed_spam, confirmed_ham
                  */
-                final DefaultFolderNamesProvider defaultFolderNamesProvider = new DefaultFolderNamesProvider();
+                final DefaultFolderNamesProvider defaultFolderNamesProvider = new DefaultFolderNamesProvider(id, user, cid);
                 {
-                    final String[] defaultFolderNames = defaultFolderNamesProvider.getDefaultFolderNames(true);
+                    final String[] defaultFolderNames = defaultFolderNamesProvider.getDefaultFolderNames(mailAccount, true);
                     setOptionalString(stmt, pos++, defaultFolderNames[StorageUtility.INDEX_TRASH]);
                     setOptionalString(stmt, pos++, defaultFolderNames[StorageUtility.INDEX_SENT]);
                     setOptionalString(stmt, pos++, defaultFolderNames[StorageUtility.INDEX_DRAFTS]);

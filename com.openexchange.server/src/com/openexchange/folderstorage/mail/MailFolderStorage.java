@@ -593,7 +593,8 @@ public final class MailFolderStorage implements FolderStorage {
                             rootFolder,
                             accountId,
                             mailAccess.getMailConfig(),
-                            storageParameters);
+                            storageParameters,
+                            null);
                     addWarnings(mailAccess, storageParameters);
                     hasSubfolders = rootFolder.hasSubfolders();
                 } else {
@@ -618,7 +619,8 @@ public final class MailFolderStorage implements FolderStorage {
                         mailFolder,
                         accountId,
                         mailAccess.getMailConfig(),
-                        storageParameters);
+                        storageParameters,
+                        new MailAccessFullnameProvider(mailAccess));
                 hasSubfolders = mailFolder.hasSubfolders();
                 /*
                  * Check if denoted parent can hold default folders like Trash, Sent, etc.
