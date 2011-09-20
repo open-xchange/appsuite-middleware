@@ -59,6 +59,8 @@ exit 0
 
 
 %changelog
+* Tue Sep 20 2011 - holger.achtziger@open-xchange.com
+ - Fixed cache statistics
 * Tue May 24 2011 - steffen.templin@open-xchange.com
  - Repaired autoconf function of most scripts.
  - Corrected wrong parameter for showruntimestats call in java heap scripts 
