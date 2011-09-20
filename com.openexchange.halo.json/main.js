@@ -19,9 +19,8 @@ define("com.openexchange.halo.json/main", ["osgi", "httpAPI"], function (osgi, h
                   contact.setEmail1(req.getParameter("email1"));
               }
               
-              return contactHalo.investigate(provider, contact, session);
+              return contactHalo.investigate(provider, contact, req, session);
           }
       });
-       
    });
 });
