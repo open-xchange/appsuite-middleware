@@ -525,11 +525,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                             /*
                              * User has \KEEP_SEEN right: Switch \Seen flag
                              */
-                            msg.setFlags(FLAGS_SEEN, true);
-                            mail.setFlag(MailMessage.FLAG_SEEN, true);
-                            final int cur = mail.getUnreadMessages();
-                            mail.setUnreadMessages(cur <= 0 ? 0 : cur - 1);
-                            imapFolderStorage.decrementUnreadMessageCount(fullName);
+                            setSeenFlag(fullName, mail, msg);
                         }
                     } catch (final MessagingException e) {
                         imapFolderStorage.removeFromCache(fullName);
@@ -541,19 +537,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         }
                     }
                 } else {
-                    try {
-                        /*
-                         * Switch \Seen flag
-                         */
-                        msg.setFlags(FLAGS_SEEN, true);
-                        mail.setFlag(MailMessage.FLAG_SEEN, true);
-                        final int cur = mail.getUnreadMessages();
-                        mail.setUnreadMessages(cur <= 0 ? 0 : cur - 1);
-                        imapFolderStorage.decrementUnreadMessageCount(fullName);
-                    } catch (final MessagingException e) {
-                        imapFolderStorage.removeFromCache(fullName);
-                        throw e;
-                    }
+                    setSeenFlag(fullName, mail, msg);
                 }
             }
             return setAccountInfo(mail);
@@ -561,6 +545,24 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
+        }
+    }
+
+    private void setSeenFlag(final String fullName, final MailMessage mail, final IMAPMessage msg) {
+        try {
+            msg.setFlags(FLAGS_SEEN, true);
+            mail.setFlag(MailMessage.FLAG_SEEN, true);
+            final int cur = mail.getUnreadMessages();
+            mail.setUnreadMessages(cur <= 0 ? 0 : cur - 1);
+            imapFolderStorage.decrementUnreadMessageCount(fullName);
+        } catch (final Exception e) {
+            imapFolderStorage.removeFromCache(fullName);
+            if (LOG.isWarnEnabled()) {
+                LOG.warn(
+                    new StringBuilder("/SEEN flag could not be set on message #").append(mail.getMailId()).append(" in folder ").append(
+                        mail.getFolder()).toString(),
+                    e);
+            }
         }
     }
 
