@@ -49,6 +49,8 @@
 
 package com.openexchange.folderstorage.outlook.memory.impl;
 
+import gnu.trove.ConcurrentTIntHashSet;
+import gnu.trove.set.TIntSet;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -64,6 +66,7 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.outlook.OutlookFolder;
+import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.folderstorage.outlook.memory.MemoryCRUD;
 import com.openexchange.folderstorage.outlook.memory.MemoryFolder;
 import com.openexchange.folderstorage.outlook.memory.MemoryTree;
@@ -151,11 +154,14 @@ public final class MemoryTreeImpl implements MemoryTree {
         return new ArrayList<String>(folderMap.keySet());
     }
 
+    private static final TIntSet KNOWN_TREES = new ConcurrentTIntHashSet(new int[] {Integer.parseInt(FolderStorage.REAL_TREE_ID), Integer.parseInt(OutlookFolderStorage.OUTLOOK_TREE_ID)});
+
     @Override
     public String[] getSubfolderIds(final Locale locale, final String parentId, final List<String[]> realSubfolderIds) {
         final List<String[]> ids = getSubfolderIds(parentId);
         final List<String> subfolderIds;
-        if (FolderStorage.ROOT_ID.equals(parentId)) {
+        final boolean knownTree = KNOWN_TREES.contains(treeId);
+        if (FolderStorage.ROOT_ID.equals(parentId) && knownTree) {
             /*
              * Proper sort of top level folders 1. Private 2. Public 3. Shared . . . n Sorted external email accounts
              */
@@ -176,18 +182,30 @@ public final class MemoryTreeImpl implements MemoryTree {
                 }
                 list.add(realSubfolderId[0]);
             }
-            for (final String[] idAndName : ids) {
-                /*
-                 * Names loaded from DB have no locale-sensitive string
-                 */
-                // String localizedName = stringHelper.getString(rs.getString(2));
-                final String name = idAndName[1];
-                List<String> list = treeMap.get(name);
-                if (null == list) {
-                    list = new ArrayList<String>(2);
-                    treeMap.put(name, list);
+            if (knownTree) {
+                for (final String[] idAndName : ids) {
+                    /*
+                     * Names loaded from DB have no locale-sensitive string
+                     */
+                    // String localizedName = stringHelper.getString(rs.getString(2));
+                    final String name = idAndName[1];
+                    List<String> list = treeMap.get(name);
+                    if (null == list) {
+                        list = new ArrayList<String>(2);
+                        treeMap.put(name, list);
+                    }
+                    list.add(idAndName[0]);
                 }
-                list.add(idAndName[0]);
+            } else {
+                for (final String[] idAndName : ids) {
+                    final String localizedName = stringHelper.getString(idAndName[1]);
+                    List<String> list = treeMap.get(localizedName);
+                    if (null == list) {
+                        list = new ArrayList<String>(2);
+                        treeMap.put(localizedName, list);
+                    }
+                    list.add(idAndName[0]);
+                }
             }
             subfolderIds = new ArrayList<String>(treeMap.size());
             for (final List<String> list : treeMap.values()) {
