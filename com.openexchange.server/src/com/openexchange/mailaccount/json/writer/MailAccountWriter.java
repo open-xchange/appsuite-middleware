@@ -175,7 +175,8 @@ public final class MailAccountWriter {
                         row.put(prepareFullname(account.getId(), value.toString()));
                     }
                 } else {
-                    row.put(attribute.doSwitch(getter));
+                    final Object value  = attribute.doSwitch(getter);
+                    row.put(value == null ? JSONObject.NULL : value);
                 }
             }
             rows.put(row);
