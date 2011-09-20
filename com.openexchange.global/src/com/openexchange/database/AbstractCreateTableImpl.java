@@ -49,44 +49,40 @@
 
 package com.openexchange.database;
 
+import static com.openexchange.database.Databases.closeSQLStuff;
 import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.UpdateTask;
 
 /**
- * If your bundle needs to create database tables for working properly this service must be implemented. Its method are called if a new
- * schema for contexts is created. The order of executing {@link CreateTableService} instances is calculated by the string arrays given from
- * the methods {@link #requiredTables()} and {@link #tablesToCreate()}. The {@link #perform(Connection)} method should then create the
- * tables needed for your bundle.
- *
- * The table must be created in its newest version. {@link UpdateTask}s are not executed after all tables have been created and the schema
- * is marked in that way that all {@link UpdateTask}s have already been executed.
+ * Abstract class for easily implementing {@link CreateTableService} services.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public interface CreateTableService {
+public abstract class AbstractCreateTableImpl implements CreateTableService {
 
-    /**
-     * This method should give all table names that have to exist before the {@link #perform(Connection)} method is called. You can use this
-     * if your table has foreign keys to some other tables.
-     * @return an array with table names that have to exist before the {@link #perform(Connection)} method is called.
-     */
-    String[] requiredTables();
+    public AbstractCreateTableImpl() {
+        super();
+    }
 
-    /**
-     * This method must give all names of tables that are create during call of the {@link #perform(Connection)} method. Maybe some other
-     * tables require your before they can be created.
-     * @return an array with table names that are created during call of the {@link #perform(Connection)} method.
-     */
-    String[] tablesToCreate();
+    @Override
+    public final void perform(final Connection con) throws OXException {
+        Statement stmt = null;
+        try {
+            stmt = con.createStatement();
+            for (final String create : getCreateStatements()) {
+                stmt.execute(create);
+            }
+        } catch (final SQLException e) {
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
 
-    /**
-     * The implementation of this method should create the required tables on the given database connection. The connection is already
-     * configured to use the correct schema. The given connection is already in a transaction. Do not modify the transaction state of the
-     * connection.
-     * @param con writable connection in a transaction state.
-     * @throws OXException should be thrown if creating the table fails.
-     */
-    void perform(Connection con) throws OXException;
+    protected abstract String[] getCreateStatements();
+
+    protected static final String[] NO_TABLES = new String[0];
 
 }
