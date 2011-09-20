@@ -890,7 +890,7 @@ public final class MailFolderStorage implements FolderStorage {
                             final String fullName = child.getFullname();
                             final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
                             if (fullName.equals(folderStorage.getDraftsFolder())) {
-                                child.setName(new StringHelper(locale).getString(MailStrings.TRASH));
+                                child.setName(new StringHelper(locale).getString(MailStrings.DRAFTS));
                             } else if (fullName.equals(folderStorage.getSentFolder())) {
                                 child.setName(new StringHelper(locale).getString(MailStrings.SENT));
                             } else if (fullName.equals(folderStorage.getSpamFolder())) {
