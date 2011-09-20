@@ -81,7 +81,8 @@ public final class MailAccountWriter {
      */
     public static JSONObject write(final MailAccount account) throws JSONException {
         final JSONObject json = new JSONObject();
-        json.put(MailAccountFields.ID, account.getId());
+        final int accountId = account.getId();
+        json.put(MailAccountFields.ID, accountId);
         json.put(MailAccountFields.LOGIN, account.getLogin());
         // json.put(MailAccountFields.PASSWORD, account.getLogin());
         json.put(MailAccountFields.MAIL_PORT, account.getMailPort());
@@ -111,12 +112,12 @@ public final class MailAccountWriter {
         json.put(MailAccountFields.CONFIRMED_SPAM, account.getConfirmedSpam());
         json.put(MailAccountFields.CONFIRMED_HAM, account.getConfirmedHam());
         // Folder full names
-        json.put(MailAccountFields.TRASH_FULLNAME, prepareFullname(account.getId(), account.getTrashFullname()));
-        json.put(MailAccountFields.SENT_FULLNAME, prepareFullname(account.getId(), account.getSentFullname()));
-        json.put(MailAccountFields.DRAFTS_FULLNAME, prepareFullname(account.getId(), account.getDraftsFullname()));
-        json.put(MailAccountFields.SPAM_FULLNAME, prepareFullname(account.getId(), account.getSpamFullname()));
-        json.put(MailAccountFields.CONFIRMED_SPAM_FULLNAME, prepareFullname(account.getId(), account.getConfirmedSpamFullname()));
-        json.put(MailAccountFields.CONFIRMED_HAM_FULLNAME, prepareFullname(account.getId(), account.getConfirmedHamFullname()));
+        json.put(MailAccountFields.TRASH_FULLNAME, prepareFullname(accountId, account.getTrashFullname()));
+        json.put(MailAccountFields.SENT_FULLNAME, prepareFullname(accountId, account.getSentFullname()));
+        json.put(MailAccountFields.DRAFTS_FULLNAME, prepareFullname(accountId, account.getDraftsFullname()));
+        json.put(MailAccountFields.SPAM_FULLNAME, prepareFullname(accountId, account.getSpamFullname()));
+        json.put(MailAccountFields.CONFIRMED_SPAM_FULLNAME, prepareFullname(accountId, account.getConfirmedSpamFullname()));
+        json.put(MailAccountFields.CONFIRMED_HAM_FULLNAME, prepareFullname(accountId, account.getConfirmedHamFullname()));
         // Unified INBOX enabled
         json.put(MailAccountFields.UNIFIED_INBOX_ENABLED, account.isUnifiedINBOXEnabled());
         // Properties
