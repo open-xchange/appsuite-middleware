@@ -133,7 +133,7 @@ public class UserModuleAccess implements Serializable {
 
     private boolean GlobalAddressBookDisabled = false;
 
-    private boolean PublicFolderEditable = true;
+    private boolean PublicFolderEditable = false;
 
     private boolean deniedPortal;
 
