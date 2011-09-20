@@ -82,11 +82,15 @@ public final class MemoryTreeImpl implements MemoryTree {
 
     private final MemoryCRUD crud;
 
+    private final int treeId;
+
     /**
      * Initializes a new {@link MemoryTreeImpl}.
+     * @param treeId 
      */
-    public MemoryTreeImpl() {
+    public MemoryTreeImpl(final int treeId) {
         super();
+        this.treeId = treeId;
         folderMap = new ConcurrentHashMap<String, MemoryFolder>(128);
         parentMap = new ConcurrentHashMap<String, Set<MemoryFolder>>(128);
         crud = new MemoryCRUDImpl(folderMap, parentMap);
