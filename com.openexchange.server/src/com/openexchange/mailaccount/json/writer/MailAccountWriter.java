@@ -49,6 +49,7 @@
 
 package com.openexchange.mailaccount.json.writer;
 
+import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONArray;
@@ -109,13 +110,13 @@ public final class MailAccountWriter {
         json.put(MailAccountFields.SPAM, account.getSpam());
         json.put(MailAccountFields.CONFIRMED_SPAM, account.getConfirmedSpam());
         json.put(MailAccountFields.CONFIRMED_HAM, account.getConfirmedHam());
-        // Folder fullnames
-        json.put(MailAccountFields.TRASH_FULLNAME, account.getTrashFullname());
-        json.put(MailAccountFields.SENT_FULLNAME, account.getSentFullname());
-        json.put(MailAccountFields.DRAFTS_FULLNAME, account.getDraftsFullname());
-        json.put(MailAccountFields.SPAM_FULLNAME, account.getSpamFullname());
-        json.put(MailAccountFields.CONFIRMED_SPAM_FULLNAME, account.getConfirmedSpamFullname());
-        json.put(MailAccountFields.CONFIRMED_HAM_FULLNAME, account.getConfirmedHamFullname());
+        // Folder full names
+        json.put(MailAccountFields.TRASH_FULLNAME, prepareFullname(account.getId(), account.getTrashFullname()));
+        json.put(MailAccountFields.SENT_FULLNAME, prepareFullname(account.getId(), account.getSentFullname()));
+        json.put(MailAccountFields.DRAFTS_FULLNAME, prepareFullname(account.getId(), account.getDraftsFullname()));
+        json.put(MailAccountFields.SPAM_FULLNAME, prepareFullname(account.getId(), account.getSpamFullname()));
+        json.put(MailAccountFields.CONFIRMED_SPAM_FULLNAME, prepareFullname(account.getId(), account.getConfirmedSpamFullname()));
+        json.put(MailAccountFields.CONFIRMED_HAM_FULLNAME, prepareFullname(account.getId(), account.getConfirmedHamFullname()));
         // Unified INBOX enabled
         json.put(MailAccountFields.UNIFIED_INBOX_ENABLED, account.isUnifiedINBOXEnabled());
         // Properties
