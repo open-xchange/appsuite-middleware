@@ -105,9 +105,9 @@ public class FormatLocalizedStringReplacement implements TemplateReplacement {
     protected StringHelper getStringHelper() {
         if (stringHelper == null) {
             if (locale == null) {
-                stringHelper = new StringHelper(Locale.ENGLISH);
+                stringHelper = StringHelper.valueOf(Locale.ENGLISH);
             } else {
-                stringHelper = new StringHelper(locale);
+                stringHelper = StringHelper.valueOf(locale);
             }
         }
         return stringHelper;

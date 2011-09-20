@@ -47,36 +47,47 @@
  *
  */
 
-package com.openexchange.id;
+package com.openexchange.groupware.update.tasks;
 
-import com.openexchange.exception.OXException;
-
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.update.Tools.columnExists;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import com.openexchange.groupware.update.SimpleUpdateTask;
 
 /**
- * {@link IDGeneratorService} - A service to generate unique numeric identifiers for a specified type.
+ * {@link VirtualFolderAddSortNumTask} - Add "sortNum" column to virtual folder table.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface IDGeneratorService {
+public final class VirtualFolderAddSortNumTask extends SimpleUpdateTask {
 
-    /**
-     * Generates a unique numeric identifier for specified type.
-     *
-     * @param type The type identifier
-     * @param contextId The context identifier
-     * @return A unique numeric identifier
-     * @throws OXException If ID generation fails
-     */
-    int getId(String type, int contextId) throws OXException;
+    public VirtualFolderAddSortNumTask() {
+        super();
+    }
 
-    /**
-     * Generates a unique numeric identifier for specified type.
-     * 
-     * @param type The type identifier
-     * @param contextId The context identifier
-     * @param minId The minimum value for returned identifier
-     * @return A unique numeric identifier
-     * @throws OXException If ID generation fails
-     */
-    int getId(String type, int contextId, int minId) throws OXException;
+    @Override
+    protected void perform(final Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            if (!columnExists(con, "virtualTree", "sortNum")) {
+                stmt =
+                    con.prepareStatement("ALTER TABLE virtualTree ADD COLUMN sortNum INT4 UNSIGNED DEFAULT NULL");
+                stmt.executeUpdate();
+                stmt.close();
+                stmt = null;
+            }
+            if (!columnExists(con, "virtualBackupTree", "sortNum")) {
+                stmt =
+                    con.prepareStatement("ALTER TABLE virtualBackupTree ADD COLUMN sortNum INT4 UNSIGNED DEFAULT NULL");
+                stmt.executeUpdate();
+                stmt.close();
+                stmt = null;
+            }
+        } finally {
+            closeSQLStuff(stmt);
+        }  
+    }
+
 }

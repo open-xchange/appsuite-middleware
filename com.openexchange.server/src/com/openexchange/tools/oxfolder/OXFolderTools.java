@@ -969,7 +969,7 @@ public class OXFolderTools {
                     if (fo.getCreatedBy() != OCLPermission.ALL_GROUPS_AND_USERS) {
                         throw e;
                     }
-                    final StringHelper strHelper = new StringHelper(locale);
+                    final StringHelper strHelper = StringHelper.valueOf(locale);
                     creatorDisplayName = strHelper.getString(Groups.ALL_USERS);
                 }
                 final FolderObject virtualOwnerFolder = FolderObject.createVirtualFolderObject(

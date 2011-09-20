@@ -163,7 +163,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     /**
      * Message used for response header composition.
      */
-    protected final AjpMessage responseHeaderMessage;
+    //protected final AjpMessage responseHeaderMessage;
 
     /**
      * Body message.
@@ -228,7 +228,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     /**
      * The byte sink used for processing.
      */
-    private final ByteArrayOutputStream sink;
+    protected final ByteArrayOutputStream sink;
 
     /**
      * Byte chunk for certs.
@@ -407,14 +407,14 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         /*
          * Apply input/output
          */
+        this.packetSize = packetSize;
         request.setInputBuffer(new SocketInputBuffer());
         response.setOutputBuffer(new SocketOutputBuffer());
         /*
          * Initialize rest
          */
-        this.packetSize = packetSize;
         requestHeaderMessage = new AjpMessage(packetSize);
-        responseHeaderMessage = new AjpMessage(packetSize);
+        //responseHeaderMessage = new AjpMessage(packetSize);
         bodyMessage = new AjpMessage(packetSize);
         /*
          * Set the get body message buffer
@@ -2009,9 +2009,30 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     // ----------------------------------- OutputStreamOutputBuffer Inner Class
 
     /**
+     * Data length of SEND_BODY_CHUNK:
+     *
+     * <pre>
+     * prefix (1) + chunk_length (2) + terminating zero byte (1)
+     * </pre>
+     */
+    private static final int SEND_BODY_CHUNK_LENGTH = 4;
+
+    /**
      * This class is an output buffer which will write data to an output stream.
      */
     protected class SocketOutputBuffer implements OutputBuffer {
+
+        private final int chunkSize;
+
+        protected SocketOutputBuffer() {
+            super();
+            chunkSize = Constants.MAX_SEND_SIZE + (packetSize - Constants.MAX_PACKET_SIZE);
+        }
+
+        @Override
+        public int getPacketSize() {
+            return chunkSize;
+        }
 
         /**
          * Write chunk.
@@ -2027,37 +2048,55 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     error = true;
                 }
             }
-
             int len = chunk.getLength();
+            if (len <= 0) {
+                return len;
+            }
             // 4 - hardcoded, byte[] marshalling overhead
             // Adjust allowed size if packetSize != default (Constants.MAX_PACKET_SIZE)
-            final int chunkSize = Constants.MAX_SEND_SIZE + packetSize - Constants.MAX_PACKET_SIZE;
+            final byte[] b = chunk.getBuffer();
+            final int start = chunk.getOffset();
             int off = 0;
-            while (len > 0) {
+            do {
                 int thisTime = len;
                 if (thisTime > chunkSize) {
                     thisTime = chunkSize;
                 }
                 len -= thisTime;
-                responseHeaderMessage.reset();
-                responseHeaderMessage.appendByte(Constants.JK_AJP13_SEND_BODY_CHUNK);
-                responseHeaderMessage.appendBytes(chunk.getBytes(), chunk.getOffset() + off, thisTime);
-                // mod_proxy: Terminating 0 (zero) byte
-                // responseHeaderMessage.appendByte(0);
-                responseHeaderMessage.end();
                 softLock.lock();
                 try {
-                    output.write(responseHeaderMessage.getBuffer(), 0, responseHeaderMessage.getLen());
+                    output.write(getSendBodyChunkBytes(b, start + off, thisTime));
                     // output.flush();
                 } finally {
                     softLock.unlock();
                 }
-                lastWriteAccess = System.currentTimeMillis();
                 off += thisTime;
-            }
-
+            } while (len > 0);
+            lastWriteAccess = System.currentTimeMillis();
             return chunk.getLength();
         }
+
+        private byte[] getSendBodyChunkBytes(final byte[] b, final int off, final int len) {
+            /*
+             * prefix + chunk_length (2 bytes) + chunk bytes + terminating zero byte
+             */
+            final int dataLength = SEND_BODY_CHUNK_LENGTH + len;
+            /*
+             * Start bytes
+             */
+            sink.reset();
+            sink.write(0x41);
+            sink.write(0x42);
+            sink.write((dataLength >>> 8) & 0xFF);
+            sink.write(dataLength & 0xFF);
+            sink.write(Constants.JK_AJP13_SEND_BODY_CHUNK);
+            sink.write((len >>> 8) & 0xFF);
+            sink.write(len & 0xFF);
+            sink.write(b, off, len);
+            sink.write(0);
+            return sink.toByteArray();
+        }
+
     }
 
     private static final class KeepAliveRunnable implements Runnable {

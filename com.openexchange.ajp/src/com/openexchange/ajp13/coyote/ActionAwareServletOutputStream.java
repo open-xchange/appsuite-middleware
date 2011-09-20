@@ -64,13 +64,16 @@ public final class ActionAwareServletOutputStream extends ServletOutputStream {
 
     private final ByteChunk byteChunk;
 
+    private final int packetSize;
+
     /**
      * Initializes a new {@link ActionAwareServletOutputStream}.
      */
     public ActionAwareServletOutputStream(final OutputBuffer outputBuffer) {
         super();
         this.outputBuffer = outputBuffer;
-        byteChunk = new ByteChunk(8192);
+        packetSize = outputBuffer.getPacketSize();
+        byteChunk = new ByteChunk(packetSize);
     }
 
     @Override
@@ -118,7 +121,7 @@ public final class ActionAwareServletOutputStream extends ServletOutputStream {
         if (len == 0) {
             return;
         }
-        byteChunk.append(b, off, len);
+        append(b, off, len);
     }
 
     @Override
@@ -130,7 +133,29 @@ public final class ActionAwareServletOutputStream extends ServletOutputStream {
         if (len == 0) {
             return;
         }
-        byteChunk.append(b, 0, len);
+        append(b, 0, len);
+    }
+
+    private void append(final byte[] b, final int offset, final int length) throws IOException {
+        int off = offset;
+        int len = length;
+        while (len > 0) {
+            final int rem = packetSize - byteChunk.getLength();
+            if (len <= rem) {
+                byteChunk.append(b, off, len);
+                return;
+            }
+            /*-
+             * Remaining size lower than len
+             * 
+             * Flush fitting chunk
+             */
+            byteChunk.append(b, off, rem);
+            outputBuffer.doWrite(byteChunk);
+            byteChunk.recycle();
+            off += rem;
+            len -= rem;
+        }
     }
 
 }

@@ -62,6 +62,7 @@ import com.openexchange.groupware.update.tasks.CorrectOrganizerInAppointments;
 import com.openexchange.groupware.update.tasks.CreateIndexOnContextAttributesTask;
 import com.openexchange.groupware.update.tasks.CreateIndexOnUserAttributesForAliasLookupTask;
 import com.openexchange.groupware.update.tasks.MailAccountAddReplyToTask;
+import com.openexchange.groupware.update.tasks.VirtualFolderAddSortNumTask;
 
 /**
  * Lists all update tasks of the com.openexchange.server bundle.
@@ -400,5 +401,8 @@ public final class InternalList {
 
         // Add "replyTo" column to mail/transport account table
         new MailAccountAddReplyToTask(),
+
+        // Add "sortNum" column to virtual folder table.
+        new VirtualFolderAddSortNumTask(),
     };
 }

@@ -339,7 +339,7 @@ public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAd
 
         String name = names.get(l);
         if (null == name) {
-            name = new StringHelper(l).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
+            name = StringHelper.valueOf(l).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
             names.put(l, name);
         }
         return name;
