@@ -50,6 +50,7 @@
 package com.openexchange.mailaccount.json.writer;
 
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONArray;
@@ -140,6 +141,14 @@ public final class MailAccountWriter {
         return json;
     }
 
+    private static final EnumSet<Attribute> FULL_NAMES = EnumSet.of(
+        Attribute.TRASH_FULLNAME_LITERAL,
+        Attribute.SENT_FULLNAME_LITERAL,
+        Attribute.DRAFTS_FULLNAME_LITERAL,
+        Attribute.SPAM_FULLNAME_LITERAL,
+        Attribute.CONFIRMED_HAM_FULLNAME_LITERAL,
+        Attribute.CONFIRMED_SPAM_FULLNAME_LITERAL);
+
     /**
      * Writes specified attributes for each mail account contained in given array in an own JSON array surrounded by a super JSON array.
      *
@@ -158,6 +167,8 @@ public final class MailAccountWriter {
                     row.put(JSONObject.NULL);
                 } else if (Attribute.POP3_DELETE_WRITE_THROUGH_LITERAL == attribute || Attribute.POP3_EXPUNGE_ON_QUIT_LITERAL == attribute) {
                 	row.put(Boolean.parseBoolean(String.valueOf(attribute.doSwitch(getter))));
+                } else if (FULL_NAMES.contains(attribute)) {
+                    row.put(prepareFullname(account.getId(), attribute.doSwitch(getter).toString()));
                 } else {
                     row.put(attribute.doSwitch(getter));
                 }
