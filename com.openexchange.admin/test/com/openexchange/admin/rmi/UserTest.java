@@ -379,9 +379,12 @@ public class UserTest extends AbstractTest {
         assertFalse("Editing public folder was allowed for a normal user.", moduleAccess.isPublicFolderEditable());
 
         moduleAccess.setPublicFolderEditable(true);
-        oxu.changeModuleAccess(ctx, usr, moduleAccess, cred);
-        moduleAccess = oxu.getModuleAccess(ctx, createduser, cred);
-        assertFalse("Editing public folder was allowed for a normal user.", moduleAccess.isPublicFolderEditable());
+        try {
+            oxu.changeModuleAccess(ctx, usr, moduleAccess, cred);
+            fail("Setting publicfoldereditable to true was not denied by admin.");
+        } catch (final StorageException e) {
+            // This is expected.
+        }
     }
 
     /**
