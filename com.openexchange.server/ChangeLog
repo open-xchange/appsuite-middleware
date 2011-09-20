@@ -6,6 +6,7 @@
 
  - Fix for bug 19615: Safely set \Seen flag
  - Fix for bug 20402 and bug 20401: Fixed translation of mail default folders.
+ - Fix for bug 20417: Fixed possible NPE
 
 * 2011-09-19 - tobias.prinz@open-xchange.com
 
