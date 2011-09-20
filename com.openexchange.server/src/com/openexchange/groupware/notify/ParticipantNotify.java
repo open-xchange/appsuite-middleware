@@ -72,10 +72,12 @@ import javax.activation.DataHandler;
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
+import javax.mail.Part;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.ajax.Attachment;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalEmitter;
@@ -90,6 +92,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.Types;
+import com.openexchange.groupware.attach.AttachmentBase;
+import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.Constants;
@@ -135,6 +139,8 @@ import com.openexchange.i18n.tools.replacement.StringReplacement;
 import com.openexchange.i18n.tools.replacement.TaskActionReplacement;
 import com.openexchange.i18n.tools.replacement.TaskPriorityReplacement;
 import com.openexchange.i18n.tools.replacement.TaskStatusReplacement;
+import com.openexchange.mail.mime.ContentDisposition;
+import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
@@ -146,6 +152,7 @@ import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
+import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -187,7 +194,13 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             String message;
             if (Multipart.class.isInstance(msg.message)) {
                 try {
-                    message = ((Multipart) msg.message).getBodyPart(0).getContent().toString() + "\n\n(With ICal attached)";
+                    Object content = ((Multipart) msg.message).getBodyPart(0).getContent();
+                    String appendix = "\n\n(With ICal attached)";
+                    if (Multipart.class.isInstance(content)) {
+                        content = ((Multipart) content).getBodyPart(0).getContent();
+                        appendix += "\n(With file attachments)";
+                    }
+                    message = content.toString() + appendix;
                 } catch (final Exception e) {
                     message = "";
                 }
@@ -1029,7 +1042,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
     }
 
     /**
-     * Builds a multipart object containing the text/plain and iCal part
+     * Builds a multipart object containing the text/plain and iCal part (and possible appointment attachments)
      *
      * @return The multipart object or given text if building failed
      */
@@ -1037,11 +1050,91 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         if (module == Types.TASK) {
             return text;
         }
-        /*
-         * Generate iCal for appointment
-         */
         try {
-            final Multipart mp = new MimeMultipart("alternative");
+            /*
+             * Cast to appointment
+             */
+            final Appointment app = (Appointment) cal;
+            /*
+             * Check if appointment has attachments
+             */
+            Multipart mixedMultipart = null;
+            try {
+                final AttachmentBase attachmentBase = Attachment.ATTACHMENT_BASE;
+                final int folderId = app.getParentFolderID();
+                final int objectId = app.getObjectID();
+                final Context context = session.getContext();
+                final User user = session.getUser();
+                final UserConfiguration config = session.getUserConfiguration();
+                final SearchIterator<?> iterator = attachmentBase.getAttachments(folderId, objectId, Types.APPOINTMENT, context, user, config).results();
+                if (iterator.hasNext()) {
+                    try {
+                        attachmentBase.startTransaction();
+                        mixedMultipart = new MimeMultipart("mixed");
+                        do {
+                            final AttachmentMetadata metadata = (AttachmentMetadata) iterator.next();
+                            /*
+                             * Create appropriate MIME body part
+                             */
+                            final MimeBodyPart bodyPart = new MimeBodyPart();
+                            final ContentType ct;
+                            {
+                                String mimeType = metadata.getFileMIMEType();
+                                if (null == mimeType) {
+                                    mimeType = "application/octet-stream";
+                                }
+                                ct = new ContentType(mimeType);
+                            }
+                            /*
+                             * Set content through a DataHandler
+                             */
+                            bodyPart.setDataHandler(new DataHandler(new MessageDataSource(attachmentBase.getAttachedFile(folderId, objectId, Types.APPOINTMENT, metadata.getId(), context, user, config), ct)));
+                            final String fileName = metadata.getFilename();
+                            if (fileName != null && !ct.containsNameParameter()) {
+                                ct.setNameParameter(fileName);
+                            }
+                            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(ct.toString()));
+                            bodyPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
+                            if (fileName != null) {
+                                final ContentDisposition cd = new ContentDisposition(Part.ATTACHMENT);
+                                cd.setFilenameParameter(fileName);
+                                bodyPart.setHeader(
+                                    MessageHeaders.HDR_CONTENT_DISPOSITION,
+                                    MIMEMessageUtility.foldContentDisposition(cd.toString()));
+                            }
+                            /*
+                             * Append body part
+                             */
+                            mixedMultipart.addBodyPart(bodyPart);
+                        } while (iterator.hasNext());
+                        attachmentBase.commit();
+                    } catch (final Exception e) {
+                        try {
+                            attachmentBase.rollback();
+                        } catch (final OXException e1) {
+                            LOG.error("Attachment transaction rollback failed", e1);
+                        }
+                        LOG.error("File attachment(s) cannot be added.", e);
+                    } finally {
+                        try {
+                            iterator.close();
+                        } catch (final OXException e) {
+                            LOG.debug("SearchIterator could not be closed", e);
+                        }
+                        try {
+                            attachmentBase.finish();
+                        } catch (final OXException e) {
+                            LOG.debug("Attachment transaction finish failed", e);
+                        }
+                    }
+                }
+            } catch (final Exception e) {
+                LOG.error("File attachment(s) cannot be added.", e);
+            }
+            /*
+             * Generate iCal for appointment
+             */
+            final Multipart alternativeMultipart = new MimeMultipart("alternative");
             /*
              * Compose text part
              */
@@ -1063,7 +1156,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             /*
              * Compose iCal part
              */
-            final Appointment app = (Appointment) cal;
+            
             final ICalEmitter emitter = ServerServiceRegistry.getInstance().getService(ICalEmitter.class);
             final ICalSession icalSession = emitter.createSession(new SimpleMode(ZoneInfo.OUTLOOK));
             Date until = null;
@@ -1110,9 +1203,18 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             /*
              * Add the parts to parental multipart & return
              */
-            mp.addBodyPart(textPart);
-            mp.addBodyPart(iCalPart);
-            return mp;
+            alternativeMultipart.addBodyPart(textPart);
+            alternativeMultipart.addBodyPart(iCalPart);
+            /*
+             * Return appropriate multipart
+             */
+            if (mixedMultipart == null) {
+                return alternativeMultipart;
+            }
+            final BodyPart bodyPart = new MimeBodyPart();
+            bodyPart.setContent(alternativeMultipart);
+            mixedMultipart.addBodyPart(bodyPart, 0);
+            return mixedMultipart;
         } catch (final MessagingException e) {
             LOG.error("Unable to compose message", e);
         } catch (final ConversionError e) {
