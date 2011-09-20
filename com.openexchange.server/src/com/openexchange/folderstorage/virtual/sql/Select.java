@@ -229,7 +229,11 @@ public final class Select {
             }
             stmt = null;
             // Select subfolders
-            virtualFolder.setSubfolderIDs(getSubfolderIds(cid, tree, user, locale, folderId, storageType, con));
+            {
+                final String[] subfolderIds = getSubfolderIds(cid, tree, user, locale, folderId, storageType, con);
+                virtualFolder.setSubfolderIDs(subfolderIds);
+                virtualFolder.setSubscribedSubfolders(subfolderIds != null && subfolderIds.length > 0);
+            }
             // Select permissions
             try {
                 stmt = con.prepareStatement(working ? SQL_SELECT_PERMS : SQL_SELECT_PERMS_BCK);
