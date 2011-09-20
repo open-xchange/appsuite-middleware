@@ -330,6 +330,9 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
     }
 
     private IDMailMessage handleMessage(final Message message) {
+        if (null == message) {
+            return null;
+        }
         try {
             final IDMailMessage mail = new IDMailMessage(null, fullname);
             for (final FetchItemHandler fetchItemHandler : lastHandlers.isEmpty() ? MAP.values() : lastHandlers) {
