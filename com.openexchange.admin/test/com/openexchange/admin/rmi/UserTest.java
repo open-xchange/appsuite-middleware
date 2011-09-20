@@ -358,10 +358,12 @@ public class UserTest extends AbstractTest {
         }
     }
     
-    // Bug 18866
+    /**
+     * Tests if fix for bug 18866 still works. 
+     */
     @Test
-    public void testPublicFolderEditableRoundtrip() throws Exception {
-     // get context to create an user
+    public void testPublicFolderEditableForUser() throws Exception {
+        // get context to create an user
         final Credentials cred = DummyCredentials();
         final Context ctx = getTestContextObject(cred);
 
@@ -369,23 +371,44 @@ public class UserTest extends AbstractTest {
         final OXUserInterface oxu = getUserClient();
         final UserModuleAccess access = new UserModuleAccess();
         access.setPublicFolderEditable(true);
-        final User usr = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
-        final User createduser = oxu.create(ctx,usr,access,cred);
+        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass);
+        final User createduser = oxu.create(ctx, usr, access, cred);
+
         // now load user from server and check if data is correct, else fail
         UserModuleAccess moduleAccess = oxu.getModuleAccess(ctx, createduser, cred);
-        
-        assertTrue("Did not survive roundtrip", moduleAccess.isPublicFolderEditable());
-        
-        moduleAccess.setPublicFolderEditable(false);
-        
+        assertFalse("Editing public folder was allowed for a normal user.", moduleAccess.isPublicFolderEditable());
+
+        moduleAccess.setPublicFolderEditable(true);
         oxu.changeModuleAccess(ctx, usr, moduleAccess, cred);
-        
         moduleAccess = oxu.getModuleAccess(ctx, createduser, cred);
-        
-        assertFalse("Did not survive roundtrip", moduleAccess.isPublicFolderEditable());
-        
+        assertFalse("Editing public folder was allowed for a normal user.", moduleAccess.isPublicFolderEditable());
     }
 
+    /**
+     * Tests if fix for bug 18866 still works. 
+     */
+    @Test
+    public void testPublicFolderEditableForAdmin() throws Exception {
+        final Credentials cred = DummyCredentials();
+        final Context ctx = getTestContextObject(cred);
+
+        // create new user
+        final OXUserInterface oxu = getUserClient();
+        final User usr = new User();
+        usr.setId(Integer.valueOf(2));
+        
+        // enable and test it.
+        UserModuleAccess access = oxu.getModuleAccess(ctx, usr, cred);
+        access.setPublicFolderEditable(true);
+        oxu.changeModuleAccess(ctx, usr, access, cred);
+        access = oxu.getModuleAccess(ctx, usr, cred);
+        assertTrue("Flag publicfoldereditable does not survice roundtrip for context administrator.", access.isPublicFolderEditable());
+
+        access.setPublicFolderEditable(false);
+        oxu.changeModuleAccess(ctx, usr, access, cred);
+        access = oxu.getModuleAccess(ctx, usr, cred);
+        assertFalse("Flag publicfoldereditable does not survice roundtrip for context administrator.", access.isPublicFolderEditable());
+    }
 
     @Test
     public void testGetDataByNameWithUserAuth() throws Exception {
