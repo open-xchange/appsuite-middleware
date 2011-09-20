@@ -1496,7 +1496,7 @@ public final class OXFolderAdminHelper {
     public void addUserToOXFolders(final int userId, final String displayName, final String language, final int cid, final Connection writeCon) throws OXException {
         try {
             final Context ctx = new ContextImpl(cid);
-            final StringHelper strHelper = new StringHelper(LocaleTools.getLocale(language));
+            final StringHelper strHelper = StringHelper.valueOf(LocaleTools.getLocale(language));
             /*
              * Check infostore sibling
              */

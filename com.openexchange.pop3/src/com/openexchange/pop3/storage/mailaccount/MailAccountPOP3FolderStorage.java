@@ -228,11 +228,10 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
                 /*
                  * Get default folder names
                  */
-                final DefaultFolderNamesProvider defaultFolderNamesProvider =
-                    new DefaultFolderNamesProvider(accountId, session.getUserId(), session.getContextId());
+                final DefaultFolderNamesProvider defaultFolderNamesProvider = new DefaultFolderNamesProvider();
                 final String[] defaultFolderFullnames =
                     defaultFolderNamesProvider.getDefaultFolderFullnames(mailAccount, isSpamOptionEnabled);
-                final String[] defaultFolderNames = defaultFolderNamesProvider.getDefaultFolderNames(mailAccount, isSpamOptionEnabled);
+                final String[] defaultFolderNames = defaultFolderNamesProvider.getDefaultFolderNames(isSpamOptionEnabled);
                 final SpamHandler spamHandler;
                 {
                     spamHandler =

@@ -96,7 +96,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
         try {
             databaseService = CCServiceRegistry.getInstance().getService(DatabaseService.class, true);
             con = databaseService.getWritable(cid);
-            final String folderName = new StringHelper(login.getUser().getLocale()).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
+            final String folderName = StringHelper.valueOf(login.getUser().getLocale()).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
             create(login.getSession(), login.getContext(), folderName, con);
         } catch (final OXException e) {
             throw new OXException(e);

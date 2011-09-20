@@ -165,11 +165,10 @@ public final class MailFolderImpl extends AbstractFolder {
      * @param mailConfig The mail configuration
      * @param user The user
      * @param context The context
-     * @param fullnameProvider The (optional) fullname provider
      * @throws OXException If creation fails
      */
-    public MailFolderImpl(final MailFolder mailFolder, final int accountId, final MailConfig mailConfig, final StorageParameters params, final DefaultFolderFullnameProvider fullnameProvider) throws OXException {
-        this(mailFolder, accountId, mailConfig, params.getUser(), params.getContext(), fullnameProvider);
+    public MailFolderImpl(final MailFolder mailFolder, final int accountId, final MailConfig mailConfig, final StorageParameters params) throws OXException {
+        this(mailFolder, accountId, mailConfig, params.getUser(), params.getContext());
     }
 
     /**
@@ -182,17 +181,16 @@ public final class MailFolderImpl extends AbstractFolder {
      * @param mailConfig The mail configuration
      * @param user The user
      * @param context The context
-     * @param fullnameProvider The (optional) fullname provider
      * @throws OXException If creation fails
      */
-    public MailFolderImpl(final MailFolder mailFolder, final int accountId, final MailConfig mailConfig, final User user, final Context context, final DefaultFolderFullnameProvider fullnameProvider) throws OXException {
+    public MailFolderImpl(final MailFolder mailFolder, final int accountId, final MailConfig mailConfig, final User user, final Context context) throws OXException {
         super();
         this.accountId = accountId;
         userId = user.getId();
         contextId = context.getContextId();
         fullName = mailFolder.getFullname();
         id = MailFolderUtility.prepareFullname(accountId, fullName);
-        name = "INBOX".equals(fullName) ? new StringHelper(user.getLocale()).getString(MailStrings.INBOX) : mailFolder.getName();
+        name = "INBOX".equals(fullName) ? StringHelper.valueOf(user.getLocale()).getString(MailStrings.INBOX) : mailFolder.getName();
         // FolderObject.SYSTEM_PRIVATE_FOLDER_ID
         parent =
             mailFolder.isRootFolder() ? FolderStorage.PRIVATE_ID : MailFolderUtility.prepareFullname(
@@ -249,50 +247,41 @@ public final class MailFolderImpl extends AbstractFolder {
                 if (mailFolder.isInbox()) {
                     mailFolderType = MailFolderType.INBOX;
                 } else if (mailFolder.isTrash()) {
-                    name = new StringHelper(user.getLocale()).getString(MailStrings.TRASH);
+                    name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.TRASH);
                     mailFolderType = MailFolderType.TRASH;
                 } else if (mailFolder.isSent()) {
-                    name = new StringHelper(user.getLocale()).getString(MailStrings.SENT);
+                    name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.SENT);
                     mailFolderType = MailFolderType.SENT;
                 } else if (mailFolder.isSpam()) {
-                    name = new StringHelper(user.getLocale()).getString(MailStrings.SPAM);
+                    name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.SPAM);
                     mailFolderType = MailFolderType.SPAM;
                 } else if (mailFolder.isDrafts()) {
-                    name = new StringHelper(user.getLocale()).getString(MailStrings.DRAFTS);
+                    name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.DRAFTS);
                     mailFolderType = MailFolderType.DRAFTS;
                 } else if (mailFolder.isConfirmedSpam()) {
-                    name = new StringHelper(user.getLocale()).getString(MailStrings.CONFIRMED_SPAM);
+                    name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.CONFIRMED_SPAM);
                 } else if (mailFolder.isConfirmedHam()) {
-                    name = new StringHelper(user.getLocale()).getString(MailStrings.CONFIRMED_HAM);
+                    name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.CONFIRMED_HAM);
                 }
             } else if (null != fullName) {
-                if (null == fullnameProvider) {
-                    mailFolderType = MailFolderType.ROOT;
-                } else {
-                    try {
-                        if (fullName.equals(fullnameProvider.getDraftsFolder())) {
-                            name = new StringHelper(user.getLocale()).getString(MailStrings.DRAFTS);
-                            mailFolderType = MailFolderType.DRAFTS;
-                        } else if (fullName.equals(fullnameProvider.getINBOXFolder())) {
-                            mailFolderType = MailFolderType.INBOX;
-                        } else if (fullName.equals(fullnameProvider.getSentFolder())) {
-                            name = new StringHelper(user.getLocale()).getString(MailStrings.SENT);
-                            mailFolderType = MailFolderType.SENT;
-                        } else if (fullName.equals(fullnameProvider.getSpamFolder())) {
-                            name = new StringHelper(user.getLocale()).getString(MailStrings.SPAM);
-                            mailFolderType = MailFolderType.SPAM;
-                        } else if (fullName.equals(fullnameProvider.getTrashFolder())) {
-                            name = new StringHelper(user.getLocale()).getString(MailStrings.TRASH);
-                            mailFolderType = MailFolderType.TRASH;
-                        } else if (fullName.equals(fullnameProvider.getConfirmedSpamFolder())) {
-                            name = new StringHelper(user.getLocale()).getString(MailStrings.CONFIRMED_SPAM);
-                        } else if (fullName.equals(fullnameProvider.getConfirmedHamFolder())) {
-                            name = new StringHelper(user.getLocale()).getString(MailStrings.CONFIRMED_HAM);
-                        }
-                    } catch (final OXException e) {
-                        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailFolderImpl.class)).error(e.getMessage(), e);
-                        mailFolderType = MailFolderType.NONE;
-                    }
+                if (fullName.equals(MailStrings.DRAFTS)) {
+                    name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.DRAFTS);
+                    mailFolderType = MailFolderType.DRAFTS;
+                } else if (fullName.equals("INBOX")) {
+                    mailFolderType = MailFolderType.INBOX;
+                } else if (fullName.equals(MailStrings.SENT)) {
+                    name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.SENT);
+                    mailFolderType = MailFolderType.SENT;
+                } else if (fullName.equals(MailStrings.SPAM)) {
+                    name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.SPAM);
+                    mailFolderType = MailFolderType.SPAM;
+                } else if (fullName.equals(MailStrings.TRASH)) {
+                    name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.TRASH);
+                    mailFolderType = MailFolderType.TRASH;
+                } else if (fullName.equals(MailStrings.CONFIRMED_SPAM)) {
+                    name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.CONFIRMED_SPAM);
+                } else if (fullName.equals(MailStrings.CONFIRMED_HAM)) {
+                    name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.CONFIRMED_HAM);
                 }
             } else {
                 mailFolderType = MailFolderType.NONE;
