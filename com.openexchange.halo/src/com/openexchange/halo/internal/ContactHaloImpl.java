@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
@@ -42,12 +43,12 @@ public class ContactHaloImpl implements ContactHalo {
 	 * @see com.openexchange.halo.internal.ContactHalo#investigate(java.lang.String, com.openexchange.groupware.container.Contact, com.openexchange.tools.session.ServerSession)
 	 */
 	@Override
-	public AJAXRequestResult investigate(String provider, Contact contact, ServerSession session) throws OXException {
+	public AJAXRequestResult investigate(String provider, Contact contact, AJAXRequestData req, ServerSession session) throws OXException {
 		HaloContactDataSource dataSource = contactDataSources.get(provider);
 		if (dataSource == null) {
 			throw new OXException(1).setPrefix("HALO").setLogMessage("Unknown halo provider '"+provider+"'");
 		}
-		return dataSource.investigate(buildQuery(contact, session), session);
+		return dataSource.investigate(buildQuery(contact, session), req, session);
 	}
 
 

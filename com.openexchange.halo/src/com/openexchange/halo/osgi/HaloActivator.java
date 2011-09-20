@@ -47,6 +47,8 @@ public class HaloActivator extends HousekeepingActivator {
 			
 		});
 		
+		openTrackers();
+		
 	}
 
 }
