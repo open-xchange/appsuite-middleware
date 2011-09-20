@@ -314,10 +314,16 @@ public class PublicationMultipleHandler implements MultipleHandler {
         if(hostname != null) {
             if(serverURL == null || serverURL.startsWith("https")) {
                 protocol = "https://";
+            } else {
+                protocol = "http://";
             }
-            protocol = "http://"+hostname;
         } else if (serverURL != null ){
             hostname = serverURL.substring(serverURL.indexOf("://")+3);
+            if(serverURL.startsWith("https")) {
+                protocol = "https://";
+            } else {
+                protocol = "http://";
+            }
         }
 
 
