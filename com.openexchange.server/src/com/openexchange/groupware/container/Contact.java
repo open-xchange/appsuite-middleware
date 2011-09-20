@@ -4469,7 +4469,7 @@ public class Contact extends CommonObject implements Serializable {
         final Contact clone = new Contact();
         for(final ContactField field: ContactField.values()){
             final int fieldNum = field.getNumber();
-            if(contains(fieldNum)) {
+            if(!field.isVirtual() && contains(fieldNum)) {
                 clone.set(fieldNum, get(fieldNum));
             }
         }

@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.contact.helpers;
 
+import java.util.EnumSet;
+
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.DataFields;
@@ -452,6 +454,11 @@ public enum ContactField{
 		case YOMI_COMPANY: return switcher.yomicompanyname(objects);
 		default: return null;
 		}
+	}
+	
+	private static final EnumSet<ContactField> VIRTUAL_FIELDS = EnumSet.of(IMAGE1_URL);
+	public boolean isVirtual() {
+		return VIRTUAL_FIELDS.contains(this);
 	}
 
 }
