@@ -608,7 +608,7 @@ public class MIMEMessageFiller {
              * Set default subject if none set
              */
             if (null == mimeMessage.getSubject()) {
-                mimeMessage.setSubject(new StringHelper(UserStorage.getStorageUser(session.getUserId(), ctx).getLocale()).getString(MailStrings.DEFAULT_SUBJECT));
+                mimeMessage.setSubject(StringHelper.valueOf(UserStorage.getStorageUser(session.getUserId(), ctx).getLocale()).getString(MailStrings.DEFAULT_SUBJECT));
             }
         } catch (final AddressException e) {
             throw MIMEMailException.handleMessagingException(e);

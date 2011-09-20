@@ -158,7 +158,7 @@ public final class VCardAttachMailDataHandler implements DataHandler {
             /*
              * Set default subject
              */
-            mimeMessage.setSubject(new StringHelper(UserStorage.getStorageUser(session.getUserId(), ctx).getLocale()).getString(MailStrings.DEFAULT_SUBJECT));
+            mimeMessage.setSubject(StringHelper.valueOf(UserStorage.getStorageUser(session.getUserId(), ctx).getLocale()).getString(MailStrings.DEFAULT_SUBJECT));
             /*
              * Set from
              */
