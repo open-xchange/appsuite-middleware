@@ -6,7 +6,12 @@ define("com.openexchange.halo.json/main", ["osgi", "httpAPI"], function (osgi, h
       
       httpAPI.defineModule("halo/contact", {
           services : function (req, session) {
-              return contactHalo.getProviders(session);
+              var retval = [];
+              var providers = contactHalo.getProviders(session).iterator();
+              while(providers.hasNext()) {
+                  retval.push(providers.next()+"");
+              }
+              return retval;
           },
           investigate : function (req, session) {
               var contact = new Contact();
