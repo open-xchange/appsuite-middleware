@@ -71,7 +71,9 @@ import com.openexchange.userconf.UserConfigurationService;
  */
 public class DiscovererActivator implements BundleActivator {
 
-    private ServiceRegistration<PublicationTargetDiscoveryService> discoveryRegistration;
+
+
+    private ServiceRegistration discoveryRegistration;
 
     private OSGiPublicationTargetCollector pubServiceCollector;
 
@@ -79,7 +81,6 @@ public class DiscovererActivator implements BundleActivator {
 
     private Whiteboard whiteboard;
 
-    @Override
     public void start(final BundleContext context) throws Exception {
         whiteboard = new Whiteboard(context);
 
@@ -96,9 +97,7 @@ public class DiscovererActivator implements BundleActivator {
         discoveryDict.put(Constants.SERVICE_RANKING, Integer.valueOf(256));
 
         discoveryRegistration =
-            context.registerService(PublicationTargetDiscoveryService.class, compositeDiscovererCollector, discoveryDict);
-
-        FolderFieldActivator.setDiscoverer( compositeDiscovererCollector );
+            context.registerService(PublicationTargetDiscoveryService.class.getName(), compositeDiscovererCollector, discoveryDict);
 
         final DBProvider provider = whiteboard.getService(DBProvider.class);
         final GenericConfigurationStorageService confStorage = whiteboard.getService(GenericConfigurationStorageService.class);
@@ -109,11 +108,10 @@ public class DiscovererActivator implements BundleActivator {
         final PublicationUserDeleteListener listener = new PublicationUserDeleteListener();
         listener.setDiscoveryService(compositeDiscovererCollector);
         listener.setGenConfStorage(confStorage);
-
+        
         context.registerService(DeleteListener.class.getName(), listener, null);
     }
 
-    @Override
     public void stop(final BundleContext context) throws Exception {
         discoveryRegistration.unregister();
         discoveryRegistration = null;

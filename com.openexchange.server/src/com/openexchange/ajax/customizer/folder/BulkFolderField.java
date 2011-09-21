@@ -49,62 +49,85 @@
 
 package com.openexchange.ajax.customizer.folder;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
- * {@link SimFolderField}
- *
+ * {@link BulkFolderField}
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public class SimFolderField implements AdditionalFolderField {
+public class BulkFolderField implements AdditionalFolderField {
 
-    private int columnId;
-    private String columnName;
-    private Object value;
-    private Object jsonValue;
+    private AdditionalFolderField delegate;
 
-    @Override
+    private Map<String, Object> values = new HashMap<String, Object>();
+
+    public BulkFolderField(AdditionalFolderField delegate) {
+        this.delegate = delegate;
+    }
+
     public int getColumnID() {
-        return columnId;
+        return delegate.getColumnID();
     }
 
-    @Override
     public String getColumnName() {
-        return columnName;
+        return delegate.getColumnName();
     }
 
-    @Override
-    public Object getValue(FolderObject folder, ServerSession session) {
-        return value;
-    }
-
-    @Override
-    public Object renderJSON(Object value) {
-        return jsonValue;
-    }
-
-    public void setColumnId(int columnId) {
-        this.columnId = columnId;
-    }
-
-    public void setColumnName(String columnName) {
-        this.columnName = columnName;
-    }
-
-    public void setValue(Object value) {
-        this.value = value;
-    }
-
-    public void setJsonValue(Object jsonValue) {
-        this.jsonValue = jsonValue;
+    public Object getValue(FolderObject f, ServerSession session) {
+        getValues(Arrays.asList(f), session);
+        
+        String fn = f.getFullName();
+        if (fn == null) {
+            fn = "" + f.getObjectID();
+        }
+        return values.get(fn);
     }
 
     public List<Object> getValues(List<FolderObject> folder, ServerSession session) {
-        return AdditionalFieldsUtils.bulk(this, folder, session);
+        List<Object> v = new ArrayList<Object>(folder.size());
+        List<FolderObject> fo = new ArrayList<FolderObject>(folder.size());
+        for (FolderObject f : folder) {
+            String fn = f.getFullName();
+            if (fn == null) {
+                fn = "" + f.getObjectID();
+            }
+            Object object = values.get(fn);
+            if (object == null) {
+                fo.add(f);
+            } else {
+                v.add(object);
+            }
+        }
+        if (fo.isEmpty()) {
+            return v;
+        }
+        warmUp(fo, session);
+        return getValues(folder, session);
+    }
+
+    public Object renderJSON(Object value) {
+        return delegate.renderJSON(value);
+    }
+
+    public void warmUp(List<FolderObject> folderObjects, ServerSession session) {
+        List<Object> v = delegate.getValues(folderObjects, session);
+        int i = 0;
+        for (FolderObject f : folderObjects) {
+            Object object = v.get(i);
+            String fn = f.getFullName();
+            if (fn == null) {
+                fn = "" + f.getObjectID();
+            }
+            values.put(fn, object);
+            i++;
+        }
     }
 
 }

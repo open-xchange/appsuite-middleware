@@ -22,9 +22,11 @@
 
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.6.1.R36x_v20100806.jar" />
+    <property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
     <property name="globaljar" value="com.openexchange.global.jar"/>
     <property name="serverjar" value="com.openexchange.server.jar"/>
 	<property name="secretjar" value="com.openexchange.secret.jar"/>
+	<property name="cryptojar" value="com.openexchange.crypto.jar"/>
 
     <!-- Classpath -->
     <path id="project.classpath">
@@ -32,7 +34,9 @@
         <pathelement location="${bundlesdir}/${globaljar}"/>
         <pathelement location="${bundlesdir}/${serverjar}"/>
         <pathelement location="${bundlesdir}/${secretjar}"/>
-    </path>
+        <pathelement location="${bundlesdir}/${cryptojar}"/>
+    	<pathelement location="${bundlesdir}/${commonsloggingjar}"/>
+     </path>
 
     <!-- Compile -->
     <target name="prepare">

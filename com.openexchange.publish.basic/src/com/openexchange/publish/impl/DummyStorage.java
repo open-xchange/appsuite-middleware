@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.publish.Entity;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationStorage;
 
@@ -153,6 +154,13 @@ public class DummyStorage implements PublicationStorage {
 	@Override
     public List<Publication> getPublicationsOfUser(Context ctx, int userId,
 			String module) throws OXException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Map<Entity, Boolean> isPublished(List<Entity> entities, Context ctx)
+			throws OXException {
 		// TODO Auto-generated method stub
 		return null;
 	}

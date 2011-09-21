@@ -47,35 +47,80 @@
  *
  */
 
-package com.openexchange.subscribe;
+package com.openexchange.secret.recovery.impl;
 
-import java.util.List;
-import java.util.Map;
+import java.util.Set;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.secret.SecretService;
+import com.openexchange.secret.recovery.SecretInconsistencyDetector;
+import com.openexchange.secret.recovery.SecretMigrator;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.UserService;
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * {@link FastSecretInconsistencyDetector}
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco
+ *         Laguna</a>
  */
-public interface SubscriptionStorage {
+public class FastSecretInconsistencyDetector implements
+		SecretInconsistencyDetector, SecretMigrator {
 
-    public void rememberSubscription(Subscription subscription) throws OXException;
+	private static final Log LOG = LogFactory
+			.getLog(FastSecretInconsistencyDetector.class);
 
-    public void forgetSubscription(Subscription subscription) throws OXException;
+	private static final String PROPERTY = "com.openexchange.secret.recovery.fast.token";
 
-    public List<Subscription> getSubscriptions(Context ctx, String folderId) throws OXException;
+	private SecretService secretService;
 
-    public Subscription getSubscription(Context ctx, int id) throws OXException;
+	private CryptoService cryptoService;
 
-    public List<Subscription> getSubscriptionsOfUser(Context ctx, int userId) throws OXException;
+	private UserService userService;
 
-    public void updateSubscription(Subscription subscription) throws OXException;
+	public FastSecretInconsistencyDetector(SecretService secretService,
+			CryptoService cryptoService, UserService userService) {
+		this.secretService = secretService;
+		this.cryptoService = cryptoService;
+		this.userService = userService;
+	}
 
-    public void deleteAllSubscriptionsForUser(int userId, Context ctx) throws OXException;
+	private static final String testString = "supercalifragilisticexplialidocious";
 
-    public void deleteAllSubscriptionsInContext(int contextId, Context ctx) throws OXException;
+	public String isSecretWorking(ServerSession session) throws OXException {
+		String secret = secretService.getSecret(session);
+		Set<String> token = session.getUser().getAttributes().get(PROPERTY);
+		if (token == null || token.isEmpty()) {
+			saveNewToken(session.getUser(), secret, session.getContext());
+			return null;
+		}
 
-    public void deleteAllSubscriptionsWhereConfigMatches(Map<String, Object> query, String sourceId, Context ctx) throws OXException;
+		if (canDecrypt(token.iterator().next(), secret)) {
+			return null;
+		}
 
-    public Map<String, Boolean> hasSubscriptions(Context ctx, List<String> folderIds) throws OXException;
+		return "Could not decrypt token";
+	}
+
+	private boolean canDecrypt(String next, String secret) throws OXException {
+		return cryptoService.decrypt(next, secret).equals(testString);
+	}
+
+	private void saveNewToken(User user, String secret, Context context) throws OXException {
+
+		userService.setAttribute(PROPERTY,
+				cryptoService.encrypt(testString, secret), user.getId(),
+				context);
+
+	}
+
+	public void migrate(String oldSecret, String newSecret,
+			ServerSession session) throws OXException {
+		saveNewToken(session.getUser(), newSecret, session.getContext());
+	}
+
 }
