@@ -67,6 +67,7 @@ import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.folderstorage.FolderEventConstants;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
+import com.openexchange.folderstorage.outlook.OutlookServiceRegistry;
 import com.openexchange.folderstorage.outlook.memory.MemoryTable;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
@@ -207,7 +208,13 @@ public class OutlookFolderStorageActivator extends DeferredActivator {
                     }
 
                     private void dropMemoryTable(final Session session) {
-                        MemoryTable.dropMemoryTableFrom(session);
+                        /*
+                         * Any active session left?
+                         */
+                        final SessiondService service = OutlookServiceRegistry.getServiceRegistry().getService(SessiondService.class);
+                        if (service.getUserSessions(session.getUserId(), session.getContextId()) <= 0) {
+                            MemoryTable.dropMemoryTableFrom(session);
+                        }
                     }
 
                 };
