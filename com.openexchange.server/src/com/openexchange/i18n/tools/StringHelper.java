@@ -79,7 +79,7 @@ public class StringHelper {
     public static StringHelper valueOf(final Locale locale) {
         StringHelper sh = CACHE.get(locale);
         if (null == sh) {
-            final StringHelper newHelper = StringHelper.valueOf(locale);
+            final StringHelper newHelper = new StringHelper(locale);
             sh = CACHE.putIfAbsent(locale, newHelper);
             if (null == sh) {
                 sh = newHelper;
