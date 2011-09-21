@@ -430,7 +430,7 @@ public final class POP3CapabilityCache {
                             try {
                                 i = in.read();
                             } catch (final java.net.SocketTimeoutException e) {
-                                // Orderly failed reading next byte. Seems CAPA response isn't terminated with `.« character.
+                                // Orderly failed reading next byte. Seems CAPA response isn't terminated with '.' character.
                                 break;
                             }
                             if ('.' == i) {
