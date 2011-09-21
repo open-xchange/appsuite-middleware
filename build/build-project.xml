@@ -89,9 +89,14 @@
             <istrue value="${3rdPartyLib}"/>
             <then>
                 <mkdir dir="${jarsDir}/${Bundle-SymbolicName}"/>
-                <jar jarfile="${jarsDir}/${Bundle-SymbolicName}/${Bundle-SymbolicName}.jar">
-                    <fileset dir="${binDir}"/>
-                </jar>
+            	<if>
+            		<available file="${binDir}" type="dir"/>
+            		<then>
+		                <jar jarfile="${jarsDir}/${Bundle-SymbolicName}/${Bundle-SymbolicName}.jar">
+		                    <fileset dir="${binDir}"/>
+		                </jar>
+        			</then>
+        		</if>
                 <copy todir="${jarsDir}/${Bundle-SymbolicName}">
                     <fileset dir=".">
                         <include name="META-INF/MANIFEST.MF"/>
@@ -191,11 +196,14 @@
         </antcall>
     </target>
 
-    <target name="testForBundleMain" description="Tests if the main classes need to be put into a bundle.">
+    <target name="testForBundleMain" depends="testFor3rdPartyLib" description="Tests if the main classes need to be put into a bundle.">
         <condition property="bundleMain">
             <and>
                 <equals arg1="${buildType}" arg2="bundle"/>
-                <available file="${mainBinDir}" type="dir"/>
+            	<or>
+                	<available file="${mainBinDir}" type="dir"/>
+            		<istrue value="${3rdPartyLib}"/>
+        		</or>
             </and>
         </condition>
     </target>

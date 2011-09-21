@@ -1110,7 +1110,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             /*
              * Open and check user rights on source folder
              */
-            imapFolder = setAndOpenFolder(imapFolder, sourceFullName, Folder.READ_ONLY);
+            imapFolder = setAndOpenFolder(imapFolder, sourceFullName, move ? Folder.READ_WRITE : Folder.READ_ONLY);
             try {
                 if (!holdsMessages()) {
                     throw IMAPException.create(

@@ -407,6 +407,21 @@ public final class StructureMailMessageParser {
             if (count == -1) {
                 throw MailExceptionCode.INVALID_MULTIPART_CONTENT.create();
             }
+            final String mpId = null == prefix && !multipartDetected ? "" : getSequenceId(prefix, partCount);
+            if (!mailPart.containsSequenceId()) {
+                mailPart.setSequenceId(mpId);
+            }
+            if (!handler.handleMultipartStart(mailPart.getContentType(), count, mpId)) {
+                stop = true;
+                return;
+            }
+            final String mpPrefix;
+            if (multipartDetected) {
+                mpPrefix = mpId;
+            } else {
+                mpPrefix = prefix;
+                multipartDetected = true;
+            }
             if (isMultipartSigned(lcct)) {
                 /*
                  * Determine the part which is considered to be the message' text according to
@@ -442,29 +457,14 @@ public final class StructureMailMessageParser {
                     return;
                 }
             } else {
-                final String mpId = null == prefix && !multipartDetected ? "" : getSequenceId(prefix, partCount);
-                if (!mailPart.containsSequenceId()) {
-                    mailPart.setSequenceId(mpId);
-                }
-                if (!handler.handleMultipartStart(mailPart.getContentType(), count, mpId)) {
-                    stop = true;
-                    return;
-                }
-                final String mpPrefix;
-                if (multipartDetected) {
-                    mpPrefix = mpId;
-                } else {
-                    mpPrefix = prefix;
-                    multipartDetected = true;
-                }
                 for (int i = 0; i < count; i++) {
                     final MailPart enclosedPart = mailPart.getEnclosedMailPart(i);
                     parseMailContent(enclosedPart, handler, mpPrefix, i + 1);
                 }
-                if (!handler.handleMultipartEnd()) {
-                    stop = true;
-                    return;
-                }
+            }
+            if (!handler.handleMultipartEnd()) {
+                stop = true;
+                return;
             }
         } else if (isMessage(lcct)) {
             if (!mailPart.containsSequenceId()) {

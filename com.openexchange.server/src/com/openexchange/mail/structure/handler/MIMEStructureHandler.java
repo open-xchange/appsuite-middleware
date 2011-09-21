@@ -323,7 +323,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             /*
              * Add body object to parental structure object
              */
-            final JSONObject jsonObject = mailJsonObjectQueue.getFirst();
+            final JSONObject jsonObject = currentMailObject;
             for (final String name : new HashSet<String>(jsonObject.keySet())) {
                 jsonObject.remove(name);
             }
@@ -337,7 +337,7 @@ public final class MIMEStructureHandler implements StructureHandler {
     @Override
     public boolean handleSMIMEBodyData(final byte[] data) throws OXException {
         try {
-            mailJsonObjectQueue.getFirst().put("smime_body_data", new String(Base64.encodeBase64(data, false), "US-ASCII"));
+            currentMailObject.put("smime_body_data", new String(Base64.encodeBase64(data, false), "US-ASCII"));
             return true;
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());

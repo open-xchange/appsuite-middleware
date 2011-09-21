@@ -192,7 +192,13 @@ public enum FolderExceptionErrorMessage implements OXExceptionCode {
     /**
      * No such tree with identifier "%1$s".
      */
-    TREE_NOT_FOUND(FolderExceptionMessages.TREE_NOT_FOUND_MSG, Category.CATEGORY_PERMISSION_DENIED, 1031);
+    TREE_NOT_FOUND(FolderExceptionMessages.TREE_NOT_FOUND_MSG, Category.CATEGORY_PERMISSION_DENIED, 1031),
+    /**
+     * A tree with identifier "%1$s" already exists.
+     */
+    DUPLICATE_TREE(FolderExceptionMessages.DUPLICATE_TREE_MSG, Category.CATEGORY_ERROR, 1032),
+    
+    ;
 
     private final Category category;
 

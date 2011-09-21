@@ -53,6 +53,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -138,9 +139,16 @@ public class ComputeBuildOrder extends Task {
         }
         final Map<String, Set<AbstractModule>> modulesByPackage = new HashMap<String, Set<AbstractModule>>();
         for (AbstractModule module : allModules) {
-            module.addToExportMap(modulesByPackage);
+            for (String exportedPackage : module.getExportedPackages()) {
+                Set<AbstractModule> exportingModules = modulesByPackage.get(exportedPackage);
+                if (exportingModules == null) {
+                    exportingModules = new HashSet<AbstractModule>();
+                    modulesByPackage.put(exportedPackage, exportingModules);
+                }
+                exportingModules.add(module);
+            }
         }
-        
+
         // Compute dependencies in the bundles.
         for (AbstractModule module : allModules) {
             module.computeDependencies(modulesByName, modulesByPackage);

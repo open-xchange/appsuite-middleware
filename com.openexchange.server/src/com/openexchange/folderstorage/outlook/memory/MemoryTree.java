@@ -51,8 +51,8 @@ package com.openexchange.folderstorage.outlook.memory;
 
 import java.util.List;
 import java.util.Locale;
+import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.SortableId;
-import com.openexchange.folderstorage.outlook.OutlookFolder;
 
 /**
  * {@link MemoryTree} - The in-memory representation of a virtual tree.
@@ -95,7 +95,7 @@ public interface MemoryTree {
      */
     public String[] getSubfolderIds(Locale locale, String parentId, List<String[]> realSubfolderIds);
 
-    public boolean fillFolder(OutlookFolder outlookFolder);
+    public boolean fillFolder(Folder folder);
 
     public MemoryCRUD getCrud();
 

@@ -88,7 +88,9 @@ public class BinDirModule extends DirModule {
                 // read Bundle-ClassPath:
                 for (String classpathEntry : osgiManifest.getListEntry(OSGIManifest.BUNDLE_CLASSPATH)) {
                     if (!classpathEntry.equals(".")) {
-                        exportedClasspath.add(classpathEntry);
+                        if (isExported(new File(dir, classpathEntry))) {
+                            exportedClasspath.add(classpathEntry);
+                        }
                     } else {
                         // TODO scan for .class files
                     }

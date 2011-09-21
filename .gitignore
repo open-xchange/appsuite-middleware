@@ -34,3 +34,11 @@ com.openexchange.publish/jars
 com.openexchange.push/jars
 com.openexchange.secret/jars
 com.openexchange.server/jars
+com.openexchange.server/build
+org.apache.tika/jars
+com.openexchange.calendar/jars
+com.openexchange.preview/jars
+com.openexchange.ajp/jars
+com.openexchange.server/build
+com.openexchange.server/build/META-INF/**/*
+com.openexchange.server/build/META-INF/*

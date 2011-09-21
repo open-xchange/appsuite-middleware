@@ -154,6 +154,9 @@ public class FolderExceptionMessages implements LocalizableStrings {
     // No such tree with identifier "%1$s".
     public static final String TREE_NOT_FOUND_MSG = "No such tree with identifier \"%1$s\".";
 
+    // A tree with identifier "%1$s" already exists.
+    public static final String DUPLICATE_TREE_MSG = "A tree with identifier \"%1$s\" already exists.";
+
     /**
      * Initializes a new {@link FolderExceptionMessages}
      */

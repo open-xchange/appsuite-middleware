@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,46 +47,41 @@
  *
  */
 
-package com.openexchange.database;
+package com.openexchange.favfolder.json;
 
-import java.sql.Connection;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * If your bundle needs to create database tables for working properly this service must be implemented. Its method are called if a new
- * schema for contexts is created. The order of executing {@link CreateTableService} instances is calculated by the string arrays given from
- * the methods {@link #requiredTables()} and {@link #tablesToCreate()}. The {@link #perform(Connection)} method should then create the
- * tables needed for your bundle.
+ * {@link FavFolderActionFactory}
  *
- * The table must be created in its newest version. {@link UpdateTask}s are not executed after all tables have been created and the schema
- * is marked in that way that all {@link UpdateTask}s have already been executed.
- *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface CreateTableService {
+public class FavFolderActionFactory implements AJAXActionServiceFactory {
+
+    private final Map<String, AJAXActionService> actions;
 
     /**
-     * This method should give all table names that have to exist before the {@link #perform(Connection)} method is called. You can use this
-     * if your table has foreign keys to some other tables.
-     * @return an array with table names that have to exist before the {@link #perform(Connection)} method is called.
+     * Initializes a new {@link FavFolderActionFactory}.
+     *
+     * @param services The service look-up
      */
-    String[] requiredTables();
+    public FavFolderActionFactory(final ServiceLookup services) {
+        super();
+        actions = new ConcurrentHashMap<String, AJAXActionService>(4);
+        actions.put("new", new com.openexchange.favfolder.json.actions.NewAction(services));
+        actions.put("delete", new com.openexchange.favfolder.json.actions.DeleteAction(services));
+        actions.put("subscribe", new com.openexchange.favfolder.json.actions.SubscribeAction(services));
+        actions.put("unsubscribe", new com.openexchange.favfolder.json.actions.UnsubscribeAction(services));
+    }
 
-    /**
-     * This method must give all names of tables that are create during call of the {@link #perform(Connection)} method. Maybe some other
-     * tables require your before they can be created.
-     * @return an array with table names that are created during call of the {@link #perform(Connection)} method.
-     */
-    String[] tablesToCreate();
-
-    /**
-     * The implementation of this method should create the required tables on the given database connection. The connection is already
-     * configured to use the correct schema. The given connection is already in a transaction. Do not modify the transaction state of the
-     * connection.
-     * @param con writable connection in a transaction state.
-     * @throws OXException should be thrown if creating the table fails.
-     */
-    void perform(Connection con) throws OXException;
+    @Override
+    public AJAXActionService createActionService(final String action) throws OXException {
+        return actions.get(action);
+    }
 
 }

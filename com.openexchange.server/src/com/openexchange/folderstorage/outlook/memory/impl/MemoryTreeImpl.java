@@ -49,6 +49,8 @@
 
 package com.openexchange.folderstorage.outlook.memory.impl;
 
+import gnu.trove.ConcurrentTIntHashSet;
+import gnu.trove.set.TIntSet;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -60,10 +62,12 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
-import com.openexchange.folderstorage.outlook.OutlookFolder;
+import com.openexchange.folderstorage.internal.Tools;
+import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.folderstorage.outlook.memory.MemoryCRUD;
 import com.openexchange.folderstorage.outlook.memory.MemoryFolder;
 import com.openexchange.folderstorage.outlook.memory.MemoryTree;
@@ -82,11 +86,15 @@ public final class MemoryTreeImpl implements MemoryTree {
 
     private final MemoryCRUD crud;
 
+    private final int treeId;
+
     /**
      * Initializes a new {@link MemoryTreeImpl}.
+     * @param treeId 
      */
-    public MemoryTreeImpl() {
+    public MemoryTreeImpl(final int treeId) {
         super();
+        this.treeId = treeId;
         folderMap = new ConcurrentHashMap<String, MemoryFolder>(128);
         parentMap = new ConcurrentHashMap<String, Set<MemoryFolder>>(128);
         crud = new MemoryCRUDImpl(folderMap, parentMap);
@@ -147,67 +155,87 @@ public final class MemoryTreeImpl implements MemoryTree {
         return new ArrayList<String>(folderMap.keySet());
     }
 
+    private static final TIntSet KNOWN_TREES = new ConcurrentTIntHashSet(new int[] {
+        Tools.getUnsignedInteger(FolderStorage.REAL_TREE_ID), Tools.getUnsignedInteger(OutlookFolderStorage.OUTLOOK_TREE_ID) });
+
     @Override
     public String[] getSubfolderIds(final Locale locale, final String parentId, final List<String[]> realSubfolderIds) {
         final List<String[]> ids = getSubfolderIds(parentId);
         final List<String> subfolderIds;
-        if (FolderStorage.ROOT_ID.equals(parentId)) {
-            /*
-             * Proper sort of top level folders 1. Private 2. Public 3. Shared . . . n Sorted external email accounts
-             */
-            Collections.sort(ids, new PrivateSubfolderIDComparator(locale));
-            subfolderIds = new ArrayList<String>(ids.size());
-            for (final String[] fn : ids) {
-                subfolderIds.add(fn[0]);
+        final boolean knownTree = KNOWN_TREES.contains(treeId);
+        if (knownTree) {
+            if (FolderStorage.ROOT_ID.equals(parentId)) {
+                /*
+                 * Proper sort of top level folders 1. Private 2. Public 3. Shared . . . n Sorted external email accounts
+                 */
+                Collections.sort(ids, PrivateSubfolderIDComparator.valueOf(locale));
+                subfolderIds = new ArrayList<String>(ids.size());
+                for (final String[] fn : ids) {
+                    subfolderIds.add(fn[0]);
+                }
+            } else {
+                final TreeMap<String, List<String>> treeMap = new TreeMap<String, List<String>>(FolderNameComparator.valueOf(locale));
+                final StringHelper stringHelper = StringHelper.valueOf(locale);
+                for (final String[] realSubfolderId : realSubfolderIds) {
+                    final String localizedName = stringHelper.getString(realSubfolderId[1]);
+                    List<String> list = treeMap.get(localizedName);
+                    if (null == list) {
+                        list = new ArrayList<String>(2);
+                        treeMap.put(localizedName, list);
+                    }
+                    list.add(realSubfolderId[0]);
+                }
+                for (final String[] idAndName : ids) {
+                    /*
+                     * Names loaded from DB have no locale-sensitive string
+                     */
+                    // String localizedName = stringHelper.getString(rs.getString(2));
+                    final String name = idAndName[1];
+                    List<String> list = treeMap.get(name);
+                    if (null == list) {
+                        list = new ArrayList<String>(2);
+                        treeMap.put(name, list);
+                    }
+                    list.add(idAndName[0]);
+                }
+                subfolderIds = new ArrayList<String>(treeMap.size());
+                for (final List<String> list : treeMap.values()) {
+                    for (final String name : list) {
+                        subfolderIds.add(name);
+                    }
+                }
             }
         } else {
-            final TreeMap<String, List<String>> treeMap = new TreeMap<String, List<String>>(new FolderNameComparator(locale));
-            final StringHelper stringHelper = StringHelper.valueOf(locale);
-            for (final String[] realSubfolderId : realSubfolderIds) {
-                final String localizedName = stringHelper.getString(realSubfolderId[1]);
-                List<String> list = treeMap.get(localizedName);
-                if (null == list) {
-                    list = new ArrayList<String>(2);
-                    treeMap.put(localizedName, list);
-                }
-                list.add(realSubfolderId[0]);
+            /*
+             * A custom tree
+             */
+            final Set<MemoryFolder> set = parentMap.get(parentId);
+            if (null == set || set.isEmpty()) {
+                return new String[0];
             }
-            for (final String[] idAndName : ids) {
-                /*
-                 * Names loaded from DB have no locale-sensitive string
-                 */
-                // String localizedName = stringHelper.getString(rs.getString(2));
-                final String name = idAndName[1];
-                List<String> list = treeMap.get(name);
-                if (null == list) {
-                    list = new ArrayList<String>(2);
-                    treeMap.put(name, list);
-                }
-                list.add(idAndName[0]);
-            }
-            subfolderIds = new ArrayList<String>(treeMap.size());
-            for (final List<String> list : treeMap.values()) {
-                for (final String name : list) {
-                    subfolderIds.add(name);
-                }
+            final List<MemoryFolder> list = new ArrayList<MemoryFolder>(set);
+            Collections.sort(list, MemoryFolderComparator.valueOf(locale));
+            subfolderIds = new ArrayList<String>(list.size());
+            for (final MemoryFolder memoryFolder : list) {
+                subfolderIds.add(memoryFolder.getId());
             }
         }
         return subfolderIds.toArray(new String[subfolderIds.size()]);
     }
 
     @Override
-    public boolean fillFolder(final OutlookFolder outlookFolder) {
-        final String folderId = outlookFolder.getID();
+    public boolean fillFolder(final Folder folder) {
+        final String folderId = folder.getID();
         final MemoryFolder memoryFolder = folderMap.get(folderId);
         if (null == memoryFolder) {
             return false;
         }
-        outlookFolder.setParentID(memoryFolder.getParentId());
+        folder.setParentID(memoryFolder.getParentId());
         // Set name
         {
             final String name = memoryFolder.getName();
             if (null != name) {
-                outlookFolder.setName(name);
+                folder.setName(name);
             }
 
         }
@@ -215,36 +243,36 @@ public final class MemoryTreeImpl implements MemoryTree {
         {
             final int modifiedBy = memoryFolder.getModifiedBy();
             if (modifiedBy > 0) {
-                outlookFolder.setModifiedBy(-1);
+                folder.setModifiedBy(-1);
             } else {
-                outlookFolder.setModifiedBy(modifiedBy);
+                folder.setModifiedBy(modifiedBy);
             }
         }
         // Set optional last-modified time stamp
         {
             final Date date = memoryFolder.getLastModified();
             if (null != date) {
-                outlookFolder.setLastModified(null);
+                folder.setLastModified(null);
             } else {
-                outlookFolder.setLastModified(date);
+                folder.setLastModified(date);
             }
         }
         // Set permissions if non-null
         {
             final Permission[] permissions = memoryFolder.getPermissions();
             if (null == permissions) {
-                outlookFolder.setPermissions(null);
+                folder.setPermissions(null);
             } else {
-                outlookFolder.setPermissions(permissions);
+                folder.setPermissions(permissions);
             }
         }
         // Set subscription
         {
             final Boolean subscribed = memoryFolder.getSubscribed();
             if (null != subscribed) {
-                outlookFolder.setSubscribed(subscribed.booleanValue());
+                folder.setSubscribed(subscribed.booleanValue());
             } else {
-                outlookFolder.setSubscribed(true);
+                folder.setSubscribed(true);
             }
         }
         // Check for subscribed subfolder
@@ -261,7 +289,7 @@ public final class MemoryTreeImpl implements MemoryTree {
                 }
             }
             if (subscribedSubfolder) {
-                outlookFolder.setSubscribedSubfolders(true);
+                folder.setSubscribedSubfolders(true);
             }
         }
         return true;
@@ -297,9 +325,26 @@ public final class MemoryTreeImpl implements MemoryTree {
      */
     private static final class FolderNameComparator implements Comparator<String> {
 
+        private static final ConcurrentMap<Locale, FolderNameComparator> CACHE = new ConcurrentHashMap<Locale, FolderNameComparator>(16);
+
+        protected static FolderNameComparator valueOf(final Locale locale) {
+            if (null == locale) {
+                return null;
+            }
+            FolderNameComparator comparator = CACHE.get(locale);
+            if (null == comparator) {
+                final FolderNameComparator nucomp = new FolderNameComparator(locale);
+                comparator = CACHE.putIfAbsent(locale, nucomp);
+                if (null == comparator) {
+                    comparator = nucomp;
+                }
+            }
+            return comparator;
+        }
+
         private final Collator collator;
 
-        public FolderNameComparator(final Locale locale) {
+        private FolderNameComparator(final Locale locale) {
             super();
             collator = Collator.getInstance(locale);
             collator.setStrength(Collator.SECONDARY);
@@ -312,11 +357,76 @@ public final class MemoryTreeImpl implements MemoryTree {
 
     } // End of FolderNameComparator
 
-    private static final class PrivateSubfolderIDComparator implements Comparator<String[]> {
+    /**
+     * A memory folder comparator
+     */
+    private static final class MemoryFolderComparator implements Comparator<MemoryFolder> {
+
+        private static final ConcurrentMap<Locale, MemoryFolderComparator> CACHE = new ConcurrentHashMap<Locale, MemoryFolderComparator>(16);
+
+        protected static MemoryFolderComparator valueOf(final Locale locale) {
+            if (null == locale) {
+                return null;
+            }
+            MemoryFolderComparator comparator = CACHE.get(locale);
+            if (null == comparator) {
+                final MemoryFolderComparator nucomp = new MemoryFolderComparator(locale);
+                comparator = CACHE.putIfAbsent(locale, nucomp);
+                if (null == comparator) {
+                    comparator = nucomp;
+                }
+            }
+            return comparator;
+        }
 
         private final Collator collator;
 
-        public PrivateSubfolderIDComparator(final Locale locale) {
+        private final StringHelper stringHelper;
+
+        public MemoryFolderComparator(final Locale locale) {
+            super();
+            collator = Collator.getInstance(locale);
+            collator.setStrength(Collator.SECONDARY);
+            stringHelper = StringHelper.valueOf(locale);
+        }
+
+        @Override
+        public int compare(final MemoryFolder o1, final MemoryFolder o2) {
+            final int sortNum1 = o1.getSortNum();
+            final int sortNum2 = o2.getSortNum();
+            if (sortNum1 < sortNum2) {
+                return -1;
+            }
+            if (sortNum1 == sortNum2) {
+                return collator.compare(stringHelper.getString(o1.getName()), stringHelper.getString(o2.getName()));
+            }
+            return 1;
+        }
+
+    } // End of MemoryFolderComparator
+
+    private static final class PrivateSubfolderIDComparator implements Comparator<String[]> {
+
+        private static final ConcurrentMap<Locale, PrivateSubfolderIDComparator> CACHE = new ConcurrentHashMap<Locale, PrivateSubfolderIDComparator>(16);
+
+        protected static PrivateSubfolderIDComparator valueOf(final Locale locale) {
+            if (null == locale) {
+                return null;
+            }
+            PrivateSubfolderIDComparator comparator = CACHE.get(locale);
+            if (null == comparator) {
+                final PrivateSubfolderIDComparator nucomp = new PrivateSubfolderIDComparator(locale);
+                comparator = CACHE.putIfAbsent(locale, nucomp);
+                if (null == comparator) {
+                    comparator = nucomp;
+                }
+            }
+            return comparator;
+        }
+
+        private final Collator collator;
+
+        private PrivateSubfolderIDComparator(final Locale locale) {
             super();
             collator = Collator.getInstance(locale);
             collator.setStrength(Collator.SECONDARY);

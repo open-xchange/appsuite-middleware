@@ -613,7 +613,7 @@ final class ListLsubCollection {
             protocol.notifyResponseHandlers(r);
             protocol.handleResult(response);
         } catch (final ProtocolException e) {
-            LOG.warn("Dummy ``LSUB \"\" \"\"лл command failed.", e);
+            LOG.warn("Dummy >>LSUB \"\" \"\"<< command failed.", e);
         }
     }
 
