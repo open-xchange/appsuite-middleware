@@ -85,24 +85,32 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  */
 public class LinkedInServiceImpl implements LinkedInService{
 
-    private static final String PROTECTED_RESOURCE_URL = "http://api.linkedin.com/v1/people/~/connections:(id,first-name,last-name,phone-numbers,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url,positions)";
+    private static final String CONNECTIONS_URL = "http://api.linkedin.com/v1/people/~/connections:(id,first-name,last-name,phone-numbers,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url,positions)";
+    private static final String PROFILE_URL = "http://api.linkedin.com/v1/people/~:(id,first-name,last-name,phone-numbers,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url,positions)";
 
+    
+    
     private Activator activator;
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LinkedInServiceImpl.class));
 
+    
     public LinkedInServiceImpl(Activator activator) {
         this.activator = activator;
     }
 
+    public Activator getActivator() {
+        return activator;
+    }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.oauth.linkedin.LinkedInService#getContacts(int, int, int)
-     */
-    @Override
-    public List<Contact> getContacts(String password, int user, int contextId, int accountId) {
+    public void setActivator(Activator activator) {
+        this.activator = activator;
+    }
+    
+    
+    public Response performRequest(String password, int user, int contextId, int accountId, Verb method, String url) {
         OAuthServiceMetaData linkedInMetaData = new OAuthServiceMetaDataLinkedInImpl(activator);
-        List<Contact> contacts = new ArrayList<Contact>();
+
         OAuthService service = new ServiceBuilder().provider(LinkedInApi.class).apiKey(linkedInMetaData.getAPIKey()).apiSecret(
             linkedInMetaData.getAPISecret()).build();
 
@@ -114,27 +122,85 @@ public class LinkedInServiceImpl implements LinkedInService{
             LOG.error(e);
         }
 
-        // get the connections (contacts) with the given access token
         Token accessToken = new Token(account.getToken(), account.getSecret());
-        OAuthRequest request = new OAuthRequest(Verb.GET, PROTECTED_RESOURCE_URL);
+        OAuthRequest request = new OAuthRequest(method, url);
         service.signRequest(accessToken, request);
-        Response response = request.send();
-
-        // parse the returned xml into neat little contacts
-        contacts = parseIntoContacts(response.getBody());
-        return contacts;
-
+        return request.send();
     }
+    
+    public Contact parse(Element person){
+        Contact contact = new Contact();
+        contact.setGivenName(getTextValue(person, "first-name"));
+        contact.setSurName(getTextValue(person, "last-name"));
+        if (null != getTextValue(person, "main-address")) {
+            contact.setNote(getTextValue(person, "main-address"));
+        }
+        try {
+            String imageUrl = getTextValue(person, "picture-url");
+            if (null != imageUrl) {
+                OXContainerConverter.loadImageFromURL(contact, imageUrl);
+            }
+        } catch (ConverterException e) {
+            LOG.error(e);
+        }
 
-    public Activator getActivator() {
-        return activator;
+        // get the current job and company
+        NodeList positions = person.getElementsByTagName("positions");
+        if (null != positions && positions.getLength() > 0) {
+            Element position = (Element) positions.item(0);
+            contact.setTitle(getTextValue(position, "title"));
+            NodeList companies = position.getElementsByTagName("company");
+            if (companies != null && companies.getLength() > 0) {
+                Element company = (Element) companies.item(0);
+                contact.setCompany(getTextValue(company, "name"));
+            }
+        }
+
+        // get the first IM-account
+        NodeList imAccounts = person.getElementsByTagName("im-account");
+        if (null != imAccounts && imAccounts.getLength() > 0 ){
+            Element imAccount = (Element) imAccounts.item(0);
+            contact.setInstantMessenger1(getTextValue(imAccount, "im-account-name") + " ("+getTextValue(imAccount, "im-account-type")+")");
+        }
+
+        // parse the phone numbers, saving the first occurrence of "home" and "work"
+        NodeList phoneNumbers = person.getElementsByTagName("phone-number");
+        if (null != phoneNumbers && phoneNumbers.getLength() > 0 ){
+            for (int p = 0; p < phoneNumbers.getLength(); p++){
+                Element phoneNumber = (Element) phoneNumbers.item(p);
+                if (null != getTextValue(phoneNumber, "phone-type")){
+                    if (getTextValue(phoneNumber, "phone-type").equals("work")) {
+                        contact.setTelephoneBusiness1(getTextValue(phoneNumber, "phone-number"));
+                    }
+                    else if (getTextValue(phoneNumber, "phone-type").equals("home")){
+                        contact.setTelephoneHome1(getTextValue(phoneNumber, "phone-number"));
+                    }
+                }
+            }
+        }
+
+        // get the birthdate
+        NodeList dateOfBirths = person.getElementsByTagName("date-of-birth");
+        if (null != dateOfBirths && dateOfBirths.getLength() > 0){
+            Element dateOfBirth = (Element) dateOfBirths.item(0);
+            int year = 0;
+            if (null != getTextValue(dateOfBirth, "year")){
+                year = Integer.parseInt(getTextValue(dateOfBirth, "year")) - 1900;
+            }
+            int month = 0;
+            if (null != getTextValue(dateOfBirth, "month")){
+                month = Integer.parseInt(getTextValue(dateOfBirth, "month")) -1;
+            }
+            int date = 0;
+            if (null != getTextValue(dateOfBirth, "day")){
+                date = Integer.parseInt(getTextValue(dateOfBirth, "day"));
+            }
+            contact.setBirthday(new Date(year, month, date));
+        }
+        return contact;
     }
-
-    public void setActivator(Activator activator) {
-        this.activator = activator;
-    }
-
-    public List<Contact> parseIntoContacts(String body) {
+    
+    public List<Contact> parseConnections(String body) {
         final List<Contact> contacts = new ArrayList<Contact>();
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 
@@ -145,79 +211,8 @@ public class LinkedInServiceImpl implements LinkedInService{
             NodeList connections = root.getElementsByTagName("person");
             if (connections != null && connections.getLength() > 0) {
                 for (int i = 0; i < connections.getLength(); i++) {
-
-                    // fill each contact
                     Element person = (Element) connections.item(i);
-                    Contact contact = new Contact();
-                    contact.setGivenName(getTextValue(person, "first-name"));
-                    contact.setSurName(getTextValue(person, "last-name"));
-                    //System.out.println("Current contact : " + contact.getGivenName() + " " + contact.getSurName());
-                    if (null != getTextValue(person, "main-address")) {
-                        contact.setNote(getTextValue(person, "main-address"));
-                    }
-                    try {
-                        String imageUrl = getTextValue(person, "picture-url");
-                        if (null != imageUrl) {
-                            OXContainerConverter.loadImageFromURL(contact, imageUrl);
-                        }
-                    } catch (ConverterException e) {
-                        LOG.error(e);
-                    }
-
-                    // get the current job and company
-                    NodeList positions = person.getElementsByTagName("positions");
-                    if (null != positions && positions.getLength() > 0) {
-                        Element position = (Element) positions.item(0);
-                        contact.setTitle(getTextValue(position, "title"));
-                        NodeList companies = position.getElementsByTagName("company");
-                        if (companies != null && companies.getLength() > 0) {
-                            Element company = (Element) companies.item(0);
-                            contact.setCompany(getTextValue(company, "name"));
-                        }
-                    }
-
-                    // get the first IM-account
-                    NodeList imAccounts = person.getElementsByTagName("im-account");
-                    if (null != imAccounts && imAccounts.getLength() > 0 ){
-                        Element imAccount = (Element) imAccounts.item(0);
-                        contact.setInstantMessenger1(getTextValue(imAccount, "im-account-name") + " ("+getTextValue(imAccount, "im-account-type")+")");
-                    }
-
-                    // parse the phone numbers, saving the first occurrence of "home" and "work"
-                    NodeList phoneNumbers = person.getElementsByTagName("phone-number");
-                    if (null != phoneNumbers && phoneNumbers.getLength() > 0 ){
-                        for (int p = 0; p < phoneNumbers.getLength(); p++){
-                            Element phoneNumber = (Element) phoneNumbers.item(p);
-                            if (null != getTextValue(phoneNumber, "phone-type")){
-                                if (getTextValue(phoneNumber, "phone-type").equals("work")) {
-                                    contact.setTelephoneBusiness1(getTextValue(phoneNumber, "phone-number"));
-                                }
-                                else if (getTextValue(phoneNumber, "phone-type").equals("home")){
-                                    contact.setTelephoneHome1(getTextValue(phoneNumber, "phone-number"));
-                                }
-                            }
-                        }
-                    }
-
-                    // get the birthdate
-                    NodeList dateOfBirths = person.getElementsByTagName("date-of-birth");
-                    if (null != dateOfBirths && dateOfBirths.getLength() > 0){
-                        Element dateOfBirth = (Element) dateOfBirths.item(0);
-                        int year = 0;
-                        if (null != getTextValue(dateOfBirth, "year")){
-                            year = Integer.parseInt(getTextValue(dateOfBirth, "year")) - 1900;
-                        }
-                        int month = 0;
-                        if (null != getTextValue(dateOfBirth, "month")){
-                            month = Integer.parseInt(getTextValue(dateOfBirth, "month")) -1;
-                        }
-                        int date = 0;
-                        if (null != getTextValue(dateOfBirth, "day")){
-                            date = Integer.parseInt(getTextValue(dateOfBirth, "day"));
-                        }
-                        contact.setBirthday(new Date(year, month, date));
-                    }
-
+                    Contact contact = parse(person);
                     contacts.add(contact);
                 }
             }
@@ -231,6 +226,24 @@ public class LinkedInServiceImpl implements LinkedInService{
         return contacts;
     }
 
+    public Contact parseProfile(String body) {
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        try {
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            Document doc = db.parse(new ByteArrayInputStream(body.getBytes("UTF-8")));
+            Element root = doc.getDocumentElement();
+            Contact contact = parse(root);
+            return contact;
+        } catch (ParserConfigurationException pce) {
+            LOG.error(pce);
+        } catch (SAXException se) {
+            LOG.error(se);
+        } catch (IOException ioe) {
+            LOG.error(ioe);
+        }
+        return null;
+    }
+    
     private String getTextValue(Element ele, String tagName) {
         String textVal = null;
         NodeList nl = ele.getElementsByTagName(tagName);
@@ -255,5 +268,20 @@ public class LinkedInServiceImpl implements LinkedInService{
             LOG.error(e);
         }
         return displayName;
+    }
+    
+
+    @Override
+    public List<Contact> getContacts(String password, int user, int contextId, int accountId) {
+    	Response response = performRequest(password, user, contextId, accountId, Verb.GET, CONNECTIONS_URL);
+        List<Contact> contacts = parseConnections(response.getBody());
+        return contacts;
+    }
+    
+    @Override
+    public Contact getProfile(String password, int user, int contextId, int accountId) {
+    	Response response = performRequest(password, user, contextId, accountId, Verb.GET, PROFILE_URL);
+        Contact contact = parseProfile(response.getBody());
+        return contact;
     }
 }

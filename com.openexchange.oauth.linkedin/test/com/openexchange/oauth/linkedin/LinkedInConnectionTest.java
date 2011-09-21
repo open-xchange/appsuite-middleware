@@ -74,16 +74,15 @@ public class LinkedInConnectionTest extends TestCase {
 
     private LinkedInServiceImpl linkedIn;
 
-    private final String apiKey = "PLEASE_INSERT_VALID_KEY_HERE";
-    private final String apiSecret = "PLEASE_INSERT_VALID_SECRET_HERE";
+    private String apiKey = "HANYG4YSMun5b1lhv-aIEUtnIvNaHK2Bemjv7VvYI_frJpllhVY9HH8ZVOrII7UV";
+    private String apiSecret = "t2-AWfC0YqMwUjt3v5lxw9VJlDE3BZ-88k7-834Rq-QH-tq_xjqdLUHQz_glLaEb";
 
     @Override
     public void setUp(){
         Activator activator = new Activator();
-//        OAuthServiceMetaDataLinkedInImpl linkedInMetadata = new OAuthServiceMetaDataLinkedInImpl();
-//        activator.setLinkedInMetadata(linkedInMetadata);
         linkedIn = new LinkedInServiceImpl(activator);
         activator.setOauthService(new MockOAuthService());
+        activator.setConfigurationService(new MockConfigurationService(apiKey, apiSecret));
     }
 
     @Override
@@ -120,15 +119,8 @@ public class LinkedInConnectionTest extends TestCase {
         System.out.println("Trading the Request Token for an Access Token...");
         Token accessToken = service.getAccessToken(requestToken, verifier);
         System.out.println("Got the Access Token!");
-        System.out.println("(if your curious it looks like this: " + accessToken.getToken() + "(Token), "+accessToken.getSecret()+"(Secret) )");
+        System.out.println("(if you're curious it looks like this: " + accessToken.getToken() + "(Token), "+accessToken.getSecret()+"(Secret) )");
         System.out.println();
-    }
-
-    public void testUsageOfExistingAccount(){
-        List<Contact> contacts = linkedIn.getContacts("password",1,1,1);
-        for (Contact contact : contacts){
-            System.out.println(contact.getGivenName() + " " + contact.getSurName());
-        }
     }
 
     public void testXMLParsing(){
@@ -140,7 +132,7 @@ public class LinkedInConnectionTest extends TestCase {
             while ((line = reader.readLine()) != null) {
                 string += line + "\n";
             }
-            List<Contact> contacts = linkedIn.parseIntoContacts(string);
+            List<Contact> contacts = linkedIn.parseConnections(string);
             System.out.println("No of contacts : " + contacts.size());
             for (Contact contact : contacts){
                 if (contact.getSurName().equals("Geck")){
@@ -158,4 +150,15 @@ public class LinkedInConnectionTest extends TestCase {
         }
     }
 
+    public void testGetMyContacts(){
+        List<Contact> contacts = linkedIn.getContacts("password",1,1,1);
+        for (Contact contact : contacts){
+            System.out.println(contact.getGivenName() + " " + contact.getSurName());
+        }
+    }
+    
+    public void testGetProfile(){
+        Contact profile = linkedIn.getProfile("password",1,1,1);
+        System.out.println(profile);
+    }
 }
