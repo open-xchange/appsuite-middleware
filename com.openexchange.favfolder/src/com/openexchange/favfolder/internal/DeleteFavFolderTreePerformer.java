@@ -64,16 +64,13 @@ import com.openexchange.server.ServiceLookup;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DeleteFavFolderTreePerformer {
-
-    private final ServiceLookup serviceLookup;
+public final class DeleteFavFolderTreePerformer extends AbstractFavFolderPerformer {
 
     /**
      * Initializes a new {@link DeleteFavFolderTreePerformer}.
      */
     public DeleteFavFolderTreePerformer(final ServiceLookup serviceLookup) {
-        super();
-        this.serviceLookup = serviceLookup;
+        super(serviceLookup);
     }
 
     /**
@@ -85,7 +82,7 @@ public final class DeleteFavFolderTreePerformer {
      * @throws OXException If deletion fails
      */
     public void deleteFavFolderTree(final int treeId, final int userId, final int contextId) throws OXException {
-        final DatabaseService databaseService = serviceLookup.getService(DatabaseService.class);
+        final DatabaseService databaseService = getService(DatabaseService.class);
         final Connection con = databaseService.getWritable(contextId);
         PreparedStatement stmt = null;
         try {

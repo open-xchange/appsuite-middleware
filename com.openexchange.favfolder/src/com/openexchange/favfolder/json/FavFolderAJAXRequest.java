@@ -131,10 +131,23 @@ public final class FavFolderAJAXRequest {
         }
     }
 
+    /**
+     * Gets the value associated with specified parameter name.
+     * 
+     * @param name The name
+     * @return The value
+     * @throws OXException If parameter is absent
+     */
     public String checkParameter(final String name) throws OXException {
         return request.checkParameter(name);
     }
 
+    /**
+     * Gets the value associated with specified parameter name.
+     * 
+     * @param name The name
+     * @return The value or <code>null</code> if absent
+     */
     public String getParameter(final String name) {
         return request.getParameter(name);
     }

@@ -55,35 +55,29 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.regex.Pattern;
-import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.id.IDGeneratorService;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.user.UserService;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link CreateFavFolderTreePerformer}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CreateFavFolderTreePerformer {
+public final class CreateFavFolderTreePerformer extends AbstractFavFolderPerformer {
 
     private static final int MIN_ID = 100;
-
-    private final ServiceLookup serviceLookup;
 
     /**
      * Initializes a new {@link CreateFavFolderTreePerformer}.
      */
     public CreateFavFolderTreePerformer(final ServiceLookup serviceLookup) {
-        super();
-        this.serviceLookup = serviceLookup;
+        super(serviceLookup);
     }
 
     private static final Pattern PATTERN_NUM = Pattern.compile(Pattern.quote("#NUM#"));
@@ -94,13 +88,13 @@ public final class CreateFavFolderTreePerformer {
      * @param name The favorite folder list name or <code>null</code> to select default name {@link FavFolderStrings#MY_FAV_FOLDERS
      *            "My favorite folders #NUM#"}
      * @param id The tree/list identifier or <code>-1</code> to generate a new unique identifier
-     * @param userId The user identifier
-     * @param contextId The context identifier
+     * @param session The session providing user data
      * @return The identifier of the newly created tree
      * @throws OXException If creation fails
      */
-    public int createNewFavFolderTree(final String name, final int id, final int userId, final int contextId) throws OXException {
+    public int createNewFavFolderTree(final String name, final int id, final ServerSession session) throws OXException {
         final DatabaseService databaseService = getService(DatabaseService.class);
+        final int contextId = session.getContextId();
         final int treeId;
         if (id <= 0) {
             /*
@@ -120,6 +114,7 @@ public final class CreateFavFolderTreePerformer {
             con.setAutoCommit(false); // BEGIN
             stmt =
                 con.prepareStatement("INSERT INTO virtualTree (cid, tree, user, folderId, parentId, name, lastModified, modifiedBy, shadow, sortNum) VALUES (?,?,?,?,?,?,?,?,?,?)");
+            final int userId = session.getUserId();
             int pos = 1;
             stmt.setInt(pos++, contextId); // cid
             stmt.setInt(pos++, treeId); // tree
@@ -127,8 +122,7 @@ public final class CreateFavFolderTreePerformer {
             stmt.setString(pos++, FolderStorage.ROOT_ID); // folderId
             stmt.setString(pos++, ""); // parentId
             if (null == name) {
-                final User user = getService(UserService.class).getUser(userId, getService(ContextService.class).getContext(contextId));
-                final String i18nName = StringHelper.valueOf(user.getLocale()).getString(FavFolderStrings.MY_FAV_FOLDERS);
+                final String i18nName = StringHelper.valueOf(session.getUser().getLocale()).getString(FavFolderStrings.MY_FAV_FOLDERS);
                 stmt.setString(pos++, PATTERN_NUM.matcher(i18nName).replaceFirst(String.valueOf(treeId))); // name
             } else {
                 stmt.setString(pos++, name); // name
@@ -160,14 +154,6 @@ public final class CreateFavFolderTreePerformer {
          * Return its identifier
          */
         return treeId;
-    }
-
-    private <S> S getService(final Class<? extends S> clazz) throws OXException {
-        try {
-            return serviceLookup.getService(clazz);
-        } catch (final IllegalStateException e) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(clazz.getName());
-        }
     }
 
 }

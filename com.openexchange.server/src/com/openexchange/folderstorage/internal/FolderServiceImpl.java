@@ -49,15 +49,21 @@
 
 package com.openexchange.folderstorage.internal;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
+import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderFilter;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
+import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.internal.performers.AllVisibleFoldersPerformer;
@@ -68,9 +74,12 @@ import com.openexchange.folderstorage.internal.performers.DeletePerformer;
 import com.openexchange.folderstorage.internal.performers.GetPerformer;
 import com.openexchange.folderstorage.internal.performers.ListPerformer;
 import com.openexchange.folderstorage.internal.performers.PathPerformer;
+import com.openexchange.folderstorage.internal.performers.SubscribePerformer;
+import com.openexchange.folderstorage.internal.performers.UnsubscribePerformer;
 import com.openexchange.folderstorage.internal.performers.UpdatePerformer;
 import com.openexchange.folderstorage.internal.performers.UpdatesPerformer;
 import com.openexchange.folderstorage.internal.performers.VisibleFoldersPerformer;
+import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
@@ -97,11 +106,7 @@ public final class FolderServiceImpl implements FolderService {
 
     @Override
     public void checkConsistency(final String treeId, final Session session) throws OXException {
-        try {
-            new ConsistencyPerformer(new ServerSessionAdapter(session)).doConsistencyCheck(treeId);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        new ConsistencyPerformer(new ServerSessionAdapter(session)).doConsistencyCheck(treeId);
     }
 
     @Override
@@ -111,11 +116,7 @@ public final class FolderServiceImpl implements FolderService {
 
     @Override
     public void clearFolder(final String treeId, final String folderId, final Session session) throws OXException {
-        try {
-            new ClearPerformer(new ServerSessionAdapter(session)).doClear(treeId, folderId);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        new ClearPerformer(new ServerSessionAdapter(session)).doClear(treeId, folderId);
     }
 
     @Override
@@ -126,12 +127,8 @@ public final class FolderServiceImpl implements FolderService {
 
     @Override
     public FolderResponse<String> createFolder(final Folder folder, final Session session) throws OXException {
-        try {
-            final CreatePerformer createPerformer = new CreatePerformer(new ServerSessionAdapter(session));
-            return FolderResponseImpl.newFolderResponse(createPerformer.doCreate(folder), createPerformer.getStorageParameters().getWarnings());
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final CreatePerformer createPerformer = new CreatePerformer(new ServerSessionAdapter(session));
+        return FolderResponseImpl.newFolderResponse(createPerformer.doCreate(folder), createPerformer.getStorageParameters().getWarnings());
     }
 
     @Override
@@ -142,11 +139,7 @@ public final class FolderServiceImpl implements FolderService {
 
     @Override
     public void deleteFolder(final String treeId, final String folderId, final Date timeStamp, final Session session) throws OXException {
-        try {
-            new DeletePerformer(new ServerSessionAdapter(session)).doDelete(treeId, folderId, timeStamp);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        new DeletePerformer(new ServerSessionAdapter(session)).doDelete(treeId, folderId, timeStamp);
     }
 
     @Override
@@ -168,11 +161,7 @@ public final class FolderServiceImpl implements FolderService {
 
     @Override
     public UserizedFolder getFolder(final String treeId, final String folderId, final Session session, final FolderServiceDecorator decorator) throws OXException {
-        try {
-            return new GetPerformer(new ServerSessionAdapter(session), decorator).doGet(treeId, folderId);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return new GetPerformer(new ServerSessionAdapter(session), decorator).doGet(treeId, folderId);
     }
 
     @Override
@@ -183,12 +172,8 @@ public final class FolderServiceImpl implements FolderService {
 
     @Override
     public FolderResponse<UserizedFolder[]> getAllVisibleFolders(final String treeId, final FolderFilter filter, final Session session, final FolderServiceDecorator decorator) throws OXException {
-        try {
-            final AllVisibleFoldersPerformer performer = new AllVisibleFoldersPerformer(new ServerSessionAdapter(session), decorator);
-            return FolderResponseImpl.newFolderResponse(performer.doAllVisibleFolders(treeId, filter), performer.getWarnings());
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final AllVisibleFoldersPerformer performer = new AllVisibleFoldersPerformer(new ServerSessionAdapter(session), decorator);
+        return FolderResponseImpl.newFolderResponse(performer.doAllVisibleFolders(treeId, filter), performer.getWarnings());
     }
 
     @Override
@@ -199,12 +184,8 @@ public final class FolderServiceImpl implements FolderService {
 
     @Override
     public FolderResponse<UserizedFolder[]> getPath(final String treeId, final String folderId, final Session session, final FolderServiceDecorator decorator) throws OXException {
-        try {
-            final PathPerformer performer = new PathPerformer(new ServerSessionAdapter(session), decorator);
-            return FolderResponseImpl.newFolderResponse(performer.doPath(treeId, folderId, true), performer.getWarnings());
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final PathPerformer performer = new PathPerformer(new ServerSessionAdapter(session), decorator);
+        return FolderResponseImpl.newFolderResponse(performer.doPath(treeId, folderId, true), performer.getWarnings());
     }
 
     @Override
@@ -215,12 +196,8 @@ public final class FolderServiceImpl implements FolderService {
 
     @Override
     public FolderResponse<UserizedFolder[]> getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final boolean all, final Session session, final FolderServiceDecorator decorator) throws OXException {
-        try {
-            final VisibleFoldersPerformer performer = new VisibleFoldersPerformer(new ServerSessionAdapter(session), decorator);
-            return FolderResponseImpl.newFolderResponse(performer.doVisibleFolders(treeId, contentType, type, all), performer.getWarnings());
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final VisibleFoldersPerformer performer = new VisibleFoldersPerformer(new ServerSessionAdapter(session), decorator);
+        return FolderResponseImpl.newFolderResponse(performer.doVisibleFolders(treeId, contentType, type, all), performer.getWarnings());
     }
 
     @Override
@@ -231,12 +208,8 @@ public final class FolderServiceImpl implements FolderService {
 
     @Override
     public FolderResponse<UserizedFolder[]> getSubfolders(final String treeId, final String parentId, final boolean all, final Session session, final FolderServiceDecorator decorator) throws OXException {
-        try {
-            final ListPerformer listPerformer = new ListPerformer(new ServerSessionAdapter(session), decorator);
-            return FolderResponseImpl.newFolderResponse(listPerformer.doList(treeId, parentId, all), listPerformer.getWarnings());
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final ListPerformer listPerformer = new ListPerformer(new ServerSessionAdapter(session), decorator);
+        return FolderResponseImpl.newFolderResponse(listPerformer.doList(treeId, parentId, all), listPerformer.getWarnings());
     }
 
     @Override
@@ -249,38 +222,51 @@ public final class FolderServiceImpl implements FolderService {
 
     @Override
     public FolderResponse<UserizedFolder[][]> getUpdates(final String treeId, final Date timeStamp, final boolean ignoreDeleted, final ContentType[] includeContentTypes, final Session session, final FolderServiceDecorator decorator) throws OXException {
-        try {
-            final UpdatesPerformer performer = new UpdatesPerformer(new ServerSessionAdapter(session), decorator);
-            return FolderResponseImpl.newFolderResponse(
-                performer.doUpdates(treeId, timeStamp, ignoreDeleted, includeContentTypes),
-                performer.getWarnings());
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final UpdatesPerformer performer = new UpdatesPerformer(new ServerSessionAdapter(session), decorator);
+        return FolderResponseImpl.newFolderResponse(
+            performer.doUpdates(treeId, timeStamp, ignoreDeleted, includeContentTypes),
+            performer.getWarnings());
     }
 
     @Override
     public void subscribeFolder(final String sourceTreeId, final String folderId, final String targetTreeId, final String targetParentId, final User user, final Context context) throws OXException {
-        // TODO Auto-generated method stub
+        if (!FolderStorage.REAL_TREE_ID.equals(sourceTreeId)) {
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Subscribe only supported for real tree as source tree.");
+        }
+        if (KNOWN_TREES.contains(targetParentId)) {
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Subscribe not supported for known trees.");
+        }
+        new SubscribePerformer(user, context).doSubscribe(sourceTreeId, folderId, targetTreeId, targetParentId);
 
     }
 
+    private static final Set<String> KNOWN_TREES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(FolderStorage.REAL_TREE_ID, OutlookFolderStorage.OUTLOOK_TREE_ID)));
+
     @Override
     public void subscribeFolder(final String sourceTreeId, final String folderId, final String targetTreeId, final String targetParentId, final Session session) throws OXException {
-        // TODO Auto-generated method stub
-
+        if (!FolderStorage.REAL_TREE_ID.equals(sourceTreeId)) {
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Subscribe only supported for real tree as source tree.");
+        }
+        if (KNOWN_TREES.contains(targetParentId)) {
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Subscribe not supported for known trees.");
+        }
+        new SubscribePerformer(new ServerSessionAdapter(session)).doSubscribe(sourceTreeId, folderId, targetTreeId, targetParentId);
     }
 
     @Override
     public void unsubscribeFolder(final String treeId, final String folderId, final User user, final Context context) throws OXException {
-        // TODO Auto-generated method stub
-
+        if (KNOWN_TREES.contains(treeId)) {
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Unsubscribe not supported for known trees.");
+        }
+        new UnsubscribePerformer(user, context).doUnsubscribe(treeId, folderId);
     }
 
     @Override
     public void unsubscribeFolder(final String treeId, final String folderId, final Session session) throws OXException {
-        // TODO Auto-generated method stub
-
+        if (KNOWN_TREES.contains(treeId)) {
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Unsubscribe not supported for known trees.");
+        }
+        new UnsubscribePerformer(new ServerSessionAdapter(session)).doUnsubscribe(treeId, folderId);
     }
 
     @Override
@@ -290,11 +276,7 @@ public final class FolderServiceImpl implements FolderService {
 
     @Override
     public void updateFolder(final Folder folder, final Date timeStamp, final Session session) throws OXException {
-        try {
-            new UpdatePerformer(new ServerSessionAdapter(session)).doUpdate(folder, timeStamp);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        new UpdatePerformer(new ServerSessionAdapter(session)).doUpdate(folder, timeStamp);
     }
 
     @Override
