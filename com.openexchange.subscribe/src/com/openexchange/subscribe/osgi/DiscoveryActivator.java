@@ -128,8 +128,6 @@ public class DiscoveryActivator implements BundleActivator {
         discoveryRegistration =
             context.registerService(SubscriptionSourceDiscoveryService.class, discoveryCollector, discoveryDict);
 
-        FolderFieldActivator.DISCOVERY = discoveryCollector;
-
         final List<FolderUpdaterService<?>> folderUpdaters = new ArrayList<FolderUpdaterService<?>>(5);
         folderUpdaters.add(new StrategyFolderUpdaterService<Contact>(new ContactFolderUpdaterStrategy()));
         folderUpdaters.add(new StrategyFolderUpdaterService<Contact>(new ContactFolderMultipleUpdaterStrategy(), true));
