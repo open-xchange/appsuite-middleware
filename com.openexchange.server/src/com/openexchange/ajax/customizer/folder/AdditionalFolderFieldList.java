@@ -52,6 +52,7 @@ package com.openexchange.ajax.customizer.folder;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -66,11 +67,11 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class AdditionalFolderFieldList {
 
-    // TODO: Track service ranking and allow fields to overwrite other fields.
+	 // TODO: Track service ranking and allow fields to overwrite other fields.
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AdditionalFolderFieldList.class));
 
-    private final TIntObjectMap<AdditionalFolderField> byColId = new TIntObjectHashMap<AdditionalFolderField>();
+    private final TIntObjectHashMap<AdditionalFolderField> byColId = new TIntObjectHashMap<AdditionalFolderField>();
     private final Map<String, AdditionalFolderField> byName = new HashMap<String, AdditionalFolderField>();
 
     /**
@@ -168,24 +169,24 @@ public class AdditionalFolderFieldList {
             this.columnId = columnId;
         }
 
-        @Override
         public int getColumnID() {
             return columnId;
         }
 
-        @Override
         public String getColumnName() {
             return null;
         }
 
-        @Override
         public Object getValue(final FolderObject folder, final ServerSession session) {
             return null;
         }
 
-        @Override
         public Object renderJSON(final Object value) {
             return null;
+        }
+
+        public List<Object> getValues(List<FolderObject> folder, ServerSession session) {
+            return AdditionalFieldsUtils.bulk(this, folder, session);
         }
 
     }

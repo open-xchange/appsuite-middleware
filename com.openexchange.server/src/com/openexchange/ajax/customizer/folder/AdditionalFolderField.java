@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.customizer.folder;
 
+import java.util.List;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.session.ServerSession;
 
@@ -64,6 +65,7 @@ public interface AdditionalFolderField {
     public int getColumnID();
     public String getColumnName();
     public Object getValue(FolderObject folder, ServerSession session);
+    public List<Object> getValues(List<FolderObject> folder, ServerSession session);
     public Object renderJSON(Object value);
 
 }
