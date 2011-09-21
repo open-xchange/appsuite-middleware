@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Hostname Service based on Config Cascade
+Bundle-SymbolicName: com.openexchange.config.cascade.hostname
+Bundle-Version: 6.20.0.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.config.cascade,
+ com.openexchange.groupware,
+ com.openexchange.groupware.notify.hostname,
+ com.openexchange.server.osgiservice,
+ org.osgi.framework,
+ org.osgi.util.tracker
+Bundle-Activator: com.openexchange.config.cascade.hostname.osgi.ConfigurableHostnameServiceActivator
