@@ -49,12 +49,25 @@
 
 package com.openexchange.favfolder.internal;
 
+import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
- * {@link Dummy}
+ * {@link FavFolderStrings} - The i18n strings for favorite folders bundle.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Dummy {
+public final class FavFolderStrings implements LocalizableStrings {
+
+    /**
+     * Initializes a new {@link FavFolderStrings}.
+     */
+    public FavFolderStrings() {
+        super();
+    }
+
+    // The default name for a newly created list of favorite folders
+    // #NUM# is replaced with the list identifier to obtain a unique name
+    public static final String MY_FAV_FOLDERS = "My favorite folders #NUM#";
 
 }

@@ -54,17 +54,22 @@ import static com.openexchange.database.Databases.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.regex.Pattern;
+import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.id.IDGeneratorService;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-
+import com.openexchange.user.UserService;
 
 /**
  * {@link CreateFavFolderTreePerformer}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CreateFavFolderTreePerformer {
@@ -81,46 +86,69 @@ public final class CreateFavFolderTreePerformer {
         this.serviceLookup = serviceLookup;
     }
 
+    private static final Pattern PATTERN_NUM = Pattern.compile(Pattern.quote("#NUM#"));
+
     /**
      * Start a new favorite folder tree by inserting its root element.
      * 
-     * @param name The favorite folder list name
+     * @param name The favorite folder list name or <code>null</code> to select default name {@link FavFolderStrings#MY_FAV_FOLDERS
+     *            "My favorite folders #NUM#"}
+     * @param id The tree/list identifier or <code>-1</code> to generate a new unique identifier
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return The identifier of the newly created tree
      * @throws OXException If creation fails
      */
     public int createNewFavFolderTree(final String name, final int id, final int userId, final int contextId) throws OXException {
-        /*
-         * Acquire new identifier
-         */
-        final IDGeneratorService generatorService = serviceLookup.getService(IDGeneratorService.class);
-        final int treeId = id <= 0 ? generatorService.getId("com.openexchange.favfolder", contextId, MIN_ID) : id;
+        final DatabaseService databaseService = getService(DatabaseService.class);
+        final int treeId;
+        if (id <= 0) {
+            /*
+             * Acquire new identifier
+             */
+            final IDGeneratorService generatorService = getService(IDGeneratorService.class);
+            treeId = generatorService.getId("com.openexchange.favfolder", contextId, MIN_ID);
+        } else {
+            treeId = id;
+        }
         /*
          * Insert root folder for new tree
          */
-        final DatabaseService databaseService = serviceLookup.getService(DatabaseService.class);
         final Connection con = databaseService.getWritable(contextId);
         PreparedStatement stmt = null;
         try {
             con.setAutoCommit(false); // BEGIN
-            stmt = con.prepareStatement("INSERT INTO virtualTree (cid, tree, user, folderId, parentId, name, lastModified, modifiedBy, shadow, sortNum) VALUES (?,?,?,?,?,?,?,?,?,?)");
+            stmt =
+                con.prepareStatement("INSERT INTO virtualTree (cid, tree, user, folderId, parentId, name, lastModified, modifiedBy, shadow, sortNum) VALUES (?,?,?,?,?,?,?,?,?,?)");
             int pos = 1;
             stmt.setInt(pos++, contextId); // cid
             stmt.setInt(pos++, treeId); // tree
             stmt.setInt(pos++, userId); // user
             stmt.setString(pos++, FolderStorage.ROOT_ID); // folderId
             stmt.setString(pos++, ""); // parentId
-            stmt.setString(pos++, name); // name
+            if (null == name) {
+                final User user = getService(UserService.class).getUser(userId, getService(ContextService.class).getContext(contextId));
+                final String i18nName = StringHelper.valueOf(user.getLocale()).getString(FavFolderStrings.MY_FAV_FOLDERS);
+                stmt.setString(pos++, PATTERN_NUM.matcher(i18nName).replaceFirst(String.valueOf(treeId))); // name
+            } else {
+                stmt.setString(pos++, name); // name
+            }
             stmt.setLong(pos++, System.currentTimeMillis()); // lastModified
             stmt.setLong(pos++, userId); // modifiedBy
             stmt.setString(pos++, ""); // shadow
             stmt.setInt(pos++, 0); // sortNum
-            stmt.executeUpdate();
+            try {
+                stmt.executeUpdate();
+            } catch (final SQLException e) {
+                throw FolderExceptionErrorMessage.DUPLICATE_TREE.create(e, Integer.valueOf(treeId));
+            }
             con.commit(); // COMMIT
         } catch (final SQLException e) {
             rollback(con);
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } catch (final OXException e) {
+            rollback(con);
+            throw e;
         } catch (final Exception e) {
             rollback(con);
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -132,6 +160,14 @@ public final class CreateFavFolderTreePerformer {
          * Return its identifier
          */
         return treeId;
+    }
+
+    private <S> S getService(final Class<? extends S> clazz) throws OXException {
+        try {
+            return serviceLookup.getService(clazz);
+        } catch (final IllegalStateException e) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(clazz.getName());
+        }
     }
 
 }
