@@ -83,7 +83,7 @@ public final class MemoryFolderImpl implements MemoryFolder {
      */
     public MemoryFolderImpl() {
         super();
-        sortNum = -1;
+        sortNum = 0;
     }
 
     @Override
