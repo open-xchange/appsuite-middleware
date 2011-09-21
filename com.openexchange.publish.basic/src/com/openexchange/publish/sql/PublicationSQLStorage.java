@@ -71,14 +71,17 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.publish.Entity;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationStorage;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.DELETE;
 import com.openexchange.sql.grammar.EQUALS;
+import com.openexchange.sql.grammar.Expression;
 import com.openexchange.sql.grammar.IN;
 import com.openexchange.sql.grammar.INSERT;
+import com.openexchange.sql.grammar.LIST;
 import com.openexchange.sql.grammar.SELECT;
 import com.openexchange.sql.grammar.UPDATE;
 import com.openexchange.sql.tools.SQLTools;
@@ -614,6 +617,55 @@ public class PublicationSQLStorage implements PublicationStorage {
             }
         }
 
+        return retval;
+    }
+    
+    public Map<Entity, Boolean> isPublished(List<Entity> entities, Context ctx) throws OXException {
+        Map<Entity, Boolean> retval = new HashMap<Entity, Boolean>();
+        for (Entity entity : entities) {
+            retval.put(entity, Boolean.FALSE);
+        }
+
+        Connection readConnection = null;
+        ResultSet resultSet = null;
+        StatementBuilder builder = null;
+        try {
+            readConnection = dbProvider.getReadConnection(ctx);
+            ArrayList<Expression> placeholders = new ArrayList<Expression>(entities.size());
+            for(int i = 0; i < entities.size(); i++) {
+                placeholders.add(PLACEHOLDER);
+            }
+            SELECT select = new SELECT("module, entity").FROM(publications).WHERE(new EQUALS("cid", PLACEHOLDER).AND(new IN("entity", new LIST(placeholders))));
+
+            List<Object> values = new ArrayList<Object>();
+            values.add(I(ctx.getContextId()));
+            for (Entity entity : entities) {
+                values.add(entity.getId());
+            }
+
+            builder = new StatementBuilder();
+            resultSet = builder.executeQuery(readConnection, select, values);
+            while (resultSet.next()) {
+                String entityType = resultSet.getString(1);
+                int entityId = resultSet.getInt(2);
+                Entity found = new Entity(entityType, entityId);
+                if (retval.containsKey(found)) {
+                    retval.put(found, Boolean.TRUE);
+                }
+            }
+        } catch (SQLException e) {
+            throw SQLException.create(e);
+        } finally {
+            try {
+                if (builder != null) {
+                    builder.closePreparedStatement(null, resultSet);
+                }
+            } catch (SQLException e) {
+                throw SQLException.create(e);
+            } finally {
+                dbProvider.releaseReadConnection(ctx, readConnection);
+            }
+        }
         return retval;
     }
 

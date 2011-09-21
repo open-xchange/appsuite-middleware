@@ -49,62 +49,97 @@
 
 package com.openexchange.ajax.customizer.folder;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link SimFolderField}
+ * {@link BulkAdditionalFolderFieldsList}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public class SimFolderField implements AdditionalFolderField {
+public class BulkAdditionalFolderFieldsList extends AdditionalFolderFieldList {
 
-    private int columnId;
-    private String columnName;
-    private Object value;
-    private Object jsonValue;
+    private AdditionalFolderFieldList delegate;
+    
+    private Map<Integer, BulkFolderField> fieldMap = new HashMap<Integer, BulkFolderField>();
+    private Map<String, BulkFolderField> fieldMap2 = new HashMap<String, BulkFolderField>();
+    private Set<BulkFolderField> fields = new HashSet<BulkFolderField>();
 
-    @Override
-    public int getColumnID() {
-        return columnId;
+    public BulkAdditionalFolderFieldsList(AdditionalFolderFieldList fields) {
+        this.delegate = fields;
     }
 
-    @Override
-    public String getColumnName() {
-        return columnName;
+    public void addField(AdditionalFolderField field) {
+        delegate.addField(field);
     }
 
-    @Override
-    public Object getValue(FolderObject folder, ServerSession session) {
-        return value;
+    public boolean equals(Object obj) {
+        return delegate.equals(obj);
     }
 
-    @Override
-    public Object renderJSON(Object value) {
-        return jsonValue;
+    public AdditionalFolderField get(int col) {
+        BulkFolderField bulkFolderField = fieldMap.get(col);
+        if (bulkFolderField != null) {
+            return bulkFolderField;
+        }
+        return cache(delegate.get(col));
     }
 
-    public void setColumnId(int columnId) {
-        this.columnId = columnId;
+    public AdditionalFolderField get(String col) {
+        BulkFolderField bulkFolderField = fieldMap2.get(col);
+        if (bulkFolderField != null) {
+            return bulkFolderField;
+        }
+        return cache(delegate.get(col));
     }
 
-    public void setColumnName(String columnName) {
-        this.columnName = columnName;
+    private AdditionalFolderField cache(AdditionalFolderField additionalFolderField) {
+        BulkFolderField bff = new BulkFolderField(additionalFolderField);
+        fieldMap.put(bff.getColumnID(), bff);
+        fieldMap2.put(bff.getColumnName(), bff);
+        fields.add(bff);
+        return bff;
+    }
+    
+    public void warmUp(Collection<FolderObject> folders, ServerSession session) {
+        List<FolderObject> folderObjects = new ArrayList<FolderObject>(folders);
+        for(BulkFolderField field : fields) {
+            field.warmUp(folderObjects, session);
+        }
     }
 
-    public void setValue(Object value) {
-        this.value = value;
+    public int[] getKnownFields() {
+        return delegate.getKnownFields();
     }
 
-    public void setJsonValue(Object jsonValue) {
-        this.jsonValue = jsonValue;
+    public int hashCode() {
+        return delegate.hashCode();
     }
 
-    public List<Object> getValues(List<FolderObject> folder, ServerSession session) {
-        return AdditionalFieldsUtils.bulk(this, folder, session);
+    public boolean knows(int col) {
+        return delegate.knows(col);
     }
+
+    public boolean knows(String col) {
+        return delegate.knows(col);
+    }
+
+    public void remove(int colId) {
+        delegate.remove(colId);
+    }
+
+    public String toString() {
+        return delegate.toString();
+    }
+    
+    
 
 }

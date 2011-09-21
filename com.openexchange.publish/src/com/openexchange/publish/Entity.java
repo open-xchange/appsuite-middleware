@@ -47,64 +47,80 @@
  *
  */
 
-package com.openexchange.ajax.customizer.folder;
-
-import java.util.List;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.tools.session.ServerSession;
+package com.openexchange.publish;
 
 
 /**
- * {@link SimFolderField}
+ * {@link Entity}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public class SimFolderField implements AdditionalFolderField {
-
-    private int columnId;
-    private String columnName;
-    private Object value;
-    private Object jsonValue;
-
-    @Override
-    public int getColumnID() {
-        return columnId;
+public class Entity {
+    private String entityType;
+    private int id;
+    
+    public Entity(String entityType, int id) {
+        super();
+        this.entityType = entityType;
+        this.id = id;
+    }
+    
+    public String getEntityType() {
+        return entityType;
+    }
+    
+    public void setEntityType(String entityType) {
+        this.entityType = entityType;
+    }
+    
+    public int getId() {
+        return id;
+    }
+    
+    public void setId(int id) {
+        this.id = id;
     }
 
     @Override
-    public String getColumnName() {
-        return columnName;
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((entityType == null) ? 0 : entityType.hashCode());
+        result = prime * result + id;
+        return result;
     }
 
     @Override
-    public Object getValue(FolderObject folder, ServerSession session) {
-        return value;
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        Entity other = (Entity) obj;
+        if (entityType == null) {
+            if (other.entityType != null) {
+                return false;
+            }
+        } else if (!entityType.equals(other.entityType)) {
+            return false;
+        }
+        if (id != other.id) {
+            return false;
+        }
+        return true;
     }
-
+    
     @Override
-    public Object renderJSON(Object value) {
-        return jsonValue;
+    public String toString() {
+        return entityType+":"+id;
     }
-
-    public void setColumnId(int columnId) {
-        this.columnId = columnId;
-    }
-
-    public void setColumnName(String columnName) {
-        this.columnName = columnName;
-    }
-
-    public void setValue(Object value) {
-        this.value = value;
-    }
-
-    public void setJsonValue(Object jsonValue) {
-        this.jsonValue = jsonValue;
-    }
-
-    public List<Object> getValues(List<FolderObject> folder, ServerSession session) {
-        return AdditionalFieldsUtils.bulk(this, folder, session);
-    }
-
+    
+    
+    
+    
 }

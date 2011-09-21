@@ -6,7 +6,8 @@ Bundle-Version: 6.20.0.0
 Bundle-Activator: com.openexchange.secret.recovery.osgi.SecretRecoveryActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.exception,
+Import-Package: com.openexchange.crypto,
+ com.openexchange.exception,
  com.openexchange.groupware,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.ldap,
@@ -14,6 +15,7 @@ Import-Package: com.openexchange.exception,
  com.openexchange.secret.osgi.tools,
  com.openexchange.session,
  com.openexchange.tools.session,
+ com.openexchange.user,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker

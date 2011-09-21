@@ -81,5 +81,7 @@ public interface PublicationStorage {
     public void deletePublicationsOfUser(int userID, Context context) throws OXException;
 
     public void deletePublicationsInContext(int contextId, Context ctx) throws OXException;
+    
+    public Map<Entity, Boolean> isPublished(List<Entity> entities, Context ctx) throws OXException;
 
 }

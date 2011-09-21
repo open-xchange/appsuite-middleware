@@ -4,7 +4,7 @@
 Name:           open-xchange-secret-recovery
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-global >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-secret >= @OXVERSION@
+BuildRequires:  ant open-xchange-global >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-secret >= @OXVERSION@  open-xchange-crypto >= @OXVERSION@
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -46,7 +46,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        Provides cryptography services to bundles in the OX server
-Requires:       open-xchange-global >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-secret >= @OXVERSION@
+Requires:       open-xchange-global >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-secret >= @OXVERSION@  open-xchange-crypto >= @OXVERSION@
 #
 
 %description

@@ -49,62 +49,24 @@
 
 package com.openexchange.ajax.customizer.folder;
 
+import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link SimFolderField}
+ * {@link AdditionalFieldsUtils}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public class SimFolderField implements AdditionalFolderField {
-
-    private int columnId;
-    private String columnName;
-    private Object value;
-    private Object jsonValue;
-
-    @Override
-    public int getColumnID() {
-        return columnId;
+public class AdditionalFieldsUtils {
+    public static List<Object> bulk(AdditionalFolderField field, List<FolderObject> folder, ServerSession session) {
+        List<Object> retval = new ArrayList<Object>(folder.size());
+        for(FolderObject f : folder) {
+            retval.add(field.getValue(f, session));
+        }
+        
+        return retval;
     }
-
-    @Override
-    public String getColumnName() {
-        return columnName;
-    }
-
-    @Override
-    public Object getValue(FolderObject folder, ServerSession session) {
-        return value;
-    }
-
-    @Override
-    public Object renderJSON(Object value) {
-        return jsonValue;
-    }
-
-    public void setColumnId(int columnId) {
-        this.columnId = columnId;
-    }
-
-    public void setColumnName(String columnName) {
-        this.columnName = columnName;
-    }
-
-    public void setValue(Object value) {
-        this.value = value;
-    }
-
-    public void setJsonValue(Object jsonValue) {
-        this.jsonValue = jsonValue;
-    }
-
-    public List<Object> getValues(List<FolderObject> folder, ServerSession session) {
-        return AdditionalFieldsUtils.bulk(this, folder, session);
-    }
-
 }

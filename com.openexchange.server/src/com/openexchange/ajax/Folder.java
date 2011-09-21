@@ -82,6 +82,7 @@ import org.json.JSONObject;
 import org.json.JSONWriter;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderFieldList;
+import com.openexchange.ajax.customizer.folder.BulkAdditionalFolderFieldsList;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.helper.ParamContainer;
@@ -426,7 +427,8 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
             if (ignore != null && "mailfolder".equalsIgnoreCase(ignore)) {
                 ignoreMailfolder = true;
             }
-            final FolderWriter folderWriter = new FolderWriter(jsonWriter, session, ctx, timeZoneId, FIELDS);
+            BulkAdditionalFolderFieldsList fieldList = new BulkAdditionalFolderFieldsList(FIELDS);
+            final FolderWriter folderWriter = new FolderWriter(jsonWriter, session, ctx, timeZoneId, fieldList);
             int parentId = -1;
             if ((parentId = getUnsignedInteger(parentIdentifier)) >= 0) {
                 // TODO: DELEGATE TO getRootFolder() if parentId is "0"
@@ -442,6 +444,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                      */
                     final Queue<FolderObject> q =
                         ((FolderObjectIterator) foldersqlinterface.getNonTreeVisiblePublicTaskFolders()).asQueue();
+                    fieldList.warmUp(q, session);
                     final int size = q.size();
                     final Iterator<FolderObject> iter = q.iterator();
                     for (int i = 0; i < size; i++) {
@@ -463,6 +466,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                      */
                     final Queue<FolderObject> q =
                         ((FolderObjectIterator) foldersqlinterface.getNonTreeVisiblePublicCalendarFolders()).asQueue();
+                    fieldList.warmUp(q, session);
                     final int size = q.size();
                     final Iterator<FolderObject> iter = q.iterator();
                     for (int i = 0; i < size; i++) {
@@ -484,6 +488,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                      */
                     final Queue<FolderObject> q =
                         ((FolderObjectIterator) foldersqlinterface.getNonTreeVisiblePublicContactFolders()).asQueue();
+                    fieldList.warmUp(q, session);
                     final int size = q.size();
                     final Iterator<FolderObject> iter = q.iterator();
                     for (int i = 0; i < size; i++) {
@@ -505,6 +510,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                      */
                     final Queue<FolderObject> q =
                         ((FolderObjectIterator) foldersqlinterface.getNonTreeVisiblePublicInfostoreFolders()).asQueue();
+                    fieldList.warmUp(q, session);
                     final int size = q.size();
                     final Iterator<FolderObject> iter = q.iterator();
                     for (int i = 0; i < size; i++) {
@@ -554,6 +560,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                             }
                         }
                     }
+                    fieldList.warmUp(l, session);
                     final Iterator<FolderObject> iter = l.iterator();
                     for (int i = 0; i < size; i++) {
                         final FolderObject fo = iter.next();
@@ -790,6 +797,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                         }
                     }
                     final Queue<FolderObject> q = ((FolderObjectIterator) foldersqlinterface.getSubfolders(parentId, null)).asQueue();
+                    fieldList.warmUp(q, session);
                     final int size = q.size();
                     final Iterator<FolderObject> iter = q.iterator();
                     for (int i = 0; i < size; i++) {
@@ -920,6 +928,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 }
                 final FolderFieldWriter[] writers = folderWriter.getFolderFieldWriter(columns);
                 final Queue<FolderObject> q = ((FolderObjectIterator) foldersqlinterface.getSharedFoldersFrom(sharedOwner, null)).asQueue();
+                fieldList.warmUp(q, session);
                 final int size = q.size();
                 final Iterator<FolderObject> iter = q.iterator();
                 for (int i = 0; i < size; i++) {
@@ -1358,7 +1367,8 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
             final Context ctx = session.getContext();
             final int[] columns = paramContainer.checkIntArrayParam(PARAMETER_COLUMNS);
             final String timeZoneId = paramContainer.getStringParam(PARAMETER_TIMEZONE);
-            final FolderWriter folderWriter = new FolderWriter(jsonWriter, session, ctx, timeZoneId, FIELDS);
+            BulkAdditionalFolderFieldsList fieldList = new BulkAdditionalFolderFieldsList(FIELDS);
+            final FolderWriter folderWriter = new FolderWriter(jsonWriter, session, ctx, timeZoneId, fieldList);
             final Date timestamp = paramContainer.checkDateParam(PARAMETER_TIMESTAMP);
             final boolean includeMailFolders = STRING_1.equals(paramContainer.getStringParam(PARAMETER_MAIL));
             final boolean ignoreDeleted = STRING_DELETED.equalsIgnoreCase(paramContainer.getStringParam(PARAMETER_IGNORE));
@@ -1370,6 +1380,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
              * Get all updated OX folders
              */
             Queue<FolderObject> q = ((FolderObjectIterator) foldersqlinterface.getAllModifiedFolders(timestamp)).asQueue();
+            fieldList.warmUp(q, session);
             final OXFolderAccess access = new OXFolderAccess(ctx);
             final Queue<FolderObject> updatedQueue = new LinkedList<FolderObject>();
             final Queue<FolderObject> deletedQueue = ignoreDeleted ? null : new LinkedList<FolderObject>();
