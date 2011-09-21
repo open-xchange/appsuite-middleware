@@ -1311,6 +1311,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 newObj.getParticipants(),
                 participantSet,
                 resourceSet,
+                isUpdate,
                 receivers,
                 session,
                 all,
@@ -1570,12 +1571,13 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         }
     }
 
-    private void sortExternalParticipantsAndResources(final Participant[] oldParticipants, final Participant[] newParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession session, final Map<String, EmailableParticipant> all, final String organizer) {
+    private void sortExternalParticipantsAndResources(final Participant[] oldParticipants, final Participant[] newParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, boolean isUpdate, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession session, final Map<String, EmailableParticipant> all, final String organizer) {
         sortNewExternalParticipantsAndResources(newParticipants, participantSet, resourceSet, receivers, session, all, oldParticipants);
         sortOldExternalParticipantsAndResources(
             oldParticipants,
             participantSet,
             resourceSet,
+            isUpdate,
             receivers,
             all,
             session,
@@ -1583,7 +1585,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             organizer);
     }
 
-    private void sortOldExternalParticipantsAndResources(final Participant[] oldParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final Map<String, EmailableParticipant> all, final ServerSession session, final Participant[] newParticipants, final String organizer) {
+    private void sortOldExternalParticipantsAndResources(final Participant[] oldParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, boolean isUpdate, final Map<Locale, List<EmailableParticipant>> receivers, final Map<String, EmailableParticipant> all, final ServerSession session, final Participant[] newParticipants, final String organizer) {
         if (oldParticipants == null) {
             return;
         }
@@ -1621,7 +1623,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             }
         }
 
-        if (organizer != null) {
+        if (isUpdate && organizer != null) {
             addSingleParticipant(
                 getExternalParticipant(new ExternalUserParticipant(organizer), session),
                 participantSet,

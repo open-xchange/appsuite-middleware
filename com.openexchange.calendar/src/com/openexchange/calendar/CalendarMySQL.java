@@ -1546,17 +1546,18 @@ public class CalendarMySQL implements CalendarSqlImp {
         writecon.commit();
         cdao.setParentFolderID(cdao.getActionFolder());
         if (notify && userIsOrganizer(so.getUserId(), cdao)) {
-			collection.triggerEvent(so, CalendarOperation.INSERT, cdao);
-		} else if (notify && !userIsOrganizer(so.getUserId(), cdao)) {
-		    int confirmOfUser = 0;
-		    for (final UserParticipant user : cdao.getUsers()) {
-		        if (user.getIdentifier() == so.getUserId()) {
+            collection.triggerEvent(so, CalendarOperation.INSERT, cdao);
+        } else if (notify && !userIsOrganizer(so.getUserId(), cdao)) {
+            int confirmOfUser = 0;
+            for (final UserParticipant user : cdao.getUsers()) {
+                if (user.getIdentifier() == so.getUserId()) {
                     confirmOfUser = user.getConfirm();
                 }
-		    }
-		    collection.triggerEvent(so, getConfirmAction(confirmOfUser), cdao);
-		}
-		return null;
+            }
+            int confirm = getConfirmAction(confirmOfUser);
+            collection.triggerEvent(so, confirm == CalendarObject.NONE ? CalendarOperation.INSERT : confirm, cdao);
+        }
+        return null;
     }
 
     private boolean userIsOrganizer(final int user, final CalendarDataObject cal) throws OXException {
