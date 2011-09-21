@@ -40,3 +40,5 @@ com.openexchange.calendar/jars
 com.openexchange.preview/jars
 com.openexchange.ajp/jars
 com.openexchange.server/build
+com.openexchange.server/build/META-INF/**/*
+com.openexchange.server/build/META-INF/*
