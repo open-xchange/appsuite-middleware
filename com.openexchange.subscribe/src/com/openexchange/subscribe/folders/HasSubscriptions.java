@@ -49,16 +49,19 @@
 
 package com.openexchange.subscribe.folders;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.secret.SecretService;
-import com.openexchange.subscribe.SubscriptionSource;
-import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
-import com.openexchange.subscribe.osgi.SubscriptionServiceRegistry;
+import com.openexchange.subscribe.SubscriptionStorage;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -70,11 +73,23 @@ public class HasSubscriptions implements AdditionalFolderField {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(HasSubscriptions.class));
 
-    private final SubscriptionSourceDiscoveryService discovery;
+    private static final Set<String> ID_BLACKLIST = new HashSet<String>(){{
+        add(String.valueOf(FolderObject.SYSTEM_GLOBAL_FOLDER_ID));
+        add(String.valueOf(FolderObject.SYSTEM_LDAP_FOLDER_ID));
+        add(String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
+        add(String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID));
+        add(String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID));
+        add(String.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID));
+        add(String.valueOf(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID));
+        add(String.valueOf(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID));
+        add(String.valueOf(FolderObject.SYSTEM_ROOT_FOLDER_ID));
+    }};
 
-    public HasSubscriptions(final SubscriptionSourceDiscoveryService discovery) {
+    private final SubscriptionStorage storage;
+
+    public HasSubscriptions(final SubscriptionStorage storage) {
         super();
-        this.discovery = discovery;
+        this.storage = storage;
     }
 
     @Override
@@ -89,37 +104,61 @@ public class HasSubscriptions implements AdditionalFolderField {
 
     @Override
     public Object getValue(final FolderObject folder, final ServerSession session) {
-        if (!session.getUserConfiguration().isSubscription()) {
-            return Boolean.FALSE;
-        }
-        try {
-            final List<SubscriptionSource> sources = discovery.filter(session.getUserId(), session.getContextId()).getSources(folder.getModule());
-            final SecretService secretService = SubscriptionServiceRegistry.getInstance().getService(SecretService.class);
+        return getValues(Arrays.asList(folder), session).get(0);
+     }
 
-            for (final SubscriptionSource subscriptionSource : sources) {
-                String fn = folder.getFullName();
-                if(fn == null) {
-                    fn = String.valueOf(folder.getObjectID());
-                }
-                final boolean hasSubscriptions =
-                    !subscriptionSource.getSubscribeService().loadSubscriptions(
-                        session.getContext(),
-                        null == fn ? String.valueOf(folder.getObjectID()) : fn,
-                        secretService.getSecret(session)).isEmpty();
-                if (hasSubscriptions) {
-                    return Boolean.TRUE;
-                }
-            }
-        } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
-        }
+     @Override
+    public List<Object> getValues(final List<FolderObject> folder, final ServerSession session) {
+         if (!session.getUserConfiguration().isSubscription()) {
+             return allFalse(folder.size());
+         }
+         final List<String> folderIdsToQuery = new ArrayList<String>(folder.size());
+         final List<String> folderIds= new ArrayList<String>(folder.size());
+         
+         final Map<String, Boolean> hasSubscriptions = new HashMap<String, Boolean>();
+         for (final FolderObject f : folder) {
+             String fn = f.getFullName();
+             if (fn == null) {
+                 fn = String.valueOf(f.getObjectID());
+             }
+             folderIds.add(fn);
+             if (f.getModule() != FolderObject.MAIL && ! ID_BLACKLIST.contains(fn)) {
+                 folderIdsToQuery.add(fn);
+             } else {
+                 hasSubscriptions.put(fn, Boolean.FALSE);
+             }
+         }
+         if (folderIdsToQuery.isEmpty()) {
+             return allFalse(folder.size());
+         }
+         try {
+             hasSubscriptions.putAll(storage.hasSubscriptions(session.getContext(), folderIdsToQuery));
+             final List<Object> retval = new ArrayList<Object>(folder.size());
+             for(final String fn : folderIds) {
+                 if (hasSubscriptions.get(fn).booleanValue()) {
+                     retval.add(Boolean.TRUE);
+                 } else {
+                     retval.add(Boolean.FALSE);
+                 }
+             }
+             return retval;
+         } catch (final OXException e) {
+             LOG.error(e.getMessage(), e);
+         }
+         return allFalse(folder.size());
+     }
 
-        return Boolean.FALSE;
-    }
+     private List<Object> allFalse(final int size) {
+         final List<Object> retval = new ArrayList<Object>(size);
+         for(int i = 0; i < size; i++) {
+             retval.add(Boolean.FALSE);
+         }
+         return retval;
+     }
 
-    @Override
+     @Override
     public Object renderJSON(final Object value) {
-        return value;
-    }
+         return value;
+     }
 
 }
