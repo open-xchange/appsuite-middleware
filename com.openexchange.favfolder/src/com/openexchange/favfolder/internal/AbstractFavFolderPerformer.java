@@ -49,6 +49,10 @@
 
 package com.openexchange.favfolder.internal;
 
+import gnu.trove.procedure.TIntObjectErrorAwareAbstractProcedure;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -78,6 +82,27 @@ public class AbstractFavFolderPerformer {
         } catch (final IllegalStateException e) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(clazz.getName());
         }
+    }
+
+    protected static final class TIntObjectProcedureImpl extends TIntObjectErrorAwareAbstractProcedure<Set<String>, SQLException> {
+
+        private final PreparedStatement ps;
+
+        protected TIntObjectProcedureImpl(final PreparedStatement ps) {
+            super();
+            this.ps = ps;
+        }
+
+        @Override
+        protected boolean next(final int sortNum, final Set<String> set) throws SQLException {
+            ps.setInt(1, sortNum);
+            for (final String folderId : set) {
+                ps.setString(5, folderId);
+                ps.addBatch();
+            }
+            return true;
+        }
+
     }
 
 }

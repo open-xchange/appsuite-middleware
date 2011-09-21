@@ -49,8 +49,17 @@
 
 package com.openexchange.favfolder.internal;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.server.ServiceLookup;
@@ -87,6 +96,66 @@ public final class SubscribeFavFolderPerformer extends AbstractFavFolderPerforme
         final String parent = null == targetParentId ? FolderStorage.ROOT_ID : targetParentId;
         for (final String folderId : folderIds) {
             folderService.subscribeFolder(sourceTreeId2, folderId, targetTreeId2, parent, session);
+        }
+        appendSortNums(targetTreeId, folderIds, session);
+    }
+
+    private void appendSortNums(final int tree, final Collection<String> folderIds, final ServerSession session) throws OXException {
+        final DatabaseService databaseService = getService(DatabaseService.class);
+        final int contextId = session.getContextId();
+        final int userId = session.getUserId();
+        final Connection con = databaseService.getWritable(contextId);
+        final Set<String> toConsider = new HashSet<String>();
+        try {
+            int maxSortNum = 0;
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+            try {
+                stmt = con.prepareStatement("SELECT folder, sortNum FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND parentId = ?");
+                int pos = 1;
+                stmt.setInt(pos++, contextId);
+                stmt.setInt(pos++, tree);
+                stmt.setInt(pos++, userId);
+                stmt.setString(pos, FolderStorage.ROOT_ID);
+                rs = stmt.executeQuery();
+                int sn;
+                while (rs.next()) {
+                    toConsider.add(rs.getString(1));
+                    sn = rs.getInt(2);
+                    if (!rs.wasNull()) {
+                        maxSortNum = maxSortNum < sn ? sn : maxSortNum;
+                    }
+                }
+            } catch (final SQLException e) {
+                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                Databases.closeSQLStuff(rs, stmt);
+            }
+            stmt = null;
+            rs = null;
+            if (maxSortNum < 0) {
+                maxSortNum = 0;
+            }
+            try {
+                stmt = con.prepareStatement("UPDATE virtualTree SET sortNum = ? WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?");
+                stmt.setInt(2, contextId);
+                stmt.setInt(3, tree);
+                stmt.setInt(4, userId);
+                for (final String folderId : folderIds) {
+                    if (toConsider.contains(folderId)) {
+                        stmt.setInt(1, ++maxSortNum);
+                        stmt.setString(5, folderId);
+                        stmt.addBatch();
+                    }
+                }
+                stmt.executeBatch();
+            } catch (final SQLException e) {
+                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                Databases.closeSQLStuff(rs, stmt);
+            }
+        } finally {
+            databaseService.backWritable(contextId, con);
         }
     }
 

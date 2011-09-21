@@ -47,42 +47,53 @@
  *
  */
 
-package com.openexchange.favfolder.json;
+package com.openexchange.favfolder.json.actions;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.favfolder.internal.ReorderFavFolderPerformer;
+import com.openexchange.favfolder.internal.UnsubscribeFavFolderPerformer;
+import com.openexchange.favfolder.json.FavFolderAJAXRequest;
 import com.openexchange.server.ServiceLookup;
 
+
 /**
- * {@link FavFolderActionFactory}
+ * {@link ReorderAction}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class FavFolderActionFactory implements AJAXActionServiceFactory {
+public final class ReorderAction extends AbstractFavFolderAction {
 
-    private final Map<String, AJAXActionService> actions;
+    private final ReorderFavFolderPerformer reorder;
 
     /**
-     * Initializes a new {@link FavFolderActionFactory}.
-     *
+     * Initializes a new {@link ReorderAction}.
+     * 
      * @param services The service look-up
      */
-    public FavFolderActionFactory(final ServiceLookup services) {
-        super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(5);
-        actions.put("new", new com.openexchange.favfolder.json.actions.NewAction(services));
-        actions.put("delete", new com.openexchange.favfolder.json.actions.DeleteAction(services));
-        actions.put("subscribe", new com.openexchange.favfolder.json.actions.SubscribeAction(services));
-        actions.put("unsubscribe", new com.openexchange.favfolder.json.actions.UnsubscribeAction(services));
-        actions.put("reorder", new com.openexchange.favfolder.json.actions.ReorderAction(services));
+    public ReorderAction(final ServiceLookup services) {
+        super(services);
+        reorder = new ReorderFavFolderPerformer(services);
     }
 
     @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return actions.get(action);
+    protected AJAXRequestResult perform(final FavFolderAJAXRequest request) throws OXException, JSONException {
+        final JSONArray ids = request.getData();
+        final int treeId = request.checkInt("treeId");
+        final int length = ids.length();
+        final List<String> folderIds = new ArrayList<String>(length);
+        for (int i = 0; i < length; i++) {
+            folderIds.add(ids.getString(i));
+        }
+        /*
+         * Perform subscribe
+         */
+        reorder.reorderFolders(treeId, folderIds, request.getSession());
+        return getJSONNullResult();
     }
 
 }
