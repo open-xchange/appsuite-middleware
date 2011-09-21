@@ -57,23 +57,26 @@ import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link FacFolderActionFactory}
+ * {@link FavFolderActionFactory}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class FacFolderActionFactory implements AJAXActionServiceFactory {
+public class FavFolderActionFactory implements AJAXActionServiceFactory {
 
     private final Map<String, AJAXActionService> actions;
 
     /**
-     * Initializes a new {@link FacFolderActionFactory}.
+     * Initializes a new {@link FavFolderActionFactory}.
      *
      * @param services The service look-up
      */
-    public FacFolderActionFactory(final ServiceLookup services) {
+    public FavFolderActionFactory(final ServiceLookup services) {
         super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(5);
-        actions.put("get", null);
+        actions = new ConcurrentHashMap<String, AJAXActionService>(4);
+        actions.put("new", new com.openexchange.favfolder.json.actions.NewAction(services));
+        actions.put("delete", new com.openexchange.favfolder.json.actions.DeleteAction(services));
+        actions.put("subscribe", new com.openexchange.favfolder.json.actions.SubscribeAction(services));
+        actions.put("unsubscribe", new com.openexchange.favfolder.json.actions.UnsubscribeAction(services));
     }
 
     @Override
