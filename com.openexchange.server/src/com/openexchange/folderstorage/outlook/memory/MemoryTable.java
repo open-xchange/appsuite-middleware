@@ -283,7 +283,7 @@ public final class MemoryTable {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT t.tree, t.folderId, t.parentId, t.name, t.lastModified, t.modifiedBy, s.subscribed FROM virtualTree AS t LEFT JOIN virtualSubscription AS s ON t.cid = s.cid AND t.tree = s.tree AND t.user = s.user AND t.folderId = s.folderId WHERE t.cid = ? AND t.user = ? ORDER BY t.tree");
+            stmt = con.prepareStatement("SELECT t.tree, t.folderId, t.parentId, t.name, t.lastModified, t.modifiedBy, s.subscribed, t.sortNum FROM virtualTree AS t LEFT JOIN virtualSubscription AS s ON t.cid = s.cid AND t.tree = s.tree AND t.user = s.user AND t.folderId = s.folderId WHERE t.cid = ? AND t.user = ? ORDER BY t.tree");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             rs = stmt.executeQuery();
@@ -334,6 +334,12 @@ public final class MemoryTable {
                     final int subscribed = rs.getInt(7);
                     if (!rs.wasNull()) {
                         memoryFolder.setSubscribed(Boolean.valueOf(subscribed > 0));
+                    }
+                }
+                {
+                    final int sortNum = rs.getInt(8);
+                    if (!rs.wasNull()) {
+                        memoryFolder.setSortNum(sortNum);
                     }
                 }
                 // Add permissions in a separate query
@@ -387,7 +393,7 @@ public final class MemoryTable {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT t.folderId, t.parentId, t.name, t.lastModified, t.modifiedBy, s.subscribed FROM virtualTree AS t LEFT JOIN virtualSubscription AS s ON t.cid = s.cid AND t.tree = s.tree AND t.user = s.user AND t.folderId = s.folderId WHERE t.cid = ? AND t.user = ? AND t.tree = ?");
+            stmt = con.prepareStatement("SELECT t.folderId, t.parentId, t.name, t.lastModified, t.modifiedBy, s.subscribed, t.sortNum FROM virtualTree AS t LEFT JOIN virtualSubscription AS s ON t.cid = s.cid AND t.tree = s.tree AND t.user = s.user AND t.folderId = s.folderId WHERE t.cid = ? AND t.user = ? AND t.tree = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             stmt.setInt(3, treeId);
@@ -424,6 +430,12 @@ public final class MemoryTable {
                     final int subscribed = rs.getInt(6);
                     if (!rs.wasNull()) {
                         memoryFolder.setSubscribed(Boolean.valueOf(subscribed > 0));
+                    }
+                }
+                {
+                    final int sortNum = rs.getInt(7);
+                    if (!rs.wasNull()) {
+                        memoryFolder.setSortNum(sortNum);
                     }
                 }
                 // Add permissions in a separate query
@@ -483,22 +495,21 @@ public final class MemoryTable {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT t.parentId, t.name, t.lastModified, t.modifiedBy, s.subscribed FROM virtualTree AS t LEFT JOIN virtualSubscription AS s ON t.cid = s.cid AND t.tree = s.tree AND t.user = s.user AND t.folderId = s.folderId WHERE t.cid = ? AND t.user = ? AND t.tree = ? AND t.folderId = ?");
+            stmt = con.prepareStatement("SELECT t.parentId, t.name, t.lastModified, t.modifiedBy, s.subscribed, t.sortNum FROM virtualTree AS t LEFT JOIN virtualSubscription AS s ON t.cid = s.cid AND t.tree = s.tree AND t.user = s.user AND t.folderId = s.folderId WHERE t.cid = ? AND t.user = ? AND t.tree = ? AND t.folderId = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             stmt.setInt(3, treeId);
             stmt.setString(4, folderId);
             rs = stmt.executeQuery();
-            ;
             if (!rs.next()) {
                 throw FolderExceptionErrorMessage.NOT_FOUND.create(folderId, Integer.valueOf(treeId));
             }
             final MemoryTree memoryTree = treeMap.get(treeId);
             final MemoryFolderImpl memoryFolder = new MemoryFolderImpl();
-            memoryFolder.setId(rs.getString(1));
+            memoryFolder.setId(folderId);
             // Set optional modified-by
             {
-                final int modifiedBy = rs.getInt(5);
+                final int modifiedBy = rs.getInt(4);
                 if (rs.wasNull()) {
                     memoryFolder.setModifiedBy(-1);
                 } else {
@@ -507,19 +518,25 @@ public final class MemoryTable {
             }
             // Set optional last-modified time stamp
             {
-                final long date = rs.getLong(4);
+                final long date = rs.getLong(3);
                 if (rs.wasNull()) {
                     memoryFolder.setLastModified(null);
                 } else {
                     memoryFolder.setLastModified(new Date(date));
                 }
             }
-            memoryFolder.setName(rs.getString(3));
-            memoryFolder.setParentId(rs.getString(2));
+            memoryFolder.setName(rs.getString(2));
+            memoryFolder.setParentId(rs.getString(1));
             {
-                final int subscribed = rs.getInt(6);
+                final int subscribed = rs.getInt(5);
                 if (!rs.wasNull()) {
                     memoryFolder.setSubscribed(Boolean.valueOf(subscribed > 0));
+                }
+            }
+            {
+                final int sortNum = rs.getInt(6);
+                if (!rs.wasNull()) {
+                    memoryFolder.setSortNum(sortNum);
                 }
             }
             // Add permissions in a separate query
