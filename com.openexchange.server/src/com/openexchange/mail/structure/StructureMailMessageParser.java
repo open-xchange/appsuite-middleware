@@ -407,7 +407,12 @@ public final class StructureMailMessageParser {
             if (count == -1) {
                 throw MailExceptionCode.INVALID_MULTIPART_CONTENT.create();
             }
-            if (isMultipartSigned(lcct)) {
+            final boolean rootLevelMultipart = null == prefix && !multipartDetected;
+            final String mpId = rootLevelMultipart ? "" : getSequenceId(prefix, partCount);
+            if (!mailPart.containsSequenceId()) {
+                mailPart.setSequenceId(mpId);
+            }
+            if (rootLevelMultipart && isMultipartSigned(lcct)) {
                 /*
                  * Determine the part which is considered to be the message' text according to
                  */
@@ -442,10 +447,6 @@ public final class StructureMailMessageParser {
                     return;
                 }
             } else {
-                final String mpId = null == prefix && !multipartDetected ? "" : getSequenceId(prefix, partCount);
-                if (!mailPart.containsSequenceId()) {
-                    mailPart.setSequenceId(mpId);
-                }
                 if (!handler.handleMultipartStart(mailPart.getContentType(), count, mpId)) {
                     stop = true;
                     return;

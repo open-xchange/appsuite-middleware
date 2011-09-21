@@ -52,30 +52,19 @@ package com.openexchange.favfolder.osgi;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.favfolder.json.FavFolderActionFactory;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.UserService;
 
 /**
  * {@link FavFolderActivator}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class FavFolderActivator extends AJAXModuleActivator {
 
-    private static volatile ServiceLookup serviceLookup;
-
-    /**
-     * Gets the service look-up
-     *
-     * @return The service look-up
-     */
-    public static ServiceLookup getServiceLookup() {
-        return serviceLookup;
-    }
-    
     /**
      * Initializes a new {@link FavFolderActivator}.
      */
@@ -90,22 +79,15 @@ public class FavFolderActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        // Track DatabaseService
+        // Track services
         trackService(DatabaseService.class);
         trackService(FolderService.class);
         trackService(IDGeneratorService.class);
         trackService(UserService.class);
         trackService(ContextService.class);
         openTrackers();
-        // Register module
-        
-        serviceLookup = new ExceptionOnAbsenceServiceLookup(this);
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        serviceLookup = null;
-        super.stopBundle();
+        // Register factory/module
+        registerModule(new FavFolderActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "favfolder");
     }
 
 }
