@@ -62,7 +62,7 @@ import com.openexchange.exception.OXExceptionFactory;
  */
 public enum IndexExceptionCodes implements OXExceptionCode {
     
-    INDEX_NOT_FOUND("Could not find search index for user %1$s and module %1$s in context %1$s.", Category.CATEGORY_CONFIGURATION, 1);
+    INDEX_NOT_FOUND("Could not find search index for user %1$s and module %2$s in context %3$s.", Category.CATEGORY_CONFIGURATION, 1);
     
     
     private String message;
