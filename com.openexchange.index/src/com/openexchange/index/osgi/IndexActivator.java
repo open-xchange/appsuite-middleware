@@ -1,24 +1,26 @@
 package com.openexchange.index.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.index.ConfigIndexService;
+import com.openexchange.index.ConfigIndexServiceImpl;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-public class IndexActivator implements BundleActivator {
+public class IndexActivator extends HousekeepingActivator {
+    
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(IndexActivator.class));
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
-	 */
-	public void start(BundleContext context) throws Exception {
-		System.out.println("Hello World!!");
-	}
-	
-	/*
-	 * (non-Javadoc)
-	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-	 */
-	public void stop(BundleContext context) throws Exception {
-		System.out.println("Goodbye World!!");
-	}
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class[] { DatabaseService.class };
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        LOG.info("Starting Bundle com.openexchange.index.osgi.");       
+        registerService(ConfigIndexService.class, new ConfigIndexServiceImpl(getService(DatabaseService.class)));
+    }
+
 
 }
