@@ -52,7 +52,7 @@ package com.openexchange.index;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link ConfigIndexService}
+ * {@link ConfigIndexService} - The configuration interface for index module.
  * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>

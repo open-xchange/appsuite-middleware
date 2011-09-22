@@ -51,12 +51,18 @@ package com.openexchange.index;
 
 
 /**
- * {@link IndexUrl}
+ * {@link IndexUrl} - The URL to an index host.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface IndexUrl {
     
+    /**
+     * Gets the string representation of the URL
+     * 
+     * @return The URL's string representation
+     */
     String getUrl();
 
 }
