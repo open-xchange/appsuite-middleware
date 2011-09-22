@@ -61,6 +61,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.AddSessionParameter;
+import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondService;
 
 /**
@@ -164,4 +165,16 @@ public class SessiondServiceImpl implements SessiondService {
     public int getNumberOfActiveSessions() {
         return SessionHandler.getNumberOfActiveSessions();
     }
+    
+    
+    public Session getAnyActiveSessionForUser(int userId, int contextId) {
+        return SessionHandler.getAnyActiveSessionForUser(userId, contextId).getSession();
+    }
+    
+    public Session findFirstMatchingSessionForUser(int userId, int contextId, SessionMatcher matcher) {
+        return SessionHandler.findFirstSessionForUser(userId, contextId, matcher);
+    }
+    
+
+
 }

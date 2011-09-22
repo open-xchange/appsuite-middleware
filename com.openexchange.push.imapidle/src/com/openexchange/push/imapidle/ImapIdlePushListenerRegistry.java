@@ -61,6 +61,7 @@ import com.openexchange.push.PushListener;
 import com.openexchange.push.PushUtility;
 import com.openexchange.push.imapidle.services.ImapIdleServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.Collections;
 
@@ -182,14 +183,13 @@ public final class ImapIdlePushListenerRegistry {
         final SessiondService sessiondService = ImapIdleServiceRegistry.getServiceRegistry().getService(SessiondService.class);
         SimpleKey key = SimpleKey.valueOf(contextId, userId);
         // Bind ImapIdlePushListener to another session because of password change issues.
-        Session session = null;
-        Iterator<Session> iter = sessiondService.getSessions(userId, contextId).iterator();
-        while (iter.hasNext() && session == null) {
-            final Session tmp = iter.next();
-            if (PushUtility.allowedClient(tmp.getClient())) {
-                session = tmp;
+        Session session = sessiondService.findFirstMatchingSessionForUser(userId, contextId, new SessionMatcher() {
+
+            public boolean accepts(Session tmp) {
+                return PushUtility.allowedClient(tmp.getClient());
             }
-        }
+            
+        });
         if (null != session) {
             removeListener(key);
             final ImapIdlePushListener pushListener = ImapIdlePushListener.newInstance(session);

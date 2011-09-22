@@ -66,6 +66,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionCounter;
 import com.openexchange.sessiond.SessionExceptionCodes;
+import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.cache.SessionCache;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -173,6 +174,14 @@ public final class SessionHandler {
      */
     public static SessionControl[] getUserSessions(final int userId, final int contextId) {
         return sessionData.getUserSessions(userId, contextId);
+    }
+    
+    public static SessionControl getAnyActiveSessionForUser(int userId, int contextId) {
+        return sessionData.getAnyActiveSessionForUser(userId, contextId);
+    }
+    
+    public static Session findFirstSessionForUser(int userId, int contextId, SessionMatcher matcher) {
+        return sessionData.findFirstSessionForUser(userId, contextId, matcher);
     }
 
     /**
@@ -511,4 +520,7 @@ public final class SessionHandler {
         }
         sessionData.removeTimerService();
     }
+
+
+
 }

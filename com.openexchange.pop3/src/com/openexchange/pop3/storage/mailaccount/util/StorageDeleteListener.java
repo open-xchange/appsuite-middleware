@@ -129,9 +129,8 @@ public final class StorageDeleteListener implements MailAccountDeleteListener {
              */
             final SessiondService sessiondService = POP3ServiceRegistry.getServiceRegistry().getService(SessiondService.class);
             if (null != sessiondService) {
-                final Collection<Session> sessions = sessiondService.getSessions(user, cid);
-                if (!sessions.isEmpty()) {
-                    final Session session = sessions.iterator().next();
+                final Session session = sessiondService.getAnyActiveSessionForUser(user, cid);
+                if (session != null) {
                     final POP3Access pop3Access = POP3Access.newInstance(session, id);
                     final POP3Storage pop3Storage = pop3Access.getPOP3Storage();
                     pop3Storage.drop();

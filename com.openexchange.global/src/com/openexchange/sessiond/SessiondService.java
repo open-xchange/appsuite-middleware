@@ -125,6 +125,11 @@ public interface SessiondService {
      * @return The <b>local-only</b> sessions associated with specified user in given context
      */
     public Collection<Session> getSessions(int userId, int contextId);
+    
+    /**
+     * Finds the first session of the specified user that matches the give criterion.
+     */
+    public Session findFirstMatchingSessionForUser(int userId, int contextId, SessionMatcher matcher);
 
     /**
      * Get the session object related to the given session identifier.
@@ -157,5 +162,10 @@ public interface SessiondService {
      * @return The number of active sessions
      */
     public int getNumberOfActiveSessions();
+    
+    /**
+     * Gets the first session that matches the given userId and contextId.
+     */
+    public Session getAnyActiveSessionForUser(int userId, int contextId);
 
 }
