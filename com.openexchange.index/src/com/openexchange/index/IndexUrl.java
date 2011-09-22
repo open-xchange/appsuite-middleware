@@ -49,20 +49,38 @@
 
 package com.openexchange.index;
 
-
 /**
  * {@link IndexUrl} - The URL to an index host.
- *
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface IndexUrl {
-    
+
     /**
      * Gets the string representation of the URL
      * 
      * @return The URL's string representation
      */
     String getUrl();
+
+    /**
+     * Gets a hash code value for this index URL. This method is supported for the benefit of hashtables.
+     * 
+     * @return A hash code value for this object.
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    int hashCode();
+
+    /**
+     * Indicates whether some other object is "equal to" this one.
+     * 
+     * @param obj The reference object with which to compare.
+     * @return <code>true</code> if this object is the same as the obj argument; <code>false</code> otherwise.
+     * @see #hashCode()
+     */
+    @Override
+    boolean equals(Object obj);
 
 }
