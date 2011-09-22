@@ -50,58 +50,85 @@
 package com.openexchange.langdetect.internal;
 
 import it.unimi.dsi.fastutil.bytes.ByteArrayList;
-import it.unimi.dsi.fastutil.io.FastBufferedInputStream;
-import java.io.DataInputStream;
-import java.io.EOFException;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import net.olivo.lc4j.LanguageCategorization;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
+import com.openexchange.langdetect.LanguageDetectionExceptionCodes;
 import com.openexchange.langdetect.LanguageDetectionService;
 
 /**
- * {@link Lc4jLanguageDetectionService}
+ * {@link Lc4jLanguageDetectionService} - The {@link LanguageDetectionService language detection service} based on <b>lc4j</b>.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Lc4jLanguageDetectionService implements LanguageDetectionService {
 
+    /**
+     * The singleton instance.
+     */
+    private static final Lc4jLanguageDetectionService INSTANCE = new Lc4jLanguageDetectionService();
+
+    /**
+     * Gets the instance
+     * 
+     * @return The instance
+     */
+    public static Lc4jLanguageDetectionService getInstance() {
+        return INSTANCE;
+    }
+
     private static final int BUFFER_SIZE = 2048;
 
     private final LanguageCategorization defaultLanguageCategorization;
 
+    private final AtomicReference<String> languageModelsDir;
+
     /**
      * Initializes a new {@link Lc4jLanguageDetectionService}.
      */
-    public Lc4jLanguageDetectionService() {
+    private Lc4jLanguageDetectionService() {
         super();
+        languageModelsDir = new AtomicReference<String>();
         defaultLanguageCategorization = new LanguageCategorization();
         defaultLanguageCategorization.setMaxLanguages(10);
         defaultLanguageCategorization.setNumCharsToExamine(1000);
         defaultLanguageCategorization.setUseTopmostNgrams(400);
         defaultLanguageCategorization.setUnknownThreshold(1.01f);
-        defaultLanguageCategorization.setLanguageModelsDir("./models/");
+    }
+
+    /**
+     * Sets the directory path containing the language models.
+     * 
+     * @param languageModelsDir The directory path
+     */
+    public void setLanguageModelsDir(final String languageModelsDir) {
+        this.languageModelsDir.set(languageModelsDir);
+        defaultLanguageCategorization.setLanguageModelsDir(languageModelsDir);
+        // Initialize
+        defaultLanguageCategorization.findLanguage(new ByteArrayList("Hello world!".getBytes()));
     }
 
     @Override
     public List<String> findLanguages(final InputStream inputStream) throws OXException {
-        // read from stream
-        final ByteArrayList input = new ByteArrayList();
-        final DataInputStream dis = new DataInputStream(new FastBufferedInputStream(inputStream, BUFFER_SIZE));
+        // Read from stream
+        final ByteArrayOutputStream tmp = Streams.newByteArrayOutputStream(BUFFER_SIZE << 1);
         try {
-            while (true) {
-                input.add(dis.readByte());
+            final byte[] b = new byte[BUFFER_SIZE];
+            for (int read; (read = inputStream.read(b, 0, BUFFER_SIZE)) > 0;) {
+                tmp.write(b, 0, read);
             }
-        } catch (final EOFException e) {
-            // Reached EOF
+            // No flush for ByteArrayOutputStream
         } catch (final IOException e) {
-            // TODO:
+            throw LanguageDetectionExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
-            Streams.close(dis);
+            Streams.close(inputStream);
         }
-        return defaultLanguageCategorization.findLanguage(input);
+        return defaultLanguageCategorization.findLanguage(new ByteArrayList(tmp.toByteArray()));
     }
 
 }

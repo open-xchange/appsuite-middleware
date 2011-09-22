@@ -6,9 +6,14 @@ Bundle-Version: 0.3.0
 Bundle-Activator: com.openexchange.langdetect.osgi.LangDetectActivator
 Bundle-Vendor: Marco Olivio
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.exception,
+Import-Package: com.openexchange.config,
+ com.openexchange.exception,
+ com.openexchange.i18n,
  com.openexchange.java,
- org.osgi.framework
+ com.openexchange.log,
+ org.apache.commons.logging,
+ org.osgi.framework,
+ org.osgi.util.tracker
 Bundle-ClassPath: .,
  lib/colt.jar,
  lib/concurrent.jar,
