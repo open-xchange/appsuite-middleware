@@ -1,12 +1,14 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Olivio Lc4j
-Bundle-SymbolicName: net.olivo.lc4j
+Bundle-SymbolicName: com.openexchange.langdetect
 Bundle-Version: 0.3.0
-Bundle-Activator: net.olivo.lc4j.osgi.Lc4jActivator
+Bundle-Activator: com.openexchange.langdetect.osgi.LangDetectActivator
 Bundle-Vendor: Marco Olivio
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: org.osgi.framework
+Import-Package: com.openexchange.exception,
+ com.openexchange.java,
+ org.osgi.framework
 Bundle-ClassPath: .,
  lib/colt.jar,
  lib/concurrent.jar,
@@ -14,4 +16,4 @@ Bundle-ClassPath: .,
  lib/java-getopt-1.0.13.jar,
  lib/lc4j-0.3.jar,
  lib/mg4j-4.0.jar
-Export-Package: net.olivo.lc4j
+Export-Package: com.openexchange.langdetect
