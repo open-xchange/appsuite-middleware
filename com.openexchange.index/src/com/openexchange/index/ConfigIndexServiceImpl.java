@@ -124,6 +124,24 @@ public class ConfigIndexServiceImpl implements ConfigIndexService {
                 public String getUrl() {
                     return fullUrl;
                 }
+
+                @Override
+                public int getSoTimeout() {
+                    // TODO Auto-generated method stub
+                    return 0;
+                }
+
+                @Override
+                public int getConnectionTimeout() {
+                    // TODO Auto-generated method stub
+                    return 0;
+                }
+
+                @Override
+                public int getMaxConnectionsPerHost() {
+                    // TODO Auto-generated method stub
+                    return 0;
+                }
             };
             
             return indexUrl;
