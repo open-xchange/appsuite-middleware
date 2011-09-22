@@ -51,16 +51,34 @@ package com.openexchange.index;
 
 import com.openexchange.exception.OXException;
 
-
 /**
- * {@link ConfigIndexService}
- *
+ * {@link ConfigIndexService} - The configuration interface for index module.
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ConfigIndexService {
 
-    IndexUrl getReadOnlyURL(int cid, int uid, int module) throws OXException;
-    
-    IndexUrl getWriteURL(int cid, int uid, int module) throws OXException;
-    
+    /**
+     * Gets the appropriate read-only URL to index host for specified arguments.
+     * 
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @param module The module; see <code>com.openexchange.groupware.Types</code>
+     * @return The appropriate read-only URL to index host
+     * @throws OXException If index URL cannot be returned
+     */
+    IndexUrl getReadOnlyURL(int contextId, int userId, int module) throws OXException;
+
+    /**
+     * Gets the appropriate read-write URL to index host for specified arguments.
+     * 
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @param module The module; see <code>com.openexchange.groupware.Types</code>
+     * @return The appropriate read-write URL to index host
+     * @throws OXException If index URL cannot be returned
+     */
+    IndexUrl getWriteURL(int contextId, int userId, int module) throws OXException;
+
 }

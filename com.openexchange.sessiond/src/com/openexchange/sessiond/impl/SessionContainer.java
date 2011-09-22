@@ -152,6 +152,15 @@ final class SessionContainer {
         }
         return l.toArray(new SessionControl[sessionIds.size()]);
     }
+    
+    public SessionControl getAnySessionByUser(int userId, int contextId) {
+        final Map<String, Object> sessionIds = userSessions.get(new UserKey(userId, contextId));
+        for (final String sessionId : sessionIds.keySet()) {
+            return sessionIdMap.get(sessionId);
+        }
+        return null;
+    }
+
 
     /**
      * Wraps specified session by a newly created {@link SessionControl} object and puts it into this container
@@ -278,4 +287,5 @@ final class SessionContainer {
     Collection<SessionControl> getSessionControls() {
         return new ArrayList<SessionControl>(sessionIdMap.values());
     }
+
 }

@@ -158,4 +158,20 @@ public class AbstractSimSessiondService implements SessiondService{
         return null;
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.sessiond.SessiondService#getAnyActiveSessionForUser(int, int)
+     */
+    public Session getAnyActiveSessionForUser(int userId, int contextId) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.sessiond.SessiondService#findFirstSessionForUser(int, int, com.openexchange.sessiond.SessionMatcher)
+     */
+    public Session findFirstMatchingSessionForUser(int userId, int contextId, SessionMatcher matcher) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

@@ -528,12 +528,13 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      */
     public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getInstance(final int userId, final int contextId, final int accountId) throws OXException {
         final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-        if (null != sessiondService) {
-            final Collection<Session> sessions = sessiondService.getSessions(userId, contextId);
-            if (!sessions.isEmpty()) {
-                return getInstance(sessions.iterator().next(), accountId);
-            }
-        }
+		if (null != sessiondService) {
+			final Session session = sessiondService.getAnyActiveSessionForUser(
+					userId, contextId);
+			if (session != null) {
+				return getInstance(session, accountId);
+			}
+		}
         /*
          * No appropriate session found.
          */
