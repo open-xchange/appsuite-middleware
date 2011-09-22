@@ -1,3 +1,7 @@
+* 2011-09-22 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20269: Retry one-by-one retrieval of POP3 message, if batch failed
+
 * 2011-09-21 - thorben.betten@open-xchange.com
 
  - Fix for bug 20425: Support for nested multipart/signed parts

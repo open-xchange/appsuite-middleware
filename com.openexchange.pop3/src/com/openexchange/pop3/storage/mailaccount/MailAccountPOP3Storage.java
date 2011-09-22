@@ -708,22 +708,38 @@ public class MailAccountPOP3Storage implements POP3Storage {
         }
     };
 
-    private void doBatchAppendWithFallback(final POP3Folder inbox, final Message[] msgs, final TIntObjectMap<String> seqnum2uidl) throws MessagingException, OXException {
+    private void doBatchAppendWithFallback(final POP3Folder inbox, final Message[] msgs, final TIntObjectMap<String> seqnum2uidl) throws OXException {
         /*
          * Fetch ENVELOPE for new messages
          */
-        final long start = System.currentTimeMillis();
-        inbox.fetch(msgs, FETCH_PROFILE_ENVELOPE);
-        MailServletInterface.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+        try {
+            final long start = System.currentTimeMillis();
+            inbox.fetch(msgs, FETCH_PROFILE_ENVELOPE);
+            MailServletInterface.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+        } catch (final MessagingException e) {
+            // Try one-by-one loading
+            LOG.debug("Batch retrieval of POP3 messages failed. Retry with one-by-one loading.", e);
+            for (int i = 0; i < msgs.length; i++) {
+                final int msgno = msgs[i].getMessageNumber();
+                try {
+                    msgs[i] = inbox.getMessage(msgno);
+                } catch (final MessagingException inner) {
+                    LOG.warn("Retrieval of POP3 message " + msgno + " failed.", inner);
+                    msgs[i] = null;
+                }
+            }
+        }
         /*
          * Append them to storage
          */
         final List<MailMessage> toAppend = new ArrayList<MailMessage>(msgs.length);
         for (int i = 0; i < msgs.length; i++) {
             final Message message = msgs[i];
-            final MailMessage mm = MIMEMessageConverter.convertMessage((MimeMessage) message, false);
-            mm.setMailId(seqnum2uidl.get(message.getMessageNumber()));
-            toAppend.add(mm);
+            if (null != message) {
+                final MailMessage mm = MIMEMessageConverter.convertMessage((MimeMessage) message, false);
+                mm.setMailId(seqnum2uidl.get(message.getMessageNumber()));
+                toAppend.add(mm);
+            }
         }
         /*
          * First try batch append operation
