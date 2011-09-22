@@ -69,6 +69,7 @@ import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.smal.adapter.IndexAdapter;
 import com.openexchange.session.Session;
@@ -225,6 +226,9 @@ public final class SolrjAdapter implements IndexAdapter {
 
     private static SolrInputDocument createDocument(final String uuid, final MailMessage mail, final int accountId, final Session session, final long stamp, final Locale locale) {
         final SolrInputDocument inputDocument = new SolrInputDocument();
+        /*
+         * Un-analyzed fields
+         */
         {
             final SolrInputField field = new SolrInputField("timestamp");
             field.setValue(Long.valueOf(stamp), 1.0f);
@@ -260,8 +264,22 @@ public final class SolrjAdapter implements IndexAdapter {
             field.setValue(mail.getMailId(), 1.0f);
             inputDocument.put("id", field);
         }
-        /*
+        /*-
          * Address fields
+         * 
+         * "From"
+            "To"
+            "Cc"
+            "Bcc"
+            "Reply-To"
+            "Sender"
+            "Errors-To"
+            "Resent-Bcc"
+            "Resent-Cc"
+            "Resent-From"
+            "Resent-To"
+            "Resent-Sender"
+            "Disposition-Notification-To"
          */
         {
             SolrInputField field = new SolrInputField("from");
