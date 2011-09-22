@@ -141,7 +141,7 @@ public final class FacebookOAuthAccessRegistry {
      */
     public boolean removeSessionIfLast(final int contextId, final int userId) {
         final SessiondService sessiondService = FacebookMessagingServiceRegistry.getServiceRegistry().getService(SessiondService.class);
-        if (null == sessiondService || 0 == sessiondService.getUserSessions(userId, contextId)) {
+        if (null == sessiondService || null == sessiondService.getAnyActiveSessionForUser(userId, contextId)) {
             /*
              * No sessions left for user
              */

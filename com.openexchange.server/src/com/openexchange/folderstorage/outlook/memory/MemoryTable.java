@@ -145,7 +145,7 @@ public final class MemoryTable {
      */
     public static void dropMemoryTableFrom(final Session session) {
         final SessiondService service = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-        if (service.getUserSessions(session.getUserId(), session.getContextId()) <= 0) {
+        if (service.getAnyActiveSessionForUser(session.getUserId(), session.getContextId()) == null) {
             MAP.remove(keyFor(session));
         }
     }

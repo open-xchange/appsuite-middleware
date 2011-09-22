@@ -190,7 +190,7 @@ public final class IMAPActivator extends HousekeepingActivator {
                     private void handleSession(final Session session) {
                         try {
                             final SessiondService service = IMAPServiceRegistry.getService(SessiondService.class);
-                            if (null != service && service.getUserSessions(session.getUserId(), session.getContextId()) <= 0) {
+                            if (null != service && service.getAnyActiveSessionForUser(session.getUserId(), session.getContextId()) == null) {
                                 ListLsubCache.dropFor(session);
                             }
                         } catch (final Exception e) {

@@ -173,7 +173,7 @@ public final class IMAPNotifierRegistry implements IMAPNotifierRegistryService {
     @Override
     public void handleRemovedSession(final Session session) {
         final SessiondService service = IMAPServiceRegistry.getService(SessiondService.class);
-        if (null == service || service.getUserSessions(session.getUserId(), session.getContextId()) <= 0) {
+        if (null == service || service.getAnyActiveSessionForUser(session.getUserId(), session.getContextId()) == null) {
             removeTaskFor(session);
         }
     }

@@ -165,16 +165,15 @@ public class SessiondServiceImpl implements SessiondService {
     public int getNumberOfActiveSessions() {
         return SessionHandler.getNumberOfActiveSessions();
     }
-    
-    
-    public Session getAnyActiveSessionForUser(int userId, int contextId) {
+
+    @Override
+    public Session getAnyActiveSessionForUser(final int userId, final int contextId) {
         return SessionHandler.getAnyActiveSessionForUser(userId, contextId).getSession();
     }
     
-    public Session findFirstMatchingSessionForUser(int userId, int contextId, SessionMatcher matcher) {
+    @Override
+    public Session findFirstMatchingSessionForUser(final int userId, final int contextId, final SessionMatcher matcher) {
         return SessionHandler.findFirstSessionForUser(userId, contextId, matcher);
     }
-    
-
 
 }

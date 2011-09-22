@@ -273,7 +273,7 @@ public final class MailNotifyPushListenerRegistry {
      */
     public boolean removePushListener(final int contextId, final int userId) throws OXException {
         final SessiondService sessiondService = PushServiceRegistry.getServiceRegistry().getService(SessiondService.class);
-        if (null == sessiondService || 0 == sessiondService.getUserSessions(userId, contextId)) {
+        if (null == sessiondService || null == sessiondService.getAnyActiveSessionForUser(userId, contextId)) {
             return removeListener(getMboxIds(contextId, userId));
         }
         return false;

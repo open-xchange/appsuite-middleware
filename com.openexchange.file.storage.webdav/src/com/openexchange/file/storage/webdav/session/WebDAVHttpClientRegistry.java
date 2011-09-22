@@ -144,7 +144,7 @@ public final class WebDAVHttpClientRegistry {
      */
     public boolean removeClientIfLast(final int contextId, final int userId) {
         final SessiondService sessiondService = WebDAVFileStorageServiceRegistry.getServiceRegistry().getService(SessiondService.class);
-        if (null == sessiondService || 0 == sessiondService.getUserSessions(userId, contextId)) {
+        if (null == sessiondService || null == sessiondService.getAnyActiveSessionForUser(userId, contextId)) {
             final ConcurrentMap<String, HttpClient> inner = map.remove(SimpleKey.valueOf(contextId, userId));
             if (null == inner || inner.isEmpty()) {
                 return false;

@@ -162,7 +162,7 @@ public final class MailSessionEventHandler implements EventHandler {
              * Pooled events: Last session removed?
              */
             final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-            if (null != sessiondService && 0 == sessiondService.getUserSessions(userId, contextId)) {
+            if (null != sessiondService && null == sessiondService.getAnyActiveSessionForUser(userId, contextId)) {
                 final EventPool eventPool = EventPool.getInstance();
                 if (null != eventPool) {
                     eventPool.removeByUser(userId, contextId);

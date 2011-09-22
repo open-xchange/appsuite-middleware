@@ -179,7 +179,7 @@ public final class MALPollPushListenerRegistry {
      */
     public boolean removePushListener(final int contextId, final int userId) {
         final SessiondService sessiondService = MALPollServiceRegistry.getServiceRegistry().getService(SessiondService.class);
-        if (null == sessiondService || 0 == sessiondService.getUserSessions(userId, contextId)) {
+        if (null == sessiondService || null == sessiondService.getAnyActiveSessionForUser(userId, contextId)) {
             return removeListener(SimpleKey.valueOf(contextId, userId));
         }
         return false;

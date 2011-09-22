@@ -336,7 +336,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
         final SessiondService service = ServerServiceRegistry.getInstance().getService(SessiondService.class);
         final int user = session.getUserId();
         final int cid = session.getContextId();
-        if (null == service || 0 == service.getUserSessions(user, cid)) {
+        if (null == service || null == service.getAnyActiveSessionForUser(user, cid)) {
             final MailAccountStorageService storageService =
                 ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
             final MailAccount[] accounts = storageService.getUserMailAccounts(user, cid);

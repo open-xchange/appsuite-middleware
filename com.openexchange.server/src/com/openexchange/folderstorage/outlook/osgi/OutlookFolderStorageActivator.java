@@ -212,7 +212,7 @@ public class OutlookFolderStorageActivator extends DeferredActivator {
                          * Any active session left?
                          */
                         final SessiondService service = OutlookServiceRegistry.getServiceRegistry().getService(SessiondService.class);
-                        if (service.getUserSessions(session.getUserId(), session.getContextId()) <= 0) {
+                        if (null == service.getAnyActiveSessionForUser(session.getUserId(), session.getContextId())) {
                             MemoryTable.dropMemoryTableFrom(session);
                         }
                     }

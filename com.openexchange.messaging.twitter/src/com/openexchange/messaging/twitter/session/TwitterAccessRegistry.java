@@ -143,7 +143,7 @@ public final class TwitterAccessRegistry {
      */
     public boolean removeAccessIfLast(final int contextId, final int userId) {
         final SessiondService sessiondService = TwitterMessagingServiceRegistry.getServiceRegistry().getService(SessiondService.class);
-        if (null == sessiondService || 0 == sessiondService.getUserSessions(userId, contextId)) {
+        if (null == sessiondService || null == sessiondService.getAnyActiveSessionForUser(userId, contextId)) {
             return (null != map.remove(SimpleKey.valueOf(contextId, userId)));
         }
         return false;
