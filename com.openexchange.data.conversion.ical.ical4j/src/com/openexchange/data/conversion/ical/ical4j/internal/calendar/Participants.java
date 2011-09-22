@@ -75,6 +75,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ConversionWarning.Code;
+import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.OXResourceResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.ResourceResolver;
@@ -104,13 +105,17 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
 
     public static ResourceResolver resourceResolver = new OXResourceResolver();
 
+    public Participants() {
+        super();
+    }
+
     @Override
     public boolean isSet(final U cObj) {
         return cObj.containsParticipants();
     }
 
     @Override
-    public void emit(final int index, final U cObj, final T component, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
+    public void emit(final Mode mode, final int index, final U cObj, final T component, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
         final List<ResourceParticipant> resources = new LinkedList<ResourceParticipant>();
         for(final Participant p : cObj.getParticipants()) {
             switch(p.getType()) {

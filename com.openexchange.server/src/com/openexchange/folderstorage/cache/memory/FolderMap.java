@@ -94,8 +94,10 @@ public final class FolderMap {
      */
     public void shrink() {
         final List<Key> removeKeys = new ArrayList<Key>(16);
+        final long now = System.currentTimeMillis();
         for (final Entry<Key, Wrapper> entry : map.entrySet()) {
-            if (entry.getValue().elapsed(maxLifeMillis)) {
+            final Wrapper wrapper = entry.getValue();
+            if ((now - wrapper.getStamp()) > maxLifeMillis) {
                 removeKeys.add(entry.getKey());
             }
         }
@@ -205,6 +207,10 @@ public final class FolderMap {
             super();
             this.value = value;
             this.stamp = System.currentTimeMillis();
+        }
+
+        public long getStamp() {
+            return stamp;
         }
 
         public boolean elapsed(final int maxLifeMillis) {

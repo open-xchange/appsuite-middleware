@@ -769,14 +769,12 @@ public class ContactMySql implements ContactSql {
 
     @Override
     public String iFwriteContactImage() {
-        return new StringBuilder("INSERT INTO prg_contacts_image (intfield01, image1, mime_type, cid, changing_date) VALUES (?,?,?,?,").append(
-            System.currentTimeMillis()).append(')').toString();
+        return new StringBuilder("INSERT INTO prg_contacts_image (intfield01, image1, mime_type, cid, changing_date) VALUES (?,?,?,?,?)").toString();
     }
 
     @Override
     public String iFupdateContactImageString() {
-        return new StringBuilder("UPDATE prg_contacts_image SET intfield01 = ?, image1 = ?, mime_type = ?, cid = ?, changing_date = ").append(
-            System.currentTimeMillis()).append(" WHERE intfield01 = ? AND cid = ? ").toString();
+        return new StringBuilder("UPDATE prg_contacts_image SET intfield01 = ?, image1 = ?, mime_type = ?, cid = ?, changing_date = ? WHERE intfield01 = ? AND cid = ? ").toString();
     }
 
     @Override

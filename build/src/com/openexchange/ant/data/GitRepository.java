@@ -49,8 +49,10 @@
 
 package com.openexchange.ant.data;
 
+import org.apache.tools.ant.BuildException;
+
 /**
- * {@link GitRepository}
+ * Parses and stores the necessary values to fetch projects from Git repositories. The reference looks like this:
  * 1.0,https://git.open-xchange.com/git/wd/backend,master,build
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
@@ -60,7 +62,7 @@ public class GitRepository extends Repository {
     private final String remote;
     private final String branch;
 
-    public GitRepository(String remote, String branch, String projectName) {
+    public GitRepository(final String remote, final String branch, final String projectName) {
         super(projectName);
         this.remote = remote;
         this.branch = branch;
@@ -77,5 +79,17 @@ public class GitRepository extends Repository {
 
     public String getBranch() {
         return branch;
+    }
+
+    static Repository parseGitReference(final String reference) {
+        // 1.0,https://git.open-xchange.com/git/wd/backend,master,build
+        final String[] parts = reference.split(",");
+        if (4 != parts.length) {
+            throw new BuildException("Unknown number of Git reference definition parts.");
+        }
+        if (!"1.0".equals(parts[0])) {
+            throw new BuildException("Unknown CVS reference version " + parts[0]);
+        }
+        return new GitRepository(parts[1], parts[2], parts[3]);
     }
 }

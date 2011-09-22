@@ -1,2 +1,2 @@
 open-xchange-osgi
-open-xchange-common
+open-xchange-core

@@ -51,7 +51,9 @@ package com.openexchange.tools.oxfolder;
 
 import static com.openexchange.tools.sql.DBUtils.closeResources;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.list.linked.TIntLinkedList;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -137,6 +139,16 @@ public final class OXFolderAdminHelper {
      * @throws OXException If an error occurs
      */
     public boolean isPublicFolderEditable(final int cid, final int userId, final Connection readCon) throws OXException {
+        final int admin;
+        try {
+            admin = getContextAdminID(cid, readCon);
+        } catch (final OXException e) {
+            LOG.error(e.getMessage(), e);
+            return false;
+        }
+        if (admin != userId) {
+            return false;
+        }
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -193,13 +205,14 @@ public final class OXFolderAdminHelper {
             ResultSet rs = null;
             try {
                 stmt =
-                    writeCon.prepareStatement("SELECT permission_id,system FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND permission_id = ?");
+                    writeCon.prepareStatement("SELECT permission_id, admin_flag FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND permission_id = ?");
                 int pos = 1;
                 stmt.setInt(pos++, cid);
                 stmt.setInt(pos++, id);
                 stmt.setInt(pos++, userId);
                 rs = stmt.executeQuery();
                 final boolean update = rs.next();
+                final boolean prevEditable = update && rs.getInt(2) > 0;
                 final int system;
                 if(update) {
                     system = rs.getInt(2);
@@ -208,6 +221,16 @@ public final class OXFolderAdminHelper {
                 }
                 DBUtils.closeSQLStuff(rs, stmt);
                 rs = null;
+                /*
+                 * Check user
+                 */
+                if (admin != userId) {
+                    if (prevEditable == editable || !editable) {
+                        // No-op
+                        return;
+                    }
+                    throw OXFolderExceptionCode.ADMIN_OP_ONLY.create();
+                }
                 /*
                  * Insert/Update
                  */
@@ -222,7 +245,7 @@ public final class OXFolderAdminHelper {
                     stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // odp
                     stmt.setInt(pos++, cid);
                     stmt.setInt(pos++, id);
-                    stmt.setInt(pos++, userId);
+                    stmt.setInt(pos++, admin);
                     stmt.setInt(pos++, system);
                     stmt.executeUpdate();
                 } else {
@@ -231,7 +254,7 @@ public final class OXFolderAdminHelper {
                     pos = 1;
                     stmt.setInt(pos++, cid); // cid
                     stmt.setInt(pos++, id); // fuid
-                    stmt.setInt(pos++, userId); // permission_id
+                    stmt.setInt(pos++, admin); // permission_id
                     stmt.setInt(pos++, OCLPermission.CREATE_SUB_FOLDERS); // fp
                     stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // orp
                     stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // owp
@@ -308,7 +331,7 @@ public final class OXFolderAdminHelper {
             /*
              * Get context's users
              */
-            final TIntArrayList users;
+            final TIntList users;
             {
                 PreparedStatement stmt = null;
                 ResultSet rs = null;
@@ -317,7 +340,7 @@ public final class OXFolderAdminHelper {
                     final int pos = 1;
                     stmt.setInt(pos, cid);
                     rs = stmt.executeQuery();
-                    users = new TIntArrayList();
+                    users = new TIntLinkedList();
                     while (rs.next()) {
                         users.add(rs.getInt(pos));
                     }
@@ -334,12 +357,12 @@ public final class OXFolderAdminHelper {
                 final Integer admin = Integer.valueOf(getContextAdminID(cid, writeCon));
                 final int size = users.size();
                 for (int i = 1; i < size; i++) {
-                    setGlobalAddressBookDisabled(cid, users.getQuick(i), !enable, writeCon, admin, false);
+                    setGlobalAddressBookDisabled(cid, users.get(i), !enable, writeCon, admin, false);
                 }
                 /*
                  * Propagate with last update
                  */
-                setGlobalAddressBookDisabled(cid, users.getQuick(0), !enable, writeCon, admin, true);
+                setGlobalAddressBookDisabled(cid, users.get(0), !enable, writeCon, admin, true);
             }
         } finally {
             Database.back(cid, true, writeCon);
@@ -1315,7 +1338,7 @@ public final class OXFolderAdminHelper {
             stmt.setInt(2, cid);
             stmt.setInt(3, group);
             rs = stmt.executeQuery();
-            final TIntArrayList list = new TIntArrayList();
+            final TIntList list = new TIntArrayList();
             while (rs.next()) {
                 list.add(rs.getInt(1));
             }
@@ -1325,7 +1348,7 @@ public final class OXFolderAdminHelper {
             if (!list.isEmpty()) {
                 stmt = writeCon.prepareStatement(SQL_UPDATE_FOLDER_TIMESTAMP.replaceFirst("#FT#", STR_OXFOLDERTREE));
                 do {
-                    final int fuid = list.remove(0);
+                    final int fuid = list.removeAt(0);
                     stmt.setLong(1, lastModified);
                     stmt.setInt(2, cid);
                     stmt.setInt(3, fuid);
@@ -1473,7 +1496,7 @@ public final class OXFolderAdminHelper {
     public void addUserToOXFolders(final int userId, final String displayName, final String language, final int cid, final Connection writeCon) throws OXException {
         try {
             final Context ctx = new ContextImpl(cid);
-            final StringHelper strHelper = new StringHelper(LocaleTools.getLocale(language));
+            final StringHelper strHelper = StringHelper.valueOf(LocaleTools.getLocale(language));
             /*
              * Check infostore sibling
              */

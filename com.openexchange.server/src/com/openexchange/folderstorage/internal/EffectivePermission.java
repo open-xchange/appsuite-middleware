@@ -49,13 +49,17 @@
 
 package com.openexchange.folderstorage.internal;
 
-import gnu.trove.TIntHashSet;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 
 /**
  * {@link EffectivePermission} - A read-only permission considering user access restrictions and folder boundaries.
@@ -74,7 +78,7 @@ public final class EffectivePermission implements Permission {
     /**
      * The allowed content types.
      */
-    private TIntHashSet allowedContentTypes;
+    private TIntSet allowedContentTypes;
 
     /**
      * The type of the referenced folder.
@@ -97,6 +101,16 @@ public final class EffectivePermission implements Permission {
     private Permission underlyingPerm;
 
     /**
+     * The entity identifier.
+     */
+    private int entityId;
+
+    /**
+     * The context.
+     */
+    private Context context;
+
+    /**
      * Initializes a new {@link EffectivePermission}.
      *
      * @param underlyingPerm The underlying permission
@@ -115,7 +129,7 @@ public final class EffectivePermission implements Permission {
         if (null == allowedContentTypes || allowedContentTypes.isEmpty()) {
             this.allowedContentTypes = new TIntHashSet(1);
         } else {
-            final TIntHashSet set = new TIntHashSet(allowedContentTypes.size() + 1);
+            final TIntSet set = new TIntHashSet(allowedContentTypes.size() + 1);
             for (final ContentType allowedContentType : allowedContentTypes) {
                 set.add(allowedContentType.getModule());
             }
@@ -124,6 +138,20 @@ public final class EffectivePermission implements Permission {
             set.add(FolderObject.UNBOUND);
             this.allowedContentTypes = set;
         }
+        entityId = -1;
+    }
+
+    /**
+     * Sets the entity information.
+     * 
+     * @param entityId The entity identifier
+     * @param context The context
+     * @return This effective permission with information applied
+     */
+    public EffectivePermission setEntityInfo(final int entityId, final Context context) {
+        setEntity(entityId);
+        this.context = context;
+        return this;
     }
 
     @Override
@@ -177,10 +205,21 @@ public final class EffectivePermission implements Permission {
 
     private boolean hasModuleAccess() {
         final int module = getModule();
-        if (!userConfig.hasModuleAccess(module)) {
+        if (!getUserConfig().hasModuleAccess(module)) {
             return false;
         }
         return allowedContentTypes.isEmpty() ? true : allowedContentTypes.contains(module);
+    }
+
+    private UserConfiguration getUserConfig() {
+        if (null == userConfig) {
+            try {
+                userConfig = UserConfigurationStorage.getInstance().getUserConfiguration(getEntity(), context);
+            } catch (final OXException e) {
+                userConfig = new UserConfiguration(0xFFFFFFFF, getEntity(), null, context);
+            }
+        }
+        return userConfig;
     }
 
     private int getType() {
@@ -196,13 +235,13 @@ public final class EffectivePermission implements Permission {
         if (!hasModuleAccess()) {
             return NO_PERMISSIONS;
         } else if ((FolderObject.PUBLIC == getType()) || String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID).equals(folderId)) {
-            if ((getModule() != FolderObject.INFOSTORE) && !userConfig.hasFullPublicFolderAccess()) {
+            if ((getModule() != FolderObject.INFOSTORE) && !getUserConfig().hasFullPublicFolderAccess()) {
                 return NO_PERMISSIONS;
                 /*
                  * return super.getDeletePermission() > DELETE_ALL_OBJECTS ? DELETE_ALL_OBJECTS : super .getDeletePermission();
                  */
             }
-        } else if (!userConfig.hasFullSharedFolderAccess() && (FolderObject.SHARED == getType())) {
+        } else if (!getUserConfig().hasFullSharedFolderAccess() && (FolderObject.SHARED == getType())) {
             return NO_PERMISSIONS;
         }
         return underlyingPerm.getDeletePermission();
@@ -210,7 +249,7 @@ public final class EffectivePermission implements Permission {
 
     @Override
     public int getEntity() {
-        return underlyingPerm.getEntity();
+        return entityId <= 0 ? underlyingPerm.getEntity() : entityId;
     }
 
     @Override
@@ -218,10 +257,10 @@ public final class EffectivePermission implements Permission {
         if (!hasModuleAccess()) {
             return NO_PERMISSIONS;
         } else if ((FolderObject.PUBLIC == getType()) || String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID).equals(folderId)) {
-            if ((getModule() != FolderObject.INFOSTORE) && !userConfig.hasFullPublicFolderAccess()) {
+            if ((getModule() != FolderObject.INFOSTORE) && !getUserConfig().hasFullPublicFolderAccess()) {
                 return underlyingPerm.getFolderPermission() > READ_FOLDER ? READ_FOLDER : underlyingPerm.getFolderPermission();
             }
-        } else if (!userConfig.hasFullSharedFolderAccess() && (FolderObject.SHARED == getType())) {
+        } else if (!getUserConfig().hasFullSharedFolderAccess() && (FolderObject.SHARED == getType())) {
             return NO_PERMISSIONS;
         }
         return underlyingPerm.getFolderPermission();
@@ -232,10 +271,10 @@ public final class EffectivePermission implements Permission {
         if (!hasModuleAccess()) {
             return NO_PERMISSIONS;
         } else if ((FolderObject.PUBLIC == getType()) || String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID).equals(folderId)) {
-            if ((getModule() != FolderObject.INFOSTORE) && !userConfig.hasFullPublicFolderAccess()) {
+            if ((getModule() != FolderObject.INFOSTORE) && !getUserConfig().hasFullPublicFolderAccess()) {
                 return underlyingPerm.getReadPermission() > READ_ALL_OBJECTS ? READ_ALL_OBJECTS : underlyingPerm.getReadPermission();
             }
-        } else if (!userConfig.hasFullSharedFolderAccess() && (FolderObject.SHARED == getType())) {
+        } else if (!getUserConfig().hasFullSharedFolderAccess() && (FolderObject.SHARED == getType())) {
             return NO_PERMISSIONS;
         }
         return underlyingPerm.getReadPermission();
@@ -251,10 +290,10 @@ public final class EffectivePermission implements Permission {
         if (!hasModuleAccess()) {
             return NO_PERMISSIONS;
         } else if ((FolderObject.PUBLIC == getType()) || String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID).equals(folderId)) {
-            if ((getModule() != FolderObject.INFOSTORE) && !userConfig.hasFullPublicFolderAccess()) {
+            if ((getModule() != FolderObject.INFOSTORE) && !getUserConfig().hasFullPublicFolderAccess()) {
                 return NO_PERMISSIONS;
             }
-        } else if (!userConfig.hasFullSharedFolderAccess() && (FolderObject.SHARED == getType())) {
+        } else if (!getUserConfig().hasFullSharedFolderAccess() && (FolderObject.SHARED == getType())) {
             return NO_PERMISSIONS;
         }
         return underlyingPerm.getWritePermission();
@@ -264,7 +303,7 @@ public final class EffectivePermission implements Permission {
     public boolean isAdmin() {
         if (!hasModuleAccess()) {
             return false;
-        } else if ((FolderObject.PUBLIC == getType()) && (getModule() != FolderObject.INFOSTORE) && !userConfig.hasFullPublicFolderAccess()) {
+        } else if ((FolderObject.PUBLIC == getType()) && (getModule() != FolderObject.INFOSTORE) && !getUserConfig().hasFullPublicFolderAccess()) {
             return false;
         }
         return underlyingPerm.isAdmin();
@@ -292,7 +331,7 @@ public final class EffectivePermission implements Permission {
 
     @Override
     public void setEntity(final int entity) {
-        throw new UnsupportedOperationException("EffectivePermission.setEntity()");
+        this.entityId = entity;
     }
 
     @Override
@@ -334,7 +373,7 @@ public final class EffectivePermission implements Permission {
     public Object clone() {
         try {
             final EffectivePermission clone = (EffectivePermission) super.clone();
-            clone.userConfig = (UserConfiguration) userConfig.clone();
+            clone.userConfig = (UserConfiguration) getUserConfig().clone();
             clone.underlyingPerm = (Permission) underlyingPerm.clone();
             clone.allowedContentTypes =
                 (null == allowedContentTypes || allowedContentTypes.isEmpty()) ? new TIntHashSet(1) : new TIntHashSet(allowedContentTypes.toArray());

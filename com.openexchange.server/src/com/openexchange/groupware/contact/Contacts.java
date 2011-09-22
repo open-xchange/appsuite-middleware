@@ -56,7 +56,8 @@ import static com.openexchange.tools.sql.DBUtils.closeResources;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.getStatement;
 import static com.openexchange.tools.sql.DBUtils.rollback;
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -341,7 +342,9 @@ public final class Contacts {
         Connection readcon = null;
 
         Context context = null;
-
+        if (!contact.containsFileAs() && contact.containsDisplayName()) {
+            contact.setFileAs(contact.getDisplayName());
+        }
         try {
             validateEmailAddress(contact);
             contactSql = new ContactMySql(session);
@@ -483,7 +486,7 @@ public final class Contacts {
                     checkImageSize(contact.getImage1().length, Integer.parseInt(ContactConfig.getInstance().getProperty(PROP_MAX_IMAGE_SIZE)));
                 }
 
-                writeContactImage(contact.getObjectID(), contact.getImage1(), session.getContextId(), contact.getImageContentType(), writecon);
+                writeContactImage(contact.getObjectID(), contact.getImage1(), session.getContextId(), contact.getImageContentType(), lmd, writecon);
             }
             writecon.commit();
         } catch (final DataTruncation se) {
@@ -782,7 +785,7 @@ public final class Contacts {
 
             ps.execute();
 
-            if (co.containsNumberOfDistributionLists() && (co.getSizeOfDistributionListArray() > 0)) {
+            if (co.containsNumberOfDistributionLists()) {
                 writeDistributionListArrayUpdate(
                     co.getDistributionList(),
                     original.getDistributionList(),
@@ -811,9 +814,9 @@ public final class Contacts {
                     }
 
                     if (original.containsImage1()) {
-                        updateContactImage(co.getObjectID(), co.getImage1(), ctx.getContextId(), co.getImageContentType(), writecon);
+                        updateContactImage(co.getObjectID(), co.getImage1(), ctx.getContextId(), co.getImageContentType(), lmd, writecon);
                     } else {
-                        writeContactImage(co.getObjectID(), co.getImage1(), ctx.getContextId(), co.getImageContentType(), writecon);
+                        writeContactImage(co.getObjectID(), co.getImage1(), ctx.getContextId(), co.getImageContentType(), lmd, writecon);
                     }
 
                 } else if (original.containsImage1()) {
@@ -1133,9 +1136,9 @@ public final class Contacts {
                             PROP_MAX_IMAGE_SIZE)));
                     }
                     if (original.containsImage1()) {
-                        updateContactImage(contact.getObjectID(), contact.getImage1(), ctx.getContextId(), contact.getImageContentType(), writecon);
+                        updateContactImage(contact.getObjectID(), contact.getImage1(), ctx.getContextId(), contact.getImageContentType(), lmd, writecon);
                     } else {
-                        writeContactImage(contact.getObjectID(), contact.getImage1(), ctx.getContextId(), contact.getImageContentType(), writecon);
+                        writeContactImage(contact.getObjectID(), contact.getImage1(), ctx.getContextId(), contact.getImageContentType(), lmd, writecon);
                     }
                 } else if (original.containsImage1()) {
                     try {
@@ -1212,7 +1215,7 @@ public final class Contacts {
         }
         sb.deleteCharAt(0);
         contactSQL.setSelect(contactSQL.iFgetContactById(sb.toString()).toString());
-        final TIntObjectHashMap<Contact> contacts = new TIntObjectHashMap<Contact>(userIds.length, 1);
+        final TIntObjectMap<Contact> contacts = new TIntObjectHashMap<Contact>(userIds.length, 1);
         for (int i = 0; i < userIds.length; i += LIMIT) {
             contactSQL.setInternalUsers(com.openexchange.tools.arrays.Arrays.extract(userIds, i, LIMIT));
             contacts.putAll(fillContactObject(contactSQL, user, memberInGroups, ctx, uc, readCon));
@@ -1292,8 +1295,8 @@ public final class Contacts {
         return co;
     }
 
-    private static TIntObjectHashMap<Contact> fillContactObject(final ContactSql contactSQL, final int user, final int[] group, final Context ctx, final UserConfiguration uc, final Connection con) throws OXException {
-        final TIntObjectHashMap<Contact> contacts = new TIntObjectHashMap<Contact>();
+    private static TIntObjectMap<Contact> fillContactObject(final ContactSql contactSQL, final int user, final int[] group, final Context ctx, final UserConfiguration uc, final Connection con) throws OXException {
+        final TIntObjectMap<Contact> contacts = new TIntObjectHashMap<Contact>();
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
@@ -1896,7 +1899,7 @@ public final class Contacts {
         }
     }
 
-    public static void writeContactImage(final int contact_id, final byte[] img, final int cid, final String mime, final Connection writecon) throws OXException, OXException {
+    public static void writeContactImage(final int contact_id, final byte[] img, final int cid, final String mime, final long lastModified, final Connection writecon) throws OXException, OXException {
         if ((contact_id < 1) || (img == null) || (img.length < 1) || (cid < 1) || (mime == null) || (mime.length() < 1)) {
             throw ContactExceptionCodes.IMAGE_BROKEN.create();
         }
@@ -1908,6 +1911,7 @@ public final class Contacts {
             ps.setBytes(2, img);
             ps.setString(3, mime);
             ps.setInt(4, cid);
+            ps.setLong(5, lastModified);
             if (DEBUG) {
                 LOG.debug(new StringBuilder("INSERT IMAGE ").append(getStatementString(ps)));
             }
@@ -1919,7 +1923,7 @@ public final class Contacts {
         }
     }
 
-    public static void updateContactImage(final int contact_id, final byte[] img, final int cid, final String mime, final Connection writecon) throws OXException, OXException {
+    public static void updateContactImage(final int contact_id, final byte[] img, final int cid, final String mime, final long lastModified, final Connection writecon) throws OXException, OXException {
         if ((contact_id < 1) || (img == null) || (img.length < 1) || (cid < 1) || (mime == null) || (mime.length() < 1)) {
             throw ContactExceptionCodes.IMAGE_BROKEN.create();
         }
@@ -1931,8 +1935,9 @@ public final class Contacts {
             ps.setBytes(2, img);
             ps.setString(3, mime);
             ps.setInt(4, cid);
-            ps.setInt(5, contact_id);
-            ps.setInt(6, cid);
+            ps.setLong(5, lastModified);
+            ps.setInt(6, contact_id);
+            ps.setInt(7, cid);
             if (DEBUG) {
                 LOG.debug(new StringBuilder("UPDATE IMAGE ").append(getStatementString(ps)));
             }

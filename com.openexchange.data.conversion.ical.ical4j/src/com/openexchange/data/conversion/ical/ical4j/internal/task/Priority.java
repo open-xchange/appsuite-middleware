@@ -56,9 +56,9 @@ import static net.fortuna.ical4j.model.property.Priority.UNDEFINED;
 import java.util.List;
 import java.util.TimeZone;
 import net.fortuna.ical4j.model.component.VToDo;
-import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ConversionWarning.Code;
+import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
@@ -68,59 +68,42 @@ import com.openexchange.groupware.tasks.Task;
  */
 public class Priority extends AbstractVerifyingAttributeConverter<VToDo, Task> {
 
-    /**
-     * Default constructor.
-     */
     public Priority() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean isSet(final Task task) {
         return task.containsPriority();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void emit(final int index, final Task task, final VToDo vToDo,
-        final List<ConversionWarning> warnings, final Context ctx, final Object... args)
-        throws ConversionError {
+    public void emit(final Mode mode, final int index, final Task task, final VToDo vToDo, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
         final net.fortuna.ical4j.model.property.Priority prio;
-        switch(task.getPriority()) {
-            case Task.HIGH:
-                prio = HIGH; break;
-            case Task.NORMAL:
-                prio = MEDIUM; break;
-            case Task.LOW:
-                prio = LOW; break;
-            default:
-                warnings.add(new ConversionWarning(index, Code.INVALID_PRIORITY,
-                    Integer.valueOf(task.getPriority())));
-                prio = UNDEFINED;
+        switch (task.getPriority()) {
+        case Task.HIGH:
+            prio = HIGH;
+            break;
+        case Task.NORMAL:
+            prio = MEDIUM;
+            break;
+        case Task.LOW:
+            prio = LOW;
+            break;
+        default:
+            warnings.add(new ConversionWarning(index, Code.INVALID_PRIORITY, Integer.valueOf(task.getPriority())));
+            prio = UNDEFINED;
         }
         vToDo.getProperties().add(prio);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean hasProperty(final VToDo vToDo) {
         return vToDo.getPriority() != null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void parse(final int index, final VToDo todo, final Task task,
-        final TimeZone timeZone, final Context ctx,
-        final List<ConversionWarning> warnings) throws ConversionError {
+    public void parse(final int index, final VToDo todo, final Task task, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
         final float lowMed = (LOW.getLevel() + MEDIUM.getLevel()) >> 1;
         final float medHigh = (MEDIUM.getLevel() + HIGH.getLevel()) >> 1;
         final int priority = todo.getPriority().getLevel();
@@ -133,8 +116,7 @@ public class Priority extends AbstractVerifyingAttributeConverter<VToDo, Task> {
         } else if (priority == UNDEFINED.getLevel()) {
             task.setPriority(Task.NORMAL); // Default to normal Bug #10401
         } else {
-            warnings.add(new ConversionWarning(index, Code.INVALID_PRIORITY,
-                Integer.valueOf(priority)));
+            warnings.add(new ConversionWarning(index, Code.INVALID_PRIORITY, Integer.valueOf(priority)));
         }
     }
 }

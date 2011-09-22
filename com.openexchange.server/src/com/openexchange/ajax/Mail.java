@@ -149,6 +149,7 @@ import com.openexchange.mail.json.writer.MessageWriter.MailFieldWriter;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mail.mime.MIMEMailExceptionCode;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -170,6 +171,7 @@ import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadRenamer;
 import com.openexchange.tools.encoding.Helper;
+import com.openexchange.tools.encoding.URLCoder;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
@@ -218,14 +220,45 @@ public class Mail extends PermissionServlet implements UploadListener {
      * @return The wrapping {@link AbstractOXException}
      */
     protected static final OXException getWrappingOXException(final Exception cause) {
+        final String message = cause.getMessage();
         if (LOG.isWarnEnabled()) {
             final StringBuilder warnBuilder = new StringBuilder(140);
             warnBuilder.append("An unexpected exception occurred, which is going to be wrapped for proper display.\n");
-            warnBuilder.append("For safety reason its original content is displayed here.");
-            LOG.warn(warnBuilder.toString(), cause);
+            warnBuilder.append("For safety reason its original content is displayed here.\n");
+            warnBuilder.append(null == message ? "[Not available]" : message).append('\n');
+            appendStackTrace(cause.getStackTrace(), warnBuilder);
+            LOG.warn(warnBuilder.toString());
         }
-        final String message = cause.getMessage();
         return MailExceptionCode.UNEXPECTED_ERROR.create(cause, null == message ? "[Not available]" : message);
+    }
+
+    private static void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb) {
+        if (null == trace) {
+            sb.append("<missing stack trace>\n");
+            return;
+        }
+        for (final StackTraceElement ste : trace) {
+            final String className = ste.getClassName();
+            if (null != className) {
+                sb.append("\tat ").append(className).append('.').append(ste.getMethodName());
+                if (ste.isNativeMethod()) {
+                    sb.append("(Native Method)");
+                } else {
+                    final String fileName = ste.getFileName();
+                    if (null == fileName) {
+                        sb.append("(Unknown Source)");
+                    } else {
+                        final int lineNumber = ste.getLineNumber();
+                        sb.append('(').append(fileName);
+                        if (lineNumber >= 0) {
+                            sb.append(':').append(lineNumber);
+                        }
+                        sb.append(')');
+                    }
+                }
+                sb.append("\n");
+            }
+        }
     }
 
     private static final String UPLOAD_PARAM_MAILINTERFACE = "msint";
@@ -290,6 +323,8 @@ public class Mail extends PermissionServlet implements UploadListener {
     private static final String VIEW_RAW = "raw";
 
     private static final String VIEW_TEXT = "text";
+
+    private static final String VIEW_TEXT_NO_HTML_ATTACHMENT = "textNoHtmlAttach";
 
     private static final String VIEW_HTML = "html";
 
@@ -1232,14 +1267,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         contentType.setSubType("octet-stream");
                         final HttpServletResponse httpResponse = paramContainer.getHttpServletResponse();
                         httpResponse.setContentType(contentType.toString());
-                        final String preparedFileName =
-                            getSaveAsFileName(
-                                new StringBuilder(mail.getSubject()).append(".eml").toString(),
-                                isMSIEOnWindows(paramContainer.getHeader(STR_USER_AGENT)),
-                                null);
-                        httpResponse.setHeader(
-                            "Content-disposition",
-                            new StringBuilder(64).append("attachment; filename=\"").append(preparedFileName).append('"').toString());
+                        httpResponse.setHeader("Content-disposition", getAttachmentDispositionValue(new StringBuilder(mail.getSubject()).append(".eml").toString(), null));
                         Tools.removeCachingHeader(httpResponse);
                         // Write output stream in max. 8K chunks
                         final OutputStream out = httpResponse.getOutputStream();
@@ -1391,6 +1419,10 @@ public class Mail extends PermissionServlet implements UploadListener {
         if (null != view) {
             if (VIEW_RAW.equals(view)) {
                 displayMode = DisplayMode.RAW;
+            } else if (VIEW_TEXT_NO_HTML_ATTACHMENT.equals(view)) {
+                usmNoSave.setDisplayHtmlInlineContent(false);
+                usmNoSave.setSuppressHTMLAlternativePart(true);
+                displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
             } else if (VIEW_TEXT.equals(view)) {
                 usmNoSave.setDisplayHtmlInlineContent(false);
                 displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
@@ -1767,12 +1799,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 contentType.setPrimaryType("application");
                 contentType.setSubType("octet-stream");
                 resp.setContentType(contentType.toString());
-                final String userAgent = req.getHeader(STR_USER_AGENT);
-                final String preparedFileName =
-                    getSaveAsFileName(fileName, isMSIEOnWindows(userAgent == null ? "" : userAgent), "application/zip");
-                resp.setHeader(
-                    "Content-disposition",
-                    new StringBuilder(64).append("attachment; filename=\"").append(preparedFileName).append('"').toString());
+                resp.setHeader("Content-disposition", getAttachmentDispositionValue(fileName, null));
                 /*
                  * Reset response header values since we are going to directly write into servlet's output stream and then some browsers do
                  * not allow header "Pragma"
@@ -1849,12 +1876,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 contentType.setPrimaryType("application");
                 contentType.setSubType("octet-stream");
                 resp.setContentType(contentType.toString());
-                final String userAgent = req.getHeader(STR_USER_AGENT);
-                final String preparedFileName =
-                    getSaveAsFileName(fileName, isMSIEOnWindows(userAgent == null ? "" : userAgent), "application/zip");
-                resp.setHeader(
-                    "Content-disposition",
-                    new StringBuilder(64).append("attachment; filename=\"").append(preparedFileName).append('"').toString());
+                resp.setHeader("Content-disposition", getAttachmentDispositionValue(fileName, null));
                 /*
                  * Reset response header values since we are going to directly write into servlet's output stream and then some browsers do
                  * not allow header "Pragma"
@@ -1993,11 +2015,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     contentType.setPrimaryType("application");
                     contentType.setSubType("octet-stream");
                     resp.setContentType(contentType.toString());
-                    final String preparedFileName =
-                        getSaveAsFileName(fileName, isMSIEOnWindows(req.getHeader(STR_USER_AGENT)), mailPart.getContentType().toString());
-                    resp.setHeader(
-                        "Content-disposition",
-                        new StringBuilder(64).append("attachment; filename=\"").append(preparedFileName).append('"').toString());
+                    resp.setHeader("Content-disposition", getAttachmentDispositionValue(fileName, mailPart.getContentType().getBaseType()));
                 } else {
                     final CheckedDownload checkedDownload =
                         DownloadUtility.checkInlineDownload(
@@ -2083,14 +2101,19 @@ public class Mail extends PermissionServlet implements UploadListener {
         return (browserDetector.isMSIE() && browserDetector.isWindows());
     }
 
-    private static final Pattern PART_FILENAME_PATTERN = Pattern.compile("(part )([0-9]+)(?:(\\.)([0-9]+))*", Pattern.CASE_INSENSITIVE);
-
     private static final Pattern PAT_BSLASH = Pattern.compile("\\\\");
 
     private static final Pattern PAT_QUOTE = Pattern.compile("\"");
 
+    private static String escapeBackslashAndQuote(final String str) {
+        return PAT_QUOTE.matcher(PAT_BSLASH.matcher(str).replaceAll("\\\\\\\\")).replaceAll("\\\\\\\"");
+    }
+
+    private static final Pattern PART_FILENAME_PATTERN = Pattern.compile("(part )([0-9]+)(?:(\\.)([0-9]+))*", Pattern.CASE_INSENSITIVE);
+
     private static final String DEFAULT_FILENAME = "file.dat";
 
+    @Deprecated
     public static final String getSaveAsFileName(final String fileName, final boolean internetExplorer, final String baseCT) {
         if (null == fileName) {
             return DEFAULT_FILENAME;
@@ -2119,7 +2142,45 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
             }
         }
-        return PAT_QUOTE.matcher(PAT_BSLASH.matcher(tmp.toString()).replaceAll("\\\\\\\\")).replaceAll("\\\\\\\"");
+        return escapeBackslashAndQuote(tmp.toString());
+    }
+
+    public static String getAttachmentDispositionValue(final String fileName, final String baseCT) {
+        if (null == fileName) {
+            return new StringBuilder("attachment; filename=\"").append(DEFAULT_FILENAME).append('"').toString();
+        }
+        final Matcher m = PART_FILENAME_PATTERN.matcher(fileName);
+        if (m.matches()) {
+            return new StringBuilder("attachment; filename=\"").append(escapeBackslashAndQuote(fileName.replaceAll(" ", "_"))).append('"').toString();
+        }
+        String fn = fileName;
+        if (null != baseCT) {
+            if (baseCT.regionMatches(true, 0, MIME_TEXT_PLAIN, 0, MIME_TEXT_PLAIN.length())) {
+                if (!fn.toLowerCase(Locale.ENGLISH).endsWith(".txt")) {
+                    fn += ".txt";
+                }
+            } else if (baseCT.regionMatches(true, 0, MIME_TEXT_HTML, 0, MIME_TEXT_HTML.length())) {
+                if (!fn.toLowerCase(Locale.ENGLISH).endsWith(".htm") && !fileName.toLowerCase(Locale.ENGLISH).endsWith(".html")) {
+                    fn += ".html";
+                }
+            }
+        }
+        fn = escapeBackslashAndQuote(fn);
+        /*-
+         * On socket layer characters are casted to byte values.
+         * 
+         * See AJPv13Response.writeString():
+         * sink.write((byte) chars[i]);
+         * 
+         * Therefore ensure we have a one-character-per-byte charset, as it is with ISO-5589-1
+         */
+        String foo;
+        try {
+            foo = new String(fn.getBytes("UTF-8"), "ISO-8859-1");
+        } catch (final UnsupportedEncodingException e) {
+            foo = null;
+        }
+        return new StringBuilder("attachment; filename*=UTF-8''").append(URLCoder.encode(fn)).append("; filename=\"").append(null == foo ? fn : foo).append('"').toString();
     }
 
     public void actionPutForwardMultiple(final ServerSession session, final JSONWriter writer, final JSONObject jsonObj, final MailServletInterface mi) throws JSONException {
@@ -2189,6 +2250,9 @@ public class Mail extends PermissionServlet implements UploadListener {
             if (null != view) {
                 if (VIEW_TEXT.equals(view)) {
                     usmNoSave.setDisplayHtmlInlineContent(false);
+                } else if (VIEW_TEXT_NO_HTML_ATTACHMENT.equals(view)) {
+                    usmNoSave.setDisplayHtmlInlineContent(false);
+                    usmNoSave.setSuppressHTMLAlternativePart(true);
                 } else if (VIEW_HTML.equals(view)) {
                     usmNoSave.setDisplayHtmlInlineContent(true);
                     usmNoSave.setAllowHTMLImages(true);
@@ -2480,7 +2544,16 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            if (MIMEMailExceptionCode.INVALID_EMAIL_ADDRESS.equals(e)) {
+                e.setCategory(Category.CATEGORY_USER_INPUT);
+                if (DEBUG) {
+                    LOG.warn(e.getMessage(), e);
+                } else {
+                    LOG.warn(e.getMessage());
+                }
+            } else {
+                LOG.error(e.getMessage(), e);
+            }
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);

@@ -51,6 +51,7 @@ package com.openexchange.mail.mime.processing;
 
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.parseAddressList;
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.unfold;
+import static java.util.regex.Matcher.quoteReplacement;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -378,7 +379,7 @@ public final class MimeReply {
                     final User user = UserStorage.getStorageUser(session.getUserId(), ctx);
                     final Locale locale = user.getLocale();
                     final LocaleAndTimeZone ltz = new LocaleAndTimeZone(locale, user.getTimeZone());
-                    generateReplyText(originalMsg, retvalContentType, new StringHelper(locale), ltz, usm, mailSession, list);
+                    generateReplyText(originalMsg, retvalContentType, StringHelper.valueOf(locale), ltz, usm, mailSession, list);
                 }
                 final StringBuilder replyTextBuilder = new StringBuilder(8192 << 1);
                 for (int i = list.size() - 1; i >= 0; i--) {
@@ -516,7 +517,7 @@ public final class MimeReply {
             final ParameterContainer pc =
                 new ParameterContainer(retvalContentType, textBuilder, strHelper, usm, mailSession, ltz, replyTexts);
             found |= gatherAllTextContents(msg, contentType, pc);
-        } else if (contentType.startsWith(TEXT)) {
+        } else if (contentType.startsWith(TEXT) && !MimeProcessingUtility.isSpecial(contentType.getBaseType())) {
             if (retvalContentType.getPrimaryType() == null) {
                 final String text = MimeProcessingUtility.handleInlineTextPart(msg, contentType, usm.isDisplayHtmlInlineContent());
                 retvalContentType.setContentType(contentType);
@@ -535,7 +536,7 @@ public final class MimeReply {
                 try {
                     replyPrefix =
                         PATTERN_DATE.matcher(replyPrefix).replaceFirst(
-                            date == null ? "" : MimeProcessingUtility.getFormattedDate(date, DateFormat.LONG, ltz.locale, ltz.timeZone));
+                            date == null ? "" : quoteReplacement(MimeProcessingUtility.getFormattedDate(date, DateFormat.LONG, ltz.locale, ltz.timeZone)));
                 } catch (final Exception e) {
                     if (LOG.isWarnEnabled()) {
                         LOG.warn(e.getMessage(), e);
@@ -546,7 +547,7 @@ public final class MimeReply {
                 try {
                     replyPrefix =
                         PATTERN_TIME.matcher(replyPrefix).replaceFirst(
-                            date == null ? "" : MimeProcessingUtility.getFormattedTime(date, DateFormat.SHORT, ltz.locale, ltz.timeZone));
+                            date == null ? "" : quoteReplacement(MimeProcessingUtility.getFormattedTime(date, DateFormat.SHORT, ltz.locale, ltz.timeZone)));
                 } catch (final Exception e) {
                     if (LOG.isWarnEnabled()) {
                         LOG.warn(e.getMessage(), e);
@@ -557,7 +558,7 @@ public final class MimeReply {
             {
                 final InternetAddress[] from = msg.getFrom();
                 replyPrefix =
-                    PATTERN_SENDER.matcher(replyPrefix).replaceFirst(from == null || from.length == 0 ? "" : from[0].toUnicodeString());
+                    PATTERN_SENDER.matcher(replyPrefix).replaceFirst(from == null || from.length == 0 ? "" : quoteReplacement(from[0].toUnicodeString()));
             }
             {
                 final char nextLine = '\n';
@@ -650,7 +651,7 @@ public final class MimeReply {
         for (int i = 0; !found && i < count; i++) {
             final MailPart part = multipartPart.getEnclosedMailPart(i);
             partContentType.setContentType(part.getContentType());
-            if (partContentType.startsWith(preferHTML ? TEXT_HTM : TEXT) && MimeProcessingUtility.isInline(part, partContentType)) {
+            if (partContentType.startsWith(preferHTML ? TEXT_HTM : TEXT) && MimeProcessingUtility.isInline(part, partContentType) && !MimeProcessingUtility.isSpecial(partContentType.getBaseType())) {
                 if (pc.retvalContentType.getPrimaryType() == null) {
                     pc.retvalContentType.setContentType(partContentType);
                     final String charset = MessageUtility.checkCharset(part, partContentType);

@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.uuencode.UUEncodedPart;
@@ -89,4 +90,6 @@ public interface StructureHandler {
     boolean handleUserFlags(String[] userFlags) throws OXException;
 
     boolean handleColorLabel(int colorLabel) throws OXException;
+
+    boolean handleEnd(MailMessage mail) throws OXException;
 }

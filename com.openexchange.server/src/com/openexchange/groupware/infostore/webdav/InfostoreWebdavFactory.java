@@ -49,7 +49,8 @@
 
 package com.openexchange.groupware.infostore.webdav;
 
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -79,10 +80,10 @@ import com.openexchange.groupware.infostore.webdav.URLCache.Type;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.EffectivePermission;
-import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tx.TransactionAware;
 import com.openexchange.webdav.loader.BulkLoader;
 import com.openexchange.webdav.loader.LoadingHints;
@@ -110,8 +111,8 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         public final Map<WebdavPath, OXWebdavResource> lockNull = new HashMap<WebdavPath, OXWebdavResource>();
 
 
-        public final TIntObjectHashMap<FolderCollection> collectionsById = new TIntObjectHashMap<FolderCollection>();
-        public final TIntObjectHashMap<DocumentMetadataResource> resourcesById = new TIntObjectHashMap<DocumentMetadataResource>();
+        public final TIntObjectMap<FolderCollection> collectionsById = new TIntObjectHashMap<FolderCollection>();
+        public final TIntObjectMap<DocumentMetadataResource> resourcesById = new TIntObjectHashMap<DocumentMetadataResource>();
 
         public void addResource(final OXWebdavResource res) {
             if(res.isCollection()) {

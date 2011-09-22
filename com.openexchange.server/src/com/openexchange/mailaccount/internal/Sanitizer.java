@@ -49,9 +49,10 @@
 
 package com.openexchange.mailaccount.internal;
 
-import gnu.trove.TIntObjectHashMap;
-import gnu.trove.TIntObjectProcedure;
-import gnu.trove.TIntProcedure;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TIntObjectProcedure;
+import gnu.trove.procedure.TIntProcedure;
 import java.net.URI;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -165,7 +166,7 @@ final class Sanitizer {
         /*
          * A map to store broken accounts
          */
-        final TIntObjectHashMap<String> map = new TIntObjectHashMap<String>(2);
+        final TIntObjectMap<String> map = new TIntObjectHashMap<String>(2);
         /*
          * Do SQL...
          */

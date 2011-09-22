@@ -51,13 +51,14 @@ package com.openexchange.ant.data;
 
 /**
  * Stores the data to access some project in the repository.
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public abstract class Repository {
 
     private final String projectName;
 
-    protected Repository(String projectName) {
+    protected Repository(final String projectName) {
         super();
         this.projectName = projectName;
     }

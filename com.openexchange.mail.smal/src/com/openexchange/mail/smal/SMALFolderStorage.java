@@ -67,7 +67,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link SMALFolderStorage} - The SMAL folder storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SMALFolderStorage extends AbstractSMALStorage implements IMailFolderStorage, IMailFolderStorageEnhanced {
@@ -76,7 +76,7 @@ public final class SMALFolderStorage extends AbstractSMALStorage implements IMai
 
     /**
      * Initializes a new {@link SMALFolderStorage}.
-     * 
+     *
      * @throws OXException If initialization fails
      */
     public SMALFolderStorage(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess) throws OXException {
@@ -99,10 +99,7 @@ public final class SMALFolderStorage extends AbstractSMALStorage implements IMai
 
     @Override
     public MailFolder[] getSubfolders(final String parentFullName, final boolean all) throws OXException {
-        System.out.println("SMALFolderStorage.getSubfolders()...");
-        final MailFolder[] subfolders = folderStorage.getSubfolders(parentFullName, all);
-        System.out.println("\tSMALFolderStorage.getSubfolders() done.");
-        return subfolders;
+        return folderStorage.getSubfolders(parentFullName, all);
     }
 
     @Override

@@ -64,9 +64,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.writer.ResponseWriter;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.UnsynchronizedStringWriter;
-import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
  * {@link JSONResponseRenderer}
@@ -75,6 +73,9 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
  */
 public class JSONResponseRenderer implements ResponseRenderer {
 
+    /**
+     * The logger constant.
+     */
     private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(JSONResponseRenderer.class));
 
     @Override
@@ -92,6 +93,21 @@ public class JSONResponseRenderer implements ResponseRenderer {
         writeResponse((Response) result.getResultObject(), request.getAction(), req, resp);
     }
 
+    /**
+     * Write specified response to Servlet output stream either as HTML callback or as JSON data.
+     * <p>
+     * The response is considered as HTML callback if one of these conditions is met:
+     * <ul>
+     * <li>The HTTP Servlet request indicates <i>multipart/*</i> content type</li>
+     * <li>The HTTP Servlet request has the <code>"respondWithHTML"</code> parameter set to <code>"true"</code></li>
+     * <li>The HTTP Servlet request contains non-<code>null</code> <code>"callback"</code> parameter</li>
+     * </ul>
+     *
+     * @param response The response to write
+     * @param action The request's action
+     * @param req The HTTP Servlet request
+     * @param resp The HTTP Servlet response
+     */
     public static void writeResponse(final Response response, final String action, final HttpServletRequest req, final HttpServletResponse resp) {
         try {
             if (FileUploadBase.isMultipartContent(new ServletRequestContext(req)) || (isRespondWithHTML(req)) || req.getParameter("callback") != null) {
@@ -107,12 +123,11 @@ public class JSONResponseRenderer implements ResponseRenderer {
                 ResponseWriter.write(response, resp.getWriter());
             }
         } catch (final JSONException e) {
-            final OXException e1 = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-            LOG.error(e1.getMessage(), e1);
+            LOG.error(e.getMessage(), e);
             try {
-                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            } catch (final IOException e2) {
-                LOG.error(e2.getMessage(), e);
+                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "A JSON error occurred: " + e.getMessage());
+            } catch (final IOException ioe) {
+                LOG.error(ioe.getMessage(), ioe);
             }
         } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
@@ -123,10 +138,8 @@ public class JSONResponseRenderer implements ResponseRenderer {
         return Boolean.parseBoolean(req.getParameter("respondWithHTML"));
     }
 
-
     private static String substituteJS(final String json, final String action) {
-    	return AJAXServlet.JS_FRAGMENT.replace("**json**", json).replace("**action**",
-				action);
+        return AJAXServlet.JS_FRAGMENT.replace("**json**", json).replace("**action**", action);
     }
 
 }

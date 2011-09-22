@@ -50,8 +50,8 @@
 package com.openexchange.mailaccount.internal;
 
 import java.util.Map;
-import com.openexchange.cache.dynamic.impl.OXObjectFactory;
-import com.openexchange.cache.dynamic.impl.Refresher;
+import com.openexchange.caching.dynamic.OXObjectFactory;
+import com.openexchange.caching.dynamic.Refresher;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccount;
 
@@ -75,7 +75,7 @@ final class MailAccountReloader extends Refresher<MailAccount> implements MailAc
      * @throws OXException If initial load of the object fails.
      */
     public MailAccountReloader(final OXObjectFactory<MailAccount> factory, final String regionName) throws OXException {
-        super(factory, regionName);
+        super(factory, regionName, true);
         delegate = refresh();
     }
 

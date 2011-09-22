@@ -49,8 +49,8 @@
 
 package com.openexchange.messaging.generic.internal;
 
-import gnu.trove.TIntArrayList;
-import gnu.trove.TIntProcedure;
+import gnu.trove.list.TIntList;
+import gnu.trove.procedure.TIntProcedure;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -60,6 +60,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
+import com.openexchange.caching.dynamic.OXObjectFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingService;
@@ -187,7 +188,7 @@ public final class CachingMessagingAccountStorage implements MessagingAccountSto
 
     @Override
     public List<MessagingAccount> getAccounts(final String serviceId, final Session session, final Modifier modifier) throws OXException {
-        final TIntArrayList ids = delegatee.getAccountIDs(serviceId, session);
+        final TIntList ids = delegatee.getAccountIDs(serviceId, session);
         if (ids.isEmpty()) {
             return Collections.emptyList();
         }

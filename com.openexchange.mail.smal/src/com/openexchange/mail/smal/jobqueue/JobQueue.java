@@ -107,7 +107,7 @@ public final class JobQueue {
 
     private final ConcurrentMap<String, Object> identifiers;
 
-    private final Future<Object> future;
+    private final Future<Object> consumerFuture;
 
     private final JobConsumer consumer;
 
@@ -119,7 +119,7 @@ public final class JobQueue {
         queue = new PriorityBlockingQueue<Job>(CAPACITY);
         identifiers = new ConcurrentHashMap<String, Object>(CAPACITY);
         consumer = new JobConsumer(queue, identifiers);
-        future = threadPool.submit(consumer, AbortBehavior.getInstance());
+        consumerFuture = threadPool.submit(consumer, AbortBehavior.getInstance());
     }
 
     /**
@@ -128,10 +128,10 @@ public final class JobQueue {
     public void stop() {
         consumer.stop();
         try {
-            future.get(1, TimeUnit.SECONDS);
+            consumerFuture.get(1, TimeUnit.SECONDS);
         } catch (final TimeoutException e) {
             // Wait time elapsed; enforce cancelation
-            future.cancel(true);
+            consumerFuture.cancel(true);
         } catch (final InterruptedException e) {
             /*
              * Cannot occur, but keep interrupted state
@@ -152,12 +152,23 @@ public final class JobQueue {
         if (null == job || queue.size() >= CAPACITY) {
             return false;
         }
-        return (null == identifiers.putIfAbsent(job.getIdentifier(), PRESENT)) && queue.offer(job);
+        final String identifier = job.getIdentifier();
+        if (null == identifiers.putIfAbsent(identifier, PRESENT)) {
+            /*
+             * Not yet contained in queue
+             */
+            if (!queue.offer(job)) {
+                identifiers.remove(identifier);
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 
     /**
      * Gets the identifier of the job currently being executed.
-     * 
+     *
      * @return The current job's identifier or <code>null</code> if none is executed at the moment
      */
     public Job currentJob() {
@@ -166,7 +177,7 @@ public final class JobQueue {
 
     /**
      * Checks if there is a job in queue with a higher ranking than specified ranking.
-     * 
+     *
      * @param ranking The ranking to check against
      * @return <code>true</code> if there is a higher-ranked job; otherwise <code>false</code>
      */

@@ -58,8 +58,8 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tx.TransactionAware;
 
 public interface InfostoreFacade extends TransactionAware{

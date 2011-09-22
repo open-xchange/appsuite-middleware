@@ -63,6 +63,7 @@ import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ConversionWarning.Code;
 import com.openexchange.data.conversion.ical.ITipContainer;
+import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -78,10 +79,10 @@ public class ReplyParticipants<T extends CalendarComponent, U extends CalendarOb
     private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ReplyParticipants.class));
 
     @Override
-    public void emit(final int index, final U cObj, final T component, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
+    public void emit(final Mode mode, final int index, final U cObj, final T component, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
         if (args == null || args.length == 0 || !ITipContainer.class.isInstance(args[0])) {
             warnings.add(new ConversionWarning(index, Code.INSUFFICIENT_INFORMATION));
-            super.emit(index, cObj, component, warnings, ctx, args);
+            super.emit(mode, index, cObj, component, warnings, ctx, args);
             return;
         }
 

@@ -24,7 +24,9 @@
 
 package com.davekoelle;
 
+import java.text.Collator;
 import java.util.Comparator;
+import java.util.Locale;
 
 /**
  * This is an updated version with enhancements made by Daniel Migowski,
@@ -46,11 +48,42 @@ import java.util.Comparator;
  */
 public class AlphanumComparator implements Comparator<String> {
 
+    private static final Locale DEFAULT_LOCALE = Locale.US;
+
+    private static final Collator DEFAULT_COLLATOR;
+
+    static {
+        final Collator collator = Collator.getInstance(DEFAULT_LOCALE);
+        collator.setStrength(Collator.SECONDARY);
+        DEFAULT_COLLATOR = collator;
+    }
+
+    private final Collator collator;
+
+    private final Locale locale;
+
     /**
-     * Default constructor.
+     * Default constructor with default location US.
      */
     public AlphanumComparator() {
+        this(null);
+    }
+
+    /**
+     * Initializes a new {@link AlphanumComparator}.
+     * 
+     * @param locale The locale
+     */
+    public AlphanumComparator(final Locale locale) {
         super();
+        if (null == locale) {
+            collator = DEFAULT_COLLATOR;
+            this.locale = DEFAULT_LOCALE;
+        } else {
+            this.locale = locale;
+            collator = Collator.getInstance(locale);
+            collator.setStrength(Collator.SECONDARY);
+        }
     }
 
     /**
@@ -94,7 +127,7 @@ public class AlphanumComparator implements Comparator<String> {
                     }
                 }
             } else {
-                result = thisChunk.compareToIgnoreCase(thatChunk);
+                result = collator.compare(thisChunk.toLowerCase(locale), thatChunk.toLowerCase(locale));
             }
             if (result != 0) {
                 return result;

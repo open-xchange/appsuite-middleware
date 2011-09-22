@@ -7,6 +7,7 @@ Bundle-Vendor: Open-Xchange Inc
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.cache,
  com.openexchange.caching,
+ com.openexchange.caching.dynamic,
  com.openexchange.context,
  com.openexchange.crypto,
  com.openexchange.database,
@@ -31,6 +32,9 @@ Import-Package: com.openexchange.cache,
  com.openexchange.tools.session,
  com.openexchange.tools.sql,
  gnu.trove,
+ gnu.trove.list,
+ gnu.trove.list.array,
+ gnu.trove.procedure,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker

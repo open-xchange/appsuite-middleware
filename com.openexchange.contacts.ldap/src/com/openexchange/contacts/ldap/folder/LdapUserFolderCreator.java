@@ -116,7 +116,7 @@ public class LdapUserFolderCreator implements LoginHandlerService {
 //            /*
 //             * Create folder
 //             */
-//            final String name = new StringHelper(login.getUser().getLocale()).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
+//            final String name = StringHelper.valueOf(login.getUser().getLocale()).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
 //            final int parent = new OXFolderAccess(login.getContext()).getDefaultFolder(userId, FolderObject.CONTACT).getObjectID();
 //            final int collectFolderID = OXFolderManager.getInstance(session).createFolder(
 //                createNewContactFolder(userId, name, parent),

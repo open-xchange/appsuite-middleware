@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.smal;
 
+import java.util.Arrays;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.IndexRange;
@@ -74,7 +75,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link SMALMessageStorage}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SMALMessageStorage extends AbstractSMALStorage implements IMailMessageStorage, IMailMessageStorageExt, IMailMessageStorageBatch {
@@ -86,7 +87,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
 
     /**
      * Initializes a new {@link SMALMessageStorage}.
-     * 
+     *
      * @throws OXException If init fails
      */
     public SMALMessageStorage(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess) throws OXException {
@@ -122,10 +123,12 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
         System.out.println("SMALMessageStorage.searchMessages()...");
         final IndexAdapter indexAdapter = getIndexAdapter();
         if (null == indexAdapter) {
+            System.out.println("MISSING INDEX ADAPTER!");
             return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
         }
         final MailFields mfs = new MailFields(fields);
         if (!indexAdapter.getIndexableFields().containsAll(mfs)) {
+            System.out.println("REQUESTED ONE OR MORE NON.INDEXED FIELDS: " + Arrays.toString(mfs.toArray()));
             return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
         }
         final long st = System.currentTimeMillis();
@@ -134,13 +137,21 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
             /*
              * Return current index state...
              */
-            final List<MailMessage> mails = indexAdapter.search(folder, searchTerm, sortField, order, accountId, session);
-            
-            System.out.println("SMALMessageStorage.searchMessages() retrieved " + mails.size() + " messages from index for " + folder);
-            
+            final List<MailMessage> mails = indexAdapter.search(folder, searchTerm, sortField, order, fields, accountId, session);
+            /*
+             * Schedule folder task
+             */
+            final boolean scheduled = JobQueue.getInstance().addJob(new FolderJob(folder, accountId, userId, contextId).setSpan(-1L));
+
+            System.out.println("SMALMessageStorage.searchMessages() retrieved " + mails.size() + " messages from index for " + folder + (scheduled ? " AND scheduled an immediate folder job." : ""));
+
             return mails.toArray(new MailMessage[mails.size()]);
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
+
+            System.out.println("AN ERROR OCCURRED RETRIEVING MAILS FROM INDEX!");
+            e.printStackTrace(System.out);
+
             return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
         } finally {
             final long dur = System.currentTimeMillis() - st;
@@ -216,6 +227,26 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
     private static IndexAdapter getIndexAdapter() {
         final IndexService indexService = SMALServiceLookup.getServiceStatic(IndexService.class);
         return null == indexService ? null : indexService.getAdapter();
+    }
+
+    /**
+     * The fields containing only the mail identifier.
+     */
+    protected static final MailField[] FIELDS_ID_AND_FOLDER = new MailField[] { MailField.ID, MailField.FOLDER_ID };
+
+    @Override
+    public MailMessage[] getMessagesByMessageID(final String... messageIDs) throws OXException {
+        if (messageStorage instanceof IMailMessageStorageExt) {
+            final IMailMessageStorageExt messageStorageExt = (IMailMessageStorageExt) messageStorage;
+            return messageStorageExt.getMessagesByMessageID(messageIDs);
+        }
+        final SearchTerm<?> searchTerm;
+        if (1 == messageIDs.length) {
+            searchTerm = new com.openexchange.mail.search.HeaderTerm("Message-ID", messageIDs[0]);
+        } else {
+            return EMPTY_RETVAL;
+        }
+        return messageStorage.searchMessages("INBOX", IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.ASC, searchTerm, FIELDS_ID_AND_FOLDER);
     }
 
     private static final MailField[] FIELDS_HEADERS = { MailField.ID, MailField.HEADERS };

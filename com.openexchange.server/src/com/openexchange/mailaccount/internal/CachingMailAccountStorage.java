@@ -60,10 +60,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import com.openexchange.cache.dynamic.impl.OXObjectFactory;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
+import com.openexchange.caching.dynamic.OXObjectFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mailaccount.Attribute;
@@ -216,17 +216,17 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         }
         final CacheKey key = newCacheKey(cacheService, id, user, cid);
         final Cache cache = cacheService.getCache(REGION_NAME);
-        if (cache.get(key) == null) {
-            /*
-             * Not contained in cache. Load with specified connection
-             */
-            final MailAccount mailAccount = delegate.getMailAccount(id, user, cid, con);
-            cacheLock.lock();
-            try {
+        cacheLock.lock();
+        try {
+            if (cache.get(key) == null) {
+                /*
+                 * Not contained in cache. Load with specified connection
+                 */
+                final MailAccount mailAccount = delegate.getMailAccount(id, user, cid, con);
                 cache.put(key, mailAccount);
-            } finally {
-                cacheLock.unlock();
             }
+        } finally {
+            cacheLock.unlock();
         }
         /*
          * Return reloading mail account
@@ -342,6 +342,10 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     @Override
     public void migratePasswords(final int user, final int cid, final String oldSecret, final String newSecret) throws OXException {
         delegate.migratePasswords(user, cid, oldSecret, newSecret);
+        final int[] ids = delegate.getUserMailAccountIDs(user, cid);
+        for (int id : ids) {
+            invalidateMailAccount(id, user, cid);
+        }
     }
 
 }

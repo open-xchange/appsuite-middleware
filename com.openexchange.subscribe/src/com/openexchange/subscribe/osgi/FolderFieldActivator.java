@@ -53,7 +53,7 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
-import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
+import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.folders.HasSubscriptions;
 
 
@@ -65,14 +65,11 @@ import com.openexchange.subscribe.folders.HasSubscriptions;
  */
 public class FolderFieldActivator implements BundleActivator {
 
-    public static SubscriptionSourceDiscoveryService DISCOVERY;
-
     private ServiceRegistration<AdditionalFolderField> registerService;
 
     @Override
     public void start(final BundleContext context) throws Exception {
-        registerService = context.registerService(AdditionalFolderField.class, new HasSubscriptions(DISCOVERY), null);
-
+        registerService = context.registerService(AdditionalFolderField.class, new HasSubscriptions(AbstractSubscribeService.STORAGE), null);
     }
 
     @Override

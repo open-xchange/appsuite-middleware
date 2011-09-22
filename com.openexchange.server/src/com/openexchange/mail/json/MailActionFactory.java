@@ -97,7 +97,7 @@ public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHan
      */
     public MailActionFactory(final ServiceLookup services) {
         super();
-        actions = new ConcurrentHashMap<String, AbstractMailAction>(8);
+        actions = new ConcurrentHashMap<String, AbstractMailAction>(22);
         actions.put("all", new AllAction(services));
         actions.put("get", new GetAction(services));
         actions.put("get_structure", new GetStructureAction(services));

@@ -49,7 +49,8 @@
 
 package com.openexchange.tools.service;
 
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -70,11 +71,11 @@ public class SpecificServiceChooser<T> {
 
     private final SortedSet<WeightedRegistration<T>> general = new TreeSet<WeightedRegistration<T>>();
 
-    private final TIntObjectHashMap<SortedSet<WeightedRegistration<T>>> contextSpecific = new TIntObjectHashMap<SortedSet<WeightedRegistration<T>>>();
+    private final TIntObjectMap<SortedSet<WeightedRegistration<T>>> contextSpecific = new TIntObjectHashMap<SortedSet<WeightedRegistration<T>>>();
 
     private final Map<String, SortedSet<WeightedRegistration<T>>> folderSpecific = new HashMap<String, SortedSet<WeightedRegistration<T>>>();
 
-    private final TIntObjectHashMap<Map<String, SortedSet<WeightedRegistration<T>>>> contextAndFolderSpecific = new TIntObjectHashMap<Map<String, SortedSet<WeightedRegistration<T>>>>();
+    private final TIntObjectMap<Map<String, SortedSet<WeightedRegistration<T>>>> contextAndFolderSpecific = new TIntObjectHashMap<Map<String, SortedSet<WeightedRegistration<T>>>>();
 
     public SpecificServiceChooser() {
         super();

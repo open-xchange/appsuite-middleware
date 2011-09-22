@@ -109,13 +109,15 @@ import com.openexchange.tools.TimeZoneUtils;
 
 /**
  * {@link JSONMessageHandler} - Generates a JSON message representation considering user-sensitive data.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JSONMessageHandler implements MailMessageHandler {
 
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(JSONMessageHandler.class));
+
+    private static final String VIRTUAL = "___VIRTUAL___";
 
     private static final class PlainTextContent {
 
@@ -176,9 +178,11 @@ public final class JSONMessageHandler implements MailMessageHandler {
 
     private final int ttlMillis;
 
+    private boolean attachHTMLAlternativePart;
+
     /**
      * Initializes a new {@link JSONMessageHandler}
-     * 
+     *
      * @param accountId The account ID
      * @param mailPath The unique mail path
      * @param displayMode The display mode
@@ -189,6 +193,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
      */
     public JSONMessageHandler(final int accountId, final String mailPath, final DisplayMode displayMode, final Session session, final UserSettingMail usm, final boolean token, final int ttlMillis) throws OXException {
         super();
+        attachHTMLAlternativePart = !usm.isSuppressHTMLAlternativePart();
         this.accountId = accountId;
         modified = new boolean[1];
         this.session = session;
@@ -203,7 +208,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 
     /**
      * Initializes a new {@link JSONMessageHandler}
-     * 
+     *
      * @param accountId The account ID
      * @param mailPath The unique mail path
      * @param mail The mail message to add JSON fields not set by message parser traversal
@@ -232,6 +237,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
      */
     private JSONMessageHandler(final int accountId, final MailPath mailPath, final MailMessage mail, final DisplayMode displayMode, final Session session, final UserSettingMail usm, final Context ctx, final boolean token, final int ttlMillis) throws OXException {
         super();
+        attachHTMLAlternativePart = !usm.isSuppressHTMLAlternativePart();
         this.ttlMillis = ttlMillis;
         this.token = token;
         this.accountId = accountId;
@@ -269,6 +275,17 @@ public final class JSONMessageHandler implements MailMessageHandler {
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
+    }
+
+    /**
+     * Sets whether the HTML part of a <i>multipart/alternative</i> content shall be attached.
+     * 
+     * @param attachHTMLAlternativePart Whether the HTML part of a <i>multipart/alternative</i> content shall be attached
+     * @return The {@link JSONMessageHandler} with new behavior applied
+     */
+    public JSONMessageHandler setAttachHTMLAlternativePart(final boolean attachHTMLAlternativePart) {
+        this.attachHTMLAlternativePart = attachHTMLAlternativePart;
+        return this;
     }
 
     private JSONArray getAttachmentsArr() throws JSONException {
@@ -537,7 +554,14 @@ public final class JSONMessageHandler implements MailMessageHandler {
                     /*
                      * Add HTML alternative part as attachment
                      */
-                    asAttachment(id, contentType.getBaseType(), htmlContent.length(), fileName, null);
+                    if (attachHTMLAlternativePart) {
+                        try {
+                            final JSONObject attachment = asAttachment(id, contentType.getBaseType(), htmlContent.length(), fileName, null);
+                            attachment.put(VIRTUAL, true);
+                        } catch (final JSONException e) {
+                            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+                        }
+                    }
                 } else if (DisplayMode.RAW.equals(displayMode)) {
                     /*
                      * Return HTML content as-is
@@ -809,8 +833,11 @@ public final class JSONMessageHandler implements MailMessageHandler {
                 for (int i = 0; i < len; i++) {
                     final JSONObject attachment = attachments.getJSONObject(i);
                     if (attachment.hasAndNotNull(dispKey) && Part.ATTACHMENT.equalsIgnoreCase(attachment.getString(dispKey))) {
-                        jsonObject.put(MailJSONField.HAS_ATTACHMENTS.getKey(), true);
-                        i = len;
+                        if (attachment.hasAndNotNull(VIRTUAL) && attachment.getBoolean(VIRTUAL)) {
+                            attachment.remove(VIRTUAL);
+                        } else {
+                            jsonObject.put(MailJSONField.HAS_ATTACHMENTS.getKey(), true);
+                        }
                     }
                 }
             }
@@ -876,6 +903,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
             }
             final JSONMessageHandler msgHandler =
                 new JSONMessageHandler(accountId, null, null, displayMode, session, usm, ctx, token, ttlMillis);
+            msgHandler.attachHTMLAlternativePart = attachHTMLAlternativePart;
             msgHandler.tokenFolder = tokenFolder;
             msgHandler.tokenMailId = tokenMailId;
             new MailMessageParser().parseMailMessage(nestedMail, msgHandler, id);
@@ -1082,7 +1110,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 
     /**
      * Gets the filled instance of {@link JSONObject}
-     * 
+     *
      * @return The filled instance of {@link JSONObject}
      */
     public JSONObject getJSONObject() {

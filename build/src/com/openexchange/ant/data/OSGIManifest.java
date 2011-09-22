@@ -52,13 +52,19 @@ package com.openexchange.ant.data;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
+/**
+ * Represents the possible values in a MANIFEST.MF file.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
 public class OSGIManifest {
+
     public static final String MANIFEST_VERSION = "Manifest-Version";
     public static final String BUNDLE_MANIFEST_VERSION = "Bundle-ManifestVersion";
     public static final String BUNDLE_SYMBOLIC_NAME = "Bundle-SymbolicName";
@@ -75,20 +81,20 @@ public class OSGIManifest {
     public static final String FRAGMENT_HOST = "Fragment-Host";
     public static final String BUNDLE_CLASSPATH = "Bundle-ClassPath";
 
-    protected Attributes fEntries;
+    protected final Attributes fEntries;
 
-    public OSGIManifest(File file) throws IOException {
-        FileInputStream stream = new FileInputStream(file);
-        Manifest manifest = new Manifest(stream);
+    public OSGIManifest(final File file) throws IOException {
+        final FileInputStream stream = new FileInputStream(file);
+        final Manifest manifest = new Manifest(stream);
         fEntries = manifest.getMainAttributes();
         stream.close();
     }
 
-    public OSGIManifest(Manifest manifest) {
+    public OSGIManifest(final Manifest manifest) {
         this.fEntries = manifest.getMainAttributes();
     }
 
-    public String getEntry(String key) {
+    public String getEntry(final String key) {
         String value = fEntries.getValue(key);
         if (value != null && value.indexOf(';') != -1) {
             value = value.substring(0, value.indexOf(';'));
@@ -96,15 +102,17 @@ public class OSGIManifest {
         return value;
     }
 
-    public Set<String> getListEntry(String key) {
-        String value = fEntries.getValue(key);
-        Set<String> tokens = new LinkedHashSet<String>();
+    public Set<String> getListEntry(final String key) {
+        final String value = fEntries.getValue(key);
+        final Set<String> tokens = new HashSet<String>();
         if (value != null) {
-            StringTokenizer tokenizer = new StringTokenizer(value, ",");
+            final StringTokenizer tokenizer = new StringTokenizer(value, ",");
             while (tokenizer.hasMoreTokens()) {
                 String token = tokenizer.nextToken();
-                if (token.indexOf(';') != -1) // in case of version specification
+                if (token.indexOf(';') != -1) {
+                    // in case of version specification
                     token = token.substring(0, token.indexOf(';'));
+                }
                 tokens.add(token.trim());
             }
         }

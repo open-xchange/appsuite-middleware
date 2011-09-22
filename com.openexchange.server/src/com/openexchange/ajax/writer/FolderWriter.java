@@ -50,7 +50,8 @@
 package com.openexchange.ajax.writer;
 
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.sql.SQLException;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -142,7 +143,7 @@ public final class FolderWriter extends DataWriter {
         public abstract void writeField(JSONWriter jsonwriter, FolderObject fo, boolean withKey, String name, int hasSubfolders) throws JSONException, SQLException, OXException;
     }
 
-    private static final TIntObjectHashMap<FolderFieldWriter> STATIC_WRITERS_MAP = new TIntObjectHashMap<FolderFieldWriter>(15);
+    private static final TIntObjectMap<FolderFieldWriter> STATIC_WRITERS_MAP = new TIntObjectHashMap<FolderFieldWriter>(15);
 
     static {
         STATIC_WRITERS_MAP.put(FolderObject.OBJECT_ID, new FolderFieldWriter() {

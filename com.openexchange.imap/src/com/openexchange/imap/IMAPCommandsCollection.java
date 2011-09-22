@@ -50,11 +50,16 @@
 package com.openexchange.imap;
 
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
-import gnu.trove.TIntArrayList;
-import gnu.trove.TIntHashSet;
-import gnu.trove.TIntLongHashMap;
-import gnu.trove.TLongArrayList;
-import gnu.trove.TLongIntHashMap;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.TLongList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.list.array.TLongArrayList;
+import gnu.trove.map.TLongIntMap;
+import gnu.trove.map.hash.TIntLongHashMap;
+import gnu.trove.map.hash.TLongIntHashMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -1165,15 +1170,9 @@ public final class IMAPCommandsCollection {
                 if (response.isOK()) {
                     return Boolean.TRUE;
                 } else if (response.isBAD()) {
-                    throw new BadCommandException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        command,
-                        response.toString()));
+                    throw new BadCommandException(response.toString());
                 } else if (response.isNO()) {
-                    throw new CommandFailedException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        command,
-                        response.toString()));
+                    throw new CommandFailedException(response.toString());
                 } else {
                     protocol.handleResult(response);
                 }
@@ -1617,9 +1616,9 @@ public final class IMAPCommandsCollection {
                                     /*
                                      * Sort all
                                      */
-                                    final TIntHashSet set = new TIntHashSet(tmp);
+                                    final TIntSet set = new TIntHashSet(tmp);
                                     tmp = IMAPCommandsCollection.getServerSortList(imapFolder, sortCriteria);
-                                    final TIntArrayList list = new TIntArrayList(limit);
+                                    final TIntList list = new TIntArrayList(limit);
                                     for (int i = 0, k = 0; i < tmp.length && k < limit; i++) {
                                         final int seqNum = tmp[i];
                                         if (set.contains(seqNum)) {
@@ -1627,7 +1626,7 @@ public final class IMAPCommandsCollection {
                                             k++;
                                         }
                                     }
-                                    tmp = list.toNativeArray();
+                                    tmp = list.toArray();
                                 } else {
                                     /*
                                      * Sort specified sequence numbers
@@ -2180,7 +2179,7 @@ public final class IMAPCommandsCollection {
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
                 Response[] r = null;
                 Response response = null;
-                final TLongArrayList uids = new TLongArrayList(messageCount);
+                final TLongList uids = new TLongArrayList(messageCount);
                 /*-
                  * Arguments:  sequence set
                  * message data item names or macro
@@ -2217,7 +2216,7 @@ public final class IMAPCommandsCollection {
                 } else {
                     p.handleResult(response);
                 }
-                return uids.toNativeArray();
+                return uids.toArray();
             }
 
         }));
@@ -2321,7 +2320,7 @@ public final class IMAPCommandsCollection {
      * @return A map resolving specified UIDs to current corresponding sequence numbers
      * @throws MessagingException If a messaging error occurs
      */
-    public static TLongIntHashMap uids2SeqNumsMap(final IMAPFolder imapFolder, final long[] uids) throws MessagingException {
+    public static TLongIntMap uids2SeqNumsMap(final IMAPFolder imapFolder, final long[] uids) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount == 0) {
             /*
@@ -2329,7 +2328,7 @@ public final class IMAPCommandsCollection {
              */
             return new TLongIntHashMap(0);
         }
-        return (TLongIntHashMap) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+        return (TLongIntMap) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
@@ -2863,44 +2862,50 @@ public final class IMAPCommandsCollection {
     private static final String COMMAND_FETCH_ENV_UID = "FETCH 1:* (ENVELOPE UID)";
 
     /**
-     * Finds corresponding UID of message whose Message-ID header matches given message ID.
+     * Finds corresponding UIDs of messages whose Message-ID header is contained in given message IDs.
      *
-     * @param messageId The message ID
-     * @param imapFolder The IMAP folder
-     * @return The UID of matching message or <code>-1</code> if none found
+     * @param imapFolder The IMAP folder to search in
+     * @param messageIds The message IDs
+     * @return The UIDs of matching message or <code>-1</code> if none found
      * @throws MessagingException
      */
-    public static long messageId2UID(final String messageId, final IMAPFolder imapFolder) throws MessagingException {
-        if ((messageId == null) || (messageId.length() == 0)) {
-            return -1L;
+    public static long[] messageId2UID(final IMAPFolder imapFolder, final String... messageIds) throws MessagingException {
+        if (0 == messageIds.length) {
+            return new long[0];
         }
         if (imapFolder.getMessageCount() == 0) {
-            return -1L;
+            final long[] uids = new long[messageIds.length];
+            Arrays.fill(uids, -1);
+            return uids;
         }
-        final Long retval = (Long) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+        return (long[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
-            /*
-             * (non-Javadoc)
-             * @see com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com.sun .mail.imap.protocol.IMAPProtocol)
-             */
             @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
                 final Response[] r = p.command(COMMAND_FETCH_ENV_UID, null);
                 final Response response = r[r.length - 1];
                 final Long retval = Long.valueOf(-1L);
                 if (response.isOK()) {
+                    final TObjectIntHashMap<String> map = new TObjectIntHashMap<String>(messageIds.length);
+                    for (int i = 0; i < messageIds.length; i++) {
+                        map.put(messageIds[i], i + 1);
+                    }
+                    final long[] uids = new long[messageIds.length];
+                    Arrays.fill(uids, -1);
                     for (int i = 0, len = r.length - 1; i < len; i++) {
                         if (!(r[i] instanceof FetchResponse)) {
                             continue;
                         }
                         final FetchResponse fetchResponse = (FetchResponse) r[i];
-                        if (messageId.equals(getItemOf(ENVELOPE.class, fetchResponse, "ENVELOPE").messageId)) {
+                        final int num = map.get(getItemOf(ENVELOPE.class, fetchResponse, "ENVELOPE").messageId);
+                        if (num > 0) {
                             final UID uidItem = getItemOf(UID.class, fetchResponse, STR_UID);
-                            return Long.valueOf(uidItem.uid);
+                            uids[num - 1] = uidItem.uid;
                         }
                         r[i] = null;
                     }
                     p.notifyResponseHandlers(r);
+                    return uids;
                 } else if (response.isBAD()) {
                     throw new BadCommandException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
@@ -2917,7 +2922,6 @@ public final class IMAPCommandsCollection {
                 return retval;
             }
         });
-        return retval.longValue();
     }
 
     private static final Pattern PATTERN_QUOTE_ARG = Pattern.compile("[\\s\\*%\\(\\)\\{\\}\"\\\\]");

@@ -50,9 +50,12 @@
 package com.openexchange.ajax.request;
 
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
-import gnu.trove.TIntArrayList;
-import gnu.trove.TIntIntHashMap;
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -514,7 +517,7 @@ public class AppointmentRequest extends CalendarRequest {
 
         SearchIterator<Appointment> it = null;
 
-        final TIntObjectHashMap<TIntArrayList> recurrencePositionMap = new TIntObjectHashMap<TIntArrayList>();
+        final TIntObjectMap<TIntArrayList> recurrencePositionMap = new TIntObjectHashMap<TIntArrayList>();
 
         final String[] sColumns = split(DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS));
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
@@ -527,7 +530,7 @@ public class AppointmentRequest extends CalendarRequest {
 
         final boolean bRecurrenceMaster = DataParser.parseBoolean(jsonObj, RECURRENCE_MASTER);
 
-        final TIntIntHashMap objectIdMap = new TIntIntHashMap();
+        final TIntIntMap objectIdMap = new TIntIntHashMap();
         for (int a = 0; a < jData.length(); a++) {
             JSONObject jObject = null;
             try {
@@ -612,7 +615,7 @@ public class AppointmentRequest extends CalendarRequest {
                         // Commented this because this is done in CalendarOperation.next():726 that calls extractRecurringInformation()
                         // appointment.calculateRecurrence();
                         if (recurrencePositionMap.containsKey(appointment.getObjectID())) {
-                            final TIntArrayList recurrencePosList = recurrencePositionMap.get(appointment.getObjectID());
+                            final TIntList recurrencePosList = recurrencePositionMap.get(appointment.getObjectID());
 
                             final int listSize = recurrencePosList.size();
                             for (int a = 0; a < listSize; a++) {
@@ -622,7 +625,7 @@ public class AppointmentRequest extends CalendarRequest {
                                     appointment,
                                     0,
                                     0,
-                                    recurrencePosList.getQuick(a));
+                                    recurrencePosList.get(a));
                                 if (recuResults.size() > 0) {
                                     final RecurringResultInterface result = recuResults.getRecurringResult(0);
                                     appointment.setStartDate(new Date(result.getStart()));

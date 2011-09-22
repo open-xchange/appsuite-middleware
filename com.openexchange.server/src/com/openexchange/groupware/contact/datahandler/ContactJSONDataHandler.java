@@ -150,6 +150,7 @@ public final class ContactJSONDataHandler implements DataHandler {
                     /*
                      * Convert to a contact object
                      */
+                    converter.setAddDisplayName4DList(true);
                     final Contact contact = converter.convertContact(versitObject);
 					/*
 					 * Store contact object in JSON array

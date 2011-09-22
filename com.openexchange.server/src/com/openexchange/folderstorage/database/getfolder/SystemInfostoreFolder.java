@@ -49,7 +49,8 @@
 
 package com.openexchange.folderstorage.database.getfolder;
 
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -145,7 +146,7 @@ public final class SystemInfostoreFolder {
                     }
                 }
             }
-            final TIntArrayList subfolderIds = new TIntArrayList(size);
+            final TIntList subfolderIds = new TIntArrayList(size);
             final Iterator<FolderObject> iter = l.iterator();
             for (int i = 0; i < size; i++) {
                 subfolderIds.add(iter.next().getObjectID());
@@ -163,7 +164,7 @@ public final class SystemInfostoreFolder {
             if (hasNonTreeVisibleFolders) {
                 subfolderIds.add(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID);
             }
-            return subfolderIds.toNativeArray();
+            return subfolderIds.toArray();
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
@@ -211,7 +212,7 @@ public final class SystemInfostoreFolder {
                     }
                 }
             }
-            final StringHelper sh = new StringHelper(user.getLocale());
+            final StringHelper sh = StringHelper.valueOf(user.getLocale());
             final List<String[]> subfolderIds = new ArrayList<String[]>(size);
             final Iterator<FolderObject> iter = l.iterator();
             for (int i = 0; i < size; i++) {

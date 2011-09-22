@@ -50,9 +50,12 @@
 package com.openexchange.folderstorage.database;
 
 import static com.openexchange.folderstorage.database.DatabaseFolderStorageUtility.getUnsignedInteger;
-import gnu.trove.TIntArrayList;
-import gnu.trove.TIntHashSet;
-import gnu.trove.TIntIntHashMap;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.Collator;
@@ -127,7 +130,8 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class DatabaseFolderStorage implements FolderStorage {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DatabaseFolderStorage.class));
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DatabaseFolderStorage.class));
 
     /**
      * Simple interface for providing and closing a connection.
@@ -149,16 +153,22 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     private static final class NonClosingConnectionProvider implements ConnectionProvider {
 
-        private final Connection connection;
+        private final ConnectionMode connection;
 
-        protected NonClosingConnectionProvider(final Connection connection) {
+        private final DatabaseService databaseService;
+
+        private final int contextId;
+
+        protected NonClosingConnectionProvider(final ConnectionMode connection, final DatabaseService databaseService, final int contextId) {
             super();
             this.connection = connection;
+            this.databaseService = databaseService;
+            this.contextId = contextId;
         }
 
         @Override
         public Connection getConnection() {
-            return connection;
+            return connection.connection;
         }
 
         @Override
@@ -171,31 +181,28 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
         private final DatabaseService databaseService;
 
-        private final Connection connection;
-
-        private final boolean writeable;
+        private final ConnectionMode connection;
 
         private final int contextId;
 
-        protected ClosingConnectionProvider(final Connection connection, final boolean writeable, final DatabaseService databaseService, final int contextId) {
+        protected ClosingConnectionProvider(final ConnectionMode connection, final DatabaseService databaseService, final int contextId) {
             super();
             this.connection = connection;
             this.databaseService = databaseService;
-            this.writeable = writeable;
             this.contextId = contextId;
         }
 
         @Override
         public Connection getConnection() {
-            return connection;
+            return connection.connection;
         }
 
         @Override
         public void close() {
-            if (writeable) {
-                databaseService.backWritable(contextId, connection);
+            if (connection.readWrite) {
+                databaseService.backWritable(contextId, connection.connection);
             } else {
-                databaseService.backReadOnly(contextId, connection);
+                databaseService.backReadOnly(contextId, connection.connection);
             }
         }
     }
@@ -235,7 +242,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
              * Determine folder with non-existing parents
              */
             int[] nonExistingParents = OXFolderSQL.getNonExistingParents(session.getContext(), con);
-            final TIntHashSet shared = new TIntHashSet();
+            final TIntSet shared = new TIntHashSet();
             final OXFolderManager manager = OXFolderManager.getInstance(session, con, con);
             final OXFolderAccess folderAccess = getFolderAccess(storageParameters);
             final int userId = session.getUserId();
@@ -250,7 +257,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         }
                     }
                 }
-                final TIntHashSet tmp = new TIntHashSet(OXFolderSQL.getNonExistingParents(session.getContext(), con));
+                final TIntSet tmp = new TIntHashSet(OXFolderSQL.getNonExistingParents(session.getContext(), con));
                 tmp.removeAll(shared.toArray());
                 for (int i = 0; i < FolderObject.MIN_FOLDER_ID; i++) {
                     tmp.remove(i);
@@ -276,11 +283,9 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     @Override
     public void commitTransaction(final StorageParameters params) throws OXException {
-        final Connection con;
-        final Boolean writable;
+        final ConnectionMode con;
         try {
-            con = optParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, params);
-            writable = optParameter(Boolean.class, DatabaseParameterConstants.PARAM_WRITABLE, params);
+            con = optParameter(ConnectionMode.class, DatabaseParameterConstants.PARAM_CONNECTION, params);
         } catch (final OXException e) {
             /*
              * Already committed
@@ -294,22 +299,21 @@ public final class DatabaseFolderStorage implements FolderStorage {
             return;
         }
         try {
-            con.commit();
+            con.connection.commit();
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.autocommit(con);
+            DBUtils.autocommit(con.connection);
             final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class);
             if (null != databaseService) {
-                if (writable.booleanValue()) {
-                    databaseService.backWritable(params.getContext(), con);
+                if (con.readWrite) {
+                    databaseService.backWritable(params.getContext(), con.connection);
                 } else {
-                    databaseService.backReadOnly(params.getContext(), con);
+                    databaseService.backReadOnly(params.getContext(), con.connection);
                 }
             }
             final FolderType folderType = getFolderType();
             params.putParameter(folderType, DatabaseParameterConstants.PARAM_CONNECTION, null);
-            params.putParameter(folderType, DatabaseParameterConstants.PARAM_WRITABLE, null);
             params.markCommitted();
         }
     }
@@ -794,7 +798,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
             if (StorageType.WORKING.equals(storageType)) {
                 final int size = folderIdentifiers.size();
                 final Folder[] ret = new Folder[size];
-                final TIntIntHashMap map = new TIntIntHashMap(size);
+                final TIntIntMap map = new TIntIntHashMap(size);
                 /*
                  * Check for special folder identifier
                  */
@@ -855,13 +859,13 @@ public final class DatabaseFolderStorage implements FolderStorage {
             /*
              * Get from backup tables
              */
-            final TIntArrayList list = new TIntArrayList(folderIdentifiers.size());
+            final TIntList list = new TIntArrayList(folderIdentifiers.size());
             for (final String folderIdentifier : folderIdentifiers) {
                 list.add(getUnsignedInteger(folderIdentifier));
             }
             final List<FolderObject> folders =
                 OXFolderBatchLoader.loadFolderObjectsFromDB(
-                    list.toNativeArray(),
+                    list.toArray(),
                     ctx,
                     con,
                     true,
@@ -938,7 +942,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                      */
                     final FolderObject gab = getFolderObject(FolderObject.SYSTEM_LDAP_FOLDER_ID, ctx, con);
                     if (gab.isVisible(userId, userConfiguration)) {
-                        gab.setFolderName(new StringHelper(user.getLocale()).getString(FolderStrings.SYSTEM_LDAP_FOLDER_NAME));
+                        gab.setFolderName(StringHelper.valueOf(user.getLocale()).getString(FolderStrings.SYSTEM_LDAP_FOLDER_NAME));
                         list.add(gab);
                     }
                 } catch (final SQLException e) {
@@ -958,17 +962,17 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         final int module = folderObject.getModule();
                         if (FolderObject.CALENDAR == module) {
                             if (null == stringHelper) {
-                                stringHelper = new StringHelper(user.getLocale());
+                                stringHelper = StringHelper.valueOf(user.getLocale());
                             }
                             folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME));
                         } else if (FolderObject.CONTACT == module) {
                             if (null == stringHelper) {
-                                stringHelper = new StringHelper(user.getLocale());
+                                stringHelper = StringHelper.valueOf(user.getLocale());
                             }
                             folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CONTACT_FOLDER_NAME));
                         } else if (FolderObject.TASK == module) {
                             if (null == stringHelper) {
-                                stringHelper = new StringHelper(user.getLocale());
+                                stringHelper = StringHelper.valueOf(user.getLocale());
                             }
                             folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_TASK_FOLDER_NAME));
                         }
@@ -1225,11 +1229,9 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     @Override
     public void rollback(final StorageParameters params) {
-        final Connection con;
-        final Boolean writable;
+        final ConnectionMode con;
         try {
-            con = optParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, params);
-            writable = optParameter(Boolean.class, DatabaseParameterConstants.PARAM_WRITABLE, params);
+            con = optParameter(ConnectionMode.class, DatabaseParameterConstants.PARAM_CONNECTION, params);
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             return;
@@ -1238,45 +1240,64 @@ public final class DatabaseFolderStorage implements FolderStorage {
             return;
         }
         try {
-            DBUtils.rollback(con);
+            DBUtils.rollback(con.connection);
         } finally {
-            DBUtils.autocommit(con);
+            DBUtils.autocommit(con.connection);
             final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class);
             if (null != databaseService) {
-                if (writable.booleanValue()) {
-                    databaseService.backWritable(params.getContext(), con);
+                if (con.readWrite) {
+                    databaseService.backWritable(params.getContext(), con.connection);
                 } else {
-                    databaseService.backReadOnly(params.getContext(), con);
+                    databaseService.backReadOnly(params.getContext(), con.connection);
                 }
             }
             params.putParameter(getFolderType(), DatabaseParameterConstants.PARAM_CONNECTION, null);
-            params.putParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_WRITABLE, null);
         }
     }
 
     @Override
     public boolean startTransaction(final StorageParameters parameters, final boolean modify) throws OXException {
         final FolderType folderType = getFolderType();
-        if (null != parameters.getParameter(folderType, DatabaseParameterConstants.PARAM_CONNECTION)) {
-            // Connection already present
-            return false;
-        }
         try {
             final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
             final Context context = parameters.getContext();
-            final Connection con = modify ? databaseService.getWritable(context) : databaseService.getReadOnly(context);
-            con.setAutoCommit(false);
+            ConnectionMode con = parameters.getParameter(folderType, DatabaseParameterConstants.PARAM_CONNECTION);
+            if (null != con) {
+                if (modify == con.readWrite) {
+                    // Connection already present in proper access mode
+                    return false;
+                }
+                /*-
+                 * Connection in wrong access mode:
+                 *
+                 * commit, restore auto-commit & push to pool
+                 */
+                parameters.putParameter(getFolderType(), DatabaseParameterConstants.PARAM_CONNECTION, null);
+                try {
+                    con.connection.commit();
+                } catch (final Exception e) {
+                    // Ignore
+                    DBUtils.rollback(con.connection);
+                }
+                DBUtils.autocommit(con.connection);
+                if (con.readWrite) {
+                    databaseService.backWritable(context, con.connection);
+                } else {
+                    databaseService.backReadOnly(context, con.connection);
+                }
+            }
+            con = modify ? new ConnectionMode(databaseService.getWritable(context), true) : new ConnectionMode(databaseService.getReadOnly(context), false);
+            con.connection.setAutoCommit(false);
             // Put to parameters
             if (parameters.putParameterIfAbsent(folderType, DatabaseParameterConstants.PARAM_CONNECTION, con)) {
                 // Success
-                parameters.putParameterIfAbsent(folderType, DatabaseParameterConstants.PARAM_WRITABLE, Boolean.valueOf(modify));
             } else {
                 // Fail
-                con.setAutoCommit(true);
+                con.connection.setAutoCommit(true);
                 if (modify) {
-                    databaseService.backWritable(context, con);
+                    databaseService.backWritable(context, con.connection);
                 } else {
-                    databaseService.backReadOnly(context, con);
+                    databaseService.backReadOnly(context, con.connection);
                 }
             }
             return true;
@@ -1300,9 +1321,10 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
             if (DatabaseFolderStorageUtility.hasSharedPrefix(id)) {
                 final int owner = Integer.parseInt(id.substring(FolderObject.SHARED_PREFIX.length()));
-                throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(OXFolderUtility.getUserName(
-                    session.getUserId(),
-                    context), UserStorage.getStorageUser(owner, context).getDisplayName(), Integer.valueOf(context.getContextId()));
+                throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(
+                    OXFolderUtility.getUserName(session.getUserId(), context),
+                    UserStorage.getStorageUser(owner, context).getDisplayName(),
+                    Integer.valueOf(context.getContextId()));
             }
 
             final int folderId = Integer.parseInt(id);
@@ -1577,7 +1599,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
          */
         final int length = folderIds.length;
         final FolderObject[] ret = new FolderObject[length];
-        final TIntIntHashMap toLoad = new TIntIntHashMap(length);
+        final TIntIntMap toLoad = new TIntIntHashMap(length);
         final FolderCacheManager cacheManager = FolderCacheManager.getInstance();
         for (int index = 0; index < length; index++) {
             final int folderId = folderIds[index];
@@ -1628,14 +1650,14 @@ public final class DatabaseFolderStorage implements FolderStorage {
     }
 
     private static ConnectionProvider getConnection(final boolean modify, final StorageParameters storageParameters) throws OXException {
-        Connection connection = optParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
-        if (null != connection) {
-            return new NonClosingConnectionProvider(connection);
-        }
         final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
         final Context context = storageParameters.getContext();
-        connection = modify ? databaseService.getWritable(context) : databaseService.getReadOnly(context);
-        return new ClosingConnectionProvider(connection, modify, databaseService, context.getContextId());
+        ConnectionMode connection = optParameter(ConnectionMode.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+        if (null != connection) {
+            return new NonClosingConnectionProvider(connection, databaseService, context.getContextId());
+        }
+        connection = modify ? new ConnectionMode(databaseService.getWritable(context), true) : new ConnectionMode(databaseService.getReadOnly(context), false);
+        return new ClosingConnectionProvider(connection, databaseService, context.getContextId());
     }
 
     private static <T> T getParameter(final Class<T> clazz, final String name, final StorageParameters parameters) throws OXException {
@@ -1779,5 +1801,30 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
 
     } // End of FolderNameComparator
+
+    public static final class ConnectionMode {
+
+        /**
+         * The connection.
+         */
+        public final Connection connection;
+
+        /**
+         * Whether connection is read-write or read-only.
+         */
+        public final boolean readWrite;
+
+        /**
+         * Initializes a new {@link ConnectionMode}.
+         *
+         * @param connection
+         * @param readWrite
+         */
+        public ConnectionMode(final Connection connection, final boolean readWrite) {
+            super();
+            this.connection = connection;
+            this.readWrite = readWrite;
+        }
+    }
 
 }

@@ -94,6 +94,21 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
     }
 
     @Override
+    public int getMaxNumConnection() {
+        final String tmp = properties.get("com.openexchange.imap.maxNumConnections");
+        if (null == tmp) {
+            return IMAPProperties.getInstance().getMaxNumConnection();
+        }
+
+        try {
+            return Integer.parseInt(tmp.trim());
+        } catch (final NumberFormatException e) {
+            LOG.error("Max. Number of connections: Invalid value.", e);
+            return IMAPProperties.getInstance().getMaxNumConnection();
+        }
+    }
+
+    @Override
     public String getImapAuthEnc() {
         String imapAuthEncStr = properties.get("com.openexchange.imap.imapAuthEnc");
         if (null == imapAuthEncStr) {

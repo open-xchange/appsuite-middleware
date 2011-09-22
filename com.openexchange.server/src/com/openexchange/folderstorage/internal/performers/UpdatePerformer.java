@@ -225,7 +225,7 @@ public final class UpdatePerformer extends AbstractPerformer {
                  * Check for forbidden public mail folder
                  */
                 {
-                    final boolean started2 = newRealParentStorage.startTransaction(storageParameters, false);
+                    final boolean started2 = newRealParentStorage.startTransaction(storageParameters, true);
                     try {
                         final Folder newParent = newRealParentStorage.getFolder(FolderStorage.REAL_TREE_ID, newParentId, storageParameters);
                         if ((FolderStorage.PUBLIC_ID.equals(newParent.getID()) || PublicType.getInstance().equals(newParent.getType())) && "mail".equals(storageFolder.getContentType().toString())) {

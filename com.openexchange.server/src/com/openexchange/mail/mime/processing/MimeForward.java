@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime.processing;
 
+import static java.util.regex.Matcher.quoteReplacement;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -307,7 +308,7 @@ public final class MimeForward {
                 compositeMail.addAdditionalParts(mailPart);
             }
             forwardMail = compositeMail;
-        } else if (originalContentType.startsWith(TEXT)) {
+        } else if (originalContentType.startsWith(TEXT) && !MimeProcessingUtility.isSpecial(originalContentType.getBaseType())) {
             /*
              * Original message is a simple text mail: Add message body prefixed with forward text
              */
@@ -477,7 +478,7 @@ public final class MimeForward {
         for (int i = 0; i < count; i++) {
             final MailPart part = multipartPart.getEnclosedMailPart(i);
             partContentType.setContentType(part.getContentType());
-            if (partContentType.startsWith(TEXT) && MimeProcessingUtility.isInline(part, partContentType)) {
+            if (partContentType.startsWith(TEXT) && MimeProcessingUtility.isInline(part, partContentType) && !MimeProcessingUtility.isSpecial(contentType.getBaseType())) {
                 final String charset = MessageUtility.checkCharset(part, partContentType);
                 retvalContentType.setContentType(partContentType);
                 retvalContentType.setCharsetParameter(charset);
@@ -519,31 +520,31 @@ public final class MimeForward {
      * @return The forward text
      */
     private static String generateForwardText(final String firstSeenText, final LocaleAndTimeZone ltz, final MailMessage msg, final boolean html) {
-        final StringHelper strHelper = new StringHelper(ltz.locale);
+        final StringHelper strHelper = StringHelper.valueOf(ltz.locale);
         String forwardPrefix = strHelper.getString(MailStrings.FORWARD_PREFIX);
         {
             final InternetAddress[] from = msg.getFrom();
             forwardPrefix =
-                PATTERN_FROM.matcher(forwardPrefix).replaceFirst(from == null || from.length == 0 ? "" : from[0].toUnicodeString());
+                PATTERN_FROM.matcher(forwardPrefix).replaceFirst(from == null || from.length == 0 ? "" : quoteReplacement(from[0].toUnicodeString()));
         }
         {
             final InternetAddress[] to = msg.getTo();
             forwardPrefix =
-                PATTERN_TO.matcher(forwardPrefix).replaceFirst(to == null || to.length == 0 ? "" : MimeProcessingUtility.addrs2String(to));
+                PATTERN_TO.matcher(forwardPrefix).replaceFirst(to == null || to.length == 0 ? "" : quoteReplacement(MimeProcessingUtility.addrs2String(to)));
         }
         {
             final InternetAddress[] cc = msg.getCc();
             forwardPrefix =
                 PATTERN_CCLINE.matcher(forwardPrefix).replaceFirst(
-                    cc == null || cc.length == 0 ? "" : new StringBuilder(64).append("\nCc: ").append(
-                        MimeProcessingUtility.addrs2String(cc)).toString());
+                    cc == null || cc.length == 0 ? "" : quoteReplacement(new StringBuilder(64).append("\nCc: ").append(
+                        MimeProcessingUtility.addrs2String(cc)).toString()));
         }
         {
             final Date date = msg.getSentDate();
             try {
                 forwardPrefix =
                     PATTERN_DATE.matcher(forwardPrefix).replaceFirst(
-                        date == null ? "" : MimeProcessingUtility.getFormattedDate(date, DateFormat.LONG, ltz.locale, ltz.timeZone));
+                        date == null ? "" : quoteReplacement(MimeProcessingUtility.getFormattedDate(date, DateFormat.LONG, ltz.locale, ltz.timeZone)));
             } catch (final Exception t) {
                 if (LOG.isWarnEnabled()) {
                     LOG.warn(t.getMessage(), t);
@@ -553,7 +554,7 @@ public final class MimeForward {
             try {
                 forwardPrefix =
                     PATTERN_TIME.matcher(forwardPrefix).replaceFirst(
-                        date == null ? "" : MimeProcessingUtility.getFormattedTime(date, DateFormat.SHORT, ltz.locale, ltz.timeZone));
+                        date == null ? "" : quoteReplacement(MimeProcessingUtility.getFormattedTime(date, DateFormat.SHORT, ltz.locale, ltz.timeZone)));
             } catch (final Exception t) {
                 if (LOG.isWarnEnabled()) {
                     LOG.warn(t.getMessage(), t);
@@ -565,7 +566,7 @@ public final class MimeForward {
         {
             final String decodedSubject = MIMEMessageUtility.decodeMultiEncodedHeader(msg.getSubject());
             forwardPrefix =
-                PATTERN_SUBJECT.matcher(forwardPrefix).replaceFirst(decodedSubject == null ? "" : Matcher.quoteReplacement(decodedSubject));
+                PATTERN_SUBJECT.matcher(forwardPrefix).replaceFirst(decodedSubject == null ? "" : quoteReplacement(decodedSubject));
         }
         if (html) {
             forwardPrefix = HTMLProcessing.htmlFormat(forwardPrefix);

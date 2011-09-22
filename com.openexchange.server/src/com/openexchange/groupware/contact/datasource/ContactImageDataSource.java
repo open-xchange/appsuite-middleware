@@ -68,7 +68,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
  * {@link ContactImageDataSource} - A data source to obtains a contact's image data
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ContactImageDataSource implements ImageDataSource {
@@ -86,12 +86,11 @@ public final class ContactImageDataSource implements ImageDataSource {
     }
 
     @Override
-    public String generateUrl(final ImageLocation imageLocation, final Session session) {
+    public String generateUrl(final ImageLocation imageLocation, final Session session) throws OXException {
         final StringBuilder sb = new StringBuilder(64);
-        /*
-         * Nothing special...
-         */
         ImageUtility.startImageUrl(imageLocation, session, this, sb);
+        final Contact contact = getContact(imageLocation, session);
+        sb.append('&').append("timestamp=").append(contact.getLastModified().getTime());
         return sb.toString();
     }
 
@@ -104,8 +103,8 @@ public final class ContactImageDataSource implements ImageDataSource {
     }
 
     @Override
-    public boolean isETagEternal() {
-        return false;
+    public long getExpires() {
+        return -1L;
     }
 
     @Override

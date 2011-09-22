@@ -236,18 +236,6 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
     public static final int MSG_FORMAT_BOTH = 3;
 
-    public static final String STD_TRASH = "Trash";
-
-    public static final String STD_DRAFTS = "Drafts";
-
-    public static final String STD_SENT = "Sent";
-
-    public static final String STD_SPAM = "Spam";
-
-    public static final String STD_CONFIRMED_SPAM = "Confirmed Spam";
-
-    public static final String STD_CONFIRMED_HAM = "Confirmed Ham";
-
     /*-
      * Member fields
      */
@@ -258,6 +246,8 @@ public final class UserSettingMail implements Cloneable, Serializable {
     private boolean modifiedDuringSession;
 
     private boolean displayHtmlInlineContent;
+
+    private boolean suppressHTMLAlternativePart;
 
     private boolean useColorQuote;
 
@@ -570,6 +560,15 @@ public final class UserSettingMail implements Cloneable, Serializable {
     }
 
     /**
+     * Whether to suppress HTML parts in text-only mode for <i>multipart/alternative</i>.
+     * 
+     * @return <code>true</code> to suppress HTML parts in text-only mode for <i>multipart/alternative</i>; otherwise <code>false</code>
+     */
+    public boolean isSuppressHTMLAlternativePart() {
+        return suppressHTMLAlternativePart;
+    }
+
+    /**
      * Checks if a forwarded message is supposed to be added as an attachment; otherwise it is added inline.
      *
      * @return <code>true</code> if a forwarded message is supposed to be added as an attachment; otherwise <code>false</code> if it is
@@ -834,6 +833,15 @@ public final class UserSettingMail implements Cloneable, Serializable {
     public void setDisplayHtmlInlineContent(final boolean htmlPreview) {
         displayHtmlInlineContent = htmlPreview;
         modifiedDuringSession = true;
+    }
+
+    /**
+     * Sets whether to suppress HTML parts in text-only mode for <i>multipart/alternative</i>.
+     * 
+     * @param suppressHTMLAlternativePart <code>true</code> to suppress HTML parts in text-only mode for <i>multipart/alternative</i>; otherwise <code>false</code>
+     */
+    public void setSuppressHTMLAlternativePart(final boolean suppressHTMLAlternativePart) {
+        this.suppressHTMLAlternativePart = suppressHTMLAlternativePart;
     }
 
     public void setDisplayMsgHeaders(final String[] displayMsgHeaders) {

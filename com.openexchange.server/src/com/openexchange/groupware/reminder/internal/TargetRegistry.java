@@ -50,7 +50,8 @@
 package com.openexchange.groupware.reminder.internal;
 
 import static com.openexchange.java.Autoboxing.I;
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
@@ -67,7 +68,7 @@ public class TargetRegistry {
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TargetRegistry.class));
     private static final TargetRegistry SINGLETON = new TargetRegistry();
 
-    private final TIntObjectHashMap<TargetService> registry = new TIntObjectHashMap<TargetService>();
+    private final TIntObjectMap<TargetService> registry = new TIntObjectHashMap<TargetService>();
 
     private TargetRegistry() {
         super();
@@ -77,23 +78,23 @@ public class TargetRegistry {
         return SINGLETON;
     }
 
-    public TargetService getService(int module) throws OXException {
-        TargetService retval = registry.get(module);
+    public TargetService getService(final int module) throws OXException {
+        final TargetService retval = registry.get(module);
         if (null == retval) {
             throw ReminderExceptionCode.NO_TARGET_SERVICE.create(I(module));
         }
         return retval;
     }
 
-    public void addService(int module, TargetService targetService) {
-        TargetService previous = registry.putIfAbsent(module, targetService);
+    public void addService(final int module, final TargetService targetService) {
+        final TargetService previous = registry.putIfAbsent(module, targetService);
         if (null == previous) {
             return;
         }
         LOG.error("Duplicate registration of a reminder target service for module " + module + " with implementation " + targetService.getClass().getName() + ".");
     }
 
-    public void removeService(int module) {
+    public void removeService(final int module) {
         registry.remove(module);
     }
 }

@@ -189,7 +189,7 @@ public final class IMAPException extends OXException {
          */
         UPDATE_FAILED(IMAPCode.UPDATE_FAILED),
         /**
-         * Rename of folder "%1$s" to "%2$s" failed.
+         * Rename of folder "%1$s" to "%2$s" failed with "%3$s".
          */
         RENAME_FAILED(IMAPCode.RENAME_FAILED),
         /**
@@ -372,7 +372,7 @@ public final class IMAPException extends OXException {
 
         @Override
         public boolean equals(final OXException e) {
-            return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
+            return OXExceptionFactory.getInstance().equals(this, e);
         }
 
         /**
@@ -823,13 +823,13 @@ public final class IMAPException extends OXException {
          */
         SQL_ERROR("A SQL error occurred: %1$s", Category.CATEGORY_ERROR, 2052),
         /**
-         * Rename of folder "%1$s" to "%2$s" failed.
+         * Rename of folder "%1$s" to "%2$s" failed with "%3$s".
          */
-        RENAME_FAILED("Rename of folder \"%1$s\" to \"%2$s\" failed.", Category.CATEGORY_ERROR, 2053),
+        RENAME_FAILED("Rename of folder \"%1$s\" to \"%2$s\" failed with \"%3$s\".", Category.CATEGORY_ERROR, 2053),
         /**
          * Rename of folder "%1$s" to "%2$s" failed on server %3$s with login %4$s (user=%5$s, context=%6$s).
          */
-        RENAME_FAILED_EXT("Rename of folder \"%1$s\" to \"%2$s\" failed on server %3$s with login %4$s (user=%5$s, context=%6$s).", RENAME_FAILED),
+        RENAME_FAILED_EXT("Rename of folder \"%1$s\" to \"%2$s\" failed with \"%3$s\" on server %4$s with login %5$s (user=%6$s, context=%7$s).", RENAME_FAILED),
         /**
          * No rename access to mail folder %1$s
          */

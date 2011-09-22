@@ -49,7 +49,8 @@
 
 package com.openexchange.groupware.attach;
 
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.event.impl.AppointmentEventInterface;
 import com.openexchange.event.impl.ContactEventInterface;
@@ -141,7 +142,7 @@ public class AttachmentCleaner implements AppointmentEventInterface, TaskEventIn
                     sessionObj.getContext(),
                     null,
                     null);
-            final TIntArrayList ids = new TIntArrayList();
+            final TIntList ids = new TIntArrayList();
             iter = rs.results();
             if (!iter.hasNext()) {
                 return; // Shortcut
@@ -154,7 +155,7 @@ public class AttachmentCleaner implements AppointmentEventInterface, TaskEventIn
                 parentFolderID,
                 objectID,
                 type,
-                ids.toNativeArray(),
+                ids.toArray(),
                 sessionObj,
                 sessionObj.getContext(),
                 null,

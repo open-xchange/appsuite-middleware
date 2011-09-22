@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -178,6 +179,8 @@ public class LdapContactInterface implements ContactInterface {
 
     private Session session;
 
+    private Locale locale;
+
     public LdapContactInterface(final int context, final int admin_id, final FolderProperties folderprop, final int folderid, final LdapContactInterfaceProvider contactIFace) {
         this.context = context;
         this.admin_id = admin_id;
@@ -187,6 +190,12 @@ public class LdapContactInterface implements ContactInterface {
         this.attributes = getDistriAttributes(folderprop);
     }
 
+    private Locale getLocale() {
+        if (null == locale) {
+            locale = UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLocale();
+        }
+        return locale;
+    }
 
     private static String escapeLDAPSearchFilter(final String ldapfilter) {
         // According to RFC2254 section 4 we escape the following chars so that no LDAP injection can be made:
@@ -792,12 +801,12 @@ public class LdapContactInterface implements ContactInterface {
     private void sorting(final int orderBy, final Order order, final List<Contact> subList, final boolean specialSort) {
         if (Order.NO_ORDER != order && folderprop.getSorting().equals(Sorting.groupware)) {
             if (orderBy == Contact.USE_COUNT_GLOBAL_FIRST) {
-                java.util.Collections.sort(subList, new UseCountComparator(specialSort));
+                java.util.Collections.sort(subList, new UseCountComparator(specialSort, getLocale()));
                 if (Order.DESCENDING.equals(order)) {
                     java.util.Collections.reverse(subList);
                 }
             } else if (specialSort) {
-                java.util.Collections.sort(subList, new SpecialAlphanumSortContactComparator());
+                java.util.Collections.sort(subList, new SpecialAlphanumSortContactComparator(getLocale()));
                 if (Order.DESCENDING.equals(order)) {
                     java.util.Collections.reverse(subList);
                 }

@@ -74,7 +74,7 @@ public final class SingletonMailAccessCache implements IMailAccessCache {
 
     /**
      * Creates a new {@link SingletonMailAccessCache}
-     * 
+     *
      * @return A new {@link SingletonMailAccessCache}
      * @throws OXException If initialization fails
      */

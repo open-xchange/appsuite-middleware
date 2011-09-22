@@ -49,13 +49,15 @@
 
 package com.openexchange.groupware.update;
 
+import java.io.Serializable;
+
 /**
  * Interface to the data container for the update information of a database
  * schema.
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Schema {
+public interface Schema extends Serializable {
 
     static final int FINAL_VERSION = 200;
 

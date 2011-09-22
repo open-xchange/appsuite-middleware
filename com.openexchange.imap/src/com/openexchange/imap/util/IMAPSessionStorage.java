@@ -49,7 +49,8 @@
 
 package com.openexchange.imap.util;
 
-import gnu.trove.TLongHashSet;
+import gnu.trove.set.TLongSet;
+import gnu.trove.set.hash.TLongHashSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -153,9 +154,9 @@ final class IMAPSessionStorage {
                     dataMap.put(key, sessionData);
                 }
                 // Generate UID sets
-                final TLongHashSet actualUIDs = data2UIDSet(actualData);
-                final TLongHashSet dbUIDs = data2UIDSet(sessionData);
-                final TLongHashSet deleted;
+                final TLongSet actualUIDs = data2UIDSet(actualData);
+                final TLongSet dbUIDs = data2UIDSet(sessionData);
+                final TLongSet deleted;
                 if (((mode & 2) > 0)) {
                     deleted = new TLongHashSet(dbUIDs.size());
                     /*
@@ -183,7 +184,7 @@ final class IMAPSessionStorage {
                 } else {
                     deleted = new TLongHashSet(0);
                 }
-                final TLongHashSet newAndModified;
+                final TLongSet newAndModified;
                 if (((mode & 1) > 0)) {
                     newAndModified = new TLongHashSet(actualUIDs.size());
                     /*
@@ -204,7 +205,7 @@ final class IMAPSessionStorage {
                     /*
                      * Detect UIDs of changed messages
                      */
-                    final TLongHashSet existing = new TLongHashSet(dbUIDs);
+                    final TLongSet existing = new TLongHashSet(dbUIDs);
                     existing.retainAll(actualUIDs.toArray());
                     if (!existing.isEmpty()) {
                         final Set<IMAPUpdateableData> changedSessionData = new HashSet<IMAPUpdateableData>(Arrays.asList(filterByUIDs(
@@ -215,7 +216,7 @@ final class IMAPSessionStorage {
                             /*
                              * Add UIDs of changed messages to appropriate set
                              */
-                            final TLongHashSet changedUIDs = data2UIDSet(changedSessionData);
+                            final TLongSet changedUIDs = data2UIDSet(changedSessionData);
                             newAndModified.addAll(changedUIDs.toArray());
                             /*
                              * Write changes to DB storage??? If yes, this routine's result are only yielded per call and thus are not
@@ -332,7 +333,7 @@ final class IMAPSessionStorage {
         return uids;
     }
 
-    private static IMAPUpdateableData[] filterByUIDs(final TLongHashSet uids, final IMAPUpdateableData[] updateableDatas) {
+    private static IMAPUpdateableData[] filterByUIDs(final TLongSet uids, final IMAPUpdateableData[] updateableDatas) {
         final List<IMAPUpdateableData> tmp = new ArrayList<IMAPUpdateableData>(uids.size());
         for (int i = 0; i < updateableDatas.length; i++) {
             final IMAPUpdateableData updateableData = updateableDatas[i];
@@ -343,7 +344,7 @@ final class IMAPSessionStorage {
         return tmp.toArray(new IMAPUpdateableData[tmp.size()]);
     }
 
-    private static IMAPUpdateableData[] filterByUIDs(final TLongHashSet uids, final Collection<IMAPUpdateableData> updateableDatas) {
+    private static IMAPUpdateableData[] filterByUIDs(final TLongSet uids, final Collection<IMAPUpdateableData> updateableDatas) {
         final List<IMAPUpdateableData> tmp = new ArrayList<IMAPUpdateableData>(uids.size());
         for (final IMAPUpdateableData updateableData : updateableDatas) {
             if (uids.contains(updateableData.getUid())) {

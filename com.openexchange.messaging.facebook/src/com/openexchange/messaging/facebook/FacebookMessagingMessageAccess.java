@@ -50,9 +50,11 @@
 package com.openexchange.messaging.facebook;
 
 import static com.openexchange.messaging.facebook.utility.FacebookMessagingUtility.fireFQLQuery;
-import gnu.trove.TLongHashSet;
-import gnu.trove.TLongIterator;
-import gnu.trove.TLongObjectHashMap;
+import gnu.trove.iterator.TLongIterator;
+import gnu.trove.map.TLongObjectMap;
+import gnu.trove.map.hash.TLongObjectHashMap;
+import gnu.trove.set.TLongSet;
+import gnu.trove.set.hash.TLongHashSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -290,10 +292,10 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                 messages.add(message);
             }
         } else {
-            final TLongObjectHashMap<List<FacebookMessagingMessage>> mUser;
-            final TLongObjectHashMap<List<FacebookMessagingMessage>> mGroup;
-            final TLongHashSet safetyCheckUser;
-            final TLongHashSet safetyCheckGroup;
+            final TLongObjectMap<List<FacebookMessagingMessage>> mUser;
+            final TLongObjectMap<List<FacebookMessagingMessage>> mGroup;
+            final TLongSet safetyCheckUser;
+            final TLongSet safetyCheckGroup;
             {
                 final List<Element> results = FacebookMessagingUtility.fireFQLQuery(query.getCharSequence(), facebookOAuthAccess);
                 final int size = results.size();
@@ -559,10 +561,10 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
             query = FacebookMessagingUtility.composeFQLStreamQueryFor(queryType, SET_ID, sortField, order, facebookUserId);
         }
         final List<MessagingMessage> messages;
-        final TLongObjectHashMap<List<FacebookMessagingMessage>> mUser;
-        final TLongObjectHashMap<List<FacebookMessagingMessage>> mGroup;
-        final TLongHashSet safetyCheckUser;
-        final TLongHashSet safetyCheckGroup;
+        final TLongObjectMap<List<FacebookMessagingMessage>> mUser;
+        final TLongObjectMap<List<FacebookMessagingMessage>> mGroup;
+        final TLongSet safetyCheckUser;
+        final TLongSet safetyCheckGroup;
         long oldestCreatedTime = Long.MAX_VALUE;
         {
             final List<Element> results = FacebookMessagingUtility.fireFQLQuery(query.getCharSequence(), facebookOAuthAccess);
@@ -751,7 +753,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
         return messages.subList(fromIndex, toIndex);
     }
 
-    private void check(final TLongHashSet safetyCheck, final EnumSet<MessagingField> entityFieldSet, final TLongObjectHashMap<List<FacebookMessagingMessage>> m, final List<MessagingMessage> messages, final boolean group) throws OXException {
+    private void check(final TLongSet safetyCheck, final EnumSet<MessagingField> entityFieldSet, final TLongObjectMap<List<FacebookMessagingMessage>> m, final List<MessagingMessage> messages, final boolean group) throws OXException {
         if (!safetyCheck.isEmpty()) {
             /*
              * Check page table

@@ -1,15 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="All Bundle Builder" basedir=".">
 
+    <description>
+        This build file reads the file packages.txt and executes build.xml for every ProjectSet listed there. This is a workaround for a
+        ProjectSet that lists all other ProjectSet projects.
+    </description>
+
     <taskdef resource="net/sf/antcontrib/antcontrib.properties"/>
 
-    <target name="buildPackage">
+    <target name="buildPackage" description="Calls the build.xml with the packageName.">
         <ant antfile="build.xml" target="build">
             <property name="packageName" value="${packageName}"/>
         </ant>
     </target>
 
-    <target name="build">
+    <target name="build" description="Reads packages.txt and executes build.xml for every ProjectSet project.">
         <loadfile property="packageList" srcFile="packages.txt">
             <filterchain>
                 <prefixlines prefix=" "/>

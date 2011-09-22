@@ -57,7 +57,8 @@ import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.getIN;
 import static com.openexchange.tools.sql.DBUtils.rollback;
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
@@ -489,6 +490,9 @@ public class RdbUserStorage extends UserStorage {
 
     @Override
     public void setUserAttribute(final String name, final String value, final int userId, final Context context) throws OXException {
+        if (null == name) {
+            throw LdapExceptionCode.UNEXPECTED_ERROR.create("Attribute name is null.").setPrefix("USR");
+        }
         final String attrName = new StringBuilder("attr_").append(name).toString();
         setAttribute(attrName, value, userId, context);
     }
@@ -870,11 +874,11 @@ public class RdbUserStorage extends UserStorage {
             stmt = con.prepareStatement("SELECT id FROM user WHERE user.cid=?");
             stmt.setInt(1, ctx.getContextId());
             result = stmt.executeQuery();
-            final TIntArrayList tmp = new TIntArrayList();
+            final TIntList tmp = new TIntArrayList();
             while (result.next()) {
                 tmp.add(result.getInt(1));
             }
-            users = tmp.toNativeArray();
+            users = tmp.toArray();
         } catch (final SQLException e) {
             throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {

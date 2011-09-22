@@ -77,6 +77,14 @@ public enum AjaxExceptionCodes implements OXExceptionCode {
      * Object has been changed in the meantime.
      */
     CONFLICT("Object has been changed in the meantime.", Category.CATEGORY_CONFLICT, 17),
+    /**
+     * Unexpected result. Expected "%1$s", but is "%2$s".
+     */
+    UNEXPECTED_RESULT("Unexpected result. Expected \"%1$s\", but is \"%2$s\".", Category.CATEGORY_ERROR, 18),
+    /**
+     * Too many concurrent requests. Please try again later.
+     */
+    TOO_MANY_REQUESTS("Too many concurrent requests. Please try again later.", Category.CATEGORY_TRY_AGAIN, 19),
 
     ;
 
@@ -130,7 +138,7 @@ public enum AjaxExceptionCodes implements OXExceptionCode {
 
     @Override
     public boolean equals(final OXException e) {
-        return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
+        return OXExceptionFactory.getInstance().equals(this, e);
     }
 
     /**

@@ -193,7 +193,7 @@ public final class ResourcesReplacement implements TemplateReplacement {
 
     private StringHelper getStringHelper() {
         if (stringHelper == null) {
-            stringHelper = new StringHelper(getLocale());
+            stringHelper = StringHelper.valueOf(getLocale());
         }
         return stringHelper;
     }

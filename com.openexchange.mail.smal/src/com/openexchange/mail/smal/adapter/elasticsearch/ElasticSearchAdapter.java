@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.smal.adapter.elasticsearch;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -60,6 +61,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.elasticsearch.ElasticSearchException;
@@ -88,7 +93,10 @@ import org.elasticsearch.common.collect.ImmutableMap;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.ImmutableSettings.Builder;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.trove.map.TIntObjectMap;
 import org.elasticsearch.common.trove.map.hash.TIntObjectHashMap;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.json.JsonXContent;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.indices.IndexAlreadyExistsException;
@@ -97,6 +105,7 @@ import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.sort.SortOrder;
 import org.elasticsearch.transport.RemoteTransportException;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailSortField;
@@ -112,21 +121,22 @@ import com.openexchange.mail.smal.adapter.IndexAdapter;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 
 /**
  * {@link ElasticSearchAdapter}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ElasticSearchAdapter implements IndexAdapter {
 
-    /**
-     *
-     */
     private static final int MAX_SEARCH_RESULTS = 1 << 20;
 
     protected static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ElasticSearchAdapter.class));
+
+    protected static final boolean DEBUG = LOG.isDebugEnabled();
 
     private static interface MailAccountLookup {
 
@@ -135,7 +145,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
 
     private static final class InMemoryMailAccountLookup implements MailAccountLookup {
 
-        private final TIntObjectHashMap<MailAccount> map;
+        private final TIntObjectMap<MailAccount> map;
 
         private final int userId;
 
@@ -198,7 +208,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
 
     /**
      * Gets the ElasticSearch client
-     * 
+     *
      * @return The ElasticSearch client
      */
     public TransportClient getClient() {
@@ -232,13 +242,40 @@ public final class ElasticSearchAdapter implements IndexAdapter {
              * Create the (transport) client
              */
             client = new TransportClient(settingsBuilder.build());
-            client.addTransportAddress(new InetSocketTransportAddress("192.168.32.36", 9300));
+            /*
+             * Safe start-up in separate thread
+             */
+            final ThreadPoolService threadPool = SMALServiceLookup.getInstance().getService(ThreadPoolService.class);
+            final TransportClient transportClient = client;
+            final Future<Object> elasticSearchStartup = threadPool.submit(ThreadPools.task(new Runnable() {
+
+                @Override
+                public void run() {
+                    transportClient.addTransportAddress(new InetSocketTransportAddress("192.168.32.36", 9300));
+                }
+            }));
+            /*
+             * Wait for start-up for 5 seconds
+             */
+            try {
+                elasticSearchStartup.get(5, TimeUnit.SECONDS);
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            } catch (final ExecutionException e) {
+                throw ThreadPools.launderThrowable(e, ElasticSearchException.class);
+            } catch (final TimeoutException e) {
+                throw SMALExceptionCodes.INDEX_FAULT.create("Failed start-up of ElasticSearch cluster within 5 seconds.");
+            }
+            /*
+             * Output cluster information
+             */
             clusterInfo();
         } catch (final NoNodeAvailableException e) {
             throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
         } catch (final ElasticSearchException e) {
             throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (final RuntimeException e) {
             throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -428,9 +465,14 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     }
 
     @Override
-    public List<MailMessage> search(final String optFullName, final SearchTerm<?> searchTerm, final MailSortField sortField, final OrderDirection order, final int optAccountId, final Session session) throws OXException {
+    public List<MailMessage> search(final String optFullName, final SearchTerm<?> searchTerm, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int optAccountId, final Session session) throws OXException {
         try {
             ensureStarted();
+            final int contextId = session.getContextId();
+            final String indexName = indexNamePrefix + contextId;
+            /*
+             * Build search query
+             */
             final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
             boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_USER_ID, session.getUserId()));
             if (optAccountId >= 0) {
@@ -443,41 +485,146 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                 boolQuery.must(SearchTerm2Query.searchTerm2Query(searchTerm));
             }
             /*
-             * Compose search request
+             * Count results
              */
-            final int contextId = session.getContextId();
-            final SearchRequestBuilder builder = client.prepareSearch(indexNamePrefix + contextId).setTypes(indexType);
-            // builder.setFrom(page * hitsPerPage).setSize(hitsPerPage);
-            if (null != sortField && null != order) {
-                builder.addSort(sortField.getKey(), OrderDirection.DESC.equals(order) ? SortOrder.DESC : SortOrder.ASC);
+            final long total;
+            {
+                final SearchRequestBuilder srb = client.prepareSearch(indexName).setTypes(indexType).addField(Constants.FIELD_ID);
+                if (null != sortField && null != order) {
+                    srb.addSort(sortField.getKey(), OrderDirection.DESC.equals(order) ? SortOrder.DESC : SortOrder.ASC);
+                }
+                srb.setQuery(boolQuery);
+                srb.setSearchType(SearchType.COUNT);
+                srb.setExplain(true);
+                srb.setOperationThreading(SearchOperationThreading.THREAD_PER_SHARD);
+                total = srb.execute().actionGet(Constants.TIMEOUT_MILLIS).getHits().getTotalHits();
             }
-            builder.setSize(MAX_SEARCH_RESULTS);
-            builder.setQuery(boolQuery);
-            builder.setSearchType(SearchType.DFS_QUERY_THEN_FETCH);
-            builder.setExplain(true);
-            builder.setOperationThreading(SearchOperationThreading.THREAD_PER_SHARD);
+            if (DEBUG) {
+                LOG.debug("Search in " + (null == optFullName ? "all folders" : optFullName) + " for " + (optAccountId >= 0 ? "account "+optAccountId : "all accounts") + " yields " + total + " results.");
+            }
             /*
-             * Perform search
+             * Page-wise retrieval of search results
              */
-            final SearchResponse rsp = builder.execute().actionGet(Constants.TIMEOUT_MILLIS);
-            final SearchHit[] docs = rsp.getHits().getHits();
-            final List<MailMessage> mails = new ArrayList<MailMessage>(docs.length);
-            final MailFields mailFields = new MailFields(true);
+            final List<MailMessage> mails = new ArrayList<MailMessage>((int) total);
             final MailAccountLookup lookup = new InMemoryMailAccountLookup(session);
-            for (final SearchHit sd : docs) {
-                // to get explanation you'll need to enable this when querying:
-                // System.out.println(sd.getExplanation().toString());
-
-                // if we use in mapping: "_source" : {"enabled" : false}
-                // we need to include all necessary fields in query and then to use doc.getFields()
-                // instead of doc.getSource()
-                final MailMessage mail = readDoc(sd.getSource(), mailFields, lookup, contextId);
-                mail.setHeader(X_ELASTIC_SEARCH_UUID, sd.getId());
-                mails.add(mail);
+            final MailFields allFields = new MailFields(true);
+            final int hitsPerPage = Constants.MAX_FILLER_CHUNK;
+            int offset = 0;
+            while (offset < total) {
+                final SearchRequestBuilder srb = client.prepareSearch(indexName).setTypes(indexType).addField(Constants.FIELD_ID);
+                if (null != fields) {
+                    applyFields2Builder(fields, srb);
+                }
+                if (null != sortField && null != order) {
+                    srb.addSort(sortField.getKey(), OrderDirection.DESC.equals(order) ? SortOrder.DESC : SortOrder.ASC);
+                }
+                /*
+                 * Calculate the number of search hits to return
+                 */
+                int size = (int) (total - offset);
+                if (size > hitsPerPage) {
+                    size = hitsPerPage;
+                }
+                srb.setFrom(offset).setSize(size);
+                srb.setQuery(boolQuery);
+                srb.setSearchType(SearchType.DFS_QUERY_THEN_FETCH);
+                srb.setExplain(true);
+                srb.setOperationThreading(SearchOperationThreading.THREAD_PER_SHARD);
+                /*
+                 * Execute search & iterate hits
+                 */
+                final long st = DEBUG ? System.currentTimeMillis() : 0L;
+                final SearchResponse rsp = srb.execute().actionGet(Constants.TIMEOUT_MILLIS);
+                final SearchHit[] hits = rsp.getHits().getHits();
+                offset += size;
+                if (DEBUG) {
+                    final long dur = System.currentTimeMillis() - st;
+                    LOG.debug("ES search took " + dur + "msec with " + hits.length + " results in " + (null == optFullName ? "all folders" : optFullName) + " for " + (optAccountId >= 0 ? "account "+optAccountId+". " : "all accounts. ") + (total - offset) + " to go...");
+                }
+                for (final SearchHit searchHit : hits) {
+                    final MailMessage mail;
+                    if (null == fields) {
+                        /*
+                         * Read from source
+                         */
+                        mail = readDoc(searchHit.getSource(), allFields, lookup, contextId);
+                    } else {
+                        /*
+                         * Read from search fields
+                         */
+                        mail = readDoc(searchHit, fields, lookup);
+                    }
+                    if (null != optFullName) {
+                        mail.setFolder(optFullName);
+                    }
+                    if (optAccountId >= 0) {
+                        mail.setAccountId(optAccountId);
+                    }
+                    mail.setHeader(X_ELASTIC_SEARCH_UUID, searchHit.getId());
+                    mails.add(mail);
+                }
             }
+            /*
+             * Finally return mails
+             */
             return mails;
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
+        }
+    }
+
+    private static void applyFields2Builder(final MailField[] fields, final SearchRequestBuilder srb) {
+        for (final MailField mailField : fields) {
+            switch (mailField) {
+            case ACCOUNT_NAME:
+                srb.addField(Constants.FIELD_ACCOUNT_ID);
+                break;
+            case ID:
+                srb.addField(Constants.FIELD_ID);
+                break;
+            case FOLDER_ID:
+                srb.addField(Constants.FIELD_FULL_NAME);
+                break;
+            case FROM:
+                srb.addField(Constants.FIELD_FROM);
+                break;
+            case TO:
+                srb.addField(Constants.FIELD_TO);
+                break;
+            case CC:
+                srb.addField(Constants.FIELD_CC);
+                break;
+            case BCC:
+                srb.addField(Constants.FIELD_BCC);
+                break;
+            case SUBJECT:
+                srb.addField(Constants.FIELD_SUBJECT);
+                break;
+            case RECEIVED_DATE:
+                srb.addField(Constants.FIELD_RECEIVED_DATE);
+                break;
+            case SENT_DATE:
+                srb.addField(Constants.FIELD_SENT_DATE);
+                break;
+            case SIZE:
+                srb.addField(Constants.FIELD_SIZE);
+                break;
+            case FLAGS:
+                srb.addFields(
+                    Constants.FIELD_FLAG_ANSWERED,
+                    Constants.FIELD_FLAG_DELETED,
+                    Constants.FIELD_FLAG_DRAFT,
+                    Constants.FIELD_FLAG_FLAGGED,
+                    Constants.FIELD_FLAG_FORWARDED,
+                    Constants.FIELD_FLAG_READ_ACK,
+                    Constants.FIELD_FLAG_RECENT,
+                    Constants.FIELD_FLAG_SEEN,
+                    Constants.FIELD_FLAG_SPAM,
+                    Constants.FIELD_FLAG_USER);
+                break;
+            default:
+                break;
+            }
         }
     }
 
@@ -617,9 +764,182 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         }
     }
 
+    private MailMessage readDoc(final SearchHit searchHit, final MailField[] fields, final MailAccountLookup lookup) throws OXException {
+        final IDMailMessage mail = new IDMailMessage(null, null);
+        for (final MailField mailField : fields) {
+            switch (mailField) {
+            case ACCOUNT_NAME:
+                {
+                    final Object tmp = searchHit.field(Constants.FIELD_ACCOUNT_ID).value();
+                    if (null == tmp) {
+                        mail.setAccountId(-1);
+                        mail.setAccountName(null);
+                    } else {
+                        final int accountId = Integer.parseInt(tmp.toString());
+                        mail.setAccountId(accountId);
+                        mail.setAccountName(lookup.getMailAccount(accountId).getName());
+                    }
+                }
+                break;
+            case ID:
+                mail.setMailId((String) searchHit.field(Constants.FIELD_ID).value());
+                break;
+            case FOLDER_ID:
+                mail.setFolder((String) searchHit.field(Constants.FIELD_FULL_NAME).value());
+                break;
+            case FROM:
+                {
+                    final List<Object> sAddrs = searchHit.field(Constants.FIELD_FROM).getValues();
+                    if (null != sAddrs) {
+                        for (final Object sAddr : sAddrs) {
+                            try {
+                                mail.addFrom(new QuotedInternetAddress(sAddr.toString()));
+                            } catch (final AddressException e) {
+                                mail.addFrom(new PlainTextAddress(sAddr.toString()));
+                            }
+                        }
+                    }
+                }
+                break;
+            case TO:
+                {
+                    final List<Object> sAddrs = searchHit.field(Constants.FIELD_TO).getValues();
+                    if (null != sAddrs) {
+                        for (final Object sAddr : sAddrs) {
+                            try {
+                                mail.addTo(new QuotedInternetAddress(sAddr.toString()));
+                            } catch (final AddressException e) {
+                                mail.addTo(new PlainTextAddress(sAddr.toString()));
+                            }
+                        }
+                    }
+                }
+                break;
+            case CC:
+                {
+                    final List<Object> sAddrs = searchHit.field(Constants.FIELD_CC).getValues();
+                    if (null != sAddrs) {
+                        for (final Object sAddr : sAddrs) {
+                            try {
+                                mail.addCc(new QuotedInternetAddress(sAddr.toString()));
+                            } catch (final AddressException e) {
+                                mail.addCc(new PlainTextAddress(sAddr.toString()));
+                            }
+                        }
+                    }
+                }
+                break;
+            case BCC:
+                {
+                    final List<Object> sAddrs = searchHit.field(Constants.FIELD_BCC).getValues();
+                    if (null != sAddrs) {
+                        for (final Object sAddr : sAddrs) {
+                            try {
+                                mail.addBcc(new QuotedInternetAddress(sAddr.toString()));
+                            } catch (final AddressException e) {
+                                mail.addBcc(new PlainTextAddress(sAddr.toString()));
+                            }
+                        }
+                    }
+                }
+                break;
+            case SUBJECT:
+                {
+                    final Object tmp = searchHit.field(Constants.FIELD_SUBJECT).value();
+                    if (null == tmp) {
+                        mail.setSubject(null);
+                    } else {
+                        mail.setSubject(tmp.toString());
+                    }
+                }
+                break;
+            case RECEIVED_DATE:
+                {
+                    final Object tmp = searchHit.field(Constants.FIELD_RECEIVED_DATE).value().toString();
+                    if (null == tmp) {
+                        mail.setReceivedDate(null);
+                    } else {
+                        mail.setReceivedDate(new Date(Long.parseLong(tmp.toString())));
+                    }
+                }
+                break;
+            case SENT_DATE:
+                {
+                    final Object tmp = searchHit.field(Constants.FIELD_SENT_DATE).value().toString();
+                    if (null == tmp) {
+                        mail.setSentDate(null);
+                    } else {
+                        mail.setSentDate(new Date(Long.parseLong(tmp.toString())));
+                    }
+                }
+                break;
+            case SIZE:
+                {
+                    final Object tmp = searchHit.field(Constants.FIELD_SIZE).value().toString();
+                    if (null == tmp) {
+                        mail.setSize(-1L);
+                    } else {
+                        mail.setSize(Long.parseLong(tmp.toString()));
+                    }
+                }
+                break;
+            case FLAGS:
+                {
+                    int flags = 0;
+                    Object tmp = searchHit.field(Constants.FIELD_FLAG_ANSWERED).value();
+                    if (null != tmp && Boolean.parseBoolean(tmp.toString())) {
+                        flags |= MailMessage.FLAG_ANSWERED;
+                    }
+                    tmp = searchHit.field(Constants.FIELD_FLAG_DELETED).value();
+                    if (null != tmp && Boolean.parseBoolean(tmp.toString())) {
+                        flags |= MailMessage.FLAG_DELETED;
+                    }
+                    tmp = searchHit.field(Constants.FIELD_FLAG_DRAFT).value();
+                    if (null != tmp && Boolean.parseBoolean(tmp.toString())) {
+                        flags |= MailMessage.FLAG_DRAFT;
+                    }
+                    tmp = searchHit.field(Constants.FIELD_FLAG_FLAGGED).value();
+                    if (null != tmp && Boolean.parseBoolean(tmp.toString())) {
+                        flags |= MailMessage.FLAG_FLAGGED;
+                    }
+                    tmp = searchHit.field(Constants.FIELD_FLAG_FORWARDED).value();
+                    if (null != tmp && Boolean.parseBoolean(tmp.toString())) {
+                        flags |= MailMessage.FLAG_FORWARDED;
+                    }
+                    tmp = searchHit.field(Constants.FIELD_FLAG_READ_ACK).value();
+                    if (null != tmp && Boolean.parseBoolean(tmp.toString())) {
+                        flags |= MailMessage.FLAG_READ_ACK;
+                    }
+                    tmp = searchHit.field(Constants.FIELD_FLAG_RECENT).value();
+                    if (null != tmp && Boolean.parseBoolean(tmp.toString())) {
+                        flags |= MailMessage.FLAG_RECENT;
+                    }
+                    tmp = searchHit.field(Constants.FIELD_FLAG_SEEN).value();
+                    if (null != tmp && Boolean.parseBoolean(tmp.toString())) {
+                        flags |= MailMessage.FLAG_SEEN;
+                    }
+                    tmp = searchHit.field(Constants.FIELD_FLAG_SPAM).value();
+                    if (null != tmp && Boolean.parseBoolean(tmp.toString())) {
+                        flags |= MailMessage.FLAG_SPAM;
+                    }
+                    tmp = searchHit.field(Constants.FIELD_FLAG_USER).value();
+                    if (null != tmp && Boolean.parseBoolean(tmp.toString())) {
+                        flags |= MailMessage.FLAG_USER;
+                    }
+                    mail.setFlags(flags);
+                }
+                break;
+            default:
+                break;
+            }
+        }
+        return mail;
+    }
+
     /**
      * Logs some cluster information.
-     * @throws OXException 
+     *
+     * @throws OXException
      */
     public void clusterInfo() throws OXException {
         try {
@@ -636,10 +956,10 @@ public final class ElasticSearchAdapter implements IndexAdapter {
 
     /**
      * Checks if specified index exists.
-     * 
+     *
      * @param indexName The index name
      * @return <code>true</code> if index exists; otherwise <code>false</code>
-     * @throws OXException 
+     * @throws OXException
      */
     public boolean indexExists(final String indexName) throws OXException {
         try {
@@ -703,12 +1023,13 @@ public final class ElasticSearchAdapter implements IndexAdapter {
 
     /**
      * Gets the number of mails held in index.
-     * 
+     *
      * @return The number of mails
      */
     public long countAll(final String indexName) {
         ensureStarted();
-        final CountResponse response = client.prepareCount(indexName).setQuery(QueryBuilders.matchAllQuery()).execute().actionGet(Constants.TIMEOUT_MILLIS);
+        final CountResponse response =
+            client.prepareCount(indexName).setQuery(QueryBuilders.matchAllQuery()).execute().actionGet(Constants.TIMEOUT_MILLIS);
         return response.getCount();
     }
 
@@ -723,6 +1044,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             irb.setOpType(OpType.CREATE);
             irb.setConsistencyLevel(WriteConsistencyLevel.DEFAULT).setSource(
                 createDoc(id, mail, mail.getAccountId(), session, System.currentTimeMillis()));
+            irb.setType(indexType);
             irb.execute().actionGet(Constants.TIMEOUT_MILLIS);
             refresh(indexName);
         } catch (final RuntimeException e) {
@@ -738,8 +1060,40 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                 return;
             }
             final String indexName = indexNamePrefix + session.getContextId();
-            final BulkRequestBuilder bulkRequest = client.prepareBulk();
             final long stamp = System.currentTimeMillis();
+            final int size = mails.size();
+            final int configuredBlockSize = Constants.MAX_FILLER_CHUNK;
+            if (size <= configuredBlockSize) {
+                addSublist(mails, session, indexName, stamp);
+            } else {
+                final List<MailMessage> list;
+                if (mails instanceof List) {
+                    list = (List<MailMessage>) mails;
+                } else {
+                    list = new ArrayList<MailMessage>(mails);
+                }
+                int fromIndex = 0;
+                while (fromIndex < size) {
+                    int toIndex = fromIndex + configuredBlockSize;
+                    if (toIndex > size) {
+                        toIndex = size;
+                    }
+                    addSublist(list.subList(fromIndex, toIndex), session, indexName, stamp);
+                    fromIndex = toIndex;
+                }
+            }
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
+        }
+    }
+
+    private void addSublist(final Collection<MailMessage> mails, final Session session, final String indexName, final long stamp) throws OXException {
+        try {
+            ensureStarted();
+            if (null == mails || mails.isEmpty()) {
+                return;
+            }
+            final BulkRequestBuilder bulkRequest = client.prepareBulk();
             final List<TextFiller> fillers = new ArrayList<TextFiller>(mails.size());
             for (final MailMessage mail : mails) {
                 final String uuid = UUID.randomUUID().toString();
@@ -748,6 +1102,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
                 irb.setReplicationType(ReplicationType.ASYNC);
                 irb.setOpType(OpType.CREATE);
                 irb.setSource(createDoc(uuid, mail, mail.getAccountId(), session, stamp));
+                irb.setType(indexType);
                 bulkRequest.add(irb);
             }
             if (bulkRequest.numberOfActions() > 0) {
@@ -760,87 +1115,92 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         }
     }
 
-    private static Map<String, Object> createDoc(final String id, final MailMessage mail, final int accountId, final Session session, final long stamp) {
-        final Map<String, Object> jsonObject = new HashMap<String, Object>(24);
-        jsonObject.put(Constants.FIELD_TIMESTAMP, Long.valueOf(stamp));
-        /*
-         * Identifiers
-         */
-        jsonObject.put(Constants.FIELD_UUID, id);
-        jsonObject.put(Constants.FIELD_USER_ID, Long.valueOf(session.getUserId()));
-        jsonObject.put(Constants.FIELD_ACCOUNT_ID, Integer.valueOf(accountId));
-        jsonObject.put(Constants.FIELD_FULL_NAME, mail.getFolder());
-        jsonObject.put(Constants.FIELD_ID, mail.getMailId());
-        /*
-         * Write address fields
-         */
-        {
-            List<String> tmp = toStringList(mail.getFrom());
-            if (null != tmp) {
-                jsonObject.put(Constants.FIELD_FROM, tmp);
+    private static XContentBuilder createDoc(final String uuid, final MailMessage mail, final int accountId, final Session session, final long stamp) throws OXException {
+        try {
+            final XContentBuilder b = JsonXContent.unCachedContentBuilder().startObject();
+            b.field(Constants.FIELD_TIMESTAMP, stamp);
+            /*
+             * Identifiers
+             */
+            b.field(Constants.FIELD_UUID, uuid);
+            b.field(Constants.FIELD_USER_ID, session.getUserId());
+            b.field(Constants.FIELD_ACCOUNT_ID, accountId);
+            b.field(Constants.FIELD_FULL_NAME, mail.getFolder());
+            b.field(Constants.FIELD_ID, mail.getMailId());
+            /*
+             * Write address fields
+             */
+            {
+                String[] tmp = toStringArray(mail.getFrom());
+                if (null != tmp) {
+                    b.field(Constants.FIELD_FROM, tmp);
+                }
+                tmp = toStringArray(mail.getTo());
+                if (null != tmp) {
+                    b.field(Constants.FIELD_TO, tmp);
+                }
+                tmp = toStringArray(mail.getCc());
+                if (null != tmp) {
+                    b.field(Constants.FIELD_CC, tmp);
+                }
+                tmp = toStringArray(mail.getBcc());
+                if (null != tmp) {
+                    b.field(Constants.FIELD_BCC, tmp);
+                }
             }
-            tmp = toStringList(mail.getTo());
-            if (null != tmp) {
-                jsonObject.put(Constants.FIELD_TO, tmp);
+            /*
+             * Write size
+             */
+            if (mail.containsSize()) {
+                b.field(Constants.FIELD_SIZE, mail.getSize());
             }
-            tmp = toStringList(mail.getCc());
-            if (null != tmp) {
-                jsonObject.put(Constants.FIELD_CC, tmp);
+            /*
+             * Write date fields
+             */
+            {
+                java.util.Date d = mail.getReceivedDate();
+                if (null != d) {
+                    b.field(Constants.FIELD_RECEIVED_DATE, d.getTime());
+                }
+                d = mail.getSentDate();
+                if (null != d) {
+                    b.field(Constants.FIELD_SENT_DATE, d.getTime());
+                }
             }
-            tmp = toStringList(mail.getBcc());
-            if (null != tmp) {
-                jsonObject.put(Constants.FIELD_BCC, tmp);
-            }
+            /*
+             * Write flags
+             */
+            final int flags = mail.getFlags();
+            b.field(Constants.FIELD_FLAG_ANSWERED, (flags & MailMessage.FLAG_ANSWERED) > 0);
+            b.field(Constants.FIELD_FLAG_DELETED, (flags & MailMessage.FLAG_DELETED) > 0);
+            b.field(Constants.FIELD_FLAG_DRAFT, (flags & MailMessage.FLAG_DRAFT) > 0);
+            b.field(Constants.FIELD_FLAG_FLAGGED, (flags & MailMessage.FLAG_FLAGGED) > 0);
+            b.field(Constants.FIELD_FLAG_RECENT, (flags & MailMessage.FLAG_RECENT) > 0);
+            b.field(Constants.FIELD_FLAG_SEEN, (flags & MailMessage.FLAG_SEEN) > 0);
+            b.field(Constants.FIELD_FLAG_USER, (flags & MailMessage.FLAG_USER) > 0);
+            b.field(Constants.FIELD_FLAG_SPAM, (flags & MailMessage.FLAG_SPAM) > 0);
+            b.field(Constants.FIELD_FLAG_FORWARDED, (flags & MailMessage.FLAG_FORWARDED) > 0);
+            b.field(Constants.FIELD_FLAG_READ_ACK, (flags & MailMessage.FLAG_READ_ACK) > 0);
+            /*
+             * Subject
+             */
+            b.field(Constants.FIELD_SUBJECT, mail.getSubject());
+            b.endObject();
+            return b;
+        } catch (final IOException e) {
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
-        /*
-         * Write size
-         */
-        if (mail.containsSize()) {
-            jsonObject.put(Constants.FIELD_SIZE, Long.valueOf(mail.getSize()));
-        }
-        /*
-         * Write date fields
-         */
-        {
-            java.util.Date d = mail.getReceivedDate();
-            if (null != d) {
-                jsonObject.put(Constants.FIELD_RECEIVED_DATE, Long.valueOf(d.getTime()));
-            }
-            d = mail.getSentDate();
-            if (null != d) {
-                jsonObject.put(Constants.FIELD_SENT_DATE, Long.valueOf(d.getTime()));
-            }
-        }
-        /*
-         * Write flags
-         */
-        final int flags = mail.getFlags();
-        jsonObject.put(Constants.FIELD_FLAG_ANSWERED, Boolean.valueOf((flags & MailMessage.FLAG_ANSWERED) > 0));
-        jsonObject.put(Constants.FIELD_FLAG_DELETED, Boolean.valueOf((flags & MailMessage.FLAG_DELETED) > 0));
-        jsonObject.put(Constants.FIELD_FLAG_DRAFT, Boolean.valueOf((flags & MailMessage.FLAG_DRAFT) > 0));
-        jsonObject.put(Constants.FIELD_FLAG_FLAGGED, Boolean.valueOf((flags & MailMessage.FLAG_FLAGGED) > 0));
-        jsonObject.put(Constants.FIELD_FLAG_RECENT, Boolean.valueOf((flags & MailMessage.FLAG_RECENT) > 0));
-        jsonObject.put(Constants.FIELD_FLAG_SEEN, Boolean.valueOf((flags & MailMessage.FLAG_SEEN) > 0));
-        jsonObject.put(Constants.FIELD_FLAG_USER, Boolean.valueOf((flags & MailMessage.FLAG_USER) > 0));
-        jsonObject.put(Constants.FIELD_FLAG_SPAM, Boolean.valueOf((flags & MailMessage.FLAG_SPAM) > 0));
-        jsonObject.put(Constants.FIELD_FLAG_FORWARDED, Boolean.valueOf((flags & MailMessage.FLAG_FORWARDED) > 0));
-        jsonObject.put(Constants.FIELD_FLAG_READ_ACK, Boolean.valueOf((flags & MailMessage.FLAG_READ_ACK) > 0));
-        /*
-         * Subject
-         */
-        jsonObject.put(Constants.FIELD_SUBJECT, mail.getSubject());
-        return jsonObject;
     }
 
-    private static List<String> toStringList(final InternetAddress[] addrs) {
+    private static String[] toStringArray(final InternetAddress[] addrs) {
         if (addrs == null || addrs.length <= 0) {
             return null;
         }
-        final List<String> ret = new ArrayList<String>(addrs.length);
+        final String[] sa = new String[addrs.length];
         for (int i = 0; i < addrs.length; i++) {
-            ret.add(addrs[i].toUnicodeString());
+            sa[i] = addrs[i].toUnicodeString();
         }
-        return ret;
+        return sa;
     }
 
     @Override
@@ -852,50 +1212,75 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             }
             final int contextId = session.getContextId();
             final String indexName = indexNamePrefix + contextId;
-            /*
-             * Request JSON representations
-             */
-            final Map<String, Map<String, Object>> jsonObjects;
-            {
-                final String[] mailIds = new String[mails.size()];
-                String fullName = null;
-                int accountId = -1;
-                final Iterator<MailMessage> iterator = mails.iterator();
-                boolean first = true;
-                for (int i = 0; i < mailIds.length; i++) {
-                    if (first) {
-                        final MailMessage m = iterator.next();
-                        fullName = m.getFolder();
-                        accountId = m.getAccountId();
-                        mailIds[0] = m.getMailId();
-                        first = false;
-                    } else {
-                        mailIds[i] = iterator.next().getMailId();
+            final int size = mails.size();
+            final int configuredBlockSize = Constants.MAX_FILLER_CHUNK;
+            if (size <= configuredBlockSize) {
+                changeSublist(mails, session, indexName, contextId);
+            } else {
+                final List<MailMessage> list;
+                if (mails instanceof List) {
+                    list = (List<MailMessage>) mails;
+                } else {
+                    list = new ArrayList<MailMessage>(mails);
+                }
+                int fromIndex = 0;
+                while (fromIndex < size) {
+                    int toIndex = fromIndex + configuredBlockSize;
+                    if (toIndex > size) {
+                        toIndex = size;
                     }
+                    changeSublist(list.subList(fromIndex, toIndex), session, indexName, contextId);
+                    fromIndex = toIndex;
                 }
-                jsonObjects = getJSONMessages(mailIds, fullName, null, null, accountId, session);
-            }
-            /*
-             * Apply new time stamp & flags and add to index
-             */
-            final BulkRequestBuilder bulkRequest = client.prepareBulk();
-            final long stamp = System.currentTimeMillis();
-            for (final MailMessage mail : mails) {
-                final Map<String, Object> jsonObject = jsonObjects.get(mail.getMailId());
-                if (null != jsonObject) {
-                    final IndexRequestBuilder irb = client.prepareIndex(indexName, indexType, (String) jsonObject.get(Constants.FIELD_UUID));
-                    irb.setReplicationType(ReplicationType.ASYNC);
-                    irb.setOpType(OpType.INDEX);
-                    irb.setSource(changeDoc(mail, jsonObject, stamp, contextId));
-                    bulkRequest.add(irb);
-                }
-            }
-            if (bulkRequest.numberOfActions() > 0) {
-                bulkRequest.execute().actionGet(Constants.TIMEOUT_MILLIS);
-                refresh(indexName);
             }
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
+        }
+    }
+
+    private void changeSublist(final Collection<MailMessage> mails, final Session session, final String indexName, final int contextId) throws OXException {
+        /*
+         * Request JSON representations
+         */
+        final Map<String, Map<String, Object>> jsonObjects;
+        {
+            final String[] mailIds = new String[mails.size()];
+            String fullName = null;
+            int accountId = -1;
+            final Iterator<MailMessage> iterator = mails.iterator();
+            boolean first = true;
+            for (int i = 0; i < mailIds.length; i++) {
+                if (first) {
+                    final MailMessage m = iterator.next();
+                    fullName = m.getFolder();
+                    accountId = m.getAccountId();
+                    mailIds[0] = m.getMailId();
+                    first = false;
+                } else {
+                    mailIds[i] = iterator.next().getMailId();
+                }
+            }
+            jsonObjects = getJSONMessages(mailIds, fullName, null, null, accountId, session);
+        }
+        /*
+         * Apply new time stamp & flags and add to index
+         */
+        final BulkRequestBuilder bulkRequest = client.prepareBulk();
+        final long stamp = System.currentTimeMillis();
+        for (final MailMessage mail : mails) {
+            final Map<String, Object> jsonObject = jsonObjects.get(mail.getMailId());
+            if (null != jsonObject) {
+                final IndexRequestBuilder irb = client.prepareIndex(indexName, indexType, (String) jsonObject.get(Constants.FIELD_UUID));
+                irb.setReplicationType(ReplicationType.ASYNC);
+                irb.setOpType(OpType.INDEX);
+                irb.setSource(changeDoc(mail, jsonObject, stamp, contextId));
+                irb.setType(indexType);
+                bulkRequest.add(irb);
+            }
+        }
+        if (bulkRequest.numberOfActions() > 0) {
+            bulkRequest.execute().actionGet(Constants.TIMEOUT_MILLIS);
+            refresh(indexName);
         }
     }
 
@@ -956,34 +1341,92 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         return jsonObjects;
     }
 
-    private Map<String, Object> changeDoc(final MailMessage mail, final Map<String, Object> jsonObject, final long stamp, final int contextId) {
-        jsonObject.put(Constants.FIELD_TIMESTAMP, Long.valueOf(stamp));
-        /*
-         * Content present?
-         */
-        if (!jsonObject.containsKey(Constants.FIELD_BODY)) {
-            textFillerQueue.add(TextFiller.fillerFor(jsonObject, contextId));
+    @SuppressWarnings("unchecked")
+    private XContentBuilder changeDoc(final MailMessage mail, final Map<String, Object> jsonObject, final long stamp, final int contextId) throws OXException {
+        try {
+            final XContentBuilder b = JsonXContent.unCachedContentBuilder().startObject();
+            b.field(Constants.FIELD_TIMESTAMP, stamp);
+            /*
+             * Content present?
+             */
+            if (!jsonObject.containsKey(Constants.FIELD_BODY)) {
+                textFillerQueue.add(TextFiller.fillerFor(jsonObject, contextId));
+            }
+            /*
+             * Identifiers
+             */
+            b.field(Constants.FIELD_UUID, (String) jsonObject.get(Constants.FIELD_UUID));
+            b.field(Constants.FIELD_USER_ID, ((Number) jsonObject.get(Constants.FIELD_USER_ID)).intValue());
+            b.field(Constants.FIELD_ACCOUNT_ID, ((Number) jsonObject.get(Constants.FIELD_ACCOUNT_ID)).intValue());
+            b.field(Constants.FIELD_FULL_NAME, (String) jsonObject.get(Constants.FIELD_FULL_NAME));
+            b.field(Constants.FIELD_ID, (String) jsonObject.get(Constants.FIELD_ID));
+            /*
+             * Write address fields
+             */
+            {
+                List<String> tmp = (List<String>) jsonObject.get(Constants.FIELD_FROM);
+                if (null != tmp) {
+                    b.field(Constants.FIELD_FROM, tmp.toArray(new String[0]));
+                }
+                tmp = (List<String>) jsonObject.get(Constants.FIELD_TO);
+                if (null != tmp) {
+                    b.field(Constants.FIELD_TO, tmp.toArray(new String[0]));
+                }
+                tmp = (List<String>) jsonObject.get(Constants.FIELD_CC);
+                if (null != tmp) {
+                    b.field(Constants.FIELD_CC, tmp.toArray(new String[0]));
+                }
+                tmp = (List<String>) jsonObject.get(Constants.FIELD_BCC);
+                if (null != tmp) {
+                    b.field(Constants.FIELD_BCC, tmp.toArray(new String[0]));
+                }
+            }
+            /*
+             * Write size
+             */
+            Number number = (Number) jsonObject.get(Constants.FIELD_SIZE);
+            if (null != number) {
+                b.field(Constants.FIELD_SIZE, number.longValue());
+            }
+            /*
+             * Write date fields
+             */
+            number = (Number) jsonObject.get(Constants.FIELD_RECEIVED_DATE);
+            if (null != number) {
+                b.field(Constants.FIELD_RECEIVED_DATE, number.longValue());
+            }
+            number = (Number) jsonObject.get(Constants.FIELD_SENT_DATE);
+            if (null != number) {
+                b.field(Constants.FIELD_SENT_DATE, number.longValue());
+            }
+            /*
+             * Write flags
+             */
+            final int flags = mail.getFlags();
+            b.field(Constants.FIELD_FLAG_ANSWERED, (flags & MailMessage.FLAG_ANSWERED) > 0);
+            b.field(Constants.FIELD_FLAG_DELETED, (flags & MailMessage.FLAG_DELETED) > 0);
+            b.field(Constants.FIELD_FLAG_DRAFT, (flags & MailMessage.FLAG_DRAFT) > 0);
+            b.field(Constants.FIELD_FLAG_FLAGGED, (flags & MailMessage.FLAG_FLAGGED) > 0);
+            b.field(Constants.FIELD_FLAG_RECENT, (flags & MailMessage.FLAG_RECENT) > 0);
+            b.field(Constants.FIELD_FLAG_SEEN, (flags & MailMessage.FLAG_SEEN) > 0);
+            b.field(Constants.FIELD_FLAG_USER, (flags & MailMessage.FLAG_USER) > 0);
+            b.field(Constants.FIELD_FLAG_SPAM, (flags & MailMessage.FLAG_SPAM) > 0);
+            b.field(Constants.FIELD_FLAG_FORWARDED, (flags & MailMessage.FLAG_FORWARDED) > 0);
+            b.field(Constants.FIELD_FLAG_READ_ACK, (flags & MailMessage.FLAG_READ_ACK) > 0);
+            /*
+             * Subject
+             */
+            b.field(Constants.FIELD_SUBJECT, (String) jsonObject.get(Constants.FIELD_SUBJECT));
+            b.endObject();
+            return b;
+        } catch (final IOException e) {
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
-        /*
-         * Write flags
-         */
-        final int flags = mail.getFlags();
-        jsonObject.put(Constants.FIELD_FLAG_ANSWERED, Boolean.valueOf((flags & MailMessage.FLAG_ANSWERED) > 0));
-        jsonObject.put(Constants.FIELD_FLAG_DELETED, Boolean.valueOf((flags & MailMessage.FLAG_DELETED) > 0));
-        jsonObject.put(Constants.FIELD_FLAG_DRAFT, Boolean.valueOf((flags & MailMessage.FLAG_DRAFT) > 0));
-        jsonObject.put(Constants.FIELD_FLAG_FLAGGED, Boolean.valueOf((flags & MailMessage.FLAG_FLAGGED) > 0));
-        jsonObject.put(Constants.FIELD_FLAG_RECENT, Boolean.valueOf((flags & MailMessage.FLAG_RECENT) > 0));
-        jsonObject.put(Constants.FIELD_FLAG_SEEN, Boolean.valueOf((flags & MailMessage.FLAG_SEEN) > 0));
-        jsonObject.put(Constants.FIELD_FLAG_USER, Boolean.valueOf((flags & MailMessage.FLAG_USER) > 0));
-        jsonObject.put(Constants.FIELD_FLAG_SPAM, Boolean.valueOf((flags & MailMessage.FLAG_SPAM) > 0));
-        jsonObject.put(Constants.FIELD_FLAG_FORWARDED, Boolean.valueOf((flags & MailMessage.FLAG_FORWARDED) > 0));
-        jsonObject.put(Constants.FIELD_FLAG_READ_ACK, Boolean.valueOf((flags & MailMessage.FLAG_READ_ACK) > 0));
-        return jsonObject;
     }
 
     public void deleteById(final String mailId, final String indexName) throws OXException {
         try {
-            /*final DeleteResponse response = */client.prepareDelete(indexName, indexType, mailId).execute().actionGet();
+            /* final DeleteResponse response = */client.prepareDelete(indexName, indexType, mailId).execute().actionGet();
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         }

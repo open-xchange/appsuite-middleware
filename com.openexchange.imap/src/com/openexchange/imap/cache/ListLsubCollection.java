@@ -49,7 +49,7 @@
 
 package com.openexchange.imap.cache;
 
-import gnu.trove.TObjectIntHashMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -613,7 +613,7 @@ final class ListLsubCollection {
             protocol.notifyResponseHandlers(r);
             protocol.handleResult(response);
         } catch (final ProtocolException e) {
-            LOG.warn("Dummy ``LSUB \"\" \"\"лл command failed.", e);
+            LOG.warn("Dummy >>LSUB \"\" \"\"<< command failed.", e);
         }
     }
 

@@ -61,6 +61,7 @@ import java.util.TimeZone;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.DtStart;
 import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
 import com.openexchange.groupware.container.Appointment;
@@ -73,21 +74,15 @@ import com.openexchange.groupware.contexts.Context;
  */
 public final class Start<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T,U> {
 
-    /**
-     * Default constructor.
-     */
     public Start() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void emit(final int index, final U calendar, final T component, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
+    public void emit(final Mode mode, final int index, final U calendar, final T component, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
         final DtStart start = new DtStart();
         String tz = EmitterTools.extractTimezoneIfPossible(calendar);
-        final net.fortuna.ical4j.model.Date date = (needsDate(calendar)) ? toDate(calendar.getStartDate()) : toDateTime(calendar.getStartDate(),tz);
+        final net.fortuna.ical4j.model.Date date = (needsDate(calendar)) ? toDate(calendar.getStartDate()) : toDateTime(mode.getZoneInfo(), calendar.getStartDate(),tz);
         start.setDate(date);
         component.getProperties().add(start);
     }
@@ -96,28 +91,18 @@ public final class Start<T extends CalendarComponent, U extends CalendarObject> 
         return Appointment.class.isAssignableFrom(calendar.getClass()) && ((Appointment)calendar).getFullTime();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean hasProperty(final T component) {
         return null != component.getProperty(DtStart.DTSTART);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean isSet(final U calendar) {
         return calendar.containsStartDate();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void parse(final int index, final T component, final U calendar,
-        final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
+    public void parse(final int index, final T component, final U calendar,        final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
         final DtStart dtStart = new DtStart();
         final boolean isDateTime = isDateTime(component, dtStart);
         final TimeZone UTC = TimeZone.getTimeZone("UTC");

@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry exported="true" kind="lib" path="lib/apache-solr-solrj-3.4.0.jar" sourcepath="sources/apache-solr-solrj-3.4.0-src.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/geronimo-stax-api_1.0_spec-1.0.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jcl-over-slf4j-1.6.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/slf4j-api-1.6.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/wstx-asl-3.2.7.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jacksum.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/elasticsearch-0.17.6.jar" sourcepath="sources/elasticsearch-0.17.6-src.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jline-0.9.94.jar"/>

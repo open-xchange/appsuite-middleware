@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Json bundle for autoconfig
+Bundle-SymbolicName: com.openexchange.mail.autoconfig.json
+Bundle-Version: 6.21.0.0
+Bundle-Activator: com.openexchange.mail.autoconfig.json.osgi.Activator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.ajax.requesthandler,
+ com.openexchange.ajax.requesthandler.osgiservice,
+ com.openexchange.exception,
+ com.openexchange.mail.autoconfig,
+ com.openexchange.server,
+ com.openexchange.server.osgiservice,
+ com.openexchange.tools.servlet,
+ com.openexchange.tools.session,
+ org.json,
+ org.osgi.framework
+Bundle-ActivationPolicy: lazy

@@ -52,8 +52,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import net.fortuna.ical4j.model.component.CalendarComponent;
-import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
@@ -68,7 +68,7 @@ public class Duration<T extends CalendarComponent, U extends CalendarObject> ext
     }
 
     @Override
-    public void emit(final int index, final U u, final T t, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
+    public void emit(final Mode mode, final int index, final U u, final T t, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
         return; // Always emitting endDate
     }
 
@@ -78,7 +78,7 @@ public class Duration<T extends CalendarComponent, U extends CalendarObject> ext
     }
 
     @Override
-    public void parse(final int index, final T component, final U cObj, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
+    public void parse(final int index, final T component, final U cObj, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
        final net.fortuna.ical4j.model.property.Duration duration = (net.fortuna.ical4j.model.property.Duration) component.getProperty("Duration");
         if(duration == null) {
             return;

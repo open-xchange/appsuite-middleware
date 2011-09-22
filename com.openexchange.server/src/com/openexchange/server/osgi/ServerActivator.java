@@ -111,6 +111,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
+import com.openexchange.filemanagement.internal.ManagedFileImageDataSource;
 import com.openexchange.folder.FolderDeleteListenerService;
 import com.openexchange.folder.FolderService;
 import com.openexchange.folder.internal.FolderDeleteListenerServiceTrackerCustomizer;
@@ -169,6 +170,7 @@ import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.multiple.internal.MultipleHandlerServiceTracker;
 import com.openexchange.passwordchange.PasswordChangeService;
+import com.openexchange.preview.PreviewService;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.report.internal.LastLoginRecorder;
 import com.openexchange.resource.ResourceService;
@@ -184,11 +186,13 @@ import com.openexchange.server.osgiservice.WhiteboardFactoryService;
 import com.openexchange.server.services.ServerRequestHandlerRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.osgi.SpamHandlerServiceTracker;
 import com.openexchange.systemname.SystemNameService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
+import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tools.strings.StringParser;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
@@ -256,8 +260,20 @@ public final class ServerActivator extends DeferredActivator {
             ConfigurationService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class, JDOMParser.class,
             TimerService.class, ThreadPoolService.class, CalendarAdministrationService.class, AppointmentSqlFactoryService.class,
             CalendarCollectionService.class, TargetService.class, MessagingServiceRegistry.class, HTMLService.class, IDBasedFileAccessFactory.class,
-            FileStorageServiceRegistry.class, CryptoService.class, HttpService.class, SystemNameService.class, FolderUpdaterRegistry.class, ConfigViewFactory.class, StringParser.class
+            FileStorageServiceRegistry.class, CryptoService.class, HttpService.class, SystemNameService.class, FolderUpdaterRegistry.class,
+            ConfigViewFactory.class, StringParser.class, PreviewService.class
         };
+
+    private static volatile BundleContext CONTEXT;
+
+    /**
+     * Gets the bundle context.
+     *
+     * @return The bundle context or <code>null</code> if not started, yet
+     */
+    public static BundleContext getContext() {
+        return CONTEXT;
+    }
 
     private final List<ServiceRegistration<?>> registrationList;
 
@@ -340,6 +356,7 @@ public final class ServerActivator extends DeferredActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        CONTEXT = context;
         // get version information from MANIFEST file
         final Dictionary<?, ?> headers = context.getBundle().getHeaders();
         Version.buildnumber = "Rev" + (String) headers.get("OXRevision");
@@ -606,6 +623,12 @@ public final class ServerActivator extends DeferredActivator {
             props.put(STR_IDENTIFIER, dataSource.getRegistrationName());
             registrationList.add(context.registerService(DataSource.class.getName(), dataSource, props));
         }
+        {
+            final ManagedFileImageDataSource dataSource = new ManagedFileImageDataSource();
+            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
+            props.put(STR_IDENTIFIER, dataSource.getRegistrationName());
+            registrationList.add(context.registerService(DataSource.class.getName(), dataSource, props));
+        }
         /*
          * Register data handlers
          */
@@ -661,7 +684,11 @@ public final class ServerActivator extends DeferredActivator {
         final ContactInterfaceDiscoveryService cids = ContactInterfaceDiscoveryServiceImpl.getInstance();
         registrationList.add(context.registerService(ContactInterfaceDiscoveryService.class.getName(), cids, null));
         ServerServiceRegistry.getInstance().addService(ContactInterfaceDiscoveryService.class, cids);
-
+        
+        // Register SessionHolder
+        registrationList.add(context.registerService(SessionHolder.class.getName(), ThreadLocalSessionHolder.getInstance(), null));
+        ServerServiceRegistry.getInstance().addService(SessionHolder.class, ThreadLocalSessionHolder.getInstance());
+        
         // Fake bundle start
         activators.add(new FolderStorageActivator());
         for (final BundleActivator activator : activators) {
@@ -725,6 +752,7 @@ public final class ServerActivator extends DeferredActivator {
         } finally {
             started.set(false);
             adminBundleInstalled = null;
+            CONTEXT = null;
         }
     }
 

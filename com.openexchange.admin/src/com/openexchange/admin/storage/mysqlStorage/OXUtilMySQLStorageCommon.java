@@ -117,7 +117,7 @@ public class OXUtilMySQLStorageCommon {
             con.setCatalog(db.getScheme());
             pumpData2DatabaseOld(con, createTableStatements);
             pumpData2DatabaseNew(con, CreateTableRegistry.getInstance().getList());
-            initUpdateTaskTable(con);
+            initUpdateTaskTable(con, db.getMasterId().intValue(), db.getScheme());
             con.commit();
         } catch (SQLException e) {
             rollback(con);
@@ -169,14 +169,48 @@ public class OXUtilMySQLStorageCommon {
     private void pumpData2DatabaseOld(Connection con, List<String> db_queries) throws StorageException {
         Statement stmt = null;
         try {
-            stmt = con.createStatement();
-            for (String sqlCreate : db_queries) {
+            try {
+                stmt = con.createStatement();
+            } catch (final SQLException e) {
+                throw new StorageException(e.getMessage(), e);
+            }
+            for (final String sqlCreate : db_queries) {
                 stmt.addBatch(sqlCreate);
             }
             stmt.executeBatch();
-        } catch (SQLException e) {
-            LOG.error("SQL Error", e);
-            throw new StorageException(e.getMessage(), e);
+        } catch (final SQLException e) {
+            if (e.getMessage().indexOf("already exists") < 0) { // MySQL error: "PROCEDURE get_mail_service_id already exists"
+                throw new StorageException(e.getMessage(), e);
+            }
+            closeSQLStuff(stmt);
+            stmt = null;
+            if (LOG.isDebugEnabled()) {
+                LOG.info("Batch table creation failed.", e);
+            } else {
+                LOG.info("Batch table creation failed.");
+            }
+            /*
+             * Execute them one-by-one...
+             */
+            try {
+                for (final String sqlCreate : db_queries) {
+                    stmt = con.createStatement();
+                    try {
+                        stmt.executeUpdate(sqlCreate);
+                    } catch (final SQLException sqlException) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.warn("Following SQL CREATE statement failed with \"" + sqlException.getMessage() + "\": "  + sqlCreate, sqlException);
+                        } else {
+                            LOG.warn("Following SQL CREATE statement failed with \"" + sqlException.getMessage() + "\": "  + sqlCreate);
+                        }
+                    } finally {
+                        closeSQLStuff(stmt);
+                        stmt = null;
+                    }
+                }
+            } catch (final SQLException abort) {
+                throw new StorageException(abort.getMessage(), abort);
+            }
         } finally {
             closeSQLStuff(stmt);
         }
@@ -237,12 +271,12 @@ public class OXUtilMySQLStorageCommon {
         return null;
     }
 
-    private void initUpdateTaskTable(Connection con) throws StorageException {
+    private void initUpdateTaskTable(Connection con, int poolId, String schema) throws StorageException {
         UpdateTask[] tasks = Updater.getInstance().getAvailableUpdateTasks();
         SchemaStore store = SchemaStore.getInstance();
         try {
             for (UpdateTask task : tasks) {
-                store.addExecutedTask(con, task.getClass().getName(), true);
+                store.addExecutedTask(con, task.getClass().getName(), true, poolId, schema);
             }
         } catch (SchemaException e) {
             throw new StorageException(e.getMessage(), e);

@@ -51,8 +51,8 @@ package com.openexchange.data.conversion.ical.ical4j.internal.task;
 import java.util.List;
 import java.util.TimeZone;
 import net.fortuna.ical4j.model.component.VToDo;
-import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
@@ -61,13 +61,18 @@ import com.openexchange.groupware.tasks.Task;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class PercentComplete extends AbstractVerifyingAttributeConverter<VToDo, Task> {
+
+    public PercentComplete() {
+        super();
+    }
+
     @Override
     public boolean isSet(final Task task) {
         return task.containsPercentComplete();
     }
 
     @Override
-    public void emit(final int index, final Task task, final VToDo vToDo, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
+    public void emit(final Mode mode, final int index, final Task task, final VToDo vToDo, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
         final net.fortuna.ical4j.model.property.PercentComplete percentage = new net.fortuna.ical4j.model.property.PercentComplete(task.getPercentComplete());
         vToDo.getProperties().add(percentage);
     }
@@ -78,8 +83,8 @@ public class PercentComplete extends AbstractVerifyingAttributeConverter<VToDo, 
     }
 
     @Override
-    public void parse(final int index, final VToDo todo, final Task task, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
-        if(null == todo.getPercentComplete()) {
+    public void parse(final int index, final VToDo todo, final Task task, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
+        if (null == todo.getPercentComplete()) {
             return;
         }
         final int percentage = todo.getPercentComplete().getPercentage();

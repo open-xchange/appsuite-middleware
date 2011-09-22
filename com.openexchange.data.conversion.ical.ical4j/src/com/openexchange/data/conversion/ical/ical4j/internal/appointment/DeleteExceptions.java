@@ -57,8 +57,8 @@ import net.fortuna.ical4j.model.DateList;
 import net.fortuna.ical4j.model.PropertyList;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.ExDate;
-import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
 import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
@@ -71,9 +71,6 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class DeleteExceptions extends AbstractVerifyingAttributeConverter<VEvent, Appointment> {
 
-    /**
-     * Default constructor.
-     */
     public DeleteExceptions() {
         super();
     }
@@ -84,14 +81,14 @@ public class DeleteExceptions extends AbstractVerifyingAttributeConverter<VEvent
     }
 
     @Override
-    public void emit(final int index, final Appointment appointment, final VEvent vEvent, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
+    public void emit(final Mode mode, final int index, final Appointment appointment, final VEvent vEvent, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
         final java.util.Date[] dates = appointment.getDeleteException();
         if (null == dates) {
             return;
         }
         // Only when the DateList is created this way the correct dates are written to iCal file.
         for (final java.util.Date deleteException : dates) {
-            final DateList deleteExceptions = new DateList(dates.length);
+            final DateList deleteExceptions = new DateList();
             deleteExceptions.setUtc(true);
             final net.fortuna.ical4j.model.Date date;
             if (CalendarDataObject.class.isAssignableFrom(appointment.getClass())) {
@@ -111,7 +108,7 @@ public class DeleteExceptions extends AbstractVerifyingAttributeConverter<VEvent
     }
 
     @Override
-    public void parse(final int index, final VEvent vEvent, final Appointment appointment, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
+    public void parse(final int index, final VEvent vEvent, final Appointment appointment, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
         final PropertyList exdates = vEvent.getProperties("EXDATE");
         final int size = exdates.size();
         for (int i = 0; i < size; i++) {

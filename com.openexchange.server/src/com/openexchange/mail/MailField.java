@@ -49,7 +49,8 @@
 
 package com.openexchange.mail;
 
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
@@ -168,7 +169,7 @@ public enum MailField {
 
     private static final EnumMap<MailListField, MailField> LIST_FIELDS_MAP = new EnumMap<MailListField, MailField>(MailListField.class);
 
-    private static final TIntObjectHashMap<MailField> FIELDS_MAP = new TIntObjectHashMap<MailField>(25);
+    private static final TIntObjectMap<MailField> FIELDS_MAP = new TIntObjectHashMap<MailField>(25);
 
     static {
         final MailField[] fields = MailField.values();

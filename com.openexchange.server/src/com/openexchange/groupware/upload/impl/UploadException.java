@@ -53,6 +53,7 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 
 /**
@@ -153,7 +154,7 @@ public class UploadException extends OXException {
 
         @Override
         public boolean equals(final OXException e) {
-            return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
+            return OXExceptionFactory.getInstance().equals(this, e);
         }
 
         /**

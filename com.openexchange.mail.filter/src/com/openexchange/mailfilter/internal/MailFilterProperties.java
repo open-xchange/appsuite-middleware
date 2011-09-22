@@ -88,6 +88,7 @@ public class MailFilterProperties {
     }
 
     public enum CredSrc {
+        SESSION_FULL_LOGIN("session-full-login"),
         SESSION("session"),
         IMAP_LOGIN("imapLogin"),
         MAIL("mail");

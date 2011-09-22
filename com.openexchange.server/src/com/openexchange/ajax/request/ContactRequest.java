@@ -50,7 +50,8 @@
 package com.openexchange.ajax.request;
 
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import java.sql.Connection;
 import java.util.Date;
 import java.util.List;
@@ -86,6 +87,7 @@ import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.ContactSearchMultiplexer;
 import com.openexchange.groupware.contact.ContactUnificationState;
+import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -305,13 +307,62 @@ public class ContactRequest {
 
         contactobject.setObjectID(id);
 
-        final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
+        final ContactInterfaceDiscoveryService discoveryService = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class);
+        final ContactInterface contactIface = discoveryService.newContactInterface(
             inFolder,
             session);
 
-        contactInterface.updateContactObject(contactobject, inFolder, timestamp);
+        if (contactobject.containsParentFolderID() && contactobject.getParentFolderID() > 0) {
+            /*
+             * A move to another folder
+             */
+            final int folderId = contactobject.getParentFolderID();
+            final ContactInterface targetContactIface = discoveryService.newContactInterface(folderId, session);
+            if (!contactIface.getClass().equals(targetContactIface.getClass())) {
+                final Contact toMove = move2AnotherProvider(id, inFolder, contactobject, contactIface, folderId, targetContactIface, session, timestamp);
+                timestamp = toMove.getLastModified();
+                return new JSONObject();
+            }
+        }
+
+        contactIface.updateContactObject(contactobject, inFolder, timestamp);
         timestamp = contactobject.getLastModified();
         return new JSONObject();
+    }
+
+    public static Contact move2AnotherProvider(final int id, final int inFolder, final Contact contact, final ContactInterface contactIface, final int newFolderId, final ContactInterface targetContactIface, final ServerSession session, final Date timestamp) throws OXException {
+        /*
+         * A move to another contact service
+         */
+        final Contact toMove = contactIface.getObjectById(id, inFolder);
+        for (int i = 1; i < Contacts.mapping.length; i++) {
+            if (null != Contacts.mapping[i]) {
+                if (contact.contains(i)) {
+                    toMove.set(i, contact.get(i));
+                }
+            }
+        }
+        if (inFolder == FolderObject.SYSTEM_LDAP_FOLDER_ID) {
+            toMove.removeInternalUserId();
+        }
+        toMove.setNumberOfAttachments(0);
+        targetContactIface.insertContactObject(toMove);
+
+        final User user = session.getUser();
+        final UserConfiguration uc = session.getUserConfiguration();
+        /*
+         * Check attachments
+         */
+        copyAttachments(newFolderId, session, session.getContext(), toMove, id, inFolder, user, uc);
+        /*
+         * Check links
+         */
+        copyLinks(newFolderId, session, session.getContext(), toMove, id, inFolder, user);
+        /*
+         * Delete original
+         */
+        contactIface.deleteContactObject(id, inFolder, timestamp);
+        return toMove;
     }
 
     public JSONArray actionUpdates(final JSONObject jsonObj) throws JSONException, OXException {
@@ -605,7 +656,7 @@ public class ContactRequest {
 
     // Removes virtual columns or exchanges them agains real columns
     private int[] removeVirtual(final int[] columns) {
-        final TIntArrayList helper = new TIntArrayList(columns.length);
+        final TIntList helper = new TIntArrayList(columns.length);
         for (final int col : columns) {
             if (col == Contact.LAST_MODIFIED_UTC) {
                 // SKIP
@@ -616,7 +667,7 @@ public class ContactRequest {
             }
 
         }
-        return helper.toNativeArray();
+        return helper.toArray();
     }
 
     public JSONObject actionGet(final JSONObject jsonObj) throws JSONException, OXException {
@@ -937,14 +988,14 @@ public class ContactRequest {
                 try {
                     attachmentBase.rollback();
                 } catch (final OXException e1) {
-                    LOG.error("Attachment transaction rollback failed", e);
+                    LOG.error("Attachment transaction rollback failed", e1);
                 }
                 throw new OXException(e);
             } catch (final OXException e) {
                 try {
                     attachmentBase.rollback();
                 } catch (final OXException e1) {
-                    LOG.error("Attachment transaction rollback failed", e);
+                    LOG.error("Attachment transaction rollback failed", e1);
                 }
                 throw e;
             } finally {

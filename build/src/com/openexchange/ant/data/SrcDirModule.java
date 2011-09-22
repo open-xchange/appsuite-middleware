@@ -63,6 +63,12 @@ import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 
+/**
+ * Represents a bundle in its source form like in Eclipse. Additionally to the MANIFEST.MF the .classpath file is read to understand
+ * possible dependencies.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
 public class SrcDirModule extends DirModule {
 
     private File dir;
@@ -71,20 +77,23 @@ public class SrcDirModule extends DirModule {
     private Set<String> requiredClasspath = new HashSet<String>();
 
     public SrcDirModule(final String name) {
+        super();
         this.name = name;
     }
 
     public SrcDirModule(final File dir) {
+        super();
         this.name = dir.getName();
     }
 
-    private void readFiles(File manifestFile, File classpathFile) {
+    private void readFiles(final File manifestFile, final File classpathFile) {
         try {
             if (manifestFile.exists() && manifestFile.length() != 0) {
                 this.osgiManifest = new OSGIManifest(manifestFile);
                 // read Bundle-ClassPath:
-                for (String classpathEntry : osgiManifest.getListEntry(OSGIManifest.BUNDLE_CLASSPATH)) {
+                for (final String classpathEntry : osgiManifest.getListEntry(OSGIManifest.BUNDLE_CLASSPATH)) {
                     // All class files are added through the <bin> directory
+                    // TODO Only libs which have a corresponding export entry.
                     if (!classpathEntry.equals(".")) {
                         exportedClasspath.add(classpathEntry);
                     }
@@ -92,17 +101,17 @@ public class SrcDirModule extends DirModule {
             }
             // read .classpath file
             if (classpathFile.exists() && classpathFile.length() != 0) {
-                Document d = new SAXBuilder().build(classpathFile);
-                Element root = d.getRootElement();
-                List<?> list = root.getChildren("classpathentry");
-                Iterator<?> it = list.iterator();
+                final Document d = new SAXBuilder().build(classpathFile);
+                final Element root = d.getRootElement();
+                final List<?> list = root.getChildren("classpathentry");
+                final Iterator<?> it = list.iterator();
                 while (it.hasNext()) {
-                    Element entry = (Element) it.next();
+                    final Element entry = (Element) it.next();
                     if (entry.getAttribute("combineaccessrules") != null) {
-                        String path = entry.getAttributeValue("path");
+                        final String path = entry.getAttributeValue("path");
                         classpathDependencies.add(path.substring(1));
                     } else if (entry.getAttributeValue("kind").equals("lib")) {
-                        String path = entry.getAttributeValue("path");
+                        final String path = entry.getAttributeValue("path");
                         requiredClasspath.add(path);
                         if ("true".equals(entry.getAttributeValue("exported"))) {
                             exportedClasspath.add(path);
@@ -110,22 +119,22 @@ public class SrcDirModule extends DirModule {
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new BuildException(e);
         }
     }
 
     @Override
-    public void readLocalFiles(Project project, File rootDir) {
+    public void readLocalFiles(final Project project, final File rootDir) {
         dir = new File(rootDir, name);
         project.log("Project " + name + " reads local files from " + dir);
         readFiles(new File(dir, "/META-INF/MANIFEST.MF"), new File(dir, ".classpath"));
     }
 
     @Override
-    public void computeDependencies(Map<String, AbstractModule> projectsByName, Map<String, Set<AbstractModule>> projectsByPackage) {
-        for (String classpathProject : classpathDependencies) {
-            AbstractModule module = projectsByName.get(classpathProject);
+    public void computeDependencies(final Map<String, AbstractModule> projectsByName, final Map<String, Set<AbstractModule>> projectsByPackage) {
+        for (final String classpathProject : classpathDependencies) {
+            final AbstractModule module = projectsByName.get(classpathProject);
             if (module != null && module != this) {
                 dependencies.add(module);
             }
@@ -135,9 +144,9 @@ public class SrcDirModule extends DirModule {
 
     @Override
     public Set<String> getExportedClasspath() {
-        Set<String> retval = new HashSet<String>();
+        final Set<String> retval = new HashSet<String>();
         retval.add(dir.getAbsolutePath() + File.separatorChar + "<bin>");
-        for (String classpathEntry : exportedClasspath) {
+        for (final String classpathEntry : exportedClasspath) {
             retval.add(dir.getAbsolutePath() + File.separatorChar + classpathEntry);
         }
         return Collections.unmodifiableSet(retval);
@@ -147,9 +156,9 @@ public class SrcDirModule extends DirModule {
     public Set<String> getRequiredClasspath() {
         Set<String> retval = super.getRequiredClasspath();
         if (!requiredClasspath.isEmpty()) {
-            Set<String> tmp = new HashSet<String>();
+            final Set<String> tmp = new HashSet<String>();
             tmp.addAll(retval);
-            for (String classpathEntry : requiredClasspath) {
+            for (final String classpathEntry : requiredClasspath) {
                 tmp.add(dir.getAbsolutePath() + File.separatorChar + classpathEntry);
             }
             retval = Collections.unmodifiableSet(tmp); 

@@ -57,7 +57,7 @@ import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 
 /**
  * {@link ContactJSONActivator} - OSGi Activator for the Contact JSON interface.
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class ContactJSONActivator extends AJAXModuleActivator {

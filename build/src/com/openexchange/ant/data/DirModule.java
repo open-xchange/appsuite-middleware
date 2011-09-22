@@ -53,12 +53,12 @@ import java.io.File;
 import org.apache.tools.ant.Project;
 
 /**
- * {@link DirModule}
+ * Abstract definition for bundles stored in directories.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public abstract class DirModule extends AbstractModule {
 
-    public abstract void readLocalFiles(Project project, File parentFile);
+    public abstract void readLocalFiles(final Project project, final File parentFile);
 
 }

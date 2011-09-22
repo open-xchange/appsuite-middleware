@@ -50,7 +50,8 @@
 package com.openexchange.ajax.request;
 
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import java.util.Date;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -526,12 +527,12 @@ public class TaskRequest extends CalendarRequest {
     }
 
     private int[] removeVirtualColumns(final int[] columns) {
-        final TIntArrayList tmp = new TIntArrayList(columns.length);
+        final TIntList tmp = new TIntArrayList(columns.length);
         for (final int col : columns) {
             if (col != Task.LAST_MODIFIED_UTC) {
                 tmp.add(col);
             }
         }
-        return tmp.toNativeArray();
+        return tmp.toArray();
     }
 }

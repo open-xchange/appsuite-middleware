@@ -62,7 +62,7 @@ import com.openexchange.ant.data.ProjectSetFileReader;
 import com.openexchange.ant.data.Repository;
 
 /**
- * {@link CreateProjectList}
+ * Parses ProjectSet files, outputs that to the named property and sets project specific properties to fetch the projects from a repository.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
@@ -70,6 +70,10 @@ public class CreateProjectList extends Task {
 
     private Path projectSets;
     private String name;
+
+    public CreateProjectList() {
+        super();
+    }
 
     public final void setName(final String name) {
         this.name = name;
@@ -82,29 +86,32 @@ public class CreateProjectList extends Task {
 
     @Override
     public final void execute() throws BuildException {
-        String[] projectSetFiles = projectSets.list();
-        Map<String, Repository> projects = new HashMap<String, Repository>();
-        for (String projectSetFile : projectSetFiles) {
+        // Parse the PSF files.
+        final String[] projectSetFiles = projectSets.list();
+        final Map<String, Repository> projects = new HashMap<String, Repository>();
+        for (final String projectSetFile : projectSetFiles) {
             log("Parsing " + projectSetFile, Project.MSG_INFO);
             projects.putAll(ProjectSetFileReader.parse(projectSetFile));
         }
 
-        String projectNamesList = getProjectNamesList(projects.keySet());
+        // Log the project list and output the property for it.
+        final String projectNamesList = joinCommaSeparated(projects.keySet());
         log(name + "=" + projectNamesList, Project.MSG_INFO);
         getProject().setInheritedProperty(name, projectNamesList);
 
-        for (Map.Entry<String, Repository> entry : projects.entrySet()) {
-            String projectName = entry.getKey();
-            Repository repository = entry.getValue();
+        // Set the project specific properties for accessing the repository for that project.
+        for (final Map.Entry<String, Repository> entry : projects.entrySet()) {
+            final String projectName = entry.getKey();
+            final Repository repository = entry.getValue();
             switch (repository.getRepositoryType()) {
             case CVS:
-                CVSRepository cvsRepo = (CVSRepository) repository;
+                final CVSRepository cvsRepo = (CVSRepository) repository;
                 getProject().setInheritedProperty(projectName + ".cvsRoot", cvsRepo.getCvsRoot());
                 getProject().setInheritedProperty(projectName + ".repositoryLocation", cvsRepo.getRepositoryLocation());
                 getProject().setInheritedProperty(projectName + ".branch", cvsRepo.getBranch());
                 break;
             case Git:
-                GitRepository gitRepo = (GitRepository) repository;
+                final GitRepository gitRepo = (GitRepository) repository;
                 getProject().setInheritedProperty(projectName + ".remote", gitRepo.getRemote());
                 getProject().setInheritedProperty(projectName + ".branch", gitRepo.getBranch());
                 break;
@@ -114,9 +121,15 @@ public class CreateProjectList extends Task {
         }
     }
 
-    public String getProjectNamesList(Set<String> projects) {
-        StringBuffer buffer = new StringBuffer();
-        for (String project : projects) {
+    /**
+     * Generates a comma separated list of the projects.
+     *
+     * @param projects Projects to put into that list.
+     * @return
+     */
+    public String joinCommaSeparated(final Set<String> projects) {
+        final StringBuffer buffer = new StringBuffer();
+        for (final String project : projects) {
             buffer.append(project);
             buffer.append(',');
         }

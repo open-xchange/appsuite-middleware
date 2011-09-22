@@ -49,6 +49,11 @@
 
 package com.openexchange.login.internal;
 
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.login.LoginRequest;
@@ -66,9 +71,11 @@ final class LoginResultImpl implements LoginResult {
     private Context context;
     private User user;
     private Session session;
+    private final List<OXException> warnings;
 
     LoginResultImpl() {
         super();
+        warnings = new LinkedList<OXException>();
     }
 
     public LoginResultImpl(final Session session, final Context context, final User user) {
@@ -76,6 +83,7 @@ final class LoginResultImpl implements LoginResult {
         this.session = session;
         this.context = context;
         this.user = user;
+        warnings = new LinkedList<OXException>();
     }
 
     @Override
@@ -113,4 +121,29 @@ final class LoginResultImpl implements LoginResult {
     public void setSession(final Session session) {
         this.session = session;
     }
+
+    @Override
+    public boolean hasWarnings() {
+        return !warnings.isEmpty();
+    }
+
+    @Override
+    public Collection<OXException> warnings() {
+        return java.util.Collections.unmodifiableList(warnings);
+    }
+
+    @Override
+    public void addWarning(final OXException warning) {
+        warning.setCategory(Category.CATEGORY_WARNING);
+        warnings.add(warning);
+    }
+
+    @Override
+    public void addWarnings(final Collection<? extends OXException> warnings) {
+        for (final OXException warning : warnings) {
+            warning.setCategory(Category.CATEGORY_WARNING);
+        }
+        this.warnings.addAll(warnings);
+    }
+
 }

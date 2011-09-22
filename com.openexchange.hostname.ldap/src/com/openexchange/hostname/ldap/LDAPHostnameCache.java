@@ -99,6 +99,9 @@ public class LDAPHostnameCache {
             final Lock writeLock = getLock(cid_int).writeLock();
             writeLock.lock();
             try {
+                if (null != cache.get(cid_int)) {
+                    cache.remove(cid_int);
+                }
                 cache.put(cid_int, hostname);
             } finally {
                 writeLock.unlock();

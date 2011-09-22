@@ -53,7 +53,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -68,12 +68,21 @@ import com.openexchange.ant.data.DirModule;
 import com.openexchange.ant.data.JarModule;
 import com.openexchange.ant.data.SrcDirModule;
 
+/**
+ * {@link ComputeBuildOrder}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
 public class ComputeBuildOrder extends Task {
 
     private File dir;
     private String propertyName;
     private String projectList;
     private Path classpath;
+
+    public ComputeBuildOrder() {
+        super();
+    }
 
     public final void setProjectList(final String projectList) {
         this.projectList = projectList;
@@ -96,10 +105,10 @@ public class ComputeBuildOrder extends Task {
     public void execute() throws BuildException {
         // Parse ClassPath-Jars
         log("using classpath: " + classpath, Project.MSG_INFO);
-        String[] classpathFiles = classpath.list();
-        List<AbstractModule> classpathModules = new ArrayList<AbstractModule>(classpathFiles.length);
-        for (String classpathFilename : classpathFiles) {
-            File classpathFile = new File(classpathFilename);
+        final String[] classpathFiles = classpath.list();
+        final List<AbstractModule> classpathModules = new ArrayList<AbstractModule>(classpathFiles.length);
+        for (final String classpathFilename : classpathFiles) {
+            final File classpathFile = new File(classpathFilename);
             if (classpathFile.isFile()) {
             	classpathModules.add(new JarModule(classpathFile));
             } else {
@@ -109,29 +118,38 @@ public class ComputeBuildOrder extends Task {
             }
         }
 
+        // All bundles from projectList need to be source bundles.
         List<AbstractModule> appModules = new ArrayList<AbstractModule>();
-        String[] split = projectList.split(",");
+        final String[] split = projectList.split(",");
         for (int i = 0; i < split.length; i++) {
             DirModule module = new SrcDirModule(split[i]);
             module.readLocalFiles(getProject(), dir);
             appModules.add(module);
         }
 
-        List<AbstractModule> allModules = new ArrayList<AbstractModule>(classpathModules.size() + appModules.size());
+        final List<AbstractModule> allModules = new ArrayList<AbstractModule>(classpathModules.size() + appModules.size());
         allModules.addAll(classpathModules);
         allModules.addAll(appModules);
         log("all modules: " + allModules, Project.MSG_INFO);
 
-        // compute dependencies
-        Map<String, AbstractModule> modulesByName = new HashMap<String, AbstractModule>();
-        for (AbstractModule module : allModules) {
+        // Build structures to help bundles resolving their dependencies.
+        final Map<String, AbstractModule> modulesByName = new HashMap<String, AbstractModule>();
+        for (final AbstractModule module : allModules) {
             modulesByName.put(module.getName(), module);
         }
-
-        Map<String, Set<AbstractModule>> modulesByPackage = new HashMap<String, Set<AbstractModule>>();
+        final Map<String, Set<AbstractModule>> modulesByPackage = new HashMap<String, Set<AbstractModule>>();
         for (AbstractModule module : allModules) {
-            module.addToExportMap(modulesByPackage);
+            for (String exportedPackage : module.getExportedPackages()) {
+                Set<AbstractModule> exportingModules = modulesByPackage.get(exportedPackage);
+                if (exportingModules == null) {
+                    exportingModules = new HashSet<AbstractModule>();
+                    modulesByPackage.put(exportedPackage, exportingModules);
+                }
+                exportingModules.add(module);
+            }
         }
+
+        // Compute dependencies in the bundles.
         for (AbstractModule module : allModules) {
             module.computeDependencies(modulesByName, modulesByPackage);
         }
@@ -139,6 +157,7 @@ public class ComputeBuildOrder extends Task {
             module.computeDependenciesForFragments();
         }
 
+        // Generate a sorted list of bundles according to their dependencies.
         List<AbstractModule> sortedModules = new DependenciesSorter().sortDependencies(classpathModules, appModules);
         log("sorted modules: " + sortedModules, Project.MSG_INFO);
 
@@ -147,10 +166,11 @@ public class ComputeBuildOrder extends Task {
         String moduleNamesList = getModuleNamesList(sortedModules, ',');
         getProject().setInheritedProperty(propertyName, moduleNamesList);
 
+        // Set properties for each bundle.
         for (AbstractModule module : sortedModules) {
-            // direct dependencies
-            StringBuilder requiredClasspath = new StringBuilder();
-            for (String classpathEntry : module.getRequiredClasspath()) {
+            // direct dependencies for compiling the classes.
+            final StringBuilder requiredClasspath = new StringBuilder();
+            for (final String classpathEntry : module.getRequiredClasspath()) {
                 requiredClasspath.append(classpathEntry);
                 requiredClasspath.append(',');
             }
@@ -160,9 +180,9 @@ public class ComputeBuildOrder extends Task {
             }
             log(module.getName() + ".requiredClasspath: " + requiredClasspath, Project.MSG_DEBUG);
             getProject().setInheritedProperty(module.getName() + ".requiredClasspath", requiredClasspath.toString());
-            // deep dependencies
-            StringBuilder deepClasspath = new StringBuilder();
-            for (String classpathEntry : module.getDeepRequiredClasspath()) {
+            // deep dependencies for executing the classes.
+            final StringBuilder deepClasspath = new StringBuilder();
+            for (final String classpathEntry : module.getDeepRequiredClasspath()) {
                 deepClasspath.append(classpathEntry);
                 deepClasspath.append(',');
             }
@@ -175,13 +195,14 @@ public class ComputeBuildOrder extends Task {
         }
     }
 
-    private String getModuleNamesList(Collection<AbstractModule> modules, char delimiter) {
-        StringBuffer buffer = new StringBuffer();
-        for (Iterator<AbstractModule> modulesIt = modules.iterator(); modulesIt.hasNext();) {
-            buffer.append(modulesIt.next().getName());
-            if (modulesIt.hasNext()) {
-                buffer.append(delimiter);
-            }
+    private String getModuleNamesList(final Collection<AbstractModule> modules, final char delimiter) {
+        final StringBuffer buffer = new StringBuffer();
+        for (AbstractModule module : modules) {
+            buffer.append(module.getName());
+            buffer.append(delimiter);
+        }
+        if (buffer.length() > 0) {
+            buffer.setLength(buffer.length() - 1);
         }
         return buffer.toString();
     }

@@ -4056,6 +4056,8 @@ public class Contact extends CommonObject implements Serializable {
             return containsNumberOfDistributionLists();
         case CONTACT_NUMBER_OF_LINKS:
             return containsNumberOfLinks();
+        case NUMBER_OF_IMAGES:
+            return containsImage1();
         case USE_COUNT:
             return containsUseCount();
         case YOMI_FIRST_NAME:
@@ -4467,7 +4469,7 @@ public class Contact extends CommonObject implements Serializable {
         final Contact clone = new Contact();
         for(final ContactField field: ContactField.values()){
             final int fieldNum = field.getNumber();
-            if(contains(fieldNum)) {
+            if(!field.isVirtual() && contains(fieldNum)) {
                 clone.set(fieldNum, get(fieldNum));
             }
         }

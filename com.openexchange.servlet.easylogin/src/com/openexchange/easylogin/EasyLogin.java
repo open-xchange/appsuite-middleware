@@ -55,6 +55,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -297,6 +298,8 @@ public class EasyLogin extends HttpServlet {
         final String clientIP = parseClientIP(req);
         final Map<String, List<String>> headers = copyHeaders(req);
         try {
+            final Map<String, Object> properties = new HashMap<String, Object>(1);
+            properties.put("http.request", req);
             result = LoginPerformer.getInstance().doLogin(new LoginRequest() {
 
                 private final String hash = HashCalculator.getHash(req, client);
@@ -350,7 +353,7 @@ public class EasyLogin extends HttpServlet {
                 public Map<String, List<String>> getHeaders() {
                     return headers;
                 }
-            });
+            }, properties);
         } catch (final OXException e) {
             LOG.error("IP: " + req.getRemoteAddr() + ", Login: " + login + ", AuthID: " + authID + ", Login failed.", e);
             final String errorPage = errorPageTemplate.replace("ERROR_MESSAGE", e.getMessage());
@@ -420,8 +423,8 @@ public class EasyLogin extends HttpServlet {
         return clientIP;
     }
 
-    static public String getFileContents(File file) {
-        StringBuilder stringBuilder = new StringBuilder();
+    static public String getFileContents(final File file) {
+        final StringBuilder stringBuilder = new StringBuilder();
         try {
             final BufferedReader input = new BufferedReader(new FileReader(file));
             try {

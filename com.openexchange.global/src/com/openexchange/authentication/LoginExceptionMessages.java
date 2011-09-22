@@ -49,6 +49,7 @@
 
 package com.openexchange.authentication;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocalizableStrings;
 
 /**
@@ -110,6 +111,9 @@ public final class LoginExceptionMessages implements LocalizableStrings {
     // This message is thrown when the login request with a HTTP authorization header contains a authorization method that is not supported.
     // %1$s is replaved with the not supported HTTP authorization header method.
     public static final String UNKNOWN_HTTP_AUTHORIZATION_MSG = "Method \"%1$s\" in HTTP header authorization is not supported.";
+
+    // Missing client capabilities.
+    public static final String MISSING_CAPABILITIES_MSG = "Missing client capabilities.";
 
     private LoginExceptionMessages() {
         super();

@@ -49,7 +49,8 @@
 
 package com.openexchange.folderstorage.outlook;
 
-import gnu.trove.TObjectIntHashMap;
+import gnu.trove.map.TObjectIntMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.Collator;
@@ -89,6 +90,7 @@ import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.Type;
+import com.openexchange.folderstorage.database.DatabaseFolderStorage.ConnectionMode;
 import com.openexchange.folderstorage.database.DatabaseFolderType;
 import com.openexchange.folderstorage.database.DatabaseParameterConstants;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
@@ -806,7 +808,7 @@ public final class OutlookFolderStorage implements FolderStorage {
     @Override
     public List<Folder> getFolders(final String treeId, final List<String> folderIds, final StorageType storageType, final StorageParameters storageParameters) throws OXException {
         final Folder[] ret = new Folder[folderIds.size()];
-        final TObjectIntHashMap<String> map = new TObjectIntHashMap<String>(folderIds.size());
+        final TObjectIntMap<String> map = new TObjectIntHashMap<String>(folderIds.size());
         for (int i = 0; i < ret.length; i++) {
             final String folderId = folderIds.get(i);
             if (PREPARED_FULLNAME_DEFAULT.equals(folderId)) {
@@ -2088,29 +2090,30 @@ public final class OutlookFolderStorage implements FolderStorage {
                 try {
                     mailIDs = getSubfolders(fullname, realTreeId, folderStorage, storageParameters);
                 } catch (final OXException e) {
-                    final Throwable cause = e.getCause();
-                    if (cause instanceof OXException) {
-                        final OXException me = (OXException) cause;
-                        if (me.isPrefix("MSG")) {
-                            final int number = me.getCode();
-                            if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.getNumber() == number) {
-                                if (LOG.isDebugEnabled()) {
-                                    LOG.debug(e.getMessage(), e);
-                                }
-                                /*
-                                 * Return empty map
-                                 */
-                                return new TreeMap<String, List<String>>(comparator);
-                            } else if (MIMEMailExceptionCode.INVALID_CREDENTIALS.getNumber() == number) {
-                                if (LOG.isDebugEnabled()) {
-                                    LOG.debug(e.getMessage(), e);
-                                }
-                                /*
-                                 * Return empty map
-                                 */
-                                return new TreeMap<String, List<String>>(comparator);
-                            }
+                    if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.equals(e)) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug(e.getMessage(), e);
                         }
+                        /*
+                         * Return empty map
+                         */
+                        return new TreeMap<String, List<String>>(comparator);
+                    } else if (MIMEMailExceptionCode.INVALID_CREDENTIALS.equals(e)) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug(e.getMessage(), e);
+                        }
+                        /*
+                         * Return empty map
+                         */
+                        return new TreeMap<String, List<String>>(comparator);
+                    } else if (MIMEMailExceptionCode.CONNECT_ERROR.equals(e)) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug(e.getMessage(), e);
+                        }
+                        /*
+                         * Return empty map
+                         */
+                        return new TreeMap<String, List<String>>(comparator);
                     }
                     throw e;
                 }
@@ -2300,16 +2303,16 @@ public final class OutlookFolderStorage implements FolderStorage {
     }
 
     static Connection checkReadConnection(final StorageParameters storageParameters) {
-        return storageParameters.<Connection> getParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_CONNECTION);
+        final ConnectionMode con =
+            storageParameters.<ConnectionMode> getParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_CONNECTION);
+        return null == con ? null : con.connection;
     }
 
     static Connection checkWriteConnection(final StorageParameters storageParameters) {
-        final Connection con =
-            storageParameters.<Connection> getParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_CONNECTION);
-        final Boolean writable =
-            storageParameters.<Boolean> getParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_WRITABLE);
-        if (null != con && null != writable && writable.booleanValue()) {
-            return con;
+        final ConnectionMode con =
+            storageParameters.<ConnectionMode> getParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_CONNECTION);
+        if (null != con && con.readWrite) {
+            return con.connection;
         }
         return null;
     }

@@ -1036,11 +1036,11 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
                 session.setNew(false);
                 session.setServletContext(getServletContext());
                 /*
-                 * Add JSESSIONID cookie
+                 * TODO: Add JSESSIONID cookie; reset max-age?
                  */
-                configureCookie(sessionCookie);
-                response.addCookie(sessionCookie);
-                return session;
+                // configureCookie(sessionCookie);
+                // response.addCookie(sessionCookie);
+                return session.touch();
             }
             /*
              * Invalidate session

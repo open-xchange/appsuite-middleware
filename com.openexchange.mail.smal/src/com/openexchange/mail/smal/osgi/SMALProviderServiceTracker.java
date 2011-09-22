@@ -89,11 +89,11 @@ public final class SMALProviderServiceTracker implements ServiceTrackerCustomize
         try {
             if (SMALMailProviderRegistry.registerMailProvider(protocol.toString(), addedService)) {
                 LOG.info(new StringBuilder(64).append("Mail provider for protocol '").append(protocol.toString()).append(
-                    "' successfully registered"));
+                    "' successfully registered in SMAL registry."));
             } else {
                 if (!Protocol.ALL.equals(protocol.toString())) {
                     LOG.warn(new StringBuilder(64).append("Mail provider for protocol '").append(protocol.toString()).append(
-                        "' could not be added.").append(" Another provider which supports the protocol has already been registered."));
+                        "' could not be added to SMAL registry.").append(" Another provider which supports the protocol has already been registered."));
                     context.ungetService(reference);
                 }
                 context.ungetService(reference);
@@ -116,14 +116,10 @@ public final class SMALProviderServiceTracker implements ServiceTrackerCustomize
     public void removedService(final ServiceReference<MailProvider> reference, final MailProvider service) {
         if (null != service) {
             try {
-                try {
-                    final MailProvider provider = service;
-                    SMALMailProviderRegistry.unregisterMailProvider(provider);
-                    LOG.info(new StringBuilder(64).append("Mail provider for protocol '").append(provider.getProtocol().toString()).append(
-                        "' successfully unregistered"));
-                } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
-                }
+                final MailProvider provider = service;
+                SMALMailProviderRegistry.unregisterMailProvider(provider);
+                LOG.info(new StringBuilder(64).append("Mail provider for protocol '").append(provider.getProtocol().toString()).append(
+                    "' successfully unregistered from SMAL registry."));
             } finally {
                 context.ungetService(reference);
             }

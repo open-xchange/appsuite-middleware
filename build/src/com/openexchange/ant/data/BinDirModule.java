@@ -59,14 +59,21 @@ import java.util.Set;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 
+/**
+ * A bundle already containing the compiled .class files. This class currently only works if all .class files are contained in a JAR listed
+ * in the MANIFEST.MF.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
 public class BinDirModule extends DirModule {
 
     private File dir;
-    private List<String> classpathDependencies = new LinkedList<String>();
-    private Set<String> exportedClasspath = new HashSet<String>();
-    private Set<String> requiredClasspath = new HashSet<String>();
+    private final List<String> classpathDependencies = new LinkedList<String>();
+    private final Set<String> exportedClasspath = new HashSet<String>();
+    private final Set<String> requiredClasspath = new HashSet<String>();
 
     public BinDirModule(final String name) {
+        super();
         this.name = name;
     }
 
@@ -74,35 +81,37 @@ public class BinDirModule extends DirModule {
         this.name = dir.getName();
     }
 
-    private void readFiles(File manifestFile) {
+    private void readFiles(final File manifestFile) {
         try {
             if (manifestFile.exists() && manifestFile.length() != 0) {
                 this.osgiManifest = new OSGIManifest(manifestFile);
                 // read Bundle-ClassPath:
                 for (String classpathEntry : osgiManifest.getListEntry(OSGIManifest.BUNDLE_CLASSPATH)) {
                     if (!classpathEntry.equals(".")) {
-                        exportedClasspath.add(classpathEntry);
+                        if (isExported(new File(dir, classpathEntry))) {
+                            exportedClasspath.add(classpathEntry);
+                        }
                     } else {
                         // TODO scan for .class files
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new BuildException(e);
         }
     }
 
     @Override
-    public void readLocalFiles(Project project, File rootDir) {
+    public void readLocalFiles(final Project project, final File rootDir) {
         dir = new File(rootDir, name);
         project.log("Project " + name + " reads local files from " + dir);
         readFiles(new File(dir, "/META-INF/MANIFEST.MF"));
     }
 
     @Override
-    public void computeDependencies(Map<String, AbstractModule> projectsByName, Map<String, Set<AbstractModule>> projectsByPackage) {
-        for (String classpathProject : classpathDependencies) {
-            AbstractModule module = projectsByName.get(classpathProject);
+    public void computeDependencies(final Map<String, AbstractModule> projectsByName, final Map<String, Set<AbstractModule>> projectsByPackage) {
+        for (final String classpathProject : classpathDependencies) {
+            final AbstractModule module = projectsByName.get(classpathProject);
             if (module != null && module != this) {
                 dependencies.add(module);
             }
@@ -112,8 +121,8 @@ public class BinDirModule extends DirModule {
 
     @Override
     public Set<String> getExportedClasspath() {
-        Set<String> retval = new HashSet<String>();
-        for (String classpathEntry : exportedClasspath) {
+        final Set<String> retval = new HashSet<String>();
+        for (final String classpathEntry : exportedClasspath) {
             retval.add(dir.getAbsolutePath() + File.separatorChar + classpathEntry);
         }
         return Collections.unmodifiableSet(retval);
@@ -123,9 +132,9 @@ public class BinDirModule extends DirModule {
     public Set<String> getRequiredClasspath() {
         Set<String> retval = super.getRequiredClasspath();
         if (!requiredClasspath.isEmpty()) {
-            Set<String> tmp = new HashSet<String>();
+            final Set<String> tmp = new HashSet<String>();
             tmp.addAll(retval);
-            for (String classpathEntry : requiredClasspath) {
+            for (final String classpathEntry : requiredClasspath) {
                 tmp.add(dir.getAbsolutePath() + File.separatorChar + classpathEntry);
             }
             retval = Collections.unmodifiableSet(tmp); 

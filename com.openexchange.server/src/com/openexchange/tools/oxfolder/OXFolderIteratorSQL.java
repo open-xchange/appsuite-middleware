@@ -52,10 +52,13 @@ package com.openexchange.tools.oxfolder;
 import static com.openexchange.tools.oxfolder.OXFolderUtility.folderModule2String;
 import static com.openexchange.tools.oxfolder.OXFolderUtility.getUserName;
 import static com.openexchange.tools.sql.DBUtils.closeResources;
-import gnu.trove.TIntArrayList;
-import gnu.trove.TIntHashSet;
-import gnu.trove.TIntIntHashMap;
-import gnu.trove.TIntIntIterator;
+import gnu.trove.iterator.TIntIntIterator;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -861,7 +864,7 @@ public final class OXFolderIteratorSQL {
      * @return The subfolders' identifiers
      * @throws OXException If an error occurs
      */
-    public static TIntArrayList getVisibleSubfolders(final int parent, final int userId, final int[] memberInGroups, final int[] accessibleModules, final Context ctx, final Connection con) throws OXException {
+    public static TIntList getVisibleSubfolders(final int parent, final int userId, final int[] memberInGroups, final int[] accessibleModules, final Context ctx, final Connection con) throws OXException {
         final StringBuilder condBuilder = new StringBuilder(32);
         final String fields = condBuilder.append(STR_OT).append(".fuid").toString();
         condBuilder.setLength(0);
@@ -902,7 +905,7 @@ public final class OXFolderIteratorSQL {
             if (!rs.next()) {
                 return new TIntArrayList(0);
             }
-            final TIntArrayList retval = new TIntArrayList(16);
+            final TIntList retval = new TIntArrayList(16);
             do {
                 retval.add(rs.getInt(1));
             } while (rs.next());
@@ -1104,8 +1107,8 @@ public final class OXFolderIteratorSQL {
                 closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
                 return false;
             }
-            final TIntIntHashMap fuid2parent = new TIntIntHashMap(128);
-            final TIntHashSet fuids = new TIntHashSet(128);
+            final TIntIntMap fuid2parent = new TIntIntHashMap(128);
+            final TIntSet fuids = new TIntHashSet(128);
             do {
                 final int fuid = rs.getInt(1);
                 fuid2parent.put(fuid, rs.getInt(2));
@@ -1177,8 +1180,8 @@ public final class OXFolderIteratorSQL {
                 closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
                 return FolderObjectIterator.EMPTY_FOLDER_ITERATOR;
             }
-            final TIntIntHashMap fuid2parent = new TIntIntHashMap(128);
-            final TIntHashSet fuids = new TIntHashSet(128);
+            final TIntIntMap fuid2parent = new TIntIntHashMap(128);
+            final TIntSet fuids = new TIntHashSet(128);
             do {
                 final int fuid = rs.getInt(1);
                 fuid2parent.put(fuid, rs.getInt(2));
@@ -1424,7 +1427,7 @@ public final class OXFolderIteratorSQL {
                     if (fo.getCreatedBy() != OCLPermission.ALL_GROUPS_AND_USERS) {
                         throw e;
                     }
-                    final StringHelper strHelper = new StringHelper(locale);
+                    final StringHelper strHelper = StringHelper.valueOf(locale);
                     creatorDisplayName = strHelper.getString(Groups.ALL_USERS);
                 }
                 final FolderObject virtualOwnerFolder =

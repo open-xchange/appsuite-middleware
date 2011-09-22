@@ -1,6 +1,5 @@
 package com.openexchange.groupware.infostore.webdav;
 
-import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -13,6 +12,7 @@ import java.util.Map;
 import junit.framework.TestCase;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.database.provider.DBPoolProvider;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -28,15 +28,15 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
-import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.setuptools.TestConfig;
+import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.webdav.protocol.TestWebdavFactoryBuilder;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -398,10 +398,12 @@ public class PermissionTest extends TestCase implements SessionHolder {
 		oxma.deleteFolder(new FolderObject(objectID), true, System.currentTimeMillis());
 	}
 
+    @Override
     public Session getSessionObject() {
         return session;
     }
 
+    @Override
     public Context getContext() {
     	return ctx;
     }
@@ -409,6 +411,7 @@ public class PermissionTest extends TestCase implements SessionHolder {
     /* (non-Javadoc)
      * @see com.openexchange.sessiond.impl.SessionHolder#getUser()
      */
+    @Override
     public User getUser() {
         // TODO Auto-generated method stub
         return null;

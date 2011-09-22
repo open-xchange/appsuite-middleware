@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.customizer.folder;
 
+import java.util.List;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.session.ServerSession;
 
@@ -100,6 +101,10 @@ public class SimFolderField implements AdditionalFolderField {
 
     public void setJsonValue(Object jsonValue) {
         this.jsonValue = jsonValue;
+    }
+
+    public List<Object> getValues(List<FolderObject> folder, ServerSession session) {
+        return AdditionalFieldsUtils.bulk(this, folder, session);
     }
 
 }

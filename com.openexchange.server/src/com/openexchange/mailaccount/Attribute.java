@@ -49,7 +49,8 @@
 
 package com.openexchange.mailaccount;
 
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
@@ -227,7 +228,7 @@ public enum Attribute {
         return id;
     }
 
-    private static TIntObjectHashMap<Attribute> byId = new TIntObjectHashMap<Attribute>();
+    private static TIntObjectMap<Attribute> byId = new TIntObjectHashMap<Attribute>();
 
     static {
         for (final Attribute attribute : Attribute.values()) {

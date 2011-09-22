@@ -79,6 +79,9 @@ public class ContactMerger {
         Contact clone = c1.clone();
 
         for (ContactField field : ContactField.values()) {
+        	if (field.isVirtual()) {
+        		continue;
+        	}
             int number = field.getNumber();
             if (c2.contains(number)) {
                 if (overwrite || !c1.contains(number)) {

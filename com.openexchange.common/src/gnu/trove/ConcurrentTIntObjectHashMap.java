@@ -49,6 +49,13 @@
 
 package gnu.trove;
 
+import gnu.trove.function.TObjectFunction;
+import gnu.trove.iterator.TIntObjectIterator;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TIntObjectProcedure;
+import gnu.trove.procedure.TIntProcedure;
+import gnu.trove.procedure.TObjectProcedure;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -63,7 +70,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ConcurrentTIntObjectHashMap<V> extends TIntObjectHashMap<V> {
+public final class ConcurrentTIntObjectHashMap<V> extends TIntObjectHashMap<V> implements Cloneable {
 
     private final TIntObjectHashMap<V> map;
 
@@ -83,35 +90,10 @@ public final class ConcurrentTIntObjectHashMap<V> extends TIntObjectHashMap<V> {
      *
      * @param initialCapacity used to find a prime capacity for the table.
      * @param loadFactor used to calculate the threshold over which rehashing takes place.
-     * @param strategy used to compute hash codes and to compare keys.
-     */
-    public ConcurrentTIntObjectHashMap(final int initialCapacity, final float loadFactor, final TIntHashingStrategy strategy) {
-        super();
-        map = new TIntObjectHashMap<V>(initialCapacity, loadFactor, strategy);
-        readWriteLock = new ReentrantReadWriteLock();
-    }
-
-    /**
-     * Initializes a new {@link ConcurrentTIntObjectHashMap}.
-     *
-     * @param initialCapacity used to find a prime capacity for the table.
-     * @param loadFactor used to calculate the threshold over which rehashing takes place.
      */
     public ConcurrentTIntObjectHashMap(final int initialCapacity, final float loadFactor) {
         super();
         map = new TIntObjectHashMap<V>(initialCapacity, loadFactor);
-        readWriteLock = new ReentrantReadWriteLock();
-    }
-
-    /**
-     * Initializes a new {@link ConcurrentTIntObjectHashMap}.
-     *
-     * @param initialCapacity used to find a prime capacity for the table.
-     * @param strategy used to compute hash codes and to compare keys.
-     */
-    public ConcurrentTIntObjectHashMap(final int initialCapacity, final TIntHashingStrategy strategy) {
-        super();
-        map = new TIntObjectHashMap<V>(initialCapacity, strategy);
         readWriteLock = new ReentrantReadWriteLock();
     }
 
@@ -126,22 +108,16 @@ public final class ConcurrentTIntObjectHashMap<V> extends TIntObjectHashMap<V> {
         readWriteLock = new ReentrantReadWriteLock();
     }
 
-    /**
-     * Initializes a new {@link ConcurrentTIntObjectHashMap}.
-     *
-     * @param strategy used to compute hash codes and to compare keys.
-     */
-    public ConcurrentTIntObjectHashMap(final TIntHashingStrategy strategy) {
-        super();
-        map = new TIntObjectHashMap<V>(strategy);
-        readWriteLock = new ReentrantReadWriteLock();
-    }
-
     @Override
     public ConcurrentTIntObjectHashMap<V> clone() {
-        final ConcurrentTIntObjectHashMap<V> clone = (ConcurrentTIntObjectHashMap<V>) super.clone();
-        clone.readWriteLock = new ReentrantReadWriteLock();
-        return clone();
+        try {
+            final ConcurrentTIntObjectHashMap<V> clone = (ConcurrentTIntObjectHashMap<V>) super.clone();
+            clone.readWriteLock = new ReentrantReadWriteLock();
+            return clone();
+        } catch (final CloneNotSupportedException e) {
+            // Cannot occur
+            throw new InternalError("Clone not supported although Cloneable implemented.");
+        }
     }
 
     @Override
@@ -243,12 +219,20 @@ public final class ConcurrentTIntObjectHashMap<V> extends TIntObjectHashMap<V> {
         }
     }
 
+    private final TIntObjectProcedure<V> PUT_ALL_PROC = new TIntObjectProcedure<V>() {
+        @Override
+        public boolean execute(final int key, final V value) {
+            put( key, value );
+            return true;
+        }
+    };
+
     @Override
-    public void putAll(final TIntObjectHashMap<V> map) {
+    public void putAll(final TIntObjectMap<? extends V> map) {
         final Lock l = readWriteLock.writeLock();
         l.lock();
         try {
-            map.putAll(map);
+            map.forEachEntry( PUT_ALL_PROC );
         } finally {
             l.unlock();
         }
@@ -332,22 +316,22 @@ public final class ConcurrentTIntObjectHashMap<V> extends TIntObjectHashMap<V> {
     }
 
     @Override
-    public Object[] getValues() {
+    public V[] values() {
         final Lock l = readWriteLock.readLock();
         l.lock();
         try {
-            return map.getValues();
+            return map.values();
         } finally {
             l.unlock();
         }
     }
 
     @Override
-    public <T> T[] getValues(final T[] a) {
+    public V[] values(final V[] a) {
         final Lock l = readWriteLock.readLock();
         l.lock();
         try {
-            return map.getValues(a);
+            return map.values(a);
         } finally {
             l.unlock();
         }
@@ -376,7 +360,7 @@ public final class ConcurrentTIntObjectHashMap<V> extends TIntObjectHashMap<V> {
     }
 
     @Override
-    public boolean containsValue(final V val) {
+    public boolean containsValue(final Object val) {
         final Lock l = readWriteLock.readLock();
         l.lock();
         try {
@@ -410,7 +394,7 @@ public final class ConcurrentTIntObjectHashMap<V> extends TIntObjectHashMap<V> {
     }
 
     @Override
-    public boolean forEachValue(final TObjectProcedure<V> procedure) {
+    public boolean forEachValue(final TObjectProcedure<? super V> procedure) {
         final Lock l = readWriteLock.readLock();
         l.lock();
         try {
@@ -421,7 +405,7 @@ public final class ConcurrentTIntObjectHashMap<V> extends TIntObjectHashMap<V> {
     }
 
     @Override
-    public boolean forEachEntry(final TIntObjectProcedure<V> procedure) {
+    public boolean forEachEntry(final TIntObjectProcedure<? super V> procedure) {
         final Lock l = readWriteLock.readLock();
         l.lock();
         try {
@@ -432,7 +416,7 @@ public final class ConcurrentTIntObjectHashMap<V> extends TIntObjectHashMap<V> {
     }
 
     @Override
-    public boolean retainEntries(final TIntObjectProcedure<V> procedure) {
+    public boolean retainEntries(final TIntObjectProcedure<? super V> procedure) {
         final Lock l = readWriteLock.writeLock();
         l.lock();
         try {

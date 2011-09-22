@@ -49,8 +49,9 @@
 
 package com.openexchange.groupware.contact.helpers;
 
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.Comparator;
+import java.util.Locale;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
 
@@ -63,18 +64,44 @@ import com.openexchange.groupware.search.Order;
  */
 public class DefaultContactComparator implements Comparator<Contact>{
 
-    private static final TIntObjectHashMap<Comparator<Contact>> SPECIAL_COMPARATORS = new TIntObjectHashMap<Comparator<Contact>>() {{
-        put(Contact.SPECIAL_SORTING, new SpecialAlphanumSortContactComparator());
-        put(Contact.USE_COUNT_GLOBAL_FIRST, new UseCountGlobalFirstComparator());
+    private static interface ComparatorProvider {
+        
+        Comparator<Contact> getComparator(Locale locale);
+    }
+
+    private static final ComparatorProvider USE_COUNT_COMPARATOR_PROVIDER = new ComparatorProvider() {
+
+        private final UseCountGlobalFirstComparator comparator = new UseCountGlobalFirstComparator();
+        
+        @Override
+        public Comparator<Contact> getComparator(final Locale locale) {
+            return comparator;
+        }
+    };
+
+    private static final ComparatorProvider SPECIAL_COMPARATOR_PROVIDER = new ComparatorProvider() {
+        
+        @Override
+        public Comparator<Contact> getComparator(final Locale locale) {
+            return new SpecialAlphanumSortContactComparator(locale);
+        }
+    };
+
+    private static final TIntObjectHashMap<ComparatorProvider> SPECIAL_COMPARATORS = new TIntObjectHashMap<ComparatorProvider>() {{
+        put(Contact.SPECIAL_SORTING, USE_COUNT_COMPARATOR_PROVIDER);
+        put(Contact.USE_COUNT_GLOBAL_FIRST, SPECIAL_COMPARATOR_PROVIDER);
     }};
 
     private final int field;
     private final Order order;
+    private final Locale locale;
 
-    public DefaultContactComparator(final int field, final Order order) {
+    public DefaultContactComparator(final int field, final Order order, final Locale locale) {
         super();
         this.field = field;
         this.order = order;
+        
+        this.locale = null == locale ? Locale.US : locale;
     }
 
     @Override
@@ -82,8 +109,9 @@ public class DefaultContactComparator implements Comparator<Contact>{
         if (field <= 0 || Order.NO_ORDER.equals(order)) {
             return 0;
         }
-        final Comparator<Contact> specialComparator = SPECIAL_COMPARATORS.get(field);
-        if (null != specialComparator) {
+        final ComparatorProvider provider = SPECIAL_COMPARATORS.get(field);
+        if (null != provider) {
+            final Comparator<Contact> specialComparator = provider.getComparator(locale);
             return Order.DESCENDING.equals(order) ? -1 * specialComparator.compare(o1, o2) : specialComparator.compare(o1, o2);
         }
         final Object v1 = o1.get(field);

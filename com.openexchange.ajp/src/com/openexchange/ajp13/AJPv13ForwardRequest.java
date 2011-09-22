@@ -49,7 +49,8 @@
 
 package com.openexchange.ajp13;
 
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -98,9 +99,9 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 
     private static final int BYTE_COOKIE = 0x09;
 
-    private static final TIntObjectHashMap<String> httpHeaderMapping;
+    private static final TIntObjectMap<String> httpHeaderMapping;
 
-    private static final TIntObjectHashMap<String> attributeMapping;
+    private static final TIntObjectMap<String> attributeMapping;
 
     private static final String DEFAULT_ENCODING = ServerConfig.getProperty(Property.DefaultEncoding);
 
@@ -268,6 +269,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
             }
         }
         LogProperties.putLogProperty("com.openexchange.ajp13.requestIp", servletRequest.getRemoteAddr());
+        LogProperties.putLogProperty("com.openexchange.ajp13.serverName", servletRequest.getServerName());
         /*
          * Determine if content type indicates form data
          */
@@ -490,7 +492,19 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
                 }
             }
             prevEnd = m.end();
-            final Cookie c = new Cookie(name, prepare(m.group(4)));
+            final Cookie c;
+            try {
+                c = new Cookie(name, prepare(m.group(4)));
+            } catch (final RuntimeException e) {
+                /*
+                 * Cookie name contains illegal characters (for example, a comma, space, or semicolon) or it is one of the tokens reserved
+                 * for use by the cookie protocol
+                 */
+                if (DEBUG) {
+                    LOG.debug("Invalid cookie name detected. Ignoring...", e);
+                }
+                continue;
+            }
             c.setVersion(version);
             String attr = m.group(5);
             if (attr != null) {

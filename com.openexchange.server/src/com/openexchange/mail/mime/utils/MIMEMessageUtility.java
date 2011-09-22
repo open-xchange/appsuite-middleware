@@ -327,7 +327,7 @@ public final class MIMEMessageUtility {
     }
 
     public static final Pattern PATTERN_REF_IMG = Pattern.compile(
-        "(<img[^>]*?)(src=\")([^\"]+?)((?:uid=|signature=))([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)",
+        "(<img[^>]*?)(src=\")([^\"]+?)((?:id=|signature=))([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)",
         Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     /**
@@ -344,21 +344,15 @@ public final class MIMEMessageUtility {
      * </ul>
      *
      * @param htmlContent The HTML content
-     * @param session The user session
      * @return <code>true</code> if given HTML content contains references to local image files; otherwise <code>false</code>
      */
-    public static boolean hasReferencedLocalImages(final CharSequence htmlContent, final Session session) {
+    public static boolean hasReferencedLocalImages(final CharSequence htmlContent) {
         final Matcher m = PATTERN_REF_IMG.matcher(htmlContent);
         if (m.find()) {
             final ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
             do {
-                final String uid = m.group(5);
-                if ("signature=".equals(m.group(4))) {
-                    // Touch image no more possible
-                } else {
-                    if (!mfm.contains(uid)) {
-                        // Touch image no more possible
-                    }
+                if ("id=".equals(m.group(4))) {
+                    mfm.contains(m.group(5));
                 }
             } while (m.find());
             return true;

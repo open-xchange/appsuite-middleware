@@ -1,6 +1,5 @@
 package com.openexchange.webdav.protocol;
 
-import com.openexchange.exception.OXException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -8,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 import junit.framework.TestCase;
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.util.PropertySwitch;
 

@@ -52,8 +52,10 @@ package com.openexchange.tools.oxfolder;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeResources;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import gnu.trove.TIntArrayList;
-import gnu.trove.TIntHashSet;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.list.linked.TIntLinkedList;
+import gnu.trove.set.hash.TIntHashSet;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -359,7 +361,7 @@ public final class OXFolderSQL {
     private static final String SQL_LOOKUPFOLDER = "SELECT fuid,fname FROM oxfolder_tree WHERE cid=? AND parent=? AND fname=? AND module=?";
 
     /**
-     * Returns an {@link TIntArrayList} of folders whose name and module matches the given parameters in the given parent folder.
+     * Returns an {@link TIntList} of folders whose name and module matches the given parameters in the given parent folder.
      * @param folderId
      * @param parent The parent folder whose subfolders shall be looked up
      * @param folderName The folder name to look for
@@ -370,12 +372,12 @@ public final class OXFolderSQL {
      * @throws OXException
      * @throws SQLException
      */
-    public static TIntArrayList lookUpFolders(final int parent, final String folderName, final int module, final Connection readConArg, final Context ctx) throws OXException, SQLException {
+    public static TIntList lookUpFolders(final int parent, final String folderName, final int module, final Connection readConArg, final Context ctx) throws OXException, SQLException {
     	Connection readCon = readConArg;
         boolean closeReadCon = false;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        final TIntArrayList folderList = new TIntArrayList();
+        final TIntList folderList = new TIntLinkedList();
         try {
             if (readCon == null) {
                 readCon = DBPool.pickup(ctx);
@@ -669,12 +671,12 @@ public final class OXFolderSQL {
     private static final String SQL_GETSUBFLDIDS = "SELECT fuid FROM oxfolder_tree WHERE cid = ? AND parent = ?";
 
     /**
-     * Creates a <tt>TIntArrayList</tt> instance containing all subfolder IDs of given folder
+     * Creates a <tt>TIntList</tt> instance containing all subfolder IDs of given folder
      *
-     * @return a <tt>TIntArrayList</tt> instance containing all subfolder IDs of given folder
+     * @return a <tt>TIntList</tt> instance containing all subfolder IDs of given folder
      */
-    public static TIntArrayList getSubfolderIDs(final int folderId, final Connection readConArg, final Context ctx) throws OXException, SQLException {
-        final TIntArrayList retval = new TIntArrayList();
+    public static TIntList getSubfolderIDs(final int folderId, final Connection readConArg, final Context ctx) throws OXException, SQLException {
+        final TIntList retval = new TIntArrayList();
         Connection readCon = readConArg;
         boolean closeReadCon = false;
         PreparedStatement stmt = null;

@@ -52,8 +52,8 @@ package com.openexchange.groupware.ldap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import com.openexchange.cache.dynamic.impl.OXObjectFactory;
-import com.openexchange.cache.dynamic.impl.Refresher;
+import com.openexchange.caching.dynamic.OXObjectFactory;
+import com.openexchange.caching.dynamic.Refresher;
 import com.openexchange.exception.OXException;
 
 /**
@@ -80,12 +80,12 @@ final class UserReloader extends Refresher<User> implements User {
      * @throws OXException if initially loading the object fails.
      */
     UserReloader(final OXObjectFactory<User> factory, final String regionName) throws OXException {
-        super(factory, regionName);
+        super(factory, regionName, false);
         this.delegate = refresh();
     }
 
     public UserReloader(final OXObjectFactory<User> factory, final User user, final String regionName) throws OXException {
-        super(factory, regionName);
+        super(factory, regionName, false);
         delegate = user;
         cache(user);
     }

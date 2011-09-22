@@ -139,7 +139,13 @@ public class ContactJSONResultConverter implements ResultConverter {
             final Contact contact = (Contact) resultObject;
             newResultObject = convertSingleContact(contact);
         } else {
-            final int[] columns = RequestTools.getColumnsAsIntArray(request, "columns");
+        	
+            final int[] columns;
+            if (request.isSet("columns")) {
+            	columns = RequestTools.getColumnsAsIntArray(request, "columns");
+            } else {
+            	columns = Contact.ALL_COLUMNS;
+            }
 
             if (request.getAction().equals("updates")) {
 
@@ -265,7 +271,7 @@ public class ContactJSONResultConverter implements ResultConverter {
                 final byte[] imageData = contact.getImage1();
                 if (imageData != null) {
                     final ContactImageDataSource imgSource = new ContactImageDataSource();
-                    final ImageLocation il = new ImageLocation(null, String.valueOf(contact.getParentFolderID()), String.valueOf(contact.getObjectID()), null);
+                    final ImageLocation il = new ImageLocation.Builder().folder(String.valueOf(contact.getParentFolderID())).id(String.valueOf(contact.getObjectID())).build();
                     imageUrl = imgSource.generateUrl(il, session);
                 }
             }

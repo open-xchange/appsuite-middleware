@@ -54,10 +54,10 @@ import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -69,6 +69,7 @@ import com.openexchange.ajax.helper.BrowserDetector;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.systemname.SystemNameService;
 import com.openexchange.tools.encoding.Charsets;
 import com.openexchange.tools.encoding.Helper;
 
@@ -90,14 +91,9 @@ public final class Tools {
     private static final String CACHE_CONTROL_KEY = "Cache-Control";
 
     /**
-     * First Cache-Control value.
+     * Cache-Control value.
      */
-    private static final String CACHE_VALUE1 = "no-store, no-cache, must-revalidate";
-
-    /**
-     * Second Cache-Control value.
-     */
-    private static final String CACHE_VALUE2 = "post-check=0, pre-check=0";
+    private static final String CACHE_VALUE = "no-store, no-cache, must-revalidate, post-check=0, pre-check=0";
 
     /**
      * Expires HTTP header name.
@@ -127,17 +123,33 @@ public final class Tools {
     }
 
     /**
-     * Sets specified ETag header (and implicitly removes/replaces any existing cache-controlling header: <i>Expires</i>, <i>Cache-Control</i>, and <i>Pragma</i>)
-     * 
+     * Sets specified ETag header (and implicitly removes/replaces any existing cache-controlling header: <i>Expires</i>,
+     * <i>Cache-Control</i>, and <i>Pragma</i>)
+     *
      * @param eTag The ETag value
-     * @param expires The expires date
+     * @param resp The HTTP servlet response to apply to
+     */
+    public static void setETag(final String eTag, final HttpServletResponse resp) {
+        setETag(eTag, null, resp);
+    }
+
+    /**
+     * Sets specified ETag header (and implicitly removes/replaces any existing cache-controlling header: <i>Expires</i>,
+     * <i>Cache-Control</i>, and <i>Pragma</i>)
+     *
+     * @param eTag The ETag value
+     * @param expires The optional expires date, pass <code>null</code> to not set any expiry
      * @param resp The HTTP servlet response to apply to
      */
     public static void setETag(final String eTag, final Date expires, final HttpServletResponse resp) {
         removeCachingHeader(resp);
-        resp.setHeader("etag", eTag);
-        synchronized (HEADER_DATEFORMAT) {
-            resp.setHeader(EXPIRES_KEY, HEADER_DATEFORMAT.format(expires));
+        resp.setHeader("ETag", eTag);
+        if (null == expires) {
+            resp.setHeader(EXPIRES_KEY, EXPIRES_DATE);
+        } else {
+            synchronized (HEADER_DATEFORMAT) {
+                resp.setHeader(EXPIRES_KEY, HEADER_DATEFORMAT.format(expires));
+            }
         }
     }
 
@@ -150,8 +162,7 @@ public final class Tools {
      */
     public static void disableCaching(final HttpServletResponse resp) {
         resp.setHeader(EXPIRES_KEY, EXPIRES_DATE);
-        resp.setHeader(CACHE_CONTROL_KEY, CACHE_VALUE1);
-        resp.setHeader(CACHE_CONTROL_KEY, CACHE_VALUE2);
+        resp.setHeader(CACHE_CONTROL_KEY, CACHE_VALUE);
         resp.setHeader(PRAGMA_KEY, PRAGMA_VALUE);
     }
 
@@ -284,30 +295,40 @@ public final class Tools {
             }
         }
     }
+
     public static void setHeaderForFileDownload(final String userAgent, final HttpServletResponse resp, final String fileName) throws UnsupportedEncodingException {
         setHeaderForFileDownload(userAgent, resp, fileName, null);
     }
 
-    public static void setHeaderForFileDownload(final String userAgent, final HttpServletResponse resp, final String fileName, String contentDisposition) throws UnsupportedEncodingException {
+    public static void setHeaderForFileDownload(final String userAgent, final HttpServletResponse resp, final String fileName, final String contentDisposition) throws UnsupportedEncodingException {
         final BrowserDetector detector = new BrowserDetector(userAgent);
-        if(contentDisposition == null) {
-            contentDisposition = "attachment";
+        String cd = contentDisposition;
+        if (cd == null) {
+            cd = "attachment";
         }
         String filename = null;
 
         if (detector.isMSIE()) {
             filename = Helper.encodeFilenameForIE(fileName, Charsets.UTF_8);
         } else if (detector.isSafari5()) {
-            // Leave empty
+            /*-
+             * On socket layer characters are casted to byte values.
+             * 
+             * See AJPv13Response.writeString():
+             * sink.write((byte) chars[i]);
+             * 
+             * Therefore ensure we have a one-character-per-byte charset, as it is with ISO-5589-1
+             */
+            filename = new String(fileName.getBytes(Charsets.UTF_8), Charsets.ISO_8859_1);
         } else {
             filename = Helper.escape(Helper.encodeFilename(fileName, "UTF-8"));
         }
 
-        if(!contentDisposition.contains(";") && filename != null) {
-            contentDisposition = new StringBuilder(64).append(contentDisposition).append("; filename=\"").append(filename).append("\"").toString();
+        if (cd.indexOf(';') < 0 && filename != null) {
+            cd = new StringBuilder(64).append(cd).append("; filename=\"").append(filename).append("\"").toString();
         }
 
-        resp.setHeader("Content-Disposition", contentDisposition);
+        resp.setHeader("Content-Disposition", cd);
     }
 
     static {
@@ -331,8 +352,10 @@ public final class Tools {
     }
 
     /**
-     * Tries to determine the best protocol used for accessing this server instance. If the configuration property com.openexchange.forceHTTPS is set to true, this will always be https://, otherwise
-     * the request will be used to determine the protocol. https:// if it was a secure request, http:// otherwise
+     * Tries to determine the best protocol used for accessing this server instance. If the configuration property
+     * com.openexchange.forceHTTPS is set to true, this will always be https://, otherwise the request will be used to determine the
+     * protocol. https:// if it was a secure request, http:// otherwise
+     *
      * @param req The HttpServletRequest used to contact this server
      * @return "http://" or "https://" depending on what was deemed more appropriate
      */
@@ -343,24 +366,35 @@ public final class Tools {
     public static boolean considerSecure(final HttpServletRequest req) {
         final ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
         if (configurationService != null) {
-            final boolean force = configurationService.getBoolProperty(ServerConfig.Property.FORCE_HTTPS.getPropertyName(), false);
-            if (force) {
-                return true;
-            }
+            return configurationService.getBoolProperty(ServerConfig.Property.FORCE_HTTPS.getPropertyName(), false);
         }
         return req.isSecure();
     }
 
+    /**
+     * Gets the route for specified HTTP session identifier to be used along with <i>";jsessionid"</i> URL part.
+     *
+     * @param httpSessionId The HTTP session identifier
+     * @return The route
+     */
+    public static String getRoute(final String httpSessionId) {
+        if (null == httpSessionId) {
+            return null;
+        }
+        final int pos = httpSessionId.indexOf('.');
+        return pos > 0 ? httpSessionId : httpSessionId + '.' + ServerServiceRegistry.getInstance().getService(SystemNameService.class).getSystemName();
+    }
+
     public static final Map<String, List<String>> copyHeaders(final HttpServletRequest req) {
         final Map<String, List<String>> headers = new HashMap<String, List<String>>();
-        for (final Enumeration<?> e = req.getHeaderNames(); e.hasMoreElements(); ) {
+        for (final Enumeration<?> e = req.getHeaderNames(); e.hasMoreElements();) {
             final String name = (String) e.nextElement();
             List<String> values = headers.get(name);
             if (null == values) {
-                values = new ArrayList<String>();
+                values = new LinkedList<String>();
                 headers.put(name, values);
             }
-            for (final Enumeration<?> valueEnum = req.getHeaders(name); valueEnum.hasMoreElements(); ) {
+            for (final Enumeration<?> valueEnum = req.getHeaders(name); valueEnum.hasMoreElements();) {
                 values.add((String) valueEnum.nextElement());
             }
 

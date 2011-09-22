@@ -57,10 +57,12 @@ import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.tasks.AllowTextInValuesOfDynamicContextAttributesTask;
 import com.openexchange.groupware.update.tasks.AllowTextInValuesOfDynamicUserAttributesTask;
 import com.openexchange.groupware.update.tasks.CorrectAttachmentCountInAppointments;
+import com.openexchange.groupware.update.tasks.CorrectFileAsInContacts;
 import com.openexchange.groupware.update.tasks.CorrectOrganizerInAppointments;
 import com.openexchange.groupware.update.tasks.CreateIndexOnContextAttributesTask;
 import com.openexchange.groupware.update.tasks.CreateIndexOnUserAttributesForAliasLookupTask;
 import com.openexchange.groupware.update.tasks.MailAccountAddReplyToTask;
+import com.openexchange.groupware.update.tasks.VirtualFolderAddSortNumTask;
 
 /**
  * Lists all update tasks of the com.openexchange.server bundle.
@@ -394,7 +396,13 @@ public final class InternalList {
         // NULL. This task corrects this.
         new CorrectOrganizerInAppointments(),
 
+        // Corrects field90 aka fileAs in contacts to have proper contact names in card view of Outlook OXtender 2.
+        new CorrectFileAsInContacts(),
+
         // Add "replyTo" column to mail/transport account table
         new MailAccountAddReplyToTask(),
+
+        // Add "sortNum" column to virtual folder table.
+        new VirtualFolderAddSortNumTask(),
     };
 }

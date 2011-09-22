@@ -49,10 +49,18 @@
 
 package com.openexchange.ajax.writer;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.LoginFields;
+import com.openexchange.exception.OXException;
+import com.openexchange.json.OXJSONWriter;
+import com.openexchange.login.LoginResult;
 import com.openexchange.session.Session;
 
 /**
@@ -61,6 +69,8 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public final class LoginWriter {
+
+    private static final Locale DEFAULT_LOCALE = Locale.US;
 
     /**
      * Initializes a new {@link LoginWriter}.
@@ -72,12 +82,12 @@ public final class LoginWriter {
     /**
      * Writes JSON login response.
      *
-     * @param session The session
+     * @param result The login result
      * @param json The JSON object to write to
      * @throws JSONException If writing to JSON object fails
      */
-    public void writeLogin(Session session, JSONObject json) throws JSONException {
-        write(session, json);
+    public void writeLogin(final LoginResult result, final JSONObject json) throws JSONException {
+        write(result, json);
     }
 
     /**
@@ -87,9 +97,46 @@ public final class LoginWriter {
      * @param json The JSON object to write to
      * @throws JSONException If writing to JSON object fails
      */
-    public static void write(Session session, JSONObject json) throws JSONException {
+    public void writeLogin(final Session session, final JSONObject json) throws JSONException {
+        write(session, json);
+    }
+
+    /**
+     * Writes JSON login response.
+     *
+     * @param result The login result
+     * @param json The JSON object to write to
+     * @throws JSONException If writing to JSON object fails
+     */
+    public static void write(final LoginResult result, final JSONObject json) throws JSONException {
+        write(result.getSession(), json, result.warnings(), result.getUser().getLocale());
+    }
+
+    /**
+     * Writes JSON login response.
+     *
+     * @param session The session
+     * @param json The JSON object to write to
+     * @param warnings The (probably empty) warnings
+     * @throws JSONException If writing to JSON object fails
+     */
+    public static void write(final Session session, final JSONObject json) throws JSONException {
+        write(session, json, Collections.<OXException> emptyList(), null);
+    }
+
+    private static void write(final Session session, final JSONObject json, final Collection<OXException> warnings, final Locale locale) throws JSONException {
         json.put(AJAXServlet.PARAMETER_SESSION, session.getSessionID());
         json.put(LoginFields.RANDOM_PARAM, session.getRandomToken());
+        if (null != warnings && !warnings.isEmpty()) {
+            /*
+             * Write warnings
+             */
+            final OXJSONWriter writer = new OXJSONWriter(json);
+            ResponseWriter.writeWarnings(
+                (warnings instanceof List) ? ((List<OXException>) warnings) : new ArrayList<OXException>(warnings),
+                writer,
+                locale == null ? DEFAULT_LOCALE : locale);
+        }
     }
 
 }

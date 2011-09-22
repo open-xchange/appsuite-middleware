@@ -50,8 +50,9 @@
 package com.openexchange.groupware.importexport.importers;
 
 import static com.openexchange.java.Autoboxing.I;
-import gnu.trove.TIntObjectHashMap;
-import gnu.trove.TObjectProcedure;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TObjectProcedure;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -265,13 +266,13 @@ public class ICalImporter extends AbstractImporter {
 		} catch (final ConversionError conversionError) {
 			throw new OXException(conversionError);
 		}
-		final TIntObjectHashMap<ConversionError> errorMap = new TIntObjectHashMap<ConversionError>();
+		final TIntObjectMap<ConversionError> errorMap = new TIntObjectHashMap<ConversionError>();
 
 		for (final ConversionError error : errors) {
 			errorMap.put(error.getIndex(), error);
 		}
 
-		final TIntObjectHashMap<List<ConversionWarning>> warningMap = new TIntObjectHashMap<List<ConversionWarning>>();
+		final TIntObjectMap<List<ConversionWarning>> warningMap = new TIntObjectHashMap<List<ConversionWarning>>();
 
 		for (final ConversionWarning warning : warnings) {
 			List<ConversionWarning> warningList = warningMap.get(warning
@@ -352,7 +353,7 @@ public class ICalImporter extends AbstractImporter {
 		} catch (final ConversionError conversionError) {
 			throw new OXException(conversionError);
 		}
-		final TIntObjectHashMap<ConversionError> errorMap = new TIntObjectHashMap<ConversionError>();
+		final TIntObjectMap<ConversionError> errorMap = new TIntObjectHashMap<ConversionError>();
 
 		for (final ConversionError error : errors) {
 			errorMap.put(error.getIndex(), error);
@@ -362,7 +363,7 @@ public class ICalImporter extends AbstractImporter {
 		final Map<Integer, Integer> pos2Master = handleChangeExceptions(appointments);
 		final Map<Integer, Integer> master2id = new HashMap<Integer,Integer>();
 
-		final TIntObjectHashMap<List<ConversionWarning>> warningMap = new TIntObjectHashMap<List<ConversionWarning>>();
+		final TIntObjectMap<List<ConversionWarning>> warningMap = new TIntObjectHashMap<List<ConversionWarning>>();
 
 		for (final ConversionWarning warning : warnings) {
 			List<ConversionWarning> warningList = warningMap.get(warning

@@ -60,7 +60,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link SMALMailAccessCache}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SMALMailAccessCache implements IMailAccessCache {
@@ -69,7 +69,7 @@ public final class SMALMailAccessCache implements IMailAccessCache {
 
     /**
      * Gets the singleton instance.
-     * 
+     *
      * @return The singleton instance
      * @throws OXException If instance initialization fails
      */

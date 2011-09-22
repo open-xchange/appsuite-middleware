@@ -49,9 +49,10 @@
 
 package com.openexchange.folderstorage.database;
 
-import gnu.trove.TIntArrayList;
-import gnu.trove.TIntObjectHashMap;
-import gnu.trove.TIntProcedure;
+import gnu.trove.list.TIntList;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TIntProcedure;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -85,12 +86,12 @@ public final class DatabaseFolderConverter {
         DatabaseFolder convert(FolderObject fo) throws OXException;
     }
 
-    private static final TIntObjectHashMap<FolderConverter> SYSTEM_CONVERTERS;
+    private static final TIntObjectMap<FolderConverter> SYSTEM_CONVERTERS;
 
-    private static final TIntObjectHashMap<FolderConverter> CONVERTERS;
+    private static final TIntObjectMap<FolderConverter> CONVERTERS;
 
     static {
-        TIntObjectHashMap<FolderConverter> m = new TIntObjectHashMap<FolderConverter>(4);
+        TIntObjectMap<FolderConverter> m = new TIntObjectHashMap<FolderConverter>(4);
         m.put(FolderObject.SYSTEM_PUBLIC_FOLDER_ID, new FolderConverter() {
 
             @Override
@@ -234,7 +235,7 @@ public final class DatabaseFolderConverter {
                 /*
                  * Determine user-visible subfolders
                  */
-                final TIntArrayList visibleSubfolders = OXFolderIteratorSQL.getVisibleSubfolders(folderId, userId, groups, modules, ctx, con);
+                final TIntList visibleSubfolders = OXFolderIteratorSQL.getVisibleSubfolders(folderId, userId, groups, modules, ctx, con);
                 if (visibleSubfolders.isEmpty()) {
                     retval.setSubfolderIDs(new String[0]);
                     retval.setSubscribedSubfolders(false);
@@ -269,7 +270,7 @@ public final class DatabaseFolderConverter {
                     /*
                      * User-sensitive loading of user infostore folder
                      */
-                    final TIntArrayList subfolders = OXFolderIteratorSQL.getVisibleSubfolders(folderId, userId, groups, modules, ctx, null);
+                    final TIntList subfolders = OXFolderIteratorSQL.getVisibleSubfolders(folderId, userId, groups, modules, ctx, null);
                     if (subfolders.isEmpty()) {
                         retval.setSubfolderIDs(new String[0]);
                         retval.setSubscribedSubfolders(false);
@@ -302,7 +303,7 @@ public final class DatabaseFolderConverter {
                             retval.setSubscribedSubfolders(true);
                         }
                     } else {
-                        final TIntArrayList subfolderIds = OXFolderLoader.getSubfolderInts(folderId, ctx, con);
+                        final TIntList subfolderIds = OXFolderLoader.getSubfolderInts(folderId, ctx, con);
                         if (subfolderIds.isEmpty()) {
                             retval.setSubfolderIDs(new String[0]);
                             retval.setSubscribedSubfolders(false);

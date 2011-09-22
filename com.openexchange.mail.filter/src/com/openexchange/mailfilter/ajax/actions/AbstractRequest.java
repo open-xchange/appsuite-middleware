@@ -49,10 +49,13 @@
 
 package com.openexchange.mailfilter.ajax.actions;
 
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailfilter.ajax.Action;
 import com.openexchange.mailfilter.ajax.Credentials;
 import com.openexchange.mailfilter.ajax.Parameter;
+import com.openexchange.mailfilter.internal.MailFilterProperties;
+import com.openexchange.mailfilter.services.MailFilterServletServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -124,7 +127,15 @@ public abstract class AbstractRequest {
     }
 
     public Credentials getCredentials() throws OXException {
-        final String loginName = session.getLoginName();
+        final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(
+            ConfigurationService.class);
+        final String credsrc = config.getProperty(MailFilterProperties.Values.SIEVE_CREDSRC.property);
+        final String loginName;
+        if (MailFilterProperties.CredSrc.SESSION_FULL_LOGIN.name.equals(credsrc)) {
+            loginName = session.getLogin();
+        } else {
+            loginName = session.getLoginName();
+        }
         final String password = session.getPassword();
         final int userId = session.getUserId();
         final int contextId = session.getContextId();

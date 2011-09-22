@@ -151,8 +151,6 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
 
     private static final String SUFFIX = ".tmp";
 
-    private static final int TIME_TO_LIVE = 300000;
-
     /**
      * Gets the file management instance.
      *
@@ -255,16 +253,21 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
 
     @Override
     public File newTempFile() throws OXException {
+        return newTempFile(PREFIX, SUFFIX);
+    }
+
+    @Override
+    public File newTempFile(final String prefix, final String suffix) throws OXException {
         File tmpFile = null;
         File directory = null;
         do {
             directory = tmpDirReference.get();
             try {
                 if (null == tmpFile) {
-                    tmpFile = File.createTempFile(PREFIX, SUFFIX, directory);
+                    tmpFile = File.createTempFile(prefix, suffix, directory);
                     tmpFile.deleteOnExit();
                 } else {
-                    final File tmp = File.createTempFile(PREFIX, SUFFIX, directory);
+                    final File tmp = File.createTempFile(prefix, suffix, directory);
                     if (!tmpFile.delete()) {
                         LOG.warn("Temporary file could not be deleted: " + tmpFile.getPath());
                     }

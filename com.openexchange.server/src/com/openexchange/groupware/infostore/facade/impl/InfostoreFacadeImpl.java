@@ -50,7 +50,8 @@
 package com.openexchange.groupware.infostore.facade.impl;
 
 import static com.openexchange.java.Autoboxing.I;
-import gnu.trove.TLongObjectHashMap;
+import gnu.trove.map.TLongObjectMap;
+import gnu.trove.map.hash.TLongObjectHashMap;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -122,7 +123,6 @@ import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.EffectivePermission;
-import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.tools.collections.Injector;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
@@ -132,6 +132,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.SessionHolder;
 
 /**
  * DatabaseImpl
@@ -1058,7 +1059,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             idSet.add(Integer.valueOf(i));
         }
 
-        final TLongObjectHashMap<EffectivePermission> perms = new TLongObjectHashMap<EffectivePermission>();
+        final TLongObjectMap<EffectivePermission> perms = new TLongObjectHashMap<EffectivePermission>();
 
         final List<DocumentMetadata> toDeleteDocs = new ArrayList<DocumentMetadata>();
         final List<DocumentMetadata> toDeleteVersions = new ArrayList<DocumentMetadata>();

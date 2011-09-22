@@ -57,21 +57,19 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.cache.dynamic.impl.CacheProxy;
-import com.openexchange.cache.dynamic.impl.OXObjectFactory;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
+import com.openexchange.caching.dynamic.OXObjectFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 public class CachingFilestoreStorage extends FilestoreStorage {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CachingFilestoreStorage.class));
-
     private static final String REGION_NAME = "Filestore";
+    private static final Lock CACHE_LOCK = new ReentrantLock();
 
     private final FilestoreStorage delegate;
-
-    private static final Lock CACHE_LOCK = new ReentrantLock();
 
     public CachingFilestoreStorage(final FilestoreStorage fs) {
         this.delegate = fs;
@@ -139,10 +137,13 @@ public class CachingFilestoreStorage extends FilestoreStorage {
         if (null == retval) {
             retval = delegate.getFilestore(con, id);
             if (null != filestoreCache) {
+                CACHE_LOCK.lock();
                 try {
                     filestoreCache.put(I(id), retval);
                 } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
+                } finally {
+                    CACHE_LOCK.unlock();
                 }
             }
         }

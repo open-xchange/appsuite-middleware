@@ -58,6 +58,7 @@ import com.openexchange.contacts.json.converters.ContactParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
+import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
@@ -130,12 +131,13 @@ public class UpdateAction extends ContactAction {
                  * A move to another contact service
                  */
                 final Contact toMove = contactIface.getObjectById(id, folder);
-                for (int i = 1; i <= 650; i++) {
-                    if (contact.contains(i)) {
-                        toMove.set(i, contact.get(i));
+                for (int i = 1; i < Contacts.mapping.length; i++) {
+                    if (null != Contacts.mapping[i]) {
+                        if (contact.contains(i)) {
+                            toMove.set(i, contact.get(i));
+                        }
                     }
                 }
-                toMove.removeObjectID();
                 if (folder == FolderObject.SYSTEM_LDAP_FOLDER_ID) {
                     toMove.removeInternalUserId();
                 }

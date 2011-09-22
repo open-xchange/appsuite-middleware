@@ -53,14 +53,17 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.NoSuchAlgorithmException;
+import java.util.Locale;
 import java.util.regex.Pattern;
 import jonelo.jacksum.JacksumAPI;
 import jonelo.jacksum.algorithm.AbstractChecksum;
 import jonelo.jacksum.algorithm.MD;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.configuration.ServerConfig;
-import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.crypto.CryptoService;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
@@ -83,7 +86,7 @@ public final class ImageUtility {
 
     /**
      * Parses image location from specified image URI.
-     * 
+     *
      * @param imageUri The image URI
      * @return The parsed image location
      */
@@ -102,34 +105,34 @@ public final class ImageUtility {
         String imageId = null;
         String registrationName = null;
         for (String nvp : nvps) {
-            nvp = nvp.trim();
+            nvp = nvp.trim().toLowerCase(Locale.US);
             if (nvp.length() > 0) {
                 // Look-up character '='
                 final int pos = nvp.indexOf('=');
                 if (pos >= 0) {
                     final String name = nvp.substring(0, pos);
                     if ("accountId".equals(name)) {
-                        accountId = decodeQueryStringValue(UTF_8, nvp.substring(pos + 1));
+                        accountId = decodeQueryStringValue(nvp.substring(pos + 1));
                     } else if (AJAXServlet.PARAMETER_FOLDERID.equals(name)) {
-                        folder = decodeQueryStringValue(UTF_8, nvp.substring(pos + 1));
+                        folder = decodeQueryStringValue(nvp.substring(pos + 1));
                     } else if (AJAXServlet.PARAMETER_ID.equals(name)) {
-                        id = decodeQueryStringValue(UTF_8, nvp.substring(pos + 1));
+                        id = decodeQueryStringValue(nvp.substring(pos + 1));
                     } else if (AJAXServlet.PARAMETER_UID.equals(name)) {
-                        imageId = decodeQueryStringValue(UTF_8, nvp.substring(pos + 1));
+                        imageId = decodeQueryStringValue(nvp.substring(pos + 1));
                     } else if ("source".equals(name)) {
-                        registrationName = decodeQueryStringValue(UTF_8, nvp.substring(pos + 1));
+                        registrationName = decodeQueryStringValue(nvp.substring(pos + 1));
                     }
                 }
             }
         }
-        final ImageLocation il = new ImageLocation(accountId, folder, id, imageId);
+        final ImageLocation il = new ImageLocation.Builder(imageId).accountId(accountId).folder(folder).id(id).build();
         il.setRegistrationName(registrationName);
         return il;
     }
 
-    private static String decodeQueryStringValue(final String charEnc, final String queryStringValue) {
+    private static String decodeQueryStringValue(final String queryStringValue) {
         try {
-            return URLDecoder.decode(queryStringValue, charEnc == null ? ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding) : charEnc);
+            return URLDecoder.decode(queryStringValue, UTF_8);
         } catch (final UnsupportedEncodingException e) {
             return queryStringValue;
         }
@@ -137,7 +140,7 @@ public final class ImageUtility {
 
     /**
      * Starts the image URL in given {@link StringBuilder} instance.
-     * 
+     *
      * @param imageLocation The image location
      * @param session The session
      * @param imageDataSource The data source
@@ -145,66 +148,74 @@ public final class ImageUtility {
      */
     public static void startImageUrl(final ImageLocation imageLocation, final Session session, final ImageDataSource imageDataSource, final StringBuilder sb) {
         final String prefix;
+        final String route;
         {
-            final String hostName = (String) session.getParameter(HostnameService.PARAM_HOST_NAME);
-            final Integer port = (Integer) session.getParameter(HostnameService.PARAM_PORT);
-            final Boolean secure = (Boolean) session.getParameter(HostnameService.PARAM_SECURE);
-            if ((hostName == null) || (port == null) || (secure == null)) {
+            final HostData hostData = (HostData) session.getParameter(HostnameService.PARAM_HOST_DATA);
+            if (hostData == null) {
                 /*
                  * Compose relative URL
                  */
                 prefix = "";
+                route = null;
             } else {
                 /*
                  * Compose absolute URL
                  */
-                final String p;
-                final String sPort;
-                if (secure.booleanValue()) {
-                    p = "https://";
-                    final int por = port.intValue();
-                    if (por == 443) {
-                        sPort = "";
-                    } else {
-                        sPort = sb.append(':').append(por).toString();
-                        sb.setLength(0);
-                    }
-                } else {
-                    p = "http://";
-                    final int por = port.intValue();
-                    if (por == 80) {
-                        sPort = "";
-                    } else {
-                        sPort = sb.append(':').append(por).toString();
-                        sb.setLength(0);
-                    }
+                sb.append(hostData.isSecure() ? "https://" : "http://");
+                sb.append(hostData.getHost());
+                final int port = hostData.getPort();
+                if ((hostData.isSecure() && port != 443) || (!hostData.isSecure() && port != 80)) {
+                    sb.append(':').append(port);
                 }
-                prefix = sb.append(p).append(hostName).append(sPort).toString();
+                prefix = sb.toString();
                 sb.setLength(0);
+                route = hostData.getRoute();
             }
         }
-        sb.append(prefix).append('/').append(ImageDataSource.ALIAS);
-        sb.append('?').append("contextid").append(session.getContextId());
+        /*
+         * Compose signature
+         */
+        String signParam;
         {
-            final String mail = UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getMail();
-            final int pos = mail.indexOf('@');
-            sb.append('&').append("username").append(urlEncodeSafe(mail.substring(0, pos)));
-            sb.append('&').append("server").append(urlEncodeSafe(mail.substring(pos + 1)));
+            final String signature = imageDataSource.getSignature(imageLocation, session);
+            final int contextId = session.getContextId();
+            final int userId = session.getUserId();
+            sb.append(contextId).append('.').append(signature).append('.').append(userId);
+            try {
+                final CryptoService cryptoService = ServerServiceRegistry.getInstance().getService(CryptoService.class);
+                signParam = cryptoService.encrypt(sb.toString(), imageDataSource.getRegistrationName());
+            } catch (final OXException e) {
+                signParam = sb.toString();
+            }
+            sb.setLength(0);
         }
-        sb.append('&').append("signature").append(urlEncodeSafe(imageDataSource.getSignature(imageLocation, session)));
-        sb.append('&').append("source").append(urlEncodeSafe(imageDataSource.getRegistrationName()));
+        /*
+         * Compose URL parameters
+         */
+        sb.append(prefix).append('/').append(ImageDataSource.ALIAS);
+        if (null != route) {
+            sb.append(";jsessionid=").append(route);
+        }
+        sb.append('?').append("signature=").append(urlEncodeSafe(signParam));
+        sb.append('&').append("source=").append(urlEncodeSafe(imageDataSource.getRegistrationName()));
         /*
          * Image location data
          */
-        sb.append('&').append(AJAXServlet.PARAMETER_FOLDERID).append(urlEncodeSafe(imageLocation.getFolder()));
-        sb.append('&').append(AJAXServlet.PARAMETER_ID).append(urlEncodeSafe(imageLocation.getId()));
+        final String folder = imageLocation.getFolder();
+        if (null != folder) {
+            sb.append('&').append(AJAXServlet.PARAMETER_FOLDERID).append('=').append(urlEncodeSafe(folder));
+        }
+        final String objectId = imageLocation.getId();
+        if (null != objectId) {
+            sb.append('&').append(AJAXServlet.PARAMETER_ID).append('=').append(urlEncodeSafe(objectId));
+        }
         final String imageId = imageLocation.getImageId();
         if (null != imageId) {
-            sb.append('&').append(AJAXServlet.PARAMETER_UID).append(urlEncodeSafe(imageId));
+            sb.append('&').append(AJAXServlet.PARAMETER_UID).append('=').append(urlEncodeSafe(imageId));
         }
         final String accountId = imageLocation.getAccountId();
         if (null != accountId) {
-            sb.append('&').append("accountId").append(urlEncodeSafe(accountId));
+            sb.append('&').append("accountId=").append(urlEncodeSafe(accountId));
         }
     }
 

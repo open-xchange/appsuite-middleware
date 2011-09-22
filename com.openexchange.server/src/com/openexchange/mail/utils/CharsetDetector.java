@@ -161,7 +161,7 @@ public final class CharsetDetector {
                  * Neither a MimeBodyPart nor a MimeMessage
                  */
                 LOG.error(e.getMessage(), e);
-                return STR_US_ASCII;
+                return FALLBACK;
             }
             return detectCharset(rawIn);
         }
@@ -241,7 +241,7 @@ public final class CharsetDetector {
                 }
             }
         }
-        return null == firstPossibleCharset ? STR_US_ASCII : firstPossibleCharset;
+        return null == firstPossibleCharset ? FALLBACK : firstPossibleCharset;
     }
 
     /**
@@ -338,7 +338,7 @@ public final class CharsetDetector {
             }
         } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
-            return STR_US_ASCII;
+            return FALLBACK;
         }
     }
 

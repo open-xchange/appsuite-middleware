@@ -59,6 +59,7 @@ import javax.mail.Message;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.mime.HeaderName;
@@ -176,7 +177,7 @@ public final class StorageUtility {
     private static final String SWITCH_DEFAULT_FOLDER = "Switching to default value %s";
 
     /**
-     * Determines the default folder names (<b>not</b> fullnames). The returned array of {@link String} indexes the names as given through
+     * Determines the default folder names (<b>not</b> full names). The returned array of {@link String} indexes the names as given through
      * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
      *
      * @param accountId The account ID
@@ -189,7 +190,7 @@ public final class StorageUtility {
     }
 
     /**
-     * Determines the default folder names (<b>not</b> fullnames). The returned array of {@link String} indexes the names as given through
+     * Determines the default folder names (<b>not</b> full names). The returned array of {@link String} indexes the names as given through
      * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
      *
      * @param accountId The account ID
@@ -210,7 +211,7 @@ public final class StorageUtility {
     }
 
     /**
-     * Determines the default folder names (<b>not</b> fullnames). The returned array of {@link String} indexes the names as given through
+     * Determines the default folder names (<b>not</b> full names). The returned array of {@link String} indexes the names as given through
      * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
      *
      * @param trash The trash name
@@ -229,56 +230,56 @@ public final class StorageUtility {
         final String[] names = new String[isSpamEnabled ? 6 : 4];
         if ((drafts == null) || (drafts.length() == 0)) {
             if (LOG.isWarnEnabled()) {
-                final OXException e = MailExceptionCode.MISSING_DEFAULT_FOLDER_NAME.create(UserSettingMail.STD_DRAFTS);
-                LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_DRAFTS), e);
+                final OXException e = MailExceptionCode.MISSING_DEFAULT_FOLDER_NAME.create(MailStrings.DRAFTS);
+                LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, MailStrings.DRAFTS), e);
             }
-            names[INDEX_DRAFTS] = UserSettingMail.STD_DRAFTS;
+            names[INDEX_DRAFTS] = MailStrings.DRAFTS;
         } else {
             names[INDEX_DRAFTS] = drafts;
         }
         if ((sent == null) || (sent.length() == 0)) {
             if (LOG.isWarnEnabled()) {
-                final OXException e = MailExceptionCode.MISSING_DEFAULT_FOLDER_NAME.create(UserSettingMail.STD_SENT);
-                LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_SENT), e);
+                final OXException e = MailExceptionCode.MISSING_DEFAULT_FOLDER_NAME.create(MailStrings.SENT);
+                LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, MailStrings.SENT), e);
             }
-            names[INDEX_SENT] = UserSettingMail.STD_SENT;
+            names[INDEX_SENT] = MailStrings.SENT;
         } else {
             names[INDEX_SENT] = sent;
         }
         if ((spam == null) || (spam.length() == 0)) {
             if (LOG.isWarnEnabled()) {
-                final OXException e = MailExceptionCode.MISSING_DEFAULT_FOLDER_NAME.create(UserSettingMail.STD_SPAM);
-                LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_SPAM), e);
+                final OXException e = MailExceptionCode.MISSING_DEFAULT_FOLDER_NAME.create(MailStrings.SPAM);
+                LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, MailStrings.SPAM), e);
             }
-            names[INDEX_SPAM] = UserSettingMail.STD_SPAM;
+            names[INDEX_SPAM] = MailStrings.SPAM;
         } else {
             names[INDEX_SPAM] = spam;
         }
         if ((trash == null) || (trash.length() == 0)) {
             if (LOG.isWarnEnabled()) {
-                final OXException e = MailExceptionCode.MISSING_DEFAULT_FOLDER_NAME.create(UserSettingMail.STD_TRASH);
-                LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_TRASH), e);
+                final OXException e = MailExceptionCode.MISSING_DEFAULT_FOLDER_NAME.create(MailStrings.TRASH);
+                LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, MailStrings.TRASH), e);
             }
-            names[INDEX_TRASH] = UserSettingMail.STD_TRASH;
+            names[INDEX_TRASH] = MailStrings.TRASH;
         } else {
             names[INDEX_TRASH] = trash;
         }
         if (isSpamEnabled) {
             if ((confirmedSpam == null) || (confirmedSpam.length() == 0)) {
                 if (LOG.isWarnEnabled()) {
-                    final OXException e = MailExceptionCode.MISSING_DEFAULT_FOLDER_NAME.create(UserSettingMail.STD_CONFIRMED_SPAM);
-                    LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_CONFIRMED_SPAM), e);
+                    final OXException e = MailExceptionCode.MISSING_DEFAULT_FOLDER_NAME.create(MailStrings.CONFIRMED_SPAM);
+                    LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, MailStrings.CONFIRMED_SPAM), e);
                 }
-                names[INDEX_CONFIRMED_SPAM] = UserSettingMail.STD_CONFIRMED_SPAM;
+                names[INDEX_CONFIRMED_SPAM] = MailStrings.CONFIRMED_SPAM;
             } else {
                 names[INDEX_CONFIRMED_SPAM] = confirmedSpam;
             }
             if ((confirmedHam == null) || (confirmedHam.length() == 0)) {
                 if (LOG.isWarnEnabled()) {
-                    final OXException e = MailExceptionCode.MISSING_DEFAULT_FOLDER_NAME.create(UserSettingMail.STD_CONFIRMED_HAM);
-                    LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_CONFIRMED_HAM), e);
+                    final OXException e = MailExceptionCode.MISSING_DEFAULT_FOLDER_NAME.create(MailStrings.CONFIRMED_HAM);
+                    LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, MailStrings.CONFIRMED_HAM), e);
                 }
-                names[INDEX_CONFIRMED_HAM] = UserSettingMail.STD_CONFIRMED_HAM;
+                names[INDEX_CONFIRMED_HAM] = MailStrings.CONFIRMED_HAM;
             } else {
                 names[INDEX_CONFIRMED_HAM] = confirmedHam;
             }

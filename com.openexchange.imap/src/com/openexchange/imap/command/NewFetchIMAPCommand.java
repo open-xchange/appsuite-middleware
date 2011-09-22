@@ -49,8 +49,8 @@
 
 package com.openexchange.imap.command;
 
-import gnu.trove.TIntIntHashMap;
-import gnu.trove.TLongIntHashMap;
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.map.hash.TLongIntHashMap;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
@@ -330,6 +330,9 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
     }
 
     private IDMailMessage handleMessage(final Message message) {
+        if (null == message) {
+            return null;
+        }
         try {
             final IDMailMessage mail = new IDMailMessage(null, fullname);
             for (final FetchItemHandler fetchItemHandler : lastHandlers.isEmpty() ? MAP.values() : lastHandlers) {

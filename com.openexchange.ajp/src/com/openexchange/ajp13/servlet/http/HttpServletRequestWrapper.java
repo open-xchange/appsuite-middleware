@@ -302,9 +302,9 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
                 /*
                  * Add JSESSIONID cookie
                  */
-                configureCookie(sessionCookie);
-                ajpRequestHandler.getServletResponse().addCookie(sessionCookie);
-                return session;
+                // configureCookie(sessionCookie);
+                // ajpRequestHandler.getServletResponse().addCookie(sessionCookie);
+                return session.touch();
             }
             /*
              * Invalidate session

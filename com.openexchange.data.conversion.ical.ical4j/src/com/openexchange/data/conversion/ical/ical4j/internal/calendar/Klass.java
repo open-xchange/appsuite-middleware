@@ -57,9 +57,9 @@ import java.util.List;
 import java.util.TimeZone;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.Clazz;
-import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ConversionWarning.Code;
+import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
@@ -71,27 +71,17 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class Klass<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T, U> {
 
-    /**
-     * Default constructor.
-     */
     public Klass() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean isSet(final U cObj) {
         return cObj.containsPrivateFlag();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void emit(final int index, final U cObj, final T component, final List<ConversionWarning> warnings,
-            final Context ctx, final Object... args) throws ConversionError {
+    public void emit(final Mode mode, final int index, final U cObj, final T component, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
         if (cObj.getPrivateFlag()) {
             component.getProperties().add(PRIVATE);
         } else {
@@ -99,21 +89,15 @@ public class Klass<T extends CalendarComponent, U extends CalendarObject> extend
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean hasProperty(final T component) {
         return component.getProperty(CLASS) != null;
     }
 
     @Override
-    public void parse(final int index, final T component, final U cObj, final TimeZone timeZone, final Context ctx,
-            final List<ConversionWarning> warnings) throws ConversionError {
+    public void parse(final int index, final T component, final U cObj, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
         final Clazz clazz = (Clazz) component.getProperty(CLASS);
-        /*
-         * Parse non-empty value
-         */
+        // Parse non-empty value
         if (PRIVATE.equals(clazz) || CONFIDENTIAL.equals(clazz)) {
             cObj.setPrivateFlag(true);
         } else if (PUBLIC.equals(clazz)) {
@@ -139,5 +123,4 @@ public class Klass<T extends CalendarComponent, U extends CalendarObject> extend
         }
         return empty;
     }
-
 }

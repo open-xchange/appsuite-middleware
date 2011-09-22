@@ -55,7 +55,7 @@ import com.openexchange.mail.MailJSONField;
 
 /**
  * {@link Constants}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Constants {
@@ -80,7 +80,7 @@ public final class Constants {
     /**
      * The timeout in milliseconds applied when performing a request to ElasticSearch server.
      */
-    public static final long TIMEOUT_MILLIS = 3500;
+    public static final long TIMEOUT_MILLIS = 60000;
 
     /**
      * The name for the cluster.

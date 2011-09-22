@@ -76,11 +76,14 @@ public final class MemoryFolderImpl implements MemoryFolder {
 
     private Boolean subscribed;
 
+    private int sortNum;
+
     /**
      * Initializes a new {@link MemoryFolderImpl}.
      */
     public MemoryFolderImpl() {
         super();
+        sortNum = 0;
     }
 
     @Override
@@ -88,13 +91,12 @@ public final class MemoryFolderImpl implements MemoryFolder {
         return subscribed;
     }
 
-
     /**
      * Sets the subscribed
      *
      * @param subscribed The subscribed to set
      */
-    public void setSubscribed(Boolean subscribed) {
+    public void setSubscribed(final Boolean subscribed) {
         this.subscribed = subscribed;
     }
 
@@ -108,7 +110,7 @@ public final class MemoryFolderImpl implements MemoryFolder {
      *
      * @param treeId The treeId to set
      */
-    public void setTreeId(String treeId) {
+    public void setTreeId(final String treeId) {
         this.treeId = treeId;
     }
 
@@ -122,7 +124,7 @@ public final class MemoryFolderImpl implements MemoryFolder {
      *
      * @param id The id to set
      */
-    public void setId(String id) {
+    public void setId(final String id) {
         this.id = id;
     }
 
@@ -136,7 +138,7 @@ public final class MemoryFolderImpl implements MemoryFolder {
      *
      * @param name The name to set
      */
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 
@@ -150,7 +152,7 @@ public final class MemoryFolderImpl implements MemoryFolder {
      *
      * @param parentId The parentId to set
      */
-    public void setParentId(String parentId) {
+    public void setParentId(final String parentId) {
         this.parentId = parentId;
     }
 
@@ -164,7 +166,7 @@ public final class MemoryFolderImpl implements MemoryFolder {
      *
      * @param permissions The permissions to set
      */
-    public void setPermissions(Permission[] permissions) {
+    public void setPermissions(final Permission[] permissions) {
         this.permissions = permissions;
     }
 
@@ -178,7 +180,7 @@ public final class MemoryFolderImpl implements MemoryFolder {
      *
      * @param modifiedBy The modifiedBy to set
      */
-    public void setModifiedBy(int modifiedBy) {
+    public void setModifiedBy(final int modifiedBy) {
         this.modifiedBy = modifiedBy;
     }
 
@@ -192,8 +194,22 @@ public final class MemoryFolderImpl implements MemoryFolder {
      *
      * @param lastModified The lastModified to set
      */
-    public void setLastModified(Date lastModified) {
+    public void setLastModified(final Date lastModified) {
         this.lastModified = lastModified;
+    }
+
+    @Override
+    public int getSortNum() {
+        return sortNum;
+    }
+
+    /**
+     * Sets the sortNum
+     *
+     * @param sortNum The sortNum to set
+     */
+    public void setSortNum(final int sortNum) {
+        this.sortNum = sortNum;
     }
 
     @Override
@@ -208,14 +224,14 @@ public final class MemoryFolderImpl implements MemoryFolder {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
         if (!(obj instanceof MemoryFolderImpl)) {
             return false;
         }
-        MemoryFolderImpl other = (MemoryFolderImpl) obj;
+        final MemoryFolderImpl other = (MemoryFolderImpl) obj;
         if (id == null) {
             if (other.id != null) {
                 return false;

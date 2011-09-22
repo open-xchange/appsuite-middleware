@@ -87,6 +87,7 @@ import com.openexchange.imap.command.CopyIMAPCommand;
 import com.openexchange.imap.command.FlagsIMAPCommand;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.converters.IMAPFolderConverter;
+import com.openexchange.imap.dataobjects.IMAPMailFolder;
 import com.openexchange.imap.entity2acl.Entity2ACL;
 import com.openexchange.imap.entity2acl.Entity2ACLArgs;
 import com.openexchange.imap.entity2acl.Entity2ACLExceptionCode;
@@ -99,9 +100,11 @@ import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.MailFolderStorage;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMEMailExceptionCode;
+import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
@@ -484,6 +487,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         try {
             if (DEFAULT_FOLDER_ID.equals(parentFullName)) {
                 final IMAPFolder parent = (IMAPFolder) imapStore.getDefaultFolder();
+                final boolean subscribed = (!MailProperties.getInstance().isIgnoreSubscription() && !all);
                 /*
                  * Request subfolders the usual way
                  */
@@ -493,7 +497,6 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                  */
                 final List<String> additionalFullNames = new ArrayList<String>(4);
                 synchronized (parent) {
-                    final boolean subscribed = (!MailProperties.getInstance().isIgnoreSubscription() && !all);
                     subfolders = new ArrayList<ListLsubEntry>();
                     {
                         final List<ListLsubEntry> children;
@@ -570,7 +573,10 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 }
                 if (!additionalFullNames.isEmpty()) {
                     for (final String fn : additionalFullNames) {
-                        list.add(FolderCache.getCachedFolder(fn, this));
+                        final MailFolder namespaceFolder = namespaceFolderFor(fn, parent, subscribed);
+                        if (null != namespaceFolder) {
+                            list.add(namespaceFolder);
+                        }
                     }
                 }
                 return list.toArray(new MailFolder[list.size()]);
@@ -608,6 +614,44 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         }
+    }
+
+    private MailFolder namespaceFolderFor(final String fn, final IMAPFolder parent, final boolean subscribed) throws OXException {
+        final ListLsubEntry listEntry = getLISTEntry(fn, parent);
+        if (null == listEntry || !listEntry.exists() || (subscribed ? !listEntry.isSubscribed() : false)) {
+            return null;
+        }
+        final IMAPMailFolder mailFolder = new IMAPMailFolder();
+        mailFolder.setRootFolder(false);
+        mailFolder.setExists(true);
+        mailFolder.setSeparator(listEntry.getSeparator());
+        mailFolder.setFullname(fn);
+        mailFolder.setName(listEntry.getName());
+        mailFolder.setHoldsMessages(listEntry.canOpen());
+        mailFolder.setHoldsFolders(listEntry.hasInferiors());
+        mailFolder.setNonExistent(false);
+        mailFolder.setShared(true);
+        mailFolder.setSubfolders(listEntry.hasChildren());
+        mailFolder.setSubscribed(listEntry.isSubscribed());
+        mailFolder.setSubscribedSubfolders(ListLsubCache.hasAnySubscribedSubfolder(fn, accountId, parent, session));
+        mailFolder.setParentFullname(null);
+        mailFolder.setDefaultFolder(false);
+        mailFolder.setDefaultFolderType(DefaultFolderType.NONE);
+        {
+            final DefaultMailPermission perm = new DefaultMailPermission();
+            perm.setAllPermission(0,0,0,0);
+            perm.setFolderAdmin(false);
+            perm.setEntity(session.getUserId());
+            perm.setGroupPermission(false);
+            mailFolder.setOwnPermission(perm);
+            mailFolder.addPermission(perm);
+        }
+        mailFolder.setMessageCount(-1);
+        mailFolder.setNewMessageCount(-1);
+        mailFolder.setUnreadMessageCount(-1);
+        mailFolder.setDeletedMessageCount(-1);
+        mailFolder.setSupportsUserFlags(false);
+        return mailFolder;
     }
 
     private MailFolder[] getSubfolderArray(final boolean all, final IMAPFolder parent) throws MessagingException, OXException {
@@ -1194,13 +1238,14 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         session,
                         e,
                         renameMe.getFullName(),
-                        newFullName);
+                        newFullName,
+                        e.getMessage());
                 }
                 /*
                  * Success?
                  */
                 if (!success) {
-                    throw IMAPException.create(IMAPException.Code.RENAME_FAILED, imapConfig, session, renameMe.getFullName(), newFullName);
+                    throw IMAPException.create(IMAPException.Code.RENAME_FAILED, imapConfig, session, renameMe.getFullName(), newFullName, "<not-available>");
                 }
                 renameMe = getIMAPFolder(oldFullName);
                 if (renameMe.exists()) {
@@ -1504,14 +1549,15 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                             session,
                             e,
                             moveMe.getFullName(),
-                            newFullName);
+                            newFullName,
+                            e.getMessage());
 
                     }
                     /*
                      * Success?
                      */
                     if (!success) {
-                        throw IMAPException.create(IMAPException.Code.RENAME_FAILED, imapConfig, session, moveMe.getFullName(), newFullName);
+                        throw IMAPException.create(IMAPException.Code.RENAME_FAILED, imapConfig, session, moveMe.getFullName(), newFullName, "<not-available>");
                     }
                     moveMe = getIMAPFolder(oldFullName);
                     if (doesExist(moveMe, false)) {
@@ -1567,9 +1613,21 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 /*
                  * Check for standard folder & possible subscribe operation
                  */
-                final boolean defaultFolder = getChecker().isDefaultFolder(fullName);
+                final IMAPDefaultFolderChecker checker = getChecker();
+                boolean defaultFolder = false;
+                if ("INBOX".equals(fullName)) {
+                    defaultFolder = true;
+                } else if (fullName.equals(checker.getDefaultFolder(StorageUtility.INDEX_TRASH)) ) {
+                    defaultFolder = true;
+                } else if (fullName.equals(checker.getDefaultFolder(StorageUtility.INDEX_DRAFTS)) ) {
+                    defaultFolder = true;
+                } else if (fullName.equals(checker.getDefaultFolder(StorageUtility.INDEX_SENT)) ) {
+                    defaultFolder = true;
+                } else if (fullName.equals(checker.getDefaultFolder(StorageUtility.INDEX_SPAM)) ) {
+                    defaultFolder = true;
+                }
                 final boolean performSubscription = MailProperties.getInstance().isIgnoreSubscription() && defaultFolder ? false : performSubscribe(toUpdate, updateMe);
-                if (performSubscription && defaultFolder) {
+                if (performSubscription && defaultFolder && !toUpdate.isSubscribed()) {
                     throw IMAPException.create(IMAPException.Code.NO_DEFAULT_FOLDER_UNSUBSCRIBE, imapConfig, session, fullName);
                 }
                 /*

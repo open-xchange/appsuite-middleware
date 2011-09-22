@@ -53,6 +53,7 @@ import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
+import com.openexchange.caching.CacheService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -66,6 +67,8 @@ import com.openexchange.groupware.update.internal.SchemaStoreImpl;
  */
 public abstract class SchemaStore {
 
+    private static final SchemaStoreImpl SINGLETON = new SchemaStoreImpl();
+
     protected SchemaStore() {
         super();
     }
@@ -76,7 +79,7 @@ public abstract class SchemaStore {
      * @return an implementation for this interface.
      */
     public static SchemaStore getInstance() {
-        return new SchemaStoreImpl();
+        return SINGLETON;
     }
 
     public abstract SchemaUpdateState getSchema(int poolId, String schemaName) throws OXException;
@@ -111,11 +114,11 @@ public abstract class SchemaStore {
 
     public abstract ExecutedTask[] getExecutedTasks(int poolId, String schemaName) throws OXException;
 
-    public final void addExecutedTask(final int contextId, final String taskName, final boolean success) throws OXException {
+    public final void addExecutedTask(final int contextId, final String taskName, final boolean success, final int poolId, final String schema) throws OXException {
         final Connection con = Database.get(contextId, true);
         try {
             con.setAutoCommit(false);
-            addExecutedTask(con, taskName, success);
+            addExecutedTask(con, taskName, success, poolId, schema);
             con.commit();
         } catch (final SQLException e) {
             rollback(con);
@@ -132,6 +135,9 @@ public abstract class SchemaStore {
     /**
      * @param con a writable database connection but into transaction mode.
      */
-    public abstract void addExecutedTask(Connection con, String taskName, boolean success) throws OXException;
+    public abstract void addExecutedTask(Connection con, String taskName, boolean success, int poolId, String schema) throws OXException;
 
+    public abstract void setCacheService(CacheService cacheService);
+
+    public abstract void removeCacheService();
 }

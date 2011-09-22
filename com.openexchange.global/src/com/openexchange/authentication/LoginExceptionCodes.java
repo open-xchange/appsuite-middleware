@@ -49,20 +49,7 @@
 
 package com.openexchange.authentication;
 
-import static com.openexchange.authentication.LoginExceptionMessages.ACCOUNT_LOCKED_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.ACCOUNT_NOT_READY_YET_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.CLASS_NOT_FOUND_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.CLIENT_DENIED_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.COMMUNICATION_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.DATABASE_DOWN_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.INSTANTIATION_FAILED_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.INVALID_CREDENTIALS_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.MISSING_PROPERTY_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.PASSWORD_EXPIRED_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.UNKNOWN_HTTP_AUTHORIZATION_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.UNKNOWN_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.USER_NOT_ACTIVE_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.USER_NOT_FOUND_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.*;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
@@ -105,7 +92,10 @@ public enum LoginExceptionCodes implements OXExceptionCode {
     /** Client "%1$s" is not activated. */
     CLIENT_DENIED(CLIENT_DENIED_MSG, Category.CATEGORY_PERMISSION_DENIED, 14),
     /** Method "%1$s" in HTTP header authorization is not supported. */
-    UNKNOWN_HTTP_AUTHORIZATION(UNKNOWN_HTTP_AUTHORIZATION_MSG, Category.CATEGORY_TRY_AGAIN, 15);
+    UNKNOWN_HTTP_AUTHORIZATION(UNKNOWN_HTTP_AUTHORIZATION_MSG, Category.CATEGORY_TRY_AGAIN, 15),
+    /** Missing client capabilities. */
+    MISSING_CAPABILITIES(MISSING_CAPABILITIES_MSG, Category.CATEGORY_WARNING, 15),
+    ;
 
     private final String message;
 
@@ -144,7 +134,7 @@ public enum LoginExceptionCodes implements OXExceptionCode {
 
     @Override
     public boolean equals(final OXException e) {
-        return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
+        return OXExceptionFactory.getInstance().equals(this, e);
     }
 
     /**

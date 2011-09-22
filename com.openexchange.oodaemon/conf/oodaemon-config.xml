@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<!-- 
+__________________________________________
+Open Office Daemon configuration file 
+__________________________________________
+-->
+<oodaemon-config>
+  <!-- Use this to allow connects from all hosts -->
+  <!--acceptor value="socket,host=0,port=2002;urp"-->
+
+  <!-- allow connections from this machine only -->
+  <acceptor value="socket,host=localhost,port=8100"/>
+
+  <!-- is used to shutdown and retrieve information from the daemon -->
+  <admin-acceptor value="socket,host=localhost,port=8101"/>
+
+  <!-- path to Open Office installation -->
+  <!-- linux : should be something like : "/usr/lib/openoffice" -->
+  <open-office-install-path path="C:/Program Files/OpenOffice.org 2.2" />
+  <!-- path to user installations -->
+  <!-- linux : should be something like : "file:///local/home/USER_NAME/.openoffice.org2" -->
+  <!-- windows : should be in documents and settings directory -->
+  <user-installation url="file:///c:/servers/OOServer_instance0_usr" />
+
+  <!-- number of secondes, that are given an openoffice worker instance to start.
+       In case the time is exceeded, daemon will terminate (and thus signaling,
+       that there is something wrong with the overall setup)
+	   DEFAULT : 180
+   -->
+  <tolerated-startuptime-per-instance value="180"/>
+  
+  <!-- a concrete OOo instances gets sick with time (e.g. memory leaks, inconsistencies,
+      aborted scripts which left documents opened,  etc. ). Attribute max gives the
+      number upper number of 'uses' by
+      a client, after which tbe office instance gets restarted. As a fixed
+      limit tends to lead to load peaks on certain points of time, this limit can
+      be randomized with the random attribute.
+	  DEFAULT : max=20 random=5
+   -->
+  <usage-count-per-instance max="20" random="5"/>
+
+  <!-- The verbosity of the daemon.
+	NONE			no output, nothing, nada
+	ERROR			only errors and fatal errors will be displayed (stack traces not available)
+	INFO			informations about the execution process will be displayed
+	WARNING			warnings displayed added to previous level informations
+	DEBUG			debug information ( + exceptions stack traces )
+	DETAILED_DEBUG	debug + minor informations (exceptions during tries, sleep, etc...)
+       -->
+  <logger level="DETAILED_DEBUG"/>
+  
+  <!-- customize delays to wait when performing certain actions -->
+  <delays>
+	<!-- generally used when waiting before doing another new task (waiting an open office instance to start, etc...) -->
+	<sleeping>4</sleeping>
+	<!-- generally used for waiting something to shutdown -->
+	<shutdown>1</shutdown>
+  </delays>
+</oodaemon-config>

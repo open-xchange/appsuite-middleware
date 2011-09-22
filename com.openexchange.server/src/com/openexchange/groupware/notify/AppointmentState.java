@@ -64,6 +64,8 @@ import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalSession;
+import com.openexchange.data.conversion.ical.SimpleMode;
+import com.openexchange.data.conversion.ical.ZoneInfo;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.Appointment;
@@ -216,7 +218,7 @@ public class AppointmentState extends LinkableState {
             final InputStream icalFile;
             {
                 final UnsynchronizedByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream();
-                final ICalSession session = emitter.createSession();
+                final ICalSession session = emitter.createSession(new SimpleMode(ZoneInfo.OUTLOOK));
                 emitter.writeAppointment(session, obj, sessObj.getContext(), new ArrayList<ConversionError>(),
                         new ArrayList<ConversionWarning>());
                 emitter.writeSession(session, byteArrayOutputStream);

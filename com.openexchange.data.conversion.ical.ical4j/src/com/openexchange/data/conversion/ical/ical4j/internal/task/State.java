@@ -53,31 +53,23 @@ import java.util.List;
 import java.util.TimeZone;
 import net.fortuna.ical4j.model.component.VToDo;
 import net.fortuna.ical4j.model.property.Status;
-import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
 
 /**
- *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class State extends AbstractVerifyingAttributeConverter<VToDo, Task> {
 
-    /**
-     * Default constructor.
-     */
     public State() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void emit(final int index, final Task task, final VToDo vtodo,
-                     final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
+    public void emit(final Mode mode, final int index, final Task task, final VToDo vtodo, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
         try {
             final Status status = new Status(toStatus(index, task.getStatus()).getValue());
             vtodo.getProperties().add(status);
@@ -86,28 +78,18 @@ public final class State extends AbstractVerifyingAttributeConverter<VToDo, Task
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean hasProperty(final VToDo vtodo) {
         return null != vtodo.getStatus();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean isSet(final Task task) {
         return task.containsStatus();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void parse(final int index, final VToDo vtodo, final Task task, final TimeZone timeZone, final Context ctx,
-        final List<ConversionWarning> warnings) throws ConversionError {
+    public void parse(final int index, final VToDo vtodo, final Task task, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
         try {
             task.setStatus(toTask(index, vtodo.getStatus()));
         } catch (final ConversionWarning e) {
@@ -132,8 +114,7 @@ public final class State extends AbstractVerifyingAttributeConverter<VToDo, Task
             retval = Status.VTODO_CANCELLED;
             break;
         default:
-            throw new ConversionWarning(index, ConversionWarning.Code.INVALID_STATUS,
-                Integer.valueOf(taskState));
+            throw new ConversionWarning(index, ConversionWarning.Code.INVALID_STATUS, Integer.valueOf(taskState));
         }
         return retval;
     }
@@ -149,8 +130,7 @@ public final class State extends AbstractVerifyingAttributeConverter<VToDo, Task
         } else if (Status.VTODO_CANCELLED.equals(status)) {
             retval = Task.DEFERRED;
         } else {
-            throw new ConversionWarning(index,ConversionWarning.Code.INVALID_STATUS,
-                status.getValue());
+            throw new ConversionWarning(index, ConversionWarning.Code.INVALID_STATUS, status.getValue());
         }
         return retval;
     }

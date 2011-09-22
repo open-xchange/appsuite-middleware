@@ -53,10 +53,11 @@ import java.util.TimeZone;
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.TimeZoneRegistry;
 import net.fortuna.ical4j.model.TimeZoneRegistryFactory;
-import net.fortuna.ical4j.model.component.VTimeZone;
 import net.fortuna.ical4j.util.TimeZones;
+import net.fortuna.ical4j.zoneinfo.outlook.OutlookTimeZoneRegistryFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.data.conversion.ical.ZoneInfo;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -71,17 +72,31 @@ import com.openexchange.groupware.container.CalendarObject;
  */
 public final class EmitterTools {
 
-	private static TimeZoneRegistry timeZoneRegistry = TimeZoneRegistryFactory.getInstance().createRegistry();
-
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EmitterTools.class));
-
     private static CalendarCollectionService calendarCollection;
 
-    /**
-     * Prevent instantiation.
-     */
-    private EmitterTools() {
+    private static final TimeZoneRegistry fullRegistry = TimeZoneRegistryFactory.getInstance().createRegistry();
+    private static final TimeZoneRegistry outlookRegistry = new OutlookTimeZoneRegistryFactory().createRegistry();
+
+    private final TimeZoneRegistry registry;
+
+    public EmitterTools(ZoneInfo zoneInfo) {
         super();
+        registry = getRegistry(zoneInfo);
+    }
+
+    private static final TimeZoneRegistry getRegistry(final ZoneInfo zoneInfo) {
+        final TimeZoneRegistry retval;
+        switch (zoneInfo) {
+        case OUTLOOK:
+            retval = outlookRegistry;
+            break;
+        case FULL:
+        default:
+            retval = fullRegistry;
+            break;
+        }
+        return retval;
     }
 
     /**
@@ -93,16 +108,22 @@ public final class EmitterTools {
         return retval;
     }
 
-    public static DateTime toDateTime(final java.util.Date date, String tzid) {
-        if(tzid == null) {
-            return toDateTime(date);
-        }
+    public DateTime toDateTime(final java.util.Date date, final String tzid) {
+        return toDateTime(registry, date, tzid);
+    }
 
-        net.fortuna.ical4j.model.TimeZone ical4jTimezone = timeZoneRegistry.getTimeZone(tzid);
-        if(ical4jTimezone == null) {
+    public static DateTime toDateTime(final ZoneInfo zoneInfo, final java.util.Date date, final String tzid) {
+        return toDateTime(getRegistry(zoneInfo), date, tzid);
+    }
+
+    private static DateTime toDateTime(final TimeZoneRegistry registry, final java.util.Date date, final String tzid) {
+        if (null == tzid) {
             return toDateTime(date);
         }
-        VTimeZone vTimeZone = ical4jTimezone.getVTimeZone();
+        net.fortuna.ical4j.model.TimeZone ical4jTimezone = registry.getTimeZone(tzid);
+        if (null == ical4jTimezone) {
+            return toDateTime(date);
+        }
         final DateTime retval = new DateTime(false);
         retval.setTimeZone(ical4jTimezone);
         retval.setTime(date.getTime());
@@ -179,7 +200,7 @@ public final class EmitterTools {
         EmitterTools.calendarCollection = calendarCollection;
     }
 
-    public static TimeZoneRegistry getTimeZoneRegistry() {
-        return timeZoneRegistry;
+    public TimeZoneRegistry getTimeZoneRegistry() {
+        return registry;
     }
 }

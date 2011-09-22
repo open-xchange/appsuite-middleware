@@ -49,7 +49,8 @@
 
 package com.openexchange.mail;
 
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
@@ -153,7 +154,7 @@ public final class MailSessionCache {
      * ##################################### MEMBER STUFF #####################################
      */
 
-    private final TIntObjectHashMap<ConcurrentMap<String, Object>> map;
+    private final TIntObjectMap<ConcurrentMap<String, Object>> map;
 
     /**
      * Initializes a new {@link MailSessionCache}.

@@ -54,7 +54,8 @@ import static com.openexchange.mail.utils.ProviderUtility.toSocketAddr;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -81,6 +82,10 @@ import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.mime.MIMEMailExceptionCode;
 import com.openexchange.mail.utils.DefaultFolderNamesProvider;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MailPasswordUtil;
@@ -440,6 +445,15 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         }
         PreparedStatement stmt = null;
         try {
+            // A POP3 account?
+            final String pop3Path = getPOP3Path(id, user, cid, con);
+            if (null != pop3Path) {
+                try {
+                    cleanseFromPrimary(pop3Path, user, cid);
+                } catch (final OXException e) {
+                    LOG.warn("Couldn't delete POP3 backup folders in primary mail account", e);
+                }
+            }
             final DeleteListenerRegistry registry = DeleteListenerRegistry.getInstance();
             registry.triggerOnBeforeDeletion(id, properties, user, cid, con);
             // First delete properties
@@ -480,6 +494,66 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
+        }
+    }
+
+    private static String getPOP3Path(final int id, final int user, final int cid, final Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT url FROM user_mail_account WHERE cid = ? AND id = ? AND user = ?");
+            stmt.setLong(1, cid);
+            stmt.setLong(2, id);
+            stmt.setLong(3, user);
+            rs = stmt.executeQuery();
+            if (!rs.next() || !rs.getString(1).startsWith("pop3")) {
+                return null;
+            }
+            closeSQLStuff(rs, stmt);
+            stmt = con.prepareStatement("SELECT value FROM user_mail_account_properties WHERE cid = ? AND id = ? AND user = ? AND name = ?");
+            stmt.setLong(1, cid);
+            stmt.setLong(2, id);
+            stmt.setLong(3, user);
+            stmt.setString(4, "pop3.path");
+            rs = stmt.executeQuery();
+            return rs.next() ? rs.getString(1) : null;
+        } catch (final SQLException e) {
+            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(rs, stmt);
+        }
+    }
+
+    private static void cleanseFromPrimary(final String path, final int user, final int cid) throws OXException {
+        if (isEmpty(path)) {
+            return;
+        }
+        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> defaultMailAccess = MailAccess.getInstance(user, cid);
+        if (defaultMailAccess.isConnected()) {
+            try {
+                defaultMailAccess.getFolderStorage().deleteFolder(path, true);
+            } catch (final OXException e) {
+                if (MIMEMailExceptionCode.FOLDER_NOT_FOUND.equals(e)) {
+                    // Ignore
+                    LOG.trace(e.getMessage(), e);
+                } else {
+                    throw e;
+                }
+            }
+        } else {
+            defaultMailAccess.connect(false);
+            try {
+                defaultMailAccess.getFolderStorage().deleteFolder(path, true);
+            } catch (final OXException e) {
+                if (MIMEMailExceptionCode.FOLDER_NOT_FOUND.equals(e)) {
+                    // Ignore
+                    LOG.trace(e.getMessage(), e);
+                } else {
+                    throw e;
+                }
+            } finally {
+                defaultMailAccess.close(true);
+            }
         }
     }
 
@@ -871,8 +945,8 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             final MailAccountGetSwitch storageGetSwitch = new MailAccountGetSwitch(storageVersion);
             final GetSwitch getSwitch = new GetSwitch(mailAccount);
             /*
-             * Iterate attributes and compare their values except the one for Attribute.UNIFIED_INBOX_ENABLED_LITERAL and
-             * Attribute.PERSONAL_LITERAL
+             * Iterate attributes and compare their values except the one for Attribute.UNIFIED_INBOX_ENABLED_LITERAL,
+             * Attribute.PERSONAL_LITERAL and Attribute.REPLY_TO_LITERAL
              */
             for (final Attribute attribute : attributes) {
                 /*
@@ -1625,8 +1699,6 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             dropPOP3StorageFolders(user, cid);
         } catch (final SQLException e) {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             closeSQLStuff(null, stmt);
         }
@@ -1696,7 +1768,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 return new int[0];
             }
             final CustomMailAccount tmp = new CustomMailAccount();
-            final TIntArrayList ids = new TIntArrayList(6);
+            final TIntList ids = new TIntArrayList(6);
             do {
                 tmp.parseMailServerURL(result.getString(2));
                 if (set.contains(tmp.getMailServer().toLowerCase(Locale.ENGLISH))) {
@@ -1706,7 +1778,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             if (ids.isEmpty()) {
                 return new int[0];
             }
-            final int[] array = ids.toNativeArray();
+            final int[] array = ids.toArray();
             Arrays.sort(array);
             return array;
         } catch (final SQLException e) {

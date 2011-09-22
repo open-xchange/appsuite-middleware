@@ -286,6 +286,10 @@ public final class StructureMailMessageParser {
              * Parse content
              */
             parseMailContent(mail, handler, prefix, 1);
+            /*
+             * Mark end of parsing
+             */
+            handler.handleEnd(mail);
         } catch (final IOException e) {
             throw MailExceptionCode.UNREADBALE_PART_CONTENT.create(e, Long.valueOf(mail.getMailId()), mail.getFolder());
         }
@@ -403,14 +407,19 @@ public final class StructureMailMessageParser {
             if (count == -1) {
                 throw MailExceptionCode.INVALID_MULTIPART_CONTENT.create();
             }
-            if (isMultipartSigned(lcct)) {
+            final boolean rootLevelMultipart = null == prefix && !multipartDetected;
+            final String mpId = rootLevelMultipart ? "" : getSequenceId(prefix, partCount);
+            if (!mailPart.containsSequenceId()) {
+                mailPart.setSequenceId(mpId);
+            }
+            if (rootLevelMultipart && isMultipartSigned(lcct)) {
                 /*
                  * Determine the part which is considered to be the message' text according to
                  */
                 MailPart part = null;
                 for (int i = 0; null == part && i < count; i++) {
                     final MailPart enclosedPart = mailPart.getEnclosedMailPart(i);
-                    part = extractTextFrom(enclosedPart, 0); 
+                    part = extractTextFrom(enclosedPart, 0);
                 }
                 if (!handler.handleSMIMEBodyText(part)) {
                     stop = true;
@@ -438,10 +447,6 @@ public final class StructureMailMessageParser {
                     return;
                 }
             } else {
-                final String mpId = null == prefix && !multipartDetected ? "" : getSequenceId(prefix, partCount);
-                if (!mailPart.containsSequenceId()) {
-                    mailPart.setSequenceId(mpId);
-                }
                 if (!handler.handleMultipartStart(mailPart.getContentType(), count, mpId)) {
                     stop = true;
                     return;
@@ -945,7 +950,7 @@ public final class StructureMailMessageParser {
 
     /**
      * Checks if content type matches <code>multipart/signed</code> content type.
-     * 
+     *
      * @param contentType The content type
      * @return <code>true</code> if content type matches <code>multipart/signed</code>; otherwise <code>false</code>
      */

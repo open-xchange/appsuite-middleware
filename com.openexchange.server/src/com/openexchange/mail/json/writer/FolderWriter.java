@@ -50,7 +50,8 @@
 package com.openexchange.mail.json.writer;
 
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -170,7 +171,7 @@ public final class FolderWriter {
     /**
      * Maps folder field constants to corresponding instance of {@link MailFolderFieldWriter}.
      */
-    private static final TIntObjectHashMap<MailFolderFieldWriter> WRITERS_MAP = new TIntObjectHashMap<MailFolderFieldWriter>(20);
+    private static final TIntObjectMap<MailFolderFieldWriter> WRITERS_MAP = new TIntObjectHashMap<MailFolderFieldWriter>(20);
 
     static {
         WRITERS_MAP.put(DataObject.OBJECT_ID, new MailFolderFieldWriter() {

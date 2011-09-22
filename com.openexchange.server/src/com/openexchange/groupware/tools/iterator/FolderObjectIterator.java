@@ -51,7 +51,8 @@ package com.openexchange.groupware.tools.iterator;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import gnu.trove.ConcurrentTIntObjectHashMap;
-import gnu.trove.TIntHashSet;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -61,12 +62,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -75,6 +74,7 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.caching.ElementAttributes;
 import com.openexchange.configuration.ServerConfig;
@@ -154,7 +154,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
     private final boolean closeCon;
 
-    private final TIntHashSet folderIds;
+    private final TIntSet folderIds;
 
     private FolderObject next;
 
@@ -833,7 +833,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
     private static final class PermissionLoader implements Callable<Object> {
 
-        protected static final Integer POISON = Integer.valueOf(-1);
+        private final Context ctx;
 
         private final ConcurrentTIntObjectHashMap<SetableFutureTask> permsMap;
 
@@ -841,43 +841,47 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
         private final Future<Object> mainFuture;
 
-        private final Context ctx;
+        private final AtomicBoolean flag;
 
         public PermissionLoader(final Context ctx) throws OXException {
             super();
             this.ctx = ctx;
+            this.flag = new AtomicBoolean(true);
             this.permsMap = new ConcurrentTIntObjectHashMap<SetableFutureTask>();
             this.queue = new LinkedBlockingQueue<Integer>();
             final ThreadPoolService tps = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
             mainFuture = tps.submit(ThreadPools.task(this, PermissionLoader.class.getSimpleName()), CallerRunsBehavior.<Object> getInstance());
         }
 
+        private final void waitForIDs(final List<Integer> ids) throws InterruptedException {
+            if (queue.isEmpty()) {
+                /*
+                 * Wait for an ID to become available
+                 */
+                ids.add(queue.take());
+            }
+            /*
+             * Gather possibly available IDs but don't wait
+             */
+            queue.drainTo(ids);
+        }
+
         @Override
         public Object call() throws Exception {
-            //try {
+            // try {
                 final Connection readCon = Database.get(ctx, false);
                 try {
                     /*
-                     * Stay active as long as no POISON is consumed
+                     * Stay active as long as flag is true
                      */
+                    final List<Integer> ids = new ArrayList<Integer>();
                     final int cid = ctx.getContextId();
-                    final Set<Integer> ids = new HashSet<Integer>();
-                    while (true) {
+                    while (flag.get()) {
                         /*
                          * Wait for IDs
                          */
-                        if (queue.isEmpty()) {
-                            final Integer folderId = queue.take();
-                            if (POISON == folderId) {
-                                return null;
-                            }
-                            ids.add(folderId);
-                        }
-                        /*
-                         * Gather possibly available IDs but don't wait
-                         */
-                        queue.drainTo(ids);
-                        final boolean quit = ids.remove(POISON);
+                        ids.clear();
+                        waitForIDs(ids);
                         /*
                          * Fill future(s) from concurrent map
                          */
@@ -885,91 +889,51 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                             final int fuid = id.intValue();
                             permsMap.get(fuid).set(loadFolderPermissions(fuid, cid, readCon));
                         }
-                        ids.clear();
-                        if (quit) {
-                            return null;
-                        }
                     }
                 } finally {
                     Database.back(ctx, false, readCon);
-                    /*
-                     * Needed to ensure termination of stopWhenEmpty() invocation
-                     */
-                    queue.clear();
                 }
-            //} catch (final InterruptedException e) {
-            //    throw e;
-            //}
+                /*
+                 * Return
+                 */
+                return null;
+            // } catch (final InterruptedException e) {
+            // throw e;
+            // }
         }
 
         public void close() {
-            if (mainFuture.isDone()) {
-                return;
-            }
-            synchronized (mainFuture) {
-                if (mainFuture.isDone()) {
-                    return;
-                }
-                queue.offer(POISON);
-                cancelFuture(mainFuture);
-                queue.clear();
-                permsMap.clear();
-            }
-        }
-
-        protected void cancelFuture(final Future<Object> f) {
-            if (f.isDone()) {
-                return;
-            }
-            try {
-                f.get(2, TimeUnit.SECONDS);
-            } catch (final InterruptedException e) {
-                // Keep interrupted flag
-                Thread.currentThread().interrupt();
-            } catch (final ExecutionException e) {
-                // Error
-                final Throwable cause = e.getCause();
-                LOG.error(cause.getMessage(), cause);
-            } catch (final TimeoutException e) {
-                // Halt it
-                f.cancel(true);
-            }
+            flag.set(false);
+            mainFuture.cancel(true);
+            queue.clear();
+            permsMap.clear();
         }
 
         public void stopWhenEmpty() {
-            if (mainFuture.isDone()) {
-                return;
-            }
-            synchronized (mainFuture) {
-                if (mainFuture.isDone()) {
-                    return;
+            final ThreadPoolService tps = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
+            if (null == tps) {
+                while (!queue.isEmpty()) {
+                    // Nope
                 }
-                final ThreadPoolService tps = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
-                if (null == tps) {
-                    while (!queue.isEmpty()) {
-                        // Nope
-                    }
-                    queue.offer(POISON);
-                    //cancelFuture(mainFuture);
-                } else {
-                    final BlockingQueue<Integer> q = queue;
-                    final Future<Object> f = mainFuture;
-                    tps.submit(ThreadPools.task(new Callable<Object>() {
+                flag.set(false);
+                mainFuture.cancel(true);
+            } else {
+                final BlockingQueue<Integer> q = queue;
+                final Future<Object> f = mainFuture;
+                final AtomicBoolean fl = flag;
+                tps.submit(ThreadPools.task(new Callable<Object>() {
 
-                        @Override
-                        public Object call() throws Exception {
-                            if (f.isDone()) {
-                                return null;
-                            }
-                            while (!q.isEmpty()) {
-                                // Nope
-                            }
-                            q.offer(POISON);
-                            return null;
+                    @Override
+                    public Object call() throws Exception {
+                        while (!q.isEmpty()) {
+                            // Nope
                         }
+                        fl.set(false);
+                        f.cancel(true);
+                        return null;
+                    }
 
-                    }), CallerRunsBehavior.<Object> getInstance());
-                }
+                }), CallerRunsBehavior.<Object> getInstance());
             }
         }
 

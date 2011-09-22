@@ -76,4 +76,6 @@ public interface SubscriptionStorage {
     public void deleteAllSubscriptionsInContext(int contextId, Context ctx) throws OXException;
 
     public void deleteAllSubscriptionsWhereConfigMatches(Map<String, Object> query, String sourceId, Context ctx) throws OXException;
+
+    public Map<String, Boolean> hasSubscriptions(Context ctx, List<String> folderIds) throws OXException;
 }

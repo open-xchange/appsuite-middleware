@@ -61,25 +61,11 @@ package com.openexchange.groupware.notify.hostname;
 public interface HostnameService {
 
     /**
-     * The parameter name for host name.
+     * The parameter name for host data.
      *
-     * @type <code>java.lang.String</code>
+     * @type <code>com.openexchange.groupware.notify.hostname.HostData</code>
      */
-    public static final String PARAM_HOST_NAME = "com.openexchange.groupware.hostname";
-
-    /**
-     * The parameter name for port.
-     *
-     * @type <code>java.lang.Integer</code>
-     */
-    public static final String PARAM_PORT = "com.openexchange.groupware.port";
-
-    /**
-     * The parameter name for secure connection.
-     *
-     * @type <code>java.lang.Boolean</code>
-     */
-    public static final String PARAM_SECURE = "com.openexchange.groupware.secure";
+    public static final String PARAM_HOST_DATA = "com.openexchange.groupware.hostdata";
 
     /**
      * Returns the host name part used in generated links to internal objects; meaning the replacement for &quot;[hostname]&quot; in URL

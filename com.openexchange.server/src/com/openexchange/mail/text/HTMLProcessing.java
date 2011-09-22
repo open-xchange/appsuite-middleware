@@ -548,7 +548,7 @@ public final class HTMLProcessing {
                     final String imageURL;
                     {
                         final InlineImageDataSource imgSource = new InlineImageDataSource();
-                        final ImageLocation imageLocation = new ImageLocation(null, prepareFullname(msgUID.getAccountId(), msgUID.getFolder()), String.valueOf(msgUID.getMailID()), cid);
+                        final ImageLocation imageLocation = new ImageLocation.Builder(cid).folder(prepareFullname(msgUID.getAccountId(), msgUID.getFolder())).id(msgUID.getMailID()).build();
                         imageURL = imgSource.generateUrl(imageLocation, session);
                     }
                     linkBuilder.setLength(0);
@@ -608,7 +608,7 @@ public final class HTMLProcessing {
                             final String imageURL;
                             {
                                 final InlineImageDataSource imgSource = new InlineImageDataSource();
-                                final ImageLocation imageLocation = new ImageLocation(null, prepareFullname(msgUID.getAccountId(), msgUID.getFolder()), String.valueOf(msgUID.getMailID()), filename);
+                                final ImageLocation imageLocation = new ImageLocation.Builder(filename).folder(prepareFullname(msgUID.getAccountId(), msgUID.getFolder())).id(msgUID.getMailID()).build();
                                 imageURL = imgSource.generateUrl(imageLocation, session);
                             }
                             linkBuilder.setLength(0);
@@ -649,7 +649,7 @@ public final class HTMLProcessing {
                 final String imageURL;
                 {
                     final InlineImageDataSource imgSource = new InlineImageDataSource();
-                    final ImageLocation imageLocation = new ImageLocation(null, prepareFullname(msgUID.getAccountId(), msgUID.getFolder()), String.valueOf(msgUID.getMailID()), cid);
+                    final ImageLocation imageLocation = new ImageLocation.Builder(cid).folder(prepareFullname(msgUID.getAccountId(), msgUID.getFolder())).id(msgUID.getMailID()).build();
                     imageURL = imgSource.generateUrl(imageLocation, session);
                 }
                 linkBuilder.setLength(0);

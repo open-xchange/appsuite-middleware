@@ -168,6 +168,13 @@ public interface IIMAPProperties extends IMailProperties {
     public int getBlockSize();
 
     /**
+     * Gets the max. number of connections
+     *
+     * @return The max. number of connections
+     */
+    public int getMaxNumConnection();
+
+    /**
      * Gets the map holding IMAP servers with new ACL Extension.
      *
      * @return The map holding IMAP servers with new ACL Extension

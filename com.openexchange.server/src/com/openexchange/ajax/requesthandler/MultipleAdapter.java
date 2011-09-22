@@ -99,7 +99,8 @@ public class MultipleAdapter implements MultipleHandler {
             if (RequestConstants.DATA.equals(name)) {
                 request.setData(entry.getValue());
             } else {
-            	if (entry.getValue() != null && entry.getValue() != JSONObject.NULL) {
+            	final Object value = entry.getValue();
+                if (value != null && value != JSONObject.NULL) {
                     request.putParameter(name, entry.getValue().toString());
             	}
             }
@@ -107,7 +108,7 @@ public class MultipleAdapter implements MultipleHandler {
         String path = "";
 
         if (module.contains("/")) {
-        	int slash = module.indexOf('/');
+        	final int slash = module.indexOf('/');
 			path = module.substring(slash);
         	module = module.substring(0, slash);
         }
@@ -115,8 +116,6 @@ public class MultipleAdapter implements MultipleHandler {
         request.setFormat("json");
         request.setAction(action);
         request.setServletRequestURI(path);
-
-
 
         return request;
     }

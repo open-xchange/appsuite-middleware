@@ -51,6 +51,8 @@ package com.openexchange.admin.rmi.dataobjects;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 
 /**
@@ -67,6 +69,8 @@ public class UserModuleAccess implements Serializable {
      * For serialization
      */
     private static final long serialVersionUID = -5336341908204911967L;
+
+    private final Map<String, String> properties;
 
     // ALL ACCESS MODULES;
     // MAKE SURE YOU REWRITE THE "equals" METHOD
@@ -129,7 +133,7 @@ public class UserModuleAccess implements Serializable {
 
     private boolean GlobalAddressBookDisabled = false;
 
-    private boolean PublicFolderEditable = true;
+    private boolean PublicFolderEditable = false;
 
     private boolean deniedPortal;
 
@@ -138,8 +142,20 @@ public class UserModuleAccess implements Serializable {
      */
     public UserModuleAccess() {
         super();
+        properties = new HashMap<String, String>();
     }
 
+    public String getProperty(final Object key) {
+        return properties.get(key);
+    }
+
+    public String putProperty(final String key, final String value) {
+        return properties.put(key, value);
+    }
+
+    public Map<String, String> getProperties() {
+        return new HashMap<String, String>(properties);
+    }
 
     /**
      * Enable all modules
@@ -697,62 +713,90 @@ public class UserModuleAccess implements Serializable {
     public int getPermissionBits() {
         int retval = 0;
         
-        if (isActiveSync())
+        if (isActiveSync()) {
             retval |= UserConfiguration.ACTIVE_SYNC;
-        if (getCalendar())
+        }
+        if (getCalendar()) {
             retval |= UserConfiguration.CALENDAR;
-        if (isCollectEmailAddresses())
+        }
+        if (isCollectEmailAddresses()) {
             retval |= UserConfiguration.COLLECT_EMAIL_ADDRESSES;
-        if (getContacts())
+        }
+        if (getContacts()) {
             retval |= UserConfiguration.CONTACTS;
-        if (getDelegateTask())
+        }
+        if (getDelegateTask()) {
             retval |= UserConfiguration.DELEGATE_TASKS;
-        if (getEditGroup())
+        }
+        if (getEditGroup()) {
             retval |= UserConfiguration.EDIT_GROUP;
-        if (getEditPassword())
+        }
+        if (getEditPassword()) {
             retval |= UserConfiguration.EDIT_PASSWORD;
-        if (getEditPublicFolders())
+        }
+        if (getEditPublicFolders()) {
             retval |= UserConfiguration.EDIT_PUBLIC_FOLDERS;
-        if (getEditResource())
+        }
+        if (getEditResource()) {
             retval |= UserConfiguration.EDIT_RESOURCE;
-        if (getForum())
+        }
+        if (getForum()) {
             retval |= UserConfiguration.FORUM;
-        if (getIcal())
+        }
+        if (getIcal()) {
             retval |= UserConfiguration.ICAL;
-        if (getInfostore())
+        }
+        if (getInfostore()) {
             retval |= UserConfiguration.INFOSTORE;
-        if (getSyncml())
+        }
+        if (getSyncml()) {
             retval |= UserConfiguration.MOBILITY;
-        if (isMultipleMailAccounts())
+        }
+        if (isMultipleMailAccounts()) {
             retval |= UserConfiguration.MULTIPLE_MAIL_ACCOUNTS;
-        if (isOLOX20())
+        }
+        if (isOLOX20()) {
             retval |= UserConfiguration.OLOX20;
-        if (getPinboardWrite())
+        }
+        if (getPinboardWrite()) {
             retval |= UserConfiguration.PINBOARD_WRITE_ACCESS;
-        if (getProjects())
+        }
+        if (getProjects()) {
             retval |= UserConfiguration.PROJECTS;
-        if (isPublication())
+        }
+        if (isPublication()) {
             retval |= UserConfiguration.PUBLICATION;
-        if (getReadCreateSharedFolders())
+        }
+        if (getReadCreateSharedFolders()) {
             retval |= UserConfiguration.READ_CREATE_SHARED_FOLDERS;
-        if (getRssBookmarks())
+        }
+        if (getRssBookmarks()) {
             retval |= UserConfiguration.RSS_BOOKMARKS;
-        if (getRssPortal())
+        }
+        if (getRssPortal()) {
             retval |= UserConfiguration.RSS_PORTAL;
-        if (isSubscription())
+        }
+        if (isSubscription()) {
             retval |= UserConfiguration.SUBSCRIPTION;
-        if (getTasks())
+        }
+        if (getTasks()) {
             retval |= UserConfiguration.TASKS;
-        if (isUSM())
+        }
+        if (isUSM()) {
             retval |= UserConfiguration.USM;
-        if (getVcard())
+        }
+        if (getVcard()) {
             retval |= UserConfiguration.VCARD;
-        if (getWebdav())
+        }
+        if (getWebdav()) {
             retval |= UserConfiguration.WEBDAV;
-        if (getWebdavXml())
+        }
+        if (getWebdavXml()) {
             retval |= UserConfiguration.WEBDAV_XML;
-        if (getWebmail())
+        }
+        if (getWebmail()) {
             retval |= UserConfiguration.WEBMAIL;
+        }
         
         return retval;
     }

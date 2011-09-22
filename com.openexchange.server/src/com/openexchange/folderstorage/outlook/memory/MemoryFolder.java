@@ -115,4 +115,11 @@ public interface MemoryFolder {
      */
     public Date getLastModified();
 
+    /**
+     * Gets the sort number.
+     * 
+     * @return The sort number or <code>0</code> if not set
+     */
+    public int getSortNum();
+
 }

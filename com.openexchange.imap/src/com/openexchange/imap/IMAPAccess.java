@@ -80,6 +80,7 @@ import com.openexchange.imap.notify.internal.IMAPNotifierMessageRecentListener;
 import com.openexchange.imap.notify.internal.IMAPNotifierRegistry;
 import com.openexchange.imap.ping.IMAPCapabilityAndGreetingCache;
 import com.openexchange.imap.services.IMAPServiceRegistry;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
@@ -419,6 +420,16 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                  * Get store
                  */
                 imapStore = connectIMAPStore(imapSession, config.getServer(), config.getPort(), config.getLogin(), tmpPass, null);
+                /*
+                 * Add warning if non-secure
+                 */
+                try {
+                    if (!config.isSecure() && !imapStore.hasCapability("STARTTLS")) {
+                        warnings.add(MailExceptionCode.NON_SECURE_WARNING.create());
+                    }
+                } catch (final MessagingException e) {
+                    // Ignore
+                }
             } catch (final MessagingException e) {
                 throw MIMEMailException.handleMessagingException(e, config, session);
             } finally {
@@ -457,7 +468,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             String tmpPass = config.getPassword();
             if (tmpPass != null) {
                 try {
-                    tmpPass = new String(tmpPass.getBytes(imapConfProps.getImapAuthEnc()), CHARENC_ISO8859);
+                    final String imapAuthEnc = imapConfProps.getImapAuthEnc();
+                    tmpPass = new String(tmpPass.getBytes(null == imapAuthEnc ? MailProperties.getInstance().getDefaultMimeCharset() : imapAuthEnc), CHARENC_ISO8859);
                 } catch (final UnsupportedEncodingException e) {
                     LOG.error(e.getMessage(), e);
                 }

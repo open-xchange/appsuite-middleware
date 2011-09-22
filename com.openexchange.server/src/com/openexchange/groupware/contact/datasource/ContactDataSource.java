@@ -51,7 +51,8 @@ package com.openexchange.groupware.contact.datasource;
 
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_FOLDERID;
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_ID;
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -136,7 +137,7 @@ public final class ContactDataSource implements DataSource {
             final ContactInterfaceDiscoveryService discoveryService = ServerServiceRegistry.getInstance().getService(
                 ContactInterfaceDiscoveryService.class,
                 true);
-            final TIntObjectHashMap<ContactInterface> tmp = new TIntObjectHashMap<ContactInterface>(len);
+            final TIntObjectMap<ContactInterface> tmp = new TIntObjectHashMap<ContactInterface>(len);
             for (int i = 0; i < len; i++) {
                 final int folderId = folderIds[i];
                 ContactInterface contactInterface = tmp.get(folderId);
@@ -172,10 +173,10 @@ public final class ContactDataSource implements DataSource {
             properties);
     }
 
-    private static void writeVCard2Stream(final Contact contact, final ByteArrayOutputStream byteArrayOutputStream, final VersitDefinition contactDef, final Session session) throws OXException {
+    private static void writeVCard2Stream(final Contact contact, final ByteArrayOutputStream stream, final VersitDefinition contactDef, final Session session) throws OXException {
         final VersitDefinition.Writer versitWriter;
         try {
-            versitWriter = contactDef.getWriter(byteArrayOutputStream, "UTF-8");
+            versitWriter = contactDef.getWriter(stream, "UTF-8");
         } catch (final IOException e) {
             throw DataExceptionCodes.ERROR.create(e, e.getMessage());
         }
@@ -189,6 +190,7 @@ public final class ContactDataSource implements DataSource {
          * Convert
          */
         try {
+            oxContainerConverter.setAddDisplayName4DList(true);
             final VersitObject versitObject = oxContainerConverter.convertContact(contact, "3.0");
             contactDef.write(versitWriter, versitObject);
             versitWriter.flush();

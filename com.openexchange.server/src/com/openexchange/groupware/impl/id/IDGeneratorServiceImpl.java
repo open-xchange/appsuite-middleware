@@ -75,6 +75,11 @@ public final class IDGeneratorServiceImpl implements IDGeneratorService {
 
     @Override
     public int getId(final String type, final int contextId) throws OXException {
+        return getId(type, contextId, 1);
+    }
+
+    @Override
+    public int getId(final String type, final int contextId, final int minId) throws OXException {
         /*
          * Get appropriate connection
          */
@@ -83,7 +88,7 @@ public final class IDGeneratorServiceImpl implements IDGeneratorService {
             /*
              * Try to perform an UPDATE
              */
-            final int id = getId(type, contextId, con);
+            final int id = getId(type, contextId, minId, con);
             if (id < 0) {
                 /*
                  * Failed
@@ -117,7 +122,7 @@ public final class IDGeneratorServiceImpl implements IDGeneratorService {
         }
     }
 
-    private static int getId(final String type, final int contextId, final Connection con) throws SQLException {
+    private static int getId(final String type, final int contextId, final int minId, final Connection con) throws SQLException {
         /*
          * Start
          */
@@ -129,12 +134,16 @@ public final class IDGeneratorServiceImpl implements IDGeneratorService {
              */
             if (performUpdate(type, contextId, con)) {
                 retval = performSelect(type, contextId, con);
+                while (retval < minId) {
+                    performUpdate(type, contextId, con);
+                    retval = performSelect(type, contextId, con);
+                }
             } else {
                 /*
                  * Try to perform initial INSERT
                  */
-                if (performInsert(type, contextId, con)) {
-                    retval = 1;
+                if (performInsert(type, contextId, minId, con)) {
+                    retval = minId;
                 }
             }
             /*
@@ -177,12 +186,13 @@ public final class IDGeneratorServiceImpl implements IDGeneratorService {
         }
     }
 
-    private static boolean performInsert(final String type, final int contextId, final Connection con) throws SQLException {
+    private static boolean performInsert(final String type, final int contextId, final int minId, final Connection con) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("INSERT INTO sequenceIds (cid, type, id) VALUES (?, ?, 1)");
+            stmt = con.prepareStatement("INSERT INTO sequenceIds (cid, type, id) VALUES (?, ?, ?)");
             stmt.setInt(1, contextId);
             stmt.setString(2, type);
+            stmt.setInt(3, minId);
             try {
                 final int result = stmt.executeUpdate();
                 return (result > 0);

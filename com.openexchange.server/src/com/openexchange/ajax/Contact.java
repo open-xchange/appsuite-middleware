@@ -327,9 +327,31 @@ public class Contact extends DataServlet {
                         contactobject.setImageContentType(uploadFile.getContentType());
                     }
 
-                    final ContactInterface contactInterface = discoveryService.newContactInterface(contactobject.getParentFolderID(), session);
-                    //final ContactSQLInterface contactsql = new RdbContactSQLInterface(session);
-                    contactInterface.updateContactObject(contactobject, inFolder, timestamp);
+                    final int folderId = contactobject.getParentFolderID();
+                    final ContactInterface targetContactInterface = discoveryService.newContactInterface(folderId, session);
+                    
+                    boolean doUpdate = true;
+                    {
+                        final ContactInterface srcContactIface = discoveryService.newContactInterface(inFolder, session);
+                        if (!targetContactInterface.getClass().equals(srcContactIface.getClass())) {
+                            doUpdate = false;
+                            final com.openexchange.groupware.container.Contact toMove =
+                                ContactRequest.move2AnotherProvider(
+                                    id,
+                                    inFolder,
+                                    contactobject,
+                                    srcContactIface,
+                                    folderId,
+                                    targetContactInterface,
+                                    session,
+                                    timestamp);
+                        }
+                    }
+                    
+                    if (doUpdate) {
+                        //final ContactSQLInterface contactsql = new RdbContactSQLInterface(session);
+                        targetContactInterface.updateContactObject(contactobject, inFolder, timestamp);
+                    }
                 } finally {
                     if (upload != null) {
                         upload.cleanUp();

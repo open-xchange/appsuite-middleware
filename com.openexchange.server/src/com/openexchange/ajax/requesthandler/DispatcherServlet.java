@@ -69,7 +69,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.MultipleAdapterServletNew;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.responseRenderers.JSONResponseRenderer;
@@ -78,7 +77,6 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.systemname.SystemNameService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -94,7 +92,7 @@ public final class DispatcherServlet extends SessionServlet {
 
     private static final long serialVersionUID = -8060034833311074781L;
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(MultipleAdapterServletNew.class));
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(DispatcherServlet.class));
 
     private static final class HTTPRequestInputStreamProvider implements AJAXRequestData.InputStreamProvider {
 
@@ -179,8 +177,6 @@ public final class DispatcherServlet extends SessionServlet {
         Tools.disableCaching(resp);
 
         final String action = req.getParameter(PARAMETER_ACTION);
-        AJAXRequestResult result = null;
-        AJAXRequestData request = null;
         AJAXState state = null;
         final Dispatcher dispatcher = DISPATCHER.get();
         try {
@@ -188,7 +184,7 @@ public final class DispatcherServlet extends SessionServlet {
             /*
              * Parse AJAXRequestData
              */
-            request = parseRequest(req, preferStream, FileUploadBase.isMultipartContent(new ServletRequestContext(req)), session);
+            final AJAXRequestData request = parseRequest(req, preferStream, FileUploadBase.isMultipartContent(new ServletRequestContext(req)), session);
             /*
              * Start dispatcher processing
              */
@@ -196,22 +192,30 @@ public final class DispatcherServlet extends SessionServlet {
             /*
              * Perform request
              */
-            result = dispatcher.perform(request, state, session);
+            final AJAXRequestResult result = dispatcher.perform(request, state, session);
+            /*
+             * Check result's type
+             */
+            if (AJAXRequestResult.ResultType.ETAG.equals(result.getType())) {
+                resp.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                return;
+            }
+            /*
+             * A common result
+             */
+            sendResponse(request, result, req, resp);
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             JSONResponseRenderer.writeResponse(new Response().setException(e), action, req, resp);
-            return;
         } catch (final RuntimeException e) {
             LOG.error(e.getMessage(), e);
             final OXException exception = AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             JSONResponseRenderer.writeResponse(new Response().setException(exception), action, req, resp);
-            return;
         } finally {
             if (null != state) {
                 dispatcher.end(state);
             }
         }
-        sendResponse(request, result, req, resp);
     }
 
     private void sendResponse(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest hReq, final HttpServletResponse hResp) {
@@ -241,8 +245,7 @@ public final class DispatcherServlet extends SessionServlet {
                 retval.setHostname(null == hn ? req.getServerName() : hn);
             }
         }
-        retval.setRoute(ServerServiceRegistry.getInstance().getService(SystemNameService.class).getSystemName()); // Maybe use system name
-                                                                                                                  // service
+        retval.setRoute(Tools.getRoute(req.getSession(true).getId()));
         /*
          * Set the module
          */
@@ -279,9 +282,11 @@ public final class DispatcherServlet extends SessionServlet {
         /*
          * Check for ETag header to support client caching
          */
-        final String eTag = req.getHeader("etag");
-        if (null != eTag) {
-            retval.setETag(eTag);
+        {
+            final String eTag = req.getHeader("If-None-Match");
+            if (null != eTag) {
+                retval.setETag(eTag);
+            }
         }
         /*
          * Set request body

@@ -58,7 +58,9 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.servlet.ServletConfig;
@@ -90,6 +92,8 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.IPRange;
+import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -219,8 +223,20 @@ public abstract class SessionServlet extends AJAXServlet {
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         Tools.disableCaching(resp);
+        AtomicInteger counter = null;
         try {
             initializeSession(req);
+            final ServerSession session = getSessionObject(req);
+            /*
+             * Check max. concurrent AJAX requests
+             */
+            final int maxConcurrentRequests = getMaxConcurrentRequests(session);
+            if (maxConcurrentRequests > 0) {
+                counter = (AtomicInteger) session.getParameter(Session.PARAM_COUNTER);
+                if (null != counter && counter.incrementAndGet() > maxConcurrentRequests) {
+                    throw AjaxExceptionCodes.TOO_MANY_REQUESTS.create();
+                }
+            }
             super.service(req, resp);
         } catch (final OXException e) {
             e.log(LOG);
@@ -236,11 +252,27 @@ public abstract class SessionServlet extends AJAXServlet {
                 sendError(resp);
             }
         } finally {
+            ThreadLocalSessionHolder.getInstance().setSession(null);
             if (LogProperties.isEnabled()) {
                 LogProperties.putLogProperty("com.openexchange.session.sessionId", null);
                 LogProperties.putLogProperty("com.openexchange.session.userId", null);
                 LogProperties.putLogProperty("com.openexchange.session.contextId", null);
             }
+            if (null != counter) {
+                counter.getAndDecrement();
+            }
+        }
+    }
+
+    private static int getMaxConcurrentRequests(final ServerSession session) {
+        final Set<String> set = session.getUser().getAttributes().get("ajax.maxCount");
+        if (null == set || set.isEmpty()) {
+            return -1;
+        }
+        try {
+            return Integer.parseInt(set.iterator().next());
+        } catch (final NumberFormatException e) {
+            return -1;
         }
     }
 

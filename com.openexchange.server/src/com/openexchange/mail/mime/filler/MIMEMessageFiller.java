@@ -278,7 +278,8 @@ public class MIMEMessageFiller {
          * Add header X-Originating-IP containing the IP address of the client
          */
         if (MailProperties.getInstance().isAddClientIPAddress()) {
-            final String clientIp = (String) LogProperties.getLogProperties().get("com.openexchange.ajp13.requestIp");
+            final Map<String, Object> logProperties = LogProperties.optLogProperties();
+            final String clientIp = null == logProperties ? null : (String) logProperties.get("com.openexchange.ajp13.requestIp");
             mimeMessage.setHeader("X-Originating-IP", clientIp == null ? session.getLocalIp() : clientIp);
         }
     }
@@ -375,27 +376,7 @@ public class MIMEMessageFiller {
         /*
          * Reply-To
          */
-        if (usm.getReplyToAddr() == null || usm.getReplyToAddr().length() == 0) {
-            if (mail.containsFrom()) {
-                mimeMessage.setReplyTo(mail.getFrom());
-            }
-        } else {
-            try {
-                mimeMessage.setReplyTo(QuotedInternetAddress.parse(usm.getReplyToAddr(), true));
-            } catch (final AddressException e) {
-                LOG.error("Default Reply-To address cannot be parsed", e);
-                try {
-                    mimeMessage.setHeader(
-                        MessageHeaders.HDR_REPLY_TO,
-                        MimeUtility.encodeWord(usm.getReplyToAddr(), MailProperties.getInstance().getDefaultMimeCharset(), "Q"));
-                } catch (final UnsupportedEncodingException e1) {
-                    /*
-                     * Cannot occur since default mime charset is supported by JVM
-                     */
-                    LOG.error(e1.getMessage(), e1);
-                }
-            }
-        }
+        setReplyTo(mail, mimeMessage);
         /*
          * Set subject
          */
@@ -491,6 +472,60 @@ public class MIMEMessageFiller {
         }
     }
 
+    private void setReplyTo(final ComposedMailMessage mail, final MimeMessage mimeMessage) throws OXException, MessagingException {
+        /*
+         * Reply-To
+         */
+        final String hdrReplyTo = mail.getFirstHeader("Reply-To");
+        if (null != hdrReplyTo) {
+            InternetAddress[] replyTo = null;
+            try {
+                replyTo = QuotedInternetAddress.parse(hdrReplyTo, true);
+            } catch (final AddressException e) {
+                LOG.error("Specified Reply-To address cannot be parsed", e);
+            }
+            if (null != replyTo) {
+                mimeMessage.setReplyTo(replyTo);
+            } else if (mail.containsFrom()) {
+                mimeMessage.setReplyTo(mail.getFrom());
+            }
+        } else if (usm.getReplyToAddr() == null || usm.getReplyToAddr().length() == 0) {
+            InternetAddress[] replyTo = null;
+            final MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+            if (null != mass) {
+                final String sReplyTo = mass.getMailAccount(mail.getAccountId(), session.getUserId(), session.getContextId()).getReplyTo();
+                if (null != sReplyTo) {
+                    try {
+                        replyTo = QuotedInternetAddress.parse(sReplyTo, true);
+                    } catch (final AddressException e) {
+                        LOG.error("Default Reply-To address cannot be parsed", e);
+                    }
+                }
+            }
+            if (null != replyTo) {
+                mimeMessage.setReplyTo(replyTo);
+            } else if (mail.containsFrom()) {
+                mimeMessage.setReplyTo(mail.getFrom());
+            }
+        } else {
+            try {
+                mimeMessage.setReplyTo(QuotedInternetAddress.parse(usm.getReplyToAddr(), true));
+            } catch (final AddressException e) {
+                LOG.error("Default Reply-To address cannot be parsed", e);
+                try {
+                    mimeMessage.setHeader(
+                        MessageHeaders.HDR_REPLY_TO,
+                        MimeUtility.encodeWord(usm.getReplyToAddr(), MailProperties.getInstance().getDefaultMimeCharset(), "Q"));
+                } catch (final UnsupportedEncodingException e1) {
+                    /*
+                     * Cannot occur since default mime charset is supported by JVM
+                     */
+                    LOG.error(e1.getMessage(), e1);
+                }
+            }
+        }
+    }
+
     /**
      * Sets the appropriate headers <code>In-Reply-To</code> and <code>References</code> in specified MIME message.
      * <p>
@@ -558,13 +593,7 @@ public class MIMEMessageFiller {
             /*
              * Set the Reply-To header for future replies to this new message
              */
-            final InternetAddress[] ia;
-            if (usm.getReplyToAddr() == null) {
-                ia = mail.getFrom();
-            } else {
-                ia = MIMEMessageUtility.parseAddressList(usm.getReplyToAddr(), false);
-            }
-            mimeMessage.setReplyTo(ia);
+            setReplyTo(mail, mimeMessage);
             /*
              * Set sent date if not done, yet
              */
@@ -579,7 +608,7 @@ public class MIMEMessageFiller {
              * Set default subject if none set
              */
             if (null == mimeMessage.getSubject()) {
-                mimeMessage.setSubject(new StringHelper(UserStorage.getStorageUser(session.getUserId(), ctx).getLocale()).getString(MailStrings.DEFAULT_SUBJECT));
+                mimeMessage.setSubject(StringHelper.valueOf(UserStorage.getStorageUser(session.getUserId(), ctx).getLocale()).getString(MailStrings.DEFAULT_SUBJECT));
             }
         } catch (final AddressException e) {
             throw MIMEMailException.handleMessagingException(e);
@@ -666,7 +695,7 @@ public class MIMEMessageFiller {
             /*
              * Check for referenced images (by cid oder locally available)
              */
-            embeddedImages = MIMEMessageUtility.hasEmbeddedImages(content) || MIMEMessageUtility.hasReferencedLocalImages(content, session);
+            embeddedImages = MIMEMessageUtility.hasEmbeddedImages(content) || MIMEMessageUtility.hasReferencedLocalImages(content);
         } else {
             embeddedImages = false;
         }

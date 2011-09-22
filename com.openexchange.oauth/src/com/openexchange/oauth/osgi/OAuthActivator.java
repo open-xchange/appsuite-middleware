@@ -69,6 +69,7 @@ import com.openexchange.secret.recovery.SecretConsistencyCheck;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.tools.session.SessionHolder;
 
 /**
  * {@link OAuthActivator}
@@ -92,7 +93,7 @@ public final class OAuthActivator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, SessiondService.class, EventAdmin.class, CryptoService.class };
+        return new Class<?>[] { DatabaseService.class, SessiondService.class, EventAdmin.class, CryptoService.class, SessionHolder.class };
     }
 
     @Override

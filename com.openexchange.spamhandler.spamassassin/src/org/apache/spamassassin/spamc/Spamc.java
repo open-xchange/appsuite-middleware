@@ -141,7 +141,7 @@ public class Spamc {
 	    }
 	    parseFirstLine(lines[0]);
 	    lineIndex = parseHeaders(lines);
-	    final StringBuffer processedMessage = new StringBuffer();
+	    final StringBuilder processedMessage = new StringBuilder();
 	    for (; lineIndex < lines.length; lineIndex++) {
 		processedMessage.append(lines[lineIndex]).append("\r\n");
 	    }
@@ -915,7 +915,7 @@ public class Spamc {
          */
     private String constructQuery(final String command, final Map headers,
 	    final String message) {
-	final StringBuffer query = new StringBuffer();
+	final StringBuilder query = new StringBuilder();
 	query.append(command);
 	query.append(' ');
 	query.append("SPAMC/");
@@ -958,7 +958,7 @@ public class Spamc {
 	    query.append("\r\n");
 	    if (getCompress()) {
 		// TODO: complete and test this feature
-		Deflater compresser = new Deflater();
+		final Deflater compresser = new Deflater();
 		compresser.setInput(message.getBytes());
 		compresser.finish();
 		final byte[] compressedMessage = new byte[message.length()];
@@ -979,7 +979,11 @@ public class Spamc {
     private SpamdResponse sendCommand(final String command, final Map headers,
 	    final String message) throws UnknownHostException, IOException {
 	final String query = constructQuery(command, headers, message);
-	return new SpamdResponse(getQueryResponse(query));
+	final String queryResponse = getQueryResponse(query);
+    if (isEmpty(queryResponse)) {
+        throw new IllegalArgumentException("Received no response from spamc for query:\n\t" + query);
+    }
+	return new SpamdResponse(queryResponse);
     }
 
     /**
@@ -1001,7 +1005,7 @@ public class Spamc {
 	}
 	String host;
 	// build up a list of host names in case we have to report an error
-	StringBuffer commaSeparatedHosts = new StringBuffer();
+	final StringBuilder commaSeparatedHosts = new StringBuilder();
 	for (int i = 0; i < getHosts().size(); i++) {
 	    host = (String) getHosts().get(i);
 	    if (i > 0) {
@@ -1156,7 +1160,7 @@ public class Spamc {
 	OutputStream out = null;
 	BufferedReader in = null;
 
-	final StringBuffer response = new StringBuffer();
+	final StringBuilder response = new StringBuilder();
 
 	try {
 	    out = socket.getOutputStream();
@@ -1303,8 +1307,8 @@ public class Spamc {
 	} else {
 	    headers.put(Headers.MESSAGE_CLASS, Headers.MESSAGE_CLASS_HAM);
 	}
-	final StringBuffer setValue = new StringBuffer();
-	final StringBuffer removeValue = new StringBuffer();
+	final StringBuilder setValue = new StringBuilder();
+	final StringBuilder removeValue = new StringBuilder();
 	if (setLocal) {
 	    setValue.append(Headers.SET_REMOVE_LOCAL);
 	} else if (removeLocal) {
@@ -1347,7 +1351,7 @@ public class Spamc {
 
 	try {
 	    // TODO: remove this debugging code
-	    File spamFile = new File(File.separator + File.separator + "ax5"
+	    final File spamFile = new File(File.separator + File.separator + "ax5"
 		    + File.separator + "apps" + File.separator + "Apache"
 		    + File.separator + "Mail-SpamAssassin-3.1.8"
 		    + File.separator + "sample-spam.txt");
@@ -1370,9 +1374,9 @@ public class Spamc {
 	    flags = Spamc.readArgs(spamc, combinedArgs);
 
 	    // read the message from stdin
-	    BufferedReader in = new BufferedReader(new InputStreamReader(
+	    final BufferedReader in = new BufferedReader(new InputStreamReader(
 		    System.in));
-	    final StringBuffer sb = new StringBuffer(System.in.available());
+	    final StringBuilder sb = new StringBuilder(System.in.available());
 	    while (in.ready()) {
 		sb.append(in.readLine()).append("\r\n");
 	    }
@@ -1826,7 +1830,7 @@ public class Spamc {
 	@Override
     protected long apply(final String hosts, final Spamc spamc,
 		final long flags) throws UsageException {
-	    long newFlags = super.apply(hosts, spamc, flags);
+	    final long newFlags = super.apply(hosts, spamc, flags);
 	    final String[] splitHosts = hosts.split(",");
 	    spamc.setHosts(splitHosts);
 	    return newFlags;
@@ -2025,7 +2029,7 @@ public class Spamc {
 	@Override
     protected long apply(final String learntype, final Spamc spamc,
 		final long flags) throws UsageException {
-	    long newFlags = super.apply(learntype, spamc, flags);
+	    final long newFlags = super.apply(learntype, spamc, flags);
 	    if (!LearnTypeOption.SPAM.equals(learntype)
 		    && !LearnTypeOption.HAM.equals(learntype)
 		    && !LearnTypeOption.FORGET.equals(learntype)) {
@@ -2054,7 +2058,7 @@ public class Spamc {
 	@Override
     protected long apply(final String reportType, final Spamc spamc,
 		final long flags) throws UsageException {
-	    long newFlags = super.apply(reportType, spamc, flags);
+	    final long newFlags = super.apply(reportType, spamc, flags);
 	    if (!ReportTypeOption.REPORT.equals(reportType)
 		    && !ReportTypeOption.REVOKE.equals(reportType)) {
 		throw new UsageException("Please specifiy a legal report type");
@@ -2625,4 +2629,17 @@ public class Spamc {
 
 	return flags;
     }
+
+    private static boolean isEmpty(final String str) {
+        if (null == str) {
+            return true;
+        }
+        final char[] chars = str.toCharArray();
+        boolean empty = true;
+        for (int i = 0; empty && i < chars.length; i++) {
+            empty = Character.isWhitespace(chars[i]);
+        }
+        return empty;
+    }
+
 }

@@ -51,6 +51,8 @@ package com.openexchange.data.conversion.ical.ical4j;
 
 import net.fortuna.ical4j.model.Calendar;
 import com.openexchange.data.conversion.ical.ICalSession;
+import com.openexchange.data.conversion.ical.Mode;
+import com.openexchange.data.conversion.ical.ZoneInfo;
 
 /**
  *
@@ -59,13 +61,26 @@ import com.openexchange.data.conversion.ical.ICalSession;
 public final class ICal4jSession implements ICalSession {
 
     private final Calendar calendar = new Calendar();
+    private final Mode mode;
     private int index;
 
     /**
      * Default constructor.
+     * @param mode
      */
-    public ICal4jSession() {
+    public ICal4jSession(Mode mode) {
         super();
+        this.mode = mode;
+    }
+
+    @Override
+    public Mode getMode() {
+        return mode;
+    }
+
+    @Override
+    public ZoneInfo getZoneInfo() {
+        return mode.getZoneInfo();
     }
 
     /**

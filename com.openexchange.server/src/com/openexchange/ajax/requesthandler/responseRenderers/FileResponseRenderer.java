@@ -49,9 +49,11 @@
 
 package com.openexchange.ajax.requesthandler.responseRenderers;
 
+import static com.openexchange.java.Streams.close;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -69,7 +71,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.tools.images.ImageScalingService;
 import com.openexchange.tools.servlet.http.Tools;
 
-
 /**
  * {@link FileResponseRenderer}
  *
@@ -79,17 +80,33 @@ public class FileResponseRenderer implements ResponseRenderer {
 
     private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(FileResponseRenderer.class));
 
+    private static final int BUFLEN = 2048;
+
     private static final String PARAMETER_CONTENT_DISPOSITION = "content_disposition";
+
     private static final String PARAMETER_CONTENT_TYPE = "content_type";
+
     protected static final String SAVE_AS_TYPE = "application/octet-stream";
 
-    private ImageScalingService scaler = null;
+    private volatile ImageScalingService scaler;
+
+    /**
+     * Initializes a new {@link FileResponseRenderer}.
+     */
+    public FileResponseRenderer() {
+        super();
+    }
 
     @Override
     public int getRanking() {
         return 0;
     }
 
+    /**
+     * Sets the image scaler.
+     *
+     * @param scaler The image scaler
+     */
     public void setScaler(final ImageScalingService scaler) {
         this.scaler = scaler;
     }
@@ -107,106 +124,114 @@ public class FileResponseRenderer implements ResponseRenderer {
     public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) {
         IFileHolder file = (IFileHolder) result.getResultObject();
 
-
         final String contentType = req.getParameter(PARAMETER_CONTENT_TYPE);
-        final String userAgent = req.getHeader("user-agent");
         String contentDisposition = req.getParameter(PARAMETER_CONTENT_DISPOSITION);
         if (null == contentDisposition) {
             contentDisposition = file.getDisposition();
         }
-        final String name = file.getName();
 
         InputStream documentData = null;
-        ServletOutputStream outputStream = null;
         try {
             file = scaleIfImage(request, file);
-            outputStream = resp.getOutputStream();
             documentData = new BufferedInputStream(file.getStream());
+            final String userAgent = req.getHeader("user-agent");
             if (SAVE_AS_TYPE.equals(contentType)) {
-                Tools.setHeaderForFileDownload(userAgent, resp, name, contentDisposition);
+                Tools.setHeaderForFileDownload(userAgent, resp, file.getName(), contentDisposition);
                 resp.setContentType(contentType);
             } else {
-                final CheckedDownload checkedDownload = DownloadUtility.checkInlineDownload(
-                    documentData,
-                    name,
-                    file.getContentType(),
-                    contentDisposition,
-                    userAgent);
-                if(contentDisposition != null) {
-                    resp.setHeader("Content-Disposition", contentDisposition);
-                } else {
+                final CheckedDownload checkedDownload =
+                    DownloadUtility.checkInlineDownload(documentData, file.getName(), file.getContentType(), contentDisposition, userAgent);
+                if (contentDisposition == null) {
                     resp.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
-                }
-                if(contentType != null) {
-                    resp.setContentType(contentType);
                 } else {
+                    resp.setHeader("Content-Disposition", contentDisposition);
+                }
+                if (contentType == null) {
                     resp.setContentType(checkedDownload.getContentType());
+                } else {
+                    resp.setContentType(contentType);
                 }
                 documentData = checkedDownload.getInputStream();
             }
-            // Browsers don't like the Pragma header the way we usually set
-            // this. Especially if files are sent to the browser. So removing
-            // pragma header
+            /*
+             * Browsers don't like the Pragma header the way we usually set this. Especially if files are sent to the browser. So removing
+             * pragma header.
+             */
             Tools.removeCachingHeader(resp);
-
-            int i = -1;
-            while ((i = documentData.read()) != -1) {
-                outputStream.write(i);
+            /*
+             * ETag present?
+             */
+            final String eTag = result.getHeader("ETag");
+            if (null != eTag) {
+                final long expires = result.getExpires();
+                if (expires > 0) {
+                    final long millis = System.currentTimeMillis() + expires;
+                    Tools.setETag(eTag, new Date(millis), resp);
+                } else {
+                    Tools.setETag(eTag, null, resp);
+                }
+            }
+            /*
+             * Output binary content
+             */
+            final ServletOutputStream outputStream = resp.getOutputStream();
+            final int len = BUFLEN;
+            final byte[] buf = new byte[len];
+            for (int read; (read = documentData.read(buf, 0, len)) > 0;) {
+                outputStream.write(buf, 0, read);
             }
             outputStream.flush();
-
         } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         } finally {
-            if (documentData != null) {
-                try {
-                    documentData.close();
-                } catch (final IOException e) {
-                    // Ignore, we did all we could here.
-                }
-            }
+             close(documentData);
         }
     }
 
     /**
-     * @param request
-     * @param file
-     * @return
-     * @throws IOException
-     * @throws OXException
+     * Scale possible image data.
+     *
+     * @param request The request data
+     * @param file The file holder
+     * @return The possibly scaled file holder
+     * @throws IOException If an I/O error occurs
+     * @throws OXException If an Open-Xchange error occurs
      */
     private IFileHolder scaleIfImage(final AJAXRequestData request, final IFileHolder file) throws IOException, OXException {
+        final ImageScalingService scaler = this.scaler;
         if (scaler == null) {
             return file;
         }
-
+        /*
+         * Check content type
+         */
         String contentType = file.getContentType();
-
-        if (!contentType.startsWith("image")) {
+        if (!contentType.startsWith("image/")) {
             contentType = MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(file.getName());
-            if (!contentType.startsWith("image")) {
+            if (!contentType.startsWith("image/")) {
                 return file;
             }
         }
-
+        /*
+         * Start scaling if appropriate parameters are present
+         */
         int width = -1, height = -1;
-
         if (request.isSet("width")) {
             width = request.getParameter("width", int.class).intValue();
         }
-
         if (request.isSet("height")) {
             height = request.getParameter("height", int.class).intValue();
         }
-
         if (width == -1 && height == -1) {
             return file;
         }
-
+        /*
+         * Scale to new input stream
+         */
         final InputStream scaled = scaler.scale(file.getStream(), width, height);
-
         return new FileHolder(scaled, -1, "image/png", "");
     }
+
 }

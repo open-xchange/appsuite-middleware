@@ -110,6 +110,9 @@ public class AJAXRequestData {
 
     private String servletRequestUri;
 
+    /**
+     * The AJP route: &lt;http-session-id&gt; + <code>"." </code>+ &lt;route&gt;
+     */
     private String route;
 
     private UploadEvent uploadEvent;
@@ -119,6 +122,8 @@ public class AJAXRequestData {
     private AJAXState state;
 
     private String eTag;
+
+    private long expires;
 
     /**
      * Initializes a new {@link AJAXRequestData}.
@@ -148,11 +153,32 @@ public class AJAXRequestData {
         super();
         params = new LinkedHashMap<String, String>();
         headers = new LinkedHashMap<String, String>();
+        expires = -1;
+    }
+
+    /**
+     * Gets the expires time.
+     * <p>
+     * Have a notion of a time-to-live value.
+     *
+     * @return The expires time or <code>-1</code> for no expiry
+     */
+    public long getExpires() {
+        return expires;
+    }
+
+    /**
+     * Sets the expires time
+     *
+     * @param expires The expires time or <code>-1</code> for no expiry
+     */
+    public void setExpires(final long expires) {
+        this.expires = expires;
     }
 
     /**
      * Gets the ETag
-     * 
+     *
      * @return The ETag
      */
     public String getETag() {
@@ -161,7 +187,7 @@ public class AJAXRequestData {
 
     /**
      * Sets the ETag
-     * 
+     *
      * @param eTag The ETag to set
      */
     public void setETag(final String eTag) {
@@ -588,7 +614,7 @@ public class AJAXRequestData {
             url.append(path);
         }
         if (withRoute) {
-            url.append(";jsessionid=12345.").append(route);
+            url.append(";jsessionid=").append(route);
         }
         if (query != null) {
             if (!query.startsWith("?")) {
@@ -618,7 +644,7 @@ public class AJAXRequestData {
     }
 
     /**
-     * Gets the AJP route.
+     * Gets the AJP route: &lt;http-session-id&gt; + <code>"." </code>+ &lt;route&gt;
      *
      * @return The AJP route
      */
@@ -627,7 +653,7 @@ public class AJAXRequestData {
     }
 
     /**
-     * Sets the AJP route.
+     * Sets the AJP route: &lt;http-session-id&gt; + <code>"." </code>+ &lt;route&gt;
      *
      * @param route The AJP route
      */

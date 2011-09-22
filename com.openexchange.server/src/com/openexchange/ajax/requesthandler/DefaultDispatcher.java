@@ -148,6 +148,21 @@ public class DefaultDispatcher implements Dispatcher {
             throw AjaxExceptionCodes.UNKNOWN_ACTION.create(modifiedRequest.getAction());
         }
         /*
+         * Is it possible to serve request by ETag?
+         */
+        {
+            final String eTag = modifiedRequest.getETag();
+            if (null != eTag && (action instanceof ETagAwareAJAXActionService) && ((ETagAwareAJAXActionService) action).checkETag(eTag, modifiedRequest, session)) {
+                final AJAXRequestResult etagResult = new AJAXRequestResult();
+                etagResult.setType(AJAXRequestResult.ResultType.ETAG);
+                final long newExpires = modifiedRequest.getExpires();
+                if (newExpires > 0) {
+                    etagResult.setExpires(newExpires);
+                }
+                return etagResult;
+            }
+        }
+        /*
          * Check for Action annotation
          */
         final Action actionMetadata = getActionMetadata(action);
@@ -170,6 +185,9 @@ public class DefaultDispatcher implements Dispatcher {
             }
         }
         modifiedRequest.setState(state);
+        /*
+         * Perform request
+         */
         AJAXRequestResult result;
         try {
             result = action.perform(modifiedRequest, session);

@@ -192,6 +192,8 @@ public final class SessiondActivator extends HousekeepingActivator {
                 }
             } catch (final OXException e) {
                 LOG.warn("Missing caching service. Remaining active sessions could not be put into session cache for remote distribution.");
+            } catch (final RuntimeException e) {
+                LOG.warn("Remaining active sessions could not be put into session cache for remote distribution.", e);
             }
             // Stop sessiond
             SessiondInit.getInstance().stop();

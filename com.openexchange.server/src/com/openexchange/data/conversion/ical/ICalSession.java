@@ -55,4 +55,8 @@ package com.openexchange.data.conversion.ical;
  */
 public interface ICalSession {
 
+    Mode getMode();
+
+    ZoneInfo getZoneInfo();
+
 }

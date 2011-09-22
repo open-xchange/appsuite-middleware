@@ -69,6 +69,9 @@ import com.openexchange.folderstorage.messaging.contentType.TrashContentType;
 import com.openexchange.folderstorage.type.MailType;
 import com.openexchange.folderstorage.type.SystemType;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.i18n.MailStrings;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingFolder.DefaultFolderType;
 import com.openexchange.messaging.MessagingPermission;
@@ -150,7 +153,7 @@ public final class MessagingFolderImpl extends AbstractFolder {
      * @param serviceId The service identifier
      * @param fullnameProvider The (optional) fullname provider
      */
-    public MessagingFolderImpl(final MessagingFolder messagingFolder, final int accountId, final String serviceId, final DefaultFolderFullnameProvider fullnameProvider) {
+    public MessagingFolderImpl(final MessagingFolder messagingFolder, final int accountId, final String serviceId, final User user, final DefaultFolderFullnameProvider fullnameProvider) {
         super();
         final String fullname = messagingFolder.getId();
         id = MessagingFolderIdentifier.getFQN(serviceId, accountId, fullname);
@@ -186,17 +189,39 @@ public final class MessagingFolderImpl extends AbstractFolder {
         deleted = messagingFolder.getDeletedMessageCount();
         if (messagingFolder.containsDefaultFolderType()) {
             messagingFolderType = TYPES.get(messagingFolder.getDefaultFolderType());
+            switch (messagingFolderType) {
+            case DRAFTS:
+                name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.DRAFTS);
+                break;
+            case SENT:
+                name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.SENT);
+                break;
+            case SPAM:
+                name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.SPAM);
+                break;
+            case TRASH:
+                name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.TRASH);
+                break;
+            default:
+                break;
+            }
+        } else if (messagingFolder.isRootFolder()) {
+            messagingFolderType = MessagingFolderType.ROOT;
         } else if (null != fullname) {
             try {
                 if (fullname.equals(fullnameProvider.getDraftsFolder())) {
+                    name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.DRAFTS);
                     messagingFolderType = MessagingFolderType.DRAFTS;
                 } else if (fullname.equals(fullnameProvider.getINBOXFolder())) {
                     messagingFolderType = MessagingFolderType.INBOX;
                 } else if (fullname.equals(fullnameProvider.getSentFolder())) {
+                    name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.SENT);
                     messagingFolderType = MessagingFolderType.SENT;
                 } else if (fullname.equals(fullnameProvider.getSpamFolder())) {
+                    name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.SPAM);
                     messagingFolderType = MessagingFolderType.SPAM;
                 } else if (fullname.equals(fullnameProvider.getTrashFolder())) {
+                    name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.TRASH);
                     messagingFolderType = MessagingFolderType.TRASH;
                 } else {
                     messagingFolderType = MessagingFolderType.NONE;
@@ -205,8 +230,6 @@ public final class MessagingFolderImpl extends AbstractFolder {
                 com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MessagingFolderImpl.class)).error(e.getMessage(), e);
                 messagingFolderType = MessagingFolderType.NONE;
             }
-        } else if (messagingFolder.isRootFolder()) {
-            messagingFolderType = MessagingFolderType.ROOT;
         } else {
             messagingFolderType = MessagingFolderType.NONE;
         }

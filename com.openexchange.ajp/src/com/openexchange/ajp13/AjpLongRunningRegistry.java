@@ -55,7 +55,7 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * {@link AjpLongRunningRegistry} - A registry for long-running requests.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AjpLongRunningRegistry {
@@ -64,7 +64,7 @@ public final class AjpLongRunningRegistry {
 
     /**
      * Gets the registry instance.
-     * 
+     *
      * @return The instance
      */
     public static AjpLongRunningRegistry getInstance() {
@@ -85,7 +85,7 @@ public final class AjpLongRunningRegistry {
 
     /**
      * Tries to register a long-running request.
-     * 
+     *
      * @param request The long-running request
      * @return <code>true</code> if request could be registered; otherwise <code>false</code> if there is already a long-running request in
      *         progress
@@ -96,7 +96,7 @@ public final class AjpLongRunningRegistry {
 
     /**
      * De-Registers specified long-running request.
-     * 
+     *
      * @param request The long-running request
      */
     public void deregisterLongRunning(final HttpServletRequest request) {

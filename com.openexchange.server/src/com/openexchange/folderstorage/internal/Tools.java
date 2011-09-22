@@ -49,7 +49,8 @@
 
 package com.openexchange.folderstorage.internal;
 
-import gnu.trove.TIntIntHashMap;
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.hash.TIntIntHashMap;
 import java.util.TimeZone;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
@@ -204,7 +205,7 @@ public final class Tools {
      */
     private static final int MAX_PERMISSION = 64;
 
-    private static final TIntIntHashMap MAPPING = new TIntIntHashMap(6) {
+    private static final TIntIntMap MAPPING = new TIntIntHashMap(6) {
         { //Unnamed Block.
             put(Permission.MAX_PERMISSION, MAX_PERMISSION);
             put(MAX_PERMISSION, MAX_PERMISSION);

@@ -49,8 +49,9 @@
 
 package com.openexchange.file.storage.rdb.internal;
 
-import gnu.trove.TIntArrayList;
-import gnu.trove.TIntProcedure;
+import gnu.trove.list.TIntList;
+import gnu.trove.procedure.TIntProcedure;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -59,6 +60,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
+import com.openexchange.caching.dynamic.OXObjectFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageService;
@@ -73,6 +75,44 @@ import com.openexchange.session.Session;
  * @since Open-Xchange v6.18.2
  */
 public final class CachingFileStorageAccountStorage implements FileStorageAccountStorage {
+
+    private static final class FileStorageAccountFactory implements OXObjectFactory<FileStorageAccount> {
+
+        private final FileStorageAccountStorage accountStorage;
+        private final String serviceId;
+        private final CacheService cacheService;
+        private final int accountId;
+        private final Session session;
+        private final Lock lock;
+
+        protected FileStorageAccountFactory(final String serviceId, final int accountId, final FileStorageAccountStorage accountStorage, final CacheService cacheService, final Session session, final Lock lock) {
+            this.accountStorage = accountStorage;
+            this.serviceId = serviceId;
+            this.cacheService = cacheService;
+            this.accountId = accountId;
+            this.session = session;
+            this.lock = lock;
+        }
+
+        @Override
+        public Serializable getKey() {
+            return newCacheKey(cacheService,
+                serviceId,
+                accountId,
+                session.getUserId(),
+                session.getContextId());
+        }
+
+        @Override
+        public FileStorageAccount load() throws OXException {
+            return accountStorage.getAccount(serviceId, accountId, session);
+        }
+
+        @Override
+        public Lock getCacheLock() {
+            return lock;
+        }
+    }
 
     private static final CachingFileStorageAccountStorage INSTANCE = new CachingFileStorageAccountStorage();
 
@@ -101,7 +141,7 @@ public final class CachingFileStorageAccountStorage implements FileStorageAccoun
      *
      * @return The new cache key
      */
-    private static CacheKey newCacheKey(final CacheService cacheService, final String serviceId, final int id, final int user, final int cid) {
+    protected static CacheKey newCacheKey(final CacheService cacheService, final String serviceId, final int id, final int user, final int cid) {
         return cacheService.newCacheKey(cid, serviceId, Integer.valueOf(id), Integer.valueOf(user));
     }
 
@@ -160,12 +200,8 @@ public final class CachingFileStorageAccountStorage implements FileStorageAccoun
             return delegatee.getAccount(serviceId, id, session);
         }
         try {
-            return new FileStorageAccountReloader(new FileStorageAccountFactory(id, serviceId, session, cacheLock, newCacheKey(
-                cacheService,
-                serviceId,
-                id,
-                session.getUserId(),
-                session.getContextId()), delegatee), REGION_NAME);
+            final OXObjectFactory<FileStorageAccount> factory = new FileStorageAccountFactory(serviceId, id, delegatee, cacheService, session, cacheLock);
+            return new FileStorageAccountReloader(factory, REGION_NAME);
         } catch (final OXException e) {
             throw e;
         }
@@ -173,7 +209,7 @@ public final class CachingFileStorageAccountStorage implements FileStorageAccoun
 
     @Override
     public List<FileStorageAccount> getAccounts(final String serviceId, final Session session) throws OXException {
-        final TIntArrayList ids = delegatee.getAccountIDs(serviceId, session);
+        final TIntList ids = delegatee.getAccountIDs(serviceId, session);
         if (ids.isEmpty()) {
             return Collections.emptyList();
         }

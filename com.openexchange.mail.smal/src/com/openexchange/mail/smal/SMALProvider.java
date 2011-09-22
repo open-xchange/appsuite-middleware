@@ -136,4 +136,9 @@ public final class SMALProvider extends AllMailProvider {
         }
     }
 
+    @Override
+    public String toString() {
+        return PROTOCOL_SMAL.getName();
+    }
+
 }

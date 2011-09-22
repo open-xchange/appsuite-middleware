@@ -122,8 +122,9 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
                     zipInputStream.close();
                 }
                 /*
-                 * Create fgile holder
+                 * Create file holder
                  */
+                req.getRequest().setFormat("file");
                 final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(out.toByteArray());
                 fileHolder.setName(fileName);
                 fileHolder.setContentType("application/octet-stream");

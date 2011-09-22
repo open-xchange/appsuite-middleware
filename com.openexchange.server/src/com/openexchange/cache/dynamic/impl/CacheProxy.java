@@ -50,6 +50,7 @@
 package com.openexchange.cache.dynamic.impl;
 
 import java.lang.reflect.Proxy;
+import com.openexchange.caching.dynamic.OXObjectFactory;
 import com.openexchange.exception.OXException;
 
 /**

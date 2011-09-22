@@ -78,7 +78,7 @@ public class SubscribeActivator extends AJAXModuleActivator {
 	protected void startBundle() throws Exception {
 //		registerService(SecretService.class, new WhiteboardSecretService(context));
 		this.addService(SecretService.class, new WhiteboardSecretService(context));
-		
+
 		registerModule(new SubscriptionSourcesActionFactory(this), "subscriptionSources");
 		registerModule(new SubscriptionActionFactory(this), "subscriptions");
 	}

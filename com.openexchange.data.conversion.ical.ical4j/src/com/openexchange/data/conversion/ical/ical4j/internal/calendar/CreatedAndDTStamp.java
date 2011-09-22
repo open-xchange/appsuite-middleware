@@ -55,8 +55,8 @@ import java.util.TimeZone;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.Created;
 import net.fortuna.ical4j.model.property.DateProperty;
-import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
 import com.openexchange.groupware.container.CalendarObject;
@@ -73,7 +73,7 @@ public class CreatedAndDTStamp <T extends CalendarComponent, U extends CalendarO
     }
 
     @Override
-    public void emit(final int index, final U calendar, final T t, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
+    public void emit(final Mode mode, final int index, final U calendar, final T t, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
         final Created created = new Created();
         created.setDate(toDateTime(calendar.getCreationDate()));
         t.getProperties().add(created);
@@ -85,7 +85,7 @@ public class CreatedAndDTStamp <T extends CalendarComponent, U extends CalendarO
     }
 
     @Override
-    public void parse(final int index, final T component, final U cObj, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
+    public void parse(final int index, final T component, final U cObj, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
         final DateProperty property = (DateProperty) ((null == component.getProperty("CREATED")) ? component.getProperty("DTSTAMP") : component.getProperty("CREATED"));
         final Date creationDate = ParserTools.parseDate(component, property, timeZone);
         cObj.setCreationDate(creationDate);

@@ -214,6 +214,39 @@ public final class MimeProcessingUtility {
         return readContent(textPart, charset);
     }
 
+    private static final String PRIMARY_TEXT= "text/";
+
+    private static final String[] SUB_SPECIAL2 = { "rfc822-headers", "vcard", "x-vcard", "calendar", "x-vcalendar" };
+
+    /**
+     * Checks if content type matches one of special content types:
+     * <ul>
+     * <li><code>text/rfc822-headers</code></li>
+     * <li><code>text/vcard</code></li>
+     * <li><code>text/x-vcard</code></li>
+     * <li><code>text/calendar</code></li>
+     * <li><code>text/x-vcalendar</code></li>
+     * </ul>
+     *
+     * @param contentType The content type
+     * @return <code>true</code> if content type matches special; otherwise <code>false</code>
+     */
+    public static boolean isSpecial(final String contentType) {
+        if (null == contentType) {
+            return false;
+        }
+        final String ct = contentType.toLowerCase(Locale.US);
+        if (ct.startsWith(PRIMARY_TEXT, 0)) {
+            final int off = PRIMARY_TEXT.length();
+            for (final String subtype : SUB_SPECIAL2) {
+                if (ct.startsWith(subtype, off)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     /**
      * Reads specified mail part's content catching possible <code>java.io.CharConversionException</code>.
      *

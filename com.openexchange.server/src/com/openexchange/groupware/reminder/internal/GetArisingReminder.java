@@ -133,7 +133,14 @@ public class GetArisingReminder {
                 } else if (appointment.getEndDate().after(now)) {
                     retval.add(reminder);
                 } else {
-                    new DeleteReminder(ctx, reminder).perform();
+                    try {
+                        new DeleteReminder(ctx, reminder).perform();
+                    } catch (final OXException e) {
+                        if (!ReminderExceptionCode.NOT_FOUND.equals(e)) {
+                            throw e;
+                        }
+                        // Ignore
+                    }
                 }
             } else {
                 retval.add(reminder);

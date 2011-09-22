@@ -58,7 +58,7 @@ import java.util.Map;
 
 /**
  * {@link TextFillerGrouper}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TextFillerGrouper {
@@ -72,7 +72,7 @@ public final class TextFillerGrouper {
 
     /**
      * Groups passed text fillers by user accounts.
-     * 
+     *
      * @param textFillers The text fillers to group
      * @return The grouped text fillers
      */
@@ -92,7 +92,7 @@ public final class TextFillerGrouper {
 
     /**
      * Groups passed text fillers by user account's folders.
-     * 
+     *
      * @param textFillers The text fillers to group
      * @return The grouped text fillers
      */

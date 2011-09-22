@@ -73,7 +73,7 @@ public final class MailUploadQuotaChecker extends UploadQuotaChecker {
 
     /**
      * Initializes a new {@link MailUploadQuotaChecker}.
-     * 
+     *
      * @param usm The settings
      */
     public MailUploadQuotaChecker(final UserSettingMail settings) {

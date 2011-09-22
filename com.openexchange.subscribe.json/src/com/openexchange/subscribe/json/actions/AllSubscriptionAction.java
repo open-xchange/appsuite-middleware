@@ -100,7 +100,7 @@ public class AllSubscriptionAction extends AbstractSubscribeAction {
         List<Subscription> allSubscriptions = null;
         if (containsFolder) {
         	SecretService secretService = services.getService(SecretService.class);
-            allSubscriptions = getSubscriptionsInFolder(subscribeRequest.getServerSession(), folderId, secretService.getSecret(subscribeRequest.getServerSession()));            
+            allSubscriptions = getSubscriptionsInFolder(subscribeRequest.getServerSession(), folderId, secretService.getSecret(subscribeRequest.getServerSession()));
         } else {
             allSubscriptions = getAllSubscriptions(subscribeRequest.getServerSession(), services.getService(SecretService.class).getSecret(subscribeRequest.getServerSession()));
         }
@@ -111,7 +111,7 @@ public class AllSubscriptionAction extends AbstractSubscribeAction {
 		try {
 			dynamicColumns = getDynamicColumns(parameters);
 			final List<String> dynamicColumnOrder = getDynamicColumnOrder(parameters);
-	        JSONArray jsonArray = (JSONArray) createResponse(allSubscriptions, basicColumns, dynamicColumns, dynamicColumnOrder);	        
+	        JSONArray jsonArray = (JSONArray) createResponse(allSubscriptions, basicColumns, dynamicColumns, dynamicColumnOrder);
 	        return new AJAXRequestResult(jsonArray, "json");
 		} catch (JSONException e) {
 			throw new OXException(e);

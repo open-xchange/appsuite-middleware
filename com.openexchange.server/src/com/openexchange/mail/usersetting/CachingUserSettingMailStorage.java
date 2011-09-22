@@ -62,9 +62,11 @@ import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.userconfiguration.UserConfigurationCodes;
 import com.openexchange.mail.usersetting.UserSettingMail.Signature;
 import com.openexchange.server.impl.DBPool;
@@ -190,7 +192,11 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
                 cacheWriteLock.lock();
                 try {
                     usm.setNoSave(false);
-                    cache.put(cache.newCacheKey(ctx.getContextId(), user), (Serializable) usm.clone());
+                    final CacheKey key = cache.newCacheKey(ctx.getContextId(), user);
+                    if (null != cache.get(key)) {
+                        cache.remove(key);
+                    }
+                    cache.put(key, (Serializable) usm.clone());
                 } catch (final OXException e) {
                     LOG.error("UserSettingMail could not be put into cache", e);
                 } finally {
@@ -235,7 +241,11 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
                 cacheWriteLock.lock();
                 try {
                     usm.setNoSave(false);
-                    cache.put(cache.newCacheKey(ctx.getContextId(), user), (Serializable) usm.clone());
+                    final CacheKey key = cache.newCacheKey(ctx.getContextId(), user);
+                    if (null != cache.get(key)) {
+                        cache.remove(key);
+                    }
+                    cache.put(key, (Serializable) usm.clone());
                 } catch (final OXException e) {
                     LOG.error("UserSettingMail could not be put into cache", e);
                 } finally {
@@ -453,14 +463,14 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
         }
         s = null;
         stmt.setInt(6, usm.getAutoLinebreak());
-        stmt.setString(7, usm.getStdTrashName() == null ? UserSettingMail.STD_TRASH : usm.getStdTrashName());
-        stmt.setString(8, usm.getStdSentName() == null ? UserSettingMail.STD_SENT : usm.getStdSentName());
-        stmt.setString(9, usm.getStdDraftsName() == null ? UserSettingMail.STD_DRAFTS : usm.getStdDraftsName());
-        stmt.setString(10, usm.getStdSpamName() == null ? UserSettingMail.STD_SPAM : usm.getStdSpamName());
+        stmt.setString(7, usm.getStdTrashName() == null ? MailStrings.TRASH : usm.getStdTrashName());
+        stmt.setString(8, usm.getStdSentName() == null ? MailStrings.SENT : usm.getStdSentName());
+        stmt.setString(9, usm.getStdDraftsName() == null ? MailStrings.DRAFTS : usm.getStdDraftsName());
+        stmt.setString(10, usm.getStdSpamName() == null ? MailStrings.SPAM : usm.getStdSpamName());
         stmt.setLong(11, usm.getUploadQuota());
         stmt.setLong(12, usm.getUploadQuotaPerFile());
-        stmt.setString(13, usm.getConfirmedSpam() == null ? UserSettingMail.STD_CONFIRMED_SPAM : usm.getConfirmedSpam());
-        stmt.setString(14, usm.getConfirmedHam() == null ? UserSettingMail.STD_CONFIRMED_HAM : usm.getConfirmedHam());
+        stmt.setString(13, usm.getConfirmedSpam() == null ? MailStrings.CONFIRMED_SPAM : usm.getConfirmedSpam());
+        stmt.setString(14, usm.getConfirmedHam() == null ? MailStrings.CONFIRMED_HAM : usm.getConfirmedHam());
         stmt.setInt(15, ctx.getContextId());
         stmt.setInt(16, user);
         return stmt;
@@ -492,14 +502,14 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
         }
         s = null;
         stmt.setInt(8, usm.getAutoLinebreak());
-        stmt.setString(9, usm.getStdTrashName() == null ? UserSettingMail.STD_TRASH : usm.getStdTrashName());
-        stmt.setString(10, usm.getStdSentName() == null ? UserSettingMail.STD_SENT : usm.getStdSentName());
-        stmt.setString(11, usm.getStdDraftsName() == null ? UserSettingMail.STD_DRAFTS : usm.getStdDraftsName());
-        stmt.setString(12, usm.getStdSpamName() == null ? UserSettingMail.STD_SPAM : usm.getStdSpamName());
+        stmt.setString(9, usm.getStdTrashName() == null ? MailStrings.TRASH : usm.getStdTrashName());
+        stmt.setString(10, usm.getStdSentName() == null ? MailStrings.SENT : usm.getStdSentName());
+        stmt.setString(11, usm.getStdDraftsName() == null ? MailStrings.DRAFTS: usm.getStdDraftsName());
+        stmt.setString(12, usm.getStdSpamName() == null ? MailStrings.SPAM : usm.getStdSpamName());
         stmt.setLong(13, usm.getUploadQuota());
         stmt.setLong(14, usm.getUploadQuotaPerFile());
-        stmt.setString(15, usm.getConfirmedSpam() == null ? UserSettingMail.STD_CONFIRMED_SPAM : usm.getConfirmedSpam());
-        stmt.setString(16, usm.getConfirmedHam() == null ? UserSettingMail.STD_CONFIRMED_HAM : usm.getConfirmedHam());
+        stmt.setString(15, usm.getConfirmedSpam() == null ? MailStrings.CONFIRMED_SPAM : usm.getConfirmedSpam());
+        stmt.setString(16, usm.getConfirmedHam() == null ? MailStrings.CONFIRMED_HAM : usm.getConfirmedHam());
         return stmt;
     }
 

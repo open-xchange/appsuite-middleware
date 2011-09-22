@@ -77,6 +77,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.ServiceException;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.User;
@@ -87,35 +88,26 @@ import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.sqlStorage.OXUserSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
-import com.openexchange.api2.OXException;
-import com.openexchange.database.DBPoolingException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteRegistry;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.preferences.ServerUserSetting;
-import com.openexchange.server.ServiceException;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
@@ -434,10 +426,17 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 if (returntype.equalsIgnoreCase("java.lang.String")) {
                     final String result = (java.lang.String) method.invoke(usrdata, (Object[]) null);
                     if (null != result || test) {
-                        contact_query.append(Mapper.method2field.get(methodname));
+                        final String fieldName = Mapper.method2field.get(methodname);
+                        contact_query.append(fieldName);
                         contact_query.append(" = ?, ");
                         methodlist2.add(method);
                         returntypes.add(returntype);
+                        if ("field01".equals(fieldName)) {
+                            contact_query.append("field90");
+                            contact_query.append("=?, ");
+                            methodlist2.add(method);
+                            returntypes.add(returntype);
+                        }
                         prg_contacts_update_needed = true;
                     }
                 } else if (returntype.equalsIgnoreCase("java.lang.Integer")) {
@@ -2463,7 +2462,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             // Apply access.isGlobalAddressBook() to OXFolderAdminHelper.setGlobalAddressBookEnabled()
             final OXFolderAdminHelper adminHelper = new OXFolderAdminHelper();
             adminHelper.setGlobalAddressBookDisabled(ctx.getId().intValue(), userId, access.isGlobalAddressBookDisabled(), writeCon);
-            adminHelper.setPublicFolderEditable(access.isPublicFolderEditable(), ctx.getId().intValue(), userId, writeCon);
+            try {
+                adminHelper.setPublicFolderEditable(access.isPublicFolderEditable(), ctx.getId().intValue(), userId, writeCon);
+            } catch (final OXException e) {
+                if (!insert && !"true".equals(access.getProperty("ignoreErrors"))) { // update
+                    throw e;
+                }
+            }
 
             RdbUserConfigurationStorage.saveUserConfiguration(user, insert, writeCon);
             if (!insert) {

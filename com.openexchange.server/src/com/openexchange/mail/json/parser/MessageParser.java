@@ -518,6 +518,15 @@ public final class MessageParser {
          */
         mail.addBcc(parseAddressKey(MailJSONField.RECIPIENT_BCC.getKey(), jsonObj, prepare4Transport));
         /*
+         * Optional Reply-To
+         */
+        {
+            final InternetAddress[] addrs = parseAddressKey("reply_to", jsonObj, false);
+            if (null != addrs && addrs.length > 0) {
+                mail.setHeader("Reply-To", addrs[0].toString());
+            }
+        }
+        /*
          * Disposition notification
          */
         if (jsonObj.hasAndNotNull(MailJSONField.DISPOSITION_NOTIFICATION_TO.getKey())) {

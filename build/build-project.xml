@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Build bundle">
 
+    <description>
+        This is the universal build script to build all bundles.
+    </description>
+
+    <!-- customizable values -->
+    <property name="destDir" value=""/><!-- Necessary to build the bundles into a distro package -->
+    <property name="prefix" value="/opt/open-xchange"/><!-- Installation path on destination system -->
+
     <!-- Constants -->
 	<property name="mainSrcDir" value="src"/>
     <property name="mainBinDir" value="build"/>
@@ -14,67 +22,87 @@
     <property file="build.properties"/>
     <property name="testJarFile" value="${bundlesDir}/${Bundle-SymbolicName}-test.jar"/>
 
-    <target name="prepareClasspath" depends="testForMainBuild">
-        <propertycopy name="reqClasspath" from="${projectName}.requiredClasspath" override="true"/>
-        <!-- echo message="${reqClasspath}"/ -->
-        <setProjectDependencies projectName="${projectName}" binDir="${mainBinDir}" pathId="mainDependencies" deepPathId="mainDeepDependencies"/>
-        <setProjectDependencies projectName="${projectName}" binDir="${simBinDir}" pathId="simDependencies" deepPathId="simDeepDependencies"/>
-        <setProjectDependencies projectName="${projectName}" binDir="${testBinDir}" pathId="testDependencies" deepPathId="testDeepDependencies"/>
+    <!-- Install Constants -->
+    <property name="bundlesDir" value="${prefix}/bundles"/>
+    <property name="confInstallDir" value="${prefix}/etc"/>
+    <property name="bundle.dDir" value="${prefix}/osgi/bundle.d"/>
+
+    <target name="prepareClasspath" depends="testForMainBuild" description="Prepares all the necessary class path for compiling or running.">
+        <!-- Copies the required class path from the project specific property to an easier named one. -->
+        <propertycopy name="requiredClasspath" from="${projectName}.requiredClasspath" override="true"/>
+        <echo message="${requiredClasspath}"/>
+        <!-- Defines the class path required for the main classes of the bundle. -->
+        <setProjectDependencies projectName="${projectName}" binDir="${mainBinDir}" pathId="mainDependencies" projectProperty="requiredClasspath"/>
         <path id="mainCompileClasspath">
+            <!-- Can only contain main source directories of other bundles or the already built required bundles -->
             <path refid="mainDependencies"/>
         </path>
         <!-- property name="printablePath" refid="mainCompileClasspath"/>
         <echo message="${printablePath}"/ -->
+        <!-- Defines the class path required for the sim classes of the bundle. -->
+        <setProjectDependencies projectName="${projectName}" binDir="${simBinDir}" pathId="simDependencies" projectProperty="requiredClasspath"/>
         <path id="simCompileClasspath">
+            <!-- Can contain main and sim source directories of other bundles or the already built required bundles -->
             <path refid="mainCompileClasspath"/>
+            <path refid="mainBinClasses"/><!-- Defined in testForMainBuild depending on wether the bundle is already installed and build -->
             <path refid="simDependencies"/>
-            <path refid="mainBinClasses"/>
         </path>
         <!-- property name="printablePath" refid="simCompileClasspath"/>
         <echo message="${printablePath}"/ -->
+        <!-- Defines the class path required for the test classes of the bundle. -->
+        <setProjectDependencies projectName="${projectName}" binDir="${testBinDir}" pathId="testDependencies" projectProperty="requiredClasspath"/>
         <path id="testCompileClasspath">
+            <!-- Can contain main,sim and test source directories of other bundles or the already built required bundles -->
             <path refid="simCompileClasspath"/>
-            <path refid="testDependencies"/>
             <pathelement location="${simBinDir}"/>
+            <path refid="testDependencies"/>
         </path>
         <!-- property name="printablePath" refid="testCompileClasspath"/>
         <echo message="${printablePath}"/ -->
+        <!-- Defines the class path required to run the test classes of the bundle. -->
+        <setProjectDependencies projectName="${projectName}" binDir="${testBinDir}" pathId="testDeepDependencies" projectProperty="deepClasspath"/>
         <path id="testRunClasspath">
+            <!-- Deep dependencies are required because to run for tests required classes again their requirements are necessary. ;-) -->
             <path refid="testCompileClasspath"/>
             <path refid="testDeepDependencies"/>
             <pathelement location="${bundlesDir}/${Bundle-SymbolicName}-test.jar"/>
         </path>
     </target>
 
-    <target name="compile">
+    <target name="compile" description="Generic compile target used for compiling src, sim and test folder.">
         <mkdir dir="${binDir}"/>
         <javac srcdir="${srcDir}" destdir="${binDir}" debug="true" encoding="US-ASCII" source="1.5" target="1.5" includeAntRuntime="false">
             <classpath refid="${compileClasspath}"/>
         </javac>
     </target>
 
-    <target name="testFor3rdPartyLib">
+    <target name="testFor3rdPartyLib" description="Sets 3rdPartyLib to true if the bundle contains a lib directory containing JAR files.">
         <condition property="3rdPartyLib">
-            <contains string="${reqClasspath}" substring="${projectName}/${libDir}"/>
+            <contains string="${requiredClasspath}" substring="${projectName}/${libDir}"/>
         </condition>
     </target>
 
-    <target name="bundle" depends="testFor3rdPartyLib">
+    <target name="bundle" depends="testFor3rdPartyLib" description="Generates in the ${jarsDir} directory the final bundle.">
         <delete file="${jarsDir}/${Bundle-SymbolicName}.jar"/>
         <delete dir="${jarsDir}/${Bundle-SymbolicName}"/>
         <if>
             <istrue value="${3rdPartyLib}"/>
             <then>
                 <mkdir dir="${jarsDir}/${Bundle-SymbolicName}"/>
-                <jar jarfile="${jarsDir}/${Bundle-SymbolicName}/${Bundle-SymbolicName}.jar">
-                    <fileset dir="${binDir}"/>
-                </jar>
+            	<if>
+            		<available file="${binDir}" type="dir"/>
+            		<then>
+		                <jar jarfile="${jarsDir}/${Bundle-SymbolicName}/${Bundle-SymbolicName}.jar">
+		                    <fileset dir="${binDir}"/>
+		                </jar>
+        			</then>
+        		</if>
                 <copy todir="${jarsDir}/${Bundle-SymbolicName}">
                     <fileset dir=".">
                         <include name="META-INF/MANIFEST.MF"/>
                     </fileset>
                 </copy>
-                <foreach list="${reqClasspath}" target="add3rdPartyLibToBundle" param="lib" inheritAll="true"/>
+                <foreach list="${requiredClasspath}" target="add3rdPartyLibToBundle" param="lib" inheritAll="true"/>
                 <!-- Eclipse puts "." as path into MANIFEST.MF. We need to replace this with Bundle-SymbolicName.jar -->
                 <replace file="${jarsDir}/${Bundle-SymbolicName}/META-INF/MANIFEST.MF">
                     <replacefilter token="Bundle-ClassPath: .," value="Bundle-ClassPath: ${Bundle-SymbolicName}.jar,"/>
@@ -88,7 +116,7 @@
         </if>
     </target>
 
-    <target name="add3rdPartyLibToBundle">
+    <target name="add3rdPartyLibToBundle" description="Sub target to add JARs from the ${libDir} directory to the final bundle.">
         <if>
             <matches string="${lib}" pattern="${projectName}/${libDir}/.*\.jar"/>
             <then>
@@ -102,7 +130,7 @@
         </if>
     </target>
 
-    <target name="installBundle">
+    <target name="installBundle" description="Installs all bundles located in the ${jarsDir} directory into the final destination.">
         <mkdir dir="${destDir}/${bundlesDir}"/>
         <copy todir="${destDir}/${bundlesDir}">
             <fileset dir="${jarsDir}">
@@ -114,14 +142,14 @@
         </copy>
     </target>
 
-    <target name="makeIni">
+    <target name="makeIni" description="Creates the .ini file to include this bundle when starting the OSGi framework.">
         <!-- TODO fragment without @start -->
         <propertyregex property="bundleName" input="${bundleFileOrDir}" regexp="^.*/(.*?)(\.jar)?$" select="\1"/>
         <propertyregex property="fileOrDir" input="${bundleFileOrDir}" regexp="^.*/(.*?(\.jar)?)$" select="\1"/>
         <echo file="${destDir}/${bundle.dDir}/${bundleName}.ini" message="${bundlesDir}/${fileOrDir}@start${line.separator}"/>
     </target>
 
-    <target name="installConfig">
+    <target name="installConfig" description="Installs the .ini file and the bundles configuration files.">
         <mkdir dir="${destDir}/${bundle.dDir}"/>
         <foreach target="makeIni" param="bundleFileOrDir" inheritAll="true">
             <path>
@@ -135,12 +163,12 @@
                 </dirset>
             </path>
         </foreach>
-        <!-- TODO configuration files -->
+        <!-- TODO configuration files to confInstallDir -->
     </target>
 
-    <target name="install" depends="installBundle,installConfig"/>
+    <target name="install" depends="installBundle,installConfig" description="Combines installBundle and installConfig targets."/>
 
-    <target name="testForMainBuild">
+    <target name="testForMainBuild" description="Tests if the main sources need to be compiled.">
         <if>
             <and>
                 <equals arg1="${buildType}" arg2="bundle"/>
@@ -160,7 +188,7 @@
         </if>
     </target>
 
-    <target name="buildMain" depends="testForMainBuild" if="buildMain">
+    <target name="buildMain" depends="testForMainBuild" if="buildMain" description="Compiles the sources from the main source directory.">
         <antcall target="compile" inheritrefs="true">
             <param name="srcDir" value="${mainSrcDir}"/>
             <param name="binDir" value="${mainBinDir}"/>
@@ -168,22 +196,25 @@
         </antcall>
     </target>
 
-    <target name="testForBundleMain">
+    <target name="testForBundleMain" depends="testFor3rdPartyLib" description="Tests if the main classes need to be put into a bundle.">
         <condition property="bundleMain">
             <and>
                 <equals arg1="${buildType}" arg2="bundle"/>
-                <available file="${mainBinDir}" type="dir"/>
+            	<or>
+                	<available file="${mainBinDir}" type="dir"/>
+            		<istrue value="${3rdPartyLib}"/>
+        		</or>
             </and>
         </condition>
     </target>
 
-    <target name="bundleMain" depends="testForBundleMain" if="bundleMain">
+    <target name="bundleMain" depends="testForBundleMain" if="bundleMain" description="Puts the main classes into a bundle file or directory.">
         <antcall target="bundle" inheritrefs="true">
             <param name="binDir" value="${mainBinDir}"/>
         </antcall>
     </target>
 
-    <target name="testForMainInstall">
+    <target name="testForMainInstall" description="Tests if the main bundle needs to be installed.">
         <condition property="installMain">
             <and>
                 <equals arg1="${buildType}" arg2="bundle"/>
@@ -192,13 +223,13 @@
         </condition>
     </target>
 
-    <target name="installMain" depends="testForMainInstall" if="installMain">
+    <target name="installMain" depends="testForMainInstall" if="installMain" description="Installs the main bundle in the target destination.">
         <antcall target="install" inheritrefs="true">
             <param name="binDir" value="${mainBinDir}"/>
         </antcall>
     </target>
 
-    <target name="testForSimBuild">
+    <target name="testForSimBuild" description="Tests if the sources in the sim source directory need to be compiled.">
         <condition property="buildSim">
             <and>
                 <equals arg1="${buildType}" arg2="tests"/>
@@ -207,7 +238,7 @@
         </condition>
     </target>
 
-    <target name="buildSim" depends="testForSimBuild" if="buildSim">
+    <target name="buildSim" depends="testForSimBuild" if="buildSim" description="Compiles the sources from the sim source directory.">
         <antcall target="compile" inheritrefs="true">
             <param name="srcDir" value="${simSrcDir}"/>
             <param name="binDir" value="${simBinDir}"/>
@@ -215,7 +246,7 @@
         </antcall>
     </target>
 
-    <target name="testForTestBuild">
+    <target name="testForTestBuild" description="Tests if the sources in the test source directory need to be compiled.">
         <condition property="buildTest">
             <and>
                 <equals arg1="${buildType}" arg2="tests"/>
@@ -224,7 +255,7 @@
         </condition>
     </target>
 
-    <target name="buildTest" depends="testForTestBuild" if="buildTest">
+    <target name="buildTest" depends="testForTestBuild" if="buildTest" description="Compiles the sources from the test source directory.">
         <antcall target="compile" inheritrefs="true">
             <param name="srcDir" value="${testSrcDir}"/>
             <param name="binDir" value="${testBinDir}"/>
@@ -232,47 +263,47 @@
         </antcall>
     </target>
 
-    <target name="testForTestJar">
+    <target name="testForTestJar" description="Tests if a JAR containing the sim and the test classes needs to be created.">
         <condition property="testJar">
             <and>
                 <equals arg1="${buildType}" arg2="tests"/>
                 <or>
-                    <available file="${simSrcDir}" type="dir"/>
-                    <available file="${testSrcDir}" type="dir"/>
+                    <available file="${simBinDir}" type="dir"/>
+                    <available file="${testBinDir}" type="dir"/>
                 </or>
             </and>
         </condition>
     </target>
 
-    <target name="addSimToJar" if="buildSim">
+    <target name="addSimToJar" if="buildSim" description="Adds the classes from the sim source directory to the test JAR.">
         <jar jarfile="${testJarFile}">
             <fileset dir="${simBinDir}"/>
         </jar>
     </target>
 
-    <target name="addTestToJar" if="buildTest">
+    <target name="addTestToJar" if="buildTest" description="Adds the classes from the test source directory to the test JAR.">
         <jar jarfile="${testJarFile}" update="true">
             <fileset dir="${testBinDir}"/>
         </jar>
     </target>
 
-    <target name="testJar" depends="testForTestJar,addSimToJar,addTestToJar" if="testJar">
+    <target name="testJar" depends="testForTestJar,addSimToJar,addTestToJar" if="testJar" description="Creates the JAR file containing the sim and test classes.">
         <fail message="not implemented"/>
     </target>
 
-    <target name="testForTestRun">
+    <target name="testForTestRun" description="Tests if the tests needs to be executed.">
         <condition property="runTests">
             <and>
                 <equals arg1="${buildType}" arg2="tests"/>
                 <or>
-                    <available file="${simSrcDir}" type="dir"/>
-                    <available file="${testSrcDir}" type="dir"/>
+                    <available file="${simBinDir}" type="dir"/>
+                    <available file="${testBinDir}" type="dir"/>
                 </or>
             </and>
         </condition>
     </target>
 
-    <target name="runTests" depends="testForTestRun" if="runTests">
+    <target name="runTests" depends="testForTestRun" if="runTests" description="Runs the bundle internal JUnit tests.">
         <mkdir dir="${logDir}"/>
         <junit errorProperty="testFailed" failureProperty="testFailed" showoutput="yes" printsummary="yes" fork="yes" dir="${basedir}">
             <classpath>
@@ -287,9 +318,9 @@
         </junit>
     </target>
 
-    <target name="build" depends="prepareClasspath,buildMain,bundleMain,installMain,buildSim,buildTest,testJar,runTests"/>
+    <target name="build" depends="prepareClasspath,buildMain,bundleMain,installMain,buildSim,buildTest,testJar,runTests" description="Main build target combining all different possible build types."/>
 
-	<target name="dist">
+	<target name="dist" description="Target to copy bundle for a build on the build service.">
 		<property name="destDir" value="${distDir}/${packageName}/${projectName}"/>
         <mkdir dir="${destDir}"/>
         <copy todir="${destDir}">
@@ -300,7 +331,7 @@
         </copy>
 	</target>
 
-    <target name="clean">
+    <target name="clean" description="Cleans the build artifacts.">
         <delete dir="${mainBinDir}"/>
         <delete dir="${simBinDir}"/>
         <delete dir="${testBinDir}"/>

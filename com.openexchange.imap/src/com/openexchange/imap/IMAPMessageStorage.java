@@ -53,8 +53,9 @@ import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.fold;
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
-import gnu.trove.TLongIntHashMap;
-import gnu.trove.TLongObjectHashMap;
+import gnu.trove.map.TLongIntMap;
+import gnu.trove.map.TLongObjectMap;
+import gnu.trove.map.hash.TLongObjectHashMap;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -172,6 +173,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     private static final String STR_MSEC = "msec";
 
+    private static final boolean LOOK_UP_INBOX_ONLY = true;
+
     /*-
      * Members
      */
@@ -283,10 +286,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     messages[i] = fetchedMsgs.get(uids[i]);
                 }
             } else {
-                final TLongIntHashMap seqNumsMap = IMAPCommandsCollection.uids2SeqNumsMap(imapFolder, uids);
-                final TLongObjectHashMap<MailMessage> fetchedMsgs =
+                final TLongIntMap seqNumsMap = IMAPCommandsCollection.uids2SeqNumsMap(imapFolder, uids);
+                final TLongObjectMap<MailMessage> fetchedMsgs =
                     fetchValidWithFallbackFor(
-                        seqNumsMap.getValues(),
+                        seqNumsMap.values(),
                         seqNumsMap.size(),
                         getFetchProfile(fields, headerNames, null, null, getIMAPProperties().isFastFetch()),
                         imapConfig.getImapCapabilities().hasIMAP4rev1(),
@@ -412,6 +415,58 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     @Override
+    public MailMessage[] getMessagesByMessageID(final String... messageIDs) throws OXException {
+        try {
+            final int length = messageIDs.length;
+            int count = 0;
+            final MailMessage[] retval = new MailMessage[length];
+            imapFolder = setAndOpenFolder(imapFolder, "INBOX", Folder.READ_ONLY);
+            final long[] uids = IMAPCommandsCollection.messageId2UID(imapFolder, messageIDs);
+            for (int i = 0; i < uids.length; i++) {
+                final long uid = uids[i];
+                if (uid != -1) {
+                    retval[i] = new IDMailMessage("INBOX", String.valueOf(uid));
+                    count++;
+                }
+            }
+            if (count == length || LOOK_UP_INBOX_ONLY) {
+                return retval;
+            }
+            /*
+             * Look-up other folders
+             */
+            recursiveMessageIDLookUp((IMAPFolder) imapStore.getDefaultFolder(), messageIDs, retval, count);
+            return retval;
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
+        }
+    }
+
+    private int recursiveMessageIDLookUp(final IMAPFolder parentFolder, final String[] messageIDs, final MailMessage[] retval, final int countArg) throws OXException, MessagingException {
+        int count = countArg;
+        final Folder[] folders = parentFolder.list();
+        for (int i = 0; count >= 0 && i < folders.length; i++) {
+            final String fullName = folders[i].getFullName();
+            final IMAPFolder imapFolder = setAndOpenFolder(fullName, Folder.READ_ONLY);
+            final long[] uids = IMAPCommandsCollection.messageId2UID(imapFolder, messageIDs);
+            for (int k = 0; k < uids.length; k++) {
+                final long uid = uids[k];
+                if (uid != -1) {
+                    retval[k] = new IDMailMessage(fullName, String.valueOf(uid));
+                    count++;
+                }
+            }
+            if (count == messageIDs.length) {
+                return -1;
+            }
+            count = recursiveMessageIDLookUp(imapFolder, messageIDs, retval, count);
+        }
+        return count;
+    }
+
+    @Override
     public MailMessage getMessageLong(final String fullName, final long msgUID, final boolean markSeen) throws OXException {
         try {
             final int desiredMode = markSeen ? Folder.READ_WRITE : Folder.READ_ONLY;
@@ -470,11 +525,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                             /*
                              * User has \KEEP_SEEN right: Switch \Seen flag
                              */
-                            msg.setFlags(FLAGS_SEEN, true);
-                            mail.setFlag(MailMessage.FLAG_SEEN, true);
-                            final int cur = mail.getUnreadMessages();
-                            mail.setUnreadMessages(cur <= 0 ? 0 : cur - 1);
-                            imapFolderStorage.decrementUnreadMessageCount(fullName);
+                            setSeenFlag(fullName, mail, msg);
                         }
                     } catch (final MessagingException e) {
                         imapFolderStorage.removeFromCache(fullName);
@@ -486,19 +537,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         }
                     }
                 } else {
-                    try {
-                        /*
-                         * Switch \Seen flag
-                         */
-                        msg.setFlags(FLAGS_SEEN, true);
-                        mail.setFlag(MailMessage.FLAG_SEEN, true);
-                        final int cur = mail.getUnreadMessages();
-                        mail.setUnreadMessages(cur <= 0 ? 0 : cur - 1);
-                        imapFolderStorage.decrementUnreadMessageCount(fullName);
-                    } catch (final MessagingException e) {
-                        imapFolderStorage.removeFromCache(fullName);
-                        throw e;
-                    }
+                    setSeenFlag(fullName, mail, msg);
                 }
             }
             return setAccountInfo(mail);
@@ -506,6 +545,24 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
+        }
+    }
+
+    private void setSeenFlag(final String fullName, final MailMessage mail, final IMAPMessage msg) {
+        try {
+            msg.setFlags(FLAGS_SEEN, true);
+            mail.setFlag(MailMessage.FLAG_SEEN, true);
+            final int cur = mail.getUnreadMessages();
+            mail.setUnreadMessages(cur <= 0 ? 0 : cur - 1);
+            imapFolderStorage.decrementUnreadMessageCount(fullName);
+        } catch (final Exception e) {
+            imapFolderStorage.removeFromCache(fullName);
+            if (LOG.isWarnEnabled()) {
+                LOG.warn(
+                    new StringBuilder("/SEEN flag could not be set on message #").append(mail.getMailId()).append(" in folder ").append(
+                        mail.getFolder()).toString(),
+                    e);
+            }
         }
     }
 
@@ -1053,7 +1110,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             /*
              * Open and check user rights on source folder
              */
-            imapFolder = setAndOpenFolder(imapFolder, sourceFullName, Folder.READ_WRITE);
+            imapFolder = setAndOpenFolder(imapFolder, sourceFullName, move ? Folder.READ_WRITE : Folder.READ_ONLY);
             try {
                 if (!holdsMessages()) {
                     throw IMAPException.create(
@@ -2080,7 +2137,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Find this message ID in destination folder
                  */
-                long startUID = IMAPCommandsCollection.messageId2UID(messageId, destFolder);
+                long startUID = IMAPCommandsCollection.messageId2UID(destFolder, messageId)[0];
                 if (startUID != -1) {
                     for (int i = 0; i < msgUIDs.length; i++) {
                         retval[i] = startUID++;

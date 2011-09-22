@@ -60,12 +60,12 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.fields.FolderFields;
-import com.openexchange.cache.dynamic.impl.OXObjectFactory;
-import com.openexchange.cache.dynamic.impl.Refresher;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.ElementAttributes;
+import com.openexchange.caching.dynamic.OXObjectFactory;
+import com.openexchange.caching.dynamic.Refresher;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.groupware.container.FolderObject;
@@ -264,7 +264,7 @@ public final class FolderCacheManager {
                 putFolderObject(loadFolderObjectInternal(objectId, ctx, readCon), ctx, true, null);
             }
             // Return refreshable object
-            return Refresher.refresh(FOLDER_CACHE_REGION_NAME, folderCache, new FolderFactory(ctx, objectId)).clone();
+            return Refresher.refresh(FOLDER_CACHE_REGION_NAME, folderCache, new FolderFactory(ctx, objectId), true).clone();
         } catch (final OXException e) {
             throw e;
         }
@@ -335,7 +335,7 @@ public final class FolderCacheManager {
         if (null != readCon) {
             putIfAbsent(loadFolderObjectInternal(folderId, ctx, readCon), ctx, null);
         }
-        return Refresher.refresh(FOLDER_CACHE_REGION_NAME, folderCache, new FolderFactory(ctx, folderId)).clone();
+        return Refresher.refresh(FOLDER_CACHE_REGION_NAME, folderCache, new FolderFactory(ctx, folderId), true).clone();
     }
 
     /**

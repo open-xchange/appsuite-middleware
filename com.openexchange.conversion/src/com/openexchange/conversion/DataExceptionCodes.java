@@ -49,18 +49,8 @@
 
 package com.openexchange.conversion;
 
-import static com.openexchange.conversion.DataExceptionMessages.ERROR_MSG;
-import static com.openexchange.conversion.DataExceptionMessages.INVALID_ARGUMENT_MSG;
-import static com.openexchange.conversion.DataExceptionMessages.IO_ERROR_MSG;
-import static com.openexchange.conversion.DataExceptionMessages.MISSING_ARGUMENT_MSG;
-import static com.openexchange.conversion.DataExceptionMessages.NO_MATCHING_TYPE_MSG;
-import static com.openexchange.conversion.DataExceptionMessages.TRUNCATED_MSG;
-import static com.openexchange.conversion.DataExceptionMessages.TYPE_NOT_SUPPORTED_MSG;
-import static com.openexchange.conversion.DataExceptionMessages.UNABLE_TO_CHANGE_DATA_MSG;
-import static com.openexchange.conversion.DataExceptionMessages.UNKNOWN_DATA_HANDLER_MSG;
-import static com.openexchange.conversion.DataExceptionMessages.UNKNOWN_DATA_SOURCE_MSG;
+import static com.openexchange.conversion.DataExceptionMessages.*;
 import com.openexchange.exception.Category;
-import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
@@ -121,14 +111,10 @@ public enum DataExceptionCodes implements OXExceptionCode {
 
     private final String message;
 
-    private final boolean display;
-
     private DataExceptionCodes(final String message, final Category category, final int detailNumber) {
         this.message = message;
         this.number = detailNumber;
         this.category = category;
-        display = category.getLogLevel().implies(LogLevel.DEBUG);
-
     }
 
     @Override
@@ -153,7 +139,7 @@ public enum DataExceptionCodes implements OXExceptionCode {
 
     @Override
     public boolean equals(final OXException e) {
-        return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
+        return OXExceptionFactory.getInstance().equals(this, e);
     }
 
     /**

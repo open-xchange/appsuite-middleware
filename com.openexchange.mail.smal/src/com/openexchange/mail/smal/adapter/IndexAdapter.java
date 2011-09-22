@@ -83,7 +83,7 @@ public interface IndexAdapter {
 
     /**
      * Gets the indexable fields.
-     * 
+     *
      * @return The indexable fields
      * @throws OXException If an error occurs
      */
@@ -112,12 +112,13 @@ public interface IndexAdapter {
      * @param searchTerm The search term
      * @param sortField The sort field
      * @param order The order direction
+     * @param fields The fields to pre-fill in returned {@link MailMessage} instances; if <code>null</code> all available fields are filled
      * @param optAccountId The optional account identifier or <code>-1</code> to not restrict to a certain account
      * @param session The session
      * @return The search result
      * @throws OXException If search fails
      */
-    public List<MailMessage> search(String optFullName, SearchTerm<?> searchTerm, MailSortField sortField, OrderDirection order, int optAccountId, Session session) throws OXException;
+    public List<MailMessage> search(String optFullName, SearchTerm<?> searchTerm, MailSortField sortField, OrderDirection order, MailField[] fields, int optAccountId, Session session) throws OXException;
 
     /**
      * Gets specified mails located in given folder.

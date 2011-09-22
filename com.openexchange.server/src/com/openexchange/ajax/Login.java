@@ -59,6 +59,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -309,9 +310,9 @@ public class Login extends AJAXServlet {
                     } else {
                         session = sessiondService.getSessionByRandomToken(randomToken);
                         if (null != session) {
-                            String oldIP = session.getLocalIp();
+                            final String oldIP = session.getLocalIp();
                             if (null == oldIP || SessionServlet.isWhitelistedFromIPCheck(oldIP, conf.ranges)) {
-                                String newIP = req.getRemoteAddr();
+                                final String newIP = req.getRemoteAddr();
                                 if (!newIP.equals(oldIP)) {
                                     LOG.info("Changing IP of session " + session.getSessionID() + " with authID: " + session.getAuthId() + " from " + oldIP + " to " + newIP + '.');
                                     session.setLocalIp(newIP);
@@ -400,9 +401,9 @@ public class Login extends AJAXServlet {
                     } else {
                         session = sessiondService.getSessionByRandomToken(randomToken);
                         if (null != session) {
-                            String oldIP = session.getLocalIp();
+                            final String oldIP = session.getLocalIp();
                             if (null == oldIP || SessionServlet.isWhitelistedFromIPCheck(oldIP, conf.ranges)) {
-                                String newIP = req.getRemoteAddr();
+                                final String newIP = req.getRemoteAddr();
                                 if (!newIP.equals(oldIP)) {
                                     LOG.info("Changing IP of session " + session.getSessionID() + " with authID: " + session.getAuthId() + " from " + oldIP + " to " + newIP + '.');
                                     session.setLocalIp(newIP);
@@ -816,14 +817,21 @@ public class Login extends AJAXServlet {
         final Response response = new Response();
         LoginResult result = null;
         try {
-            result = LoginPerformer.getInstance().doLogin(request);
+            final Map<String, Object> properties = new HashMap<String, Object>(1);
+            properties.put("http.request", req);
+            {
+                final String capabilities = req.getParameter("capabilities");
+                if (null != capabilities) {
+                    properties.put("client.capabilities", capabilities);
+                }
+            }
+            result = LoginPerformer.getInstance().doLogin(request, properties);
             result.getSession().setParameter("user-agent", req.getHeader("user-agent"));
             // Write response
             final JSONObject json = new JSONObject();
-            final Session session = result.getSession();
-            LoginWriter.write(session, json);
+            LoginWriter.write(result, json);
             // Append "config/modules"
-            appendModules(session, json, req);
+            appendModules(result.getSession(), json, req);
             response.setData(json);
         } catch (final OXException e) {
             if (Category.CATEGORY_USER_INPUT == e.getCategory()) {
@@ -1025,7 +1033,15 @@ public class Login extends AJAXServlet {
 
     protected void doFormLogin(final HttpServletRequest req, final HttpServletResponse resp) throws OXException, OXException, IOException {
         final LoginRequest request = parseLogin(req, LoginFields.LOGIN_PARAM, true);
-        final LoginResult result = LoginPerformer.getInstance().doLogin(request);
+        final Map<String, Object> properties = new HashMap<String, Object>(1);
+        properties.put("http.request", req);
+        {
+            final String capabilities = req.getParameter("capabilities");
+            if (null != capabilities) {
+                properties.put("client.capabilities", capabilities);
+            }
+        }
+        final LoginResult result = LoginPerformer.getInstance().doLogin(request, properties);
         final Session session = result.getSession();
 
         Tools.disableCaching(resp);
@@ -1093,7 +1109,15 @@ public class Login extends AJAXServlet {
                 return headers;
             }
         };
-        final LoginResult result = LoginPerformer.getInstance().doLogin(request);
+        final Map<String, Object> properties = new HashMap<String, Object>(1);
+        properties.put("http.request", req);
+        {
+            final String capabilities = req.getParameter("capabilities");
+            if (null != capabilities) {
+                properties.put("client.capabilities", capabilities);
+            }
+        }
+        final LoginResult result = LoginPerformer.getInstance().doLogin(request, properties);
         final Session session = result.getSession();
         Tools.disableCaching(resp);
         writeSecretCookie(resp, session, session.getHash(), req.isSecure());

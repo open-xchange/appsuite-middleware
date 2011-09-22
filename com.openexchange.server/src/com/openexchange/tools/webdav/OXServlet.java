@@ -52,6 +52,7 @@ package com.openexchange.tools.webdav;
 import static com.openexchange.tools.servlet.http.Tools.copyHeaders;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -223,7 +224,7 @@ public abstract class OXServlet extends WebDavServlet {
         return null;
     }
 
-    public static boolean doAuth(final HttpServletRequest req, final HttpServletResponse resp, Interface face) throws IOException {
+    public static boolean doAuth(final HttpServletRequest req, final HttpServletResponse resp, final Interface face) throws IOException {
         return doAuth(req, resp, face, null);
     }
 
@@ -236,7 +237,7 @@ public abstract class OXServlet extends WebDavServlet {
      * @return <code>true</code> if the authentication was successful; otherwise <code>false</code>.
      * @throws IOException If an I/O error occurs
      */
-    public static boolean doAuth(final HttpServletRequest req, final HttpServletResponse resp, Interface face, LoginCustomizer customizer) throws IOException {
+    public static boolean doAuth(final HttpServletRequest req, final HttpServletResponse resp, final Interface face, final LoginCustomizer customizer) throws IOException {
         Session session;
         try {
             session = findSessionByCookie(req, resp);
@@ -262,7 +263,9 @@ public abstract class OXServlet extends WebDavServlet {
                 return false;
             }
             try {
-                session = addSession(loginRequest);
+                final Map<String, Object> properties = new HashMap<String, Object>(1);
+                properties.put("http.request", req);
+                session = addSession(loginRequest, properties);
             } catch (final OXException e) {
                 if (e.getCategory() == Category.CATEGORY_USER_INPUT) {
                     addUnauthorizedHeader(req, resp);
@@ -428,14 +431,13 @@ public abstract class OXServlet extends WebDavServlet {
     /**
      * This method tries to create a session for the given user.
      *
-     * @param login login name of the user.
-     * @param pass plain text password of the user.
-     * @param ipAddress client IP.
+     * @param request The login request
+     * @param properties The login request properties
      * @return the initialized session or <code>null</code>.
      * @throws OXException if an error occurs while creating the session.
      */
-    private static Session addSession(final LoginRequest request) throws OXException {
-        return loginPerformer.doLogin(request).getSession();
+    private static Session addSession(final LoginRequest request, final Map<String, Object> properties) throws OXException {
+        return loginPerformer.doLogin(request, properties).getSession();
     }
 
     private static Session findSessionByCookie(final HttpServletRequest req, final HttpServletResponse resp) throws OXException {

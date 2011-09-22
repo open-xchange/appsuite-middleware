@@ -49,7 +49,8 @@
 
 package com.openexchange.mail;
 
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link MailSortField} - An enumeration of sortable mail list fields.
@@ -151,7 +152,7 @@ public enum MailSortField {
         return retval;
     }
 
-    private static final TIntObjectHashMap<MailSortField> field2sortfield = new TIntObjectHashMap<MailSortField>(25);
+    private static final TIntObjectMap<MailSortField> field2sortfield = new TIntObjectHashMap<MailSortField>(25);
 
     static {
         final MailSortField[] fields = MailSortField.values();

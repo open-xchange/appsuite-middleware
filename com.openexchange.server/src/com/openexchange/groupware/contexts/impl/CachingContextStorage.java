@@ -56,9 +56,9 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.cache.dynamic.impl.OXObjectFactory;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
+import com.openexchange.caching.dynamic.OXObjectFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateStatus;
 import com.openexchange.groupware.update.Updater;
@@ -100,7 +100,11 @@ public class CachingContextStorage extends ContextStorage {
             }
             contextId = I(persistantImpl.getContextId(loginInfo));
             if (NOT_FOUND != contextId.intValue()) {
-                cache.put(loginInfo, contextId);
+                try {
+                    cache.put(loginInfo, contextId);
+                } catch (final OXException e) {
+                    LOG.error(e.getMessage(), e);
+                }
             }
         } else if (LOG.isTraceEnabled()) {
             LOG.trace("Cache HIT. Login info: " + loginInfo);
@@ -190,7 +194,7 @@ public class CachingContextStorage extends ContextStorage {
         final Cache cache = cacheService.getCache(REGION_NAME);
         cacheLock.lock();
         try {
-            cache.remove(Integer.valueOf(contextId));
+            cache.remove(I(contextId));
         } finally {
             cacheLock.unlock();
         }

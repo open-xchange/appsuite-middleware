@@ -81,7 +81,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link FolderJob}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderJob extends AbstractMailSyncJob {
@@ -106,8 +106,9 @@ public final class FolderJob extends AbstractMailSyncJob {
     private volatile long span;
 
     /**
-     * Initializes a new {@link FolderJob}.
-     * 
+     * Initializes a new {@link FolderJob} with default span which does not check if span is exceeded but only if able to exclusively set
+     * sync flag.
+     *
      * @param fullName The folder full name
      * @param accountId The account ID
      * @param userId The user ID
@@ -118,8 +119,10 @@ public final class FolderJob extends AbstractMailSyncJob {
     }
 
     /**
-     * Initializes a new {@link FolderJob}.
-     * 
+     * Initializes a new {@link FolderJob} with default span.
+     * <p>
+     * This job is performed is span is exceeded and if able to exclusively set sync flag.
+     *
      * @param fullName The folder full name
      * @param accountId The account ID
      * @param userId The user ID
@@ -137,8 +140,8 @@ public final class FolderJob extends AbstractMailSyncJob {
     }
 
     /**
-     * Sets the span
-     * 
+     * Sets the span; a negative span enforces this job to run if able to exclusively set sync flag
+     *
      * @param span The span to set
      * @return This folder job with specified span applied
      */
@@ -171,7 +174,7 @@ public final class FolderJob extends AbstractMailSyncJob {
             } else {
                 final long now = System.currentTimeMillis();
                 try {
-                    if ((checkShouldSync && !shouldSync(fullName, now, span)) || !wasAbleToSetSyncFlag(fullName)) {
+                    if ((checkShouldSync && (span > 0 ? !shouldSync(fullName, now, span) : false)) || !wasAbleToSetSyncFlag(fullName)) {
                         return;
                     }
                 } catch (final OXException e) {
@@ -285,30 +288,39 @@ public final class FolderJob extends AbstractMailSyncJob {
                 /*
                  * Add
                  */
-                final int blockSize;
-                final int size = newIds.size();
-                {
-                    final int configuredBlockSize = Constants.CHUNK_SIZE;
-                    blockSize = configuredBlockSize > size ? size : configuredBlockSize;
-                }
-                final List<String> ids = new ArrayList<String>(newIds);
-                final List<MailMessage> list = new ArrayList<MailMessage>(blockSize);
-                newIds = null;
-                int start = 0;
-                final JobQueue queue = JobQueue.getInstance();
-                while (start < size) {
-                    final int num = add2Index(ids, start, blockSize, fullName, indexAdapter, list);
-                    start += num;
-                    if (DEBUG) {
-                        final long dur = System.currentTimeMillis() - st;
-                        LOG.debug("Folder job \"" + identifier + "\" inserted " + start + " of " + size + " messages in " + dur + "msec.");
+                if (!newIds.isEmpty()) {
+                    final int blockSize;
+                    final int size = newIds.size();
+                    {
+                        final int configuredBlockSize = Constants.CHUNK_SIZE;
+                        blockSize = configuredBlockSize > size ? size : configuredBlockSize;
                     }
-                    if (queue.hasHigherRankedJobInQueue(getRanking())) {
-                        break;
+                    final List<String> ids = new ArrayList<String>(newIds);
+                    final List<MailMessage> list = new ArrayList<MailMessage>(blockSize);
+                    newIds = null;
+                    int start = 0;
+                    final JobQueue queue = JobQueue.getInstance();
+                    while (start < size) {
+                        final int num = add2Index(ids, start, blockSize, fullName, indexAdapter, list);
+                        start += num;
+                        if (DEBUG) {
+                            final long dur = System.currentTimeMillis() - st;
+                            LOG.debug("Folder job \"" + identifier + "\" inserted " + start + " of " + size + " messages in " + dur + "msec in folder " + fullName + " in account " + accountId);
+                        }
+                        if (queue.hasHigherRankedJobInQueue(getRanking())) {
+                            break;
+                        }
                     }
+                    reEnqueued = (start < size);
+                } else if (DEBUG) {
+                    LOG.debug("Folder job \"" + identifier + "\" detected no new messages in folder " + fullName + " in account " + accountId);
+
+
+                    System.out.println("NO NEW MAILS FOR FOLDER " + fullName + " OF ACCOUNT " + accountId);
+
+
                 }
                 setTimestampAndUnsetSyncFlag(fullName, System.currentTimeMillis());
-                reEnqueued = (start < size);
                 unset = false;
             } finally {
                 if (unset) {
@@ -317,7 +329,7 @@ public final class FolderJob extends AbstractMailSyncJob {
                 }
                 if (DEBUG) {
                     final long dur = System.currentTimeMillis() - st;
-                    LOG.debug("Folder job \"" + identifier + "\" took " + dur + "msec.");
+                    LOG.debug("Folder job \"" + identifier + "\" took " + dur + "msec for folder " + fullName + " in account " + accountId);
                 }
             }
             if (reEnqueued) {
@@ -355,10 +367,13 @@ public final class FolderJob extends AbstractMailSyncJob {
             final MailFields fields = new MailFields(indexAdapter.getIndexableFields());
             fields.removeMailField(MailField.BODY);
             fields.removeMailField(MailField.FULL);
-            mails.addAll(Arrays.asList(mailAccess.getMessageStorage().getMessages(fullName, ids.subList(offset, end).toArray(new String[retval]), fields.toArray())));
-//            for (MailMessage mail : mails) {
-//                mail.setAccountId(accountId);
-//            }
+            mails.addAll(Arrays.asList(mailAccess.getMessageStorage().getMessages(
+                fullName,
+                ids.subList(offset, end).toArray(new String[retval]),
+                fields.toArray())));
+            // for (MailMessage mail : mails) {
+            // mail.setAccountId(accountId);
+            // }
             for (int i = offset; i < end; i++) {
                 ids.set(i, null);
             }

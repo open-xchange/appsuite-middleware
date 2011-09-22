@@ -1,15 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Bundle Builder" basedir=".">
 
+    <description>
+        Reads a ProjectSet file and builds all bundles referenced in that ProjectSet file.
+    </description>
+
     <!-- customizable values -->
-    <property name="destDir" value=""/>
-    <property name="prefix" value="/opt/open-xchange"/>
-    <property name="tmpDir" value="tmp"/>
-	<property name="distDir" value=""/>
+    <property name="destDir" value=""/><!-- Necessary to build the bundles into a distro package -->
+    <property name="prefix" value="/opt/open-xchange"/><!-- Installation path on destination system -->
+    <property name="tmpDir" value="tmp"/><!-- Directory for temporary file storage -->
+    <property name="distDir" value=""/><!-- Use some tmpDir -->
 
-	<property name="branch" value="master"/>
+    <property name="branch" value="master"/>
 
-	<!-- Constants -->
+    <!-- Constants -->
     <property name="mainDir" value=".."/>
     <property name="checkoutDir" value="${mainDir}"/>
     <property name="logDir" value="${mainDir}/log"/>
@@ -18,7 +22,7 @@
     <property name="bundlesDir" value="${prefix}/bundles"/>
     <property name="bundle.dDir" value="${prefix}/etc/osgi/bundle.d"/>
 
-	<target name="antExtensions">
+    <target name="antExtensions" description="Compiles our additional Ant tasks and defines them for this build.">
         <path id="ant3rdPartyLib">
             <fileset dir="lib" includes="*.jar"/>
         </path>
@@ -33,15 +37,15 @@
             <pathelement location="${build}"/>
         </path>
         <taskdef resource="tasks.properties" classpathref="antClasspath"/>
-		<taskdef resource="net/sf/antcontrib/antcontrib.properties"/>
+        <taskdef resource="net/sf/antcontrib/antcontrib.properties"/>
     </target>
 
-    <target name="clean">
+    <target name="clean" description="Removes the build artifacts.">
         <delete dir="${build}"/>
     </target>
 
-    <target name="prepare" depends="antExtensions">
-        <!-- reads the project sets and generates the ant properties for each project -->
+    <target name="prepare" depends="antExtensions" description="Reads the ProjectSet PSF file and generates the repository properties for each project listed there.">
+        <!-- TODO Have a property that defines the exact path to the PSF file. This helps locating the checkoutDir inside the ProjectSet project. -->
         <fail message="Please define package to build." unless="packageName"/>
         <createProjectList name="projectsList">
             <projectSets>
@@ -50,11 +54,11 @@
         </createProjectList>
     </target>
 
-    <target name="updateProject">
-    	<!-- TODO Fetching bundles from other repositories needs to be implemented. --> 
+    <target name="updateProject" description="This task should be able to fetch sources from repositories.">
+        <!-- TODO Fetching bundles from other repositories needs to be implemented. -->
     </target>
 
-    <target name="buildProject">
+    <target name="buildProject" description="Copies the build.xml to the bundle if there is not already one and executes it.">
         <if>
             <not>
                 <available file="${checkoutDir}/${projectName}/build.xml" type="file"/>
@@ -65,15 +69,16 @@
             </then>
         </if>
         <ant dir="${checkoutDir}/${projectName}" antfile="build.xml" target="clean"/>
-    	<if>
-    		<equals arg1="dist" arg2="${buildType}"/>
-    		<then>
-    			<ant dir="${checkoutDir}/${projectName}" antfile="build.xml" target="dist"/>
-    		</then>
-			<else>
-				<ant dir="${checkoutDir}/${projectName}" antfile="build.xml" target="build"/>
-    		</else>
-    	</if>
+        <!-- TODO include the dist build as a normal buildType in build-project.xml -->
+        <if>
+            <equals arg1="dist" arg2="${buildType}"/>
+            <then>
+                <ant dir="${checkoutDir}/${projectName}" antfile="build.xml" target="dist"/>
+            </then>
+            <else>
+                <ant dir="${checkoutDir}/${projectName}" antfile="build.xml" target="build"/>
+            </else>
+        </if>
         <if>
             <equals arg1="${deleteBuildXML}" arg2="true"/>
             <then>
@@ -82,12 +87,13 @@
         </if>
     </target>
 
-    <target name="buildOnBuilt">
+    <target name="buildOnBuilt" description="Calls computeBuildOrder again to build against already built bundles and starts the bundle build.">
+        <!-- Pass only current and further projects from the list -->
         <propertyregex property="notBuilt" input="${projectsOrdered}" regexp=".*?,?(${projectName}.*)" select="\1"/>
         <if>
             <isset property="notBuilt"/>
             <then>
-                <!-- changes path to use already built modules -->
+                <!-- Called again to change path to use already built modules -->
                 <computeBuildOrder dir="${checkoutDir}" propertyName="nextProjects" projectList="${notBuilt}">
                     <classpath>
                         <fileset dir="${bundlesDir}" includes="*.jar"/>
@@ -99,10 +105,10 @@
         <antcall target="buildProject" inheritall="true"/>
     </target>
 
-	<target name="buildProjects" depends="antExtensions,prepare">
+    <target name="buildProjects" depends="antExtensions,prepare" description="Fetches projects from repository, computes build order and builds then each project.">
         <foreach list="${projectsList}" target="updateProject" param="projectName"/>
+        <mkdir dir="${bundlesDir}"/>
         <!-- Computes the dependencies and sorts the projects accordingly -->
-		<mkdir dir="${bundlesDir}"/>
         <computeBuildOrder dir="${checkoutDir}" propertyName="projectsOrdered" projectList="${projectsList}">
             <classpath>
                 <fileset dir="${bundlesDir}" includes="*.jar"/>
@@ -111,49 +117,49 @@
         <foreach list="${projectsOrdered}" target="buildOnBuilt" param="projectName" inheritAll="true"/>
     </target>
 
-    <target name="setBuild">
+    <target name="setBuild" description="Sets the build type to build and install all bundles.">
         <property name="buildType" value="bundle"/>
     </target>
 
-    <target name="build" depends="setBuild,buildProjects"/>
+    <target name="build" depends="setBuild,buildProjects" description="Builds and installs all bundles for the specified ProjectSet."/>
 
-	<target name="distBuild">
+    <target name="distBuild" description="Sets the build type to create a tar.gz for uploading to build service.">
         <property name="buildType" value="dist"/>
     </target>
 
-    <target name="dist" depends="distBuild">
-    	<!-- Packaging files -->
-    	<property name="packageDir" value="${distDir}/${packageName}"/>
+    <target name="dist" depends="distBuild" description="Creates the tar.gz for uploading to the build service.">
+        <!-- Packaging files -->
+        <property name="packageDir" value="${distDir}/${packageName}"/>
         <mkdir dir="${packageDir}"/>
-		<copy todir="${packageDir}">
-            <fileset dir="${mainDir}/${packageName}">
-                <exclude name="**${distDir}/**"/>
-                <exclude name="Todo"/>
-            </fileset>
-		</copy>
-    	<!-- Buildsystem -->
-    	<property name="buildDir" value="${distDir}/${packageName}/build"/>
-        <mkdir dir="${buildDir}"/>
-        <copy todir="${buildDir}">
-            <fileset dir=".">
+        <copy todir="${packageDir}">
+            <fileset dir="${checkoutDir}/${packageName}">
                 <exclude name="**${distDir}/**"/>
                 <exclude name="Todo"/>
             </fileset>
         </copy>
-    	<antcall target="buildProjects"/>
+        <!-- Buildsystem -->
+        <property name="buildDir" value="${distDir}/${packageName}/build"/>
+        <mkdir dir="${buildDir}"/>
+        <copy todir="${buildDir}">
+            <fileset dir="${mainDir}">
+                <exclude name="**${distDir}/**"/>
+                <exclude name="Todo"/>
+            </fileset>
+        </copy>
+        <antcall target="buildProjects"/>
         <delete file="${packageName}.tar.gz"/>
         <tar destfile="${packageName}.tar.gz" basedir="${distDir}" compression="gzip">
-        	<fileset dir="${distDir}">
-    			<include name="**"/>
-			    <exclude name="exclude"/>
-			</fileset>
-    	</tar>
-		<fail message="Todo"/>
+            <fileset dir="${distDir}">
+                <include name="**"/>
+                <exclude name="exclude"/>
+            </fileset>
+        </tar>
+        <fail message="Todo"/>
         <!-- dpkg-source does not like anything else -->
         <delete dir="${distDir}"/>
-	</target>
+    </target>
 
-	<target name="cpd">
+    <target name="cpd" description="Find copied and pasted code.">
         <mkdir dir="${logDir}"/>
         <taskdef name="cpd" classname="net.sourceforge.pmd.cpd.CPDTask"/>
         <cpd minimumTokenCount="100" encoding="US-ASCII" format="xml" outputFile="${logDir}/cpd.xml">

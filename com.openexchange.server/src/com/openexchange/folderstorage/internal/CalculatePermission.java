@@ -49,8 +49,9 @@
 
 package com.openexchange.folderstorage.internal;
 
-import gnu.trove.TIntHashSet;
-import gnu.trove.TIntIntHashMap;
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -126,13 +127,17 @@ public final class CalculatePermission {
                     final int userId = userIds[i];
                     if (toLoad.containsKey(userId)) {
                         final int index = toLoad.get(userId);
+                        UserConfiguration userConfig = configurations[i];
+                        if (null == userConfig) {
+                            userConfig = userConfStorage.getUserConfiguration(userId, context);
+                        }
                         userizedPermissions[index] = new EffectivePermission(
                             staticPermissions[index],
                             id,
                             type,
                             contentType,
-                            configurations[i],
-                            Collections.<ContentType> emptyList());
+                            userConfig,
+                            Collections.<ContentType> emptyList()).setEntityInfo(userId, context);
                     }
                 }
             } catch (final OXException e) {
@@ -199,7 +204,7 @@ public final class CalculatePermission {
             folder.getType(),
             folder.getContentType(),
             userConfiguration,
-            allowedContentTypes);
+            allowedContentTypes).setEntityInfo(user.getId(), context);
     }
 
     public static boolean isVisible(final Folder folder, final User user, final Context context, final java.util.List<ContentType> allowedContentTypes) throws OXException {
@@ -254,7 +259,7 @@ public final class CalculatePermission {
         if (null == allowedContentTypes || allowedContentTypes.isEmpty()) {
             return true;
         }
-        final TIntHashSet set = new TIntHashSet(allowedContentTypes.size() + 2);
+        final TIntSet set = new TIntHashSet(allowedContentTypes.size() + 2);
         for (final ContentType allowedContentType : allowedContentTypes) {
             set.add(allowedContentType.getModule());
         }

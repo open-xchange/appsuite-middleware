@@ -49,52 +49,65 @@
 
 package com.openexchange.ant.data;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.zip.ZipEntry;
+import org.apache.tools.ant.BuildException;
 
+/**
+ * Abstract super class for all supported types of presentation of a bundle. Contains the general methods for handling imports and exports
+ * and for generating the dependencies and the required class path.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
 public abstract class AbstractModule {
+
     protected String name;
     protected OSGIManifest osgiManifest;
     protected AbstractModule fragmentHost;
     protected Set<AbstractModule> dependencies = new HashSet<AbstractModule>();
 
-    public void addToExportMap(Map<String, Set<AbstractModule>> modules) {
-        if (osgiManifest != null)
-            for (Iterator<String> exportedIt = osgiManifest.getListEntry(OSGIManifest.EXPORT_PACKAGE).iterator(); exportedIt
-                    .hasNext();) {
-                String exportedPackage = exportedIt.next();
-                Set<AbstractModule> exportingModules = modules.get(exportedPackage);
-                if (exportingModules == null) {
-                    exportingModules = new HashSet<AbstractModule>();
-                    modules.put(exportedPackage, exportingModules);
-                }
-                exportingModules.add(this);
-            }
+    protected AbstractModule() {
+        super();
     }
 
-    public void computeDependencies(Map<String, AbstractModule> modulesByName, Map<String, Set<AbstractModule>> modulesByPackage) {
+    public final Set<String> getExportedPackages() {
+        final Set<String> retval;
+        if (null == osgiManifest) {
+            retval = Collections.emptySet();
+        } else {
+            retval = osgiManifest.getListEntry(OSGIManifest.EXPORT_PACKAGE);
+        }
+        return retval;
+    }
+
+    public void computeDependencies(final Map<String, AbstractModule> modulesByName, final Map<String, Set<AbstractModule>> modulesByPackage) {
         if (osgiManifest != null) {
-            for (String importedPackage : osgiManifest.getListEntry(OSGIManifest.IMPORT_PACKAGE)) {
-                Set<AbstractModule> exportingModules = modulesByPackage.get(importedPackage);
+            for (final String importedPackage : osgiManifest.getListEntry(OSGIManifest.IMPORT_PACKAGE)) {
+                final Set<AbstractModule> exportingModules = modulesByPackage.get(importedPackage);
                 if (exportingModules != null) {
-                    for (AbstractModule module : exportingModules) {
+                    for (final AbstractModule module : exportingModules) {
                         if (module != this) {
                             dependencies.add(module);
                         }
                     }
                 }
             }
-            for (String requiredBundle : osgiManifest.getListEntry(OSGIManifest.REQUIRE_BUNDLE)) {
-                AbstractModule requiredModule = modulesByName.get(requiredBundle);
+            for (final String requiredBundle : osgiManifest.getListEntry(OSGIManifest.REQUIRE_BUNDLE)) {
+                final AbstractModule requiredModule = modulesByName.get(requiredBundle);
                 if (requiredModule != null && requiredModule != this) {
                     dependencies.add(requiredModule);
                 }
             }
-            String fragmentHostName = osgiManifest.getEntry(OSGIManifest.FRAGMENT_HOST);
+            final String fragmentHostName = osgiManifest.getEntry(OSGIManifest.FRAGMENT_HOST);
             if (fragmentHostName != null) {
                 fragmentHost = modulesByName.get(fragmentHostName);
                 dependencies.add(fragmentHost);
@@ -114,22 +127,22 @@ public abstract class AbstractModule {
     }
 
     public Set<String> getRequiredClasspath() {
-        Set<String> retval = new HashSet<String>();
-        for (AbstractModule dependency : dependencies) {
+        final Set<String> retval = new HashSet<String>();
+        for (final AbstractModule dependency : dependencies) {
             retval.addAll(dependency.getExportedClasspath());
         }
         return Collections.unmodifiableSet(retval);
     }
 
     public Set<String> getDeepRequiredClasspath() {
-        Stack<AbstractModule> seenModules = new Stack<AbstractModule>();
+        final Stack<AbstractModule> seenModules = new Stack<AbstractModule>();
         return getDeepRequiredClasspath(seenModules, this);
     }
 
-    private static Set<String> getDeepRequiredClasspath(Stack<AbstractModule> seenModules, AbstractModule module) {
+    private static Set<String> getDeepRequiredClasspath(final Stack<AbstractModule> seenModules, final AbstractModule module) {
         seenModules.push(module);
-        Set<String> retval = new HashSet<String>();
-        for (AbstractModule dependency : module.getDependencies()) {
+        final Set<String> retval = new HashSet<String>();
+        for (final AbstractModule dependency : module.getDependencies()) {
             if (!seenModules.contains(dependency)) {
                 retval.addAll(getDeepRequiredClasspath(seenModules, dependency));
             }
@@ -139,16 +152,40 @@ public abstract class AbstractModule {
         return retval;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == null)
+    protected final boolean isExported(final File classpathEntry) {
+        if (!classpathEntry.exists()) {
             return false;
-        if (o == this)
-            return true;
-        if (o.getClass() != this.getClass())
-            return false;
+        }
+        try {
+            final JarFile jarFile = new JarFile(classpathEntry);
+            for (final String exportedPackage : getExportedPackages()) {
+                String expected = exportedPackage.replace('.', '/') + '/';
+                Enumeration<JarEntry> entries = jarFile.entries();
+                while (entries.hasMoreElements()) {
+                    JarEntry entry = entries.nextElement();
+                    if (entry.getName().startsWith(expected)) {
+                        return true;
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new BuildException(e);
+        }
+        return false;
+    }
 
-        AbstractModule other = (AbstractModule) o;
+    @Override
+    public boolean equals(final Object o) {
+        if (o == null) {
+            return false;
+        }
+        if (o == this) {
+            return true;
+        }
+        if (o.getClass() != this.getClass()) {
+            return false;
+        }
+        final AbstractModule other = (AbstractModule) o;
         return this.name.equals(other.name);
     }
 

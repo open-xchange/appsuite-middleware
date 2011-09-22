@@ -184,8 +184,8 @@ public class HTMLServiceActivator extends DeferredActivator {
             /*
              * Add mapping for '\'' (apos) character
              */
-            htmlEntityMap.put("apos", Character.valueOf('\''));
-            htmlCharMap.put(Character.valueOf('\''), "apos");
+            htmlEntityMap.put("#39", Character.valueOf('\''));
+            htmlCharMap.put(Character.valueOf('\''), "#39");
         }
         /*
          * Register HTML service

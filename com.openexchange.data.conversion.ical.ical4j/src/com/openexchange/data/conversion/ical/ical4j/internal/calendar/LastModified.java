@@ -54,8 +54,8 @@ import java.util.List;
 import java.util.TimeZone;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.DateProperty;
-import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
 import com.openexchange.groupware.container.CalendarObject;
@@ -66,13 +66,17 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class LastModified <T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T,U> {
 
+    public LastModified() {
+        super();
+    }
+
     @Override
     public boolean isSet(final U calendar) {
         return calendar.containsLastModified();
     }
 
     @Override
-    public void emit(final int index, final U calendar, final T t, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
+    public void emit(final Mode mode, final int index, final U calendar, final T t, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
         final net.fortuna.ical4j.model.property.LastModified lastModified = new net.fortuna.ical4j.model.property.LastModified();
         lastModified.setDate(toDateTime(calendar.getLastModified()));
         t.getProperties().add(lastModified);
@@ -84,7 +88,7 @@ public class LastModified <T extends CalendarComponent, U extends CalendarObject
     }
 
     @Override
-    public void parse(final int index, final T component, final U cObj, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
+    public void parse(final int index, final T component, final U cObj, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
         final DateProperty property = (DateProperty) component.getProperty("LAST-MODIFIED");
         final Date lastModified = ParserTools.parseDate(component, property, timeZone);
         cObj.setLastModified(lastModified);

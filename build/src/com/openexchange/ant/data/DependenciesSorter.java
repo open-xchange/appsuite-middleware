@@ -52,27 +52,38 @@ package com.openexchange.ant.data;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import org.apache.tools.ant.BuildException;
 
+/**
+ * Sorts bundles according to their dependencies.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
 public class DependenciesSorter {
 
     public DependenciesSorter() {
         super();
     }
 
-    public List<AbstractModule> sortDependencies(List<AbstractModule> classPathModules, List<AbstractModule> appModules) throws BuildException {
-        List<AbstractModule> sorted = new LinkedList<AbstractModule>(classPathModules);
+    /**
+     * Visits all modules.
+     *
+     * @param classPathModules Base modules not to visit that can be used to solve dependencies.
+     * @param appModules Modules to visit and to sort according to their dependencies.
+     * @return a sorted list of modules ordered for the build.
+     */
+    public List<AbstractModule> sortDependencies(final List<AbstractModule> classPathModules, final List<AbstractModule> appModules) {
+        final List<AbstractModule> sorted = new LinkedList<AbstractModule>(classPathModules);
         for (Iterator<AbstractModule> modulesIt = appModules.iterator(); modulesIt.hasNext();) {
             visit(modulesIt.next(), sorted);
         }
         return sorted;
     }
 
-    private void visit(AbstractModule module, List<AbstractModule> sorted) throws BuildException {
+    private void visit(final AbstractModule module, final List<AbstractModule> sorted) {
         if (sorted.contains(module)) {
             return;
         }
-        for (Iterator<AbstractModule> dependentIt = module.getDependencies().iterator(); dependentIt.hasNext();) {
+        for (final Iterator<AbstractModule> dependentIt = module.getDependencies().iterator(); dependentIt.hasNext();) {
             visit(dependentIt.next(), sorted);
         }
         sorted.add(module);

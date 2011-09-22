@@ -216,7 +216,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
             if (null == providerName) {
                 final OXException e =
                     POP3ExceptionCode.MISSING_POP3_STORAGE_NAME.create(Integer.valueOf(user), Integer.valueOf(cid));
-                LOG.warn("Using fallback storage \"mailaccount\".\n" + e.getMessage(), e);
+                LOG.debug("Using fallback storage \"mailaccount\".\n" + e.getMessage(), e);
                 providerName = MailAccountPOP3StorageProvider.NAME;
                 /*
                  * Add to properties if marker is absent
@@ -393,6 +393,16 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
                 pop3Store.close();
             } catch (final MessagingException e) {
                 LOG.warn(e.getMessage(), e);
+            }
+            /*
+             * Add warning if non-secure
+             */
+            try {
+                if (!config.isSecure() && !pop3Store.capabilities().containsKey("STLS")) {
+                    warnings.add(MailExceptionCode.NON_SECURE_WARNING.create());
+                }
+            } catch (final MessagingException e) {
+                // Ignore
             }
         } catch (final OXException e) {
             throw e;

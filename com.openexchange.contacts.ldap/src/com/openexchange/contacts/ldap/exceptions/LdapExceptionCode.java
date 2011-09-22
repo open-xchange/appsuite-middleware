@@ -172,7 +172,7 @@ public enum LdapExceptionCode implements OXExceptionCode {
 
     @Override
     public boolean equals(final OXException e) {
-        return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
+        return OXExceptionFactory.getInstance().equals(this, e);
     }
 
     /**

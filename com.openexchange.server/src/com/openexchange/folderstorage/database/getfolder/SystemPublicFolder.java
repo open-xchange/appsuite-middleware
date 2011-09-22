@@ -49,7 +49,8 @@
 
 package com.openexchange.folderstorage.database.getfolder;
 
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -124,7 +125,7 @@ public final class SystemPublicFolder {
                     userConfiguration,
                     null,
                     con)).asQueue();
-            final TIntArrayList subfolderIds = new TIntArrayList(q.size());
+            final TIntList subfolderIds = new TIntArrayList(q.size());
             /*
              * Add global address book and subfolders
              */
@@ -174,7 +175,7 @@ public final class SystemPublicFolder {
                     subfolderIds.add(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID);
                 }
             }
-            return subfolderIds.toNativeArray();
+            return subfolderIds.toArray();
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
@@ -205,7 +206,7 @@ public final class SystemPublicFolder {
                     null,
                     con)).asQueue();
             final List<String[]> subfolderIds = new ArrayList<String[]>(q.size());
-            final StringHelper sh = new StringHelper(user.getLocale());
+            final StringHelper sh = StringHelper.valueOf(user.getLocale());
             /*
              * Add global address book and subfolders
              */
