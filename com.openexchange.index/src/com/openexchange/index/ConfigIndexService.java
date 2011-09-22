@@ -62,23 +62,23 @@ public interface ConfigIndexService {
     /**
      * Gets the appropriate read-only URL to index host for specified arguments.
      * 
-     * @param cid The context identifier
-     * @param uid The user identifier
+     * @param contextId The context identifier
+     * @param userId The user identifier
      * @param module The module; see <code>com.openexchange.groupware.Types</code>
      * @return The appropriate read-only URL to index host
      * @throws OXException If index URL cannot be returned
      */
-    IndexUrl getReadOnlyURL(int cid, int uid, int module) throws OXException;
+    IndexUrl getReadOnlyURL(int contextId, int userId, int module) throws OXException;
 
     /**
      * Gets the appropriate read-write URL to index host for specified arguments.
      * 
-     * @param cid The context identifier
-     * @param uid The user identifier
+     * @param contextId The context identifier
+     * @param userId The user identifier
      * @param module The module; see <code>com.openexchange.groupware.Types</code>
      * @return The appropriate read-write URL to index host
      * @throws OXException If index URL cannot be returned
      */
-    IndexUrl getWriteURL(int cid, int uid, int module) throws OXException;
+    IndexUrl getWriteURL(int contextId, int userId, int module) throws OXException;
 
 }
