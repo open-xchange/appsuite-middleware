@@ -47,67 +47,70 @@
  *
  */
 
-package com.openexchange.index;
+package com.openexchange.mail.smal.adapter.solrj.cache;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 /**
- * {@link IndexUrl} - The URL to an index host.
- * 
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * {@link MaxCapacityLinkedHashMap}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface IndexUrl {
+final class MaxCapacityLinkedHashMap<K, V> extends LinkedHashMap<K, V> implements ConcurrentMap<K, V> {
+
+    private static final long serialVersionUID = 8965907246210389424L;
+
+    private static final int INITIAL_CAPACITY = 16;
+
+    private static final float LOAD_FACTOR = 0.75f;
+
+    private final int maximumCapacity;
 
     /**
-     * Gets the string representation of the URL
-     * 
-     * @return The URL's string representation
+     * Initializes a new {@link MaxCapacityLinkedHashMap}.
+     *
+     * @param maximumCapacity The maximum capacity
      */
-    String getUrl();
+    MaxCapacityLinkedHashMap(final int maximumCapacity) {
+        super(INITIAL_CAPACITY, LOAD_FACTOR, true);
+        this.maximumCapacity = maximumCapacity;
+    }
 
-    /**
-     * Gets the setting for SO_TIMEOUT. 0 implies that the option is disabled (i.e., timeout of infinity).
-     * <p>
-     * Default is <code>1000</code>.
-     * 
-     * @return The setting for SO_TIMEOUT
-     */
-    int getSoTimeout();
-
-    /**
-     * Gets the connection timeout. 0 implies that the option is disabled (i.e., timeout of infinity).
-     * <p>
-     * Default is <code>100</code>.
-     * 
-     * @return The connection timeout
-     */
-    int getConnectionTimeout();
-
-    /**
-     * Gets the max. number of connections allowed being established per host. 0 implies that there is no restriction.
-     * <p>
-     * Default is <code>100</code>.
-     * 
-     * @return The max. number of connections per host
-     */
-    int getMaxConnectionsPerHost();
-
-    /**
-     * Gets a hash code value for this index URL. This method is supported for the benefit of hashtables.
-     * 
-     * @return A hash code value for this object.
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
-    int hashCode();
+    protected boolean removeEldestEntry(final Map.Entry<K, V> eldest) {
+        return size() > maximumCapacity;
+    }
 
-    /**
-     * Indicates whether some other object is "equal to" this one.
-     * 
-     * @param obj The reference object with which to compare.
-     * @return <code>true</code> if this object is the same as the obj argument; <code>false</code> otherwise.
-     * @see #hashCode()
-     */
     @Override
-    boolean equals(Object obj);
+    public V putIfAbsent(final K key, final V value) {
+        final V currentValue = get(key);
+        return (currentValue == null) ? put(key, value) : currentValue;
+    }
+
+    @Override
+    public boolean remove(final Object key, final Object value) {
+        if (value.equals(get(key))) {
+            remove(key);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public V replace(final K key, final V value) {
+        return containsKey(key) ? put(key, value) : null;
+    }
+
+    @Override
+    public boolean replace(final K key, final V oldValue, final V newValue) {
+        final V currentValue = get(key);
+        if (oldValue.equals(currentValue)) {
+            put(key, newValue);
+            return true;
+        }
+        return false;
+    }
 
 }

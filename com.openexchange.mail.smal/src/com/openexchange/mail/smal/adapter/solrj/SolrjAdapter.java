@@ -50,77 +50,89 @@
 package com.openexchange.mail.smal.adapter.solrj;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import javax.mail.internet.InternetAddress;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
-import org.apache.solr.client.solrj.impl.XMLResponseParser;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.Types;
+import com.openexchange.index.ConfigIndexService;
+import com.openexchange.index.IndexUrl;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.search.SearchTerm;
+import com.openexchange.mail.smal.SMALExceptionCodes;
+import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.mail.smal.adapter.IndexAdapter;
+import com.openexchange.mail.smal.adapter.solrj.cache.CommonsHttpSolrServerCache;
 import com.openexchange.session.Session;
-
 
 /**
  * {@link SolrjAdapter}
  * <p>
  * http://wiki.apache.org/solr/Solrj
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SolrjAdapter implements IndexAdapter {
 
-    private volatile CommonsHttpSolrServer server;
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SolrjAdapter.class));
+
+    private volatile CommonsHttpSolrServerCache solrServerCache;
 
     /**
      * Initializes a new {@link SolrjAdapter}.
      */
     public SolrjAdapter() {
         super();
-        
     }
 
-    @Override
-    public void start() throws OXException {
-        try {
-            final String url = "http://localhost:8983/solr";
-            final CommonsHttpSolrServer server = new CommonsHttpSolrServer(url);
-            server.setSoTimeout(1000);  // socket read timeout
-            server.setConnectionTimeout(100);
-            server.setDefaultMaxConnectionsPerHost(100);
-            server.setMaxTotalConnections(100);
-            server.setFollowRedirects(false);  // defaults to false
-            // allowCompression defaults to false.
-            // Server side must support gzip or deflate for this to have any effect.
-            server.setAllowCompression(true);
-            server.setMaxRetries(1); // defaults to 0.  > 1 not recommended.
-            server.setParser(new XMLResponseParser()); // binary parser is used by default
-            this.server = server;
-        } catch (final MalformedURLException e) {
-            
+    private IndexUrl indexUrlFor(final Session session, final boolean readWrite) throws OXException {
+        final ConfigIndexService configIndexService = SMALServiceLookup.getServiceStatic(ConfigIndexService.class);
+        if (readWrite) {
+            return configIndexService.getWriteURL(session.getContextId(), session.getUserId(), Types.EMAIL);
+        }
+        return configIndexService.getReadOnlyURL(session.getContextId(), session.getUserId(), Types.EMAIL);
+    }
+
+    private CommonsHttpSolrServer solrServerFor(final Session session, final boolean readWrite) throws OXException {
+        return solrServerCache.getSolrServer(indexUrlFor(session, readWrite));
+    }
+
+    private void rollback(final CommonsHttpSolrServer solrServer) {
+        if (null != solrServer) {
+            try {
+                solrServer.rollback();
+            } catch (final SolrServerException e) {
+                LOG.warn("Commit to Solr server failed.", e);
+            } catch (final IOException e) {
+                LOG.warn("Commit to Solr server failed.", e);
+            } catch (final RuntimeException e) {
+                LOG.warn("Commit to Solr server failed.", e);
+            }
         }
     }
 
     @Override
+    public void start() throws OXException {
+        solrServerCache = new CommonsHttpSolrServerCache(100, 300000);
+    }
+
+    @Override
     public void stop() throws OXException {
-        final CommonsHttpSolrServer server = this.server;
-        if (null != server) {
-            final HttpClient httpClient = server.getHttpClient();
-            ((MultiThreadedHttpConnectionManager) httpClient.getHttpConnectionManager()).shutdown();
-            this.server = null;
+        final CommonsHttpSolrServerCache solrServerCache = this.solrServerCache;
+        if (null != solrServerCache) {
+            solrServerCache.shutDown();
+            this.solrServerCache = null;
         }
     }
 
@@ -130,7 +142,8 @@ public final class SolrjAdapter implements IndexAdapter {
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.mail.smal.adapter.IndexAdapter#onSessionAdd(com.openexchange.session.Session)
      */
     @Override
@@ -139,7 +152,8 @@ public final class SolrjAdapter implements IndexAdapter {
 
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.mail.smal.adapter.IndexAdapter#onSessionGone(com.openexchange.session.Session)
      */
     @Override
@@ -148,8 +162,11 @@ public final class SolrjAdapter implements IndexAdapter {
 
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.smal.adapter.IndexAdapter#search(java.lang.String, com.openexchange.mail.search.SearchTerm, com.openexchange.mail.MailSortField, com.openexchange.mail.OrderDirection, com.openexchange.mail.MailField[], int, com.openexchange.session.Session)
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.mail.smal.adapter.IndexAdapter#search(java.lang.String, com.openexchange.mail.search.SearchTerm,
+     * com.openexchange.mail.MailSortField, com.openexchange.mail.OrderDirection, com.openexchange.mail.MailField[], int,
+     * com.openexchange.session.Session)
      */
     @Override
     public List<MailMessage> search(final String optFullName, final SearchTerm<?> searchTerm, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int optAccountId, final Session session) throws OXException {
@@ -157,8 +174,11 @@ public final class SolrjAdapter implements IndexAdapter {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.smal.adapter.IndexAdapter#getMessages(java.lang.String[], java.lang.String, com.openexchange.mail.MailSortField, com.openexchange.mail.OrderDirection, com.openexchange.mail.MailField[], int, com.openexchange.session.Session)
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.mail.smal.adapter.IndexAdapter#getMessages(java.lang.String[], java.lang.String,
+     * com.openexchange.mail.MailSortField, com.openexchange.mail.OrderDirection, com.openexchange.mail.MailField[], int,
+     * com.openexchange.session.Session)
      */
     @Override
     public List<MailMessage> getMessages(final String[] optMailIds, final String fullName, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int accountId, final Session session) throws OXException {
@@ -166,8 +186,10 @@ public final class SolrjAdapter implements IndexAdapter {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.smal.adapter.IndexAdapter#deleteMessages(java.util.Collection, java.lang.String, int, com.openexchange.session.Session)
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.mail.smal.adapter.IndexAdapter#deleteMessages(java.util.Collection, java.lang.String, int,
+     * com.openexchange.session.Session)
      */
     @Override
     public void deleteMessages(final Collection<String> mailIds, final String fullName, final int accountId, final Session session) throws OXException {
@@ -175,7 +197,8 @@ public final class SolrjAdapter implements IndexAdapter {
 
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.mail.smal.adapter.IndexAdapter#containsFolder(java.lang.String, int, com.openexchange.session.Session)
      */
     @Override
@@ -184,7 +207,8 @@ public final class SolrjAdapter implements IndexAdapter {
         return false;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.mail.smal.adapter.IndexAdapter#change(java.util.Collection, com.openexchange.session.Session)
      */
     @Override
@@ -193,28 +217,30 @@ public final class SolrjAdapter implements IndexAdapter {
 
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.smal.adapter.IndexAdapter#add(com.openexchange.mail.dataobjects.MailMessage, com.openexchange.session.Session)
-     */
     @Override
     public void add(final MailMessage mail, final Session session) throws OXException {
+        CommonsHttpSolrServer solrServer = null;
         try {
-            final CommonsHttpSolrServer server = this.server;
-
+            solrServer = solrServerFor(session, true);
             final String uuid = UUID.randomUUID().toString();
-            final SolrInputDocument inputDocument = createDocument(uuid, mail, mail.getAccountId(), session, System.currentTimeMillis(), detectLocale(mail.getSubject()));
-
-            server.add(inputDocument);
+            final SolrInputDocument inputDocument =
+                createDocument(uuid, mail, mail.getAccountId(), session, System.currentTimeMillis(), detectLocale(mail.getSubject()));
+            solrServer.add(inputDocument);
+            solrServer.commit();
         } catch (final SolrServerException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            rollback(solrServer);
+            throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
         } catch (final IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            rollback(solrServer);
+            throw SMALExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            rollback(solrServer);
+            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.mail.smal.adapter.IndexAdapter#add(java.util.Collection, com.openexchange.session.Session)
      */
     @Override
@@ -290,12 +316,12 @@ public final class SolrjAdapter implements IndexAdapter {
             array = toStringArray(mail.getTo());
             field.setValue(array, 1.0f);
             inputDocument.put("to", field);
-            
+
             field = new SolrInputField("cc");
             array = toStringArray(mail.getCc());
             field.setValue(array, 1.0f);
             inputDocument.put("cc", field);
-            
+
             field = new SolrInputField("bcc");
             array = toStringArray(mail.getBcc());
             field.setValue(array, 1.0f);

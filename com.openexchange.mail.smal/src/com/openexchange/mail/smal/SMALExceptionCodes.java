@@ -100,7 +100,14 @@ public enum SMALExceptionCodes implements OXExceptionCode {
     /**
      * Unparseable HTTP response: %1$s
      */
-    UNPARSEABLE_HTTP_RESPONSE(SMALExceptionMessages.UNPARSEABLE_HTTP_RESPONSE_MSG, CATEGORY_ERROR, 10);
+    UNPARSEABLE_HTTP_RESPONSE(SMALExceptionMessages.UNPARSEABLE_HTTP_RESPONSE_MSG, CATEGORY_ERROR, 10),
+    /**
+     * An I/O error occurred: %1$s
+     */
+    IO_ERROR(SMALExceptionMessages.IO_ERROR_MSG, CATEGORY_CONNECTIVITY, 11),
+    
+    
+    ;
 
     private final Category category;
 

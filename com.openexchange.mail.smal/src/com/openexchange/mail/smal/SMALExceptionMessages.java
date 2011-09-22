@@ -88,6 +88,9 @@ public final class SMALExceptionMessages implements LocalizableStrings {
     // Unparseable HTTP response: %1$s
     public static final String UNPARSEABLE_HTTP_RESPONSE_MSG = "Unparseable HTTP response: %1$s";
 
+    // An I/O error occurred: %1$s
+    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
+
     /**
      * Initializes a new {@link SMALExceptionMessages}.
      */

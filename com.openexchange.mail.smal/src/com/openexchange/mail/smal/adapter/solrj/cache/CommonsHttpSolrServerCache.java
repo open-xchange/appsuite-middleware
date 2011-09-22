@@ -1,0 +1,283 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.mail.smal.adapter.solrj.cache;
+
+import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
+import org.apache.solr.client.solrj.impl.XMLResponseParser;
+import com.openexchange.exception.OXException;
+import com.openexchange.index.IndexUrl;
+import com.openexchange.mail.smal.SMALExceptionCodes;
+import com.openexchange.mail.smal.SMALServiceLookup;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
+
+/**
+ * {@link CommonsHttpSolrServerCache}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public final class CommonsHttpSolrServerCache {
+
+    private final ConcurrentMap<IndexUrl, Wrapper> map;
+
+    private final int maxLifeMillis;
+
+    private final ScheduledTimerTask timerTask;
+
+    /**
+     * Initializes a new {@link CommonsHttpSolrServerCache}.
+     */
+    public CommonsHttpSolrServerCache(final int maxCapacity, final int maxLifeMillis) {
+        super();
+        final Lock lock = new ReentrantLock();
+        map = new LockBasedConcurrentMap<IndexUrl, Wrapper>(lock, lock, new MaxCapacityLinkedHashMap<IndexUrl, Wrapper>(maxCapacity));
+        this.maxLifeMillis = maxLifeMillis;
+        final Runnable task = new Runnable() {
+            
+            @Override
+            public void run() {
+                shrink();
+            }
+        };
+        final int delay = maxLifeMillis / 3;
+        timerTask = SMALServiceLookup.getInstance().getService(TimerService.class).scheduleWithFixedDelay(task, delay, delay);
+    }
+
+    /**
+     * Puts specified mapping into this cache (if not already present)
+     * 
+     * @param indexUrl The index URL
+     * @param solrServer The Solr server
+     * @return <code>true</code> for successful put; otherwise <code>false</code>
+     */
+    public boolean putSolrServerIfAbsent(final IndexUrl indexUrl, final CommonsHttpSolrServer solrServer) {
+        final Wrapper wrapper = new Wrapper(solrServer);
+        Wrapper prev = map.putIfAbsent(indexUrl, wrapper);
+        if (null == prev) {
+            // Successfully put into map
+            return true;
+        }
+        if (prev.elapsed(maxLifeMillis)) {
+            synchronized (map) {
+                prev = map.get(indexUrl);
+                if (prev.elapsed(maxLifeMillis)) {
+                    shrink();
+                    map.put(indexUrl, wrapper);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Removes elapsed entries from map.
+     */
+    public void shrink() {
+        final List<IndexUrl> removeKeys = new ArrayList<IndexUrl>(16);
+        final long now = System.currentTimeMillis();
+        for (final Entry<IndexUrl, Wrapper> entry : map.entrySet()) {
+            final Wrapper wrapper = entry.getValue();
+            if ((now - wrapper.getStamp()) > maxLifeMillis) {
+                removeKeys.add(entry.getKey());
+            }
+        }
+        for (final IndexUrl key : removeKeys) {
+            final Wrapper wrapper = map.remove(key);
+            if (null != wrapper) {
+                closeSolrServer(wrapper.getValue());
+            }
+        }
+    }
+
+    private static void closeSolrServer(final CommonsHttpSolrServer server) {
+        try {
+            if (null != server) {
+                final HttpClient httpClient = server.getHttpClient();
+                ((MultiThreadedHttpConnectionManager) httpClient.getHttpConnectionManager()).shutdown();
+            }
+        } catch (final Exception e) {
+            // Ignore
+        }
+    }
+
+    /**
+     * Checks is there is a mapping for specified index URL.
+     * 
+     * @param indexUrl The index URL
+     * @return <code>true</code> if there is a mapping; otherwise <code>false</code>
+     */
+    public boolean containsSolrServer(final IndexUrl indexUrl) {
+        return map.containsKey(indexUrl);
+    }
+
+    /**
+     * Gets the Solr server associated with specified index URL either from cache or newly established.
+     * 
+     * @param indexUrl The index URL
+     * @return The Solr server
+     * @throws OXException If creation of a new Solr server fails
+     */
+    public CommonsHttpSolrServer getSolrServer(final IndexUrl indexUrl) throws OXException {
+        final Wrapper wrapper = map.get(indexUrl);
+        if (null == wrapper) {
+            final CommonsHttpSolrServer solrServer = newCommonsHttpSolrServer(indexUrl);
+            map.put(indexUrl, new Wrapper(solrServer));
+            return solrServer;
+        }
+        if (wrapper.elapsed(maxLifeMillis)) {
+            map.remove(indexUrl);
+            shrink();
+            final CommonsHttpSolrServer solrServer = newCommonsHttpSolrServer(indexUrl);
+            map.put(indexUrl, new Wrapper(solrServer));
+            return solrServer;
+        }
+        return wrapper.getValue();
+    }
+
+    private static CommonsHttpSolrServer newCommonsHttpSolrServer(final IndexUrl indexUrl) throws OXException {
+        try {
+            final CommonsHttpSolrServer server = new CommonsHttpSolrServer(indexUrl.getUrl());
+            server.setSoTimeout(indexUrl.hashCode());  // socket read timeout
+            server.setConnectionTimeout(indexUrl.getConnectionTimeout());
+            server.setDefaultMaxConnectionsPerHost(indexUrl.getMaxConnectionsPerHost());
+            server.setMaxTotalConnections(indexUrl.getMaxConnectionsPerHost());
+            server.setFollowRedirects(false);  // defaults to false
+            // allowCompression defaults to false.
+            // Server side must support gzip or deflate for this to have any effect.
+            server.setAllowCompression(true);
+            server.setMaxRetries(1); // defaults to 0.  > 1 not recommended.
+            server.setParser(new XMLResponseParser()); // binary parser is used by default
+            return server;
+        } catch (final MalformedURLException e) {
+            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Gets the Solr server associated with specified index URL.
+     * 
+     * @param indexUrl The index URL
+     * @return The Solr server or <code>null</code> if none available, yet
+     */
+    public CommonsHttpSolrServer optSolrServer(final IndexUrl indexUrl) {
+        final Wrapper wrapper = map.get(indexUrl);
+        if (null == wrapper) {
+            return null;
+        }
+        if (wrapper.elapsed(maxLifeMillis)) {
+            map.remove(indexUrl);
+            shrink();
+            return null;
+        }
+        return wrapper.getValue();
+    }
+
+    /**
+     * Shuts-down the cache.
+     */
+    public void shutDown() {
+        timerTask.cancel(false);
+        for (final Iterator<Wrapper> it = map.values().iterator(); it.hasNext();) {
+            final Wrapper wrapper = it.next();
+            if (null != wrapper) {
+                closeSolrServer(wrapper.getValue());
+            }
+            it.remove();
+        }
+        map.clear();
+    }
+
+    private static final class Wrapper {
+
+        private final CommonsHttpSolrServer value;
+
+        private final long stamp;
+
+        public Wrapper(final CommonsHttpSolrServer value) {
+            super();
+            this.value = value;
+            this.stamp = System.currentTimeMillis();
+        }
+
+        public long getStamp() {
+            return stamp;
+        }
+
+        public boolean elapsed(final int maxLifeMillis) {
+            return (System.currentTimeMillis() - stamp) > maxLifeMillis;
+        }
+
+        public CommonsHttpSolrServer getIfNotElapsed(final int maxLifeMillis) {
+            return elapsed(maxLifeMillis) ? null : value;
+        }
+
+        public CommonsHttpSolrServer getValue() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return value.getHttpClient().toString();
+        }
+
+    } // End of class Wrapper
+
+}

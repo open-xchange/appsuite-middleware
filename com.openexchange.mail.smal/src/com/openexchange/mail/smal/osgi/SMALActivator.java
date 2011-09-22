@@ -58,6 +58,7 @@ import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.index.ConfigIndexService;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.smal.SMALProvider;
 import com.openexchange.mail.smal.SMALServiceLookup;
@@ -99,15 +100,17 @@ public class SMALActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {
-            ConfigurationService.class, ThreadPoolService.class, TimerService.class, MailAccountStorageService.class,
-            SessiondService.class, DatabaseService.class };
+        return new Class<?>[] { ConfigurationService.class, ThreadPoolService.class, TimerService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         SMALServiceLookup.getInstance().setServiceLookup(this);
         track(MailProvider.class, new SMALProviderServiceTracker(context));
+        trackService(MailAccountStorageService.class);
+        trackService(SessiondService.class);
+        trackService(DatabaseService.class);
+        trackService(ConfigIndexService.class);
         openTrackers();
         JobQueue.getInstance();
         /*
