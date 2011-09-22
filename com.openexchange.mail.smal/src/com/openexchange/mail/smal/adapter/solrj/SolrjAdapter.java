@@ -239,14 +239,29 @@ public final class SolrjAdapter implements IndexAdapter {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.smal.adapter.IndexAdapter#add(java.util.Collection, com.openexchange.session.Session)
-     */
     @Override
     public void add(final Collection<MailMessage> mails, final Session session) throws OXException {
-        // TODO Auto-generated method stub
-
+        CommonsHttpSolrServer solrServer = null;
+        try {
+            solrServer = solrServerFor(session, true);
+            final long now = System.currentTimeMillis();
+            for (final MailMessage mail : mails) {
+                final String uuid = UUID.randomUUID().toString();
+                final SolrInputDocument inputDocument =
+                    createDocument(uuid, mail, mail.getAccountId(), session, now, detectLocale(mail.getSubject()));
+                solrServer.add(inputDocument);
+            }
+            solrServer.commit();
+        } catch (final SolrServerException e) {
+            rollback(solrServer);
+            throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
+        } catch (final IOException e) {
+            rollback(solrServer);
+            throw SMALExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            rollback(solrServer);
+            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     private static SolrInputDocument createDocument(final String uuid, final MailMessage mail, final int accountId, final Session session, final long stamp, final Locale locale) {

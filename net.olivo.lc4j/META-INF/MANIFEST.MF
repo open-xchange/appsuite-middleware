@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Olivio Lc4j
+Bundle-SymbolicName: net.olivo.lc4j
+Bundle-Version: 0.3.0
+Bundle-Activator: net.olivo.lc4j.osgi.Lc4jActivator
+Bundle-Vendor: Marco Olivio
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: org.osgi.framework
+Bundle-ClassPath: .,
+ lib/colt.jar,
+ lib/concurrent.jar,
+ lib/fastutil-6.4.jar,
+ lib/java-getopt-1.0.13.jar,
+ lib/lc4j-0.3.jar,
+ lib/mg4j-4.0.jar
+Export-Package: net.olivo.lc4j
