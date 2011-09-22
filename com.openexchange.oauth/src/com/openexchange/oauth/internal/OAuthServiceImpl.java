@@ -466,8 +466,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
         if (null == service) {
             return null;
         }
-        final Collection<Session> sessions = service.getSessions(userId, contextId);
-        return sessions.isEmpty() ? null : sessions.iterator().next();
+        return service.getAnyActiveSessionForUser(userId, contextId);
     }
 
     @Override

@@ -52,10 +52,12 @@ package com.openexchange.sessiond.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -68,6 +70,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
+import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -92,6 +95,11 @@ final class SessionData {
     private final Lock wlock;
 
     private final LinkedList<Map<String, SessionControl>> longTermList;
+    
+    // The LongTermUserGuardian contains an entry for a given UserKey if the longTermList contains a session for the user
+    // This is used to guard against potentially slow serial searches of the long term sessions
+    private final Set<UserKey> longTermUserGuardian = new HashSet<UserKey>();
+    
     private final Lock longTermLock = new ReentrantLock();
 
     SessionData(final long containerCount, final int maxSessions, final long randomTokenTimeout, final long longTermContainerCount, final boolean autoLogin) {
@@ -126,6 +134,7 @@ final class SessionData {
         longTermLock.lock();
         try {
             longTermList.clear();
+            longTermUserGuardian.clear();
         } finally {
             longTermLock.unlock();
         }
@@ -149,6 +158,7 @@ final class SessionData {
                     final Map<String, SessionControl> first = longTermList.getFirst();
                     for (final SessionControl control : retval) {
                         first.put(control.getSession().getSessionID(), control);
+                        longTermUserGuardian.add(new UserKey(control.getSession().getUserId(), control.getSession().getContextId()));
                     }
                 } finally {
                     longTermLock.unlock();
@@ -166,6 +176,9 @@ final class SessionData {
             longTermList.addFirst(new HashMap<String, SessionControl>());
             final List<SessionControl> retval = new ArrayList<SessionControl>();
             retval.addAll(longTermList.removeLast().values());
+            for (SessionControl sessionControl : retval) {
+                longTermUserGuardian.remove(new UserKey(sessionControl.getSession().getUserId(), sessionControl.getSession().getContextId()));
+            }
             return retval;
         } finally {
             longTermLock.unlock();
@@ -193,18 +206,14 @@ final class SessionData {
         }
         longTermLock.lock();
         try {
-            for (final Map<String, SessionControl> longTermMap : longTermList) {
-                for (final SessionControl control : longTermMap.values()) {
-                    final Session session = control.getSession();
-                    if (session.getContextId() == context.getContextId() && session.getUserId() == userId) {
-                        return true;
-                    }
-                }
-            }
+            return hasLongTermSession(userId, context.getContextId());
         } finally {
             longTermLock.unlock();
         }
-        return false;
+    }
+
+    private final boolean hasLongTermSession(int userId, int contextId) {
+        return this.longTermUserGuardian.contains(new UserKey(userId, contextId));
     }
 
     SessionControl[] removeUserSessions(final int userId, final int contextId) {
@@ -223,6 +232,9 @@ final class SessionData {
         }
         longTermLock.lock();
         try {
+            if (!hasLongTermSession(userId, contextId)) {
+                return retval.toArray(new SessionControl[retval.size()]);
+            }
             for (final Map<String, SessionControl> longTerm : longTermList) {
                 final Iterator<SessionControl> iter = longTerm.values().iterator();
                 while (iter.hasNext()) {
@@ -239,6 +251,70 @@ final class SessionData {
         }
         return retval.toArray(new SessionControl[retval.size()]);
     }
+    
+    public SessionControl getAnyActiveSessionForUser(int userId, int contextId) {
+        rlock.lock();
+        try {
+            for (final SessionContainer container : sessionList) {
+                SessionControl control = container.getAnySessionByUser(userId, contextId);
+                if ( control != null ) {
+                    return control;
+                }
+            }
+        } finally {
+            rlock.unlock();
+        }
+        longTermLock.lock();
+        try {
+            if (!hasLongTermSession(userId, contextId)) {
+                return null;
+            }
+            for (final Map<String, SessionControl> longTermMap : longTermList) {
+                for (final SessionControl control : longTermMap.values()) {
+                    final Session session = control.getSession();
+                    if (session.getContextId() == contextId && session.getUserId() == userId) {
+                        return control;
+                    }
+                }
+            }
+        } finally {
+            longTermLock.unlock();
+        }
+        return null;
+    }
+    
+    public Session findFirstSessionForUser(int userId, int contextId, SessionMatcher matcher) {
+        rlock.lock();
+        try {
+            for (final SessionContainer container : sessionList) {
+                SessionControl control = container.getAnySessionByUser(userId, contextId);
+                if ( control != null && matcher.accepts(control.getSession())) {
+                    return control.getSession();
+                }
+            }
+        } finally {
+            rlock.unlock();
+        }
+        longTermLock.lock();
+        try {
+            if (!hasLongTermSession(userId, contextId)) {
+                return null;
+            }
+            for (final Map<String, SessionControl> longTermMap : longTermList) {
+                for (final SessionControl control : longTermMap.values()) {
+                    final Session session = control.getSession();
+                    if (session.getContextId() == contextId && session.getUserId() == userId && matcher.accepts(control.getSession())) {
+                        return control.getSession();
+                    }
+                }
+            }
+        } finally {
+            longTermLock.unlock();
+        }
+        return null;
+    }
+
+
 
     SessionControl[] getUserSessions(final int userId, final int contextId) {
         // A read-only access to session list
@@ -253,6 +329,9 @@ final class SessionData {
         }
         longTermLock.lock();
         try {
+            if (!hasLongTermSession(userId, contextId)) {
+                return retval.toArray(new SessionControl[retval.size()]);
+            }
             for (final Map<String, SessionControl> longTermMap : longTermList) {
                 for (final SessionControl control : longTermMap.values()) {
                     final Session session = control.getSession();
@@ -280,6 +359,9 @@ final class SessionData {
         }
         longTermLock.lock();
         try {
+            if (!hasLongTermSession(userId, contextId)) {
+                return count;
+            }
             for (final Map<String, SessionControl> longTermMap : longTermList) {
                 for (final SessionControl control : longTermMap.values()) {
                     final Session session = control.getSession();
@@ -517,6 +599,7 @@ final class SessionData {
                     continue;
                 }
                 sessionList.getFirst().putSessionControl(control);
+                longTermUserGuardian.remove(new UserKey(control.getSession().getUserId(), control.getSession().getContextId()));
                 LOG.trace("Moved from long term container " + i + " to first one.");
                 movedSession = true;
             }
@@ -679,4 +762,6 @@ final class SessionData {
             }
         }
     }
+
+
 }
