@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.index;
+package com.openexchange.index.internal;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -58,6 +58,9 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.index.ConfigIndexService;
+import com.openexchange.index.IndexExceptionCodes;
+import com.openexchange.index.IndexUrl;
 import com.openexchange.server.ServiceExceptionCodes;
 
 
@@ -123,6 +126,24 @@ public class ConfigIndexServiceImpl implements ConfigIndexService {
                 @Override
                 public String getUrl() {
                     return fullUrl;
+                }
+
+                @Override
+                public int getSoTimeout() {
+                    // TODO Auto-generated method stub
+                    return 0;
+                }
+
+                @Override
+                public int getConnectionTimeout() {
+                    // TODO Auto-generated method stub
+                    return 0;
+                }
+
+                @Override
+                public int getMaxConnectionsPerHost() {
+                    // TODO Auto-generated method stub
+                    return 0;
                 }
             };
             

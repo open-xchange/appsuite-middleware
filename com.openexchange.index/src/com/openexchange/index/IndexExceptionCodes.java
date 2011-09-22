@@ -61,8 +61,21 @@ import com.openexchange.exception.OXExceptionFactory;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public enum IndexExceptionCodes implements OXExceptionCode {
+
+    /**
+     * An unexpected error occurred: %1$s
+     */
+    UNEXPECTED_ERROR(IndexExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CATEGORY_ERROR, 1),
+    /**
+     * An I/O error occurred: %1$s
+     */
+    IO_ERROR(IndexExceptionMessages.IO_ERROR_MSG, Category.CATEGORY_CONNECTIVITY, 2),
+    /**
+     * Could not find search index for user %1$s and module %2$s in context %3$s.
+     */
+    INDEX_NOT_FOUND(IndexExceptionMessages.INDEX_NOT_FOUND_MSG, Category.CATEGORY_CONFIGURATION, 3),
     
-    INDEX_NOT_FOUND("Could not find search index for user %1$s and module %2$s in context %3$s.", Category.CATEGORY_CONFIGURATION, 1);
+    ;
     
     
     private String message;

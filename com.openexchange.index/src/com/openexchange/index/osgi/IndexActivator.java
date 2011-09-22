@@ -2,7 +2,7 @@ package com.openexchange.index.osgi;
 
 import com.openexchange.database.DatabaseService;
 import com.openexchange.index.ConfigIndexService;
-import com.openexchange.index.ConfigIndexServiceImpl;
+import com.openexchange.index.internal.ConfigIndexServiceImpl;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
