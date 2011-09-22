@@ -65,6 +65,27 @@ public interface IndexUrl {
     String getUrl();
 
     /**
+     * Gets the setting for SO_TIMEOUT. 0 implies that the option is disabled (i.e., timeout of infinity).
+     * 
+     * @return The setting for SO_TIMEOUT
+     */
+    int getSoTimeout();
+
+    /**
+     * Gets the connection timeout. 0 implies that the option is disabled (i.e., timeout of infinity).
+     * 
+     * @return The connection timeout
+     */
+    int getConnectionTimeout();
+
+    /**
+     * Gets the max. number of connections allowed being established per host. 0 implies that there is no restriction.
+     * 
+     * @return The max. number of connections per host
+     */
+    int getMaxConnectionsPerHost();
+
+    /**
      * Gets a hash code value for this index URL. This method is supported for the benefit of hashtables.
      * 
      * @return A hash code value for this object.
