@@ -135,7 +135,7 @@ public final class CommonsHttpSolrServerCache {
         final long now = System.currentTimeMillis();
         for (final Entry<IndexUrl, Wrapper> entry : map.entrySet()) {
             final Wrapper wrapper = entry.getValue();
-            if ((now - wrapper.getStamp()) > maxLifeMillis) {
+            if ((now - wrapper.getLastAccessed()) > maxLifeMillis) {
                 removeKeys.add(entry.getKey());
             }
         }
@@ -249,20 +249,20 @@ public final class CommonsHttpSolrServerCache {
 
         private final CommonsHttpSolrServer value;
 
-        private final long stamp;
+        private volatile long lastAccessed;
 
         public Wrapper(final CommonsHttpSolrServer value) {
             super();
             this.value = value;
-            this.stamp = System.currentTimeMillis();
+            this.lastAccessed = System.currentTimeMillis();
         }
 
-        public long getStamp() {
-            return stamp;
+        public long getLastAccessed() {
+            return lastAccessed;
         }
 
         public boolean elapsed(final int maxLifeMillis) {
-            return (System.currentTimeMillis() - stamp) > maxLifeMillis;
+            return (System.currentTimeMillis() - lastAccessed) > maxLifeMillis;
         }
 
         public CommonsHttpSolrServer getIfNotElapsed(final int maxLifeMillis) {
@@ -270,6 +270,7 @@ public final class CommonsHttpSolrServerCache {
         }
 
         public CommonsHttpSolrServer getValue() {
+            this.lastAccessed = System.currentTimeMillis();
             return value;
         }
 

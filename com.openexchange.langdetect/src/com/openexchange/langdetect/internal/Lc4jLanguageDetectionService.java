@@ -51,11 +51,14 @@ package com.openexchange.langdetect.internal;
 
 import it.unimi.dsi.fastutil.bytes.ByteArrayList;
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -191,4 +194,43 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
         return locales;
     }
 
+    @Override
+    public List<Locale> findLanguages(final Reader reader) throws OXException {
+        // Read from stream
+        final StringBuilder tmp = new StringBuilder(BUFFER_SIZE << 1);
+        try {
+            final BufferedReader br = reader instanceof BufferedReader ? (BufferedReader) reader : new BufferedReader(reader, BUFFER_SIZE);
+            for (String line; (line = br.readLine()) != null;) {
+                tmp.append(line).append('\n');
+            }
+            // No flush for ByteArrayOutputStream
+        } catch (final IOException e) {
+            throw LanguageDetectionExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(reader);
+        }
+        return findLanguages(tmp.toString());
+    }
+
+    @Override
+    public List<Locale> findLanguages(final String input) throws OXException {
+        try {
+            final List<String> languages = defaultLanguageCategorization.findLanguage(new ByteArrayList(input.getBytes("utf-8")));
+            final List<Locale> locales = new ArrayList<Locale>(languages.size());
+            for (final String language : languages) {
+                final String lang = language.substring(0, language.indexOf('.')).toLowerCase(locale_us);
+                final int pos = lang.indexOf('-');
+                Locale locale = languageCodes.get(pos < 0 ? lang : lang.substring(0, pos));
+                if (null == locale) {
+                    LOG.warn("No language code for model: " + language);
+                    locale = LOCALE_DEFAULT;
+                }
+                locales.add(locale);
+            }
+            return locales;
+        } catch (final UnsupportedEncodingException e) {
+            // Cannot occur
+            throw LanguageDetectionExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        }
+    }
 }
