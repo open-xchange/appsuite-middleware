@@ -76,14 +76,12 @@ public enum IndexExceptionCodes implements OXExceptionCode {
     INDEX_NOT_FOUND(IndexExceptionMessages.INDEX_NOT_FOUND_MSG, Category.CATEGORY_CONFIGURATION, 3),
     
     ;
+
+    private final String message;
     
+    private final int number;
     
-    private String message;
-    
-    private int number;
-    
-    private Category category;
-    
+    private final Category category;
 
     private IndexExceptionCodes(final String message, final Category category, final int detailNumber) {
         this.message = message;
