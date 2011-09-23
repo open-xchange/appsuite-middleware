@@ -66,6 +66,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest.METHOD;
@@ -87,6 +88,8 @@ import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.mime.PlainTextAddress;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.smal.SMALExceptionCodes;
@@ -134,11 +137,11 @@ public final class SolrjAdapter implements IndexAdapter {
             try {
                 solrServer.rollback();
             } catch (final SolrServerException e) {
-                LOG.warn("Commit to Solr server failed.", e);
+                LOG.warn("Rollback of Solr server failed.", e);
             } catch (final IOException e) {
-                LOG.warn("Commit to Solr server failed.", e);
+                LOG.warn("Rollback of Solr server failed.", e);
             } catch (final RuntimeException e) {
-                LOG.warn("Commit to Solr server failed.", e);
+                LOG.warn("Rollback of Solr server failed.", e);
             }
         }
     }
@@ -207,19 +210,17 @@ public final class SolrjAdapter implements IndexAdapter {
             final QueryResponse queryResponse = solrServer.query(solrQuery);
             final SolrDocumentList results = queryResponse.getResults();
             final int size = results.size();
+            final List<MailMessage> mails = new ArrayList<MailMessage>(size);
             for (int i = 0; i < size; i++) {
                 final SolrDocument solrDocument = results.get(i);
-                
+                mails.add(readDocument(solrDocument));
             }
-            
+            return mails;
         } catch (final SolrServerException e) {
             throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-
-        // TODO Auto-generated method stub
-        return null;
     }
 
     private static MailMessage readDocument(final SolrDocument document) {
@@ -229,11 +230,94 @@ public final class SolrjAdapter implements IndexAdapter {
         mail.setReceivedDate(new Date(SolrjAdapter.<Long> getFieldValue("received_date", document).longValue()));
         mail.setSentDate(new Date(SolrjAdapter.<Long> getFieldValue("sent_date", document).longValue()));
         {
-            final List<String> personalList = getFieldValue("from_personal", document);
-            final List<String> addressList = getFieldValue("from_addr", document);
-            
+            String addressList = getFieldValue("from_plain", document);
+            if (!isEmpty(addressList)) {
+                try {
+                    mail.addFrom(QuotedInternetAddress.parse(addressList, false));
+                } catch (final AddressException e) {
+                    mail.addFrom(new PlainTextAddress(addressList));
+                }
+            }
+            addressList = getFieldValue("to_plain", document);
+            if (!isEmpty(addressList)) {
+                try {
+                    mail.addTo(QuotedInternetAddress.parse(addressList, false));
+                } catch (final AddressException e) {
+                    mail.addTo(new PlainTextAddress(addressList));
+                }
+            }
+            addressList = getFieldValue("cc_plain", document);
+            if (!isEmpty(addressList)) {
+                try {
+                    mail.addCc(QuotedInternetAddress.parse(addressList, false));
+                } catch (final AddressException e) {
+                    mail.addCc(new PlainTextAddress(addressList));
+                }
+            }
+            addressList = getFieldValue("bcc_plain", document);
+            if (!isEmpty(addressList)) {
+                try {
+                    mail.addBcc(QuotedInternetAddress.parse(addressList, false));
+                } catch (final AddressException e) {
+                    mail.addBcc(new PlainTextAddress(addressList));
+                }
+            }
         }
-        
+        {
+            int flags = 0;
+            Boolean b = SolrjAdapter.<Boolean> getFieldValue("flag_answered", document);
+            if (null != b && b.booleanValue()) {
+                flags |= MailMessage.FLAG_ANSWERED;
+            }
+            b = SolrjAdapter.<Boolean> getFieldValue("flag_deleted", document);
+            if (null != b && b.booleanValue()) {
+                flags |= MailMessage.FLAG_DELETED;
+            }
+            b = SolrjAdapter.<Boolean> getFieldValue("flag_draft", document);
+            if (null != b && b.booleanValue()) {
+                flags |= MailMessage.FLAG_DRAFT;
+            }
+            b = SolrjAdapter.<Boolean> getFieldValue("flag_flagged", document);
+            if (null != b && b.booleanValue()) {
+                flags |= MailMessage.FLAG_FLAGGED;
+            }
+            b = SolrjAdapter.<Boolean> getFieldValue("flag_forwarded", document);
+            if (null != b && b.booleanValue()) {
+                flags |= MailMessage.FLAG_FORWARDED;
+            }
+            b = SolrjAdapter.<Boolean> getFieldValue("flag_read_ack", document);
+            if (null != b && b.booleanValue()) {
+                flags |= MailMessage.FLAG_READ_ACK;
+            }
+            b = SolrjAdapter.<Boolean> getFieldValue("flag_recent", document);
+            if (null != b && b.booleanValue()) {
+                flags |= MailMessage.FLAG_RECENT;
+            }
+            b = SolrjAdapter.<Boolean> getFieldValue("flag_seen", document);
+            if (null != b && b.booleanValue()) {
+                flags |= MailMessage.FLAG_SEEN;
+            }
+            b = SolrjAdapter.<Boolean> getFieldValue("flag_spam", document);
+            if (null != b && b.booleanValue()) {
+                flags |= MailMessage.FLAG_SPAM;
+            }
+            b = SolrjAdapter.<Boolean> getFieldValue("flag_user", document);
+            if (null != b && b.booleanValue()) {
+                flags |= MailMessage.FLAG_USER;
+            }
+            mail.setFlags(flags);
+        }
+        // Subject
+        final StringBuilder pre = new StringBuilder("subject_");
+        for (final Locale l : KNOWN_LOCALES) {
+            pre.setLength(8);
+            final String subject = getFieldValue(pre.append(l.getLanguage()).toString(), document);
+            if (null != subject) {
+                mail.setSubject(subject);
+                break;
+            }
+        }
+        // Return mail
         return mail;
     }
 
@@ -285,6 +369,7 @@ public final class SolrjAdapter implements IndexAdapter {
             map.put(mail.getMailId(), mail);
         }
         CommonsHttpSolrServer solrServer = null;
+        boolean rollback = false;
         try {
             solrServer = solrServerFor(session, true);
             final SolrQuery solrQuery = new SolrQuery();
@@ -301,16 +386,17 @@ public final class SolrjAdapter implements IndexAdapter {
             }
             final QueryResponse queryResponse = solrServer.query(solrQuery, METHOD.POST);
             final SolrDocumentList results = queryResponse.getResults();
+            rollback = true;
             solrServer.add(new SolrDocumentIterator(results, map));
             solrServer.commit();
         } catch (final SolrServerException e) {
-            rollback(solrServer);
+            rollback(rollback ? solrServer : null);
             throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
         } catch (final IOException e) {
-            rollback(solrServer);
+            rollback(rollback ? solrServer : null);
             throw SMALExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            rollback(solrServer);
+            rollback(rollback ? solrServer : null);
             throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -596,6 +682,7 @@ public final class SolrjAdapter implements IndexAdapter {
     private static final class SolrDocumentIterator implements Iterator<SolrInputDocument> {
 
         private final Iterator<SolrDocument> iterator;
+
         private final Map<String, MailMessage> mailMap;
 
         protected SolrDocumentIterator(final SolrDocumentList results, final Map<String, MailMessage> mailMap) {
@@ -606,8 +693,8 @@ public final class SolrjAdapter implements IndexAdapter {
 
         @Override
         public boolean hasNext() {
-           return iterator.hasNext();
-         }
+            return iterator.hasNext();
+        }
 
         @Override
         public SolrInputDocument next() {
@@ -674,7 +761,7 @@ public final class SolrjAdapter implements IndexAdapter {
                 inputDocument.put(name, field);
             }
             return inputDocument;
-         }
+        }
 
         @Override
         public void remove() {
@@ -685,7 +772,9 @@ public final class SolrjAdapter implements IndexAdapter {
     private static final class MailDocumentIterator implements Iterator<SolrInputDocument> {
 
         private final Iterator<MailMessage> iterator;
+
         private final Session session;
+
         private final long now;
 
         protected MailDocumentIterator(final Iterator<MailMessage> iterator, final Session session, final long now) {
@@ -697,14 +786,14 @@ public final class SolrjAdapter implements IndexAdapter {
 
         @Override
         public boolean hasNext() {
-           return iterator.hasNext();
-         }
+            return iterator.hasNext();
+        }
 
         @Override
         public SolrInputDocument next() {
             final MailMessage mail = iterator.next();
             return createDocument(UUID.randomUUID().toString(), mail, mail.getAccountId(), session, now);
-         }
+        }
 
         @Override
         public void remove() {
@@ -715,6 +804,7 @@ public final class SolrjAdapter implements IndexAdapter {
     private static final class AddressesPreparation {
 
         protected final List<String> personalList;
+
         protected final List<String> addressList;
 
         protected AddressesPreparation(final InternetAddress[] addrs) {
