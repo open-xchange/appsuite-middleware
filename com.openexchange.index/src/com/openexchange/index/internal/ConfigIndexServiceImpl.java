@@ -120,31 +120,7 @@ public class ConfigIndexServiceImpl implements ConfigIndexService {
             index = rs.getString(2);
             fullUrl = serverUrl + DELIM + index;
             
-            final IndexUrl indexUrl = new IndexUrl() {
-                
-                @Override
-                public String getUrl() {
-                    return fullUrl;
-                }
-
-                @Override
-                public int getSoTimeout() {
-                    // TODO Auto-generated method stub
-                    return 0;
-                }
-
-                @Override
-                public int getConnectionTimeout() {
-                    // TODO Auto-generated method stub
-                    return 0;
-                }
-
-                @Override
-                public int getMaxConnectionsPerHost() {
-                    // TODO Auto-generated method stub
-                    return 0;
-                }
-            };
+            final IndexUrl indexUrl = new IndexUrlImpl(fullUrl);
             
             return indexUrl;
         } catch (final SQLException e) {
