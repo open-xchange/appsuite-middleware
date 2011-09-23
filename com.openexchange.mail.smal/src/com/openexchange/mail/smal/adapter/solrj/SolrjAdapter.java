@@ -132,7 +132,7 @@ public final class SolrjAdapter implements IndexAdapter {
         return solrServerCache.getSolrServer(indexUrlFor(session, readWrite));
     }
 
-    private void rollback(final CommonsHttpSolrServer solrServer) {
+    private static void rollback(final CommonsHttpSolrServer solrServer) {
         if (null != solrServer) {
             try {
                 solrServer.rollback();
@@ -359,13 +359,13 @@ public final class SolrjAdapter implements IndexAdapter {
     }
 
     @Override
-    public void change(final Collection<MailMessage> mails, final Session session) throws OXException {
+    public void change(final List<MailMessage> mails, final Session session) throws OXException {
         if (null == mails || mails.isEmpty()) {
             return;
         }
-        final List<MailMessage> list = mails instanceof List ? (List) mails : new ArrayList<MailMessage>(mails);
-        final Map<String, MailMessage> map = new HashMap<String, MailMessage>(list.size());
-        for (final MailMessage mail : list) {
+        final int size = mails.size();
+        final Map<String, MailMessage> map = new HashMap<String, MailMessage>(size);
+        for (final MailMessage mail : mails) {
             map.put(mail.getMailId(), mail);
         }
         CommonsHttpSolrServer solrServer = null;
@@ -375,10 +375,10 @@ public final class SolrjAdapter implements IndexAdapter {
             final SolrQuery solrQuery = new SolrQuery();
             solrQuery.set("context", session.getContextId());
             solrQuery.set("user", session.getUserId());
-            solrQuery.set("account", list.get(0).getAccountId());
-            solrQuery.set("full_name", list.get(0).getFolder());
+            solrQuery.set("account", mails.get(0).getAccountId());
+            solrQuery.set("full_name", mails.get(0).getFolder());
             {
-                final List<String> ids = new ArrayList<String>(list.size());
+                final List<String> ids = new ArrayList<String>(size);
                 for (final MailMessage mail : mails) {
                     ids.add(mail.getMailId());
                 }
@@ -422,7 +422,7 @@ public final class SolrjAdapter implements IndexAdapter {
     }
 
     @Override
-    public void add(final Collection<MailMessage> mails, final Session session) throws OXException {
+    public void add(final List<MailMessage> mails, final Session session) throws OXException {
         CommonsHttpSolrServer solrServer = null;
         try {
             solrServer = solrServerFor(session, true);

@@ -1053,7 +1053,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     }
 
     @Override
-    public void add(final Collection<MailMessage> mails, final Session session) throws OXException {
+    public void add(final List<MailMessage> mails, final Session session) throws OXException {
         try {
             ensureStarted();
             if (null == mails || mails.isEmpty()) {
@@ -1066,19 +1066,13 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             if (size <= configuredBlockSize) {
                 addSublist(mails, session, indexName, stamp);
             } else {
-                final List<MailMessage> list;
-                if (mails instanceof List) {
-                    list = (List<MailMessage>) mails;
-                } else {
-                    list = new ArrayList<MailMessage>(mails);
-                }
                 int fromIndex = 0;
                 while (fromIndex < size) {
                     int toIndex = fromIndex + configuredBlockSize;
                     if (toIndex > size) {
                         toIndex = size;
                     }
-                    addSublist(list.subList(fromIndex, toIndex), session, indexName, stamp);
+                    addSublist(mails.subList(fromIndex, toIndex), session, indexName, stamp);
                     fromIndex = toIndex;
                 }
             }
@@ -1204,7 +1198,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     }
 
     @Override
-    public void change(final Collection<MailMessage> mails, final Session session) throws OXException {
+    public void change(final List<MailMessage> mails, final Session session) throws OXException {
         try {
             ensureStarted();
             if (null == mails || mails.isEmpty()) {
@@ -1219,7 +1213,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             } else {
                 final List<MailMessage> list;
                 if (mails instanceof List) {
-                    list = (List<MailMessage>) mails;
+                    list = mails;
                 } else {
                     list = new ArrayList<MailMessage>(mails);
                 }

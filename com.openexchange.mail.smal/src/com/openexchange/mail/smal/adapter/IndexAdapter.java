@@ -161,7 +161,7 @@ public interface IndexAdapter {
      * @param session The user session
      * @throws OXException If changing mails in index fails
      */
-    public void change(Collection<MailMessage> mails, Session session) throws OXException;
+    public void change(List<MailMessage> mails, Session session) throws OXException;
 
     /**
      * Adds specified mail to the index.
@@ -179,6 +179,6 @@ public interface IndexAdapter {
      * @param session The session
      * @throws OXException If adding mails to index fails
      */
-    public void add(Collection<MailMessage> mails, Session session) throws OXException;
+    public void add(List<MailMessage> mails, Session session) throws OXException;
 
 }
