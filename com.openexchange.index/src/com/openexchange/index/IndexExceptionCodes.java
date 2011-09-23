@@ -59,6 +59,7 @@ import com.openexchange.exception.OXExceptionFactory;
  * {@link IndexExceptionCodes}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum IndexExceptionCodes implements OXExceptionCode {
 
