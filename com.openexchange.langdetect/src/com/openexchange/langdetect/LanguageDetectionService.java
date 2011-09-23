@@ -51,6 +51,7 @@ package com.openexchange.langdetect;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Locale;
 import com.openexchange.exception.OXException;
 
 /**
@@ -70,5 +71,5 @@ public interface LanguageDetectionService {
      * @return The detected language(s)
      * @throws OXException OIf language detection fails for any reason
      */
-    List<String> findLanguages(InputStream input) throws OXException;
+    List<Locale> findLanguages(InputStream input) throws OXException;
 }

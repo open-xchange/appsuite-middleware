@@ -50,10 +50,19 @@
 package com.openexchange.langdetect.internal;
 
 import it.unimi.dsi.fastutil.bytes.ByteArrayList;
+import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map.Entry;
+import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
 import net.olivo.lc4j.LanguageCategorization;
 import com.openexchange.exception.OXException;
@@ -67,6 +76,9 @@ import com.openexchange.langdetect.LanguageDetectionService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Lc4jLanguageDetectionService implements LanguageDetectionService {
+
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Lc4jLanguageDetectionService.class));
 
     /**
      * The singleton instance.
@@ -82,23 +94,59 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
         return INSTANCE;
     }
 
+    private static final Locale LOCALE_DEFAULT = Locale.US;
+
     private static final int BUFFER_SIZE = 2048;
 
     private final LanguageCategorization defaultLanguageCategorization;
 
     private final AtomicReference<String> languageModelsDir;
 
+    private final ConcurrentMap<String, Locale> languageCodes;
+
+    private final Locale locale_us;
+
     /**
      * Initializes a new {@link Lc4jLanguageDetectionService}.
      */
     private Lc4jLanguageDetectionService() {
         super();
+        locale_us = Locale.US;
+        languageCodes = new ConcurrentHashMap<String, Locale>(64);
         languageModelsDir = new AtomicReference<String>();
         defaultLanguageCategorization = new LanguageCategorization();
         defaultLanguageCategorization.setMaxLanguages(10);
         defaultLanguageCategorization.setNumCharsToExamine(1000);
         defaultLanguageCategorization.setUseTopmostNgrams(400);
         defaultLanguageCategorization.setUnknownThreshold(1.01f);
+    }
+
+    /**
+     * Loads specified language code file.
+     * 
+     * @param languageCodesFile The file name
+     * @throws OXException If loading file fails
+     */
+    public void loadLanguageCodes(final String languageCodesFile) throws OXException {
+        final BufferedInputStream inputStream;
+        try {
+            inputStream = new BufferedInputStream(new FileInputStream(languageCodesFile));
+        } catch (final FileNotFoundException e) {
+            throw LanguageDetectionExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        }
+        try {
+            final Properties properties = new Properties();
+            properties.load(inputStream);
+            for (final Entry<Object, Object> entry : properties.entrySet()) {
+                languageCodes.put(
+                    entry.getKey().toString().toLowerCase(locale_us),
+                    new Locale(entry.getValue().toString().toLowerCase(locale_us)));
+            }
+        } catch (final IOException e) {
+            throw LanguageDetectionExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(inputStream);
+        }
     }
 
     /**
@@ -114,7 +162,7 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
     }
 
     @Override
-    public List<String> findLanguages(final InputStream inputStream) throws OXException {
+    public List<Locale> findLanguages(final InputStream inputStream) throws OXException {
         // Read from stream
         final ByteArrayOutputStream tmp = Streams.newByteArrayOutputStream(BUFFER_SIZE << 1);
         try {
@@ -128,7 +176,19 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
         } finally {
             Streams.close(inputStream);
         }
-        return defaultLanguageCategorization.findLanguage(new ByteArrayList(tmp.toByteArray()));
+        final List<String> languages = defaultLanguageCategorization.findLanguage(new ByteArrayList(tmp.toByteArray()));
+        final List<Locale> locales = new ArrayList<Locale>(languages.size());
+        for (final String language : languages) {
+            final String lang = language.substring(0, language.indexOf('.')).toLowerCase(locale_us);
+            final int pos = lang.indexOf('-');
+            Locale locale = languageCodes.get(pos < 0 ? lang : lang.substring(0, pos));
+            if (null == locale) {
+                LOG.warn("No language code for model: " + language);
+                locale = LOCALE_DEFAULT;
+            }
+            locales.add(locale);
+        }
+        return locales;
     }
 
 }
