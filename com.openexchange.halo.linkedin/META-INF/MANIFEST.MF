@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Linkedin
+Bundle-SymbolicName: com.openexchange.halo.linkedin
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: com.openexchange.halo.linkedin.osgi.Activator
+Bundle-Vendor: OPENEXCHANGE
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.oauth.linkedin,
+ org.osgi.framework;version="1.3.0"
+Bundle-ActivationPolicy: lazy
