@@ -204,7 +204,7 @@ public final class CommonsHttpSolrServerCache {
             // Server side must support gzip or deflate for this to have any effect.
             server.setAllowCompression(true);
             server.setMaxRetries(1); // defaults to 0.  > 1 not recommended.
-            server.setParser(new XMLResponseParser()); // binary parser is used by default
+            server.setParser(new XMLResponseParser()); // Otherwise binary parser is used by default
             return server;
         } catch (final MalformedURLException e) {
             throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());

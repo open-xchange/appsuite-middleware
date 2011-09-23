@@ -59,6 +59,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.index.ConfigIndexService;
+import com.openexchange.langdetect.LanguageDetectionService;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.smal.SMALProvider;
 import com.openexchange.mail.smal.SMALServiceLookup;
@@ -111,6 +112,7 @@ public class SMALActivator extends HousekeepingActivator {
         trackService(SessiondService.class);
         trackService(DatabaseService.class);
         trackService(ConfigIndexService.class);
+        trackService(LanguageDetectionService.class);
         openTrackers();
         JobQueue.getInstance();
         /*
