@@ -50,7 +50,9 @@
 package com.openexchange.langdetect;
 
 import java.io.InputStream;
+import java.io.Reader;
 import java.util.List;
+import java.util.Locale;
 import com.openexchange.exception.OXException;
 
 /**
@@ -70,5 +72,30 @@ public interface LanguageDetectionService {
      * @return The detected language(s)
      * @throws OXException OIf language detection fails for any reason
      */
-    List<String> findLanguages(InputStream input) throws OXException;
+    List<Locale> findLanguages(InputStream input) throws OXException;
+
+    /**
+     * Gets the detected language for specified input.
+     * <p>
+     * If more than one language matches, other languages are reported (in decreasing order of probability) in the list. If more than the
+     * maximum number of matched languages are matched, an "UNKNOWN" language is reported.
+     * 
+     * @param input The (textual) input data
+     * @return The detected language(s)
+     * @throws OXException OIf language detection fails for any reason
+     */
+    List<Locale> findLanguages(Reader input) throws OXException;
+
+    /**
+     * Gets the detected language for specified input.
+     * <p>
+     * If more than one language matches, other languages are reported (in decreasing order of probability) in the list. If more than the
+     * maximum number of matched languages are matched, an "UNKNOWN" language is reported.
+     * 
+     * @param input The (textual) input data
+     * @return The detected language(s)
+     * @throws OXException OIf language detection fails for any reason
+     */
+    List<Locale> findLanguages(String input) throws OXException;
+
 }

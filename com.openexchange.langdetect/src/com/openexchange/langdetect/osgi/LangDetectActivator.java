@@ -60,6 +60,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
 import com.openexchange.langdetect.LanguageDetectionService;
 import com.openexchange.langdetect.internal.Lc4jLanguageDetectionService;
 
@@ -93,6 +94,17 @@ public class LangDetectActivator implements BundleActivator {
                     public ConfigurationService addingService(final ServiceReference<ConfigurationService> reference) {
                         final ConfigurationService service = bundleContext.getService(reference);
                         final Lc4jLanguageDetectionService languageDetectionService = Lc4jLanguageDetectionService.getInstance();
+                        /*
+                         * Load language codes
+                         */
+                        try {
+                            languageDetectionService.loadLanguageCodes(service.getProperty("com.openexchange.langdetect.languageCodesFile"));
+                        } catch (final OXException e) {
+                            logger.error(e.getMessage(), e);
+                        }
+                        /*
+                         * Set language model directory
+                         */
                         languageDetectionService.setLanguageModelsDir(service.getProperty("com.openexchange.langdetect.languageModelsDir"));
                         registrations.add(bundleContext.registerService(LanguageDetectionService.class, languageDetectionService, null));
                         return service;
