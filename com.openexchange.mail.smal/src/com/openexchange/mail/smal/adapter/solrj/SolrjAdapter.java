@@ -55,9 +55,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -220,10 +222,23 @@ public final class SolrjAdapter implements IndexAdapter {
         return null;
     }
 
-    private MailMessage readDocument() {
-        final MailMessage mail = new IDMailMessage(null, null);
+    private static MailMessage readDocument(final SolrDocument document) {
+        final MailMessage mail = new IDMailMessage(document.getFieldValue("id").toString(), document.getFieldValue("full_name").toString());
+        mail.setAccountId(SolrjAdapter.<Integer> getFieldValue("account", document).intValue());
+        mail.setSize(SolrjAdapter.<Long> getFieldValue("size", document).longValue());
+        mail.setReceivedDate(new Date(SolrjAdapter.<Long> getFieldValue("received_date", document).longValue()));
+        mail.setSentDate(new Date(SolrjAdapter.<Long> getFieldValue("sent_date", document).longValue()));
+        {
+            final List<String> personalList = getFieldValue("from_personal", document);
+            final List<String> addressList = getFieldValue("from_addr", document);
+            
+        }
         
         return mail;
+    }
+
+    private static <V> V getFieldValue(final String name, final SolrDocument document) {
+        return (V) document.getFieldValue(name);
     }
 
     /*
@@ -406,6 +421,9 @@ public final class SolrjAdapter implements IndexAdapter {
             field = new SolrInputField("from_addr");
             field.setValue(preparation.addressList, 1.0f);
             inputDocument.put("from_addr", field);
+            field = new SolrInputField("from_plain");
+            field.setValue(mail.getFirstHeader("From"), 1.0f);
+            inputDocument.put("from_plain", field);
 
             preparation = new AddressesPreparation(mail.getTo());
             field = new SolrInputField("to_personal");
@@ -414,6 +432,9 @@ public final class SolrjAdapter implements IndexAdapter {
             field = new SolrInputField("to_addr");
             field.setValue(preparation.addressList, 1.0f);
             inputDocument.put("to_addr", field);
+            field = new SolrInputField("to_plain");
+            field.setValue(mail.getFirstHeader("To"), 1.0f);
+            inputDocument.put("to_plain", field);
 
             preparation = new AddressesPreparation(mail.getCc());
             field = new SolrInputField("cc_personal");
@@ -422,6 +443,9 @@ public final class SolrjAdapter implements IndexAdapter {
             field = new SolrInputField("cc_addr");
             field.setValue(preparation.addressList, 1.0f);
             inputDocument.put("cc_addr", field);
+            field = new SolrInputField("cc_plain");
+            field.setValue(mail.getFirstHeader("Cc"), 1.0f);
+            inputDocument.put("cc_plain", field);
 
             preparation = new AddressesPreparation(mail.getBcc());
             field = new SolrInputField("bcc_personal");
@@ -430,6 +454,9 @@ public final class SolrjAdapter implements IndexAdapter {
             field = new SolrInputField("bcc_addr");
             field.setValue(preparation.addressList, 1.0f);
             inputDocument.put("bcc_addr", field);
+            field = new SolrInputField("bcc_plain");
+            field.setValue(mail.getFirstHeader("Bcc"), 1.0f);
+            inputDocument.put("bcc_plain", field);
         }
         /*
          * Write size
@@ -585,6 +612,7 @@ public final class SolrjAdapter implements IndexAdapter {
         @Override
         public SolrInputDocument next() {
             final SolrDocument document = iterator.next();
+            final Set<Entry<String, Object>> documentFields = document.entrySet();
             final SolrInputDocument inputDocument = new SolrInputDocument();
             {
                 final int flags = mailMap.get(document.getFieldValue("id")).getFlags();
@@ -592,50 +620,58 @@ public final class SolrjAdapter implements IndexAdapter {
                 SolrInputField field = new SolrInputField("flag_answered");
                 field.setValue(Boolean.valueOf((flags & MailMessage.FLAG_ANSWERED) > 0), 1.0f);
                 inputDocument.put("flag_answered", field);
+                documentFields.remove("flag_answered");
 
                 field = new SolrInputField("flag_deleted");
                 field.setValue(Boolean.valueOf((flags & MailMessage.FLAG_DELETED) > 0), 1.0f);
                 inputDocument.put("flag_deleted", field);
+                documentFields.remove("flag_deleted");
 
                 field = new SolrInputField("flag_draft");
                 field.setValue(Boolean.valueOf((flags & MailMessage.FLAG_DRAFT) > 0), 1.0f);
                 inputDocument.put("flag_draft", field);
+                documentFields.remove("flag_draft");
 
                 field = new SolrInputField("flag_flagged");
                 field.setValue(Boolean.valueOf((flags & MailMessage.FLAG_DRAFT) > 0), 1.0f);
                 inputDocument.put("flag_flagged", field);
+                documentFields.remove("flag_flagged");
 
                 field = new SolrInputField("flag_recent");
                 field.setValue(Boolean.valueOf((flags & MailMessage.FLAG_RECENT) > 0), 1.0f);
                 inputDocument.put("flag_recent", field);
+                documentFields.remove("flag_recent");
 
                 field = new SolrInputField("flag_seen");
                 field.setValue(Boolean.valueOf((flags & MailMessage.FLAG_SEEN) > 0), 1.0f);
                 inputDocument.put("flag_seen", field);
+                documentFields.remove("flag_seen");
 
                 field = new SolrInputField("flag_user");
                 field.setValue(Boolean.valueOf((flags & MailMessage.FLAG_USER) > 0), 1.0f);
                 inputDocument.put("flag_user", field);
+                documentFields.remove("flag_user");
 
                 field = new SolrInputField("flag_spam");
                 field.setValue(Boolean.valueOf((flags & MailMessage.FLAG_SPAM) > 0), 1.0f);
                 inputDocument.put("flag_spam", field);
+                documentFields.remove("flag_spam");
 
                 field = new SolrInputField("flag_forwarded");
                 field.setValue(Boolean.valueOf((flags & MailMessage.FLAG_FORWARDED) > 0), 1.0f);
                 inputDocument.put("flag_forwarded", field);
+                documentFields.remove("flag_forwarded");
 
                 field = new SolrInputField("flag_read_ack");
                 field.setValue(Boolean.valueOf((flags & MailMessage.FLAG_READ_ACK) > 0), 1.0f);
                 inputDocument.put("flag_read_ack", field);
+                documentFields.remove("flag_read_ack");
             }
-            for (final Entry<String, Object> entry : document.entrySet()) {
+            for (final Entry<String, Object> entry : documentFields) {
                 final String name = entry.getKey();
-                if (!name.startsWith("flag_")) {
-                    final SolrInputField field = new SolrInputField(name);
-                    field.setValue(entry.getValue(), 1.0f);
-                    inputDocument.put(name, field);
-                }
+                final SolrInputField field = new SolrInputField(name);
+                field.setValue(entry.getValue(), 1.0f);
+                inputDocument.put(name, field);
             }
             return inputDocument;
          }
@@ -678,29 +714,27 @@ public final class SolrjAdapter implements IndexAdapter {
 
     private static final class AddressesPreparation {
 
-        protected final String personalList;
-        protected final String addressList;
+        protected final List<String> personalList;
+        protected final List<String> addressList;
 
         protected AddressesPreparation(final InternetAddress[] addrs) {
             super();
             if (addrs == null || addrs.length <= 0) {
-                personalList = "";
-                addressList = "";
+                personalList = Collections.emptyList();
+                addressList = Collections.emptyList();
             } else {
-                final StringBuilder pl = new StringBuilder(64);
-                final StringBuilder al = new StringBuilder(128);
+                final List<String> pl = new LinkedList<String>();
+                final List<String> al = new LinkedList<String>();
                 for (int i = 0; i < addrs.length; i++) {
                     final InternetAddress address = addrs[i];
                     final String personal = address.getPersonal();
                     if (!isEmpty(personal)) {
-                        pl.append(',').append(preparePersonal(personal));
+                        pl.add(preparePersonal(personal));
                     }
-                    al.append(',').append(prepareAddress(address.getAddress()));
+                    al.add(prepareAddress(address.getAddress()));
                 }
-                pl.deleteCharAt(0);
-                al.deleteCharAt(0);
-                personalList = pl.toString();
-                addressList = al.toString();
+                personalList = pl;
+                addressList = al;
             }
         }
 
