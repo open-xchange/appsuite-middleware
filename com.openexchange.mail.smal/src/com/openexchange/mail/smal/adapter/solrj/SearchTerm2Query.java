@@ -72,8 +72,7 @@ import com.openexchange.mail.search.ToTerm;
 /**
  * {@link SearchTerm2Query} - Transforms a search term to a query.
  * 
- * http://lucene.apache.org/java/2_4_0/queryparsersyntax.html#Range Searches
- *
+ * @see http://lucene.apache.org/java/2_4_0/queryparsersyntax.html#Range Searches
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SearchTerm2Query {
@@ -87,7 +86,7 @@ public final class SearchTerm2Query {
 
     /**
      * Transforms specified search term to a query.
-     *
+     * 
      * @param searchTerm The search term
      * @return The resulting query
      */
@@ -150,9 +149,11 @@ public final class SearchTerm2Query {
             case EQUALS:
                 return queryBuilder.append('(').append("size").append(':').append(comparablePattern.getPattern().intValue()).append(')');
             case GREATER_THAN:
-                return queryBuilder.append('(').append("size").append(':').append('[').append(comparablePattern.getPattern().intValue() + 1).append(" TO ").append(Integer.MAX_VALUE).append(']').append(')');
+                return queryBuilder.append('(').append("size").append(':').append('[').append(comparablePattern.getPattern().intValue() + 1).append(
+                    " TO ").append(Integer.MAX_VALUE).append(']').append(')');
             case LESS_THAN:
-                return queryBuilder.append('(').append("size").append(':').append('[').append(0).append(" TO ").append(comparablePattern.getPattern().intValue() - 1).append(']').append(')');
+                return queryBuilder.append('(').append("size").append(':').append('[').append(0).append(" TO ").append(
+                    comparablePattern.getPattern().intValue() - 1).append(']').append(')');
             default:
                 throw new IllegalStateException("Unknown operator: " + comparablePattern.getComparisonType());
             }
@@ -215,9 +216,11 @@ public final class SearchTerm2Query {
             case EQUALS:
                 return queryBuilder.append('(').append(name).append(':').append(time).append(')');
             case GREATER_THAN:
-                return queryBuilder.append('(').append(name).append(':').append('[').append(time + 1).append(" TO ").append(Long.MAX_VALUE).append(']').append(')');
+                return queryBuilder.append('(').append(name).append(':').append('[').append(time + 1).append(" TO ").append(Long.MAX_VALUE).append(
+                    ']').append(')');
             case LESS_THAN:
-                return queryBuilder.append('(').append(name).append(':').append('[').append(Long.MIN_VALUE).append(" TO ").append(time - 1).append(']').append(')');
+                return queryBuilder.append('(').append(name).append(':').append('[').append(Long.MIN_VALUE).append(" TO ").append(time - 1).append(
+                    ']').append(')');
             default:
                 throw new IllegalStateException("Unknown operator: " + comparablePattern.getComparisonType());
             }

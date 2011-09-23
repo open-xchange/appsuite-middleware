@@ -55,7 +55,7 @@ import com.openexchange.index.IndexUrl;
 
 
 /**
- * {@link StaticConfigIndexService}
+ * {@link StaticConfigIndexService} - Only for testing purpose!!!
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
