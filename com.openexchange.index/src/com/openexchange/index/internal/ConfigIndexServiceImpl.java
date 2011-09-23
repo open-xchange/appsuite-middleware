@@ -113,13 +113,12 @@ public class ConfigIndexServiceImpl implements ConfigIndexService {
             String serverUrl;
             String index;
             final String fullUrl;
-            if (rs.next()) {
-                serverUrl = rs.getString(1);
-                index = rs.getString(2);
-                fullUrl = serverUrl + DELIM + index;
-            } else {
+            if (!rs.next()) {
                 throw IndexExceptionCodes.INDEX_NOT_FOUND.create(uid, module, cid);
             }
+            serverUrl = rs.getString(1);
+            index = rs.getString(2);
+            fullUrl = serverUrl + DELIM + index;
             
             final IndexUrl indexUrl = new IndexUrl() {
                 
