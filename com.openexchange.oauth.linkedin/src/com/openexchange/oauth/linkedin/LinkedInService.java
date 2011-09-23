@@ -50,6 +50,10 @@
 package com.openexchange.oauth.linkedin;
 
 import java.util.List;
+
+import org.json.JSONObject;
+
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 
 /**
@@ -63,5 +67,5 @@ public interface LinkedInService {
 
     public String getAccountDisplayName(String password, int user, int contextId, int accountId);
    
-	public Contact getProfile(String password, int user, int contextId, int accountId);
+	public JSONObject getProfileForEMail(String email, String password, int user, int contextId, int accountId) throws OXException;
 }

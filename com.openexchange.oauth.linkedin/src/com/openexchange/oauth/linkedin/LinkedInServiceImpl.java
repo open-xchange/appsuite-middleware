@@ -59,6 +59,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.LinkedInApi;
 import org.scribe.model.OAuthRequest;
@@ -87,8 +89,7 @@ public class LinkedInServiceImpl implements LinkedInService{
 
     private static final String CONNECTIONS_URL = "http://api.linkedin.com/v1/people/~/connections:(id,first-name,last-name,phone-numbers,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url,positions)";
     private static final String PROFILE_URL = "http://api.linkedin.com/v1/people/~:(id,first-name,last-name,phone-numbers,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url,positions)";
-
-    
+    private static final String FORMAT_JSON = "?format=json";
     
     private Activator activator;
 
@@ -279,9 +280,14 @@ public class LinkedInServiceImpl implements LinkedInService{
     }
     
     @Override
-    public Contact getProfile(String password, int user, int contextId, int accountId) {
-    	Response response = performRequest(password, user, contextId, accountId, Verb.GET, PROFILE_URL);
-        Contact contact = parseProfile(response.getBody());
-        return contact;
+    public JSONObject getProfileForEMail(String email, String password, int user, int contextId, int accountId) throws OXException{
+    	Response response = performRequest(password, user, contextId, accountId, Verb.GET, PROFILE_URL + FORMAT_JSON);
+    	JSONObject json;
+		try {
+			json = new JSONObject(response.getBody());
+		} catch (JSONException e) {
+			throw OXException.general("Could not parse JSON: " + response.getBody()); //TODO: Different exception - wasn't this supposed to get easier with the rewrite? 
+		}
+        return json;
     }
 }

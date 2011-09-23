@@ -57,11 +57,15 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Scanner;
 import junit.framework.TestCase;
+
+import org.json.JSONObject;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.LinkedInApi;
 import org.scribe.model.Token;
 import org.scribe.model.Verifier;
 import org.scribe.oauth.OAuthService;
+
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.linkedin.osgi.Activator;
@@ -157,8 +161,8 @@ public class LinkedInConnectionTest extends TestCase {
         }
     }
     
-    public void testGetProfile(){
-        Contact profile = linkedIn.getProfile("password",1,1,1);
+    public void testGetProfile() throws OXException{
+        JSONObject profile = linkedIn.getProfileForEMail("nomatter@ox.invalid", "password",1,1,1);
         System.out.println(profile);
     }
 }
