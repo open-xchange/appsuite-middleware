@@ -65,9 +65,9 @@ import com.openexchange.mail.smal.SMALProvider;
 import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.mail.smal.adapter.IndexAdapter;
 import com.openexchange.mail.smal.adapter.IndexService;
-import com.openexchange.mail.smal.adapter.elasticsearch.ElasticSearchAdapter;
 import com.openexchange.mail.smal.adapter.internal.IndexEventHandler;
 import com.openexchange.mail.smal.adapter.internal.IndexServiceImpl;
+import com.openexchange.mail.smal.adapter.solrj.SolrjAdapter;
 import com.openexchange.mail.smal.internal.SMALDeleteListener;
 import com.openexchange.mail.smal.internal.SMALUpdateTaskProviderService;
 import com.openexchange.mail.smal.internal.tasks.CreateMailSyncTable;
@@ -128,7 +128,7 @@ public class SMALActivator extends HousekeepingActivator {
          */
         {
             final ConfigurationService cs = getService(ConfigurationService.class);
-            final String className = cs.getProperty("com.openexchange.mail.smal.adapter", ElasticSearchAdapter.class.getName());
+            final String className = cs.getProperty("com.openexchange.mail.smal.adapter", SolrjAdapter.class.getName());
             final Class<? extends IndexAdapter> clazz = Class.forName(className).asSubclass(IndexAdapter.class);
             indexService = new IndexServiceImpl(clazz.newInstance());
             registerService(IndexService.class, indexService);
