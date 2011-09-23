@@ -569,12 +569,12 @@ public final class SolrjAdapter implements IndexAdapter {
     private static final class SolrDocumentIterator implements Iterator<SolrInputDocument> {
 
         private final Iterator<SolrDocument> iterator;
-        private final Map<String, MailMessage> map;
+        private final Map<String, MailMessage> mailMap;
 
-        protected SolrDocumentIterator(final SolrDocumentList results, final Map<String, MailMessage> map) {
+        protected SolrDocumentIterator(final SolrDocumentList results, final Map<String, MailMessage> mailMap) {
             super();
             iterator = results.iterator();
-            this.map = map;
+            this.mailMap = mailMap;
         }
 
         @Override
@@ -587,7 +587,7 @@ public final class SolrjAdapter implements IndexAdapter {
             final SolrDocument document = iterator.next();
             final SolrInputDocument inputDocument = new SolrInputDocument();
             {
-                final int flags = map.get(document.getFieldValue("id")).getFlags();
+                final int flags = mailMap.get(document.getFieldValue("id")).getFlags();
 
                 SolrInputField field = new SolrInputField("flag_answered");
                 field.setValue(Boolean.valueOf((flags & MailMessage.FLAG_ANSWERED) > 0), 1.0f);
