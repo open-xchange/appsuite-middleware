@@ -132,7 +132,12 @@ public final class SolrjAdapter implements IndexAdapter {
         return solrServerCache.getSolrServer(indexUrlFor(session, readWrite));
     }
 
-    private static void rollback(final CommonsHttpSolrServer solrServer) {
+    /**
+     * Performs a roll-back for specified Solr server.
+     * 
+     * @param solrServer The Solr server
+     */
+    public static void rollback(final CommonsHttpSolrServer solrServer) {
         if (null != solrServer) {
             try {
                 solrServer.rollback();
@@ -639,7 +644,14 @@ public final class SolrjAdapter implements IndexAdapter {
         return inputDocument;
     }
 
-    private static Locale detectLocale(final String str) throws OXException {
+    /**
+     * Detects the locale.
+     * 
+     * @param str The string source
+     * @return The detected locale
+     * @throws OXException If language detection fails
+     */
+    public static Locale detectLocale(final String str) throws OXException {
         try {
             return SMALServiceLookup.getServiceStatic(LanguageDetectionService.class).findLanguages(str).get(0);
         } catch (final IllegalStateException e) {
@@ -648,7 +660,10 @@ public final class SolrjAdapter implements IndexAdapter {
         }
     }
 
-    private static final Set<Locale> KNOWN_LOCALES;
+    /**
+     * Currently known languages.
+     */
+    public static final Set<Locale> KNOWN_LOCALES;
 
     static {
         final Set<Locale> set = new HashSet<Locale>(10);
