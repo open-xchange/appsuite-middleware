@@ -51,13 +51,13 @@ package com.openexchange.mail.smal.adapter.solrj;
 
 import static com.openexchange.mail.mime.QuotedInternetAddress.toIDN;
 import static com.openexchange.mail.smal.adapter.IndexAdapters.isEmpty;
+import static com.openexchange.mail.smal.adapter.solrj.SolrUtils.detectLocale;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -81,7 +81,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.index.ConfigIndexService;
 import com.openexchange.index.IndexUrl;
-import com.openexchange.langdetect.LanguageDetectionService;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailSortField;
@@ -96,7 +95,6 @@ import com.openexchange.mail.smal.SMALExceptionCodes;
 import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.mail.smal.adapter.IndexAdapter;
 import com.openexchange.mail.smal.adapter.solrj.cache.CommonsHttpSolrServerCache;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 
 /**
@@ -130,25 +128,6 @@ public final class SolrjAdapter implements IndexAdapter {
 
     private CommonsHttpSolrServer solrServerFor(final Session session, final boolean readWrite) throws OXException {
         return solrServerCache.getSolrServer(indexUrlFor(session, readWrite));
-    }
-
-    /**
-     * Performs a roll-back for specified Solr server.
-     * 
-     * @param solrServer The Solr server
-     */
-    public static void rollback(final CommonsHttpSolrServer solrServer) {
-        if (null != solrServer) {
-            try {
-                solrServer.rollback();
-            } catch (final SolrServerException e) {
-                LOG.warn("Rollback of Solr server failed.", e);
-            } catch (final IOException e) {
-                LOG.warn("Rollback of Solr server failed.", e);
-            } catch (final RuntimeException e) {
-                LOG.warn("Rollback of Solr server failed.", e);
-            }
-        }
     }
 
     @Override
@@ -314,7 +293,7 @@ public final class SolrjAdapter implements IndexAdapter {
         }
         // Subject
         final StringBuilder pre = new StringBuilder("subject_");
-        for (final Locale l : KNOWN_LOCALES) {
+        for (final Locale l : SolrUtils.KNOWN_LOCALES) {
             pre.setLength(8);
             final String subject = getFieldValue(pre.append(l.getLanguage()).toString(), document);
             if (null != subject) {
@@ -395,13 +374,13 @@ public final class SolrjAdapter implements IndexAdapter {
             solrServer.add(new SolrDocumentIterator(results, map));
             solrServer.commit();
         } catch (final SolrServerException e) {
-            rollback(rollback ? solrServer : null);
+            SolrUtils.rollback(rollback ? solrServer : null);
             throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
         } catch (final IOException e) {
-            rollback(rollback ? solrServer : null);
+            SolrUtils.rollback(rollback ? solrServer : null);
             throw SMALExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            rollback(rollback ? solrServer : null);
+            SolrUtils.rollback(rollback ? solrServer : null);
             throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -415,13 +394,13 @@ public final class SolrjAdapter implements IndexAdapter {
             solrServer.add(createDocument(uuid, mail, mail.getAccountId(), session, System.currentTimeMillis()));
             solrServer.commit();
         } catch (final SolrServerException e) {
-            rollback(solrServer);
+            SolrUtils.rollback(solrServer);
             throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
         } catch (final IOException e) {
-            rollback(solrServer);
+            SolrUtils.rollback(solrServer);
             throw SMALExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            rollback(solrServer);
+            SolrUtils.rollback(solrServer);
             throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -435,13 +414,13 @@ public final class SolrjAdapter implements IndexAdapter {
             solrServer.add(iter);
             solrServer.commit();
         } catch (final SolrServerException e) {
-            rollback(solrServer);
+            SolrUtils.rollback(solrServer);
             throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
         } catch (final IOException e) {
-            rollback(solrServer);
+            SolrUtils.rollback(solrServer);
             throw SMALExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            rollback(solrServer);
+            SolrUtils.rollback(solrServer);
             throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -644,49 +623,9 @@ public final class SolrjAdapter implements IndexAdapter {
         return inputDocument;
     }
 
-    /**
-     * Detects the locale.
-     * 
-     * @param str The string source
-     * @return The detected locale
-     * @throws OXException If language detection fails
-     */
-    public static Locale detectLocale(final String str) throws OXException {
-        try {
-            return SMALServiceLookup.getServiceStatic(LanguageDetectionService.class).findLanguages(str).get(0);
-        } catch (final IllegalStateException e) {
-            // Missing service
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(e, LanguageDetectionService.class.getName());
-        }
-    }
-
-    /**
-     * Currently known languages.
-     */
-    public static final Set<Locale> KNOWN_LOCALES;
-
-    static {
-        final Set<Locale> set = new HashSet<Locale>(10);
-        set.add(new Locale("en"));
-        set.add(new Locale("de"));
-        set.add(new Locale("fr"));
-        set.add(new Locale("nl"));
-        set.add(new Locale("sv"));
-        set.add(new Locale("es"));
-        set.add(new Locale("ja"));
-        set.add(new Locale("pl"));
-        set.add(new Locale("it"));
-        set.add(new Locale("zh"));
-        set.add(new Locale("hu"));
-        set.add(new Locale("sk"));
-        set.add(new Locale("cs"));
-        set.add(new Locale("cs"));
-        KNOWN_LOCALES = Collections.unmodifiableSet(set);
-    }
-
     private static boolean isSupportedLocale(final Locale locale) {
         final String language = locale.getLanguage();
-        for (final Locale loc : KNOWN_LOCALES) {
+        for (final Locale loc : SolrUtils.KNOWN_LOCALES) {
             if (language.equals(loc.getLanguage())) {
                 return true;
             }

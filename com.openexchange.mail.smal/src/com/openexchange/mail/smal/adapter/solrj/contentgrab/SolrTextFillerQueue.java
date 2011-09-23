@@ -49,7 +49,8 @@
 
 package com.openexchange.mail.smal.adapter.solrj.contentgrab;
 
-import static com.openexchange.mail.smal.adapter.solrj.SolrjAdapter.rollback;
+import static com.openexchange.mail.smal.adapter.solrj.SolrUtils.detectLocale;
+import static com.openexchange.mail.smal.adapter.solrj.SolrUtils.rollback;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -82,7 +83,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.smal.SMALExceptionCodes;
 import com.openexchange.mail.smal.SMALMailAccess;
 import com.openexchange.mail.smal.SMALServiceLookup;
-import com.openexchange.mail.smal.adapter.solrj.SolrjAdapter;
+import com.openexchange.mail.smal.adapter.solrj.SolrUtils;
 import com.openexchange.mail.smal.adapter.solrj.cache.CommonsHttpSolrServerCache;
 import com.openexchange.mail.text.TextProcessing;
 import com.openexchange.threadpool.Task;
@@ -437,7 +438,7 @@ public final class SolrTextFillerQueue implements Runnable {
                              */
                             final String text =
                                 TextProcessing.extractTextFrom(access.getMessageStorage().getMessage(filler.getFullName(), mailId, false));
-                            final Locale locale = SolrjAdapter.detectLocale(text);
+                            final Locale locale = detectLocale(text);
                             inputDocument.setField("content_" + locale.getLanguage(), text);
                             inputDocuments.add(inputDocument);
                             /*
@@ -488,7 +489,7 @@ public final class SolrTextFillerQueue implements Runnable {
             return false;
         }
         final StringBuilder pre = new StringBuilder("content_");
-        for (final Locale l : SolrjAdapter.KNOWN_LOCALES) {
+        for (final Locale l : SolrUtils.KNOWN_LOCALES) {
             pre.setLength(8);
             if (solrDocument.containsKey(pre.append(l.getLanguage()).toString())) {
                 return false;
