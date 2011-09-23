@@ -53,7 +53,7 @@ import com.openexchange.index.IndexUrl;
 
 /**
  * {@link IndexUrlImpl}
- *
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -64,8 +64,15 @@ public final class IndexUrlImpl implements IndexUrl {
      */
     private final String fullUrl;
 
+    private int soTimeout;
+
+    private int connectionTimeout;
+
+    private int maxConnectionsPerHost;
+
     /**
      * Initializes a new {@link IndexUrlImpl}.
+     * 
      * @param fullUrl
      */
     public IndexUrlImpl(final String fullUrl) {
@@ -79,19 +86,71 @@ public final class IndexUrlImpl implements IndexUrl {
 
     @Override
     public int getSoTimeout() {
-        // TODO Auto-generated method stub
-        return 1000;
+        return soTimeout;
     }
 
     @Override
     public int getConnectionTimeout() {
-        // TODO Auto-generated method stub
-        return 100;
+        return connectionTimeout;
     }
 
     @Override
     public int getMaxConnectionsPerHost() {
-        // TODO Auto-generated method stub
-        return 100;
+        return maxConnectionsPerHost;
     }
+
+    /**
+     * Sets the soTimeout
+     * 
+     * @param soTimeout The soTimeout to set
+     */
+    public void setSoTimeout(final int soTimeout) {
+        this.soTimeout = soTimeout;
+    }
+
+    /**
+     * Sets the connectionTimeout
+     * 
+     * @param connectionTimeout The connectionTimeout to set
+     */
+    public void setConnectionTimeout(final int connectionTimeout) {
+        this.connectionTimeout = connectionTimeout;
+    }
+
+    /**
+     * Sets the maxConnectionsPerHost
+     * 
+     * @param maxConnectionsPerHost The maxConnectionsPerHost to set
+     */
+    public void setMaxConnectionsPerHost(final int maxConnectionsPerHost) {
+        this.maxConnectionsPerHost = maxConnectionsPerHost;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((fullUrl == null) ? 0 : fullUrl.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof IndexUrlImpl)) {
+            return false;
+        }
+        final IndexUrlImpl other = (IndexUrlImpl) obj;
+        if (fullUrl == null) {
+            if (other.fullUrl != null) {
+                return false;
+            }
+        } else if (!fullUrl.equals(other.fullUrl)) {
+            return false;
+        }
+        return true;
+    }
+
 }
