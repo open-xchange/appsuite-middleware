@@ -68,28 +68,11 @@ public final class StaticConfigIndexService implements ConfigIndexService {
      */
     public StaticConfigIndexService() {
         super();
-        indexUrl = new IndexUrl() {
-            
-            @Override
-            public String getUrl() {
-                return "http://10.20.31.1/solr/";
-            }
-            
-            @Override
-            public int getSoTimeout() {
-                return 1000;
-            }
-            
-            @Override
-            public int getMaxConnectionsPerHost() {
-                return 100;
-            }
-            
-            @Override
-            public int getConnectionTimeout() {
-                return 100;
-            }
-        };
+        final IndexUrlImpl indexUrl = new IndexUrlImpl("http://10.20.31.1/solr/");
+        indexUrl.setConnectionTimeout(100);
+        indexUrl.setMaxConnectionsPerHost(100);
+        indexUrl.setSoTimeout(1000);
+        this.indexUrl = indexUrl;
     }
 
     @Override
