@@ -21,16 +21,16 @@ public class CalendarRequest {
 
     protected TimeZone timeZone;
 
-    protected void convertExternalToInternalUsersIfPossible(CalendarObject appointmentObj, Context ctx, Log log){
-		Participant[] participants = appointmentObj.getParticipants();
+    protected void convertExternalToInternalUsersIfPossible(final CalendarObject appointmentObj, final Context ctx, final Log log){
+		final Participant[] participants = appointmentObj.getParticipants();
 		if(participants == null) {
             return;
         }
 
-		UserService us = ServerServiceRegistry.getInstance().getService(UserService.class);
+		final UserService us = ServerServiceRegistry.getInstance().getService(UserService.class);
 
 		for(int pos = 0; pos < participants.length; pos++){
-			Participant part = participants[pos];
+			final Participant part = participants[pos];
 			if(part.getType() == Participant.EXTERNAL_USER){
 				User foundUser;
 				try {
@@ -39,8 +39,8 @@ public class CalendarRequest {
                         continue;
                     }
 					participants[pos] = new UserParticipant(foundUser.getId());
-				} catch (OXException e) {
-					log.error(e); //...and continue doing this for the remaining users
+				} catch (final OXException e) {
+				    log.debug("Couldn't resolve external participant \"" + part.getEmailAddress() + "\" to an internal user", e); //...and continue doing this for the remaining users
 				}
 			}
 		}
