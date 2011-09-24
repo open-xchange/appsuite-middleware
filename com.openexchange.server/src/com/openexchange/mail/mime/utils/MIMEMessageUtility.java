@@ -111,6 +111,8 @@ public final class MIMEMessageUtility {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MIMEMessageUtility.class));
 
+    private static final boolean TRACE = LOG.isTraceEnabled();
+
     private static final Set<HeaderName> ENCODINGS;
 
     private static final MailDateFormat MAIL_DATE_FORMAT;
@@ -905,6 +907,8 @@ public final class MIMEMessageUtility {
         }
     }
 
+    private static final Pattern SPLIT = Pattern.compile("\\s*,\\s*");
+
     /**
      * Parse the given sequence of addresses into InternetAddress objects by invoking
      * <code>{@link InternetAddress#parse(String, boolean)}</code>. If <code>strict</code> is false, simple email addresses separated by
@@ -933,6 +937,14 @@ public final class MIMEMessageUtility {
             addrs = QuotedInternetAddress.parse(al, strict);
         } catch (final AddressException e) {
             if (failOnError) {
+                final String[] sAddrs = SPLIT.split(al, 0);
+                for (final String sAddr : sAddrs) {
+                    final QuotedInternetAddress tmp = new QuotedInternetAddress(sAddr, strict);
+                    if (TRACE) {
+                        LOG.trace(tmp);
+                    }
+                }
+                // Hm... single parse did not fail, throw original exception instead
                 throw e;
             }
             if (LOG.isDebugEnabled()) {
