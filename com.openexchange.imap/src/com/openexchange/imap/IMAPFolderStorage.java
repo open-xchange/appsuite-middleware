@@ -73,6 +73,7 @@ import javax.mail.StoreClosedException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.imap.acl.ACLExtension;
 import com.openexchange.imap.cache.FolderCache;
 import com.openexchange.imap.cache.ListLsubCache;
@@ -2600,7 +2601,13 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     imapStore,
                     ctx));
             } catch (final OXException e) {
-                if (Entity2ACLExceptionCode.UNKNOWN_USER.getNumber() == e.getCode() && e.isPrefix("ACL")) {
+                if (Entity2ACLExceptionCode.UNKNOWN_USER.equals(e)) {
+                    // Obviously the user is not known, skip
+                    if (DEBUG) {
+                        LOG.debug(new StringBuilder().append("User ").append(aclPermission.getEntity()).append(
+                            " is not known on IMAP server \"").append(imapConfig.getImapServerAddress()).append('"').toString());
+                    }
+                } else if (UserExceptionCode.USER_NOT_FOUND.equals(e)) {
                     // Obviously the user is not known, skip
                     if (DEBUG) {
                         LOG.debug(new StringBuilder().append("User ").append(aclPermission.getEntity()).append(
