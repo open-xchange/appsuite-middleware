@@ -52,6 +52,7 @@ package com.openexchange.ajax.login;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -63,52 +64,54 @@ import com.openexchange.tools.encoding.Base64;
 
 /**
  * {@link HashCalculator}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class HashCalculator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(HashCalculator.class));
 
-    public static String getHash(HttpServletRequest req, String client) {
+    private static final Pattern PATTERN_SPLIT = Pattern.compile("\\s*,\\s*");
+
+    private static final Pattern PATTERN_NON_WORD_CHAR = Pattern.compile("\\W");
+
+    public static String getHash(final HttpServletRequest req, final String client) {
         try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
+            final MessageDigest md = MessageDigest.getInstance("MD5");
             md.update(getUserAgent(req).getBytes("UTF-8"));
             md.update(client.getBytes("UTF-8"));
-            String fieldList = ServerServiceRegistry.getInstance().getService(ConfigurationService.class).getProperty(
-                "com.openexchange.cookie.hash.fields",
-                "");
-            String[] fields = fieldList.split("\\s*,\\s*");
-            for (String field : fields) {
-                String header = req.getHeader(field);
+            final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+            final String fieldList = null == service ? "" : service.getProperty("com.openexchange.cookie.hash.fields", "");
+            final String[] fields = PATTERN_SPLIT.split(fieldList, 0);
+            for (final String field : fields) {
+                final String header = req.getHeader(field);
                 if (header != null) {
                     md.update(header.getBytes("UTF-8"));
                 }
             }
-            byte[] digest = md.digest();
-            return Base64.encode(digest).replaceAll("\\W", "");
-        } catch (NoSuchAlgorithmException e) {
+            return PATTERN_NON_WORD_CHAR.matcher(Base64.encode(md.digest())).replaceAll("");
+        } catch (final NoSuchAlgorithmException e) {
             LOG.fatal(e.getMessage(), e);
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             LOG.fatal(e.getMessage(), e);
         }
         return "";
     }
 
-    public static String getHash(HttpServletRequest req) {
+    public static String getHash(final HttpServletRequest req) {
         return getHash(req, getClient(req));
     }
 
-    public static String getClient(HttpServletRequest req) {
-        String parameter = req.getParameter(LoginFields.CLIENT_PARAM);
+    public static String getClient(final HttpServletRequest req) {
+        final String parameter = req.getParameter(LoginFields.CLIENT_PARAM);
         if (parameter == null) {
             return "default";
         }
         return parameter;
     }
 
-    private static String getUserAgent(HttpServletRequest req) {
-        String header = req.getHeader(Header.USER_AGENT);
+    private static String getUserAgent(final HttpServletRequest req) {
+        final String header = req.getHeader(Header.USER_AGENT);
         if (header == null) {
             return "";
         }
