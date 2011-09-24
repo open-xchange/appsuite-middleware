@@ -128,7 +128,14 @@ public final class TwitterServiceImpl implements TwitterService {
         }
         final Configuration configuration =
             OXConfigurationBase.getInstance().generateConfiguration(consumerKey, consumerSecret, twitterToken, twitterTokenSecret);
-        return new TwitterAccessImpl(new OXTwitterImpl(configuration, new OAuthAuthorization(configuration)));
+        final OAuthAuthorization oAuthAuthorization = new OAuthAuthorization(configuration);
+        try {
+            // Ensure presence of access token in authorization instance
+            oAuthAuthorization.getOAuthAccessToken();
+        } catch (final twitter4j.TwitterException e) {
+            throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+        return new TwitterAccessImpl(new OXTwitterImpl(configuration, oAuthAuthorization));
     }
 
     @Override
