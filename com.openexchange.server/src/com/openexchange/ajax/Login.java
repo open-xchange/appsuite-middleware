@@ -269,6 +269,7 @@ public class Login extends AJAXServlet {
                         final String secret = SessionServlet.extractSecret(conf.hashSource, req, session.getHash(), session.getClient());
 
                         if (secret == null || !session.getSecret().equals(secret)) {
+                            LOG.info("Status code 403 (FORBIDDEN): Missing or non-matching secret.");
                             resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                             return;
                         }
@@ -342,13 +343,16 @@ public class Login extends AJAXServlet {
                     final Context context = ContextStorage.getInstance().getContext(session.getContextId());
                     final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
                     if (!context.isEnabled() || !user.isMailEnabled()) {
+                        LOG.info("Status code 403 (FORBIDDEN): Either context " + context.getContextId() + " or user " + user.getId() + " not enabled");
                         resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                         return;
                     }
                 } catch (final UndeclaredThrowableException e) {
+                    LOG.info("Status code 403 (FORBIDDEN): Unexpected error occurred during login: " + e.getMessage());
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 } catch (final OXException e) {
+                    LOG.info("Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: " + session.getContextId() + "/" + session.getUserId());
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
@@ -433,13 +437,16 @@ public class Login extends AJAXServlet {
                     final Context context = ContextStorage.getInstance().getContext(session.getContextId());
                     final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
                     if (!context.isEnabled() || !user.isMailEnabled()) {
+                        LOG.info("Status code 403 (FORBIDDEN): Either context " + context.getContextId() + " or user " + user.getId() + " not enabled");
                         resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                         return;
                     }
                 } catch (final UndeclaredThrowableException e) {
+                    LOG.info("Status code 403 (FORBIDDEN): Unexpected error occurred during login: " + e.getMessage());
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 } catch (final OXException e) {
+                    LOG.info("Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: " + session.getContextId() + "/" + session.getUserId());
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }

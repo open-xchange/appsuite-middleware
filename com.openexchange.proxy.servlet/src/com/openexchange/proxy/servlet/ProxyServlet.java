@@ -69,6 +69,7 @@ import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.SessionServlet;
+import com.openexchange.log.Log;
 import com.openexchange.proxy.ProxyRegistration;
 import com.openexchange.proxy.Response;
 import com.openexchange.proxy.Restriction;
@@ -175,7 +176,7 @@ public class ProxyServlet extends SessionServlet {
             /*
              * GET request failed
              */
-            String txt = httpMethod.getStatusLine().toString();
+            final String txt = httpMethod.getStatusLine().toString();
             closeHttpMethod(httpMethod);
             resp.sendError(responseCode, txt);
             return;
@@ -184,6 +185,8 @@ public class ProxyServlet extends SessionServlet {
             final Response response = new ResponseImpl(httpMethod);
             for (final Restriction restriction : registration.getRestrictions()) {
                 if (!restriction.allow(response)) {
+                    final org.apache.commons.logging.Log log = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ProxyServlet.class));
+                    log.info("Status code 403 (FORBIDDEN): Restriction failed: " + restriction.getDescription());
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Restriction failed: " + restriction.getDescription());
                     return;
                 }
