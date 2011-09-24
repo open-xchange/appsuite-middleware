@@ -216,7 +216,16 @@ public enum OXCalendarExceptionCodes implements OXExceptionCode {
     COULD_NOT_FIND_PARTICIPANT("Could not find participant for this object.", 103, Category.CATEGORY_USER_INPUT),
     /** Was not able to calculate next upcoming reminder for series appointment %2$d in context %1$d. */
     NEXT_REMINDER_FAILED("Was not able to calculate next upcoming reminder for series appointment %2$d in context %1$d.", 104, Category.CATEGORY_ERROR),
-    INVALID_SEQUENCE("Invalid Sequence value: %1$d", 105, Category.CATEGORY_USER_INPUT);
+    /**
+     * Invalid sequence value: %1$d
+     */
+    INVALID_SEQUENCE("Invalid sequence value: %1$d", 105, Category.CATEGORY_USER_INPUT),
+    /**
+     * An external participant with email address %1$s is already contained. Please remove duplicate participant and retry.
+     */
+    DUPLICATE_EXTERNAL_PARTICIPANT("An external participant with email address %1$s is already contained. Please remove duplicate participant and retry.", 106, Category.CATEGORY_USER_INPUT),
+    
+    ;
 
     /**
      * Message of the exception.
