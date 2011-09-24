@@ -50,6 +50,7 @@
 package com.openexchange.folderstorage.outlook.osgi;
 
 import static com.openexchange.folderstorage.outlook.OutlookServiceRegistry.getServiceRegistry;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -63,12 +64,14 @@ import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.folderstorage.FolderEventConstants;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.folderstorage.outlook.OutlookServiceRegistry;
 import com.openexchange.folderstorage.outlook.memory.MemoryTable;
+import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
@@ -152,6 +155,19 @@ public class OutlookFolderStorageActivator extends DeferredActivator {
             serviceRegistrations = new ArrayList<ServiceRegistration<?>>(2);
             // DeleteListener was added statically
             // serviceRegistrations.add(context.registerService(DeleteListener.class.getName(), new OutlookFolderDeleteListener(), null));
+
+            serviceRegistrations.add(context.registerService(MailAccountDeleteListener.class, new MailAccountDeleteListener() {
+
+                @Override
+                public void onBeforeMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OXException {
+                    OutlookFolderStorage.clearTCM();
+                }
+
+                @Override
+                public void onAfterMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OXException {
+                    // Nothing todo
+                }
+            }, null));
 
             final Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
             dictionary.put("tree", OutlookFolderStorage.OUTLOOK_TREE_ID);
