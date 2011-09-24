@@ -60,9 +60,11 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -80,7 +82,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
     }
 
     @Override
-    public void insertParticipants(Context ctx, Connection con, int appointmentId, ExternalUserParticipant[] participants) throws OXException {
+    public void insertParticipants(final Context ctx, final Connection con, final int appointmentId, final ExternalUserParticipant[] participants) throws OXException {
         if (null == participants || 0 == participants.length) {
             return;
         }
@@ -90,17 +92,25 @@ public class RdbParticipantStorage extends ParticipantStorage {
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
             stmt.setInt(pos++, appointmentId);
-            for (ExternalUserParticipant participant : participants) {
+            final Set<String> addresses = new HashSet<String>(participants.length);
+            for (final ExternalUserParticipant participant : participants) {
                 pos = 3;
-                stmt.setString(pos++, participant.getEmailAddress());
-                String displayName = participant.getDisplayName();
+                final String emailAddress = participant.getEmailAddress();
+                if (!addresses.add(emailAddress)) {
+                    /*
+                     * Duplicate address
+                     */
+                    throw OXCalendarExceptionCodes.DUPLICATE_EXTERNAL_PARTICIPANT.create(emailAddress);
+                }
+                stmt.setString(pos++, emailAddress);
+                final String displayName = participant.getDisplayName();
                 if (null == displayName) {
                     stmt.setNull(pos++, Types.VARCHAR);
                 } else {
                     stmt.setString(pos++, displayName);
                 }
                 stmt.setInt(pos++, participant.getConfirm());
-                String message = participant.getMessage();
+                final String message = participant.getMessage();
                 if (null == message) {
                     stmt.setNull(pos++, Types.VARCHAR);
                 } else {
@@ -120,66 +130,66 @@ public class RdbParticipantStorage extends ParticipantStorage {
     }
 
     @Override
-    public Map<Integer, ExternalUserParticipant[]> selectExternal(Context ctx, Connection con, int[] appointmentIds) throws OXException {
+    public Map<Integer, ExternalUserParticipant[]> selectExternal(final Context ctx, final Connection con, final int[] appointmentIds) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         final Map<Integer, List<ExternalUserParticipant>> retval = new HashMap<Integer, List<ExternalUserParticipant>>(appointmentIds.length, 1);
-        for (int appointmentId : appointmentIds) {
+        for (final int appointmentId : appointmentIds) {
             retval.put(I(appointmentId), new ArrayList<ExternalUserParticipant>());
         }
         try {
             stmt = con.prepareStatement(getIN(SQL.SELECT_EXTERNAL, appointmentIds.length));
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
-            for (int appointmentId : appointmentIds) {
+            for (final int appointmentId : appointmentIds) {
                 stmt.setInt(pos++, appointmentId);
             }
             rs = stmt.executeQuery();
             while (rs.next()) {
                 pos = 1;
                 final int appointmentId = rs.getInt(pos++);
-                ExternalUserParticipant participant = new ExternalUserParticipant(rs.getString(pos++));
+                final ExternalUserParticipant participant = new ExternalUserParticipant(rs.getString(pos++));
                 participant.setDisplayName(rs.getString(pos++));
                 participant.setConfirm(rs.getInt(pos++));
                 participant.setMessage(rs.getString(pos++));
-                List<ExternalUserParticipant> participants = retval.get(I(appointmentId));
+                final List<ExternalUserParticipant> participants = retval.get(I(appointmentId));
                 participants.add(participant);
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw OXCalendarExceptionCodes.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(rs, stmt);
         }
         final Map<Integer, ExternalUserParticipant[]> retval2 = new HashMap<Integer, ExternalUserParticipant[]>();
-        for (Entry<Integer, List<ExternalUserParticipant>> entry : retval.entrySet()) {
-            List<ExternalUserParticipant> participants = entry.getValue();
+        for (final Entry<Integer, List<ExternalUserParticipant>> entry : retval.entrySet()) {
+            final List<ExternalUserParticipant> participants = entry.getValue();
             retval2.put(entry.getKey(), participants.toArray(new ExternalUserParticipant[participants.size()]));
         }
         return Collections.unmodifiableMap(retval2);
     }
 
     @Override
-    public void deleteParticipants(Context ctx, Connection con, int appointmentId, ExternalUserParticipant[] participants) throws OXException {
+    public void deleteParticipants(final Context ctx, final Connection con, final int appointmentId, final ExternalUserParticipant[] participants) throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(SQL.DELETE_EXTERNAL);
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
             stmt.setInt(pos++, appointmentId);
-            for (ExternalUserParticipant participant : participants) {
+            for (final ExternalUserParticipant participant : participants) {
                 stmt.setString(pos, participant.getEmailAddress());
                 stmt.addBatch();
             }
-            int[] rowss = stmt.executeBatch();
+            final int[] rowss = stmt.executeBatch();
             if (rowss.length != participants.length) {
                 throw OXCalendarExceptionCodes.WRONG_ROW_COUNT.create(I(participants.length), I(rowss.length));
             }
-            for (int rows : rowss) {
+            for (final int rows : rowss) {
                 if (1 != rows) {
                     throw OXCalendarExceptionCodes.WRONG_ROW_COUNT.create(I(1), I(rows));
                 }
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw OXCalendarExceptionCodes.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(stmt);
