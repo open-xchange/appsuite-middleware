@@ -920,7 +920,20 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                                  * Add ZIP entry to output stream
                                  */
                                 final String subject = mails[i].getSubject();
-                                out.putNextEntry(new ZipEntry((isEmpty(subject) ? "mail" + (i+1) : subject.replaceAll("\\s+", "_").replaceAll("[^\\p{ASCII}]+", "_")) + ".eml"));
+                                final String name = (isEmpty(subject) ? "mail" + (i+1) : subject.replaceAll("\\s+", "_").replaceAll("[^\\p{ASCII}]+", "_")) + ".eml";
+                                int num = 1;
+                                while (true) {
+                                    try {
+                                        out.putNextEntry(new ZipEntry(name + (num > 1 ? "_(" + num + ")" : "")));
+                                        break;
+                                    } catch (final java.util.zip.ZipException e) {
+                                        final String message = e.getMessage();
+                                        if (message == null || !message.startsWith("duplicate entry")) {
+                                            throw e;
+                                        }
+                                        num++;
+                                    }
+                                }
                                 /*
                                  * Transfer bytes from the file to the ZIP file
                                  */
@@ -1028,7 +1041,20 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                                 /*
                                  * Add ZIP entry to output stream
                                  */
-                                out.putNextEntry(new ZipEntry(parts[i].getFileName().replaceAll("[^\\p{ASCII}]+", "_")));
+                                final String name = parts[i].getFileName().replaceAll("[^\\p{ASCII}]+", "_");
+                                int num = 1;
+                                while (true) {
+                                    try {
+                                        out.putNextEntry(new ZipEntry(name + (num > 1 ? "_(" + num + ")" : "")));
+                                        break;
+                                    } catch (final java.util.zip.ZipException e) {
+                                        final String message = e.getMessage();
+                                        if (message == null || !message.startsWith("duplicate entry")) {
+                                            throw e;
+                                        }
+                                        num++;
+                                    }
+                                }
                                 /*
                                  * Transfer bytes from the file to the ZIP file
                                  */
