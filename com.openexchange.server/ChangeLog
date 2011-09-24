@@ -8,6 +8,7 @@
  - Fix for bug 20419: Preparing JSON strings before parsing to a JSON object
  - Fix for bug 20415: FIxed possible NPE when calculating hash
  - Fix for bug 20410: Dealing with absent user on IMAP folder creation
+ - Fix for bug 20404: Trying to identify malformed email address in address list
 
 * 2011-09-23 - thorben.betten@open-xchange.com
 
