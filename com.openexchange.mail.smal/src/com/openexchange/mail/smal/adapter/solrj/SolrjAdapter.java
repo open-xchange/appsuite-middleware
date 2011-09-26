@@ -50,8 +50,8 @@
 package com.openexchange.mail.smal.adapter.solrj;
 
 import static com.openexchange.mail.mime.QuotedInternetAddress.toIDN;
+import static com.openexchange.mail.smal.adapter.IndexAdapters.detectLocale;
 import static com.openexchange.mail.smal.adapter.IndexAdapters.isEmpty;
-import static com.openexchange.mail.smal.adapter.solrj.SolrUtils.detectLocale;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -96,6 +96,7 @@ import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.smal.SMALExceptionCodes;
 import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.mail.smal.adapter.IndexAdapter;
+import com.openexchange.mail.smal.adapter.IndexAdapters;
 import com.openexchange.mail.smal.adapter.solrj.cache.CommonsHttpSolrServerCache;
 import com.openexchange.session.Session;
 
@@ -295,7 +296,7 @@ public final class SolrjAdapter implements IndexAdapter {
         }
         // Subject
         final StringBuilder pre = new StringBuilder("subject_");
-        for (final Locale l : SolrUtils.KNOWN_LOCALES) {
+        for (final Locale l : IndexAdapters.KNOWN_LOCALES) {
             pre.setLength(8);
             final String subject = getFieldValue(pre.append(l.getLanguage()).toString(), document);
             if (null != subject) {
@@ -724,7 +725,7 @@ public final class SolrjAdapter implements IndexAdapter {
 
     private static boolean isSupportedLocale(final Locale locale) {
         final String language = locale.getLanguage();
-        for (final Locale loc : SolrUtils.KNOWN_LOCALES) {
+        for (final Locale loc : IndexAdapters.KNOWN_LOCALES) {
             if (language.equals(loc.getLanguage())) {
                 return true;
             }

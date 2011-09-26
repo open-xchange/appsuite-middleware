@@ -49,6 +49,15 @@
 
 package com.openexchange.mail.smal.adapter;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
+import com.openexchange.exception.OXException;
+import com.openexchange.langdetect.LanguageDetectionService;
+import com.openexchange.mail.smal.SMALServiceLookup;
+import com.openexchange.server.ServiceExceptionCode;
+
 /**
  * {@link IndexAdapters} - A utility class for index adapters.
  * 
@@ -79,5 +88,45 @@ public final class IndexAdapters {
             empty = Character.isWhitespace(chars[i]);
         }
         return empty;
+    }
+
+    /**
+     * Currently known languages.
+     */
+    public static final Set<Locale> KNOWN_LOCALES;
+
+    static {
+        final Set<Locale> set = new HashSet<Locale>(10);
+        set.add(new Locale("en"));
+        set.add(new Locale("de"));
+        // set.add(new Locale("fr"));
+        // set.add(new Locale("nl"));
+        // set.add(new Locale("sv"));
+        // set.add(new Locale("es"));
+        // set.add(new Locale("ja"));
+        // set.add(new Locale("pl"));
+        // set.add(new Locale("it"));
+        // set.add(new Locale("zh"));
+        // set.add(new Locale("hu"));
+        // set.add(new Locale("sk"));
+        // set.add(new Locale("cs"));
+        // set.add(new Locale("lv"));
+        KNOWN_LOCALES = Collections.unmodifiableSet(set);
+    }
+
+    /**
+     * Detects the locale.
+     * 
+     * @param str The string source
+     * @return The detected locale
+     * @throws OXException If language detection fails
+     */
+    public static Locale detectLocale(final String str) throws OXException {
+        try {
+            return SMALServiceLookup.getServiceStatic(LanguageDetectionService.class).findLanguages(str).get(0);
+        } catch (final IllegalStateException e) {
+            // Missing service
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(e, LanguageDetectionService.class.getName());
+        }
     }
 }

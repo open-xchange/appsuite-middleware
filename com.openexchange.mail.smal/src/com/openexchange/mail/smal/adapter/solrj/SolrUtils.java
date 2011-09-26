@@ -50,17 +50,9 @@
 package com.openexchange.mail.smal.adapter.solrj;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Set;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
-import com.openexchange.exception.OXException;
-import com.openexchange.langdetect.LanguageDetectionService;
 import com.openexchange.log.Log;
-import com.openexchange.mail.smal.SMALServiceLookup;
-import com.openexchange.server.ServiceExceptionCode;
 
 
 /**
@@ -80,30 +72,6 @@ public final class SolrUtils {
     }
 
     /**
-     * Currently known languages.
-     */
-    public static final Set<Locale> KNOWN_LOCALES;
-
-    static {
-        final Set<Locale> set = new HashSet<Locale>(10);
-        set.add(new Locale("en"));
-        set.add(new Locale("de"));
-        set.add(new Locale("fr"));
-        set.add(new Locale("nl"));
-        set.add(new Locale("sv"));
-        set.add(new Locale("es"));
-        set.add(new Locale("ja"));
-        set.add(new Locale("pl"));
-        set.add(new Locale("it"));
-        set.add(new Locale("zh"));
-        set.add(new Locale("hu"));
-        set.add(new Locale("sk"));
-        set.add(new Locale("cs"));
-        set.add(new Locale("cs"));
-        KNOWN_LOCALES = Collections.unmodifiableSet(set);
-    }
-
-    /**
      * Performs a roll-back for specified Solr server.
      * 
      * @param solrServer The Solr server
@@ -119,22 +87,6 @@ public final class SolrUtils {
             } catch (final RuntimeException e) {
                 LOG.warn("Rollback of Solr server failed.", e);
             }
-        }
-    }
-
-    /**
-     * Detects the locale.
-     * 
-     * @param str The string source
-     * @return The detected locale
-     * @throws OXException If language detection fails
-     */
-    public static Locale detectLocale(final String str) throws OXException {
-        try {
-            return SMALServiceLookup.getServiceStatic(LanguageDetectionService.class).findLanguages(str).get(0);
-        } catch (final IllegalStateException e) {
-            // Missing service
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(e, LanguageDetectionService.class.getName());
         }
     }
 
