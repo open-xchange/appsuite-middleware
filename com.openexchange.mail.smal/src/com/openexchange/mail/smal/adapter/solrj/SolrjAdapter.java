@@ -211,6 +211,7 @@ public final class SolrjAdapter implements IndexAdapter {
     private static MailMessage readDocument(final SolrDocument document) throws OXException {
         final MailMessage mail = new IDMailMessage(document.getFieldValue("id").toString(), document.getFieldValue("full_name").toString());
         mail.setAccountId(SolrjAdapter.<Integer> getFieldValue("account", document).intValue());
+        mail.setColorLabel(SolrjAdapter.<Integer> getFieldValue("color_label", document).intValue());
         mail.setSize(SolrjAdapter.<Long> getFieldValue("size", document).longValue());
         mail.setReceivedDate(new Date(SolrjAdapter.<Long> getFieldValue("received_date", document).longValue()));
         mail.setSentDate(new Date(SolrjAdapter.<Long> getFieldValue("sent_date", document).longValue()));
@@ -613,6 +614,14 @@ public final class SolrjAdapter implements IndexAdapter {
             field = new SolrInputField("bcc_plain");
             field.setValue(mail.getFirstHeader("Bcc"), 1.0f);
             inputDocument.put("bcc_plain", field);
+        }
+        /*
+         * Write color label
+         */
+        {
+            final SolrInputField field = new SolrInputField("color_label");
+            field.setValue(Integer.valueOf(mail.getColorLabel()), 1.0f);
+            inputDocument.put("color_label", field);
         }
         /*
          * Write size
