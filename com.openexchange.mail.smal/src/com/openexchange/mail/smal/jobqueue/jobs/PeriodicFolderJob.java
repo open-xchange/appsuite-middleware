@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.smal.jobqueue;
+package com.openexchange.mail.smal.jobqueue.jobs;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -59,12 +59,13 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.smal.SMALServiceLookup;
+import com.openexchange.mail.smal.jobqueue.Constants;
+import com.openexchange.mail.smal.jobqueue.JobQueue;
 import com.openexchange.tools.sql.DBUtils;
-
 
 /**
  * {@link PeriodicFolderJob}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PeriodicFolderJob extends AbstractMailSyncJob {
@@ -78,9 +79,10 @@ public final class PeriodicFolderJob extends AbstractMailSyncJob {
 
     /**
      * Initializes a new {@link PeriodicFolderJob}.
-     * @param accountId
-     * @param userId
-     * @param contextId
+     * 
+     * @param accountId The account identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
      */
     public PeriodicFolderJob(final int accountId, final int userId, final int contextId) {
         super(accountId, userId, contextId);
@@ -119,14 +121,6 @@ public final class PeriodicFolderJob extends AbstractMailSyncJob {
         }
     }
 
-    /**
-     * Checks if a sync should be performed for specified full name.
-     *
-     * @param fullName The full name
-     * @param now The current time milliseconds
-     * @return <code>true</code> if a sync should be performed for passed full name; otherwise <code>false</code>
-     * @throws OXException If an error occurs
-     */
     private List<String> getExceededFolders(final long now) throws OXException {
         final DatabaseService databaseService = SMALServiceLookup.getServiceStatic(DatabaseService.class);
         if (null == databaseService) {
@@ -136,8 +130,7 @@ public final class PeriodicFolderJob extends AbstractMailSyncJob {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt =
-                con.prepareStatement("SELECT fullName FROM mailSync WHERE cid = ? AND user = ? AND accountId = ? AND timestamp < ?");
+            stmt = con.prepareStatement("SELECT fullName FROM mailSync WHERE cid = ? AND user = ? AND accountId = ? AND timestamp < ?");
             int pos = 1;
             stmt.setLong(pos++, contextId);
             stmt.setLong(pos++, userId);

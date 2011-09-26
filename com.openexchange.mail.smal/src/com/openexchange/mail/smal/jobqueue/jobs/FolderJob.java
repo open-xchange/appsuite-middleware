@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.smal.jobqueue;
+package com.openexchange.mail.smal.jobqueue.jobs;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -76,6 +76,8 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.smal.SMALMailAccess;
 import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.mail.smal.adapter.IndexAdapter;
+import com.openexchange.mail.smal.jobqueue.Constants;
+import com.openexchange.mail.smal.jobqueue.JobQueue;
 import com.openexchange.session.Session;
 import com.openexchange.tools.sql.DBUtils;
 
