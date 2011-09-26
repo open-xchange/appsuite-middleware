@@ -252,7 +252,7 @@ public final class ServerActivator extends DeferredActivator {
     private static final Class<?>[] NEEDED_SERVICES_ADMIN =
         {
             ConfigurationService.class, CacheService.class, EventAdmin.class, TimerService.class, ThreadPoolService.class,
-            CalendarAdministrationService.class, CalendarCollectionService.class
+            CalendarAdministrationService.class, CalendarCollectionService.class, AppointmentSqlFactoryService.class
         };
 
     private static final Class<?>[] NEEDED_SERVICES_SERVER =
