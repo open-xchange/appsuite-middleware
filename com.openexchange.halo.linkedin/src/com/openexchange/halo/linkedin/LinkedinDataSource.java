@@ -49,6 +49,7 @@
 package com.openexchange.halo.linkedin;
 
 import java.util.List;
+import java.util.ServiceLoader;
 
 import org.json.JSONObject;
 
@@ -65,15 +66,35 @@ import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 import com.openexchange.oauth.linkedin.LinkedInService;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 
 public class LinkedinDataSource implements HaloContactDataSource {
 
 	private LinkedInService linkedinService;
+	
 	private OAuthService oauthService;
+	
+	
+	public LinkedInService getLinkedinService() {
+		return linkedinService;
+	}
 
-	public LinkedinDataSource(LinkedinHaloActivator activator) {
+	public void setLinkedinService(LinkedInService linkedinService) {
+		this.linkedinService = linkedinService;
+	}
+
+	public OAuthService getOauthService() {
+		return oauthService;
+	}
+
+	public void setOauthService(OAuthService oauthService) {
+		this.oauthService = oauthService;
+	}
+
+
+	public LinkedinDataSource(ServiceLookup activator) {
 		linkedinService = activator.getService(LinkedInService.class);
 		oauthService = activator.getService(OAuthService.class);
 		
@@ -92,14 +113,14 @@ public class LinkedinDataSource implements HaloContactDataSource {
 		
 		String email = query.getContact().getEmail1();
 
-		List<OAuthAccount> accounts = oauthService.getAccounts("com.openexchange.socialplugin.linkedin", password, uid, cid);
-		if(accounts.size() != 1)
-			throw OXException.general("Confused: More than one LinkedIn account"); //TODO proper exception handling
+		List<OAuthAccount> accounts = getOauthService().getAccounts("com.openexchange.socialplugin.linkedin", password, uid, cid);
+		if(accounts.size() == 0)
+			throw new OXException(1).setPrefix("HAL-LI").setLogMessage("Need at least 1 LinkedIn account");
+		
 		OAuthAccount linkedinAccount = accounts.get(0);
-		JSONObject json = linkedinService.getProfileForEMail(email, password, uid, cid, linkedinAccount.getId());
+		JSONObject json = getLinkedinService().getProfileForEMail(email, password, uid, cid, linkedinAccount.getId());
 		AJAXRequestResult result = new AJAXRequestResult();
-		result.setResultObject(json);
-		result.setType(ResultType.COMMON); //TODO
-		return null;
+		result.setResultObject(json, "json");
+		return result;
 	}
 }

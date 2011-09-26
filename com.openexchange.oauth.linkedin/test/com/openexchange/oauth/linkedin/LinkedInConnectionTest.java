@@ -61,7 +61,9 @@ import junit.framework.TestCase;
 import org.json.JSONObject;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.LinkedInApi;
+import org.scribe.model.Response;
 import org.scribe.model.Token;
+import org.scribe.model.Verb;
 import org.scribe.model.Verifier;
 import org.scribe.oauth.OAuthService;
 
@@ -80,7 +82,9 @@ public class LinkedInConnectionTest extends TestCase {
 
     private String apiKey = "HANYG4YSMun5b1lhv-aIEUtnIvNaHK2Bemjv7VvYI_frJpllhVY9HH8ZVOrII7UV";
     private String apiSecret = "t2-AWfC0YqMwUjt3v5lxw9VJlDE3BZ-88k7-834Rq-QH-tq_xjqdLUHQz_glLaEb";
-
+    private String LI_ID_KLEIN = "a0EFOQ6WNm"; //LinkedIn ID of Marcus Klein - I assume every dev testing this will have either Marcus or Martin in their contact list
+    private String LI_ID_KAUSS = "hzFnTZPLsz"; //LinkedIn ID of Martin Kauss - I assume every dev testing this will have either Marcus or Martin in their contact list
+    
     @Override
     public void setUp(){
         Activator activator = new Activator();
@@ -161,8 +165,27 @@ public class LinkedInConnectionTest extends TestCase {
         }
     }
     
-    public void testGetProfile() throws OXException{
-        JSONObject profile = linkedIn.getProfileForEMail("nomatter@ox.invalid", "password",1,1,1);
-        System.out.println(profile);
+
+    public void testGetContacts() {
+    	linkedIn.getContacts("password",1,1,1);
     }
+    
+    
+    public void testGetProfileForEMail() throws OXException{
+    	JSONObject profileForEMail = linkedIn.getProfileForEMail("tobiasprinz@gmx.net","password",1,1,1);
+    }
+
+	public void testGetProfileForId() throws OXException {
+		JSONObject profileForId = linkedIn.getProfileForId(LI_ID_KLEIN,"password",1,1,1);
+		System.out.println(profileForId);
+	}
+
+	public void testGetConnections() throws OXException {
+		JSONObject connections = linkedIn.getConnections("password",1,1,1);
+	}
+
+	public void testGetUsersConnectionsIds() throws OXException {
+		List<String> connectionIds = linkedIn.getUsersConnectionsIds("password",1,1,1);
+		assertTrue("Should contain either Kleini or Big Kauss in contact list", connectionIds.contains(LI_ID_KAUSS) || connectionIds.contains(LI_ID_KLEIN)); //you're an OX programmer, aren't you?
+	}
 }

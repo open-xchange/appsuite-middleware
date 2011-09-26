@@ -67,5 +67,23 @@ public interface LinkedInService {
 
     public String getAccountDisplayName(String password, int user, int contextId, int accountId);
    
+    /**
+     * @return all data on a contact identified by e-mail (special feature, only available with extended API keys) 
+     */
 	public JSONObject getProfileForEMail(String email, String password, int user, int contextId, int accountId) throws OXException;
+
+    /**
+     * @return all data on a contact identified by id 
+     */
+	public JSONObject getProfileForId(String id, String password, int user, int contextId, int accountId) throws OXException;
+
+	/**
+	 * @return all data of all connections a user has
+	 */
+	public JSONObject getConnections(String password, int user, int contextId,	int accountId) throws OXException;
+
+	/**
+	 * @return the IDs of all connections a user has (so you can query them separately)
+	 */
+	public List<String> getUsersConnectionsIds(String password, int user, int contextId, int accountId) throws OXException;
 }

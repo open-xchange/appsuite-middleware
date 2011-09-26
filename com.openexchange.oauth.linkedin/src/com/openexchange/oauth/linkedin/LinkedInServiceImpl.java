@@ -53,12 +53,14 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.scribe.builder.ServiceBuilder;
@@ -87,9 +89,10 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  */
 public class LinkedInServiceImpl implements LinkedInService{
 
-    private static final String CONNECTIONS_URL = "http://api.linkedin.com/v1/people/~/connections:(id,first-name,last-name,phone-numbers,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url,positions)";
+    private static final String ALL_FIELDS = ":(id,first-name,last-name,phone-numbers,headline,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url,positions,industry)";
+	private static final String CONNECTIONS_URL = "http://api.linkedin.com/v1/people/~/connections:(id,first-name,last-name,phone-numbers,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url,positions)";
     private static final String PROFILE_URL = "http://api.linkedin.com/v1/people/~:(id,first-name,last-name,phone-numbers,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url,positions)";
-    private static final String FORMAT_JSON = "?format=json";
+    private static final String IN_JSON = "?format=json";
     
     private Activator activator;
 
@@ -258,6 +261,18 @@ public class LinkedInServiceImpl implements LinkedInService{
         return textVal;
     }
 
+	private JSONObject extractJson(Response response) throws OXException {
+		JSONObject json;
+		try {
+			json = new JSONObject(response.getBody());
+		} catch (JSONException e) {
+			throw OXException.general("Could not parse JSON: " + response.getBody()); //TODO: Different exception - wasn't this supposed to get easier with the rewrite? 
+		}
+        return json;
+	}
+	
+	
+	
     @Override
     public String getAccountDisplayName(String password, int user, int contextId, int accountId) {
         String displayName="";
@@ -279,15 +294,44 @@ public class LinkedInServiceImpl implements LinkedInService{
         return contacts;
     }
     
+    
     @Override
     public JSONObject getProfileForEMail(String email, String password, int user, int contextId, int accountId) throws OXException{
-    	Response response = performRequest(password, user, contextId, accountId, Verb.GET, PROFILE_URL + FORMAT_JSON);
-    	JSONObject json;
-		try {
-			json = new JSONObject(response.getBody());
-		} catch (JSONException e) {
-			throw OXException.general("Could not parse JSON: " + response.getBody()); //TODO: Different exception - wasn't this supposed to get easier with the rewrite? 
-		}
-        return json;
+    	throw OXException.general("Not implemented, because LinkedIn has not upgraded our ID yet");
     }
+
+	@Override
+	public JSONObject getProfileForId(String id, String password, int user, int contextId, int accountId) throws OXException {
+		String uri = "http://api.linkedin.com/v1/people/id="+id+ALL_FIELDS;
+	   	Response response = performRequest(password, user, contextId, accountId, Verb.GET, uri + IN_JSON);
+    	return extractJson(response);
+	}
+
+	@Override
+	public JSONObject getConnections(String password, int user, int contextId,	int accountId) throws OXException {
+		String uri = "http://api.linkedin.com/v1/people/~/connections"+ALL_FIELDS;
+	   	Response response = performRequest(password, user, contextId, accountId, Verb.GET, uri + IN_JSON);
+    	return extractJson(response);
+	}
+
+	@Override
+	public List<String> getUsersConnectionsIds(String password, int user, int contextId, int accountId) throws OXException {
+		String uri = "http://api.linkedin.com/v1/people/~/connections:(id)";
+	   	Response response = performRequest(password, user, contextId, accountId, Verb.GET, uri + IN_JSON);
+	   	return extractIds(response);
+	}
+
+	private List<String> extractIds(Response response) throws OXException{
+		List<String> result = new LinkedList();
+		try {
+			JSONObject json = new JSONObject(response.getBody());
+			JSONArray ids = json.getJSONArray("values");
+			for(int i = 0, max = ids.length(); i < max; i++){
+				result.add(ids.getJSONObject(i).getString("id"));
+			}
+		} catch (JSONException e) {
+			
+		}
+		return result;
+	}
 }
