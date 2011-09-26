@@ -49,13 +49,13 @@
 
 package com.openexchange.ajax.mailaccount;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.List;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.mailaccount.actions.MailAccountAllRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountAllResponse;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccountDescription;
 

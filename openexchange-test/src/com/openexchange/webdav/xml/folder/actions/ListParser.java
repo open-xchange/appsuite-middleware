@@ -49,9 +49,8 @@
 
 package com.openexchange.webdav.xml.folder.actions;
 
-import com.openexchange.exception.OXException;
 import org.jdom.Document;
-
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.webdav.xml.framework.AbstractWebDAVParser;

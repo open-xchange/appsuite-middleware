@@ -51,14 +51,11 @@ package com.openexchange.webdav;
 
 import java.io.ByteArrayInputStream;
 import java.util.Properties;
-
 import junit.framework.TestCase;
-
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
-
 import com.meterware.httpunit.Base64;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.test.WebdavInit;

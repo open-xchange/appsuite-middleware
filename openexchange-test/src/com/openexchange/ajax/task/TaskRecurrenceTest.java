@@ -50,7 +50,6 @@
 package com.openexchange.ajax.task;
 
 import org.junit.Test;
-
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TestTask;
 

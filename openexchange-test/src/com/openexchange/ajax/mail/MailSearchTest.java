@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -58,6 +57,7 @@ import org.xml.sax.SAXException;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.mail.actions.MailSearchRequest;
 import com.openexchange.ajax.mail.actions.MailSearchResponse;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailListField;
 
 /**

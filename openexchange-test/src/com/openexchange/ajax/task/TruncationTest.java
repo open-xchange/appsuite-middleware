@@ -49,10 +49,10 @@
 
 package com.openexchange.ajax.task;
 
-import com.openexchange.exception.OXException.ProblematicAttribute;
-import com.openexchange.exception.OXException.Truncated;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
+import com.openexchange.exception.OXException.ProblematicAttribute;
+import com.openexchange.exception.OXException.Truncated;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.tools.RandomString;
 

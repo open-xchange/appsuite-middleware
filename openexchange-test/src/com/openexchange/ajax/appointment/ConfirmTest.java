@@ -2,7 +2,6 @@ package com.openexchange.ajax.appointment;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.FolderTest;
 import com.openexchange.groupware.container.Appointment;

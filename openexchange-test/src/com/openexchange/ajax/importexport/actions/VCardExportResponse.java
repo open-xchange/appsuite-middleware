@@ -49,12 +49,10 @@
 
 package com.openexchange.ajax.importexport.actions;
 
+import java.util.Date;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.ProblematicAttribute;
-
-import java.util.Date;
-
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 
 public class VCardExportResponse extends AbstractAJAXResponse {

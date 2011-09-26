@@ -96,8 +96,6 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
         return INSTANCE;
     }
 
-    private static final Locale LOCALE_DEFAULT = Locale.US;
-
     private static final int BUFFER_SIZE = 2048;
 
     private final LanguageCategorization defaultLanguageCategorization;
@@ -178,12 +176,13 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
         final List<String> languages = defaultLanguageCategorization.findLanguage(new ByteArrayList(tmp.toByteArray()));
         final List<Locale> locales = new ArrayList<Locale>(languages.size());
         for (final String language : languages) {
-            final String lang = language.substring(0, language.indexOf('.')).toLowerCase(locale_us);
-            final int pos = lang.indexOf('-');
+            int pos = language.indexOf('.');
+            final String lang = (pos > 0 ? language.substring(0, pos) : language).toLowerCase(locale_us);
+            pos = lang.indexOf('-');
             Locale locale = languageCodes.get(pos < 0 ? lang : lang.substring(0, pos));
             if (null == locale) {
-                LOG.warn("No language code for model: " + language);
-                locale = LOCALE_DEFAULT;
+                LOG.warn("No language code for model: " + language + ". Using default " + locale_us);
+                locale = locale_us;
             }
             locales.add(locale);
         }
@@ -218,8 +217,8 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
                 final int pos = lang.indexOf('-');
                 Locale locale = languageCodes.get(pos < 0 ? lang : lang.substring(0, pos));
                 if (null == locale) {
-                    LOG.warn("No language code for model: " + language);
-                    locale = LOCALE_DEFAULT;
+                    LOG.warn("No language code for model: " + language + ". Using default " + locale_us);
+                    locale = locale_us;
                 }
                 locales.add(locale);
             }

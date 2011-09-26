@@ -51,7 +51,6 @@ package com.openexchange.ajax.appointment;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
 import com.openexchange.ajax.appointment.bugtests.AppointmentBugTestSuite;
 import com.openexchange.ajax.appointment.recurrence.RecurrenceTestSuite;
 

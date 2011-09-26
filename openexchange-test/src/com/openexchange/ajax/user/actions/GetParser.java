@@ -49,13 +49,13 @@
 
 package com.openexchange.ajax.user.actions;
 
-import com.openexchange.exception.OXException;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.user.UserImpl4Test;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.user.json.parser.UserParser;
 

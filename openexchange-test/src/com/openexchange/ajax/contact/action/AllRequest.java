@@ -51,7 +51,6 @@ package com.openexchange.ajax.contact.action;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.CommonAllRequest;
 import com.openexchange.groupware.container.Contact;

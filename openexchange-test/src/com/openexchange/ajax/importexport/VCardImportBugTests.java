@@ -49,11 +49,11 @@
 
 package com.openexchange.ajax.importexport;
 
-import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.webdav.xml.ContactTest;

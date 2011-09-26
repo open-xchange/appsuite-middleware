@@ -52,7 +52,6 @@ package com.openexchange.ajax.importexport;
 import java.io.StringReader;
 import java.util.Calendar;
 import java.util.TimeZone;
-
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.folder.Create;

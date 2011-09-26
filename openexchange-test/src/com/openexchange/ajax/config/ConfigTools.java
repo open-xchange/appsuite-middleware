@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.config;
 
-import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.TimeZone;
@@ -77,6 +76,7 @@ import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.URLParameter;
 
 /**

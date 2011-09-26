@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.participant;
 
-import com.openexchange.exception.OXException;
 import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -64,6 +63,7 @@ import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.user.actions.SearchRequest;
 import com.openexchange.ajax.user.actions.SearchResponse;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;

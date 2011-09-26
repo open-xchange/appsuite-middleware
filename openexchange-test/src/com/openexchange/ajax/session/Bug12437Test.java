@@ -49,14 +49,14 @@
 
 package com.openexchange.ajax.session;
 
-import com.openexchange.exception.Category;
-import com.openexchange.exception.OXException;
+import junit.framework.TestCase;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.session.actions.LoginRequest;
 import com.openexchange.ajax.session.actions.LoginResponse;
 import com.openexchange.configuration.AJAXConfig;
-import junit.framework.TestCase;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
 
 /**
  *

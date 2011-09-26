@@ -49,7 +49,6 @@
 
 package com.openexchange.webdav.xml.contact.actions;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.webdav.xml.framework.Constants.NS_DAV;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -59,6 +58,7 @@ import org.apache.commons.httpclient.methods.RequestEntity;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.output.XMLOutputter;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.webdav.xml.ContactWriter;
 import com.openexchange.webdav.xml.framework.RequestTools;

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.infostore.actions;
 
-import com.openexchange.exception.OXException;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -61,6 +60,7 @@ import java.util.Set;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 
 /**

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.framework;
 
-import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -93,6 +92,7 @@ import com.openexchange.ajax.framework.AJAXRequest.FileParameter;
 import com.openexchange.ajax.framework.AJAXRequest.Parameter;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.URLParameter;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 

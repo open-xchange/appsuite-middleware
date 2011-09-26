@@ -48,10 +48,10 @@
  */
 package com.openexchange.test.fixtures;
 
-import com.openexchange.exception.OXException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import com.openexchange.exception.OXException;
 
 /**
  * @author Martin Braun <martin.braun@open-xchange.com>

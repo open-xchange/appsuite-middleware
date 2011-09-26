@@ -2,7 +2,6 @@ package com.openexchange.importexport.actions;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.importexport.formats.Format;
 

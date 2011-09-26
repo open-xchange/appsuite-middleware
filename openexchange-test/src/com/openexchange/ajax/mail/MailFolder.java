@@ -49,12 +49,12 @@
 
 package com.openexchange.ajax.mail;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.UserValues;
+import com.openexchange.exception.OXException;
 
 
 /**

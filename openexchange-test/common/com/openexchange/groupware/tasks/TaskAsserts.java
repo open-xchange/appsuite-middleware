@@ -3,9 +3,7 @@ package com.openexchange.groupware.tasks;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Set;
-
 import junit.framework.TestCase;
-
 import com.openexchange.groupware.container.CalendarObject;
 
 public class TaskAsserts extends TestCase{

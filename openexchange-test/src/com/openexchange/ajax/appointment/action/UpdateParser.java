@@ -49,12 +49,12 @@
 
 package com.openexchange.ajax.appointment.action;
 
+import static com.openexchange.ajax.appointment.action.AppointmentParserTools.parseConflicts;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
-import static com.openexchange.ajax.appointment.action.AppointmentParserTools.parseConflicts;
 
 /**
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>

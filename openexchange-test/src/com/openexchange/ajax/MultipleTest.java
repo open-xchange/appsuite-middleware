@@ -51,10 +51,8 @@ package com.openexchange.ajax;
 
 import java.io.ByteArrayInputStream;
 import java.util.TimeZone;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;

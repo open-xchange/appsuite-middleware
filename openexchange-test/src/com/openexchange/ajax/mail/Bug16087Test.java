@@ -59,7 +59,7 @@ import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.ImportMailRequest;
 import com.openexchange.ajax.mail.actions.ImportMailResponse;
 import com.openexchange.ajax.mail.actions.ListRequest;
-import com.openexchange.tools.encoding.Charsets;
+import com.openexchange.java.Charsets;
 
 /**
  * {@link Bug16087Test}
@@ -74,7 +74,7 @@ public class Bug16087Test extends AbstractAJAXSession {
     private String address;
     private String[] ids;
 
-    public Bug16087Test(String name) {
+    public Bug16087Test(final String name) {
         super(name);
     }
 
@@ -84,9 +84,9 @@ public class Bug16087Test extends AbstractAJAXSession {
         client = getClient();
         folder = client.getValues().getInboxFolder();
         address = client.getValues().getSendAddress();
-        String mail = TestMails.replaceAddresses(TestMails.UMLAUT_MAIL, address);
-        ImportMailRequest request = new ImportMailRequest(folder, 0, Charsets.UTF_8, mail);
-        ImportMailResponse response = client.execute(request);
+        final String mail = TestMails.replaceAddresses(TestMails.UMLAUT_MAIL, address);
+        final ImportMailRequest request = new ImportMailRequest(folder, 0, Charsets.UTF_8, mail);
+        final ImportMailResponse response = client.execute(request);
         ids = response.getIds()[0];
     }
 
@@ -98,18 +98,18 @@ public class Bug16087Test extends AbstractAJAXSession {
 
     public void testGetRawWithUnseen() throws Throwable {
         {
-            GetRequest request = new GetRequest(folder, ids[1]);
+            final GetRequest request = new GetRequest(folder, ids[1]);
             request.setUnseen(true);
             request.setSource(true);
             request.setSave(true);
             client.execute(request);
         }
         {
-            ListRequest request = new ListRequest(new String[][] { ids }, ATTRIBUTES);
-            CommonListResponse response = client.execute(request);
-            int flagsPos = response.getColumnPos(FLAGS.getField());
-            for (Object[] mail : response) {
-                int testFlags = ((Integer) mail[flagsPos]).intValue();
+            final ListRequest request = new ListRequest(new String[][] { ids }, ATTRIBUTES);
+            final CommonListResponse response = client.execute(request);
+            final int flagsPos = response.getColumnPos(FLAGS.getField());
+            for (final Object[] mail : response) {
+                final int testFlags = ((Integer) mail[flagsPos]).intValue();
                 assertEquals("Wanted flags are not set.", 0, testFlags);
             }
         }

@@ -45,7 +45,6 @@
 package com.openexchange.webdav.xml.parser;
 
 import org.jdom.Element;
-
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.webdav.xml.XmlServlet;
 import com.openexchange.webdav.xml.fields.CommonFields;

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.subscribe.test;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.util.Collection;
@@ -77,6 +76,7 @@ import com.openexchange.ajax.subscribe.actions.RefreshSubscriptionResponse;
 import com.openexchange.ajax.subscribe.actions.UpdateSubscriptionRequest;
 import com.openexchange.ajax.subscribe.actions.UpdateSubscriptionResponse;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 

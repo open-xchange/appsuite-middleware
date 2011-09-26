@@ -50,7 +50,6 @@
 package com.openexchange.ajax.importexport.actions;
 
 import java.io.InputStream;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;

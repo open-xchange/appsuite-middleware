@@ -50,10 +50,8 @@
 package com.openexchange.ajax.task.actions;
 
 import java.util.Date;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.groupware.tasks.Task;

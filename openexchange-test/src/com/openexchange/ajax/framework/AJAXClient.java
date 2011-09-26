@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.framework;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.json.JSONException;
 import com.openexchange.ajax.session.LoginTools;
@@ -58,6 +57,7 @@ import com.openexchange.ajax.session.actions.LogoutRequest;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
+import com.openexchange.exception.OXException;
 
 /**
  * This class implements the temporary memory of an AJAX client and provides some convenience methods to determine user specific values for

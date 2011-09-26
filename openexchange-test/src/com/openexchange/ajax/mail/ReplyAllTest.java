@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -60,6 +59,7 @@ import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.mail.contenttypes.MailContentType;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 
 

@@ -2,7 +2,6 @@ package com.openexchange.ajax.mail.filter;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.mail.filter.action.AbstractAction;
 import com.openexchange.ajax.mail.filter.action.Stop;

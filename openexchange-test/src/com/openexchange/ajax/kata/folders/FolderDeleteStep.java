@@ -48,7 +48,6 @@
 package com.openexchange.ajax.kata.folders;
 
 import org.junit.Assert;
-
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.kata.NeedExistingStep;
 import com.openexchange.groupware.container.FolderObject;

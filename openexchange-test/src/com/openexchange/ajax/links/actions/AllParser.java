@@ -52,7 +52,6 @@ package com.openexchange.ajax.links.actions;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.groupware.container.LinkObject;

@@ -51,9 +51,9 @@ package com.openexchange.ajax.user;
 
 import org.json.JSONObject;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.Executor;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.user.actions.GetRequest;
 import com.openexchange.ajax.user.actions.GetResponse;
 

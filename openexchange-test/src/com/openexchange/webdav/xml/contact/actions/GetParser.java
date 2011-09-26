@@ -49,8 +49,8 @@
 
 package com.openexchange.webdav.xml.contact.actions;
 
-import com.openexchange.exception.OXException;
 import org.jdom.Document;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.webdav.xml.framework.AbstractWebDAVParser;
 import com.openexchange.webdav.xml.types.Response;

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.publish.tests;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -63,6 +62,7 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.publish.Publication;

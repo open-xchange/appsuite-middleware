@@ -50,7 +50,6 @@ package com.openexchange.test.fixtures;
 
 import java.util.Date;
 import java.util.Map;
-
 import com.openexchange.test.fixtures.transformators.IntegerTransformator;
 import com.openexchange.test.fixtures.transformators.JChronicDateTransformator;
 import com.openexchange.test.fixtures.transformators.LongTransformator;

@@ -52,7 +52,6 @@ package com.openexchange.ajax.user.actions;
 import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONException;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.contact.action.ContactSearchJSONWriter;
 import com.openexchange.groupware.container.Contact;

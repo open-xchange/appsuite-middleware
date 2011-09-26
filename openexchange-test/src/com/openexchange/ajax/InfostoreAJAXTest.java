@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax;
 
-import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -71,6 +70,7 @@ import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.parser.ResponseParser;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 
 public class InfostoreAJAXTest extends AbstractAJAXTest {

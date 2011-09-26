@@ -49,13 +49,13 @@
 
 package com.openexchange.ajax.resource;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.resource.actions.ResourceNewRequest;
 import com.openexchange.ajax.resource.actions.ResourceNewResponse;
+import com.openexchange.exception.OXException;
 import com.openexchange.resource.Resource;
 
 /**

@@ -48,11 +48,11 @@
  */
 package com.openexchange.test.fixtures;
 
-import com.openexchange.exception.OXException;
-import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Comparator;
 import java.util.Map;
+import com.openexchange.exception.OXException;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

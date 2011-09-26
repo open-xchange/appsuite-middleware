@@ -50,9 +50,7 @@
 package com.openexchange.ajax.reminder.actions;
 
 import java.util.Date;
-
 import org.json.JSONException;
-
 import com.openexchange.ajax.AJAXServlet;
 
 /**

@@ -49,7 +49,6 @@
 
 package com.openexchange.test;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
@@ -68,6 +67,7 @@ import com.openexchange.ajax.contact.action.GetAssociationResponse;
 import com.openexchange.ajax.contact.action.GetContactByUIDRequest;
 import com.openexchange.ajax.contact.action.GetResponse;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactUnificationState;
 import com.openexchange.groupware.container.Contact;
 

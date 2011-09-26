@@ -49,14 +49,13 @@
 
 package com.openexchange.ajax.framework;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXException.ProblematicAttribute;
-
 import java.util.Date;
 import java.util.List;
 import junit.framework.Assert;
 import com.openexchange.ajax.appointment.action.ConflictObject;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.ProblematicAttribute;
 
 /**
  * This class implements inheritable methods for AJAX responses.

@@ -50,7 +50,6 @@
 package com.openexchange.importexport.exceptions;
 
 import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.*;
-
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;

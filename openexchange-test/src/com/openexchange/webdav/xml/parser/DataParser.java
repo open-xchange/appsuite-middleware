@@ -46,9 +46,7 @@
 package com.openexchange.webdav.xml.parser;
 
 import java.util.Date;
-
 import org.jdom.Element;
-
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.webdav.xml.XmlServlet;
 import com.openexchange.webdav.xml.fields.DataFields;

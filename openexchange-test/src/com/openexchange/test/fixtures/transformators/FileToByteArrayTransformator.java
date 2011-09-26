@@ -49,10 +49,10 @@
 
 package com.openexchange.test.fixtures.transformators;
 
-import com.openexchange.exception.OXException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import com.openexchange.exception.OXException;
 import com.openexchange.test.fixtures.Document;
 import com.openexchange.test.fixtures.FixtureLoader;
 

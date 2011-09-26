@@ -49,19 +49,17 @@
 
 package com.openexchange.ajax.reminder.actions;
 
-import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.parser.ReminderParser;
 import com.openexchange.ajax.reminder.ReminderTools;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 

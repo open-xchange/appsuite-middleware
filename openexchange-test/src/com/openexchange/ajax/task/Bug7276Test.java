@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.task;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXException.Generic;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.participant.ParticipantTools;
 import com.openexchange.ajax.task.actions.DeleteRequest;
@@ -60,6 +58,8 @@ import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.ajax.task.actions.UpdateResponse;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.Generic;
 import com.openexchange.groupware.tasks.Create;
 import com.openexchange.groupware.tasks.Task;
 

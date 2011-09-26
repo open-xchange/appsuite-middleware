@@ -51,7 +51,6 @@ package com.openexchange.ajax.framework;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-
 import com.openexchange.ajax.container.Response;
 
 /**

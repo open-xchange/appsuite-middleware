@@ -50,7 +50,6 @@
 package com.openexchange.ajax.task;
 
 import java.util.TimeZone;
-
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.MultipleRequest;

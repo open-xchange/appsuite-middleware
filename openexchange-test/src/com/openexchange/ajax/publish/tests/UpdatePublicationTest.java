@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.publish.tests;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import org.json.JSONException;
@@ -58,6 +57,7 @@ import com.openexchange.ajax.publish.actions.NewPublicationRequest;
 import com.openexchange.ajax.publish.actions.NewPublicationResponse;
 import com.openexchange.ajax.publish.actions.UpdatePublicationRequest;
 import com.openexchange.ajax.publish.actions.UpdatePublicationResponse;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.SimPublicationTargetDiscoveryService;

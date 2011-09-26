@@ -50,9 +50,7 @@
 package com.openexchange.ajax.appointment.action;
 
 import java.util.TimeZone;
-
 import org.json.JSONArray;
-
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;

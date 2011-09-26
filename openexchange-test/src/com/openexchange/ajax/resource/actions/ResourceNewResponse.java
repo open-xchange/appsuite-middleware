@@ -51,7 +51,6 @@ package com.openexchange.ajax.resource.actions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.resource.json.ResourceFields;

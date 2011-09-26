@@ -50,9 +50,7 @@
 package com.openexchange.ajax.contact.action;
 
 import java.util.Iterator;
-
 import org.json.JSONException;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.CommonAllParser;
 import com.openexchange.ajax.framework.CommonAllResponse;

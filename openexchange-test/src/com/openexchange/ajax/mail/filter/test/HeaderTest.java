@@ -50,7 +50,6 @@
 package com.openexchange.ajax.mail.filter.test;
 
 import java.util.Arrays;
-
 import com.openexchange.ajax.mail.filter.comparison.AbstractComparison;
 
 /**

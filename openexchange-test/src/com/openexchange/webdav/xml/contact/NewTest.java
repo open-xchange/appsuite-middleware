@@ -1,7 +1,6 @@
 package com.openexchange.webdav.xml.contact;
 
 import java.io.ByteArrayInputStream;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentMetadata;

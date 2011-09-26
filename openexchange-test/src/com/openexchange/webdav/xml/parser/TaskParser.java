@@ -45,9 +45,8 @@
 
 package com.openexchange.webdav.xml.parser;
 
-import com.openexchange.exception.OXException;
 import org.jdom.Element;
-
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.webdav.xml.XmlServlet;
 import com.openexchange.webdav.xml.fields.TaskFields;

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.tools.encoding;
+package com.openexchange.java;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -69,6 +69,9 @@ public final class Charsets {
      */
     public static final Charset US_ASCII = Charset.forName("US-ASCII");
 
+    /**
+     * The name of "UTF-8" charset.
+     */
     public static final String UTF_8_NAME = "UTF-8";
 
     /**

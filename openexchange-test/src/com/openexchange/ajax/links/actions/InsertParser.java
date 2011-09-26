@@ -50,7 +50,6 @@
 package com.openexchange.ajax.links.actions;
 
 import org.json.JSONException;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.CommonInsertParser;
 import com.openexchange.ajax.framework.CommonInsertResponse;

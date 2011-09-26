@@ -49,10 +49,10 @@
 
 package com.openexchange.test;
 
+import static com.openexchange.server.impl.OCLPermission.*;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.server.impl.OCLPermission;
-import static com.openexchange.server.impl.OCLPermission.*;
 
 /**
  * {@link PermissionTools}

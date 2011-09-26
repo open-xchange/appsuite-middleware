@@ -53,9 +53,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.GetRequest;
+import com.openexchange.ajax.mail.actions.GetRequest.View;
 import com.openexchange.ajax.mail.actions.GetResponse;
 import com.openexchange.ajax.mail.actions.SendRequest;
-import com.openexchange.ajax.mail.actions.GetRequest.View;
 
 /**
  * {@link ViewTest}

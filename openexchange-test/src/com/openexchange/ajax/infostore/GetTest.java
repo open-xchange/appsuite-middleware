@@ -1,9 +1,7 @@
 package com.openexchange.ajax.infostore;
 
 import java.io.File;
-
 import org.json.JSONObject;
-
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.test.TestInit;

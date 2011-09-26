@@ -49,7 +49,6 @@
 
 package com.openexchange.webdav.xml.appointment;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -68,6 +67,7 @@ import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.UserValues;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 
 

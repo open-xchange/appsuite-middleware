@@ -49,10 +49,9 @@
 
 package com.openexchange.test.fixtures;
 
-import com.openexchange.exception.OXException;
 import java.util.HashMap;
 import java.util.Map;
-
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.internal.CustomMailAccount;
 import com.openexchange.test.fixtures.transformators.BooleanTransformator;
 

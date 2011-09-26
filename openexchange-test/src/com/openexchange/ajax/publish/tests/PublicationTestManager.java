@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.publish.tests;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.util.Collection;
@@ -75,6 +74,7 @@ import com.openexchange.ajax.publish.actions.NewPublicationResponse;
 import com.openexchange.ajax.publish.actions.UpdatePublicationRequest;
 import com.openexchange.ajax.publish.actions.UpdatePublicationResponse;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+import com.openexchange.exception.OXException;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 

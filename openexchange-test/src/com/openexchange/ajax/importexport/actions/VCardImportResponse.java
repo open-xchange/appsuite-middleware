@@ -51,7 +51,6 @@ package com.openexchange.ajax.importexport.actions;
 
 import java.util.Arrays;
 import java.util.Iterator;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 

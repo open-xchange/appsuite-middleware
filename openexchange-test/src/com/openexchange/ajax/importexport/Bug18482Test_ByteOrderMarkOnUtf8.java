@@ -51,9 +51,7 @@ package com.openexchange.ajax.importexport;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-
 import org.json.JSONArray;
-
 import com.openexchange.ajax.contact.AbstractManagedContactTest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.importexport.actions.CSVImportRequest;

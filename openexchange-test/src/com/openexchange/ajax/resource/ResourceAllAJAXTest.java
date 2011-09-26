@@ -49,14 +49,14 @@
 
 package com.openexchange.ajax.resource;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
+import org.json.JSONException;
+import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.resource.actions.ResourceAllRequest;
 import com.openexchange.ajax.resource.actions.ResourceAllResponse;
+import com.openexchange.exception.OXException;
 import com.openexchange.resource.Resource;
-import org.json.JSONException;
-import org.xml.sax.SAXException;
 
 /**
  * {@link ResourceAllAJAXTest} - Tests the ALL request on resource servlet

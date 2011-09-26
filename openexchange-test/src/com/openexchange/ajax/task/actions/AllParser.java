@@ -50,9 +50,7 @@
 package com.openexchange.ajax.task.actions;
 
 import java.util.Iterator;
-
 import org.json.JSONException;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractColumnsParser;
 import com.openexchange.ajax.framework.CommonAllResponse;

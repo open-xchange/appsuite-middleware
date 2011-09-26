@@ -51,10 +51,8 @@ package com.openexchange.ajax.conversion;
 
 import java.io.InputStream;
 import java.util.UUID;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.conversion.actions.ConvertRequest;
 import com.openexchange.ajax.conversion.actions.ConvertResponse;
 import com.openexchange.ajax.framework.Executor;

@@ -57,9 +57,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import junit.framework.TestCase;
 import org.json.JSONObject;
 import com.openexchange.test.json.JSONAssertion;
-import junit.framework.TestCase;
 
 
 /**

@@ -51,7 +51,6 @@ package com.openexchange.importexport.helpers;
 
 import java.io.IOException;
 import java.io.InputStream;
-
 import com.openexchange.importexport.formats.Format;
 
 /**

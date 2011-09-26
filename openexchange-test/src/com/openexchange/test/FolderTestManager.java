@@ -49,7 +49,6 @@
 
 package com.openexchange.test;
 
-import com.openexchange.exception.OXException;
 import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -77,6 +76,7 @@ import com.openexchange.ajax.framework.CommonAllRequest;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.CommonUpdatesResponse;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;

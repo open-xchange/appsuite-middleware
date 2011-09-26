@@ -52,7 +52,6 @@ package com.openexchange.ajax.contact;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;

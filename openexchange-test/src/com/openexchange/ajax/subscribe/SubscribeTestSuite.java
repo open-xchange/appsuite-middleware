@@ -49,15 +49,15 @@
 
 package com.openexchange.ajax.subscribe;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
 import com.openexchange.ajax.subscribe.test.AllSubscriptionsTest;
-import com.openexchange.ajax.subscribe.test.NewSubscriptionTest;
 import com.openexchange.ajax.subscribe.test.DeleteSubscriptionTest;
 import com.openexchange.ajax.subscribe.test.ListSubscriptionsTest;
+import com.openexchange.ajax.subscribe.test.NewSubscriptionTest;
 import com.openexchange.ajax.subscribe.test.RefreshSubscriptionTest;
 import com.openexchange.ajax.subscribe.test.SubscriptionFolderIconTest;
 import com.openexchange.ajax.subscribe.test.UpdateSubscriptionTest;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
  * {@link SubscribeTestSuite}

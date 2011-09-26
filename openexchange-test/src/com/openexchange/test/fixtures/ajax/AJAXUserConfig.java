@@ -1,10 +1,8 @@
 package com.openexchange.test.fixtures.ajax;
 
 import java.io.IOException;
-
 import org.json.JSONException;
 import org.xml.sax.SAXException;
-
 import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.SetRequest;

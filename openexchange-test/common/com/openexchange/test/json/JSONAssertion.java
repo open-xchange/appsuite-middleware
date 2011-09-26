@@ -49,14 +49,14 @@
 
 package com.openexchange.test.json;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 /**
  * {@link JSONAssertion}
  *

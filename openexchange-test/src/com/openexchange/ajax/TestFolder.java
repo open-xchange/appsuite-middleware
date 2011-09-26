@@ -2,11 +2,8 @@ package com.openexchange.ajax;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-
 import junit.framework.TestCase;
-
 import org.xml.sax.SAXException;
-
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;

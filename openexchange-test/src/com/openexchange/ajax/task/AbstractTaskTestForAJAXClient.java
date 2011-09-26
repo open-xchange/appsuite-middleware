@@ -51,7 +51,6 @@ package com.openexchange.ajax.task;
 
 import java.util.HashSet;
 import java.util.Set;
-
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.groupware.tasks.Task;

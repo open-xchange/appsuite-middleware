@@ -1,11 +1,9 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import java.util.Date;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.framework.AJAXSession;

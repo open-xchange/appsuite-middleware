@@ -1,7 +1,6 @@
 package com.openexchange.test.fixtures.ajax;
 
 import java.io.File;
-
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.container.Appointment;

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.kata;
 
-import com.openexchange.exception.OXException;
 import static junit.framework.Assert.fail;
 import java.io.IOException;
 import java.util.TimeZone;
@@ -59,6 +58,7 @@ import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.exception.OXException;
 
 
 /**

@@ -49,16 +49,14 @@
 
 package com.openexchange.webdav.xml.framework;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
-
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.jdom.JDOMException;
-
 import com.openexchange.configuration.WebDAVConfig;
 import com.openexchange.configuration.WebDAVConfig.Property;
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.xml.folder.FolderTools;
 import com.openexchange.webdav.xml.user.GroupUserTools;
 

@@ -49,6 +49,8 @@
 
 package com.openexchange.tools.encoding;
 
+import com.openexchange.java.Charsets;
+
 /**
  * Central entry point for a base64 en/decoder.
  *

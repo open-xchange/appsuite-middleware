@@ -7,11 +7,9 @@ import java.io.PrintWriter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONWriter;
-
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;

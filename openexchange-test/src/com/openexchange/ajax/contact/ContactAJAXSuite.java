@@ -49,9 +49,9 @@
 
 package com.openexchange.ajax.contact;
 
-import com.openexchange.ajax.contact.action.ExemplaryContactTestManagerTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import com.openexchange.ajax.contact.action.ExemplaryContactTestManagerTest;
 
 public class ContactAJAXSuite extends TestSuite {
 

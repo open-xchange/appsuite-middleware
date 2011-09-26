@@ -50,9 +50,9 @@
 package com.openexchange.ajax.voipnow;
 
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.Executor;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.voipnow.actions.ExtensionDetailsRequest;
 import com.openexchange.ajax.voipnow.actions.ExtensionDetailsResponse;
 

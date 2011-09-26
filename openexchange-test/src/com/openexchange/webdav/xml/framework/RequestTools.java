@@ -51,12 +51,9 @@ package com.openexchange.webdav.xml.framework;
 
 import static com.openexchange.webdav.xml.XmlServlet.NS;
 import static com.openexchange.webdav.xml.framework.Constants.NS_DAV;
-
 import java.util.Date;
-
 import org.jdom.Document;
 import org.jdom.Element;
-
 import com.openexchange.webdav.xml.XmlServlet;
 
 /**

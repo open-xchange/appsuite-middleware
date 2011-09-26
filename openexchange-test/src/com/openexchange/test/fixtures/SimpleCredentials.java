@@ -48,12 +48,11 @@
  */
 package com.openexchange.test.fixtures;
 
-import com.openexchange.exception.OXException;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.TimeZone;
-
 import com.openexchange.ajax.config.actions.Tree;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 
 /**

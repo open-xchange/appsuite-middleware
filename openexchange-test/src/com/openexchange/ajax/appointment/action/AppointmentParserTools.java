@@ -2,11 +2,9 @@ package com.openexchange.ajax.appointment.action;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**

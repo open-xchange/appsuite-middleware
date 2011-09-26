@@ -49,9 +49,8 @@
 
 package com.openexchange.webdav.xml.task;
 
-import com.openexchange.exception.OXException;
 import java.util.Date;
-
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;

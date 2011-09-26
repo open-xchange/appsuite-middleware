@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.resource;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -61,6 +60,7 @@ import com.openexchange.ajax.resource.actions.ResourceAllRequest;
 import com.openexchange.ajax.resource.actions.ResourceAllResponse;
 import com.openexchange.ajax.resource.actions.ResourceListRequest;
 import com.openexchange.ajax.resource.actions.ResourceListResponse;
+import com.openexchange.exception.OXException;
 import com.openexchange.resource.Resource;
 
 /**

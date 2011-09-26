@@ -69,9 +69,9 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.TaskIterator2.StatementSetter;
+import com.openexchange.java.Charsets;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.StringCollection;
-import com.openexchange.tools.encoding.Charsets;
 import com.openexchange.tools.sql.DBUtils;
 
 /**

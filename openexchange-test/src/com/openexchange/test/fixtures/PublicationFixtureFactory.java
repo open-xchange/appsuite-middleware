@@ -48,11 +48,10 @@
  */
 package com.openexchange.test.fixtures;
 
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.publish.Publication;
-
-import java.util.Map;
-import java.util.HashMap;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

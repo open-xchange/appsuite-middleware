@@ -50,7 +50,6 @@
 package com.openexchange.ajax.attach;
 
 import java.util.Date;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.task.TaskTools;
 import com.openexchange.groupware.Types;

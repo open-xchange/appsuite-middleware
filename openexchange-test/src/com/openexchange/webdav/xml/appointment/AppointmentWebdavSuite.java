@@ -51,7 +51,6 @@ package com.openexchange.webdav.xml.appointment;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
 import com.openexchange.webdav.xml.appointment.recurrence.RecurrenceTestSuite;
 
 public class AppointmentWebdavSuite {

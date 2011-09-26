@@ -49,13 +49,13 @@
 
 package com.openexchange.ajax.appointment.action;
 
-import com.openexchange.exception.OXException;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.parser.AppointmentParser;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 
 /**

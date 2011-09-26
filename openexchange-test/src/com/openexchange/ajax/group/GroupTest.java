@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.group;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
@@ -58,6 +57,7 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.group.actions.SearchRequest;
 import com.openexchange.ajax.group.actions.SearchResponse;
+import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 
 public class GroupTest {

@@ -45,11 +45,9 @@
 
 package com.openexchange.webdav.xml.parser;
 
-import com.openexchange.exception.OXException;
 import java.util.List;
-
 import org.jdom.Element;
-
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.ExternalGroupParticipant;
 import com.openexchange.groupware.container.ExternalUserParticipant;

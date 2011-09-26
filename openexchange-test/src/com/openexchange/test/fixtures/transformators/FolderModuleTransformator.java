@@ -49,8 +49,8 @@
 
 package com.openexchange.test.fixtures.transformators;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.ajax.Folder;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 
 

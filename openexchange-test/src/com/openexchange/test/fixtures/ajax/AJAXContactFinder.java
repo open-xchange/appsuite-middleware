@@ -49,7 +49,6 @@
 
 package com.openexchange.test.fixtures.ajax;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.HashMap;
 import org.json.JSONArray;
@@ -57,6 +56,7 @@ import org.json.JSONException;
 import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonAllResponse;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactSetter;
 import com.openexchange.groupware.container.Contact;

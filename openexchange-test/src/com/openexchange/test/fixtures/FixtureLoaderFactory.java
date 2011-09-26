@@ -49,16 +49,15 @@
 package com.openexchange.test.fixtures;
 
 import java.io.File;
-
 import com.openexchange.group.Group;
-import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.tasks.Task;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mailaccount.internal.CustomMailAccount;
 import com.openexchange.publish.Publication;
-import com.openexchange.subscribe.Subscription;
 import com.openexchange.resource.Resource;
+import com.openexchange.subscribe.Subscription;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

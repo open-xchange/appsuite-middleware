@@ -1,8 +1,7 @@
 package com.openexchange.ajax.framework;
 
-import com.openexchange.ajax.framework.AJAXRequest.Parameter;
-
 import junit.framework.TestCase;
+import com.openexchange.ajax.framework.AJAXRequest.Parameter;
 
 public class ParamsTest extends TestCase {
 	protected Params defaultParams;

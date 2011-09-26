@@ -2,10 +2,8 @@ package com.openexchange.ajax.importexport;
 
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.webdav.xml.ContactTest;
 

@@ -49,17 +49,15 @@
 
 package com.openexchange.ajax.reminder;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
-
 import org.json.JSONException;
 import org.junit.Assert;
 import org.xml.sax.SAXException;
-
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.reminder.actions.RangeRequest;
 import com.openexchange.ajax.reminder.actions.RangeResponse;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.reminder.ReminderObject;
 
 /**

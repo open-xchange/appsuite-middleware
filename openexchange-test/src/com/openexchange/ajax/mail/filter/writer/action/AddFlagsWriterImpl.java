@@ -52,7 +52,6 @@ package com.openexchange.ajax.mail.filter.writer.action;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.mail.filter.action.AbstractAction;
 import com.openexchange.ajax.mail.filter.action.AddFlags;
 

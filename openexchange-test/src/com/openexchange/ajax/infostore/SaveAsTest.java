@@ -3,10 +3,8 @@ package com.openexchange.ajax.infostore;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.attach.SimpleAttachmentTest;
 import com.openexchange.ajax.container.Response;

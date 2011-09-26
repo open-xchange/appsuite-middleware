@@ -48,14 +48,14 @@
  */
 package com.openexchange.test.fixtures;
 
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.test.fixtures.transformators.BooleanTransformator;
-import com.openexchange.test.fixtures.transformators.FileToByteArrayTransformator;
 import com.openexchange.test.fixtures.transformators.DistributionListTransformator;
-import java.util.Comparator;
-import java.util.Map;
-import java.util.HashMap;
+import com.openexchange.test.fixtures.transformators.FileToByteArrayTransformator;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

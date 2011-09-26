@@ -51,7 +51,6 @@ package com.openexchange.ajax.links.actions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.groupware.container.LinkObject;
 

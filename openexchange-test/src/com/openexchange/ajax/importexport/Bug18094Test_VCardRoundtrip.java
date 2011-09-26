@@ -55,10 +55,8 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.contact.AbstractManagedContactTest;
 import com.openexchange.ajax.importexport.actions.VCardExportRequest;
 import com.openexchange.ajax.importexport.actions.VCardExportResponse;

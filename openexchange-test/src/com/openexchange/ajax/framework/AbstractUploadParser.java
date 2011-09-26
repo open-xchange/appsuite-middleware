@@ -51,9 +51,7 @@ package com.openexchange.ajax.framework;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.json.JSONException;
-
 import com.openexchange.ajax.container.Response;
 
 /**

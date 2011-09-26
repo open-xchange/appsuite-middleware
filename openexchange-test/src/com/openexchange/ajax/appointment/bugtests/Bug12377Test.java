@@ -48,31 +48,35 @@
  */
 package com.openexchange.ajax.appointment.bugtests;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.ajax.framework.*;
-import com.openexchange.ajax.appointment.action.*;
-import com.openexchange.ajax.appointment.action.DeleteRequest;
-import com.openexchange.ajax.appointment.action.InsertRequest;
+import static com.openexchange.groupware.calendar.TimeTools.D;
+import java.io.File;
+import java.io.IOException;
+import java.util.Date;
+import java.util.TimeZone;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.xml.sax.SAXException;
+import com.meterware.httpunit.WebConversation;
 import com.openexchange.ajax.AttachmentClient;
+import com.openexchange.ajax.appointment.action.DeleteRequest;
+import com.openexchange.ajax.appointment.action.GetRequest;
+import com.openexchange.ajax.appointment.action.GetResponse;
+import com.openexchange.ajax.appointment.action.InsertRequest;
+import com.openexchange.ajax.appointment.action.UpdateRequest;
+import com.openexchange.ajax.appointment.action.UpdateResponse;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXSession;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.links.actions.AllRequest;
 import com.openexchange.ajax.links.actions.AllResponse;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.LinkObject;
-
-import static com.openexchange.groupware.calendar.TimeTools.D;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentField;
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.LinkObject;
 import com.openexchange.test.TestInit;
-import com.meterware.httpunit.WebConversation;
-import org.json.JSONException;
-import org.json.JSONArray;
-import org.xml.sax.SAXException;
-
-import java.io.IOException;
-import java.io.File;
-import java.util.TimeZone;
-import java.util.Date;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

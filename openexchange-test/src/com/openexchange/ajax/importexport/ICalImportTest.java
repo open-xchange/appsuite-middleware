@@ -49,26 +49,24 @@
 
 package com.openexchange.ajax.importexport;
 
-import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.List;
 import java.util.Date;
-
+import java.util.List;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
-
-import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.importexport.ImportResult;
-import com.openexchange.groupware.tasks.Task;
-import com.openexchange.webdav.xml.AppointmentTest;
-import com.openexchange.webdav.xml.TaskTest;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
 import com.openexchange.ajax.importexport.actions.ICalImportResponse;
 import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.importexport.ImportResult;
+import com.openexchange.groupware.tasks.Task;
+import com.openexchange.webdav.xml.AppointmentTest;
+import com.openexchange.webdav.xml.TaskTest;
 
 public class ICalImportTest extends AbstractICalTest {
 

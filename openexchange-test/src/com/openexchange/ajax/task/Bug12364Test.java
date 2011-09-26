@@ -50,7 +50,6 @@
 package com.openexchange.ajax.task;
 
 import java.util.TimeZone;
-
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.DeleteRequest;

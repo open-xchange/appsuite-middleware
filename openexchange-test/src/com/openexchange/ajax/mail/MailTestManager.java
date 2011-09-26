@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
@@ -78,6 +77,7 @@ import com.openexchange.ajax.mail.actions.SendRequest;
 import com.openexchange.ajax.mail.actions.SendResponse;
 import com.openexchange.ajax.mail.actions.UpdateMailRequest;
 import com.openexchange.ajax.mail.actions.UpdateMailResponse;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailListField;
 
 /**

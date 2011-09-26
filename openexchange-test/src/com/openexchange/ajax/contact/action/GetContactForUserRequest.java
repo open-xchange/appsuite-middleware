@@ -2,9 +2,7 @@ package com.openexchange.ajax.contact.action;
 
 import java.io.IOException;
 import java.util.TimeZone;
-
 import org.json.JSONException;
-
 import com.openexchange.ajax.framework.Params;
 
 public class GetContactForUserRequest extends AbstractContactRequest<GetResponse> {

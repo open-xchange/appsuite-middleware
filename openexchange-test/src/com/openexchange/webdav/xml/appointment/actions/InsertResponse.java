@@ -50,7 +50,6 @@
 package com.openexchange.webdav.xml.appointment.actions;
 
 import org.jdom.Document;
-
 import com.openexchange.webdav.xml.framework.CommonInsertResponse;
 import com.openexchange.webdav.xml.types.Response;
 

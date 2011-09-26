@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-
 import org.json.JSONObject;
 import com.openexchange.ajax.contact.action.AdvancedSearchRequest;
 import com.openexchange.ajax.framework.CommonSearchResponse;

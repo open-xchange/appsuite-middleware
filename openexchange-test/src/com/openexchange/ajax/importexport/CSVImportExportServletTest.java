@@ -52,9 +52,7 @@ package com.openexchange.ajax.importexport;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
-
 import org.json.JSONObject;
-
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebConversation;

@@ -50,7 +50,6 @@
 package com.openexchange.ajax.links.actions;
 
 import org.json.JSONException;
-
 import com.openexchange.ajax.AJAXServlet;
 
 /**

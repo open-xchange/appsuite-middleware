@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.attach;
 
-import com.openexchange.exception.OXException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -60,17 +59,16 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
-
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.AttachmentTest;
 import com.openexchange.ajax.LoginTest;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;

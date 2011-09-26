@@ -54,7 +54,6 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.mail.filter.Rule;
 import com.openexchange.ajax.mail.filter.action.AbstractAction;
 import com.openexchange.ajax.mail.filter.fields.RuleFields;

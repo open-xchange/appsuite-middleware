@@ -1,17 +1,14 @@
 package com.openexchange.ajax.mail;
 
 import java.io.IOException;
-
 import javax.mail.internet.InternetAddress;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
-
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.AllRequest;
 import com.openexchange.ajax.mail.actions.AllResponse;
 import com.openexchange.ajax.mail.actions.SendRequest;

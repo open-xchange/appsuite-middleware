@@ -51,7 +51,6 @@ package com.openexchange.ajax.mail.filter.writer.comparison;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.mail.filter.comparison.AbstractComparison;
 import com.openexchange.ajax.mail.filter.comparison.SizeComparison;
 

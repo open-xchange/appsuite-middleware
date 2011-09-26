@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.Arrays;
 import org.json.JSONException;
@@ -59,6 +58,7 @@ import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.mail.actions.SendRequest;
 import com.openexchange.ajax.mail.actions.SendResponse;
 import com.openexchange.ajax.mail.contenttypes.MailContentType;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link SendTest}

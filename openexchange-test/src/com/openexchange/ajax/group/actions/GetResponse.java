@@ -49,13 +49,12 @@
 
 package com.openexchange.ajax.group.actions;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.parser.GroupParser;
+import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 
 /**

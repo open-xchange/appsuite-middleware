@@ -49,11 +49,12 @@
 
 package com.openexchange.test;
 
-import java.util.List;
-import com.openexchange.server.impl.OCLPermission;
-import junit.framework.TestCase;
 import static com.openexchange.server.impl.OCLPermission.*;
-import static com.openexchange.test.PermissionTools.*;
+import static com.openexchange.test.PermissionTools.OCLP;
+import static com.openexchange.test.PermissionTools.P;
+import java.util.List;
+import junit.framework.TestCase;
+import com.openexchange.server.impl.OCLPermission;
 
 /**
  * {@link PermissionToolsTest}

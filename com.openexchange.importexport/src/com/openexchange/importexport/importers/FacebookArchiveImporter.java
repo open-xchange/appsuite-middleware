@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.importexport.ImportResult;
 import com.openexchange.importexport.formats.Format;

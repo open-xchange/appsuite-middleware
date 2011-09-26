@@ -49,17 +49,14 @@
 
 package com.openexchange.ajax.reminder;
 
-import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Date;
 import java.util.TimeZone;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
-
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
@@ -74,6 +71,7 @@ import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.reminder.actions.RangeRequest;
 import com.openexchange.ajax.reminder.actions.RangeResponse;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.test.OXTestToolkit;
 import com.openexchange.test.TestException;

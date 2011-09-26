@@ -1,7 +1,6 @@
 package com.openexchange.ajax.group.actions;
 
 import org.json.JSONException;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 

@@ -49,11 +49,11 @@
 
 package com.openexchange.ajax.folder.actions;
 
-import com.openexchange.exception.OXException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 import com.openexchange.ajax.parser.FolderParser;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 

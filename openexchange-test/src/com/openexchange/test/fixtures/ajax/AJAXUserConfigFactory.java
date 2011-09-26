@@ -49,13 +49,13 @@
 
 package com.openexchange.test.fixtures.ajax;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.json.JSONException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.session.LoginTools;
 import com.openexchange.ajax.session.actions.LoginRequest;
+import com.openexchange.exception.OXException;
 import com.openexchange.test.fixtures.SimpleCredentials;
 import com.openexchange.test.fixtures.TestUserConfig;
 import com.openexchange.test.fixtures.TestUserConfigFactory;

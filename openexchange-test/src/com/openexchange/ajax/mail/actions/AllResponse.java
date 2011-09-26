@@ -49,15 +49,13 @@
 
 package com.openexchange.ajax.mail.actions;
 
-import com.openexchange.exception.OXException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.CommonAllResponse;
-
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.dataobjects.MIMEMailMessage;
 /**

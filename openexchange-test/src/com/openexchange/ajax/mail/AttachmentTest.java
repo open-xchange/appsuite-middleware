@@ -51,7 +51,6 @@ package com.openexchange.ajax.mail;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.AttachmentRequest;

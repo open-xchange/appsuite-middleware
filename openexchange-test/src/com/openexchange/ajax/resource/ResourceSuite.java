@@ -49,9 +49,9 @@
 
 package com.openexchange.ajax.resource;
 
-import com.openexchange.ajax.ResourceTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import com.openexchange.ajax.ResourceTest;
 
 /**
  * Suite for the resource tests.

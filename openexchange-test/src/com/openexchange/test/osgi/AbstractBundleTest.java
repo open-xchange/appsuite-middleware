@@ -49,7 +49,6 @@
 
 package com.openexchange.test.osgi;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -71,6 +70,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.parser.FolderParser;
 import com.openexchange.control.console.StartBundle;
 import com.openexchange.control.console.StopBundle;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.JMXInit;

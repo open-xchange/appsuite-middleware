@@ -49,12 +49,12 @@
 
 package com.openexchange.ajax.folder.actions;
 
-import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractColumnsResponse;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 
 /**

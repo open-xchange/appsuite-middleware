@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import javax.mail.internet.AddressException;
 import org.apache.commons.logging.Log;
@@ -62,6 +61,7 @@ import com.openexchange.ajax.mail.actions.AllResponse;
 import com.openexchange.ajax.mail.actions.CopyRequest;
 import com.openexchange.ajax.mail.actions.SendRequest;
 import com.openexchange.ajax.mail.actions.SendResponse;
+import com.openexchange.exception.OXException;
 
 /**
  * @author <a href="karsten.will@open-xchange.com">Karsten Will</a>

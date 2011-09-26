@@ -49,14 +49,12 @@
 
 package com.openexchange.ajax.task.actions;
 
-import com.openexchange.exception.OXException;
 import java.util.TimeZone;
-
 import org.json.JSONObject;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.parser.TaskParser;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Task;
 
 /**

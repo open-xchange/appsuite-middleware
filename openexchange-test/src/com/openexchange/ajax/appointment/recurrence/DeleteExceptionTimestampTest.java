@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
-import com.openexchange.exception.OXException;
+import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.io.IOException;
 import java.util.Date;
 import org.json.JSONException;
@@ -57,9 +57,9 @@ import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.test.CalendarTestManager;
-import static com.openexchange.groupware.calendar.TimeTools.D;
 
 /**
  * {@link DeleteExceptionTimestampTest}

@@ -51,9 +51,7 @@ package com.openexchange.ajax.session;
 
 import static com.openexchange.ajax.framework.AJAXClient.User.User1;
 import static com.openexchange.ajax.framework.AJAXClient.User.User2;
-
 import junit.framework.TestCase;
-
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.session.actions.LoginRequest;

@@ -68,9 +68,9 @@ import com.openexchange.ajax.Login;
 import com.openexchange.ajax.helper.BrowserDetector;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
+import com.openexchange.java.Charsets;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.systemname.SystemNameService;
-import com.openexchange.tools.encoding.Charsets;
 import com.openexchange.tools.encoding.Helper;
 
 /**

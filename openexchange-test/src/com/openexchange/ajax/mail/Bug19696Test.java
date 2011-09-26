@@ -53,7 +53,7 @@ import com.openexchange.ajax.mail.actions.DeleteRequest;
 import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.ImportMailRequest;
 import com.openexchange.ajax.mail.actions.ImportMailResponse;
-import com.openexchange.tools.encoding.Charsets;
+import com.openexchange.java.Charsets;
 
 /**
  * {@link Bug19696Test}

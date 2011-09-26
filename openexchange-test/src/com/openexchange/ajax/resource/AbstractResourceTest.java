@@ -49,20 +49,18 @@
 
 package com.openexchange.ajax.resource;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.Date;
 import java.util.TimeZone;
-
 import org.json.JSONException;
 import org.xml.sax.SAXException;
-
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.resource.actions.ResourceDeleteRequest;
 import com.openexchange.ajax.resource.actions.ResourceGetRequest;
 import com.openexchange.ajax.resource.actions.ResourceGetResponse;
 import com.openexchange.ajax.resource.actions.ResourceNewRequest;
+import com.openexchange.exception.OXException;
 import com.openexchange.resource.Resource;
 
 /**

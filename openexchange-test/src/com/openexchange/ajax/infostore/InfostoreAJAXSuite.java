@@ -1,9 +1,9 @@
 package com.openexchange.ajax.infostore;
 
 
-import com.openexchange.ajax.infostore.test.InfostoreManagedTests;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import com.openexchange.ajax.infostore.test.InfostoreManagedTests;
 
 public class InfostoreAJAXSuite extends TestSuite{
 	public static Test suite(){

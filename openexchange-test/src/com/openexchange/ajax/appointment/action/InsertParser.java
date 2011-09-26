@@ -49,13 +49,12 @@
 
 package com.openexchange.ajax.appointment.action;
 
+import static com.openexchange.ajax.appointment.action.AppointmentParserTools.parseConflicts;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.framework.AbstractInsertParser;
-import static com.openexchange.ajax.appointment.action.AppointmentParserTools.parseConflicts;
 
 /**
  *

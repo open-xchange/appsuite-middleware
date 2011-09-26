@@ -51,11 +51,9 @@ package com.openexchange.webdav.xml.user.actions;
 
 import static com.openexchange.webdav.xml.XmlServlet.NS;
 import static com.openexchange.webdav.xml.framework.RequestTools.addElement2PropFind;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Date;
-
 import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
 import org.apache.commons.httpclient.methods.RequestEntity;
 import org.jdom.Document;

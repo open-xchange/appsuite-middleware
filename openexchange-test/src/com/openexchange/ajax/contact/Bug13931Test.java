@@ -50,9 +50,7 @@
 package com.openexchange.ajax.contact;
 
 import static com.openexchange.ajax.folder.Create.ocl;
-
 import java.util.Date;
-
 import org.json.JSONArray;
 import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.contact.action.InsertRequest;

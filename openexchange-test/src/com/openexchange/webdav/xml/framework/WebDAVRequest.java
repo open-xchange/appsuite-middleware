@@ -49,9 +49,9 @@
 
 package com.openexchange.webdav.xml.framework;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.apache.commons.httpclient.methods.RequestEntity;
+import com.openexchange.exception.OXException;
 
 /**
  *

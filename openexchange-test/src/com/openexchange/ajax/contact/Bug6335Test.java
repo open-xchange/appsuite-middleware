@@ -49,14 +49,10 @@
 
 package com.openexchange.ajax.contact;
 
-import com.openexchange.exception.Category;
-import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.StringWriter;
 import java.util.TimeZone;
-
 import org.json.JSONObject;
-
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
@@ -65,6 +61,8 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ContactWriter;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.tools.URLParameter;
 

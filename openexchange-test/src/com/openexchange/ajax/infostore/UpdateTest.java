@@ -1,11 +1,14 @@
 package com.openexchange.ajax.infostore;
 
-import java.io.*;
-
-import org.json.JSONObject;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.xml.sax.SAXException;
-
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.infostore.utils.Metadata;

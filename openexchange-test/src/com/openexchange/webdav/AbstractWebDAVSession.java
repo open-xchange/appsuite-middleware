@@ -50,7 +50,6 @@
 package com.openexchange.webdav;
 
 import junit.framework.TestCase;
-
 import com.openexchange.webdav.xml.framework.WebDAVClient;
 import com.openexchange.webdav.xml.framework.WebDAVClient.User;
 

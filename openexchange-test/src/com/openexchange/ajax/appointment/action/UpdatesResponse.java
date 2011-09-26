@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.action;
 
-import com.openexchange.exception.OXException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.TimeZone;
@@ -58,6 +57,7 @@ import org.json.JSONException;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractColumnsResponse;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 
 /**

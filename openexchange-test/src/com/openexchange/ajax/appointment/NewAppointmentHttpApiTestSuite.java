@@ -49,16 +49,16 @@
 
 package com.openexchange.ajax.appointment;
 
-import com.openexchange.ajax.appointment.recurrence.TestsForCreatingChangeExceptions;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 import com.openexchange.ajax.appointment.recurrence.TestsForChangingAmongMonthlyRecurrences;
 import com.openexchange.ajax.appointment.recurrence.TestsForChangingAmongYearlyRecurrences;
+import com.openexchange.ajax.appointment.recurrence.TestsForCreatingChangeExceptions;
 import com.openexchange.ajax.appointment.recurrence.TestsForDeleteExceptionsAndFixedEndsOfSeries;
 import com.openexchange.ajax.appointment.recurrence.TestsForDifferentWaysOfEndingASeries;
 import com.openexchange.ajax.appointment.recurrence.TestsForModifyingChangeExceptions;
 import com.openexchange.ajax.appointment.recurrence.TestsForUsingRecurrencePositionToGetChangeExceptions;
 import com.openexchange.ajax.appointment.recurrence.TestsToCreateMinimalAppointmentSeries;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 
 /**

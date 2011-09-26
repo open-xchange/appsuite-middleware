@@ -48,10 +48,9 @@
  */
 package com.openexchange.test.fixtures;
 
-import com.openexchange.exception.OXException;
-import java.util.Map;
 import java.util.HashMap;
-
+import java.util.Map;
+import com.openexchange.exception.OXException;
 import com.openexchange.resource.Resource;
 
 /**

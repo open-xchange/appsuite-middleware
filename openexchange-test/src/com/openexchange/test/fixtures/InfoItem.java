@@ -1,7 +1,6 @@
 package com.openexchange.test.fixtures;
 
 import java.util.Date;
-
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 
 public class InfoItem extends DocumentMetadataImpl {

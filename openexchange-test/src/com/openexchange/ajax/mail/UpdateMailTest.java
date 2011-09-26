@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.Date;
 import org.json.JSONException;
@@ -65,6 +64,7 @@ import com.openexchange.ajax.mail.actions.NewMailRequest;
 import com.openexchange.ajax.mail.actions.NewMailResponse;
 import com.openexchange.ajax.mail.actions.UpdateMailRequest;
 import com.openexchange.ajax.mail.actions.UpdateMailResponse;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.mail.MailListField;

@@ -52,7 +52,6 @@ package com.openexchange.ajax.user.actions;
 import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.CommonSearchResponse;
 import com.openexchange.ajax.user.UserImpl4Test;

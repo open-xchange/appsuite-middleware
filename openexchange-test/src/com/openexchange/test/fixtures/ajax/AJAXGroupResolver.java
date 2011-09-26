@@ -49,7 +49,6 @@
 
 package com.openexchange.test.fixtures.ajax;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -57,6 +56,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.group.actions.GetRequest;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.test.fixtures.GroupResolver;
 

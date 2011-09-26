@@ -49,9 +49,9 @@
 
 package com.openexchange.test.fixtures;
 
-import com.openexchange.exception.OXException;
 import java.util.HashMap;
 import java.util.Map;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.fixtures.transformators.FolderModuleTransformator;
 import com.openexchange.test.fixtures.transformators.FolderTypeTransformator;

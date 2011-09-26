@@ -50,7 +50,6 @@
 package com.openexchange.ajax.mail.filter.parser.action;
 
 import org.json.JSONObject;
-
 import com.openexchange.ajax.mail.filter.action.AbstractAction;
 import com.openexchange.ajax.mail.filter.action.Discard;
 import com.openexchange.ajax.mail.filter.action.Keep;

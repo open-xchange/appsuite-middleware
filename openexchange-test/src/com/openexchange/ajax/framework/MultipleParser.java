@@ -6,10 +6,8 @@ package com.openexchange.ajax.framework;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.json.JSONArray;
 import org.json.JSONException;
-
 import com.openexchange.ajax.container.Response;
 
 /**

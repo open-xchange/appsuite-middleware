@@ -49,12 +49,11 @@
 
 package com.openexchange.ajax.importexport.actions;
 
-import com.openexchange.exception.OXException;
 import org.json.JSONArray;
 import org.json.JSONException;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractUploadParser;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.importexport.ImportResult;
 
 /**

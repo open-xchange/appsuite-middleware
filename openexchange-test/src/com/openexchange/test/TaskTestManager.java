@@ -49,14 +49,13 @@
 
 package com.openexchange.test;
 
-import com.openexchange.exception.OXException;
+import static junit.framework.Assert.fail;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
-import static junit.framework.Assert.fail;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
@@ -76,6 +75,7 @@ import com.openexchange.ajax.task.actions.TaskUpdatesResponse;
 import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.ajax.task.actions.UpdateResponse;
 import com.openexchange.ajax.task.actions.UpdatesRequest;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.search.Order;

@@ -3,10 +3,8 @@ package com.openexchange.tools.events;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
-
 import com.openexchange.event.CommonEvent;
 
 public class TestEventAdmin implements EventAdmin {

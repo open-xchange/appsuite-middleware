@@ -49,12 +49,12 @@
 
 package com.openexchange.ajax.importexport;
 
-import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.importexport.ImportResult;
 
 public class Bug15229Test extends AbstractVCardImportTest {

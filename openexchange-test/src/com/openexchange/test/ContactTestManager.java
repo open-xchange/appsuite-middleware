@@ -49,10 +49,8 @@
 
 package com.openexchange.test;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.fail;
-
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
@@ -60,14 +58,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.Vector;
-
 import junit.framework.TestCase;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
-
 import com.openexchange.ajax.contact.action.AdvancedSearchRequest;
 import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.contact.action.ContactUpdatesResponse;
@@ -89,6 +84,7 @@ import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.CommonSearchResponse;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.ajax.parser.ContactParser;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;

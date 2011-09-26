@@ -54,9 +54,9 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.java.Charsets;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
-import com.openexchange.tools.encoding.Charsets;
 
 /**
  * PushOutputQueue

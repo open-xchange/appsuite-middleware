@@ -51,11 +51,9 @@ package com.openexchange.ajax.mail.filter.actions;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.mail.filter.AbstractMailFilterTestParser;

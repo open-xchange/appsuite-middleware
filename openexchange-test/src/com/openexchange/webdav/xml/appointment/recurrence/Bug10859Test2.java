@@ -51,7 +51,6 @@ package com.openexchange.webdav.xml.appointment.recurrence;
 
 import java.util.Calendar;
 import java.util.TimeZone;
-
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.webdav.AbstractWebDAVSession;

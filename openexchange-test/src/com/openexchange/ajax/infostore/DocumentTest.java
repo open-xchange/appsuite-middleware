@@ -3,7 +3,6 @@ package com.openexchange.ajax.infostore;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.InfostoreAJAXTest;

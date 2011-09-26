@@ -49,11 +49,11 @@
 
 package com.openexchange.ajax.kata.fixtures;
 
-import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import com.openexchange.ajax.kata.Step;
+import com.openexchange.exception.OXException;
 import com.openexchange.test.fixtures.Fixture;
 import com.openexchange.test.fixtures.FixtureLoader;
 import com.openexchange.test.fixtures.Fixtures;

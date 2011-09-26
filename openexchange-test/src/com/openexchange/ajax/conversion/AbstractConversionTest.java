@@ -49,14 +49,12 @@
 
 package com.openexchange.ajax.conversion;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.TimeZone;
-
 import org.json.JSONException;
 import org.xml.sax.SAXException;
-
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link AbstractConversionTest}

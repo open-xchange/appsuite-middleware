@@ -49,8 +49,8 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.ajax.appointment.helper.AbstractPositiveAssertion;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Changes;
 import com.openexchange.groupware.container.Expectations;

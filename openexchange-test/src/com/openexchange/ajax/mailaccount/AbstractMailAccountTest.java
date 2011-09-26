@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mailaccount;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
@@ -57,6 +56,7 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.mailaccount.actions.MailAccountDeleteRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountInsertRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountInsertResponse;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountDescription;
 
 

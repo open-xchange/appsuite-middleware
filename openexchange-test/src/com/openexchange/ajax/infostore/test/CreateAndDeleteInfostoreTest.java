@@ -49,12 +49,12 @@
 
 package com.openexchange.ajax.infostore.test;
 
-import com.openexchange.exception.OXException;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;

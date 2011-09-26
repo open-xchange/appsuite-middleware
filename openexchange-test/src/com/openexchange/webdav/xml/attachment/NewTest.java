@@ -1,7 +1,6 @@
 package com.openexchange.webdav.xml.attachment;
 
 import java.io.ByteArrayInputStream;
-
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;

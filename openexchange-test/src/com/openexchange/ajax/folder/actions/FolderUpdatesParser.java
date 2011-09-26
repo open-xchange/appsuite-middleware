@@ -1,7 +1,6 @@
 
 package com.openexchange.ajax.folder.actions;
 
-import com.openexchange.exception.OXException;
 import java.util.Date;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -9,6 +8,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.CommonUpdatesParser;
 import com.openexchange.ajax.parser.FolderParser;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.fixtures.transformators.FolderModuleTransformator;

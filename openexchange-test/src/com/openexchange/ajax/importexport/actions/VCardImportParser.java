@@ -51,10 +51,8 @@ package com.openexchange.ajax.importexport.actions;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.json.JSONArray;
 import org.json.JSONException;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractUploadParser;
 import com.openexchange.ajax.parser.ResponseParser;

@@ -3,7 +3,6 @@ package com.openexchange.ajax.appointment.recurrence;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 import com.openexchange.groupware.container.Appointment;
 
 /**

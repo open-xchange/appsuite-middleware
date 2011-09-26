@@ -51,8 +51,8 @@ package com.openexchange.ajax.config;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Date;
-import java.util.Random;
 import java.util.Map.Entry;
+import java.util.Random;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;

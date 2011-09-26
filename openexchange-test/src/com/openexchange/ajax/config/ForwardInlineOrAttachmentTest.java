@@ -51,7 +51,6 @@ package com.openexchange.ajax.config;
 
 import static com.openexchange.ajax.config.ConfigTools.readSetting;
 import static com.openexchange.ajax.config.ConfigTools.storeSetting;
-
 import com.openexchange.ajax.AbstractAJAXTest;
 
 /**

@@ -48,9 +48,8 @@
  */
 package com.openexchange.test.fixtures.transformators;
 
-import com.openexchange.exception.OXException;
 import java.util.Date;
-
+import com.openexchange.exception.OXException;
 import com.openexchange.test.fixtures.FixtureLoader;
 
 /**

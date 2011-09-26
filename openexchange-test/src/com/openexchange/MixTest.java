@@ -49,14 +49,10 @@
 
 package com.openexchange;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.Random;
-
 import junit.framework.AssertionFailedError;
-
 import org.xml.sax.SAXException;
-
 import com.meterware.httpunit.AuthorizationRequiredException;
 import com.meterware.httpunit.HeadMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
@@ -70,6 +66,7 @@ import com.openexchange.ajax.session.actions.LoginResponse;
 import com.openexchange.ajax.session.actions.LogoutRequest;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
+import com.openexchange.exception.OXException;
 
 /**
  * Tests if AJAX and WebDAV requests may get mixed up.

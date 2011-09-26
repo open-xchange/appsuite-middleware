@@ -48,10 +48,9 @@
  */
 package com.openexchange.test.fixtures.transformators;
 
-import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.List;
-
+import com.openexchange.exception.OXException;
 import com.openexchange.test.fixtures.Document;
 import com.openexchange.test.fixtures.FixtureLoader;
 

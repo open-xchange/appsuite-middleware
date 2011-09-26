@@ -50,8 +50,8 @@
 package com.openexchange.ajax.mail.filter;
 
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.mail.filter.action.AbstractAction;
 import com.openexchange.ajax.mail.filter.action.Keep;
 import com.openexchange.ajax.mail.filter.comparison.IsComparison;

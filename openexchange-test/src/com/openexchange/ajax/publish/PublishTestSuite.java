@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.publish;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+import com.openexchange.ajax.mail.MailTestSuite;
 import com.openexchange.ajax.publish.tests.AllPublicationsTest;
 import com.openexchange.ajax.publish.tests.CreatePublicationTest;
 import com.openexchange.ajax.publish.tests.DeletePublicationTest;
@@ -57,8 +60,6 @@ import com.openexchange.ajax.publish.tests.ListPublicationsTest;
 import com.openexchange.ajax.publish.tests.OXMFInfostoreTest;
 import com.openexchange.ajax.publish.tests.PublishFolderIconTest;
 import com.openexchange.ajax.publish.tests.UpdatePublicationTest;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
  * {@link MailTestSuite}

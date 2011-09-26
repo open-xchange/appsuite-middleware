@@ -2,7 +2,6 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import java.util.Date;
 import java.util.List;
-
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.groupware.container.Appointment;
 

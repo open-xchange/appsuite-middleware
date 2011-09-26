@@ -1,8 +1,7 @@
 package com.openexchange.webdav.xml.task;
 
-import com.openexchange.exception.OXException;
 import java.util.Date;
-
+import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.UserParticipant;

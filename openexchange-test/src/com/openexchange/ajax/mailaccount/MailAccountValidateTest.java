@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mailaccount;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -57,6 +56,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.mailaccount.actions.MailAccountValidateRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountValidateResponse;
 import com.openexchange.configuration.MailConfig;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountDescription;
 
 /**

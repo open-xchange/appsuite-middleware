@@ -50,7 +50,6 @@
 package com.openexchange.ajax.folder.api2;
 
 import java.util.Iterator;
-
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.GetRequest;

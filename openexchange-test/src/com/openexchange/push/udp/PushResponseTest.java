@@ -3,7 +3,6 @@ package com.openexchange.push.udp;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-
 import junit.framework.TestCase;
 
 public class PushResponseTest extends TestCase {

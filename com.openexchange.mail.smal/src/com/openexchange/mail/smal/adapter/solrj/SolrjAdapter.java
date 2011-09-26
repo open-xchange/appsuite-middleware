@@ -207,7 +207,7 @@ public final class SolrjAdapter implements IndexAdapter {
         }
     }
 
-    private static MailMessage readDocument(final SolrDocument document) {
+    private static MailMessage readDocument(final SolrDocument document) throws OXException {
         final MailMessage mail = new IDMailMessage(document.getFieldValue("id").toString(), document.getFieldValue("full_name").toString());
         mail.setAccountId(SolrjAdapter.<Integer> getFieldValue("account", document).intValue());
         mail.setSize(SolrjAdapter.<Long> getFieldValue("size", document).longValue());
@@ -305,12 +305,12 @@ public final class SolrjAdapter implements IndexAdapter {
         return mail;
     }
 
-    private static <V> V getFieldValue(final String name, final SolrDocument document) {
+    private static <V> V getFieldValue(final String name, final SolrDocument document) throws OXException {
         final Object value = document.getFieldValue(name);
         try {
             return (V) value;
         } catch (final ClassCastException e) {
-            throw SMALExceptionCodes.UNEXPECTED_ERROR.create("Unexpected type ");
+            throw SMALExceptionCodes.UNEXPECTED_ERROR.create("Unexpected type " + value.getClass().getName() + "");
         }
     }
 

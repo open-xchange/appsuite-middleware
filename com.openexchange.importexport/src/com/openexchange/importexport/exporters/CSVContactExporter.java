@@ -53,7 +53,6 @@ import static com.openexchange.importexport.formats.csv.CSVLibrary.getFolderId;
 import static com.openexchange.importexport.formats.csv.CSVLibrary.getFolderObject;
 import static com.openexchange.importexport.formats.csv.CSVLibrary.transformIntArrayToSet;
 import static com.openexchange.importexport.formats.csv.CSVLibrary.transformSetToIntArray;
-
 import java.io.ByteArrayInputStream;
 import java.sql.SQLException;
 import java.util.LinkedList;
@@ -76,8 +75,8 @@ import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.importexport.osgi.ImportExportServices;
+import com.openexchange.java.Charsets;
 import com.openexchange.server.impl.EffectivePermission;
-import com.openexchange.tools.encoding.Charsets;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.session.ServerSession;

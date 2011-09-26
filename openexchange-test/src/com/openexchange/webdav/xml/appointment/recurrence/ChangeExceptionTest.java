@@ -1,7 +1,6 @@
 package com.openexchange.webdav.xml.appointment.recurrence;
 
 import java.util.Date;
-
 import com.openexchange.groupware.container.Appointment;
 
 public class ChangeExceptionTest extends AbstractRecurrenceTest {

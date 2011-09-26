@@ -51,10 +51,8 @@ package com.openexchange.ajax.mail.actions;
 
 import java.util.LinkedList;
 import java.util.List;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;

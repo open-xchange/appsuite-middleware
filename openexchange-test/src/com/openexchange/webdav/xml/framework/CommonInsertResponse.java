@@ -50,9 +50,7 @@
 package com.openexchange.webdav.xml.framework;
 
 import java.util.Date;
-
 import org.jdom.Document;
-
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.webdav.xml.types.Response;
 

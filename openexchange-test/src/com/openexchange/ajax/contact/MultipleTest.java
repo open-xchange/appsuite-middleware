@@ -1,7 +1,6 @@
 package com.openexchange.ajax.contact;
 
 import java.util.Date;
-
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.InsertRequest;

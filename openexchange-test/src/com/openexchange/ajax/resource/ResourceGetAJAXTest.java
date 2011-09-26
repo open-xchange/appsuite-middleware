@@ -49,15 +49,15 @@
 
 package com.openexchange.ajax.resource;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
-import com.openexchange.ajax.framework.Executor;
-import com.openexchange.ajax.resource.actions.ResourceGetRequest;
-import com.openexchange.ajax.resource.actions.ResourceGetResponse;
-import com.openexchange.resource.Resource;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
+import com.openexchange.ajax.framework.Executor;
+import com.openexchange.ajax.resource.actions.ResourceGetRequest;
+import com.openexchange.ajax.resource.actions.ResourceGetResponse;
+import com.openexchange.exception.OXException;
+import com.openexchange.resource.Resource;
 
 /**
  * {@link ResourceGetAJAXTest} - Tests the GET request on resource servlet

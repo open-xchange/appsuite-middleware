@@ -49,12 +49,12 @@
 
 package com.openexchange.ajax.publish.actions;
 
-import com.openexchange.exception.OXException;
 import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link AllPublicationsResponse}

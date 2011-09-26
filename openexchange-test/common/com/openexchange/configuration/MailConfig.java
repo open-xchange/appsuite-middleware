@@ -49,9 +49,9 @@
 
 package com.openexchange.configuration;
 
-import com.openexchange.exception.OXException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.conf.AbstractConfig;
 
 /**

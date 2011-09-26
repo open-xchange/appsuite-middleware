@@ -49,13 +49,13 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
-import com.openexchange.exception.Category;
-import com.openexchange.exception.OXException;
 import java.util.Calendar;
 import java.util.TimeZone;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.ExternalUserParticipant;

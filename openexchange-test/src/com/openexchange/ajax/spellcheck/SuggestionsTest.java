@@ -50,7 +50,6 @@
 package com.openexchange.ajax.spellcheck;
 
 import java.util.Arrays;
-
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.spellcheck.actions.suggestions.SuggestionsRequest;
 import com.openexchange.ajax.spellcheck.actions.suggestions.SuggestionsResponse;

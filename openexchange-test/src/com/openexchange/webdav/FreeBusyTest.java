@@ -1,7 +1,6 @@
 package com.openexchange.webdav;
 
 import java.util.Date;
-
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;

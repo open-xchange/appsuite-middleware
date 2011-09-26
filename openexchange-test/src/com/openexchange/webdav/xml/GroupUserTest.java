@@ -1,13 +1,11 @@
 package com.openexchange.webdav.xml;
 
 import static com.openexchange.webdav.xml.framework.RequestTools.addElement2PropFind;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.Map;
-
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
@@ -17,7 +15,6 @@ import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 import org.jdom.output.XMLOutputter;
-
 import com.meterware.httpunit.WebConversation;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.Types;

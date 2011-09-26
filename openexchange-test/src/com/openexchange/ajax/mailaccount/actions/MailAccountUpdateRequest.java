@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mailaccount.actions;
 
-import com.openexchange.exception.OXException;
 import java.util.EnumSet;
 import java.util.Set;
 import org.json.JSONException;
@@ -57,6 +56,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Header;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.json.fields.GetSwitch;

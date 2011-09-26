@@ -50,7 +50,6 @@
 package com.openexchange.ajax.importexport;
 
 import java.util.Date;
-
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.importexport.actions.ICalExportRequest;
 import com.openexchange.ajax.importexport.actions.ICalExportResponse;

@@ -51,13 +51,12 @@ package com.openexchange.ajax.mail.netsol;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.contenttypes.MailContentType;
 import com.openexchange.ajax.mail.netsol.actions.NetsolClearRequest;
+import com.openexchange.ajax.mail.netsol.actions.NetsolClearRequest.NetsolClearResponse;
 import com.openexchange.ajax.mail.netsol.actions.NetsolDeleteRequest;
 import com.openexchange.ajax.mail.netsol.actions.NetsolSendRequest;
-import com.openexchange.ajax.mail.netsol.actions.NetsolClearRequest.NetsolClearResponse;
 import com.openexchange.mail.MailJSONField;
 
 /**

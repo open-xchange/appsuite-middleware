@@ -49,9 +49,8 @@
 
 package com.openexchange.webdav.xml.contact;
 
-import com.openexchange.exception.OXException;
 import java.util.Date;
-
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.webdav.xml.ContactTest;
 import com.openexchange.webdav.xml.XmlServlet;

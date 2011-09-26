@@ -49,7 +49,6 @@
 
 package com.openexchange.test;
 
-import com.openexchange.exception.OXException;
 import static junit.framework.Assert.fail;
 import java.io.IOException;
 import java.util.Date;
@@ -62,6 +61,7 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.resource.actions.ResourceNewResponse;
 import com.openexchange.ajax.resource.actions.ResourceSearchRequest;
 import com.openexchange.ajax.resource.actions.ResourceSearchResponse;
+import com.openexchange.exception.OXException;
 import com.openexchange.resource.Resource;
 
 /**

@@ -50,7 +50,6 @@
 package com.openexchange.ajax.importexport;
 
 import java.io.ByteArrayInputStream;
-
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.importexport.actions.CSVImportRequest;

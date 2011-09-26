@@ -49,16 +49,13 @@
 
 package com.openexchange.webdav.xml.framework;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
-
 import junit.framework.Assert;
-
 import org.apache.commons.httpclient.HttpMethodBase;
 import org.jdom.Document;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
-
+import com.openexchange.exception.OXException;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.parser.ResponseParser;
 import com.openexchange.webdav.xml.types.Response;

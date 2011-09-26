@@ -50,7 +50,6 @@
 package com.openexchange.ajax.appointment.recurrence;
 
 import java.util.Calendar;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.Appointment;

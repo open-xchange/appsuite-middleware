@@ -1,16 +1,12 @@
 package com.openexchange.ajax.mail.filter;
 
 import static org.junit.Assert.assertEquals;
-
 import java.io.IOException;
 import java.net.MalformedURLException;
-
 import javax.servlet.http.HttpServletResponse;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
-
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebConversation;

@@ -1,7 +1,6 @@
 package com.openexchange.ajax.appointment.recurrence;
 
 import java.util.TimeZone;
-
 import com.openexchange.ajax.contact.action.GetContactForUserRequest;
 import com.openexchange.ajax.contact.action.GetResponse;
 import com.openexchange.ajax.framework.AJAXClient;

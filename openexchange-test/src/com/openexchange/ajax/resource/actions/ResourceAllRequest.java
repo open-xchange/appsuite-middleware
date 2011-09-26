@@ -51,9 +51,7 @@ package com.openexchange.ajax.resource.actions;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.json.JSONException;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;

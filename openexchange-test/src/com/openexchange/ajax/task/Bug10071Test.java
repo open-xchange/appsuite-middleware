@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.task;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.F;
 import static com.openexchange.java.Autoboxing.L;
 import java.io.IOException;
@@ -65,6 +64,7 @@ import com.openexchange.ajax.task.actions.GetResponse;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.ajax.task.actions.ListRequest;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Create;
 import com.openexchange.groupware.tasks.Mapper;
 import com.openexchange.groupware.tasks.Mapping;

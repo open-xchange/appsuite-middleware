@@ -49,18 +49,16 @@
 
 package com.openexchange.ajax.importexport.actions;
 
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONArray;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.parser.ResponseParser;
-import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.data.conversion.ical.ConversionWarning;
-
-import java.util.List;
-import java.util.ArrayList;
+import com.openexchange.groupware.importexport.ImportResult;
 
 /**
  *

@@ -48,15 +48,12 @@
  */
 package com.openexchange.ajax.task;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.Date;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
-
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.Executor;
@@ -69,6 +66,7 @@ import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.ajax.task.actions.ListRequest;
 import com.openexchange.ajax.task.actions.SearchRequest;
 import com.openexchange.ajax.task.actions.UpdatesRequest;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Task;
 

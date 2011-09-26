@@ -1,9 +1,7 @@
 package com.openexchange.ajax.group.actions;
 
 import java.io.IOException;
-
 import org.json.JSONException;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Params;

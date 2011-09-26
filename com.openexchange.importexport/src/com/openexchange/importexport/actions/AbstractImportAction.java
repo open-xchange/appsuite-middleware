@@ -1,7 +1,6 @@
 package com.openexchange.importexport.actions;
 
 import java.util.List;
-
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;

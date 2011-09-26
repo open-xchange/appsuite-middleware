@@ -51,7 +51,6 @@ package com.openexchange.ajax.task;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.ajax.framework.AJAXClient;

@@ -49,20 +49,20 @@
 
 package com.openexchange.test;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
 import com.openexchange.ajax.AJAXFileUploadTest;
 import com.openexchange.ajax.appointment.recurrence.Bug12280Test;
 import com.openexchange.ajax.importexport.ICalImportExportServletTest;
 import com.openexchange.ajax.importexport.VCardImportExportServletTest;
 import com.openexchange.ajax.infostore.test.CreateAndDeleteInfostoreTest;
+import com.openexchange.ajax.task.BasicManagedTaskTests;
 import com.openexchange.ajax.task.Bug10941Test;
 import com.openexchange.ajax.task.Bug14450Test;
-import com.openexchange.ajax.task.BasicManagedTaskTests;
 import com.openexchange.test.osgi.BundleTestAuthentication;
 import com.openexchange.test.osgi.BundleTestIMAP;
 import com.openexchange.test.osgi.BundleTestSessionD;
 import com.openexchange.webdav.client.EmptyLockTest;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 
 /**

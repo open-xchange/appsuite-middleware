@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax;
 
-import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -86,6 +85,7 @@ import com.openexchange.ajax.parser.AppointmentParser;
 import com.openexchange.ajax.parser.ResponseParser;
 import com.openexchange.ajax.request.AppointmentRequest;
 import com.openexchange.ajax.writer.AppointmentWriter;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;

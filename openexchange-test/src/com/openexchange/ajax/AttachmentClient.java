@@ -6,10 +6,8 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Map;
-
 import org.json.JSONException;
 import org.xml.sax.SAXException;
-
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.openexchange.ajax.container.Response;

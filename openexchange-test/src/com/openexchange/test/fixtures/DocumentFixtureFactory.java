@@ -48,11 +48,10 @@
  */
 package com.openexchange.test.fixtures;
 
-import com.openexchange.exception.OXException;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-
+import com.openexchange.exception.OXException;
 import com.openexchange.test.fixtures.transformators.CredentialsTransformator;
 
 /**

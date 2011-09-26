@@ -50,7 +50,6 @@
 package com.openexchange.test.fixtures;
 
 import java.util.Map;
-
 import com.openexchange.messaging.generic.DefaultMessagingAccount;
 
 public class Messaging extends DefaultMessagingAccount {

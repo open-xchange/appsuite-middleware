@@ -37,7 +37,6 @@
 
 package com.openexchange.webdav.xml.parser;
 
-import com.openexchange.exception.OXException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -45,6 +44,7 @@ import java.util.Map;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.Namespace;
+import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.Appointment;

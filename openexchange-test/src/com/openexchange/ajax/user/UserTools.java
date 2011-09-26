@@ -49,14 +49,10 @@
 
 package com.openexchange.ajax.user;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
-
 import junit.framework.Assert;
-
 import org.json.JSONException;
 import org.xml.sax.SAXException;
-
 import com.meterware.httpunit.WebConversation;
 import com.openexchange.ajax.UserTest;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -66,6 +62,7 @@ import com.openexchange.ajax.user.actions.GetRequest;
 import com.openexchange.ajax.user.actions.GetResponse;
 import com.openexchange.ajax.user.actions.SearchRequest;
 import com.openexchange.ajax.user.actions.SearchResponse;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;

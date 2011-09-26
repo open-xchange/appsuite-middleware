@@ -4,10 +4,8 @@ package com.openexchange.push.udp;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.Date;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
 import com.clarkware.junitperf.TimedTest;
 import com.meterware.httpunit.WebConversation;
 import com.openexchange.groupware.container.Appointment;

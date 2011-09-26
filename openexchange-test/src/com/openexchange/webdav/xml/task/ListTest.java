@@ -49,10 +49,10 @@
 
 package com.openexchange.webdav.xml.task;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.F;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.Date;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.webdav.xml.TaskTest;
 import com.openexchange.webdav.xml.XmlServlet;

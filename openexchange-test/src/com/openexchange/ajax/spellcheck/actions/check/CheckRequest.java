@@ -51,9 +51,7 @@ package com.openexchange.ajax.spellcheck.actions.check;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.json.JSONException;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.spellcheck.actions.AbstractSpellCheckRequest;
 

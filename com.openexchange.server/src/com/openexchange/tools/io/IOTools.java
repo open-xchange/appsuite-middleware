@@ -58,7 +58,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Scanner;
-import com.openexchange.tools.encoding.Charsets;
+import com.openexchange.java.Charsets;
 
 public class IOTools {
 
@@ -76,9 +76,9 @@ public class IOTools {
         }
     }
 
-    public static final void copy(InputStream in, OutputStream out) throws IOException {
-        BufferedInputStream inputStream = new BufferedInputStream(in);
-        BufferedOutputStream outputStream = new BufferedOutputStream(out);
+    public static final void copy(final InputStream in, final OutputStream out) throws IOException {
+        final BufferedInputStream inputStream = new BufferedInputStream(in);
+        final BufferedOutputStream outputStream = new BufferedOutputStream(out);
 
         int i = -1;
         int count = 0;
@@ -90,10 +90,10 @@ public class IOTools {
         outputStream.flush();
     }
 
-    public static final byte[] getBytes(InputStream stream) throws IOException {
-        BufferedInputStream in = new BufferedInputStream(stream);
+    public static final byte[] getBytes(final InputStream stream) throws IOException {
+        final BufferedInputStream in = new BufferedInputStream(stream);
         try {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            final ByteArrayOutputStream out = new ByteArrayOutputStream();
             int i;
             while((i = in.read()) != -1) {
                 out.write(i);
@@ -106,8 +106,8 @@ public class IOTools {
 
     }
 
-    public static final String getFileContents(File file) throws FileNotFoundException {
-        StringBuilder sb = new StringBuilder();
+    public static final String getFileContents(final File file) throws FileNotFoundException {
+        final StringBuilder sb = new StringBuilder();
         Scanner scanner = null;
         try {
             scanner = new Scanner(file, Charsets.UTF_8_NAME);

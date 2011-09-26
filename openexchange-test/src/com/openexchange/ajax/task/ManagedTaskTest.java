@@ -1,7 +1,6 @@
 package com.openexchange.ajax.task;
 
 import java.util.Date;
-
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.test.TaskTestManager;

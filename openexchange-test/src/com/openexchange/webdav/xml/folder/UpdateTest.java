@@ -50,7 +50,6 @@
 package com.openexchange.webdav.xml.folder;
 
 import java.util.Date;
-
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.webdav.xml.FolderTest;

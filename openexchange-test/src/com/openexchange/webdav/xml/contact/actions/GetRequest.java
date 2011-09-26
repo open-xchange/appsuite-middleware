@@ -49,9 +49,9 @@
 
 package com.openexchange.webdav.xml.contact.actions;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import org.apache.commons.httpclient.methods.RequestEntity;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link GetRequest}

@@ -3,10 +3,8 @@ package com.openexchange.push.udp;
 
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
 import com.clarkware.junitperf.TimedTest;
 import com.meterware.httpunit.WebConversation;
 import com.openexchange.webdav.xml.GroupUserTest;

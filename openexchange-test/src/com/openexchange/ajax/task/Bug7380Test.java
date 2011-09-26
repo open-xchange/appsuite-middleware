@@ -50,7 +50,6 @@
 package com.openexchange.ajax.task;
 
 import java.util.List;
-
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.participant.ParticipantTools;

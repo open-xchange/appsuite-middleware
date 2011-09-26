@@ -48,8 +48,8 @@
  */
 package com.openexchange.test.fixtures;
 
-import com.openexchange.exception.OXException;
 import java.util.List;
+import com.openexchange.exception.OXException;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

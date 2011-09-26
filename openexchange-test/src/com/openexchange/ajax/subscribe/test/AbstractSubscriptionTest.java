@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.subscribe.test;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -58,6 +57,7 @@ import org.xml.sax.SAXException;
 import com.openexchange.ajax.publish.tests.AbstractPubSubTest;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
+import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
 

@@ -50,10 +50,8 @@
 package com.openexchange.ajax.task.actions;
 
 import java.util.TimeZone;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.groupware.tasks.Task;

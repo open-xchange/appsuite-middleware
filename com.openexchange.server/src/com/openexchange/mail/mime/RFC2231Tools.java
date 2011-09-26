@@ -57,7 +57,7 @@ import java.nio.charset.CharsetDecoder;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import com.openexchange.tools.encoding.Charsets;
+import com.openexchange.java.Charsets;
 
 /**
  * {@link RFC2231Tools} - A collection of <small><b><a href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small> related utility
