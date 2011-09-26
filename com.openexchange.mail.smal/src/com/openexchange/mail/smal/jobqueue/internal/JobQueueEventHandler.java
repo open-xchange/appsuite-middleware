@@ -49,9 +49,11 @@
 
 package com.openexchange.mail.smal.jobqueue.internal;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
@@ -62,10 +64,11 @@ import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.mail.smal.jobqueue.Constants;
 import com.openexchange.mail.smal.jobqueue.Job;
 import com.openexchange.mail.smal.jobqueue.JobQueue;
+import com.openexchange.mail.smal.jobqueue.jobs.ElapsedFolderJob;
 import com.openexchange.mail.smal.jobqueue.jobs.MailAccountJob;
-import com.openexchange.mail.smal.jobqueue.jobs.PeriodicFolderJob;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.Tools;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
@@ -73,7 +76,7 @@ import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
 /**
- * {@link JobQueueEventHandler}
+ * {@link JobQueueEventHandler} - Starts/drops periodic jobs for a user by tracking added/removed sessions.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -199,16 +202,49 @@ public final class JobQueueEventHandler implements EventHandler {
             final int contextId = session.getContextId();
             final Queue<Job> jobs = getJobsFrom(session);
             final JobQueue jobQueue = JobQueue.getInstance();
+            final Set<String> filter = new HashSet<String>(8);
             for (final MailAccount account : storageService.getUserMailAccounts(userId, contextId)) {
                 final int accountId = account.getId();
-                final MailAccountJob maj = new MailAccountJob(accountId, userId, contextId, "INBOX");
+                filter.add("INBOX");
+                {
+                    MailAccount acc = account;
+                    String fn = acc.getDraftsFullname();
+                    if (null == fn) {
+                        acc = Tools.checkFullNames(acc, storageService, session, null);
+                        fn = acc.getDraftsFullname();
+                    }
+                    filter.add(fn);
+
+                    fn = acc.getSentFullname();
+                    if (null == fn) {
+                        acc = Tools.checkFullNames(acc, storageService, session, null);
+                        fn = acc.getSentFullname();
+                    }
+                    filter.add(fn);
+
+                    fn = acc.getTrashFullname();
+                    if (null == fn) {
+                        acc = Tools.checkFullNames(acc, storageService, session, null);
+                        fn = acc.getTrashFullname();
+                    }
+                    filter.add(fn);
+
+                    /*
+                     * TODO: Add custom user folders
+                     */
+                }
+                /*
+                 * Create job
+                 */
+                final MailAccountJob maj = new MailAccountJob(accountId, userId, contextId, filter);
+                filter.clear();
                 if (jobQueue.addJob(maj)) {
                     jobs.offer(maj);
                 }
                 /*
                  * Add periodic job
                  */
-                addPeriodicJob(new PeriodicFolderJob(accountId, userId, contextId), session);
+                addPeriodicJob(new ElapsedFolderJob(accountId, userId, contextId), session);
             }
         } catch (final Exception e) {
             // Failed handling session
@@ -245,11 +281,7 @@ public final class JobQueueEventHandler implements EventHandler {
 
         private final ConcurrentMap<Key, ConcurrentMap<String, Job>> periodicJobs;
 
-        /**
-         * Initializes a new {@link JobQueueEventHandler.PeriodicRunnable}.
-         * @param periodicJobs
-         */
-        public PeriodicRunnable(final ConcurrentMap<Key, ConcurrentMap<String, Job>> periodicJobs) {
+        protected PeriodicRunnable(final ConcurrentMap<Key, ConcurrentMap<String, Job>> periodicJobs) {
             super();
             this.periodicJobs = periodicJobs;
         }
@@ -278,7 +310,7 @@ public final class JobQueueEventHandler implements EventHandler {
 
         private final int hash;
 
-        public Key(final int user, final int cid) {
+        protected Key(final int user, final int cid) {
             super();
             this.user = user;
             this.cid = cid;

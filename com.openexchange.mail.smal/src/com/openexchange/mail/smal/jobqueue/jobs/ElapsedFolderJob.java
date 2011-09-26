@@ -64,30 +64,30 @@ import com.openexchange.mail.smal.jobqueue.JobQueue;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link PeriodicFolderJob}
+ * {@link ElapsedFolderJob}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PeriodicFolderJob extends AbstractMailSyncJob {
+public final class ElapsedFolderJob extends AbstractMailSyncJob {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(PeriodicFolderJob.class));
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ElapsedFolderJob.class));
 
     private static final long serialVersionUID = -7360411730956519503L;
 
     private final String identifier;
 
     /**
-     * Initializes a new {@link PeriodicFolderJob}.
+     * Initializes a new {@link ElapsedFolderJob}.
      * 
      * @param accountId The account identifier
      * @param userId The user identifier
      * @param contextId The context identifier
      */
-    public PeriodicFolderJob(final int accountId, final int userId, final int contextId) {
+    public ElapsedFolderJob(final int accountId, final int userId, final int contextId) {
         super(accountId, userId, contextId);
         identifier =
-            new StringBuilder(PeriodicFolderJob.class.getSimpleName()).append('@').append(contextId).append('@').append(userId).append('@').append(
+            new StringBuilder(ElapsedFolderJob.class.getSimpleName()).append('@').append(contextId).append('@').append(userId).append('@').append(
                 accountId).toString();
     }
 
@@ -117,7 +117,7 @@ public final class PeriodicFolderJob extends AbstractMailSyncJob {
             }
         } catch (final Exception e) {
             cancel();
-            LOG.error("Periodic folder job failed.", e);
+            LOG.error("Elapsed folder job failed.", e);
         }
     }
 
