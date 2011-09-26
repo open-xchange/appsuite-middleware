@@ -49,8 +49,10 @@
 
 package com.openexchange.mail.smal.jobqueue.internal;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
@@ -60,6 +62,11 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.smal.SMALMailAccess;
 import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.mail.smal.jobqueue.Constants;
 import com.openexchange.mail.smal.jobqueue.Job;
@@ -206,7 +213,7 @@ public final class JobQueueEventHandler implements EventHandler {
             for (final MailAccount account : storageService.getUserMailAccounts(userId, contextId)) {
                 final int accountId = account.getId();
                 filter.add("INBOX");
-                {
+                if (MailAccount.DEFAULT_ID != accountId) {
                     MailAccount acc = account;
                     String fn = acc.getDraftsFullname();
                     if (null == fn) {
@@ -230,8 +237,10 @@ public final class JobQueueEventHandler implements EventHandler {
                     filter.add(fn);
 
                     /*
-                     * TODO: Add custom user folders
+                     * TODO: Add custom user folders specified by user
                      */
+                } else {
+                    filter.addAll(getPrimaryFullNames(session));
                 }
                 /*
                  * Create job
@@ -249,6 +258,22 @@ public final class JobQueueEventHandler implements EventHandler {
         } catch (final Exception e) {
             // Failed handling session
             LOG.warn("Failed handling tracked added session.", e);
+        }
+    }
+
+    private List<String> getPrimaryFullNames(final Session session) throws OXException {
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+        try {
+            mailAccess = SMALMailAccess.getUnwrappedInstance(session, MailAccount.DEFAULT_ID);
+            mailAccess.connect(true);
+            final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
+            final List<String> fullNames = new ArrayList<String>(3);
+            fullNames.add(folderStorage.getDraftsFolder());
+            fullNames.add(folderStorage.getSentFolder());
+            fullNames.add(folderStorage.getTrashFolder());
+            return fullNames;
+        } finally {
+            SMALMailAccess.closeUnwrappedInstance(mailAccess);
         }
     }
 

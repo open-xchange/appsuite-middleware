@@ -723,7 +723,7 @@ public final class OXFolderDowngradeSQL {
 	}
 
 	private static final String SQL_SEL_SUB_INFO_FLD = "SELECT ot.fuid FROM " + RPL_FOLDER
-			+ " AS ot WHERE ot.parent IN (" + "SELECT ot2.fuid FROM " + RPL_FOLDER
+			+ " AS ot WHERE ot.cid = ? AND ot.parent IN (" + "SELECT ot2.fuid FROM " + RPL_FOLDER
 			+ " AS ot2 WHERE ot2.cid = ? AND ot2.module = ? AND ot2.created_from = ? AND ot2.default_flag = 1)";
 
 	private static final String SQL_SEL_SUB2_INFO_FLD = "SELECT ot.fuid FROM " + RPL_FOLDER
@@ -757,8 +757,9 @@ public final class OXFolderDowngradeSQL {
 		try {
 			stmt = writeCon.prepareStatement(SQL_SEL_SUB_INFO_FLD.replaceAll(RPL_FOLDER, folderTable));
 			stmt.setInt(1, cid);
-			stmt.setInt(2, FolderObject.INFOSTORE);
-			stmt.setInt(3, entity);
+			stmt.setInt(2, cid);
+			stmt.setInt(3, FolderObject.INFOSTORE);
+			stmt.setInt(4, entity);
 			rs = stmt.executeQuery();
 			final SmartIntArray sia = new SmartIntArray(128);
 			while (rs.next()) {
