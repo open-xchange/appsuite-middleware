@@ -107,7 +107,7 @@ public final class ElapsedFolderJob extends AbstractMailSyncJob {
             return;
         }
         try {
-            final List<String> exceededFolders = getExceededFolders(System.currentTimeMillis());
+            final List<String> exceededFolders = getElapsedFolders(System.currentTimeMillis());
             if (exceededFolders.isEmpty()) {
                 return;
             }
@@ -121,7 +121,7 @@ public final class ElapsedFolderJob extends AbstractMailSyncJob {
         }
     }
 
-    private List<String> getExceededFolders(final long now) throws OXException {
+    private List<String> getElapsedFolders(final long now) throws OXException {
         final DatabaseService databaseService = SMALServiceLookup.getServiceStatic(DatabaseService.class);
         if (null == databaseService) {
             return java.util.Collections.emptyList();
