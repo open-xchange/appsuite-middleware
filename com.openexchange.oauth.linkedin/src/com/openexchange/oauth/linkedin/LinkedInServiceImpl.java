@@ -91,7 +91,6 @@ public class LinkedInServiceImpl implements LinkedInService{
 
     private static final String ALL_FIELDS = ":(id,first-name,last-name,phone-numbers,headline,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url,positions,industry)";
 	private static final String CONNECTIONS_URL = "http://api.linkedin.com/v1/people/~/connections:(id,first-name,last-name,phone-numbers,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url,positions)";
-    private static final String PROFILE_URL = "http://api.linkedin.com/v1/people/~:(id,first-name,last-name,phone-numbers,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url,positions)";
     private static final String IN_JSON = "?format=json";
     
     private Activator activator;
