@@ -49,15 +49,9 @@
 
 package com.openexchange.oauth.linkedin;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
@@ -70,22 +64,18 @@ import org.scribe.model.Response;
 import org.scribe.model.Token;
 import org.scribe.model.Verb;
 import org.scribe.oauth.OAuthService;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
+
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.linkedin.osgi.Activator;
-import com.openexchange.tools.versit.converter.ConverterException;
-import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 /**
  * {@link LinkedInServiceImpl}
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class LinkedInServiceImpl implements LinkedInService{
 
@@ -131,135 +121,7 @@ public class LinkedInServiceImpl implements LinkedInService{
         return request.send();
     }
     
-    public Contact parse(Element person){
-        Contact contact = new Contact();
-        contact.setGivenName(getTextValue(person, "first-name"));
-        contact.setSurName(getTextValue(person, "last-name"));
-        if (null != getTextValue(person, "main-address")) {
-            contact.setNote(getTextValue(person, "main-address"));
-        }
-        try {
-            String imageUrl = getTextValue(person, "picture-url");
-            if (null != imageUrl) {
-                OXContainerConverter.loadImageFromURL(contact, imageUrl);
-            }
-        } catch (ConverterException e) {
-            LOG.error(e);
-        }
-
-        // get the current job and company
-        NodeList positions = person.getElementsByTagName("positions");
-        if (null != positions && positions.getLength() > 0) {
-            Element position = (Element) positions.item(0);
-            contact.setTitle(getTextValue(position, "title"));
-            NodeList companies = position.getElementsByTagName("company");
-            if (companies != null && companies.getLength() > 0) {
-                Element company = (Element) companies.item(0);
-                contact.setCompany(getTextValue(company, "name"));
-            }
-        }
-
-        // get the first IM-account
-        NodeList imAccounts = person.getElementsByTagName("im-account");
-        if (null != imAccounts && imAccounts.getLength() > 0 ){
-            Element imAccount = (Element) imAccounts.item(0);
-            contact.setInstantMessenger1(getTextValue(imAccount, "im-account-name") + " ("+getTextValue(imAccount, "im-account-type")+")");
-        }
-
-        // parse the phone numbers, saving the first occurrence of "home" and "work"
-        NodeList phoneNumbers = person.getElementsByTagName("phone-number");
-        if (null != phoneNumbers && phoneNumbers.getLength() > 0 ){
-            for (int p = 0; p < phoneNumbers.getLength(); p++){
-                Element phoneNumber = (Element) phoneNumbers.item(p);
-                if (null != getTextValue(phoneNumber, "phone-type")){
-                    if (getTextValue(phoneNumber, "phone-type").equals("work")) {
-                        contact.setTelephoneBusiness1(getTextValue(phoneNumber, "phone-number"));
-                    }
-                    else if (getTextValue(phoneNumber, "phone-type").equals("home")){
-                        contact.setTelephoneHome1(getTextValue(phoneNumber, "phone-number"));
-                    }
-                }
-            }
-        }
-
-        // get the birthdate
-        NodeList dateOfBirths = person.getElementsByTagName("date-of-birth");
-        if (null != dateOfBirths && dateOfBirths.getLength() > 0){
-            Element dateOfBirth = (Element) dateOfBirths.item(0);
-            int year = 0;
-            if (null != getTextValue(dateOfBirth, "year")){
-                year = Integer.parseInt(getTextValue(dateOfBirth, "year")) - 1900;
-            }
-            int month = 0;
-            if (null != getTextValue(dateOfBirth, "month")){
-                month = Integer.parseInt(getTextValue(dateOfBirth, "month")) -1;
-            }
-            int date = 0;
-            if (null != getTextValue(dateOfBirth, "day")){
-                date = Integer.parseInt(getTextValue(dateOfBirth, "day"));
-            }
-            contact.setBirthday(new Date(year, month, date));
-        }
-        return contact;
-    }
     
-    public List<Contact> parseConnections(String body) {
-        final List<Contact> contacts = new ArrayList<Contact>();
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-
-        try {
-            DocumentBuilder db = dbf.newDocumentBuilder();
-            Document doc = db.parse(new ByteArrayInputStream(body.getBytes("UTF-8")));
-            Element root = doc.getDocumentElement();
-            NodeList connections = root.getElementsByTagName("person");
-            if (connections != null && connections.getLength() > 0) {
-                for (int i = 0; i < connections.getLength(); i++) {
-                    Element person = (Element) connections.item(i);
-                    Contact contact = parse(person);
-                    contacts.add(contact);
-                }
-            }
-        } catch (ParserConfigurationException pce) {
-            LOG.error(pce);
-        } catch (SAXException se) {
-            LOG.error(se);
-        } catch (IOException ioe) {
-            LOG.error(ioe);
-        }
-        return contacts;
-    }
-
-    public Contact parseProfile(String body) {
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        try {
-            DocumentBuilder db = dbf.newDocumentBuilder();
-            Document doc = db.parse(new ByteArrayInputStream(body.getBytes("UTF-8")));
-            Element root = doc.getDocumentElement();
-            Contact contact = parse(root);
-            return contact;
-        } catch (ParserConfigurationException pce) {
-            LOG.error(pce);
-        } catch (SAXException se) {
-            LOG.error(se);
-        } catch (IOException ioe) {
-            LOG.error(ioe);
-        }
-        return null;
-    }
-    
-    private String getTextValue(Element ele, String tagName) {
-        String textVal = null;
-        NodeList nl = ele.getElementsByTagName(tagName);
-        if (nl != null && nl.getLength() > 0) {
-            Element el = (Element) nl.item(0);
-            if (null != el.getFirstChild()){
-                textVal = el.getFirstChild().getNodeValue();
-            }
-        }
-
-        return textVal;
-    }
-
 	private JSONObject extractJson(Response response) throws OXException {
 		JSONObject json;
 		try {
@@ -270,6 +132,20 @@ public class LinkedInServiceImpl implements LinkedInService{
         return json;
 	}
 	
+
+	private List<String> extractIds(Response response) throws OXException{
+		List<String> result = new LinkedList<String>();
+		try {
+			JSONObject json = new JSONObject(response.getBody());
+			JSONArray ids = json.getJSONArray("values");
+			for(int i = 0, max = ids.length(); i < max; i++){
+				result.add(ids.getJSONObject(i).getString("id"));
+			}
+		} catch (JSONException e) {
+			
+		}
+		return result;
+	}
 	
 	
     @Override
@@ -285,11 +161,12 @@ public class LinkedInServiceImpl implements LinkedInService{
         return displayName;
     }
     
-
+    
     @Override
     public List<Contact> getContacts(String password, int user, int contextId, int accountId) {
     	Response response = performRequest(password, user, contextId, accountId, Verb.GET, CONNECTIONS_URL);
-        List<Contact> contacts = parseConnections(response.getBody());
+    	LinkedInXMLParser parser = new LinkedInXMLParser();
+        List<Contact> contacts = parser.parseConnections(response.getBody());
         return contacts;
     }
     
@@ -299,6 +176,7 @@ public class LinkedInServiceImpl implements LinkedInService{
     	throw OXException.general("Not implemented, because LinkedIn has not upgraded our ID yet");
     }
 
+    
 	@Override
 	public JSONObject getProfileForId(String id, String password, int user, int contextId, int accountId) throws OXException {
 		String uri = "http://api.linkedin.com/v1/people/id="+id+ALL_FIELDS;
@@ -306,6 +184,7 @@ public class LinkedInServiceImpl implements LinkedInService{
     	return extractJson(response);
 	}
 
+	
 	@Override
 	public JSONObject getConnections(String password, int user, int contextId,	int accountId) throws OXException {
 		String uri = "http://api.linkedin.com/v1/people/~/connections"+ALL_FIELDS;
@@ -313,6 +192,7 @@ public class LinkedInServiceImpl implements LinkedInService{
     	return extractJson(response);
 	}
 
+	
 	@Override
 	public List<String> getUsersConnectionsIds(String password, int user, int contextId, int accountId) throws OXException {
 		String uri = "http://api.linkedin.com/v1/people/~/connections:(id)";
@@ -320,17 +200,4 @@ public class LinkedInServiceImpl implements LinkedInService{
 	   	return extractIds(response);
 	}
 
-	private List<String> extractIds(Response response) throws OXException{
-		List<String> result = new LinkedList();
-		try {
-			JSONObject json = new JSONObject(response.getBody());
-			JSONArray ids = json.getJSONArray("values");
-			for(int i = 0, max = ids.length(); i < max; i++){
-				result.add(ids.getJSONObject(i).getString("id"));
-			}
-		} catch (JSONException e) {
-			
-		}
-		return result;
-	}
 }
