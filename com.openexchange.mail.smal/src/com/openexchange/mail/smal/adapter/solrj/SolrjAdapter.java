@@ -306,7 +306,12 @@ public final class SolrjAdapter implements IndexAdapter {
     }
 
     private static <V> V getFieldValue(final String name, final SolrDocument document) {
-        return (V) document.getFieldValue(name);
+        final Object value = document.getFieldValue(name);
+        try {
+            return (V) value;
+        } catch (final ClassCastException e) {
+            throw SMALExceptionCodes.UNEXPECTED_ERROR.create("Unexpected type ");
+        }
     }
 
     /*

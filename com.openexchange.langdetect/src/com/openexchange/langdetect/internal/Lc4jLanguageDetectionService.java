@@ -54,7 +54,6 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -131,13 +130,9 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
      * @throws OXException If loading file fails
      */
     public void loadLanguageCodes(final String languageCodesFile) throws OXException {
-        final BufferedInputStream inputStream;
+        BufferedInputStream inputStream = null;
         try {
             inputStream = new BufferedInputStream(new FileInputStream(languageCodesFile));
-        } catch (final FileNotFoundException e) {
-            throw LanguageDetectionExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        }
-        try {
             final Properties properties = new Properties();
             properties.load(inputStream);
             for (final Entry<Object, Object> entry : properties.entrySet()) {
