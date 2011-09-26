@@ -307,10 +307,13 @@ public final class SolrjAdapter implements IndexAdapter {
 
     private static <V> V getFieldValue(final String name, final SolrDocument document) throws OXException {
         final Object value = document.getFieldValue(name);
+        if (null == value) {
+            return null;
+        }
         try {
             return (V) value;
         } catch (final ClassCastException e) {
-            throw SMALExceptionCodes.UNEXPECTED_ERROR.create("Unexpected type " + value.getClass().getName() + "");
+            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, "Unexpected type: " + e.getMessage());
         }
     }
 
