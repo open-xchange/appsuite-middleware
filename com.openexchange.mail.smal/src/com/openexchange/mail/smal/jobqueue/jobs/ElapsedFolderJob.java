@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.smal.jobqueue;
+package com.openexchange.mail.smal.jobqueue.jobs;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -59,33 +59,35 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.smal.SMALServiceLookup;
+import com.openexchange.mail.smal.jobqueue.Constants;
+import com.openexchange.mail.smal.jobqueue.JobQueue;
 import com.openexchange.tools.sql.DBUtils;
 
-
 /**
- * {@link PeriodicFolderJob}
- *
+ * {@link ElapsedFolderJob}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PeriodicFolderJob extends AbstractMailSyncJob {
+public final class ElapsedFolderJob extends AbstractMailSyncJob {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(PeriodicFolderJob.class));
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ElapsedFolderJob.class));
 
     private static final long serialVersionUID = -7360411730956519503L;
 
     private final String identifier;
 
     /**
-     * Initializes a new {@link PeriodicFolderJob}.
-     * @param accountId
-     * @param userId
-     * @param contextId
+     * Initializes a new {@link ElapsedFolderJob}.
+     * 
+     * @param accountId The account identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
      */
-    public PeriodicFolderJob(final int accountId, final int userId, final int contextId) {
+    public ElapsedFolderJob(final int accountId, final int userId, final int contextId) {
         super(accountId, userId, contextId);
         identifier =
-            new StringBuilder(PeriodicFolderJob.class.getSimpleName()).append('@').append(contextId).append('@').append(userId).append('@').append(
+            new StringBuilder(ElapsedFolderJob.class.getSimpleName()).append('@').append(contextId).append('@').append(userId).append('@').append(
                 accountId).toString();
     }
 
@@ -105,7 +107,7 @@ public final class PeriodicFolderJob extends AbstractMailSyncJob {
             return;
         }
         try {
-            final List<String> exceededFolders = getExceededFolders(System.currentTimeMillis());
+            final List<String> exceededFolders = getElapsedFolders(System.currentTimeMillis());
             if (exceededFolders.isEmpty()) {
                 return;
             }
@@ -115,19 +117,11 @@ public final class PeriodicFolderJob extends AbstractMailSyncJob {
             }
         } catch (final Exception e) {
             cancel();
-            LOG.error("Periodic folder job failed.", e);
+            LOG.error("Elapsed folder job failed.", e);
         }
     }
 
-    /**
-     * Checks if a sync should be performed for specified full name.
-     *
-     * @param fullName The full name
-     * @param now The current time milliseconds
-     * @return <code>true</code> if a sync should be performed for passed full name; otherwise <code>false</code>
-     * @throws OXException If an error occurs
-     */
-    private List<String> getExceededFolders(final long now) throws OXException {
+    private List<String> getElapsedFolders(final long now) throws OXException {
         final DatabaseService databaseService = SMALServiceLookup.getServiceStatic(DatabaseService.class);
         if (null == databaseService) {
             return java.util.Collections.emptyList();
@@ -136,8 +130,7 @@ public final class PeriodicFolderJob extends AbstractMailSyncJob {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt =
-                con.prepareStatement("SELECT fullName FROM mailSync WHERE cid = ? AND user = ? AND accountId = ? AND timestamp < ?");
+            stmt = con.prepareStatement("SELECT fullName FROM mailSync WHERE cid = ? AND user = ? AND accountId = ? AND timestamp < ?");
             int pos = 1;
             stmt.setLong(pos++, contextId);
             stmt.setLong(pos++, userId);

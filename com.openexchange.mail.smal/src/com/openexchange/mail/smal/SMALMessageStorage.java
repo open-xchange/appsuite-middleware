@@ -69,8 +69,8 @@ import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.smal.adapter.IndexAdapter;
 import com.openexchange.mail.smal.adapter.IndexService;
 import com.openexchange.mail.smal.jobqueue.Constants;
-import com.openexchange.mail.smal.jobqueue.FolderJob;
 import com.openexchange.mail.smal.jobqueue.JobQueue;
+import com.openexchange.mail.smal.jobqueue.jobs.FolderJob;
 import com.openexchange.session.Session;
 
 /**

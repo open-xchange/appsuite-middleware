@@ -49,9 +49,11 @@
 
 package com.openexchange.mail.smal.jobqueue.internal;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
@@ -62,18 +64,19 @@ import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.mail.smal.jobqueue.Constants;
 import com.openexchange.mail.smal.jobqueue.Job;
 import com.openexchange.mail.smal.jobqueue.JobQueue;
-import com.openexchange.mail.smal.jobqueue.MailAccountJob;
-import com.openexchange.mail.smal.jobqueue.PeriodicFolderJob;
+import com.openexchange.mail.smal.jobqueue.jobs.ElapsedFolderJob;
+import com.openexchange.mail.smal.jobqueue.jobs.MailAccountJob;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.Tools;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessionCounter;
 import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
 /**
- * {@link JobQueueEventHandler}
+ * {@link JobQueueEventHandler} - Starts/drops periodic jobs for a user by tracking added/removed sessions.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -91,8 +94,9 @@ public final class JobQueueEventHandler implements EventHandler {
      */
     public JobQueueEventHandler() {
         super();
-        periodicJobs = new ConcurrentHashMap<JobQueueEventHandler.Key, ConcurrentMap<String,Job>>();
-        timerTask = SMALServiceLookup.getServiceStatic(TimerService.class).scheduleWithFixedDelay(new PeriodicRunnable(periodicJobs), Constants.HOUR_MILLIS, Constants.HOUR_MILLIS);
+        periodicJobs = new ConcurrentHashMap<Key, ConcurrentMap<String,Job>>();
+        final TimerService timerService = SMALServiceLookup.getServiceStatic(TimerService.class);
+        timerTask = timerService.scheduleWithFixedDelay(new PeriodicRunnable(periodicJobs), Constants.HOUR_MILLIS, Constants.HOUR_MILLIS);
     }
 
     /**
@@ -140,21 +144,20 @@ public final class JobQueueEventHandler implements EventHandler {
     @Override
     public void handleEvent(final Event event) {
         final String topic = event.getTopic();
-        final SessionCounter counter = (SessionCounter) event.getProperty(SessiondEventConstants.PROP_COUNTER);
         if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic)) {
             @SuppressWarnings("unchecked") final Map<String, Session> container =
                 (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
             for (final Session session : container.values()) {
-                handleDroppedSession(session, counter);
+                handleDroppedSession(session);
             }
         } else if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
             final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
-            handleDroppedSession(session, counter);
+            handleDroppedSession(session);
         } else if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
             @SuppressWarnings("unchecked") final Map<String, Session> container =
                 (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
             for (final Session session : container.values()) {
-                handleDroppedSession(session, counter);
+                handleDroppedSession(session);
             }
         } else if (SessiondEventConstants.TOPIC_ADD_SESSION.equals(topic)) {
             final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
@@ -165,8 +168,9 @@ public final class JobQueueEventHandler implements EventHandler {
         }
     }
 
-    private void handleDroppedSession(final Session session, final SessionCounter counter) {
+    private void handleDroppedSession(final Session session) {
         try {
+            @SuppressWarnings("unchecked")
             final Queue<Job> jobs = (Queue<Job>) session.getParameter("com.openexchange.mail.smal.jobqueue.jobs");
             if (null != jobs) {
                 while (!jobs.isEmpty()) {
@@ -176,7 +180,8 @@ public final class JobQueueEventHandler implements EventHandler {
                     }
                 }
             }
-            if (counter.getNumberOfSessions(session.getUserId(), session.getContextId()) <= 0) {
+            final SessiondService sessiondService = SMALServiceLookup.getServiceStatic(SessiondService.class);
+            if (null != sessiondService && sessiondService.getAnyActiveSessionForUser(session.getUserId(), session.getContextId()) != null) {
                 dropForLast(session);
             }
         } catch (final Exception e) {
@@ -197,16 +202,49 @@ public final class JobQueueEventHandler implements EventHandler {
             final int contextId = session.getContextId();
             final Queue<Job> jobs = getJobsFrom(session);
             final JobQueue jobQueue = JobQueue.getInstance();
+            final Set<String> filter = new HashSet<String>(8);
             for (final MailAccount account : storageService.getUserMailAccounts(userId, contextId)) {
                 final int accountId = account.getId();
-                final MailAccountJob maj = new MailAccountJob(accountId, userId, contextId, "INBOX");
+                filter.add("INBOX");
+                {
+                    MailAccount acc = account;
+                    String fn = acc.getDraftsFullname();
+                    if (null == fn) {
+                        acc = Tools.checkFullNames(acc, storageService, session, null);
+                        fn = acc.getDraftsFullname();
+                    }
+                    filter.add(fn);
+
+                    fn = acc.getSentFullname();
+                    if (null == fn) {
+                        acc = Tools.checkFullNames(acc, storageService, session, null);
+                        fn = acc.getSentFullname();
+                    }
+                    filter.add(fn);
+
+                    fn = acc.getTrashFullname();
+                    if (null == fn) {
+                        acc = Tools.checkFullNames(acc, storageService, session, null);
+                        fn = acc.getTrashFullname();
+                    }
+                    filter.add(fn);
+
+                    /*
+                     * TODO: Add custom user folders
+                     */
+                }
+                /*
+                 * Create job
+                 */
+                final MailAccountJob maj = new MailAccountJob(accountId, userId, contextId, filter);
+                filter.clear();
                 if (jobQueue.addJob(maj)) {
                     jobs.offer(maj);
                 }
                 /*
                  * Add periodic job
                  */
-                addPeriodicJob(new PeriodicFolderJob(accountId, userId, contextId), session);
+                addPeriodicJob(new ElapsedFolderJob(accountId, userId, contextId), session);
             }
         } catch (final Exception e) {
             // Failed handling session
@@ -230,6 +268,7 @@ public final class JobQueueEventHandler implements EventHandler {
     }
 
     private static Queue<Job> getJobsFrom0(final Session session) {
+        @SuppressWarnings("unchecked")
         Queue<Job> jobs = (Queue<Job>) session.getParameter("com.openexchange.mail.smal.jobqueue.jobs");
         if (null == jobs) {
             jobs = new ConcurrentLinkedQueue<Job>();
@@ -242,21 +281,18 @@ public final class JobQueueEventHandler implements EventHandler {
 
         private final ConcurrentMap<Key, ConcurrentMap<String, Job>> periodicJobs;
 
-        /**
-         * Initializes a new {@link JobQueueEventHandler.PeriodicRunnable}.
-         * @param periodicJobs
-         */
-        public PeriodicRunnable(final ConcurrentMap<Key, ConcurrentMap<String, Job>> periodicJobs) {
+        protected PeriodicRunnable(final ConcurrentMap<Key, ConcurrentMap<String, Job>> periodicJobs) {
             super();
             this.periodicJobs = periodicJobs;
         }
 
         @Override
         public void run() {
+            final JobQueue jobQueue = JobQueue.getInstance();
             for (final ConcurrentMap<String, Job> jobs : periodicJobs.values()) {
                 for (final Job job : jobs.values()) {
                     job.reset();
-                    JobQueue.getInstance().addJob(job);
+                    jobQueue.addJob(job);
                 }
             }
         }
@@ -274,7 +310,7 @@ public final class JobQueueEventHandler implements EventHandler {
 
         private final int hash;
 
-        public Key(final int user, final int cid) {
+        protected Key(final int user, final int cid) {
             super();
             this.user = user;
             this.cid = cid;

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.smal.jobqueue;
+package com.openexchange.mail.smal.jobqueue.jobs;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -61,6 +61,8 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.smal.SMALMailAccess;
+import com.openexchange.mail.smal.jobqueue.Constants;
+import com.openexchange.mail.smal.jobqueue.JobQueue;
 
 /**
  * {@link MailAccountJob}
@@ -156,29 +158,27 @@ public final class MailAccountJob extends AbstractMailSyncJob {
             final long now = System.currentTimeMillis();
             if (null == filter || filter.isEmpty()) {
                 for (final String fullName : list) {
-                    try {
-                        if (shouldSync(fullName, now)) {
-                            queue.addJob(new FolderJob(fullName, accountId, userId, contextId, false).setSpan(Constants.HOUR_MILLIS));
-                        }
-                    } catch (final OXException e) {
-                        LOG.error("Couldn't look-up database.", e);
-                    }
+                    addJobIfShouldSync(queue, now, fullName);
                 }
             } else {
                 for (final String fullName : list) {
                     if (filter.contains(fullName)) {
-                        try {
-                            if (shouldSync(fullName, now)) {
-                                queue.addJob(new FolderJob(fullName, accountId, userId, contextId, false));
-                            }
-                        } catch (final OXException e) {
-                            LOG.error("Couldn't look-up database.", e);
-                        }
+                        addJobIfShouldSync(queue, now, fullName);
                     }
                 }
             }
         } catch (final Exception e) {
             LOG.error("Mail account job failed.", e);
+        }
+    }
+
+    private void addJobIfShouldSync(final JobQueue queue, final long now, final String fullName) {
+        try {
+            if (shouldSync(fullName, now)) {
+                queue.addJob(new FolderJob(fullName, accountId, userId, contextId, false).setSpan(Constants.HOUR_MILLIS));
+            }
+        } catch (final OXException e) {
+            LOG.error("Couldn't look-up database.", e);
         }
     }
 

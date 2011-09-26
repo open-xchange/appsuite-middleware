@@ -367,15 +367,18 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
     }
 
     private static void deleteContainedAppointments(final int folderID, final DowngradeEvent event) throws OXException {
-        final AppointmentSQLInterface cSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(event.getSession());
-        try {
-            if (null == event.getWriteCon()) {
-                cSql.deleteAppointmentsInFolder(folderID);
-            } else {
-                cSql.deleteAppointmentsInFolder(folderID, event.getWriteCon());
+        final AppointmentSqlFactoryService service = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class);
+        if (null != service) {
+            final AppointmentSQLInterface cSql = service.createAppointmentSql(event.getSession());
+            try {
+                if (null == event.getWriteCon()) {
+                    cSql.deleteAppointmentsInFolder(folderID);
+                } else {
+                    cSql.deleteAppointmentsInFolder(folderID, event.getWriteCon());
+                }
+            } catch (final SQLException e) {
+                throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
             }
-        } catch (final SQLException e) {
-            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
     }
 

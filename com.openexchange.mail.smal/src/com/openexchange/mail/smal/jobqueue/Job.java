@@ -109,7 +109,7 @@ public abstract class Job implements Task<Object>, Comparable<Job>, Serializable
     /**
      * Gets this job's ranking.
      * <p>
-     * The job ranking is used by the {@link JobQueue} to determine the <i>natural order</i> of services, see
+     * The job ranking is used by the {@link JobQueue} to determine the <i>natural order</i> of jobs, see
      * {@link Comparable#compareTo(Object)}.
      * <p>
      * The default ranking is zero (0). A job with a ranking of {@code Integer.MAX_VALUE} is very likely to be immediately executed, whereas

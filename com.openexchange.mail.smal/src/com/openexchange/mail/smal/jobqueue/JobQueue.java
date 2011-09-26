@@ -57,6 +57,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.behavior.AbortBehavior;
@@ -139,6 +141,9 @@ public final class JobQueue {
             Thread.currentThread().interrupt();
         } catch (final ExecutionException e) {
             // What?!
+            final Throwable t = e.getCause();
+            final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(JobQueue.class));
+            log.error(t.getMessage(), t);
         }
     }
 
