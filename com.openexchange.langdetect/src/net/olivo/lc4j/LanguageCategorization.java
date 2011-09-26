@@ -197,7 +197,7 @@ public class LanguageCategorization {
 	 * @return the language-model resulting from the given input text.
 	 */
 	public LanguageModel createLanguageModel( final ByteArrayList input ) {
-		final long startTime = System.currentTimeMillis();
+	    final long startTime = DEBUG ? System.currentTimeMillis() : 0L;
 
 		final IncrementalInt2IntMap hash = new IncrementalInt2IntMap();
 		final LanguageModel languageModel = new LanguageModel();
@@ -322,7 +322,7 @@ public class LanguageCategorization {
 	 */
 	public void loadLanguages( final String path ) throws IOException, FileNotFoundException {
 		if ( language == null ) {	// load language-models only if not already loaded
-			final long startTime = System.currentTimeMillis();
+		    final long startTime = DEBUG ? System.currentTimeMillis() : 0L;
 
 			if ( DEBUG ) {
                 LOG.debug( "loading language-models from files in " + path );
@@ -407,7 +407,7 @@ public class LanguageCategorization {
 			return null;
 		}
 
-		final long startTime = System.currentTimeMillis();
+		final long startTime = DEBUG ? System.currentTimeMillis() : 0L;
 
 		// where we store probabilities and language indexes
 		final int n = language.length;
