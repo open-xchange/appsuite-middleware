@@ -168,7 +168,8 @@ public class SessiondServiceImpl implements SessiondService {
 
     @Override
     public Session getAnyActiveSessionForUser(final int userId, final int contextId) {
-        return SessionHandler.getAnyActiveSessionForUser(userId, contextId).getSession();
+        final SessionControl sessionControl = SessionHandler.getAnyActiveSessionForUser(userId, contextId);
+        return null == sessionControl ? null: sessionControl.getSession();
     }
     
     @Override
