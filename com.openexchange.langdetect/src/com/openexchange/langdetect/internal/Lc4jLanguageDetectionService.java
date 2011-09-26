@@ -135,6 +135,7 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
             inputStream = new BufferedInputStream(new FileInputStream(languageCodesFile));
             final Properties properties = new Properties();
             properties.load(inputStream);
+            languageCodes.clear();
             for (final Entry<Object, Object> entry : properties.entrySet()) {
                 languageCodes.put(
                     entry.getKey().toString().toLowerCase(locale_us),
