@@ -60,6 +60,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -169,7 +170,7 @@ public final class SolrTextFillerQueue implements Runnable {
     /**
      * Checks if it is allowed to submit a further filler task to thread pool.
      * 
-     * @return A positive number if it is allowed to submit to pool; otherwise <code>-1</code>
+     * @return A number equal to or greater than zero if it is allowed to submit to pool; otherwise <code>-1</code>
      */
     private int isSubmittable() {
         for (int i = 0; i < maxNumConcurrentFillerTasks; i++) {
@@ -300,7 +301,12 @@ public final class SolrTextFillerQueue implements Runnable {
             handleFillersSublist(groupedFillersSublist, simpleName);
         } else {
             final int index = isSubmittable();
-            if (index > 0) {
+            if (index < 0) {
+                /*
+                 * Caller runs because other worker threads are busy
+                 */
+                handleFillersSublist(groupedFillersSublist, simpleName);
+            } else {
                 /*
                  * Submit to a free worker thread
                  */
@@ -308,11 +314,6 @@ public final class SolrTextFillerQueue implements Runnable {
                 final Future<Object> f = poolService.submit(ThreadPools.task(task));
                 concurrentFutures.set(index, f);
                 task.start();
-            } else {
-                /*
-                 * Caller runs because other worker threads are busy
-                 */
-                handleFillersSublist(groupedFillersSublist, simpleName);
             }
         }
     }
@@ -507,14 +508,12 @@ public final class SolrTextFillerQueue implements Runnable {
     private final class MaxAwareTask implements Task<Object> {
 
         private final List<TextFiller> fillers;
-
         private final int indexPos;
-
-        private volatile boolean start;
+        private final CountDownLatch startSignal;
 
         protected MaxAwareTask(final List<TextFiller> fillers, final int indexPos) {
             super();
-            start = false;
+            this.startSignal = new CountDownLatch(1);
             this.fillers = fillers;
             this.indexPos = indexPos;
         }
@@ -523,7 +522,7 @@ public final class SolrTextFillerQueue implements Runnable {
          * Opens this task for processing.
          */
         protected void start() {
-            start = true;
+            startSignal.countDown();
         }
 
         @Override
@@ -543,9 +542,7 @@ public final class SolrTextFillerQueue implements Runnable {
 
         @Override
         public Object call() throws Exception {
-            while (!start) {
-                //
-            }
+            startSignal.await();
             handleFillersSublist(fillers, String.valueOf(indexPos + 1));
             return null;
         }
