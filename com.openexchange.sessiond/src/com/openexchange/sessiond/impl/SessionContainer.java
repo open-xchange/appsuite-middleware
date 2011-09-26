@@ -155,6 +155,9 @@ final class SessionContainer {
     
     public SessionControl getAnySessionByUser(int userId, int contextId) {
         final Map<String, Object> sessionIds = userSessions.get(new UserKey(userId, contextId));
+        if (sessionIds == null) {
+        	return null;
+        }
         for (final String sessionId : sessionIds.keySet()) {
             return sessionIdMap.get(sessionId);
         }
