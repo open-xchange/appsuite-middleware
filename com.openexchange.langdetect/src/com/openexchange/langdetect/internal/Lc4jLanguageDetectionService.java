@@ -198,7 +198,6 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
             for (String line; (line = br.readLine()) != null;) {
                 tmp.append(line).append('\n');
             }
-            // No flush for ByteArrayOutputStream
         } catch (final IOException e) {
             throw LanguageDetectionExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
