@@ -73,7 +73,8 @@ import com.openexchange.langdetect.LanguageDetectionExceptionCodes;
 import com.openexchange.langdetect.LanguageDetectionService;
 
 /**
- * {@link Lc4jLanguageDetectionService} - The {@link LanguageDetectionService language detection service} based on <b>lc4j</b>.
+ * {@link Lc4jLanguageDetectionService} - The {@link LanguageDetectionService language detection service} based on <a
+ * href="http://olivo.net/software/lc4j/">lc4j</a>.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
