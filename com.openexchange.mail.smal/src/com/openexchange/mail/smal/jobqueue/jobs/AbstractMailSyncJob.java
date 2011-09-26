@@ -237,6 +237,36 @@ public abstract class AbstractMailSyncJob extends Job {
     }
 
     /**
+     * Drops the entry associated with specified full name.
+     * 
+     * @param fullName The full name
+     * @throws OXException If removal fails
+     */
+    protected void dropFolderEntry(final String fullName) throws OXException {
+        final DatabaseService databaseService = SMALServiceLookup.getServiceStatic(DatabaseService.class);
+        if (null == databaseService) {
+            return;
+        }
+        final Connection con = databaseService.getWritable(contextId);
+        PreparedStatement stmt = null;
+        try {
+            stmt =
+                con.prepareStatement("DELETE FROM mailSync WHERE cid = ? AND user = ? AND accountId = ? AND fullName = ?");
+            int pos = 1;
+            stmt.setLong(pos++, contextId);
+            stmt.setLong(pos++, userId);
+            stmt.setLong(pos++, accountId);
+            stmt.setString(pos, fullName);
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+            databaseService.backWritable(contextId, con);
+        }
+    }
+
+    /**
      * Checks if this call succeeds in setting the sync flag.
      *
      * @param fullName The folder full name

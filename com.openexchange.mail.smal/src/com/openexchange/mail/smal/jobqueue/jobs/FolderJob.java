@@ -345,6 +345,18 @@ public final class FolderJob extends AbstractMailSyncJob {
         }
     }
 
+    @Override
+    public void cancel() {
+        try {
+            dropFolderEntry(fullName);
+        } catch (final OXException e) {
+            // Entry could not be removed
+            LOG.warn("Entry for failed folder job \"" + identifier + "\" could not be removed.", e);
+        } finally {
+            super.cancel();
+        }
+    }
+
     private int add2Index(final List<String> ids, final int offset, final int len, final String fullName, final IndexAdapter indexAdapter, final List<MailMessage> mails) throws OXException {
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         try {
