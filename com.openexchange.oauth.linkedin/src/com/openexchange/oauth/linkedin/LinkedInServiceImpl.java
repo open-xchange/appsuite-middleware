@@ -133,13 +133,23 @@ public class LinkedInServiceImpl implements LinkedInService{
 	}
 	
 
-	private List<String> extractIds(Response response) throws OXException{
+	protected List<String> extractIds(Response response) throws OXException{
 		List<String> result = new LinkedList<String>();
 		try {
 			JSONObject json = new JSONObject(response.getBody());
 			JSONArray ids = json.getJSONArray("values");
-			for(int i = 0, max = ids.length(); i < max; i++){
-				result.add(ids.getJSONObject(i).getString("id"));
+			result = extractIds(ids);
+		} catch (JSONException e) {
+			
+		}
+		return result;
+	}
+	
+	protected List<String> extractIds(JSONArray connections) throws OXException{
+		List<String> result = new LinkedList<String>();
+		try {
+			for(int i = 0, max = connections.length(); i < max; i++){
+				result.add(connections.getJSONObject(i).getString("id"));
 			}
 		} catch (JSONException e) {
 			
