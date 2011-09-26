@@ -49,19 +49,22 @@
 
 package com.openexchange.mail.smal.adapter.solrj.contentgrab;
 
+import org.apache.solr.common.SolrDocument;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.smal.SMALExceptionCodes;
 import com.openexchange.session.Session;
 
 /**
  * {@link TextFiller} - A test filler.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TextFiller {
 
     /**
      * Gets the filler for specified arguments.
-     *
+     * 
      * @param uuid The UUID
      * @param mail The mail
      * @param session The session
@@ -69,6 +72,33 @@ public final class TextFiller {
      */
     public static TextFiller fillerFor(final String uuid, final MailMessage mail, final Session session) {
         return new TextFiller(uuid, mail.getMailId(), mail.getFolder(), mail.getAccountId(), session.getUserId(), session.getContextId());
+    }
+
+    /**
+     * Gets the filler for specified document.
+     * 
+     * @param document The document
+     * @return The filler
+     * @throws OXException If creating filler fails
+     */
+    public static TextFiller fillerFor(final SolrDocument document) throws OXException {
+        return new TextFiller(
+            document.get("uuid").toString(),
+            document.get("id").toString(),
+            document.get("full_name").toString(),
+            TextFiller.<Integer> get("account", document).intValue(),
+            TextFiller.<Long> get("user", document).intValue(),
+            TextFiller.<Long> get("context", document).intValue());
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <V> V get(final String name, final SolrDocument document) throws OXException {
+        final Object object = document.get(name);
+        try {
+            return (V) object;
+        } catch (final ClassCastException e) {
+            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, "Unexpected type: " + e.getMessage());
+        }
     }
 
     private final String uuid;
@@ -90,7 +120,7 @@ public final class TextFiller {
 
     /**
      * Initializes a new {@link TextFiller}.
-     *
+     * 
      * @param uuid
      * @param mailId
      * @param fullName
@@ -111,7 +141,7 @@ public final class TextFiller {
 
     /**
      * Gets the UUID
-     *
+     * 
      * @return The UUID
      */
     public String getUuid() {
@@ -120,7 +150,7 @@ public final class TextFiller {
 
     /**
      * Gets the mail identifier
-     *
+     * 
      * @return The mail identifier
      */
     public String getMailId() {
@@ -129,7 +159,7 @@ public final class TextFiller {
 
     /**
      * Gets the full name
-     *
+     * 
      * @return The full name
      */
     public String getFullName() {
@@ -138,7 +168,7 @@ public final class TextFiller {
 
     /**
      * Gets the account identifier
-     *
+     * 
      * @return The account identifier
      */
     public int getAccountId() {
@@ -147,7 +177,7 @@ public final class TextFiller {
 
     /**
      * Gets the user identifier
-     *
+     * 
      * @return The user identifier
      */
     public int getUserId() {
@@ -156,7 +186,7 @@ public final class TextFiller {
 
     /**
      * Gets the context identifier
-     *
+     * 
      * @return The context identifier
      */
     public int getContextId() {

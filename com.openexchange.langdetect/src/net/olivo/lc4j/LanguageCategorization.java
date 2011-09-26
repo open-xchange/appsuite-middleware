@@ -274,8 +274,10 @@ public class LanguageCategorization {
             LOG.debug( "size of languageModel: " + languageModel.size() );
         }
 
-		final long endTime = System.currentTimeMillis();
-		LOG.info( "time taken to create language-model from input: " + (double)( endTime - startTime ) / 1000 + "s" );
+		if ( DEBUG ) {
+    		final long endTime = System.currentTimeMillis();
+    		LOG.debug( "time taken to create language-model from input: " + (double)( endTime - startTime ) / 1000 + "s" );
+		}
 
 		return languageModel;
 	}
@@ -366,8 +368,10 @@ public class LanguageCategorization {
 				dis.close();
 			}
 
-			final long endTime = System.currentTimeMillis();
-			LOG.info( "time taken to load all available language-models: " + (double)( endTime - startTime ) / 1000 + "s" );
+			if (DEBUG) {
+                final long endTime = System.currentTimeMillis();
+                LOG.debug("time taken to load all available language-models: " + (double) (endTime - startTime) / 1000 + "s");
+            }
 		}
 
 		if ( language == null || language.length == 0 ) {
@@ -476,10 +480,12 @@ public class LanguageCategorization {
 			ret.add( "UNKNOWN" );
 		}
 
-		final long endTime = System.currentTimeMillis();
-		LOG.info( "time taken to effectively determine the language: " + (double)( endTime - startTime ) / 1000 + "s" );
+		if (DEBUG) {
+            final long endTime = System.currentTimeMillis();
+            LOG.debug("time taken to effectively determine the language: " + (double) (endTime - startTime) / 1000 + "s");
+        }
 
-		return ret;
+        return ret;
 	}
 
 	/** The main loop.

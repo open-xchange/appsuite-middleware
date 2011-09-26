@@ -68,7 +68,7 @@ public final class StaticConfigIndexService implements ConfigIndexService {
      */
     public StaticConfigIndexService() {
         super();
-        final IndexUrlImpl indexUrl = new IndexUrlImpl("http://10.20.31.1/solr/");
+        final IndexUrlImpl indexUrl = new IndexUrlImpl("http://10.20.31.1:8580/solr/main");
         indexUrl.setConnectionTimeout(100);
         indexUrl.setMaxConnectionsPerHost(100);
         indexUrl.setSoTimeout(1000);

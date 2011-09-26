@@ -50,6 +50,7 @@
 package com.openexchange.mail.smal.adapter.solrj.cache;
 
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -57,14 +58,20 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
+import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+import org.apache.commons.httpclient.params.HttpMethodParams;
+import org.apache.commons.httpclient.protocol.Protocol;
+import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 import org.apache.solr.client.solrj.impl.XMLResponseParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexUrl;
 import com.openexchange.mail.smal.SMALExceptionCodes;
 import com.openexchange.mail.smal.SMALServiceLookup;
+import com.openexchange.mail.smal.json.TrustAllAdapter;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
@@ -195,7 +202,7 @@ public final class CommonsHttpSolrServerCache {
     private static CommonsHttpSolrServer newCommonsHttpSolrServer(final IndexUrl indexUrl) throws OXException {
         try {
             final CommonsHttpSolrServer server = new CommonsHttpSolrServer(indexUrl.getUrl());
-            server.setSoTimeout(indexUrl.hashCode());  // socket read timeout
+            server.setSoTimeout(indexUrl.getSoTimeout());  // socket read timeout
             server.setConnectionTimeout(indexUrl.getConnectionTimeout());
             server.setDefaultMaxConnectionsPerHost(indexUrl.getMaxConnectionsPerHost());
             server.setMaxTotalConnections(indexUrl.getMaxConnectionsPerHost());
@@ -205,8 +212,60 @@ public final class CommonsHttpSolrServerCache {
             server.setAllowCompression(true);
             server.setMaxRetries(1); // defaults to 0.  > 1 not recommended.
             server.setParser(new XMLResponseParser()); // Otherwise binary parser is used by default
+            // Configure HttpClient
+            configureHttpClient(server.getHttpClient(), indexUrl);
             return server;
         } catch (final MalformedURLException e) {
+            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * The HTTP protocol constant.
+     */
+    private static final Protocol PROTOCOL_HTTP = Protocol.getProtocol("http");
+
+    /**
+     * The HTTPS identifier constant.
+     */
+    private static final String HTTPS = "https";
+
+    private static void configureHttpClient(final HttpClient client, final IndexUrl indexUrl) throws OXException {
+        try {
+            final int httpTimeout = indexUrl.getSoTimeout();
+            client.getParams().setSoTimeout(httpTimeout);
+            client.getParams().setIntParameter("http.connection.timeout", httpTimeout);
+            client.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(0, false));
+            /*
+             * Create host configuration or URI
+             */
+            final java.net.URI uri = new java.net.URI(indexUrl.getUrl());
+            final String host = uri.getHost();
+            final HostConfiguration hostConfiguration;
+            if (HTTPS.equalsIgnoreCase(uri.getScheme())) {
+                int port = uri.getPort();
+                if (port == -1) {
+                    port = 443;
+                }
+                /*
+                 * Own HTTPS host configuration and relative URI
+                 */
+                final Protocol httpsProtocol = new Protocol(HTTPS, ((ProtocolSocketFactory) new TrustAllAdapter()), port);
+                hostConfiguration = new HostConfiguration();
+                hostConfiguration.setHost(host, port, httpsProtocol);
+            } else {
+                int port = uri.getPort();
+                if (port == -1) {
+                    port = 80;
+                }
+                /*
+                 * HTTP host configuration and relative URI
+                 */
+                hostConfiguration = new HostConfiguration();
+                hostConfiguration.setHost(host, port, PROTOCOL_HTTP);
+            }
+            client.setHostConfiguration(hostConfiguration);
+        } catch (final URISyntaxException e) {
             throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

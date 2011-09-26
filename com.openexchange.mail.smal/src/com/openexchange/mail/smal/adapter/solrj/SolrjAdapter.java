@@ -98,6 +98,8 @@ import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.mail.smal.adapter.IndexAdapter;
 import com.openexchange.mail.smal.adapter.IndexAdapters;
 import com.openexchange.mail.smal.adapter.solrj.cache.CommonsHttpSolrServerCache;
+import com.openexchange.mail.smal.adapter.solrj.contentgrab.SolrTextFillerQueue;
+import com.openexchange.mail.smal.adapter.solrj.contentgrab.TextFiller;
 import com.openexchange.session.Session;
 
 /**
@@ -113,6 +115,8 @@ public final class SolrjAdapter implements IndexAdapter {
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SolrjAdapter.class));
 
     private volatile CommonsHttpSolrServerCache solrServerCache;
+
+    private volatile SolrTextFillerQueue textFillerQueue;
 
     /**
      * Initializes a new {@link SolrjAdapter}.
@@ -135,7 +139,9 @@ public final class SolrjAdapter implements IndexAdapter {
 
     @Override
     public void start() throws OXException {
-        solrServerCache = new CommonsHttpSolrServerCache(100, 300000);
+        final CommonsHttpSolrServerCache cache = solrServerCache = new CommonsHttpSolrServerCache(100, 300000);
+        final SolrTextFillerQueue q = textFillerQueue = new SolrTextFillerQueue(cache);
+        q.start();
     }
 
     @Override
@@ -209,7 +215,10 @@ public final class SolrjAdapter implements IndexAdapter {
         }
     }
 
-    private static MailMessage readDocument(final SolrDocument document) throws OXException {
+    private MailMessage readDocument(final SolrDocument document) throws OXException {
+        if (SolrTextFillerQueue.checkSolrDocument(document)) {
+            textFillerQueue.add(TextFiller.fillerFor(document));
+        }
         final MailMessage mail = new IDMailMessage(document.getFieldValue("id").toString(), document.getFieldValue("full_name").toString());
         mail.setAccountId(SolrjAdapter.<Integer> getFieldValue("account", document).intValue());
         mail.setColorLabel(SolrjAdapter.<Integer> getFieldValue("color_label", document).intValue());
@@ -368,6 +377,9 @@ public final class SolrjAdapter implements IndexAdapter {
 
     @Override
     public void deleteMessages(final Collection<String> mailIds, final String fullName, final int accountId, final Session session) throws OXException {
+        if (null == mailIds || mailIds.isEmpty()) {
+            return;
+        }
         CommonsHttpSolrServer solrServer = null;
         try {
             solrServer = solrServerFor(session, true);
@@ -459,7 +471,7 @@ public final class SolrjAdapter implements IndexAdapter {
             final QueryResponse queryResponse = solrServer.query(solrQuery, METHOD.POST);
             final SolrDocumentList results = queryResponse.getResults();
             rollback = true;
-            solrServer.add(new SolrDocumentIterator(results, map));
+            solrServer.add(new SolrDocumentIterator(results, map, textFillerQueue));
             solrServer.commit();
         } catch (final SolrServerException e) {
             SolrUtils.rollback(rollback ? solrServer : null);
@@ -481,6 +493,7 @@ public final class SolrjAdapter implements IndexAdapter {
             final String uuid = UUID.randomUUID().toString();
             solrServer.add(createDocument(uuid, mail, mail.getAccountId(), session, System.currentTimeMillis()));
             solrServer.commit();
+            textFillerQueue.add(TextFiller.fillerFor(uuid, mail, session));
         } catch (final SolrServerException e) {
             SolrUtils.rollback(solrServer);
             throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
@@ -498,9 +511,11 @@ public final class SolrjAdapter implements IndexAdapter {
         CommonsHttpSolrServer solrServer = null;
         try {
             solrServer = solrServerFor(session, true);
-            final Iterator<SolrInputDocument> iter = new MailDocumentIterator(mails.iterator(), session, System.currentTimeMillis());
+            final List<TextFiller> fillers = new ArrayList<TextFiller>(mails.size());
+            final Iterator<SolrInputDocument> iter = new MailDocumentIterator(mails.iterator(), session, System.currentTimeMillis(), fillers);
             solrServer.add(iter);
             solrServer.commit();
+            textFillerQueue.add(fillers);
         } catch (final SolrServerException e) {
             SolrUtils.rollback(solrServer);
             throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
@@ -580,7 +595,7 @@ public final class SolrjAdapter implements IndexAdapter {
             field.setValue(preparation.addressList, 1.0f);
             inputDocument.put("from_addr", field);
             field = new SolrInputField("from_plain");
-            field.setValue(mail.getFirstHeader("From"), 1.0f);
+            field.setValue(preparation.line, 1.0f);
             inputDocument.put("from_plain", field);
 
             preparation = new AddressesPreparation(mail.getTo());
@@ -591,7 +606,7 @@ public final class SolrjAdapter implements IndexAdapter {
             field.setValue(preparation.addressList, 1.0f);
             inputDocument.put("to_addr", field);
             field = new SolrInputField("to_plain");
-            field.setValue(mail.getFirstHeader("To"), 1.0f);
+            field.setValue(preparation.line, 1.0f);
             inputDocument.put("to_plain", field);
 
             preparation = new AddressesPreparation(mail.getCc());
@@ -602,7 +617,7 @@ public final class SolrjAdapter implements IndexAdapter {
             field.setValue(preparation.addressList, 1.0f);
             inputDocument.put("cc_addr", field);
             field = new SolrInputField("cc_plain");
-            field.setValue(mail.getFirstHeader("Cc"), 1.0f);
+            field.setValue(preparation.line, 1.0f);
             inputDocument.put("cc_plain", field);
 
             preparation = new AddressesPreparation(mail.getBcc());
@@ -613,7 +628,7 @@ public final class SolrjAdapter implements IndexAdapter {
             field.setValue(preparation.addressList, 1.0f);
             inputDocument.put("bcc_addr", field);
             field = new SolrInputField("bcc_plain");
-            field.setValue(mail.getFirstHeader("Bcc"), 1.0f);
+            field.setValue(preparation.line, 1.0f);
             inputDocument.put("bcc_plain", field);
         }
         /*
@@ -739,8 +754,11 @@ public final class SolrjAdapter implements IndexAdapter {
 
         private final Map<String, MailMessage> mailMap;
 
-        protected SolrDocumentIterator(final SolrDocumentList results, final Map<String, MailMessage> mailMap) {
+        private final SolrTextFillerQueue textFillerQueue;
+
+        protected SolrDocumentIterator(final SolrDocumentList results, final Map<String, MailMessage> mailMap, final SolrTextFillerQueue textFillerQueue) {
             super();
+            this.textFillerQueue = textFillerQueue;
             iterator = results.iterator();
             this.mailMap = mailMap;
         }
@@ -753,6 +771,13 @@ public final class SolrjAdapter implements IndexAdapter {
         @Override
         public SolrInputDocument next() {
             final SolrDocument document = iterator.next();
+            if (SolrTextFillerQueue.checkSolrDocument(document)) {
+                try {
+                    textFillerQueue.add(TextFiller.fillerFor(document));
+                } catch (final OXException e) {
+                    // Ignore
+                }
+            }
             final Set<Entry<String, Object>> documentFields = document.entrySet();
             final SolrInputDocument inputDocument = new SolrInputDocument();
             {
@@ -831,8 +856,11 @@ public final class SolrjAdapter implements IndexAdapter {
 
         private final long now;
 
-        protected MailDocumentIterator(final Iterator<MailMessage> iterator, final Session session, final long now) {
+        private final List<TextFiller> fillers;
+
+        protected MailDocumentIterator(final Iterator<MailMessage> iterator, final Session session, final long now, final List<TextFiller> fillers) {
             super();
+            this.fillers = fillers;
             this.iterator = iterator;
             this.session = session;
             this.now = now;
@@ -846,7 +874,10 @@ public final class SolrjAdapter implements IndexAdapter {
         @Override
         public SolrInputDocument next() {
             final MailMessage mail = iterator.next();
-            return createDocument(UUID.randomUUID().toString(), mail, mail.getAccountId(), session, now);
+            final String uuid = UUID.randomUUID().toString();
+            final SolrInputDocument inputDocument = createDocument(uuid, mail, mail.getAccountId(), session, now);
+            fillers.add(TextFiller.fillerFor(uuid, mail, session));
+            return inputDocument;
         }
 
         @Override
@@ -861,14 +892,18 @@ public final class SolrjAdapter implements IndexAdapter {
 
         protected final List<String> addressList;
 
+        protected final String line;
+
         protected AddressesPreparation(final InternetAddress[] addrs) {
             super();
             if (addrs == null || addrs.length <= 0) {
                 personalList = Collections.emptyList();
                 addressList = Collections.emptyList();
+                line = null;
             } else {
                 final List<String> pl = new LinkedList<String>();
                 final List<String> al = new LinkedList<String>();
+                final StringBuilder lineBuilder = new StringBuilder(256);
                 for (int i = 0; i < addrs.length; i++) {
                     final InternetAddress address = addrs[i];
                     final String personal = address.getPersonal();
@@ -876,9 +911,12 @@ public final class SolrjAdapter implements IndexAdapter {
                         pl.add(preparePersonal(personal));
                     }
                     al.add(prepareAddress(address.getAddress()));
+                    lineBuilder.append(", ").append(address.toString());
                 }
                 personalList = pl;
                 addressList = al;
+                lineBuilder.delete(0, 2);
+                line = lineBuilder.toString();
             }
         }
 

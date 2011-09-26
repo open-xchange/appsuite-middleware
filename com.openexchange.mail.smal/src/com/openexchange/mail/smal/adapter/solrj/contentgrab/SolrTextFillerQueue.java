@@ -484,7 +484,13 @@ public final class SolrTextFillerQueue implements Runnable {
         }
     }
 
-    private static boolean checkSolrDocument(final SolrDocument solrDocument) {
+    /**
+     * Checks specified document if content yet needs to be added.
+     * 
+     * @param solrDocument The document to check
+     * @return <code>true</code> if no content is present in document; otherwise <code>false</code> if content was found
+     */
+    public static boolean checkSolrDocument(final SolrDocument solrDocument) {
         if (null == solrDocument) {
             return false;
         }
