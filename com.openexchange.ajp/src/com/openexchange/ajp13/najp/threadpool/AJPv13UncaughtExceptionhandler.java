@@ -50,6 +50,7 @@
 package com.openexchange.ajp13.najp.threadpool;
 
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.util.Map;
 
 /**
  * {@link AJPv13UncaughtExceptionhandler} - The {@link UncaughtExceptionHandler} for AJP threads.
@@ -70,6 +71,47 @@ final class AJPv13UncaughtExceptionhandler implements UncaughtExceptionHandler {
     @Override
     public void uncaughtException(final Thread t, final Throwable e) {
         LOG.fatal("Thread terminated with exception: " + t.getName(), e);
+        /*
+         * Gather thread information
+         */
+        final Map<Thread, StackTraceElement[]> stackMap = Thread.getAllStackTraces();
+        final StringBuilder sb = new StringBuilder(256);
+        for (final Thread thread : stackMap.keySet()) {
+            sb.append(thread.getName()).append(" ID:").append(thread.getId());
+            sb.append(" State:").append(thread.getState()).append(" Prio:").append(thread.getPriority()).append('\n');
+            appendStackTrace(stackMap.get(thread), sb);
+            sb.append('\n');
+        }
+        LOG.fatal(sb.toString());
+    }
+
+    private static void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb) {
+        if (null == trace) {
+            sb.append("<missing stack trace>\n");
+            return;
+        }
+        for (final StackTraceElement ste : trace) {
+            final String className = ste.getClassName();
+            if (null != className) {
+                sb.append("\tat ").append(className).append('.').append(ste.getMethodName());
+                if (ste.isNativeMethod()) {
+                    sb.append("(Native Method)");
+                } else {
+                    final String fileName = ste.getFileName();
+                    if (null == fileName) {
+                        sb.append("(Unknown Source)");
+                    } else {
+                        final int lineNumber = ste.getLineNumber();
+                        sb.append('(').append(fileName);
+                        if (lineNumber >= 0) {
+                            sb.append(':').append(lineNumber);
+                        }
+                        sb.append(')');
+                    }
+                }
+                sb.append("\n");
+            }
+        }
     }
 
 }
