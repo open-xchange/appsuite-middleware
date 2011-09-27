@@ -13,6 +13,6 @@ public interface ContactHalo {
 	public abstract AJAXRequestResult investigate(String provider,
 			Contact contact, AJAXRequestData req, ServerSession session) throws OXException;
 
-	public abstract List<String> getProviders(ServerSession session);
+	public abstract List<String> getProviders(ServerSession session) throws OXException;
 
 }

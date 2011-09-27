@@ -8,4 +8,5 @@ import com.openexchange.tools.session.ServerSession;
 public interface HaloContactDataSource {
 	public AJAXRequestResult investigate(HaloContactQuery query, AJAXRequestData req, ServerSession session) throws OXException;
 	public String getId();
+	public boolean isAvailable(ServerSession session);
 }
