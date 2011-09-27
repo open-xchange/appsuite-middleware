@@ -532,14 +532,18 @@ public final class SolrTextFillerQueue implements Runnable {
 
         @Override
         public void afterExecute(final Throwable t) {
-            concurrentFutures.set(indexPos, null);
+            // Nope
         }
 
         @Override
         public Object call() throws Exception {
-            startSignal.await();
-            handleFillersSublist(fillers, String.valueOf(indexPos + 1));
-            return null;
+            try {
+                startSignal.await();
+                handleFillersSublist(fillers, String.valueOf(indexPos + 1));
+                return null;
+            } finally {
+                concurrentFutures.set(indexPos, null);
+            }
         }
 
     }
