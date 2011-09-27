@@ -108,9 +108,11 @@ public final class TextFinder {
             if (ct.startsWith("text/")) {
                 String content = readContent(p, ct);
                 if (ct.startsWith("text/plain")) {
-                    final UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
-                    if (uuencodedMP.isUUEncoded()) {
-                        content = uuencodedMP.getCleanText();
+                    if (UUEncodedMultiPart.isUUEncoded(content)) {
+                        final UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
+                        if (uuencodedMP.isUUEncoded()) {
+                            content = uuencodedMP.getCleanText();
+                        }
                     }
                     textIsHtml = false;
                 } else {
