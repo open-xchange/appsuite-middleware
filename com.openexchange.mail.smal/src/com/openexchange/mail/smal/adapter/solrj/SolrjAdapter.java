@@ -187,7 +187,9 @@ public final class SolrjAdapter implements IndexAdapter {
         MailField.SIZE,
         MailField.SUBJECT,
         MailField.RECEIVED_DATE,
-        MailField.SENT_DATE);
+        MailField.SENT_DATE,
+        MailField.COLOR_LABEL,
+        MailField.CONTENT_TYPE);
 
     @Override
     public MailFields getIndexableFields() throws OXException {
@@ -289,6 +291,7 @@ public final class SolrjAdapter implements IndexAdapter {
         final MailMessage mail = new IDMailMessage(document.getFieldValue("id").toString(), document.getFieldValue("full_name").toString());
         mail.setAccountId(SolrjAdapter.<Integer> getFieldValue("account", document).intValue());
         mail.setColorLabel(SolrjAdapter.<Integer> getFieldValue("color_label", document).intValue());
+        mail.setHasAttachment(SolrjAdapter.<Boolean> getFieldValue("attachment", document).booleanValue());
         mail.setSize(SolrjAdapter.<Long> getFieldValue("size", document).longValue());
         mail.setReceivedDate(new Date(SolrjAdapter.<Long> getFieldValue("received_date", document).longValue()));
         mail.setSentDate(new Date(SolrjAdapter.<Long> getFieldValue("sent_date", document).longValue()));
@@ -766,6 +769,14 @@ public final class SolrjAdapter implements IndexAdapter {
             field = new SolrInputField("bcc_plain");
             field.setValue(preparation.line, 1.0f);
             inputDocument.put("bcc_plain", field);
+        }
+        /*
+         * Attachment flag
+         */
+        {
+            final SolrInputField field = new SolrInputField("attachment");
+            field.setValue(Boolean.valueOf(mail.hasAttachment()), 1.0f);
+            inputDocument.put("attachment", field);
         }
         /*
          * Write color label
