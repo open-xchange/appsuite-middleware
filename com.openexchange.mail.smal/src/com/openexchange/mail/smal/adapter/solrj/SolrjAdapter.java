@@ -238,8 +238,7 @@ public final class SolrjAdapter implements IndexAdapter {
                 mails = new ArrayList<MailMessage>((int) numFound);
                 final int size = results.size();
                 for (int i = 0; i < size; i++) {
-                    final SolrDocument solrDocument = results.get(i);
-                    mails.add(readDocument(solrDocument));
+                    mails.add(readDocument(results.get(i)));
                 }
                 off += size;
             }
@@ -253,8 +252,7 @@ public final class SolrjAdapter implements IndexAdapter {
                     break;
                 }
                 for (int i = 0; i < size; i++) {
-                    final SolrDocument solrDocument = results.get(i);
-                    mails.add(readDocument(solrDocument));
+                    mails.add(readDocument(results.get(i)));
                 }
                 off += size;
             }
@@ -437,8 +435,7 @@ public final class SolrjAdapter implements IndexAdapter {
                 mails = new ArrayList<MailMessage>((int) numFound);
                 final int size = results.size();
                 for (int i = 0; i < size; i++) {
-                    final SolrDocument solrDocument = results.get(i);
-                    mails.add(readDocument(solrDocument));
+                    mails.add(readDocument(results.get(i)));
                 }
                 off += size;
             }
@@ -452,8 +449,7 @@ public final class SolrjAdapter implements IndexAdapter {
                     break;
                 }
                 for (int i = 0; i < size; i++) {
-                    final SolrDocument solrDocument = results.get(i);
-                    mails.add(readDocument(solrDocument));
+                    mails.add(readDocument(results.get(i)));
                 }
                 off += size;
             }
