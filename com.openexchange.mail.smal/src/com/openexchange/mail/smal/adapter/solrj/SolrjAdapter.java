@@ -65,7 +65,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.UUID;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -798,7 +797,7 @@ public final class SolrjAdapter implements IndexAdapter {
                     // Ignore
                 }
             }
-            final Set<Entry<String, Object>> documentFields = document.entrySet();
+            final Map<String, Object> documentFields = document.getFieldValueMap();
             final SolrInputDocument inputDocument = new SolrInputDocument();
             {
                 final int flags = mailMap.get(document.getFieldValue("id")).getFlags();
@@ -853,7 +852,7 @@ public final class SolrjAdapter implements IndexAdapter {
                 inputDocument.put("flag_read_ack", field);
                 documentFields.remove("flag_read_ack");
             }
-            for (final Entry<String, Object> entry : documentFields) {
+            for (final Entry<String, Object> entry : documentFields.entrySet()) {
                 final String name = entry.getKey();
                 final SolrInputField field = new SolrInputField(name);
                 field.setValue(entry.getValue(), 1.0f);

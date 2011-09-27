@@ -504,7 +504,7 @@ public final class SolrTextFillerQueue implements Runnable {
         if (null == solrDocument) {
             return false;
         }
-        final Boolean contentFlag = (Boolean) solrDocument.get("content_flag");
+        final Boolean contentFlag = (Boolean) solrDocument.getFieldValue("content_flag");
         return null != contentFlag && contentFlag.booleanValue();
     }
 
