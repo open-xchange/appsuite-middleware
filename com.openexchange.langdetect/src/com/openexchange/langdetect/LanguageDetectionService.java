@@ -63,6 +63,11 @@ import com.openexchange.exception.OXException;
 public interface LanguageDetectionService {
 
     /**
+     * The default locale.
+     */
+    public static final Locale DEFAULT_LOCALE = Locale.ENGLISH;
+
+    /**
      * Gets the detected language for specified input.
      * <p>
      * If more than one language matches, other languages are reported (in decreasing order of probability) in the list. If more than the

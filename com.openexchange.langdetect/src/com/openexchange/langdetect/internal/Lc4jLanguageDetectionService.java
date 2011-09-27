@@ -105,14 +105,14 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
 
     private final ConcurrentMap<String, Locale> languageCodes;
 
-    private final Locale locale_us;
+    private final Locale defaultLocale;
 
     /**
      * Initializes a new {@link Lc4jLanguageDetectionService}.
      */
     private Lc4jLanguageDetectionService() {
         super();
-        locale_us = Locale.US;
+        defaultLocale = DEFAULT_LOCALE;
         languageCodes = new ConcurrentHashMap<String, Locale>(64);
         languageModelsDir = new AtomicReference<String>();
         defaultLanguageCategorization = new LanguageCategorization();
@@ -137,8 +137,8 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
             languageCodes.clear();
             for (final Entry<Object, Object> entry : properties.entrySet()) {
                 languageCodes.put(
-                    entry.getKey().toString().toLowerCase(locale_us),
-                    new Locale(entry.getValue().toString().toLowerCase(locale_us)));
+                    entry.getKey().toString().toLowerCase(defaultLocale),
+                    new Locale(entry.getValue().toString().toLowerCase(defaultLocale)));
             }
         } catch (final IOException e) {
             throw LanguageDetectionExceptionCodes.IO_ERROR.create(e, e.getMessage());
@@ -178,12 +178,12 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
         final List<Locale> locales = new ArrayList<Locale>(languages.size());
         for (final String language : languages) {
             int pos = language.indexOf('.');
-            final String lang = (pos > 0 ? language.substring(0, pos) : language).toLowerCase(locale_us);
+            final String lang = (pos > 0 ? language.substring(0, pos) : language).toLowerCase(defaultLocale);
             pos = lang.indexOf('-');
             Locale locale = languageCodes.get(pos < 0 ? lang : lang.substring(0, pos));
             if (null == locale) {
-                LOG.warn("No language code for model: " + language + ". Using default " + locale_us);
-                locale = locale_us;
+                LOG.warn("No language code for model: " + language + ". Using default " + defaultLocale);
+                locale = defaultLocale;
             }
             locales.add(locale);
         }
@@ -213,12 +213,12 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
             final List<String> languages = defaultLanguageCategorization.findLanguage(new ByteArrayList(input.getBytes("utf-8")));
             final List<Locale> locales = new ArrayList<Locale>(languages.size());
             for (final String language : languages) {
-                final String lang = language.substring(0, language.indexOf('.')).toLowerCase(locale_us);
+                final String lang = language.substring(0, language.indexOf('.')).toLowerCase(defaultLocale);
                 final int pos = lang.indexOf('-');
                 Locale locale = languageCodes.get(pos < 0 ? lang : lang.substring(0, pos));
                 if (null == locale) {
-                    LOG.warn("No language code for model: " + language + ". Using default " + locale_us);
-                    locale = locale_us;
+                    LOG.warn("No language code for model: " + language + ". Using default " + defaultLocale);
+                    locale = defaultLocale;
                 }
                 locales.add(locale);
             }
