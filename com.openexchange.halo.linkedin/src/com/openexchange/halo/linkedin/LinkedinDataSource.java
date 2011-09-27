@@ -75,10 +75,14 @@ public class LinkedinDataSource implements HaloContactDataSource {
 	private LinkedInService linkedinService;
 	
 	private OAuthService oauthService;
+
+	private ServiceLookup serviceLookup;
 	
 	
 	public LinkedInService getLinkedinService() {
-		return linkedinService;
+		if(linkedinService != null)
+			return linkedinService;
+		return serviceLookup.getService(LinkedInService.class);
 	}
 
 	public void setLinkedinService(LinkedInService linkedinService) {
@@ -86,7 +90,9 @@ public class LinkedinDataSource implements HaloContactDataSource {
 	}
 
 	public OAuthService getOauthService() {
-		return oauthService;
+		if(oauthService != null)
+			return oauthService;
+		return serviceLookup.getService(OAuthService.class);
 	}
 
 	public void setOauthService(OAuthService oauthService) {
@@ -94,10 +100,8 @@ public class LinkedinDataSource implements HaloContactDataSource {
 	}
 
 
-	public LinkedinDataSource(ServiceLookup activator) {
-		linkedinService = activator.getService(LinkedInService.class);
-		oauthService = activator.getService(OAuthService.class);
-		
+	public LinkedinDataSource(ServiceLookup serviceLookup) {
+		this.serviceLookup = serviceLookup;
 	}
 
 	@Override
@@ -118,7 +122,7 @@ public class LinkedinDataSource implements HaloContactDataSource {
 			throw new OXException(1).setPrefix("HAL-LI").setLogMessage("Need at least 1 LinkedIn account");
 		
 		OAuthAccount linkedinAccount = accounts.get(0);
-		JSONObject json = getLinkedinService().getProfileForEMail(email, password, uid, cid, linkedinAccount.getId());
+		JSONObject json = getLinkedinService().getFullProfileByEMail(email, password, uid, cid, linkedinAccount.getId());
 		AJAXRequestResult result = new AJAXRequestResult();
 		result.setResultObject(json, "json");
 		return result;

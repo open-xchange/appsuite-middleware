@@ -1,3 +1,9 @@
+import com.openexchange.halo.linkedin.LinkedinDataSource;
+import com.openexchange.oauth.linkedin.LinkedInServiceImpl;
+import com.openexchange.oauth.linkedin.MockOAuthService;
+
+import junit.framework.TestCase;
+
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -28,7 +34,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,48 +53,23 @@
  *
  */
 
-package com.openexchange.oauth.linkedin;
+public class LinkedInDataSourceTest extends TestCase {
+	
+	private LinkedinDataSource source;
 
-import java.util.List;
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
 
-import org.json.JSONObject;
+		LinkedInServiceImpl lis = new LinkedInServiceImpl(null);
+		
+		source = new LinkedinDataSource(null);
+		source.setLinkedinService(lis);
+		source.setOauthService(new MockOAuthService());
 
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Contact;
+	}
 
-/**
- * {@link LinkedInService}
- *
- * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
- */
-public interface LinkedInService {
+	public void testBasics(){
 
-    public List<Contact> getContacts(String password, int user, int contextId, int accountId);
-
-    public String getAccountDisplayName(String password, int user, int contextId, int accountId);
-   
-    /**
-     * @return all data on a contact identified by e-mail (special feature, only available with extended API keys) 
-     */
-	public JSONObject getFullProfileByEMail(String email, String password, int user, int contextId, int accountId) throws OXException;
-
-    /**
-     * @return all data on a contact identified by id 
-     */
-	public JSONObject getProfileForId(String id, String password, int user, int contextId, int accountId) throws OXException;
-
-	/**
-	 * @return all data of all connections a user has
-	 */
-	public JSONObject getConnections(String password, int user, int contextId,	int accountId) throws OXException;
-
-	/**
-	 * @return the IDs of all connections a user has (so you can query them separately)
-	 */
-	public List<String> getUsersConnectionsIds(String password, int user, int contextId, int accountId) throws OXException;
-
-	/**
-	 * @return A list of contacts that list the targeted user to the current user
-	 */
-	public JSONObject getRelationToViewer(String id, String password, int user, int contextId, int accountId) throws OXException;
+	}
 }

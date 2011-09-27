@@ -79,7 +79,8 @@ import com.openexchange.oauth.linkedin.osgi.Activator;
  */
 public class LinkedInServiceImpl implements LinkedInService{
 
-    private static final String ALL_FIELDS = ":(id,first-name,last-name,phone-numbers,headline,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url,positions,industry)";
+    private static final String PERSONAL_FIELDS = "id,first-name,last-name,phone-numbers,headline,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url,positions,industry";
+	private static final String PERSONAL_FIELD_QUERY = ":("+PERSONAL_FIELDS+")";
 	private static final String CONNECTIONS_URL = "http://api.linkedin.com/v1/people/~/connections:(id,first-name,last-name,phone-numbers,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url,positions)";
     private static final String IN_JSON = "?format=json";
     
@@ -180,34 +181,69 @@ public class LinkedInServiceImpl implements LinkedInService{
         return contacts;
     }
     
-    
-    @Override
-    public JSONObject getProfileForEMail(String email, String password, int user, int contextId, int accountId) throws OXException{
-    	throw OXException.general("Not implemented, because LinkedIn has not upgraded our ID yet");
-    }
 
-    
 	@Override
 	public JSONObject getProfileForId(String id, String password, int user, int contextId, int accountId) throws OXException {
-		String uri = "http://api.linkedin.com/v1/people/id="+id+ALL_FIELDS;
+		String uri = "http://api.linkedin.com/v1/people/id="+id+PERSONAL_FIELD_QUERY;
 	   	Response response = performRequest(password, user, contextId, accountId, Verb.GET, uri + IN_JSON);
     	return extractJson(response);
 	}
+	
 
+	@Override
+	public JSONObject getRelationToViewer(String id, String password, int user, int contextId, int accountId) throws OXException {
+		String uri = "http://api.linkedin.com/v1/people/id="+id+":(relation-to-viewer)";
+	   	Response response = performRequest(password, user, contextId, accountId, Verb.GET, uri + IN_JSON);
+    	JSONObject relations = extractJson(response);
+    	return relations;
+	}
 	
 	@Override
 	public JSONObject getConnections(String password, int user, int contextId,	int accountId) throws OXException {
-		String uri = "http://api.linkedin.com/v1/people/~/connections"+ALL_FIELDS;
-	   	Response response = performRequest(password, user, contextId, accountId, Verb.GET, uri + IN_JSON);
-    	return extractJson(response);
+		String uri = "http://api.linkedin.com/v1/people/~/connections"+PERSONAL_FIELD_QUERY;
+		Response response = performRequest(password, user, contextId, accountId, Verb.GET, uri + IN_JSON);
+		return extractJson(response);
 	}
-
+	
 	
 	@Override
 	public List<String> getUsersConnectionsIds(String password, int user, int contextId, int accountId) throws OXException {
 		String uri = "http://api.linkedin.com/v1/people/~/connections:(id)";
+		Response response = performRequest(password, user, contextId, accountId, Verb.GET, uri + IN_JSON);
+		return extractIds(response);
+	}
+
+    
+    @Override
+    public JSONObject getFullProfileByEMail(String email, String password, int user, int contextId, int accountId) throws OXException{
+    	//Implemented as dummy, because LinkedIn has not upgraded our keys yet to do this");
+    	String id = "hzFnTZPLsz";
+		String uri = "http://api.linkedin.com/v1/people/id="+id+":(relation-to-viewer,"+PERSONAL_FIELDS+")";
 	   	Response response = performRequest(password, user, contextId, accountId, Verb.GET, uri + IN_JSON);
-	   	return extractIds(response);
+    	JSONObject data = extractJson(response);
+    	addFullInformationToRelation(data, password, user, contextId, accountId);
+    	return data;
+    }
+    
+    
+	private void addFullInformationToRelation(JSONObject relation2, String password, int user, int contextId, int accountId) throws OXException {
+		try {
+			JSONObject relation = relation2.getJSONObject("relationToViewer");
+			JSONArray connections = relation.getJSONObject("connections").getJSONArray("values");
+			for(int i = 0, max = connections.length(); i < max; i++){
+				JSONObject contact = connections.getJSONObject(i);
+				if(!contact.has("person")) continue;
+				
+				JSONObject person = contact.getJSONObject("person");
+				String id = person.getString("id");
+				JSONObject fullProfile = getProfileForId(id, password, user, contextId, accountId);
+				contact.put("person",fullProfile);
+			}
+
+		} catch (JSONException e) {
+			throw new OXException(1).setPrefix("OAUTH-LI").setLogMessage("Could not parse JSON");
+		}
+		
 	}
 
 }

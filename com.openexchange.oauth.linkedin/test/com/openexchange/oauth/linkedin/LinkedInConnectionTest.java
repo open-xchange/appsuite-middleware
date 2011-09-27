@@ -49,28 +49,27 @@
 
 package com.openexchange.oauth.linkedin;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.List;
-import java.util.Scanner;
-import junit.framework.TestCase;
+//import java.io.BufferedReader;
+//import java.io.FileInputStream;
+//import java.io.FileNotFoundException;
+//import java.io.IOException;
+//import java.io.InputStreamReader;
+//import java.util.Scanner;
+//import org.scribe.builder.ServiceBuilder;
+//import org.scribe.builder.api.LinkedInApi;
+//import org.scribe.model.Response;
+//import org.scribe.model.Token;
+//import org.scribe.model.Verb;
+//import org.scribe.model.Verifier;
+//import org.scribe.oauth.OAuthService;
+//import com.openexchange.oauth.DefaultOAuthToken;
 
+import java.util.List;
+import junit.framework.TestCase;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.scribe.builder.ServiceBuilder;
-import org.scribe.builder.api.LinkedInApi;
-import org.scribe.model.Response;
-import org.scribe.model.Token;
-import org.scribe.model.Verb;
-import org.scribe.model.Verifier;
-import org.scribe.oauth.OAuthService;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.linkedin.osgi.Activator;
 /**
  * {@link LinkedInConnectionTest}
@@ -173,12 +172,9 @@ public class LinkedInConnectionTest extends TestCase {
     	linkedIn.getContacts("password",1,1,1);
     }
     
-    
     public void testGetProfileForEMail() throws OXException{
-    	try {
-    	linkedIn.getProfileForEMail("tobiasprinz@gmx.net","password",1,1,1);
-    	fail("Expecting exception");
-    	} catch (OXException e){  	}
+    	JSONObject fullProfile = linkedIn.getFullProfileByEMail("tobiasprinz@gmx.net","password",1,1,1);
+    	System.out.println(fullProfile);
     }
 
 	public void testGetProfileForId() throws OXException, JSONException {
@@ -195,5 +191,10 @@ public class LinkedInConnectionTest extends TestCase {
 	public void testGetUsersConnectionsIds() throws OXException {
 		List<String> connectionIds = linkedIn.getUsersConnectionsIds("password",1,1,1);
 		assertTrue("Should contain either Kleini or Big Kauss in contact list", connectionIds.contains(LI_ID_KAUSS) || connectionIds.contains(LI_ID_KLEIN)); //you're an OX programmer, aren't you?
+	}
+	
+	public void testGetRelationToViewer() throws Exception {
+		JSONObject relations = linkedIn.getRelationToViewer(LI_ID_KAUSS, "password",1,1,1);
+		assertEquals("Should know Martin", 1, relations.getJSONObject("relationToViewer").getInt("distance"));
 	}
 }
