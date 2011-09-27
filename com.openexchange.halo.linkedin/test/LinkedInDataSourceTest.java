@@ -1,4 +1,4 @@
-import com.openexchange.halo.linkedin.LinkedinDataSource;
+import com.openexchange.halo.linkedin.LinkedinProfileDataSource;
 import com.openexchange.oauth.linkedin.LinkedInServiceImpl;
 import com.openexchange.oauth.linkedin.MockOAuthService;
 
@@ -55,7 +55,7 @@ import junit.framework.TestCase;
 
 public class LinkedInDataSourceTest extends TestCase {
 	
-	private LinkedinDataSource source;
+	private LinkedinProfileDataSource source;
 
 	@Override
 	protected void setUp() throws Exception {
@@ -63,7 +63,7 @@ public class LinkedInDataSourceTest extends TestCase {
 
 		LinkedInServiceImpl lis = new LinkedInServiceImpl(null);
 		
-		source = new LinkedinDataSource(null);
+		source = new LinkedinProfileDataSource(null);
 		source.setLinkedinService(lis);
 		source.setOauthService(new MockOAuthService());
 
