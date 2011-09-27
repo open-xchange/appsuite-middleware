@@ -99,6 +99,10 @@ public final class TextFinder {
      */
     public String getText(final MailPart p) throws OXException {
         textIsHtml = false;
+        return getTextRecursive(p);
+    }
+
+    private String getTextRecursive(final MailPart p) throws OXException {
         try {
             final ContentType ct = p.getContentType();
             if (ct.startsWith("text/")) {
@@ -125,23 +129,23 @@ public final class TextFinder {
                     final ContentType bct = bp.getContentType();
                     if (bct.startsWith("text/plain")) {
                         if (text == null) {
-                            text = getText(bp);
+                            text = getTextRecursive(bp);
                         }
                         continue;
                     } else if (bct.startsWith("text/htm")) {
-                        final String s = getText(bp);
+                        final String s = getTextRecursive(bp);
                         if (s != null) {
                             return s;
                         }
                     } else {
-                        return getText(bp);
+                        return getTextRecursive(bp);
                     }
                 }
                 return text;
             } else if (ct.startsWith("multipart/")) {
                 final int count = p.getEnclosedCount();
                 for (int i = 0; i < count; i++) {
-                    final String s = getText(p.getEnclosedMailPart(i));
+                    final String s = getTextRecursive(p.getEnclosedMailPart(i));
                     if (s != null) {
                         return s;
                     }
