@@ -1,14 +1,16 @@
 package com.openexchange.halo.appointments;
 
-import java.util.Arrays;
 import java.util.Date;
-
+import java.util.List;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.HaloContactQuery;
 import com.openexchange.server.ServiceLookup;
@@ -32,18 +34,35 @@ public class AppointmentContactHalo implements HaloContactDataSource {
 	public AJAXRequestResult investigate(HaloContactQuery query, AJAXRequestData req,
 			ServerSession session) throws OXException {
 		AppointmentSQLInterface appointmentService = getAppointmentService(session);
-		//TODO: Construct a list of appointments with the given user and the session user in the near future
-		CalendarDataObject cdo1 = new CalendarDataObject();
-		cdo1.setTitle("An Appointment");
-		cdo1.setStartDate(new Date());
-		cdo1.setEndDate(new Date());
 		
-		CalendarDataObject cdo2 = new CalendarDataObject();
-		cdo2.setTitle("Another Appointment");
-		cdo2.setStartDate(new Date());
-		cdo2.setEndDate(new Date());
+		int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
+		String parameterStart = req.checkParameter(AJAXServlet.PARAMETER_START);
+		Date start = new Date(Long.parseLong(parameterStart));
+        String parameterEnd = req.checkParameter(AJAXServlet.PARAMETER_END);
+        Date end = new Date(Long.parseLong(parameterEnd));
+        int orderBy = Integer.parseInt(req.checkParameter(AJAXServlet.PARAMETER_SORT));
+        String parameterOrder = req.checkParameter(AJAXServlet.PARAMETER_ORDER);
+        Order order = OrderFields.parse(parameterOrder);
+        
+		List<Appointment> appointments = null;
+		if (query.getUser() != null) {
+		    appointments = appointmentService.getAppointmentsWithUserBetween(query.getUser(), columns, start, end, orderBy, order);
+		} else {
+		    appointments = appointmentService.getAppointmentsWithExternalParticipantBetween(query.getContact().getEmail1(), columns, start, end, orderBy, order);
+		}
 		
-		return new AJAXRequestResult(Arrays.asList(cdo1, cdo2), "appointment");
+//		//TODO: Construct a list of appointments with the given user and the session user in the near future
+//		CalendarDataObject cdo1 = new CalendarDataObject();
+//		cdo1.setTitle("An Appointment");
+//		cdo1.setStartDate(new Date());
+//		cdo1.setEndDate(new Date());
+//		
+//		CalendarDataObject cdo2 = new CalendarDataObject();
+//		cdo2.setTitle("Another Appointment");
+//		cdo2.setStartDate(new Date());
+//		cdo2.setEndDate(new Date());
+		
+		return new AJAXRequestResult(appointments, "appointment");
 	}
 	
 	public AppointmentSQLInterface getAppointmentService(ServerSession session) {

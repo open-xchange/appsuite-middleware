@@ -55,6 +55,7 @@ import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -1261,5 +1262,51 @@ public class CalendarSql implements AppointmentSQLInterface {
     @Override
     public boolean getIncludePrivateAppointments() {
         return this.includePrivateAppointments;
+    }
+    
+    @Override
+    public List<Appointment> getAppointmentsWithExternalParticipantBetween(String email, int[] cols, Date start, Date end, int orderBy, Order order) throws OXException {
+        List<Appointment> appointments = new ArrayList<Appointment>();
+        SearchIterator<Appointment> searchIterator;
+        try {
+            searchIterator = getModifiedAppointmentsBetween(session.getUserId(), start, end, cols, null, orderBy, order);
+        } catch (SQLException e) {
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);
+        }
+        while (searchIterator.hasNext()) {
+            Appointment app = searchIterator.next();
+            Participant[] participants = app.getParticipants();
+            for (Participant participant : participants) {
+                if (participant.getType() == Participant.EXTERNAL_USER && participant.getEmailAddress().equals(email)) {
+                    appointments.add(app);
+                    break;
+                }
+            }
+        }
+        
+        return appointments;
+    }
+    
+    @Override
+    public List<Appointment> getAppointmentsWithUserBetween(User user, int[] cols, Date start, Date end, int orderBy, Order order) throws OXException {
+        List<Appointment> appointments = new ArrayList<Appointment>();
+        SearchIterator<Appointment> searchIterator;
+        try {
+            searchIterator = getModifiedAppointmentsBetween(session.getUserId(), start, end, cols, null, orderBy, order);
+        } catch (SQLException e) {
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);
+        }
+        while (searchIterator.hasNext()) {
+            Appointment app = searchIterator.next();
+            UserParticipant[] users = app.getUsers();
+            for (UserParticipant userParticipant : users) {
+                if (userParticipant.getIdentifier() == user.getId()) {
+                    appointments.add(app);
+                    break;
+                }
+            }
+        }
+        
+        return appointments;
     }
 }
