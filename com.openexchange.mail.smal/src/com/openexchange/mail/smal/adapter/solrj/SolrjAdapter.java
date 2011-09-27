@@ -69,7 +69,6 @@ import java.util.UUID;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import org.apache.solr.client.solrj.SolrRequest.METHOD;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
@@ -79,8 +78,10 @@ import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.index.ConfigIndexService;
 import com.openexchange.index.IndexUrl;
 import com.openexchange.mail.MailField;
@@ -100,7 +101,10 @@ import com.openexchange.mail.smal.adapter.IndexAdapters;
 import com.openexchange.mail.smal.adapter.solrj.contentgrab.SolrTextFillerQueue;
 import com.openexchange.mail.smal.adapter.solrj.contentgrab.TextFiller;
 import com.openexchange.mail.smal.adapter.solrj.management.CommonsHttpSolrServerManagement;
+import com.openexchange.mail.utils.MailMessageComparator;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.UserService;
 
 /**
  * {@link SolrjAdapter}
@@ -113,6 +117,8 @@ public final class SolrjAdapter implements IndexAdapter {
 
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SolrjAdapter.class));
+
+    private static final Integer QUERY_ROWS = Integer.valueOf(125);
 
     private volatile CommonsHttpSolrServerManagement solrServerManagement;
 
@@ -218,19 +224,31 @@ public final class SolrjAdapter implements IndexAdapter {
                 queryBuilder.append(" AND (").append(SearchTerm2Query.searchTerm2Query(searchTerm)).append(')');
             }
             final SolrQuery solrQuery = new SolrQuery().setQuery(queryBuilder.toString());
-            if (null != sortField && null != order) {
-                final String name = sortField2Name.get(sortField);
-                if (null != name) {
-                    solrQuery.setSortField(name, OrderDirection.ASC.equals(order) ? ORDER.asc : ORDER.desc);
+            /*
+             * Page-wise retrieval
+             */
+            int off = 0;
+            List<MailMessage> mails = null;
+            while (true) {
+                solrQuery.setStart(Integer.valueOf(off));
+                solrQuery.setRows(QUERY_ROWS);
+                final QueryResponse queryResponse = solrServer.query(solrQuery);
+                final SolrDocumentList results = queryResponse.getResults();
+                final int size = results.size();
+                if (size <= 0) {
+                    break;
                 }
+                if (mails == null) {
+                    mails = new ArrayList<MailMessage>((int) results.getNumFound());
+                }
+                for (int i = 0; i < size; i++) {
+                    final SolrDocument solrDocument = results.get(i);
+                    mails.add(readDocument(solrDocument));
+                }
+                off += size;
             }
-            final QueryResponse queryResponse = solrServer.query(solrQuery);
-            final SolrDocumentList results = queryResponse.getResults();
-            final int size = results.size();
-            final List<MailMessage> mails = new ArrayList<MailMessage>(size);
-            for (int i = 0; i < size; i++) {
-                final SolrDocument solrDocument = results.get(i);
-                mails.add(readDocument(solrDocument));
+            if (null != sortField && null != order) {
+                Collections.sort(mails, new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), getUserLocaleLazy(session)));
             }
             return mails;
         } catch (final SolrServerException e) {
@@ -238,6 +256,21 @@ public final class SolrjAdapter implements IndexAdapter {
         } catch (final RuntimeException e) {
             throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private static Locale getUserLocaleLazy(final Session session) throws OXException {
+        Locale locale = (Locale) session.getParameter("solr.userLocale");
+        if (null == locale) {
+            if (session instanceof ServerSession) {
+                final ServerSession serverSession = (ServerSession) session;
+                locale = serverSession.getUser().getLocale();
+            } else {
+                final Context context = SMALServiceLookup.getServiceStatic(ContextService.class).getContext(session.getContextId());
+                locale = SMALServiceLookup.getServiceStatic(UserService.class).getUser(session.getUserId(), context).getLocale();
+            }
+            session.setParameter("solr.userLocale", locale);
+        }
+        return locale;
     }
 
     private MailMessage readDocument(final SolrDocument document) throws OXException {
@@ -378,19 +411,31 @@ public final class SolrjAdapter implements IndexAdapter {
                 }
             }
             final SolrQuery solrQuery = new SolrQuery().setQuery(queryBuilder.toString());
-            if (null != sortField && null != order) {
-                final String name = sortField2Name.get(sortField);
-                if (null != name) {
-                    solrQuery.setSortField(name, OrderDirection.ASC.equals(order) ? ORDER.asc : ORDER.desc);
+            /*
+             * Page-wise retrieval
+             */
+            int off = 0;
+            List<MailMessage> mails = null;
+            while (true) {
+                solrQuery.setStart(Integer.valueOf(off));
+                solrQuery.setRows(QUERY_ROWS);
+                final QueryResponse queryResponse = solrServer.query(solrQuery);
+                final SolrDocumentList results = queryResponse.getResults();
+                final int size = results.size();
+                if (size <= 0) {
+                    break;
                 }
+                if (mails == null) {
+                    mails = new ArrayList<MailMessage>((int) results.getNumFound());
+                }
+                for (int i = 0; i < size; i++) {
+                    final SolrDocument solrDocument = results.get(i);
+                    mails.add(readDocument(solrDocument));
+                }
+                off += size;
             }
-            final QueryResponse queryResponse = solrServer.query(solrQuery);
-            final SolrDocumentList results = queryResponse.getResults();
-            final int size = results.size();
-            final List<MailMessage> mails = new ArrayList<MailMessage>(size);
-            for (int i = 0; i < size; i++) {
-                final SolrDocument solrDocument = results.get(i);
-                mails.add(readDocument(solrDocument));
+            if (null != sortField && null != order) {
+                Collections.sort(mails, new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), getUserLocaleLazy(session)));
             }
             return mails;
         } catch (final SolrServerException e) {

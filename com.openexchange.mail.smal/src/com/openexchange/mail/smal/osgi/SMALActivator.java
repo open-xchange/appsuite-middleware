@@ -54,6 +54,7 @@ import java.util.Hashtable;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
@@ -81,6 +82,7 @@ import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
+import com.openexchange.user.UserService;
 
 /**
  * {@link SMALActivator} - The activator for Super-MAL bundle.
@@ -113,6 +115,8 @@ public class SMALActivator extends HousekeepingActivator {
         trackService(DatabaseService.class);
         trackService(ConfigIndexService.class);
         trackService(LanguageDetectionService.class);
+        trackService(UserService.class);
+        trackService(ContextService.class);
         openTrackers();
         JobQueue.getInstance();
         /*
