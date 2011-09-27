@@ -6,12 +6,15 @@ Bundle-Version: 7.0.0.0
 Bundle-Activator: com.openexchange.halo.appointments.osgi.AppointmentHaloActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.ajax.requesthandler,
+Import-Package: com.openexchange.ajax,
+ com.openexchange.ajax.fields,
+ com.openexchange.ajax.requesthandler,
  com.openexchange.api2,
  com.openexchange.calendar,
  com.openexchange.exception,
  com.openexchange.groupware.calendar,
  com.openexchange.groupware.container,
+ com.openexchange.groupware.search,
  com.openexchange.halo,
  com.openexchange.server,
  com.openexchange.server.osgiservice,

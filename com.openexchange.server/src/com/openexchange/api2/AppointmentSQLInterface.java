@@ -52,10 +52,12 @@ package com.openexchange.api2;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.session.Session;
@@ -114,6 +116,10 @@ public interface AppointmentSQLInterface {
      * @return a boolean[] that contains true if the user has an appointment on this day or false if not
      */
     public boolean[] hasAppointmentsBetween(Date start, Date end) throws OXException;
+    
+    public List<Appointment> getAppointmentsWithExternalParticipantBetween(String email, int[] cols, Date start, Date end, int orderBy, Order order) throws OXException;
+    
+    public List<Appointment> getAppointmentsWithUserBetween(User user, int[] cols, Date start, Date end, int orderBy, Order order) throws OXException;
 
     /**
      * Lists all modified objects in a folder.
