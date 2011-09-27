@@ -80,8 +80,8 @@ public class LinkedInConnectionTest extends TestCase {
 
     private LinkedInServiceImpl linkedIn;
 
-    private String apiKey = "HANYG4YSMun5b1lhv-aIEUtnIvNaHK2Bemjv7VvYI_frJpllhVY9HH8ZVOrII7UV";
-    private String apiSecret = "t2-AWfC0YqMwUjt3v5lxw9VJlDE3BZ-88k7-834Rq-QH-tq_xjqdLUHQz_glLaEb";
+    private String apiKey = "INSERT KEY HERE";
+    private String apiSecret = "INSERT SECRET HERE";
     private String LI_ID_KLEIN = "a0EFOQ6WNm"; //LinkedIn ID of Marcus Klein - I assume every dev testing this will have either Marcus or Martin in their contact list
     private String LI_ID_KAUSS = "hzFnTZPLsz"; //LinkedIn ID of Martin Kauss - I assume every dev testing this will have either Marcus or Martin in their contact list
     

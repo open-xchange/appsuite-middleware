@@ -82,7 +82,6 @@ public class LinkedInXMLParser {
                 textVal = el.getFirstChild().getNodeValue();
             }
         }
-
         return textVal;
     }
     
