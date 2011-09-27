@@ -65,7 +65,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.UUID;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -77,6 +76,7 @@ import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
 import com.openexchange.exception.OXException;
@@ -97,9 +97,9 @@ import com.openexchange.mail.smal.SMALExceptionCodes;
 import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.mail.smal.adapter.IndexAdapter;
 import com.openexchange.mail.smal.adapter.IndexAdapters;
-import com.openexchange.mail.smal.adapter.solrj.cache.CommonsHttpSolrServerCache;
 import com.openexchange.mail.smal.adapter.solrj.contentgrab.SolrTextFillerQueue;
 import com.openexchange.mail.smal.adapter.solrj.contentgrab.TextFiller;
+import com.openexchange.mail.smal.adapter.solrj.management.CommonsHttpSolrServerManagement;
 import com.openexchange.session.Session;
 
 /**
@@ -114,7 +114,7 @@ public final class SolrjAdapter implements IndexAdapter {
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SolrjAdapter.class));
 
-    private volatile CommonsHttpSolrServerCache solrServerCache;
+    private volatile CommonsHttpSolrServerManagement solrServerManagement;
 
     private volatile SolrTextFillerQueue textFillerQueue;
 
@@ -134,22 +134,25 @@ public final class SolrjAdapter implements IndexAdapter {
     }
 
     private CommonsHttpSolrServer solrServerFor(final Session session, final boolean readWrite) throws OXException {
-        return solrServerCache.getSolrServer(indexUrlFor(session, readWrite));
+        if (readWrite) {
+            return solrServerManagement.newSolrServer(indexUrlFor(session, true));
+        }
+        return solrServerManagement.getSolrServer(indexUrlFor(session, false));
     }
 
     @Override
     public void start() throws OXException {
-        final CommonsHttpSolrServerCache cache = solrServerCache = new CommonsHttpSolrServerCache(100, 300000);
+        final CommonsHttpSolrServerManagement cache = solrServerManagement = new CommonsHttpSolrServerManagement(100, 300000);
         final SolrTextFillerQueue q = textFillerQueue = new SolrTextFillerQueue(cache);
         q.start();
     }
 
     @Override
     public void stop() throws OXException {
-        final CommonsHttpSolrServerCache solrServerCache = this.solrServerCache;
+        final CommonsHttpSolrServerManagement solrServerCache = this.solrServerManagement;
         if (null != solrServerCache) {
             solrServerCache.shutDown();
-            this.solrServerCache = null;
+            this.solrServerManagement = null;
         }
     }
 
@@ -512,8 +515,24 @@ public final class SolrjAdapter implements IndexAdapter {
         try {
             solrServer = solrServerFor(session, true);
             final List<TextFiller> fillers = new ArrayList<TextFiller>(mails.size());
-            final Iterator<SolrInputDocument> iter = new MailDocumentIterator(mails.iterator(), session, System.currentTimeMillis(), fillers);
-            solrServer.add(iter);
+            final long now = System.currentTimeMillis();
+            final Iterator<SolrInputDocument> iter = new MailDocumentIterator(mails.iterator(), session, now, fillers);
+            try {
+                solrServer.add(iter);
+            } catch (final SolrException e) {
+                // Batch failed
+                SolrUtils.rollback(solrServer);
+                fillers.clear();
+                for (final Iterator<SolrInputDocument> it = new MailDocumentIterator(mails.iterator(), session, now, new ArrayList<TextFiller>(mails.size())); it.hasNext();) {
+                    final SolrInputDocument inputDocument = it.next();
+                    try {
+                        solrServer.add(inputDocument);
+                        fillers.add(TextFiller.fillerFor(inputDocument));
+                    } catch (final Exception addFailed) {
+                        LOG.warn("Mail input document could not be added: id=" + inputDocument.get("id") + " fullName=" + inputDocument.get("full_name"), addFailed);
+                    }
+                }
+            }
             solrServer.commit();
             textFillerQueue.add(fillers);
         } catch (final SolrServerException e) {
@@ -778,7 +797,7 @@ public final class SolrjAdapter implements IndexAdapter {
                     // Ignore
                 }
             }
-            final Set<Entry<String, Object>> documentFields = document.entrySet();
+            final Map<String, Object> documentFields = document.getFieldValueMap();
             final SolrInputDocument inputDocument = new SolrInputDocument();
             {
                 final int flags = mailMap.get(document.getFieldValue("id")).getFlags();
@@ -833,7 +852,7 @@ public final class SolrjAdapter implements IndexAdapter {
                 inputDocument.put("flag_read_ack", field);
                 documentFields.remove("flag_read_ack");
             }
-            for (final Entry<String, Object> entry : documentFields) {
+            for (final Entry<String, Object> entry : documentFields.entrySet()) {
                 final String name = entry.getKey();
                 final SolrInputField field = new SolrInputField(name);
                 field.setValue(entry.getValue(), 1.0f);

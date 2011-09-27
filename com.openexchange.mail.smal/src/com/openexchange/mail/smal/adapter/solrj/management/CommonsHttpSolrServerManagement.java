@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.smal.adapter.solrj.cache;
+package com.openexchange.mail.smal.adapter.solrj.management;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -76,11 +76,11 @@ import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
 /**
- * {@link CommonsHttpSolrServerCache}
+ * {@link CommonsHttpSolrServerManagement}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CommonsHttpSolrServerCache {
+public final class CommonsHttpSolrServerManagement {
 
     private final ConcurrentMap<IndexUrl, Wrapper> map;
 
@@ -89,9 +89,9 @@ public final class CommonsHttpSolrServerCache {
     private final ScheduledTimerTask timerTask;
 
     /**
-     * Initializes a new {@link CommonsHttpSolrServerCache}.
+     * Initializes a new {@link CommonsHttpSolrServerManagement}.
      */
-    public CommonsHttpSolrServerCache(final int maxCapacity, final int maxLifeMillis) {
+    public CommonsHttpSolrServerManagement(final int maxCapacity, final int maxLifeMillis) {
         super();
         final Lock lock = new ReentrantLock();
         map = new LockBasedConcurrentMap<IndexUrl, Wrapper>(lock, lock, new MaxCapacityLinkedHashMap<IndexUrl, Wrapper>(maxCapacity));
@@ -173,6 +173,17 @@ public final class CommonsHttpSolrServerCache {
      */
     public boolean containsSolrServer(final IndexUrl indexUrl) {
         return map.containsKey(indexUrl);
+    }
+
+    /**
+     * Gets a new Solr server associated with specified index URL.
+     * 
+     * @param indexUrl The index URL
+     * @return The new Solr server
+     * @throws OXException If creation of a new Solr server fails
+     */
+    public CommonsHttpSolrServer newSolrServer(final IndexUrl indexUrl) throws OXException {
+        return newCommonsHttpSolrServer(indexUrl);
     }
 
     /**

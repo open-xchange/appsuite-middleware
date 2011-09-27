@@ -50,6 +50,7 @@
 package com.openexchange.mail.smal.adapter.solrj.contentgrab;
 
 import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrInputDocument;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.smal.SMALExceptionCodes;
@@ -83,9 +84,9 @@ public final class TextFiller {
      */
     public static TextFiller fillerFor(final SolrDocument document) throws OXException {
         return new TextFiller(
-            document.get("uuid").toString(),
-            document.get("id").toString(),
-            document.get("full_name").toString(),
+            document.getFieldValue("uuid").toString(),
+            document.getFieldValue("id").toString(),
+            document.getFieldValue("full_name").toString(),
             TextFiller.<Integer> get("account", document).intValue(),
             TextFiller.<Long> get("user", document).intValue(),
             TextFiller.<Long> get("context", document).intValue());
@@ -93,7 +94,34 @@ public final class TextFiller {
 
     @SuppressWarnings("unchecked")
     private static <V> V get(final String name, final SolrDocument document) throws OXException {
-        final Object object = document.get(name);
+        final Object object = document.getFieldValue(name);
+        try {
+            return (V) object;
+        } catch (final ClassCastException e) {
+            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, "Unexpected type: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Gets the filler for specified input document.
+     * 
+     * @param inputDocument The input document
+     * @return The filler
+     * @throws OXException If creating filler fails
+     */
+    public static TextFiller fillerFor(final SolrInputDocument inputDocument) throws OXException {
+        return new TextFiller(
+            inputDocument.getFieldValue("uuid").toString(),
+            inputDocument.getFieldValue("id").toString(),
+            inputDocument.getFieldValue("full_name").toString(),
+            TextFiller.<Integer> get("account", inputDocument).intValue(),
+            TextFiller.<Long> get("user", inputDocument).intValue(),
+            TextFiller.<Long> get("context", inputDocument).intValue());
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <V> V get(final String name, final SolrInputDocument inputDocument) throws OXException {
+        final Object object = inputDocument.getFieldValue(name);
         try {
             return (V) object;
         } catch (final ClassCastException e) {

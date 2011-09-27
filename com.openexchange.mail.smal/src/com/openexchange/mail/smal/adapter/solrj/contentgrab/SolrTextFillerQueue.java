@@ -85,8 +85,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.smal.SMALExceptionCodes;
 import com.openexchange.mail.smal.SMALMailAccess;
 import com.openexchange.mail.smal.SMALServiceLookup;
-import com.openexchange.mail.smal.adapter.IndexAdapters;
-import com.openexchange.mail.smal.adapter.solrj.cache.CommonsHttpSolrServerCache;
+import com.openexchange.mail.smal.adapter.solrj.management.CommonsHttpSolrServerManagement;
 import com.openexchange.mail.text.TextFinder;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -153,14 +152,14 @@ public final class SolrTextFillerQueue implements Runnable {
 
     private final int maxNumConcurrentFillerTasks;
 
-    private final CommonsHttpSolrServerCache serverCache;
+    private final CommonsHttpSolrServerManagement serverManagement;
 
     /**
      * Initializes a new {@link SolrTextFillerQueue}.
      */
-    public SolrTextFillerQueue(final CommonsHttpSolrServerCache serverCache) {
+    public SolrTextFillerQueue(final CommonsHttpSolrServerManagement serverManagement) {
         super();
-        this.serverCache = serverCache;
+        this.serverManagement = serverManagement;
         maxNumConcurrentFillerTasks = MAX_NUM_CONCURRENT_FILLER_TASKS;
         concurrentFutures = new AtomicReferenceArray<Future<Object>>(new Future[maxNumConcurrentFillerTasks]);
         keepgoing = new AtomicBoolean(true);
@@ -370,7 +369,7 @@ public final class SolrTextFillerQueue implements Runnable {
         boolean rollback = false;
         try {
             solrServer =
-                serverCache.getSolrServer(SMALServiceLookup.getServiceStatic(ConfigIndexService.class).getReadOnlyURL(
+                serverManagement.getSolrServer(SMALServiceLookup.getServiceStatic(ConfigIndexService.class).getReadOnlyURL(
                     contextId,
                     userId,
                     Types.EMAIL));
@@ -474,8 +473,11 @@ public final class SolrTextFillerQueue implements Runnable {
                          * Get text
                          */
                         final String text = textFinder.getText(messageStorage.getMessage(filler.getFullName(), filler.getMailId(), false));
-                        final Locale locale = detectLocale(text);
-                        inputDocument.setField("content_" + locale.getLanguage(), text);
+                        if (null != text) {
+                            final Locale locale = detectLocale(text);
+                            inputDocument.setField("content_" + locale.getLanguage(), text);
+                        }
+                        inputDocument.setField("content_flag", Boolean.TRUE);
                         inputDocuments.add(inputDocument);
                         /*
                          * Remove from map
@@ -493,7 +495,7 @@ public final class SolrTextFillerQueue implements Runnable {
     }
 
     /**
-     * Checks specified document if content yet needs to be added.
+     * Checks specified document if content still needs to be added.
      * 
      * @param solrDocument The document to check
      * @return <code>true</code> if no content is present in document; otherwise <code>false</code> if content was found
@@ -502,14 +504,8 @@ public final class SolrTextFillerQueue implements Runnable {
         if (null == solrDocument) {
             return false;
         }
-        final StringBuilder pre = new StringBuilder("content_");
-        for (final Locale l : IndexAdapters.KNOWN_LOCALES) {
-            pre.setLength(8);
-            if (solrDocument.containsKey(pre.append(l.getLanguage()).toString())) {
-                return false;
-            }
-        }
-        return true;
+        final Boolean contentFlag = (Boolean) solrDocument.getFieldValue("content_flag");
+        return null == contentFlag || !contentFlag.booleanValue();
     }
 
     private final class MaxAwareTask implements Task<Object> {

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.smal.adapter.solrj.cache;
+package com.openexchange.mail.smal.adapter.solrj.management;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;

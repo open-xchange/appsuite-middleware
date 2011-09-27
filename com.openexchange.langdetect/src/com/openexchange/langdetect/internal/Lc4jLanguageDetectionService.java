@@ -213,8 +213,9 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
             final List<String> languages = defaultLanguageCategorization.findLanguage(new ByteArrayList(input.getBytes("utf-8")));
             final List<Locale> locales = new ArrayList<Locale>(languages.size());
             for (final String language : languages) {
-                final String lang = language.substring(0, language.indexOf('.')).toLowerCase(defaultLocale);
-                final int pos = lang.indexOf('-');
+                int pos = language.indexOf('.');
+                final String lang = (pos > 0 ? language.substring(0, pos) : language).toLowerCase(defaultLocale);
+                pos = lang.indexOf('-');
                 Locale locale = languageCodes.get(pos < 0 ? lang : lang.substring(0, pos));
                 if (null == locale) {
                     LOG.warn("No language code for model: " + language + ". Using default " + defaultLocale);
@@ -226,6 +227,9 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
         } catch (final UnsupportedEncodingException e) {
             // Cannot occur
             throw LanguageDetectionExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            // Cannot occur
+            throw LanguageDetectionExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 }
