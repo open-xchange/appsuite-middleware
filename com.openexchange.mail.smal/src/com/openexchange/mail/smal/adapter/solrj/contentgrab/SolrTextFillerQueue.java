@@ -495,7 +495,7 @@ public final class SolrTextFillerQueue implements Runnable {
     }
 
     /**
-     * Checks specified document if content yet needs to be added.
+     * Checks specified document if content still needs to be added.
      * 
      * @param solrDocument The document to check
      * @return <code>true</code> if no content is present in document; otherwise <code>false</code> if content was found
