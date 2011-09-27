@@ -190,6 +190,7 @@ import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.osgi.SpamHandlerServiceTracker;
 import com.openexchange.systemname.SystemNameService;
+import com.openexchange.textxtraction.TextXtractService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.session.SessionHolder;
@@ -261,7 +262,7 @@ public final class ServerActivator extends DeferredActivator {
             TimerService.class, ThreadPoolService.class, CalendarAdministrationService.class, AppointmentSqlFactoryService.class,
             CalendarCollectionService.class, TargetService.class, MessagingServiceRegistry.class, HTMLService.class, IDBasedFileAccessFactory.class,
             FileStorageServiceRegistry.class, CryptoService.class, HttpService.class, SystemNameService.class, FolderUpdaterRegistry.class,
-            ConfigViewFactory.class, StringParser.class, PreviewService.class
+            ConfigViewFactory.class, StringParser.class, PreviewService.class, TextXtractService.class
         };
 
     private static volatile BundleContext CONTEXT;
