@@ -60,6 +60,7 @@ import net.freeutils.tnef.RawInputStream;
 import net.freeutils.tnef.TNEFInputStream;
 import net.freeutils.tnef.TNEFUtils;
 import com.openexchange.exception.OXException;
+import com.openexchange.html.HTMLService;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 import com.openexchange.mail.MailExceptionCode;
@@ -92,12 +93,15 @@ public final class TextFinder {
 
     private final TextXtractService textXtractService;
 
+    private final HTMLService htmlService;
+
     /**
      * Initializes a new {@link TextFinder}.
      */
     public TextFinder() {
         super();
         textXtractService = ServerServiceRegistry.getInstance().getService(TextXtractService.class);
+        htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
     }
 
     private String extractPlainText(final String content) throws OXException {
@@ -134,7 +138,8 @@ public final class TextFinder {
                     textIsHtml = false;
                 } else {
                     textIsHtml = ct.startsWith("text/htm");
-                    content = content.replaceAll("(\r?\n)+", ""); //.replaceAll("(  )+", "");
+                    //content = htmlService.getConformHTML(content, "UTF-8");
+                    content = content.replaceAll("(\r?\n)+", "");// .replaceAll("(  )+", "");
                 }
                 return textIsHtml ? extractPlainText(content) : content;
             }
