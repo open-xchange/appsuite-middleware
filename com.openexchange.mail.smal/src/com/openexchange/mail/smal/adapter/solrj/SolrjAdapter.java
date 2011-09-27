@@ -69,7 +69,6 @@ import java.util.UUID;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrRequest.METHOD;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -228,8 +227,23 @@ public final class SolrjAdapter implements IndexAdapter {
              * Page-wise retrieval
              */
             int off = 0;
-            List<MailMessage> mails = null;
-            while (true) {
+            final long numFound;
+            final List<MailMessage> mails;
+            {
+                solrQuery.setStart(Integer.valueOf(off));
+                solrQuery.setRows(QUERY_ROWS);
+                final QueryResponse queryResponse = solrServer.query(solrQuery);
+                final SolrDocumentList results = queryResponse.getResults();
+                numFound = results.getNumFound();
+                mails = new ArrayList<MailMessage>((int) numFound);
+                final int size = results.size();
+                for (int i = 0; i < size; i++) {
+                    final SolrDocument solrDocument = results.get(i);
+                    mails.add(readDocument(solrDocument));
+                }
+                off += size;
+            }
+            while (off < numFound) {
                 solrQuery.setStart(Integer.valueOf(off));
                 solrQuery.setRows(QUERY_ROWS);
                 final QueryResponse queryResponse = solrServer.query(solrQuery);
@@ -237,9 +251,6 @@ public final class SolrjAdapter implements IndexAdapter {
                 final int size = results.size();
                 if (size <= 0) {
                     break;
-                }
-                if (mails == null) {
-                    mails = new ArrayList<MailMessage>((int) results.getNumFound());
                 }
                 for (int i = 0; i < size; i++) {
                     final SolrDocument solrDocument = results.get(i);
@@ -415,8 +426,23 @@ public final class SolrjAdapter implements IndexAdapter {
              * Page-wise retrieval
              */
             int off = 0;
-            List<MailMessage> mails = null;
-            while (true) {
+            final long numFound;
+            final List<MailMessage> mails;
+            {
+                solrQuery.setStart(Integer.valueOf(off));
+                solrQuery.setRows(QUERY_ROWS);
+                final QueryResponse queryResponse = solrServer.query(solrQuery);
+                final SolrDocumentList results = queryResponse.getResults();
+                numFound = results.getNumFound();
+                mails = new ArrayList<MailMessage>((int) numFound);
+                final int size = results.size();
+                for (int i = 0; i < size; i++) {
+                    final SolrDocument solrDocument = results.get(i);
+                    mails.add(readDocument(solrDocument));
+                }
+                off += size;
+            }
+            while (off < numFound) {
                 solrQuery.setStart(Integer.valueOf(off));
                 solrQuery.setRows(QUERY_ROWS);
                 final QueryResponse queryResponse = solrServer.query(solrQuery);
@@ -424,9 +450,6 @@ public final class SolrjAdapter implements IndexAdapter {
                 final int size = results.size();
                 if (size <= 0) {
                     break;
-                }
-                if (mails == null) {
-                    mails = new ArrayList<MailMessage>((int) results.getNumFound());
                 }
                 for (int i = 0; i < size; i++) {
                     final SolrDocument solrDocument = results.get(i);
@@ -536,10 +559,43 @@ public final class SolrjAdapter implements IndexAdapter {
             }
             queryBuilder.append(')');
             final SolrQuery solrQuery = new SolrQuery().setQuery(queryBuilder.toString());
-            final QueryResponse queryResponse = solrServer.query(solrQuery, METHOD.POST);
-            final SolrDocumentList results = queryResponse.getResults();
+            /*
+             * Page-wise retrieval
+             */
+            int off = 0;
+            final long numFound;
+            final List<SolrDocument> documents;
+            {
+                solrQuery.setStart(Integer.valueOf(off));
+                solrQuery.setRows(QUERY_ROWS);
+                final QueryResponse queryResponse = solrServer.query(solrQuery);
+                final SolrDocumentList results = queryResponse.getResults();
+                numFound = results.getNumFound();
+                documents = new ArrayList<SolrDocument>((int) numFound);
+                final int rsize = results.size();
+                for (int i = 0; i < rsize; i++) {
+                    final SolrDocument solrDocument = results.get(i);
+                    mails.add(readDocument(solrDocument));
+                }
+                off += rsize;
+            }
+            while (off < numFound) {
+                solrQuery.setStart(Integer.valueOf(off));
+                solrQuery.setRows(QUERY_ROWS);
+                final QueryResponse queryResponse = solrServer.query(solrQuery);
+                final SolrDocumentList results = queryResponse.getResults();
+                final int rsize = results.size();
+                if (rsize <= 0) {
+                    break;
+                }
+                for (int i = 0; i < rsize; i++) {
+                    final SolrDocument solrDocument = results.get(i);
+                    mails.add(readDocument(solrDocument));
+                }
+                off += rsize;
+            }
             rollback = true;
-            solrServer.add(new SolrDocumentIterator(results, map, textFillerQueue));
+            solrServer.add(new SolrDocumentIterator(documents, map, textFillerQueue));
             solrServer.commit();
         } catch (final SolrServerException e) {
             SolrUtils.rollback(rollback ? solrServer : null);
@@ -840,10 +896,10 @@ public final class SolrjAdapter implements IndexAdapter {
 
         private final SolrTextFillerQueue textFillerQueue;
 
-        protected SolrDocumentIterator(final SolrDocumentList results, final Map<String, MailMessage> mailMap, final SolrTextFillerQueue textFillerQueue) {
+        protected SolrDocumentIterator(final Collection<SolrDocument> documents, final Map<String, MailMessage> mailMap, final SolrTextFillerQueue textFillerQueue) {
             super();
             this.textFillerQueue = textFillerQueue;
-            iterator = results.iterator();
+            iterator = documents.iterator();
             this.mailMap = mailMap;
         }
 
