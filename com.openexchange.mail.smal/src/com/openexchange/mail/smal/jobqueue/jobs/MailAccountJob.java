@@ -185,7 +185,7 @@ public final class MailAccountJob extends AbstractMailSyncJob {
         
         final FolderJob folderJob = new FolderJob(fullName, accountId, userId, contextId).setSpan(Constants.HOUR_MILLIS);
         if (queue.addJob(folderJob)) {
-            LOG.debug("Folder job \"" + folderJob.toString() + "\" schedulued to job queue.");
+            LOG.debug("Folder job \"" + folderJob.toString() + "\" scheduled to job queue.");
         } else {
             LOG.debug("Folder job \"" + folderJob.toString() + "\" denied by job queue. Either due to capacity restrictions or because a similar job is already in queue.");
         }
