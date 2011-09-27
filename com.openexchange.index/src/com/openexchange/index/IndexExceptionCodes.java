@@ -74,7 +74,11 @@ public enum IndexExceptionCodes implements OXExceptionCode {
     /**
      * Could not find search index for user %1$s and module %2$s in context %3$s.
      */
-    INDEX_NOT_FOUND(IndexExceptionMessages.INDEX_NOT_FOUND_MSG, Category.CATEGORY_CONFIGURATION, 3),
+    INDEX_NOT_FOUND(IndexExceptionMessages.INDEX_NOT_FOUND_MSG, Category.CATEGORY_CONFIGURATION, 3),     
+    /**
+     * A database error occurred.
+     */
+    SQL_ERROR(IndexExceptionMessages.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 4)
     
     ;
 

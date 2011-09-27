@@ -47,74 +47,37 @@
  *
  */
 
-package com.openexchange.index;
+package com.openexchange.index.internal.tasks;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskV2;
+
 
 /**
- * {@link IndexUrl} - The URL to an index host.
- * 
+ * {@link IndexUpdateTaskProviderService}
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface IndexUrl {
-
-    /**
-     * Gets the string representation of the URL
-     * 
-     * @return The URL's string representation
-     */
-    String getUrl();
-
-    /**
-     * Gets the setting for SO_TIMEOUT. 0 implies that the option is disabled (i.e., timeout of infinity).
-     * <p>
-     * Default is <code>1000</code>.
-     * 
-     * @return The setting for SO_TIMEOUT
-     */
-    int getSoTimeout();
-
-    /**
-     * Gets the connection timeout. 0 implies that the option is disabled (i.e., timeout of infinity).
-     * <p>
-     * Default is <code>100</code>.
-     * 
-     * @return The connection timeout
-     */
-    int getConnectionTimeout();
-
-    /**
-     * Gets the max. number of connections allowed being established per host. 0 implies that there is no restriction.
-     * <p>
-     * Default is <code>100</code>.
-     * 
-     * @return The max. number of connections per host
-     */
-    int getMaxConnectionsPerHost();
+public class IndexUpdateTaskProviderService implements UpdateTaskProviderService {
     
-    /**
-     * Gets the max. number of indices that can be created on this server.
-     * 
-     * @return The max. number of indices
-     */
-    int getMaxIndices();
+    private List<UpdateTaskV2> updateTasks;
+    
+    public IndexUpdateTaskProviderService(UpdateTaskV2... updateTasks) {
+        super();
+        if (updateTasks == null || updateTasks.length == 0) {
+            this.updateTasks = Collections.EMPTY_LIST;
+        } else {
+            this.updateTasks = Arrays.asList(updateTasks);
+        }
+    }
 
-    /**
-     * Gets a hash code value for this index URL. This method is supported for the benefit of hashtables.
-     * 
-     * @return A hash code value for this object.
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
-    int hashCode();
-
-    /**
-     * Indicates whether some other object is "equal to" this one.
-     * 
-     * @param obj The reference object with which to compare.
-     * @return <code>true</code> if this object is the same as the obj argument; <code>false</code> otherwise.
-     * @see #hashCode()
-     */
-    @Override
-    boolean equals(Object obj);
+    public Collection<UpdateTaskV2> getUpdateTasks() {
+        return updateTasks;
+    }
 
 }

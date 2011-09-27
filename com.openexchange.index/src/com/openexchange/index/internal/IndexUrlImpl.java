@@ -69,6 +69,8 @@ public final class IndexUrlImpl implements IndexUrl {
     private int connectionTimeout;
 
     private int maxConnectionsPerHost;
+    
+    private int maxIndices;
 
     /**
      * Initializes a new {@link IndexUrlImpl}.
@@ -98,6 +100,11 @@ public final class IndexUrlImpl implements IndexUrl {
     public int getMaxConnectionsPerHost() {
         return maxConnectionsPerHost;
     }
+    
+    @Override
+    public int getMaxIndices() {
+        return maxIndices;
+    }
 
     /**
      * Sets the soTimeout
@@ -124,6 +131,15 @@ public final class IndexUrlImpl implements IndexUrl {
      */
     public void setMaxConnectionsPerHost(final int maxConnectionsPerHost) {
         this.maxConnectionsPerHost = maxConnectionsPerHost;
+    }
+    
+    /**
+     * Sets the maxIndices
+     * 
+     * @param maxIndices The maxIndices to set
+     */
+    public void setMaxIndices(int maxIndices) {
+        this.maxIndices = maxIndices;        
     }
 
     @Override

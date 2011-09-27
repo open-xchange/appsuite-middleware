@@ -22,7 +22,12 @@ public class IndexActivator extends HousekeepingActivator {
         // Only for testing purpose...
         // registerService(ConfigIndexService.class, new ConfigIndexServiceImpl(getService(DatabaseService.class)));
         registerService(ConfigIndexService.class, new StaticConfigIndexService());
+        
+        /*
+         * Register UpdateTask and DeleteListener. Uncomment for production.        
+         */
+//        registerService(UpdateTaskProviderService.class, new IndexUpdateTaskProviderService(new IndexCreateTablesTask()));
+//        registerService(DeleteListener.class, new IndexDeleteListener());
     }
-
-
+    
 }

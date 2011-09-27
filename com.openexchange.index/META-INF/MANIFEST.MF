@@ -11,6 +11,9 @@ Import-Package: com.openexchange.database,
  com.openexchange.server.osgiservice,
  org.apache.commons.logging,
  org.osgi.framework,
- com.openexchange.server
+ com.openexchange.server,
+ com.openexchange.groupware.update,
+ com.openexchange.tools.sql
 Export-Package: com.openexchange.index
-Require-Bundle: com.openexchange.global
+Require-Bundle: com.openexchange.global,
+ com.openexchange.server
