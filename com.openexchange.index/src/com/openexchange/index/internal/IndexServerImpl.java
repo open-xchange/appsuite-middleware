@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,82 +50,125 @@
 package com.openexchange.index.internal;
 
 import com.openexchange.index.IndexServer;
-import com.openexchange.index.IndexUrl;
+
 
 /**
- * {@link IndexUrlImpl}
- * 
+ * {@link IndexServerImpl}
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IndexUrlImpl implements IndexUrl {
-
-    private static final String DELIM = "/";
+public class IndexServerImpl implements IndexServer {
     
-    private final String fullUrl;
+    private int id;
     
-    private final IndexServer server;
+    private String url;
+    
+    private int soTimeout;
 
-    /**
-     * Initializes a new {@link IndexUrlImpl}.
-     * 
-     * @param fullUrl
-     */
-    public IndexUrlImpl(final IndexServer server, final String indexName) {
+    private int connectionTimeout;
+
+    private int maxConnectionsPerHost;
+    
+    private int maxIndices;
+    
+
+    public IndexServerImpl(int id, String url) {
         super();
-        this.server = server;
-        this.fullUrl = server.getUrl() + DELIM + indexName;
+        this.id = id;
+        this.url = url;
+    }
+
+    @Override
+    public int getId() {
+        return id;
     }
 
     @Override
     public String getUrl() {
-        return fullUrl;
+        return url;
     }
-
+    
     @Override
     public int getSoTimeout() {
-        return server.getSoTimeout();
+        return soTimeout;
     }
 
     @Override
     public int getConnectionTimeout() {
-        return server.getConnectionTimeout();
+        return connectionTimeout;
     }
 
     @Override
     public int getMaxConnectionsPerHost() {
-        return server.getMaxConnectionsPerHost();
+        return maxConnectionsPerHost;
     }
     
     @Override
     public int getMaxIndices() {
-        return server.getMaxIndices();
+        return maxIndices;
+    }
+    
+    /**
+     * Sets the soTimeout
+     * 
+     * @param soTimeout The soTimeout to set
+     */
+    public void setSoTimeout(final int soTimeout) {
+        this.soTimeout = soTimeout;
+    }
+
+    /**
+     * Sets the connectionTimeout
+     * 
+     * @param connectionTimeout The connectionTimeout to set
+     */
+    public void setConnectionTimeout(final int connectionTimeout) {
+        this.connectionTimeout = connectionTimeout;
+    }
+
+    /**
+     * Sets the maxConnectionsPerHost
+     * 
+     * @param maxConnectionsPerHost The maxConnectionsPerHost to set
+     */
+    public void setMaxConnectionsPerHost(final int maxConnectionsPerHost) {
+        this.maxConnectionsPerHost = maxConnectionsPerHost;
+    }
+    
+    /**
+     * Sets the maxIndices
+     * 
+     * @param maxIndices The maxIndices to set
+     */
+    public void setMaxIndices(int maxIndices) {
+        this.maxIndices = maxIndices;        
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((fullUrl == null) ? 0 : fullUrl.hashCode());
+        result = prime * result + id;
+        result = prime * result + ((url == null) ? 0 : url.hashCode());
         return result;
     }
 
     @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
+    public boolean equals(Object obj) {
+        if (this == obj)
             return true;
-        }
-        if (!(obj instanceof IndexUrlImpl)) {
+        if (obj == null)
             return false;
-        }
-        final IndexUrlImpl other = (IndexUrlImpl) obj;
-        if (fullUrl == null) {
-            if (other.fullUrl != null) {
+        if (getClass() != obj.getClass())
+            return false;
+        IndexServerImpl other = (IndexServerImpl) obj;
+        if (id != other.id)
+            return false;
+        if (url == null) {
+            if (other.url != null)
                 return false;
-            }
-        } else if (!fullUrl.equals(other.fullUrl)) {
+        } else if (!url.equals(other.url))
             return false;
-        }
         return true;
     }
 

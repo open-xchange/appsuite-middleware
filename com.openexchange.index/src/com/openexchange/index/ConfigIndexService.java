@@ -50,6 +50,7 @@
 package com.openexchange.index;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.Types;
 
 /**
  * {@link ConfigIndexService} - The configuration interface for index module.
@@ -80,5 +81,52 @@ public interface ConfigIndexService {
      * @throws OXException If index URL cannot be returned
      */
     IndexUrl getWriteURL(int contextId, int userId, int module) throws OXException;
+    
+    /**
+     * Registers a new index search server at the config db.
+     * 
+     * @param server The index server to register
+     * @return The id of the registered server
+     * @throws OXException If the server could not be registered
+     */
+    int registerIndexServer(IndexServer server) throws OXException;
+    
+    /**
+     * Modifies an index search server.
+     * 
+     * @param server The index server to modify
+     * @throws OXException If the server could not be modified
+     */
+    void modifyIndexServer(IndexServer server) throws OXException;
+    
+    /**
+     * Removes an index search server from the config db.
+     * 
+     * @param serverId The id of the server to remove
+     * @param deleteMappings <code>true</code> if all mapping entries shall be removed that use this server.
+     *                       <code>false</code> if if all mappings should be kept.
+     * @throws OXException
+     */
+    void unregisterIndexServer(int serverId, boolean deleteMappings) throws OXException;
+    
+    /**
+     * Gets all registered index search servers.
+     * 
+     * @return An array of IndexUrls. Every IndexUrl points to one server.
+     * @throws OXException
+     */
+    IndexServer[] getAllIndexServers() throws OXException;
+    
+    /**
+     * Adds a new (Context, User, Module) to (Server, Index) mapping to the config db.
+     * 
+     * @param cid The context id
+     * @param uid The user id
+     * @param module The module. See {@link Types}
+     * @param server The server id
+     * @param index Name of the index
+     * @throws OXException If mapping could not be added
+     */
+    void addIndexMapping(int cid, int uid, int module, int server, String index) throws OXException;
 
 }
