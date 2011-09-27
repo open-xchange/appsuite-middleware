@@ -106,7 +106,7 @@ public class LinkedinProfileDataSource implements HaloContactDataSource {
 
 	@Override
 	public String getId() {
-		return "com.openexchange.halo.linkedIn:profile";
+		return "com.openexchange.halo.linkedIn:fullProfile";
 	}
 
 	@Override
@@ -129,7 +129,12 @@ public class LinkedinProfileDataSource implements HaloContactDataSource {
 	}
 
 	@Override
-	public boolean isAvailable(ServerSession session) {
-		return true;
+	public boolean isAvailable(ServerSession session) throws OXException {
+		String password = session.getPassword();
+		int uid = session.getUserId();
+		int cid = session.getContextId();
+		
+		List<OAuthAccount> accounts = getOauthService().getAccounts("com.openexchange.socialplugin.linkedin", password, uid, cid);
+		return !accounts.isEmpty();
 	}
 }
