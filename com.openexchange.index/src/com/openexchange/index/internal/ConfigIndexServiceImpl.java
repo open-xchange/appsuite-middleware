@@ -62,6 +62,7 @@ import com.openexchange.index.ConfigIndexService;
 import com.openexchange.index.IndexExceptionCodes;
 import com.openexchange.index.IndexUrl;
 import com.openexchange.server.ServiceExceptionCodes;
+import com.openexchange.tools.sql.DBUtils;
 
 
 /**
@@ -74,9 +75,9 @@ public class ConfigIndexServiceImpl implements ConfigIndexService {
     private final DatabaseService dbService;
     
     private static final String SELECT_INDEX_URL = "SELECT " +
-    		                                           "s.serverUrl, u.index " +
+    		                                           "s.serverUrl, s.maxIndices, s.socketTimeout, s.connectionTimeout, s.maxConnections, u.index " +
     		                                       "FROM " +
-    		                                           "servers AS s " +
+    		                                           "index_servers AS s " +
     		                                       "JOIN " +
     		                                           "user_module2index AS u " +
     		                                       "ON " +
@@ -95,11 +96,11 @@ public class ConfigIndexServiceImpl implements ConfigIndexService {
 
     @Override
     public IndexUrl getReadOnlyURL(final int cid, final int uid, final int module) throws OXException {
-        final Connection readCon = dbService.getReadOnly();
-        if (readCon == null) {
-            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(DatabaseService.class.getSimpleName());
+        if (dbService == null) {
+            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
         }
         
+        final Connection readCon = dbService.getReadOnly();        
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -107,41 +108,33 @@ public class ConfigIndexServiceImpl implements ConfigIndexService {
             int i = 1;
             stmt.setInt(i++, cid);
             stmt.setInt(i++, uid);
-            stmt.setInt(i++, module);
+            stmt.setInt(i, module);
             rs = stmt.executeQuery();
             
-            String serverUrl;
-            String index;
-            final String fullUrl;
             if (!rs.next()) {
                 throw IndexExceptionCodes.INDEX_NOT_FOUND.create(uid, module, cid);
             }
-            serverUrl = rs.getString(1);
-            index = rs.getString(2);
-            fullUrl = serverUrl + DELIM + index;
             
-            final IndexUrl indexUrl = new IndexUrlImpl(fullUrl);
+            i = 1;
+            final String serverUrl = rs.getString(i++);
+            final int maxIndices = rs.getInt(i++);
+            final int socketTimeout = rs.getInt(i++);
+            final int connectionTimeout = rs.getInt(i++);
+            final int maxConnections = rs.getInt(i++);
+            final String index = rs.getString(i);
+            final String fullUrl = serverUrl + DELIM + index;
+            
+            final IndexUrlImpl indexUrl = new IndexUrlImpl(fullUrl);
+            indexUrl.setMaxIndices(maxIndices);
+            indexUrl.setSoTimeout(socketTimeout);
+            indexUrl.setConnectionTimeout(connectionTimeout);
+            indexUrl.setMaxConnectionsPerHost(maxConnections);
             
             return indexUrl;
         } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (final SQLException e) {
-                    LOG.warn("Could not close prepared statement.", e);
-                }
-            }
-            
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (final SQLException e) {
-                    LOG.warn("Could not close result set.", e);
-                }
-            }
-            
+            DBUtils.closeSQLStuff(rs, stmt);            
             dbService.backReadOnly(readCon);
         }
     }

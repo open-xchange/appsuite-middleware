@@ -47,74 +47,69 @@
  *
  */
 
-package com.openexchange.index;
+package com.openexchange.index.internal;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.index.IndexExceptionCodes;
+import com.openexchange.tools.sql.DBUtils;
+import static com.openexchange.index.internal.IndexDatabaseStuff.*;
+
 
 /**
- * {@link IndexUrl} - The URL to an index host.
- * 
+ * {@link IndexDeleteListener}
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface IndexUrl {
-
-    /**
-     * Gets the string representation of the URL
-     * 
-     * @return The URL's string representation
-     */
-    String getUrl();
-
-    /**
-     * Gets the setting for SO_TIMEOUT. 0 implies that the option is disabled (i.e., timeout of infinity).
-     * <p>
-     * Default is <code>1000</code>.
-     * 
-     * @return The setting for SO_TIMEOUT
-     */
-    int getSoTimeout();
-
-    /**
-     * Gets the connection timeout. 0 implies that the option is disabled (i.e., timeout of infinity).
-     * <p>
-     * Default is <code>100</code>.
-     * 
-     * @return The connection timeout
-     */
-    int getConnectionTimeout();
-
-    /**
-     * Gets the max. number of connections allowed being established per host. 0 implies that there is no restriction.
-     * <p>
-     * Default is <code>100</code>.
-     * 
-     * @return The max. number of connections per host
-     */
-    int getMaxConnectionsPerHost();
+public class IndexDeleteListener implements DeleteListener {
     
-    /**
-     * Gets the max. number of indices that can be created on this server.
-     * 
-     * @return The max. number of indices
-     */
-    int getMaxIndices();
-
-    /**
-     * Gets a hash code value for this index URL. This method is supported for the benefit of hashtables.
-     * 
-     * @return A hash code value for this object.
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
+    public IndexDeleteListener() {
+        super();
+    }
+    
     @Override
-    int hashCode();
+    public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
+        if (event.getType() == DeleteEvent.TYPE_USER) {
+            deleteUserEntriesFromDB(event, writeCon);
+        } else if (event.getType() == DeleteEvent.TYPE_CONTEXT) {
+            deleteContextEntriesFromDB(event, writeCon);
+        } else {
+            return;
+        }
+    }
 
-    /**
-     * Indicates whether some other object is "equal to" this one.
-     * 
-     * @param obj The reference object with which to compare.
-     * @return <code>true</code> if this object is the same as the obj argument; <code>false</code> otherwise.
-     * @see #hashCode()
-     */
-    @Override
-    boolean equals(Object obj);
+    private void deleteContextEntriesFromDB(DeleteEvent event, Connection writeCon) throws OXException {
+        final int cid = event.getContext().getContextId();
+        PreparedStatement stmt = null;
+        try {
+            stmt = writeCon.prepareStatement(SQL_DEL_CTX_FROM_MAPPING);
+            stmt.setInt(1, cid);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw IndexExceptionCodes.SQL_ERROR.create(e);
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }        
+    }
+
+    private void deleteUserEntriesFromDB(DeleteEvent event, Connection writeCon) throws OXException {
+        final int cid = event.getContext().getContextId();
+        final int uid = event.getId();
+        PreparedStatement stmt = null;
+        try {
+            stmt = writeCon.prepareStatement(SQL_DEL_USR_FROM_MAPPING);
+            stmt.setInt(1, cid);
+            stmt.setInt(2, uid);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw IndexExceptionCodes.SQL_ERROR.create(e);
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }        
+    }
 
 }

@@ -75,4 +75,7 @@ public final class IndexExceptionMessages implements LocalizableStrings {
     // Could not find search index for user %1$s and module %2$s in context %3$s.
     public static final String INDEX_NOT_FOUND_MSG = "Could not find search index for user %1$s and module %2$s in context %3$s.";
 
+    // A database error occurred.
+    public static final String SQL_ERROR_MSG = "A database error occurred.";
+
 }

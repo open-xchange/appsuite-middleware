@@ -47,74 +47,45 @@
  *
  */
 
-package com.openexchange.index;
+package com.openexchange.index.internal;
+
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
+
 
 /**
- * {@link IndexUrl} - The URL to an index host.
- * 
+ * {@link IndexServiceLookup}
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface IndexUrl {
-
-    /**
-     * Gets the string representation of the URL
-     * 
-     * @return The URL's string representation
-     */
-    String getUrl();
-
-    /**
-     * Gets the setting for SO_TIMEOUT. 0 implies that the option is disabled (i.e., timeout of infinity).
-     * <p>
-     * Default is <code>1000</code>.
-     * 
-     * @return The setting for SO_TIMEOUT
-     */
-    int getSoTimeout();
-
-    /**
-     * Gets the connection timeout. 0 implies that the option is disabled (i.e., timeout of infinity).
-     * <p>
-     * Default is <code>100</code>.
-     * 
-     * @return The connection timeout
-     */
-    int getConnectionTimeout();
-
-    /**
-     * Gets the max. number of connections allowed being established per host. 0 implies that there is no restriction.
-     * <p>
-     * Default is <code>100</code>.
-     * 
-     * @return The max. number of connections per host
-     */
-    int getMaxConnectionsPerHost();
+public class IndexServiceLookup implements ServiceLookup {
     
-    /**
-     * Gets the max. number of indices that can be created on this server.
-     * 
-     * @return The max. number of indices
-     */
-    int getMaxIndices();
+    private static final IndexServiceLookup INSTANCE = new IndexServiceLookup();
+    
+    private final AtomicReference<ServiceLookup> serviceLookupRef;
+    
+    
+    private IndexServiceLookup() {
+        super();
+        serviceLookupRef = new AtomicReference<ServiceLookup>();
+    }
+    
+    public static IndexServiceLookup getInstance() {
+        return INSTANCE;
+    }
 
-    /**
-     * Gets a hash code value for this index URL. This method is supported for the benefit of hashtables.
-     * 
-     * @return A hash code value for this object.
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
-    int hashCode();
-
-    /**
-     * Indicates whether some other object is "equal to" this one.
-     * 
-     * @param obj The reference object with which to compare.
-     * @return <code>true</code> if this object is the same as the obj argument; <code>false</code> otherwise.
-     * @see #hashCode()
-     */
-    @Override
-    boolean equals(Object obj);
+    public <S> S getService(Class<? extends S> clazz) {
+        final ServiceLookup serviceLookup = serviceLookupRef.get();
+        if (null == serviceLookup) {
+            return null;
+        }
+        
+        return serviceLookup.getService(clazz);
+    }
+    
+    public void setServiceLookup(final ServiceLookup serviceLookup) {
+        serviceLookupRef.set(serviceLookup);
+    }
 
 }
