@@ -523,8 +523,15 @@ public final class SolrjAdapter implements IndexAdapter {
             } catch (final SolrException e) {
                 // Batch failed
                 SolrUtils.rollback(solrServer);
-                for (final Iterator<SolrInputDocument> it = new MailDocumentIterator(mails.iterator(), session, now, fillers); it.hasNext();) {
-                    solrServer.add(it.next());
+                fillers.clear();
+                for (final Iterator<SolrInputDocument> it = new MailDocumentIterator(mails.iterator(), session, now, new ArrayList<TextFiller>(mails.size())); it.hasNext();) {
+                    final SolrInputDocument inputDocument = it.next();
+                    try {
+                        solrServer.add(inputDocument);
+                        fillers.add(TextFiller.fillerFor(inputDocument));
+                    } catch (final Exception addFailed) {
+                        LOG.warn("Mail input document could not be added: id=" + inputDocument.get("id") + " fullName=" + inputDocument.get("full_name"), addFailed);
+                    }
                 }
             }
             solrServer.commit();
