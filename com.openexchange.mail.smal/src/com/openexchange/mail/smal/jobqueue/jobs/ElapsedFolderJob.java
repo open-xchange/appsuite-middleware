@@ -92,8 +92,7 @@ public final class ElapsedFolderJob extends AbstractMailSyncJob {
         super(accountId, userId, contextId);
         this.start = start;
         identifier =
-            new StringBuilder(SIMPLE_NAME).append('@').append(contextId).append('@').append(userId).append('@').append(
-                accountId).toString();
+            new StringBuilder(SIMPLE_NAME).append('@').append(contextId).append('@').append(userId).append('@').append(accountId).toString();
     }
 
     /**
