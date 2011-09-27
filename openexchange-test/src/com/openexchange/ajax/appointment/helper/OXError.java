@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,48 +47,71 @@
  *
  */
 
-package com.openexchange.oauth.linkedin;
+package com.openexchange.ajax.appointment.helper;
 
-import java.util.List;
-
-import org.json.JSONObject;
-
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.AbstractOXException;
 
 /**
- * {@link LinkedInService}
- *
- * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public interface LinkedInService {
+public class OXError {
 
-    public List<Contact> getContacts(String password, int user, int contextId, int accountId);
+    private String category;
 
-    public String getAccountDisplayName(String password, int user, int contextId, int accountId);
-   
-    /**
-     * @return all data on a contact identified by e-mail (special feature, only available with extended API keys) 
-     */
-	public JSONObject getFullProfileByEMail(String email, String password, int user, int contextId, int accountId) throws OXException;
+    private int number;
 
-    /**
-     * @return all data on a contact identified by id 
-     */
-	public JSONObject getProfileForId(String id, String password, int user, int contextId, int accountId) throws OXException;
+    public void setCategory(String category) {
+        this.category = category;
+    }
 
-	/**
-	 * @return all data of all connections a user has
-	 */
-	public JSONObject getConnections(String password, int user, int contextId,	int accountId) throws OXException;
+    public String getCategory() {
+        return category;
+    }
 
-	/**
-	 * @return the IDs of all connections a user has (so you can query them separately)
-	 */
-	public List<String> getUsersConnectionsIds(String password, int user, int contextId, int accountId) throws OXException;
+    public void setNumber(int number) {
+        this.number = number;
+    }
 
-	/**
-	 * @return A list of contacts that list the targeted user to the current user
-	 */
-	public JSONObject getRelationToViewer(String id, String password, int user, int contextId, int accountId) throws OXException;
+    public int getNumber() {
+        return number;
+    }
+
+    public OXError(String category, int number) {
+        setNumber(number);
+        setCategory(category);
+    }
+
+    public boolean matches(OXError other) {
+        boolean matchesNumber = false, matchesCategory = false;
+
+        if (category == null || other.getCategory() == null)
+            matchesCategory = true;
+        else
+            matchesCategory = category.equals(other.getCategory());
+
+        if (number == -1 || other.getNumber() == -1)
+            matchesNumber = true;
+        else
+            matchesNumber = number == other.getNumber();
+
+        return matchesNumber && matchesCategory;
+    }
+
+    public boolean matches(AbstractOXException exception) {
+        return matches(new OXError(exception.getComponent().getAbbreviation(), exception.getDetailNumber()));
+    }
+
+    public boolean matches(Throwable t) {
+        try {
+            AbstractOXException exception = (AbstractOXException) t;
+            return matches(new OXError(exception.getComponent().getAbbreviation(), exception.getDetailNumber()));
+        } catch (ClassCastException e) {
+            return false;
+        }
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%3s-%04d", category, number);
+    }
 }

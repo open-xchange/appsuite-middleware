@@ -68,7 +68,10 @@ import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
  */
 public class MockOAuthService implements OAuthService {
 
-    /* (non-Javadoc)
+    private static final String TOKEN = "6208a7db-a114-46bc-87c1-32107f310ff4";//"23a0c108-2ea5-49e9-a23d-fb7d6d404462";
+	private static final String SECRET = "45a3d835-375b-406e-a9a2-5e98afb8c5f2";//"b558fc34-ecb0-45f2-a1ca-0f3c8ea1eb1a";
+
+	/* (non-Javadoc)
      * @see com.openexchange.oauth.OAuthService#createAccount(java.lang.String, com.openexchange.oauth.OAuthInteractionType, java.util.Map, int, int)
      */
     @Override
@@ -92,8 +95,8 @@ public class MockOAuthService implements OAuthService {
     @Override
     public OAuthAccount getAccount(final int accountId, final String password, final int user, final int contextId) {
         final DefaultOAuthAccount account = new DefaultOAuthAccount();
-        account.setSecret("b558fc34-ecb0-45f2-a1ca-0f3c8ea1eb1a");
-        account.setToken("23a0c108-2ea5-49e9-a23d-fb7d6d404462");
+        account.setSecret(SECRET);
+        account.setToken(TOKEN);
         return account;
     }
 
@@ -113,8 +116,8 @@ public class MockOAuthService implements OAuthService {
     public List<OAuthAccount> getAccounts(final String serviceMetaData, final String password, final int user, final int contextId) {
         final List<OAuthAccount> accounts = new ArrayList<OAuthAccount>();
         final DefaultOAuthAccount account = new DefaultOAuthAccount();
-        account.setSecret("b558fc34-ecb0-45f2-a1ca-0f3c8ea1eb1a");
-        account.setToken("23a0c108-2ea5-49e9-a23d-fb7d6d404462");
+        account.setSecret(SECRET);
+        account.setToken(TOKEN);
         accounts.add(account);
         return accounts;
     }

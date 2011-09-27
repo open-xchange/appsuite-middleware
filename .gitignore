@@ -7,8 +7,6 @@ open-xchange-config/development/commonTmp
 com.openexchange.axis2/conf/axis2.properties
 com.openexchange.axis2/lib/*.jar
 com.openexchange.axis2/tmp/*
-open-xchange-config/development/Open-Xchange Configuration Generator.launch
-open-xchange-config/development/Open-Xchange Server (Development).launch
 com.openexchange.common/jars
 build/build
 com.openexchange.global/jars
@@ -42,3 +40,4 @@ com.openexchange.ajp/jars
 com.openexchange.server/build
 com.openexchange.server/build/META-INF/**/*
 com.openexchange.server/build/META-INF/*
+**/CVS/

@@ -49,16 +49,14 @@
 
 package com.openexchange.oauth.linkedin;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.LinkedInApi;
 import org.scribe.model.OAuthRequest;
@@ -66,43 +64,47 @@ import org.scribe.model.Response;
 import org.scribe.model.Token;
 import org.scribe.model.Verb;
 import org.scribe.oauth.OAuthService;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
+
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.linkedin.osgi.Activator;
-import com.openexchange.tools.versit.converter.ConverterException;
-import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 /**
  * {@link LinkedInServiceImpl}
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class LinkedInServiceImpl implements LinkedInService{
 
-    private static final String PROTECTED_RESOURCE_URL = "http://api.linkedin.com/v1/people/~/connections:(id,first-name,last-name,phone-numbers,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url,positions)";
-
+    private static final String PERSONAL_FIELDS = "id,first-name,last-name,phone-numbers,headline,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url,positions,industry";
+	private static final String PERSONAL_FIELD_QUERY = ":("+PERSONAL_FIELDS+")";
+	private static final String CONNECTIONS_URL = "http://api.linkedin.com/v1/people/~/connections:(id,first-name,last-name,phone-numbers,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url,positions)";
+    private static final String IN_JSON = "?format=json";
+    
     private Activator activator;
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LinkedInServiceImpl.class));
 
+    
     public LinkedInServiceImpl(Activator activator) {
         this.activator = activator;
     }
 
+    public Activator getActivator() {
+        return activator;
+    }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.oauth.linkedin.LinkedInService#getContacts(int, int, int)
-     */
-    @Override
-    public List<Contact> getContacts(String password, int user, int contextId, int accountId) {
+    public void setActivator(Activator activator) {
+        this.activator = activator;
+    }
+    
+    
+    public Response performRequest(String password, int user, int contextId, int accountId, Verb method, String url) {
         OAuthServiceMetaData linkedInMetaData = new OAuthServiceMetaDataLinkedInImpl(activator);
-        List<Contact> contacts = new ArrayList<Contact>();
+
         OAuthService service = new ServiceBuilder().provider(LinkedInApi.class).apiKey(linkedInMetaData.getAPIKey()).apiSecret(
             linkedInMetaData.getAPISecret()).build();
 
@@ -114,136 +116,49 @@ public class LinkedInServiceImpl implements LinkedInService{
             LOG.error(e);
         }
 
-        // get the connections (contacts) with the given access token
         Token accessToken = new Token(account.getToken(), account.getSecret());
-        OAuthRequest request = new OAuthRequest(Verb.GET, PROTECTED_RESOURCE_URL);
+        OAuthRequest request = new OAuthRequest(method, url);
         service.signRequest(accessToken, request);
-        Response response = request.send();
-
-        // parse the returned xml into neat little contacts
-        contacts = parseIntoContacts(response.getBody());
-        return contacts;
-
+        return request.send();
     }
+    
+    
+	private JSONObject extractJson(Response response) throws OXException {
+		JSONObject json;
+		try {
+			json = new JSONObject(response.getBody());
+		} catch (JSONException e) {
+			throw OXException.general("Could not parse JSON: " + response.getBody()); //TODO: Different exception - wasn't this supposed to get easier with the rewrite? 
+		}
+        return json;
+	}
+	
 
-    public Activator getActivator() {
-        return activator;
-    }
-
-    public void setActivator(Activator activator) {
-        this.activator = activator;
-    }
-
-    public List<Contact> parseIntoContacts(String body) {
-        final List<Contact> contacts = new ArrayList<Contact>();
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-
-        try {
-            DocumentBuilder db = dbf.newDocumentBuilder();
-            Document doc = db.parse(new ByteArrayInputStream(body.getBytes("UTF-8")));
-            Element root = doc.getDocumentElement();
-            NodeList connections = root.getElementsByTagName("person");
-            if (connections != null && connections.getLength() > 0) {
-                for (int i = 0; i < connections.getLength(); i++) {
-
-                    // fill each contact
-                    Element person = (Element) connections.item(i);
-                    Contact contact = new Contact();
-                    contact.setGivenName(getTextValue(person, "first-name"));
-                    contact.setSurName(getTextValue(person, "last-name"));
-                    //System.out.println("Current contact : " + contact.getGivenName() + " " + contact.getSurName());
-                    if (null != getTextValue(person, "main-address")) {
-                        contact.setNote(getTextValue(person, "main-address"));
-                    }
-                    try {
-                        String imageUrl = getTextValue(person, "picture-url");
-                        if (null != imageUrl) {
-                            OXContainerConverter.loadImageFromURL(contact, imageUrl);
-                        }
-                    } catch (ConverterException e) {
-                        LOG.error(e);
-                    }
-
-                    // get the current job and company
-                    NodeList positions = person.getElementsByTagName("positions");
-                    if (null != positions && positions.getLength() > 0) {
-                        Element position = (Element) positions.item(0);
-                        contact.setTitle(getTextValue(position, "title"));
-                        NodeList companies = position.getElementsByTagName("company");
-                        if (companies != null && companies.getLength() > 0) {
-                            Element company = (Element) companies.item(0);
-                            contact.setCompany(getTextValue(company, "name"));
-                        }
-                    }
-
-                    // get the first IM-account
-                    NodeList imAccounts = person.getElementsByTagName("im-account");
-                    if (null != imAccounts && imAccounts.getLength() > 0 ){
-                        Element imAccount = (Element) imAccounts.item(0);
-                        contact.setInstantMessenger1(getTextValue(imAccount, "im-account-name") + " ("+getTextValue(imAccount, "im-account-type")+")");
-                    }
-
-                    // parse the phone numbers, saving the first occurrence of "home" and "work"
-                    NodeList phoneNumbers = person.getElementsByTagName("phone-number");
-                    if (null != phoneNumbers && phoneNumbers.getLength() > 0 ){
-                        for (int p = 0; p < phoneNumbers.getLength(); p++){
-                            Element phoneNumber = (Element) phoneNumbers.item(p);
-                            if (null != getTextValue(phoneNumber, "phone-type")){
-                                if (getTextValue(phoneNumber, "phone-type").equals("work")) {
-                                    contact.setTelephoneBusiness1(getTextValue(phoneNumber, "phone-number"));
-                                }
-                                else if (getTextValue(phoneNumber, "phone-type").equals("home")){
-                                    contact.setTelephoneHome1(getTextValue(phoneNumber, "phone-number"));
-                                }
-                            }
-                        }
-                    }
-
-                    // get the birthdate
-                    NodeList dateOfBirths = person.getElementsByTagName("date-of-birth");
-                    if (null != dateOfBirths && dateOfBirths.getLength() > 0){
-                        Element dateOfBirth = (Element) dateOfBirths.item(0);
-                        int year = 0;
-                        if (null != getTextValue(dateOfBirth, "year")){
-                            year = Integer.parseInt(getTextValue(dateOfBirth, "year")) - 1900;
-                        }
-                        int month = 0;
-                        if (null != getTextValue(dateOfBirth, "month")){
-                            month = Integer.parseInt(getTextValue(dateOfBirth, "month")) -1;
-                        }
-                        int date = 0;
-                        if (null != getTextValue(dateOfBirth, "day")){
-                            date = Integer.parseInt(getTextValue(dateOfBirth, "day"));
-                        }
-                        contact.setBirthday(new Date(year, month, date));
-                    }
-
-                    contacts.add(contact);
-                }
-            }
-        } catch (ParserConfigurationException pce) {
-            LOG.error(pce);
-        } catch (SAXException se) {
-            LOG.error(se);
-        } catch (IOException ioe) {
-            LOG.error(ioe);
-        }
-        return contacts;
-    }
-
-    private String getTextValue(Element ele, String tagName) {
-        String textVal = null;
-        NodeList nl = ele.getElementsByTagName(tagName);
-        if (nl != null && nl.getLength() > 0) {
-            Element el = (Element) nl.item(0);
-            if (null != el.getFirstChild()){
-                textVal = el.getFirstChild().getNodeValue();
-            }
-        }
-
-        return textVal;
-    }
-
+	protected List<String> extractIds(Response response) throws OXException{
+		List<String> result = new LinkedList<String>();
+		try {
+			JSONObject json = new JSONObject(response.getBody());
+			JSONArray ids = json.getJSONArray("values");
+			result = extractIds(ids);
+		} catch (JSONException e) {
+			
+		}
+		return result;
+	}
+	
+	protected List<String> extractIds(JSONArray connections) throws OXException{
+		List<String> result = new LinkedList<String>();
+		try {
+			for(int i = 0, max = connections.length(); i < max; i++){
+				result.add(connections.getJSONObject(i).getString("id"));
+			}
+		} catch (JSONException e) {
+			
+		}
+		return result;
+	}
+	
+	
     @Override
     public String getAccountDisplayName(String password, int user, int contextId, int accountId) {
         String displayName="";
@@ -256,4 +171,79 @@ public class LinkedInServiceImpl implements LinkedInService{
         }
         return displayName;
     }
+    
+    
+    @Override
+    public List<Contact> getContacts(String password, int user, int contextId, int accountId) {
+    	Response response = performRequest(password, user, contextId, accountId, Verb.GET, CONNECTIONS_URL);
+    	LinkedInXMLParser parser = new LinkedInXMLParser();
+        List<Contact> contacts = parser.parseConnections(response.getBody());
+        return contacts;
+    }
+    
+
+	@Override
+	public JSONObject getProfileForId(String id, String password, int user, int contextId, int accountId) throws OXException {
+		String uri = "http://api.linkedin.com/v1/people/id="+id+PERSONAL_FIELD_QUERY;
+	   	Response response = performRequest(password, user, contextId, accountId, Verb.GET, uri + IN_JSON);
+    	return extractJson(response);
+	}
+	
+
+	@Override
+	public JSONObject getRelationToViewer(String id, String password, int user, int contextId, int accountId) throws OXException {
+		String uri = "http://api.linkedin.com/v1/people/id="+id+":(relation-to-viewer)";
+	   	Response response = performRequest(password, user, contextId, accountId, Verb.GET, uri + IN_JSON);
+    	JSONObject relations = extractJson(response);
+    	return relations;
+	}
+	
+	@Override
+	public JSONObject getConnections(String password, int user, int contextId,	int accountId) throws OXException {
+		String uri = "http://api.linkedin.com/v1/people/~/connections"+PERSONAL_FIELD_QUERY;
+		Response response = performRequest(password, user, contextId, accountId, Verb.GET, uri + IN_JSON);
+		return extractJson(response);
+	}
+	
+	
+	@Override
+	public List<String> getUsersConnectionsIds(String password, int user, int contextId, int accountId) throws OXException {
+		String uri = "http://api.linkedin.com/v1/people/~/connections:(id)";
+		Response response = performRequest(password, user, contextId, accountId, Verb.GET, uri + IN_JSON);
+		return extractIds(response);
+	}
+
+    
+    @Override
+    public JSONObject getFullProfileByEMail(String email, String password, int user, int contextId, int accountId) throws OXException{
+    	//Implemented as dummy, because LinkedIn has not upgraded our keys yet to do this");
+    	String id = "hzFnTZPLsz";
+		String uri = "http://api.linkedin.com/v1/people/id="+id+":(relation-to-viewer,"+PERSONAL_FIELDS+")";
+	   	Response response = performRequest(password, user, contextId, accountId, Verb.GET, uri + IN_JSON);
+    	JSONObject data = extractJson(response);
+    	addFullInformationToRelation(data, password, user, contextId, accountId);
+    	return data;
+    }
+    
+    
+	private void addFullInformationToRelation(JSONObject relation2, String password, int user, int contextId, int accountId) throws OXException {
+		try {
+			JSONObject relation = relation2.getJSONObject("relationToViewer");
+			JSONArray connections = relation.getJSONObject("connections").getJSONArray("values");
+			for(int i = 0, max = connections.length(); i < max; i++){
+				JSONObject contact = connections.getJSONObject(i);
+				if(!contact.has("person")) continue;
+				
+				JSONObject person = contact.getJSONObject("person");
+				String id = person.getString("id");
+				JSONObject fullProfile = getProfileForId(id, password, user, contextId, accountId);
+				contact.put("person",fullProfile);
+			}
+
+		} catch (JSONException e) {
+			throw new OXException(1).setPrefix("OAUTH-LI").setLogMessage("Could not parse JSON");
+		}
+		
+	}
+
 }
