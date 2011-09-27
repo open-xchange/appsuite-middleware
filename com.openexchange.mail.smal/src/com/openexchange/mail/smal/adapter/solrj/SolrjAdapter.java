@@ -115,7 +115,7 @@ public final class SolrjAdapter implements IndexAdapter {
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SolrjAdapter.class));
 
-    private volatile CommonsHttpSolrServerManagement solrServerCache;
+    private volatile CommonsHttpSolrServerManagement solrServerManagement;
 
     private volatile SolrTextFillerQueue textFillerQueue;
 
@@ -136,24 +136,24 @@ public final class SolrjAdapter implements IndexAdapter {
 
     private CommonsHttpSolrServer solrServerFor(final Session session, final boolean readWrite) throws OXException {
         if (readWrite) {
-            return solrServerCache.newSolrServer(indexUrlFor(session, true));
+            return solrServerManagement.newSolrServer(indexUrlFor(session, true));
         }
-        return solrServerCache.getSolrServer(indexUrlFor(session, false));
+        return solrServerManagement.getSolrServer(indexUrlFor(session, false));
     }
 
     @Override
     public void start() throws OXException {
-        final CommonsHttpSolrServerManagement cache = solrServerCache = new CommonsHttpSolrServerManagement(100, 300000);
+        final CommonsHttpSolrServerManagement cache = solrServerManagement = new CommonsHttpSolrServerManagement(100, 300000);
         final SolrTextFillerQueue q = textFillerQueue = new SolrTextFillerQueue(cache);
         q.start();
     }
 
     @Override
     public void stop() throws OXException {
-        final CommonsHttpSolrServerManagement solrServerCache = this.solrServerCache;
+        final CommonsHttpSolrServerManagement solrServerCache = this.solrServerManagement;
         if (null != solrServerCache) {
             solrServerCache.shutDown();
-            this.solrServerCache = null;
+            this.solrServerManagement = null;
         }
     }
 

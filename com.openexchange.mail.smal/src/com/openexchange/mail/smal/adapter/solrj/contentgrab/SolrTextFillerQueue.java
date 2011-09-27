@@ -152,14 +152,14 @@ public final class SolrTextFillerQueue implements Runnable {
 
     private final int maxNumConcurrentFillerTasks;
 
-    private final CommonsHttpSolrServerManagement serverCache;
+    private final CommonsHttpSolrServerManagement serverManagement;
 
     /**
      * Initializes a new {@link SolrTextFillerQueue}.
      */
-    public SolrTextFillerQueue(final CommonsHttpSolrServerManagement serverCache) {
+    public SolrTextFillerQueue(final CommonsHttpSolrServerManagement serverManagement) {
         super();
-        this.serverCache = serverCache;
+        this.serverManagement = serverManagement;
         maxNumConcurrentFillerTasks = MAX_NUM_CONCURRENT_FILLER_TASKS;
         concurrentFutures = new AtomicReferenceArray<Future<Object>>(new Future[maxNumConcurrentFillerTasks]);
         keepgoing = new AtomicBoolean(true);
@@ -369,7 +369,7 @@ public final class SolrTextFillerQueue implements Runnable {
         boolean rollback = false;
         try {
             solrServer =
-                serverCache.getSolrServer(SMALServiceLookup.getServiceStatic(ConfigIndexService.class).getReadOnlyURL(
+                serverManagement.getSolrServer(SMALServiceLookup.getServiceStatic(ConfigIndexService.class).getReadOnlyURL(
                     contextId,
                     userId,
                     Types.EMAIL));
