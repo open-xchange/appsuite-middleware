@@ -74,8 +74,17 @@ public final class IndexExceptionMessages implements LocalizableStrings {
 
     // Could not find search index for user %1$s and module %2$s in context %3$s.
     public static final String INDEX_NOT_FOUND_MSG = "Could not find search index for user %1$s and module %2$s in context %3$s.";
+    
+    // Could not register index search server with url %1$s.
+    public static final String REGISTER_SERVER_ERROR_MSG = "Could not register index search server with url %1$s.";
 
-    // A database error occurred.
-    public static final String SQL_ERROR_MSG = "A database error occurred.";
+    // Could not unregister index search server with id %1$s.
+    public static final String UNREGISTER_SERVER_ERROR_MSG = "Could not unregister index search server with id %1$s.";
+
+    // Could not create index mapping for user %1$s in context %2$s for module %3$s on server %4$s.
+    public static final String ADD_MAPPING_ERROR_MSG = "Could not create index mapping for user %1$s in context %2$s for module %3$s on server %4$s.";
+
+    // Could not find server with id %1$s.
+    public static final String SERVER_NOT_FOUND_MSG = "Could not find server with id %1$s.";
 
 }

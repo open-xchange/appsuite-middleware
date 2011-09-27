@@ -49,6 +49,8 @@
 
 package com.openexchange.index.internal;
 
+import java.util.Arrays;
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.ConfigIndexService;
 import com.openexchange.index.IndexServer;
@@ -101,8 +103,8 @@ public final class StaticConfigIndexService implements ConfigIndexService {
     }
 
     @Override
-    public IndexServer[] getAllIndexServers() throws OXException {
-        return new IndexServer[] { server };
+    public List<IndexServer> getAllIndexServers() throws OXException {
+        return Arrays.asList(new IndexServer[] { server });
     }
 
     @Override
@@ -113,6 +115,18 @@ public final class StaticConfigIndexService implements ConfigIndexService {
 
     @Override
     public void addIndexMapping(int cid, int uid, int module, int server, String index) throws OXException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void removeIndexMapping(int cid, int uid, int module) throws OXException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void modifiyIndexMapping(int cid, int uid, int module, int server, String index) throws OXException {
         // TODO Auto-generated method stub
         
     }

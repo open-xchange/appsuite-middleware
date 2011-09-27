@@ -93,6 +93,8 @@ public interface IndexUrl {
     
     /**
      * Gets the max. number of indices that can be created on this server.
+     * <p>
+     * Default is <code>100</code>.
      * 
      * @return The max. number of indices
      */

@@ -61,32 +61,86 @@ public class IndexDatabaseStuff {
     
     public static final String TBL_IDX_MAPPING = "user_module2index";
     
+    public static final String SQL_SELECT_INDEX_URL = "SELECT " +
+                                                          "s.id, s.serverUrl, s.maxIndices, s.socketTimeout, " +
+                                                          "s.connectionTimeout, s.maxConnections, u.index " +
+                                                      "FROM " +
+                                                          TBL_IDX_SERVER + " AS s " +
+                                                      "JOIN " +
+                                                          TBL_IDX_MAPPING + " AS u " +
+                                                      "ON " +
+                                                          "s.id = u.server " +
+                                                      "WHERE " +
+                                                          "u.cid = ? AND u.uid = ? AND u.module = ?";
+    
     public static final String SQL_CREATE_SERVER_TBL = "CREATE TABLE " + TBL_IDX_SERVER + " (" +
-                                                       "id int(10) unsigned NOT NULL," +
-                                                       "serverUrl varchar(32) NOT NULL," +
-                                                       "maxIndices int(10) unsigned NOT NULL," +
-                                                       "socketTimeout int(10) unsigned default '1000'," +
-                                                       "connectionTimeout int(10) unsigned default '100'," +
-                                                       "maxConnections int(10) unsigned default '100'," +
-                                                       "PRIMARY KEY (id)," +
-                                                       "KEY url (serverUrl)" +
+                                                           "id int(10) unsigned NOT NULL," +
+                                                           "serverUrl varchar(32) NOT NULL," +
+                                                           "maxIndices int(10) unsigned default '1000'," +
+                                                           "socketTimeout int(10) unsigned default '1000'," +
+                                                           "connectionTimeout int(10) unsigned default '100'," +
+                                                           "maxConnections int(10) unsigned default '100'," +
+                                                           "PRIMARY KEY (id)," +
+                                                           "KEY url (serverUrl)" +
                                                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8";
     
     public static final String SQL_CREATE_MAPPING_TBL = "CREATE TABLE " + TBL_IDX_MAPPING + " (" +
-                                                        "cid int(10) unsigned NOT NULL," +
-                                                        "uid int(10) unsigned NOT NULL," +
-                                                        "module int(10) unsigned NOT NULL," +
-                                                        "server int(10) unsigned NOT NULL," +
-                                                        "index varchar(32) NOT NULL," +
-                                                        "PRIMARY KEY  (cid,uid,module)," +
-                                                        "KEY user_module (cid,uid,module)," +
-                                                        "KEY server (server)" +
+                                                            "cid int(10) unsigned NOT NULL," +
+                                                            "uid int(10) unsigned NOT NULL," +
+                                                            "module int(10) unsigned NOT NULL," +
+                                                            "server int(10) unsigned NOT NULL," +
+                                                            "index varchar(32) NOT NULL," +
+                                                            "PRIMARY KEY  (cid,uid,module)," +
+                                                            "KEY user_module (cid,uid,module)," +
+                                                            "KEY server (server)" +
                                                         ") ENGINE=InnoDB DEFAULT CHARSET=utf8";
     
-    public static final String SQL_DEL_USR_FROM_MAPPING = "DELETE FROM " + TBL_IDX_MAPPING + " " +
-                                                          "WHERE cid = ? AND uid = ?";
+    public static final String SQL_DEL_USR_FROM_MAPPING = "DELETE FROM " + 
+                                                              TBL_IDX_MAPPING + " " +
+                                                          "WHERE " +
+                                                              "cid = ? AND uid = ?";
     
-    public static final String SQL_DEL_CTX_FROM_MAPPING = "DELETE FROM " + TBL_IDX_MAPPING + " " +
-                                                          "WHERE cid = ?";
+    public static final String SQL_DEL_CTX_FROM_MAPPING = "DELETE FROM " + 
+                                                              TBL_IDX_MAPPING + " " +
+                                                          "WHERE " +
+                                                              "cid = ?";
+    
+    public static final String SQL_INSERT_INDEX_SERVER = "INSERT INTO " + TBL_IDX_SERVER + " " +
+                                                             "(id, serverUrl, maxIndices, socketTimeout, connectionTimeout, maxConnections) " +
+                                                         "VALUES " +
+                                                             "(?, ?, ?, ?, ?, ?)";
+    
+    public static final String SQL_DELETE_INDEX_SERVER = "DELETE FROM " +
+    		                                                 TBL_IDX_SERVER + " " +
+    		                                             "WHERE id = ?";
+    
+    public static final String SQL_DELETE_INDEX_MAPPING = "DELETE FROM " +
+                                                              TBL_IDX_MAPPING + " " +
+                                                          "WHERE cid = ? AND uid = ? AND module = ?";
+    
+    public static final String SQL_UPDATE_INDEX_MAPPING = "UPDATE " + TBL_IDX_MAPPING + " " +
+                                                          "SET " +
+                                                              "server = ?, index = ? " +
+                                                          "WHERE cid = ? AND uid = ? AND module = ?";
+    
+    public static final String SQL_SELECT_INDEX_SERVERS = "SELECT " +
+    		                                                  "id, serverUrl, maxIndices, socketTimeout, connectionTimeout, maxConnections " +
+    		                                              "FROM " +
+    		                                                  TBL_IDX_SERVER;
+    
+    public static final String SQL_INSERT_INDEX_MAPPING = "INSERT INTO " + TBL_IDX_MAPPING + " " +
+                                                    	      "(cid, uid, module, server, index) " +
+                                                    	  "VALUES" +
+                                                    	      "(?, ?, ?, ?, ?)";
+    
+    public static final String SQL_UPDATE_INDEX_SERVER = "UPDATE " + TBL_IDX_SERVER + " " +
+                                                		 "SET " +
+                                                		     "serverUrl = ?, maxIndices = ?, socketTimeout = ?, " +
+                                                		     "connectionTimeout = ?, maxConnections = ? " +
+                                                		 "WHERE id = ?";
+    
+    public static final String SQL_DELETE_INDEX_MAPPING_BY_SERVER = "DELETE FROM " +
+                                                                        TBL_IDX_MAPPING + " " +
+                                                                    "WHERE server = ?";
 
 }

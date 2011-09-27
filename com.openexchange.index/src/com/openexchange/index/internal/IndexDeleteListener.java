@@ -49,15 +49,16 @@
 
 package com.openexchange.index.internal;
 
+import static com.openexchange.index.internal.IndexDatabaseStuff.SQL_DEL_CTX_FROM_MAPPING;
+import static com.openexchange.index.internal.IndexDatabaseStuff.SQL_DEL_USR_FROM_MAPPING;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.index.IndexExceptionCodes;
 import com.openexchange.tools.sql.DBUtils;
-import static com.openexchange.index.internal.IndexDatabaseStuff.*;
 
 
 /**
@@ -90,7 +91,7 @@ public class IndexDeleteListener implements DeleteListener {
             stmt.setInt(1, cid);
             stmt.executeUpdate();
         } catch (SQLException e) {
-            throw IndexExceptionCodes.SQL_ERROR.create(e);
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }        
@@ -106,7 +107,7 @@ public class IndexDeleteListener implements DeleteListener {
             stmt.setInt(2, uid);
             stmt.executeUpdate();
         } catch (SQLException e) {
-            throw IndexExceptionCodes.SQL_ERROR.create(e);
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }        
