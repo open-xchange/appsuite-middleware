@@ -134,6 +134,7 @@ public final class TextFinder {
                     textIsHtml = false;
                 } else {
                     textIsHtml = ct.startsWith("text/htm");
+                    content = content.replaceAll("(\r?\n)+", ""); //.replaceAll("(  )+", "");
                 }
                 return textIsHtml ? extractPlainText(content) : content;
             }
