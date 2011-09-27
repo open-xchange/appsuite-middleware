@@ -65,9 +65,9 @@ public class IndexDatabaseStuff {
                                                        "id int(10) unsigned NOT NULL," +
                                                        "serverUrl varchar(32) NOT NULL," +
                                                        "maxIndices int(10) unsigned NOT NULL," +
-                                                       "socketTimeout int(10) unsigned default '0'," +
-                                                       "connectionTimeout int(10) unsigned default '0'," +
-                                                       "maxConnections int(10) unsigned default '0'," +
+                                                       "socketTimeout int(10) unsigned default '1000'," +
+                                                       "connectionTimeout int(10) unsigned default '100'," +
+                                                       "maxConnections int(10) unsigned default '100'," +
                                                        "PRIMARY KEY (id)," +
                                                        "KEY url (serverUrl)" +
                                                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8";
@@ -79,13 +79,14 @@ public class IndexDatabaseStuff {
                                                         "server int(10) unsigned NOT NULL," +
                                                         "index varchar(32) NOT NULL," +
                                                         "PRIMARY KEY  (cid,uid,module)," +
-                                                        "KEY user_module (cid,uid,module)" +
+                                                        "KEY user_module (cid,uid,module)," +
+                                                        "KEY server (server)" +
                                                         ") ENGINE=InnoDB DEFAULT CHARSET=utf8";
     
-    public static final String SQL_DEL_USR_FROM_MAPPING = "DELETE FROM " + TBL_IDX_SERVER + " " +
+    public static final String SQL_DEL_USR_FROM_MAPPING = "DELETE FROM " + TBL_IDX_MAPPING + " " +
                                                           "WHERE cid = ? AND uid = ?";
     
-    public static final String SQL_DEL_CTX_FROM_MAPPING = "DELETE FROM " + TBL_IDX_SERVER + " " +
+    public static final String SQL_DEL_CTX_FROM_MAPPING = "DELETE FROM " + TBL_IDX_MAPPING + " " +
                                                           "WHERE cid = ?";
 
 }

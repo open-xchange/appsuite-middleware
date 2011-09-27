@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,74 +47,61 @@
  *
  */
 
-package com.openexchange.index.internal;
-
-import com.openexchange.exception.OXException;
-import com.openexchange.index.ConfigIndexService;
-import com.openexchange.index.IndexServer;
-import com.openexchange.index.IndexUrl;
+package com.openexchange.index;
 
 
 /**
- * {@link StaticConfigIndexService} - Only for testing purpose!!!
+ * {@link IndexServer}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public final class StaticConfigIndexService implements ConfigIndexService {
-
-    private final IndexUrl indexUrl;
-    
-    private final IndexServer server;
+public interface IndexServer {
     
     /**
-     * Initializes a new {@link StaticConfigIndexService}.
+     * Gets the unique id of the index server.
+     * 
+     * @return The id.
      */
-    public StaticConfigIndexService() {
-        super();
-        final IndexServerImpl server = new IndexServerImpl(1, "http://10.20.31.1:8580");
-        server.setConnectionTimeout(100);
-        server.setMaxConnectionsPerHost(100);
-        server.setSoTimeout(1000);
-        this.server = server;
-        this.indexUrl = new IndexUrlImpl(server, "solr/main");
-    }
+    int getId();
+    
+    /**
+     * Gets the index servers url.
+     * 
+     * @return The url
+     */
+    String getUrl();
+    
+    /**
+     * Gets the setting for SO_TIMEOUT. 0 implies that the option is disabled (i.e., timeout of infinity).
+     * <p>
+     * Default is <code>1000</code>.
+     * 
+     * @return The setting for SO_TIMEOUT
+     */
+    int getSoTimeout();
 
-    @Override
-    public IndexUrl getReadOnlyURL(final int contextId, final int userId, final int module) throws OXException {
-        return indexUrl;
-    }
+    /**
+     * Gets the connection timeout. 0 implies that the option is disabled (i.e., timeout of infinity).
+     * <p>
+     * Default is <code>100</code>.
+     * 
+     * @return The connection timeout
+     */
+    int getConnectionTimeout();
 
-    @Override
-    public IndexUrl getWriteURL(final int contextId, final int userId, final int module) throws OXException {
-        return indexUrl;
-    }
-
-    @Override
-    public int registerIndexServer(IndexServer server) throws OXException {
-        return 0;        
-    }
-
-    @Override
-    public void unregisterIndexServer(int serverId, boolean deleteMappings) throws OXException {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public IndexServer[] getAllIndexServers() throws OXException {
-        return new IndexServer[] { server };
-    }
-
-    @Override
-    public void modifyIndexServer(IndexServer server) throws OXException {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void addIndexMapping(int cid, int uid, int module, int server, String index) throws OXException {
-        // TODO Auto-generated method stub
-        
-    }
-
+    /**
+     * Gets the max. number of connections allowed being established per host. 0 implies that there is no restriction.
+     * <p>
+     * Default is <code>100</code>.
+     * 
+     * @return The max. number of connections per host
+     */
+    int getMaxConnectionsPerHost();
+    
+    /**
+     * Gets the max. number of indices that can be created on this server.
+     * 
+     * @return The max. number of indices
+     */
+    int getMaxIndices();
 }

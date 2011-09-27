@@ -60,6 +60,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.ConfigIndexService;
 import com.openexchange.index.IndexExceptionCodes;
+import com.openexchange.index.IndexServer;
 import com.openexchange.index.IndexUrl;
 import com.openexchange.server.ServiceExceptionCodes;
 import com.openexchange.tools.sql.DBUtils;
@@ -75,7 +76,7 @@ public class ConfigIndexServiceImpl implements ConfigIndexService {
     private final DatabaseService dbService;
     
     private static final String SELECT_INDEX_URL = "SELECT " +
-    		                                           "s.serverUrl, s.maxIndices, s.socketTimeout, s.connectionTimeout, s.maxConnections, u.index " +
+    		                                           "s.id, s.serverUrl, s.maxIndices, s.socketTimeout, s.connectionTimeout, s.maxConnections, u.index " +
     		                                       "FROM " +
     		                                           "index_servers AS s " +
     		                                       "JOIN " +
@@ -85,7 +86,6 @@ public class ConfigIndexServiceImpl implements ConfigIndexService {
     		                                       "WHERE " +
     		                                           "u.cid = ? AND u.uid = ? AND u.module = ?";
     
-    private static final String DELIM = "/";
     
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConfigIndexServiceImpl.class));
     
@@ -116,20 +116,21 @@ public class ConfigIndexServiceImpl implements ConfigIndexService {
             }
             
             i = 1;
+            final int id = rs.getInt(i++);
             final String serverUrl = rs.getString(i++);
             final int maxIndices = rs.getInt(i++);
             final int socketTimeout = rs.getInt(i++);
             final int connectionTimeout = rs.getInt(i++);
             final int maxConnections = rs.getInt(i++);
             final String index = rs.getString(i);
-            final String fullUrl = serverUrl + DELIM + index;
             
-            final IndexUrlImpl indexUrl = new IndexUrlImpl(fullUrl);
-            indexUrl.setMaxIndices(maxIndices);
-            indexUrl.setSoTimeout(socketTimeout);
-            indexUrl.setConnectionTimeout(connectionTimeout);
-            indexUrl.setMaxConnectionsPerHost(maxConnections);
+            final IndexServerImpl server = new IndexServerImpl(id, serverUrl);
+            server.setMaxIndices(maxIndices);
+            server.setSoTimeout(socketTimeout);
+            server.setConnectionTimeout(connectionTimeout);
+            server.setMaxConnectionsPerHost(maxConnections);
             
+            final IndexUrlImpl indexUrl = new IndexUrlImpl(server, index);            
             return indexUrl;
         } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -142,6 +143,36 @@ public class ConfigIndexServiceImpl implements ConfigIndexService {
     @Override
     public IndexUrl getWriteURL(final int cid, final int uid, final int module) throws OXException {
         return getWriteURL(cid, uid, module);
+    }
+
+    @Override
+    public void unregisterIndexServer(int serverId, boolean deleteMappings) throws OXException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public int registerIndexServer(IndexServer server) throws OXException {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public IndexServer[] getAllIndexServers() throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void modifyIndexServer(IndexServer server) throws OXException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void addIndexMapping(int cid, int uid, int module, int server, String index) throws OXException {
+        // TODO Auto-generated method stub
+        
     }
 
 }
