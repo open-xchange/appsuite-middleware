@@ -50,6 +50,7 @@
 package com.openexchange.calendar;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.I2i;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
@@ -71,6 +72,7 @@ import com.openexchange.groupware.calendar.CalendarFolderObject;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -82,6 +84,7 @@ import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Charsets;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
@@ -1267,6 +1270,7 @@ public class CalendarSql implements AppointmentSQLInterface {
     @Override
     public List<Appointment> getAppointmentsWithExternalParticipantBetween(String email, int[] cols, Date start, Date end, int orderBy, Order order) throws OXException {
         List<Appointment> appointments = new ArrayList<Appointment>();
+        cols = addColumnIfNecessary(cols, CalendarObject.PARTICIPANTS);
         SearchIterator<Appointment> searchIterator;
         try {
             searchIterator = getModifiedAppointmentsBetween(session.getUserId(), start, end, cols, null, orderBy, order);
@@ -1286,10 +1290,11 @@ public class CalendarSql implements AppointmentSQLInterface {
         
         return appointments;
     }
-    
+
     @Override
     public List<Appointment> getAppointmentsWithUserBetween(User user, int[] cols, Date start, Date end, int orderBy, Order order) throws OXException {
         List<Appointment> appointments = new ArrayList<Appointment>();
+        cols = addColumnIfNecessary(cols, CalendarObject.USERS);
         SearchIterator<Appointment> searchIterator;
         try {
             searchIterator = getModifiedAppointmentsBetween(session.getUserId(), start, end, cols, null, orderBy, order);
@@ -1308,5 +1313,17 @@ public class CalendarSql implements AppointmentSQLInterface {
         }
         
         return appointments;
+    }
+
+    private int[] addColumnIfNecessary(int[] cols, int participants) {
+        
+        ArrayList<Integer> columns = new ArrayList<Integer>();
+        for (int c : cols) {
+            columns.add(c);
+        }
+        if (!columns.contains(participants))
+            columns.add(participants);
+        
+        return I2i(columns);
     }
 }

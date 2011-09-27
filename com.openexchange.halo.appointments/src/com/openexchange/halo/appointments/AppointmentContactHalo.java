@@ -40,8 +40,9 @@ public class AppointmentContactHalo implements HaloContactDataSource {
 		Date start = new Date(Long.parseLong(parameterStart));
         String parameterEnd = req.checkParameter(AJAXServlet.PARAMETER_END);
         Date end = new Date(Long.parseLong(parameterEnd));
-        int orderBy = Integer.parseInt(req.checkParameter(AJAXServlet.PARAMETER_SORT));
-        String parameterOrder = req.checkParameter(AJAXServlet.PARAMETER_ORDER);
+        String parameterSort = req.getParameter(AJAXServlet.PARAMETER_SORT);
+        int orderBy = parameterSort == null ? 0 : Integer.parseInt(parameterSort);
+        String parameterOrder = req.getParameter(AJAXServlet.PARAMETER_ORDER);
         Order order = OrderFields.parse(parameterOrder);
         
 		List<Appointment> appointments = null;
