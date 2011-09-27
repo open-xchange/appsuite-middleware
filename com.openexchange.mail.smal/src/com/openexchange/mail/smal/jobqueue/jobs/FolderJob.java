@@ -99,26 +99,11 @@ public final class FolderJob extends AbstractMailSyncJob {
 
     private final String identifier;
 
-    private final boolean checkShouldSync;
-
     private volatile boolean reEnqueued;
 
     private volatile boolean error;
 
     private volatile long span;
-
-    /**
-     * Initializes a new {@link FolderJob} with default span which does not check if span is exceeded but only if able to exclusively set
-     * sync flag.
-     *
-     * @param fullName The folder full name
-     * @param accountId The account ID
-     * @param userId The user ID
-     * @param contextId The context ID
-     */
-    public FolderJob(final String fullName, final int accountId, final int userId, final int contextId) {
-        this(fullName, accountId, userId, contextId, true);
-    }
 
     /**
      * Initializes a new {@link FolderJob} with default span.
@@ -129,11 +114,9 @@ public final class FolderJob extends AbstractMailSyncJob {
      * @param accountId The account ID
      * @param userId The user ID
      * @param contextId The context ID
-     * @param checkShouldSync <code>true</code> to check if a sync for denoted folder should be performed; otherwise <code>false</code>
      */
-    public FolderJob(final String fullName, final int accountId, final int userId, final int contextId, final boolean checkShouldSync) {
+    public FolderJob(final String fullName, final int accountId, final int userId, final int contextId) {
         super(accountId, userId, contextId);
-        this.checkShouldSync = checkShouldSync;
         this.fullName = fullName;
         identifier =
             new StringBuilder(FolderJob.class.getSimpleName()).append('@').append(contextId).append('@').append(userId).append('@').append(
@@ -176,7 +159,7 @@ public final class FolderJob extends AbstractMailSyncJob {
             } else {
                 final long now = System.currentTimeMillis();
                 try {
-                    if ((checkShouldSync && (span > 0 ? !shouldSync(fullName, now, span) : false)) || !wasAbleToSetSyncFlag(fullName)) {
+                    if ((span > 0 ? !shouldSync(fullName, now, span) : false) || !wasAbleToSetSyncFlag(fullName)) {
                         return;
                     }
                 } catch (final OXException e) {

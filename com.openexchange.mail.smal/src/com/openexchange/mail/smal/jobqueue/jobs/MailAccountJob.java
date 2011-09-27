@@ -155,15 +155,14 @@ public final class MailAccountJob extends AbstractMailSyncJob {
         try {
             final List<String> list = getList();
             final JobQueue queue = JobQueue.getInstance();
-            final long now = System.currentTimeMillis();
             if (null == filter || filter.isEmpty()) {
                 for (final String fullName : list) {
-                    addJobIfShouldSync(queue, now, fullName);
+                    addJobIfShouldSync(queue, fullName);
                 }
             } else {
                 for (final String fullName : list) {
                     if (filter.contains(fullName)) {
-                        addJobIfShouldSync(queue, now, fullName);
+                        addJobIfShouldSync(queue, fullName);
                     }
                 }
             }
@@ -172,7 +171,7 @@ public final class MailAccountJob extends AbstractMailSyncJob {
         }
     }
 
-    private void addJobIfShouldSync(final JobQueue queue, final long now, final String fullName) {
+    private void addJobIfShouldSync(final JobQueue queue, final String fullName) {
         
         
         // TESTING !! ! !
@@ -182,13 +181,7 @@ public final class MailAccountJob extends AbstractMailSyncJob {
         
         
         
-        try {
-            if (shouldSync(fullName, now)) {
-                queue.addJob(new FolderJob(fullName, accountId, userId, contextId, false).setSpan(Constants.HOUR_MILLIS));
-            }
-        } catch (final OXException e) {
-            LOG.error("Couldn't look-up in database.", e);
-        }
+        queue.addJob(new FolderJob(fullName, accountId, userId, contextId).setSpan(Constants.HOUR_MILLIS));
     }
 
 }

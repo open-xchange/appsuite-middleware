@@ -126,7 +126,7 @@ public final class ElapsedFolderJob extends AbstractMailSyncJob {
             }
             final JobQueue queue = JobQueue.getInstance();
             for (final String fullName : exceededFolders) {
-                queue.addJob(new FolderJob(fullName, accountId, userId, contextId, true).setSpan(Constants.HOUR_MILLIS));
+                queue.addJob(new FolderJob(fullName, accountId, userId, contextId).setSpan(Constants.HOUR_MILLIS));
             }
         } catch (final Exception e) {
             cancel();
