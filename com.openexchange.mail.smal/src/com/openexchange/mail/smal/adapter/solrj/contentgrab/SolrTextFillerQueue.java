@@ -505,7 +505,7 @@ public final class SolrTextFillerQueue implements Runnable {
             return false;
         }
         final Boolean contentFlag = (Boolean) solrDocument.getFieldValue("content_flag");
-        return null != contentFlag && contentFlag.booleanValue();
+        return null == contentFlag || !contentFlag.booleanValue();
     }
 
     private final class MaxAwareTask implements Task<Object> {
