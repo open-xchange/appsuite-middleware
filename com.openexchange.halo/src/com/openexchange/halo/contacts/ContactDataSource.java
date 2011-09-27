@@ -27,7 +27,12 @@ public class ContactDataSource implements HaloContactDataSource {
 
 	@Override
 	public String getId() {
-		return "contact";
+		return "com.openexchange.halo.contacts";
+	}
+	
+	@Override
+	public boolean isAvailable(ServerSession session) {
+		return true;
 	}
 
 }

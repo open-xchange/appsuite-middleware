@@ -70,7 +70,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 
-public class LinkedinDataSource implements HaloContactDataSource {
+public class LinkedinProfileDataSource implements HaloContactDataSource {
 
 	private LinkedInService linkedinService;
 	
@@ -100,13 +100,13 @@ public class LinkedinDataSource implements HaloContactDataSource {
 	}
 
 
-	public LinkedinDataSource(ServiceLookup serviceLookup) {
+	public LinkedinProfileDataSource(ServiceLookup serviceLookup) {
 		this.serviceLookup = serviceLookup;
 	}
 
 	@Override
 	public String getId() {
-		return "linkedin:sharedConnections";
+		return "com.openexchange.halo.linkedIn:fullProfile";
 	}
 
 	@Override
@@ -126,5 +126,15 @@ public class LinkedinDataSource implements HaloContactDataSource {
 		AJAXRequestResult result = new AJAXRequestResult();
 		result.setResultObject(json, "json");
 		return result;
+	}
+
+	@Override
+	public boolean isAvailable(ServerSession session) throws OXException {
+		String password = session.getPassword();
+		int uid = session.getUserId();
+		int cid = session.getContextId();
+		
+		List<OAuthAccount> accounts = getOauthService().getAccounts("com.openexchange.socialplugin.linkedin", password, uid, cid);
+		return !accounts.isEmpty();
 	}
 }

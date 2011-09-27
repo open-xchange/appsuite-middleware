@@ -27,7 +27,7 @@ public class AppointmentContactHalo implements HaloContactDataSource {
 
 	@Override
 	public String getId() {
-		return "calendar";
+		return "com.openexchange.halo.appointments";
 	}
 
 	@Override
@@ -69,6 +69,11 @@ public class AppointmentContactHalo implements HaloContactDataSource {
 	public AppointmentSQLInterface getAppointmentService(ServerSession session) {
 		AppointmentSqlFactoryService factoryService = services.getService(AppointmentSqlFactoryService.class);
 		return factoryService.createAppointmentSql(session);
+	}
+
+	@Override
+	public boolean isAvailable(ServerSession session) {
+		return session.getUserConfiguration().hasCalendar();
 	}
 
 }

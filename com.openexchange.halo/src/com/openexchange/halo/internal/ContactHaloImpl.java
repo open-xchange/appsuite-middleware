@@ -7,6 +7,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
@@ -30,18 +33,17 @@ public class ContactHaloImpl implements ContactHalo {
 	private ContactInterfaceDiscoveryService contactDiscoveryService;
 	private ContactSearchMultiplexer contactSearchMultiplexer;
 	
+	private ConfigViewFactory configViews;
 	
 	private Map<String, HaloContactDataSource> contactDataSources = new ConcurrentHashMap<String, HaloContactDataSource>();
 	
-	public ContactHaloImpl(UserService userService, ContactInterfaceDiscoveryService contactDiscoveryService, SessionSpecificContainerRetrievalService sessionScope) {
+	public ContactHaloImpl(UserService userService, ContactInterfaceDiscoveryService contactDiscoveryService, SessionSpecificContainerRetrievalService sessionScope, ConfigViewFactory configViews) {
 		this.userService = userService;
 		this.contactDiscoveryService = contactDiscoveryService;
 		this.contactSearchMultiplexer = new ContactSearchMultiplexer(contactDiscoveryService);
+		this.configViews = configViews;
 	}
 	
-	/* (non-Javadoc)
-	 * @see com.openexchange.halo.internal.ContactHalo#investigate(java.lang.String, com.openexchange.groupware.container.Contact, com.openexchange.tools.session.ServerSession)
-	 */
 	@Override
 	public AJAXRequestResult investigate(String provider, Contact contact, AJAXRequestData req, ServerSession session) throws OXException {
 		HaloContactDataSource dataSource = contactDataSources.get(provider);
@@ -96,12 +98,17 @@ public class ContactHaloImpl implements ContactHalo {
 		return contactQuery;
 	}
 	
-	/* (non-Javadoc)
-	 * @see com.openexchange.halo.internal.ContactHalo#getProviders(com.openexchange.tools.session.ServerSession)
-	 */
 	@Override
-	public List<String> getProviders(ServerSession session) {
-		return new ArrayList<String>(contactDataSources.keySet());
+	public List<String> getProviders(ServerSession session) throws OXException {
+		ConfigView view = configViews.getView(session.getUserId(), session.getContextId());
+		List<String> providers = new ArrayList<String>();
+		for(String provider: contactDataSources.keySet()) {
+			ComposedConfigProperty<Boolean> property = view.property(provider, boolean.class);
+			if (property.isDefined() && property.get()) {
+				providers.add(provider);
+			}
+		}
+		return providers;
 	}
 
 

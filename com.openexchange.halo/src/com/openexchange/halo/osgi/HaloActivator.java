@@ -2,6 +2,7 @@ package com.openexchange.halo.osgi;
 
 import org.osgi.framework.ServiceReference;
 
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.halo.ContactHalo;
 import com.openexchange.halo.internal.ContactHaloImpl;
@@ -16,7 +17,7 @@ public class HaloActivator extends HousekeepingActivator {
 
 	@Override
 	protected Class<?>[] getNeededServices() {
-		return new Class[]{UserService.class, ContactInterfaceDiscoveryService.class, SessionSpecificContainerRetrievalService.class};
+		return new Class[]{UserService.class, ContactInterfaceDiscoveryService.class, SessionSpecificContainerRetrievalService.class, ConfigViewFactory.class};
 	}
 
 	@Override
@@ -24,8 +25,9 @@ public class HaloActivator extends HousekeepingActivator {
 		UserService userService = getService(UserService.class);
 		ContactInterfaceDiscoveryService contactDiscoveryService = getService(ContactInterfaceDiscoveryService.class);
 		SessionSpecificContainerRetrievalService sessionScope = getService(SessionSpecificContainerRetrievalService.class);
+		ConfigViewFactory configViews = getService(ConfigViewFactory.class);
 		
-		final ContactHaloImpl halo = new ContactHaloImpl(userService, contactDiscoveryService, sessionScope);
+		final ContactHaloImpl halo = new ContactHaloImpl(userService, contactDiscoveryService, sessionScope, configViews);
 		
 		halo.addContactDataSource(new ContactDataSource());
 		
