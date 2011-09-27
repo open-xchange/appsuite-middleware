@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.smal.adapter.solrj.cache;
+package com.openexchange.mail.smal.adapter.solrj.management;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;

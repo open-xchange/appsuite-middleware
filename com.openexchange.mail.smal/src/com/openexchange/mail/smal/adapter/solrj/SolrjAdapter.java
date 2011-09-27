@@ -98,9 +98,9 @@ import com.openexchange.mail.smal.SMALExceptionCodes;
 import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.mail.smal.adapter.IndexAdapter;
 import com.openexchange.mail.smal.adapter.IndexAdapters;
-import com.openexchange.mail.smal.adapter.solrj.cache.CommonsHttpSolrServerManagement;
 import com.openexchange.mail.smal.adapter.solrj.contentgrab.SolrTextFillerQueue;
 import com.openexchange.mail.smal.adapter.solrj.contentgrab.TextFiller;
+import com.openexchange.mail.smal.adapter.solrj.management.CommonsHttpSolrServerManagement;
 import com.openexchange.session.Session;
 
 /**

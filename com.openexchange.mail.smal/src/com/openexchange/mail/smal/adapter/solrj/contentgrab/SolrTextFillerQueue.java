@@ -85,7 +85,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.smal.SMALExceptionCodes;
 import com.openexchange.mail.smal.SMALMailAccess;
 import com.openexchange.mail.smal.SMALServiceLookup;
-import com.openexchange.mail.smal.adapter.solrj.cache.CommonsHttpSolrServerManagement;
+import com.openexchange.mail.smal.adapter.solrj.management.CommonsHttpSolrServerManagement;
 import com.openexchange.mail.text.TextFinder;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
