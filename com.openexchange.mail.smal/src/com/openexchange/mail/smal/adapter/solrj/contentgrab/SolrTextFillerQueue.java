@@ -161,24 +161,10 @@ public final class SolrTextFillerQueue implements Runnable {
         super();
         this.serverManagement = serverManagement;
         maxNumConcurrentFillerTasks = MAX_NUM_CONCURRENT_FILLER_TASKS;
-        concurrentFutures = new AtomicReferenceArray<Future<Object>>(new Future[maxNumConcurrentFillerTasks]);
+        concurrentFutures = new AtomicReferenceArray<Future<Object>>(maxNumConcurrentFillerTasks);
         keepgoing = new AtomicBoolean(true);
         queue = new LinkedBlockingQueue<TextFiller>();
         simpleName = getClass().getSimpleName();
-    }
-
-    /**
-     * Checks if it is allowed to submit a further filler task to thread pool.
-     * 
-     * @return A number equal to or greater than zero if it is allowed to submit to pool; otherwise <code>-1</code>
-     */
-    private int isSubmittable() {
-        for (int i = 0; i < maxNumConcurrentFillerTasks; i++) {
-            if (concurrentFutures.compareAndSet(i, null, PLACEHOLDER)) {
-                return i;
-            }
-        }
-        return -1;
     }
 
     /**
@@ -195,7 +181,7 @@ public final class SolrTextFillerQueue implements Runnable {
         final int length = concurrentFutures.length();
         for (int i = 0; i < length; i++) {
             final Future<Object> f = concurrentFutures.get(i);
-            if (null != f) {
+            if (null != f && PLACEHOLDER != f) {
                 f.cancel(true);
             }
         }
@@ -300,7 +286,13 @@ public final class SolrTextFillerQueue implements Runnable {
              */
             handleFillersSublist(groupedFillersSublist, simpleName);
         } else {
-            final int index = isSubmittable();
+            int index = -1;
+            for (int i = 0; i < maxNumConcurrentFillerTasks; i++) {
+                if (concurrentFutures.compareAndSet(i, null, PLACEHOLDER)) {
+                    index = i; // Found a free slot
+                    break;
+                }
+            }
             if (index < 0) {
                 /*
                  * Caller runs because other worker threads are busy
