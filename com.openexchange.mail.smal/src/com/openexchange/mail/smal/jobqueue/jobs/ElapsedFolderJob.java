@@ -70,10 +70,12 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class ElapsedFolderJob extends AbstractMailSyncJob {
 
+    private static final long serialVersionUID = -3561304349504231252L;
+
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ElapsedFolderJob.class));
 
-    private static final long serialVersionUID = -7360411730956519503L;
+    private static final String SIMPLE_NAME = ElapsedFolderJob.class.getSimpleName();
 
     private final long start;
 
@@ -90,7 +92,7 @@ public final class ElapsedFolderJob extends AbstractMailSyncJob {
         super(accountId, userId, contextId);
         this.start = start;
         identifier =
-            new StringBuilder(ElapsedFolderJob.class.getSimpleName()).append('@').append(contextId).append('@').append(userId).append('@').append(
+            new StringBuilder(SIMPLE_NAME).append('@').append(contextId).append('@').append(userId).append('@').append(
                 accountId).toString();
     }
 
