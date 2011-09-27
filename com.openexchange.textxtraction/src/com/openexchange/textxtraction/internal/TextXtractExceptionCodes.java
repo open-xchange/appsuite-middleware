@@ -95,7 +95,7 @@ public enum TextXtractExceptionCodes implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "PREVIEW";
+        return "TXT";
     }
 
     @Override
