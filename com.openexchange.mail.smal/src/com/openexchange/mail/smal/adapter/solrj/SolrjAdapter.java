@@ -462,14 +462,12 @@ public final class SolrjAdapter implements IndexAdapter {
             if (null != fullName) {
                 queryBuilder.append(" AND (").append("full_name:").append(fullName).append(')');
             }
-            if (null != mailIds && !mailIds.isEmpty()) {
-                final Iterator<String> iterator = mailIds.iterator();
-                queryBuilder.append(" AND (").append("id:").append(iterator.next());
-                while (iterator.hasNext()) {
-                    queryBuilder.append(" OR id:").append(iterator.next());
-                }
-                queryBuilder.append(')');
+            final Iterator<String> iterator = mailIds.iterator();
+            queryBuilder.append(" AND (").append("id:").append(iterator.next());
+            while (iterator.hasNext()) {
+                queryBuilder.append(" OR id:").append(iterator.next());
             }
+            queryBuilder.append(')');
             solrServer.deleteByQuery(queryBuilder.toString());
             solrServer.commit();
         } catch (final SolrServerException e) {
