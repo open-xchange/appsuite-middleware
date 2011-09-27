@@ -71,7 +71,9 @@ import com.openexchange.mail.smal.jobqueue.JobQueue;
  */
 public final class MailAccountJob extends AbstractMailSyncJob {
 
-    private static final long serialVersionUID = -854493208476191708L;
+    private static final long serialVersionUID = -6340938661683281026L;
+
+    private static final String SIMPLE_NAME = MailAccountJob.class.getSimpleName();
 
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailAccountJob.class));
@@ -114,7 +116,7 @@ public final class MailAccountJob extends AbstractMailSyncJob {
     public MailAccountJob(final int accountId, final int userId, final int contextId, final Set<String> filter) {
         super(accountId, userId, contextId);
         identifier =
-            new StringBuilder(MailAccountJob.class.getSimpleName()).append('@').append(contextId).append('@').append(userId).append('@').append(
+            new StringBuilder(SIMPLE_NAME).append('@').append(contextId).append('@').append(userId).append('@').append(
                 accountId).toString();
         this.filter = new HashSet<String>(filter);
     }
