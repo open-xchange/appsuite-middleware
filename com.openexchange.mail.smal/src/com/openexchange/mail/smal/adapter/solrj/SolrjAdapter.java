@@ -65,7 +65,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.UUID;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -85,6 +84,7 @@ import com.openexchange.index.ConfigIndexService;
 import com.openexchange.index.IndexUrl;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
+import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.dataobjects.IDMailMessage;
@@ -613,8 +613,9 @@ public final class SolrjAdapter implements IndexAdapter {
         CommonsHttpSolrServer solrServer = null;
         try {
             solrServer = solrServerFor(session, true);
-            final String uuid = UUID.randomUUID().toString();
-            solrServer.add(createDocument(uuid, mail, mail.getAccountId(), session, System.currentTimeMillis()));
+            final int accountId = mail.getAccountId();
+            final String uuid = MailPath.getMailPath(accountId, mail.getFolder(), mail.getMailId()).toString();
+            solrServer.add(createDocument(uuid, mail, accountId, session, System.currentTimeMillis()));
             solrServer.commit();
             textFillerQueue.add(TextFiller.fillerFor(uuid, mail, session));
         } catch (final SolrServerException e) {
@@ -1021,7 +1022,7 @@ public final class SolrjAdapter implements IndexAdapter {
         @Override
         public SolrInputDocument next() {
             final MailMessage mail = iterator.next();
-            final String uuid = UUID.randomUUID().toString();
+            final String uuid = MailPath.getMailPath(mail.getAccountId(), mail.getFolder(), mail.getMailId());
             final SolrInputDocument inputDocument = createDocument(uuid, mail, mail.getAccountId(), session, now);
             fillers.add(TextFiller.fillerFor(uuid, mail, session));
             return inputDocument;

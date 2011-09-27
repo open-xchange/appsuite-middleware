@@ -180,11 +180,25 @@ public final class MailPath implements Cloneable, Serializable {
      * Initializes a new {@link MailPath}
      *
      * @param accountId The account ID
-     * @param folder Folder fullname
+     * @param folder Folder full name
      * @param uid The mail's unique ID
      */
     public MailPath(final int accountId, final String folder, final String uid) {
         super();
+        this.accountId = accountId;
+        this.folder = folder;
+        mailID = uid;
+        str = getMailPath(accountId, folder, mailID);
+    }
+
+    /**
+     * Sets specified arguments.
+     * 
+     * @param accountId The account ID
+     * @param folder Folder full name
+     * @param uid The mail's unique ID
+     */
+    public void set(final int accountId, final String folder, final String uid) {
         this.accountId = accountId;
         this.folder = folder;
         mailID = uid;
@@ -255,9 +269,9 @@ public final class MailPath implements Cloneable, Serializable {
     }
 
     /**
-     * Gets the folder fullname
+     * Gets the folder full name
      *
-     * @return The folder fullname
+     * @return The folder full name
      */
     public String getFolder() {
         return folder;
@@ -292,7 +306,7 @@ public final class MailPath implements Cloneable, Serializable {
     }
 
     /**
-     * Sets this mail path's folder fullname and mail's unique ID (for re-usage).
+     * Sets this mail path's folder full name and mail's unique ID (for re-usage).
      *
      * @param mailPathStr The mail paths string representation
      * @return The mail path itself
@@ -313,7 +327,7 @@ public final class MailPath implements Cloneable, Serializable {
 
     /**
      * Gets this mail path's string representation following pattern:<br>
-     * <i>"default" + &lt;account-id&gt; + &lt;default-separator&gt; + &lt;folder-fullname&gt; + "/" + &lt;mail-id&gt;</i>
+     * <i>"default" + &lt;account-id&gt; + &lt;default-separator&gt; + &lt;folder-full-name&gt; + "/" + &lt;mail-id&gt;</i>
      *
      * <pre>
      * default2/INBOX/Subfolder/453&quot;
