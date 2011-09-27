@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.appointment.helper;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -60,7 +60,7 @@ public class OXError {
 
     private int number;
 
-    public void setCategory(String category) {
+    public void setCategory(final String category) {
         this.category = category;
     }
 
@@ -68,7 +68,7 @@ public class OXError {
         return category;
     }
 
-    public void setNumber(int number) {
+    public void setNumber(final int number) {
         this.number = number;
     }
 
@@ -76,36 +76,38 @@ public class OXError {
         return number;
     }
 
-    public OXError(String category, int number) {
+    public OXError(final String category, final int number) {
         setNumber(number);
         setCategory(category);
     }
 
-    public boolean matches(OXError other) {
+    public boolean matches(final OXError other) {
         boolean matchesNumber = false, matchesCategory = false;
 
-        if (category == null || other.getCategory() == null)
+        if (category == null || other.getCategory() == null) {
             matchesCategory = true;
-        else
+        } else {
             matchesCategory = category.equals(other.getCategory());
+        }
 
-        if (number == -1 || other.getNumber() == -1)
+        if (number == -1 || other.getNumber() == -1) {
             matchesNumber = true;
-        else
+        } else {
             matchesNumber = number == other.getNumber();
+        }
 
         return matchesNumber && matchesCategory;
     }
 
-    public boolean matches(AbstractOXException exception) {
-        return matches(new OXError(exception.getComponent().getAbbreviation(), exception.getDetailNumber()));
+    public boolean matches(final OXException exception) {
+        return matches(new OXError(exception.getPrefix(), exception.getCode()));
     }
 
-    public boolean matches(Throwable t) {
+    public boolean matches(final Throwable t) {
         try {
-            AbstractOXException exception = (AbstractOXException) t;
-            return matches(new OXError(exception.getComponent().getAbbreviation(), exception.getDetailNumber()));
-        } catch (ClassCastException e) {
+            final OXException exception = (OXException) t;
+            return matches(new OXError(exception.getPrefix(), exception.getCode()));
+        } catch (final ClassCastException e) {
             return false;
         }
     }
