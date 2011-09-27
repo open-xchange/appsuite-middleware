@@ -49,18 +49,21 @@
 
 package com.openexchange.index.internal.tasks;
 
+import static com.openexchange.index.internal.IndexDatabaseStuff.SQL_CREATE_MAPPING_TBL;
+import static com.openexchange.index.internal.IndexDatabaseStuff.SQL_CREATE_SERVER_TBL;
+import static com.openexchange.index.internal.IndexDatabaseStuff.TBL_IDX_MAPPING;
+import static com.openexchange.index.internal.IndexDatabaseStuff.TBL_IDX_SERVER;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.index.IndexExceptionCodes;
 import com.openexchange.index.internal.IndexServiceLookup;
 import com.openexchange.server.ServiceExceptionCodes;
 import com.openexchange.tools.sql.DBUtils;
-import static com.openexchange.index.internal.IndexDatabaseStuff.*;
 
 
 /**
@@ -94,7 +97,7 @@ public class IndexCreateTablesTask extends UpdateTaskAdapter {
                 stmt = writeCon.prepareStatement(SQL_CREATE_SERVER_TBL);
                 stmt.executeUpdate();            
             } catch (SQLException e) {
-                throw IndexExceptionCodes.SQL_ERROR.create(e);
+                throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             } finally {
                 DBUtils.closeSQLStuff(stmt);
             }
@@ -109,7 +112,7 @@ public class IndexCreateTablesTask extends UpdateTaskAdapter {
                 stmt = writeCon.prepareStatement(SQL_CREATE_MAPPING_TBL);
                 stmt.executeUpdate();            
             } catch (SQLException e) {
-                throw IndexExceptionCodes.SQL_ERROR.create(e);
+                throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             } finally {
                 DBUtils.closeSQLStuff(stmt);
             }   

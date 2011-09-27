@@ -100,8 +100,30 @@ public interface IndexServer {
     
     /**
      * Gets the max. number of indices that can be created on this server.
+     * <p>
+     * Default is <code>100</code>.
      * 
      * @return The max. number of indices
      */
     int getMaxIndices();
+    
+    /**
+     * <code>true</code> if socket timeout has been set. Otherwise <code>false</code>.
+     */
+    boolean hasSoTimeout();
+    
+    /**
+     * <code>true</code> if connection timeout has been set. Otherwise <code>false</code>.
+     */
+    boolean hasConnectionTimeout();
+    
+    /**
+     * <code>true</code> if max. connections per host has been set. Otherwise <code>false</code>.
+     */
+    boolean hasMaxConnectionsPerHost();
+    
+    /**
+     * <code>true</code> if max. indices has been set. Otherwise <code>false</code>.
+     */
+    boolean hasMaxIndices();
 }

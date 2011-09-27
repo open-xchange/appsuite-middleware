@@ -49,6 +49,7 @@
 
 package com.openexchange.index;
 
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 
@@ -115,7 +116,7 @@ public interface ConfigIndexService {
      * @return An array of IndexUrls. Every IndexUrl points to one server.
      * @throws OXException
      */
-    IndexServer[] getAllIndexServers() throws OXException;
+    List<IndexServer> getAllIndexServers() throws OXException;
     
     /**
      * Adds a new (Context, User, Module) to (Server, Index) mapping to the config db.
@@ -128,5 +129,27 @@ public interface ConfigIndexService {
      * @throws OXException If mapping could not be added
      */
     void addIndexMapping(int cid, int uid, int module, int server, String index) throws OXException;
+    
+    /**
+     * Removes an index mapping for a (Context, User, Module) relation.
+     * 
+     * @param cid The context id
+     * @param uid The user id
+     * @param module The module. See {@link Types}
+     * @throws OXException If mapping could not be removed
+     */
+    void removeIndexMapping(int cid, int uid, int module) throws OXException;
+    
+    /**
+     * Modifies an existing (Context, User, Module) to (Server, Index) mapping.
+     * 
+     * @param cid The context id
+     * @param uid The user id
+     * @param module The module. See {@link Types}
+     * @param server The server id
+     * @param index Name of the index
+     * @throws OXException If mapping could not be modified
+     */
+    void modifiyIndexMapping(int cid, int uid, int module, int server, String index) throws OXException;
 
 }

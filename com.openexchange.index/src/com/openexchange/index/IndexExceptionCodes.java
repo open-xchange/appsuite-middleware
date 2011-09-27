@@ -74,11 +74,23 @@ public enum IndexExceptionCodes implements OXExceptionCode {
     /**
      * Could not find search index for user %1$s and module %2$s in context %3$s.
      */
-    INDEX_NOT_FOUND(IndexExceptionMessages.INDEX_NOT_FOUND_MSG, Category.CATEGORY_CONFIGURATION, 3),     
+    INDEX_NOT_FOUND(IndexExceptionMessages.INDEX_NOT_FOUND_MSG, Category.CATEGORY_CONFIGURATION, 3),    
     /**
-     * A database error occurred.
+     * Could not register index search server with url %1$s.
      */
-    SQL_ERROR(IndexExceptionMessages.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 4)
+    REGISTER_SERVER_ERROR(IndexExceptionMessages.REGISTER_SERVER_ERROR_MSG, Category.CATEGORY_ERROR, 4), 
+    /**
+     * Could not unregister index search server with id %1$s.
+     */
+    UNREGISTER_SERVER_ERROR(IndexExceptionMessages.UNREGISTER_SERVER_ERROR_MSG, Category.CATEGORY_ERROR, 5), 
+    /**
+     * Could not create index mapping for user %1$s in context %2$s for module %3$s on server %4$s.
+     */
+    ADD_MAPPING_ERROR(IndexExceptionMessages.ADD_MAPPING_ERROR_MSG, Category.CATEGORY_ERROR, 6),
+    /**
+     * Could not find server with id %1$s.
+     */
+    SERVER_NOT_FOUND(IndexExceptionMessages.SERVER_NOT_FOUND_MSG, CATEGORY_ERROR, 7)
     
     ;
 

@@ -64,18 +64,35 @@ public class IndexServerImpl implements IndexServer {
     private String url;
     
     private int soTimeout;
+    
+    private boolean hasSoTimeout;
 
     private int connectionTimeout;
+    
+    private boolean hasConnectionTimeout;
 
     private int maxConnectionsPerHost;
     
+    private boolean hasMaxConnectionsPerHost;
+    
     private int maxIndices;
+    
+    private boolean hasMaxIndices;
     
 
     public IndexServerImpl(int id, String url) {
         super();
         this.id = id;
         this.url = url;
+        soTimeout = 1000;
+        connectionTimeout = 100;
+        maxConnectionsPerHost = 100;
+        maxIndices = 1000;
+        
+        hasSoTimeout = false;
+        hasConnectionTimeout = false;
+        hasMaxConnectionsPerHost = false;
+        hasMaxIndices = false;
     }
 
     @Override
@@ -115,6 +132,7 @@ public class IndexServerImpl implements IndexServer {
      */
     public void setSoTimeout(final int soTimeout) {
         this.soTimeout = soTimeout;
+        hasSoTimeout = true;
     }
 
     /**
@@ -124,6 +142,7 @@ public class IndexServerImpl implements IndexServer {
      */
     public void setConnectionTimeout(final int connectionTimeout) {
         this.connectionTimeout = connectionTimeout;
+        hasConnectionTimeout = true;
     }
 
     /**
@@ -133,6 +152,7 @@ public class IndexServerImpl implements IndexServer {
      */
     public void setMaxConnectionsPerHost(final int maxConnectionsPerHost) {
         this.maxConnectionsPerHost = maxConnectionsPerHost;
+        hasMaxConnectionsPerHost = true;
     }
     
     /**
@@ -142,6 +162,27 @@ public class IndexServerImpl implements IndexServer {
      */
     public void setMaxIndices(int maxIndices) {
         this.maxIndices = maxIndices;        
+        hasMaxIndices = true;
+    }
+    
+    @Override
+    public boolean hasSoTimeout() {
+        return hasSoTimeout;
+    }
+
+    @Override
+    public boolean hasConnectionTimeout() {
+        return hasConnectionTimeout;
+    }
+
+    @Override
+    public boolean hasMaxConnectionsPerHost() {
+        return hasMaxConnectionsPerHost;
+    }
+
+    @Override
+    public boolean hasMaxIndices() {
+        return hasMaxIndices;
     }
 
     @Override
