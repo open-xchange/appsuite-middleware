@@ -65,17 +65,16 @@ public class ConfigurableHostnameService implements HostnameService {
 
     private static final String HOSTNAME_KEY = "com.openexchange.hostname";
 
-    public ConfigurableHostnameService(ConfigViewFactory configViews) {
+    public ConfigurableHostnameService(final ConfigViewFactory configViews) {
         super();
         this.configViews = configViews;
     }
 
-    @Override
-    public String getHostname(int userId, int contextId) {
+    public String getHostname(final int userId, final int contextId) {
         try {
-            ConfigView view = configViews.getView(userId, contextId);
+            final ConfigView view = configViews.getView(userId, contextId);
             return view.get(HOSTNAME_KEY, String.class);
-        } catch (AbstractOXException e) {
+        } catch (final AbstractOXException e) {
             return null;
         }
     }
