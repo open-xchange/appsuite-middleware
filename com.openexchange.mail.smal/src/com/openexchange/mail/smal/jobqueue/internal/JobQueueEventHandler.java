@@ -212,8 +212,16 @@ public final class JobQueueEventHandler implements EventHandler {
             final Set<String> filter = new HashSet<String>(8);
             for (final MailAccount account : storageService.getUserMailAccounts(userId, contextId)) {
                 final int accountId = account.getId();
+
+                // FOR TESTING ! ! !
+                if (accountId != MailAccount.DEFAULT_ID) {
+                    continue;
+                }
+
                 filter.add("INBOX");
-                if (MailAccount.DEFAULT_ID != accountId) {
+                if (MailAccount.DEFAULT_ID == accountId) {
+                    filter.addAll(getPrimaryFullNames(session));
+                } else {
                     MailAccount acc = account;
                     String fn = acc.getDraftsFullname();
                     if (null == fn) {
@@ -239,8 +247,6 @@ public final class JobQueueEventHandler implements EventHandler {
                     /*
                      * TODO: Add custom user folders specified by user
                      */
-                } else {
-                    filter.addAll(getPrimaryFullNames(session));
                 }
                 /*
                  * Create job
