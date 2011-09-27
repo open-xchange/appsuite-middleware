@@ -68,7 +68,6 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.smal.adapter.IndexAdapter;
 import com.openexchange.mail.smal.adapter.IndexService;
-import com.openexchange.mail.smal.jobqueue.Constants;
 import com.openexchange.mail.smal.jobqueue.JobQueue;
 import com.openexchange.mail.smal.jobqueue.jobs.FolderJob;
 import com.openexchange.session.Session;
@@ -133,7 +132,6 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
         }
         final long st = System.currentTimeMillis();
         try {
-            JobQueue.getInstance().addJob(new FolderJob(folder, accountId, userId, contextId).setSpan(Constants.DEFAULT_MILLIS));
             /*
              * Return current index state...
              */
