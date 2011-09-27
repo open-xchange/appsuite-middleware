@@ -118,11 +118,25 @@ public final class SolrjAdapter implements IndexAdapter {
 
     private volatile SolrTextFillerQueue textFillerQueue;
 
+    private final EnumMap<MailSortField, String> sortField2Name;
+
     /**
      * Initializes a new {@link SolrjAdapter}.
      */
     public SolrjAdapter() {
         super();
+        final EnumMap<MailSortField, String> map = new EnumMap<MailSortField, String>(MailSortField.class);
+        map.put(MailSortField.ACCOUNT_NAME, "account");
+        map.put(MailSortField.CC, "cc_plain");
+        map.put(MailSortField.COLOR_LABEL, "color_label");
+        map.put(MailSortField.FLAG_SEEN, "flag_seen");
+        map.put(MailSortField.FROM, "from_plain");
+        map.put(MailSortField.RECEIVED_DATE, "received_date");
+        map.put(MailSortField.SENT_DATE, "sent_date");
+        map.put(MailSortField.SIZE, "size");
+        map.put(MailSortField.SUBJECT, "subject_plain");
+        map.put(MailSortField.TO, "to_plain");
+        sortField2Name = map;
     }
 
     private IndexUrl indexUrlFor(final Session session, final boolean readWrite) throws OXException {
@@ -198,10 +212,18 @@ public final class SolrjAdapter implements IndexAdapter {
                 queryBuilder.append(" AND (").append("account:").append(optAccountId).append(')');
             }
             if (null != optFullName) {
-                queryBuilder.append(" AND (").append("full_name:").append(optFullName).append(')');
+                queryBuilder.append(" AND (").append("full_name:\"").append(optFullName).append("\")");
             }
-            queryBuilder.append(" AND (").append(SearchTerm2Query.searchTerm2Query(searchTerm)).append(')');
+            if (null != searchTerm) {
+                queryBuilder.append(" AND (").append(SearchTerm2Query.searchTerm2Query(searchTerm)).append(')');
+            }
             final SolrQuery solrQuery = new SolrQuery().setQuery(queryBuilder.toString());
+            if (null != sortField && null != order) {
+                final String name = sortField2Name.get(sortField);
+                if (null != name) {
+                    solrQuery.setSortField(name, OrderDirection.ASC.equals(order) ? ORDER.asc : ORDER.desc);
+                }
+            }
             final QueryResponse queryResponse = solrServer.query(solrQuery);
             final SolrDocumentList results = queryResponse.getResults();
             final int size = results.size();
@@ -343,7 +365,7 @@ public final class SolrjAdapter implements IndexAdapter {
                 queryBuilder.append(" AND (").append("account:").append(accountId).append(')');
             }
             if (null != fullName) {
-                queryBuilder.append(" AND (").append("full_name:").append(fullName).append(')');
+                queryBuilder.append(" AND (").append("full_name:\"").append(fullName).append("\")");
             }
             if (null != optMailIds) {
                 final int length = optMailIds.length;
@@ -357,7 +379,7 @@ public final class SolrjAdapter implements IndexAdapter {
             }
             final SolrQuery solrQuery = new SolrQuery().setQuery(queryBuilder.toString());
             if (null != sortField && null != order) {
-                final String name = SORTFIELD2NAME.get(sortField);
+                final String name = sortField2Name.get(sortField);
                 if (null != name) {
                     solrQuery.setSortField(name, OrderDirection.ASC.equals(order) ? ORDER.asc : ORDER.desc);
                 }
@@ -428,7 +450,7 @@ public final class SolrjAdapter implements IndexAdapter {
                 queryBuilder.append(" AND (").append("account:").append(accountId).append(')');
             }
             if (null != fullName) {
-                queryBuilder.append(" AND (").append("full_name:").append(fullName).append(')');
+                queryBuilder.append(" AND (").append("full_name:\"").append(fullName).append("\")");
             }
             final SolrQuery solrQuery = new SolrQuery().setQuery(queryBuilder.toString());
             final QueryResponse queryResponse = solrServer.query(solrQuery);
@@ -463,7 +485,7 @@ public final class SolrjAdapter implements IndexAdapter {
             }
             final String fullName = mails.get(0).getFolder();
             if (null != fullName) {
-                queryBuilder.append(" AND (").append("full_name:").append(fullName).append(')');
+                queryBuilder.append(" AND (").append("full_name:\"").append(fullName).append("\")");
             }
             queryBuilder.append(" AND (").append("id:").append(mails.get(0).getMailId());
             for (int i = 1; i < size; i++) {
@@ -954,22 +976,6 @@ public final class SolrjAdapter implements IndexAdapter {
             return toIDN(decoded);
         }
 
-    }
-
-    private static EnumMap<MailSortField, String> SORTFIELD2NAME;
-
-    static {
-        final EnumMap<MailSortField, String> map = new EnumMap<MailSortField, String>(MailSortField.class);
-        map.put(MailSortField.ACCOUNT_NAME, "account");
-        map.put(MailSortField.CC, "cc_plain");
-        map.put(MailSortField.COLOR_LABEL, "color_label");
-        map.put(MailSortField.FLAG_SEEN, "flag_seen");
-        map.put(MailSortField.FROM, "from_plain");
-        map.put(MailSortField.RECEIVED_DATE, "received_date");
-        map.put(MailSortField.SENT_DATE, "sent_date");
-        map.put(MailSortField.SIZE, "size");
-        map.put(MailSortField.SUBJECT, "subject_plain");
-        map.put(MailSortField.TO, "to_plain");
     }
 
 }
