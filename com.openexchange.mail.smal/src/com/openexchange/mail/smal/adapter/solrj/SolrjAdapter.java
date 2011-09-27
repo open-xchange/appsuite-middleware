@@ -479,7 +479,7 @@ public final class SolrjAdapter implements IndexAdapter {
                 queryBuilder.append(" AND (").append("account:").append(accountId).append(')');
             }
             if (null != fullName) {
-                queryBuilder.append(" AND (").append("full_name:").append(fullName).append(')');
+                queryBuilder.append(" AND (").append("full_name:\"").append(fullName).append("\")");
             }
             final Iterator<String> iterator = mailIds.iterator();
             queryBuilder.append(" AND (").append("id:").append(iterator.next());
