@@ -50,6 +50,15 @@
 package com.openexchange.mail.text;
 
 import java.io.IOException;
+import javax.activation.DataHandler;
+import javax.mail.MessagingException;
+import net.freeutils.tnef.Attr;
+import net.freeutils.tnef.CompressedRTFInputStream;
+import net.freeutils.tnef.MAPIProp;
+import net.freeutils.tnef.MAPIProps;
+import net.freeutils.tnef.RawInputStream;
+import net.freeutils.tnef.TNEFInputStream;
+import net.freeutils.tnef.TNEFUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.UnsynchronizedByteArrayInputStream;
@@ -57,15 +66,20 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.TNEFBodyPart;
+import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedMultiPart;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.textxtraction.TextXtractService;
+import com.openexchange.tools.tnef.TNEF2ICal;
 
 /**
- * {@link TextFinder} - Looks-up the primary text content of the message.
+ * {@link TextFinder} - Looks-up the primary text content of a message.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -91,7 +105,7 @@ public final class TextFinder {
     }
 
     /**
-     * Gets the primary text content of the message.
+     * Gets the primary text content of the specified part.
      *
      * @param p The part
      * @return The primary text content or <code>null</code>
@@ -102,11 +116,14 @@ public final class TextFinder {
         return getTextRecursive(p);
     }
 
-    private String getTextRecursive(final MailPart p) throws OXException {
+    private String getTextRecursive(final MailPart part) throws OXException {
+        if (null == part) {
+            return null;
+        }
         try {
-            final ContentType ct = p.getContentType();
+            final ContentType ct = part.getContentType();
             if (ct.startsWith("text/")) {
-                String content = readContent(p, ct);
+                String content = readContent(part, ct);
                 if (ct.startsWith("text/plain")) {
                     if (UUEncodedMultiPart.isUUEncoded(content)) {
                         final UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
@@ -124,10 +141,10 @@ public final class TextFinder {
                 /*
                  * Prefer HTML text over plain text
                  */
-                final int count = p.getEnclosedCount();
+                final int count = part.getEnclosedCount();
                 String text = null;
                 for (int i = 0; i < count; i++) {
-                    final MailPart bp = p.getEnclosedMailPart(i);
+                    final MailPart bp = part.getEnclosedMailPart(i);
                     final ContentType bct = bp.getContentType();
                     if (bct.startsWith("text/plain")) {
                         if (text == null) {
@@ -145,19 +162,97 @@ public final class TextFinder {
                 }
                 return text;
             } else if (ct.startsWith("multipart/")) {
-                final int count = p.getEnclosedCount();
+                final int count = part.getEnclosedCount();
                 for (int i = 0; i < count; i++) {
-                    final String s = getTextRecursive(p.getEnclosedMailPart(i));
+                    final String s = getTextRecursive(part.getEnclosedMailPart(i));
                     if (s != null) {
                         return s;
                     }
                 }
+            } if (TNEFUtils.isTNEFMimeType(ct.getBaseType())) {
+                return handleTNEFPart(part);
             }
             return null;
         } catch (final IOException e) {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private static final String TNEF_IPM_CONTACT = "IPM.Contact";
+
+    private static final String TNEF_IPM_MS_READ_RECEIPT = "IPM.Microsoft Mail.Read Receipt";
+
+    private String handleTNEFPart(final MailPart part) throws OXException {
+        try {
+            final TNEFInputStream tnefInputStream = new TNEFInputStream(part.getInputStream());
+            /*
+             * Wrapping TNEF message
+             */
+            final net.freeutils.tnef.Message message = new net.freeutils.tnef.Message(tnefInputStream);
+            /*
+             * Handle special conversion
+             */
+            final Attr messageClass = message.getAttribute(Attr.attMessageClass);
+            final String messageClassName = messageClass == null ? "" : ((String) messageClass.getValue());
+            if (TNEF_IPM_CONTACT.equalsIgnoreCase(messageClassName)) {
+                return null;
+            }
+            if (TNEF_IPM_MS_READ_RECEIPT.equalsIgnoreCase(messageClassName)) {
+                return null;
+            }
+            if (TNEF2ICal.isVPart(messageClassName)) {
+                return null;
+            }
+            /*
+             * Look for body. Usually the body is the RTF text.
+             */
+            final Attr attrBody = Attr.findAttr(message.getAttributes(), Attr.attBody);
+            if (attrBody != null) {
+                final TNEFBodyPart bodyPart = new TNEFBodyPart();
+                final String value = (String) attrBody.getValue();
+                bodyPart.setText(value);
+                bodyPart.setSize(value.length());
+                final String s = getTextRecursive(MIMEMessageConverter.convertPart(bodyPart));
+                if (null != s) {
+                    return s;
+                }
+            }
+            /*
+             * Check for possible RTF content
+             */
+            TNEFBodyPart rtfPart = null;
+            {
+                final MAPIProps mapiProps = message.getMAPIProps();
+                if (mapiProps != null) {
+                    final RawInputStream ris = (RawInputStream) mapiProps.getPropValue(MAPIProp.PR_RTF_COMPRESSED);
+                    if (ris != null) {
+                        rtfPart = new TNEFBodyPart();
+                        /*
+                         * De-compress RTF body
+                         */
+                        final byte[] decompressedBytes = CompressedRTFInputStream.decompressRTF(ris.toByteArray());
+                        final String contentTypeStr;
+                        {
+                            // final String charset = CharsetDetector.detectCharset(new
+                            // UnsynchronizedByteArrayInputStream(decompressedBytes));
+                            contentTypeStr = "application/rtf";
+                        }
+                        /*
+                         * Set content through a data handler to avoid further exceptions raised by unavailable DCH (data content handler)
+                         */
+                        rtfPart.setDataHandler(new DataHandler(new MessageDataSource(decompressedBytes, contentTypeStr)));
+                        rtfPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentTypeStr);
+                        rtfPart.setSize(decompressedBytes.length);
+                    }
+                }
+            }
+            return getTextRecursive(MIMEMessageConverter.convertPart(rtfPart));
+        } catch (final IOException e) {
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e);
         }
     }
 

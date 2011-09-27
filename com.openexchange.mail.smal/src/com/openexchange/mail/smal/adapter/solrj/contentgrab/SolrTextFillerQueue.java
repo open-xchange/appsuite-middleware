@@ -85,7 +85,6 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.smal.SMALExceptionCodes;
 import com.openexchange.mail.smal.SMALMailAccess;
 import com.openexchange.mail.smal.SMALServiceLookup;
-import com.openexchange.mail.smal.adapter.IndexAdapters;
 import com.openexchange.mail.smal.adapter.solrj.cache.CommonsHttpSolrServerCache;
 import com.openexchange.mail.text.TextFinder;
 import com.openexchange.threadpool.Task;
@@ -474,8 +473,12 @@ public final class SolrTextFillerQueue implements Runnable {
                          * Get text
                          */
                         final String text = textFinder.getText(messageStorage.getMessage(filler.getFullName(), filler.getMailId(), false));
-                        final Locale locale = detectLocale(text);
-                        inputDocument.setField("content_" + locale.getLanguage(), text);
+                        if (null == text) {
+                            inputDocument.setField("content_en", "");
+                        } else {
+                            final Locale locale = detectLocale(text);
+                            inputDocument.setField("content_" + locale.getLanguage(), text);
+                        }
                         inputDocuments.add(inputDocument);
                         /*
                          * Remove from map
@@ -502,14 +505,8 @@ public final class SolrTextFillerQueue implements Runnable {
         if (null == solrDocument) {
             return false;
         }
-        final StringBuilder pre = new StringBuilder("content_");
-        for (final Locale l : IndexAdapters.KNOWN_LOCALES) {
-            pre.setLength(8);
-            if (solrDocument.containsKey(pre.append(l.getLanguage()).toString())) {
-                return false;
-            }
-        }
-        return true;
+        final Boolean contentFlag = (Boolean) solrDocument.get("content_flag");
+        return null != contentFlag && contentFlag.booleanValue();
     }
 
     private final class MaxAwareTask implements Task<Object> {
