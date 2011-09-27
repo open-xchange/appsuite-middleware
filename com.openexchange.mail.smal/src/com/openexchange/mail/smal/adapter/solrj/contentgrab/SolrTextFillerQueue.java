@@ -80,13 +80,14 @@ import org.elasticsearch.ElasticSearchException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.index.ConfigIndexService;
+import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.smal.SMALExceptionCodes;
 import com.openexchange.mail.smal.SMALMailAccess;
 import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.mail.smal.adapter.IndexAdapters;
 import com.openexchange.mail.smal.adapter.solrj.cache.CommonsHttpSolrServerCache;
-import com.openexchange.mail.text.TextProcessing;
+import com.openexchange.mail.text.TextFinder;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -398,8 +399,9 @@ public final class SolrTextFillerQueue implements Runnable {
                 for (int i = 0; i < rsize; i++) {
                     final SolrDocument solrDocument = results.get(i);
                     if (checkSolrDocument(solrDocument)) {
-                        documents.put((String) solrDocument.get("id"), solrDocument);
-                        map.remove(solrDocument.getFieldValue("uuid").toString()); // Processed, so remove from map
+                        final String uuid = solrDocument.getFieldValue("uuid").toString();
+                        documents.put(uuid, solrDocument);
+                        map.remove(uuid); // Processed, so remove from map
                     }
                 }
                 for (final TextFiller filler : map.values()) {
@@ -418,43 +420,7 @@ public final class SolrTextFillerQueue implements Runnable {
             /*
              * Iterate fillers & extract text
              */
-            MailAccess<?, ?> access = null;
-            try {
-                access = SMALMailAccess.getUnwrappedInstance(userId, contextId, accountId);
-                access.connect(false);
-                for (final TextFiller filler : fillers) {
-                    final String mailId = filler.getMailId();
-                    final SolrDocument solrDocument = documents.get(mailId);
-                    if (null != solrDocument) {
-                        try {
-                            final SolrInputDocument inputDocument = new SolrInputDocument();
-                            for (final Entry<String, Object> entry : solrDocument.entrySet()) {
-                                final String name = entry.getKey();
-                                final SolrInputField field = new SolrInputField(name);
-                                field.setValue(entry.getValue(), 1.0f);
-                                inputDocument.put(name, field);
-                            }
-                            /*
-                             * Get text
-                             */
-                            final String text =
-                                TextProcessing.extractTextFrom(access.getMessageStorage().getMessage(filler.getFullName(), mailId, false));
-                            final Locale locale = detectLocale(text);
-                            inputDocument.setField("content_" + locale.getLanguage(), text);
-                            inputDocuments.add(inputDocument);
-                            /*
-                             * Remove from map
-                             */
-                            documents.remove(mailId);
-                        } catch (final Exception e) {
-                            LOG.error("Text could not be extracted from: " + filler, e);
-                        }
-                    }
-                }
-            } finally {
-                SMALMailAccess.closeUnwrappedInstance(access);
-                access = null;
-            }
+            grabTextFor(fillers, contextId, userId, accountId, documents, inputDocuments);
             /*
              * Add to index
              */
@@ -482,6 +448,47 @@ public final class SolrTextFillerQueue implements Runnable {
         } catch (final RuntimeException e) {
             rollback(rollback ? solrServer : null);
             throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private void grabTextFor(final List<TextFiller> fillers, final int contextId, final int userId, final int accountId, final Map<String, SolrDocument> documents, final List<SolrInputDocument> inputDocuments) throws OXException {
+        MailAccess<?, ?> access = null;
+        try {
+            access = SMALMailAccess.getUnwrappedInstance(userId, contextId, accountId);
+            access.connect(false);
+            final IMailMessageStorage messageStorage = access.getMessageStorage();
+            final TextFinder textFinder = new TextFinder();
+            for (final TextFiller filler : fillers) {
+                final String uuid = filler.getUuid();
+                final SolrDocument solrDocument = documents.get(uuid);
+                if (null != solrDocument) {
+                    try {
+                        final SolrInputDocument inputDocument = new SolrInputDocument();
+                        for (final Entry<String, Object> entry : solrDocument.entrySet()) {
+                            final String name = entry.getKey();
+                            final SolrInputField field = new SolrInputField(name);
+                            field.setValue(entry.getValue(), 1.0f);
+                            inputDocument.put(name, field);
+                        }
+                        /*
+                         * Get text
+                         */
+                        final String text = textFinder.getText(messageStorage.getMessage(filler.getFullName(), filler.getMailId(), false));
+                        final Locale locale = detectLocale(text);
+                        inputDocument.setField("content_" + locale.getLanguage(), text);
+                        inputDocuments.add(inputDocument);
+                        /*
+                         * Remove from map
+                         */
+                        documents.remove(uuid);
+                    } catch (final Exception e) {
+                        LOG.error("Text could not be extracted from: " + filler, e);
+                    }
+                }
+            }
+        } finally {
+            SMALMailAccess.closeUnwrappedInstance(access);
+            access = null;
         }
     }
 

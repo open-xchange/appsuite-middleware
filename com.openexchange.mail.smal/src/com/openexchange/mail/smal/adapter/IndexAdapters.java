@@ -53,6 +53,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.langdetect.LanguageDetectionService;
 import com.openexchange.mail.smal.SMALServiceLookup;
@@ -123,7 +125,15 @@ public final class IndexAdapters {
      */
     public static Locale detectLocale(final String str) throws OXException {
         try {
-            return SMALServiceLookup.getServiceStatic(LanguageDetectionService.class).findLanguages(str).get(0);
+            final Locale locale = SMALServiceLookup.getServiceStatic(LanguageDetectionService.class).findLanguages(str).get(0);
+            if (KNOWN_LOCALES.contains(locale)) {
+                return locale;
+            }
+            final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(IndexAdapters.class));
+            if (logger.isWarnEnabled()) {
+                logger.warn("Detected locale \"" + locale + "\" is not supported. Using fall-back locale \"" + LanguageDetectionService.DEFAULT_LOCALE + "\".");
+            }
+            return LanguageDetectionService.DEFAULT_LOCALE;
         } catch (final IllegalStateException e) {
             // Missing service
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(e, LanguageDetectionService.class.getName());

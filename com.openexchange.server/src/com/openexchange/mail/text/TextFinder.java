@@ -50,12 +50,19 @@
 package com.openexchange.mail.text;
 
 import java.io.IOException;
-import javax.mail.MessagingException;
-import javax.mail.Multipart;
-import javax.mail.Part;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.utils.CharsetDetector;
+import com.openexchange.mail.utils.MessageUtility;
+import com.openexchange.mail.uuencode.UUEncodedMultiPart;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.textxtraction.TextXtractService;
 
 /**
  * {@link TextFinder} - Looks-up the primary text content of the message.
@@ -64,22 +71,23 @@ import com.openexchange.mail.mime.MIMEMailException;
  */
 public final class TextFinder {
 
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TextFinder.class));
+
     private boolean textIsHtml = false;
+
+    private final TextXtractService textXtractService;
 
     /**
      * Initializes a new {@link TextFinder}.
      */
     public TextFinder() {
         super();
+        textXtractService = ServerServiceRegistry.getInstance().getService(TextXtractService.class);
     }
 
-    /**
-     * Checks whether found text part indicates to be of HTML content.
-     * 
-     * @return <code>true</code> for HTML content; otherwise <code>false</code>
-     */
-    public boolean isHtml() {
-        return textIsHtml;
+    private String extractPlainText(final String content) throws OXException {
+        return textXtractService.extractFrom(new UnsynchronizedByteArrayInputStream(content.getBytes(Charsets.UTF_8)), null);
     }
 
     /**
@@ -89,51 +97,119 @@ public final class TextFinder {
      * @return The primary text content or <code>null</code>
      * @throws OXException If primary text content cannot be returned
      */
-    public String getText(final Part p) throws OXException {
+    public String getText(final MailPart p) throws OXException {
+        textIsHtml = false;
+        return getTextRecursive(p);
+    }
+
+    private String getTextRecursive(final MailPart p) throws OXException {
         try {
-            if (p.isMimeType("text/*")) {
-                final String s = (String) p.getContent();
-                textIsHtml = p.isMimeType("text/html");
-                return s;
+            final ContentType ct = p.getContentType();
+            if (ct.startsWith("text/")) {
+                String content = readContent(p, ct);
+                if (ct.startsWith("text/plain")) {
+                    if (UUEncodedMultiPart.isUUEncoded(content)) {
+                        final UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
+                        if (uuencodedMP.isUUEncoded()) {
+                            content = uuencodedMP.getCleanText();
+                        }
+                    }
+                    textIsHtml = false;
+                } else {
+                    textIsHtml = ct.startsWith("text/htm");
+                }
+                return textIsHtml ? extractPlainText(content) : content;
             }
-            if (p.isMimeType("multipart/alternative")) {
+            if (ct.startsWith("multipart/alternative")) {
                 /*
                  * Prefer HTML text over plain text
                  */
-                final Multipart mp = (Multipart) p.getContent();
+                final int count = p.getEnclosedCount();
                 String text = null;
-                for (int i = 0; i < mp.getCount(); i++) {
-                    final Part bp = mp.getBodyPart(i);
-                    if (bp.isMimeType("text/plain")) {
+                for (int i = 0; i < count; i++) {
+                    final MailPart bp = p.getEnclosedMailPart(i);
+                    final ContentType bct = bp.getContentType();
+                    if (bct.startsWith("text/plain")) {
                         if (text == null) {
-                            text = getText(bp);
+                            text = getTextRecursive(bp);
                         }
                         continue;
-                    } else if (bp.isMimeType("text/html")) {
-                        final String s = getText(bp);
+                    } else if (bct.startsWith("text/htm")) {
+                        final String s = getTextRecursive(bp);
                         if (s != null) {
                             return s;
                         }
                     } else {
-                        return getText(bp);
+                        return getTextRecursive(bp);
                     }
                 }
                 return text;
-            } else if (p.isMimeType("multipart/*")) {
-                final Multipart mp = (Multipart) p.getContent();
-                for (int i = 0; i < mp.getCount(); i++) {
-                    final String s = getText(mp.getBodyPart(i));
+            } else if (ct.startsWith("multipart/")) {
+                final int count = p.getEnclosedCount();
+                for (int i = 0; i < count; i++) {
+                    final String s = getTextRecursive(p.getEnclosedMailPart(i));
                     if (s != null) {
                         return s;
                     }
                 }
             }
             return null;
-        } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
         } catch (final IOException e) {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private static String readContent(final MailPart mailPart, final ContentType contentType) throws OXException, IOException {
+        final String charset = getCharset(mailPart, contentType);
+        try {
+            return MessageUtility.readMailPart(mailPart, charset);
+        } catch (final java.io.CharConversionException e) {
+            // Obviously charset was wrong or bogus implementation of character conversion
+            final String fallback = "US-ASCII";
+            if (LOG.isWarnEnabled()) {
+                LOG.warn(
+                    new StringBuilder("Character conversion exception while reading content with charset \"").append(charset).append(
+                        "\". Using fallback charset \"").append(fallback).append("\" instead."),
+                    e);
+            }
+            return MessageUtility.readMailPart(mailPart, fallback);
+        }
+    }
+
+    private static String getCharset(final MailPart mailPart, final ContentType contentType) throws OXException {
+        final String charset;
+        if (mailPart.containsHeader(MessageHeaders.HDR_CONTENT_TYPE)) {
+            String cs = contentType.getCharsetParameter();
+            if (!CharsetDetector.isValid(cs)) {
+                StringBuilder sb = null;
+                if (null != cs) {
+                    sb = new StringBuilder(64).append("Illegal or unsupported encoding: \"").append(cs).append("\".");
+                }
+                if (contentType.startsWith("text/")) {
+                    cs = CharsetDetector.detectCharset(mailPart.getInputStream());
+                    if (LOG.isWarnEnabled() && null != sb) {
+                        sb.append(" Using auto-detected encoding: \"").append(cs).append('"');
+                        LOG.warn(sb.toString());
+                    }
+                } else {
+                    cs = MailProperties.getInstance().getDefaultMimeCharset();
+                    if (LOG.isWarnEnabled() && null != sb) {
+                        sb.append(" Using fallback encoding: \"").append(cs).append('"');
+                        LOG.warn(sb.toString());
+                    }
+                }
+            }
+            charset = cs;
+        } else {
+            if (contentType.startsWith("text/")) {
+                charset = CharsetDetector.detectCharset(mailPart.getInputStream());
+            } else {
+                charset = MailProperties.getInstance().getDefaultMimeCharset();
+            }
+        }
+        return charset;
     }
 
 }
