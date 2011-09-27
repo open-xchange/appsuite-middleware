@@ -85,7 +85,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.smal.SMALExceptionCodes;
 import com.openexchange.mail.smal.SMALMailAccess;
 import com.openexchange.mail.smal.SMALServiceLookup;
-import com.openexchange.mail.smal.adapter.solrj.cache.CommonsHttpSolrServerCache;
+import com.openexchange.mail.smal.adapter.solrj.cache.CommonsHttpSolrServerManagement;
 import com.openexchange.mail.text.TextFinder;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -152,12 +152,12 @@ public final class SolrTextFillerQueue implements Runnable {
 
     private final int maxNumConcurrentFillerTasks;
 
-    private final CommonsHttpSolrServerCache serverCache;
+    private final CommonsHttpSolrServerManagement serverCache;
 
     /**
      * Initializes a new {@link SolrTextFillerQueue}.
      */
-    public SolrTextFillerQueue(final CommonsHttpSolrServerCache serverCache) {
+    public SolrTextFillerQueue(final CommonsHttpSolrServerManagement serverCache) {
         super();
         this.serverCache = serverCache;
         maxNumConcurrentFillerTasks = MAX_NUM_CONCURRENT_FILLER_TASKS;

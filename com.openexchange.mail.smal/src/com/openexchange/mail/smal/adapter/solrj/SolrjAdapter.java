@@ -98,7 +98,7 @@ import com.openexchange.mail.smal.SMALExceptionCodes;
 import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.mail.smal.adapter.IndexAdapter;
 import com.openexchange.mail.smal.adapter.IndexAdapters;
-import com.openexchange.mail.smal.adapter.solrj.cache.CommonsHttpSolrServerCache;
+import com.openexchange.mail.smal.adapter.solrj.cache.CommonsHttpSolrServerManagement;
 import com.openexchange.mail.smal.adapter.solrj.contentgrab.SolrTextFillerQueue;
 import com.openexchange.mail.smal.adapter.solrj.contentgrab.TextFiller;
 import com.openexchange.session.Session;
@@ -115,7 +115,7 @@ public final class SolrjAdapter implements IndexAdapter {
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SolrjAdapter.class));
 
-    private volatile CommonsHttpSolrServerCache solrServerCache;
+    private volatile CommonsHttpSolrServerManagement solrServerCache;
 
     private volatile SolrTextFillerQueue textFillerQueue;
 
@@ -135,19 +135,22 @@ public final class SolrjAdapter implements IndexAdapter {
     }
 
     private CommonsHttpSolrServer solrServerFor(final Session session, final boolean readWrite) throws OXException {
-        return solrServerCache.getSolrServer(indexUrlFor(session, readWrite));
+        if (readWrite) {
+            return solrServerCache.newSolrServer(indexUrlFor(session, true));
+        }
+        return solrServerCache.getSolrServer(indexUrlFor(session, false));
     }
 
     @Override
     public void start() throws OXException {
-        final CommonsHttpSolrServerCache cache = solrServerCache = new CommonsHttpSolrServerCache(100, 300000);
+        final CommonsHttpSolrServerManagement cache = solrServerCache = new CommonsHttpSolrServerManagement(100, 300000);
         final SolrTextFillerQueue q = textFillerQueue = new SolrTextFillerQueue(cache);
         q.start();
     }
 
     @Override
     public void stop() throws OXException {
-        final CommonsHttpSolrServerCache solrServerCache = this.solrServerCache;
+        final CommonsHttpSolrServerManagement solrServerCache = this.solrServerCache;
         if (null != solrServerCache) {
             solrServerCache.shutDown();
             this.solrServerCache = null;
