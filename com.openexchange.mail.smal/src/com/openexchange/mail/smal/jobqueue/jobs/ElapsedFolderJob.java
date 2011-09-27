@@ -75,6 +75,8 @@ public final class ElapsedFolderJob extends AbstractMailSyncJob {
 
     private static final long serialVersionUID = -7360411730956519503L;
 
+    private final long start;
+
     private final String identifier;
 
     /**
@@ -84,11 +86,22 @@ public final class ElapsedFolderJob extends AbstractMailSyncJob {
      * @param userId The user identifier
      * @param contextId The context identifier
      */
-    public ElapsedFolderJob(final int accountId, final int userId, final int contextId) {
+    public ElapsedFolderJob(final int accountId, final int userId, final int contextId, final long start) {
         super(accountId, userId, contextId);
+        this.start = start;
         identifier =
             new StringBuilder(ElapsedFolderJob.class.getSimpleName()).append('@').append(contextId).append('@').append(userId).append('@').append(
                 accountId).toString();
+    }
+
+    /**
+     * Checks if this job may already start.
+     * 
+     * @param now The current time millis
+     * @return <code>true</code> if job may start; otherwise <code>false</code>
+     */
+    public boolean mayStart(final long now) {
+        return now >= start;
     }
 
     @Override

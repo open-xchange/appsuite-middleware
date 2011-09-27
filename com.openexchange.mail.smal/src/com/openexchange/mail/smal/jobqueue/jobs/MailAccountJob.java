@@ -173,6 +173,15 @@ public final class MailAccountJob extends AbstractMailSyncJob {
     }
 
     private void addJobIfShouldSync(final JobQueue queue, final long now, final String fullName) {
+        
+        
+        // TESTING !! ! !
+        if (!"INBOX".equals(fullName)) {
+            return;
+        }
+        
+        
+        
         try {
             if (shouldSync(fullName, now)) {
                 queue.addJob(new FolderJob(fullName, accountId, userId, contextId, false).setSpan(Constants.HOUR_MILLIS));

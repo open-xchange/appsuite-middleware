@@ -92,7 +92,7 @@ public final class JobQueueEventHandler implements EventHandler {
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(JobQueueEventHandler.class));
 
-    private final ConcurrentMap<Key, ConcurrentMap<String, Job>> periodicJobs;
+    private final ConcurrentMap<Key, ConcurrentMap<String, ElapsedFolderJob>> periodicJobs;
 
     private final ScheduledTimerTask timerTask;
 
@@ -101,7 +101,7 @@ public final class JobQueueEventHandler implements EventHandler {
      */
     public JobQueueEventHandler() {
         super();
-        periodicJobs = new ConcurrentHashMap<Key, ConcurrentMap<String,Job>>();
+        periodicJobs = new ConcurrentHashMap<Key, ConcurrentMap<String,ElapsedFolderJob>>();
         final TimerService timerService = SMALServiceLookup.getServiceStatic(TimerService.class);
         timerTask = timerService.scheduleWithFixedDelay(new PeriodicRunnable(periodicJobs), Constants.HOUR_MILLIS, Constants.HOUR_MILLIS);
     }
@@ -110,10 +110,10 @@ public final class JobQueueEventHandler implements EventHandler {
      * Closes this event handler.
      */
     public void close() {
-        for (final Iterator<ConcurrentMap<String, Job>> iter = periodicJobs.values().iterator(); iter.hasNext();) {
-            final ConcurrentMap<String, Job> jobs = iter.next();
+        for (final Iterator<ConcurrentMap<String, ElapsedFolderJob>> iter = periodicJobs.values().iterator(); iter.hasNext();) {
+            final ConcurrentMap<String, ElapsedFolderJob> jobs = iter.next();
             iter.remove();
-            for (final Job job : jobs.values()) {
+            for (final ElapsedFolderJob job : jobs.values()) {
                 if (!job.isDone()) {
                     job.cancel();
                 }
@@ -123,11 +123,11 @@ public final class JobQueueEventHandler implements EventHandler {
         timerTask.cancel(true);
     }
 
-    private boolean addPeriodicJob(final Job job, final Session session) {
+    private boolean addPeriodicJob(final ElapsedFolderJob job, final Session session) {
         final Key key = keyFor(session);
-        ConcurrentMap<String, Job> jobs = periodicJobs.get(key);
+        ConcurrentMap<String, ElapsedFolderJob> jobs = periodicJobs.get(key);
         if (null == jobs) {
-            final ConcurrentMap<String, Job> newjobs = new ConcurrentHashMap<String, Job>();
+            final ConcurrentMap<String, ElapsedFolderJob> newjobs = new ConcurrentHashMap<String, ElapsedFolderJob>();
             jobs = periodicJobs.putIfAbsent(key, newjobs);
             if (null == jobs) {
                 jobs = newjobs;
@@ -137,11 +137,11 @@ public final class JobQueueEventHandler implements EventHandler {
     }
 
     private void dropForLast(final Session session) {
-        final ConcurrentMap<String, Job> jobs = periodicJobs.remove(keyFor(session));
+        final ConcurrentMap<String, ElapsedFolderJob> jobs = periodicJobs.remove(keyFor(session));
         if (null == jobs) {
             return;
         }
-        for (final Job job : jobs.values()) {
+        for (final ElapsedFolderJob job : jobs.values()) {
             if (!job.isDone()) {
                 job.cancel();
             }
@@ -208,6 +208,7 @@ public final class JobQueueEventHandler implements EventHandler {
             final int userId = session.getUserId();
             final int contextId = session.getContextId();
             final Queue<Job> jobs = getJobsFrom(session);
+            final long start = System.currentTimeMillis() + Constants.HOUR_MILLIS;
             final JobQueue jobQueue = JobQueue.getInstance();
             final Set<String> filter = new HashSet<String>(8);
             for (final MailAccount account : storageService.getUserMailAccounts(userId, contextId)) {
@@ -259,7 +260,7 @@ public final class JobQueueEventHandler implements EventHandler {
                 /*
                  * Add periodic job
                  */
-                addPeriodicJob(new ElapsedFolderJob(accountId, userId, contextId), session);
+                addPeriodicJob(new ElapsedFolderJob(accountId, userId, contextId, start), session);
             }
         } catch (final Exception e) {
             // Failed handling session
@@ -310,20 +311,23 @@ public final class JobQueueEventHandler implements EventHandler {
 
     private static final class PeriodicRunnable implements Runnable {
 
-        private final ConcurrentMap<Key, ConcurrentMap<String, Job>> periodicJobs;
+        private final ConcurrentMap<Key, ConcurrentMap<String, ElapsedFolderJob>> periodicJobs;
 
-        protected PeriodicRunnable(final ConcurrentMap<Key, ConcurrentMap<String, Job>> periodicJobs) {
+        protected PeriodicRunnable(final ConcurrentMap<Key, ConcurrentMap<String, ElapsedFolderJob>> periodicJobs) {
             super();
             this.periodicJobs = periodicJobs;
         }
 
         @Override
         public void run() {
+            final long now = System.currentTimeMillis();
             final JobQueue jobQueue = JobQueue.getInstance();
-            for (final ConcurrentMap<String, Job> jobs : periodicJobs.values()) {
-                for (final Job job : jobs.values()) {
-                    job.reset();
-                    jobQueue.addJob(job);
+            for (final ConcurrentMap<String, ElapsedFolderJob> jobs : periodicJobs.values()) {
+                for (final ElapsedFolderJob job : jobs.values()) {
+                    if (job.mayStart(now)) {
+                        job.reset();
+                        jobQueue.addJob(job);
+                    }
                 }
             }
         }
