@@ -77,6 +77,7 @@ import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
 import com.openexchange.exception.OXException;
@@ -512,8 +513,17 @@ public final class SolrjAdapter implements IndexAdapter {
         try {
             solrServer = solrServerFor(session, true);
             final List<TextFiller> fillers = new ArrayList<TextFiller>(mails.size());
-            final Iterator<SolrInputDocument> iter = new MailDocumentIterator(mails.iterator(), session, System.currentTimeMillis(), fillers);
-            solrServer.add(iter);
+            final long now = System.currentTimeMillis();
+            final Iterator<SolrInputDocument> iter = new MailDocumentIterator(mails.iterator(), session, now, fillers);
+            try {
+                solrServer.add(iter);
+            } catch (final SolrException e) {
+                // Batch failed
+                SolrUtils.rollback(solrServer);
+                for (final Iterator<SolrInputDocument> it = new MailDocumentIterator(mails.iterator(), session, now, fillers); it.hasNext();) {
+                    solrServer.add(it.next());
+                }
+            }
             solrServer.commit();
             textFillerQueue.add(fillers);
         } catch (final SolrServerException e) {
