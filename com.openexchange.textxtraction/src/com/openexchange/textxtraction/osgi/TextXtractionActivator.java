@@ -49,8 +49,13 @@
 
 package com.openexchange.textxtraction.osgi;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import com.openexchange.textxtraction.TextXtractService;
+import com.openexchange.textxtraction.internal.TikaTextXtractService;
 
 /**
  * {@link TextXtractionActivator}
@@ -58,8 +63,9 @@ import org.osgi.framework.BundleContext;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class TextXtractionActivator implements BundleActivator {
-    
-    
+
+    private ServiceRegistration<TextXtractService> registration;
+
     /**
      * Initializes a new {@link TextXtractionActivator}.
      */
@@ -69,12 +75,31 @@ public class TextXtractionActivator implements BundleActivator {
 
 	@Override
     public void start(final BundleContext context) throws Exception {
-		
+		final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(TextXtractionActivator.class));
+		final String name = "com.openexchange.textxtraction";
+		log.info("Starting bundle: " + name);
+		try {
+            registration = context.registerService(TextXtractService.class, new TikaTextXtractService(), null);
+        } catch (final Exception e) {
+            log.info("Starting bundle failed: " + name, e);
+            throw e;
+        }
 	}
 
 	@Override
     public void stop(final BundleContext context) throws Exception {
-		
+	    final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(TextXtractionActivator.class));
+	    final String name = "com.openexchange.textxtraction";
+	    log.info("Stopping bundle: " + name);
+	    try {
+            if (null != registration) {
+                registration.unregister();
+                registration = null;
+            }
+        } catch (final Exception e) {
+            log.info("Stopping bundle failed: " + name, e);
+            throw e;
+        }
 	}
 
 }
