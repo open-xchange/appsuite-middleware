@@ -473,12 +473,11 @@ public final class SolrTextFillerQueue implements Runnable {
                          * Get text
                          */
                         final String text = textFinder.getText(messageStorage.getMessage(filler.getFullName(), filler.getMailId(), false));
-                        if (null == text) {
-                            inputDocument.setField("content_en", "");
-                        } else {
+                        if (null != text) {
                             final Locale locale = detectLocale(text);
                             inputDocument.setField("content_" + locale.getLanguage(), text);
                         }
+                        inputDocument.setField("content_flag", Boolean.TRUE);
                         inputDocuments.add(inputDocument);
                         /*
                          * Remove from map
