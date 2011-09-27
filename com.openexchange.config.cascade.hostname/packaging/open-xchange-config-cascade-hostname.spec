@@ -1,6 +1,6 @@
 # norootforbuild
 
-Name:           open-xchange-config-cascade-context
+Name:           open-xchange-config-cascade-hostname
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
 BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-config-cascade >= @OXVERSION@
@@ -49,7 +49,7 @@ Requires:       open-xchange-global >= @OXVERSION@
 #
 
 %description
-The Open-Xchange Server Context Level Config Cascade Provider Bundle
+The Open-Xchange Server Hostname Config Cascade Provider Bundle
 
 Authors:
 --------
