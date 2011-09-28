@@ -51,25 +51,32 @@ package com.openexchange.mail.smal.adapter.solrj;
 
 import com.openexchange.mail.MailPath;
 
-
 /**
  * {@link MailUUID}
- *
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class MailUUID {
-    
-    private final String mailUUID;
-    
 
-    public MailUUID(int cid, int uid, int accountId, String folder, String mailId) {
+    private final String mailUUID;
+
+    /**
+     * Initializes a new {@link MailUUID}.
+     * 
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @param accountId The account identifier
+     * @param fullName The folder full name
+     * @param mailId The mail identifier
+     */
+    public MailUUID(final int contextId, final int userId, final int accountId, final String fullName, final String mailId) {
         super();
-        mailUUID = String.valueOf(cid) + MailPath.SEPERATOR + String.valueOf(uid) + MailPath.SEPERATOR + MailPath.getMailPath(
-                                                                                                                    accountId,
-                                                                                                                    folder,
-                                                                                                                    mailId);
+        final StringBuilder tmp = new StringBuilder(64);
+        tmp.append(contextId).append(MailPath.SEPERATOR).append(userId).append(MailPath.SEPERATOR);
+        tmp.append(MailPath.getMailPath(accountId, fullName, mailId));
+        mailUUID = tmp.toString();
     }
-    
+
     public String getUUID() {
         return mailUUID;
     }
