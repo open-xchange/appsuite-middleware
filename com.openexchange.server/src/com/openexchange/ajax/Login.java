@@ -106,6 +106,7 @@ import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.IPRange;
 import com.openexchange.tools.io.IOTools;
@@ -193,6 +194,7 @@ public class Login extends AJAXServlet {
     public static final String SECRET_PREFIX = "open-xchange-secret-";
 
     private static final String ACTION_FORMLOGIN = "formlogin";
+    public static final String ACTION_CHANGEIP = "changeip";
 
     private static enum CookieType {
         SESSION,
@@ -378,6 +380,50 @@ public class Login extends AJAXServlet {
                     session.getSessionID()));
             }
         });
+        map.put(ACTION_CHANGEIP, new JSONRequestHandler() {
+            public void handleRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+                final Response response = new Response();
+                try {
+                    final String sessionId = req.getParameter(PARAMETER_SESSION);
+                    if (null == sessionId) {
+                        throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
+                    }
+                    final String newIP = req.getParameter(LoginFields.CLIENT_IP_PARAM);
+                    if (null == newIP) {
+                        throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.CLIENT_IP_PARAM);                        
+                    }
+                    final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class, true);
+                    final Session session = sessiondService.getSession(sessionId);
+                    final LoginConfiguration conf = confReference.get();
+                    if (session != null) {
+                        SessionServlet.checkIP(conf.ipCheck, conf.ranges, session, req.getRemoteAddr());
+                        final String secret = SessionServlet.extractSecret(conf.hashSource, req, session.getHash(), session.getClient());
+                        if (secret == null || !session.getSecret().equals(secret)) {
+                            throw SessionExceptionCodes.WRONG_SESSION_SECRET.create(secret, session.getSecret());
+                        }
+                        final String oldIP = session.getLocalIp();
+                        if (!newIP.equals(oldIP)) {
+                            LOG.info("Changing IP of session " + session.getSessionID() + " with authID: " + session.getAuthId() + " from " + oldIP + " to " + newIP + '.');
+                            session.setLocalIp(newIP);
+                        }
+                        response.setData("1");
+                    } else {
+                        throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+                    }
+                } catch (final OXException e) {
+                    LOG.debug(e.getMessage(), e);
+                    response.setException(e);
+                }
+                Tools.disableCaching(resp);
+                resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+                resp.setStatus(HttpServletResponse.SC_OK);
+                try {
+                    ResponseWriter.write(response, resp.getWriter());
+                } catch (final JSONException e) {
+                    log(RESPONSE_ERROR, e);
+                    sendError(resp);
+                }
+            }});
         map.put(ACTION_REDEEM, new JSONRequestHandler() {
 
             @Override

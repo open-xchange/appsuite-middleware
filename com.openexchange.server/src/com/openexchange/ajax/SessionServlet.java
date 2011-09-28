@@ -155,7 +155,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 // Fall back to configuration service
                 final ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
                 if (configurationService != null) {
-                    text = config.getInitParameter(SESSION_WHITELIST_FILE);
+                    text = configurationService.getText(SESSION_WHITELIST_FILE);
                 } else {
                     //LOG.error("Can't load IP Check whitelist file. Please check that the servlet activator is in order");
                     return;

@@ -78,6 +78,7 @@ public final class SessionTestSuite {
         tests.addTestSuite(DuplicateAuthIdTest.class);
         tests.addTestSuite(RedeemTest.class);
         tests.addTestSuite(HttpAuthTest.class);
+        tests.addTestSuite(ChangeIPTest.class);
         return tests;
     }
 }

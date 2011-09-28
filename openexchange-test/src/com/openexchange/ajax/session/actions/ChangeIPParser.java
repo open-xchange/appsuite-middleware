@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,32 +49,22 @@
 
 package com.openexchange.ajax.session.actions;
 
-import com.openexchange.ajax.Login;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * {@link RefreshSecretRequest}
+ * {@link ChangeIPParser}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class RefreshSecretRequest extends AbstractRequest<RefreshSecretResponse> {
+public class ChangeIPParser extends AbstractAJAXParser<ChangeIPResponse> {
 
-    private final boolean failOnError;
+    public ChangeIPParser(boolean failOnError) {
+        super(failOnError);
+    }
 
-	public RefreshSecretRequest(final boolean failOnError) {
-		super(new Parameter[] {
-		    new URLParameter(Login.PARAMETER_ACTION, Login.ACTION_REFRESH_SECRET)
-		});
-		this.failOnError = failOnError;
-	}
-
-	public AbstractAJAXParser<RefreshSecretResponse> getParser() {
-		return new AbstractAJAXParser<RefreshSecretResponse>(failOnError) {
-			@Override
-			protected RefreshSecretResponse createResponse(Response response) {
-				return new RefreshSecretResponse(response);
-			}
-		};
-	}
+    @Override
+    protected ChangeIPResponse createResponse(Response response) {
+        return new ChangeIPResponse(response);
+    }
 }
