@@ -179,7 +179,14 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
 
     @Override
     public MailMessage getMessage(final String folder, final String mailId, final boolean markSeen) throws OXException {
-        return messageStorage.getMessage(folder, mailId, markSeen);
+        final IndexAdapter indexAdapter = getIndexAdapter();
+        if (null == indexAdapter) {
+            return messageStorage.getMessage(folder, mailId, markSeen);
+        }
+        final MailMessage mail = messageStorage.getMessage(folder, mailId, markSeen);
+        mail.setAccountId(accountId);
+        indexAdapter.addContent(mail, session);
+        return mail;
     }
 
     @Override

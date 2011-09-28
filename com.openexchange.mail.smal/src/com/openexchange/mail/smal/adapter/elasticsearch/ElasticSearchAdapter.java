@@ -1459,4 +1459,13 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         return SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.mail.smal.adapter.IndexAdapter#addContent(com.openexchange.mail.dataobjects.MailMessage, com.openexchange.session.Session)
+     */
+    @Override
+    public void addContent(final MailMessage mail, final Session session) throws OXException {
+        // TODO Auto-generated method stub
+        
+    }
+
 }
