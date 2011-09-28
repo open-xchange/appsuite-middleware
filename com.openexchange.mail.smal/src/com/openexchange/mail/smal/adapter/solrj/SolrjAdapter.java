@@ -87,7 +87,6 @@ import com.openexchange.index.ConfigIndexService;
 import com.openexchange.index.IndexUrl;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
-import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.dataobjects.IDMailMessage;
@@ -719,12 +718,8 @@ public final class SolrjAdapter implements IndexAdapter {
 
     @Override
     public void addContent(final MailMessage mail, final Session session) throws OXException {
-        final String uuid =
-            String.valueOf(session.getContextId()) + MailPath.SEPERATOR + String.valueOf(session.getUserId()) + MailPath.SEPERATOR + MailPath.getMailPath(
-                mail.getAccountId(),
-                mail.getFolder(),
-                mail.getMailId()).toString();
-        textFillerQueue.add(TextFiller.fillerFor(uuid, mail, session));
+        final MailUUID uuid = new MailUUID(session.getContextId(), session.getUserId(), mail.getAccountId(), mail.getFolder(), mail.getMailId());
+        textFillerQueue.add(TextFiller.fillerFor(uuid.getUUID(), mail, session));
     }
 
     @Override
@@ -733,14 +728,10 @@ public final class SolrjAdapter implements IndexAdapter {
         try {
             solrServer = solrServerFor(session, true);
             final int accountId = mail.getAccountId();
-            final String uuid =
-                String.valueOf(session.getContextId()) + MailPath.SEPERATOR + String.valueOf(session.getUserId()) + MailPath.SEPERATOR + MailPath.getMailPath(
-                    accountId,
-                    mail.getFolder(),
-                    mail.getMailId()).toString();
-            solrServer.add(createDocument(uuid, mail, accountId, session, System.currentTimeMillis()));
+            final MailUUID uuid = new MailUUID(session.getContextId(), session.getUserId(), accountId, mail.getFolder(), mail.getMailId());
+            solrServer.add(createDocument(uuid.getUUID(), mail, accountId, session, System.currentTimeMillis()));
             solrServer.commit();
-            //textFillerQueue.add(TextFiller.fillerFor(uuid, mail, session));
+            textFillerQueue.add(TextFiller.fillerFor(uuid.getUUID(), mail, session));
         } catch (final SolrServerException e) {
             SolrUtils.rollback(solrServer);
             throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
@@ -1144,13 +1135,9 @@ public final class SolrjAdapter implements IndexAdapter {
         @Override
         public SolrInputDocument next() {
             final MailMessage mail = iterator.next();
-            final String uuid =
-                String.valueOf(session.getContextId()) + MailPath.SEPERATOR + String.valueOf(session.getUserId()) + MailPath.SEPERATOR + MailPath.getMailPath(
-                    mail.getAccountId(),
-                    mail.getFolder(),
-                    mail.getMailId()).toString();
-            final SolrInputDocument inputDocument = createDocument(uuid, mail, mail.getAccountId(), session, now);
-            fillers.add(TextFiller.fillerFor(uuid, mail, session));
+            final MailUUID uuid = new MailUUID(session.getContextId(), session.getUserId(), mail.getAccountId(), mail.getFolder(), mail.getMailId());
+            final SolrInputDocument inputDocument = createDocument(uuid.getUUID(), mail, mail.getAccountId(), session, now);
+            fillers.add(TextFiller.fillerFor(uuid.getUUID(), mail, session));
             return inputDocument;
         }
 
