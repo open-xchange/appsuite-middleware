@@ -237,6 +237,9 @@ public final class SolrjAdapter implements IndexAdapter {
                 final QueryResponse queryResponse = solrServer.query(solrQuery);
                 final SolrDocumentList results = queryResponse.getResults();
                 numFound = results.getNumFound();
+                if (numFound <= 0) {
+                    return Collections.emptyList();
+                }
                 mails = new ArrayList<MailMessage>((int) numFound);
                 final int size = results.size();
                 for (int i = 0; i < size; i++) {
@@ -435,6 +438,9 @@ public final class SolrjAdapter implements IndexAdapter {
                 final QueryResponse queryResponse = solrServer.query(solrQuery);
                 final SolrDocumentList results = queryResponse.getResults();
                 numFound = results.getNumFound();
+                if (numFound <= 0) {
+                    return Collections.emptyList();
+                }
                 mails = new ArrayList<MailMessage>((int) numFound);
                 final int size = results.size();
                 for (int i = 0; i < size; i++) {
@@ -570,6 +576,9 @@ public final class SolrjAdapter implements IndexAdapter {
                 final QueryResponse queryResponse = solrServer.query(solrQuery);
                 final SolrDocumentList results = queryResponse.getResults();
                 numFound = results.getNumFound();
+                if (numFound <= 0) {
+                    return;
+                }
                 documents = new ArrayList<SolrDocument>((int) numFound);
                 final int rsize = results.size();
                 for (int i = 0; i < rsize; i++) {
@@ -614,7 +623,11 @@ public final class SolrjAdapter implements IndexAdapter {
         try {
             solrServer = solrServerFor(session, true);
             final int accountId = mail.getAccountId();
-            final String uuid = MailPath.getMailPath(accountId, mail.getFolder(), mail.getMailId()).toString();
+            final String uuid =
+                String.valueOf(session.getContextId()) + MailPath.SEPERATOR + String.valueOf(session.getUserId()) + MailPath.SEPERATOR + MailPath.getMailPath(
+                    accountId,
+                    mail.getFolder(),
+                    mail.getMailId()).toString();
             solrServer.add(createDocument(uuid, mail, accountId, session, System.currentTimeMillis()));
             solrServer.commit();
             textFillerQueue.add(TextFiller.fillerFor(uuid, mail, session));
@@ -637,9 +650,8 @@ public final class SolrjAdapter implements IndexAdapter {
             solrServer = solrServerFor(session, true);
             final List<TextFiller> fillers = new ArrayList<TextFiller>(mails.size());
             final long now = System.currentTimeMillis();
-            final Iterator<SolrInputDocument> iter = new MailDocumentIterator(mails.iterator(), session, now, fillers);
             try {
-                solrServer.add(iter);
+                solrServer.add(new MailDocumentIterator(mails.iterator(), session, now, fillers));
             } catch (final SolrException e) {
                 // Batch failed
                 SolrUtils.rollback(solrServer);
@@ -650,7 +662,7 @@ public final class SolrjAdapter implements IndexAdapter {
                         solrServer.add(inputDocument);
                         fillers.add(TextFiller.fillerFor(inputDocument));
                     } catch (final Exception addFailed) {
-                        LOG.warn("Mail input document could not be added: id=" + inputDocument.get("id") + " fullName=" + inputDocument.get("full_name"), addFailed);
+                        LOG.warn("Mail input document could not be added: id=" + inputDocument.getFieldValue("id") + " fullName=" + inputDocument.getFieldValue("full_name"), addFailed);
                     }
                 }
             }
@@ -1022,7 +1034,11 @@ public final class SolrjAdapter implements IndexAdapter {
         @Override
         public SolrInputDocument next() {
             final MailMessage mail = iterator.next();
-            final String uuid = MailPath.getMailPath(mail.getAccountId(), mail.getFolder(), mail.getMailId());
+            final String uuid =
+                String.valueOf(session.getContextId()) + MailPath.SEPERATOR + String.valueOf(session.getUserId()) + MailPath.SEPERATOR + MailPath.getMailPath(
+                    mail.getAccountId(),
+                    mail.getFolder(),
+                    mail.getMailId()).toString();
             final SolrInputDocument inputDocument = createDocument(uuid, mail, mail.getAccountId(), session, now);
             fillers.add(TextFiller.fillerFor(uuid, mail, session));
             return inputDocument;

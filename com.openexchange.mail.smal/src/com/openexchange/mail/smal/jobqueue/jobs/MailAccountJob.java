@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.smal.jobqueue.jobs;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -155,17 +156,16 @@ public final class MailAccountJob extends AbstractMailSyncJob {
     @Override
     public void perform() {
         try {
-            final List<String> list = getList();
             final JobQueue queue = JobQueue.getInstance();
             if (null == filter || filter.isEmpty()) {
+                final List<String> list = getList();
                 for (final String fullName : list) {
                     addJobIfShouldSync(queue, fullName);
                 }
             } else {
+                final List<String> list = new ArrayList<String>(filter);
                 for (final String fullName : list) {
-                    if (filter.contains(fullName)) {
-                        addJobIfShouldSync(queue, fullName);
-                    }
+                    addJobIfShouldSync(queue, fullName);
                 }
             }
         } catch (final Exception e) {
@@ -174,15 +174,6 @@ public final class MailAccountJob extends AbstractMailSyncJob {
     }
 
     private void addJobIfShouldSync(final JobQueue queue, final String fullName) {
-        
-        
-        // TESTING !! ! !
-        if (!"INBOX".equals(fullName)) {
-            return;
-        }
-        
-        
-        
         final FolderJob folderJob = new FolderJob(fullName, accountId, userId, contextId).setSpan(Constants.HOUR_MILLIS);
         if (queue.addJob(folderJob)) {
             LOG.debug("Folder job \"" + folderJob.toString() + "\" scheduled to job queue.");

@@ -63,7 +63,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link AbstractMailSyncJob}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractMailSyncJob extends Job {
@@ -88,7 +88,7 @@ public abstract class AbstractMailSyncJob extends Job {
 
     /**
      * Checks if a sync should be performed for specified full name with default span of 1 hour.
-     *
+     * 
      * @param fullName The full name
      * @param now The current time milliseconds
      * @return <code>true</code> if a sync should be performed for passed full name; otherwise <code>false</code>
@@ -100,7 +100,7 @@ public abstract class AbstractMailSyncJob extends Job {
 
     /**
      * Checks if a sync should be performed because given span is exceeded for specified full name.
-     *
+     * 
      * @param fullName The full name
      * @param now The current time milliseconds
      * @param span The max. allowed span; if exceeded the folder is considered to be synchronized
@@ -174,7 +174,7 @@ public abstract class AbstractMailSyncJob extends Job {
 
     /**
      * Updates the time stamp and unsets the sync flag.
-     *
+     * 
      * @param fullName The folder full name
      * @param stamp The time stamp
      * @return <code>true</code> if operation was successful; otherwise <code>false</code>
@@ -207,7 +207,7 @@ public abstract class AbstractMailSyncJob extends Job {
 
     /**
      * Unsets the sync flag.
-     *
+     * 
      * @param fullName The folder full name
      * @return <code>true</code> if operation was successful; otherwise <code>false</code>
      * @throws OXException If an error occurs
@@ -250,8 +250,7 @@ public abstract class AbstractMailSyncJob extends Job {
         final Connection con = databaseService.getWritable(contextId);
         PreparedStatement stmt = null;
         try {
-            stmt =
-                con.prepareStatement("DELETE FROM mailSync WHERE cid = ? AND user = ? AND accountId = ? AND fullName = ?");
+            stmt = con.prepareStatement("DELETE FROM mailSync WHERE cid = ? AND user = ? AND accountId = ? AND fullName = ?");
             int pos = 1;
             stmt.setLong(pos++, contextId);
             stmt.setLong(pos++, userId);
@@ -268,22 +267,55 @@ public abstract class AbstractMailSyncJob extends Job {
 
     /**
      * Checks if this call succeeds in setting the sync flag.
-     *
+     * 
      * @param fullName The folder full name
+     * @param now
      * @return <code>true</code> if operation was successful; otherwise <code>false</code>
      * @throws OXException If an error occurs
      */
-    protected boolean wasAbleToSetSyncFlag(final String fullName) throws OXException {
+    protected boolean wasAbleToSetSyncFlag(final String fullName, final long now) throws OXException {
         final DatabaseService databaseService = SMALServiceLookup.getServiceStatic(DatabaseService.class);
         if (null == databaseService) {
             return false;
         }
         final Connection con = databaseService.getWritable(contextId);
         PreparedStatement stmt = null;
+        ResultSet rs = null;
         try {
+            stmt = con.prepareStatement("SELECT sync FROM mailSync WHERE cid = ? AND user = ? AND accountId = ? AND fullName = ?");
+            int pos = 1;
+            stmt.setLong(pos++, contextId);
+            stmt.setLong(pos++, userId);
+            stmt.setLong(pos++, accountId);
+            stmt.setString(pos, fullName);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                DBUtils.closeSQLStuff(rs, stmt);
+                stmt = con.prepareStatement("INSERT INTO mailSync (cid, user, accountId, fullName, timestamp, sync) VALUES (?,?,?,?,?,?)");
+                pos = 1;
+                stmt.setLong(pos++, contextId);
+                stmt.setLong(pos++, userId);
+                stmt.setLong(pos++, accountId);
+                stmt.setString(pos++, fullName);
+                stmt.setLong(pos++, now);
+                stmt.setInt(pos, 1);
+                try {
+                    stmt.executeUpdate();
+                    return true;
+                } catch (final Exception e) {
+                    /*
+                     * Another INSERTed in the meantime
+                     */
+                    return false;
+                }
+            }
+            /*
+             * Try to set sync flag
+             */
+            DBUtils.closeSQLStuff(rs, stmt);
             stmt =
                 con.prepareStatement("UPDATE mailSync SET sync = 1 WHERE cid = ? AND user = ? AND accountId = ? AND fullName = ? AND sync = 0");
-            int pos = 1;
+            pos = 1;
             stmt.setLong(pos++, contextId);
             stmt.setLong(pos++, userId);
             stmt.setLong(pos++, accountId);
@@ -292,7 +324,7 @@ public abstract class AbstractMailSyncJob extends Job {
         } catch (final SQLException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            DBUtils.closeSQLStuff(rs, stmt);
             databaseService.backWritable(contextId, con);
         }
     }

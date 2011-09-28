@@ -218,7 +218,7 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
                 pos = lang.indexOf('-');
                 Locale locale = languageCodes.get(pos < 0 ? lang : lang.substring(0, pos));
                 if (null == locale) {
-                    LOG.warn("No language code for model: " + language + ". Using default " + defaultLocale);
+                    LOG.warn("No language code for model: " + language + ". Using default \"" + defaultLocale + '"');
                     locale = defaultLocale;
                 }
                 locales.add(locale);
