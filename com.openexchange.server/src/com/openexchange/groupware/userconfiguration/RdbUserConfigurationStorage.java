@@ -232,6 +232,8 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
                     DowngradeRegistry.getInstance().fireDowngradeEvent(event);
                 } catch (final OXException e) {
                     LOG.warn("New user configuration could not be propagated through system.", e);
+                } catch (final RuntimeException e) {
+                    LOG.warn("New user configuration could not be propagated through system.", e);
                 }
             }
         } finally {

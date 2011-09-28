@@ -119,7 +119,7 @@ public final class SolrjAdapter implements IndexAdapter {
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SolrjAdapter.class));
 
-    private static final Integer QUERY_ROWS = Integer.valueOf(125);
+    private static final int QUERY_ROWS = 125;
 
     private volatile CommonsHttpSolrServerManagement solrServerManagement;
 
@@ -271,13 +271,14 @@ public final class SolrjAdapter implements IndexAdapter {
             /*
              * Page-wise retrieval
              */
+            final Integer rows = Integer.valueOf(QUERY_ROWS);
             int off;
             final long numFound;
             final List<MailMessage> mails;
             {
                 final SolrQuery solrQuery = new SolrQuery().setQuery(query);
                 solrQuery.setStart(Integer.valueOf(0));
-                solrQuery.setRows(QUERY_ROWS);
+                solrQuery.setRows(rows);
                 final QueryResponse queryResponse = solrServer.query(solrQuery);
                 final SolrDocumentList results = queryResponse.getResults();
                 numFound = results.getNumFound();
@@ -294,7 +295,7 @@ public final class SolrjAdapter implements IndexAdapter {
             while (off < numFound) {
                 final SolrQuery solrQuery = new SolrQuery().setQuery(query);
                 solrQuery.setStart(Integer.valueOf(off));
-                solrQuery.setRows(QUERY_ROWS);
+                solrQuery.setRows(rows);
                 final QueryResponse queryResponse = solrServer.query(solrQuery);
                 final SolrDocumentList results = queryResponse.getResults();
                 final int size = results.size();
@@ -514,13 +515,14 @@ public final class SolrjAdapter implements IndexAdapter {
             /*
              * Page-wise retrieval
              */
+            final Integer rows = Integer.valueOf(QUERY_ROWS);
             int off;
             final long numFound;
             final List<MailMessage> mails;
             {
                 final SolrQuery solrQuery = new SolrQuery().setQuery(query);
                 solrQuery.setStart(Integer.valueOf(0));
-                solrQuery.setRows(QUERY_ROWS);
+                solrQuery.setRows(rows);
                 final QueryResponse queryResponse = solrServer.query(solrQuery);
                 final SolrDocumentList results = queryResponse.getResults();
                 numFound = results.getNumFound();
@@ -539,7 +541,7 @@ public final class SolrjAdapter implements IndexAdapter {
             while (off < numFound) {
                 final SolrQuery solrQuery = new SolrQuery().setQuery(query);
                 solrQuery.setStart(Integer.valueOf(off));
-                solrQuery.setRows(QUERY_ROWS);
+                solrQuery.setRows(rows);
                 final QueryResponse queryResponse = solrServer.query(solrQuery);
                 final SolrDocumentList results = queryResponse.getResults();
                 final int size = results.size();
@@ -664,13 +666,14 @@ public final class SolrjAdapter implements IndexAdapter {
             /*
              * Page-wise retrieval
              */
+            final Integer rows = Integer.valueOf(QUERY_ROWS);
             int off;
             final long numFound;
             final List<SolrDocument> documents;
             {
                 final SolrQuery solrQuery = new SolrQuery().setQuery(query);
                 solrQuery.setStart(Integer.valueOf(0));
-                solrQuery.setRows(QUERY_ROWS);
+                solrQuery.setRows(rows);
                 final QueryResponse queryResponse = solrServer.query(solrQuery);
                 final SolrDocumentList results = queryResponse.getResults();
                 numFound = results.getNumFound();
@@ -688,7 +691,7 @@ public final class SolrjAdapter implements IndexAdapter {
             while (off < numFound) {
                 final SolrQuery solrQuery = new SolrQuery().setQuery(query);
                 solrQuery.setStart(Integer.valueOf(off));
-                solrQuery.setRows(QUERY_ROWS);
+                solrQuery.setRows(rows);
                 final QueryResponse queryResponse = solrServer.query(solrQuery);
                 final SolrDocumentList results = queryResponse.getResults();
                 final int rsize = results.size();
