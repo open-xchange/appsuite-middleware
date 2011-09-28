@@ -134,6 +134,15 @@ public abstract class Job implements Task<Object>, Comparable<Job>, Serializable
     public abstract void perform();
 
     /**
+     * Replaces this job with values/operations from passed job.
+     * 
+     * @param anotherJob The other job to copy from
+     */
+    public void replaceWith(final Job anotherJob) {
+        // Default do nothing
+    }
+
+    /**
      * Gets the associated future.
      *
      * @return The associated future or <code>null</code> if not in progress

@@ -107,7 +107,7 @@ public final class JobQueue {
 
     private final BlockingQueue<Job> queue;
 
-    private final ConcurrentMap<String, Object> identifiers;
+    private final ConcurrentMap<String, Job> identifiers;
 
     private final Future<Object> consumerFuture;
 
@@ -119,7 +119,7 @@ public final class JobQueue {
     private JobQueue(final ThreadPoolService threadPool) {
         super();
         queue = new PriorityBlockingQueue<Job>(CAPACITY);
-        identifiers = new ConcurrentHashMap<String, Object>(CAPACITY);
+        identifiers = new ConcurrentHashMap<String, Job>(CAPACITY);
         consumer = new JobConsumer(queue, identifiers);
         consumerFuture = threadPool.submit(consumer, AbortBehavior.getInstance());
     }
@@ -158,7 +158,8 @@ public final class JobQueue {
             return false;
         }
         final String identifier = job.getIdentifier();
-        if (null == identifiers.putIfAbsent(identifier, PRESENT)) {
+        final Job prev = identifiers.putIfAbsent(identifier, job);
+        if (null == prev) {
             /*
              * Not yet contained in queue
              */
@@ -166,6 +167,13 @@ public final class JobQueue {
                 identifiers.remove(identifier);
                 return false;
             }
+            return true;
+        }
+        if (prev.getRanking() < job.getRanking()) {
+            /*
+             * Replace
+             */
+            prev.replaceWith(job);
             return true;
         }
         return false;

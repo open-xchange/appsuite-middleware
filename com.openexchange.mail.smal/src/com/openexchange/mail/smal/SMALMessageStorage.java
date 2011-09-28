@@ -139,7 +139,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
             /*
              * Schedule folder task
              */
-            final boolean scheduled = JobQueue.getInstance().addJob(new FolderJob(folder, accountId, userId, contextId).setSpan(-1L));
+            final boolean scheduled = JobQueue.getInstance().addJob(new FolderJob(folder, accountId, userId, contextId).setSpan(-1L).setRanking(1));
 
             System.out.println("SMALMessageStorage.searchMessages() retrieved " + mails.size() + " messages from index for " + folder + (scheduled ? " AND scheduled an immediate folder job." : ""));
 
@@ -209,11 +209,15 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
 
     @Override
     public MailMessage[] getNewAndModifiedMessages(final String folder, final MailField[] fields) throws OXException {
+        final Long timestamp = (Long) session.getParameter("smal.Timestamp");
+        
         return messageStorage.getNewAndModifiedMessages(folder, fields);
     }
 
     @Override
     public MailMessage[] getDeletedMessages(final String folder, final MailField[] fields) throws OXException {
+        final Long timestamp = (Long) session.getParameter("smal.Timestamp");
+        
         return messageStorage.getDeletedMessages(folder, fields);
     }
 

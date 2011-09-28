@@ -113,7 +113,7 @@ final class JobConsumer extends AbstractTask<Object> {
 
     private final BlockingQueue<Job> queue;
 
-    private final ConcurrentMap<String, Object> identifiers;
+    private final ConcurrentMap<String, Job> identifiers;
 
     private final AtomicBoolean keepgoing;
 
@@ -122,7 +122,7 @@ final class JobConsumer extends AbstractTask<Object> {
     /**
      * Initializes a new {@link JobConsumer}.
      */
-    protected JobConsumer(final BlockingQueue<Job> queue, final ConcurrentMap<String, Object> identifiers) {
+    protected JobConsumer(final BlockingQueue<Job> queue, final ConcurrentMap<String, Job> identifiers) {
         super();
         keepgoing = new AtomicBoolean(true);
         this.queue = queue;
