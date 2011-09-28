@@ -52,8 +52,10 @@ package com.openexchange.mail.smal.adapter.solrj;
 import static com.openexchange.mail.mime.QuotedInternetAddress.toIDN;
 import static com.openexchange.mail.smal.adapter.IndexAdapters.detectLocale;
 import static com.openexchange.mail.smal.adapter.IndexAdapters.isEmpty;
+import static java.util.Collections.singletonList;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -65,6 +67,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -125,23 +128,69 @@ public final class SolrjAdapter implements IndexAdapter {
 
     private final EnumMap<MailSortField, String> sortField2Name;
 
+    private final EnumMap<MailField, List<String>> field2Name;
+
+    private final MailFields mailFields;
+
     /**
      * Initializes a new {@link SolrjAdapter}.
      */
     public SolrjAdapter() {
         super();
-        final EnumMap<MailSortField, String> map = new EnumMap<MailSortField, String>(MailSortField.class);
-        map.put(MailSortField.ACCOUNT_NAME, "account");
-        map.put(MailSortField.CC, "cc_plain");
-        map.put(MailSortField.COLOR_LABEL, "color_label");
-        map.put(MailSortField.FLAG_SEEN, "flag_seen");
-        map.put(MailSortField.FROM, "from_plain");
-        map.put(MailSortField.RECEIVED_DATE, "received_date");
-        map.put(MailSortField.SENT_DATE, "sent_date");
-        map.put(MailSortField.SIZE, "size");
-        map.put(MailSortField.SUBJECT, "subject_plain");
-        map.put(MailSortField.TO, "to_plain");
-        sortField2Name = map;
+        {
+            final EnumMap<MailSortField, String> map = new EnumMap<MailSortField, String>(MailSortField.class);
+            map.put(MailSortField.ACCOUNT_NAME, "account");
+            map.put(MailSortField.CC, "cc_plain");
+            map.put(MailSortField.COLOR_LABEL, "color_label");
+            map.put(MailSortField.FLAG_SEEN, "flag_seen");
+            map.put(MailSortField.FROM, "from_plain");
+            map.put(MailSortField.RECEIVED_DATE, "received_date");
+            map.put(MailSortField.SENT_DATE, "sent_date");
+            map.put(MailSortField.SIZE, "size");
+            map.put(MailSortField.SUBJECT, "subject_plain");
+            map.put(MailSortField.TO, "to_plain");
+            sortField2Name = map;
+        }
+        {
+            final EnumMap<MailField, List<String>> map = new EnumMap<MailField, List<String>>(MailField.class);
+            map.put(MailField.ACCOUNT_NAME, singletonList("account"));
+            map.put(MailField.ID, singletonList("id"));
+            map.put(MailField.FOLDER_ID, singletonList("full_name"));
+            map.put(MailField.FROM, singletonList("from_plain"));
+            map.put(MailField.TO, singletonList("to_plain"));
+            map.put(MailField.CC, singletonList("cc_plain"));
+            map.put(MailField.BCC, singletonList("bcc_plain"));
+            map.put(MailField.FLAGS, Arrays.asList("flag_answered", "flag_deleted", "flag_draft", "flag_flagged", "flag_forwarded", "flag_read_ack", "flag_recent", "flag_seen", "flag_", "flag_spam", "flag_user"));
+            map.put(MailField.SIZE, singletonList("size"));
+            {
+                final Set<Locale> knownLocales = IndexAdapters.KNOWN_LOCALES;
+                final List<String> names = new ArrayList<String>(knownLocales.size());
+                final StringBuilder tmp = new StringBuilder("subject_"); //8
+                for (final Locale loc : knownLocales) {
+                    tmp.setLength(8);
+                    tmp.append(loc.getLanguage());
+                    names.add(tmp.toString());
+                }
+                map.put(MailField.SUBJECT, names);
+            }
+            map.put(MailField.RECEIVED_DATE, singletonList("received_date"));
+            map.put(MailField.SENT_DATE, singletonList("sent_date"));
+            map.put(MailField.COLOR_LABEL, singletonList("color_label"));
+            map.put(MailField.CONTENT_TYPE, singletonList("attachment"));
+            {
+                final Set<Locale> knownLocales = IndexAdapters.KNOWN_LOCALES;
+                final List<String> names = new ArrayList<String>(knownLocales.size());
+                final StringBuilder tmp = new StringBuilder("content_"); //8
+                for (final Locale loc : knownLocales) {
+                    tmp.setLength(8);
+                    tmp.append(loc.getLanguage());
+                    names.add(tmp.toString());
+                }
+                map.put(MailField.BODY, names);
+            }
+            field2Name = map;
+        }
+        mailFields = new MailFields(field2Name.keySet());
     }
 
     private IndexUrl indexUrlFor(final Session session, final boolean readWrite) throws OXException {
@@ -175,25 +224,9 @@ public final class SolrjAdapter implements IndexAdapter {
         }
     }
 
-    private static final MailFields INDEXABLE_FIELDS = new MailFields(
-        MailField.ACCOUNT_NAME,
-        MailField.ID,
-        MailField.FOLDER_ID,
-        MailField.FROM,
-        MailField.TO,
-        MailField.CC,
-        MailField.BCC,
-        MailField.FLAGS,
-        MailField.SIZE,
-        MailField.SUBJECT,
-        MailField.RECEIVED_DATE,
-        MailField.SENT_DATE,
-        MailField.COLOR_LABEL,
-        MailField.CONTENT_TYPE);
-
     @Override
     public MailFields getIndexableFields() throws OXException {
-        return INDEXABLE_FIELDS;
+        return mailFields;
     }
 
     @Override
