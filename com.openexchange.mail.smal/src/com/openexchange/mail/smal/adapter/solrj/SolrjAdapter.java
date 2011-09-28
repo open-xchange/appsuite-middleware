@@ -294,9 +294,24 @@ public final class SolrjAdapter implements IndexAdapter {
         mail.setAccountId(SolrjAdapter.<Integer> getFieldValue("account", document).intValue());
         mail.setColorLabel(SolrjAdapter.<Integer> getFieldValue("color_label", document).intValue());
         mail.setHasAttachment(SolrjAdapter.<Boolean> getFieldValue("attachment", document).booleanValue());
-        mail.setSize(SolrjAdapter.<Long> getFieldValue("size", document).longValue());
-        mail.setReceivedDate(new Date(SolrjAdapter.<Long> getFieldValue("received_date", document).longValue()));
-        mail.setSentDate(new Date(SolrjAdapter.<Long> getFieldValue("sent_date", document).longValue()));
+        {
+            final Long size = SolrjAdapter.<Long> getFieldValue("size", document);
+            if (null != size) {
+                mail.setSize(size.longValue());
+            }
+        }
+        {
+            final Long time = SolrjAdapter.<Long> getFieldValue("received_date", document);
+            if (null != time) {
+                mail.setReceivedDate(new Date(time.longValue()));
+            }
+        }
+        {
+            final Long time = SolrjAdapter.<Long> getFieldValue("sent_date", document);
+            if (null != time) {
+                mail.setSentDate(new Date(time.longValue()));
+            }
+        }
         {
             String addressList = getFieldValue("from_plain", document);
             if (!isEmpty(addressList)) {
