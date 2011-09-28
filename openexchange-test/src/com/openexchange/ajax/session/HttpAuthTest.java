@@ -50,6 +50,7 @@
 package com.openexchange.ajax.session;
 
 import javax.servlet.http.HttpServletResponse;
+import junit.framework.TestCase;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -57,7 +58,6 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.params.ClientPNames;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.session.actions.HttpAuthRequest;
 import com.openexchange.ajax.session.actions.HttpAuthResponse;
 import com.openexchange.configuration.AJAXConfig;
@@ -68,7 +68,7 @@ import com.openexchange.configuration.AJAXConfig.Property;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class HttpAuthTest extends AbstractAJAXSession {
+public class HttpAuthTest extends TestCase {
 
     private String protocol;
     private String hostname;
