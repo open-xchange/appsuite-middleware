@@ -334,9 +334,9 @@ public final class SolrjAdapter implements IndexAdapter {
     }
 
     private MailMessage readDocument(final SolrDocument document, final MailFields mailFields) throws OXException {
-        if (SolrTextFillerQueue.checkSolrDocument(document)) {
-            textFillerQueue.add(TextFiller.fillerFor(document));
-        }
+//        if (SolrTextFillerQueue.checkSolrDocument(document)) {
+//            textFillerQueue.add(TextFiller.fillerFor(document));
+//        }
         final MailFields fields = null == mailFields ? new MailFields(true) : mailFields;
         final MailMessage mail = new IDMailMessage(document.getFieldValue("id").toString(), document.getFieldValue("full_name").toString());
         mail.setAccountId(SolrjAdapter.<Integer> getFieldValue("account", document).intValue());
@@ -474,6 +474,9 @@ public final class SolrjAdapter implements IndexAdapter {
     @Override
     public List<MailMessage> getMessages(final String[] optMailIds, final String fullName, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int accountId, final Session session) throws OXException {
         try {
+            
+            System.out.println("SolrjAdapter.getMessages(): start...");
+            
             final CommonsHttpSolrServer solrServer = solrServerFor(session, true);
             final MailFields mailFields = new MailFields(fields);
             final boolean sort = null != sortField && null != order;
@@ -506,6 +509,9 @@ public final class SolrjAdapter implements IndexAdapter {
                 }
                 query = queryBuilder.toString();
             }
+            
+            System.out.println("SolrjAdapter.getMessages(): query:\n" + query);
+            
             /*
              * Page-wise retrieval
              */
@@ -529,9 +535,8 @@ public final class SolrjAdapter implements IndexAdapter {
                 }
                 off += size;
                 
-                System.out.println("Requested first chunk from index for:\n" + query);
+                System.out.println("SolrjAdapter.getMessages() requested " + off +" of " + numFound + " mails from index for:\n" + query);
             }
-            int num = 2;
             while (off < numFound) {
                 final SolrQuery solrQuery = new SolrQuery().setQuery(query);
                 solrQuery.setStart(Integer.valueOf(off));
@@ -547,7 +552,7 @@ public final class SolrjAdapter implements IndexAdapter {
                 }
                 off += size;
                 
-                System.out.println("Requested " + (num++) +". chunk from index for:\n" + query);
+                System.out.println("SolrjAdapter.getMessages() requested " + off +" of " + numFound + " mails from index for:\n" + query);
             }
             if (sort) {
                 Collections.sort(mails, new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), getUserLocaleLazy(session)));
@@ -713,6 +718,16 @@ public final class SolrjAdapter implements IndexAdapter {
     }
 
     @Override
+    public void addContent(final MailMessage mail, final Session session) throws OXException {
+        final String uuid =
+            String.valueOf(session.getContextId()) + MailPath.SEPERATOR + String.valueOf(session.getUserId()) + MailPath.SEPERATOR + MailPath.getMailPath(
+                mail.getAccountId(),
+                mail.getFolder(),
+                mail.getMailId()).toString();
+        textFillerQueue.add(TextFiller.fillerFor(uuid, mail, session));
+    }
+
+    @Override
     public void add(final MailMessage mail, final Session session) throws OXException {
         CommonsHttpSolrServer solrServer = null;
         try {
@@ -725,7 +740,7 @@ public final class SolrjAdapter implements IndexAdapter {
                     mail.getMailId()).toString();
             solrServer.add(createDocument(uuid, mail, accountId, session, System.currentTimeMillis()));
             solrServer.commit();
-            textFillerQueue.add(TextFiller.fillerFor(uuid, mail, session));
+            //textFillerQueue.add(TextFiller.fillerFor(uuid, mail, session));
         } catch (final SolrServerException e) {
             SolrUtils.rollback(solrServer);
             throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
@@ -762,7 +777,7 @@ public final class SolrjAdapter implements IndexAdapter {
                 }
             }
             solrServer.commit();
-            textFillerQueue.add(fillers);
+            //textFillerQueue.add(fillers);
         } catch (final SolrServerException e) {
             SolrUtils.rollback(solrServer);
             throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
@@ -1026,13 +1041,13 @@ public final class SolrjAdapter implements IndexAdapter {
         @Override
         public SolrInputDocument next() {
             final SolrDocument document = iterator.next();
-            if (SolrTextFillerQueue.checkSolrDocument(document)) {
-                try {
-                    textFillerQueue.add(TextFiller.fillerFor(document));
-                } catch (final OXException e) {
-                    // Ignore
-                }
-            }
+//            if (SolrTextFillerQueue.checkSolrDocument(document)) {
+//                try {
+//                    textFillerQueue.add(TextFiller.fillerFor(document));
+//                } catch (final OXException e) {
+//                    // Ignore
+//                }
+//            }
             final Map<String, Object> documentFields = document.getFieldValueMap();
             final SolrInputDocument inputDocument = new SolrInputDocument();
             {
