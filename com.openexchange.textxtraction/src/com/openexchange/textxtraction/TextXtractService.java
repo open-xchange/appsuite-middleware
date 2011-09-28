@@ -72,15 +72,27 @@ public interface TextXtractService {
     String extractFrom(InputStream inputStream, String optMimeType) throws OXException;
 
     /**
-     * Extracts plain-text content from specified stream's content.
+     * Extracts plain-text content from specified content.
      * <p>
-     * An auto-detection mechanism is performed to determine file's/URL's document format if <code>optMimeType</code> is <code>null</code>.
+     * An auto-detection mechanism is performed to determine stream's document format if <code>optMimeType</code> is <code>null</code>.
      * 
-     * @param arg The argument either denotes an URL or a file
+     * @param content The content to extract text from (and hopefully no plain-text content)
      * @param optMimeType The optional MIME type, pass <code>null</code> to auto-detect
      * @return The extracted plain-text
      * @throws OXException If text extraction fails for any reason
      */
-    String extractFrom(String arg, String optMimeType) throws OXException;
+    String extractFrom(String content, String optMimeType) throws OXException;
+
+    /**
+     * Extracts plain-text content from specified resource's content.
+     * <p>
+     * An auto-detection mechanism is performed to determine file's/URL's document format if <code>optMimeType</code> is <code>null</code>.
+     * 
+     * @param arg The (resource) argument either denotes an URL or a file
+     * @param optMimeType The optional MIME type, pass <code>null</code> to auto-detect
+     * @return The extracted plain-text
+     * @throws OXException If text extraction fails for any reason
+     */
+    String extractFromResource(String arg, String optMimeType) throws OXException;
 
 }

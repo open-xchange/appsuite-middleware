@@ -57,6 +57,7 @@ import java.net.URL;
 import org.apache.tika.io.TikaInputStream;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.textxtraction.TextXtractService;
 
 /**
@@ -84,7 +85,7 @@ public final class TikaTextXtractService implements TextXtractService {
     }
 
     @Override
-    public String extractFrom(final String arg, final String optMimeType) throws OXException {
+    public String extractFromResource(final String arg, final String optMimeType) throws OXException {
         try {
             final URL url;
             {
@@ -103,6 +104,11 @@ public final class TikaTextXtractService implements TextXtractService {
         } catch (final IOException e) {
             throw TextXtractExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }
+    }
+
+    @Override
+    public String extractFrom(final String content, final String optMimeType) throws OXException {
+        return (isEmpty(optMimeType) ? newDefaultHandler() : newHandler(optMimeType)).getDocumentContent(Streams.newByteArrayInputStream(content.getBytes(Charsets.UTF_8)));
     }
 
     @Override
