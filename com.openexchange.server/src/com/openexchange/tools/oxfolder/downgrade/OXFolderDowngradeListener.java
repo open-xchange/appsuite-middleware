@@ -117,7 +117,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
                     LOG.info("All calendar-related folder data removed due to loss of task module access");
                 }
             } catch (final Exception e) {
-                LOG.warn("Could not remove all calendar-related folder data removed due to loss of task module access.");
+                LOG.warn("Could not remove all calendar-related folder data caused by loss of task module access.");
                 LOG.debug(e.getMessage(), e);
             }
         }
@@ -131,7 +131,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
                     LOG.info("All task-related folder data removed due to loss of task module access");
                 }
             } catch (final Exception e) {
-                LOG.warn("Could not remove all task-related folder data removed due to loss of task module access.");
+                LOG.warn("Could not remove all task-related folder data caused by loss of task module access.");
                 LOG.debug(e.getMessage(), e);
             }
         }
@@ -145,7 +145,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
                     LOG.info("All infostore-related folder data removed due to loss of task module access");
                 }
             } catch (final Exception e) {
-                LOG.warn("Could not remove all infostore-related folder data removed due to loss of task module access.");
+                LOG.warn("Could not remove all infostore-related folder data caused by loss of task module access.");
                 LOG.debug(e.getMessage(), e);
             }
         }
@@ -159,7 +159,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
                     LOG.info("All shared folder data removed due to loss of full shared folder access");
                 }
             } catch (final Exception e) {
-                LOG.warn("Could not remove all shared folder data removed due to loss of task module access.");
+                LOG.warn("Could not remove all shared folder data caused by loss of task module access.");
                 LOG.debug(e.getMessage(), e);
             }
         }
