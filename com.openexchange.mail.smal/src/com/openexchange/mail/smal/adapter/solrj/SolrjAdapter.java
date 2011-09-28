@@ -271,12 +271,12 @@ public final class SolrjAdapter implements IndexAdapter {
             /*
              * Page-wise retrieval
              */
-            int off = 0;
+            int off;
             final long numFound;
             final List<MailMessage> mails;
             {
                 final SolrQuery solrQuery = new SolrQuery().setQuery(query);
-                solrQuery.setStart(Integer.valueOf(off));
+                solrQuery.setStart(Integer.valueOf(0));
                 solrQuery.setRows(QUERY_ROWS);
                 final QueryResponse queryResponse = solrServer.query(solrQuery);
                 final SolrDocumentList results = queryResponse.getResults();
@@ -289,7 +289,7 @@ public final class SolrjAdapter implements IndexAdapter {
                 for (int i = 0; i < size; i++) {
                     mails.add(readDocument(results.get(i), mailFields));
                 }
-                off += size;
+                off = size;
             }
             while (off < numFound) {
                 final SolrQuery solrQuery = new SolrQuery().setQuery(query);
@@ -514,12 +514,12 @@ public final class SolrjAdapter implements IndexAdapter {
             /*
              * Page-wise retrieval
              */
-            int off = 0;
+            int off;
             final long numFound;
             final List<MailMessage> mails;
             {
                 final SolrQuery solrQuery = new SolrQuery().setQuery(query);
-                solrQuery.setStart(Integer.valueOf(off));
+                solrQuery.setStart(Integer.valueOf(0));
                 solrQuery.setRows(QUERY_ROWS);
                 final QueryResponse queryResponse = solrServer.query(solrQuery);
                 final SolrDocumentList results = queryResponse.getResults();
@@ -532,7 +532,7 @@ public final class SolrjAdapter implements IndexAdapter {
                 for (int i = 0; i < size; i++) {
                     mails.add(readDocument(results.get(i), mailFields));
                 }
-                off += size;
+                off = size;
                 
                 System.out.println("SolrjAdapter.getMessages() requested " + off +" of " + numFound + " mails from index for:\n" + query);
             }
@@ -664,12 +664,12 @@ public final class SolrjAdapter implements IndexAdapter {
             /*
              * Page-wise retrieval
              */
-            int off = 0;
+            int off;
             final long numFound;
             final List<SolrDocument> documents;
             {
                 final SolrQuery solrQuery = new SolrQuery().setQuery(query);
-                solrQuery.setStart(Integer.valueOf(off));
+                solrQuery.setStart(Integer.valueOf(0));
                 solrQuery.setRows(QUERY_ROWS);
                 final QueryResponse queryResponse = solrServer.query(solrQuery);
                 final SolrDocumentList results = queryResponse.getResults();
@@ -683,7 +683,7 @@ public final class SolrjAdapter implements IndexAdapter {
                     final SolrDocument solrDocument = results.get(i);
                     mails.add(readDocument(solrDocument, CHANGE_FIELDS));
                 }
-                off += rsize;
+                off = rsize;
             }
             while (off < numFound) {
                 final SolrQuery solrQuery = new SolrQuery().setQuery(query);
