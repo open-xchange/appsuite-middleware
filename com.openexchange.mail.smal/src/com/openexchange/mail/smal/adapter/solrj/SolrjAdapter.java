@@ -405,6 +405,7 @@ public final class SolrjAdapter implements IndexAdapter {
         return mail;
     }
 
+    @SuppressWarnings("unchecked")
     private static <V> V getFieldValue(final String name, final SolrDocument document) throws OXException {
         final Object value = document.getFieldValue(name);
         if (null == value) {
