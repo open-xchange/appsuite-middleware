@@ -133,7 +133,6 @@ public final class TikaDocumentHandler {
             detector = new DefaultDetector();
             parser = null == mimeType ? new AutoDetectParser(detector) : ParseUtils.getParser(mimeType, TikaConfig.getDefaultConfig());
             context.set(Parser.class, parser);
-            // context.set(EmbeddedDocumentExtractor.class, new FileEmbeddedDocumentExtractor(this));
         } catch (final TikaException e) {
             throw TextXtractExceptionCodes.ERROR.create(e, e.getMessage());
         }

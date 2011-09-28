@@ -1564,8 +1564,11 @@ public class DatabaseImpl extends DBService {
     @Override
     public void rollback() throws OXException {
         final Context ctx = ctxHolder.get();
-        for (final String id : fileIdAddList.get()) {
-            getFileStorage(ctx).deleteFile(id);
+        final List<String> list = fileIdAddList.get();
+        if (null != list && !list.isEmpty()) {
+            for (final String id : list) {
+                getFileStorage(ctx).deleteFile(id);
+            }
         }
         super.rollback();
     }
