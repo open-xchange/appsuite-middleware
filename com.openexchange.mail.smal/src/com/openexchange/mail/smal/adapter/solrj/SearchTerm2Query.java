@@ -49,9 +49,12 @@
 
 package com.openexchange.mail.smal.adapter.solrj;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.search.ANDTerm;
 import com.openexchange.mail.search.BccTerm;
@@ -68,6 +71,7 @@ import com.openexchange.mail.search.SentDateTerm;
 import com.openexchange.mail.search.SizeTerm;
 import com.openexchange.mail.search.SubjectTerm;
 import com.openexchange.mail.search.ToTerm;
+import com.openexchange.mail.smal.adapter.IndexAdapters;
 
 /**
  * {@link SearchTerm2Query} - Transforms a search term to a query.
@@ -233,7 +237,15 @@ public final class SearchTerm2Query {
             return Arrays.asList("bcc_personal", "bcc_addr");
         }
         if (searchTerm instanceof BodyTerm) {
-            return Arrays.asList("content_en", "content_de", "content_fr", "content_nl", "content_sv", "content_es", "content_it");
+            final Set<Locale> knownLocales = IndexAdapters.KNOWN_LOCALES;
+            final List<String> names = new ArrayList<String>(knownLocales.size());
+            final StringBuilder tmp = new StringBuilder("content_"); //8
+            for (final Locale loc : knownLocales) {
+                tmp.setLength(8);
+                tmp.append(loc.getLanguage());
+                names.add(tmp.toString());
+            }
+            return names;
         }
         if (searchTerm instanceof CcTerm) {
             return Arrays.asList("cc_personal", "cc_addr");
@@ -251,7 +263,15 @@ public final class SearchTerm2Query {
             return Arrays.asList("size");
         }
         if (searchTerm instanceof SubjectTerm) {
-            return Arrays.asList("subject_en", "subject_de", "subject_fr", "subject_nl", "subject_sv", "subject_es", "subject_it");
+            final Set<Locale> knownLocales = IndexAdapters.KNOWN_LOCALES;
+            final List<String> names = new ArrayList<String>(knownLocales.size());
+            final StringBuilder tmp = new StringBuilder("subject_"); //8
+            for (final Locale loc : knownLocales) {
+                tmp.setLength(8);
+                tmp.append(loc.getLanguage());
+                names.add(tmp.toString());
+            }
+            return names;
         }
         if (searchTerm instanceof ToTerm) {
             return Arrays.asList("to_personal", "to_addr");
