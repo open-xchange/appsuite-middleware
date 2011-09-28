@@ -55,9 +55,9 @@ import com.openexchange.ajax.session.actions.ChangeIPRequest;
 import com.openexchange.ajax.session.actions.ChangeIPResponse;
 import com.openexchange.ajax.session.actions.RefreshSecretRequest;
 import com.openexchange.ajax.session.actions.RefreshSecretResponse;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
+import com.openexchange.sessiond.SessionExceptionCodes;
 
 /**
  * {@link ChangeIPTest}
@@ -92,9 +92,9 @@ public final class ChangeIPTest extends AbstractAJAXSession {
         final RefreshSecretRequest request2 = new RefreshSecretRequest(false);
         final RefreshSecretResponse response2 = client.execute(request2);
         assertTrue("Refresh request should be denied because of wrong IP.", response2.hasError());
-        final AbstractOXException e = response2.getException();
-        assertEquals("Wrong exception message.", EnumComponent.SESSION, e.getComponent());
-        assertEquals("Wrong exception message.", Category.PERMISSION, e.getCategory());
-        assertEquals("Wrong exception message.", 205, e.getDetailNumber());
+        final OXException e = response2.getException();
+        assertEquals("Wrong exception message.", SessionExceptionCodes.WRONG_CLIENT_IP.getPrefix(), e.getPrefix());
+        assertEquals("Wrong exception message.", Category.CATEGORY_PERMISSION_DENIED, e.getCategory());
+        assertEquals("Wrong exception message.", SessionExceptionCodes.WRONG_CLIENT_IP.getNumber(), e.getCode());
     }
 }
