@@ -244,7 +244,7 @@ public final class SolrjAdapter implements IndexAdapter {
     @Override
     public List<MailMessage> search(final String optFullName, final SearchTerm<?> searchTerm, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int optAccountId, final Session session) throws OXException {
         try {
-            final CommonsHttpSolrServer solrServer = solrServerFor(session, true);
+            final CommonsHttpSolrServer solrServer = solrServerFor(session, false);
             final MailFields mailFields = new MailFields(fields);
             final boolean sort = null != sortField && null != order;
             if (sort) {
@@ -477,7 +477,7 @@ public final class SolrjAdapter implements IndexAdapter {
             
             System.out.println("SolrjAdapter.getMessages(): start...");
             
-            final CommonsHttpSolrServer solrServer = solrServerFor(session, true);
+            final CommonsHttpSolrServer solrServer = solrServerFor(session, false);
             final MailFields mailFields = new MailFields(fields);
             final boolean sort = null != sortField && null != order;
             if (sort) {
