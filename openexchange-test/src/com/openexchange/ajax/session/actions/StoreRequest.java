@@ -70,7 +70,6 @@ public class StoreRequest extends AbstractRequest<StoreResponse> {
             new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_STORE),
             new URLParameter(PARAM_SESSION, session)
         });
-
         this.failOnError = failOnError;
     }
 
@@ -78,12 +77,8 @@ public class StoreRequest extends AbstractRequest<StoreResponse> {
         return new StoreResponseParser(failOnError);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Method getMethod() {
         return Method.GET;
     }
-
 }
