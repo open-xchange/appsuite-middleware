@@ -181,4 +181,13 @@ public interface IndexAdapter {
      */
     public void add(List<MailMessage> mails, Session session) throws OXException;
 
+    /**
+     * Adds specified mail's content to the index.
+     *
+     * @param mail The mail from which the content shall be added
+     * @param session The session
+     * @throws OXException If adding mail's content to index fails
+     */
+    public void addContent(MailMessage mail, Session session) throws OXException;
+
 }

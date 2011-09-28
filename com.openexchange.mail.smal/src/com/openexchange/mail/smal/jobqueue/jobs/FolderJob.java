@@ -61,6 +61,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.IndexRange;
@@ -77,6 +78,7 @@ import com.openexchange.mail.smal.SMALMailAccess;
 import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.mail.smal.adapter.IndexAdapter;
 import com.openexchange.mail.smal.jobqueue.Constants;
+import com.openexchange.mail.smal.jobqueue.Job;
 import com.openexchange.mail.smal.jobqueue.JobQueue;
 import com.openexchange.session.Session;
 import com.openexchange.tools.sql.DBUtils;
@@ -97,9 +99,19 @@ public final class FolderJob extends AbstractMailSyncJob {
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
+    private static final int GATE_PERFORM = -1;
+
+    private static final int GATE_OPEN = 0;
+
+    private static final int GATE_REPLACE = 1;
+
     private final String fullName;
 
     private final String identifier;
+
+    private final AtomicInteger gate;
+
+    private volatile int ranking;
 
     private volatile boolean reEnqueued;
 
@@ -119,6 +131,8 @@ public final class FolderJob extends AbstractMailSyncJob {
      */
     public FolderJob(final String fullName, final int accountId, final int userId, final int contextId) {
         super(accountId, userId, contextId);
+        gate = new AtomicInteger(0);
+        ranking = 0;
         this.fullName = fullName;
         identifier =
             new StringBuilder(SIMPLE_NAME).append('@').append(contextId).append('@').append(userId).append('@').append(accountId).append(
@@ -137,6 +151,36 @@ public final class FolderJob extends AbstractMailSyncJob {
         return this;
     }
 
+    /**
+     * Sets the ranking
+     *
+     * @param ranking The ranking to set
+     * @return This folder job with specified ranking applied
+     */
+    public FolderJob setRanking(final int ranking) {
+        this.ranking = ranking;
+        return this;
+    }
+
+    @Override
+    public void replaceWith(final Job anotherJob) {
+        if (!identifier.equals(anotherJob.getIdentifier())) {
+            return;
+        }
+        int state;
+        do {
+            state = gate.get();
+            if (GATE_PERFORM == state) {
+                // Already performed
+                return;
+            }
+        } while (state != GATE_OPEN || !gate.compareAndSet(state, GATE_REPLACE));
+        final FolderJob anotherFolderJob = (FolderJob) anotherJob;
+        this.ranking = anotherFolderJob.ranking;
+        this.span = anotherFolderJob.span;
+        gate.set(0);
+    }
+
     @Override
     public String getIdentifier() {
         return identifier;
@@ -144,7 +188,7 @@ public final class FolderJob extends AbstractMailSyncJob {
 
     @Override
     public int getRanking() {
-        return 0;
+        return ranking;
     }
 
     private static final MailField[] FIELDS = new MailField[] { MailField.ID, MailField.FLAGS };
@@ -155,6 +199,14 @@ public final class FolderJob extends AbstractMailSyncJob {
             cancel();
             return;
         }
+        int state;
+        do {
+            state = gate.get();
+            if (GATE_PERFORM == state) {
+                // Already performed?
+                return;
+            }
+        } while (state != GATE_OPEN || !gate.compareAndSet(state, GATE_PERFORM));
         try {
             if (reEnqueued) {
                 reEnqueued = false;
@@ -374,7 +426,14 @@ public final class FolderJob extends AbstractMailSyncJob {
             for (int i = offset; i < end; i++) {
                 ids.set(i, null);
             }
-            indexAdapter.add(mails, session);
+            try {
+                indexAdapter.add(mails, session);
+            } catch (final OXException e) {
+                // Batch add failed; retry one-by-one
+                for (final MailMessage mail : mails) {
+                    indexAdapter.add(mail, session);
+                }
+            }
             mails.clear();
             return retval;
         } finally {

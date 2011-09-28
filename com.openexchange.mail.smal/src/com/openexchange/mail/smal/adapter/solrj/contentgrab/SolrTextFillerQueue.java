@@ -205,7 +205,9 @@ public final class SolrTextFillerQueue implements Runnable {
      * @param filler The text filler
      */
     public void add(final TextFiller filler) {
-        queue.offer(filler);
+        if (queue.offer(filler) && DEBUG) {
+            LOG.debug("SolrTextFillerQueue.add() Added text filler:\n" + filler);
+        }
     }
 
     /**
@@ -215,7 +217,7 @@ public final class SolrTextFillerQueue implements Runnable {
      */
     public void add(final Collection<TextFiller> fillers) {
         for (final TextFiller filler : fillers) {
-            queue.offer(filler);
+            add(filler);
         }
     }
 
