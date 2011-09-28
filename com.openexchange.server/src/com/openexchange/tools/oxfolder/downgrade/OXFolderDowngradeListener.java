@@ -113,11 +113,12 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
              */
             try {
                 deleteCalendarFolderData(newUserConfiguration.getUserId(), event);
-            } catch (final OXException e) {
-                throw new OXException(e);
-            }
-            if (LOG.isInfoEnabled()) {
-                LOG.info("All calendar-related folder data removed due to loss of task module access");
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("All calendar-related folder data removed due to loss of task module access");
+                }
+            } catch (final Exception e) {
+                LOG.info("Could not remove all calendar-related folder data removed due to loss of task module access.");
+                LOG.debug(e.getMessage(), e);
             }
         }
         if (!newUserConfiguration.hasTask()) {
@@ -126,11 +127,12 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
              */
             try {
                 deleteTaskFolderData(newUserConfiguration.getUserId(), event);
-            } catch (final OXException e) {
-                throw new OXException(e);
-            }
-            if (LOG.isInfoEnabled()) {
-                LOG.info("All task-related folder data removed due to loss of task module access");
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("All task-related folder data removed due to loss of task module access");
+                }
+            } catch (final Exception e) {
+                LOG.info("Could not remove all task-related folder data removed due to loss of task module access.");
+                LOG.debug(e.getMessage(), e);
             }
         }
         if (!newUserConfiguration.hasInfostore()) {
@@ -139,11 +141,12 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
              */
             try {
                 deleteInfostoreFolderData(newUserConfiguration.getUserId(), event);
-            } catch (final OXException e) {
-                throw new OXException(e);
-            }
-            if (LOG.isInfoEnabled()) {
-                LOG.info("All infostore-related folder data removed due to loss of task module access");
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("All infostore-related folder data removed due to loss of task module access");
+                }
+            } catch (final Exception e) {
+                LOG.info("Could not remove all infostore-related folder data removed due to loss of task module access.");
+                LOG.debug(e.getMessage(), e);
             }
         }
         if (!newUserConfiguration.hasFullSharedFolderAccess()) {
@@ -152,11 +155,12 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
              */
             try {
                 deleteSharedFolderData(newUserConfiguration.getUserId(), event);
-            } catch (final OXException e) {
-                throw new OXException(e);
-            }
-            if (LOG.isInfoEnabled()) {
-                LOG.info("All shared folder data removed due to loss of full shared folder access");
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("All shared folder data removed due to loss of full shared folder access");
+                }
+            } catch (final Exception e) {
+                LOG.info("Could not remove all shared folder data removed due to loss of task module access.");
+                LOG.debug(e.getMessage(), e);
             }
         }
         /*
