@@ -99,8 +99,6 @@ public abstract class AbstractModule {
                             dependencies.add(module);
                         }
                     }
-                } else {
-                    throw new BuildException("Can not find bundle that exports \"" + importedPackage + "\"");
                 }
             }
             for (final String requiredBundle : osgiManifest.getListEntry(OSGIManifest.REQUIRE_BUNDLE)) {
