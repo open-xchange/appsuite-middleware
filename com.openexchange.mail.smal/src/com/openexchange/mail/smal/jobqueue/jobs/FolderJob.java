@@ -81,6 +81,7 @@ import com.openexchange.mail.smal.jobqueue.Constants;
 import com.openexchange.mail.smal.jobqueue.Job;
 import com.openexchange.mail.smal.jobqueue.JobQueue;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -118,6 +119,8 @@ public final class FolderJob extends AbstractMailSyncJob {
     private volatile boolean error;
 
     private volatile long span;
+
+    private volatile List<MailMessage> storageMails;
 
     /**
      * Initializes a new {@link FolderJob} with default span.
@@ -162,6 +165,17 @@ public final class FolderJob extends AbstractMailSyncJob {
         return this;
     }
 
+    /**
+     * Sets the storage mails
+     *
+     * @param storageMails The storage mails to set
+     * @return This folder job with specified storage mails applied
+     */
+    public FolderJob setStorageMails(final List<MailMessage> storageMails) {
+        this.storageMails = storageMails;
+        return this;
+    }
+
     @Override
     public void replaceWith(final Job anotherJob) {
         if (!identifier.equals(anotherJob.getIdentifier())) {
@@ -178,6 +192,7 @@ public final class FolderJob extends AbstractMailSyncJob {
         final FolderJob anotherFolderJob = (FolderJob) anotherJob;
         this.ranking = anotherFolderJob.ranking;
         this.span = anotherFolderJob.span;
+        this.storageMails = storageMails;
         gate.set(0);
     }
 
@@ -227,47 +242,52 @@ public final class FolderJob extends AbstractMailSyncJob {
             boolean unset = true;
             try {
                 final IndexAdapter indexAdapter = getAdapter();
-                final MailMessage[] mails;
+                final List<MailMessage> mails;
                 final Session session;
-                MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
-                try {
-                    mailAccess = SMALMailAccess.getUnwrappedInstance(userId, contextId, accountId);
-                    session = mailAccess.getSession();
-                    /*
-                     * Get the mails from mail storage
-                     */
-                    mailAccess.connect(true);
-                    /*
-                     * At first check existence of denoted folder
-                     */
-                    if (!mailAccess.getFolderStorage().exists(fullName)) {
+                if (null == storageMails) {
+                    MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+                    try {
+                        mailAccess = SMALMailAccess.getUnwrappedInstance(userId, contextId, accountId);
+                        session = mailAccess.getSession();
                         /*
-                         * Drop entry from database and return
+                         * Get the mails from mail storage
                          */
-                        deleteDBEntry();
-                        unset = false;
-                        return;
+                        mailAccess.connect(true);
+                        /*
+                         * At first check existence of denoted folder
+                         */
+                        if (!mailAccess.getFolderStorage().exists(fullName)) {
+                            /*
+                             * Drop entry from database and return
+                             */
+                            deleteDBEntry();
+                            unset = false;
+                            return;
+                        }
+                        /*
+                         * Fetch mails
+                         */
+                        mails =
+                            Arrays.asList(mailAccess.getMessageStorage().searchMessages(
+                                fullName,
+                                IndexRange.NULL,
+                                MailSortField.RECEIVED_DATE,
+                                OrderDirection.ASC,
+                                null,
+                                FIELDS));
+                    } finally {
+                        SMALMailAccess.closeUnwrappedInstance(mailAccess);
+                        mailAccess = null;
                     }
-                    /*
-                     * Fetch mails
-                     */
-                    mails =
-                        mailAccess.getMessageStorage().searchMessages(
-                            fullName,
-                            IndexRange.NULL,
-                            MailSortField.RECEIVED_DATE,
-                            OrderDirection.ASC,
-                            null,
-                            FIELDS);
-                } finally {
-                    SMALMailAccess.closeUnwrappedInstance(mailAccess);
-                    mailAccess = null;
+                } else {
+                    mails = storageMails;
+                    session = SMALServiceLookup.getServiceStatic(SessiondService.class).getAnyActiveSessionForUser(userId, contextId);
                 }
                 final Map<String, MailMessage> storagedMap;
-                if (0 == mails.length) {
+                if (mails.isEmpty()) {
                     storagedMap = Collections.emptyMap();
                 } else {
-                    storagedMap = new HashMap<String, MailMessage>(mails.length);
+                    storagedMap = new HashMap<String, MailMessage>(mails.size());
                     for (final MailMessage mailMessage : mails) {
                         storagedMap.put(mailMessage.getMailId(), mailMessage);
                     }

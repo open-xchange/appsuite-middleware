@@ -241,7 +241,7 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
     }
 
     @Override
-    public List<MailMessage> search(final String optFullName, final SearchTerm<?> searchTerm, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int optAccountId, final Session session) throws OXException {
+    public List<MailMessage> search(final String optFullName, final SearchTerm<?> searchTerm, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int optAccountId, final Session session) throws OXException, InterruptedException {
         try {
             final CommonsHttpSolrServer solrServer = solrServerFor(session, false);
             final MailFields mailFields = new MailFields(fields);
@@ -292,6 +292,10 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
                 off = size;
             }
             while (off < numFound) {
+                if (Thread.interrupted()) {
+                    // Clears the thread's interrupted flag
+                    throw new InterruptedException("Thread interrupted while paging through Solr results.");
+                }
                 final SolrQuery solrQuery = new SolrQuery().setQuery(query);
                 solrQuery.setStart(Integer.valueOf(off));
                 solrQuery.setRows(rows);
@@ -471,7 +475,7 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
     }
 
     @Override
-    public List<MailMessage> getMessages(final String[] optMailIds, final String fullName, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int accountId, final Session session) throws OXException {
+    public List<MailMessage> getMessages(final String[] optMailIds, final String fullName, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int accountId, final Session session) throws OXException, InterruptedException {
         try {
             
             System.out.println("SolrjAdapter.getMessages(): start...");
@@ -537,6 +541,10 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
                 System.out.println("SolrjAdapter.getMessages() requested " + off +" of " + numFound + " mails from index for:\n" + query);
             }
             while (off < numFound) {
+                if (Thread.interrupted()) {
+                    // Clears the thread's interrupted flag
+                    throw new InterruptedException("Thread interrupted while paging through Solr results.");
+                }
                 final SolrQuery solrQuery = new SolrQuery().setQuery(query);
                 solrQuery.setStart(Integer.valueOf(off));
                 solrQuery.setRows(rows);
@@ -628,7 +636,7 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
     private static final MailFields CHANGE_FIELDS = new MailFields(MailField.FOLDER_ID, MailField.ID, MailField.FLAGS);
 
     @Override
-    public void change(final List<MailMessage> mails, final Session session) throws OXException {
+    public void change(final List<MailMessage> mails, final Session session) throws OXException, InterruptedException {
         if (null == mails || mails.isEmpty()) {
             return;
         }
@@ -687,6 +695,10 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
                 off = rsize;
             }
             while (off < numFound) {
+                if (Thread.interrupted()) {
+                    // Clears the thread's interrupted flag
+                    throw new InterruptedException("Thread interrupted while paging through Solr results.");
+                }
                 final SolrQuery solrQuery = new SolrQuery().setQuery(query);
                 solrQuery.setStart(Integer.valueOf(off));
                 solrQuery.setRows(rows);
