@@ -49,15 +49,21 @@
 
 package com.openexchange.mail.smal;
 
+import static com.openexchange.mail.smal.SMALServiceLookup.getServiceStatic;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.server.ServiceExceptionCodes;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.ThreadPoolCompletionService;
+import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link AbstractSMALStorage}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractSMALStorage {
@@ -107,6 +113,30 @@ public abstract class AbstractSMALStorage {
         contextId = session.getContextId();
         this.accountId = accountId;
         this.delegateMailAccess = delegateMailAccess;
+    }
+
+    /**
+     * Handles specified {@link RuntimeException} instance.
+     * 
+     * @param e The runtime exception to handle
+     * @return An appropriate {@link OXException}
+     */
+    protected OXException handleRuntimeException(final RuntimeException e) {
+        return MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+    }
+
+    /**
+     * Creates a new {@link ThreadPoolCompletionService completion service}.
+     * 
+     * @return A new completion service.
+     * @throws OXException If completion service cannot be created due to absent {@link ThreadPoolService service}
+     */
+    protected static <V> ThreadPoolCompletionService<V> newCompletionService() throws OXException {
+        final ThreadPoolService threadPool = getServiceStatic(ThreadPoolService.class);
+        if (null == threadPool) {
+            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(ThreadPoolService.class.getName());
+        }
+        return new ThreadPoolCompletionService<V>(threadPool);
     }
 
 }

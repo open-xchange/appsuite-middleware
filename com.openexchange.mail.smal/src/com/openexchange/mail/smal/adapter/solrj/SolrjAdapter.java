@@ -290,6 +290,10 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
                     mails.add(readDocument(results.get(i), mailFields));
                 }
                 off = size;
+                
+                System.out.println("SolrjAdapter.search() requested " + off +" of " + numFound + " mails from index for:\n" + query);
+                
+                
             }
             final Thread thread = Thread.currentThread();
             while (off < numFound) {
@@ -310,6 +314,10 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
                     mails.add(readDocument(results.get(i), mailFields));
                 }
                 off += size;
+                
+                System.out.println("SolrjAdapter.search() requested " + off +" of " + numFound + " mails from index.");
+                
+                
             }
             if (null != sortField) {
                 Collections.sort(mails, new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), getUserLocaleLazy(session)));
@@ -477,9 +485,6 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
     @Override
     public List<MailMessage> getMessages(final String[] optMailIds, final String fullName, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int accountId, final Session session) throws OXException, InterruptedException {
         try {
-            
-            System.out.println("SolrjAdapter.getMessages(): start...");
-            
             final CommonsHttpSolrServer solrServer = solrServerFor(session, false);
             final MailFields mailFields = new MailFields(fields);
             if (null != sortField) {
@@ -511,9 +516,6 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
                 }
                 query = queryBuilder.toString();
             }
-            
-            System.out.println("SolrjAdapter.getMessages(): query:\n" + query);
-            
             /*
              * Page-wise retrieval
              */
@@ -537,8 +539,6 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
                     mails.add(readDocument(results.get(i), mailFields));
                 }
                 off = size;
-                
-                System.out.println("SolrjAdapter.getMessages() requested " + off +" of " + numFound + " mails from index for:\n" + query);
             }
             final Thread thread = Thread.currentThread();
             while (off < numFound) {
@@ -559,8 +559,6 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
                     mails.add(readDocument(results.get(i), mailFields));
                 }
                 off += size;
-                
-                System.out.println("SolrjAdapter.getMessages() requested " + off +" of " + numFound + " mails from index for:\n" + query);
             }
             if (null != sortField) {
                 Collections.sort(mails, new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), getUserLocaleLazy(session)));

@@ -112,6 +112,8 @@ public final class FolderJob extends AbstractMailSyncJob {
 
     private final AtomicInteger gate;
 
+    private volatile boolean ignoreDeleted;
+
     private volatile int ranking;
 
     private volatile boolean reEnqueued;
@@ -141,6 +143,17 @@ public final class FolderJob extends AbstractMailSyncJob {
             new StringBuilder(SIMPLE_NAME).append('@').append(contextId).append('@').append(userId).append('@').append(accountId).append(
                 '@').append(fullName).toString();
         span = Constants.DEFAULT_MILLIS;
+    }
+
+    /**
+     * Sets the ignore-deleted flag.
+     *
+     * @param ignoreDeleted The ignore-deleted flag
+     * @return This folder job with new behavior applied
+     */
+    public FolderJob setIgnoreDeleted(final boolean ignoreDeleted) {
+        this.ignoreDeleted = ignoreDeleted;
+        return this;
     }
 
     /**
@@ -313,8 +326,13 @@ public final class FolderJob extends AbstractMailSyncJob {
                 /*
                  * Removed ones
                  */
-                Set<String> deletedIds = new HashSet<String>(indexedMap.keySet());
-                deletedIds.removeAll(storageMap.keySet());
+                Set<String> deletedIds;
+                if (ignoreDeleted) {
+                    deletedIds = Collections.emptySet();
+                } else {
+                    deletedIds = new HashSet<String>(indexedMap.keySet());
+                    deletedIds.removeAll(storageMap.keySet());
+                }
                 /*
                  * Changed ones
                  */
@@ -451,7 +469,13 @@ public final class FolderJob extends AbstractMailSyncJob {
             } catch (final OXException e) {
                 // Batch add failed; retry one-by-one
                 for (final MailMessage mail : mails) {
-                    indexAdapter.add(mail, session);
+                    try {
+                        indexAdapter.add(mail, session);
+                    } catch (final Exception inner) {
+                        LOG.warn(
+                            "Mail " + mail.getMailId() + " from folder " + mail.getFolder() + " of account " + accountId + " could not be added to index.",
+                            inner);
+                    }
                 }
             }
             mails.clear();
