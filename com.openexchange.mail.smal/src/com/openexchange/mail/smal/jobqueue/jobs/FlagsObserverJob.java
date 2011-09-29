@@ -216,30 +216,41 @@ public final class FlagsObserverJob extends AbstractMailSyncJob {
                     }
                 }
                 final List<MailMessage> indexedMails = indexAdapter.getMessages(mailIds, fullName, null, null, FIELDS, accountId, session);
-                final Map<String, MailMessage> indexedMap;
+                final Map<String, MailMessage> indexMap;
                 if (indexedMails.isEmpty()) {
-                    indexedMap = Collections.emptyMap();
+                    indexMap = Collections.emptyMap();
                 } else {
-                    indexedMap = new HashMap<String, MailMessage>(indexedMails.size());
+                    indexMap = new HashMap<String, MailMessage>(indexedMails.size());
                     for (final MailMessage mailMessage : indexedMails) {
-                        indexedMap.put(mailMessage.getMailId(), mailMessage);
+                        indexMap.put(mailMessage.getMailId(), mailMessage);
                     }
                 }
                 /*
                  * Changed ones
                  */
-                Set<String> changedIds = new HashSet<String>(indexedMap.keySet());
+                Set<String> changedIds = new HashSet<String>(indexMap.keySet());
                 List<MailMessage> changedMails = new ArrayList<MailMessage>(changedIds.size());
                 for (final Iterator<String> iterator = changedIds.iterator(); iterator.hasNext();) {
                     final String mailId = iterator.next();
                     final MailMessage storageMail = storageMap.get(mailId);
-                    if (storageMail.getFlags() == indexedMap.get(mailId).getFlags()) {
-                        iterator.remove();
-                    } else {
+                    final MailMessage indexMail = indexMap.get(mailId);
+                    boolean different = false;
+                    if (storageMail.getFlags() != indexMail.getFlags()) {
                         storageMail.setAccountId(accountId);
                         storageMail.setFolder(fullName);
                         storageMail.setMailId(mailId);
                         changedMails.add(storageMail);
+                        different = true;
+                    }
+                    if (storageMail.getFlags() != indexMail.getFlags()) {
+                        storageMail.setAccountId(accountId);
+                        storageMail.setFolder(fullName);
+                        storageMail.setMailId(mailId);
+                        changedMails.add(storageMail);
+                        different = true;
+                    }
+                    if (different) {
+                        iterator.remove();
                     }
                 }
                 changedIds = null;

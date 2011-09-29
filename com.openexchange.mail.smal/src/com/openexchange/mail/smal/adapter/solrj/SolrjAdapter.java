@@ -632,7 +632,7 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
         }
     }
 
-    private static final MailFields CHANGE_FIELDS = new MailFields(MailField.FOLDER_ID, MailField.ID, MailField.FLAGS);
+    private static final MailFields CHANGE_FIELDS = new MailFields(MailField.FOLDER_ID, MailField.ID, MailField.FLAGS, MailField.COLOR_LABEL);
 
     @Override
     public void change(final List<MailMessage> mails, final Session session) throws OXException, InterruptedException {
@@ -1054,8 +1054,9 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
 //            }
             final Map<String, Object> documentFields = document.getFieldValueMap();
             final SolrInputDocument inputDocument = new SolrInputDocument();
+            final MailMessage mail = mailMap.get(document.getFieldValue(FIELD_ID));
             {
-                final int flags = mailMap.get(document.getFieldValue(FIELD_ID)).getFlags();
+                final int flags = mail.getFlags();
 
                 SolrInputField field = new SolrInputField(FIELD_FLAG_ANSWERED);
                 field.setValue(Boolean.valueOf((flags & MailMessage.FLAG_ANSWERED) > 0), 1.0f);
@@ -1106,6 +1107,14 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
                 field.setValue(Boolean.valueOf((flags & MailMessage.FLAG_READ_ACK) > 0), 1.0f);
                 inputDocument.put(FIELD_FLAG_READ_ACK, field);
                 documentFields.remove(FIELD_FLAG_READ_ACK);
+            }
+            {
+                final int colorLabel = mail.getColorLabel();
+
+                final SolrInputField field = new SolrInputField(FIELD_COLOR_LABEL);
+                field.setValue(Integer.valueOf(colorLabel), 1.0f);
+                inputDocument.put(FIELD_COLOR_LABEL, field);
+                documentFields.remove(FIELD_COLOR_LABEL);
             }
             for (final Entry<String, Object> entry : documentFields.entrySet()) {
                 final String name = entry.getKey();

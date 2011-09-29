@@ -51,11 +51,15 @@ package com.openexchange.mail.smal.jobqueue;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Future;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.Task;
@@ -69,6 +73,8 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class JobConsumer extends AbstractTask<Object> {
+
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(JobConsumer.class));
 
     /**
      * The poison element.
@@ -111,13 +117,17 @@ final class JobConsumer extends AbstractTask<Object> {
         }
     };
 
+    private static final int NUM_OF_MAX_CONCURRENT_WORKERS = Runtime.getRuntime().availableProcessors();
+
     private final BlockingQueue<Job> queue;
 
     private final ConcurrentMap<String, Job> identifiers;
 
     private final AtomicBoolean keepgoing;
 
-    protected final AtomicReference<Job> currentJob;
+    protected final Semaphore semaphore;
+
+    protected final Queue<Job> currentJobs;
 
     /**
      * Initializes a new {@link JobConsumer}.
@@ -127,7 +137,8 @@ final class JobConsumer extends AbstractTask<Object> {
         keepgoing = new AtomicBoolean(true);
         this.queue = queue;
         this.identifiers = identifiers;
-        currentJob = new AtomicReference<Job>();
+        currentJobs = new ConcurrentLinkedQueue<Job>();
+        semaphore = new Semaphore(NUM_OF_MAX_CONCURRENT_WORKERS);
     }
 
     /**
@@ -149,12 +160,12 @@ final class JobConsumer extends AbstractTask<Object> {
     }
 
     /**
-     * Gets the identifier of the job currently being executed.
+     * Gets the jobs currently being executed.
      *
-     * @return The current job's identifier or <code>null</code> if none is executed at the moment
+     * @return The jobs currently being executed or an empty list if none is executed at the moment
      */
-    protected Job currentJob() {
-        return currentJob.get();
+    protected List<Job> currentJobs() {
+        return new ArrayList<Job>(currentJobs);
     }
 
     /**
@@ -198,37 +209,7 @@ final class JobConsumer extends AbstractTask<Object> {
                         final ThreadPoolService threadPool =
                             DELEGATE ? SMALServiceLookup.getInstance().getService(ThreadPoolService.class) : null;
                         for (final Job job : jobs) {
-                            /*
-                             * Check if canceled in the meantime
-                             */
-                            if (job.isCanceled()) {
-                                identifiers.remove(job.getIdentifier());
-                            } else {
-                                if (job.isPaused()) {
-                                    /*
-                                     * Unset "paused" flag & re-enqueue
-                                     */
-                                    job.proceed();
-                                    queue.offer(job);
-                                } else {
-                                    identifiers.remove(job.getIdentifier());
-                                    final JobWrapper jobWrapper = wrapperFor(job);
-                                    if (DELEGATE) {
-                                        final Future<Object> future = threadPool.submit(jobWrapper, CallerRunsBehavior.getInstance());
-                                        job.future = future;
-                                    } else {
-                                        jobWrapper.beforeExecute(consumerThread);
-                                        try {
-                                            jobWrapper.call();
-                                            jobWrapper.afterExecute(null);
-                                        } catch (final Throwable t) {
-                                            jobWrapper.afterExecute(t);
-                                        } finally {
-                                            Thread.interrupted();
-                                        }
-                                    }
-                                }
-                            }
+                            performJob(job, threadPool);
                         }
                     }
                     jobs.clear();
@@ -246,16 +227,67 @@ final class JobConsumer extends AbstractTask<Object> {
         return null;
     }
 
-    private JobWrapper wrapperFor(final Job job) {
-        return new JobWrapper(job);
+    protected void performJob(final Job job, final ThreadPoolService threadPool) {
+        /*
+         * Check if canceled in the meantime
+         */
+        if (job.isCanceled()) {
+            identifiers.remove(job.getIdentifier());
+        } else {
+            if (job.isPaused()) {
+                /*
+                 * Unset "paused" flag & re-enqueue
+                 */
+                job.proceed();
+                queue.offer(job);
+            } else {
+                try {
+                    if (semaphore.tryAcquire()) {
+                        // Further concurrent worker allowed
+                        final Future<Object> future = threadPool.submit(wrapperFor(job, true), CallerRunsBehavior.getInstance());
+                        job.future = future;
+                    } else {
+                        // Execute with "Job-Consumer" thread
+                        final JobWrapper jobWrapper = wrapperFor(job, false);
+                        boolean ran = false;
+                        jobWrapper.beforeExecute(Thread.currentThread());
+                        try {
+                            jobWrapper.call();
+                            ran = true;
+                            jobWrapper.afterExecute(null);
+                        } catch (final Throwable t) {
+                            if (!ran) {
+                                afterExecute(t);
+                            }
+                            // Else the exception occurred within afterExecute itself in which case we don't want to call it again.
+                            LOG.warn("Exception occurred within afterExecute().", t);
+                        } finally {
+                            Thread.interrupted();
+                        }
+                    }
+                } finally {
+                    /*
+                     * Last, but not least, remove from known identifiers if done
+                     */
+                    identifiers.remove(job.getIdentifier());
+                }
+            }
+        }
+    }
+
+    private JobWrapper wrapperFor(final Job job, final boolean releasePermit) {
+        return new JobWrapper(job, releasePermit);
     }
 
     private final class JobWrapper implements Task<Object> {
 
         private final Job job;
 
-        protected JobWrapper(final Job job) {
+        private final boolean releasePermit;
+
+        protected JobWrapper(final Job job, final boolean releasePermit) {
             super();
+            this.releasePermit = releasePermit;
             this.job = job;
         }
 
@@ -266,15 +298,18 @@ final class JobConsumer extends AbstractTask<Object> {
 
         @Override
         public void beforeExecute(final Thread t) {
-            currentJob.set(job);
+            currentJobs.offer(job);
             job.beforeExecute(t);
         }
 
         @Override
         public void afterExecute(final Throwable t) {
+            if (releasePermit) {
+                semaphore.release();
+            }
             job.done = true;
             job.executionFailure = t;
-            currentJob.set(null);
+            currentJobs.remove(job);
             job.afterExecute(t);
         }
 

@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.smal.jobqueue;
 
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -103,7 +104,7 @@ public final class JobQueue {
         }
     }
 
-    private static final Object PRESENT = new Object();
+    // private static final Object PRESENT = new Object();
 
     private final BlockingQueue<Job> queue;
 
@@ -180,12 +181,12 @@ public final class JobQueue {
     }
 
     /**
-     * Gets the identifier of the job currently being executed.
+     * Gets the jobs currently being executed.
      *
-     * @return The current job's identifier or <code>null</code> if none is executed at the moment
+     * @return The jobs currently being executed or an empty list if none is executed at the moment
      */
-    public Job currentJob() {
-        return consumer.currentJob();
+    public List<Job> currentJobs() {
+        return consumer.currentJobs();
     }
 
     /**

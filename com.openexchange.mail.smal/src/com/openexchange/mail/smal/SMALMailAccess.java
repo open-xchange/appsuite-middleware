@@ -208,8 +208,8 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
     /**
      * Closes specified unwrapped mail access.
      */
-    public static void closeUnwrappedInstance(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> uma) {
-        if (null == uma || !uma.isConnectedUnsafe()) {
+    public static void closeUnwrappedInstance(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) {
+        if (null == mailAccess || !mailAccess.isConnectedUnsafe()) {
             return;
         }
         boolean put = true;
@@ -217,7 +217,7 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
             /*
              * Release all used, non-cachable resources
              */
-            uma.invokeReleaseResources();
+            mailAccess.invokeReleaseResources();
         } catch (final Throwable t) {
             /*
              * Dropping
@@ -229,11 +229,11 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
             /*
              * Cache connection if desired/possible anymore
              */
-            if (put && uma.isCacheable() && SMALMailAccessCache.getInstance().putMailAccess(uma.getSession(), uma.getAccountId(), uma)) {
+            if (put && mailAccess.isCacheable() && SMALMailAccessCache.getInstance().putMailAccess(mailAccess.getSession(), mailAccess.getAccountId(), mailAccess)) {
                 /*
                  * Successfully cached: return
                  */
-                MailAccessWatcher.removeMailAccess(uma);
+                MailAccessWatcher.removeMailAccess(mailAccess);
                 return;
             }
         } catch (final OXException e) {
@@ -242,7 +242,7 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
         /*
          * Couldn't be put into cache
          */
-        uma.close(false);
+        mailAccess.close(false);
     }
 
     @Override

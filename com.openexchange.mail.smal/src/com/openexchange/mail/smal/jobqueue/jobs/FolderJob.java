@@ -309,20 +309,20 @@ public final class FolderJob extends AbstractMailSyncJob {
                  * Get the mails from index
                  */
                 final List<MailMessage> indexedMails = indexAdapter.search(fullName, null, null, null, FIELDS, accountId, session);
-                final Map<String, MailMessage> indexedMap;
+                final Map<String, MailMessage> indexMap;
                 if (indexedMails.isEmpty()) {
-                    indexedMap = Collections.emptyMap();
+                    indexMap = Collections.emptyMap();
                 } else {
-                    indexedMap = new HashMap<String, MailMessage>(indexedMails.size());
+                    indexMap = new HashMap<String, MailMessage>(indexedMails.size());
                     for (final MailMessage mailMessage : indexedMails) {
-                        indexedMap.put(mailMessage.getMailId(), mailMessage);
+                        indexMap.put(mailMessage.getMailId(), mailMessage);
                     }
                 }
                 /*
                  * New ones
                  */
                 Set<String> newIds = new HashSet<String>(storageMap.keySet());
-                newIds.removeAll(indexedMap.keySet());
+                newIds.removeAll(indexMap.keySet());
                 /*
                  * Removed ones
                  */
@@ -330,25 +330,36 @@ public final class FolderJob extends AbstractMailSyncJob {
                 if (ignoreDeleted) {
                     deletedIds = Collections.emptySet();
                 } else {
-                    deletedIds = new HashSet<String>(indexedMap.keySet());
+                    deletedIds = new HashSet<String>(indexMap.keySet());
                     deletedIds.removeAll(storageMap.keySet());
                 }
                 /*
                  * Changed ones
                  */
-                Set<String> changedIds = new HashSet<String>(indexedMap.keySet());
+                Set<String> changedIds = new HashSet<String>(indexMap.keySet());
                 List<MailMessage> changedMails = new ArrayList<MailMessage>(changedIds.size());
                 changedIds.removeAll(deletedIds);
                 for (final Iterator<String> iterator = changedIds.iterator(); iterator.hasNext();) {
                     final String mailId = iterator.next();
                     final MailMessage storageMail = storageMap.get(mailId);
-                    if (storageMail.getFlags() == indexedMap.get(mailId).getFlags()) {
-                        iterator.remove();
-                    } else {
+                    final MailMessage indexMail = indexMap.get(mailId);
+                    boolean different = false;
+                    if (storageMail.getFlags() != indexMail.getFlags()) {
                         storageMail.setAccountId(accountId);
                         storageMail.setFolder(fullName);
                         storageMail.setMailId(mailId);
                         changedMails.add(storageMail);
+                        different = true;
+                    }
+                    if (storageMail.getFlags() != indexMail.getFlags()) {
+                        storageMail.setAccountId(accountId);
+                        storageMail.setFolder(fullName);
+                        storageMail.setMailId(mailId);
+                        changedMails.add(storageMail);
+                        different = true;
+                    }
+                    if (different) {
+                        iterator.remove();
                     }
                 }
                 changedIds = null;

@@ -173,7 +173,12 @@ public abstract class Job implements Task<Object>, Comparable<Job>, Serializable
 
     @Override
     public int hashCode() {
-        return getIdentifier().hashCode();
+        final int prime = 31;
+        int result = 1;
+        final String id = getIdentifier();
+        result = prime * result + (null == id ? 0 : id.hashCode());
+        result = prime * result + getRanking();
+        return result;
     }
 
     @Override
@@ -224,13 +229,15 @@ public abstract class Job implements Task<Object>, Comparable<Job>, Serializable
 
     @Override
     public final Object call() throws Exception {
-        final Job currentJob = JobQueue.getInstance().currentJob();
-        if (this != currentJob && equals(currentJob)) {
-            /*
-             * Same or similar-intention job in progress
-             */
-            return null;
-        }
+        // final List<Job> currentJobs = JobQueue.getInstance().currentJobs();
+        // for (final Job currentJob : currentJobs) {
+        // if (this != currentJob && equals(currentJob)) {
+        // /*
+        // * Same or similar-purpose job in progress
+        // */
+        // return null;
+        // }
+        // }
         performJob();
         return null;
     }

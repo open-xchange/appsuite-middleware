@@ -420,8 +420,10 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
 
     @Override
     public void updateMessageColorLabel(final String folder, final String[] mailIds, final int colorLabel) throws OXException {
-        // TODO:
         messageStorage.updateMessageColorLabel(folder, mailIds, colorLabel);
+
+        final ChangerJob job = new ChangerJob(folder, accountId, userId, contextId);
+        JobQueue.getInstance().addJob(job.setRanking(10).setMailIds(Arrays.asList(mailIds)));
     }
 
     @Override
