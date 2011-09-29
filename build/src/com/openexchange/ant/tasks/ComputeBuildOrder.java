@@ -165,34 +165,6 @@ public class ComputeBuildOrder extends Task {
 
         String moduleNamesList = getModuleNamesList(sortedModules, ',');
         getProject().setInheritedProperty(propertyName, moduleNamesList);
-
-        // Set properties for each bundle.
-        for (AbstractModule module : sortedModules) {
-            // direct dependencies for compiling the classes.
-            final StringBuilder requiredClasspath = new StringBuilder();
-            for (final String classpathEntry : module.getRequiredClasspath()) {
-                requiredClasspath.append(classpathEntry);
-                requiredClasspath.append(',');
-            }
-            if (requiredClasspath.length() > 0) {
-                // first package will not have dependencies.
-                requiredClasspath.setLength(requiredClasspath.length() - 1);
-            }
-            log(module.getName() + ".requiredClasspath: " + requiredClasspath, Project.MSG_DEBUG);
-            getProject().setInheritedProperty(module.getName() + ".requiredClasspath", requiredClasspath.toString());
-            // deep dependencies for executing the classes.
-            final StringBuilder deepClasspath = new StringBuilder();
-            for (final String classpathEntry : module.getDeepRequiredClasspath()) {
-                deepClasspath.append(classpathEntry);
-                deepClasspath.append(',');
-            }
-            if (deepClasspath.length() > 0) {
-                // first package will not have dependencies.
-                deepClasspath.setLength(deepClasspath.length() - 1);
-            }
-            log(module.getName() + ".deepClasspath: " + deepClasspath, Project.MSG_DEBUG);
-            getProject().setInheritedProperty(module.getName() + ".deepClasspath", deepClasspath.toString());
-        }
     }
 
     private String getModuleNamesList(final Collection<AbstractModule> modules, final char delimiter) {

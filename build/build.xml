@@ -56,6 +56,14 @@
 
     <target name="updateProject" description="This task should be able to fetch sources from repositories.">
         <!-- TODO Fetching bundles from other repositories needs to be implemented. -->
+        <if>
+            <not>
+                <available file="${checkoutDir}/${projectName}" type="dir"/>
+            </not>
+            <then>
+                <fail message="Project ${projectName} can not be checked out."/>
+            </then>
+        </if>
     </target>
 
     <target name="buildProject" description="Copies the build.xml to the bundle if there is not already one and executes it.">
@@ -105,6 +113,17 @@
         <antcall target="buildProject" inheritall="true"/>
     </target>
 
+    <target name="newBuildProject" description="Uses new target to set project dependency properties just before the build by using the already compiled classpath.">
+        <echo message="Build bundle ${projectName}"/>
+        <setBundleProperties dir="${checkoutDir}" currentBundle="${projectName}">
+            <classpath>
+                <fileset dir="${bundlesDir}" includes="*.jar"/>
+                <dirset dir="${bundlesDir}" includes="*"/>
+            </classpath>
+        </setBundleProperties>
+        <antcall target="buildProject" inheritall="true"/>
+    </target>
+
     <target name="buildProjects" depends="antExtensions,prepare" description="Fetches projects from repository, computes build order and builds then each project.">
         <foreach list="${projectsList}" target="updateProject" param="projectName"/>
         <mkdir dir="${bundlesDir}"/>
@@ -115,7 +134,7 @@
                 <dirset dir="${bundlesDir}" includes="*"/>
             </classpath>
         </computeBuildOrder>
-        <foreach list="${projectsOrdered}" target="buildOnBuilt" param="projectName" inheritAll="true"/>
+        <foreach list="${projectsOrdered}" target="newBuildProject" param="projectName" inheritAll="true"/>
     </target>
 
     <target name="setBuild" description="Sets the build type to build and install all bundles.">
