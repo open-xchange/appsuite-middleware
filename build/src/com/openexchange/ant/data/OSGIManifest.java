@@ -57,6 +57,8 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Represents the possible values in a MANIFEST.MF file.
@@ -100,6 +102,22 @@ public class OSGIManifest {
             value = value.substring(0, value.indexOf(';'));
         }
         return value;
+    }
+
+    private static final String IMPORT_REGEX = "([a-z0-9\\.]+)(?:; ?(?:(?:resolution:=\"?optional\"?)|(?:version=((?:[0-9.]+)|(?:\"[0-9\\.\\[ \\),]+\")))))*(?:,)?";
+    private static final Pattern IMPORT_PATTERN = Pattern.compile(IMPORT_REGEX);
+
+    public Set<String> getImports() {
+        final String value = fEntries.getValue(IMPORT_PACKAGE);
+        final Set<String> imports = new HashSet<String>();
+        if (value != null) {
+            final Matcher matcher = IMPORT_PATTERN.matcher(value);
+            while (matcher.find()) {
+                final String packageName = matcher.group(1);
+                imports.add(packageName);
+            }
+        }
+        return imports;
     }
 
     public Set<String> getListEntry(final String key) {

@@ -59,7 +59,6 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.zip.ZipEntry;
 import org.apache.tools.ant.BuildException;
 
 /**
@@ -91,7 +90,7 @@ public abstract class AbstractModule {
 
     public void computeDependencies(final Map<String, AbstractModule> modulesByName, final Map<String, Set<AbstractModule>> modulesByPackage) {
         if (osgiManifest != null) {
-            for (final String importedPackage : osgiManifest.getListEntry(OSGIManifest.IMPORT_PACKAGE)) {
+            for (final String importedPackage : osgiManifest.getImports()) {
                 final Set<AbstractModule> exportingModules = modulesByPackage.get(importedPackage);
                 if (exportingModules != null) {
                     for (final AbstractModule module : exportingModules) {
@@ -99,8 +98,8 @@ public abstract class AbstractModule {
                             dependencies.add(module);
                         }
                     }
-                } else {
-                    throw new BuildException("Can not find bundle that exports \"" + importedPackage + "\"");
+                } else if (!JDK.exports(importedPackage)) {
+                    throw new BuildException("Can not find bundle that exports \"" + importedPackage + "\" to resolve import of bundle \"" + name + "\".");
                 }
             }
             for (final String requiredBundle : osgiManifest.getListEntry(OSGIManifest.REQUIRE_BUNDLE)) {
