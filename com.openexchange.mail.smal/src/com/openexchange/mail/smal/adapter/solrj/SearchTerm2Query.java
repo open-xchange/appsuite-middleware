@@ -79,7 +79,7 @@ import com.openexchange.mail.smal.adapter.IndexAdapters;
  * @see http://lucene.apache.org/java/2_4_0/queryparsersyntax.html#Range Searches
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SearchTerm2Query {
+public final class SearchTerm2Query implements SolrConstants {
 
     /**
      * Initializes a new {@link SearchTerm2Query}.
@@ -151,12 +151,12 @@ public final class SearchTerm2Query {
             final ComparablePattern<Integer> comparablePattern = sizeTerm.getPattern();
             switch (comparablePattern.getComparisonType()) {
             case EQUALS:
-                return queryBuilder.append('(').append("size").append(':').append(comparablePattern.getPattern().intValue()).append(')');
+                return queryBuilder.append('(').append(FIELD_SIZE).append(':').append(comparablePattern.getPattern().intValue()).append(')');
             case GREATER_THAN:
-                return queryBuilder.append('(').append("size").append(':').append('[').append(comparablePattern.getPattern().intValue() + 1).append(
+                return queryBuilder.append('(').append(FIELD_SIZE).append(':').append('[').append(comparablePattern.getPattern().intValue() + 1).append(
                     " TO ").append(Integer.MAX_VALUE).append(']').append(')');
             case LESS_THAN:
-                return queryBuilder.append('(').append("size").append(':').append('[').append(0).append(" TO ").append(
+                return queryBuilder.append('(').append(FIELD_SIZE).append(':').append('[').append(0).append(" TO ").append(
                     comparablePattern.getPattern().intValue() - 1).append(']').append(')');
             default:
                 throw new IllegalStateException("Unknown operator: " + comparablePattern.getComparisonType());
@@ -172,37 +172,40 @@ public final class SearchTerm2Query {
             if (!set) {
                 flags *= -1;
             }
+            final String andConcat = " AND ";
             queryBuilder.append('(');
+            final int off = queryBuilder.length();
             if ((flags & MailMessage.FLAG_ANSWERED) > 0) {
-                queryBuilder.append(" AND flag_answered:").append(set);
+                queryBuilder.append(andConcat).append(FIELD_FLAG_ANSWERED).append(':').append(set);
             }
             if ((flags & MailMessage.FLAG_DELETED) > 0) {
-                queryBuilder.append(" AND flag_deleted:").append(set);
+                queryBuilder.append(andConcat).append(FIELD_FLAG_DELETED).append(':').append(set);
             }
             if ((flags & MailMessage.FLAG_DRAFT) > 0) {
-                queryBuilder.append(" AND flag_draft:").append(set);
+                queryBuilder.append(andConcat).append(FIELD_FLAG_DRAFT).append(':').append(set);
             }
             if ((flags & MailMessage.FLAG_FLAGGED) > 0) {
-                queryBuilder.append(" AND flag_flagged:").append(set);
+                queryBuilder.append(andConcat).append(FIELD_FLAG_FLAGGED).append(':').append(set);
             }
             if ((flags & MailMessage.FLAG_RECENT) > 0) {
-                queryBuilder.append(" AND flag_recent:").append(set);
+                queryBuilder.append(andConcat).append(FIELD_FLAG_RECENT).append(':').append(set);
             }
             if ((flags & MailMessage.FLAG_SEEN) > 0) {
-                queryBuilder.append(" AND flag_seen:").append(set);
+                queryBuilder.append(andConcat).append(FIELD_FLAG_SEEN).append(':').append(set);
             }
             if ((flags & MailMessage.FLAG_USER) > 0) {
-                queryBuilder.append(" AND flag_user:").append(set);
+                queryBuilder.append(andConcat).append(FIELD_FLAG_USER).append(':').append(set);
             }
             if ((flags & MailMessage.FLAG_SPAM) > 0) {
-                queryBuilder.append(" AND flag_spam:").append(set);
+                queryBuilder.append(andConcat).append(FIELD_FLAG_SPAM).append(':').append(set);
             }
             if ((flags & MailMessage.FLAG_FORWARDED) > 0) {
-                queryBuilder.append(" AND flag_forwarded:").append(set);
+                queryBuilder.append(andConcat).append(FIELD_FLAG_FORWARDED).append(':').append(set);
             }
             if ((flags & MailMessage.FLAG_READ_ACK) > 0) {
-                queryBuilder.append(" AND flag_read_ack:").append(set);
+                queryBuilder.append(andConcat).append(FIELD_FLAG_READ_ACK).append(':').append(set);
             }
+            queryBuilder.delete(off, off + andConcat.length()); // Delete first >>" AND "<< prefix
             queryBuilder.append(')');
             return queryBuilder;
         }
@@ -215,7 +218,7 @@ public final class SearchTerm2Query {
                 (SearchTerm<ComparablePattern<java.util.Date>>) searchTerm;
             final ComparablePattern<Date> comparablePattern = dateTerm.getPattern();
             final long time = comparablePattern.getPattern().getTime();
-            final String name = isRecDate ? "received_date" : "sent_date";
+            final String name = isRecDate ? FIELD_RECEIVED_DATE : FIELD_SENT_DATE;
             switch (comparablePattern.getComparisonType()) {
             case EQUALS:
                 return queryBuilder.append('(').append(name).append(':').append(time).append(')');
@@ -234,12 +237,12 @@ public final class SearchTerm2Query {
 
     private static List<String> getFieldNameFor(final SearchTerm<?> searchTerm) {
         if (searchTerm instanceof BccTerm) {
-            return Arrays.asList("bcc_personal", "bcc_addr");
+            return Arrays.asList(FIELD_BCC_PERSONAL, FIELD_BCC_ADDR);
         }
         if (searchTerm instanceof BodyTerm) {
             final Set<Locale> knownLocales = IndexAdapters.KNOWN_LOCALES;
             final List<String> names = new ArrayList<String>(knownLocales.size());
-            final StringBuilder tmp = new StringBuilder("content_"); //8
+            final StringBuilder tmp = new StringBuilder(FIELD_CONTENT_PREFIX); //8
             for (final Locale loc : knownLocales) {
                 tmp.setLength(8);
                 tmp.append(loc.getLanguage());
@@ -248,24 +251,24 @@ public final class SearchTerm2Query {
             return names;
         }
         if (searchTerm instanceof CcTerm) {
-            return Arrays.asList("cc_personal", "cc_addr");
+            return Arrays.asList(FIELD_CC_PERSONAL, FIELD_CC_ADDR);
         }
         if (searchTerm instanceof FromTerm) {
-            return Arrays.asList("from_personal", "from_addr");
+            return Arrays.asList(FIELD_FROM_PERSONAL, FIELD_FROM_ADDR);
         }
         if (searchTerm instanceof ReceivedDateTerm) {
-            return Arrays.asList("received_date");
+            return Arrays.asList(FIELD_RECEIVED_DATE);
         }
         if (searchTerm instanceof SentDateTerm) {
-            return Arrays.asList("sent_date");
+            return Arrays.asList(FIELD_SENT_DATE);
         }
         if (searchTerm instanceof SizeTerm) {
-            return Arrays.asList("size");
+            return Arrays.asList(FIELD_SIZE);
         }
         if (searchTerm instanceof SubjectTerm) {
             final Set<Locale> knownLocales = IndexAdapters.KNOWN_LOCALES;
             final List<String> names = new ArrayList<String>(knownLocales.size());
-            final StringBuilder tmp = new StringBuilder("subject_"); //8
+            final StringBuilder tmp = new StringBuilder(FIELD_SUBJECT_PREFIX); //8
             for (final Locale loc : knownLocales) {
                 tmp.setLength(8);
                 tmp.append(loc.getLanguage());
@@ -274,7 +277,7 @@ public final class SearchTerm2Query {
             return names;
         }
         if (searchTerm instanceof ToTerm) {
-            return Arrays.asList("to_personal", "to_addr");
+            return Arrays.asList(FIELD_TO_PERSONAL, FIELD_TO_ADDR);
         }
         throw new IllegalStateException("Unsupported search term: " + searchTerm.getClass().getName());
     }

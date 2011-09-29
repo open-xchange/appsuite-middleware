@@ -85,6 +85,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.smal.SMALExceptionCodes;
 import com.openexchange.mail.smal.SMALMailAccess;
 import com.openexchange.mail.smal.SMALServiceLookup;
+import com.openexchange.mail.smal.adapter.solrj.SolrConstants;
 import com.openexchange.mail.smal.adapter.solrj.management.CommonsHttpSolrServerManagement;
 import com.openexchange.mail.text.TextFinder;
 import com.openexchange.threadpool.Task;
@@ -97,7 +98,7 @@ import com.openexchange.threadpool.ThreadRenamer;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SolrTextFillerQueue implements Runnable {
+public final class SolrTextFillerQueue implements Runnable, SolrConstants {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SolrTextFillerQueue.class);
 
@@ -132,10 +133,6 @@ public final class SolrTextFillerQueue implements Runnable {
     };
 
     private static final TextFiller POISON = new TextFiller(null, null, null, 0, 0, 0);
-
-    private static final int MAX_NUM_CONCURRENT_FILLER_TASKS = Runtime.getRuntime().availableProcessors();
-
-    private static final int MAX_FILLER_CHUNK = 25;
 
     private final BlockingQueue<TextFiller> queue;
 
@@ -380,7 +377,7 @@ public final class SolrTextFillerQueue implements Runnable {
                     for (final TextFiller filler : fillers) {
                         final String uuid = filler.getUuid();
                         map.put(uuid, filler);
-                        q.append(" OR ").append("uuid:").append(uuid);
+                        q.append(" OR ").append(FIELD_UUID).append(':').append(uuid);
                     }
                     q.delete(0, 4);
                     solrQuery = new SolrQuery(q.toString());
@@ -392,7 +389,7 @@ public final class SolrTextFillerQueue implements Runnable {
                 for (int i = 0; i < rsize; i++) {
                     final SolrDocument solrDocument = results.get(i);
                     if (checkSolrDocument(solrDocument)) {
-                        final String uuid = solrDocument.getFieldValue("uuid").toString();
+                        final String uuid = solrDocument.getFieldValue(FIELD_UUID).toString();
                         documents.put(uuid, solrDocument);
                         map.remove(uuid); // Processed, so remove from map
                     }
@@ -469,9 +466,9 @@ public final class SolrTextFillerQueue implements Runnable {
                         final String text = textFinder.getText(messageStorage.getMessage(filler.getFullName(), filler.getMailId(), false));
                         if (null != text) {
                             final Locale locale = detectLocale(text);
-                            inputDocument.setField("content_" + locale.getLanguage(), text);
+                            inputDocument.setField(FIELD_CONTENT_PREFIX + locale.getLanguage(), text);
                         }
-                        inputDocument.setField("content_flag", Boolean.TRUE);
+                        inputDocument.setField(FIELD_CONTENT_FLAG, Boolean.TRUE);
                         inputDocuments.add(inputDocument);
                         /*
                          * Remove from map
@@ -498,7 +495,7 @@ public final class SolrTextFillerQueue implements Runnable {
         if (null == solrDocument) {
             return false;
         }
-        final Boolean contentFlag = (Boolean) solrDocument.getFieldValue("content_flag");
+        final Boolean contentFlag = (Boolean) solrDocument.getFieldValue(FIELD_CONTENT_FLAG);
         return null == contentFlag || !contentFlag.booleanValue();
     }
 

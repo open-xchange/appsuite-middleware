@@ -52,9 +52,10 @@ package com.openexchange.mail.smal.adapter.solrj;
 import com.openexchange.mail.MailPath;
 
 /**
- * {@link MailUUID}
+ * {@link MailUUID} - Represents a mail's UUID in index storage.
  * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MailUUID {
 
