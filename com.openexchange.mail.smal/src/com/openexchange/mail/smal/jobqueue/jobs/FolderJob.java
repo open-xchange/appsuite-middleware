@@ -469,7 +469,13 @@ public final class FolderJob extends AbstractMailSyncJob {
             } catch (final OXException e) {
                 // Batch add failed; retry one-by-one
                 for (final MailMessage mail : mails) {
-                    indexAdapter.add(mail, session);
+                    try {
+                        indexAdapter.add(mail, session);
+                    } catch (final Exception inner) {
+                        LOG.warn(
+                            "Mail " + mail.getMailId() + " from folder " + mail.getFolder() + " of account " + accountId + " could not be added to index.",
+                            inner);
+                    }
                 }
             }
             mails.clear();
