@@ -138,4 +138,12 @@ public interface SolrConstants {
 
     public static final String FIELD_CONTENT_FLAG = "content_flag";
 
+    /*-
+     * --------------------------- TEXT FILLER CONSTANTS ---------------------
+     */
+
+    public static final int MAX_NUM_CONCURRENT_FILLER_TASKS = Runtime.getRuntime().availableProcessors();
+
+    public static final int MAX_FILLER_CHUNK = 25;
+
 }

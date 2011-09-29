@@ -134,10 +134,6 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
 
     private static final TextFiller POISON = new TextFiller(null, null, null, 0, 0, 0);
 
-    private static final int MAX_NUM_CONCURRENT_FILLER_TASKS = Runtime.getRuntime().availableProcessors();
-
-    private static final int MAX_FILLER_CHUNK = 25;
-
     private final BlockingQueue<TextFiller> queue;
 
     private final AtomicBoolean keepgoing;

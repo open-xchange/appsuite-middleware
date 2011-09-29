@@ -245,8 +245,7 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
         try {
             final CommonsHttpSolrServer solrServer = solrServerFor(session, false);
             final MailFields mailFields = new MailFields(fields);
-            final boolean sort = null != sortField && null != order;
-            if (sort) {
+            if (null != sortField) {
                 final MailField sf = MailField.getField(sortField.getField());
                 if (null != sf) {
                     mailFields.add(sf);
@@ -307,7 +306,7 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
                 }
                 off += size;
             }
-            if (sort) {
+            if (null != sortField) {
                 Collections.sort(mails, new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), getUserLocaleLazy(session)));
             }
             return mails;
@@ -479,8 +478,7 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
             
             final CommonsHttpSolrServer solrServer = solrServerFor(session, false);
             final MailFields mailFields = new MailFields(fields);
-            final boolean sort = null != sortField && null != order;
-            if (sort) {
+            if (null != sortField) {
                 final MailField sf = MailField.getField(sortField.getField());
                 if (null != sf) {
                     mailFields.add(sf);
@@ -555,7 +553,7 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
                 
                 System.out.println("SolrjAdapter.getMessages() requested " + off +" of " + numFound + " mails from index for:\n" + query);
             }
-            if (sort) {
+            if (null != sortField) {
                 Collections.sort(mails, new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), getUserLocaleLazy(session)));
             }
             return mails;
