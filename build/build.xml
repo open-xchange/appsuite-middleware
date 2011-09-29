@@ -112,6 +112,7 @@
         <computeBuildOrder dir="${checkoutDir}" propertyName="projectsOrdered" projectList="${projectsList}">
             <classpath>
                 <fileset dir="${bundlesDir}" includes="*.jar"/>
+                <dirset dir="${bundlesDir}" includes="*"/>
             </classpath>
         </computeBuildOrder>
         <foreach list="${projectsOrdered}" target="buildOnBuilt" param="projectName" inheritAll="true"/>
