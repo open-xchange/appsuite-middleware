@@ -609,6 +609,34 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
     }
 
     @Override
+    public void deleteFolder(final String fullName, final int accountId, final Session session) throws OXException {
+        CommonsHttpSolrServer solrServer = null;
+        try {
+            solrServer = solrServerFor(session, true);
+            final StringBuilder queryBuilder = new StringBuilder(128);
+            queryBuilder.append('(').append(FIELD_USER).append(':').append(session.getUserId()).append(')');
+            queryBuilder.append(" AND (").append(FIELD_CONTEXT).append(':').append(session.getContextId()).append(')');
+            if (accountId >= 0) {
+                queryBuilder.append(" AND (").append(FIELD_ACCOUNT).append(':').append(accountId).append(')');
+            }
+            if (null != fullName) {
+                queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(fullName).append("\")");
+            }
+            solrServer.deleteByQuery(queryBuilder.toString());
+            solrServer.commit();
+        } catch (final SolrServerException e) {
+            SolrUtils.rollback(solrServer);
+            throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
+        } catch (final IOException e) {
+            SolrUtils.rollback(solrServer);
+            throw SMALExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            SolrUtils.rollback(solrServer);
+            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    @Override
     public boolean containsFolder(final String fullName, final int accountId, final Session session) throws OXException {
         try {
             final CommonsHttpSolrServer solrServer = solrServerFor(session, true);

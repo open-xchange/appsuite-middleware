@@ -414,6 +414,25 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     }
 
     @Override
+    public void deleteFolder(final String fullName, final int accountId, final Session session) throws OXException {
+        try {
+            ensureStarted();
+            final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+            boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_USER_ID, session.getUserId()));
+            boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_ACCOUNT_ID, accountId));
+            boolQuery.must(QueryBuilders.termQuery(Constants.FIELD_FULL_NAME, fullName));
+            /*
+             * Build delete request
+             */
+            final String indexName = indexNamePrefix + session.getContextId();
+            client.prepareDeleteByQuery(indexName).setTypes(indexType).setQuery(boolQuery).execute().actionGet(Constants.TIMEOUT_MILLIS);
+            refresh(indexName);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
+        }
+    }
+    
+    @Override
     public List<MailMessage> getMessages(final String[] optMailIds, final String fullName, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int accountId, final Session session) throws OXException {
         try {
             ensureStarted();

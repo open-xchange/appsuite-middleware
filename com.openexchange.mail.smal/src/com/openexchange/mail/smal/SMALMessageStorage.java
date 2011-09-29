@@ -72,7 +72,6 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.smal.adapter.IndexAdapter;
-import com.openexchange.mail.smal.adapter.IndexService;
 import com.openexchange.mail.smal.jobqueue.JobQueue;
 import com.openexchange.mail.smal.jobqueue.jobs.AdderJob;
 import com.openexchange.mail.smal.jobqueue.jobs.ChangerJob;
@@ -443,11 +442,6 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
     @Override
     public void releaseResources() throws OXException {
         messageStorage.releaseResources();
-    }
-
-    private static IndexAdapter getIndexAdapter() {
-        final IndexService indexService = getServiceStatic(IndexService.class);
-        return null == indexService ? null : indexService.getAdapter();
     }
 
     /**

@@ -56,6 +56,8 @@ import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.smal.adapter.IndexAdapter;
+import com.openexchange.mail.smal.adapter.IndexService;
 import com.openexchange.server.ServiceExceptionCodes;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
@@ -113,6 +115,16 @@ public abstract class AbstractSMALStorage {
         contextId = session.getContextId();
         this.accountId = accountId;
         this.delegateMailAccess = delegateMailAccess;
+    }
+
+    /**
+     * Gets the available index adapter.
+     * 
+     * @return The index adapter
+     */
+    protected static IndexAdapter getIndexAdapter() {
+        final IndexService indexService = getServiceStatic(IndexService.class);
+        return null == indexService ? null : indexService.getAdapter();
     }
 
     /**

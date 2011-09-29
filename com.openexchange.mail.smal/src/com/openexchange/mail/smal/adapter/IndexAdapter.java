@@ -146,6 +146,16 @@ public interface IndexAdapter {
     public void deleteMessages(Collection<String> mailIds, String fullName, int accountId, Session session) throws OXException;
 
     /**
+     * Deletes all mails from specified folder from index.
+     *
+     * @param fullName The folder full name
+     * @param accountId The account identifier
+     * @param session The session
+     * @throws OXException If deletion fails
+     */
+    public void deleteFolder(String fullName, int accountId, Session session) throws OXException;
+
+    /**
      * Checks if index contains mail located in specified folder.
      *
      * @param fullName The folder full name

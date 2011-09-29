@@ -63,6 +63,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.smal.adapter.IndexAdapter;
 import com.openexchange.session.Session;
 
 /**
@@ -124,7 +125,14 @@ public final class SMALFolderStorage extends AbstractSMALStorage implements IMai
 
     @Override
     public String deleteFolder(final String fullName, final boolean hardDelete) throws OXException {
-        return folderStorage.deleteFolder(fullName, hardDelete);
+        final String retval = folderStorage.deleteFolder(fullName, hardDelete);
+        final IndexAdapter indexAdapter = getIndexAdapter();
+        if (null != indexAdapter) {
+            indexAdapter.deleteFolder(fullName, accountId, session);
+            // Sync trash folder
+            
+        }
+        return retval;
     }
 
     @Override
