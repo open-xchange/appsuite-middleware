@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.smal;
 
+import static com.openexchange.mail.smal.SMALServiceLookup.getServiceStatic;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -185,7 +186,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
              * Concurrently fetch from index and mail storage and serve request with whichever comes first
              */
             final IMailMessageStorage messageStorage = this.messageStorage;
-            final ThreadPoolService threadPool = SMALServiceLookup.getServiceStatic(ThreadPoolService.class);
+            final ThreadPoolService threadPool = getServiceStatic(ThreadPoolService.class);
             final ThreadPoolCompletionService<MailResult<List<MailMessage>>> completionService =
                 new ThreadPoolCompletionService<MailResult<List<MailMessage>>>(threadPool);
             completionService.submit(new Callable<MailResult<List<MailMessage>>>() {
@@ -348,7 +349,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
     }
 
     private static IndexAdapter getIndexAdapter() {
-        final IndexService indexService = SMALServiceLookup.getServiceStatic(IndexService.class);
+        final IndexService indexService = getServiceStatic(IndexService.class);
         return null == indexService ? null : indexService.getAdapter();
     }
 

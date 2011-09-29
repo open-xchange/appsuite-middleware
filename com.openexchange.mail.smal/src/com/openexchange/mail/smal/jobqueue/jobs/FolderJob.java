@@ -283,19 +283,19 @@ public final class FolderJob extends AbstractMailSyncJob {
                     mails = storageMails;
                     session = SMALServiceLookup.getServiceStatic(SessiondService.class).getAnyActiveSessionForUser(userId, contextId);
                 }
-                final Map<String, MailMessage> storagedMap;
+                final Map<String, MailMessage> storageMap;
                 if (mails.isEmpty()) {
-                    storagedMap = Collections.emptyMap();
+                    storageMap = Collections.emptyMap();
                 } else {
-                    storagedMap = new HashMap<String, MailMessage>(mails.size());
+                    storageMap = new HashMap<String, MailMessage>(mails.size());
                     for (final MailMessage mailMessage : mails) {
-                        storagedMap.put(mailMessage.getMailId(), mailMessage);
+                        storageMap.put(mailMessage.getMailId(), mailMessage);
                     }
                 }
                 /*
                  * Get the mails from index
                  */
-                final List<MailMessage> indexedMails = indexAdapter.getMessages(null, fullName, null, null, FIELDS, accountId, session);
+                final List<MailMessage> indexedMails = indexAdapter.search(fullName, null, null, null, FIELDS, accountId, session);
                 final Map<String, MailMessage> indexedMap;
                 if (indexedMails.isEmpty()) {
                     indexedMap = Collections.emptyMap();
@@ -308,13 +308,13 @@ public final class FolderJob extends AbstractMailSyncJob {
                 /*
                  * New ones
                  */
-                Set<String> newIds = new HashSet<String>(storagedMap.keySet());
+                Set<String> newIds = new HashSet<String>(storageMap.keySet());
                 newIds.removeAll(indexedMap.keySet());
                 /*
                  * Removed ones
                  */
                 Set<String> deletedIds = new HashSet<String>(indexedMap.keySet());
-                deletedIds.removeAll(storagedMap.keySet());
+                deletedIds.removeAll(storageMap.keySet());
                 /*
                  * Changed ones
                  */
@@ -323,7 +323,7 @@ public final class FolderJob extends AbstractMailSyncJob {
                 changedIds.removeAll(deletedIds);
                 for (final Iterator<String> iterator = changedIds.iterator(); iterator.hasNext();) {
                     final String mailId = iterator.next();
-                    final MailMessage storageMail = storagedMap.get(mailId);
+                    final MailMessage storageMail = storageMap.get(mailId);
                     if (storageMail.getFlags() == indexedMap.get(mailId).getFlags()) {
                         iterator.remove();
                     } else {
