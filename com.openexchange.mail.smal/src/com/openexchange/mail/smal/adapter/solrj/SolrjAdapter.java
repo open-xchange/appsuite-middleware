@@ -114,7 +114,7 @@ import com.openexchange.user.UserService;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SolrjAdapter implements IndexAdapter {
+public final class SolrjAdapter implements IndexAdapter, SolrConstants {
 
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SolrjAdapter.class));
@@ -138,33 +138,33 @@ public final class SolrjAdapter implements IndexAdapter {
         super();
         {
             final EnumMap<MailSortField, String> map = new EnumMap<MailSortField, String>(MailSortField.class);
-            map.put(MailSortField.ACCOUNT_NAME, "account");
-            map.put(MailSortField.CC, "cc_plain");
-            map.put(MailSortField.COLOR_LABEL, "color_label");
-            map.put(MailSortField.FLAG_SEEN, "flag_seen");
-            map.put(MailSortField.FROM, "from_plain");
-            map.put(MailSortField.RECEIVED_DATE, "received_date");
-            map.put(MailSortField.SENT_DATE, "sent_date");
-            map.put(MailSortField.SIZE, "size");
-            map.put(MailSortField.SUBJECT, "subject_plain");
-            map.put(MailSortField.TO, "to_plain");
+            map.put(MailSortField.ACCOUNT_NAME, FIELD_ACCOUNT);
+            map.put(MailSortField.CC, FIELD_CC_PLAIN);
+            map.put(MailSortField.COLOR_LABEL, FIELD_COLOR_LABEL);
+            map.put(MailSortField.FLAG_SEEN, FIELD_FLAG_SEEN);
+            map.put(MailSortField.FROM, FIELD_FROM_PLAIN);
+            map.put(MailSortField.RECEIVED_DATE, FIELD_RECEIVED_DATE);
+            map.put(MailSortField.SENT_DATE, FIELD_SENT_DATE);
+            map.put(MailSortField.SIZE, FIELD_SIZE);
+            map.put(MailSortField.SUBJECT, FIELD_SUBJECT_PLAIN);
+            map.put(MailSortField.TO, FIELD_TO_PLAIN);
             sortField2Name = map;
         }
         {
             final EnumMap<MailField, List<String>> map = new EnumMap<MailField, List<String>>(MailField.class);
-            map.put(MailField.ACCOUNT_NAME, singletonList("account"));
-            map.put(MailField.ID, singletonList("id"));
-            map.put(MailField.FOLDER_ID, singletonList("full_name"));
-            map.put(MailField.FROM, singletonList("from_plain"));
-            map.put(MailField.TO, singletonList("to_plain"));
-            map.put(MailField.CC, singletonList("cc_plain"));
-            map.put(MailField.BCC, singletonList("bcc_plain"));
-            map.put(MailField.FLAGS, Arrays.asList("flag_answered", "flag_deleted", "flag_draft", "flag_flagged", "flag_forwarded", "flag_read_ack", "flag_recent", "flag_seen", "flag_", "flag_spam", "flag_user"));
-            map.put(MailField.SIZE, singletonList("size"));
+            map.put(MailField.ACCOUNT_NAME, singletonList(FIELD_ACCOUNT));
+            map.put(MailField.ID, singletonList(FIELD_ID));
+            map.put(MailField.FOLDER_ID, singletonList(FIELD_FULL_NAME));
+            map.put(MailField.FROM, singletonList(FIELD_FROM_PLAIN));
+            map.put(MailField.TO, singletonList(FIELD_TO_PLAIN));
+            map.put(MailField.CC, singletonList(FIELD_CC_PLAIN));
+            map.put(MailField.BCC, singletonList(FIELD_BCC_PLAIN));
+            map.put(MailField.FLAGS, Arrays.asList(FIELD_FLAG_ANSWERED, FIELD_FLAG_DELETED, FIELD_FLAG_DRAFT, FIELD_FLAG_FLAGGED, FIELD_FLAG_FORWARDED, FIELD_FLAG_READ_ACK, FIELD_FLAG_RECENT, FIELD_FLAG_SEEN, FIELD_FLAG_SPAM, FIELD_FLAG_USER));
+            map.put(MailField.SIZE, singletonList(FIELD_SIZE));
             {
                 final Set<Locale> knownLocales = IndexAdapters.KNOWN_LOCALES;
                 final List<String> names = new ArrayList<String>(knownLocales.size());
-                final StringBuilder tmp = new StringBuilder("subject_"); //8
+                final StringBuilder tmp = new StringBuilder(FIELD_SUBJECT_PREFIX); //8
                 for (final Locale loc : knownLocales) {
                     tmp.setLength(8);
                     tmp.append(loc.getLanguage());
@@ -172,10 +172,10 @@ public final class SolrjAdapter implements IndexAdapter {
                 }
                 map.put(MailField.SUBJECT, names);
             }
-            map.put(MailField.RECEIVED_DATE, singletonList("received_date"));
-            map.put(MailField.SENT_DATE, singletonList("sent_date"));
-            map.put(MailField.COLOR_LABEL, singletonList("color_label"));
-            map.put(MailField.CONTENT_TYPE, singletonList("attachment"));
+            map.put(MailField.RECEIVED_DATE, singletonList(FIELD_RECEIVED_DATE));
+            map.put(MailField.SENT_DATE, singletonList(FIELD_SENT_DATE));
+            map.put(MailField.COLOR_LABEL, singletonList(FIELD_COLOR_LABEL));
+            map.put(MailField.CONTENT_TYPE, singletonList(FIELD_ATTACHMENT));
             // {
             // final Set<Locale> knownLocales = IndexAdapters.KNOWN_LOCALES;
             // final List<String> names = new ArrayList<String>(knownLocales.size());
@@ -255,13 +255,13 @@ public final class SolrjAdapter implements IndexAdapter {
             final String query;
             {
                 final StringBuilder queryBuilder = new StringBuilder(128);
-                queryBuilder.append('(').append("user:").append(session.getUserId()).append(')');
-                queryBuilder.append(" AND (").append("context:").append(session.getContextId()).append(')');
+                queryBuilder.append('(').append(FIELD_USER).append(':').append(session.getUserId()).append(')');
+                queryBuilder.append(" AND (").append(FIELD_CONTEXT).append(':').append(session.getContextId()).append(')');
                 if (optAccountId >= 0) {
-                    queryBuilder.append(" AND (").append("account:").append(optAccountId).append(')');
+                    queryBuilder.append(" AND (").append(FIELD_ACCOUNT).append(':').append(optAccountId).append(')');
                 }
                 if (null != optFullName) {
-                    queryBuilder.append(" AND (").append("full_name:\"").append(optFullName).append("\")");
+                    queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(optFullName).append("\")");
                 }
                 if (null != searchTerm) {
                     queryBuilder.append(" AND (").append(SearchTerm2Query.searchTerm2Query(searchTerm)).append(')');
@@ -338,34 +338,34 @@ public final class SolrjAdapter implements IndexAdapter {
 //            textFillerQueue.add(TextFiller.fillerFor(document));
 //        }
         final MailFields fields = null == mailFields ? new MailFields(true) : mailFields;
-        final MailMessage mail = new IDMailMessage(document.getFieldValue("id").toString(), document.getFieldValue("full_name").toString());
-        mail.setAccountId(SolrjAdapter.<Integer> getFieldValue("account", document).intValue());
+        final MailMessage mail = new IDMailMessage(document.getFieldValue(FIELD_ID).toString(), document.getFieldValue(FIELD_FULL_NAME).toString());
+        mail.setAccountId(SolrjAdapter.<Integer> getFieldValue(FIELD_ACCOUNT, document).intValue());
         if (fields.contains(MailField.COLOR_LABEL)) {
-            mail.setColorLabel(SolrjAdapter.<Integer> getFieldValue("color_label", document).intValue());
+            mail.setColorLabel(SolrjAdapter.<Integer> getFieldValue(FIELD_COLOR_LABEL, document).intValue());
         }
         if (fields.contains(MailField.CONTENT_TYPE)) {
-            mail.setHasAttachment(SolrjAdapter.<Boolean> getFieldValue("attachment", document).booleanValue());
+            mail.setHasAttachment(SolrjAdapter.<Boolean> getFieldValue(FIELD_ATTACHMENT, document).booleanValue());
         }
         if (fields.contains(MailField.SIZE)) {
-            final Long size = SolrjAdapter.<Long> getFieldValue("size", document);
+            final Long size = SolrjAdapter.<Long> getFieldValue(FIELD_SIZE, document);
             if (null != size) {
                 mail.setSize(size.longValue());
             }
         }
         if (fields.contains(MailField.RECEIVED_DATE)) {
-            final Long time = SolrjAdapter.<Long> getFieldValue("received_date", document);
+            final Long time = SolrjAdapter.<Long> getFieldValue(FIELD_RECEIVED_DATE, document);
             if (null != time) {
                 mail.setReceivedDate(new Date(time.longValue()));
             }
         }
         if (fields.contains(MailField.SENT_DATE)) {
-            final Long time = SolrjAdapter.<Long> getFieldValue("sent_date", document);
+            final Long time = SolrjAdapter.<Long> getFieldValue(FIELD_SENT_DATE, document);
             if (null != time) {
                 mail.setSentDate(new Date(time.longValue()));
             }
         }
         {
-            String addressList = (String) (fields.contains(MailField.FROM) ? getFieldValue("from_plain", document) : null);
+            String addressList = (String) (fields.contains(MailField.FROM) ? getFieldValue(FIELD_FROM_PLAIN, document) : null);
             if (!isEmpty(addressList)) {
                 try {
                     mail.addFrom(QuotedInternetAddress.parse(addressList, false));
@@ -373,7 +373,7 @@ public final class SolrjAdapter implements IndexAdapter {
                     mail.addFrom(new PlainTextAddress(addressList));
                 }
             }
-            addressList = (String) (fields.contains(MailField.TO) ? getFieldValue("to_plain", document) : null);
+            addressList = (String) (fields.contains(MailField.TO) ? getFieldValue(FIELD_TO_PLAIN, document) : null);
             if (!isEmpty(addressList)) {
                 try {
                     mail.addTo(QuotedInternetAddress.parse(addressList, false));
@@ -381,7 +381,7 @@ public final class SolrjAdapter implements IndexAdapter {
                     mail.addTo(new PlainTextAddress(addressList));
                 }
             }
-            addressList = (String) (fields.contains(MailField.CC) ? getFieldValue("cc_plain", document) : null);
+            addressList = (String) (fields.contains(MailField.CC) ? getFieldValue(FIELD_CC_PLAIN, document) : null);
             if (!isEmpty(addressList)) {
                 try {
                     mail.addCc(QuotedInternetAddress.parse(addressList, false));
@@ -389,7 +389,7 @@ public final class SolrjAdapter implements IndexAdapter {
                     mail.addCc(new PlainTextAddress(addressList));
                 }
             }
-            addressList = (String) (fields.contains(MailField.BCC) ? getFieldValue("bcc_plain", document) : null);
+            addressList = (String) (fields.contains(MailField.BCC) ? getFieldValue(FIELD_BCC_PLAIN, document) : null);
             if (!isEmpty(addressList)) {
                 try {
                     mail.addBcc(QuotedInternetAddress.parse(addressList, false));
@@ -400,43 +400,43 @@ public final class SolrjAdapter implements IndexAdapter {
         }
         if (fields.contains(MailField.FLAGS)) {
             int flags = 0;
-            Boolean b = SolrjAdapter.<Boolean> getFieldValue("flag_answered", document);
+            Boolean b = SolrjAdapter.<Boolean> getFieldValue(FIELD_FLAG_ANSWERED, document);
             if (null != b && b.booleanValue()) {
                 flags |= MailMessage.FLAG_ANSWERED;
             }
-            b = SolrjAdapter.<Boolean> getFieldValue("flag_deleted", document);
+            b = SolrjAdapter.<Boolean> getFieldValue(FIELD_FLAG_DELETED, document);
             if (null != b && b.booleanValue()) {
                 flags |= MailMessage.FLAG_DELETED;
             }
-            b = SolrjAdapter.<Boolean> getFieldValue("flag_draft", document);
+            b = SolrjAdapter.<Boolean> getFieldValue(FIELD_FLAG_DRAFT, document);
             if (null != b && b.booleanValue()) {
                 flags |= MailMessage.FLAG_DRAFT;
             }
-            b = SolrjAdapter.<Boolean> getFieldValue("flag_flagged", document);
+            b = SolrjAdapter.<Boolean> getFieldValue(FIELD_FLAG_FLAGGED, document);
             if (null != b && b.booleanValue()) {
                 flags |= MailMessage.FLAG_FLAGGED;
             }
-            b = SolrjAdapter.<Boolean> getFieldValue("flag_forwarded", document);
+            b = SolrjAdapter.<Boolean> getFieldValue(FIELD_FLAG_FORWARDED, document);
             if (null != b && b.booleanValue()) {
                 flags |= MailMessage.FLAG_FORWARDED;
             }
-            b = SolrjAdapter.<Boolean> getFieldValue("flag_read_ack", document);
+            b = SolrjAdapter.<Boolean> getFieldValue(FIELD_FLAG_READ_ACK, document);
             if (null != b && b.booleanValue()) {
                 flags |= MailMessage.FLAG_READ_ACK;
             }
-            b = SolrjAdapter.<Boolean> getFieldValue("flag_recent", document);
+            b = SolrjAdapter.<Boolean> getFieldValue(FIELD_FLAG_RECENT, document);
             if (null != b && b.booleanValue()) {
                 flags |= MailMessage.FLAG_RECENT;
             }
-            b = SolrjAdapter.<Boolean> getFieldValue("flag_seen", document);
+            b = SolrjAdapter.<Boolean> getFieldValue(FIELD_FLAG_SEEN, document);
             if (null != b && b.booleanValue()) {
                 flags |= MailMessage.FLAG_SEEN;
             }
-            b = SolrjAdapter.<Boolean> getFieldValue("flag_spam", document);
+            b = SolrjAdapter.<Boolean> getFieldValue(FIELD_FLAG_SPAM, document);
             if (null != b && b.booleanValue()) {
                 flags |= MailMessage.FLAG_SPAM;
             }
-            b = SolrjAdapter.<Boolean> getFieldValue("flag_user", document);
+            b = SolrjAdapter.<Boolean> getFieldValue(FIELD_FLAG_USER, document);
             if (null != b && b.booleanValue()) {
                 flags |= MailMessage.FLAG_USER;
             }
@@ -444,7 +444,7 @@ public final class SolrjAdapter implements IndexAdapter {
         }
         // Subject
         if (fields.contains(MailField.SUBJECT)) {
-            final StringBuilder pre = new StringBuilder("subject_");
+            final StringBuilder pre = new StringBuilder(FIELD_SUBJECT_PREFIX);
             for (final Locale l : IndexAdapters.KNOWN_LOCALES) {
                 pre.setLength(8);
                 final String subject = getFieldValue(pre.append(l.getLanguage()).toString(), document);
@@ -489,20 +489,20 @@ public final class SolrjAdapter implements IndexAdapter {
             final String query;
             {
                 final StringBuilder queryBuilder = new StringBuilder(128);
-                queryBuilder.append('(').append("user:").append(session.getUserId()).append(')');
-                queryBuilder.append(" AND (").append("context:").append(session.getContextId()).append(')');
+                queryBuilder.append('(').append(FIELD_USER).append(':').append(session.getUserId()).append(')');
+                queryBuilder.append(" AND (").append(FIELD_CONTEXT).append(':').append(session.getContextId()).append(')');
                 if (accountId >= 0) {
-                    queryBuilder.append(" AND (").append("account:").append(accountId).append(')');
+                    queryBuilder.append(" AND (").append(FIELD_ACCOUNT).append(':').append(accountId).append(')');
                 }
                 if (null != fullName) {
-                    queryBuilder.append(" AND (").append("full_name:\"").append(fullName).append("\")");
+                    queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(fullName).append("\")");
                 }
                 if (null != optMailIds) {
                     final int length = optMailIds.length;
                     if (length > 0) {
-                        queryBuilder.append(" AND (").append("id:").append(optMailIds[0]);
+                        queryBuilder.append(" AND (").append(FIELD_ID).append(':').append(optMailIds[0]);
                         for (int i = 1; i < length; i++) {
-                            queryBuilder.append(" OR id:").append(optMailIds[i]);
+                            queryBuilder.append(" OR ").append(FIELD_ID).append(':').append(optMailIds[i]);
                         }
                         queryBuilder.append(')');
                     }
@@ -575,18 +575,18 @@ public final class SolrjAdapter implements IndexAdapter {
         try {
             solrServer = solrServerFor(session, true);
             final StringBuilder queryBuilder = new StringBuilder(128);
-            queryBuilder.append('(').append("user:").append(session.getUserId()).append(')');
-            queryBuilder.append(" AND (").append("context:").append(session.getContextId()).append(')');
+            queryBuilder.append('(').append(FIELD_USER).append(':').append(session.getUserId()).append(')');
+            queryBuilder.append(" AND (").append(FIELD_CONTEXT).append(':').append(session.getContextId()).append(')');
             if (accountId >= 0) {
-                queryBuilder.append(" AND (").append("account:").append(accountId).append(')');
+                queryBuilder.append(" AND (").append(FIELD_ACCOUNT).append(':').append(accountId).append(')');
             }
             if (null != fullName) {
-                queryBuilder.append(" AND (").append("full_name:\"").append(fullName).append("\")");
+                queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(fullName).append("\")");
             }
             final Iterator<String> iterator = mailIds.iterator();
-            queryBuilder.append(" AND (").append("id:").append(iterator.next());
+            queryBuilder.append(" AND (").append(FIELD_ID).append(':').append(iterator.next());
             while (iterator.hasNext()) {
-                queryBuilder.append(" OR id:").append(iterator.next());
+                queryBuilder.append(" OR ").append(FIELD_ID).append(':').append(iterator.next());
             }
             queryBuilder.append(')');
             solrServer.deleteByQuery(queryBuilder.toString());
@@ -608,13 +608,13 @@ public final class SolrjAdapter implements IndexAdapter {
         try {
             final CommonsHttpSolrServer solrServer = solrServerFor(session, true);
             final StringBuilder queryBuilder = new StringBuilder(128);
-            queryBuilder.append('(').append("user:").append(session.getUserId()).append(')');
-            queryBuilder.append(" AND (").append("context:").append(session.getContextId()).append(')');
+            queryBuilder.append('(').append(FIELD_USER).append(':').append(session.getUserId()).append(')');
+            queryBuilder.append(" AND (").append(FIELD_CONTEXT).append(':').append(session.getContextId()).append(')');
             if (accountId >= 0) {
-                queryBuilder.append(" AND (").append("account:").append(accountId).append(')');
+                queryBuilder.append(" AND (").append(FIELD_ACCOUNT).append(':').append(accountId).append(')');
             }
             if (null != fullName) {
-                queryBuilder.append(" AND (").append("full_name:\"").append(fullName).append("\")");
+                queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(fullName).append("\")");
             }
             final SolrQuery solrQuery = new SolrQuery().setQuery(queryBuilder.toString());
             solrQuery.setRows(Integer.valueOf(0)); // No results needed
@@ -646,19 +646,19 @@ public final class SolrjAdapter implements IndexAdapter {
             final String query;
             {
                 final StringBuilder queryBuilder = new StringBuilder(128);
-                queryBuilder.append('(').append("user:").append(session.getUserId()).append(')');
-                queryBuilder.append(" AND (").append("context:").append(session.getContextId()).append(')');
+                queryBuilder.append('(').append(FIELD_USER).append(':').append(session.getUserId()).append(')');
+                queryBuilder.append(" AND (").append(FIELD_CONTEXT).append(':').append(session.getContextId()).append(')');
                 final int accountId = mails.get(0).getAccountId();
                 if (accountId >= 0) {
-                    queryBuilder.append(" AND (").append("account:").append(accountId).append(')');
+                    queryBuilder.append(" AND (").append(FIELD_ACCOUNT).append(':').append(accountId).append(')');
                 }
                 final String fullName = mails.get(0).getFolder();
                 if (null != fullName) {
-                    queryBuilder.append(" AND (").append("full_name:\"").append(fullName).append("\")");
+                    queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(fullName).append("\")");
                 }
-                queryBuilder.append(" AND (").append("id:").append(mails.get(0).getMailId());
+                queryBuilder.append(" AND (").append(FIELD_ID).append(':').append(mails.get(0).getMailId());
                 for (int i = 1; i < size; i++) {
-                    queryBuilder.append(" OR id:").append(mails.get(i).getMailId());
+                    queryBuilder.append(" OR ").append(FIELD_ID).append(':').append(mails.get(i).getMailId());
                 }
                 queryBuilder.append(')');
                 query = queryBuilder.toString();
@@ -790,39 +790,39 @@ public final class SolrjAdapter implements IndexAdapter {
          * Un-analyzed fields
          */
         {
-            final SolrInputField field = new SolrInputField("timestamp");
+            final SolrInputField field = new SolrInputField(FIELD_TIMESTAMP);
             field.setValue(Long.valueOf(stamp), 1.0f);
-            inputDocument.put("timestamp", field);
+            inputDocument.put(FIELD_TIMESTAMP, field);
         }
         {
-            final SolrInputField field = new SolrInputField("uuid");
+            final SolrInputField field = new SolrInputField(FIELD_UUID);
             field.setValue(uuid, 1.0f);
-            inputDocument.put("uuid", field);
+            inputDocument.put(FIELD_UUID, field);
         }
         {
-            final SolrInputField field = new SolrInputField("context");
+            final SolrInputField field = new SolrInputField(FIELD_CONTEXT);
             field.setValue(Long.valueOf(session.getContextId()), 1.0f);
-            inputDocument.put("context", field);
+            inputDocument.put(FIELD_CONTEXT, field);
         }
         {
-            final SolrInputField field = new SolrInputField("user");
+            final SolrInputField field = new SolrInputField(FIELD_USER);
             field.setValue(Long.valueOf(session.getUserId()), 1.0f);
-            inputDocument.put("user", field);
+            inputDocument.put(FIELD_USER, field);
         }
         {
-            final SolrInputField field = new SolrInputField("account");
+            final SolrInputField field = new SolrInputField(FIELD_ACCOUNT);
             field.setValue(Integer.valueOf(accountId), 1.0f);
-            inputDocument.put("account", field);
+            inputDocument.put(FIELD_ACCOUNT, field);
         }
         {
-            final SolrInputField field = new SolrInputField("full_name");
+            final SolrInputField field = new SolrInputField(FIELD_FULL_NAME);
             field.setValue(mail.getFolder(), 1.0f);
-            inputDocument.put("full_name", field);
+            inputDocument.put(FIELD_FULL_NAME, field);
         }
         {
-            final SolrInputField field = new SolrInputField("id");
+            final SolrInputField field = new SolrInputField(FIELD_ID);
             field.setValue(mail.getMailId(), 1.0f);
-            inputDocument.put("id", field);
+            inputDocument.put(FIELD_ID, field);
         }
         /*-
          * Address fields
@@ -844,72 +844,72 @@ public final class SolrjAdapter implements IndexAdapter {
          */
         {
             AddressesPreparation preparation = new AddressesPreparation(mail.getFrom());
-            SolrInputField field = new SolrInputField("from_personal");
+            SolrInputField field = new SolrInputField(FIELD_FROM_PERSONAL);
             field.setValue(preparation.personalList, 1.0f);
-            inputDocument.put("from_personal", field);
-            field = new SolrInputField("from_addr");
+            inputDocument.put(FIELD_FROM_PERSONAL, field);
+            field = new SolrInputField(FIELD_FROM_ADDR);
             field.setValue(preparation.addressList, 1.0f);
-            inputDocument.put("from_addr", field);
-            field = new SolrInputField("from_plain");
+            inputDocument.put(FIELD_FROM_ADDR, field);
+            field = new SolrInputField(FIELD_FROM_PLAIN);
             field.setValue(preparation.line, 1.0f);
-            inputDocument.put("from_plain", field);
+            inputDocument.put(FIELD_FROM_PLAIN, field);
 
             preparation = new AddressesPreparation(mail.getTo());
-            field = new SolrInputField("to_personal");
+            field = new SolrInputField(FIELD_TO_PERSONAL);
             field.setValue(preparation.personalList, 1.0f);
-            inputDocument.put("to_personal", field);
-            field = new SolrInputField("to_addr");
+            inputDocument.put(FIELD_TO_PERSONAL, field);
+            field = new SolrInputField(FIELD_TO_ADDR);
             field.setValue(preparation.addressList, 1.0f);
-            inputDocument.put("to_addr", field);
-            field = new SolrInputField("to_plain");
+            inputDocument.put(FIELD_TO_ADDR, field);
+            field = new SolrInputField(FIELD_TO_PLAIN);
             field.setValue(preparation.line, 1.0f);
-            inputDocument.put("to_plain", field);
+            inputDocument.put(FIELD_TO_PLAIN, field);
 
             preparation = new AddressesPreparation(mail.getCc());
-            field = new SolrInputField("cc_personal");
+            field = new SolrInputField(FIELD_CC_PERSONAL);
             field.setValue(preparation.personalList, 1.0f);
-            inputDocument.put("cc_personal", field);
-            field = new SolrInputField("cc_addr");
+            inputDocument.put(FIELD_CC_PERSONAL, field);
+            field = new SolrInputField(FIELD_CC_ADDR);
             field.setValue(preparation.addressList, 1.0f);
-            inputDocument.put("cc_addr", field);
-            field = new SolrInputField("cc_plain");
+            inputDocument.put(FIELD_CC_ADDR, field);
+            field = new SolrInputField(FIELD_CC_PLAIN);
             field.setValue(preparation.line, 1.0f);
-            inputDocument.put("cc_plain", field);
+            inputDocument.put(FIELD_CC_PLAIN, field);
 
             preparation = new AddressesPreparation(mail.getBcc());
-            field = new SolrInputField("bcc_personal");
+            field = new SolrInputField(FIELD_BCC_PERSONAL);
             field.setValue(preparation.personalList, 1.0f);
-            inputDocument.put("bcc_personal", field);
-            field = new SolrInputField("bcc_addr");
+            inputDocument.put(FIELD_BCC_PERSONAL, field);
+            field = new SolrInputField(FIELD_BCC_ADDR);
             field.setValue(preparation.addressList, 1.0f);
-            inputDocument.put("bcc_addr", field);
-            field = new SolrInputField("bcc_plain");
+            inputDocument.put(FIELD_BCC_ADDR, field);
+            field = new SolrInputField(FIELD_BCC_PLAIN);
             field.setValue(preparation.line, 1.0f);
-            inputDocument.put("bcc_plain", field);
+            inputDocument.put(FIELD_BCC_PLAIN, field);
         }
         /*
          * Attachment flag
          */
         {
-            final SolrInputField field = new SolrInputField("attachment");
+            final SolrInputField field = new SolrInputField(FIELD_ATTACHMENT);
             field.setValue(Boolean.valueOf(mail.hasAttachment()), 1.0f);
-            inputDocument.put("attachment", field);
+            inputDocument.put(FIELD_ATTACHMENT, field);
         }
         /*
          * Write color label
          */
         {
-            final SolrInputField field = new SolrInputField("color_label");
+            final SolrInputField field = new SolrInputField(FIELD_COLOR_LABEL);
             field.setValue(Integer.valueOf(mail.getColorLabel()), 1.0f);
-            inputDocument.put("color_label", field);
+            inputDocument.put(FIELD_COLOR_LABEL, field);
         }
         /*
          * Write size
          */
         {
-            final SolrInputField field = new SolrInputField("size");
+            final SolrInputField field = new SolrInputField(FIELD_SIZE);
             field.setValue(Long.valueOf(mail.getSize()), 1.0f);
-            inputDocument.put("size", field);
+            inputDocument.put(FIELD_SIZE, field);
         }
         /*
          * Write date fields
@@ -917,15 +917,15 @@ public final class SolrjAdapter implements IndexAdapter {
         {
             java.util.Date d = mail.getReceivedDate();
             if (null != d) {
-                final SolrInputField field = new SolrInputField("received_date");
+                final SolrInputField field = new SolrInputField(FIELD_RECEIVED_DATE);
                 field.setValue(Long.valueOf(d.getTime()), 1.0f);
-                inputDocument.put("received_date", field);
+                inputDocument.put(FIELD_RECEIVED_DATE, field);
             }
             d = mail.getSentDate();
             if (null != d) {
-                final SolrInputField field = new SolrInputField("sent_date");
+                final SolrInputField field = new SolrInputField(FIELD_SENT_DATE);
                 field.setValue(Long.valueOf(d.getTime()), 1.0f);
-                inputDocument.put("sent_date", field);
+                inputDocument.put(FIELD_SENT_DATE, field);
             }
         }
         /*
@@ -934,54 +934,54 @@ public final class SolrjAdapter implements IndexAdapter {
         {
             final int flags = mail.getFlags();
 
-            SolrInputField field = new SolrInputField("flag_answered");
+            SolrInputField field = new SolrInputField(FIELD_FLAG_ANSWERED);
             field.setValue(Boolean.valueOf((flags & MailMessage.FLAG_ANSWERED) > 0), 1.0f);
-            inputDocument.put("flag_answered", field);
+            inputDocument.put(FIELD_FLAG_ANSWERED, field);
 
-            field = new SolrInputField("flag_deleted");
+            field = new SolrInputField(FIELD_FLAG_DELETED);
             field.setValue(Boolean.valueOf((flags & MailMessage.FLAG_DELETED) > 0), 1.0f);
-            inputDocument.put("flag_deleted", field);
+            inputDocument.put(FIELD_FLAG_DELETED, field);
 
-            field = new SolrInputField("flag_draft");
+            field = new SolrInputField(FIELD_FLAG_DRAFT);
             field.setValue(Boolean.valueOf((flags & MailMessage.FLAG_DRAFT) > 0), 1.0f);
-            inputDocument.put("flag_draft", field);
+            inputDocument.put(FIELD_FLAG_DRAFT, field);
 
-            field = new SolrInputField("flag_flagged");
-            field.setValue(Boolean.valueOf((flags & MailMessage.FLAG_DRAFT) > 0), 1.0f);
-            inputDocument.put("flag_flagged", field);
+            field = new SolrInputField(FIELD_FLAG_FLAGGED);
+            field.setValue(Boolean.valueOf((flags & MailMessage.FLAG_FLAGGED) > 0), 1.0f);
+            inputDocument.put(FIELD_FLAG_FLAGGED, field);
 
-            field = new SolrInputField("flag_recent");
+            field = new SolrInputField(FIELD_FLAG_RECENT);
             field.setValue(Boolean.valueOf((flags & MailMessage.FLAG_RECENT) > 0), 1.0f);
-            inputDocument.put("flag_recent", field);
+            inputDocument.put(FIELD_FLAG_RECENT, field);
 
-            field = new SolrInputField("flag_seen");
+            field = new SolrInputField(FIELD_FLAG_SEEN);
             field.setValue(Boolean.valueOf((flags & MailMessage.FLAG_SEEN) > 0), 1.0f);
-            inputDocument.put("flag_seen", field);
+            inputDocument.put(FIELD_FLAG_SEEN, field);
 
-            field = new SolrInputField("flag_user");
+            field = new SolrInputField(FIELD_FLAG_USER);
             field.setValue(Boolean.valueOf((flags & MailMessage.FLAG_USER) > 0), 1.0f);
-            inputDocument.put("flag_user", field);
+            inputDocument.put(FIELD_FLAG_USER, field);
 
-            field = new SolrInputField("flag_spam");
+            field = new SolrInputField(FIELD_FLAG_SPAM);
             field.setValue(Boolean.valueOf((flags & MailMessage.FLAG_SPAM) > 0), 1.0f);
-            inputDocument.put("flag_spam", field);
+            inputDocument.put(FIELD_FLAG_SPAM, field);
 
-            field = new SolrInputField("flag_forwarded");
+            field = new SolrInputField(FIELD_FLAG_FORWARDED);
             field.setValue(Boolean.valueOf((flags & MailMessage.FLAG_FORWARDED) > 0), 1.0f);
-            inputDocument.put("flag_forwarded", field);
+            inputDocument.put(FIELD_FLAG_FORWARDED, field);
 
-            field = new SolrInputField("flag_read_ack");
+            field = new SolrInputField(FIELD_FLAG_READ_ACK);
             field.setValue(Boolean.valueOf((flags & MailMessage.FLAG_READ_ACK) > 0), 1.0f);
-            inputDocument.put("flag_read_ack", field);
+            inputDocument.put(FIELD_FLAG_READ_ACK, field);
         }
         /*
          * Subject
          */
         {
             final String subject = mail.getSubject();
-            SolrInputField field = new SolrInputField("subject_plain");
+            SolrInputField field = new SolrInputField(FIELD_SUBJECT_PLAIN);
             field.setValue(subject, 1.0f);
-            inputDocument.put("subject_plain", field);
+            inputDocument.put(FIELD_SUBJECT_PLAIN, field);
 
             String language;
             try {
@@ -994,7 +994,7 @@ public final class SolrjAdapter implements IndexAdapter {
             } catch (final Exception e) {
                 language = "en";
             }
-            final String name = "subject_" + language;
+            final String name = FIELD_SUBJECT_PREFIX + language;
             field = new SolrInputField(name);
             field.setValue(subject, 1.0f);
             inputDocument.put(name, field);
@@ -1045,57 +1045,57 @@ public final class SolrjAdapter implements IndexAdapter {
             final Map<String, Object> documentFields = document.getFieldValueMap();
             final SolrInputDocument inputDocument = new SolrInputDocument();
             {
-                final int flags = mailMap.get(document.getFieldValue("id")).getFlags();
+                final int flags = mailMap.get(document.getFieldValue(FIELD_ID)).getFlags();
 
-                SolrInputField field = new SolrInputField("flag_answered");
+                SolrInputField field = new SolrInputField(FIELD_FLAG_ANSWERED);
                 field.setValue(Boolean.valueOf((flags & MailMessage.FLAG_ANSWERED) > 0), 1.0f);
-                inputDocument.put("flag_answered", field);
-                documentFields.remove("flag_answered");
+                inputDocument.put(FIELD_FLAG_ANSWERED, field);
+                documentFields.remove(FIELD_FLAG_ANSWERED);
 
-                field = new SolrInputField("flag_deleted");
+                field = new SolrInputField(FIELD_FLAG_DELETED);
                 field.setValue(Boolean.valueOf((flags & MailMessage.FLAG_DELETED) > 0), 1.0f);
-                inputDocument.put("flag_deleted", field);
-                documentFields.remove("flag_deleted");
+                inputDocument.put(FIELD_FLAG_DELETED, field);
+                documentFields.remove(FIELD_FLAG_DELETED);
 
-                field = new SolrInputField("flag_draft");
+                field = new SolrInputField(FIELD_FLAG_DRAFT);
                 field.setValue(Boolean.valueOf((flags & MailMessage.FLAG_DRAFT) > 0), 1.0f);
-                inputDocument.put("flag_draft", field);
-                documentFields.remove("flag_draft");
+                inputDocument.put(FIELD_FLAG_DRAFT, field);
+                documentFields.remove(FIELD_FLAG_DRAFT);
 
-                field = new SolrInputField("flag_flagged");
-                field.setValue(Boolean.valueOf((flags & MailMessage.FLAG_DRAFT) > 0), 1.0f);
-                inputDocument.put("flag_flagged", field);
-                documentFields.remove("flag_flagged");
+                field = new SolrInputField(FIELD_FLAG_FLAGGED);
+                field.setValue(Boolean.valueOf((flags & MailMessage.FLAG_FLAGGED) > 0), 1.0f);
+                inputDocument.put(FIELD_FLAG_FLAGGED, field);
+                documentFields.remove(FIELD_FLAG_FLAGGED);
 
-                field = new SolrInputField("flag_recent");
+                field = new SolrInputField(FIELD_FLAG_RECENT);
                 field.setValue(Boolean.valueOf((flags & MailMessage.FLAG_RECENT) > 0), 1.0f);
-                inputDocument.put("flag_recent", field);
-                documentFields.remove("flag_recent");
+                inputDocument.put(FIELD_FLAG_RECENT, field);
+                documentFields.remove(FIELD_FLAG_RECENT);
 
-                field = new SolrInputField("flag_seen");
+                field = new SolrInputField(FIELD_FLAG_SEEN);
                 field.setValue(Boolean.valueOf((flags & MailMessage.FLAG_SEEN) > 0), 1.0f);
-                inputDocument.put("flag_seen", field);
-                documentFields.remove("flag_seen");
+                inputDocument.put(FIELD_FLAG_SEEN, field);
+                documentFields.remove(FIELD_FLAG_SEEN);
 
-                field = new SolrInputField("flag_user");
+                field = new SolrInputField(FIELD_FLAG_USER);
                 field.setValue(Boolean.valueOf((flags & MailMessage.FLAG_USER) > 0), 1.0f);
-                inputDocument.put("flag_user", field);
-                documentFields.remove("flag_user");
+                inputDocument.put(FIELD_FLAG_USER, field);
+                documentFields.remove(FIELD_FLAG_USER);
 
-                field = new SolrInputField("flag_spam");
+                field = new SolrInputField(FIELD_FLAG_SPAM);
                 field.setValue(Boolean.valueOf((flags & MailMessage.FLAG_SPAM) > 0), 1.0f);
-                inputDocument.put("flag_spam", field);
-                documentFields.remove("flag_spam");
+                inputDocument.put(FIELD_FLAG_SPAM, field);
+                documentFields.remove(FIELD_FLAG_SPAM);
 
-                field = new SolrInputField("flag_forwarded");
+                field = new SolrInputField(FIELD_FLAG_FORWARDED);
                 field.setValue(Boolean.valueOf((flags & MailMessage.FLAG_FORWARDED) > 0), 1.0f);
-                inputDocument.put("flag_forwarded", field);
-                documentFields.remove("flag_forwarded");
+                inputDocument.put(FIELD_FLAG_FORWARDED, field);
+                documentFields.remove(FIELD_FLAG_FORWARDED);
 
-                field = new SolrInputField("flag_read_ack");
+                field = new SolrInputField(FIELD_FLAG_READ_ACK);
                 field.setValue(Boolean.valueOf((flags & MailMessage.FLAG_READ_ACK) > 0), 1.0f);
-                inputDocument.put("flag_read_ack", field);
-                documentFields.remove("flag_read_ack");
+                inputDocument.put(FIELD_FLAG_READ_ACK, field);
+                documentFields.remove(FIELD_FLAG_READ_ACK);
             }
             for (final Entry<String, Object> entry : documentFields.entrySet()) {
                 final String name = entry.getKey();
