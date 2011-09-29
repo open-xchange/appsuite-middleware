@@ -75,6 +75,7 @@ import com.openexchange.mail.smal.adapter.IndexAdapter;
 import com.openexchange.mail.smal.adapter.IndexService;
 import com.openexchange.mail.smal.jobqueue.JobQueue;
 import com.openexchange.mail.smal.jobqueue.jobs.AdderJob;
+import com.openexchange.mail.smal.jobqueue.jobs.ChangerJob;
 import com.openexchange.mail.smal.jobqueue.jobs.FlagsObserverJob;
 import com.openexchange.mail.smal.jobqueue.jobs.FolderJob;
 import com.openexchange.mail.smal.jobqueue.jobs.RemoverJob;
@@ -357,11 +358,14 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
     @Override
     public void updateMessageFlags(final String folder, final String[] mailIds, final int flags, final boolean set) throws OXException {
         messageStorage.updateMessageFlags(folder, mailIds, flags, set);
+
+        final ChangerJob job = new ChangerJob(folder, accountId, userId, contextId);
+        JobQueue.getInstance().addJob(job.setRanking(10).setMailIds(Arrays.asList(mailIds)));
     }
 
     @Override
     public MailMessage[] getAllMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws OXException {
-        return messageStorage.getAllMessages(folder, indexRange, sortField, order, fields);
+        return searchMessages(folder, indexRange, sortField, order, null, fields);
     }
 
     @Override
@@ -416,6 +420,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
 
     @Override
     public void updateMessageColorLabel(final String folder, final String[] mailIds, final int colorLabel) throws OXException {
+        // TODO:
         messageStorage.updateMessageColorLabel(folder, mailIds, colorLabel);
     }
 

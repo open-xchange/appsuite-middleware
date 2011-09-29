@@ -205,7 +205,7 @@ public final class FolderJob extends AbstractMailSyncJob {
         final FolderJob anotherFolderJob = (FolderJob) anotherJob;
         this.ranking = anotherFolderJob.ranking;
         this.span = anotherFolderJob.span;
-        this.storageMails = storageMails;
+        this.storageMails = anotherFolderJob.storageMails;
         gate.set(0);
     }
 
