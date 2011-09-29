@@ -337,6 +337,8 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
         return locale;
     }
 
+    private static final MailFields FIELDS_ADDRESSES = new MailFields(MailField.FROM, MailField.TO, MailField.CC, MailField.BCC);
+
     private MailMessage readDocument(final SolrDocument document, final MailFields mailFields) throws OXException {
 //        if (SolrTextFillerQueue.checkSolrDocument(document)) {
 //            textFillerQueue.add(TextFiller.fillerFor(document));
@@ -368,33 +370,30 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
                 mail.setSentDate(new Date(time.longValue()));
             }
         }
-        {
-            String addressList = (String) (fields.contains(MailField.FROM) ? getFieldValue(FIELD_FROM_PLAIN, document) : null);
-            if (!isEmpty(addressList)) {
+        if (fields.containsAny(FIELDS_ADDRESSES)) {
+            String addressList;
+            if (fields.contains(MailField.FROM) && !isEmpty((addressList = getFieldValue(FIELD_FROM_PLAIN, document)))) {
                 try {
                     mail.addFrom(QuotedInternetAddress.parse(addressList, false));
                 } catch (final AddressException e) {
                     mail.addFrom(new PlainTextAddress(addressList));
                 }
             }
-            addressList = (String) (fields.contains(MailField.TO) ? getFieldValue(FIELD_TO_PLAIN, document) : null);
-            if (!isEmpty(addressList)) {
+            if (fields.contains(MailField.TO) && !isEmpty((addressList = getFieldValue(FIELD_TO_PLAIN, document)))) {
                 try {
                     mail.addTo(QuotedInternetAddress.parse(addressList, false));
                 } catch (final AddressException e) {
                     mail.addTo(new PlainTextAddress(addressList));
                 }
             }
-            addressList = (String) (fields.contains(MailField.CC) ? getFieldValue(FIELD_CC_PLAIN, document) : null);
-            if (!isEmpty(addressList)) {
+            if (fields.contains(MailField.CC) && !isEmpty((addressList = getFieldValue(FIELD_CC_PLAIN, document)))) {
                 try {
                     mail.addCc(QuotedInternetAddress.parse(addressList, false));
                 } catch (final AddressException e) {
                     mail.addCc(new PlainTextAddress(addressList));
                 }
             }
-            addressList = (String) (fields.contains(MailField.BCC) ? getFieldValue(FIELD_BCC_PLAIN, document) : null);
-            if (!isEmpty(addressList)) {
+            if (fields.contains(MailField.BCC) && !isEmpty((addressList = getFieldValue(FIELD_BCC_PLAIN, document)))) {
                 try {
                     mail.addBcc(QuotedInternetAddress.parse(addressList, false));
                 } catch (final AddressException e) {
