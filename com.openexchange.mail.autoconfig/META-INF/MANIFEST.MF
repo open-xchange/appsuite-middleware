@@ -27,6 +27,6 @@ Import-Package: com.openexchange.config.cascade,
  org.apache.commons.logging,
  org.osgi.framework
 Bundle-ActivationPolicy: lazy
-Bundle-ClassPath: lib/kxml.jar,
- .
+Bundle-ClassPath: .,
+ lib/kxml.jar
 Export-Package: com.openexchange.mail.autoconfig
