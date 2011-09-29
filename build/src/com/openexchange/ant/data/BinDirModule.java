@@ -104,7 +104,6 @@ public class BinDirModule extends DirModule {
     @Override
     public void readLocalFiles(final Project project, final File rootDir) {
         dir = new File(rootDir, name);
-        project.log("Project " + name + " reads local files from " + dir);
         readFiles(new File(dir, "/META-INF/MANIFEST.MF"));
     }
 
