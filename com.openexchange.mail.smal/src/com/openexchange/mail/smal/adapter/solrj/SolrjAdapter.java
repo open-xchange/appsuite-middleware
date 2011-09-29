@@ -291,8 +291,9 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
                 }
                 off = size;
             }
+            final Thread thread = Thread.currentThread();
             while (off < numFound) {
-                if (Thread.interrupted()) {
+                if (thread.isInterrupted()) {
                     // Clears the thread's interrupted flag
                     throw new InterruptedException("Thread interrupted while paging through Solr results.");
                 }
@@ -540,8 +541,9 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
                 
                 System.out.println("SolrjAdapter.getMessages() requested " + off +" of " + numFound + " mails from index for:\n" + query);
             }
+            final Thread thread = Thread.currentThread();
             while (off < numFound) {
-                if (Thread.interrupted()) {
+                if (thread.isInterrupted()) {
                     // Clears the thread's interrupted flag
                     throw new InterruptedException("Thread interrupted while paging through Solr results.");
                 }
@@ -694,8 +696,9 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
                 }
                 off = rsize;
             }
+            final Thread thread = Thread.currentThread();
             while (off < numFound) {
-                if (Thread.interrupted()) {
+                if (thread.isInterrupted()) {
                     // Clears the thread's interrupted flag
                     throw new InterruptedException("Thread interrupted while paging through Solr results.");
                 }
