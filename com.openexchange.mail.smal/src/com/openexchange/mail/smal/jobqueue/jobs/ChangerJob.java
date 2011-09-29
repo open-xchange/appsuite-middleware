@@ -49,28 +49,33 @@
 
 package com.openexchange.mail.smal.jobqueue.jobs;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
-import com.openexchange.mail.smal.SMALServiceLookup;
+import com.openexchange.mail.MailField;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.smal.SMALMailAccess;
 import com.openexchange.mail.smal.adapter.IndexAdapter;
 import com.openexchange.mail.smal.jobqueue.Job;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessiondService;
 
 /**
- * {@link RemoverJob}
+ * {@link ChangerJob}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class RemoverJob extends AbstractMailSyncJob {
+public final class ChangerJob extends AbstractMailSyncJob {
 
     private static final long serialVersionUID = -4811521171077091128L;
 
-    private static final String SIMPLE_NAME = RemoverJob.class.getSimpleName();
+    private static final String SIMPLE_NAME = ChangerJob.class.getSimpleName();
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(RemoverJob.class));
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ChangerJob.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -93,7 +98,7 @@ public final class RemoverJob extends AbstractMailSyncJob {
     private volatile List<String> mailIds;
 
     /**
-     * Initializes a new {@link RemoverJob} with default span.
+     * Initializes a new {@link ChangerJob} with default span.
      * <p>
      * This job is performed is span is exceeded and if able to exclusively set sync flag.
      * 
@@ -102,7 +107,7 @@ public final class RemoverJob extends AbstractMailSyncJob {
      * @param userId The user ID
      * @param contextId The context ID
      */
-    public RemoverJob(final String fullName, final int accountId, final int userId, final int contextId) {
+    public ChangerJob(final String fullName, final int accountId, final int userId, final int contextId) {
         super(accountId, userId, contextId);
         gate = new AtomicInteger(0);
         ranking = 0;
@@ -119,18 +124,18 @@ public final class RemoverJob extends AbstractMailSyncJob {
      * @param ranking The ranking to set
      * @return This folder job with specified ranking applied
      */
-    public RemoverJob setRanking(final int ranking) {
+    public ChangerJob setRanking(final int ranking) {
         this.ranking = ranking;
         return this;
     }
 
     /**
-     * Sets the mails identifiers
+     * Sets the mail identifiers
      * 
-     * @param mailIds The identifiers to set
+     * @param mailIds The identifiers
      * @return This folder job
      */
-    public RemoverJob setMailIds(final List<String> mailIds) {
+    public ChangerJob setMailIds(final List<String> mailIds) {
         this.mailIds = mailIds;
         return this;
     }
@@ -148,7 +153,7 @@ public final class RemoverJob extends AbstractMailSyncJob {
                 return;
             }
         } while (state != GATE_OPEN || !gate.compareAndSet(state, GATE_REPLACE));
-        final RemoverJob anotherFolderJob = (RemoverJob) anotherJob;
+        final ChangerJob anotherFolderJob = (ChangerJob) anotherJob;
         this.ranking = anotherFolderJob.ranking;
         this.mailIds = anotherFolderJob.mailIds;
         gate.set(0);
@@ -164,10 +169,12 @@ public final class RemoverJob extends AbstractMailSyncJob {
         return ranking;
     }
 
+    private static final MailField[] FIELDS = new MailField[] { MailField.ID, MailField.FLAGS };
+
     @Override
     public void perform() {
         final List<String> mailIds = this.mailIds;
-        if (null == mailIds) {
+        if (null == mailIds || mailIds.isEmpty()) {
             return;
         }
         if (error) {
@@ -189,19 +196,48 @@ public final class RemoverJob extends AbstractMailSyncJob {
             final long st = DEBUG ? System.currentTimeMillis() : 0L;
             try {
                 final IndexAdapter indexAdapter = getAdapter();
-                final SessiondService service = SMALServiceLookup.getServiceStatic(SessiondService.class);
-                final Session session = service.getAnyActiveSessionForUser(userId, contextId);
-                indexAdapter.deleteMessages(mailIds, fullName, accountId, session);
+                final List<MailMessage> mails;
+                final Session session;
+                {
+                    MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+                    try {
+                        mailAccess = SMALMailAccess.getUnwrappedInstance(userId, contextId, accountId);
+                        session = mailAccess.getSession();
+                        /*
+                         * Get the mails from mail storage
+                         */
+                        mailAccess.connect(true);
+                        /*
+                         * Fetch mails
+                         */
+                        mails =
+                            Arrays.asList(mailAccess.getMessageStorage().getMessages(
+                                fullName,
+                                mailIds.toArray(new String[mailIds.size()]),
+                                FIELDS));
+                    } finally {
+                        SMALMailAccess.closeUnwrappedInstance(mailAccess);
+                        mailAccess = null;
+                    }
+                }
+                for (final MailMessage mail : mails) {
+                    mail.setAccountId(accountId);
+                    mail.setFolder(fullName);
+                }
+                /*
+                 * Change flags
+                 */
+                indexAdapter.change(mails, session);
             } finally {
                 if (DEBUG) {
                     final long dur = System.currentTimeMillis() - st;
-                    LOG.debug("RemoverJob \"" + identifier + "\" took " + dur + "msec for folder " + fullName + " in account " + accountId);
+                    LOG.debug("ChangerJob \"" + identifier + "\" took " + dur + "msec for folder " + fullName + " in account " + accountId);
                 }
             }
         } catch (final Exception e) {
             error = true;
             cancel();
-            LOG.error("RemoverJob \"" + identifier + "\" failed.", e);
+            LOG.error("ChangerJob \"" + identifier + "\" failed.", e);
         }
     }
 

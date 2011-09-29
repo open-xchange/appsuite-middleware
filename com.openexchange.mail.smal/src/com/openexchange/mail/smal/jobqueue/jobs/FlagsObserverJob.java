@@ -159,7 +159,7 @@ public final class FlagsObserverJob extends AbstractMailSyncJob {
         } while (state != GATE_OPEN || !gate.compareAndSet(state, GATE_REPLACE));
         final FlagsObserverJob anotherFolderJob = (FlagsObserverJob) anotherJob;
         this.ranking = anotherFolderJob.ranking;
-        this.storageMails = storageMails;
+        this.storageMails = anotherFolderJob.storageMails;
         gate.set(0);
     }
 
@@ -251,13 +251,13 @@ public final class FlagsObserverJob extends AbstractMailSyncJob {
             } finally {
                 if (DEBUG) {
                     final long dur = System.currentTimeMillis() - st;
-                    LOG.debug("Folder job \"" + identifier + "\" took " + dur + "msec for folder " + fullName + " in account " + accountId);
+                    LOG.debug("FlagsObserverJob \"" + identifier + "\" took " + dur + "msec for folder " + fullName + " in account " + accountId);
                 }
             }
         } catch (final Exception e) {
             error = true;
             cancel();
-            LOG.error("Folder job \"" + identifier + "\" failed.", e);
+            LOG.error("FlagsObserverJob \"" + identifier + "\" failed.", e);
         }
     }
 

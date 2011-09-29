@@ -157,7 +157,7 @@ public final class AdderJob extends AbstractMailSyncJob {
         } while (state != GATE_OPEN || !gate.compareAndSet(state, GATE_REPLACE));
         final AdderJob anotherFolderJob = (AdderJob) anotherJob;
         this.ranking = anotherFolderJob.ranking;
-        this.mailIds = mailIds;
+        this.mailIds = anotherFolderJob.mailIds;
         gate.set(0);
     }
 
@@ -243,13 +243,13 @@ public final class AdderJob extends AbstractMailSyncJob {
             } finally {
                 if (DEBUG) {
                     final long dur = System.currentTimeMillis() - st;
-                    LOG.debug("Folder job \"" + identifier + "\" took " + dur + "msec for folder " + fullName + " in account " + accountId);
+                    LOG.debug("AdderJob \"" + identifier + "\" took " + dur + "msec for folder " + fullName + " in account " + accountId);
                 }
             }
         } catch (final Exception e) {
             error = true;
             cancel();
-            LOG.error("Folder job \"" + identifier + "\" failed.", e);
+            LOG.error("AdderJob \"" + identifier + "\" failed.", e);
         }
     }
 
