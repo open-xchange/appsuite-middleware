@@ -1726,6 +1726,20 @@ public class ContactSetter implements ContactSwitcher {
         conObj.setYomiCompany(value);
         return conObj;
     }
+    
+    @Override
+    public Object image1contenttype(Object[] objects) throws OXException {
+        if (objects.length < 2) {
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("image1_content_type");
+        }
+        final Contact conObj = (Contact) objects[0];
+        if(objects[1] == null) {
+            return conObj;
+        }
+        final String value = (String) objects[1];
+        conObj.setImageContentType(value);
+        return conObj;
+    }
 
     @Override
     public boolean _unknownfield(final Contact contact, final String fieldname, final Object value, final Object... additionalObjects) {
@@ -1738,5 +1752,5 @@ public class ContactSetter implements ContactSwitcher {
         }
 
         return false;
-    }
+    }    
 }
