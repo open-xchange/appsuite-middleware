@@ -295,6 +295,8 @@ public interface ContactSwitcher {
     public Object yomilastname(Object[] objects) throws OXException;
 
     public Object yomicompanyname(Object[] objects) throws OXException;
+    
+    public Object image1contenttype(Object[] objects) throws OXException;
 
     public boolean _unknownfield(Contact contact, String fieldname, Object value, Object... additionalObjects) throws OXException;
 

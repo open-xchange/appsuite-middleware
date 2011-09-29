@@ -686,9 +686,14 @@ public class ContactStringGetter implements ContactSwitcher {
     public Object yomicompanyname(Object[] objects) throws OXException {
         return stringify(delegate.yomicompanyname(objects));
     }
+    
+    @Override
+    public Object image1contenttype(Object[] objects) throws OXException {
+        return stringify(delegate.image1contenttype(objects));
+    }
 
     @Override
     public boolean _unknownfield(final Contact contact, final String fieldname, final Object value, final Object... additionalObjects) throws OXException {
         return delegate._unknownfield(contact, fieldname, value, additionalObjects);
-    }
+    }    
 }

@@ -1106,6 +1106,15 @@ public class ContactGetter implements ContactSwitcher {
         final Contact conObj = (Contact) objects[0];
         return conObj.getYomiCompany();
     }
+    
+    @Override
+    public Object image1contenttype(Object[] objects) throws OXException {
+        if (objects.length < 1) {
+            throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("image1_content_type"); 
+        }
+        final Contact conObj = (Contact) objects[0];
+        return conObj.getImageContentType();
+    }
 
     @Override
     public boolean _unknownfield(final Contact contact, final String fieldname, final Object value, final Object... additionalObjects){

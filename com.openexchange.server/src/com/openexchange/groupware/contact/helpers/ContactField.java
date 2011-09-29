@@ -185,8 +185,8 @@ public enum ContactField{
     BIRTHDAY (511 , "timestampfield01" , "BIRTHDAY" , "Birthday" , ContactFields.BIRTHDAY),
     ANNIVERSARY (517 , "timestampfield02" , "ANNIVERSARY" , "Anniversary" , ContactFields.ANNIVERSARY),
     IMAGE1 (570 , "intfield04" , "IMAGE1" , ""  , ContactFields.IMAGE1),
-    IMAGE_LAST_MODIFIED (597 , "intfield04" , "IMAGE_LAST_MODIFIED" , ""  , ""),
-    IMAGE1_CONTENT_TYPE (601 , "intfield04" , "IMAGE1_CONTENT_TYPE" , ""  , ""),
+    IMAGE_LAST_MODIFIED (597 , "intfield04" , "IMAGE_LAST_MODIFIED" , ""  ,"image_last_modified"),
+    IMAGE1_CONTENT_TYPE (601 , "intfield04" , "IMAGE1_CONTENT_TYPE" , ""  , "image1_content_type"),
     INTERNAL_USERID (524 , "userid" , "INTERNAL_USERID" , ""  , ContactFields.USER_ID),
     COLOR_LABEL (102 , "intfield05" , "COLOR_LABEL" , ""  , CommonFields.COLORLABEL),
     FILE_AS (599 , "field90" , "FILE_AS" , ""  , ContactFields.FILE_AS),
@@ -452,6 +452,7 @@ public enum ContactField{
 		case YOMI_FIRST_NAME: return switcher.yomifirstname(objects);
 		case YOMI_LAST_NAME: return switcher.yomilastname(objects);
 		case YOMI_COMPANY: return switcher.yomicompanyname(objects);
+		case IMAGE1_CONTENT_TYPE: return switcher.image1contenttype(objects);
 		default: return null;
 		}
 	}

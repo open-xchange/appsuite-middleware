@@ -112,7 +112,7 @@
         </move>
         <replace dir="${patchConfDir}">
             <replacefilter token="$PWD/" value=""/>
-            <replacefilter token="INITIAL_OX_SQL_DIR=@oxconfdir@" value="INITIAL_OX_SQL_DIR=${basedir}/../open-xchange-admin/etc"/>
+            <replacefilter token="INITIAL_OX_SQL_DIR=@oxconfdir@" value="INITIAL_OX_SQL_DIR=${basedir}/../com.openexchange.admin/etc"/>
             <replacefilter token="@oxconfdir@" value="${confAdminSubstPatch}"/>
             <replacefilter token="@serverconfdir@" value="${confGroupSubstPatch}"/>
             <replacefilter token="@oxgroupwaresysconfdir@" value="${confGroupSubstPatch}"/>
