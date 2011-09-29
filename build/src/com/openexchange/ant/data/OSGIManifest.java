@@ -104,7 +104,7 @@ public class OSGIManifest {
         return value;
     }
 
-    private static final String IMPORT_REGEX = "([a-z0-9\\.]+)(?:; ?(?:(?:resolution:=\"?optional\"?)|(?:version=((?:[0-9.]+)|(?:\"[0-9\\.\\[ \\),]+\")))))*(?:,)?";
+    private static final String IMPORT_REGEX = "([a-z0-9A-Z\\.]+)(?:; ?(?:(?:resolution:=\"?optional\"?)|(?:version=((?:[0-9.]+)|(?:\"[0-9\\.\\[ \\),]+\")))))*(?:,)?";
     private static final Pattern IMPORT_PATTERN = Pattern.compile(IMPORT_REGEX);
 
     public Set<String> getImports() {
