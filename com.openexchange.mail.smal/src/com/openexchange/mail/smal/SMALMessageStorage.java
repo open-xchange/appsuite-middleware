@@ -125,6 +125,18 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
         }
     }
 
+    private static <V> void cancelRemaining(final ThreadPoolCompletionService<MailResult<V>> completionService) {
+        try {
+            completionService.cancel(true);
+        } catch (final RuntimeException e) {
+            LOG.warn("Failed canceling remaining tasks.", e);
+        }
+    }
+
+    /*-
+     * --------------------------------------------- Member stuff -----------------------------------------------
+     */
+
     private final IMailMessageStorage messageStorage;
 
     /**
@@ -323,14 +335,6 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
             }
         };
         getServiceStatic(ThreadPoolService.class).submit(ThreadPools.task(task));
-    }
-
-    private static <V> void cancelRemaining(final ThreadPoolCompletionService<MailResult<V>> completionService) {
-        try {
-            completionService.cancel(true);
-        } catch (final RuntimeException e) {
-            LOG.warn("Failed canceling remaining tasks.", e);
-        }
     }
 
     @Override
