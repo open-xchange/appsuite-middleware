@@ -53,13 +53,11 @@ import static com.openexchange.smtp.services.SMTPServiceRegistry.getServiceRegis
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.BundleActivator;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.server.osgiservice.RegistryCustomizer;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.smtp.SMTPProvider;
@@ -69,28 +67,20 @@ import com.openexchange.smtp.SMTPProvider;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SMTPActivator extends DeferredActivator {
+public final class SMTPActivator extends HousekeepingActivator {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SMTPActivator.class));
-
-    private final Dictionary<String, String> dictionary;
-
-    private ServiceRegistration smtpServiceRegistration;
-
-    private ServiceTracker<HostnameService,HostnameService> tracker;
 
     /**
      * Initializes a new {@link SMTPActivator}
      */
     public SMTPActivator() {
         super();
-        dictionary = new Hashtable<String, String>();
-        dictionary.put("protocol", SMTPProvider.PROTOCOL_SMTP.toString());
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, MailAccountStorageService.class, HostnameService.class };
+        return new Class<?>[] { ConfigurationService.class, MailAccountStorageService.class };
     }
 
     @Override
@@ -129,9 +119,11 @@ public final class SMTPActivator extends DeferredActivator {
                     }
                 }
             }
-            tracker = new ServiceTracker<HostnameService,HostnameService>(context, HostnameService.class.getName(), new RegistryCustomizer<HostnameService>(context, HostnameService.class, getServiceRegistry()));
-            tracker.open();
-            smtpServiceRegistration = context.registerService(TransportProvider.class.getName(), SMTPProvider.getInstance(), dictionary);
+            track(HostnameService.class, new RegistryCustomizer<HostnameService>(context, HostnameService.class, getServiceRegistry()));
+            openTrackers();
+            final Dictionary<String, String> dictionary = new Hashtable<String, String>();
+            dictionary.put("protocol", SMTPProvider.PROTOCOL_SMTP.toString());
+            registerService(TransportProvider.class, SMTPProvider.getInstance(), dictionary);
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
@@ -142,14 +134,7 @@ public final class SMTPActivator extends DeferredActivator {
     @Override
     public void stopBundle() throws Exception {
         try {
-            if (null != smtpServiceRegistration) {
-                smtpServiceRegistration.unregister();
-                smtpServiceRegistration = null;
-            }
-            if (null != tracker) {
-                tracker.close();
-                tracker = null;
-            }
+            cleanUp();
             /*
              * Clear service registry
              */

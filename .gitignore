@@ -1,9 +1,9 @@
 *.class
 bin
 bin/
-open-xchange-config/development/tmp
-open-xchange-config/development/adminTmp
-open-xchange-config/development/commonTmp
+open-xchange-development/tmp
+open-xchange-development/adminTmp
+open-xchange-development/commonTmp
 com.openexchange.axis2/conf/axis2.properties
 com.openexchange.axis2/lib/*.jar
 com.openexchange.axis2/tmp/*

@@ -49,6 +49,8 @@
 
 package com.openexchange.threadpool;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
@@ -61,7 +63,7 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 /**
  * {@link ThreadPoolCompletionService} - A {@link CompletionService} that uses a supplied {@link ThreadPoolService} to execute tasks. This
  * class arranges that submitted tasks are, upon completion, placed on a queue accessible using <tt>take</tt>.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ThreadPoolCompletionService<V> implements CompletionService<V> {
@@ -95,9 +97,11 @@ public final class ThreadPoolCompletionService<V> implements CompletionService<V
 
     private final RefusedExecutionBehavior<V> behavior;
 
+    private final List<Future<V>> submittedFutures;
+
     /**
      * Initializes a new {@link ThreadPoolCompletionService} with caller-runs behavior and an unbound {@link BlockingQueue}.
-     *
+     * 
      * @param threadPoolService The thread pool to use
      * @throws NullPointerException If threadPoolService is <tt>null</tt>
      */
@@ -109,11 +113,12 @@ public final class ThreadPoolCompletionService<V> implements CompletionService<V
         this.threadPoolService = threadPoolService;
         this.completionQueue = new LinkedBlockingQueue<Future<V>>();
         behavior = CallerRunsBehavior.getInstance();
+        submittedFutures = new LinkedList<Future<V>>();
     }
 
     /**
      * Initializes a new {@link ThreadPoolCompletionService}.
-     *
+     * 
      * @param threadPoolService The thread pool to use
      * @param completionQueue The queue to use as the completion queue normally one dedicated for use by this service
      * @param behavior The behavior to apply to submitted tasks
@@ -133,6 +138,7 @@ public final class ThreadPoolCompletionService<V> implements CompletionService<V
         this.threadPoolService = threadPoolService;
         this.completionQueue = completionQueue;
         this.behavior = behavior;
+        submittedFutures = new LinkedList<Future<V>>();
     }
 
     @Override
@@ -141,7 +147,7 @@ public final class ThreadPoolCompletionService<V> implements CompletionService<V
             throw new NullPointerException();
         }
         final QueueingFuture<V> f = new QueueingFuture<V>(task, completionQueue);
-        threadPoolService.submit(ThreadPools.task(f, (V) null), behavior);
+        submittedFutures.add(threadPoolService.submit(ThreadPools.task(f, (V) null), behavior));
         return f;
     }
 
@@ -151,7 +157,7 @@ public final class ThreadPoolCompletionService<V> implements CompletionService<V
             throw new NullPointerException();
         }
         final QueueingFuture<V> f = new QueueingFuture<V>(task, result, completionQueue);
-        threadPoolService.submit(ThreadPools.task(f, (V) null), behavior);
+        submittedFutures.add(threadPoolService.submit(ThreadPools.task(f, (V) null), behavior));
         return f;
     }
 
@@ -168,6 +174,21 @@ public final class ThreadPoolCompletionService<V> implements CompletionService<V
     @Override
     public Future<V> poll(final long timeout, final TimeUnit unit) throws InterruptedException {
         return completionQueue.poll(timeout, unit);
+    }
+
+    /**
+     * Attempts to cancel execution of this completion service. The attempt will fail for tasks that have already completed, have already
+     * been cancelled, or could not be cancelled for some other reason. If a task has already started, then the
+     * <tt>mayInterruptIfRunning</tt> parameter determines whether the thread executing this task should be interrupted in an attempt to
+     * stop the task.
+     * 
+     * @param mayInterruptIfRunning <tt>true</tt> if the thread executing a task should be interrupted; otherwise, in-progress tasks are
+     *            allowed to complete
+     */
+    public void cancel(final boolean mayInterruptIfRunning) {
+        while (!submittedFutures.isEmpty()) {
+            submittedFutures.remove(0).cancel(mayInterruptIfRunning);
+        }
     }
 
 }

@@ -117,8 +117,9 @@ public interface IndexAdapter {
      * @param session The session
      * @return The search result
      * @throws OXException If search fails
+     * @throws InterruptedException If processing is interrupted
      */
-    public List<MailMessage> search(String optFullName, SearchTerm<?> searchTerm, MailSortField sortField, OrderDirection order, MailField[] fields, int optAccountId, Session session) throws OXException;
+    public List<MailMessage> search(String optFullName, SearchTerm<?> searchTerm, MailSortField sortField, OrderDirection order, MailField[] fields, int optAccountId, Session session) throws OXException, InterruptedException;
 
     /**
      * Gets specified mails located in given folder.
@@ -129,8 +130,9 @@ public interface IndexAdapter {
      * @param session The session
      * @return <code>true</code> if folder is contained; otherwise <code>false</code>
      * @throws OXException If check fails
+     * @throws InterruptedException If processing is interrupted
      */
-    public List<MailMessage> getMessages(String[] optMailIds, String fullName, MailSortField sortField, OrderDirection order, MailField[] fields, int accountId, Session session) throws OXException;
+    public List<MailMessage> getMessages(String[] optMailIds, String fullName, MailSortField sortField, OrderDirection order, MailField[] fields, int accountId, Session session) throws OXException, InterruptedException;
 
     /**
      * Deletes specified mails from index.
@@ -161,7 +163,7 @@ public interface IndexAdapter {
      * @param session The user session
      * @throws OXException If changing mails in index fails
      */
-    public void change(List<MailMessage> mails, Session session) throws OXException;
+    public void change(List<MailMessage> mails, Session session) throws OXException, InterruptedException;
 
     /**
      * Adds specified mail to the index.

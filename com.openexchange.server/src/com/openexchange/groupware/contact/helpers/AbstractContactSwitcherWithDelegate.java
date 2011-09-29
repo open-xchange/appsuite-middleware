@@ -660,6 +660,11 @@ public class AbstractContactSwitcherWithDelegate implements ContactSwitcher {
     public Object yomicompanyname(Object[] objects) throws OXException {
         return delegate.yomicompanyname(objects);
     }
+    
+    @Override
+    public Object image1contenttype(Object[] objects) throws OXException {
+        return delegate.image1contenttype(objects);
+    }
 
     @Override
     public boolean _unknownfield(final Contact contact, final String fieldname, final Object value, final Object... additionalObjects) throws OXException {
