@@ -11,8 +11,8 @@ Import-Package: com.openexchange.log,
  org.apache.commons.logging,
  org.osgi.framework;version="1.3.0",
  org.osgi.util.tracker;version="1.5.0"
-Bundle-ClassPath: lib/js.jar,
- .
+Bundle-ClassPath: .,
+ lib/js.jar
 Export-Package: com.openexchange.scripting.rhino,
  com.openexchange.scripting.rhino.require,
  org.mozilla.classfile,
