@@ -110,6 +110,9 @@ public abstract class AbstractModule {
             final String fragmentHostName = osgiManifest.getEntry(OSGIManifest.FRAGMENT_HOST);
             if (fragmentHostName != null) {
                 fragmentHost = modulesByName.get(fragmentHostName);
+                if (null == fragmentHost) {
+                    throw new BuildException("Can not find bundle for fragment host \"" + fragmentHostName + "\".");
+                }
                 dependencies.add(fragmentHost);
             }
         }
