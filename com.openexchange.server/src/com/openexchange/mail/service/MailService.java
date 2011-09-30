@@ -69,12 +69,15 @@ public interface MailService {
      * On finished work the final {@link MailAccess#close(boolean)} must be called in order to release resources:
      *
      * <pre>
-     * final MailAccess mailAccess = mailService.getMailAccess(session);
-     * mailAccess.connect();
+     * MailAccess mailAccess = null;
      * try {
-     * 	// Do something
+     *  mailAccess = mailService.getMailAccess(session);
+     *  mailAccess.connect();
+     *  // Do something
      * } finally {
-     * 	mailAccess.close(putToCache)
+     *  if (mailAccess != null) {
+     *   mailAccess.close(putToCache);
+     *  }
      * }
      * </pre>
      *

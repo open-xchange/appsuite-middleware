@@ -82,7 +82,6 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.SessionHolder;
 
 /**
  * {@link MailAccess} - Handles connecting to the mailing system while using an internal cache for connected access objects (see
@@ -416,12 +415,15 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * On finished work the final {@link #close(boolean)} must be called:
      *
      * <pre>
-     * final MailAccess mailAccess = MailAccess.getInstance(session);
-     * mailAccess.connect();
+     * MailAccess mailAccess = null;
      * try {
+     *  mailAccess = mailService.getInstance(...);
+     *  mailAccess.connect();
      *  // Do something
      * } finally {
-     *  mailAccess.close(putToCache)
+     *  if (mailAccess != null) {
+     *   mailAccess.close(putToCache);
+     *  }
      * }
      * </pre>
      *
@@ -440,12 +442,15 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * On finished work the final {@link #close(boolean)} must be called:
      *
      * <pre>
-     * final MailAccess mailAccess = MailAccess.getInstance(session, accountID);
-     * mailAccess.connect();
+     * MailAccess mailAccess = null;
      * try {
-     * 	// Do something
+     *  mailAccess = mailService.getInstance(...);
+     *  mailAccess.connect();
+     *  // Do something
      * } finally {
-     * 	mailAccess.close(putToCache)
+     *  if (mailAccess != null) {
+     *   mailAccess.close(putToCache);
+     *  }
      * }
      * </pre>
      *
@@ -486,12 +491,15 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * On finished work the final {@link #close(boolean)} must be called:
      *
      * <pre>
-     * final MailAccess mailAccess = MailAccess.getInstance(session, accountID);
-     * mailAccess.connect();
+     * MailAccess mailAccess = null;
      * try {
+     *  mailAccess = mailService.getInstance(...);
+     *  mailAccess.connect();
      *  // Do something
      * } finally {
-     *  mailAccess.close(putToCache)
+     *  if (mailAccess != null) {
+     *   mailAccess.close(putToCache);
+     *  }
      * }
      * </pre>
      *
@@ -511,12 +519,15 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * On finished work the final {@link #close(boolean)} must be called:
      *
      * <pre>
-     * final MailAccess mailAccess = MailAccess.getInstance(session, accountID);
-     * mailAccess.connect();
+     * MailAccess mailAccess = null;
      * try {
+     *  mailAccess = mailService.getInstance(...);
+     *  mailAccess.connect();
      *  // Do something
      * } finally {
-     *  mailAccess.close(putToCache)
+     *  if (mailAccess != null) {
+     *   mailAccess.close(putToCache);
+     *  }
      * }
      * </pre>
      *
