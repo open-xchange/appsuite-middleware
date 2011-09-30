@@ -87,10 +87,10 @@ public final class IndexAdapters {
         if (null == str) {
             return true;
         }
-        final char[] chars = str.toCharArray();
+        final int len = str.length();
         boolean empty = true;
-        for (int i = 0; empty && i < chars.length; i++) {
-            empty = Character.isWhitespace(chars[i]);
+        for (int i = 0; empty && i < len; i++) {
+            empty = Character.isWhitespace(str.charAt(i));
         }
         return empty;
     }
