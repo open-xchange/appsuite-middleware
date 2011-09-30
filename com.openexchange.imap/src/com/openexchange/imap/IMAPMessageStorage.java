@@ -949,7 +949,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 }
                 throw IMAPException.create(IMAPException.Code.MISSING_DEFAULT_FOLDER_NAME, imapConfig, session, "trash");
             }
-            final boolean backup = (!(fullName.startsWith(trashFullname)));
+            final boolean backup = (!isSubfolderOf(fullName, trashFullname, getSeparator(imapFolder)));
             blockwiseDeletion(msgUIDs, backup, backup ? trashFullname : null);
             IMAPSessionStorageAccess.removeDeletedSessionData(msgUIDs, accountId, session, fullName);
             notifyIMAPFolderModification(fullName);
@@ -2325,6 +2325,17 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     private ListLsubEntry getLISTEntry(final String fullName, final IMAPFolder imapFolder) throws OXException {
         return ListLsubCache.getCachedLISTEntry(fullName, accountId, imapFolder, session);
+    }
+
+    private static boolean isSubfolderOf(final String fullName, final String possibleParent, final char separator) {
+        if (!fullName.startsWith(possibleParent)) {
+            return false;
+        }
+        final int length = possibleParent.length();
+        if (length >= fullName.length()) {
+            return true;
+        }
+        return fullName.charAt(length) == separator;
     }
 
 }

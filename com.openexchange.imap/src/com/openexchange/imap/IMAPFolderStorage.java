@@ -1439,7 +1439,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                                 session,
                                 Character.valueOf(separator));
                         }
-                        if (destFolder.getFullName().startsWith(oldFullname)) {
+                        if (isSubfolderOf(destFolder.getFullName(), oldFullname, separator)) {
                             throw IMAPException.create(
                                 IMAPException.Code.NO_MOVE_TO_SUBFLD,
                                 imapConfig,
@@ -1787,7 +1787,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 } else {
                     final String trashFullName = getTrashFolder();
                     final IMAPFolder trashFolder = (IMAPFolder) imapStore.getFolder(trashFullName);
-                    if (deleteMe.getParent().getFullName().startsWith(trashFolder.getFullName()) || !inferiors(trashFolder)) {
+                    if (isSubfolderOf(deleteMe.getParent().getFullName(), trashFullName, getSeparator()) || !inferiors(trashFolder)) {
                         /*
                          * Delete permanently
                          */
@@ -1890,9 +1890,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         return;
                     }
                     String trashFullname = null;
+                    final boolean hardDeleteMsgsByConfig = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx).isHardDeleteMsgs();
                     final boolean backup =
-                        (!hardDelete && !UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx).isHardDeleteMsgs() && !(f.getFullName().startsWith((trashFullname =
-                            getTrashFolder()))));
+                        (!hardDelete && !hardDeleteMsgsByConfig && !isSubfolderOf(f.getFullName(), (trashFullname = getTrashFolder()), getSeparator()));
                     if (backup) {
                         imapAccess.getMessageStorage().notifyIMAPFolderModification(trashFullname);
                     }
@@ -2859,6 +2859,17 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             return MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
         }
         return MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+    }
+
+    private static boolean isSubfolderOf(final String fullName, final String possibleParent, final char separator) {
+        if (!fullName.startsWith(possibleParent)) {
+            return false;
+        }
+        final int length = possibleParent.length();
+        if (length >= fullName.length()) {
+            return true;
+        }
+        return fullName.charAt(length) == separator;
     }
 
 }
