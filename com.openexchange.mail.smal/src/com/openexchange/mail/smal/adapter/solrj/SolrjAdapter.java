@@ -315,7 +315,7 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
                 }
                 off += size;
                 
-                System.out.println("SolrjAdapter.search() requested " + off +" of " + numFound + " mails from index.");
+                System.out.println("SolrjAdapter.search() requested " + off +" of " + numFound + " mails from index for " + optFullName);
                 
                 
             }
@@ -577,32 +577,53 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
             return;
         }
         CommonsHttpSolrServer solrServer = null;
+        String query = null;
+        boolean ran = false;
         try {
             solrServer = solrServerFor(session, true);
-            final StringBuilder queryBuilder = new StringBuilder(128);
-            queryBuilder.append('(').append(FIELD_USER).append(':').append(session.getUserId()).append(')');
-            queryBuilder.append(" AND (").append(FIELD_CONTEXT).append(':').append(session.getContextId()).append(')');
-            if (accountId >= 0) {
-                queryBuilder.append(" AND (").append(FIELD_ACCOUNT).append(':').append(accountId).append(')');
+            {
+                final StringBuilder queryBuilder = new StringBuilder(128);
+                queryBuilder.append('(').append(FIELD_USER).append(':').append(session.getUserId()).append(')');
+                queryBuilder.append(" AND (").append(FIELD_CONTEXT).append(':').append(session.getContextId()).append(')');
+                if (accountId >= 0) {
+                    queryBuilder.append(" AND (").append(FIELD_ACCOUNT).append(':').append(accountId).append(')');
+                }
+                if (null != fullName) {
+                    queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(fullName).append("\")");
+                }
+                final Iterator<String> iterator = mailIds.iterator();
+                queryBuilder.append(" AND (").append(FIELD_ID).append(':').append(iterator.next());
+                while (iterator.hasNext()) {
+                    queryBuilder.append(" OR ").append(FIELD_ID).append(':').append(iterator.next());
+                }
+                queryBuilder.append(')');
+                query = queryBuilder.toString();
             }
-            if (null != fullName) {
-                queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(fullName).append("\")");
-            }
-            final Iterator<String> iterator = mailIds.iterator();
-            queryBuilder.append(" AND (").append(FIELD_ID).append(':').append(iterator.next());
-            while (iterator.hasNext()) {
-                queryBuilder.append(" OR ").append(FIELD_ID).append(':').append(iterator.next());
-            }
-            queryBuilder.append(')');
-            solrServer.deleteByQuery(queryBuilder.toString());
+            solrServer.deleteByQuery(query);
+            ran = true;
             solrServer.commit();
         } catch (final SolrServerException e) {
+            if (!ran) {
+                LOG.debug("SolrServer.deleteByQuery() failed for query:\n" + query);
+                
+                System.out.println("SolrServer.deleteByQuery() failed for query:\n" + query);
+            }
             SolrUtils.rollback(solrServer);
             throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
         } catch (final IOException e) {
+            if (!ran) {
+                LOG.debug("SolrServer.deleteByQuery() failed for query:\n" + query);
+                
+                System.out.println("SolrServer.deleteByQuery() failed for query:\n" + query);
+            }
             SolrUtils.rollback(solrServer);
             throw SMALExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
+            if (!ran) {
+                LOG.debug("SolrServer.deleteByQuery() failed for query:\n" + query);
+                
+                System.out.println("SolrServer.deleteByQuery() failed for query:\n" + query);
+            }
             SolrUtils.rollback(solrServer);
             throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }

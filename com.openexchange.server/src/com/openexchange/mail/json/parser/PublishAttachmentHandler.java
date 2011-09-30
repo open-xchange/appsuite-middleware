@@ -429,7 +429,10 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                 externalVersion.addEnclosedPart(attachment);
             }
         } else {
-            final Locale locale = TransportProperties.getInstance().getExternalRecipientsLocale();
+            Locale locale = TransportProperties.getInstance().getExternalRecipientsLocale();
+            if (null == locale) {
+                locale = getSessionUserLocale();
+            }
             final StringHelper stringHelper = StringHelper.valueOf(locale);
             if (appendLinksAsAttachment) {
                 // Apply text part as it is
@@ -455,6 +458,14 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             }
         }
         return externalVersion;
+    }
+
+    private Locale getSessionUserLocale() throws OXException {
+        if (session instanceof ServerSession) {
+            return ((ServerSession) session).getUser().getLocale();
+        }
+        final Context context = ContextStorage.getStorageContext(session.getContextId());
+        return UserStorage.getStorageUser(session.getUserId(), context).getLocale();
     }
 
     private ComposedMailMessage copyOf(final ComposedMailMessage source, final Context ctx) throws OXException {

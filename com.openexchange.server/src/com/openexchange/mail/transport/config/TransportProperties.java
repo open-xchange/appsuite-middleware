@@ -143,7 +143,7 @@ public final class TransportProperties implements ITransportProperties {
         sendAttachmentToExternalRecipients = false;
         provideLinksInAttachment = false;
         publishedDocumentTimeToLive = 604800000L;
-        externalRecipientsLocale = Locale.ENGLISH;
+        externalRecipientsLocale = null;
     }
 
     private void loadProperties0() {
@@ -220,22 +220,27 @@ public final class TransportProperties implements ITransportProperties {
         }
 
         {
-            final String tmp = configuration.getProperty("com.openexchange.mail.transport.externalRecipientsLocale", "en").trim();
-            try {
-                externalRecipientsLocale = LocaleTools.getLocale(tmp);
-            } catch (final Exception e) {
-                LOG.warn(
-                    new StringBuilder("Value of property \"com.openexchange.mail.transport.externalRecipientsLocale\"").append(
-                        " is not a valid locale identifier (such as \"en_US\"): ").append(tmp).append(". Using fallback \"en\" instead.").toString(),
-                    e);
-                externalRecipientsLocale = Locale.ENGLISH;
+            final String tmp = configuration.getProperty("com.openexchange.mail.transport.externalRecipientsLocale", "user-defined").trim();
+            if ("user-defined".equalsIgnoreCase(tmp)) {
+                externalRecipientsLocale = null;
+                logBuilder.append("\tExternal Recipients Locale: ").append("user-defined").append('\n');
+            } else {
+                try {
+                    externalRecipientsLocale = LocaleTools.getLocale(tmp);
+                } catch (final Exception e) {
+                    LOG.warn(
+                        new StringBuilder("Value of property \"com.openexchange.mail.transport.externalRecipientsLocale\"").append(
+                            " is not a valid locale identifier (such as \"en_US\"): ").append(tmp).append(". Using fallback \"en\" instead.").toString(),
+                        e);
+                    externalRecipientsLocale = Locale.ENGLISH;
+                }
+                if (null == externalRecipientsLocale) {
+                    LOG.warn(new StringBuilder("Value of property \"com.openexchange.mail.transport.externalRecipientsLocale\"").append(
+                        " is not a valid locale identifier (such as \"en_US\"): ").append(tmp).append(". Using fallback \"en\" instead.").toString());
+                    externalRecipientsLocale = Locale.ENGLISH;
+                }
+                logBuilder.append("\tExternal Recipients Locale: ").append(externalRecipientsLocale.toString()).append('\n');
             }
-            if (null == externalRecipientsLocale) {
-                LOG.warn(new StringBuilder("Value of property \"com.openexchange.mail.transport.externalRecipientsLocale\"").append(
-                    " is not a valid locale identifier (such as \"en_US\"): ").append(tmp).append(". Using fallback \"en\" instead.").toString());
-                externalRecipientsLocale = Locale.ENGLISH;
-            }
-            logBuilder.append("\tExternal Recipients Locale: ").append(externalRecipientsLocale.toString()).append('\n');
         }
 
         logBuilder.append("Global transport properties successfully loaded!");
@@ -324,7 +329,7 @@ public final class TransportProperties implements ITransportProperties {
     /**
      * Gets the locale to use when composing text sent to external recipients.
      *
-     * @return The locale to use when composing text sent to external recipients
+     * @return The locale to use when composing text sent to external recipients or <code>null</code> to select user's locale
      */
     public Locale getExternalRecipientsLocale() {
         return externalRecipientsLocale;
