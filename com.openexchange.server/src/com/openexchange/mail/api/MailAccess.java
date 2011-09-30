@@ -417,7 +417,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * <pre>
      * MailAccess mailAccess = null;
      * try {
-     *  mailAccess = mailService.getInstance(...);
+     *  mailAccess = MailAccess.getInstance(...);
      *  mailAccess.connect();
      *  // Do something
      * } finally {
@@ -444,7 +444,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * <pre>
      * MailAccess mailAccess = null;
      * try {
-     *  mailAccess = mailService.getInstance(...);
+     *  mailAccess = MailAccess.getInstance(...);
      *  mailAccess.connect();
      *  // Do something
      * } finally {
@@ -493,7 +493,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * <pre>
      * MailAccess mailAccess = null;
      * try {
-     *  mailAccess = mailService.getInstance(...);
+     *  mailAccess = MailAccess.getInstance(...);
      *  mailAccess.connect();
      *  // Do something
      * } finally {
@@ -521,7 +521,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * <pre>
      * MailAccess mailAccess = null;
      * try {
-     *  mailAccess = mailService.getInstance(...);
+     *  mailAccess = MailAccess.getInstance(...);
      *  mailAccess.connect();
      *  // Do something
      * } finally {
