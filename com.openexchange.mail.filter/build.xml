@@ -4,8 +4,6 @@
     <!-- Constants -->
     <property name="jSievePrefix" value="org/apache"/>
     <property name="javaccDir" value="javacc"/>
-    <!-- property name="tmpDir" value="tmp"/>
-    <property name="libDir" value="lib"/ -->
 
 	<import file="build-project.xml" as="main"/>
 
@@ -15,27 +13,26 @@
     </fileset>
 
     <target name="prepare">
-    	<mkdir dir="${tmpDir}"/>
         <!-- This target generated parts of the code out of the grammar file vor jjtree -->
         <mkdir dir="${srcDir}/${jSievePrefix}/jsieve/parser/generated"/>
-        <java classname="jjtree" fork="yes" failonerror="true" dir="${src}">
-            <arg line="-output_directory=${tmpDir} ${javaccDir}/sieve.jjt"/>
+        <java classname="jjtree" fork="yes" failonerror="true">
+            <arg line="-output_directory=${srcDir}/${jSievePrefix}/jsieve/parser/generated ${javaccDir}/sieve.jjt"/>
             <classpath>
-                <fileset refid="javaccjars"/>
+                <fileset refid="javaCCJars"/>
             </classpath>
        </java>
 
         <!-- This part isn't needed anymore if we switch to JAVACC 4.0 which isn't supplied with Ubuntu at the moment -->
-        <replace file="${srcDir}${jSievePrefix}/jsieve/parser/generated/SimpleNode.java" token="public class SimpleNode" value="public class SimpleNode extends org.apache.jsieve.parser.SieveNode"/>
+        <replace file="${srcDir}/${jSievePrefix}/jsieve/parser/generated/SimpleNode.java" token="public class SimpleNode" value="public class SimpleNode extends org.apache.jsieve.parser.SieveNode"/>
 
-        <java classname="javacc" fork="yes" failonerror="true" dir="${src}">
-            <arg line="-output_directory=${srcDir}/${jSievePrefix}/jsieve/parser/generated ${tmpDir}/sieve.jj"/>
+        <java classname="javacc" fork="yes" failonerror="true">
+            <arg line="-output_directory=${srcDir}/${jSievePrefix}/jsieve/parser/generated ${srcDir}/${jSievePrefix}/jsieve/parser/generated/sieve.jj"/>
             <classpath>
-                <fileset refid="javaccjars"/>
+                <fileset refid="javaCCJars"/>
             </classpath>
         </java>
 
-        <delete dir="${tmpDir}"/>
+        <delete file="${srcDir}/${jSievePrefix}/jsieve/parser/generated/sieve.jj"/>
     </target>
 
 	<target name="clean" depends="main.clean">
