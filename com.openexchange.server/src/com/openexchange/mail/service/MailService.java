@@ -97,7 +97,7 @@ public interface MailService {
      * <pre>
      * MailAccess mailAccess = null;
      * try {
-     *  mailAccess = mailService.getMailAccess(session);
+     *  mailAccess = mailService.getMailAccess(...);
      *  mailAccess.connect();
      *  // Do something
      * } finally {
