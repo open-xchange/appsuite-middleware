@@ -53,8 +53,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.langdetect.LanguageDetectionService;
 import com.openexchange.mail.smal.SMALServiceLookup;
@@ -66,6 +64,11 @@ import com.openexchange.server.ServiceExceptionCode;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IndexAdapters {
+
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IndexAdapters.class));
+
+    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     /**
      * Initializes a new {@link IndexAdapters}.
@@ -129,9 +132,8 @@ public final class IndexAdapters {
             if (KNOWN_LOCALES.contains(locale)) {
                 return locale;
             }
-            final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(IndexAdapters.class));
-            if (logger.isWarnEnabled()) {
-                logger.warn("Detected locale \"" + locale + "\" is not supported. Using fall-back locale \"" + LanguageDetectionService.DEFAULT_LOCALE + "\".");
+            if (DEBUG) {
+                LOG.debug("Detected locale \"" + locale + "\" is not supported. Using fall-back locale \"" + LanguageDetectionService.DEFAULT_LOCALE + "\".");
             }
             return LanguageDetectionService.DEFAULT_LOCALE;
         } catch (final IllegalStateException e) {
