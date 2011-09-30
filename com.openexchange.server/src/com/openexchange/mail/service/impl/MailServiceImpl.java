@@ -75,6 +75,11 @@ public final class MailServiceImpl implements MailService {
     }
 
     @Override
+    public MailAccess<?, ?> getMailAccess(final int userId, final int contextId, final int accountId) throws OXException {
+        return MailAccess.getInstance(userId, contextId, accountId);
+    }
+
+    @Override
     public MailTransport getMailTransport(final Session session, final int accountId) throws OXException {
         return MailTransport.getInstance(session, accountId);
     }

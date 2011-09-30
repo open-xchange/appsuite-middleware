@@ -89,6 +89,33 @@ public interface MailService {
     public MailAccess<?, ?> getMailAccess(Session session, int accountId) throws OXException;
 
     /**
+     * Gets an appropriate instance of {@link MailAccess mail access} parameterized with given session.
+     * <p>
+     * When starting to work with obtained {@link MailAccess mail access} at first its {@link MailAccess#connect()} method is supposed to be invoked.
+     * On finished work the final {@link MailAccess#close(boolean)} must be called in order to release resources:
+     *
+     * <pre>
+     * MailAccess mailAccess = null;
+     * try {
+     *  mailAccess = mailService.getMailAccess(session);
+     *  mailAccess.connect();
+     *  // Do something
+     * } finally {
+     *  if (mailAccess != null) {
+     *   mailAccess.close(putToCache);
+     *  }
+     * }
+     * </pre>
+     *
+     * @param userId The user ID
+     * @param contextId The context ID
+     * @param accountId The account ID
+     * @return An appropriate instance of {@link MailAccess}
+     * @throws OXException If an appropriate instance of {@link MailAccess mail access} cannot be initialized
+     */
+    public MailAccess<?, ?> getMailAccess(int userId, int contextId, int accountId) throws OXException;
+
+    /**
      * Gets an appropriate instance of {@link MailTransport mail transport} parameterized with given session.
      * <p>
      * Note: Don't forget to call final {@link MailTransport#close()} on obtained {@link MailTransport mail transport}:
