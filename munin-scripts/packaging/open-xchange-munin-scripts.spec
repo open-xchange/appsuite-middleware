@@ -36,7 +36,7 @@ from <http://munin.projects.linpro.no/> to a live installation.
 %install
 %__mkdir_p %{buildroot}/usr/share/munin/plugins/
 %__cp ox_munin_scripts/* $RPM_BUILD_ROOT/usr/share/munin/plugins/
-
+chmod a+x $RPM_BUILD_ROOT/usr/share/munin/plugins/*
 
 %post
 TMPFILE=`mktemp /tmp/munin-node.configure.XXXXXXXXXX`

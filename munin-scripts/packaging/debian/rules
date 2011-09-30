@@ -56,6 +56,7 @@ install: build
 	mkdir -p $(buildroot)/usr/share/munin/plugins/
 	# copy files
 	cp ox_munin_scripts/* $(buildroot)/usr/share/munin/plugins/
+	chmod a+x $(buildroot)/usr/share/munin/plugins/*
 
 
 # Build architecture-independent files here.
