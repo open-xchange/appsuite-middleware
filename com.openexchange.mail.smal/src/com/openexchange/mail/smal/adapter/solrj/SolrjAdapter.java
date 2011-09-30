@@ -121,6 +121,8 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
 
     private static final int QUERY_ROWS = 125;
 
+    private static final int DELETE_ROWS = 25;
+
     private volatile CommonsHttpSolrServerManagement solrServerManagement;
 
     private volatile SolrTextFillerQueue textFillerQueue;
@@ -581,23 +583,41 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
         boolean ran = false;
         try {
             solrServer = solrServerFor(session, true);
-            {
-                final StringBuilder queryBuilder = new StringBuilder(128);
-                queryBuilder.append('(').append(FIELD_USER).append(':').append(session.getUserId()).append(')');
-                queryBuilder.append(" AND (").append(FIELD_CONTEXT).append(':').append(session.getContextId()).append(')');
-                if (accountId >= 0) {
-                    queryBuilder.append(" AND (").append(FIELD_ACCOUNT).append(':').append(accountId).append(')');
+            final StringBuilder queryBuilder = new StringBuilder(128);
+            queryBuilder.append('(').append(FIELD_USER).append(':').append(session.getUserId()).append(')');
+            queryBuilder.append(" AND (").append(FIELD_CONTEXT).append(':').append(session.getContextId()).append(')');
+            if (accountId >= 0) {
+                queryBuilder.append(" AND (").append(FIELD_ACCOUNT).append(':').append(accountId).append(')');
+            }
+            if (null != fullName) {
+                queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(fullName).append("\")");
+            }
+            final int resetLen = queryBuilder.length();
+            final int size = mailIds.size();
+            final List<String> list;
+            if (mailIds instanceof List) {
+                list = (List<String>) mailIds;
+            } else {
+                list = new ArrayList<String>(size);
+                list.addAll(mailIds);
+            }
+            int off = 0;
+            while (off < size) {
+                int endIndex = off + DELETE_ROWS;
+                if (endIndex >= size) {
+                    endIndex = size;
                 }
-                if (null != fullName) {
-                    queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(fullName).append("\")");
-                }
-                final Iterator<String> iterator = mailIds.iterator();
+                final List<String> subList = list.subList(off, endIndex);
+                queryBuilder.setLength(resetLen);
+                final Iterator<String> iterator = subList.iterator();
                 queryBuilder.append(" AND (").append(FIELD_ID).append(':').append(iterator.next());
                 while (iterator.hasNext()) {
                     queryBuilder.append(" OR ").append(FIELD_ID).append(':').append(iterator.next());
                 }
                 queryBuilder.append(')');
                 query = queryBuilder.toString();
+                solrServer.deleteByQuery(query);
+                off = endIndex;
             }
             solrServer.deleteByQuery(query);
             ran = true;

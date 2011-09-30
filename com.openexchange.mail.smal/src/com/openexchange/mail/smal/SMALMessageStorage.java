@@ -310,6 +310,8 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
             case STORAGE:
                 // Storage result came first
                 cancelRemaining(completionService);
+                scheduleFolderJob(folder, result.result, (null != searchTerm));
+                break;
             }
             final List<MailMessage> mails = result.result;
             return mails.toArray(new MailMessage[mails.size()]);
@@ -342,6 +344,13 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
         getServiceStatic(ThreadPoolService.class).submit(ThreadPools.task(task));
     }
 
+    /**
+     * Schedules a new folder job.
+     * 
+     * @param fullName The folder full name
+     * @param optMails The optional storage mails
+     * @param ignoreDeleted Whether to ignore deleted mails during sync operation
+     */
     protected void scheduleFolderJob(final String fullName, final List<MailMessage> optMails, final boolean ignoreDeleted) {
         final FolderJob folderJob = new FolderJob(fullName, accountId, userId, contextId);
         if (null != optMails) {
