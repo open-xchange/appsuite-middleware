@@ -414,20 +414,22 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
             /*
              * Add to index
              */
-            rollback = true;
-            solrServer.add(inputDocuments.iterator());
-            solrServer.commit();
-            if (DEBUG) {
-                final long dur = System.currentTimeMillis() - st;
-                final StringBuilder sb = new StringBuilder(64);
-                sb.append("Thread \"").append(threadDesc);
-                sb.append("\" added ").append(size);
-                sb.append(" mail bodies in ").append(dur).append("msec");
-                sb.append(" from folder \"").append(fillers.get(0).getFullName()).append('"');
-                sb.append(" for account ").append(accountId);
-                sb.append(" of user ").append(userId);
-                sb.append(" in context ").append(contextId);
-                LOG.debug(sb.toString());
+            if (!inputDocuments.isEmpty()) {
+                solrServer.add(inputDocuments.iterator());
+                rollback = true;
+                solrServer.commit();
+                if (DEBUG) {
+                    final long dur = System.currentTimeMillis() - st;
+                    final StringBuilder sb = new StringBuilder(64);
+                    sb.append("Thread \"").append(threadDesc);
+                    sb.append("\" added ").append(inputDocuments.size());
+                    sb.append(" mail bodies in ").append(dur).append("msec");
+                    sb.append(" from folder \"").append(fillers.get(0).getFullName()).append('"');
+                    sb.append(" for account ").append(accountId);
+                    sb.append(" of user ").append(userId);
+                    sb.append(" in context ").append(contextId);
+                    LOG.debug(sb.toString());
+                }
             }
         } catch (final SolrServerException e) {
             rollback(rollback ? solrServer : null);

@@ -303,12 +303,18 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
             final MailResult<List<MailMessage>> result = takeNextFrom(completionService);
             switch (result.resultType) {
             case INDEX:
-                // Index result came first
+                // Index result came first: Await storage task completion separately & schedule sync job
                 // Ignore deleted if results are filtered by a search term
+                
+                System.out.println(">>>INDEX<<< request completed first for " + folder + ". Awaitning storage result separately & schedule sync job");
+                
                 awaitStorageSearchResult(folder, completionService, (null != searchTerm));
                 break;
             case STORAGE:
-                // Storage result came first
+                // Storage result came first: Cancel remaining index task and schedule sync job
+                
+                System.out.println(">>>STORAGE<<< request completed first for " + folder + ". Canceling remaining index request & schedule sync job.");
+                
                 cancelRemaining(completionService);
                 scheduleFolderJob(folder, result.result, (null != searchTerm));
                 break;
