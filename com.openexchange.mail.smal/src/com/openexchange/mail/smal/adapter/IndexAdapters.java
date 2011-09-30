@@ -65,6 +65,8 @@ import com.openexchange.server.ServiceExceptionCode;
  */
 public final class IndexAdapters {
 
+    private static final Locale DEFAULT_LOCALE = LanguageDetectionService.DEFAULT_LOCALE;
+
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IndexAdapters.class));
 
@@ -128,14 +130,19 @@ public final class IndexAdapters {
      */
     public static Locale detectLocale(final String str) throws OXException {
         try {
-            final Locale locale = SMALServiceLookup.getServiceStatic(LanguageDetectionService.class).findLanguages(str).get(0);
+            final LanguageDetectionService detectionService = SMALServiceLookup.getServiceStatic(LanguageDetectionService.class);
+            if (null == detectionService) {
+                LOG.warn("Missing language detection service. Using fall-back locale \"" + DEFAULT_LOCALE + "\".");
+                return DEFAULT_LOCALE;
+            }
+            final Locale locale = detectionService.findLanguages(str).get(0);
             if (KNOWN_LOCALES.contains(locale)) {
                 return locale;
             }
             if (DEBUG) {
-                LOG.debug("Detected locale \"" + locale + "\" is not supported. Using fall-back locale \"" + LanguageDetectionService.DEFAULT_LOCALE + "\".");
+                LOG.debug("Detected locale \"" + locale + "\" is not supported. Using fall-back locale \"" + DEFAULT_LOCALE + "\".");
             }
-            return LanguageDetectionService.DEFAULT_LOCALE;
+            return DEFAULT_LOCALE;
         } catch (final IllegalStateException e) {
             // Missing service
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(e, LanguageDetectionService.class.getName());
