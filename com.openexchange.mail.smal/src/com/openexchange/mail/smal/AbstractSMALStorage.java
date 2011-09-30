@@ -60,6 +60,7 @@ import com.openexchange.mail.smal.adapter.IndexAdapter;
 import com.openexchange.mail.smal.adapter.IndexService;
 import com.openexchange.server.ServiceExceptionCodes;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.CancelableCompletionService;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 
@@ -143,7 +144,7 @@ public abstract class AbstractSMALStorage {
      * @return A new completion service.
      * @throws OXException If completion service cannot be created due to absent {@link ThreadPoolService service}
      */
-    protected static <V> ThreadPoolCompletionService<V> newCompletionService() throws OXException {
+    protected static <V> CancelableCompletionService<V> newCompletionService() throws OXException {
         final ThreadPoolService threadPool = getServiceStatic(ThreadPoolService.class);
         if (null == threadPool) {
             throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(ThreadPoolService.class.getName());

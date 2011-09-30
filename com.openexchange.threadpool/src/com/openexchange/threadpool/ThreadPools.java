@@ -314,6 +314,16 @@ public final class ThreadPools {
     }
 
     /**
+     * Creates a new <code>CancelableCompletionService</code> from passed thread pool.
+     * 
+     * @param threadPool The thread pool
+     * @return A newly created <code>CancelableCompletionService</code>
+     */
+    public static <V> CancelableCompletionService<V> newCompletionService(final ThreadPoolService threadPool) {
+        return new ThreadPoolCompletionService<V>(threadPool);
+    }
+
+    /**
      * The dummy {@link ExecutorService} using current thread.
      */
     public static final ExecutorService CURRENT_THREAD_EXECUTOR_SERVICE = new CurrentThreadExecutorService();

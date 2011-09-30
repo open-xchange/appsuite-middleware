@@ -65,7 +65,7 @@ import com.openexchange.sessiond.SessiondService;
  */
 public final class RemoverJob extends AbstractMailSyncJob {
 
-    private static final long serialVersionUID = -4811521171077091128L;
+    private static final long serialVersionUID = -1211521171077091128L;
 
     private static final String SIMPLE_NAME = RemoverJob.class.getSimpleName();
 

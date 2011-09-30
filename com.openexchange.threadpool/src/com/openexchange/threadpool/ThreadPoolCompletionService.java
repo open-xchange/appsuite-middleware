@@ -66,7 +66,7 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ThreadPoolCompletionService<V> implements CompletionService<V> {
+public final class ThreadPoolCompletionService<V> implements CancelableCompletionService<V> {
 
     /**
      * FutureTask extension to enqueue upon completion
@@ -176,15 +176,7 @@ public final class ThreadPoolCompletionService<V> implements CompletionService<V
         return completionQueue.poll(timeout, unit);
     }
 
-    /**
-     * Attempts to cancel execution of this completion service. The attempt will fail for tasks that have already completed, have already
-     * been cancelled, or could not be cancelled for some other reason. If a task has already started, then the
-     * <tt>mayInterruptIfRunning</tt> parameter determines whether the thread executing this task should be interrupted in an attempt to
-     * stop the task.
-     * 
-     * @param mayInterruptIfRunning <tt>true</tt> if the thread executing a task should be interrupted; otherwise, in-progress tasks are
-     *            allowed to complete
-     */
+    @Override
     public void cancel(final boolean mayInterruptIfRunning) {
         while (!submittedFutures.isEmpty()) {
             submittedFutures.remove(0).cancel(mayInterruptIfRunning);

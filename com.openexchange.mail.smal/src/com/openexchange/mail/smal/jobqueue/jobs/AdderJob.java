@@ -72,7 +72,7 @@ import com.openexchange.session.Session;
  */
 public final class AdderJob extends AbstractMailSyncJob {
 
-    private static final long serialVersionUID = -4811521171077091128L;
+    private static final long serialVersionUID = -5611521171077091128L;
 
     private static final String SIMPLE_NAME = AdderJob.class.getSimpleName();
 

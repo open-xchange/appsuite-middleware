@@ -74,7 +74,7 @@ import com.openexchange.sessiond.SessiondService;
  */
 public final class FlagsObserverJob extends AbstractMailSyncJob {
 
-    private static final long serialVersionUID = -4811521171077091128L;
+    private static final long serialVersionUID = -7281521171077091128L;
 
     private static final String SIMPLE_NAME = FlagsObserverJob.class.getSimpleName();
 

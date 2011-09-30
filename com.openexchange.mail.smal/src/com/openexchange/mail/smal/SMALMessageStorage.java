@@ -79,7 +79,7 @@ import com.openexchange.mail.smal.jobqueue.jobs.FlagsObserverJob;
 import com.openexchange.mail.smal.jobqueue.jobs.FolderJob;
 import com.openexchange.mail.smal.jobqueue.jobs.RemoverJob;
 import com.openexchange.session.Session;
-import com.openexchange.threadpool.ThreadPoolCompletionService;
+import com.openexchange.threadpool.CancelableCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 
@@ -134,7 +134,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
         }
     }
 
-    private static <V> void cancelRemaining(final ThreadPoolCompletionService<MailResult<V>> completionService) {
+    private static <V> void cancelRemaining(final CancelableCompletionService<MailResult<V>> completionService) {
         try {
             completionService.cancel(true);
         } catch (final RuntimeException e) {
@@ -196,7 +196,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
              * Concurrently fetch from index and mail storage and serve request with whichever comes first
              */
             final IMailMessageStorage messageStorage = this.messageStorage;
-            final ThreadPoolCompletionService<MailResult<List<MailMessage>>> completionService = newCompletionService();
+            final CancelableCompletionService<MailResult<List<MailMessage>>> completionService = newCompletionService();
             completionService.submit(new Callable<MailResult<List<MailMessage>>>() {
 
                 @Override
@@ -279,7 +279,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
              * Concurrently fetch from index and mail storage and serve request with whichever comes first
              */
             final IMailMessageStorage messageStorage = this.messageStorage;
-            final ThreadPoolCompletionService<MailResult<List<MailMessage>>> completionService = newCompletionService();
+            final CancelableCompletionService<MailResult<List<MailMessage>>> completionService = newCompletionService();
             completionService.submit(new Callable<MailResult<List<MailMessage>>>() {
 
                 @Override
