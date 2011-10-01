@@ -50,6 +50,8 @@
 package com.openexchange.imap;
 
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
 import javax.mail.Quota;
@@ -64,18 +66,22 @@ import com.sun.mail.imap.IMAPStore;
 
 /**
  * {@link AccessedAccessedIMAPStore} - The {@link AccessedIMAPStore} extended by {@link #getImapAccess()}.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AccessedIMAPStore extends IMAPStore {
 
+    private final Lock lock;
+
     private final IMAPStore imapStore;
 
-    private final IMAPAccess imapAccess;
+    private volatile IMAPAccess imapAccess;
+
+    private final IMAPStoreMarker marker;
 
     /**
      * Initializes a new {@link AccessedAccessedIMAPStore}.
-     *
+     * 
      * @param imapAccess The associated IMAP access
      * @param imapStore The IMAP store
      * @param imapSession The IMAP session with which the store was created
@@ -83,13 +89,15 @@ public final class AccessedIMAPStore extends IMAPStore {
     public AccessedIMAPStore(final IMAPAccess imapAccess, final IMAPStore imapStore, final Session imapSession) {
         super(imapSession, imapStore.getURLName());
         this.imapAccess = imapAccess;
+        lock = new ReentrantLock();
         this.imapStore = imapStore;
+        marker = new IMAPStoreMarker();
     }
 
     /**
      * Whether to notify about recent messages. Notification is enabled if both conditions are met:<br>
      * It's the primary account's IMAP store <b>AND</b> notify-recent has been enabled by configuration.
-     *
+     * 
      * @return <code>true</code> to notify about recent messages; otherwise <code>false</code>
      */
     public boolean notifyRecent() {
@@ -97,12 +105,39 @@ public final class AccessedIMAPStore extends IMAPStore {
     }
 
     /**
+     * Gets the associated lock.
+     * 
+     * @return The lock
+     */
+    public Lock getLock() {
+        return lock;
+    }
+
+    /**
+     * Sets the IMAP access.
+     * 
+     * @param imapAccess The IMAP access
+     */
+    public void setImapAccess(final IMAPAccess imapAccess) {
+        this.imapAccess = imapAccess;
+    }
+
+    /**
      * Gets the IMAP access
-     *
+     * 
      * @return The IMAP access
      */
     public IMAPAccess getImapAccess() {
         return imapAccess;
+    }
+
+    /**
+     * Gets the marker.
+     * 
+     * @return The marker
+     */
+    public IMAPStoreMarker getMarker() {
+        return marker;
     }
 
     @Override

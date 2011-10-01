@@ -53,15 +53,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
-import java.util.Map.Entry;
 import java.util.Properties;
-import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.TimeUnit;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -77,7 +69,6 @@ import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
@@ -99,168 +90,6 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     private static final long serialVersionUID = -2580495494392812083L;
 
     private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailAccess.class));
-
-    private static final class Key {
-
-        private final int user;
-
-        private final int cid;
-
-        private final int accountId;
-
-        private final int hash;
-
-        public Key(final int user, final int cid, final int accountId) {
-            super();
-            this.user = user;
-            this.cid = cid;
-            this.accountId = accountId;
-            this.hash = hashCode0();
-        }
-
-        private int hashCode0() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + accountId;
-            result = prime * result + cid;
-            result = prime * result + user;
-            return result;
-        }
-
-        @Override
-        public int hashCode() {
-            return hash;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            final Key other = (Key) obj;
-            if (accountId != other.accountId) {
-                return false;
-            }
-            if (cid != other.cid) {
-                return false;
-            }
-            if (user != other.user) {
-                return false;
-            }
-            return true;
-        }
-
-    } // End of class Key
-
-    private static final Object PRESENT = new Object();
-
-    private static final BlockingQueue<Object> NO_RESTRICTION = new ArrayBlockingQueue<Object>(1);
-
-    private static final ConcurrentMap<Key, BlockingQueue<Object>> COUNTER_MAP =
-        new ConcurrentHashMap<MailAccess.Key, BlockingQueue<Object>>();
-
-    private static Key getUserKey(final int user, final int accountId, final int cid) {
-        return new Key(user, cid, accountId);
-    }
-
-    /**
-     * Clears the counter map.
-     */
-    public static void clearCounterMap() {
-        final Set<Entry<Key, BlockingQueue<Object>>> entrySet = COUNTER_MAP.entrySet();
-        for (final Iterator<Entry<Key, BlockingQueue<Object>>> iterator = entrySet.iterator(); iterator.hasNext();) {
-            final BlockingQueue<Object> queue = iterator.next().getValue();
-            iterator.remove();
-            while (queue.poll() != null) {
-                ;
-            }
-        }
-    }
-
-    /**
-     * Signal a closed {@link MailAccess} instance.
-     *
-     * @param accountId The account ID
-     * @param session The session
-     */
-    private static void freeSlot(final int accountId, final Session session) {
-        if (MailAccount.DEFAULT_ID != accountId) {
-            final BlockingQueue<Object> queue =
-                COUNTER_MAP.get(getUserKey(session.getUserId(), accountId, session.getContextId()));
-            if (null != queue && !NO_RESTRICTION.equals(queue)) {
-                /*
-                 * Dequeue
-                 */
-                queue.poll();
-            }
-        }
-    }
-
-    /**
-     * Signals that specified {@link MailAccess} which shall be connected. Waiting if capacity bounds specified for a closed
-     * {@link MailAccess} instance.
-     *
-     * @param accountId The account ID
-     * @param session The session
-     * @param provider The mail provider
-     * @return <code>true</code> if an immediate enqueue was possible; otherwise <code>false</code> for a blocking enqueue.
-     * @throws OXException If protocol specifies capacity bounds and waiting for space is interrupted
-     */
-    private static boolean occupySlot(final int accountId, final Session session, final MailProvider provider) throws OXException {
-        final boolean primary = (MailAccount.DEFAULT_ID == accountId);
-        final int userId = session.getUserId();
-        final int contextId = session.getContextId();
-        final Key key = getUserKey(userId, accountId, contextId);
-        BlockingQueue<Object> queue = COUNTER_MAP.get(key);
-        if (null == queue) {
-            final MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-            final int max = provider.getProtocol().getMaxCount(mass.getMailAccount(accountId, userId, contextId).getMailServer(), primary);
-            if (max > 0) {
-                final BlockingQueue<Object> nq = new ArrayBlockingQueue<Object>(max);
-                queue = COUNTER_MAP.putIfAbsent(key, nq);
-                if (null == queue) {
-                    queue = nq;
-                }
-            } else {
-                queue = COUNTER_MAP.putIfAbsent(key, NO_RESTRICTION);
-                if (null == queue) {
-                    queue = NO_RESTRICTION;
-                }
-            }
-        }
-        if ((null == queue) || (NO_RESTRICTION.equals(queue)) || queue.offer(PRESENT)) {
-            /*
-             * No capacity restrictions or space was immediately available
-             */
-            return true;
-        }
-        /*-
-         * Wasn't possible to immediately add to queue:
-         *
-         * Perform blocking enqueue (waiting if necessary for space to become available).
-         */
-        try {
-            final int timeout = 10;
-            Throwable t = null;
-            int count = 0;
-            while(!queue.offer(PRESENT, timeout, TimeUnit.SECONDS)) {
-                final String message = "Thread waited more than " + (++count * timeout) + " seconds for free MailAccess slot.";
-                if (null == t) {
-                    t = new Throwable();
-                }
-                LOG.info(message, t);
-            }
-            return false;
-        } catch (final InterruptedException e) {
-            throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
-        }
-    }
 
     /*-
      * ############### MEMBERS ###############
@@ -476,7 +305,6 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
          * Occupy free slot
          */
         final MailProvider mailProvider = MailProviderRegistry.getMailProviderBySession(session, accountId);
-        occupySlot(accountId, session, mailProvider);
         final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = getMailAccessCache().removeMailAccess(session, accountId);
         if (mailAccess != null) {
             return mailAccess;
@@ -775,7 +603,6 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     public final void close(final boolean put2Cache) {
         try {
             if (!isConnectedUnsafe()) {
-                freeSlot(accountId, session);
                 return;
             }
             boolean put = put2Cache;
@@ -800,7 +627,6 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                     /*
                      * Successfully cached: return
                      */
-                    freeSlot(accountId, session);
                     return;
                 }
             } catch (final OXException e) {
@@ -810,12 +636,6 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
              * Close mail connection
              */
             closeInternal();
-            if (!cached) {
-                /*
-                 * Not closed by MailAccessCache
-                 */
-                freeSlot(accountId, session);
-            }
         } finally {
             /*
              * Remove from watcher no matter if cached or closed
