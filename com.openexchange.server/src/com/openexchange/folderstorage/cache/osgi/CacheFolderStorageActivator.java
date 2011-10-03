@@ -239,7 +239,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                     final Boolean contentRelated = (Boolean) event.getProperty(FolderEventConstants.PROPERTY_CONTENT_RELATED);
                     try {
                         if (null == session) {
-                            tmp.removeSingleFromCache(folderId, FolderStorage.REAL_TREE_ID, null == userId ? -1 : userId.intValue(), contextId.intValue(), session);
+                            tmp.removeSingleFromCache(folderId, FolderStorage.REAL_TREE_ID, null == userId ? -1 : userId.intValue(), contextId.intValue(), true);
                         } else {
                             tmp.removeFromCache(folderId, FolderStorage.REAL_TREE_ID, null != contentRelated && contentRelated.booleanValue(), session);
                         }
