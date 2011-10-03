@@ -50,10 +50,10 @@
 package com.openexchange.folderstorage.mail;
 
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
+import gnu.trove.map.hash.TIntIntHashMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
-import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.StorageParameters;
@@ -354,9 +354,47 @@ public final class MailFolderImpl extends AbstractFolder {
         }
     }
 
+    /**
+     * The actual max permission that can be transfered in field 'bits' or JSON's permission object
+     */
+    private static final int MAX_PERMISSION = 64;
+
+    private static final TIntIntHashMap MAPPING = new TIntIntHashMap(6) {
+        { //Unnamed Block.
+            put(Permission.MAX_PERMISSION, MAX_PERMISSION);
+            put(MAX_PERMISSION, MAX_PERMISSION);
+            put(0, 0);
+            put(2, 1);
+            put(4, 2);
+            put(8, 4);
+        }
+    };
+
+    static int createPermissionBits(final Permission perm) {
+        return createPermissionBits(
+            perm.getFolderPermission(),
+            perm.getReadPermission(),
+            perm.getWritePermission(),
+            perm.getDeletePermission(),
+            perm.isAdmin());
+    }
+
+    static int createPermissionBits(final int fp, final int rp, final int wp, final int dp, final boolean adminFlag) {
+        int retval = 0;
+        int i = 4;
+        retval += (adminFlag ? 1 : 0) << (i-- * 7)/*Number of bits to be shifted*/;
+        retval += MAPPING.get(dp) << (i-- * 7);
+        retval += MAPPING.get(wp) << (i-- * 7);
+        retval += MAPPING.get(rp) << (i-- * 7);
+        retval += MAPPING.get(fp) << (i * 7);
+        return retval;
+    }
+
+    /*-
+     * 
     private static final int[] mapping = { 0, -1, 1, -1, 2, -1, -1, -1, 4 };
 
-    static int createPermissionBits(final int fp, final int orp, final int owp, final int odp, final boolean adminFlag) throws OXException {
+    static int createPermissionBits(final int fp, final int orp, final int owp, final int odp, final boolean adminFlag) throws FolderException {
         final int[] perms = new int[5];
         perms[0] = fp == MAX_PERMISSION ? OCLPermission.ADMIN_PERMISSION : fp;
         perms[1] = orp == MAX_PERMISSION ? OCLPermission.ADMIN_PERMISSION : orp;
@@ -366,12 +404,9 @@ public final class MailFolderImpl extends AbstractFolder {
         return createPermissionBits(perms);
     }
 
-    /**
-     * The actual max permission that can be transfered in field 'bits' or JSON's permission object
-     */
     private static final int MAX_PERMISSION = 64;
 
-    private static int createPermissionBits(final int[] permission) throws OXException {
+    private static int createPermissionBits(final int[] permission) throws FolderException {
         int retval = 0;
         boolean first = true;
         for (int i = permission.length - 1; i >= 0; i--) {
@@ -393,6 +428,8 @@ public final class MailFolderImpl extends AbstractFolder {
         }
         return retval;
     }
+     * 
+     */
 
     private static final MailField[] FIELDS_ID = new MailField[] { MailField.ID };
 
