@@ -54,12 +54,10 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -512,9 +510,9 @@ public final class FolderWriter {
 	}
 	
 	private static List<FolderObject> turnIntoFolderObjects(
-			UserizedFolder[] folders) {
-		List<FolderObject> retval = new ArrayList<FolderObject>(folders.length);
-		for (UserizedFolder folder : folders) {
+			final UserizedFolder[] folders) {
+		final List<FolderObject> retval = new ArrayList<FolderObject>(folders.length);
+		for (final UserizedFolder folder : folders) {
 			final FolderObject fo = new FolderObject();
 			final int numFolderId = getUnsignedInteger(folder.getID());
 			if (numFolderId < 0) {
@@ -599,7 +597,8 @@ public final class FolderWriter {
 							turnIntoFolderObjects(folders), serverSession);
 					ffw = new FolderFieldWriter() {
 
-						public void writeField(
+						@Override
+                        public void writeField(
 								final JSONValuePutter jsonPutter,
 								final UserizedFolder folder)
 								throws JSONException {
@@ -798,6 +797,12 @@ public final class FolderWriter {
 	 * Helper methods
 	 */
 
+	/**
+     * The actual max permission that can be transfered in field 'bits' or
+     * JSON's permission object
+     */
+    private static final int MAX_PERMISSION = 64;
+
 	private static final TIntIntHashMap MAPPING = new TIntIntHashMap(6) {
 
 		{ // Unnamed Block.
@@ -815,12 +820,6 @@ public final class FolderWriter {
 				perm.getReadPermission(), perm.getWritePermission(),
 				perm.getDeletePermission(), perm.isAdmin());
 	}
-
-	/**
-	 * The actual max permission that can be transfered in field 'bits' or
-	 * JSON's permission object
-	 */
-	private static final int MAX_PERMISSION = 64;
 
 	static int createPermissionBits(final int fp, final int rp, final int wp,
 			final int dp, final boolean adminFlag) {
