@@ -193,8 +193,8 @@ public class MIMEMailException extends OXException {
                 return MIMEMailExceptionCode.NO_SUCH_PROVIDER.create(e, e.getMessage());
             } else if (e instanceof javax.mail.internet.ParseException) {
                 if (e instanceof javax.mail.internet.AddressException) {
-                    final String ref = ((AddressException) e).getRef() == null ? STR_EMPTY : ((AddressException) e).getRef();
-                    return MIMEMailExceptionCode.INVALID_EMAIL_ADDRESS.create(e, ref);
+                    final String optRef = ((AddressException) e).getRef();
+                    return MIMEMailExceptionCode.INVALID_EMAIL_ADDRESS.create(e, optRef == null ? STR_EMPTY : optRef);
                 }
                 return MIMEMailExceptionCode.PARSE_ERROR.create(e, e.getMessage());
             } else if (e instanceof javax.mail.ReadOnlyFolderException) {
