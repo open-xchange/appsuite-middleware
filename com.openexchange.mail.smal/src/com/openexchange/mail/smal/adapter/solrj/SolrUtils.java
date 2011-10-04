@@ -72,7 +72,7 @@ public final class SolrUtils {
     }
 
     /**
-     * Perform a commit on specified Solr server, but temporarily disables possible default socket timeout (if any <tt>SO_TIMEOUT</tt> set)
+     * Performs a commit on specified Solr server, but temporarily disables possible default socket timeout (if any <tt>SO_TIMEOUT</tt> set)
      * and restores it afterwards.
      * 
      * @param solrServer The Solr server
