@@ -650,8 +650,7 @@ public final class IMAPFolderConverter {
                         }
                         final MailPermission ownPermission = mailFolder.getOwnPermission();
                         if (ownPermission instanceof ACLPermission) {
-                            final ACLPermission ownAclPermission = (ACLPermission) ownPermission;
-                            ownAclPermission.parseRights(aclRights, imapConfig);
+                            ((ACLPermission) ownPermission).parseRights(aclRights, imapConfig);
                         } else {
                             ownPermission.setAllPermission(
                                 aclPerm.getFolderPermission(),
