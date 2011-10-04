@@ -36,7 +36,7 @@
     </target>
 
 	<target name="clean" depends="main.clean">
-		<delete dir="${mainSrcDir}/${jsieveprefix}/jsieve/parser/generated"/>
+		<delete dir="${mainSrcDir}/${jSievePrefix}/jsieve/parser/generated"/>
 	</target>
 
 </project>
