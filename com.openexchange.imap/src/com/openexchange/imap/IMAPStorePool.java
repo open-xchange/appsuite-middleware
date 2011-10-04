@@ -353,6 +353,9 @@ public final class IMAPStorePool {
                     }
                 } else {
                     IMAPAccess.closeSafely(imapStore.getImapAccess());
+                    if (capacity > 0) {
+                        numActive.decrementAndGet();
+                    }
                 }
                 if (DEBUG) {
                     LOG.debug("NumActive:" + numActive.get() + ", QueueSize:" + queue.size());
