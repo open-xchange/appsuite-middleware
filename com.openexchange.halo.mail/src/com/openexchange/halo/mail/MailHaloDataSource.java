@@ -142,7 +142,7 @@ public class MailHaloDataSource implements HaloContactDataSource {
 
 	@Override
 	public String getId() {
-		return "com.openexchange.halo.mail:";
+		return "com.openexchange.halo.mail:inbox";
 	}
 
 	@Override
