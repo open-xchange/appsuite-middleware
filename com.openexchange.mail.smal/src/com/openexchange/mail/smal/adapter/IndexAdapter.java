@@ -142,8 +142,9 @@ public interface IndexAdapter {
      * @param accountId The account identifier
      * @param session The session
      * @throws OXException If deletion fails
+     * @throws InterruptedException If processing is interrupted
      */
-    public void deleteMessages(Collection<String> mailIds, String fullName, int accountId, Session session) throws OXException;
+    public void deleteMessages(Collection<String> mailIds, String fullName, int accountId, Session session) throws OXException, InterruptedException;
 
     /**
      * Deletes all mails from specified folder from index.

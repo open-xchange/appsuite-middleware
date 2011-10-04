@@ -50,6 +50,7 @@
 package com.openexchange.mail.smal.jobqueue;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
@@ -165,7 +166,8 @@ final class JobConsumer extends AbstractTask<Object> {
      * @return The jobs currently being executed or an empty list if none is executed at the moment
      */
     protected List<Job> currentJobs() {
-        return new ArrayList<Job>(currentJobs);
+        // TODO: Useful? return new ArrayList<Job>(currentJobs);
+        return Collections.emptyList();
     }
 
     /**
@@ -184,13 +186,10 @@ final class JobConsumer extends AbstractTask<Object> {
         threadRenamer.rename("Job-Consumer");
     }
 
-    private static final boolean DELEGATE = false;
-
     @Override
     public Object call() throws Exception {
         try {
             final List<Job> jobs = new ArrayList<Job>(16);
-            final Thread consumerThread = Thread.currentThread();
             while (keepgoing.get()) {
                 try {
                     if (queue.isEmpty()) {
@@ -206,8 +205,7 @@ final class JobConsumer extends AbstractTask<Object> {
                     queue.drainTo(jobs);
                     final boolean quit = jobs.remove(POISON);
                     {
-                        final ThreadPoolService threadPool =
-                            DELEGATE ? SMALServiceLookup.getInstance().getService(ThreadPoolService.class) : null;
+                        final ThreadPoolService threadPool = SMALServiceLookup.getInstance().getService(ThreadPoolService.class);
                         for (final Job job : jobs) {
                             performJob(job, threadPool);
                         }
@@ -233,45 +231,48 @@ final class JobConsumer extends AbstractTask<Object> {
          */
         if (job.isCanceled()) {
             identifiers.remove(job.getIdentifier());
-        } else {
-            if (job.isPaused()) {
-                /*
-                 * Unset "paused" flag & re-enqueue
-                 */
-                job.proceed();
-                queue.offer(job);
+            return;
+        }
+        if (job.isPaused()) {
+            /*
+             * Unset "paused" flag & re-enqueue
+             */
+            job.proceed();
+            queue.offer(job);
+            return;
+        }
+        try {
+            if (semaphore.tryAcquire()) {
+                // Further concurrent worker allowed
+                
+                System.out.println("Concurrent worker permitted...");
+                
+                final Future<Object> future = threadPool.submit(wrapperFor(job, true), CallerRunsBehavior.getInstance());
+                job.future = future;
             } else {
+                // Execute with "Job-Consumer" thread
+                final JobWrapper jobWrapper = wrapperFor(job, false);
+                boolean ran = false;
+                jobWrapper.beforeExecute(Thread.currentThread());
                 try {
-                    if (semaphore.tryAcquire()) {
-                        // Further concurrent worker allowed
-                        final Future<Object> future = threadPool.submit(wrapperFor(job, true), CallerRunsBehavior.getInstance());
-                        job.future = future;
-                    } else {
-                        // Execute with "Job-Consumer" thread
-                        final JobWrapper jobWrapper = wrapperFor(job, false);
-                        boolean ran = false;
-                        jobWrapper.beforeExecute(Thread.currentThread());
-                        try {
-                            jobWrapper.call();
-                            ran = true;
-                            jobWrapper.afterExecute(null);
-                        } catch (final Throwable t) {
-                            if (!ran) {
-                                afterExecute(t);
-                            }
-                            // Else the exception occurred within afterExecute itself in which case we don't want to call it again.
-                            LOG.warn("Exception occurred within afterExecute().", t);
-                        } finally {
-                            Thread.interrupted();
-                        }
+                    jobWrapper.call();
+                    ran = true;
+                    jobWrapper.afterExecute(null);
+                } catch (final Throwable t) {
+                    if (!ran) {
+                        afterExecute(t);
                     }
+                    // Else the exception occurred within afterExecute itself in which case we don't want to call it again.
+                    LOG.warn("Exception occurred within afterExecute().", t);
                 } finally {
-                    /*
-                     * Last, but not least, remove from known identifiers if done
-                     */
-                    identifiers.remove(job.getIdentifier());
+                    Thread.interrupted();
                 }
             }
+        } finally {
+            /*
+             * Last, but not least, remove from known identifiers if done
+             */
+            identifiers.remove(job.getIdentifier());
         }
     }
 
@@ -298,18 +299,25 @@ final class JobConsumer extends AbstractTask<Object> {
 
         @Override
         public void beforeExecute(final Thread t) {
-            currentJobs.offer(job);
+            // TODO: Useful? currentJobs.offer(job);
             job.beforeExecute(t);
         }
 
         @Override
         public void afterExecute(final Throwable t) {
+            
+            System.out.println(job.getIdentifier() + " done.");
+            
             if (releasePermit) {
                 semaphore.release();
+                
+                System.out.println("Released previous permit.");
+                
+                
             }
             job.done = true;
             job.executionFailure = t;
-            currentJobs.remove(job);
+            // TODO: Useful? currentJobs.remove(job);
             job.afterExecute(t);
         }
 

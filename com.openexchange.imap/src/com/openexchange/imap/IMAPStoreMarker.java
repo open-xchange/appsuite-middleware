@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,43 +47,90 @@
  *
  */
 
-package com.openexchange.mail.service.impl;
+package com.openexchange.imap;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.mail.api.IMailFolderStorage;
-import com.openexchange.mail.api.IMailMessageStorage;
-import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.service.MailService;
-import com.openexchange.mail.transport.MailTransport;
-import com.openexchange.session.Session;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * {@link MailServiceImpl} - The mail service implementation
- *
+ * {@link IMAPStoreMarker} - Marker for IMAP store.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailServiceImpl implements MailService {
+public final class IMAPStoreMarker {
+
+    private volatile long stamp;
+
+    private final AtomicBoolean inUse;
+
+    private volatile boolean pooled;
 
     /**
-     * Initializes a new {@link MailServiceImpl}
+     * Initializes a new {@link IMAPStoreMarker}.
      */
-    public MailServiceImpl() {
+    public IMAPStoreMarker() {
         super();
+        inUse = new AtomicBoolean();
     }
 
-    @Override
-    public MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getMailAccess(final Session session, final int accountId) throws OXException {
-        return MailAccess.getInstance(session, accountId);
+    /**
+     * Gets the pooled flag
+     * 
+     * @return The pooled flag
+     */
+    public boolean isPooled() {
+        return pooled;
     }
 
-    @Override
-    public MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getMailAccess(final int userId, final int contextId, final int accountId) throws OXException {
-        return MailAccess.getInstance(userId, contextId, accountId);
+    /**
+     * Sets the pooled flag
+     * 
+     * @param pooled The pooled flag
+     */
+    public void setPooled() {
+        pooled = true;
     }
 
-    @Override
-    public MailTransport getMailTransport(final Session session, final int accountId) throws OXException {
-        return MailTransport.getInstance(session, accountId);
+    /**
+     * Gets the stamp
+     * 
+     * @return The stamp
+     */
+    public long getStamp() {
+        return stamp;
+    }
+
+    /**
+     * Sets the stamp
+     * 
+     * @param stamp The stamp to set
+     */
+    public void setStamp(final long stamp) {
+        this.stamp = stamp;
+    }
+
+    /**
+     * Gets the in-use flag.
+     * 
+     * @return The in-use flag
+     */
+    public boolean isInUse() {
+        return inUse.get();
+    }
+
+    /**
+     * Tries to set the in-use flag.
+     * 
+     * @return <code>true</code> for success; otherwise <code>false</code>
+     */
+    public boolean markInUse() {
+        return inUse.compareAndSet(false, true);
+    }
+
+    /**
+     * Unsets the in-use flag.
+     */
+    public void unmarkInUse() {
+        inUse.set(false);
     }
 
 }

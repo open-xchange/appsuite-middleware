@@ -50,10 +50,13 @@
 package com.openexchange.mail.parser.handlers;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 import javax.mail.Part;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
@@ -70,12 +73,14 @@ import com.openexchange.mail.uuencode.UUEncodedPart;
 /**
  * {@link NonInlineForwardPartHandler} - Gathers all occuring non-inline parts in a mail and makes them accessible through
  * {@link #getNonInlineParts()}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class NonInlineForwardPartHandler implements MailMessageHandler {
 
     private final List<MailPart> nonInlineParts;
+
+    private final Set<String> imageContentIds;
 
     /**
      * Initializes a new {@link NonInlineForwardPartHandler}
@@ -83,16 +88,18 @@ public final class NonInlineForwardPartHandler implements MailMessageHandler {
     public NonInlineForwardPartHandler() {
         super();
         nonInlineParts = new ArrayList<MailPart>();
+        imageContentIds = new HashSet<String>(1);
     }
 
     /**
      * Initializes a new {@link NonInlineForwardPartHandler}
-     *
+     * 
      * @param nonInlineParts The container for non-inline parts
      */
     public NonInlineForwardPartHandler(final List<MailPart> nonInlineParts) {
         super();
         this.nonInlineParts = nonInlineParts;
+        imageContentIds = new HashSet<String>(1);
     }
 
     /**
@@ -100,6 +107,16 @@ public final class NonInlineForwardPartHandler implements MailMessageHandler {
      */
     public List<MailPart> getNonInlineParts() {
         return nonInlineParts;
+    }
+
+    /**
+     * Sets the image content IDs.
+     * 
+     * @param imageContentIds The content IDs
+     */
+    public void setImageContentIds(final Collection<String> imageContentIds) {
+        this.imageContentIds.clear();
+        this.imageContentIds.addAll(imageContentIds);
     }
 
     private static final String APPLICATION = "application/";
@@ -152,6 +169,11 @@ public final class NonInlineForwardPartHandler implements MailMessageHandler {
     public boolean handleImagePart(final MailPart part, final String imageCID, final String baseContentType, final boolean isInline, final String fileName, final String id) throws OXException {
         if (imageCID == null && (!isInline || part.getContentDisposition().containsFilenameParameter())) {
             nonInlineParts.add(part);
+        } else if (imageCID != null && !imageContentIds.contains(prepareContentId(imageCID))) {
+            /*
+             * Image is not referenced in HTML content
+             */
+            nonInlineParts.add(part);
         }
         /*-
          * Previous code
@@ -162,6 +184,21 @@ public final class NonInlineForwardPartHandler implements MailMessageHandler {
         }
          */
         return true;
+    }
+
+    private static String prepareContentId(final String contentId) {
+        if (null == contentId) {
+            return null;
+        }
+        String cid = contentId;
+        if (cid.charAt(0) == '<') {
+            cid = cid.substring(1);
+        }
+        final int lastIndex = cid.length() - 1;
+        if (cid.charAt(lastIndex) == '>') {
+            cid = cid.substring(0, lastIndex);
+        }
+        return cid;
     }
 
     @Override

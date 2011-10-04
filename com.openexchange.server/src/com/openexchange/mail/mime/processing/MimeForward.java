@@ -268,26 +268,33 @@ public final class MimeForward {
         final MailMessage forwardMail;
         if (originalContentType.startsWith(MULTIPART)) {
             final Multipart multipart = new MimeMultipart();
+            List<String> contentIds = null;
             {
                 /*
                  * Grab first seen text from original message
                  */
                 final ContentType contentType = new ContentType();
-                final String firstSeenText = getFirstSeenText(originalMsg, contentType, usm);
+                String firstSeenText = getFirstSeenText(originalMsg, contentType, usm);
                 {
                     final String cs = contentType.getCharsetParameter();
                     if (cs == null || "US-ASCII".equalsIgnoreCase(cs)) {
                         contentType.setCharsetParameter(MailProperties.getInstance().getDefaultMimeCharset());
                     }
                 }
+                final boolean isHtml = contentType.startsWith(TEXT_HTM);
+                if (null == firstSeenText) {
+                    firstSeenText = "";
+                } else if (isHtml) {
+                    contentIds = MIMEMessageUtility.getContentIDs(firstSeenText);
+                }
                 /*
                  * Add appropriate text part prefixed with forward text
                  */
                 final MimeBodyPart textPart = new MimeBodyPart();
                 textPart.setText(
-                    generateForwardText(firstSeenText == null ? "" : firstSeenText, new LocaleAndTimeZone(UserStorage.getStorageUser(
+                    generateForwardText(firstSeenText, new LocaleAndTimeZone(UserStorage.getStorageUser(
                         session.getUserId(),
-                        ctx)), originalMsg, contentType.startsWith(TEXT_HTM)),
+                        ctx)), originalMsg, isHtml),
                     contentType.getCharsetParameter(),
                     contentType.getSubType());
                 textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
@@ -301,9 +308,11 @@ public final class MimeForward {
              * Add all non-inline parts through a handler to keep original sequence IDs
              */
             final NonInlineForwardPartHandler handler = new NonInlineForwardPartHandler();
+            if (null != contentIds && !contentIds.isEmpty()) {
+                handler.setImageContentIds(contentIds);
+            }
             new MailMessageParser().setInlineDetectorBehavior(true).parseMailMessage(originalMsg, handler);
-            final List<MailPart> parts = handler.getNonInlineParts();
-            for (final MailPart mailPart : parts) {
+            for (final MailPart mailPart : handler.getNonInlineParts()) {
                 mailPart.getContentDisposition().setDisposition(Part.ATTACHMENT);
                 compositeMail.addAdditionalParts(mailPart);
             }

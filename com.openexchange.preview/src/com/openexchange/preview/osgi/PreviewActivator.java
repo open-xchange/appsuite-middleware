@@ -137,6 +137,13 @@ public class PreviewActivator extends HousekeepingActivator {
      * http://www.tutego.de/blog/javainsel/2011/08/microsoft-office-dokumente-in-java-verarbeiten/
      * 
      * http://blogs.reucon.com/srt/2007/02/25/using_openoffice_org_from_java_applications.html
+     * 
+     * 
+     * -----
+     * Generating PDF and Previewing it as an Image Ð iText and PDF Renderer
+     * http://technology.amis.nl/blog/4174/java-generating-pdf-and-previewing-it-as-an-image-itext-and-pdf-renderer
+     * http://jmupdf.sourceforge.net/joomla/
+     * -----
      */
 
     /**

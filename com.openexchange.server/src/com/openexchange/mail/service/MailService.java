@@ -50,6 +50,8 @@
 package com.openexchange.mail.service;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.session.Session;
@@ -86,7 +88,7 @@ public interface MailService {
      * @return An appropriate instance of {@link MailAccess}
      * @throws OXException If an appropriate instance of {@link MailAccess mail access} cannot be initialized
      */
-    public MailAccess<?, ?> getMailAccess(Session session, int accountId) throws OXException;
+    public MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getMailAccess(Session session, int accountId) throws OXException;
 
     /**
      * Gets an appropriate instance of {@link MailAccess mail access} parameterized with given session.
@@ -113,7 +115,7 @@ public interface MailService {
      * @return An appropriate instance of {@link MailAccess}
      * @throws OXException If an appropriate instance of {@link MailAccess mail access} cannot be initialized
      */
-    public MailAccess<?, ?> getMailAccess(int userId, int contextId, int accountId) throws OXException;
+    public MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getMailAccess(int userId, int contextId, int accountId) throws OXException;
 
     /**
      * Gets an appropriate instance of {@link MailTransport mail transport} parameterized with given session.

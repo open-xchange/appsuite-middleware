@@ -50,14 +50,14 @@
 package com.openexchange.mail.smal.adapter.solrj;
 
 import java.io.IOException;
+import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 import com.openexchange.log.Log;
 
-
 /**
  * {@link SolrUtils}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SolrUtils {
@@ -72,13 +72,37 @@ public final class SolrUtils {
     }
 
     /**
-     * Performs a roll-back for specified Solr server.
+     * Perform a commit on specified Solr server, but temporarily disables possible default socket timeout (if any <tt>SO_TIMEOUT</tt> set)
+     * and restores it afterwards.
+     * 
+     * @param solrServer The Solr server
+     * @throws SolrServerException If an index error occurs
+     * @throws IOException If an I/O error occurs
+     */
+    public static void commitNoTimeout(final CommonsHttpSolrServer solrServer) throws SolrServerException, IOException {
+        final HttpConnectionManagerParams managerParams = solrServer.getHttpClient().getHttpConnectionManager().getParams();
+        final int timeout = managerParams.getSoTimeout();
+        managerParams.setSoTimeout(0);
+        try {
+            solrServer.commit();
+        } finally {
+            if (timeout > 0) {
+                managerParams.setSoTimeout(timeout);
+            }
+        }
+    }
+
+    /**
+     * Performs a roll-back for specified Solr server (with temporarily disabling default socket timeout (<tt>SO_TIMEOUT</tt>)).
      * 
      * @param solrServer The Solr server
      */
     public static void rollback(final CommonsHttpSolrServer solrServer) {
         if (null != solrServer) {
+            final HttpConnectionManagerParams managerParams = solrServer.getHttpClient().getHttpConnectionManager().getParams();
+            final int timeout = managerParams.getSoTimeout();
             try {
+                managerParams.setSoTimeout(0);
                 solrServer.rollback();
             } catch (final SolrServerException e) {
                 LOG.warn("Rollback of Solr server failed.", e);
@@ -86,6 +110,9 @@ public final class SolrUtils {
                 LOG.warn("Rollback of Solr server failed.", e);
             } catch (final RuntimeException e) {
                 LOG.warn("Rollback of Solr server failed.", e);
+            }
+            if (timeout > 0) {
+                managerParams.setSoTimeout(timeout);
             }
         }
     }

@@ -68,13 +68,15 @@
 
     <target name="buildProject" description="Copies the build.xml to the bundle if there is not already one and executes it.">
         <if>
-            <not>
-                <available file="${checkoutDir}/${projectName}/build.xml" type="file"/>
-            </not>
-            <then>
+            <available file="${checkoutDir}/${projectName}/build.xml" type="file"/>
+        	<then>
+        		<copy file="build-project.xml" tofile="${checkoutDir}/${projectName}/build-project.xml" overwrite="true"/>
+                <property name="deleteBuildXML" value="build-project.xml"/>
+        	</then>
+            <else>
                 <copy file="build-project.xml" tofile="${checkoutDir}/${projectName}/build.xml" overwrite="true"/>
-                <property name="deleteBuildXML" value="true"/>
-            </then>
+                <property name="deleteBuildXML" value="build.xml"/>
+            </else>
         </if>
         <ant dir="${checkoutDir}/${projectName}" antfile="build.xml" target="clean"/>
         <!-- TODO include the dist build as a normal buildType in build-project.xml -->
@@ -88,9 +90,9 @@
             </else>
         </if>
         <if>
-            <equals arg1="${deleteBuildXML}" arg2="true"/>
+            <isset property="deleteBuildXML"/>
             <then>
-                <delete file="${checkoutDir}/${projectName}/build.xml" />
+                <delete file="${checkoutDir}/${projectName}/${deleteBuildXML}"/>
             </then>
         </if>
     </target>

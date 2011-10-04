@@ -69,6 +69,8 @@
         </path>
     </target>
 
+    <target name="prepare" description="Empty target that can be overwritten by some bundles."/>
+
     <target name="compile" description="Generic compile target used for compiling src, sim and test folder.">
         <mkdir dir="${binDir}"/>
         <javac srcdir="${srcDir}" destdir="${binDir}" debug="true" encoding="US-ASCII" source="1.5" target="1.5" includeAntRuntime="false">
@@ -168,6 +170,12 @@
     </target>
 
     <target name="install" depends="installBundle,installConfig" description="Combines installBundle and installConfig targets."/>
+
+	<target name="prepareBuild" description="Executes a currently empty and overwritable prepare step before building the sources.">
+		<antcall target="prepare" inheritrefs="true">
+		    <param name="srcDir" value="${mainSrcDir}"/>
+	    </antcall>
+	</target>
 
     <target name="testForMainBuild" description="Tests if the main sources need to be compiled.">
         <if>
@@ -319,7 +327,7 @@
         </junit>
     </target>
 
-    <target name="build" depends="prepareClasspath,buildMain,bundleMain,installMain,buildSim,buildTest,testJar,runTests" description="Main build target combining all different possible build types."/>
+    <target name="build" depends="prepareClasspath,prepareBuild,buildMain,bundleMain,installMain,buildSim,buildTest,testJar,runTests" description="Main build target combining all different possible build types."/>
 
 	<target name="dist" description="Target to copy bundle for a build on the build service.">
 		<property name="destDir" value="${distDir}/${packageName}/${projectName}"/>
