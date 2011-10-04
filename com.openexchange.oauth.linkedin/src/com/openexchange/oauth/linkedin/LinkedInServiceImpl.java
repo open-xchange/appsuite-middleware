@@ -217,7 +217,7 @@ public class LinkedInServiceImpl implements LinkedInService{
     @Override
     public JSONObject getFullProfileByEMail(String email, String password, int user, int contextId, int accountId) throws OXException{
     	//Implemented as dummy, because LinkedIn has not upgraded our keys yet to do this");
-    	String id = "hzFnTZPLsz";
+    	String id = "hTHkfgJLSi";
 		String uri = "http://api.linkedin.com/v1/people/id="+id+":(relation-to-viewer,"+PERSONAL_FIELDS+")";
 	   	Response response = performRequest(password, user, contextId, accountId, Verb.GET, uri + IN_JSON);
     	JSONObject data = extractJson(response);
@@ -237,9 +237,9 @@ public class LinkedInServiceImpl implements LinkedInService{
 				JSONObject person = contact.getJSONObject("person");
 				String id = person.getString("id");
 				JSONObject fullProfile = getProfileForId(id, password, user, contextId, accountId);
-				contact.put("person",fullProfile);
+				contact.put("fullProfile",fullProfile);
 			}
-
+			
 		} catch (JSONException e) {
 			throw new OXException(1).setPrefix("OAUTH-LI").setLogMessage("Could not parse JSON");
 		}

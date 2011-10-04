@@ -106,7 +106,7 @@ public class LinkedinProfileDataSource implements HaloContactDataSource {
 
 	@Override
 	public String getId() {
-		return "com.openexchange.halo.linkedIn:fullProfile";
+		return "com.openexchange.halo.linkedIn.fullProfile";
 	}
 
 	@Override
