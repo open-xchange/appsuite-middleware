@@ -57,6 +57,8 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.mail.MailExceptionCode;
@@ -72,6 +74,10 @@ import com.openexchange.timer.TimerService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IMAPStorePool {
+
+    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(IMAPStorePool.class));
+
+    protected static final boolean DEBUG = LOG.isDebugEnabled();
 
     private static volatile IMAPStorePool instance;
 
@@ -262,10 +268,9 @@ public final class IMAPStorePool {
             final AccessedIMAPStore imapStore = getPooled();
             if (null != imapStore) {
                 IMAPAccess.applyStoreTo(imapStore, imapAccess);
-                
-                System.out.println("Applied pooled IMAP store...");
-                System.out.println("NumActive:" + numActive.get() + ", QueueSize:" + queue.size());
-                
+                if (DEBUG) {
+                    LOG.debug("Applied pooled IMAP store...\n" + "NumActive:" + numActive.get() + ", QueueSize:" + queue.size());
+                }
                 return imapStore;
             }
             /*
