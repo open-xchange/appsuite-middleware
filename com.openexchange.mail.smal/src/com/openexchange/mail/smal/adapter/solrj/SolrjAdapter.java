@@ -922,7 +922,7 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
                 // Batch failed
                 rollback(solrServer);
                 fillers.clear();
-                for (final Iterator<SolrInputDocument> it = new MailDocumentIterator(mails.iterator(), session, now, new ArrayList<TextFiller>(mails.size())); it.hasNext();) {
+                for (final Iterator<SolrInputDocument> it = new MailDocumentIterator(mails.iterator(), session, now, null); it.hasNext();) {
                     final SolrInputDocument inputDocument = it.next();
                     try {
                         solrServer.add(inputDocument);
@@ -1314,7 +1314,9 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
             final MailMessage mail = iterator.next();
             final MailUUID uuid = new MailUUID(session.getContextId(), session.getUserId(), mail.getAccountId(), mail.getFolder(), mail.getMailId());
             final SolrInputDocument inputDocument = createDocument(uuid.getUUID(), mail, mail.getAccountId(), session, now);
-            fillers.add(TextFiller.fillerFor(uuid.getUUID(), mail, session));
+            if (null != fillers) {
+                fillers.add(TextFiller.fillerFor(uuid.getUUID(), mail, session));
+            }
             return inputDocument;
         }
 
