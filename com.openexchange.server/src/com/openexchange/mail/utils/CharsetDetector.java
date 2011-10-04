@@ -83,6 +83,15 @@ public final class CharsetDetector {
     }
 
     /**
+     * Gets the fall-back charset name.
+     * 
+     * @return The fall-back charset name
+     */
+    public static String getFallback() {
+        return FALLBACK;
+    }
+
+    /**
      * Convenience method to check if given name is valid; meaning not <code>null</code>, a legal charset name and supported as indicated by
      * {@link Charset#isSupported(String)}.
      *
@@ -254,6 +263,25 @@ public final class CharsetDetector {
      * @return The detected charset or <i>US-ASCII</i> if no matching/supported charset could be found
      */
     public static String detectCharset(final InputStream in) {
+        try {
+            return detectCharsetFailOnError(in);
+        } catch (final IOException e) {
+            LOG.error(e.getMessage(), e);
+            return FALLBACK;
+        }
+    }
+
+    /**
+     * Detects the charset of specified input stream's data.
+     * <p>
+     * <b>Note</b>: Specified input stream is going to be closed in this method.
+     *
+     * @param in The input stream to examine
+     * @throws NullPointerException If input stream is <code>null</code>
+     * @throws IOException If reading from stream fails
+     * @return The detected charset or <i>US-ASCII</i> if no matching/supported charset could be found
+     */
+    public static String detectCharsetFailOnError(final InputStream in) throws IOException {
         if (null == in) {
             throw new NullPointerException("input stream is null");
         }
@@ -264,81 +292,76 @@ public final class CharsetDetector {
         final CharsetDetectionObserver observer = new CharsetDetectionObserver();
         det.Init(observer);
         try {
-            try {
-                final byte[] buf = new byte[1024];
-                int len;
-                boolean done = false;
-                boolean isAscii = true;
+            final byte[] buf = new byte[1024];
+            int len;
+            boolean done = false;
+            boolean isAscii = true;
 
-                while ((len = in.read(buf, 0, buf.length)) != -1) {
-                    /*
-                     * Check if the stream is only ascii.
-                     */
-                    if (isAscii) {
-                        isAscii = det.isAscii(buf, len);
-                    }
-                    /*
-                     * DoIt if non-ascii and not done yet.
-                     */
-                    if (!isAscii && !done) {
-                        done = det.DoIt(buf, len, false);
-                    }
-                }
-                det.DataEnd();
+            while ((len = in.read(buf, 0, buf.length)) != -1) {
                 /*
-                 * Check if content is ascii
+                 * Check if the stream is only ascii.
                  */
                 if (isAscii) {
-                    return STR_US_ASCII;
-                }
-                {
-                    /*
-                     * Check observer
-                     */
-                    final String charset = observer.getCharset();
-                    if (null != charset && Charset.isSupported(charset)) {
-                        return charset;
-                    }
-                }
-                /*-
-                 * Choose first possible charset but prefer:
-                 * 1. UTF-8
-                 * 2. WINDOWS-1252
-                 */
-                final String prob[] = det.getProbableCharsets();
-                String firstPossibleCharset = null;
-                for (int i = 0; i < prob.length; i++) {
-                    final String lcs = prob[i].toLowerCase(Locale.US);
-                    if (Charset.isSupported(lcs)) {
-                        if ("utf-8".equals(lcs)) {
-                            return prob[i];
-                        } else if ("windows-1252".equals(lcs)) {
-                            return prob[i];
-                        }
-                        if (null == firstPossibleCharset) {
-                            firstPossibleCharset = prob[i];
-                        }
-                    } else if ("nomatch".equals(lcs)) {
-                        /*
-                         * Non-ASCII and nomatch
-                         */
-                        return FALLBACK;
-                    }
+                    isAscii = det.isAscii(buf, len);
                 }
                 /*
-                 * Non-ASCII
+                 * DoIt if non-ascii and not done yet.
                  */
-                return null == firstPossibleCharset ? FALLBACK : firstPossibleCharset;
-            } finally {
-                try {
-                    in.close();
-                } catch (final IOException e) {
-                    LOG.error(e.getMessage(), e);
+                if (!isAscii && !done) {
+                    done = det.DoIt(buf, len, false);
                 }
             }
-        } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
-            return FALLBACK;
+            det.DataEnd();
+            /*
+             * Check if content is ascii
+             */
+            if (isAscii) {
+                return STR_US_ASCII;
+            }
+            {
+                /*
+                 * Check observer
+                 */
+                final String charset = observer.getCharset();
+                if (null != charset && Charset.isSupported(charset)) {
+                    return charset;
+                }
+            }
+            /*-
+             * Choose first possible charset but prefer:
+             * 1. UTF-8
+             * 2. WINDOWS-1252
+             */
+            final String prob[] = det.getProbableCharsets();
+            String firstPossibleCharset = null;
+            for (int i = 0; i < prob.length; i++) {
+                final String lcs = prob[i].toLowerCase(Locale.US);
+                if (Charset.isSupported(lcs)) {
+                    if ("utf-8".equals(lcs)) {
+                        return prob[i];
+                    } else if ("windows-1252".equals(lcs)) {
+                        return prob[i];
+                    }
+                    if (null == firstPossibleCharset) {
+                        firstPossibleCharset = prob[i];
+                    }
+                } else if ("nomatch".equals(lcs)) {
+                    /*
+                     * Non-ASCII and nomatch
+                     */
+                    return FALLBACK;
+                }
+            }
+            /*
+             * Non-ASCII
+             */
+            return null == firstPossibleCharset ? FALLBACK : firstPossibleCharset;
+        } finally {
+            try {
+                in.close();
+            } catch (final IOException e) {
+                LOG.error(e.getMessage(), e);
+            }
         }
     }
 

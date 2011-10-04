@@ -59,18 +59,18 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 
 /**
- * {@link RemoverJob}
+ * {@link RemoveByIDsJob}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class RemoverJob extends AbstractMailSyncJob {
+public final class RemoveByIDsJob extends AbstractMailSyncJob {
 
     private static final long serialVersionUID = -1211521171077091128L;
 
-    private static final String SIMPLE_NAME = RemoverJob.class.getSimpleName();
+    private static final String SIMPLE_NAME = RemoveByIDsJob.class.getSimpleName();
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(RemoverJob.class));
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(RemoveByIDsJob.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -93,7 +93,7 @@ public final class RemoverJob extends AbstractMailSyncJob {
     private volatile List<String> mailIds;
 
     /**
-     * Initializes a new {@link RemoverJob} with default span.
+     * Initializes a new {@link RemoveByIDsJob} with default span.
      * <p>
      * This job is performed is span is exceeded and if able to exclusively set sync flag.
      * 
@@ -102,7 +102,7 @@ public final class RemoverJob extends AbstractMailSyncJob {
      * @param userId The user ID
      * @param contextId The context ID
      */
-    public RemoverJob(final String fullName, final int accountId, final int userId, final int contextId) {
+    public RemoveByIDsJob(final String fullName, final int accountId, final int userId, final int contextId) {
         super(accountId, userId, contextId);
         gate = new AtomicInteger(0);
         ranking = 0;
@@ -119,7 +119,7 @@ public final class RemoverJob extends AbstractMailSyncJob {
      * @param ranking The ranking to set
      * @return This folder job with specified ranking applied
      */
-    public RemoverJob setRanking(final int ranking) {
+    public RemoveByIDsJob setRanking(final int ranking) {
         this.ranking = ranking;
         return this;
     }
@@ -130,7 +130,7 @@ public final class RemoverJob extends AbstractMailSyncJob {
      * @param mailIds The identifiers to set
      * @return This folder job
      */
-    public RemoverJob setMailIds(final List<String> mailIds) {
+    public RemoveByIDsJob setMailIds(final List<String> mailIds) {
         this.mailIds = mailIds;
         return this;
     }
@@ -148,7 +148,7 @@ public final class RemoverJob extends AbstractMailSyncJob {
                 return;
             }
         } while (state != GATE_OPEN || !gate.compareAndSet(state, GATE_REPLACE));
-        final RemoverJob anotherFolderJob = (RemoverJob) anotherJob;
+        final RemoveByIDsJob anotherFolderJob = (RemoveByIDsJob) anotherJob;
         this.ranking = anotherFolderJob.ranking;
         this.mailIds = anotherFolderJob.mailIds;
         gate.set(0);

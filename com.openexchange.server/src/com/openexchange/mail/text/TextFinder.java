@@ -71,6 +71,7 @@ import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.TNEFBodyPart;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.dataobjects.MIMERawSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
@@ -289,7 +290,15 @@ public final class TextFinder {
                     sb = new StringBuilder(64).append("Illegal or unsupported encoding: \"").append(cs).append("\".");
                 }
                 if (contentType.startsWith("text/")) {
-                    cs = CharsetDetector.detectCharset(mailPart.getInputStream());
+                    try {
+                        cs = CharsetDetector.detectCharsetFailOnError(mailPart.getInputStream());
+                    } catch (final IOException e) {
+                        if (mailPart instanceof MIMERawSource) {
+                            cs = CharsetDetector.detectCharset(((MIMERawSource) mailPart).getRawInputStream());
+                        } else {
+                            cs = CharsetDetector.getFallback();
+                        }
+                    }
                     if (LOG.isWarnEnabled() && null != sb) {
                         sb.append(" Using auto-detected encoding: \"").append(cs).append('"');
                         LOG.warn(sb.toString());
@@ -305,7 +314,17 @@ public final class TextFinder {
             charset = cs;
         } else {
             if (contentType.startsWith("text/")) {
-                charset = CharsetDetector.detectCharset(mailPart.getInputStream());
+                String cs;
+                try {
+                    cs = CharsetDetector.detectCharsetFailOnError(mailPart.getInputStream());
+                } catch (final IOException e) {
+                    if (mailPart instanceof MIMERawSource) {
+                        cs = CharsetDetector.detectCharset(((MIMERawSource) mailPart).getRawInputStream());
+                    } else {
+                        cs = CharsetDetector.getFallback();
+                    }
+                }
+                charset = cs;
             } else {
                 charset = MailProperties.getInstance().getDefaultMimeCharset();
             }

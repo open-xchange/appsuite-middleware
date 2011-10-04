@@ -80,6 +80,7 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType;
 import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
@@ -627,9 +628,39 @@ public final class IMAPFolderConverter {
         boolean userPermAdded = false;
         for (int j = 0; j < acls.length; j++) {
             final ACLPermission aclPerm = new ACLPermission();
+            final ACL acl = acls[j];
             try {
-                aclPerm.parseACL(acls[j], args, (IMAPStore) imapFolder.getStore(), imapConfig, ctx);
-                userPermAdded |= (session.getUserId() == aclPerm.getEntity());
+                aclPerm.parseACL(acl, args, (IMAPStore) imapFolder.getStore(), imapConfig, ctx);
+                if (session.getUserId() == aclPerm.getEntity()) {
+                    userPermAdded = true;
+                    final Rights aclRights = acl.getRights();
+                    if (!ownRights.equals(aclRights)) {
+                        if (LOG.isWarnEnabled()) {
+                            final StringBuilder tmp = new StringBuilder(64);
+                            tmp.append("Detected different rights for MYRIGHTS (");
+                            tmp.append(ownRights);
+                            tmp.append(") and GETACL (");
+                            tmp.append(aclRights);
+                            tmp.append(") for user ");
+                            tmp.append(session.getUserId());
+                            tmp.append(" in context ");
+                            tmp.append(session.getContextId());
+                            tmp.append(". Preferring GETACL rights as user's own-rights.");
+                            LOG.warn(tmp.toString());
+                        }
+                        final MailPermission ownPermission = mailFolder.getOwnPermission();
+                        if (ownPermission instanceof ACLPermission) {
+                            ((ACLPermission) ownPermission).parseRights(aclRights, imapConfig);
+                        } else {
+                            ownPermission.setAllPermission(
+                                aclPerm.getFolderPermission(),
+                                aclPerm.getReadPermission(),
+                                aclPerm.getWritePermission(),
+                                aclPerm.getDeletePermission());
+                            ownPermission.setFolderAdmin(aclPerm.isFolderAdmin());
+                        }
+                    }
+                }
                 mailFolder.addPermission(aclPerm);
             } catch (final OXException e) {
                 if (!isUnknownEntityError(e)) {
@@ -637,7 +668,7 @@ public final class IMAPFolderConverter {
                 }
                 if (DEBUG) {
                     debugBuilder.setLength(0);
-                    LOG.debug(debugBuilder.append("Cannot map ACL entity named \"").append(acls[j].getName()).append("\" to a system user").toString());
+                    LOG.debug(debugBuilder.append("Cannot map ACL entity named \"").append(acl.getName()).append("\" to a system user").toString());
                 }
             }
         }

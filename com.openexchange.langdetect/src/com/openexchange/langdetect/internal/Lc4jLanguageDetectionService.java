@@ -59,10 +59,12 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
@@ -211,19 +213,22 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
     public List<Locale> findLanguages(final String input) throws OXException {
         try {
             final List<String> languages = defaultLanguageCategorization.findLanguage(new ByteArrayList(input.getBytes("utf-8")));
-            final List<Locale> locales = new ArrayList<Locale>(languages.size());
+            final Set<Locale> locales = new LinkedHashSet<Locale>(languages.size());
             for (final String language : languages) {
                 int pos = language.indexOf('.');
-                final String lang = (pos > 0 ? language.substring(0, pos) : language).toLowerCase(defaultLocale);
+                String lang = (pos > 0 ? language.substring(0, pos) : language).toLowerCase(defaultLocale);
                 pos = lang.indexOf('-');
-                Locale locale = languageCodes.get(pos < 0 ? lang : lang.substring(0, pos));
+                lang = (pos > 0 ? lang.substring(0, pos) : lang);
+                pos = lang.indexOf('_');
+                lang = (pos > 0 ? lang.substring(0, pos) : lang);
+                Locale locale = languageCodes.get(lang);
                 if (null == locale) {
                     LOG.warn("No language code for model: " + language + ". Using default \"" + defaultLocale + '"');
                     locale = defaultLocale;
                 }
                 locales.add(locale);
             }
-            return locales;
+            return new ArrayList<Locale>(locales);
         } catch (final UnsupportedEncodingException e) {
             // Cannot occur
             throw LanguageDetectionExceptionCodes.IO_ERROR.create(e, e.getMessage());

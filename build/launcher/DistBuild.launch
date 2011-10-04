@@ -19,8 +19,8 @@
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.eclipse.ant.internal.launching.remote.InternalAntRunner"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="build"/>
 <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.ant.ui.AntClasspathProvider"/>
-<stringAttribute key="org.eclipse.ui.externaltools.ATTR_ANT_TARGETS" value="dist,"/>
+<stringAttribute key="org.eclipse.ui.externaltools.ATTR_ANT_TARGETS" value="clean,dist,"/>
 <stringAttribute key="org.eclipse.ui.externaltools.ATTR_LOCATION" value="${workspace_loc:/build/build.xml}"/>
-<stringAttribute key="org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS" value="-Dprefix=/home/marcus/tmp/open-xchange -DdistDir=/home/marcus/tmp/dist"/>
+<stringAttribute key="org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS" value="-DpackageName=open-xchange-osgi"/>
 <stringAttribute key="process_factory_id" value="org.eclipse.ant.ui.remoteAntProcessFactory"/>
 </launchConfiguration>

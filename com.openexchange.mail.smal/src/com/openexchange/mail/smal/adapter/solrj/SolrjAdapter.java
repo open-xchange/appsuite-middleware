@@ -127,6 +127,8 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
 
     private static final int CHANGE_ROWS = 25;
 
+    private static final int GET_ROWS = 25;
+
     private volatile CommonsHttpSolrServerManagement solrServerManagement;
 
     private volatile SolrTextFillerQueue textFillerQueue;
@@ -354,9 +356,9 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
     private static final MailFields FIELDS_ADDRESSES = new MailFields(MailField.FROM, MailField.TO, MailField.CC, MailField.BCC);
 
     private MailMessage readDocument(final SolrDocument document, final MailFields mailFields) throws OXException {
-//        if (SolrTextFillerQueue.checkSolrDocument(document)) {
-//            textFillerQueue.add(TextFiller.fillerFor(document));
-//        }
+        if (SolrTextFillerQueue.checkSolrDocument(document)) {
+            textFillerQueue.add(TextFiller.fillerFor(document));
+        }
         final MailFields fields = null == mailFields ? new MailFields(true) : mailFields;
         final MailMessage mail = new IDMailMessage(document.getFieldValue(FIELD_ID).toString(), document.getFieldValue(FIELD_FULL_NAME).toString());
         mail.setAccountId(SolrjAdapter.<Integer> getFieldValue(FIELD_ACCOUNT, document).intValue());
@@ -490,6 +492,9 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
 
     @Override
     public List<MailMessage> getMessages(final String[] optMailIds, final String fullName, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int accountId, final Session session) throws OXException, InterruptedException {
+        if (null == optMailIds || 0 == optMailIds.length) {
+            return search(fullName, null, sortField, order, fields, accountId, session);
+        }
         try {
             final CommonsHttpSolrServer solrServer = solrServerFor(session, false);
             final MailFields mailFields = new MailFields(fields);
@@ -499,9 +504,8 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
                     mailFields.add(sf);
                 }
             }
-            final String query;
+            final StringBuilder queryBuilder = new StringBuilder(128);
             {
-                final StringBuilder queryBuilder = new StringBuilder(128);
                 queryBuilder.append('(').append(FIELD_USER).append(':').append(session.getUserId()).append(')');
                 queryBuilder.append(" AND (").append(FIELD_CONTEXT).append(':').append(session.getContextId()).append(')');
                 if (accountId >= 0) {
@@ -510,18 +514,44 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
                 if (null != fullName) {
                     queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(fullName).append("\")");
                 }
-                if (null != optMailIds) {
-                    final int length = optMailIds.length;
-                    if (length > 0) {
-                        queryBuilder.append(" AND (").append(FIELD_ID).append(':').append(optMailIds[0]);
-                        for (int i = 1; i < length; i++) {
-                            queryBuilder.append(" OR ").append(FIELD_ID).append(':').append(optMailIds[i]);
-                        }
-                        queryBuilder.append(')');
-                    }
-                }
-                query = queryBuilder.toString();
             }
+            final int size = optMailIds.length;
+            final List<MailMessage> mails = new ArrayList<MailMessage>(size);
+            final String fieldId = FIELD_ID;
+            final Thread thread = Thread.currentThread();
+            final int resetLen = queryBuilder.length();
+            int off = 0;
+            while (off < size) {
+                if (thread.isInterrupted()) {
+                    throw new InterruptedException("Thread interrupted while getting Solr documents.");
+                }
+                int endIndex = off + GET_ROWS;
+                if (endIndex >= size) {
+                    endIndex = size;
+                }
+                final int len = endIndex - off;
+                final String[] ids = new String[len];
+                System.arraycopy(optMailIds, off, ids, 0, len);
+                queryBuilder.setLength(resetLen);
+                queryBuilder.append(" AND (").append(fieldId).append(':').append(ids[0]);
+                for (int i = 1; i < len; i++) {
+                    queryBuilder.append(" OR ").append(fieldId).append(':').append(ids[i]);
+                }
+                queryBuilder.append(')');
+                mails.addAll(getMessageSublist(queryBuilder.toString(), solrServer, mailFields));
+                off = endIndex;
+            }
+            if (null != sortField) {
+                Collections.sort(mails, new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), getUserLocaleLazy(session)));
+            }
+            return mails;
+        } catch (final RuntimeException e) {
+            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private List<MailMessage> getMessageSublist(final String query, final CommonsHttpSolrServer solrServer, final MailFields mailFields) throws OXException, InterruptedException {
+        try {
             /*
              * Page-wise retrieval
              */
@@ -549,7 +579,6 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
             final Thread thread = Thread.currentThread();
             while (off < numFound) {
                 if (thread.isInterrupted()) {
-                    // Clears the thread's interrupted flag
                     throw new InterruptedException("Thread interrupted while paging through Solr results.");
                 }
                 final SolrQuery solrQuery = new SolrQuery().setQuery(query);
@@ -565,9 +594,6 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
                     mails.add(readDocument(results.get(i), mailFields));
                 }
                 off += size;
-            }
-            if (null != sortField) {
-                Collections.sort(mails, new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), getUserLocaleLazy(session)));
             }
             return mails;
         } catch (final SolrServerException e) {
@@ -610,7 +636,7 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
             int off = 0;
             while (off < size) {
                 if (thread.isInterrupted()) {
-                    throw new InterruptedException("Thread interrupted while changing Solr documents.");
+                    throw new InterruptedException("Thread interrupted while deleting Solr documents.");
                 }
                 int endIndex = off + DELETE_ROWS;
                 if (endIndex >= size) {
@@ -628,7 +654,6 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
                 solrServer.deleteByQuery(query);
                 off = endIndex;
             }
-            solrServer.deleteByQuery(query);
             ran = true;
             /*
              * Commit without timeout
@@ -911,7 +936,7 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
              * Commit without timeout
              */
             commitNoTimeout(solrServer);
-            //textFillerQueue.add(fillers);
+            textFillerQueue.add(fillers);
         } catch (final SolrServerException e) {
             rollback(solrServer);
             throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
@@ -1175,13 +1200,13 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
         @Override
         public SolrInputDocument next() {
             final SolrDocument document = iterator.next();
-//            if (SolrTextFillerQueue.checkSolrDocument(document)) {
-//                try {
-//                    textFillerQueue.add(TextFiller.fillerFor(document));
-//                } catch (final OXException e) {
-//                    // Ignore
-//                }
-//            }
+            if (SolrTextFillerQueue.checkSolrDocument(document)) {
+                try {
+                    textFillerQueue.add(TextFiller.fillerFor(document));
+                } catch (final OXException e) {
+                    // Ignore
+                }
+            }
             final Map<String, Object> documentFields = document.getFieldValueMap();
             final SolrInputDocument inputDocument = new SolrInputDocument();
             final MailMessage mail = mailMap.get(document.getFieldValue(FIELD_ID));

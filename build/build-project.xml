@@ -330,12 +330,11 @@
     <target name="build" depends="prepareClasspath,prepareBuild,buildMain,bundleMain,installMain,buildSim,buildTest,testJar,runTests" description="Main build target combining all different possible build types."/>
 
 	<target name="dist" description="Target to copy bundle for a build on the build service.">
-		<property name="destDir" value="${distDir}/${packageName}/${projectName}"/>
-        <mkdir dir="${destDir}"/>
-        <copy todir="${destDir}">
-            <fileset dir=".">
-                <exclude name="**${distDir}/**"/>
-                <exclude name="Todo"/>
+		<property name="destinationDir" value="${packageDir}/${projectName}"/>
+        <mkdir dir="${destinationDir}"/>
+        <copy todir="${destinationDir}">
+            <fileset dir="${basedir}">
+                <exclude name="build.xml"/>
             </fileset>
         </copy>
 	</target>

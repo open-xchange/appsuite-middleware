@@ -42,6 +42,7 @@
 
     <target name="clean" description="Removes the build artifacts.">
         <delete dir="${build}"/>
+        <delete dir="${tmpDir}"/>
     </target>
 
     <target name="prepare" depends="antExtensions" description="Reads the ProjectSet PSF file and generates the repository properties for each project listed there.">
@@ -67,6 +68,13 @@
     </target>
 
     <target name="buildProject" description="Copies the build.xml to the bundle if there is not already one and executes it.">
+        <echo message="Build bundle ${projectName}"/>
+        <setBundleProperties dir="${checkoutDir}" currentBundle="${projectName}">
+            <classpath>
+                <fileset dir="${bundlesDir}" includes="*.jar"/>
+                <dirset dir="${bundlesDir}" includes="*"/>
+            </classpath>
+        </setBundleProperties>
         <if>
             <available file="${checkoutDir}/${projectName}/build.xml" type="file"/>
         	<then>
@@ -86,7 +94,7 @@
                 <ant dir="${checkoutDir}/${projectName}" antfile="build.xml" target="dist"/>
             </then>
             <else>
-                <ant dir="${checkoutDir}/${projectName}" antfile="build.xml" target="build"/>
+                <ant dir="${checkoutDir}/${projectName}" antfile="build.xml" target="build" />
             </else>
         </if>
         <if>
@@ -97,38 +105,9 @@
         </if>
     </target>
 
-    <target name="buildOnBuilt" description="Calls computeBuildOrder again to build against already built bundles and starts the bundle build.">
-        <!-- Pass only current and further projects from the list -->
-        <propertyregex property="notBuilt" input="${projectsOrdered}" regexp=".*?,?(${projectName}.*)" select="\1"/>
-        <if>
-            <isset property="notBuilt"/>
-            <then>
-                <!-- Called again to change path to use already built modules -->
-                <computeBuildOrder dir="${checkoutDir}" propertyName="nextProjects" projectList="${notBuilt}">
-                    <classpath>
-                        <fileset dir="${bundlesDir}" includes="*.jar"/>
-                        <dirset dir="${bundlesDir}" includes="*"/>
-                    </classpath>
-                </computeBuildOrder>
-            </then>
-        </if>
-        <antcall target="buildProject" inheritall="true"/>
-    </target>
-
-    <target name="newBuildProject" description="Uses new target to set project dependency properties just before the build by using the already compiled classpath.">
-        <echo message="Build bundle ${projectName}"/>
-        <setBundleProperties dir="${checkoutDir}" currentBundle="${projectName}">
-            <classpath>
-                <fileset dir="${bundlesDir}" includes="*.jar"/>
-                <dirset dir="${bundlesDir}" includes="*"/>
-            </classpath>
-        </setBundleProperties>
-        <antcall target="buildProject" inheritall="true"/>
-    </target>
-
     <target name="buildProjects" depends="antExtensions,prepare" description="Fetches projects from repository, computes build order and builds then each project.">
         <foreach list="${projectsList}" target="updateProject" param="projectName"/>
-        <mkdir dir="${bundlesDir}"/>
+        <mkdir dir="${bundlesDir}"/> <!-- TODO remove this -->
         <!-- Computes the dependencies and sorts the projects accordingly -->
         <computeBuildOrder dir="${checkoutDir}" propertyName="projectsOrdered" projectList="${projectsList}">
             <classpath>
@@ -136,7 +115,7 @@
                 <dirset dir="${bundlesDir}" includes="*"/>
             </classpath>
         </computeBuildOrder>
-        <foreach list="${projectsOrdered}" target="newBuildProject" param="projectName" inheritAll="true"/>
+        <foreach list="${projectsOrdered}" target="buildProject" param="projectName" inheritAll="true"/>
     </target>
 
     <target name="setBuild" description="Sets the build type to build and install all bundles.">
@@ -151,34 +130,34 @@
 
     <target name="dist" depends="distBuild" description="Creates the tar.gz for uploading to the build service.">
         <!-- Packaging files -->
-        <property name="packageDir" value="${distDir}/${packageName}"/>
+        <property name="packageDir" value="${basedir}/${tmpDir}/${packageName}"/>
         <mkdir dir="${packageDir}"/>
         <copy todir="${packageDir}">
             <fileset dir="${checkoutDir}/${packageName}">
-                <exclude name="**${distDir}/**"/>
+                <exclude name="**${tmpDir}/**"/>
                 <exclude name="Todo"/>
             </fileset>
         </copy>
         <!-- Buildsystem -->
-        <property name="buildDir" value="${distDir}/${packageName}/build"/>
+        <property name="buildDir" value="${packageDir}/build"/>
         <mkdir dir="${buildDir}"/>
         <copy todir="${buildDir}">
-            <fileset dir="${mainDir}">
-                <exclude name="**${distDir}/**"/>
+            <fileset dir="${checkoutDir}/build">
+                <exclude name="**${tmpDir}/**"/>
+                <exclude name="build/**"/>
                 <exclude name="Todo"/>
             </fileset>
         </copy>
-        <antcall target="buildProjects"/>
-        <delete file="${packageName}.tar.gz"/>
-        <tar destfile="${packageName}.tar.gz" basedir="${distDir}" compression="gzip">
-            <fileset dir="${distDir}">
-                <include name="**"/>
-                <exclude name="exclude"/>
+        <antcall target="buildProjects">
+            <param name="packageDir" value="${packageDir}"/>
+         </antcall>
+        <!-- dpkg-source does not like anything else -->
+        <tar destfile="${tmpDir}/${packageName}.tar.gz" compression="gzip">
+            <fileset dir="${tmpDir}">
+                <include name="${packageName}/**"/>
+                <exclude name="${packageName}.tar.gz"/>
             </fileset>
         </tar>
-        <fail message="Todo"/>
-        <!-- dpkg-source does not like anything else -->
-        <delete dir="${distDir}"/>
     </target>
 
     <target name="cpd" description="Find copied and pasted code.">

@@ -77,7 +77,7 @@ import com.openexchange.mail.smal.jobqueue.jobs.AdderJob;
 import com.openexchange.mail.smal.jobqueue.jobs.ChangerJob;
 import com.openexchange.mail.smal.jobqueue.jobs.FlagsObserverJob;
 import com.openexchange.mail.smal.jobqueue.jobs.FolderJob;
-import com.openexchange.mail.smal.jobqueue.jobs.RemoverJob;
+import com.openexchange.mail.smal.jobqueue.jobs.RemoveByIDsJob;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.CancelableCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -185,7 +185,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
     @Override
     public void deleteMessages(final String folder, final String[] mailIds, final boolean hardDelete) throws OXException {
         messageStorage.deleteMessages(folder, mailIds, hardDelete);
-        final RemoverJob removerJob = new RemoverJob(folder, accountId, userId, contextId);
+        final RemoveByIDsJob removerJob = new RemoveByIDsJob(folder, accountId, userId, contextId);
         JobQueue.getInstance().addJob(removerJob.setMailIds(asList(mailIds)).setRanking(10));
     }
 
@@ -420,7 +420,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
         final AdderJob adderJob = new AdderJob(destFolder, accountId, userId, contextId);
         JobQueue.getInstance().addJob(adderJob.setMailIds(asList(newIds)).setRanking(10));
 
-        final RemoverJob removerJob = new RemoverJob(sourceFolder, accountId, userId, contextId);
+        final RemoveByIDsJob removerJob = new RemoveByIDsJob(sourceFolder, accountId, userId, contextId);
         JobQueue.getInstance().addJob(removerJob.setMailIds(asList(mailIds)).setRanking(10));
 
         return fast ? new String[0] : newIds;

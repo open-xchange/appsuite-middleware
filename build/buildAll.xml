@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="All Bundle Builder" basedir=".">
+<project name="All Bundle Builder" basedir="." default="build">
 
     <description>
         This build file reads the file packages.txt and executes build.xml for every ProjectSet listed there. This is a workaround for a

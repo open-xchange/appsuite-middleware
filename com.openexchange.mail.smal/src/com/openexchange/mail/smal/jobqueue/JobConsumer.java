@@ -244,9 +244,6 @@ final class JobConsumer extends AbstractTask<Object> {
         try {
             if (semaphore.tryAcquire()) {
                 // Further concurrent worker allowed
-                
-                System.out.println("Concurrent worker permitted...");
-                
                 final Future<Object> future = threadPool.submit(wrapperFor(job, true), CallerRunsBehavior.getInstance());
                 job.future = future;
             } else {
@@ -310,10 +307,6 @@ final class JobConsumer extends AbstractTask<Object> {
             
             if (releasePermit) {
                 semaphore.release();
-                
-                System.out.println("Released previous permit.");
-                
-                
             }
             job.done = true;
             job.executionFailure = t;
