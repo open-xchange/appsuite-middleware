@@ -627,9 +627,15 @@ public final class IMAPFolderConverter {
         boolean userPermAdded = false;
         for (int j = 0; j < acls.length; j++) {
             final ACLPermission aclPerm = new ACLPermission();
+            final ACL acl = acls[j];
             try {
-                aclPerm.parseACL(acls[j], args, (IMAPStore) imapFolder.getStore(), imapConfig, ctx);
-                userPermAdded |= (session.getUserId() == aclPerm.getEntity());
+                aclPerm.parseACL(acl, args, (IMAPStore) imapFolder.getStore(), imapConfig, ctx);
+                if (session.getUserId() == aclPerm.getEntity()) {
+                    userPermAdded = true;
+                    if (!ownRights.equals(acl.getRights())) {
+                        aclPerm.parseRights(ownRights, imapConfig);
+                    }
+                }
                 mailFolder.addPermission(aclPerm);
             } catch (final OXException e) {
                 if (!isUnknownEntityError(e)) {
@@ -637,7 +643,7 @@ public final class IMAPFolderConverter {
                 }
                 if (DEBUG) {
                     debugBuilder.setLength(0);
-                    LOG.debug(debugBuilder.append("Cannot map ACL entity named \"").append(acls[j].getName()).append("\" to a system user").toString());
+                    LOG.debug(debugBuilder.append("Cannot map ACL entity named \"").append(acl.getName()).append("\" to a system user").toString());
                 }
             }
         }
