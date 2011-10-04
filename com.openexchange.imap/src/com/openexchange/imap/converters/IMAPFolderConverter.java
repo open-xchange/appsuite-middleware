@@ -80,6 +80,7 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType;
 import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
@@ -632,8 +633,33 @@ public final class IMAPFolderConverter {
                 aclPerm.parseACL(acl, args, (IMAPStore) imapFolder.getStore(), imapConfig, ctx);
                 if (session.getUserId() == aclPerm.getEntity()) {
                     userPermAdded = true;
-                    if (!ownRights.equals(acl.getRights())) {
-                        aclPerm.parseRights(ownRights, imapConfig);
+                    final Rights aclRights = acl.getRights();
+                    if (!ownRights.equals(aclRights)) {
+                        if (LOG.isWarnEnabled()) {
+                            final StringBuilder tmp = new StringBuilder(64);
+                            tmp.append("Detected different rights for MYRIGHTS (");
+                            tmp.append(ownRights);
+                            tmp.append(") and GETACL (");
+                            tmp.append(aclRights);
+                            tmp.append(") for user ");
+                            tmp.append(session.getUserId());
+                            tmp.append(" in context ");
+                            tmp.append(session.getContextId());
+                            tmp.append(". Preferring GETACL rights as user's own-rights.");
+                            LOG.warn(tmp.toString());
+                        }
+                        final MailPermission ownPermission = mailFolder.getOwnPermission();
+                        if (ownPermission instanceof ACLPermission) {
+                            final ACLPermission ownAclPermission = (ACLPermission) ownPermission;
+                            ownAclPermission.parseRights(aclRights, imapConfig);
+                        } else {
+                            ownPermission.setAllPermission(
+                                aclPerm.getFolderPermission(),
+                                aclPerm.getReadPermission(),
+                                aclPerm.getWritePermission(),
+                                aclPerm.getDeletePermission());
+                            ownPermission.setFolderAdmin(aclPerm.isFolderAdmin());
+                        }
                     }
                 }
                 mailFolder.addPermission(aclPerm);
