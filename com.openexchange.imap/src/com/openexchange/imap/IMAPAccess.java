@@ -313,9 +313,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             if (imapAccess.imapStore != null) {
                 try {
                     imapAccess.imapStore.close();
-                    
-                    System.out.println("IMAPAccess.closeSafely() IMAPStore closed!");
-                    
                 } catch (final MessagingException e) {
                     LOG.error("Error while closing IMAP store.", e);
                 } catch (final RuntimeException e) {

@@ -287,13 +287,14 @@ public final class IMAPStorePool {
                     // Limit reached
                     synchronized (mutex) {
                         try {
-                            
-                            System.out.println("---------> Awaiting free connection slot <----------");
-                            final long st = System.currentTimeMillis();
-                            
-                            mutex.wait();
-                            
-                            System.out.println("---------> Waited " + (System.currentTimeMillis() - st) + "msec <---------");
+                            if (DEBUG) {
+                                LOG.debug("---------> Awaiting free connection slot <----------");
+                                final long st = DEBUG ? System.currentTimeMillis() : 0L;
+                                mutex.wait();
+                                LOG.debug("---------> Waited " + (System.currentTimeMillis() - st) + "msec <---------");
+                            } else {
+                                mutex.wait();
+                            }
                         } catch (final InterruptedException e) {
                             // Interrupted
                             throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
@@ -303,10 +304,9 @@ public final class IMAPStorePool {
                     }
                 }
             } while (!numActive.compareAndSet(count, count + 1));
-            
-            System.out.println("Established new IMAP store...");
-            System.out.println("NumActive:" + numActive.get() + ", QueueSize:" + queue.size());
-            
+            if (DEBUG) {
+                LOG.debug("Established new IMAP store...\n" + "NumActive:" + numActive.get() + ", QueueSize:" + queue.size());
+            }
             IMAPAccess.connect(imapAccess);
             return imapAccess.getIMAPStore();
         }
@@ -354,8 +354,9 @@ public final class IMAPStorePool {
                 } else {
                     IMAPAccess.closeSafely(imapStore.getImapAccess());
                 }
-                
-                System.out.println("NumActive:" + numActive.get() + ", QueueSize:" + queue.size());
+                if (DEBUG) {
+                    LOG.debug("NumActive:" + numActive.get() + ", QueueSize:" + queue.size());
+                }
             } finally {
                 lock.unlock();
             }
@@ -407,7 +408,9 @@ public final class IMAPStorePool {
                 synchronized (mutex) {
                     mutex.notifyAll();
                 }
-                System.out.println("NumActive:" + numActive.get() + ", QueueSize:" + queue.size());
+                if (DEBUG) {
+                    LOG.debug("Closed one or more elapsed IMAP stores...\n" + "NumActive:" + numActive.get() + ", QueueSize:" + queue.size());
+                }
             }
         }
 
