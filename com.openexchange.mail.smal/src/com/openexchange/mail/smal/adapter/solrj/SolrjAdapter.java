@@ -356,9 +356,9 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
     private static final MailFields FIELDS_ADDRESSES = new MailFields(MailField.FROM, MailField.TO, MailField.CC, MailField.BCC);
 
     private MailMessage readDocument(final SolrDocument document, final MailFields mailFields) throws OXException {
-//        if (SolrTextFillerQueue.checkSolrDocument(document)) {
-//            textFillerQueue.add(TextFiller.fillerFor(document));
-//        }
+        if (SolrTextFillerQueue.checkSolrDocument(document)) {
+            textFillerQueue.add(TextFiller.fillerFor(document));
+        }
         final MailFields fields = null == mailFields ? new MailFields(true) : mailFields;
         final MailMessage mail = new IDMailMessage(document.getFieldValue(FIELD_ID).toString(), document.getFieldValue(FIELD_FULL_NAME).toString());
         mail.setAccountId(SolrjAdapter.<Integer> getFieldValue(FIELD_ACCOUNT, document).intValue());
@@ -936,7 +936,7 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
              * Commit without timeout
              */
             commitNoTimeout(solrServer);
-            //textFillerQueue.add(fillers);
+            textFillerQueue.add(fillers);
         } catch (final SolrServerException e) {
             rollback(solrServer);
             throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
@@ -1200,13 +1200,13 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
         @Override
         public SolrInputDocument next() {
             final SolrDocument document = iterator.next();
-//            if (SolrTextFillerQueue.checkSolrDocument(document)) {
-//                try {
-//                    textFillerQueue.add(TextFiller.fillerFor(document));
-//                } catch (final OXException e) {
-//                    // Ignore
-//                }
-//            }
+            if (SolrTextFillerQueue.checkSolrDocument(document)) {
+                try {
+                    textFillerQueue.add(TextFiller.fillerFor(document));
+                } catch (final OXException e) {
+                    // Ignore
+                }
+            }
             final Map<String, Object> documentFields = document.getFieldValueMap();
             final SolrInputDocument inputDocument = new SolrInputDocument();
             final MailMessage mail = mailMap.get(document.getFieldValue(FIELD_ID));

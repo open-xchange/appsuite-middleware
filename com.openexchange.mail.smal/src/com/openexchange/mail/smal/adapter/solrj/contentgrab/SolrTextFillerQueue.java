@@ -86,6 +86,7 @@ import com.openexchange.mail.smal.SMALExceptionCodes;
 import com.openexchange.mail.smal.SMALMailAccess;
 import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.mail.smal.adapter.solrj.SolrConstants;
+import com.openexchange.mail.smal.adapter.solrj.SolrUtils;
 import com.openexchange.mail.smal.adapter.solrj.management.CommonsHttpSolrServerManagement;
 import com.openexchange.mail.text.TextFinder;
 import com.openexchange.threadpool.Task;
@@ -415,9 +416,18 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
              * Add to index
              */
             if (!inputDocuments.isEmpty()) {
-                solrServer.add(inputDocuments.iterator());
-                rollback = true;
-                solrServer.commit();
+                final int docSize = inputDocuments.size();
+                int off = 0;
+                while (off < docSize) {
+                    int toIndex = off + 10;
+                    if (toIndex > docSize) {
+                        toIndex = docSize;
+                    }
+                    solrServer.add(inputDocuments.subList(off, toIndex));
+                    rollback = true;
+                    off = toIndex;
+                }
+                SolrUtils.commitNoTimeout(solrServer);
                 if (DEBUG) {
                     final long dur = System.currentTimeMillis() - st;
                     final StringBuilder sb = new StringBuilder(64);
